@@ -2,7 +2,7 @@ from typing import Dict, Optional, List, TYPE_CHECKING, TypedDict, Union, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
 from app.logging_config import central_logger
-from app.services.service_locator import IMessageHandlerService
+from app.services.service_interfaces import IMessageHandlerService
 from app.db.models_postgres import Thread, Run
 
 if TYPE_CHECKING:
@@ -294,8 +294,12 @@ class MessageHandlerService(IMessageHandlerService):
         logger.info(f"User {user_id} switched to thread {thread_id}")
 
     # Interface implementation methods
-    async def handle_message(self, user_id: str, message_type: str, payload: Dict[str, Any]):
+    async def handle_message(self, user_id: str, message: Dict[str, Any]):
         """Handle a WebSocket message with proper type and payload."""
+        # Extract message type and payload from message
+        message_type = message.get("type", "")
+        payload = message.get("payload", {})
+        
         # Route to specific handlers based on message type
         if message_type == "start_agent":
             await self.handle_start_agent(user_id, payload, None)
@@ -316,3 +320,7 @@ class MessageHandlerService(IMessageHandlerService):
         if thread_id:
             payload["thread_id"] = thread_id
         await self.handle_user_message(user_id, payload, None)
+
+    async def broadcast_message(self, message: Dict[str, Any]):
+        """Broadcast a message to all connected clients."""
+        await manager.broadcast(message)

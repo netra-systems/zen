@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { useWebSocketContext } from '@/providers/WebSocketProvider';
 import { MessageItem } from './MessageItem';
-import { Message } from '@/types/chat';
+import { Message } from '@/types/registry';
 import { generateUniqueId } from '@/lib/utils';
 
 const ChatHistory: React.FC = React.memo(() => {

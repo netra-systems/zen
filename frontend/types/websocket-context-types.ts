@@ -5,7 +5,8 @@
  */
 
 import { WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage } from './backend_schema_auto_generated';
+import { WebSocketMessage } from './registry';
+import { OptimisticMessage, ReconciliationStats } from '../services/reconciliation';
 
 /**
  * Context type for WebSocket provider state and actions
@@ -18,6 +19,10 @@ export interface WebSocketContextType {
   messages: WebSocketMessage[];
   /** Function to send a message through WebSocket */
   sendMessage: (message: WebSocketMessage) => void;
+  /** Function to send optimistic message with automatic reconciliation */
+  sendOptimisticMessage: (content: string, type?: 'user' | 'assistant') => OptimisticMessage;
+  /** Current reconciliation statistics */
+  reconciliationStats: ReconciliationStats;
 }
 
 /**

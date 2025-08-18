@@ -43,21 +43,22 @@ def get_timeout():
 def run_server():
     """Run the uvicorn server with proper configuration."""
     setup_cloud_run_environment()
-    
-    config = {
-        "app": "app.main:app",
-        "host": "0.0.0.0",
-        "port": get_port(),
-        "workers": get_workers(),
-        "loop": "asyncio",
-        "log_level": "info",
-        "access_log": True,
-        "use_colors": False,
-        "timeout_keep_alive": get_timeout(),
-    }
-    
-    # Run uvicorn with the configuration
+    config = _create_server_config()
     uvicorn.run(**config)
+
+
+def _create_server_config() -> dict:
+    """Create uvicorn server configuration."""
+    return _build_server_config_dict()
+
+
+def _build_server_config_dict() -> dict:
+    """Build server configuration dictionary."""
+    return {
+        "app": "app.main:app", "host": "0.0.0.0", "port": get_port(),
+        "workers": get_workers(), "loop": "asyncio", "log_level": "info",
+        "access_log": True, "use_colors": False, "timeout_keep_alive": get_timeout()
+    }
 
 
 if __name__ == "__main__":

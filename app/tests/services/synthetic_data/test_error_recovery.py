@@ -99,11 +99,13 @@ class TestErrorRecovery:
             return None
         
         ws_manager.broadcast_to_job = flaky_send
+        ws_manager.send_progress = AsyncMock()
         
         # Should continue generation despite WS failures
         result = await recovery_service.generate_with_ws_updates(
             GenerationConfig(num_traces=100),
-            ws_manager=ws_manager
+            ws_manager=ws_manager,
+            job_id="test_job_id"
         )
         
         assert result["generation_complete"] == True

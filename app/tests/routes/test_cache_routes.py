@@ -79,7 +79,7 @@ class TestLLMCacheRoute:
     
     def test_cache_performance_monitoring(self, basic_test_client):
         """Test cache performance monitoring endpoints."""
-        with patch('app.services.llm_cache_service.get_performance_stats') as mock_perf:
+        with patch('app.services.llm_cache_service.llm_cache_service.get_performance_stats') as mock_perf:
             mock_perf.return_value = {
                 "avg_response_time_ms": 45,
                 "cache_hit_rate_24h": 0.78,
@@ -139,7 +139,7 @@ class TestLLMCacheRoute:
             "max_items": 100
         }
         
-        with patch('app.services.llm_cache_service.warm_up_cache') as mock_warm_up:
+        with patch('app.services.llm_cache_service.llm_cache_service.warm_up_cache') as mock_warm_up:
             mock_warm_up.return_value = {
                 "warmed_up": 85,
                 "failed": 15,

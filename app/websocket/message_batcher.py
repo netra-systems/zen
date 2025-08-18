@@ -43,13 +43,13 @@ class BatchedMessage:
     priority: int = 0
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     size_bytes: int = 0
+    _cached_data: Optional[Dict] = field(default=None, init=False)
     
     def __post_init__(self):
-        """Calculate message size after initialization."""
+        """Calculate message size efficiently."""
         if self.size_bytes == 0:
-            # Estimate message size
-            import json
-            self.size_bytes = len(json.dumps(self.message.model_dump(), default=str))
+            # Use a more efficient size estimation
+            self.size_bytes = len(str(self.message)) * 2  # Conservative estimate
 
 
 @dataclass
@@ -148,10 +148,17 @@ class MessageBatch:
         return len(self.messages) == 0
     
     def get_batch_data(self) -> Dict[str, Any]:
-        """Get batch data for sending."""
+        """Get batch data for sending efficiently."""
+        # Cache serialized messages to avoid repeated model_dump() calls
+        messages_data = []
+        for msg in self.messages:
+            if msg._cached_data is None:
+                msg._cached_data = msg.message.model_dump()
+            messages_data.append(msg._cached_data)
+        
         return {
             "type": "batch", "count": len(self.messages),
-            "messages": [msg.message.model_dump() for msg in self.messages],
+            "messages": messages_data,
             "total_size_bytes": self.total_size_bytes, "highest_priority": self.highest_priority,
             "created_at": self.created_at.isoformat()
         }
@@ -167,6 +174,8 @@ class WebSocketMessageBatcher:
         self.metrics = BatchMetrics()
         self._flush_task: Optional[asyncio.Task] = None
         self._running = False
+        self._last_flush_check = time.time()
+        self._flush_check_interval = 0.05  # Check every 50ms instead of 10ms
     
     async def start(self, send_callback: Callable) -> None:
         """Start the message batcher."""
@@ -254,9 +263,12 @@ class WebSocketMessageBatcher:
             await self._handle_flush_loop_error(e)
 
     async def _execute_flush_cycle(self) -> None:
-        """Execute one flush cycle."""
-        await self._check_and_flush_batches()
-        await asyncio.sleep(0.01)  # Check every 10ms
+        """Execute one flush cycle efficiently."""
+        current_time = time.time()
+        if current_time - self._last_flush_check >= self._flush_check_interval:
+            await self._check_and_flush_batches()
+            self._last_flush_check = current_time
+        await asyncio.sleep(0.01)  # Maintain responsiveness
 
     async def _handle_flush_loop_error(self, error: Exception) -> None:
         """Handle errors in flush loop."""
@@ -270,12 +282,14 @@ class WebSocketMessageBatcher:
             await self._flush_batch(connection_id, reason)
 
     def _identify_batches_to_flush(self) -> List[Tuple[str, str]]:
-        """Identify which batches need flushing."""
+        """Identify which batches need flushing efficiently."""
         connections_to_flush = []
+        # Only check non-empty batches to avoid unnecessary processing
         for connection_id, batch in self.batches.items():
-            flush_info = self._check_batch_flush_needed(batch)
-            if flush_info:
-                connections_to_flush.append((connection_id, flush_info))
+            if not batch.is_empty():
+                flush_info = self._check_batch_flush_needed(batch)
+                if flush_info:
+                    connections_to_flush.append((connection_id, flush_info))
         return connections_to_flush
 
     def _check_batch_flush_needed(self, batch: MessageBatch) -> Optional[str]:

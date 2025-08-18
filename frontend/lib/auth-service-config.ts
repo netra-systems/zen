@@ -34,10 +34,13 @@ export function getAuthServiceConfig(): AuthServiceConfig {
   let baseUrl: string;
   if (authServiceUrl) {
     baseUrl = authServiceUrl;
-  } else if (env === 'production') {
+  } else if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'production') {
     baseUrl = 'https://auth.netrasystems.ai';
-  } else if (env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
+  } else if (process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging') {
     baseUrl = 'https://auth.staging.netrasystems.ai'; // Staging auth service URL
+  } else if (env === 'production' && !process.env.NEXT_PUBLIC_ENVIRONMENT) {
+    // Fallback: if NODE_ENV is production but NEXT_PUBLIC_ENVIRONMENT not set, assume staging
+    baseUrl = 'https://auth.staging.netrasystems.ai';
   } else {
     // Development - auth service runs on port 8081
     baseUrl = process.env.NEXT_PUBLIC_AUTH_API_URL || 'http://localhost:8081';

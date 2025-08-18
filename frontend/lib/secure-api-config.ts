@@ -51,17 +51,23 @@ export const getSecureApiConfig = (): ApiConfig => {
   const environment = process.env.NEXT_PUBLIC_ENVIRONMENT || 'development';
   const forceHttps = isSecureEnvironment();
 
-  // Default URLs
+  // Default URLs - properly handle production vs staging
   const defaultApiUrl = environment === 'development' 
     ? 'http://localhost:8000' 
+    : environment === 'production'
+    ? 'https://api.netrasystems.ai'
     : 'https://api.staging.netrasystems.ai';
   
   const defaultWsUrl = environment === 'development' 
     ? 'ws://localhost:8000/ws' 
+    : environment === 'production'
+    ? 'wss://api.netrasystems.ai/ws'
     : 'wss://api.staging.netrasystems.ai/ws';
 
   const defaultAuthUrl = environment === 'development' 
     ? 'http://localhost:8001' 
+    : environment === 'production'
+    ? 'https://auth.netrasystems.ai'
     : 'https://auth.staging.netrasystems.ai';
 
   // Get URLs from environment variables or use defaults

@@ -31,7 +31,7 @@ REM Run the installer
 echo.
 echo Starting installation...
 echo.
-python install_dev_env.py
+python scripts\install_dev_env.py
 
 if %errorlevel% equ 0 (
     echo.

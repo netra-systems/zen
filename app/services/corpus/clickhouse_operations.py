@@ -31,7 +31,7 @@ from .clickhouse_helpers import (
 )
 
 
-class ClickHouseOperations:
+class CorpusClickHouseOperations:
     """Handles ClickHouse-specific operations for corpus management"""
     
     def _get_table_columns(self) -> str:
@@ -239,3 +239,7 @@ class ClickHouseOperations:
         except Exception as e:
             log_table_operation_error("get size for", table_name, e)
             raise create_clickhouse_operation_error("get table size", e)
+
+
+# Backward compatibility alias
+ClickHouseOperations = CorpusClickHouseOperations

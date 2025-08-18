@@ -4,21 +4,20 @@
  * Lines: <300, Functions: ≤8 lines each
  */
 
+// Import unified Message types from registry
+import type { Message, MessageRole } from '@/types/registry';
+
 export interface DemoChatProps {
   industry: string
   onInteraction?: () => void
   useWebSocket?: boolean
 }
 
-export interface Message {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  timestamp: Date
-  metadata?: MessageMetadata
-}
+// Re-export Message from unified registry for convenience
+export type { Message };
 
-export interface MessageMetadata {
+// Demo-specific metadata extension (backward compatible)
+export interface DemoMessageMetadata {
   processingTime?: number
   tokensUsed?: number
   costSaved?: number

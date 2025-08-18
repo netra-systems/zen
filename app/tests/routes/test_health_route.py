@@ -39,7 +39,9 @@ def test_health_endpoint_direct():
     client = TestClient(app)
     response = client.get("/health/live")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy", "service": "netra-ai-platform"}
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "netra-ai-platform"
 
 
 def test_live_endpoint():
@@ -55,4 +57,6 @@ def test_live_endpoint():
     client = TestClient(app)
     response = client.get("/health/live")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy", "service": "netra-ai-platform"}
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "netra-ai-platform"

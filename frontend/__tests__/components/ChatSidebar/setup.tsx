@@ -132,8 +132,8 @@ export class ChatSidebarTestSetup {
     jest.clearAllMocks();
     (useUnifiedChatStore as jest.Mock).mockReturnValue(mockChatStore);
     (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
-    // Mock ThreadService
-    (ThreadServiceModule.ThreadService as any) = mockThreadService;
+    // Configure ThreadService mock methods
+    Object.assign(ThreadServiceModule.ThreadService, mockThreadService);
   }
 
   afterEach() {

@@ -112,6 +112,14 @@ def _setup_agents(db_session: AsyncMock, llm_manager: Mock,
 
 
 @pytest.fixture
+def mock_dependencies():
+    """Create mock dependencies for DataSubAgent and other tests"""
+    llm_manager = _setup_llm_manager()
+    websocket_manager, tool_dispatcher = _setup_websocket_tool_dispatcher()
+    return llm_manager, tool_dispatcher
+
+
+@pytest.fixture
 def setup_real_infrastructure():
     """Setup infrastructure for real LLM tests."""
     config = get_config()

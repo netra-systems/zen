@@ -71,12 +71,15 @@
     <swimlane-definitions>
         <swimlane id="1" name="Core Chat Architecture">
             <reference>SPEC/ui_ux_chat_architecture.xml</reference>
+            <reference>SPEC/ui_ux_fluid_updates.xml</reference>
             <ownership>
                 <owns>Thread management and lifecycle</owns>
                 <owns>Message history and storage</owns>
                 <owns>Navigation between chats</owns>
                 <owns>State management (Zustand store)</owns>
                 <owns>Component hierarchy and routing</owns>
+                <owns>Optimistic rendering and reconciliation</owns>
+                <owns>Authentication-aware UI logic</owns>
             </ownership>
             <dependencies>
                 <depends-on>WebSocket for real-time events</depends-on>

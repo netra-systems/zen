@@ -1,0 +1,44 @@
+"""Catalog Tools Module - MCP tools for supply catalog operations"""
+
+import json
+from typing import Optional
+
+
+class CatalogTools:
+    """Supply catalog tools registration"""
+    
+    def __init__(self, mcp_instance):
+        self.mcp = mcp_instance
+        
+    def register_all(self, server):
+        """Register supply catalog tools"""
+        @self.mcp.tool()
+        async def get_supply_catalog(filter: Optional[str] = None) -> str:
+            """Get available AI models and providers"""
+            return await self._execute_catalog_query(server, filter)
+    
+    async def _execute_catalog_query(self, server, filter: Optional[str]) -> str:
+        """Execute catalog query with error handling"""
+        if not server.supply_catalog_service:
+            return self._get_mock_catalog()
+        try:
+            catalog = await server.supply_catalog_service.get_catalog(
+                filter_criteria=filter
+            )
+            return json.dumps(catalog, indent=2)
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+    
+    def _get_mock_catalog(self) -> str:
+        """Get mock catalog data when service unavailable"""
+        catalog = {
+            "providers": [
+                {"name": "Anthropic",
+                 "models": ["claude-3-opus", "claude-3-sonnet", "claude-3-haiku"]},
+                {"name": "OpenAI",
+                 "models": ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"]},
+                {"name": "Google",
+                 "models": ["gemini-pro", "gemini-pro-vision"]}
+            ]
+        }
+        return json.dumps(catalog, indent=2)

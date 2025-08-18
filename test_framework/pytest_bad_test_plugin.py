@@ -26,21 +26,9 @@ class BadTestPlugin:
         Args:
             config: Pytest config object
         """
-        # Check if bad test detection is disabled
-        if config.option.no_bad_test_detection:
-            self.enabled = False
-            return
-        
-        # Get component from config
-        self.component = getattr(config.option, 'test_component', 'backend')
-        self.verbose = config.option.verbose > 0
-        
-        # Initialize detector
-        data_file = self._get_data_file(config)
-        self.detector = BadTestDetector(data_file)
-        
-        if self.verbose:
-            print(f"[BAD TEST DETECTOR] Initialized for {self.component} tests")
+        # Bad test detection is now disabled - using single test_results.json
+        self.enabled = False
+        return
     
     def _get_data_file(self, config) -> Optional[Path]:
         """Get data file path from config.
@@ -53,8 +41,8 @@ class BadTestPlugin:
         """
         if hasattr(config.option, 'bad_test_data_file') and config.option.bad_test_data_file:
             return Path(config.option.bad_test_data_file)
-        # Default to test_reports/bad_tests.json
-        return Path("test_reports/bad_tests.json")
+        # Default to test_reports/test_results.json (single source of truth)
+        return Path("test_reports/test_results.json")
     
     def record_test_outcome(self, nodeid: str, outcome: str, 
                            longrepr=None):

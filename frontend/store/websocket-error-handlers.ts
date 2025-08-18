@@ -3,7 +3,8 @@
 
 import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
 import type { UnifiedChatState } from '@/types/store-types';
-import type { ChatMessage } from '@/types/chat';
+import type { ChatMessage } from '@/types/registry';
+import { MessageFormatterService } from '@/services/messageFormatter';
 
 /**
  * Handles error events - sets processing to false and adds error message
@@ -15,8 +16,9 @@ export const handleError = (
   get: () => UnifiedChatState
 ): void => {
   const errorMessage = (event.payload as any).error_message || 'An error occurred';
-  const errorChatMessage: ChatMessage = createErrorChatMessage(errorMessage);
-  set({ isProcessing: false, messages: [...state.messages, errorChatMessage] });
+  const baseErrorMessage: ChatMessage = createErrorChatMessage(errorMessage);
+  const enrichedErrorMessage = MessageFormatterService.enrich(baseErrorMessage);
+  set({ isProcessing: false, messages: [...state.messages, enrichedErrorMessage] });
 };
 
 /**

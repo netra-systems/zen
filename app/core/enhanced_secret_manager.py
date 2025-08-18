@@ -18,6 +18,7 @@ from app.core.secret_manager_types import SecretAccessLevel, SecretMetadata
 from app.core.secret_manager_encryption import SecretEncryption
 from app.core.secret_manager_core import EnhancedSecretManager
 from app.core.secret_manager_factory import create_secret_manager, enhanced_secret_manager
+from app.schemas.config_types import EnvironmentType
 
 # Expose the main API
 __all__ = [
@@ -26,5 +27,6 @@ __all__ = [
     'SecretEncryption',
     'EnhancedSecretManager',
     'create_secret_manager',
-    'enhanced_secret_manager'
+    'enhanced_secret_manager',
+    'EnvironmentType'
 ]

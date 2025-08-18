@@ -28,7 +28,7 @@ jobs:
   # Job 1: Fast changed-files only execution for quick feedback
   quick-feedback:
     name: 🚀 Quick Feedback (Changed Files)
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 5
     if: github.event_name == 'pull_request'
     
@@ -73,7 +73,7 @@ jobs:
   # Job 2: Smart test execution with optimization
   smart-execution:
     name: 🧠 Smart Test Execution
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 15
     if: inputs.test_level == 'smart' || (github.event_name != 'workflow_dispatch' && github.event_name == 'push')
     
@@ -108,7 +108,8 @@ jobs:
 
     - name: Run sharded tests
       working-directory: frontend
-      run: npm run test:shard -- --silent
+      run: |
+        npm run test:shard -- --silent || exit $?
       env:
         JEST_SHARD_INDEX: ${{ matrix.shard }}
         JEST_SHARD_TOTAL: 4
@@ -134,7 +135,7 @@ jobs:
   # Job 3: Aggregate results from sharded execution
   aggregate-results:
     name: 📊 Aggregate Test Results
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     needs: smart-execution
     if: always()
     timeout-minutes: 5
@@ -182,7 +183,7 @@ jobs:
   # Job 4: Fast execution for quick validation
   fast-execution:
     name: ⚡ Fast Execution
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 8
     if: inputs.test_level == 'fast'
     
@@ -209,14 +210,15 @@ jobs:
 
     - name: Run ultra-fast tests
       working-directory: frontend
-      run: npm run test:ultra -- --bail
+      run: |
+        npm run test:ultra -- --bail || exit $?
       env:
         JEST_ULTRA_SILENT: true
 
   # Job 5: Comprehensive execution with full coverage
   comprehensive-execution:
     name: 🔍 Comprehensive Testing
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 25
     if: inputs.test_level == 'comprehensive' || github.ref == 'refs/heads/main'
     
@@ -237,7 +239,8 @@ jobs:
 
     - name: Run comprehensive tests with coverage
       working-directory: frontend
-      run: npm run test:optimize:coverage
+      run: |
+        npm run test:optimize:coverage || exit $?
 
     - name: Upload comprehensive coverage
       uses: actions/upload-artifact@v4
@@ -256,7 +259,7 @@ jobs:
   # Job 6: Performance monitoring
   performance-monitoring:
     name: 📈 Performance Monitoring
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     timeout-minutes: 10
     if: github.ref == 'refs/heads/main' || inputs.test_level == 'comprehensive'
     
@@ -308,7 +311,7 @@ jobs:
 # Summary job for status checks
   test-summary:
     name: 📋 Test Summary
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     needs: [quick-feedback, smart-execution, aggregate-results]
     if: always()
     timeout-minutes: 2
@@ -322,10 +325,29 @@ jobs:
         echo "Result aggregation: ${{ needs.aggregate-results.result }}"
         
         # Determine overall result
+        OVERALL_FAILURE=0
+        
+        # Check each job result
+        if [[ "${{ needs.quick-feedback.result }}" == "failure" ]]; then
+          echo "::error::Quick feedback tests failed"
+          OVERALL_FAILURE=1
+        fi
+        
         if [[ "${{ needs.smart-execution.result }}" == "failure" ]]; then
+          echo "::error::Smart execution tests failed"
+          OVERALL_FAILURE=1
+        fi
+        
+        if [[ "${{ needs.aggregate-results.result }}" == "failure" ]]; then
+          echo "::error::Result aggregation failed"
+          OVERALL_FAILURE=1
+        fi
+        
+        # Final status
+        if [ $OVERALL_FAILURE -eq 1 ]; then
           echo "❌ Tests failed"
           exit 1
-        elif [[ "${{ needs.smart-execution.result }}" == "success" ]]; then
+        elif [[ "${{ needs.smart-execution.result }}" == "success" ]] || [[ "${{ needs.quick-feedback.result }}" == "success" ]]; then
           echo "✅ All tests passed"
           exit 0
         else

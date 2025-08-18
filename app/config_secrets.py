@@ -100,11 +100,20 @@ def get_auth_mappings() -> Dict[str, Dict[str, Any]]:
 
 def get_all_secret_mappings() -> Dict[str, Dict[str, Any]]:
     """Get all secret mappings combined."""
-    mappings = {}
-    mappings["gemini-api-key"] = get_gemini_mapping()
+    mappings = _create_base_mappings()
+    _update_mappings_with_providers(mappings)
+    return mappings
+
+
+def _create_base_mappings() -> Dict[str, Dict[str, Any]]:
+    """Create base mappings with gemini configuration."""
+    return {"gemini-api-key": get_gemini_mapping()}
+
+
+def _update_mappings_with_providers(mappings: Dict[str, Dict[str, Any]]) -> None:
+    """Update mappings with all provider configurations."""
     mappings.update(get_llm_mappings())
     mappings.update(get_google_mappings())
     mappings.update(get_service_mappings())
     mappings.update(get_database_mappings())
     mappings.update(get_auth_mappings())
-    return mappings

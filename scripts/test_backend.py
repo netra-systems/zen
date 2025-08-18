@@ -277,15 +277,11 @@ def _add_common_options(args, pytest_args):
 
 def _add_bad_test_detection_args(args, pytest_args):
     """Add bad test detection plugin arguments"""
-    # Add the plugin
-    pytest_args.extend(["-p", "test_framework.pytest_bad_test_plugin"])
+    # Bad test detection disabled - using single test_results.json
+    # pytest_args.extend(["-p", "test_framework.pytest_bad_test_plugin"])
     
-    # Add component info
-    pytest_args.extend(["--test-component", "backend"])
-    
-    # Disable if requested
-    if hasattr(args, 'no_bad_test_detection') and args.no_bad_test_detection:
-        pytest_args.append("--no-bad-test-detection")
+    # Component info not needed since plugin is disabled
+    # pytest_args.extend(["--test-component", "backend"])
 
 
 def setup_reports_directory(args, isolation_manager=None) -> Path:

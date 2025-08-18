@@ -11,6 +11,7 @@ import {
 import { mapEventPayload } from '@/utils/event-payload-mapper';
 import { parseTimestamp } from './websocket-event-handlers-core';
 import { cleanupToolsOnAgentComplete } from './websocket-tool-handlers-enhanced';
+import { MessageFormatterService } from '@/services/messageFormatter';
 import type { 
   UnifiedWebSocketEvent,
   ChatMessage,
@@ -54,17 +55,18 @@ export const processAgentIteration = (
 };
 
 /**
- * Creates agent started message for chat
+ * Creates agent started message for chat with formatting
  */
 export const createAgentStartedMessage = (displayName: string, runId: string, get: () => UnifiedChatState): void => {
-  const message: ChatMessage = {
+  const baseMessage: ChatMessage = {
     id: generateUniqueId('agent-start'),
     role: 'assistant',
     content: `🚀 Starting ${displayName}...`,
     timestamp: Date.now(),
     metadata: { agentName: displayName, runId }
   };
-  get().addMessage(message);
+  const enrichedMessage = MessageFormatterService.enrich(baseMessage);
+  get().addMessage(enrichedMessage);
 };
 
 /**
@@ -131,17 +133,18 @@ export const extractThinkingData = (payload: any) => {
 };
 
 /**
- * Creates thinking message for chat
+ * Creates thinking message for chat with formatting
  */
 export const createThinkingMessage = (thinkingData: any, get: () => UnifiedChatState): void => {
-  const message: ChatMessage = {
+  const baseMessage: ChatMessage = {
     id: generateUniqueId('thinking'),
     role: 'assistant',
     content: `🤔 ${thinkingData.agentId}: ${thinkingData.thought}`,
     timestamp: Date.now(),
     metadata: { agentName: thinkingData.agentId }
   };
-  get().addMessage(message);
+  const enrichedMessage = MessageFormatterService.enrich(baseMessage);
+  get().addMessage(enrichedMessage);
 };
 
 /**
@@ -210,7 +213,7 @@ export const updateAgentExecution = (
 };
 
 /**
- * Creates agent completed message for chat
+ * Creates agent completed message for chat with formatting
  */
 export const createAgentCompletedMessage = (
   displayName: string,
@@ -218,14 +221,15 @@ export const createAgentCompletedMessage = (
   get: () => UnifiedChatState
 ): void => {
   const durationInSeconds = agentData.durationMs > 0 ? (agentData.durationMs / 1000).toFixed(2) : '0.00';
-  const message: ChatMessage = {
+  const baseMessage: ChatMessage = {
     id: generateUniqueId('agent-complete'),
     role: 'assistant',
     content: `✅ ${displayName} completed in ${durationInSeconds}s`,
     timestamp: Date.now(),
     metadata: { agentName: displayName, duration: agentData.durationMs }
   };
-  get().addMessage(message);
+  const enrichedMessage = MessageFormatterService.enrich(baseMessage);
+  get().addMessage(enrichedMessage);
 };
 
 /**

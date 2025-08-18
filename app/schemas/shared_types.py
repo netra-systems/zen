@@ -78,6 +78,11 @@ class ErrorContext(BaseModel):
     severity: Optional[str] = Field(default=None, description="Error severity")
     error_code: Optional[str] = Field(default=None, description="Error code")
 
+    @classmethod
+    def get_all_context(cls) -> Dict[str, Union[str, int, float, bool]]:
+        """Get default context for error handling compatibility."""
+        return {}
+
 
 class BaseAgentInterface(ABC):
     """Base interface for agent implementations to ensure consistency"""

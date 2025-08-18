@@ -1,6 +1,15 @@
 """
 Main FastAPI application module.
 Entry point for the Netra AI Optimization Platform.
+
+🔴 CRITICAL AUTH ARCHITECTURE:
+- This is the MAIN BACKEND service, NOT the auth service
+- Auth service runs SEPARATELY on port 8001 (see app/auth/auth_service.py)
+- This backend ONLY uses auth_integration to connect to auth service
+- NEVER implement authentication logic here
+- All auth operations go through auth_client
+
+See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 import sys
 import os
@@ -50,14 +59,19 @@ def _load_all_env_files(root_path: Path) -> None:
 
 
 def _setup_environment_files() -> None:
-    """Load environment files in the correct order of precedence."""
+    """Load environment files ONLY if not already loaded by dev launcher."""
+    # Skip loading if running under dev launcher (it already loaded secrets)
+    if os.environ.get('DEV_LAUNCHER_ACTIVE'):
+        return
+    
+    # Only load for direct uvicorn runs
     try:
         root_path = _get_project_root()
         _load_all_env_files(root_path)
-    except ImportError: pass
+    except ImportError: 
+        pass
 
-
-# Load environment files in the correct order
+# Load environment files only if needed
 _setup_environment_files()
 
 # Import unified logging first to ensure interceptor is set up

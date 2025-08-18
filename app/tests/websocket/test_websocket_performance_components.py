@@ -7,13 +7,14 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Dict, Any
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 from app.websocket.memory_manager import WebSocketMemoryManager
 from app.websocket.message_batcher import WebSocketMessageBatcher, BatchConfig
 from app.websocket.compression import WebSocketCompressor, CompressionConfig
 from app.websocket.performance_monitor import PerformanceMonitor
 from app.websocket.state_synchronizer import ConnectionStateSynchronizer
+from app.websocket.connection import ConnectionInfo
 from app.schemas.websocket_models import WebSocketMessage
 
 
@@ -163,7 +164,7 @@ class TestWebSocketMessageBatcherPerformance:
         """Send large messages to test memory handling."""
         for i in range(50):
             message = WebSocketMessage(
-                type="large_data",
+                type="user_message",
                 payload={"data": "x" * 5000}  # 5KB message
             )
             connection_id = f"conn_{i % 3}"
@@ -321,7 +322,14 @@ class TestWebSocketStateSynchronizerResilience:
         from app.websocket.connection import ConnectionManager, ConnectionInfo
         from unittest.mock import MagicMock
         
-        connection_manager = ConnectionManager()
+        # Mock connection manager to prevent automatic unregistration
+        connection_manager = MagicMock()
+        self.active_connections = {}
+        
+        def mock_get_connection_by_id(connection_id):
+            return self.active_connections.get(connection_id)
+        
+        connection_manager.get_connection_by_id = mock_get_connection_by_id
         synchronizer = ConnectionStateSynchronizer(connection_manager)
         
         await synchronizer.start_monitoring()
@@ -341,19 +349,21 @@ class TestWebSocketStateSynchronizerResilience:
             websocket = MagicMock()
             websocket.client_state.name = "CONNECTED"
             
-            conn_info = {
-                "websocket": websocket,
-                "user_id": f"user_{i}",
-                "connection_id": f"conn_{i}"
-            }
+            conn_info = ConnectionInfo(
+                websocket=websocket,
+                user_id=f"user_{i}",
+                connection_id=f"conn_{i}"
+            )
             
             connections.append(conn_info)
+            self.active_connections[f"conn_{i}"] = conn_info  # Add to mock manager
             await synchronizer.register_connection(conn_info)
-            await synchronizer.update_connection_activity(conn_info["connection_id"])
+            await synchronizer.update_connection_activity(conn_info.connection_id)
         
-        # Remove some connections
+        # Remove some connections (both from synchronizer and mock manager)
         for i in range(0, 25):
             await synchronizer.unregister_connection(f"conn_{i}")
+            self.active_connections.pop(f"conn_{i}", None)  # Remove from mock manager
         
         # Wait for sync checks
         await asyncio.sleep(1)

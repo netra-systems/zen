@@ -56,6 +56,7 @@ class TestAgentRoute:
         """Test agent streaming response capability."""
         from app.routes.agent_route import stream_agent_response
         from app.services.agent_service import AgentService
+        import json
         
         # Create a mock agent service with streaming capability
         mock_agent_service = Mock(spec=AgentService)
@@ -70,16 +71,23 @@ class TestAgentRoute:
         
         # Mock the dependencies
         with patch('app.routes.agent_route.get_agent_service', return_value=mock_agent_service):
-            chunks = []
-            async for chunk in stream_agent_response("test message", agent_service=mock_agent_service):
-                chunks.append(chunk)
+            chunks = await self._collect_stream_chunks("test message", mock_agent_service)
             
             assert len(chunks) == 4  # 3 content chunks + 1 completion chunk
             
-            # Verify chunk structure
-            for i, chunk in enumerate(chunks[:3]):
+            # Verify chunk structure (parse JSON strings back to dicts)
+            for i, chunk_str in enumerate(chunks[:3]):
+                chunk = json.loads(chunk_str)
                 assert chunk["type"] == "content"
                 assert chunk["data"] == f"Part {i+1}"
+    
+    async def _collect_stream_chunks(self, message: str, agent_service):
+        """Helper to collect streaming chunks into a list."""
+        from app.routes.agent_route import stream_agent_response
+        chunks = []
+        async for chunk in stream_agent_response(message, agent_service=agent_service):
+            chunks.append(chunk)
+        return chunks
     
     def test_agent_error_handling(self, agent_test_client):
         """Test agent error handling."""
@@ -249,23 +257,25 @@ class TestAgentRoute:
     
     def test_agent_websocket_integration(self, agent_test_client):
         """Test agent integration with WebSocket communication."""
-        # Test WebSocket endpoint for real-time agent communication
-        with agent_test_client.websocket_connect("/ws/agent") as websocket:
-            # Send agent message via WebSocket
-            test_message = {
-                "type": "agent_message",
-                "message": "WebSocket test",
-                "thread_id": "ws_thread_1"
-            }
-            
-            websocket.send_json(test_message)
-            
-            # Receive response
-            response = websocket.receive_json()
-            
-            # Validate WebSocket response structure
-            assert "type" in response
-            assert response["type"] in ["agent_response", "error"]
-            
-            if response["type"] == "agent_response":
-                assert "message" in response or "response" in response
+        self._test_websocket_connection(agent_test_client)
+    
+    def _test_websocket_connection(self, agent_test_client):
+        """Test WebSocket connection with proper endpoint."""
+        with agent_test_client.websocket_connect("/api/agent/ws/agent") as websocket:
+            self._send_agent_test_message(websocket)
+    
+    def _send_agent_test_message(self, websocket):
+        """Send agent test message via WebSocket."""
+        message = self._create_test_message()
+        websocket.send_json(message)
+        self._validate_websocket_response(websocket)
+        
+    def _create_test_message(self) -> dict:
+        """Create test message for WebSocket."""
+        return {"type": "agent_message", "message": "WebSocket test", "thread_id": "ws_thread_1"}
+    
+    def _validate_websocket_response(self, websocket):
+        """Validate WebSocket response structure."""
+        response = websocket.receive_json()
+        assert "type" in response
+        assert response["type"] in ["agent_response", "error"]

@@ -6,7 +6,7 @@ All functions ≤8 lines per requirements.
 import asyncio
 from typing import List, Optional, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError, OperationalError
 
 from app.services.database.base_repository import BaseRepository
 from .database_transaction_test_helpers import MockDatabaseModel
@@ -29,17 +29,41 @@ class MockRepository(BaseRepository[MockDatabaseModel]):
         return await self._perform_create_operation(db, kwargs)
     
     async def _perform_create_operation(self, db: AsyncSession, kwargs: dict) -> Optional[MockDatabaseModel]:
-        """Perform create operation with error handling"""
-        try:
-            entity = MockDatabaseModel(**kwargs)
-            db.add(entity)
-            await db.flush()  # Use flush instead of commit to match BaseRepository
-            return entity
-        except DisconnectionError:
-            raise  # Let DisconnectionError propagate
-        except (IntegrityError, SQLAlchemyError):
-            await self._handle_create_error(db)
-            return None
+        """Perform create operation with error handling and deadlock recovery"""
+        max_retries = 3
+        retry_count = 0
+        
+        while retry_count < max_retries:
+            try:
+                entity = MockDatabaseModel(**kwargs)
+                db.add(entity)
+                await db.flush()  # Use flush instead of commit to match BaseRepository
+                return entity
+            except DisconnectionError:
+                raise  # Let DisconnectionError propagate
+            except OperationalError as e:
+                # Handle deadlock and timeout scenarios
+                retry_count += 1
+                await self._handle_deadlock_recovery(db, e, retry_count, max_retries)
+                if retry_count >= max_retries:
+                    return None
+                continue
+            except (IntegrityError, SQLAlchemyError):
+                await self._handle_create_error(db)
+                return None
+    
+    async def _handle_deadlock_recovery(self, db: AsyncSession, error: OperationalError, 
+                                        retry_count: int, max_retries: int) -> None:
+        """Handle deadlock recovery with exponential backoff"""
+        # Log the deadlock attempt
+        self.operation_log.append(('deadlock_recovery', retry_count, str(error)))
+        
+        # Perform rollback to clear the transaction state
+        await db.rollback()
+        
+        # Exponential backoff: wait progressively longer between retries
+        wait_time = 0.001 * (2 ** (retry_count - 1))  # 1ms, 2ms, 4ms...
+        await asyncio.sleep(wait_time)
     
     async def _handle_create_error(self, db: AsyncSession) -> None:
         """Handle create operation errors"""

@@ -9,7 +9,8 @@
  */
 
 import { ThreadService, ThreadMessagesResponse } from './threadService';
-import type { ChatMessage } from '@/types/chat';
+import { MessageFormatterService } from './messageFormatter';
+import type { ChatMessage } from '@/types/registry';
 
 /**
  * Thread loading result interface
@@ -75,19 +76,22 @@ const fetchThreadMessages = async (
 };
 
 /**
- * Converts backend messages to ChatMessage format
+ * Converts backend messages to ChatMessage format with formatting
  */
 const convertToChartMessages = (
   response: ThreadMessagesResponse,
   threadId: string
 ): ChatMessage[] => {
-  return response.messages.map((msg) => ({
+  const messages = response.messages.map((msg) => ({
     id: msg.id,
     role: determineMessageRole(msg.role),
     content: msg.content,
     timestamp: convertTimestamp(msg.created_at),
-    threadId
+    threadId,
+    metadata: msg.metadata
   }));
+  
+  return messages.map(msg => MessageFormatterService.enrich(msg));
 };
 
 /**

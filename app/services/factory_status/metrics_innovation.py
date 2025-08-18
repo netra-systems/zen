@@ -7,7 +7,7 @@ Follows 300-line limit with 8-line function limit.
 from typing import List
 from .git_commit_parser import GitCommitParser, CommitInfo
 from .metrics_business_value_types import InnovationMetrics
-from .metrics_pattern_utils import PatternMatcher
+from .metrics_pattern_utils import BusinessValuePatternMatcher
 
 
 class InnovationCalculator:
@@ -16,7 +16,7 @@ class InnovationCalculator:
     def __init__(self, repo_path: str = "."):
         """Initialize innovation calculator."""
         self.commit_parser = GitCommitParser(repo_path)
-        self.pattern_matcher = PatternMatcher()
+        self.pattern_matcher = BusinessValuePatternMatcher()
         self.repo_path = repo_path
     
     def calculate_innovation_metrics(self, hours: int = 168) -> InnovationMetrics:

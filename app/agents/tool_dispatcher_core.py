@@ -58,7 +58,7 @@ class ToolDispatcher:
             return self._create_error_result(tool_input, f"Tool {tool_name} not found")
         
         tool = self.registry.get_tool(tool_name)
-        return await self.executor.execute_tool(tool_input, tool, kwargs)
+        return await self.executor.execute_tool_with_input(tool_input, tool, kwargs)
     
     def _create_tool_input(self, tool_name: str, kwargs: Dict[str, Any]) -> ToolInput:
         """Create tool input from parameters"""
@@ -92,7 +92,7 @@ class ToolDispatcher:
     
     async def _execute_tool(self, tool_input: ToolInput, tool: Any, kwargs: Dict[str, Any]) -> ToolResult:
         """Execute tool via executor - backward compatibility method"""
-        return await self.executor.execute_tool(tool_input, tool, kwargs)
+        return await self.executor.execute_tool_with_input(tool_input, tool, kwargs)
     
     async def _execute_tool_with_error_handling(
         self,

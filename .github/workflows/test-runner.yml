@@ -136,8 +136,9 @@ jobs:
             if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
               echo "🧪 ACT: Running mock smoke tests"
               echo "✅ Smoke tests passed (mock)"
+              exit 0
             else
-              python test_runner.py --level smoke
+              python test_runner.py --level smoke --no-coverage --fast-fail || exit $?
             fi
             
       - name: Run unit tests
@@ -155,8 +156,9 @@ jobs:
               # Create mock coverage file
               mkdir -p test-results
               echo '<coverage line-rate="0.85"></coverage>' > coverage.xml
+              exit 0
             else
-              python test_runner.py --level unit --coverage
+              python test_runner.py --level unit --no-coverage --fast-fail || exit $?
             fi
             
       - name: Run integration tests
@@ -171,8 +173,9 @@ jobs:
             if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
               echo "🧪 ACT: Running mock integration tests"
               echo "✅ Integration tests passed (mock)"
+              exit 0
             else
-              python test_runner.py --level integration
+              python test_runner.py --level integration --no-coverage --fast-fail || exit $?
             fi
             
       - name: Run E2E tests
@@ -187,8 +190,9 @@ jobs:
             if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
               echo "🧪 ACT: Running mock E2E tests"
               echo "✅ E2E tests passed (mock)"
+              exit 0
             else
-              python test_runner.py --level e2e
+              python test_runner.py --level e2e --no-coverage --fast-fail || exit $?
             fi
             
       - name: Collect coverage
@@ -222,17 +226,25 @@ jobs:
              [ "${{ steps.integration-tests.outcome }}" = "failure" ] || \
              [ "${{ steps.e2e-tests.outcome }}" = "failure" ]; then
             status="failure"
+            echo "::error::Tests failed - at least one test suite reported failures"
           elif [ "${{ steps.smoke-tests.outcome }}" = "cancelled" ] || \
                [ "${{ steps.unit-tests.outcome }}" = "cancelled" ] || \
                [ "${{ steps.integration-tests.outcome }}" = "cancelled" ] || \
                [ "${{ steps.e2e-tests.outcome }}" = "cancelled" ]; then
             status="cancelled"
+            echo "::warning::Tests were cancelled"
           else
             status="success"
+            echo "::notice::All tests passed successfully"
           fi
           
           echo "test_status=$status" >> $GITHUB_OUTPUT
           echo "duration=${duration}s" >> $GITHUB_OUTPUT
+          
+          # Exit with failure if tests failed
+          if [ "$status" = "failure" ]; then
+            exit 1
+          fi
           
       - name: Update commit status
         if: always()

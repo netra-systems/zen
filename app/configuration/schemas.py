@@ -240,6 +240,7 @@ class DevelopmentConfig(AppConfig):
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
+    secret_key: str = os.environ.get("SECRET_KEY", "development_secret_key_that_is_at_least_32_characters_long_for_validation")
     jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
     fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
     

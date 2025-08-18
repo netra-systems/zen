@@ -5,8 +5,8 @@ Minimal authentication service for Netra
 import os
 import logging
 from contextlib import asynccontextmanager
-from typing import Optional
-from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from datetime import datetime, timedelta, UTC
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,7 +15,8 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 import jwt
-from passlib.context import CryptContext
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
 # Configure logging
 logging.basicConfig(
@@ -30,10 +31,37 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+ph = PasswordHasher()
 
 # Security
 security = HTTPBearer()
+
+# Unified Health System (simplified for standalone service)
+class SimpleHealthInterface:
+    """Simplified health interface for standalone auth service."""
+    
+    def __init__(self, service_name: str, version: str = "1.0.0"):
+        self.service_name = service_name
+        self.version = version
+        self.start_time = datetime.now(UTC)
+    
+    def get_basic_health(self) -> Dict[str, Any]:
+        """Get basic health status."""
+        return {
+            "status": "healthy",
+            "service": self.service_name,
+            "version": self.version,
+            "environment": os.getenv("ENVIRONMENT", "development"),
+            "timestamp": datetime.now(UTC).isoformat(),
+            "uptime_seconds": self._get_uptime_seconds()
+        }
+    
+    def _get_uptime_seconds(self) -> float:
+        """Calculate service uptime in seconds."""
+        return (datetime.now(UTC) - self.start_time).total_seconds()
+
+# Initialize health interface
+health_interface = SimpleHealthInterface("auth-service", "1.0.0")
 
 # Pydantic models
 class LoginRequest(BaseModel):
@@ -54,13 +82,15 @@ class HealthResponse(BaseModel):
     service: str
     version: str
     environment: str
+    timestamp: str
+    uptime_seconds: Optional[float] = None
 
 # Temporary in-memory user store (replace with database in production)
 USERS_DB = {
     "admin@netra.ai": {
         "id": "user_001",
         "email": "admin@netra.ai",
-        "hashed_password": pwd_context.hash("admin123"),
+        "hashed_password": ph.hash("admin123"),
         "role": "admin"
     }
 }
@@ -112,7 +142,11 @@ if os.getenv("ENVIRONMENT") in ["staging", "production"]:
 # Helper functions
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        ph.verify(hashed_password, plain_password)
+        return True
+    except (VerifyMismatchError, InvalidHashError):
+        return False
 
 def create_access_token(data: dict) -> str:
     """Create a JWT access token"""
@@ -164,15 +198,10 @@ async def root():
         }
     }
 
-@app.get("/health", response_model=HealthResponse)
-async def health():
-    """Health check endpoint"""
-    return HealthResponse(
-        status="healthy",
-        service="auth-service",
-        version="1.0.0",
-        environment=os.getenv("ENVIRONMENT", "development")
-    )
+@app.get("/health")
+async def health() -> Dict[str, Any]:
+    """Health check endpoint with unified health system"""
+    return health_interface.get_basic_health()
 
 @app.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):

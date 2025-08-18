@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import logging
+from typing import Dict, Any
+from datetime import datetime, UTC
 
 from app.routes.auth_routes import router as auth_router
 
@@ -18,6 +20,32 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# Simplified Health Interface for Auth Service
+class AuthServiceHealthInterface:
+    """Simple health interface for auth service."""
+    
+    def __init__(self, service_name: str, version: str = "1.0.0"):
+        self.service_name = service_name
+        self.version = version
+        self.start_time = datetime.now(UTC)
+    
+    def get_basic_health(self) -> Dict[str, Any]:
+        """Get basic health status."""
+        return {
+            "status": "healthy",
+            "service": self.service_name,
+            "version": self.version,
+            "timestamp": datetime.now(UTC).isoformat(),
+            "uptime_seconds": self._get_uptime_seconds()
+        }
+    
+    def _get_uptime_seconds(self) -> float:
+        """Calculate service uptime in seconds."""
+        return (datetime.now(UTC) - self.start_time).total_seconds()
+
+# Initialize health interface
+health_interface = AuthServiceHealthInterface("auth-service", "1.0.0")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -107,12 +135,9 @@ async def root():
 
 # Health check at root level
 @app.get("/health")
-async def health():
-    """Basic health check"""
-    return {
-        "status": "healthy",
-        "service": "auth-service"
-    }
+async def health() -> Dict[str, Any]:
+    """Basic health check with unified health system"""
+    return health_interface.get_basic_health()
 
 if __name__ == "__main__":
     import uvicorn

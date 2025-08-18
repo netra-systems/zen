@@ -223,7 +223,7 @@ class ToolPermissionMiddleware:
     def _get_environment(self) -> str:
         """Get current environment"""
         import os
-        return os.getenv("ENVIRONMENT", "production")
+        return os.getenv("ENVIRONMENT", "staging")  # Default to staging for safety
     
     def _permission_denied_response(
         self, 

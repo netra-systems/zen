@@ -1,7 +1,7 @@
 """Tool interfaces - Single source of truth.
 
-Consolidated tool execution and registry logic from both simple and comprehensive
-implementations. Follows 300-line limit and 8-line functions.
+Main ToolExecutionEngine implementation with proper modular design.
+Follows 300-line limit and 8-line functions.
 """
 
 from typing import Dict, Any, Optional, List, TYPE_CHECKING
@@ -11,6 +11,7 @@ import inspect
 
 from app.logging_config import central_logger
 from app.core.exceptions_base import NetraException
+from .tool_models import ToolExecutionResult, UnifiedTool
 
 if TYPE_CHECKING:
     from app.db.models_postgres import User
@@ -19,30 +20,6 @@ if TYPE_CHECKING:
     from app.services.tool_permission_service import ToolPermissionService
 
 logger = central_logger.get_logger(__name__)
-
-
-class ToolExecutionResult:
-    """Result of tool execution with comprehensive tracking."""
-    
-    def __init__(self, tool_name: str, user_id: str, status: str, 
-                 execution_time_ms: int, result: Any = None, 
-                 error_message: str = None, permission_check = None):
-        self.tool_name = tool_name
-        self.user_id = user_id
-        self.status = status
-        self.execution_time_ms = execution_time_ms
-        self.result = result
-        self.error_message = error_message
-        self.permission_check = permission_check
-
-
-class UnifiedTool:
-    """Unified tool representation."""
-    
-    def __init__(self, name: str, handler: Any = None, input_schema: Dict = None):
-        self.name = name
-        self.handler = handler
-        self.input_schema = input_schema
 
 
 class ToolExecutionEngine:
@@ -272,103 +249,3 @@ class ToolExecutionEngine:
             tool_name=tool.name if tool else "unknown", user_id=str(user.id),
             status="error", error_message=str(error), execution_time_ms=execution_time_ms
         )
-
-
-class ToolRegistry:
-    """Unified tool registry merging full-featured and simple implementations."""
-    
-    def __init__(self, db_session=None):
-        """Initialize tool registry."""
-        self.db_session = db_session
-        self.tools: Dict[str, Any] = {}
-        self._tool_configs = self._init_agent_tool_configs()
-        self._register_default_tools()
-    
-    def _init_agent_tool_configs(self) -> Dict[str, List]:
-        """Initialize agent-specific tool configurations."""
-        return {
-            "triage": [], "data": [], "optimizations_core": [],
-            "actions_to_meet_goals": [], "reporting": []
-        }
-    
-    def _register_default_tools(self) -> None:
-        """Register default synthetic and corpus tools."""
-        self._register_synthetic_tools()
-        self._register_corpus_tools()
-    
-    def _register_synthetic_tools(self) -> None:
-        """Register synthetic data generation tools."""
-        from app.agents.production_tool import ProductionTool
-        
-        synthetic_tools = ["generate_synthetic_data_batch", "validate_synthetic_data", "store_synthetic_data"]
-        for tool_name in synthetic_tools:
-            if tool_name not in self.tools:
-                self.tools[tool_name] = ProductionTool(tool_name)
-    
-    def _register_corpus_tools(self) -> None:
-        """Register corpus management tools."""
-        from app.agents.production_tool import ProductionTool
-        
-        corpus_tools = [
-            "create_corpus", "search_corpus", "update_corpus", "delete_corpus",
-            "analyze_corpus", "export_corpus", "import_corpus", "validate_corpus"
-        ]
-        for tool_name in corpus_tools:
-            if tool_name not in self.tools:
-                self.tools[tool_name] = ProductionTool(tool_name)
-    
-    # Tool management methods
-    
-    def register_tool(self, tool: Any) -> None:
-        """Register a single tool."""
-        self.tools[tool.name] = tool
-        logger.debug(f"Registered tool: {tool.name}")
-    
-    def register_tools(self, tools: List[Any]) -> None:
-        """Register list of tools."""
-        for tool in tools:
-            self.register_tool(tool)
-    
-    def get_tool(self, tool_name: str) -> Optional[Any]:
-        """Get a tool by name."""
-        return self.tools.get(tool_name)
-    
-    def get_tools(self, tool_names: List[str]) -> List[Any]:
-        """Get tools for agent-specific tool names."""
-        tools = []
-        for name in tool_names:
-            if name in self._tool_configs:
-                tools.extend(self._tool_configs[name])
-            elif name in self.tools:
-                tools.append(self.tools[name])
-        return tools
-    
-    def has_tool(self, tool_name: str) -> bool:
-        """Check if a tool exists."""
-        return tool_name in self.tools or tool_name in self._tool_configs
-    
-    def list_tools(self) -> List[str]:
-        """List all registered tool names."""
-        all_tools = list(self.tools.keys()) + list(self._tool_configs.keys())
-        return sorted(set(all_tools))
-    
-    def remove_tool(self, tool_name: str) -> bool:
-        """Remove a tool from registry."""
-        removed = False
-        if tool_name in self.tools:
-            del self.tools[tool_name]
-            removed = True
-        if tool_name in self._tool_configs:
-            del self._tool_configs[tool_name]
-            removed = True
-        return removed
-    
-    def clear_tools(self) -> None:
-        """Clear all tools from registry."""
-        self.tools.clear()
-        self._tool_configs = self._init_agent_tool_configs()
-        self._register_default_tools()
-    
-    def get_tool_count(self) -> int:
-        """Get total number of registered tools."""
-        return len(self.tools) + sum(len(tools) for tools in self._tool_configs.values())

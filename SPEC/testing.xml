@@ -79,6 +79,31 @@
         <description>Single entry point for all Netra AI Platform testing with automatic report generation</description>
         <path>test_runner.py</path>
         
+        <github_actions_integration>
+            <description>Test runner is integrated with GitHub Actions workflows for CI/CD</description>
+            <reference>
+                <workflow>.github/workflows/test-runner.yml</workflow>
+                <description>Main test execution workflow</description>
+            </reference>
+            <reference>
+                <workflow>.github/workflows/test-standard-template.yml</workflow>
+                <description>Template for creating new test workflows</description>
+            </reference>
+            <reference>
+                <workflow>.github/workflows/test-runner-validation.yml</workflow>
+                <description>Validates test runner exit code propagation</description>
+            </reference>
+            <reference>
+                <documentation>.github/workflows/WORKFLOW_FIX_SUMMARY.md</documentation>
+                <description>Complete guide to workflow fixes and best practices</description>
+            </reference>
+            <exit_code_handling>
+                <rule>Test runner returns non-zero exit codes on failure</rule>
+                <rule>Workflows must use || exit $? to propagate failures</rule>
+                <rule>Never use continue-on-error in test steps</rule>
+            </exit_code_handling>
+        </github_actions_integration>
+        
         <test_levels>
             <level name="smoke" recommended="pre_commit">
                 <description>Quick smoke tests for basic functionality (< 30 seconds)</description>
@@ -87,6 +112,7 @@
                 <timeout>30</timeout>
                 <coverage>false</coverage>
                 <components>backend+frontend</components>
+                <ci_flags>--no-coverage --fast-fail --ci --no-warnings</ci_flags>
             </level>
             
             <level name="unit">
@@ -97,6 +123,7 @@
                 <coverage>true</coverage>
                 <components>backend+frontend</components>
                 <note>Coverage summary generated for unit level and above</note>
+                <ci_flags>--no-coverage --fast-fail --ci --no-warnings</ci_flags>
             </level>
             
             <level name="integration">
@@ -107,6 +134,7 @@
                 <coverage>true</coverage>
                 <components>backend+frontend</components>
                 <note>Coverage summary generated for unit level and above</note>
+                <ci_flags>--no-coverage --fast-fail --ci --no-warnings</ci_flags>
             </level>
             
             <level name="comprehensive">
@@ -933,6 +961,48 @@
             python test_runner.py --real-llm --llm-model gemini-1.5-flash -k "test_critical"
         </command>
     </unified_commands>
+    
+    <speed_optimization_commands>
+        <description>Speed optimization options for faster test execution</description>
+        
+        <safe_optimizations>
+            <command name="ci_mode" description="Safe speed optimizations for CI/CD">
+                python test_runner.py --level unit --ci
+            </command>
+            <command name="no_warnings" description="Suppress warnings for faster execution">
+                python test_runner.py --level unit --no-warnings
+            </command>
+            <command name="no_coverage" description="Skip coverage collection for speed">
+                python test_runner.py --level unit --no-coverage
+            </command>
+            <command name="fast_fail" description="Stop on first failure">
+                python test_runner.py --level unit --fast-fail
+            </command>
+            <command name="combined_safe" description="All safe optimizations">
+                python test_runner.py --level unit --ci --no-warnings --no-coverage --fast-fail
+            </command>
+        </safe_optimizations>
+        
+        <aggressive_optimizations>
+            <command name="speed_mode" description="WARNING: May skip slow tests">
+                python test_runner.py --level unit --speed
+            </command>
+            <note>Use --speed with caution - it may skip slow tests to improve execution time</note>
+            <note>Prefer --ci for safe speed optimizations that don't skip tests</note>
+        </aggressive_optimizations>
+        
+        <parallelization>
+            <command name="sequential" description="Run tests sequentially">
+                python test_runner.py --level unit --parallel 1
+            </command>
+            <command name="auto_parallel" description="Auto-detect optimal parallelism">
+                python test_runner.py --level unit --parallel auto
+            </command>
+            <command name="custom_parallel" description="Specify number of workers">
+                python test_runner.py --level unit --parallel 4
+            </command>
+        </parallelization>
+    </speed_optimization_commands>
     
     <troubleshooting>
         <issue>

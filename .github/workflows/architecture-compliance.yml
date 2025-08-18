@@ -19,7 +19,7 @@ on:
 jobs:
   architectural-limits-enforcement:
     name: Enforce 300-Line & 8-Line Limits
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     
     steps:
       - name: Checkout Code
@@ -40,9 +40,25 @@ jobs:
       - name: Run Architecture Compliance Check
         id: compliance-check
         run: |
-          python scripts/enforce_limits.py --mode strict --json > compliance-report.json
-          echo "COMPLIANCE_STATUS=$(cat compliance-report.json | jq -r '.compliance_status')" >> $GITHUB_OUTPUT
-        continue-on-error: true
+          COMPLIANCE_EXIT_CODE=0
+          python scripts/enforce_limits.py --mode strict --json > compliance-report.json || COMPLIANCE_EXIT_CODE=$?
+          
+          if [ -f compliance-report.json ]; then
+            COMPLIANCE_STATUS=$(cat compliance-report.json | jq -r '.compliance_status')
+            echo "COMPLIANCE_STATUS=$COMPLIANCE_STATUS" >> $GITHUB_OUTPUT
+            
+            if [ "$COMPLIANCE_STATUS" != "PASS" ]; then
+              echo "::error::Architecture compliance check failed"
+              COMPLIANCE_EXIT_CODE=1
+            fi
+          else
+            echo "::error::Failed to generate compliance report"
+            echo "COMPLIANCE_STATUS=ERROR" >> $GITHUB_OUTPUT
+            COMPLIANCE_EXIT_CODE=1
+          fi
+          
+          # Store exit code for later
+          echo "COMPLIANCE_EXIT_CODE=$COMPLIANCE_EXIT_CODE" >> $GITHUB_ENV
       
       - name: Generate Compliance Report
         if: always()
@@ -125,7 +141,7 @@ jobs:
       
       - name: Upload Compliance Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: architecture-compliance-report
           path: |
@@ -134,7 +150,7 @@ jobs:
           retention-days: 30
       
       - name: Block Merge on Violations
-        if: steps.compliance-check.outputs.COMPLIANCE_STATUS == 'FAIL'
+        if: steps.compliance-check.outputs.COMPLIANCE_STATUS == 'FAIL' || steps.compliance-check.outputs.COMPLIANCE_STATUS == 'ERROR'
         run: |
           echo "🔴 Architecture compliance violations detected!"
           echo "This PR cannot be merged until all violations are resolved."
@@ -148,11 +164,13 @@ jobs:
           echo "1. Fix all file size violations (300-line limit)"
           echo "2. Fix all function size violations (8-line limit)"
           echo "3. Re-run checks until compliance is achieved"
-          exit 1
+          
+          # Exit with the original compliance check exit code
+          exit ${COMPLIANCE_EXIT_CODE:-1}
 
   file-size-detailed-check:
     name: Detailed File Size Analysis
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: always()
     
     steps:
@@ -186,7 +204,7 @@ jobs:
           echo "- Extract reusable components" >> file-analysis.md
       
       - name: Upload File Analysis
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: file-size-analysis
           path: file-analysis.md
@@ -194,7 +212,7 @@ jobs:
 
   function-complexity-check:
     name: Function Complexity Analysis
-    runs-on: ubuntu-latest
+    runs-on: warp-custom-default
     if: always()
     
     steps:
@@ -208,7 +226,7 @@ jobs:
       
       - name: Analyze Function Complexity
         run: |
-          python scripts/enforce_limits.py --check-functions-only --json > function-report.json
+          python scripts/enforce_limits.py --check-functions-only --json > function-report.json || true
           
           echo "## 🔧 Function Complexity Report" > function-analysis.md
           echo "" >> function-analysis.md
@@ -237,7 +255,7 @@ jobs:
           echo "- Composable, testable units" >> function-analysis.md
       
       - name: Upload Function Analysis
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: function-complexity-analysis
           path: |

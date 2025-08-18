@@ -16,7 +16,7 @@ from .core_unified import CorpusService
 from .document_manager import DocumentManager
 from .search_operations import SearchOperations
 from .validation import ValidationManager
-from .clickhouse_operations import ClickHouseOperations
+from .clickhouse_operations import CorpusClickHouseOperations
 from .corpus_manager import CorpusManager
 
 # Create singleton instance
@@ -27,7 +27,7 @@ __all__ = [
     "DocumentManager", 
     "SearchOperations",
     "ValidationManager",
-    "ClickHouseOperations",
+    "CorpusClickHouseOperations",
     "CorpusManager",
     "CorpusStatus",
     "ContentSource",

@@ -9,6 +9,7 @@ import subprocess
 from typing import List
 
 from .git_commit_parser import GitCommitParser
+from .technical_debt_calculator import TechnicalDebtCalculator
 from .quality_core import (
     ArchitectureCompliance, TechnicalDebt, ComplianceStatus, 
     QualityConstants, QualityMetrics, QualityLevel,
@@ -127,100 +128,6 @@ class ArchitectureValidator:
         return ComplianceStatus.NON_COMPLIANT
 
 
-class TechnicalDebtCalculator:
-    """Calculator for technical debt metrics."""
-    
-    def __init__(self, repo_path: str = "."):
-        """Initialize debt calculator."""
-        self.commit_parser = GitCommitParser(repo_path)
-        self.repo_path = repo_path
-    
-    def calculate(self) -> TechnicalDebt:
-        """Calculate technical debt metrics."""
-        code_smells = self._count_code_smells()
-        duplication = self._calculate_duplication()
-        hotspots = self._find_complexity_hotspots()
-        deprecated = self._count_deprecated_usage()
-        todos = self._count_todo_items()
-        
-        debt_score = self._calculate_debt_score(
-            code_smells, duplication, len(hotspots), deprecated, todos
-        )
-        debt_trend = self._calculate_debt_trend()
-        
-        return TechnicalDebt(
-            code_smells=code_smells,
-            duplication_percentage=duplication,
-            complexity_hotspots=hotspots,
-            deprecated_usage=deprecated,
-            todo_count=todos,
-            debt_score=debt_score,
-            debt_trend=debt_trend
-        )
-    
-    def _count_code_smells(self) -> int:
-        """Count code smells (simplified)."""
-        patterns = ["TODO", "FIXME", "HACK", "TEMP", "XXX"]
-        count = 0
-        
-        for pattern in patterns:
-            cmd = ["grep", "-r", pattern, ".", "--include=*.py", "--include=*.ts"]
-            result = subprocess.run(cmd, capture_output=True, text=True)
-            count += len(result.stdout.strip().split("\n")) if result.stdout else 0
-        
-        return count
-    
-    def _calculate_duplication(self) -> float:
-        """Calculate code duplication percentage (simplified)."""
-        return 5.0
-    
-    def _find_complexity_hotspots(self) -> List[str]:
-        """Find complexity hotspots."""
-        hotspots = []
-        
-        cmd = ["find", ".", "-name", "*.py", "-exec", "wc", "-l", "{}", ";"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.stdout:
-            lines = result.stdout.strip().split("\n")
-            for line in lines:
-                parts = line.strip().split()
-                if len(parts) >= 2 and parts[0].isdigit():
-                    line_count = int(parts[0])
-                    if line_count > 200:
-                        hotspots.append(parts[1])
-        
-        return hotspots[:10]
-    
-    def _count_deprecated_usage(self) -> int:
-        """Count deprecated function/method usage."""
-        cmd = ["grep", "-r", "deprecated", ".", "--include=*.py", "--include=*.ts"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        return len(result.stdout.strip().split("\n")) if result.stdout else 0
-    
-    def _count_todo_items(self) -> int:
-        """Count TODO items in code."""
-        cmd = ["grep", "-r", "TODO", ".", "--include=*.py", "--include=*.ts"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        return len(result.stdout.strip().split("\n")) if result.stdout else 0
-    
-    def _calculate_debt_score(self, smells: int, duplication: float,
-                             hotspots: int, deprecated: int, todos: int) -> float:
-        """Calculate overall debt score."""
-        score = (smells * 2 + duplication * 5 + hotspots * 10 + 
-                deprecated * 3 + todos * 1)
-        
-        return min(score / 10, 10.0)
-    
-    def _calculate_debt_trend(self) -> float:
-        """Calculate debt trend over time."""
-        current_todos = self._count_todo_items()
-        
-        cmd = ["git", "log", "--since", "7 days ago", "--grep", "TODO"]
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        recent_todo_commits = len(result.stdout.strip().split("\n")) if result.stdout else 0
-        
-        return recent_todo_commits - (current_todos * 0.1)
 
 
 class QualityCalculator:
@@ -242,7 +149,7 @@ class QualityCalculator:
         coverage = coverage_calc.calculate()
         docs = doc_calc.calculate()
         architecture = arch_validator.check_compliance()
-        debt = debt_calc.calculate()
+        debt = debt_calc.calculate_debt()
         
         overall_score = self._calculate_overall_quality_score(
             coverage, docs, architecture, debt

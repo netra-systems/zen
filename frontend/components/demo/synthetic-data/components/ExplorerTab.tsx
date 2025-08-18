@@ -65,7 +65,7 @@ export default function ExplorerTab({ dataSamples }: ExplorerTabProps) {
         <Alert className="mb-4">
           <Code className="h-4 w-4" />
           <AlertDescription>
-            Use JSON path expressions to filter and transform data. Example: $.user_behavior.conversion_likelihood > 0.5
+            Use JSON path expressions to filter and transform data. Example: $.user_behavior.conversion_likelihood &gt; 0.5
           </AlertDescription>
         </Alert>
         

@@ -15,8 +15,8 @@ logger = central_logger.get_logger(__name__)
 class StateCheckpointManager:
     """Manages state checkpointing and persistence."""
     
-    def __init__(self, db_session_factory):
-        self.db_session_factory = db_session_factory
+    def __init__(self, db_session):
+        self.db_session = db_session
         self.state_persistence = state_persistence_service
         self.current_checkpoint_id: Optional[str] = None
         self.auto_checkpoint_interval = 300  # 5 minutes
@@ -40,10 +40,10 @@ class StateCheckpointManager:
     
     async def _save_checkpoint_request(self, request: StatePersistenceRequest):
         """Save checkpoint request to database."""
-        async with self.db_session_factory() as session:
-            state = self._convert_request_to_state(request)
-            success = await self._persist_state_data(request, state, session)
-            return success, request.run_id
+        session = self.db_session
+        state = self._convert_request_to_state(request)
+        success = await self._persist_state_data(request, state, session)
+        return success, request.run_id
     
     def _convert_request_to_state(self, request: StatePersistenceRequest):
         """Convert StatePersistenceRequest to DeepAgentState."""
@@ -53,8 +53,9 @@ class StateCheckpointManager:
     async def _persist_state_data(self, request: StatePersistenceRequest, 
                                 state, session):
         """Persist state data to database."""
-        return await self.state_persistence.save_agent_state(
-            request.run_id, request.thread_id, request.user_id, state, session)
+        success, snapshot_id = await self.state_persistence.save_agent_state(
+            request, session)
+        return success
     
     def _handle_checkpoint_save_result(self, success: bool, checkpoint_id: str) -> None:
         """Handle checkpoint save result."""

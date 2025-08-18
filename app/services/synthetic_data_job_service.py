@@ -40,7 +40,7 @@ async def _handle_generation_error(job_id: str, error: Exception):
 
 async def run_synthetic_data_generation_job(job_id: str, params: dict):
     """Main job runner for synthetic data generation."""
-    if not await validate_job_params(job_id):
+    if not await validate_job_params(job_id, api_key_required=False):
         return
     try:
         result = await _execute_synthetic_data_generation(job_id, params)

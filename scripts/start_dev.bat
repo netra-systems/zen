@@ -7,7 +7,7 @@ call venv\Scripts\activate.bat
 
 REM Start services in new windows
 echo Starting Backend Server...
-start "Netra Backend" cmd /k "python dev_launcher.py --dynamic --no-backend-reload"
+start "Netra Backend" cmd /k "python scripts\dev_launcher.py --dynamic --no-backend-reload"
 
 echo.
 echo Development environment is starting...

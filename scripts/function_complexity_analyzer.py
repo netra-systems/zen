@@ -146,7 +146,7 @@ class FunctionComplexityAnalyzer:
                 "test_runner.py",
                 "test_framework/test_discovery.py",
                 "test_framework/runner.py",
-                "test_framework/unified_reporter.py"
+                "test_framework/comprehensive_reporter.py"
             ],
             "websocket": ["app/websocket/*.py"],
             "database": ["app/db/*.py"],

@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useRef, useCallback } from 'react';
-import { WebSocketMessage } from '@/types/backend_schema_auto_generated';
+import { WebSocketMessage } from '@/types/registry';
 import { UnifiedWebSocketEvent } from '@/types/unified-chat';
 import { EventQueue, ProcessableEvent, createWebSocketEventQueue } from '@/lib/event-queue';
 import { logger } from '@/lib/logger';

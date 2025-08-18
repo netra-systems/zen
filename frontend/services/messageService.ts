@@ -1,4 +1,4 @@
-import { Message } from '@/types/chat';
+import { Message } from '@/types/registry';
 import { Thread } from '@/types/registry';
 
 interface PaginatedMessages {

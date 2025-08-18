@@ -58,8 +58,8 @@ class TestAdminRoute:
         response = basic_test_client.get("/api/admin/dashboard")
         CommonResponseValidators.validate_error_response(response, [401, 404])
         
-        # Test with mock authorization (if endpoint exists)
-        with patch('app.auth.auth_integration.verify_token') as mock_verify:
+        # Test with mock authorization (if endpoint exists)  
+        with patch('app.auth_integration.get_current_user') as mock_verify:
             mock_verify.return_value = TEST_USER_DATA["admin"]
             
             response = basic_test_client.get(

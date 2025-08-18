@@ -5,7 +5,7 @@
         <type>learnings</type>
         <category>Infrastructure</category>
         <version>1.0</version>
-        <last_updated>2025-08-16</last_updated>
+        <last_updated>2025-08-17</last_updated>
         <description>Learnings and fixes for Infrastructure</description>
     </metadata>
     
@@ -30,33 +30,47 @@
                     </commands>
                 </learning>
 
-        <learning id="staging-secrets-zero-load">
-                    <title>Staging Environment Loading Zero Secrets Fix</title>
-                    <date>2025-08-15</date>
+
+        <learning id="github-actions-runner-requirement">
+                    <title>GitHub Actions Must Use warp-custom-default Runner</title>
+                    <date>2025-08-17</date>
                     <category>Infrastructure</category>
+                    <priority>CRITICAL</priority>
                     <description>
-                        Staging environment was loading zero secrets due to missing IAM permissions and secret configuration.
-                        The staging service account lacked Secret Manager access permissions.
+                        ALL GitHub Actions workflows MUST use runs-on: warp-custom-default.
+                        This is a MANDATORY requirement for all workflows without exception.
+                        Never use ubuntu-latest or any other runner type.
                     </description>
                     <root-causes>
-                        <cause>Missing roles/secretmanager.secretAccessor IAM permission for staging service account</cause>
-                        <cause>Staging secrets with -staging suffix not created in Secret Manager</cause>
-                        <cause>Project ID configuration mismatch in secret loading</cause>
+                        <cause>Custom runner infrastructure requirement for Netra project</cause>
+                        <cause>Specific tooling and configuration available only on warp-custom-default runners</cause>
+                        <cause>Performance and security requirements mandate custom runner usage</cause>
                     </root-causes>
                     <solution>
-                        <step>Add roles/secretmanager.secretAccessor to staging service account IAM permissions</step>
-                        <step>Create staging-specific secrets with -staging suffix in Secret Manager</step>
-                        <step>Ensure GCP_PROJECT_ID_NUMERICAL_STAGING is set correctly in deployment</step>
+                        <step>Always use runs-on: warp-custom-default for all GitHub Actions jobs</step>
+                        <step>For ACT local testing compatibility, use conditional: ${{ github.event.act && 'ubuntu-latest' || 'warp-custom-default' }}</step>
+                        <step>Check all workflow files to ensure compliance with this requirement</step>
                     </solution>
                     <files-modified>
-                        <file>terraform/staging/shared-infrastructure/main.tf - Added secretmanager.secretAccessor role</file>
-                        <file>scripts/create_staging_secrets.py - Script to create staging secrets</file>
+                        <file>.github/workflows/*.yml - All workflow files updated to use warp-custom-default</file>
+                        <file>SPEC/github_actions.xml - Added mandatory runner requirement section</file>
                     </files-modified>
-                    <commands>
-                        <command>cd terraform/staging/shared-infrastructure && terraform apply</command>
-                        <command>python scripts/create_staging_secrets.py netra-staging</command>
-                        <command>gcloud run services update backend-pr-XXX --region us-central1</command>
-                    </commands>
+                    <examples>
+                        <correct>
+                            jobs:
+                              build:
+                                runs-on: warp-custom-default
+                        </correct>
+                        <incorrect>
+                            jobs:
+                              build:
+                                runs-on: ubuntu-latest  # WRONG - Must use warp-custom-default
+                        </incorrect>
+                    </examples>
+                    <validation>
+                        <command>grep -r "runs-on:" .github/workflows/ | grep -v "warp-custom-default"</command>
+                        <expected>Should return no results (except ACT conditional expressions)</expected>
+                    </validation>
                 </learning>
 
     </learnings>

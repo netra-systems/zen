@@ -1,0 +1,125 @@
+"""
+Config Validator Tests - Core Components
+Tests for configuration status, validation results, and validation context.
+Compliance: <300 lines, 8-line max functions, modular design.
+"""
+
+import pytest
+import asyncio
+import aiohttp
+from pathlib import Path
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from typing import Dict, List, Optional
+
+from dev_launcher.config_validator import (
+    ConfigStatus, ConfigValidationResult, ValidationContext
+)
+from dev_launcher.service_config import ServicesConfiguration, ResourceMode
+
+
+@pytest.fixture
+def temp_config_path(tmp_path: Path) -> Path:
+    """Create temporary config file path."""
+    return tmp_path / ".dev_services.json"
+
+
+@pytest.fixture
+def mock_validation_context(temp_config_path: Path) -> ValidationContext:
+    """Create mock validation context."""
+    return ValidationContext(
+        config_path=temp_config_path,
+        is_interactive=True,
+        is_ci_environment=False,
+        cli_overrides={"REDIS_HOST": "localhost"},
+        env_overrides={"POSTGRES_HOST": "db.example.com"}
+    )
+
+
+@pytest.fixture
+def mock_services_config() -> ServicesConfiguration:
+    """Create mock services configuration."""
+    config = Mock(spec=ServicesConfiguration)
+    
+    # Create mock redis service
+    mock_redis = Mock()
+    mock_redis.mode = ResourceMode.SHARED
+    mock_redis.get_config.return_value = {"host": "redis.example.com", "port": 6379}
+    config.redis = mock_redis
+    
+    # Create mock clickhouse service
+    mock_clickhouse = Mock()
+    mock_clickhouse.mode = ResourceMode.LOCAL
+    mock_clickhouse.get_config.return_value = {"host": "ch.example.com", "port": 8123, "secure": False}
+    config.clickhouse = mock_clickhouse
+    
+    return config
+
+
+class TestConfigStatus:
+    """Test configuration status enumeration."""
+    
+    def test_config_status_values(self) -> None:
+        """Test all config status enum values."""
+        assert ConfigStatus.VALID.value == "valid"
+        assert ConfigStatus.INVALID.value == "invalid"
+        assert ConfigStatus.STALE.value == "stale"
+        assert ConfigStatus.MISSING.value == "missing"
+        assert ConfigStatus.UNREACHABLE.value == "unreachable"
+
+
+class TestConfigValidationResult:
+    """Test configuration validation result model."""
+    
+    def test_validation_result_creation(self) -> None:
+        """Test creating validation result with defaults."""
+        result = ConfigValidationResult(status=ConfigStatus.VALID)
+        assert result.status == ConfigStatus.VALID
+        assert len(result.warnings) == 0
+        assert len(result.errors) == 0
+        assert result.config_age_days is None
+
+    def test_validation_result_with_data(self) -> None:
+        """Test creating validation result with full data."""
+        result = ConfigValidationResult(
+            status=ConfigStatus.STALE,
+            warnings=["Config is old"],
+            errors=["Invalid endpoint"],
+            config_age_days=45,
+            reachable_endpoints=["http://api.example.com"],
+            unreachable_endpoints=["http://old.example.com"]
+        )
+        assert result.status == ConfigStatus.STALE
+        assert len(result.warnings) == 1
+        assert result.config_age_days == 45
+
+
+class TestValidationContext:
+    """Test validation context dataclass."""
+    
+    def test_validation_context_defaults(self, temp_config_path: Path) -> None:
+        """Test validation context with default values."""
+        context = ValidationContext(config_path=temp_config_path)
+        assert context.is_interactive is True
+        assert context.is_ci_environment is False
+        assert len(context.cli_overrides) == 0
+        assert len(context.env_overrides) == 0
+
+    def test_validation_context_with_overrides(self, temp_config_path: Path) -> None:
+        """Test validation context with custom overrides."""
+        cli_overrides = {"REDIS_PORT": "6380"}
+        env_overrides = {"DB_NAME": "test"}
+        
+        context = ValidationContext(
+            config_path=temp_config_path,
+            is_interactive=False,
+            cli_overrides=cli_overrides,
+            env_overrides=env_overrides
+        )
+        assert context.is_interactive is False
+        assert context.cli_overrides == cli_overrides
+        assert context.env_overrides == env_overrides
+
+
+if __name__ == "__main__":
+    pytest.main([__file__, "-v"])

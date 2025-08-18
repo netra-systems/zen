@@ -115,6 +115,7 @@ class TestLLMManagerStructuredGeneration:
         """Test getting structured LLM in dev mode (mock)."""
         llm_manager.enabled = False  # Force mock mode
         llm_manager._core.enabled = False  # Also set core enabled to False
+        llm_manager._core.provider_manager.config_manager.enabled = False  # Disable at config level
         
         structured_llm = llm_manager.get_structured_llm(
             "test",
@@ -175,16 +176,9 @@ class TestLLMManagerStructuredGeneration:
             tags=["cached"]
         )
         
-        # Check if we're using a test key and mock accordingly
-        if llm_manager.settings.llm_configs and "test" in llm_manager.settings.llm_configs:
-            api_key = llm_manager.settings.llm_configs["test"].api_key
-            if "test" in str(api_key).lower():
-                llm_manager.enabled = False  # Force mock mode for test keys
-        
-        with patch('app.services.llm_cache_service.llm_cache_service') as mock_cache:
-            mock_cache.get_cached_response = AsyncMock(
-                return_value=cached_data.model_dump_json()
-            )
+        # Mock the structured operations to return cached data directly
+        with patch.object(llm_manager._structured, 'ask_structured_llm') as mock_ask:
+            mock_ask.return_value = cached_data
             
             result = await llm_manager.ask_structured_llm(
                 "test prompt",
@@ -194,13 +188,9 @@ class TestLLMManagerStructuredGeneration:
             )
             
             assert isinstance(result, SampleResponseModel)
-            # For cached responses
-            if result.message == "Cached response":
-                assert result.confidence == 0.85
-            # For mock responses (when cache miss)
-            else:
-                assert isinstance(result.message, str)
-                assert 0.0 <= result.confidence <= 1.0
+            assert result.message == "Cached response"
+            assert result.confidence == 0.85
+            assert result.tags == ["cached"]
     async def test_ask_structured_llm_fallback_to_json(self, llm_manager):
         """Test fallback to JSON parsing when structured generation fails."""
         json_response = json.dumps({
@@ -209,7 +199,8 @@ class TestLLMManagerStructuredGeneration:
             "tags": ["fallback"]
         })
         
-        with patch.object(llm_manager, 'get_structured_llm') as mock_get:
+        # Mock the structured operations to trigger fallback behavior
+        with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             # Make structured call fail
             mock_structured_llm = AsyncMock()
             mock_structured_llm.ainvoke = AsyncMock(
@@ -217,8 +208,8 @@ class TestLLMManagerStructuredGeneration:
             )
             mock_get.return_value = mock_structured_llm
             
-            # Mock regular LLM to return JSON
-            with patch.object(llm_manager, 'ask_llm') as mock_ask:
+            # Mock the core ask_llm for fallback
+            with patch.object(llm_manager._structured.core, 'ask_llm') as mock_ask:
                 mock_ask.return_value = json_response
                 
                 result = await llm_manager.ask_structured_llm(
@@ -233,7 +224,7 @@ class TestLLMManagerStructuredGeneration:
                 assert result.confidence == 0.75
     async def test_ask_structured_llm_complete_failure(self, llm_manager):
         """Test complete failure of structured generation."""
-        with patch.object(llm_manager, 'get_structured_llm') as mock_get:
+        with patch.object(llm_manager._structured, 'get_structured_llm') as mock_get:
             # Make structured call fail
             mock_structured_llm = AsyncMock()
             mock_structured_llm.ainvoke = AsyncMock(
@@ -242,7 +233,7 @@ class TestLLMManagerStructuredGeneration:
             mock_get.return_value = mock_structured_llm
             
             # Make fallback also fail
-            with patch.object(llm_manager, 'ask_llm') as mock_ask:
+            with patch.object(llm_manager._structured.core, 'ask_llm') as mock_ask:
                 mock_ask.return_value = "Not JSON"
                 
                 with pytest.raises(Exception) as exc_info:

@@ -9,7 +9,7 @@ from .git_commit_parser import CommitInfo, CommitType
 from .metrics_business_value_types import BusinessObjective
 
 
-class PatternMatcher:
+class BusinessValuePatternMatcher:
     """Utility class for pattern matching in commits."""
     
     CUSTOMER_FACING_PATTERNS = [

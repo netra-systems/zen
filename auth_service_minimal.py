@@ -9,13 +9,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import JSONResponse
 import logging
+from typing import Dict, Any
 
 from app.config import settings
 from app.logging_config import central_logger
 from app.routes.auth import router as auth_router
 from app.db.postgres import init_db, close_db
+from app.core.health import HealthInterface, HealthLevel, DatabaseHealthChecker
 
 logger = central_logger.get_logger(__name__)
+
+# Initialize unified health interface
+health_interface = HealthInterface("auth-service", "1.0.0")
+health_interface.register_checker(DatabaseHealthChecker("postgres"))
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -116,16 +122,10 @@ async def root():
 
 # Health check
 @app.get("/health")
-async def health():
-    """Health check endpoint"""
+async def health() -> Dict[str, Any]:
+    """Health check endpoint with unified health system"""
     try:
-        # Basic health check - just verify service is responsive
-        return {
-            "status": "healthy",
-            "service": "auth-service",
-            "version": "1.0.0",
-            "environment": os.getenv("ENVIRONMENT", "development")
-        }
+        return await health_interface.get_health_status(HealthLevel.BASIC)
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return JSONResponse(
@@ -135,14 +135,18 @@ async def health():
 
 # Readiness check
 @app.get("/ready")
-async def ready():
-    """Readiness check endpoint"""
+async def ready() -> Dict[str, Any]:
+    """Readiness check endpoint with database connectivity"""
     try:
-        # Could add database connectivity check here if needed
-        return {
-            "status": "ready",
-            "service": "auth-service"
-        }
+        health_status = await health_interface.get_health_status(HealthLevel.STANDARD)
+        
+        if health_status["status"] in ["healthy", "degraded"]:
+            return {"status": "ready", "service": "auth-service", "details": health_status}
+        else:
+            return JSONResponse(
+                status_code=503,
+                content={"status": "not_ready", "health": health_status}
+            )
     except Exception as e:
         logger.error(f"Readiness check failed: {e}")
         return JSONResponse(

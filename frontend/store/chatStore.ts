@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
-import { Message } from '@/types/chat';
+import { Message } from '@/types/registry';
 import type { SubAgentStatusData } from '@/types/chat-store';
 import { LegacyAgentStatus } from '@/types/agent-types';
 

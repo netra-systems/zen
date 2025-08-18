@@ -83,7 +83,7 @@ async def _handle_ingestion_error(job_id: str, error: Exception):
 
 async def run_data_ingestion_job(job_id: str, params: dict):
     """Main job runner for data ingestion."""
-    if not await validate_job_params(job_id):
+    if not await validate_job_params(job_id, api_key_required=False):
         return
     try:
         result = await _execute_data_ingestion(job_id, params)

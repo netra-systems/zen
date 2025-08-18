@@ -10,7 +10,7 @@ from typing import Dict, List, Any, Tuple
 from app.logging_config import central_logger as logger
 
 
-class PatternMatcher:
+class GitHubAnalyzerPatternMatcher:
     """Handles pattern matching and result processing."""
     
     def scan_content(

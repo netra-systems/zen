@@ -7,7 +7,7 @@ import pytest
 import json
 import time
 from unittest.mock import patch, MagicMock
-from app.agents.supervisor.flow_logger import SupervisorFlowLogger, FlowState, TodoState
+from app.agents.supervisor.flow_logger import SupervisorPipelineLogger, FlowState, TodoState
 
 
 class TestSupervisorFlowLogger:
@@ -16,7 +16,7 @@ class TestSupervisorFlowLogger:
     @pytest.fixture
     def flow_logger(self):
         """Create test flow logger instance."""
-        return SupervisorFlowLogger("test-correlation-123", "test-run-456")
+        return SupervisorPipelineLogger("test-correlation-123", "test-run-456")
 
     def test_initialization(self, flow_logger):
         """Test flow logger initialization."""
@@ -186,7 +186,7 @@ class TestSupervisorFlowLoggerDataStructures:
     @pytest.fixture
     def flow_logger(self):
         """Create test flow logger instance."""
-        return SupervisorFlowLogger("test-correlation", "test-run")
+        return SupervisorPipelineLogger("test-correlation", "test-run")
 
     def test_build_flow_start_data(self, flow_logger):
         """Test flow start data structure building."""

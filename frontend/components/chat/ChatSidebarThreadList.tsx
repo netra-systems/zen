@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { Thread } from '@/services/threadService';
+import { Thread, getThreadTitle } from '@/types/registry';
 
 const getThreadIcon = (thread: Thread, isActive: boolean) => {
   const baseClasses = "w-5 h-5 mt-0.5 flex-shrink-0";
@@ -32,12 +32,7 @@ const getThreadIcon = (thread: Thread, isActive: boolean) => {
   return <MessageSquare className={cn(baseClasses, defaultColor)} />;
 };
 
-const getThreadTitle = (thread: Thread) => {
-  return thread.metadata?.title || 
-         thread.title || 
-         thread.metadata?.last_message || 
-         `Chat ${new Date(thread.created_at * 1000).toLocaleDateString()}`;
-};
+// Using unified getThreadTitle from registry for consistency
 
 const ThreadItem: React.FC<{
   thread: Thread;

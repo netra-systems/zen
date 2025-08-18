@@ -6,13 +6,20 @@ import { ThreadService } from '@/services/threadService';
 import { ThreadRenameService } from '@/services/threadRenameService';
 import { generateUniqueId } from '@/lib/utils';
 import { ChatMessage, MessageSendingParams, MESSAGE_INPUT_CONSTANTS } from '../types';
+import { optimisticMessageManager } from '@/services/optimistic-updates';
 
 const { CHAR_LIMIT } = MESSAGE_INPUT_CONSTANTS;
 
 export const useMessageSending = () => {
   const [isSending, setIsSending] = useState(false);
   const { sendMessage } = useWebSocket();
-  const { addMessage, setActiveThread, setProcessing } = useUnifiedChatStore();
+  const { 
+    addMessage, 
+    setActiveThread, 
+    setProcessing, 
+    addOptimisticMessage,
+    updateOptimisticMessage 
+  } = useUnifiedChatStore();
   const { setCurrentThread, addThread } = useThreadStore();
 
   const validateMessage = (params: MessageSendingParams): boolean => {
@@ -87,17 +94,45 @@ export const useMessageSending = () => {
         trimmedMessage
       );
       
-      const userMessage = createUserMessage(trimmedMessage);
-      addMessage(userMessage);
-      
-      sendWebSocketMessage(trimmedMessage, threadId);
+      await handleOptimisticSend(trimmedMessage, threadId);
       await handleThreadRename(threadId, trimmedMessage);
-      
       setProcessing(true);
     } catch (error) {
       console.error('Failed to send message:', error);
+      await handleSendFailure(error);
     } finally {
       setIsSending(false);
+    }
+  };
+
+  // ========================================================================
+  // Optimistic Update Helpers (8-line functions)
+  // ========================================================================
+
+  const handleOptimisticSend = async (message: string, threadId: string): Promise<void> => {
+    const optimisticUser = optimisticMessageManager.addOptimisticUserMessage(message, threadId);
+    const optimisticAi = optimisticMessageManager.addOptimisticAiMessage(threadId);
+    
+    addOptimisticMessage(optimisticUser);
+    addOptimisticMessage(optimisticAi);
+    sendWebSocketMessage(message, threadId);
+  };
+
+  const handleSendFailure = async (error: unknown): Promise<void> => {
+    const failedMessages = optimisticMessageManager.getFailedMessages();
+    
+    failedMessages.forEach(msg => {
+      updateOptimisticMessage(msg.localId, { status: 'failed', retry: createRetryHandler(msg) });
+    });
+  };
+
+  const createRetryHandler = (message: any) => async (): Promise<void> => {
+    try {
+      await optimisticMessageManager.retryMessage(message.localId);
+      updateOptimisticMessage(message.localId, { status: 'pending' });
+    } catch (retryError) {
+      console.error('Retry failed:', retryError);
+      updateOptimisticMessage(message.localId, { status: 'failed' });
     }
   };
 

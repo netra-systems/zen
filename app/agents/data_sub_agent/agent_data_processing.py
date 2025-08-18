@@ -16,7 +16,8 @@ class DataProcessor:
         """Process data and stream results via WebSocket for real-time updates."""
         try:
             result = await self.agent.analysis_engine.process_data(data)
-            await websocket.send(json.dumps({"type": "data_result", "data": result}))
+            response = {"type": "data_result", "data": result, "processed": True}
+            await websocket.send(json.dumps(response))
         except Exception as e:
             await websocket.send(json.dumps({"type": "error", "message": str(e)}))
 

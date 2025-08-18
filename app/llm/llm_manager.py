@@ -12,6 +12,7 @@ from app.schemas.llm_base_types import LLMConfigInfo, LLMManagerStats, LLMHealth
 from app.llm.llm_core_operations import LLMCoreOperations
 from app.llm.llm_structured_operations import LLMStructuredOperations
 from app.llm.llm_management_utilities import LLMManagementUtilities
+from app.llm.llm_response_processing import parse_nested_json_recursive
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -70,3 +71,7 @@ class LLMManager:
     async def health_check(self, config_name: str) -> LLMHealthCheck:
         """Perform health check on an LLM configuration."""
         return await self._management.health_check(config_name)
+    
+    def _parse_nested_json(self, data: Any) -> Any:
+        """Parse nested JSON strings within data structure for test compatibility."""
+        return parse_nested_json_recursive(data)

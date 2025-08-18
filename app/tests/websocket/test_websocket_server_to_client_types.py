@@ -8,11 +8,11 @@ from pydantic import ValidationError
 
 from app.schemas.registry import (
     WebSocketMessageType,
-    ServerToClientMessage
+    ServerToClientMessage,
+    AgentCompletedPayload
 )
 from app.schemas.websocket_payloads import (
     AgentStartedPayload,
-    AgentCompletedPayload,
     AgentErrorPayload,
     ToolStartedPayload,
     ToolCompletedPayload,

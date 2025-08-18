@@ -6,7 +6,7 @@ Implements IMCPClientService interface with modular architecture compliance.
 
 from typing import Optional, List, Dict, Any
 
-from app.services.service_locator import IMCPClientService
+from app.services.service_interfaces import IMCPClientService
 from app.services.database.mcp_client_repository import MCPClientRepository
 from app.services.mcp_client_connection_manager import MCPConnectionManager
 from app.services.mcp_client_tool_executor import MCPToolExecutor

@@ -10,7 +10,7 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import MagicMock
 
 from app.services.tool_registry import ToolRegistry
-from test_tool_registry_registration_core import MockTool
+from .test_tool_registry_registration_core import MockTool
 
 
 class TestToolRegistryPerformance:

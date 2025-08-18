@@ -21,10 +21,14 @@ class ErrorHandler:
     ) -> None:
         """Handle generation job error with full recovery process"""
         await self._log_error(job_id, error)
-        await self._mark_job_failed(job_id, error, active_jobs)
-        await self._update_database_status(db, synthetic_data_id)
-        await self._send_error_notification(job_id, error)
-        await self._attempt_error_recovery(job_id, error, active_jobs)
+        
+        # Only fail job for critical errors, otherwise try recovery
+        if self._is_critical_error(error):
+            await self._mark_job_failed(job_id, error, active_jobs)
+            await self._update_database_status(db, synthetic_data_id)
+            await self._send_error_notification(job_id, error)
+        else:
+            await self._attempt_error_recovery(job_id, error, active_jobs)
 
     async def _log_error(self, job_id: str, error: Exception) -> None:
         """Log error with contextual information"""
@@ -81,6 +85,17 @@ class ErrorHandler:
             "suggested_action": self._get_suggested_action(error)
         }
 
+    def _is_critical_error(self, error: Exception) -> bool:
+        """Determine if error is critical and should immediately fail the job"""
+        critical_errors = [
+            "OutOfMemoryError",
+            "PermissionError", 
+            "FileNotFoundError",
+            "ValidationError",
+            "ValueError"
+        ]
+        return type(error).__name__ in critical_errors
+
     def _is_recoverable_error(self, error: Exception) -> bool:
         """Determine if error is recoverable"""
         recoverable_errors = [
@@ -113,6 +128,10 @@ class ErrorHandler:
         if self._is_recoverable_error(error):
             recovery_strategy = self._get_recovery_strategy(error)
             await self._execute_recovery_strategy(job_id, recovery_strategy, active_jobs)
+        else:
+            # For non-critical, non-recoverable errors, allow job to continue
+            central_logger.warning(f"Non-critical error in job {job_id}: {error}. Continuing generation.")
+            await self._mark_job_warning(job_id, error, active_jobs)
 
     def _get_recovery_strategy(self, error: Exception) -> Dict:
         """Get recovery strategy for error type"""
@@ -148,6 +167,13 @@ class ErrorHandler:
             active_jobs[job_id]["recovery_strategy"] = strategy
 
         central_logger.info(f"Scheduled retry for job {job_id} with strategy: {strategy}")
+
+    async def _mark_job_warning(self, job_id: str, error: Exception, active_jobs: Dict) -> None:
+        """Mark job with warning but allow it to continue"""
+        if job_id in active_jobs:
+            if "warnings" not in active_jobs[job_id]:
+                active_jobs[job_id]["warnings"] = []
+            active_jobs[job_id]["warnings"].append(str(error))
 
     def validate_generation_parameters(self, config) -> Optional[str]:
         """Validate generation parameters before processing"""

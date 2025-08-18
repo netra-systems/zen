@@ -48,6 +48,8 @@ class ConnectionStateSynchronizer:
         self.desync_threshold_seconds = 30
         self._sync_task: Optional[asyncio.Task] = None
         self._running = False
+        self._sync_interval = 5  # Check every 5 seconds instead of 10
+        self._max_concurrent_checks = 10  # Limit concurrent checks
     
     async def start_monitoring(self) -> None:
         """Start state synchronization monitoring."""
@@ -118,28 +120,40 @@ class ConnectionStateSynchronizer:
         self.sync_callbacks[connection_id].add(callback)
     
     async def _sync_loop(self) -> None:
-        """Main synchronization monitoring loop."""
+        """Main synchronization monitoring loop with resilience."""
+        retry_count = 0
+        max_retries = 3
+        
         while self._running:
             try:
-                await self._perform_sync_check()
-                await asyncio.sleep(10)  # Check every 10 seconds
+                await self._perform_sync_check_concurrent()
+                await asyncio.sleep(self._sync_interval)
+                retry_count = 0  # Reset on success
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Sync loop error: {e}")
-                await asyncio.sleep(5)
+                retry_count += 1
+                backoff_time = min(5 * (2 ** retry_count), 60)  # Exponential backoff
+                logger.error(f"Sync loop error (attempt {retry_count}): {e}")
+                
+                if retry_count >= max_retries:
+                    logger.error("Max retries exceeded, resetting sync state")
+                    retry_count = 0
+                    
+                await asyncio.sleep(backoff_time)
     
-    async def _perform_sync_check(self) -> None:
-        """Perform synchronization check on all connections."""
-        for connection_id, checkpoint in list(self.checkpoints.items()):
-            conn_info = self.connection_manager.get_connection_by_id(connection_id)
-            
-            if not conn_info:
-                # Connection no longer exists
-                await self.unregister_connection(connection_id)
-                continue
-            
-            await self.check_connection_sync(conn_info)
+    async def _perform_sync_check_concurrent(self) -> None:
+        """Perform concurrent synchronization checks with limits."""
+        connection_items = list(self.checkpoints.items())
+        if not connection_items:
+            return
+        
+        # Process connections in batches to avoid overwhelming the system
+        semaphore = asyncio.Semaphore(self._max_concurrent_checks)
+        tasks = [self._check_single_connection(connection_id, semaphore) 
+                for connection_id, _ in connection_items]
+        
+        await asyncio.gather(*tasks, return_exceptions=True)
     
     async def _handle_state_desync(self, conn_info: ConnectionInfo, checkpoint: StateCheckpoint) -> None:
         """Handle connection state desynchronization."""
@@ -163,17 +177,44 @@ class ConnectionStateSynchronizer:
         # Notify callbacks
         await self._notify_sync_callbacks(conn_info.connection_id, "activity_timeout")
     
+    async def _check_single_connection(self, connection_id: str, semaphore: asyncio.Semaphore) -> None:
+        """Check single connection with semaphore protection."""
+        async with semaphore:
+            try:
+                conn_info = self.connection_manager.get_connection_by_id(connection_id)
+                if not conn_info:
+                    await self.unregister_connection(connection_id)
+                    return
+                await self.check_connection_sync(conn_info)
+            except Exception as e:
+                logger.error(f"Error checking connection {connection_id}: {e}")
+    
     async def _notify_sync_callbacks(self, connection_id: str, event_type: str) -> None:
-        """Notify registered callbacks about sync events."""
+        """Notify registered callbacks about sync events with timeout."""
         callbacks = self.sync_callbacks.get(connection_id, set())
+        callback_tasks = []
+        
         for callback in callbacks:
             try:
                 if asyncio.iscoroutinefunction(callback):
-                    await callback(connection_id, event_type)
+                    task = asyncio.create_task(callback(connection_id, event_type))
+                    callback_tasks.append(task)
                 else:
-                    callback(connection_id, event_type)
+                    # Run sync callbacks in executor to avoid blocking
+                    loop = asyncio.get_event_loop()
+                    task = loop.run_in_executor(None, callback, connection_id, event_type)
+                    callback_tasks.append(task)
             except Exception as e:
-                logger.error(f"Sync callback error for {connection_id}: {e}")
+                logger.error(f"Error creating callback task for {connection_id}: {e}")
+        
+        # Wait for all callbacks with timeout
+        if callback_tasks:
+            try:
+                await asyncio.wait_for(asyncio.gather(*callback_tasks, return_exceptions=True), timeout=5.0)
+            except asyncio.TimeoutError:
+                logger.warning(f"Callback timeout for connection {connection_id}")
+            except Exception as e:
+                logger.error(f"Callback execution error for {connection_id}: {e}")
     
     def get_sync_stats(self) -> Dict[str, Any]:
         """Get synchronization statistics."""

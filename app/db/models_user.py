@@ -1,7 +1,18 @@
 """User and authentication related database models.
 
-Defines User, Secret, and ToolUsageLog models for authentication and user management.
-Focused module adhering to modular architecture and single responsibility.
+🔴 CRITICAL: Auth Service Architecture
+- The User table stores user PROFILE data only
+- Authentication is handled by the EXTERNAL auth service
+- The hashed_password field is ONLY managed by the auth service
+- Main backend must NEVER directly authenticate users or hash passwords
+
+⚠️ IMPORTANT:
+- User records are created/updated by the auth service
+- Main backend can READ user data for authorization
+- Main backend must NEVER write to authentication fields
+- All password operations go through auth_client
+
+See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 
 from sqlalchemy import (

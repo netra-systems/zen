@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>GitHub Actions Learnings</name>
+        <type>learnings</type>
+        <version>1.0</version>
+        <last_updated>2025-08-18</last_updated>
+        <description>Learnings from GitHub Actions CI/CD implementations and issues</description>
+    </metadata>
+    
+    <learnings>
+        <learning>
+            <id>artifact-actions-v4-upgrade</id>
+            <category>github-actions</category>
+            <severity>HIGH</severity>
+            <date>2025-08-18</date>
+            <issue>
+                <description>GitHub deprecated v3 of artifact actions (upload-artifact/download-artifact)</description>
+                <symptoms>
+                    <symptom>Workflows fail with deprecation error</symptom>
+                    <symptom>Message: "This request has been automatically failed because it uses a deprecated version"</symptom>
+                    <symptom>Affects actions/upload-artifact@v3 and actions/download-artifact@v3</symptom>
+                </symptoms>
+                <error_message>Error: This request has been automatically failed because it uses a deprecated version of `actions/upload-artifact: v3`. Learn more: https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/</error_message>
+            </issue>
+            
+            <root_cause>
+                <description>GitHub Actions deprecated v3 of artifact actions on April 16, 2024</description>
+                <details>
+                    <detail>v3 actions are no longer supported and workflows fail immediately</detail>
+                    <detail>All workflows must upgrade to v4 to continue functioning</detail>
+                    <detail>This is a breaking change that affects all workflows using artifact actions</detail>
+                </details>
+            </root_cause>
+            
+            <solution>
+                <description>Upgrade all artifact actions to v4 in all workflow files</description>
+                <implementation>
+                    <step>Search for all occurrences of upload-artifact@v3 and download-artifact@v3</step>
+                    <step>Replace actions/upload-artifact@v3 with actions/upload-artifact@v4</step>
+                    <step>Replace actions/download-artifact@v3 with actions/download-artifact@v4</step>
+                    <step>No configuration changes needed - v4 is backward compatible</step>
+                </implementation>
+                <code_changes>
+                    <change>
+                        <file>.github/workflows/*.yml</file>
+                        <before>uses: actions/upload-artifact@v3</before>
+                        <after>uses: actions/upload-artifact@v4</after>
+                    </change>
+                    <change>
+                        <file>.github/workflows/*.yml</file>
+                        <before>uses: actions/download-artifact@v3</before>
+                        <after>uses: actions/download-artifact@v4</after>
+                    </change>
+                </code_changes>
+            </solution>
+            
+            <files_affected>
+                <file>.github/workflows/factory-status-report.yml</file>
+                <file>.github/workflows/architecture-compliance.yml</file>
+                <file>.github/workflows/frontend-tests-ultra.yml</file>
+            </files_affected>
+            
+            <prevention>
+                <description>Keep GitHub Actions dependencies up to date</description>
+                <best_practices>
+                    <practice>Regularly check for deprecated actions in workflows</practice>
+                    <practice>Monitor GitHub changelog for deprecation notices</practice>
+                    <practice>Use dependabot or similar tools to automate action updates</practice>
+                    <practice>Test workflows regularly to catch deprecation early</practice>
+                    <practice>Pin to major versions (v4) rather than specific tags for automatic patch updates</practice>
+                </best_practices>
+            </prevention>
+            
+            <business_impact>
+                <impact>HIGH - Prevents CI/CD pipeline from running</impact>
+                <details>
+                    <detail>Blocks all deployments and testing</detail>
+                    <detail>Prevents PR validation and merges</detail>
+                    <detail>Affects development velocity</detail>
+                    <detail>Could impact production deployments if not fixed quickly</detail>
+                </details>
+            </business_impact>
+            
+            <references>
+                <reference>https://github.blog/changelog/2024-04-16-deprecation-notice-v3-of-the-artifact-actions/</reference>
+                <reference>https://github.com/actions/upload-artifact</reference>
+                <reference>https://github.com/actions/download-artifact</reference>
+            </references>
+        </learning>
+        
+        <learning>
+            <id>cache-action-version-consistency</id>
+            <category>github-actions</category>
+            <severity>MEDIUM</severity>
+            <date>2025-08-18</date>
+            <issue>
+                <description>Inconsistent versions of actions/cache across workflows</description>
+                <symptoms>
+                    <symptom>Some workflows use actions/cache@v3 while others use v4</symptom>
+                    <symptom>Potential for future deprecation issues</symptom>
+                </symptoms>
+            </issue>
+            
+            <solution>
+                <description>Standardize on latest stable version (v4) across all workflows</description>
+                <implementation>
+                    <step>Update all actions/cache@v3 to actions/cache@v4</step>
+                    <step>Ensure consistency across all workflow files</step>
+                </implementation>
+            </solution>
+            
+            <prevention>
+                <description>Maintain version consistency across all workflows</description>
+                <best_practices>
+                    <practice>Create a standard template for common action versions</practice>
+                    <practice>Document required action versions in SPEC</practice>
+                    <practice>Regular audits of action versions</practice>
+                </best_practices>
+            </prevention>
+        </learning>
+    </learnings>
+    
+    <learnings>
+        <learning>
+            <id>test-exit-code-propagation</id>
+            <category>github-actions</category>
+            <severity>CRITICAL</severity>
+            <date>2025-08-18</date>
+            <issue>
+                <description>Test failures not propagating correctly in GitHub Actions workflows</description>
+                <symptoms>
+                    <symptom>Tests show "[FAIL] TESTS FAILED with exit code 4" but workflow shows success</symptom>
+                    <symptom>PR merge not blocked despite test failures</symptom>
+                    <symptom>Commit status shows success when tests fail</symptom>
+                </symptoms>
+                <error_message>[FAIL] TESTS FAILED with exit code 4 after 1.21s (but workflow continues as success)</error_message>
+            </issue>
+            
+            <root_cause>
+                <description>Test commands not explicitly handling exit codes</description>
+                <details>
+                    <detail>Missing || exit $? to propagate test_runner.py exit codes</detail>
+                    <detail>Some steps using continue-on-error: true which masks failures</detail>
+                    <detail>No proper error annotations for GitHub Actions</detail>
+                    <detail>Final status calculation not exiting with failure code</detail>
+                </details>
+            </root_cause>
+            
+            <solution>
+                <description>Explicitly handle and propagate exit codes in all test steps</description>
+                <implementation>
+                    <step>Add || exit $? to all test_runner.py commands</step>
+                    <step>Remove continue-on-error: true from test steps</step>
+                    <step>Add error annotations with ::error::</step>
+                    <step>Ensure final status step exits with failure code</step>
+                </implementation>
+                <code_changes>
+                    <change>
+                        <file>.github/workflows/test-runner.yml</file>
+                        <before>python test_runner.py --level smoke</before>
+                        <after>python test_runner.py --level smoke --no-coverage --fast-fail || exit $?</after>
+                    </change>
+                    <change>
+                        <file>.github/workflows/test-smoke-simple.yml</file>
+                        <before>continue-on-error: true</before>
+                        <after># Removed continue-on-error to propagate failures</after>
+                    </change>
+                </code_changes>
+            </solution>
+            
+            <files_affected>
+                <file>.github/workflows/test-runner.yml</file>
+                <file>.github/workflows/test-smoke-simple.yml</file>
+                <file>.github/workflows/frontend-tests-ultra.yml</file>
+                <file>.github/workflows/architecture-compliance.yml</file>
+                <file>.github/workflows/code-quality.yml</file>
+            </files_affected>
+            
+            <prevention>
+                <description>Use standardized templates and validation</description>
+                <best_practices>
+                    <practice>Always use || exit $? with test commands</practice>
+                    <practice>Never use continue-on-error: true in test steps</practice>
+                    <practice>Use test-standard-template.yml as reference</practice>
+                    <practice>Run test-runner-validation.yml to verify propagation</practice>
+                    <practice>Add CI flags: --no-coverage --fast-fail --ci --no-warnings</practice>
+                </best_practices>
+            </prevention>
+            
+            <business_impact>
+                <impact>CRITICAL - Broken code could be deployed to production</impact>
+                <details>
+                    <detail>Failed tests don't block PR merges</detail>
+                    <detail>Broken code reaches main branch</detail>
+                    <detail>Customer-facing bugs in production</detail>
+                    <detail>Loss of trust in CI/CD pipeline</detail>
+                </details>
+            </business_impact>
+            
+            <references>
+                <reference>.github/workflows/test-standard-template.yml</reference>
+                <reference>.github/workflows/test-runner-validation.yml</reference>
+                <reference>.github/workflows/WORKFLOW_FIX_SUMMARY.md</reference>
+            </references>
+        </learning>
+        
+        <learning>
+            <id>optimal-test-runner-parameters</id>
+            <category>github-actions</category>
+            <severity>HIGH</severity>
+            <date>2025-08-18</date>
+            <issue>
+                <description>Tests running slowly in CI, coverage slowing feedback loops</description>
+                <symptoms>
+                    <symptom>Test runs taking too long for PR feedback</symptom>
+                    <symptom>Coverage calculation adding unnecessary overhead</symptom>
+                    <symptom>Tests continuing after first failure</symptom>
+                </symptoms>
+            </issue>
+            
+            <solution>
+                <description>Use optimized test_runner.py parameters for CI</description>
+                <implementation>
+                    <step>Add --no-coverage for PR validation</step>
+                    <step>Add --fast-fail to stop on first failure</step>
+                    <step>Add --ci for CI optimizations</step>
+                    <step>Add --no-warnings to reduce noise</step>
+                </implementation>
+                <code_changes>
+                    <change>
+                        <file>.github/workflows/*.yml</file>
+                        <before>python test_runner.py --level integration</before>
+                        <after>python test_runner.py --level integration --no-coverage --fast-fail --ci --no-warnings</after>
+                    </change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <description>Document standard CI parameters in specs</description>
+                <best_practices>
+                    <practice>Use --no-coverage for PR tests</practice>
+                    <practice>Use --fast-fail for quick feedback</practice>
+                    <practice>Only run coverage on main branch</practice>
+                    <practice>Document in testing.xml spec</practice>
+                </best_practices>
+            </prevention>
+        </learning>
+    </learnings>
+    
+    <best_practices>
+        <practice>
+            <name>Action Version Management</name>
+            <description>Always use the latest stable major version of GitHub Actions</description>
+            <guidelines>
+                <guideline>Pin to major versions (v4) for automatic patch updates</guideline>
+                <guideline>Avoid using @master or @main tags in production</guideline>
+                <guideline>Test new major versions in non-critical workflows first</guideline>
+                <guideline>Document version requirements in workflow comments</guideline>
+            </guidelines>
+        </practice>
+        
+        <practice>
+            <name>Deprecation Monitoring</name>
+            <description>Proactively monitor for deprecated actions</description>
+            <guidelines>
+                <guideline>Subscribe to GitHub changelog RSS feed</guideline>
+                <guideline>Set up dependabot for GitHub Actions</guideline>
+                <guideline>Regular monthly audits of action versions</guideline>
+                <guideline>Test workflows weekly to catch issues early</guideline>
+            </guidelines>
+        </practice>
+    </best_practices>
+</specification>

@@ -39,7 +39,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 # Add project root to path
-PROJECT_ROOT = Path(__file__).parent
+PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Load environment variables from .env file
@@ -596,7 +596,7 @@ def run_level_based_tests(args, runner, speed_opts):
     apply_shard_filtering(args, config)
     print_test_configuration(level, config, speed_opts)
     real_llm_config = configure_real_llm_if_requested(args, level, config)
-    exit_code = execute_test_suite(args, config, runner, real_llm_config, speed_opts)
+    exit_code = execute_test_suite(args, config, runner, real_llm_config, speed_opts, level)
     return finalize_test_run(runner, level, config, "", exit_code)
 
 def apply_shard_filtering(args, config):
@@ -645,14 +645,14 @@ def print_real_llm_configuration(args, config):
     config['timeout'] = adjusted_timeout
     print(f"  - Adjusted test timeout: {adjusted_timeout}s")
 
-def execute_test_suite(args, config, runner, real_llm_config, speed_opts):
+def execute_test_suite(args, config, runner, real_llm_config, speed_opts, test_level):
     """Execute the test suite based on configuration"""
     if args.backend_only:
         return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
     elif args.frontend_only:
-        return execute_frontend_only_tests(config, runner, speed_opts)
+        return execute_frontend_only_tests(config, runner, speed_opts, test_level)
     else:
-        return execute_full_test_suite(config, runner, real_llm_config, speed_opts)
+        return execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level)
 
 def execute_backend_only_tests(config, runner, real_llm_config, speed_opts):
     """Execute backend-only tests"""
@@ -665,17 +665,18 @@ def execute_backend_only_tests(config, runner, real_llm_config, speed_opts):
     runner.results["frontend"]["status"] = "skipped"
     return backend_exit
 
-def execute_frontend_only_tests(config, runner, speed_opts):
+def execute_frontend_only_tests(config, runner, speed_opts, test_level):
     """Execute frontend-only tests"""
     frontend_exit, _ = runner.run_frontend_tests(
         config['frontend_args'],
         config.get('timeout', 300),
-        speed_opts
+        speed_opts,
+        test_level
     )
     runner.results["backend"]["status"] = "skipped"
     return frontend_exit
 
-def execute_full_test_suite(config, runner, real_llm_config, speed_opts):
+def execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level):
     """Execute full test suite (backend + frontend + E2E)"""
     if config.get('run_both', True):
         backend_exit, _ = runner.run_backend_tests(
@@ -687,7 +688,8 @@ def execute_full_test_suite(config, runner, real_llm_config, speed_opts):
         frontend_exit, _ = runner.run_frontend_tests(
             config['frontend_args'], 
             config.get('timeout', 300),
-            speed_opts
+            speed_opts,
+            test_level
         )
         exit_code = max(backend_exit, frontend_exit)
         if config.get('run_e2e', False):

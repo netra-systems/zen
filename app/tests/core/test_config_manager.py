@@ -8,7 +8,8 @@ from pydantic import ValidationError
 from app.core.secret_manager import SecretManager, SecretManagerError
 from app.core.config_validator import ConfigValidator, ConfigurationValidationError
 from app.core.exceptions_config import ConfigurationError
-from app.config import ConfigManager, get_config, reload_config
+from app.config_manager import ConfigManager
+from app.config import get_config, reload_config
 from app.schemas.Config import AppConfig, DevelopmentConfig
 
 
@@ -289,7 +290,7 @@ class TestConfigManager:
 class TestConfigurationFunctions:
     """Test global configuration functions."""
     
-    @patch('app.config._config_manager')
+    @patch('app.config.config_manager')
     def test_get_config(self, mock_manager):
         """Test global get_config function."""
         mock_config = DevelopmentConfig()
@@ -300,7 +301,7 @@ class TestConfigurationFunctions:
         assert config == mock_config
         mock_manager.get_config.assert_called_once()
     
-    @patch('app.config._config_manager')
+    @patch('app.config.config_manager')
     def test_reload_config(self, mock_manager):
         """Test global reload_config function."""
         reload_config()
@@ -322,7 +323,7 @@ class TestConfigurationIntegration:
         # Use clear=True to ensure only our test env vars are set
         with patch.dict(os.environ, test_env, clear=True):
             # Create a new config manager to avoid cached config
-            from app.config import ConfigManager
+            from app.config_manager import ConfigManager
             manager = ConfigManager()
             
             # Override the _load_secrets_into_config to apply our DATABASE_URL

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>UI/UX Thread State Management Specification</name>
+        <type>ui_ux_thread_state</type>
+        <version>1.0</version>
+        <created>2025-08-18</created>
+        <description>Specification for thread state management, formatting preservation, and URL routing</description>
+        <business-value>
+            <segment>All (Free → Enterprise)</segment>
+            <goal>Improve user experience through seamless thread navigation</goal>
+            <value-impact>5-10% conversion rate improvement via polished UX</value-impact>
+            <revenue-impact>Better retention through professional navigation experience</revenue-impact>
+        </business-value>
+    </metadata>
+    
+    <primary-goals>
+        <goal id="G1">Preserve message formatting when threads are reloaded</goal>
+        <goal id="G2">Maintain URL state synchronized with current thread ID</goal>
+        <goal id="G3">Enable bookmarking and sharing specific conversations</goal>
+        <goal id="G4">Ensure browser history works correctly with thread navigation</goal>
+    </primary-goals>
+    
+    <thread-formatting-preservation>
+        <problem>
+            When threads are reloaded (pulling existing data from backend), the message formatting is lost.
+            Markdown formatting, code blocks, and structured content lose their visual presentation.
+        </problem>
+        
+        <requirements>
+            <requirement id="TFP-1">
+                <title>Preserve Markdown Formatting</title>
+                <description>All markdown content must be re-rendered properly when loading thread history</description>
+                <implementation>
+                    - Store raw markdown in message content
+                    - Apply markdown processor consistently
+                    - Maintain formatting state in message metadata
+                </implementation>
+            </requirement>
+            
+            <requirement id="TFP-2">
+                <title>Maintain Code Block Formatting</title>
+                <description>Code blocks with syntax highlighting must persist across reloads</description>
+                <implementation>
+                    - Preserve language hints in metadata
+                    - Re-apply syntax highlighting on load
+                    - Maintain indentation and line breaks
+                </implementation>
+            </requirement>
+            
+            <requirement id="TFP-3">
+                <title>Preserve Agent Response Structure</title>
+                <description>Multi-layer agent responses must maintain their visual hierarchy</description>
+                <implementation>
+                    - Store layer metadata with messages
+                    - Re-construct response cards from stored data
+                    - Maintain collapse/expand states
+                </implementation>
+            </requirement>
+            
+            <requirement id="TFP-4">
+                <title>Handle Rich Content Types</title>
+                <description>Tables, lists, links, and embedded content must render correctly</description>
+                <implementation>
+                    - Process all content through unified renderer
+                    - Store content type hints in metadata
+                    - Apply consistent styling on reload
+                </implementation>
+            </requirement>
+        </requirements>
+        
+        <message-processing-pipeline>
+            <step number="1">Receive message from backend/storage</step>
+            <step number="2">Extract content and metadata</step>
+            <step number="3">Determine content type from metadata</step>
+            <step number="4">Apply appropriate formatter/renderer</step>
+            <step number="5">Store processed result in UI state</step>
+            <step number="6">Render with preserved formatting</step>
+        </message-processing-pipeline>
+    </thread-formatting-preservation>
+    
+    <url-state-management>
+        <problem>
+            URLs do not update when switching between threads, preventing bookmarking,
+            sharing, and proper browser history navigation.
+        </problem>
+        
+        <requirements>
+            <requirement id="USM-1">
+                <title>Dynamic URL Updates</title>
+                <description>URL must update immediately when thread changes</description>
+                <implementation>
+                    - Use Next.js router for URL updates
+                    - Pattern: /chat/[threadId]
+                    - Update without page reload
+                </implementation>
+            </requirement>
+            
+            <requirement id="USM-2">
+                <title>Deep Linking Support</title>
+                <description>Direct links to threads must load correct conversation</description>
+                <implementation>
+                    - Parse threadId from URL on mount
+                    - Load thread data automatically
+                    - Handle invalid thread IDs gracefully
+                </implementation>
+            </requirement>
+            
+            <requirement id="USM-3">
+                <title>Browser History Integration</title>
+                <description>Back/forward buttons must work with thread navigation</description>
+                <implementation>
+                    - Push state on thread change
+                    - Listen for popstate events
+                    - Sync UI with URL changes
+                </implementation>
+            </requirement>
+            
+            <requirement id="USM-4">
+                <title>Shareable URLs</title>
+                <description>URLs must be shareable between users (with proper auth)</description>
+                <implementation>
+                    - Include only thread ID in URL
+                    - Validate access on server
+                    - Show appropriate error for unauthorized access
+                </implementation>
+            </requirement>
+        </requirements>
+        
+        <url-patterns>
+            <pattern path="/chat" description="Chat home, no thread selected"/>
+            <pattern path="/chat/new" description="Create new thread"/>
+            <pattern path="/chat/[threadId]" description="Specific thread view"/>
+            <pattern path="/chat/[threadId]/message/[messageId]" description="Deep link to specific message (future)"/>
+        </url-patterns>
+        
+        <routing-flow>
+            <step number="1">User selects thread from sidebar</step>
+            <step number="2">Update URL with thread ID</step>
+            <step number="3">Push to browser history</step>
+            <step number="4">Load thread messages</step>
+            <step number="5">Update UI state</step>
+            <step number="6">Apply formatting pipeline</step>
+        </routing-flow>
+    </url-state-management>
+    
+    <implementation-checklist>
+        <category name="Message Formatting">
+            <task status="pending">Create unified message formatter service</task>
+            <task status="pending">Add content type detection logic</task>
+            <task status="pending">Implement markdown processor with state preservation</task>
+            <task status="pending">Add code block syntax highlighter</task>
+            <task status="pending">Create rich content renderers</task>
+        </category>
+        
+        <category name="URL Routing">
+            <task status="pending">Create dynamic chat route with thread ID</task>
+            <task status="pending">Implement URL update service</task>
+            <task status="pending">Add browser history management</task>
+            <task status="pending">Create deep link handler</task>
+            <task status="pending">Add URL validation and error handling</task>
+        </category>
+        
+        <category name="State Management">
+            <task status="pending">Update thread store to sync with URL</task>
+            <task status="pending">Add formatting metadata to messages</task>
+            <task status="pending">Create message processing pipeline</task>
+            <task status="pending">Implement state persistence for formatting</task>
+        </category>
+        
+        <category name="Testing">
+            <task status="pending">Test formatting preservation across reloads</task>
+            <task status="pending">Test URL updates on thread switch</task>
+            <task status="pending">Test browser history navigation</task>
+            <task status="pending">Test deep linking scenarios</task>
+            <task status="pending">Test error cases and edge conditions</task>
+        </category>
+    </implementation-checklist>
+    
+    <technical-approach>
+        <formatting-preservation>
+            <approach>
+                Store raw content with rich metadata, process through consistent pipeline on every render
+            </approach>
+            <key-components>
+                - MessageFormatter service (< 300 lines)
+                - ContentTypeDetector (< 100 lines)
+                - MarkdownProcessor with state cache
+                - RichContentRenderers module
+            </key-components>
+        </formatting-preservation>
+        
+        <url-management>
+            <approach>
+                Use Next.js App Router with dynamic segments, sync with Zustand store
+            </approach>
+            <key-components>
+                - Dynamic route: app/chat/[threadId]/page.tsx
+                - URLSyncService (< 200 lines)
+                - HistoryManager hook
+                - DeepLinkHandler component
+            </key-components>
+        </url-management>
+    </technical-approach>
+    
+    <validation-criteria>
+        <criterion>Messages retain all formatting after thread reload</criterion>
+        <criterion>URLs update immediately on thread switch</criterion>
+        <criterion>Browser back/forward works correctly</criterion>
+        <criterion>Deep links load correct thread and messages</criterion>
+        <criterion>No formatting loss during WebSocket reconnection</criterion>
+        <criterion>Performance remains under 100ms for thread switch</criterion>
+    </validation-criteria>
+    
+    <dependencies>
+        <dependency>ui_ux_master.xml - Master orchestration</dependency>
+        <dependency>ui_ux_chat_architecture.xml - Chat architecture</dependency>
+        <dependency>ui_ux_websocket.xml - WebSocket events</dependency>
+        <dependency>type_safety.xml - Type definitions</dependency>
+    </dependencies>
+</specification>

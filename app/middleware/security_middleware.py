@@ -87,6 +87,11 @@ class RateLimitTracker:
             return True
         self._requests[identifier].append(now)
         return False
+    
+    def check_rate_limit(self, identifier: str, limit: int = None, window: int = 60) -> bool:
+        """Check rate limit for identifier (alias for is_rate_limited)."""
+        limit = limit or SecurityConfig.DEFAULT_RATE_LIMIT
+        return self.is_rate_limited(identifier, limit, window)
 
 
 class InputValidator:
@@ -232,6 +237,15 @@ class SecurityMiddleware(BaseHTTPMiddleware):
         user_id = await self._get_user_id(request)
         limit = self._determine_rate_limit(request)
         await self._perform_rate_limit_checks(client_ip, user_id, limit)
+    
+    def _check_rate_limits_sync(self, request: Request) -> None:
+        """Synchronous rate limit check for testing."""
+        client_ip = self._get_client_ip(request)
+        limit = self._determine_rate_limit(request)
+        identifier = f"ip:{client_ip}"
+        if self.rate_limiter.is_rate_limited(identifier, limit):
+            logger.warning(f"Rate limit exceeded for IP: {client_ip}")
+            self._raise_rate_limit_exception("Rate limit exceeded")
     
     async def _perform_rate_limit_checks(self, client_ip: str, user_id: Optional[str], limit: int) -> None:
         """Perform IP and user rate limit checks."""

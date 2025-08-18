@@ -210,7 +210,7 @@ class ClaudeCLIRunner:
     
     def __init__(self, enabled: bool = False):
         """Initialize Claude CLI runner."""
-        self.enabled = enabled and os.getenv("ENVIRONMENT", "production") != "production"
+        self.enabled = enabled and os.getenv("ENVIRONMENT", "staging") != "production"  # Default to staging for safety
     
     async def run_compliance_review(self, module_path: Path) -> Optional[Dict[str, Any]]:
         """Run Claude CLI compliance review."""

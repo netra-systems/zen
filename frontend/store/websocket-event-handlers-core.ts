@@ -3,7 +3,7 @@
 
 import { logger } from '@/lib/logger';
 import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
-import type { ChatMessage } from '@/types/chat';
+import type { ChatMessage } from '@/types/registry';
 import type { UnifiedChatState } from '@/types/store-types';
 
 /**

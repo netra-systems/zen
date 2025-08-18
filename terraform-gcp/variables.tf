@@ -32,7 +32,7 @@ variable "redis_url" {
 variable "environment" {
   description = "Environment name (production, staging, development)"
   type        = string
-  default     = "production"
+  default     = "staging"  # Default to staging for safety
 }
 
 variable "enable_apis" {

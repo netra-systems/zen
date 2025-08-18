@@ -20,12 +20,8 @@ from .failing_tests_manager import (
     clear_failing_tests, organize_failures_by_category
 )
 
-# Try to import enhanced reporter if available
-try:
-    from .enhanced_reporter import EnhancedReporter as EnhancedTestReporter
-    ENHANCED_REPORTER_AVAILABLE = True
-except ImportError:
-    ENHANCED_REPORTER_AVAILABLE = False
+# Import comprehensive reporter
+from .comprehensive_reporter import ComprehensiveTestReporter
 
 PROJECT_ROOT = Path(__file__).parent.parent
 
@@ -47,7 +43,7 @@ class UnifiedTestRunner:
         self.test_categories = defaultdict(list)
         self.results = self._initialize_results_structure()
         self._setup_directories()
-        self.enhanced_reporter = self._setup_enhanced_reporter()
+        self.comprehensive_reporter = ComprehensiveTestReporter(self.reports_dir)
         self.staging_mode = False
     
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
@@ -56,9 +52,9 @@ class UnifiedTestRunner:
         self._handle_test_failures(exit_code, output, "backend")
         return exit_code, output
     
-    def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
+    def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None, test_level: str = None) -> Tuple[int, str]:
         """Run frontend tests and update results."""
-        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts)
+        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts, test_level)
         self._handle_test_failures(exit_code, output, "frontend")
         return exit_code, output
     
@@ -78,80 +74,15 @@ class UnifiedTestRunner:
         return run_failing_tests(failing_tests, max_fixes, backend_only, frontend_only)
     
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
-        """Save test report to test_reports directory with latest/history structure."""
-        if self._use_enhanced_reporter(level, config, exit_code):
-            return
-        save_test_report(self.results, level, config, exit_code, self.reports_dir, self.staging_mode)
-    
-    def _try_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
-        """Try to use enhanced reporter, return success status."""
-        return self._execute_safe_enhanced_report(level, config, exit_code)
-    
-    def _execute_safe_enhanced_report(self, level: str, config: Dict, exit_code: int) -> bool:
-        """Execute enhanced report with error handling."""
-        try:
-            self._execute_enhanced_reporting_workflow(level, config, exit_code)
-            return True
-        except Exception as e:
-            self._handle_enhanced_reporter_error(e)
-            return False
-    
-    def _generate_enhanced_report(self, level: str, config: Dict, exit_code: int) -> str:
-        """Generate comprehensive report using enhanced reporter."""
-        return self.enhanced_reporter.generate_comprehensive_report(
+        """Save test report to test_reports directory with comprehensive reporting."""
+        # Use comprehensive reporter ONLY - single source of truth
+        self.comprehensive_reporter.generate_comprehensive_report(
             level=level,
             results=self.results,
             config=config,
             exit_code=exit_code
         )
     
-    def _calculate_test_metrics(self) -> Dict:
-        """Calculate test metrics for enhanced reporter."""
-        backend_counts = self._get_backend_counts()
-        frontend_counts = self._get_frontend_counts()
-        totals = self._aggregate_test_counts(backend_counts, frontend_counts)
-        coverage = self._get_coverage_data()
-        return {**totals, "coverage": coverage}
-    
-    def _get_backend_counts(self) -> Dict:
-        """Get backend test counts."""
-        return self.results["backend"]["test_counts"]
-    
-    def _get_frontend_counts(self) -> Dict:
-        """Get frontend test counts."""
-        return self.results["frontend"]["test_counts"]
-    
-    def _aggregate_test_counts(self, backend_counts: Dict, frontend_counts: Dict) -> Dict:
-        """Aggregate test counts from backend and frontend."""
-        total_tests = backend_counts["total"] + frontend_counts["total"]
-        passed = backend_counts["passed"] + frontend_counts["passed"]
-        failed = backend_counts["failed"] + frontend_counts["failed"]
-        return {"total_tests": total_tests, "passed": passed, "failed": failed}
-    
-    def _save_enhanced_report(self, level: str, report_content: str, metrics: Dict):
-        """Save report using enhanced reporter."""
-        self.enhanced_reporter.save_report(
-            level=level,
-            report_content=report_content,
-            results=self.results,
-            metrics=metrics
-        )
-    
-    def _maybe_cleanup_reports(self):
-        """Periodically cleanup old reports."""
-        import random
-        if random.random() < 0.1:  # 10% chance to run cleanup
-            print("[INFO] Running report cleanup...")
-            self.enhanced_reporter.cleanup_old_reports(keep_days=7)
-    
-    def _handle_enhanced_reporter_error(self, e: Exception):
-        """Handle enhanced reporter errors gracefully."""
-        error_msg = str(e)
-        try:
-            print(f"[WARNING] Enhanced reporter failed, using standard: {error_msg}")
-        except UnicodeEncodeError:
-            safe_msg = error_msg.encode('ascii', 'replace').decode('ascii')
-            print(f"[WARNING] Enhanced reporter failed, using standard: {safe_msg}")
     
     def generate_json_report(self, level: str, config: Dict, exit_code: int) -> Dict:
         """Generate JSON report for CI/CD integration."""
@@ -172,34 +103,6 @@ class UnifiedTestRunner:
     def clear_failing_tests(self):
         """Clear the failing tests log."""
         clear_failing_tests(self.reports_dir)
-    
-    def _setup_enhanced_reporter(self) -> Optional['EnhancedTestReporter']:
-        """Initialize enhanced reporter if available."""
-        if not ENHANCED_REPORTER_AVAILABLE:
-            return None
-        return self._create_enhanced_reporter_instance()
-    
-    def _create_enhanced_reporter_instance(self) -> Optional['EnhancedTestReporter']:
-        """Create enhanced reporter instance with error handling."""
-        try:
-            return self._build_enhanced_reporter()
-        except Exception as e:
-            self._log_enhanced_reporter_failure(e)
-            return None
-    
-    def _build_enhanced_reporter(self) -> 'EnhancedTestReporter':
-        """Build and configure enhanced reporter."""
-        reporter = EnhancedTestReporter(self.reports_dir)
-        self._log_enhanced_reporter_success()
-        return reporter
-    
-    def _log_enhanced_reporter_success(self):
-        """Log successful enhanced reporter initialization."""
-        print("[INFO] Enhanced Test Reporter enabled")
-    
-    def _log_enhanced_reporter_failure(self, error: Exception):
-        """Log enhanced reporter initialization failure."""
-        print(f"[WARNING] Could not initialize Enhanced Reporter: {error}")
     
     def _initialize_results_structure(self) -> Dict:
         """Initialize results dictionary structure."""
@@ -241,19 +144,6 @@ class UnifiedTestRunner:
             failures = extract_failing_tests(output, component)
             if failures:
                 update_failing_tests(component, failures, None, self.reports_dir)
-    
-    def _use_enhanced_reporter(self, level: str, config: Dict, exit_code: int) -> bool:
-        """Use enhanced reporter if available and successful."""
-        if self.enhanced_reporter:
-            return self._try_enhanced_report(level, config, exit_code)
-        return False
-    
-    def _execute_enhanced_reporting_workflow(self, level: str, config: Dict, exit_code: int):
-        """Execute complete enhanced reporting workflow."""
-        report_content = self._generate_enhanced_report(level, config, exit_code)
-        metrics = self._calculate_test_metrics()
-        self._save_enhanced_report(level, report_content, metrics)
-        self._maybe_cleanup_reports()
     
     def _get_coverage_data(self) -> Optional[Dict]:
         """Get coverage data from results."""

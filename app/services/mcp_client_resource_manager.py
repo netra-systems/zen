@@ -1,11 +1,16 @@
 """MCP Client Resource Manager.
 
 Handles resource discovery and fetching from external MCP servers.
+Implements real MCP protocol for production use.
 Modular component extracted to maintain 300-line limit compliance.
 """
 
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+import asyncio
 
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+from mcp.client.session import ClientSession
 from app.services.database.mcp_client_repository import MCPResourceAccessRepository
 from app.core.exceptions_service import ServiceError
 from app.logging_config import central_logger
@@ -35,21 +40,23 @@ class MCPResourceManager:
             raise ServiceError(f"Resource discovery failed: {str(e)}")
     
     async def _discover_resources(self, server_name: str) -> List[Dict[str, Any]]:
-        """Mock resource discovery."""
-        return [
-            {
-                "uri": f"{server_name}://readme/overview",
-                "name": "Project Overview",
-                "description": "Main project documentation",
-                "mime_type": "text/markdown"
-            },
-            {
-                "uri": f"{server_name}://api/reference",
-                "name": "API Reference",
-                "description": "Complete API documentation",
-                "mime_type": "text/markdown"
-            }
-        ]
+        """Discover resources from MCP server using real protocol."""
+        try:
+            session = await self._get_server_session(server_name)
+            resources_result = await session.list_resources()
+            
+            return [
+                {
+                    "uri": resource.uri,
+                    "name": resource.name,
+                    "description": resource.description or "",
+                    "mime_type": resource.mimeType or "text/plain"
+                }
+                for resource in resources_result.resources
+            ]
+        except Exception as e:
+            logger.error(f"Resource discovery failed for {server_name}: {e}")
+            raise ServiceError(f"Resource discovery failed: {str(e)}")
     
     async def fetch_resource(self, db, server_name: str, uri: str) -> Dict[str, Any]:
         """Fetch a specific resource from an MCP server."""
@@ -68,8 +75,22 @@ class MCPResourceManager:
             raise ServiceError(f"Resource fetch failed: {str(e)}")
     
     async def _fetch_resource_content(self, server_name: str, uri: str) -> str:
-        """Mock resource content fetching."""
-        return f"Mock content for resource {uri} from {server_name}"
+        """Fetch resource content from MCP server using real protocol."""
+        try:
+            session = await self._get_server_session(server_name)
+            resource_result = await session.read_resource(uri)
+            
+            if resource_result.contents:
+                # Handle different content types
+                content_item = resource_result.contents[0]
+                if hasattr(content_item, 'text'):
+                    return content_item.text
+                elif hasattr(content_item, 'blob'):
+                    return content_item.blob.decode('utf-8', errors='ignore')
+            return ""
+        except Exception as e:
+            logger.error(f"Resource fetch failed for {uri} from {server_name}: {e}")
+            raise ServiceError(f"Resource fetch failed: {str(e)}")
     
     def clear_resource_cache(self, server_name: str = None):
         """Clear resource cache for specific server or all."""
@@ -80,3 +101,19 @@ class MCPResourceManager:
                 del self.cache[key]
         else:
             self.cache.clear()
+    
+    async def _get_server_session(self, server_name: str) -> ClientSession:
+        """Get or create MCP client session for server."""
+        cache_key = f"{server_name}:session"
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+        
+        # For now, assume stdio transport - this should be configurable
+        server_params = StdioServerParameters(
+            command="python",
+            args=["-m", "mcp_server", server_name]
+        )
+        
+        session = await stdio_client(server_params)
+        self.cache[cache_key] = session
+        return session

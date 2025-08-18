@@ -55,9 +55,14 @@ class TestScanners:
     
     def _scan_backend_test_directories(self, test_dirs: List[Path], discovered: defaultdict):
         """Scan backend test directories for Python test files"""
+        from .test_categories import TestCategories
+        categories = TestCategories()
+        
         for test_dir in test_dirs:
             for test_file in test_dir.rglob("test_*.py"):
-                discovered["backend"].append(str(test_file))
+                path_str = str(test_file).lower()
+                category = categories.categorize_test_by_path(path_str)
+                discovered[category].append(str(test_file))
     
     def _scan_jest_test_directory(self, test_dir: Path, discovered: defaultdict):
         """Scan Jest test directory for frontend tests"""

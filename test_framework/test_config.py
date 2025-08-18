@@ -32,9 +32,9 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "description": "Agent-specific unit tests (2-3 minutes)",
         "purpose": "Quick validation of agent functionality during development",
         "backend_args": [
-            "app/tests/agents/test_data_sub_agent.py", 
-            "tests/test_actions_sub_agent.py",
-            "-v", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}"
+            "--category", "agent", 
+            "-v", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}",
+            "--markers", "not real_services"
         ],
         "frontend_args": [],
         "timeout": 180,
@@ -90,9 +90,9 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "description": "Agent system comprehensive tests (10-15 minutes)",
         "purpose": "Deep validation of multi-agent system",
         "backend_args": [
-            "tests/test_data_sub_agent.py", 
-            "tests/test_actions_sub_agent.py",
-            "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"
+            "app/tests/agents", "tests/test_actions_sub_agent.py",
+            "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast",
+            "--markers", "not real_services"
         ],
         "frontend_args": [],
         "timeout": 900,

@@ -8,7 +8,7 @@ from app.schemas.agent_state import (
 )
 from app.logging_config import central_logger
 from .state_checkpoint_manager import StateCheckpointManager
-from .state_recovery_manager import StateRecoveryManager
+from .state_recovery_manager import AgentStateRecoveryManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -16,10 +16,10 @@ logger = central_logger.get_logger(__name__)
 class StateManagerCore:
     """Core state manager with initialization and coordination."""
     
-    def __init__(self, db_session_factory):
-        self.db_session_factory = db_session_factory
-        self.checkpoint_manager = StateCheckpointManager(db_session_factory)
-        self.recovery_manager = StateRecoveryManager(db_session_factory)
+    def __init__(self, db_session):
+        self.db_session = db_session
+        self.checkpoint_manager = StateCheckpointManager(db_session)
+        self.recovery_manager = AgentStateRecoveryManager(db_session)
     
     async def initialize_state(self, prompt: str, thread_id: str, 
                               user_id: str, run_id: str) -> DeepAgentState:

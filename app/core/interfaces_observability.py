@@ -35,7 +35,7 @@ class TodoState(Enum):
     SKIPPED = "skipped"
 
 
-class SupervisorFlowLogger:
+class CoreSupervisorFlowLogger:
     """Unified supervisor flow logger with comprehensive tracking and observability."""
     
     def __init__(self, correlation_id: Optional[str] = None, run_id: Optional[str] = None, enabled: bool = True):
@@ -353,18 +353,18 @@ class SupervisorFlowLogger:
 
 
 # Global supervisor flow logger instance
-_supervisor_flow_logger: Optional[SupervisorFlowLogger] = None
+_supervisor_flow_logger: Optional[CoreSupervisorFlowLogger] = None
 
 
-def get_supervisor_flow_logger() -> SupervisorFlowLogger:
+def get_supervisor_flow_logger() -> CoreSupervisorFlowLogger:
     """Get the global supervisor flow logger instance."""
     global _supervisor_flow_logger
     if _supervisor_flow_logger is None:
-        _supervisor_flow_logger = SupervisorFlowLogger()
+        _supervisor_flow_logger = CoreSupervisorFlowLogger()
     return _supervisor_flow_logger
 
 
 def create_supervisor_flow_logger(correlation_id: Optional[str] = None, 
-                                 run_id: Optional[str] = None, enabled: bool = True) -> SupervisorFlowLogger:
+                                 run_id: Optional[str] = None, enabled: bool = True) -> CoreSupervisorFlowLogger:
     """Create a new supervisor flow logger instance."""
-    return SupervisorFlowLogger(correlation_id, run_id, enabled)
+    return CoreSupervisorFlowLogger(correlation_id, run_id, enabled)

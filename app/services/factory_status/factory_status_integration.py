@@ -194,7 +194,7 @@ class FactoryStatusReporter:
     def _is_dev_environment(self) -> bool:
         """Check if running in development environment."""
         import os
-        env = os.getenv("ENVIRONMENT", "production")
+        env = os.getenv("ENVIRONMENT", "staging")  # Default to staging for safety
         return env in ["development", "dev", "local"]
 
 

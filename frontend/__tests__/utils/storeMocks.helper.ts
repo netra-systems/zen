@@ -3,6 +3,7 @@
  */
 
 import { generateUniqueId } from '@/lib/utils';
+import type { Thread, createThreadWithTitle } from '@/types/registry';
 
 // Types for stores
 interface Message {
@@ -11,16 +12,6 @@ interface Message {
   role: 'user' | 'assistant' | 'system';
   timestamp?: number;
   metadata?: any;
-}
-
-interface Thread {
-  id: string;
-  title: string;
-  created_at: number;
-  updated_at: number;
-  user_id: string;
-  message_count: number;
-  status: 'active' | 'archived' | 'deleted';
 }
 
 // Mock implementations for each store

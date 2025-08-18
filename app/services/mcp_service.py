@@ -16,7 +16,7 @@ from fastmcp import FastMCP
 
 from app.logging_config import CentralLogger
 from app.core.exceptions_base import NetraException
-from app.services.service_locator import IMCPService
+from app.services.service_interfaces import IMCPService
 from app.services.agent_service import AgentService
 from app.services.thread_service import ThreadService
 from app.services.corpus_service import CorpusService

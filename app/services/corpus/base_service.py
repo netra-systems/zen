@@ -5,7 +5,7 @@ Base corpus service class - core orchestrator initialization
 from .document_manager import DocumentManager
 from .search_operations import SearchOperations
 from .validation import ValidationManager
-from .clickhouse_operations import ClickHouseOperations
+from .clickhouse_operations import CorpusClickHouseOperations
 from .corpus_manager import CorpusManager
 
 
@@ -17,7 +17,7 @@ class BaseCorpusService:
         self.document_manager = DocumentManager()
         self.search_operations = SearchOperations()
         self.validation_manager = ValidationManager()
-        self.clickhouse_ops = ClickHouseOperations()
+        self.clickhouse_ops = CorpusClickHouseOperations()
         self.corpus_manager = CorpusManager()
     
     def get_document_manager(self) -> DocumentManager:
@@ -32,7 +32,7 @@ class BaseCorpusService:
         """Get validation manager instance"""
         return self.validation_manager
     
-    def get_clickhouse_ops(self) -> ClickHouseOperations:
+    def get_clickhouse_ops(self) -> CorpusClickHouseOperations:
         """Get ClickHouse operations instance"""
         return self.clickhouse_ops
     

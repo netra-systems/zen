@@ -1,14 +1,16 @@
 
 import React, { useMemo, useCallback } from 'react';
-import { Message as MessageType } from '@/types/chat';
+import { Message as MessageType } from '@/types/registry';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { RawJsonView } from './RawJsonView';
 import { MCPToolIndicator } from './MCPToolIndicator';
+import { FormattedMessageContent } from './FormattedMessageContent';
 import { motion } from 'framer-motion';
 import { AlertCircle, Bot, ChevronDown, ChevronRight, Clock, Code, FileText, User, Wrench } from 'lucide-react';
 import { getMessageDisplayName, shouldShowSubtitle, getMessageSubtitle } from '@/utils/message-display';
+import { MessageFormatterService, type FormattedContent } from '@/services/messageFormatter';
 
 // ============================================
 // Helper Functions (8 lines max each)
@@ -75,17 +77,14 @@ const renderToolCollapsibleContent = (tool_info: any) => (
 );
 
 const renderRegularContent = (
-  content: string | any,
+  message: MessageType,
   type: string,
   references: string[] | undefined,
   id: string | undefined
 ) => {
-  const textContent = typeof content === 'string' 
-    ? content 
-    : (content?.text || JSON.stringify(content));
   return (
     <div className="space-y-3">
-      <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{textContent}</p>
+      <FormattedMessageContent message={message} className="" />
       {type === 'user' && references && references.length > 0 && 
         renderUserReferences(references, id)
       }
@@ -168,7 +167,7 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
   const renderContent = () => {
     if (error) return renderErrorContent(error);
     if (tool_info) return renderToolContent(tool_info, isToolExpanded, toggleToolExpanded);
-    return renderRegularContent(content, type, references, id);
+    return renderRegularContent(message, type, references, id);
   };
 
   return (

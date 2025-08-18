@@ -1,10 +1,11 @@
 'use client';
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { webSocketService, WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage } from '../types/backend_schema_auto_generated';
+import { WebSocketMessage, Message } from '@/types/registry';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
+import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
 
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
@@ -25,12 +26,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const isConnectingRef = useRef(false);
   const cleanupRef = useRef<() => void>();
 
-  // Memoized message handler to prevent unnecessary re-renders
+  // Memoized message handler with reconciliation integration
   const handleMessage = useCallback((newMessage: WebSocketMessage) => {
-    // Only update local state - let useEventProcessor handle unified events
-    // This prevents duplicate processing and race conditions
+    // Process through reconciliation service first
+    const reconciledMessage = reconciliationService.processConfirmation(newMessage);
+    
     setMessages((prevMessages) => {
-      // Prevent duplicate messages by checking if message already exists
+      // Check for duplicates using message_id
       const messageExists = prevMessages.some(msg => 
         msg.payload?.message_id === newMessage.payload?.message_id &&
         newMessage.payload?.message_id
@@ -48,12 +50,13 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         return prevMessages;
       }
       
-      logger.debug('WebSocket message received and queued', {
+      logger.debug('WebSocket message received and processed', {
         component: 'WebSocketProvider',
         action: 'message_received',
         metadata: { 
           eventType: newMessage.type,
           messageId: newMessage.payload?.message_id,
+          reconciled: !!reconciledMessage,
           totalMessages: prevMessages.length + 1
         }
       });
@@ -119,10 +122,36 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     webSocketService.sendMessage(message);
   }, []);
 
+  // Enhanced sendMessage with optimistic update support
+  const sendOptimisticMessage = useCallback((messageContent: string, messageType: 'user' | 'assistant' = 'user') => {
+    // Create optimistic message for immediate UI update
+    const optimisticMsg = reconciliationService.addOptimisticMessage({
+      id: `temp_${Date.now()}`,
+      content: messageContent,
+      role: messageType,
+      timestamp: Date.now()
+    });
+    
+    // Send actual WebSocket message
+    const wsMessage: WebSocketMessage = {
+      type: 'user_message',
+      payload: {
+        content: messageContent,
+        timestamp: new Date().toISOString(),
+        correlation_id: optimisticMsg.tempId
+      }
+    };
+    
+    webSocketService.sendMessage(wsMessage);
+    return optimisticMsg;
+  }, []);
+
   const contextValue = {
     status,
     messages,
     sendMessage,
+    sendOptimisticMessage,
+    reconciliationStats: reconciliationService.getStats(),
   };
 
   return (

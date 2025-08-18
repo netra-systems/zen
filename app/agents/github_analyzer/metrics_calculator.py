@@ -9,7 +9,7 @@ from typing import Dict, List, Any
 from app.logging_config import central_logger as logger
 
 
-class MetricsCalculator:
+class GitHubAnalyzerMetricsCalculator:
     """Calculates metrics for AI operations analysis."""
     
     def calculate_metrics(self, ai_map: Dict[str, Any]) -> Dict[str, Any]:
