@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Download, Share2, Send } from 'lucide-react';
+import { logger } from '@/utils/debug-logger';
 
 interface ExportButtonProps {
   icon: React.ReactNode;
@@ -22,17 +23,17 @@ const ExportButton: React.FC<ExportButtonProps> = ({ icon, label, onClick }) => 
 export const ExportControls: React.FC = () => {
   const handleExportReport = () => {
     // TODO: Implement export functionality
-    console.log('Export report clicked');
+    logger.debug('Export report clicked');
   };
 
   const handleShare = () => {
     // TODO: Implement share functionality
-    console.log('Share clicked');
+    logger.debug('Share clicked');
   };
 
   const handleEmailReport = () => {
     // TODO: Implement email functionality
-    console.log('Email report clicked');
+    logger.debug('Email report clicked');
   };
 
   return (
