@@ -84,10 +84,19 @@ def get_clickhouse_config():
     """Get ClickHouse configuration based on environment.
     
     Returns appropriate config for real ClickHouse connection.
+    Uses environment variables for all settings.
     """
-    if settings.environment == "development":
-        return settings.clickhouse_https_dev
-    return settings.clickhouse_https
+    import os
+    from app.schemas.Config import ClickHouseHTTPSConfig
+    
+    # Always use environment variables for configuration
+    return ClickHouseHTTPSConfig(
+        host=os.environ.get("CLICKHOUSE_HOST", "localhost"),
+        port=int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")),
+        user=os.environ.get("CLICKHOUSE_USER", "default"),
+        password=os.environ.get("CLICKHOUSE_PASSWORD", ""),
+        database=os.environ.get("CLICKHOUSE_DB", "netra_dev")
+    )
 
 
 @asynccontextmanager
