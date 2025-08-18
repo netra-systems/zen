@@ -166,21 +166,29 @@ class DeepAgentState(BaseModel):
         if v is None:
             return v
         
-        # Check cost savings bounds
-        if v.cost_savings is not None:
-            if v.cost_savings < 0:
-                raise ValueError('Cost savings cannot be negative')
-            if v.cost_savings > 1000000:  # $1M upper bound
-                raise ValueError('Cost savings exceeds reasonable limit')
-        
-        # Check performance improvement bounds
-        if v.performance_improvement is not None:
-            if v.performance_improvement < -100:
-                raise ValueError('Performance improvement cannot be less than -100%')
-            if v.performance_improvement > 10000:  # 100x improvement upper bound
-                raise ValueError('Performance improvement exceeds reasonable limit')
-        
+        cls._validate_cost_savings(v.cost_savings)
+        cls._validate_performance_improvement(v.performance_improvement)
         return v
+    
+    @classmethod
+    def _validate_cost_savings(cls, cost_savings: Optional[float]) -> None:
+        """Validate cost savings bounds."""
+        if cost_savings is None:
+            return
+        if cost_savings < 0:
+            raise ValueError('Cost savings cannot be negative')
+        if cost_savings > 1000000:  # $1M upper bound
+            raise ValueError('Cost savings exceeds reasonable limit')
+    
+    @classmethod
+    def _validate_performance_improvement(cls, improvement: Optional[float]) -> None:
+        """Validate performance improvement bounds."""
+        if improvement is None:
+            return
+        if improvement < -100:
+            raise ValueError('Performance improvement cannot be less than -100%')
+        if improvement > 10000:  # 100x improvement upper bound
+            raise ValueError('Performance improvement exceeds reasonable limit')
     
     def to_dict(self) -> Dict[str, Union[str, int, float, bool, None]]:
         """Convert state to dictionary with typed values."""

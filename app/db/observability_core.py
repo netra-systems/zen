@@ -25,11 +25,23 @@ class DatabaseObservability:
     
     def __init__(self, alert_thresholds: Optional[AlertThresholds] = None):
         """Initialize observability system."""
+        self._initialize_alert_system(alert_thresholds)
+        self._initialize_monitoring_state()
+        self._initialize_metrics_and_callbacks()
+
+    def _initialize_alert_system(self, alert_thresholds: Optional[AlertThresholds]) -> None:
+        """Initialize alert system components."""
         self.alert_thresholds = alert_thresholds or AlertThresholds()
         self.storage = MetricsStorage()
+
+    def _initialize_monitoring_state(self) -> None:
+        """Initialize monitoring state variables."""
         self._monitoring_task: Optional[asyncio.Task] = None
         self._running = False
         self._collection_interval = 60  # 1 minute
+
+    def _initialize_metrics_and_callbacks(self) -> None:
+        """Initialize current metrics and callback settings."""
         self.current_metrics = DatabaseMetrics(timestamp=datetime.now())
         self.alert_callback: Optional[callable] = None
 

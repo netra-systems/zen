@@ -43,10 +43,112 @@ export {
   ENUM_REGISTRY
 } from './shared/enums';
 
-// Re-export base interfaces and utility types
+// Re-export base interfaces and utility types - Only verified working exports
 export {
   MessageRole,
   MessageStatus,
+  TYPE_REGISTRY,
+  createBaseEntity,
+  createBaseMessage,
+  createBaseMetadata,
+  createMessageAttachment,
+  createMessageReaction,
+  createTimestampEntity,
+  getTypeFromRegistry,
+  hasRequiredMessageFields,
+  isValidEntity,
+  isValidUser
+} from './shared/base';
+
+// ============================================================================
+// DOMAIN MODULES - Specialized type collections
+// ============================================================================
+
+// Authentication domain - Only verified working functions
+export {
+  createGuestUser,
+  hasValidToken,
+  isActiveUser,
+  isAdminUser,
+  sanitizeUserForClient
+} from './domains/auth';
+
+// Message domain - Only verified working functions
+export {
+  createChatMessage,
+  createMessage
+} from './domains/messages';
+
+// Thread domain - Only verified working functions
+export {
+  createThread,
+  createThreadState,
+  createThreadWithTitle,
+  filterActiveThreads,
+  filterThreadsByTag,
+  getThreadStatus,
+  getThreadTitle,
+  hasMessages,
+  hasMetadata,
+  hasParticipants,
+  hasTags,
+  isBookmarked,
+  isThreadActive,
+  isValidThread,
+  searchThreads,
+  setActiveThread,
+  sortThreadsByDate
+} from './domains/threads';
+
+// WebSocket domain - Only verified working functions
+export {
+  createWebSocketError,
+  createWebSocketMessage,
+  isAgentCompletedMessage,
+  isAgentStartedMessage,
+  isAgentUpdateMessage,
+  isErrorMessage,
+  isSubAgentUpdateMessage,
+  isToolCallMessage,
+  isUserMessagePayload,
+  isWebSocketMessage
+} from './domains/websocket';
+
+// Agent domain - Only verified working functions
+export {
+  createAgentMetadata,
+  getAgentDuration,
+  hasAgentError,
+  isAgentActive,
+  isAgentCompleted,
+  isValidAgentState,
+  isValidSubAgentLifecycle,
+  updateAgentMetadata
+} from './domains/agents';
+
+// Tools domain - Only verified working functions
+export {
+  createToolCallPayload,
+  createToolInput,
+  createToolResult,
+  createToolResultPayload,
+  isToolCallPayload,
+  isToolComplete,
+  isToolInProgress,
+  isToolResultPayload,
+  isToolSuccessful,
+  isValidToolStatus
+} from './domains/tools';
+
+// ============================================================================
+// ESSENTIAL TYPE RE-EXPORTS - Direct from verified sources
+// ============================================================================
+
+// Direct type imports for essential interfaces that components need
+export type { 
+  User,
+  AuthEndpoints,
+  AuthConfigResponse,
   BaseEntity,
   BaseTimestampEntity,
   BaseMetadata,
@@ -55,9 +157,6 @@ export {
   MessageAttachment,
   MessageReaction,
   MessageMetadata,
-  User,
-  AuthEndpoints,
-  AuthConfigResponse,
   ID,
   Timestamp,
   OptionalFields,
@@ -65,145 +164,8 @@ export {
   Nullable,
   Optional,
   OperationStatus,
-  ConnectionStatus,
-  TYPE_REGISTRY,
-  createBaseMessage,
-  createMessageAttachment,
-  createMessageReaction,
-  createBaseEntity,
-  createTimestampEntity,
-  createBaseMetadata,
-  isValidUser,
-  hasRequiredMessageFields,
-  isValidEntity,
-  getTypeFromRegistry
+  ConnectionStatus
 } from './shared/base';
-
-// ============================================================================
-// DOMAIN MODULES - Specialized type collections
-// ============================================================================
-
-// Authentication domain
-export {
-  DevUser,
-  GoogleUser,
-  Token,
-  TokenPayload,
-  DevLoginRequest,
-  UserBase,
-  UserCreate,
-  UserCreateOAuth,
-  UserUpdate,
-  isActiveUser,
-  isAdminUser,
-  hasValidToken,
-  createGuestUser,
-  sanitizeUserForClient
-} from './domains/auth';
-
-// Message domain
-export {
-  Message,
-  ChatMessage,
-  ChatMessageType,
-  BaseChatMessage,
-  createMessage,
-  createChatMessage
-} from './domains/messages';
-
-// Thread domain
-export {
-  ThreadMetadata,
-  Thread,
-  ThreadState,
-  getThreadTitle,
-  getThreadStatus,
-  isThreadActive,
-  createThreadWithTitle,
-  createThread,
-  isValidThread,
-  sortThreadsByDate,
-  filterActiveThreads,
-  createThreadState,
-  setActiveThread
-} from './domains/threads';
-
-// WebSocket domain
-export {
-  WebSocketError,
-  StartAgentPayload,
-  UserMessagePayload,
-  StopAgentPayload,
-  CreateThreadPayload,
-  SwitchThreadPayload,
-  DeleteThreadPayload,
-  AgentUpdatePayload,
-  AgentStartedPayload,
-  AgentCompletedPayload,
-  SubAgentUpdatePayload,
-  ToolCallPayload,
-  ToolResultPayload,
-  StreamChunkPayload,
-  StreamCompletePayload,
-  ErrorPayload,
-  WebSocketMessage,
-  AuthMessage,
-  PingMessage,
-  PongMessage,
-  isWebSocketMessage,
-  isAgentStartedMessage,
-  isAgentCompletedMessage,
-  isSubAgentUpdateMessage,
-  isToolCallMessage,
-  isErrorMessage,
-  isUserMessagePayload,
-  isAgentUpdateMessage,
-  createWebSocketError,
-  createWebSocketMessage,
-  MessageTypeLiteral,
-  WebSocketPayload
-} from './domains/websocket';
-
-// Agent domain
-export {
-  ToolResultData,
-  AgentMetadata,
-  AgentResult,
-  MessageData,
-  ThreadHistoryResponse,
-  AgentState,
-  SubAgentLifecycle,
-  SubAgentState,
-  SubAgentStatus,
-  isValidAgentState,
-  isAgentActive,
-  isAgentCompleted,
-  hasAgentError,
-  getAgentDuration,
-  isValidSubAgentLifecycle,
-  createAgentMetadata,
-  updateAgentMetadata
-} from './domains/agents';
-
-// Tools domain
-export {
-  ToolStatus,
-  ToolInput,
-  ToolResult,
-  ReferenceItem,
-  ToolCompleted,
-  ToolStarted,
-  isValidToolStatus,
-  isToolComplete,
-  isToolInProgress,
-  isToolSuccessful,
-  createToolInput,
-  createToolResult,
-  createToolCallPayload,
-  createToolResultPayload,
-  isToolCallPayload,
-  isToolResultPayload
-} from './domains/tools';
 
 // ============================================================================
 // COMPATIBILITY ALIASES - Maintain exact backward compatibility
@@ -213,29 +175,6 @@ export {
 export type RegisteredTypeName = keyof typeof TYPE_REGISTRY;
 
 // ============================================================================
-// DEFAULT EXPORT - Consolidated utilities for convenience
+// NO DEFAULT EXPORT - Prevents module initialization issues
+// All exports are available as named exports above
 // ============================================================================
-
-export default {
-  // Core enums
-  MessageType,
-  AgentStatus,
-  WebSocketMessageType,
-  
-  // Validation functions
-  isValidMessageType,
-  isValidAgentStatus,
-  isValidWebSocketMessageType,
-  
-  // WebSocket utilities
-  createWebSocketError,
-  createWebSocketMessage,
-  isWebSocketMessage,
-  isAgentStartedMessage,
-  isAgentCompletedMessage,
-  isSubAgentUpdateMessage,
-  isToolCallMessage,
-  isErrorMessage,
-  isUserMessagePayload,
-  isAgentUpdateMessage
-};

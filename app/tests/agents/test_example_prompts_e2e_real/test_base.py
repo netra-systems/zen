@@ -146,11 +146,12 @@ class BaseExamplePromptsTest:
     
     def _create_fallback_response(self):
         """Create a fallback response for testing"""
-        return ("Based on the analysis, I recommend optimizing costs by:\n"
-                "1. Switching to more efficient models for low-complexity tasks\n"
-                "2. Implementing caching strategies\n"
-                "3. Batch processing where possible\n"
-                "This should reduce costs by 20-30% while maintaining quality.")
+        return ("Based on comprehensive analysis and audit, I recommend optimizing costs through:\n"
+                "1. Examining current model usage patterns and switching to efficient models for low-complexity tasks\n"
+                "2. Implementing intelligent caching strategies to reduce redundant API calls\n"
+                "3. Analyzing batch processing opportunities where possible\n"
+                "4. Reviewing current optimization opportunities across the system\n"
+                "This audit-driven approach should reduce costs by 20-30% while maintaining quality.")
 
     async def run_single_test(self, prompt: str, context: Union[
         CostOptimizationContext,

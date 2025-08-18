@@ -56,30 +56,69 @@ def create_tool_availability(tool: Dict) -> ToolAvailability:
     return ToolAvailability(**{**basic_info, **requirements})
 
 
+def create_tool_availability_objects(available_tools: List[Dict]) -> List[ToolAvailability]:
+    """Create tool availability objects from tool dicts."""
+    return [create_tool_availability(tool) for tool in available_tools]
+
+
+def create_response_data(
+    tool_objects: List[ToolAvailability], available_tools: List[Dict],
+    tools_available: List[Dict], current_user: User
+) -> Dict[str, Any]:
+    """Create basic response data."""
+    return {
+        "tools": tool_objects, "user_plan": current_user.plan_tier,
+        "total_tools": len(available_tools), "available_tools": len(tools_available)
+    }
+
+
+def build_response_params(
+    tool_objects: List[ToolAvailability], available_tools: List[Dict],
+    tools_available: List[Dict], categories: List[str], current_user: User
+) -> Dict[str, Any]:
+    """Build response parameters for ToolAvailabilityResponse."""
+    base_data = create_response_data(tool_objects, available_tools, tools_available, current_user)
+    base_data["categories"] = categories
+    return base_data
+
+
+def create_response_objects_and_params(
+    available_tools: List[Dict], tools_available: List[Dict],
+    categories: List[str], current_user: User
+) -> Dict[str, Any]:
+    """Create response objects and parameters."""
+    tool_objects = create_tool_availability_objects(available_tools)
+    return build_response_params(
+        tool_objects, available_tools, tools_available, categories, current_user
+    )
+
+
 def build_tool_availability_response(
-    available_tools: List[Dict], 
-    tools_available: List[Dict], 
-    categories: List[str], 
-    current_user: User
+    available_tools: List[Dict], tools_available: List[Dict],
+    categories: List[str], current_user: User
 ) -> ToolAvailabilityResponse:
     """Build the tool availability response."""
-    tool_objects = [create_tool_availability(tool) for tool in available_tools]
-    return ToolAvailabilityResponse(
-        tools=tool_objects,
-        user_plan=current_user.plan_tier,
-        total_tools=len(available_tools),
-        available_tools=len(tools_available),
-        categories=categories
+    params = create_response_objects_and_params(
+        available_tools, tools_available, categories, current_user
     )
+    return ToolAvailabilityResponse(**params)
+
+
+async def get_tools_and_categories(
+    tool_registry, current_user: User, category: Optional[str]
+) -> tuple[List[Dict], List[str]]:
+    """Get available tools and categories."""
+    available_tools = await get_available_tools_for_user(
+        tool_registry, current_user, category)
+    categories = get_tool_category_names(tool_registry)
+    return available_tools, categories
 
 
 async def gather_tool_data(
     tool_registry, current_user: User, category: Optional[str]
 ) -> tuple[List[Dict], List[str], List[Dict]]:
     """Gather tool data for user."""
-    available_tools = await get_available_tools_for_user(
-        tool_registry, current_user, category
-    )
-    categories = get_tool_category_names(tool_registry)
+    available_tools, categories = await get_tools_and_categories(
+        tool_registry, current_user, category)
     tools_available = filter_available_tools(available_tools)
     return available_tools, categories, tools_available

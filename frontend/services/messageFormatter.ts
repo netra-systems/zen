@@ -272,10 +272,41 @@ export const getContentForRendering = (message: Message): string => {
 };
 
 // ============================================================================
+// MESSAGE ENRICHMENT UTILITIES
+// ============================================================================
+
+/**
+ * Ensures message has all required fields with fallback values
+ */
+const ensureRequiredFields = (message: Message): Message => {
+  const timestamp = message.timestamp || Date.now();
+  const id = message.id || `msg_${timestamp}_${Math.random().toString(36).substr(2, 9)}`;
+  
+  return {
+    ...message,
+    id,
+    timestamp,
+    created_at: message.created_at || new Date(timestamp).toISOString()
+  };
+};
+
+// ============================================================================
 // MAIN SERVICE CLASS
 // ============================================================================
 
 export class MessageFormatterService {
+  /**
+   * Formats single message for display (legacy interface)
+   */
+  static format(message: Message) {
+    const enhanced = enhanceMessageWithFormatting(message);
+    return {
+      content: enhanced.content,
+      metadata: enhanced.metadata,
+      renderHints: enhanced.metadata?.renderingHints || {}
+    };
+  }
+
   /**
    * Formats single message for display
    */
@@ -309,6 +340,14 @@ export class MessageFormatterService {
    */
   static getContent(message: Message): string {
     return getContentForRendering(message);
+  }
+
+  /**
+   * Enriches message with missing fields and formatting metadata
+   */
+  static enrich(message: Message): Message {
+    const enrichedMessage = ensureRequiredFields(message);
+    return enhanceMessageWithFormatting(enrichedMessage);
   }
 }
 

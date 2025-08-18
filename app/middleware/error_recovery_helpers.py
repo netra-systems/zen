@@ -36,9 +36,24 @@ def get_special_operation_type(path: str) -> Optional[OperationType]:
 
 def _get_path_operation_mappings() -> Dict[tuple, OperationType]:
     """Get path pattern to operation type mappings."""
+    return _build_all_path_mappings()
+
+def _build_all_path_mappings() -> Dict[tuple, OperationType]:
+    """Build all path operation mappings."""
+    basic_mappings = _get_basic_path_mappings()
+    advanced_mappings = _get_advanced_path_mappings()
+    return {**basic_mappings, **advanced_mappings}
+
+def _get_basic_path_mappings() -> Dict[tuple, OperationType]:
+    """Get basic path operation mappings."""
     return {
         ('/websocket', '/ws'): OperationType.WEBSOCKET_SEND,
-        ('/llm', '/ai', '/agent'): OperationType.LLM_REQUEST,
+        ('/llm', '/ai', '/agent'): OperationType.LLM_REQUEST
+    }
+
+def _get_advanced_path_mappings() -> Dict[tuple, OperationType]:
+    """Get advanced path operation mappings."""
+    return {
         ('/api/external',): OperationType.EXTERNAL_API,
         ('/files', '/upload'): OperationType.FILE_OPERATION,
         ('/cache',): OperationType.CACHE_OPERATION
@@ -56,10 +71,8 @@ def determine_operation_type(request: Request) -> OperationType:
 
 def get_severity_mapping() -> Dict[str, ErrorSeverity]:
     """Get error type to severity mapping."""
-    high_severity = ['ValidationError', 'PermissionError', 'ValueError', 'TypeError']
-    medium_severity = ['ConnectionError', 'TimeoutError', 'HTTPException', 'KeyError', 'FileNotFoundError']
-    mapping = {error: ErrorSeverity.HIGH for error in high_severity}
-    mapping.update({error: ErrorSeverity.MEDIUM for error in medium_severity})
+    mapping = _build_high_severity_mapping()
+    mapping.update(_build_medium_severity_mapping())
     mapping['MemoryError'] = ErrorSeverity.CRITICAL
     return mapping
 
@@ -82,10 +95,7 @@ def extract_request_metadata(request: Request) -> Dict[str, Any]:
 
 def get_base_metadata(request: Request) -> Dict[str, Any]:
     """Get base request metadata."""
-    metadata = {
-        'method': request.method, 'path': request.url.path,
-        'query_params': dict(request.query_params), 'headers': dict(request.headers)
-    }
+    metadata = _build_base_request_metadata(request)
     add_client_metadata(metadata, request)
     return metadata
 
@@ -120,12 +130,9 @@ def build_error_data(error: Exception, context: RecoveryContext, request: Reques
 
 def get_error_base_data(error: Exception, context: RecoveryContext) -> Dict[str, Any]:
     """Get base error data from error and context."""
-    return {
-        'operation_id': context.operation_id, 'operation_type': context.operation_type.value,
-        'severity': context.severity.value, 'retry_count': context.retry_count,
-        'error_type': type(error).__name__, 'error_message': str(error),
-        'elapsed_time_ms': context.elapsed_time.total_seconds() * 1000
-    }
+    context_data = _extract_context_data(context)
+    error_data = _extract_error_data(error)
+    return {**context_data, **error_data}
 
 
 def get_error_request_data(request: Request) -> Dict[str, Any]:
@@ -157,11 +164,49 @@ def add_stack_trace_if_critical(error_data: Dict[str, Any], context: RecoveryCon
 
 def log_by_severity(severity: ErrorSeverity, error_data: Dict[str, Any]) -> None:
     """Log error based on severity level."""
-    log_methods = _get_severity_log_methods()
-    log_method = log_methods.get(severity, logger.info)
-    message = "Error in request processing"
-    log_method(f"{severity.value.title()} {message.lower()}", **error_data)
+    log_method = _get_log_method_for_severity(severity)
+    message = _build_severity_log_message(severity)
+    log_method(message, **error_data)
 
+
+def _build_high_severity_mapping() -> Dict[str, ErrorSeverity]:
+    """Build high severity error mapping."""
+    high_severity = ['ValidationError', 'PermissionError', 'ValueError', 'TypeError']
+    return {error: ErrorSeverity.HIGH for error in high_severity}
+
+def _build_medium_severity_mapping() -> Dict[str, ErrorSeverity]:
+    """Build medium severity error mapping."""
+    medium_severity = ['ConnectionError', 'TimeoutError', 'HTTPException', 'KeyError', 'FileNotFoundError']
+    return {error: ErrorSeverity.MEDIUM for error in medium_severity}
+
+def _build_base_request_metadata(request: Request) -> Dict[str, Any]:
+    """Build base request metadata dictionary."""
+    return {
+        'method': request.method, 'path': request.url.path,
+        'query_params': dict(request.query_params), 'headers': dict(request.headers)
+    }
+
+def _extract_context_data(context: RecoveryContext) -> Dict[str, Any]:
+    """Extract data from recovery context."""
+    return {
+        'operation_id': context.operation_id, 'operation_type': context.operation_type.value,
+        'severity': context.severity.value, 'retry_count': context.retry_count,
+        'elapsed_time_ms': context.elapsed_time.total_seconds() * 1000
+    }
+
+def _extract_error_data(error: Exception) -> Dict[str, Any]:
+    """Extract data from exception."""
+    return {'error_type': type(error).__name__, 'error_message': str(error)}
+
+def _get_log_method_for_severity(severity: ErrorSeverity) -> callable:
+    """Get log method for severity level."""
+    log_methods = _get_severity_log_methods()
+    return log_methods.get(severity, logger.info)
+
+def _build_severity_log_message(severity: ErrorSeverity) -> str:
+    """Build log message for severity level."""
+    base_message = "Error in request processing"
+    return f"{severity.value.title()} {base_message.lower()}"
 
 def _get_severity_log_methods() -> Dict[ErrorSeverity, callable]:
     """Get severity to log method mappings."""
@@ -177,6 +222,15 @@ def build_recovery_context(
     severity: ErrorSeverity, attempt: int, max_attempts: int, metadata: Dict[str, Any]
 ) -> RecoveryContext:
     """Build recovery context with all parameters."""
+    return _create_recovery_context(
+        operation_id, operation_type, error, severity, attempt, max_attempts, metadata
+    )
+
+def _create_recovery_context(
+    operation_id: str, operation_type: OperationType, error: Exception,
+    severity: ErrorSeverity, attempt: int, max_attempts: int, metadata: Dict[str, Any]
+) -> RecoveryContext:
+    """Create RecoveryContext with provided parameters."""
     return RecoveryContext(
         operation_id=operation_id, operation_type=operation_type, error=error,
         severity=severity, retry_count=attempt, max_retries=max_attempts - 1, metadata=metadata

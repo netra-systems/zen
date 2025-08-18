@@ -13,14 +13,14 @@ class TestDataSubAgentProcessing:
     """Test DataSubAgent processing and utility methods"""
     async def test_process_data_valid(self, agent):
         """Test process_data with valid data"""
-        data = {"valid": True, "content": "test"}
+        data = {"input": "test_input", "type": "test_type"}
         result = await agent.process_data(data)
         
         assert result["status"] == "success"
-        assert result["processed"] == True
+        assert result["data"] == data
     async def test_process_data_invalid(self, agent):
         """Test process_data with invalid data"""
-        data = {"valid": False, "content": "test"}
+        data = {"invalid": "missing_required_fields"}  # Missing "input" and "type"
         result = await agent.process_data(data)
         
         assert result["status"] == "error"

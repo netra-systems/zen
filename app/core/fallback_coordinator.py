@@ -39,16 +39,32 @@ class FallbackCoordinator:
     def register_agent(self, agent_name: str, 
                       fallback_config: Optional[FallbackConfig] = None) -> LLMFallbackHandler:
         """Register an agent with the fallback coordinator"""
+        existing_handler = self._check_existing_agent(agent_name)
+        if existing_handler:
+            return existing_handler
+        handler = self._create_agent_handler(agent_name, fallback_config)
+        self._setup_agent_circuit_breaker(agent_name)
+        self._initialize_agent_status(agent_name)
+        logger.info(f"Registered agent {agent_name} with fallback coordinator")
+        return handler
+
+    def _check_existing_agent(self, agent_name: str) -> Optional[LLMFallbackHandler]:
+        """Check if agent is already registered and return existing handler."""
         if agent_name in self.agent_handlers:
             logger.warning(f"Agent {agent_name} already registered, returning existing handler")
             return self.agent_handlers[agent_name]
-        
-        # Create fallback handler
+        return None
+
+    def _create_agent_handler(self, agent_name: str, 
+                             fallback_config: Optional[FallbackConfig]) -> LLMFallbackHandler:
+        """Create and store fallback handler for agent."""
         config = fallback_config or self._get_default_fallback_config()
         handler = LLMFallbackHandler(config)
         self.agent_handlers[agent_name] = handler
-        
-        # Create circuit breaker
+        return handler
+
+    def _setup_agent_circuit_breaker(self, agent_name: str) -> None:
+        """Setup circuit breaker for agent."""
         cb_config = CircuitBreakerConfig(
             failure_threshold=3,
             recovery_timeout=60.0,
@@ -56,8 +72,9 @@ class FallbackCoordinator:
         )
         circuit_breaker = CircuitBreaker(cb_config)
         self.agent_circuit_breakers[agent_name] = circuit_breaker
-        
-        # Initialize status
+
+    def _initialize_agent_status(self, agent_name: str) -> None:
+        """Initialize status tracking for agent."""
         self.agent_statuses[agent_name] = AgentFallbackStatus(
             agent_name=agent_name,
             circuit_breaker_open=False,
@@ -66,9 +83,6 @@ class FallbackCoordinator:
             last_failure_time=None,
             health_score=1.0
         )
-        
-        logger.info(f"Registered agent {agent_name} with fallback coordinator")
-        return handler
     
     def _get_default_fallback_config(self) -> FallbackConfig:
         """Get default fallback configuration"""
@@ -151,19 +165,35 @@ class FallbackCoordinator:
         """Reset status for a specific agent"""
         if agent_name not in self.agent_statuses:
             return False
-        
-        # Reset circuit breaker
+        self._reset_agent_components(agent_name)
+        self._reset_agent_status_data(agent_name)
+        logger.info(f"Reset fallback status for agent {agent_name}")
+        return True
+    
+    def _reset_agent_components(self, agent_name: str) -> None:
+        """Reset circuit breaker and handler for agent."""
+        self._reset_agent_circuit_breaker(agent_name)
+        self._reset_agent_handler(agent_name)
+    
+    def _reset_agent_circuit_breaker(self, agent_name: str) -> None:
+        """Reset circuit breaker for agent."""
         cb = self.agent_circuit_breakers.get(agent_name)
         if cb:
             cb.reset()
-        
-        # Reset handler
+    
+    def _reset_agent_handler(self, agent_name: str) -> None:
+        """Reset handler for agent."""
         handler = self.agent_handlers.get(agent_name)
         if handler:
             handler.reset_circuit_breakers()
-        
-        # Reset status
-        self.agent_statuses[agent_name] = AgentFallbackStatus(
+    
+    def _reset_agent_status_data(self, agent_name: str) -> None:
+        """Reset status data for agent."""
+        self.agent_statuses[agent_name] = self._create_fresh_agent_status(agent_name)
+    
+    def _create_fresh_agent_status(self, agent_name: str) -> AgentFallbackStatus:
+        """Create fresh agent status instance."""
+        return AgentFallbackStatus(
             agent_name=agent_name,
             circuit_breaker_open=False,
             recent_failures=0,
@@ -171,9 +201,6 @@ class FallbackCoordinator:
             last_failure_time=None,
             health_score=1.0
         )
-        
-        logger.info(f"Reset fallback status for agent {agent_name}")
-        return True
     
     async def reset_system_status(self) -> None:
         """Reset entire system fallback status"""

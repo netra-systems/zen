@@ -68,6 +68,42 @@ Always edit the existing file or create a new file and delete the old if it's no
 - Each module must have clear interface and single purpose
 - It's okay to have many modules.
 
+## 🔴 AGENT NAMING CONVENTIONS (MANDATORY)
+**CRITICAL**: Use precise naming to prevent confusion and ensure clear component identification
+
+### Component Naming Rules:
+**MANDATORY**: Follow these naming patterns to distinguish between component types
+
+1. **"Agent" suffix**: ONLY for LLM-based SubAgents extending BaseSubAgent
+   - ✅ TriageSubAgent, DataSubAgent, ReportingSubAgent
+   - ❌ Never use for utilities or services
+   - **Business Value**: Clear distinction ensures proper agent scaling and billing
+
+2. **"Executor/Manager" suffix**: For infrastructure patterns
+   - ✅ BroadcastExecutor, ExecutionManager, MCPManager
+   - Focus: Reliability, monitoring, infrastructure
+   - **Business Value**: Separates core business logic from infrastructure
+
+3. **"Service" suffix**: For specialized processors
+   - ✅ GitHubAnalyzerService, DemoService
+   - Focus: Task-specific operations
+   - **Business Value**: Modular services enable targeted feature monetization
+
+4. **Utility naming**: Descriptive names without "Agent"
+   - ✅ ToolDispatcher, StateManager, ErrorHandler
+   - ❌ Never append "Agent" to utilities
+   - **Business Value**: Clear separation prevents architectural confusion
+
+**ENFORCEMENT**: These naming conventions are MANDATORY for all new development and must be followed during refactoring.
+
+## AI Factory Productivity
+- The system is built by Agents (LLM based) based on XML specs.
+- WHENEVER REASONABLE: Use "Tasks" system to spawn new agents as needed.
+- NEWLY SPAWNED AGENTS MUST SCOPE WORK TO RETURN SINGLE UNIT OF WORK BACK TO YOU (MASTER)
+- Assume that other agents are working along side and aim to do one atomic unit of work at a time
+- Think about managing context and AI Factory Productivity
+
+
 ## Project Overview
 **Netra Apex AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
 
@@ -86,14 +122,11 @@ prioritizing the conversion of free users to paid tiers.
 
 ```
 root/
+├── agent_to_agent/           # Agent communication reports
+├── agent_to_agent_status_updates/ # Status update reports
 ├── app/                      # Main backend application
-│   ├── agents/              # AI agent implementations
-│   │   ├── admin_tool_dispatcher/   # Admin tool dispatch modules
-│   │   ├── corpus_admin/            # Corpus administration agents
-│   │   ├── data_sub_agent/          # Data processing sub-agents
-│   │   ├── supervisor/              # Supervisor agent modules
-│   │   ├── supply_researcher/       # Supply research agents
-│   │   └── triage_sub_agent/        # Triage sub-agent modules
+│   ├── agents/              # AI agent implementations (consolidated modules)
+│   ├── agent_to_agent/      # Agent-to-agent communication reports
 │   ├── auth/                # Authentication & authorization
 │   ├── auth_integration/    # SHARED AUTH SERVICE (MANDATORY USE)
 │   ├── core/                # Core utilities & exceptions
@@ -120,7 +153,11 @@ root/
 │   │   └── metrics/               # Metrics collection
 │   ├── startup_checks/      # Startup validation modules
 │   ├── tests/               # Backend test suite
+│   │   ├── auth_integration/      # Auth integration tests
+│   │   ├── config/                # Test configuration
+│   │   ├── critical/              # Critical path tests
 │   │   ├── e2e/                   # End-to-end tests
+│   │   ├── integration/           # Integration tests
 │   │   └── unit/                  # Unit tests
 │   ├── websocket/           # WebSocket management
 │   │   ├── connection.py          # Connection handling
@@ -157,15 +194,21 @@ root/
 │   └── comprehensive_reporter.py  # Test reporting (single source of truth)
 │
 ├── SPEC/                    # Specification documents
+│   ├── learnings/           # Modular learnings by category
+│   │   ├── index.xml              # Master index of learnings
+│   │   ├── testing.xml            # Testing-related learnings
+│   │   ├── startup.xml            # Startup and initialization
+│   │   ├── critical_tests_implementation.xml # Critical test insights
+│   │   └── *.xml                  # Category-specific learnings
 │   ├── type_safety.xml      # Type safety rules
 │   ├── conventions.xml      # Coding conventions
-│   ├── learnings.xml        # Documented learnings
 │   └── *.xml                # Other spec files
 │
 ├── docs/                    # Documentation
 │   ├── API_DOCUMENTATION.md
 │   ├── ARCHITECTURE.md
-│   └── TESTING_GUIDE.md
+│   ├── TESTING_GUIDE.md
+│   └── USER_GUIDE.md        # User guide documentation
 │
 ├── terraform-gcp/           # GCP infrastructure as code
 ├── terraform-dev-postgres/  # PostgreSQL dev setup
@@ -191,6 +234,29 @@ root/
 python scripts/dev_launcher.py # Start dev
 python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
 ```
+
+## 🚀 DEPLOYMENT COMMANDS (GCP Staging)
+```bash
+# First-time setup (one-time only)
+gcloud auth login  # Authenticate yourself first
+.\setup-staging-auth.ps1  # Creates service account & key
+
+# Deploy to staging
+.\deploy-staging-reliable.ps1
+
+# Deployment options
+.\deploy-staging-reliable.ps1 -SkipHealthChecks  # Skip health checks
+.\deploy-staging-reliable.ps1 -BuildOnly         # Build images only
+.\deploy-staging-reliable.ps1 -DeployOnly        # Deploy pre-built images
+
+# If auth issues occur
+.\setup-staging-auth.ps1 -ForceNewKey  # Regenerate service account key
+```
+
+**CRITICAL**: Use ONLY `deploy-staging-reliable.ps1` for deployments. This script:
+- ✅ Uses service account (never expires)
+- ✅ Auto-retries on failures
+- ✅ Self-heals authentication issues
 
 ## 🧪 UNIFIED TEST RUNNER (test_runner.py)
 **SINGLE AUTHORITATIVE TEST RUNNER** - Do not create alternatives
@@ -316,6 +382,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 ### Critical Specs - ALWAYS CONSULT FIRST
 | Spec | Purpose | When |
 |------|---------|------|
+| [`learnings/index.xml`](SPEC/learnings/index.xml) | **#0 PRIORITY** - Master index of all learnings | ALWAYS check first |
 | [`type_safety.xml`](SPEC/type_safety.xml) | **#1 PRIORITY** - Type safety, duplicate-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | **#2 PRIORITY** - Standards, 300-line limit | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | **#3 PRIORITY** - Change checklist | BEFORE changes |
@@ -325,12 +392,14 @@ Ensures every feature directly creates and captures value proportional to a cust
 ### Domain Specs
 | Domain | Key Specs |
 |--------|-----------|
-| **Testing** | [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml) |
+| **Testing** | [`testing.xml`](SPEC/testing.xml), [`coverage_requirements.xml`](SPEC/coverage_requirements.xml), [`learnings/testing.xml`](SPEC/learnings/testing.xml) |
 | **Database** | [`clickhouse.xml`](SPEC/clickhouse.xml), [`postgres.xml`](SPEC/postgres.xml) |
 | **WebSocket** | [`websockets.xml`](SPEC/websockets.xml), [`websocket_communication.xml`](SPEC/websocket_communication.xml) |
 | **Security** | [`security.xml`](SPEC/security.xml), [`PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml) |
 | **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - **CRITICAL: Check permissions first!** |
-| **⚠️ LEARNINGS** | [`learnings/index.xml`](SPEC/learnings/index.xml) - **ALWAYS CHECK FIRST - Modular learnings by category** |
+| **⚠️ LEARNINGS** | [`learnings/`](SPEC/learnings/) - **Directory of modular learnings by category** |
+| **Startup** | [`learnings/startup.xml`](SPEC/learnings/startup.xml) - Startup and initialization insights |
+| **Critical Tests** | [`learnings/critical_tests_implementation.xml`](SPEC/learnings/critical_tests_implementation.xml) - Critical test patterns |
 
 ## ⚠️ CRITICAL RULES (Memorize These)
 
@@ -369,6 +438,10 @@ Ensures every feature directly creates and captures value proportional to a cust
 - async/await for ALL I/O
 - Database via repositories only
 - NetraException for errors
+
+
+### Complex Debugging:
+- Use Root Cause Analysis (5 Whys)
 
 ### COMPLEX CODING: MULTI STEP PLAN Process
 MUST FOLLOW THIS:

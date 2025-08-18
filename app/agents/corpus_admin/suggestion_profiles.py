@@ -8,25 +8,39 @@ extracted from suggestions.py to maintain 300-line limit.
 from typing import Dict, Any, List
 
 
+def _get_performance_optimization_rules() -> Dict[str, Any]:
+    """Get performance optimization rules."""
+    return {
+        "batch_size": {"value": 256, "impact": "Higher throughput"},
+        "concurrency": {"value": 20, "impact": "Parallel processing"},
+        "compression": {"value": "lz4", "impact": "Fast compression"}
+    }
+
+
+def _get_quality_optimization_rules() -> Dict[str, Any]:
+    """Get quality optimization rules."""
+    return {
+        "error_rate": {"value": 0.001, "impact": "High accuracy"},
+        "validation": {"value": True, "impact": "Data integrity"},
+        "sampling_rate": {"value": 1.0, "impact": "Complete data"}
+    }
+
+
+def _get_balanced_optimization_rules() -> Dict[str, Any]:
+    """Get balanced optimization rules."""
+    return {
+        "batch_size": {"value": 128, "impact": "Balanced load"},
+        "error_rate": {"value": 0.01, "impact": "Acceptable accuracy"},
+        "concurrency": {"value": 10, "impact": "Moderate parallelism"}
+    }
+
+
 def get_optimization_rules() -> Dict[str, Dict[str, Any]]:
     """Initialize optimization rules for different focuses"""
-    return {
-        "performance": {
-            "batch_size": {"value": 256, "impact": "Higher throughput"},
-            "concurrency": {"value": 20, "impact": "Parallel processing"},
-            "compression": {"value": "lz4", "impact": "Fast compression"}
-        },
-        "quality": {
-            "error_rate": {"value": 0.001, "impact": "High accuracy"},
-            "validation": {"value": True, "impact": "Data integrity"},
-            "sampling_rate": {"value": 1.0, "impact": "Complete data"}
-        },
-        "balanced": {
-            "batch_size": {"value": 128, "impact": "Balanced load"},
-            "error_rate": {"value": 0.01, "impact": "Acceptable accuracy"},
-            "concurrency": {"value": 10, "impact": "Moderate parallelism"}
-        }
-    }
+    performance_rules = _get_performance_optimization_rules()
+    quality_rules = _get_quality_optimization_rules()
+    balanced_rules = _get_balanced_optimization_rules()
+    return {"performance": performance_rules, "quality": quality_rules, "balanced": balanced_rules}
 
 
 def get_domain_profiles() -> Dict[str, Dict[str, Any]]:
@@ -34,6 +48,10 @@ def get_domain_profiles() -> Dict[str, Dict[str, Any]]:
     fintech_profile = _get_fintech_profile()
     healthcare_profile = _get_healthcare_profile()
     ecommerce_profile = _get_ecommerce_profile()
+    return _build_domain_profiles_dict(fintech_profile, healthcare_profile, ecommerce_profile)
+
+def _build_domain_profiles_dict(fintech_profile: Dict[str, Any], healthcare_profile: Dict[str, Any], ecommerce_profile: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """Build domain profiles dictionary."""
     return {
         "fintech": fintech_profile,
         "healthcare": healthcare_profile,
@@ -73,6 +91,10 @@ def get_workload_optimizations() -> Dict[str, Dict[str, Any]]:
     ml_optimizations = _get_machine_learning_optimizations()
     web_optimizations = _get_web_services_optimizations()
     data_optimizations = _get_data_processing_optimizations()
+    return _build_workload_optimizations_dict(ml_optimizations, web_optimizations, data_optimizations)
+
+def _build_workload_optimizations_dict(ml_optimizations: Dict[str, Any], web_optimizations: Dict[str, Any], data_optimizations: Dict[str, Any]) -> Dict[str, Dict[str, Any]]:
+    """Build workload optimizations dictionary."""
     return {
         "machine_learning": ml_optimizations,
         "web_services": web_optimizations,
@@ -130,12 +152,20 @@ def get_category_options(category: str) -> List[str]:
 def apply_domain_rules(config: Dict, domain: str) -> Dict[str, Any]:
     """Apply domain-specific business rules"""
     if domain == "fintech":
-        config["audit_logging"] = True
-        config["encryption"] = config.get("encryption", "AES-256")
+        _apply_fintech_rules(config)
     elif domain == "healthcare":
-        config["anonymization"] = True
-        config["retention"] = config.get("retention", "7y")
+        _apply_healthcare_rules(config)
     return config
+
+def _apply_fintech_rules(config: Dict) -> None:
+    """Apply fintech-specific business rules."""
+    config["audit_logging"] = True
+    config["encryption"] = config.get("encryption", "AES-256")
+
+def _apply_healthcare_rules(config: Dict) -> None:
+    """Apply healthcare-specific business rules."""
+    config["anonymization"] = True
+    config["retention"] = config.get("retention", "7y")
 
 
 def merge_domain_settings(config: Dict, domain_settings: Dict) -> Dict[str, Any]:

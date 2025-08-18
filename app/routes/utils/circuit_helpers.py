@@ -8,15 +8,19 @@ def _circuit_matches_keywords(name: str, keywords: List[str]) -> bool:
     return any(keyword in name.lower() for keyword in keywords)
 
 
+def _build_filtered_circuits_dict(all_circuits: Dict[str, Dict[str, Any]], keywords: List[str]) -> Dict[str, Dict[str, Any]]:
+    """Build filtered circuits dictionary."""
+    return {
+        name: status for name, status in all_circuits.items()
+        if _circuit_matches_keywords(name, keywords)
+    }
+
 def filter_circuits_by_keywords(
     all_circuits: Dict[str, Dict[str, Any]], 
     keywords: List[str]
 ) -> Dict[str, Dict[str, Any]]:
     """Filter circuits by keywords."""
-    return {
-        name: status for name, status in all_circuits.items()
-        if _circuit_matches_keywords(name, keywords)
-    }
+    return _build_filtered_circuits_dict(all_circuits, keywords)
 
 
 def filter_llm_circuits(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
@@ -48,15 +52,19 @@ def _get_categorized_circuit_names(service_health: Dict[str, Dict[str, Any]]) ->
     return categorized_names
 
 
+def _filter_uncategorized_items(all_status: Dict[str, Dict[str, Any]], categorized_names: set) -> Dict[str, Any]:
+    """Filter items not in categorized names."""
+    return {
+        name: status for name, status in all_status.items()
+        if name not in categorized_names
+    }
+
 def _get_uncategorized_circuits(
     all_status: Dict[str, Dict[str, Any]], 
     categorized_names: set
 ) -> Dict[str, Any]:
     """Get circuits not in any category."""
-    return {
-        name: status for name, status in all_status.items()
-        if name not in categorized_names
-    }
+    return _filter_uncategorized_items(all_status, categorized_names)
 
 
 def _build_initial_categories(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
@@ -77,14 +85,19 @@ def categorize_circuits(all_status: Dict[str, Dict[str, Any]]) -> Dict[str, Dict
     return service_health
 
 
-def build_service_summary(service_health: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
-    """Build service health summary."""
+def _build_service_entry(service: str, circuits: Dict[str, Any]) -> Dict[str, Any]:
+    """Build single service entry."""
     from .response_builders import _assess_service_health
     return {
-        service: {
-            "circuit_count": len(circuits),
-            "overall_health": _assess_service_health(circuits),
-            "circuits": circuits
-        }
+        "circuit_count": len(circuits),
+        "overall_health": _assess_service_health(circuits),
+        "circuits": circuits
+    }
+
+
+def build_service_summary(service_health: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    """Build service health summary."""
+    return {
+        service: _build_service_entry(service, circuits)
         for service, circuits in service_health.items()
     }

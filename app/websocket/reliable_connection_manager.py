@@ -79,18 +79,34 @@ class ReliableConnectionManager:
     
     def _initialize_specialized_managers(self) -> None:
         """Initialize specialized manager components."""
+        self._create_lifecycle_manager()
+        self._create_message_handler_manager()
+        self._create_cleanup_monitor()
+        self._create_user_tracker()
+    
+    def _create_lifecycle_manager(self) -> None:
+        """Create connection lifecycle manager."""
         self.lifecycle_manager = ConnectionLifecycleManager(
             self.connection_manager, self.heartbeat_manager, self.reliability,
             self.user_connections, self.connection_timeouts, self.stats, self.connection_timeout
         )
+    
+    def _create_message_handler_manager(self) -> None:
+        """Create message handler manager."""
         self.message_handler_manager = ConnectionMessageHandler(
             self.connection_manager, self.message_handler, self.message_router,
             self.reliability, self.connection_timeouts, self.connection_timeout
         )
+    
+    def _create_cleanup_monitor(self) -> None:
+        """Create connection cleanup monitor."""
         self.cleanup_monitor = ConnectionCleanupMonitor(
             self.connection_manager, self.heartbeat_manager, self.error_handler,
             self.connection_timeouts, self.stats, self.cleanup_interval
         )
+    
+    def _create_user_tracker(self) -> None:
+        """Create connection user tracker."""
         self.user_tracker = ConnectionUserTracker(
             self.connection_manager, self.max_connections_per_user
         )
@@ -102,26 +118,50 @@ class ReliableConnectionManager:
     
     async def start(self):
         """Start the reliable connection manager."""
-        if self._running:
+        if self._is_already_running():
             return
+        self._start_background_services()
+        self._log_startup_success()
+    
+    def _is_already_running(self) -> bool:
+        """Check if manager is already running."""
+        return self._running
+    
+    def _start_background_services(self) -> None:
+        """Start background services and tasks."""
         self._running = True
         self._cleanup_task = asyncio.create_task(
             self.cleanup_monitor.cleanup_loop(
                 lambda: self._running, self.remove_connection
             )
         )
+    
+    def _log_startup_success(self) -> None:
+        """Log successful startup."""
         logger.info("ReliableConnectionManager started")
     
     async def stop(self):
         """Stop the reliable connection manager."""
-        if not self._running:
+        if self._is_already_stopped():
             return
+        await self._shutdown_all_services()
+        self._log_shutdown_success()
+    
+    def _is_already_stopped(self) -> bool:
+        """Check if manager is already stopped."""
+        return not self._running
+    
+    async def _shutdown_all_services(self) -> None:
+        """Shutdown all services and connections."""
         self._running = False
         await self._stop_background_tasks()
         await self.heartbeat_manager.shutdown_all_heartbeats()
         await self.cleanup_monitor.close_all_connections(
             self.user_connections, self.connection_timeouts
         )
+    
+    def _log_shutdown_success(self) -> None:
+        """Log successful shutdown."""
         logger.info("ReliableConnectionManager stopped")
     
     async def _stop_background_tasks(self) -> None:

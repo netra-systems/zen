@@ -23,13 +23,21 @@ def create_security_headers_middleware(environment: Optional[str] = None) -> Sec
 async def handle_csp_violation_report(request: Request, middleware: SecurityHeadersMiddleware) -> Dict[str, str]:
     """Handle CSP violation reports."""
     try:
-        violation_data = await request.json()
-        csp_report = violation_data.get("csp-report", {})
-        middleware.handle_csp_violation(csp_report)
-        return {"status": "received"}
+        return await _process_csp_violation(request, middleware)
     except Exception as e:
-        logger.error(f"Error handling CSP violation report: {e}")
-        return {"status": "error", "message": str(e)}
+        return _handle_csp_violation_error(e)
+
+async def _process_csp_violation(request: Request, middleware: SecurityHeadersMiddleware) -> Dict[str, str]:
+    """Process CSP violation report."""
+    violation_data = await request.json()
+    csp_report = violation_data.get("csp-report", {})
+    middleware.handle_csp_violation(csp_report)
+    return {"status": "received"}
+
+def _handle_csp_violation_error(error: Exception) -> Dict[str, str]:
+    """Handle CSP violation processing error."""
+    logger.error(f"Error handling CSP violation report: {error}")
+    return {"status": "error", "message": str(error)}
 
 
 # Global instance (to be initialized by app factory)

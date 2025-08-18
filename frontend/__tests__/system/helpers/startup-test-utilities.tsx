@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../test-utils/providers';
+import { AllTheProviders as TestProviders } from '../../utils/test-utils';
 
 // Mock Environment Variables
 export const mockEnv = {

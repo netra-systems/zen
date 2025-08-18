@@ -63,6 +63,14 @@ export const useAgentUpdates = (options: UseAgentUpdatesOptions = {}): UseAgentU
   // Stream Event Handlers
   // ============================================
 
+  // Use refs to store latest callbacks to avoid dependency issues
+  const onUpdateRef = useRef(onUpdate);
+  const onBatchRef = useRef(onBatch);
+  
+  // Update refs when callbacks change
+  onUpdateRef.current = onUpdate;
+  onBatchRef.current = onBatch;
+
   const handleStreamBatch = useCallback((batch: StreamBatch) => {
     const filteredUpdates = filterUpdatesForAgent(batch.updates, agentId);
     
@@ -75,12 +83,12 @@ export const useAgentUpdates = (options: UseAgentUpdatesOptions = {}): UseAgentU
       streamMetrics: agentUpdateStream.getMetrics()
     }));
     
-    // Trigger callbacks
-    filteredUpdates.forEach(update => onUpdate?.(update));
-    onBatch?.(batch);
+    // Trigger callbacks using refs
+    filteredUpdates.forEach(update => onUpdateRef.current?.(update));
+    onBatchRef.current?.(batch);
     
     logBatchProcessing(batch, filteredUpdates.length);
-  }, [agentId, batchSize, onUpdate, onBatch]);
+  }, [agentId, batchSize]);
 
   // ============================================
   // Stream Controls
@@ -168,15 +176,15 @@ export const useAgentUpdates = (options: UseAgentUpdatesOptions = {}): UseAgentU
     return () => {
       stopStreaming();
     };
-  }, [startStreaming, stopStreaming]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-restart when agentId changes
+  // Auto-restart when agentId changes  
   useEffect(() => {
     if (subscriptionIdRef.current) {
       stopStreaming();
       startStreaming();
     }
-  }, [agentId]);
+  }, [agentId, stopStreaming, startStreaming]);
 
   // ============================================
   // Return Interface

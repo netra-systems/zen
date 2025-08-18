@@ -248,15 +248,15 @@ export const debugLayerVisibility = (
   
   const result = calculateEnhancedLayerVisibility(config);
   
-  console.group('Layer Visibility Debug');
-  console.log('Fast Layer:', result.showFastLayer, '-', result.fastLayerReason);
-  console.log('Medium Layer:', result.showMediumLayer, '-', result.mediumLayerReason);
-  console.log('Slow Layer:', result.showSlowLayer, '-', result.slowLayerReason);
-  console.log('Data:', {
+  logger.group('Layer Visibility Debug');
+  logger.debug('Fast Layer:', result.showFastLayer, '-', result.fastLayerReason);
+  logger.debug('Medium Layer:', result.showMediumLayer, '-', result.mediumLayerReason);
+  logger.debug('Slow Layer:', result.showSlowLayer, '-', result.slowLayerReason);
+  logger.debug('Data:', {
     fast: config.fastLayerData,
     medium: config.mediumLayerData,
     slow: config.slowLayerData,
     processing: config.isProcessing
   });
-  console.groupEnd();
+  logger.groupEnd();
 };

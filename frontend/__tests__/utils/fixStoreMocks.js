@@ -47,7 +47,7 @@ function fixFile(filePath) {
   
   if (modified) {
     fs.writeFileSync(filePath, content, 'utf8');
-    console.log(`Fixed: ${path.basename(filePath)}`);
+    // test debug removed: console.log(`Fixed: ${path.basename(filePath)}`);
     return true;
   }
   
@@ -62,7 +62,7 @@ const testFiles = [
   'C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/frontend/__tests__/chat/chatUIUXCore.test.tsx',
 ];
 
-console.log('Fixing store mock references in test files...\n');
+// test debug removed: console.log('Fixing store mock references in test files...\n');
 
 let fixedCount = 0;
 testFiles.forEach(file => {
@@ -71,8 +71,8 @@ testFiles.forEach(file => {
       fixedCount++;
     }
   } else {
-    console.log(`File not found: ${path.basename(file)}`);
+    // test debug removed: console.log(`File not found: ${path.basename(file)}`);
   }
 });
 
-console.log(`\nFixed ${fixedCount} files.`);
+// test debug removed: console.log(`\nFixed ${fixedCount} files.`);

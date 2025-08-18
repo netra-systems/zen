@@ -55,7 +55,7 @@ class TestAgentE2ECriticalCore(AgentE2ETestBase):
                 message = first_call[0][1] if isinstance(first_call[0][1], dict) else first_call[0][0]
                 if isinstance(message, dict) and "type" in message:
                     # Be flexible about message types since different methods may send different types
-                    assert message["type"] in ["agent_started", "sub_agent_update", "agent_log", "agent_fallback"]
+                    assert message["type"] in ["agent_started", "sub_agent_update", "agent_log", "agent_fallback", "agent_completed"]
         
         # Verify all sub-agents were created
         if hasattr(supervisor, '_impl') and supervisor._impl:

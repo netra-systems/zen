@@ -113,12 +113,16 @@ class AlertManager:
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop that evaluates alert rules."""
         while self._running:
-            try:
-                await self._do_monitoring_cycle()
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                await self._handle_monitoring_error(e)
+            await self._execute_monitoring_iteration()
+
+    async def _execute_monitoring_iteration(self) -> None:
+        """Execute single monitoring iteration."""
+        try:
+            await self._do_monitoring_cycle()
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            await self._handle_monitoring_error(e)
 
     async def _handle_monitoring_error(self, error: Exception) -> None:
         """Handle monitoring loop error."""
@@ -223,13 +227,20 @@ class AlertManager:
         message: str
     ) -> Alert:
         """Build alert instance with all required fields."""
-        return Alert(
-            alert_id=alert_id, rule_id=rule.rule_id, level=rule.level,
-            title=rule.name, message=message, timestamp=datetime.now(UTC),
-            agent_name=agent_name, metric_name=rule.rule_id,
-            current_value=current_value, threshold_value=rule.threshold_value,
-            metadata=self._create_alert_metadata(rule)
-        )
+        alert_data = self._prepare_alert_data(alert_id, rule, current_value, agent_name, message)
+        return Alert(**alert_data)
+
+    def _prepare_alert_data(
+        self, alert_id: str, rule: AlertRule, current_value: Optional[float], agent_name: Optional[str], message: str
+    ) -> Dict[str, Any]:
+        """Prepare alert data dictionary for Alert constructor."""
+        return {
+            "alert_id": alert_id, "rule_id": rule.rule_id, "level": rule.level,
+            "title": rule.name, "message": message, "timestamp": datetime.now(UTC),
+            "agent_name": agent_name, "metric_name": rule.rule_id,
+            "current_value": current_value, "threshold_value": rule.threshold_value,
+            "metadata": self._create_alert_metadata(rule)
+        }
 
     def _create_alert_metadata(self, rule: AlertRule) -> Dict[str, str]:
         """Create metadata for alert."""
@@ -251,7 +262,10 @@ class AlertManager:
     def _extract_agent_alert_values(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> tuple:
         """Extract alert values for agent-specific rules."""
         agent_metrics = metrics_data.get("agent_metrics", {})
-        
+        return self._find_matching_agent_values(rule, agent_metrics)
+
+    def _find_matching_agent_values(self, rule: AlertRule, agent_metrics: Dict[str, Any]) -> tuple:
+        """Find agent metrics that match the rule condition."""
         for agent_name, metrics in agent_metrics.items():
             if self._check_agent_rule_match(rule, metrics):
                 value = self.rule_evaluator.get_metric_value_for_rule(rule.rule_id, metrics)
@@ -283,9 +297,8 @@ class AlertManager:
     ) -> str:
         """Append metric details to base message."""
         if current_value is not None:
-            base_msg += self._format_metric_details(
-                current_value, agent_name, rule.threshold_value
-            )
+            details = self._format_metric_details(current_value, agent_name, rule.threshold_value)
+            return base_msg + details
         return base_msg
 
     def _format_metric_details(
@@ -360,9 +373,13 @@ class AlertManager:
 
     def _build_summary_dict(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
         """Build summary dictionary with all status information."""
+        alert_info = {"active_alerts": active_count, "alerts_by_level": level_counts}
+        system_info = self._get_system_summary_info()
+        return {**alert_info, **system_info}
+
+    def _get_system_summary_info(self) -> Dict[str, Any]:
+        """Get system summary information for alert manager."""
         return {
-            "active_alerts": active_count,
-            "alerts_by_level": level_counts,
             "suppressed_rules": len(self.suppressed_rules),
             "total_rules": len(self.alert_rules),
             "enabled_rules": self._count_enabled_rules(),

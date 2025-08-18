@@ -1,7 +1,7 @@
 """
 User Plan Management for Unified Tools API
 """
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
@@ -36,20 +36,42 @@ async def get_usage_summary(current_user: User, db: AsyncSession) -> Dict[str, A
     }
 
 
+def get_plan_expiration_date(current_user: User) -> Optional[str]:
+    """Get formatted plan expiration date."""
+    if current_user.plan_expires_at:
+        return current_user.plan_expires_at.isoformat()
+    return None
+
+
+def get_plan_features(current_plan_def) -> List[str]:
+    """Get plan features list."""
+    if current_plan_def:
+        return current_plan_def.features.permissions
+    return []
+
+
+def create_plan_response_params(
+    current_user: User, current_plan_def,
+    available_upgrades: List[str], usage_summary: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Create plan response parameters."""
+    return {
+        "current_plan": current_user.plan_tier,
+        "plan_expires_at": get_plan_expiration_date(current_user),
+        "features": get_plan_features(current_plan_def),
+        "available_upgrades": available_upgrades, "usage_summary": usage_summary
+    }
+
+
 def build_user_plan_response(
-    current_user: User, 
-    current_plan_def, 
-    available_upgrades: List[str], 
-    usage_summary: Dict[str, Any]
+    current_user: User, current_plan_def, 
+    available_upgrades: List[str], usage_summary: Dict[str, Any]
 ) -> UserPlanResponse:
     """Build user plan response."""
-    return UserPlanResponse(
-        current_plan=current_user.plan_tier,
-        plan_expires_at=current_user.plan_expires_at.isoformat() if current_user.plan_expires_at else None,
-        features=current_plan_def.features.permissions if current_plan_def else [],
-        available_upgrades=available_upgrades,
-        usage_summary=usage_summary
+    params = create_plan_response_params(
+        current_user, current_plan_def, available_upgrades, usage_summary
     )
+    return UserPlanResponse(**params)
 
 
 async def gather_user_plan_data(current_user: User, db: AsyncSession):

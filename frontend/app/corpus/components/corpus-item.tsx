@@ -28,7 +28,7 @@ export const CorpusItemRow = ({
       <ItemContent 
         item={item}
         depth={depth}
-        hasChildren={hasChildren}
+        hasChildren={hasChildren ?? false}
         isExpanded={isExpanded}
         isSelected={isSelected}
         onToggleExpand={onToggleExpand}
@@ -48,7 +48,7 @@ export const CorpusItemRow = ({
 
 const ItemContent = ({ 
   item, 
-  depth, 
+  depth = 0, 
   hasChildren, 
   isExpanded, 
   isSelected, 
@@ -136,7 +136,7 @@ const ItemActions = () => {
 
 const ChildrenContainer = ({ 
   item, 
-  depth, 
+  depth = 0, 
   onToggleExpand, 
   onToggleSelect 
 }: Omit<CorpusItemProps, 'isExpanded' | 'isSelected'>) => {

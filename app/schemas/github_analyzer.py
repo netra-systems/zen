@@ -1,6 +1,6 @@
-"""GitHub Analyzer Agent Schemas.
+"""GitHub Analyzer Service Schemas.
 
-Type definitions for GitHub code analysis agent.
+Type definitions for GitHub code analysis service.
 """
 
 from typing import Dict, List, Optional, Any

@@ -12,7 +12,7 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from datetime import datetime
 
@@ -47,7 +47,10 @@ class PerformanceMonitor:
         """Start performance monitoring."""
         if self._monitoring_active:
             return
-        
+        await self._start_monitoring_components()
+
+    async def _start_monitoring_components(self) -> None:
+        """Start all monitoring components."""
         await self.metrics_collector.start_collection()
         self._alert_task = asyncio.create_task(self._alert_monitoring_loop())
         self._monitoring_active = True
@@ -57,7 +60,10 @@ class PerformanceMonitor:
         """Stop performance monitoring."""
         if not self._monitoring_active:
             return
-        
+        await self._stop_monitoring_components()
+
+    async def _stop_monitoring_components(self) -> None:
+        """Stop all monitoring components."""
         self._monitoring_active = False
         await self._stop_alert_task()
         await self.metrics_collector.stop_collection()
@@ -75,25 +81,35 @@ class PerformanceMonitor:
     async def _alert_monitoring_loop(self) -> None:
         """Alert monitoring loop."""
         while self._monitoring_active:
-            try:
-                await self._alert_manager.check_alerts()
-                await asyncio.sleep(30)  # Check every 30 seconds
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Error in alert monitoring: {e}")
-                await asyncio.sleep(30)
+            await self._execute_alert_check_cycle()
+
+    async def _execute_alert_check_cycle(self) -> None:
+        """Execute single alert check cycle."""
+        try:
+            await self._alert_manager.check_alerts()
+            await asyncio.sleep(30)  # Check every 30 seconds
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            await self._handle_alert_error(e)
+
+    async def _handle_alert_error(self, error: Exception) -> None:
+        """Handle alert monitoring error."""
+        logger.error(f"Error in alert monitoring: {error}")
+        await asyncio.sleep(30)
     
     def get_performance_dashboard(self) -> Dict[str, Any]:
         """Get performance dashboard data."""
         dashboard_data = self._dashboard.get_dashboard_data()
-        
-        # Ensure required fields are present
+        enhanced_data = self._enhance_dashboard_data(dashboard_data)
+        return {**enhanced_data, **dashboard_data}
+
+    def _enhance_dashboard_data(self, dashboard_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Enhance dashboard data with required fields."""
         return {
             "timestamp": dashboard_data.get("timestamp", datetime.now().isoformat()),
             "system": self._get_system_metrics(),
-            "memory": self._get_memory_metrics(),
-            **dashboard_data
+            "memory": self._get_memory_metrics()
         }
     
     def _get_system_metrics(self) -> Dict[str, Any]:
@@ -108,7 +124,10 @@ class PerformanceMonitor:
         """Get memory performance metrics."""
         memory_metrics = self.metrics_collector.get_recent_metrics("system.memory_percent", 60)
         available_metrics = self.metrics_collector.get_recent_metrics("system.memory_available_mb", 60)
-        
+        return self._build_memory_metrics_dict(memory_metrics, available_metrics)
+
+    def _build_memory_metrics_dict(self, memory_metrics: List, available_metrics: List) -> Dict[str, Any]:
+        """Build memory metrics dictionary from collected metrics."""
         return {
             "usage_percent": memory_metrics[-1].value if memory_metrics else 0.0,
             "available_mb": available_metrics[-1].value if available_metrics else 0.0
@@ -126,12 +145,15 @@ class PerformanceMonitor:
     async def measure_operation(self, operation_name: str):
         """Context manager to measure operation performance."""
         start_time = asyncio.get_event_loop().time()
-        
         try:
             yield
         finally:
-            duration = asyncio.get_event_loop().time() - start_time
-            self._record_operation_metric(operation_name, duration)
+            await self._finalize_operation_measurement(operation_name, start_time)
+
+    async def _finalize_operation_measurement(self, operation_name: str, start_time: float) -> None:
+        """Finalize operation measurement and record metric."""
+        duration = asyncio.get_event_loop().time() - start_time
+        self._record_operation_metric(operation_name, duration)
     
     def _record_operation_metric(self, operation_name: str, duration: float) -> None:
         """Record operation performance metric."""

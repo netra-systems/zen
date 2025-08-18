@@ -245,37 +245,39 @@ class TestQualityRoute:
     
     def test_quality_report_generation(self, basic_test_client):
         """Test quality report generation."""
-        report_request = {
-            "period": "monthly",
-            "format": "json",
-            "include_charts": True,
-            "sections": ["summary", "trends", "alerts", "recommendations"]
-        }
         
-        with patch('app.services.quality_reporting.generate_report') as mock_report:
-            mock_report.return_value = {
-                "report_id": "report_456",
-                "generated_at": datetime.now(UTC).isoformat(),
-                "summary": {
+        with patch('app.routes.quality_handlers.handle_report_generation') as mock_report:
+            from app.schemas.quality_types import QualityReport, QualityReportType
+            
+            mock_report.return_value = QualityReport(
+                report_type=QualityReportType.SUMMARY,
+                generated_at=datetime.now(UTC),
+                generated_by="test_user",
+                period_days=7,
+                data={
                     "overall_quality_score": 89.5,
                     "total_requests": 50000,
                     "average_accuracy": 0.93
                 },
-                "recommendations": [
+                summary="Overall quality is good with room for improvement",
+                recommendations=[
                     "Consider increasing training data for low-confidence predictions",
                     "Optimize response time for peak usage hours"
                 ]
-            }
+            )
             
-            response = basic_test_client.post("/api/quality/reports", json=report_request)
+            response = basic_test_client.get("/api/quality/reports/generate?report_type=summary&period_days=7")
             
             if response.status_code in [200, 201]:
                 data = response.json()
-                assert "report_id" in data or "summary" in data
+                assert "report_type" in data
+                assert "generated_at" in data
+                assert "data" in data
                 
-                if "summary" in data:
-                    summary = data["summary"]
-                    if "overall_quality_score" in summary:
-                        assert 0 <= summary["overall_quality_score"] <= 100
+                # Check the data contains expected quality metrics
+                if "data" in data:
+                    report_data = data["data"]
+                    if "overall_quality_score" in report_data:
+                        assert 0 <= report_data["overall_quality_score"] <= 100
             else:
                 assert response.status_code in [404, 422, 401]

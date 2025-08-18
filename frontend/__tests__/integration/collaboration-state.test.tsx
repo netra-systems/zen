@@ -2,6 +2,49 @@
  * Collaboration and State Management Integration Tests
  */
 
+// Declare mocks first (Jest Module Hoisting)
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseAuthStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+const mockCreateWebSocketManager = jest.fn();
+
+// Mock hooks before imports
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// Mock AuthGate to always render children
+jest.mock('@/components/auth/AuthGate', () => {
+  return function MockAuthGate({ children }: { children: React.ReactNode }) {
+    return <>{children}</>;
+  };
+});
+
+// Mock WebSocket test manager
+jest.mock('../helpers/websocket-test-manager', () => ({
+  createWebSocketManager: mockCreateWebSocketManager,
+  WebSocketTestManager: jest.fn()
+}));
+
+// Now imports
 import React from 'react';
 import { render, waitFor, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -12,19 +55,72 @@ import { createWebSocketManager, WebSocketTestManager } from '../helpers/websock
 // Mock fetch
 global.fetch = jest.fn();
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn()
-};
+// Mock localStorage with proper implementation
+const localStorageMock = (() => {
+  let store: Record<string, string> = {};
+  return {
+    getItem: jest.fn((key: string) => store[key] || null),
+    setItem: jest.fn((key: string, value: string) => {
+      store[key] = value;
+    }),
+    removeItem: jest.fn((key: string) => {
+      delete store[key];
+    }),
+    clear: jest.fn(() => {
+      store = {};
+    }),
+    get length() {
+      return Object.keys(store).length;
+    },
+    key: jest.fn((index: number) => Object.keys(store)[index] || null)
+  };
+})();
 global.localStorage = localStorageMock as any;
 
 // WebSocket test manager
 let wsManager: WebSocketTestManager;
 
 beforeEach(() => {
+  // Setup hook mocks
+  mockUseUnifiedChatStore.mockReturnValue({
+    messages: [],
+    threads: [],
+    addMessage: jest.fn(),
+    updateThread: jest.fn()
+  });
+  
+  mockUseWebSocket.mockReturnValue({
+    sendMessage: jest.fn(),
+    isConnected: true,
+    connectionState: 'connected'
+  });
+  
+  mockUseAuthStore.mockReturnValue({
+    isAuthenticated: true,
+    user: { id: '1', email: 'test@example.com' }
+  });
+  
+  mockUseLoadingState.mockReturnValue({
+    isLoading: false,
+    setLoading: jest.fn()
+  });
+  
+  mockUseThreadNavigation.mockReturnValue({
+    currentThreadId: 'thread-1',
+    navigateToThread: jest.fn()
+  });
+  
+  // Setup WebSocket manager
+  const mockWsManager = {
+    setup: jest.fn(),
+    cleanup: jest.fn(),
+    sendMessage: jest.fn(),
+    getUrl: jest.fn(() => 'ws://localhost:8000/ws'),
+    waitForConnection: jest.fn(() => Promise.resolve())
+  };
+  
+  mockCreateWebSocketManager.mockReturnValue(mockWsManager);
+  
   try {
     wsManager = createWebSocketManager();
     wsManager.setup();
@@ -46,6 +142,10 @@ afterEach(() => {
   }
   jest.clearAllMocks();
   localStorageMock.clear();
+  // Reset localStorage mock call history
+  localStorageMock.getItem.mockClear();
+  localStorageMock.setItem.mockClear();
+  localStorageMock.removeItem.mockClear();
 });
 
 describe('Collaboration Features', () => {

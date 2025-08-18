@@ -54,7 +54,7 @@ async def test_llm_triage_processing(supervisor_agent, mock_llm_manager):
 
 def _setup_valid_json_response(mock_llm_manager):
     """Setup valid JSON response for testing"""
-    mock_llm_manager.ask_llm = pytest.AsyncMock(return_value=json.dumps({
+    mock_llm_manager.ask_llm = AsyncMock(return_value=json.dumps({
         "analysis": "Valid response",
         "recommendations": ["rec1", "rec2"]
     }))
@@ -70,7 +70,7 @@ async def _test_valid_json_parsing(mock_llm_manager):
 
 def _setup_invalid_json_response(mock_llm_manager):
     """Setup invalid JSON response for testing"""
-    mock_llm_manager.ask_llm = pytest.AsyncMock(return_value="Invalid JSON {")
+    mock_llm_manager.ask_llm = AsyncMock(return_value="Invalid JSON {")
 
 
 async def _test_invalid_json_handling(mock_llm_manager):
@@ -145,7 +145,7 @@ def _setup_message_capture(mock_websocket_manager):
     messages_sent = []
     async def capture_message(run_id, message):
         messages_sent.append((run_id, message))
-    mock_websocket_manager.send_message = pytest.AsyncMock(side_effect=capture_message)
+    mock_websocket_manager.send_message = AsyncMock(side_effect=capture_message)
     return messages_sent
 
 
@@ -181,7 +181,7 @@ async def _test_successful_tool_execution(mock_tool_dispatcher):
 
 def _setup_tool_error(mock_tool_dispatcher):
     """Setup tool dispatcher to raise error"""
-    mock_tool_dispatcher.dispatch_tool = pytest.AsyncMock(side_effect=Exception("Tool error"))
+    mock_tool_dispatcher.dispatch_tool = AsyncMock(side_effect=Exception("Tool error"))
 
 
 async def _test_tool_error_handling(mock_tool_dispatcher):
@@ -208,14 +208,14 @@ def _setup_persistence_mocks(supervisor_agent):
         else:
             return (True, "test_id")
     
-    supervisor_agent.state_persistence.save_agent_state = pytest.AsyncMock(side_effect=mock_save_agent_state)
-    supervisor_agent.state_persistence.load_agent_state = pytest.AsyncMock(return_value=None)
+    supervisor_agent.state_persistence.save_agent_state = AsyncMock(side_effect=mock_save_agent_state)
+    supervisor_agent.state_persistence.load_agent_state = AsyncMock(return_value=None)
 
 
 def _setup_additional_persistence_mocks(supervisor_agent):
     """Setup additional persistence mocks"""
-    supervisor_agent.state_persistence.get_thread_context = pytest.AsyncMock(return_value=None)
-    supervisor_agent.state_persistence.recover_agent_state = pytest.AsyncMock(return_value=(True, "recovery_id"))
+    supervisor_agent.state_persistence.get_thread_context = AsyncMock(return_value=None)
+    supervisor_agent.state_persistence.recover_agent_state = AsyncMock(return_value=(True, "recovery_id"))
 
 
 async def _run_persistence_test(supervisor_agent):
@@ -245,7 +245,7 @@ async def test_state_persistence(supervisor_agent):
 
 def _setup_pipeline_error(supervisor_agent):
     """Setup pipeline to raise error"""
-    supervisor_agent.engine.execute_pipeline = pytest.AsyncMock(
+    supervisor_agent.engine.execute_pipeline = AsyncMock(
         side_effect=Exception("Pipeline error")
     )
 

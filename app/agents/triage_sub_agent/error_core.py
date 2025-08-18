@@ -33,25 +33,38 @@ class TriageErrorHandler:
     
     def _create_intent_error_context(self, user_input: str, run_id: str, original_error: Exception) -> ErrorContext:
         """Create error context for intent detection errors."""
+        additional_data = self._build_intent_additional_data(user_input, original_error)
         return ErrorContext(
             agent_name="triage_sub_agent",
             operation_name="intent_detection",
             run_id=run_id,
-            additional_data={
-                'user_input': user_input[:200],  # Truncate for logging
-                'original_error': str(original_error)
-            }
+            additional_data=additional_data
         )
+    
+    def _build_intent_additional_data(self, user_input: str, original_error: Exception) -> Dict[str, Any]:
+        """Build additional data for intent error context."""
+        return {
+            'user_input': user_input[:200],  # Truncate for logging
+            'original_error': str(original_error)
+        }
     
     async def _process_intent_error_with_fallback(self, error: IntentDetectionError, user_input: str, run_id: str) -> Dict[str, Any]:
         """Process intent error with fallback handling."""
         try:
-            fallback_result = await self.recovery.fallback_intent_detection(user_input)
-            self.reporter.log_intent_recovery(run_id, fallback_result)
-            return fallback_result
+            return await self._execute_intent_fallback_recovery(user_input, run_id)
         except Exception:
-            await global_error_handler.handle_error(error, error.context)
-            raise error
+            await self._handle_intent_fallback_failure(error)
+    
+    async def _execute_intent_fallback_recovery(self, user_input: str, run_id: str) -> Dict[str, Any]:
+        """Execute intent fallback recovery."""
+        fallback_result = await self.recovery.fallback_intent_detection(user_input)
+        self.reporter.log_intent_recovery(run_id, fallback_result)
+        return fallback_result
+    
+    async def _handle_intent_fallback_failure(self, error: IntentDetectionError) -> None:
+        """Handle intent fallback failure."""
+        await global_error_handler.handle_error(error, error.context)
+        raise error
     
     async def handle_entity_extraction_error(
         self,
@@ -67,26 +80,39 @@ class TriageErrorHandler:
     
     def _create_entity_error_context(self, failed_entities: list, user_input: str, run_id: str, original_error: Exception) -> ErrorContext:
         """Create error context for entity extraction errors."""
+        additional_data = self._build_entity_additional_data(failed_entities, user_input, original_error)
         return ErrorContext(
             agent_name="triage_sub_agent",
             operation_name="entity_extraction",
             run_id=run_id,
-            additional_data={
-                'failed_entities': failed_entities,
-                'user_input': user_input[:200],  # Truncate for logging
-                'original_error': str(original_error)
-            }
+            additional_data=additional_data
         )
+    
+    def _build_entity_additional_data(self, failed_entities: list, user_input: str, original_error: Exception) -> Dict[str, Any]:
+        """Build additional data for entity error context."""
+        return {
+            'failed_entities': failed_entities,
+            'user_input': user_input[:200],  # Truncate for logging
+            'original_error': str(original_error)
+        }
     
     async def _process_entity_error_with_fallback(self, error: EntityExtractionError, failed_entities: list, user_input: str, run_id: str) -> Dict[str, Any]:
         """Process entity error with fallback handling."""
         try:
-            fallback_result = await self.recovery.fallback_entity_extraction(user_input, failed_entities)
-            self.reporter.log_entity_recovery(run_id, fallback_result)
-            return fallback_result
+            return await self._execute_entity_fallback_recovery(failed_entities, user_input, run_id)
         except Exception:
-            await global_error_handler.handle_error(error, error.context)
-            raise error
+            await self._handle_entity_fallback_failure(error)
+    
+    async def _execute_entity_fallback_recovery(self, failed_entities: list, user_input: str, run_id: str) -> Dict[str, Any]:
+        """Execute entity fallback recovery."""
+        fallback_result = await self.recovery.fallback_entity_extraction(user_input, failed_entities)
+        self.reporter.log_entity_recovery(run_id, fallback_result)
+        return fallback_result
+    
+    async def _handle_entity_fallback_failure(self, error: EntityExtractionError) -> None:
+        """Handle entity fallback failure."""
+        await global_error_handler.handle_error(error, error.context)
+        raise error
     
     async def handle_tool_recommendation_error(
         self,
@@ -102,26 +128,39 @@ class TriageErrorHandler:
     
     def _create_tool_error_context(self, intent: str, entities: Dict[str, Any], run_id: str, original_error: Exception) -> ErrorContext:
         """Create error context for tool recommendation errors."""
+        additional_data = self._build_tool_additional_data(intent, entities, original_error)
         return ErrorContext(
             agent_name="triage_sub_agent",
             operation_name="tool_recommendation",
             run_id=run_id,
-            additional_data={
-                'intent': intent,
-                'entities': entities,
-                'original_error': str(original_error)
-            }
+            additional_data=additional_data
         )
+    
+    def _build_tool_additional_data(self, intent: str, entities: Dict[str, Any], original_error: Exception) -> Dict[str, Any]:
+        """Build additional data for tool error context."""
+        return {
+            'intent': intent,
+            'entities': entities,
+            'original_error': str(original_error)
+        }
     
     async def _process_tool_error_with_fallback(self, error: ToolRecommendationError, intent: str, entities: Dict[str, Any], run_id: str) -> Dict[str, Any]:
         """Process tool error with fallback handling."""
         try:
-            fallback_result = await self.recovery.fallback_tool_recommendation(intent, entities)
-            self.reporter.log_tool_recovery(run_id, intent, fallback_result)
-            return fallback_result
+            return await self._execute_tool_fallback_recovery(intent, entities, run_id)
         except Exception:
-            await global_error_handler.handle_error(error, error.context)
-            raise error
+            await self._handle_tool_fallback_failure(error)
+    
+    async def _execute_tool_fallback_recovery(self, intent: str, entities: Dict[str, Any], run_id: str) -> Dict[str, Any]:
+        """Execute tool fallback recovery."""
+        fallback_result = await self.recovery.fallback_tool_recommendation(intent, entities)
+        self.reporter.log_tool_recovery(run_id, intent, fallback_result)
+        return fallback_result
+    
+    async def _handle_tool_fallback_failure(self, error: ToolRecommendationError) -> None:
+        """Handle tool fallback failure."""
+        await global_error_handler.handle_error(error, error.context)
+        raise error
     
     async def handle_with_retry(
         self,
@@ -149,10 +188,26 @@ class TriageErrorHandler:
             try:
                 return await operation_func(**kwargs)
             except Exception as error:
-                if self.reporter.should_retry(attempt, max_retries):
-                    await self._handle_retry_attempt(operation_name, attempt, max_retries, error)
-                else:
+                should_continue = await self._handle_retry_or_fallback(
+                    operation_name, attempt, max_retries, kwargs, run_id, error
+                )
+                if not should_continue:
                     return await self._handle_operation_specific_error(operation_name, kwargs, run_id, error)
+    
+    async def _handle_retry_or_fallback(
+        self, 
+        operation_name: str, 
+        attempt: int, 
+        max_retries: int, 
+        kwargs: Dict[str, Any], 
+        run_id: str, 
+        error: Exception
+    ) -> bool:
+        """Handle retry decision or fallback."""
+        if self.reporter.should_retry(attempt, max_retries):
+            await self._handle_retry_attempt(operation_name, attempt, max_retries, error)
+            return True
+        return False
     
     async def _handle_retry_attempt(
         self, 
@@ -174,14 +229,19 @@ class TriageErrorHandler:
         error: Exception
     ) -> Any:
         """Route to specific error handler based on operation type."""
-        if operation_name == 'intent_detection':
-            return await self._handle_intent_detection_fallback(kwargs, run_id, error)
-        elif operation_name == 'entity_extraction':
-            return await self._handle_entity_extraction_fallback(kwargs, run_id, error)
-        elif operation_name == 'tool_recommendation':
-            return await self._handle_tool_recommendation_fallback(kwargs, run_id, error)
+        error_handlers = self._get_operation_error_handlers()
+        if operation_name in error_handlers:
+            return await error_handlers[operation_name](kwargs, run_id, error)
         else:
             await self._handle_generic_error_fallback(operation_name, run_id, error)
+    
+    def _get_operation_error_handlers(self) -> Dict[str, Any]:
+        """Get mapping of operation names to error handlers."""
+        return {
+            'intent_detection': self._handle_intent_detection_fallback,
+            'entity_extraction': self._handle_entity_extraction_fallback,
+            'tool_recommendation': self._handle_tool_recommendation_fallback
+        }
     
     async def _handle_intent_detection_fallback(
         self, 
@@ -231,13 +291,17 @@ class TriageErrorHandler:
         error: Exception
     ) -> None:
         """Handle generic error fallback."""
-        context = ErrorContext(
+        context = self._create_generic_error_context(operation_name, run_id)
+        await global_error_handler.handle_error(error, context)
+        raise error
+    
+    def _create_generic_error_context(self, operation_name: str, run_id: str) -> ErrorContext:
+        """Create generic error context."""
+        return ErrorContext(
             agent_name="triage_sub_agent",
             operation_name=operation_name,
             run_id=run_id
         )
-        await global_error_handler.handle_error(error, context)
-        raise error
     
     def get_error_metrics(self) -> Dict[str, Any]:
         """Get comprehensive error metrics."""

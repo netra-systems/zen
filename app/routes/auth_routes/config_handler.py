@@ -26,10 +26,8 @@ def build_auth_endpoints(base_url: str, oauth_config) -> AuthEndpoints:
 def get_base_endpoints(base_url: str) -> dict:
     """Get base authentication endpoints."""
     return {
-        "login": f"{base_url}/api/auth/login",
-        "logout": f"{base_url}/api/auth/logout",
-        "callback": f"{base_url}/api/auth/callback",
-        "token": f"{base_url}/api/auth/token",
+        "login": f"{base_url}/api/auth/login", "logout": f"{base_url}/api/auth/logout",
+        "callback": f"{base_url}/api/auth/callback", "token": f"{base_url}/api/auth/token",
         "user": f"{base_url}/api/users/me"
     }
 
@@ -41,12 +39,15 @@ def get_dev_login_endpoint(base_url: str, oauth_config) -> Optional[str]:
     return None
 
 
+def _get_development_mode() -> bool:
+    """Check if running in development mode."""
+    return auth_client.detect_environment().value == "development"
+
 def build_base_auth_response(oauth_config, endpoints: AuthEndpoints) -> AuthConfigResponse:
     """Build base authentication configuration response."""
     return AuthConfigResponse(
-        development_mode=auth_client.detect_environment().value == "development",
-        google_client_id=oauth_config.client_id,
-        endpoints=endpoints,
+        development_mode=_get_development_mode(),
+        google_client_id=oauth_config.client_id, endpoints=endpoints,
         authorized_javascript_origins=oauth_config.javascript_origins,
         authorized_redirect_uris=oauth_config.redirect_uris
     )
@@ -71,57 +72,71 @@ def determine_environment_urls() -> tuple[str, str]:
     return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081'), 'http://localhost:3000'
 
 
+def _get_dev_login_url(auth_service_url: str, oauth_config) -> Optional[str]:
+    """Get dev login URL if allowed."""
+    return f"{auth_service_url}/auth/dev_login" if oauth_config.allow_dev_login else None
+
 def build_environment_endpoints(auth_service_url: str, frontend_url: str, oauth_config) -> AuthEndpoints:
     """Build authentication endpoints for the current environment."""
-    dev_login = f"{auth_service_url}/auth/dev_login" if oauth_config.allow_dev_login else None
+    dev_login = _get_dev_login_url(auth_service_url, oauth_config)
     return AuthEndpoints(
-        login=f"{auth_service_url}/auth/login",
-        logout=f"{auth_service_url}/auth/logout",
-        callback=f"{frontend_url}/auth/callback",
-        token=f"{auth_service_url}/auth/token",
-        user=f"{auth_service_url}/auth/me",
-        dev_login=dev_login
+        login=f"{auth_service_url}/auth/login", logout=f"{auth_service_url}/auth/logout",
+        callback=f"{frontend_url}/auth/callback", token=f"{auth_service_url}/auth/token",
+        user=f"{auth_service_url}/auth/me", dev_login=dev_login
     )
 
+
+def _get_google_client_id(oauth_config) -> str:
+    """Get Google client ID from config or environment."""
+    return oauth_config.client_id or os.getenv('GOOGLE_CLIENT_ID', '')
+
+def _create_config_dict(environment, endpoints: AuthEndpoints, oauth_config) -> dict:
+    """Create authentication configuration dictionary."""
+    return {
+        "development_mode": environment.value == "development",
+        "google_client_id": _get_google_client_id(oauth_config), "endpoints": endpoints,
+        "authorized_javascript_origins": oauth_config.javascript_origins,
+        "authorized_redirect_uris": oauth_config.redirect_uris
+    }
+
+def _build_auth_config_params(endpoints: AuthEndpoints, oauth_config) -> dict:
+    """Build authentication config parameters."""
+    environment = auth_client.detect_environment()
+    return _create_config_dict(environment, endpoints, oauth_config)
 
 def create_auth_response(endpoints: AuthEndpoints, oauth_config) -> AuthConfigResponse:
     """Create authentication configuration response."""
-    environment = auth_client.detect_environment()
-    response = AuthConfigResponse(
-        development_mode=environment.value == "development",
-        google_client_id=oauth_config.client_id or os.getenv('GOOGLE_CLIENT_ID', ''),
-        endpoints=endpoints,
-        authorized_javascript_origins=oauth_config.javascript_origins,
-        authorized_redirect_uris=oauth_config.redirect_uris
-    )
-    return response
+    config_params = _build_auth_config_params(endpoints, oauth_config)
+    return AuthConfigResponse(**config_params)
 
+
+def _get_fallback_urls() -> tuple[str, str]:
+    """Get fallback URLs for auth service and frontend."""
+    return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
 
 def build_fallback_endpoints() -> AuthEndpoints:
     """Build fallback authentication endpoints."""
-    auth_service_url = 'https://auth.staging.netrasystems.ai'
-    frontend_url = 'https://staging.netrasystems.ai'
+    auth_service_url, frontend_url = _get_fallback_urls()
     return AuthEndpoints(
-        login=f"{auth_service_url}/auth/login",
-        logout=f"{auth_service_url}/auth/logout",
-        callback=f"{frontend_url}/auth/callback",
-        token=f"{auth_service_url}/auth/token",
-        user=f"{auth_service_url}/auth/me",
-        dev_login=None
+        login=f"{auth_service_url}/auth/login", logout=f"{auth_service_url}/auth/logout",
+        callback=f"{frontend_url}/auth/callback", token=f"{auth_service_url}/auth/token",
+        user=f"{auth_service_url}/auth/me", dev_login=None
     )
 
+
+def _create_fallback_config(fallback_endpoints: AuthEndpoints, frontend_url: str) -> AuthConfigResponse:
+    """Create fallback configuration with endpoints."""
+    return AuthConfigResponse(
+        development_mode=False, google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+        endpoints=fallback_endpoints, authorized_javascript_origins=[frontend_url],
+        authorized_redirect_uris=[f"{frontend_url}/auth/callback"]
+    )
 
 def create_fallback_response() -> AuthConfigResponse:
     """Create fallback authentication configuration response."""
     fallback_endpoints = build_fallback_endpoints()
     frontend_url = 'https://staging.netrasystems.ai'
-    return AuthConfigResponse(
-        development_mode=False,
-        google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
-        endpoints=fallback_endpoints,
-        authorized_javascript_origins=[frontend_url],
-        authorized_redirect_uris=[f"{frontend_url}/auth/callback"]
-    )
+    return _create_fallback_config(fallback_endpoints, frontend_url)
 
 
 def log_auth_config_error(error: Exception) -> None:
@@ -131,15 +146,19 @@ def log_auth_config_error(error: Exception) -> None:
     logger.error(f"Failed to build auth config response: {str(error)}", exc_info=True)
 
 
+def _build_auth_config_with_urls(auth_service_url: str, frontend_url: str) -> AuthConfigResponse:
+    """Build auth config with determined URLs."""
+    oauth_config = auth_client.get_oauth_config()
+    endpoints = build_environment_endpoints(auth_service_url, frontend_url, oauth_config)
+    response = create_auth_response(endpoints, oauth_config)
+    add_pr_configuration(response, oauth_config)
+    return response
+
 def build_auth_config_response(request: Request) -> AuthConfigResponse:
     """Build complete authentication configuration response."""
     try:
         auth_service_url, frontend_url = determine_environment_urls()
-        oauth_config = auth_client.get_oauth_config()
-        endpoints = build_environment_endpoints(auth_service_url, frontend_url, oauth_config)
-        response = create_auth_response(endpoints, oauth_config)
-        add_pr_configuration(response, oauth_config)
-        return response
+        return _build_auth_config_with_urls(auth_service_url, frontend_url)
     except Exception as e:
         log_auth_config_error(e)
         return create_fallback_response()

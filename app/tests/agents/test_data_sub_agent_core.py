@@ -52,7 +52,7 @@ class TestDataSubAgentInitialization:
         assert agent.name == "DataSubAgent"
         assert agent.tool_dispatcher == mock_tool_dispatcher
         
-    @patch('app.agents.data_sub_agent.agent.RedisManager')
+    @patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager')
     def test_initialization_with_redis(self, mock_redis):
         """Test DataSubAgent initializes with components"""
         mock_llm_manager = Mock()

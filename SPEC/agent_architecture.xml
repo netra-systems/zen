@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <title>Agent Architecture Specification</title>
+        <version>1.0</version>
+        <created>2025-08-18</created>
+        <purpose>Defines agent types, architecture patterns, and usage guidelines for Netra Apex platform</purpose>
+        <business_impact>Critical for maintaining scalable agent infrastructure that creates value proportional to customer AI spend</business_impact>
+    </metadata>
+
+    <overview>
+        <description>
+            Netra Apex employs a multi-layered agent architecture designed to optimize AI workloads 
+            across different customer segments. This specification defines the four primary component 
+            categories and their proper usage patterns to ensure business value creation.
+        </description>
+        <key_principles>
+            <principle>Single responsibility per component (300-line maximum)</principle>
+            <principle>Strong typing throughout all interfaces</principle>
+            <principle>Modular design enabling composable reuse</principle>
+            <principle>Business value justification for every component</principle>
+            <principle>Customer segment alignment for feature development</principle>
+        </key_principles>
+    </overview>
+
+    <agent_categories>
+        <category name="Core SubAgents" type="LLM_WORKFLOW">
+            <description>
+                LLM-powered agents that execute complex workflows and decision-making processes.
+                These components directly interface with language models to provide intelligent
+                automation and analysis capabilities.
+            </description>
+            <characteristics>
+                <characteristic>LLM integration required</characteristic>
+                <characteristic>Complex decision-making logic</characteristic>
+                <characteristic>Stateful workflow management</characteristic>
+                <characteristic>High business value creation</characteristic>
+                <characteristic>Customer-facing functionality</characteristic>
+            </characteristics>
+            <examples>
+                <example>data_sub_agent - Data analysis and insights generation</example>
+                <example>triage_sub_agent - Request classification and routing</example>
+                <example>reporting_sub_agent - Automated report generation</example>
+                <example>supervisor - Agent coordination and management</example>
+            </examples>
+            <business_value>
+                <segment>Growth, Mid, Enterprise</segment>
+                <value_creation>Direct AI cost optimization and intelligent automation</value_creation>
+                <revenue_impact>Primary value drivers for performance fee capture</revenue_impact>
+            </business_value>
+        </category>
+
+        <category name="Execution Components" type="INFRASTRUCTURE">
+            <description>
+                Infrastructure patterns that handle execution flow, state management, and
+                system orchestration. These components provide the foundation for agent
+                operations without direct LLM interaction.
+            </description>
+            <characteristics>
+                <characteristic>No direct LLM dependency</characteristic>
+                <characteristic>Infrastructure and orchestration focus</characteristic>
+                <characteristic>Stateless or well-defined state management</characteristic>
+                <characteristic>High reliability requirements</characteristic>
+                <characteristic>Performance-critical operations</characteristic>
+            </characteristics>
+            <examples>
+                <example>execution_core - Core execution engine</example>
+                <example>execution_engine - Workflow execution management</example>
+                <example>state_management - State persistence and retrieval</example>
+                <example>circuit_breaker_core - Reliability and fault tolerance</example>
+            </examples>
+            <business_value>
+                <segment>All segments</segment>
+                <value_creation>Platform reliability and performance optimization</value_creation>
+                <revenue_impact>Enablers for customer retention and satisfaction</revenue_impact>
+            </business_value>
+        </category>
+
+        <category name="Service Components" type="SPECIALIZED_PROCESSOR">
+            <description>
+                Specialized processors that handle specific business domains or data operations.
+                These components provide focused functionality for particular use cases or
+                data processing requirements.
+            </description>
+            <characteristics>
+                <characteristic>Domain-specific functionality</characteristic>
+                <characteristic>Data processing and transformation</characteristic>
+                <characteristic>Well-defined input/output contracts</characteristic>
+                <characteristic>Reusable across multiple workflows</characteristic>
+                <characteristic>Performance-optimized operations</characteristic>
+            </characteristics>
+            <examples>
+                <example>clickhouse_operations - Database query optimization</example>
+                <example>data_fetching - External data source integration</example>
+                <example>anomaly_detector - Statistical analysis and detection</example>
+                <example>performance_analyzer - System performance evaluation</example>
+            </examples>
+            <business_value>
+                <segment>Growth, Mid, Enterprise</segment>
+                <value_creation>Specialized optimization capabilities</value_creation>
+                <revenue_impact>Feature differentiation and competitive advantage</revenue_impact>
+            </business_value>
+        </category>
+
+        <category name="Utility Modules" type="HELPER_COMPONENT">
+            <description>
+                Helper components that provide shared functionality, validation, and support
+                operations across the platform. These modules enable code reuse and
+                maintain consistency across different system areas.
+            </description>
+            <characteristics>
+                <characteristic>Shared functionality across components</characteristic>
+                <characteristic>Validation and data transformation</characteristic>
+                <characteristic>Configuration and setup operations</characteristic>
+                <characteristic>Error handling and logging</characteristic>
+                <characteristic>Cross-cutting concerns</characteristic>
+            </characteristics>
+            <examples>
+                <example>validation - Input validation and sanitization</example>
+                <example>error_handler - Centralized error processing</example>
+                <example>configuration_manager - System configuration management</example>
+                <example>fallback_helpers - Graceful degradation support</example>
+            </examples>
+            <business_value>
+                <segment>All segments</segment>
+                <value_creation>Development efficiency and system reliability</value_creation>
+                <revenue_impact>Cost reduction through code reuse and consistency</revenue_impact>
+            </business_value>
+        </category>
+    </agent_categories>
+
+    <architecture_principles>
+        <principle name="Single Responsibility">
+            <description>Each component handles exactly one business capability or technical concern</description>
+            <implementation>Maximum 300 lines per file, maximum 8 lines per function</implementation>
+            <validation>Regular architecture compliance checks required</validation>
+        </principle>
+
+        <principle name="Clear Interface Boundaries">
+            <description>Components communicate through well-defined, strongly-typed interfaces</description>
+            <implementation>Pydantic models for all data contracts, explicit async patterns</implementation>
+            <validation>Type checking and interface validation in tests</validation>
+        </principle>
+
+        <principle name="Modular Design">
+            <description>Components are designed for composable reuse throughout the system</description>
+            <implementation>Standard initialization patterns, dependency injection support</implementation>
+            <validation>Integration tests verify component composition</validation>
+        </principle>
+
+        <principle name="Strong Typing">
+            <description>All interfaces use explicit, validated types for data exchange</description>
+            <implementation>TypedDict, Pydantic models, no generic dict/list parameters</implementation>
+            <validation>Static type checking and runtime validation</validation>
+        </principle>
+    </architecture_principles>
+
+    <component_lifecycle>
+        <phase name="Initialization">
+            <description>Component setup and dependency resolution</description>
+            <patterns>
+                <pattern>Dependency injection through constructor parameters</pattern>
+                <pattern>Configuration validation during initialization</pattern>
+                <pattern>Resource allocation and connection establishment</pattern>
+                <pattern>Health check registration for monitoring</pattern>
+            </patterns>
+            <requirements>
+                <requirement>All dependencies explicitly declared</requirement>
+                <requirement>Initialization failures handled gracefully</requirement>
+                <requirement>Configuration validation before operation</requirement>
+            </requirements>
+        </phase>
+
+        <phase name="State Management">
+            <description>Component state handling and persistence</description>
+            <patterns>
+                <pattern>Immutable state objects for data consistency</pattern>
+                <pattern>State validation on transitions</pattern>
+                <pattern>Atomic operations for state updates</pattern>
+                <pattern>State recovery mechanisms for reliability</pattern>
+            </patterns>
+            <requirements>
+                <requirement>State changes are atomic and validated</requirement>
+                <requirement>State persistence for critical components</requirement>
+                <requirement>State recovery procedures documented</requirement>
+            </requirements>
+        </phase>
+
+        <phase name="Error Handling">
+            <description>Error detection, classification, and recovery</description>
+            <patterns>
+                <pattern>NetraException hierarchy for error classification</pattern>
+                <pattern>Circuit breaker patterns for external dependencies</pattern>
+                <pattern>Fallback mechanisms for degraded operation</pattern>
+                <pattern>Error reporting and monitoring integration</pattern>
+            </patterns>
+            <requirements>
+                <requirement>All errors properly classified and logged</requirement>
+                <requirement>Recovery mechanisms for transient failures</requirement>
+                <requirement>Error metrics tracked for monitoring</requirement>
+            </requirements>
+        </phase>
+
+        <phase name="Cleanup Procedures">
+            <description>Resource cleanup and graceful shutdown</description>
+            <patterns>
+                <pattern>Resource cleanup in finally blocks</pattern>
+                <pattern>Graceful shutdown with timeout handling</pattern>
+                <pattern>Connection cleanup for external services</pattern>
+                <pattern>State persistence before shutdown</pattern>
+            </patterns>
+            <requirements>
+                <requirement>All resources properly cleaned up</requirement>
+                <requirement>Graceful shutdown within timeout limits</requirement>
+                <requirement>State preserved during shutdown</requirement>
+            </requirements>
+        </phase>
+    </component_lifecycle>
+
+    <integration_patterns>
+        <pattern name="Agent Communication">
+            <description>How agents and components communicate with each other</description>
+            <implementation>
+                <approach>Async message passing through well-defined interfaces</approach>
+                <approach>Event-driven communication for loose coupling</approach>
+                <approach>Request-response patterns for synchronous operations</approach>
+                <approach>State sharing through controlled access patterns</approach>
+            </implementation>
+            <validation>Integration tests verify communication protocols</validation>
+        </pattern>
+
+        <pattern name="Data Flow Requirements">
+            <description>Standards for data movement between components</description>
+            <implementation>
+                <approach>Typed data contracts using Pydantic models</approach>
+                <approach>Data validation at component boundaries</approach>
+                <approach>Immutable data objects for consistency</approach>
+                <approach>Data transformation through explicit converters</approach>
+            </implementation>
+            <validation>Data flow tests verify transformation accuracy</validation>
+        </pattern>
+
+        <pattern name="Service Integration">
+            <description>Integration with external services and dependencies</description>
+            <implementation>
+                <approach>Repository pattern for data access abstraction</approach>
+                <approach>Circuit breaker pattern for fault tolerance</approach>
+                <approach>Retry mechanisms with exponential backoff</approach>
+                <approach>Health checks for external service monitoring</approach>
+            </implementation>
+            <validation>End-to-end tests verify service integration</validation>
+        </pattern>
+    </integration_patterns>
+
+    <business_value_mapping>
+        <segment name="Free Tier">
+            <focus>Basic functionality to demonstrate value and drive conversion</focus>
+            <components>
+                <component>Core SubAgents - Limited usage and basic insights</component>
+                <component>Utility Modules - Essential validation and error handling</component>
+            </components>
+            <value_creation>Proof of concept for AI optimization capabilities</value_creation>
+            <conversion_strategy>Show potential savings to drive paid tier adoption</conversion_strategy>
+        </segment>
+
+        <segment name="Growth Tier">
+            <focus>Enhanced capabilities with moderate usage limits</focus>
+            <components>
+                <component>Core SubAgents - Enhanced analysis and reporting</component>
+                <component>Service Components - Specialized processing capabilities</component>
+                <component>Execution Components - Improved reliability and performance</component>
+            </components>
+            <value_creation>Measurable AI cost optimization and efficiency gains</value_creation>
+            <revenue_capture>Performance fee based on demonstrated savings</revenue_capture>
+        </segment>
+
+        <segment name="Mid Tier">
+            <focus>Advanced features with higher usage limits</focus>
+            <components>
+                <component>All component categories with advanced features</component>
+                <component>Custom configuration and optimization settings</component>
+                <component>Advanced analytics and reporting capabilities</component>
+            </components>
+            <value_creation>Significant AI spend optimization with detailed insights</value_creation>
+            <revenue_capture>Higher performance fees with premium features</revenue_capture>
+        </segment>
+
+        <segment name="Enterprise Tier">
+            <focus>Full platform capabilities with unlimited usage</focus>
+            <components>
+                <component>Complete platform access with white-label options</component>
+                <component>Custom integrations and specialized components</component>
+                <component>Dedicated support and consulting services</component>
+            </components>
+            <value_creation>Maximum AI spend optimization with enterprise-grade features</value_creation>
+            <revenue_capture>Premium pricing with custom contract terms</revenue_capture>
+        </segment>
+    </business_value_mapping>
+
+    <development_guidelines>
+        <guideline name="Component Classification">
+            <description>Determine appropriate category before implementation</description>
+            <process>
+                <step>Identify primary business function</step>
+                <step>Determine LLM dependency requirements</step>
+                <step>Assess customer segment alignment</step>
+                <step>Select appropriate component category</step>
+            </process>
+        </guideline>
+
+        <guideline name="Architecture Compliance">
+            <description>Maintain architectural standards throughout development</description>
+            <process>
+                <step>Plan module boundaries before coding</step>
+                <step>Implement with 300-line and 8-line limits</step>
+                <step>Run architecture compliance checks regularly</step>
+                <step>Address compliance issues immediately</step>
+            </process>
+        </guideline>
+
+        <guideline name="Business Value Validation">
+            <description>Ensure every component creates measurable business value</description>
+            <process>
+                <step>Define Business Value Justification (BVJ) before implementation</step>
+                <step>Identify target customer segment</step>
+                <step>Quantify expected value creation</step>
+                <step>Plan revenue capture mechanism</step>
+            </process>
+        </guideline>
+    </development_guidelines>
+
+    <testing_requirements>
+        <requirement name="Component Testing">
+            <description>Each component requires comprehensive test coverage</description>
+            <coverage_minimum>90% for Core SubAgents, 85% for other categories</coverage_minimum>
+            <test_types>
+                <type>Unit tests for individual functions</type>
+                <type>Integration tests for component interactions</type>
+                <type>Real LLM tests for Core SubAgents</type>
+            </test_types>
+        </requirement>
+
+        <requirement name="Architecture Validation">
+            <description>Automated validation of architectural compliance</description>
+            <validation_checks>
+                <check>300-line file limit enforcement</check>
+                <check>8-line function limit enforcement</check>
+                <check>Type safety validation</check>
+                <check>Interface contract verification</check>
+            </validation_checks>
+        </requirement>
+    </testing_requirements>
+
+    <monitoring_and_observability>
+        <metric name="Component Performance">
+            <description>Track performance metrics for all component categories</description>
+            <measurements>
+                <measurement>Execution time per component operation</measurement>
+                <measurement>Resource utilization patterns</measurement>
+                <measurement>Error rates and failure patterns</measurement>
+                <measurement>Business value generation metrics</measurement>
+            </measurements>
+        </metric>
+
+        <metric name="Business Impact">
+            <description>Monitor business value creation across customer segments</description>
+            <measurements>
+                <measurement>Cost savings generated per customer segment</measurement>
+                <measurement>Feature utilization rates by component category</measurement>
+                <measurement>Customer conversion rates from Free to paid tiers</measurement>
+                <measurement>Revenue capture efficiency per component</measurement>
+            </measurements>
+        </metric>
+    </monitoring_and_observability>
+
+    <evolution_strategy>
+        <approach name="Incremental Enhancement">
+            <description>Evolve architecture through incremental improvements</description>
+            <implementation>
+                <step>Identify improvement opportunities through monitoring</step>
+                <step>Plan changes within architectural constraints</step>
+                <step>Implement with backward compatibility</step>
+                <step>Validate improvements through testing</step>
+            </implementation>
+        </approach>
+
+        <approach name="Business-Driven Development">
+            <description>Prioritize enhancements based on business value creation</description>
+            <implementation>
+                <step>Analyze customer segment value creation opportunities</step>
+                <step>Prioritize components with highest revenue impact</step>
+                <step>Develop features that increase AI spend optimization</step>
+                <step>Measure and validate business value creation</step>
+            </implementation>
+        </approach>
+    </evolution_strategy>
+</specification>

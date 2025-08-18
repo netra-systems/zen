@@ -2,7 +2,7 @@
 Error Handler Module - Comprehensive error handling and recovery
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from sqlalchemy.orm import Session
 from app.logging_config import central_logger
 from app.ws_manager import manager
@@ -21,26 +21,37 @@ class ErrorHandler:
     ) -> None:
         """Handle generation job error with full recovery process"""
         await self._log_error(job_id, error)
-        
-        # Only fail job for critical errors, otherwise try recovery
+        await self._process_error_by_severity(job_id, error, db, synthetic_data_id, active_jobs)
+    
+    async def _process_error_by_severity(self, job_id: str, error: Exception, db: Optional[Session], 
+                                       synthetic_data_id: Optional[str], active_jobs: Dict) -> None:
+        """Process error based on severity level."""
         if self._is_critical_error(error):
-            await self._mark_job_failed(job_id, error, active_jobs)
-            await self._update_database_status(db, synthetic_data_id)
-            await self._send_error_notification(job_id, error)
+            await self._handle_critical_error(job_id, error, db, synthetic_data_id, active_jobs)
         else:
             await self._attempt_error_recovery(job_id, error, active_jobs)
+
+    async def _handle_critical_error(self, job_id: str, error: Exception, db: Optional[Session], 
+                                   synthetic_data_id: Optional[str], active_jobs: Dict):
+        """Handle critical error processing"""
+        await self._mark_job_failed(job_id, error, active_jobs)
+        await self._update_database_status(db, synthetic_data_id)
+        await self._send_error_notification(job_id, error)
 
     async def _log_error(self, job_id: str, error: Exception) -> None:
         """Log error with contextual information"""
         error_type = type(error).__name__
-        central_logger.error(
-            f"Generation job {job_id} failed: {error_type} - {str(error)}",
-            extra={
-                "job_id": job_id,
-                "error_type": error_type,
-                "error_message": str(error)
-            }
-        )
+        error_message = f"Generation job {job_id} failed: {error_type} - {str(error)}"
+        extra_data = self._build_error_context(job_id, error_type, error)
+        central_logger.error(error_message, extra=extra_data)
+
+    def _build_error_context(self, job_id: str, error_type: str, error: Exception) -> Dict:
+        """Build error context for logging"""
+        return {
+            "job_id": job_id,
+            "error_type": error_type,
+            "error_message": str(error)
+        }
 
     async def _mark_job_failed(
         self,
@@ -61,11 +72,15 @@ class ErrorHandler:
     ) -> None:
         """Update database record to failed status"""
         if db and synthetic_data_id:
-            from app.db import models_postgres as models
-            db.query(models.Corpus).filter(
-                models.Corpus.id == synthetic_data_id
-            ).update({"status": "failed"})
-            db.commit()
+            await self._execute_status_update(db, synthetic_data_id)
+
+    async def _execute_status_update(self, db: Session, synthetic_data_id: str):
+        """Execute database status update"""
+        from app.db import models_postgres as models
+        db.query(models.Corpus).filter(
+            models.Corpus.id == synthetic_data_id
+        ).update({"status": "failed"})
+        db.commit()
 
     async def _send_error_notification(self, job_id: str, error: Exception) -> None:
         """Send error notification via WebSocket"""
@@ -77,46 +92,73 @@ class ErrorHandler:
 
     def _build_error_payload(self, job_id: str, error: Exception) -> Dict:
         """Build error notification payload"""
+        error_info = self._get_error_info(error)
         return {
             "job_id": job_id,
-            "error_type": type(error).__name__,
-            "error_message": str(error),
+            **error_info,
             "recoverable": self._is_recoverable_error(error),
             "suggested_action": self._get_suggested_action(error)
+        }
+    
+    def _get_error_info(self, error: Exception) -> Dict[str, str]:
+        """Get basic error information."""
+        return {
+            "error_type": type(error).__name__,
+            "error_message": str(error)
         }
 
     def _is_critical_error(self, error: Exception) -> bool:
         """Determine if error is critical and should immediately fail the job"""
-        critical_errors = [
-            "OutOfMemoryError",
-            "PermissionError", 
-            "FileNotFoundError",
-            "ValidationError",
-            "ValueError"
-        ]
+        critical_errors = self._get_critical_error_types()
         return type(error).__name__ in critical_errors
+
+    def _get_critical_error_types(self) -> List[str]:
+        """Get list of critical error types"""
+        memory_errors = ["OutOfMemoryError"]
+        permission_errors = ["PermissionError", "FileNotFoundError"]
+        validation_errors = ["ValidationError", "ValueError"]
+        return memory_errors + permission_errors + validation_errors
 
     def _is_recoverable_error(self, error: Exception) -> bool:
         """Determine if error is recoverable"""
-        recoverable_errors = [
+        recoverable_errors = self._get_recoverable_error_types()
+        return type(error).__name__ in recoverable_errors
+
+    def _get_recoverable_error_types(self) -> List[str]:
+        """Get list of recoverable error types"""
+        return [
             "ConnectionError",
             "TimeoutError",
             "TemporaryFailure",
             "RateLimitExceeded"
         ]
-        return type(error).__name__ in recoverable_errors
 
     def _get_suggested_action(self, error: Exception) -> str:
         """Get suggested action for error type"""
         error_type = type(error).__name__
-        suggestions = {
+        suggestions = self._build_action_suggestions()
+        return suggestions.get(error_type, "Contact support for assistance")
+
+    def _build_action_suggestions(self) -> Dict[str, str]:
+        """Build dictionary of error action suggestions"""
+        connection_suggestions = self._get_connection_suggestions()
+        resource_suggestions = self._get_resource_suggestions()
+        return {**connection_suggestions, **resource_suggestions}
+    
+    def _get_connection_suggestions(self) -> Dict[str, str]:
+        """Get connection-related error suggestions."""
+        return {
             "ConnectionError": "Check database connectivity and retry",
-            "TimeoutError": "Reduce batch size and retry",
+            "TimeoutError": "Reduce batch size and retry"
+        }
+    
+    def _get_resource_suggestions(self) -> Dict[str, str]:
+        """Get resource-related error suggestions."""
+        return {
             "MemoryError": "Reduce generation parameters",
             "ValidationError": "Check input parameters",
             "PermissionError": "Verify database permissions"
         }
-        return suggestions.get(error_type, "Contact support for assistance")
 
     async def _attempt_error_recovery(
         self,
@@ -125,23 +167,38 @@ class ErrorHandler:
         active_jobs: Dict
     ) -> None:
         """Attempt automatic error recovery if possible"""
+        await self._route_recovery_by_type(job_id, error, active_jobs)
+    
+    async def _route_recovery_by_type(self, job_id: str, error: Exception, active_jobs: Dict) -> None:
+        """Route recovery based on error type."""
         if self._is_recoverable_error(error):
-            recovery_strategy = self._get_recovery_strategy(error)
-            await self._execute_recovery_strategy(job_id, recovery_strategy, active_jobs)
+            await self._handle_recoverable_error(job_id, error, active_jobs)
         else:
-            # For non-critical, non-recoverable errors, allow job to continue
-            central_logger.warning(f"Non-critical error in job {job_id}: {error}. Continuing generation.")
-            await self._mark_job_warning(job_id, error, active_jobs)
+            await self._handle_non_recoverable_error(job_id, error, active_jobs)
+
+    async def _handle_recoverable_error(self, job_id: str, error: Exception, active_jobs: Dict):
+        """Handle recoverable error with strategy"""
+        recovery_strategy = self._get_recovery_strategy(error)
+        await self._execute_recovery_strategy(job_id, recovery_strategy, active_jobs)
+
+    async def _handle_non_recoverable_error(self, job_id: str, error: Exception, active_jobs: Dict):
+        """Handle non-recoverable error"""
+        central_logger.warning(f"Non-critical error in job {job_id}: {error}. Continuing generation.")
+        await self._mark_job_warning(job_id, error, active_jobs)
 
     def _get_recovery_strategy(self, error: Exception) -> Dict:
         """Get recovery strategy for error type"""
         error_type = type(error).__name__
-        strategies = {
+        strategies = self._build_recovery_strategies()
+        return strategies.get(error_type, {"retry_count": 0})
+
+    def _build_recovery_strategies(self) -> Dict[str, Dict]:
+        """Build recovery strategies dictionary"""
+        return {
             "ConnectionError": {"retry_count": 3, "backoff_seconds": 5},
             "TimeoutError": {"reduce_batch_size": True, "retry_count": 2},
             "RateLimitExceeded": {"delay_seconds": 60, "retry_count": 1}
         }
-        return strategies.get(error_type, {"retry_count": 0})
 
     async def _execute_recovery_strategy(
         self,
@@ -157,16 +214,26 @@ class ErrorHandler:
         """Schedule job retry with recovery strategy"""
         import asyncio
         
+        await self._apply_retry_delay(strategy)
+        await self._execute_retry_schedule(job_id, strategy, active_jobs)
+    
+    async def _apply_retry_delay(self, strategy: Dict) -> None:
+        """Apply retry delay if specified in strategy."""
+        import asyncio
         delay = strategy.get("delay_seconds", 0)
         if delay > 0:
             await asyncio.sleep(delay)
+    
+    async def _execute_retry_schedule(self, job_id: str, strategy: Dict, active_jobs: Dict) -> None:
+        """Execute the retry scheduling."""
+        await self._mark_job_for_retry(job_id, strategy, active_jobs)
+        central_logger.info(f"Scheduled retry for job {job_id} with strategy: {strategy}")
 
-        # Mark job for retry
+    async def _mark_job_for_retry(self, job_id: str, strategy: Dict, active_jobs: Dict):
+        """Mark job for retry with strategy"""
         if job_id in active_jobs:
             active_jobs[job_id]["retry_scheduled"] = True
             active_jobs[job_id]["recovery_strategy"] = strategy
-
-        central_logger.info(f"Scheduled retry for job {job_id} with strategy: {strategy}")
 
     async def _mark_job_warning(self, job_id: str, error: Exception, active_jobs: Dict) -> None:
         """Mark job with warning but allow it to continue"""
@@ -178,37 +245,53 @@ class ErrorHandler:
     def validate_generation_parameters(self, config) -> Optional[str]:
         """Validate generation parameters before processing"""
         errors = []
+        self._validate_num_logs(config, errors)
+        self._validate_corpus_id(config, errors)
+        return "; ".join(errors) if errors else None
 
+    def _validate_num_logs(self, config, errors: List[str]):
+        """Validate num_logs parameter"""
         if hasattr(config, 'num_logs') and config.num_logs <= 0:
             errors.append("num_logs must be greater than 0")
-
         if hasattr(config, 'num_logs') and config.num_logs > 100000:
             errors.append("num_logs exceeds maximum limit of 100,000")
 
+    def _validate_corpus_id(self, config, errors: List[str]):
+        """Validate corpus_id parameter"""
         if hasattr(config, 'corpus_id') and not config.corpus_id:
             errors.append("corpus_id is required")
-
-        return "; ".join(errors) if errors else None
 
     async def handle_validation_error(self, job_id: str, validation_error: str) -> None:
         """Handle parameter validation errors"""
         central_logger.warning(f"Validation failed for job {job_id}: {validation_error}")
-        
+        payload = self._build_validation_error_payload(job_id, validation_error)
+        await self._broadcast_validation_error(payload)
+
+    def _build_validation_error_payload(self, job_id: str, validation_error: str) -> Dict:
+        """Build validation error payload"""
+        return {
+            "job_id": job_id,
+            "error_type": "validation_error",
+            "error_message": validation_error,
+            "recoverable": True
+        }
+
+    async def _broadcast_validation_error(self, payload: Dict):
+        """Broadcast validation error via WebSocket"""
         await manager.broadcasting.broadcast_to_all({
             "type": "generation:validation_error",
-            "payload": {
-                "job_id": job_id,
-                "error_type": "validation_error",
-                "error_message": validation_error,
-                "recoverable": True
-            }
+            "payload": payload
         })
 
     def categorize_error(self, error: Exception) -> str:
         """Categorize error for reporting and handling"""
         error_type = type(error).__name__
-        
-        categories = {
+        categories = self._build_error_categories()
+        return categories.get(error_type, "unknown")
+
+    def _build_error_categories(self) -> Dict[str, str]:
+        """Build error category mapping"""
+        return {
             "ConnectionError": "infrastructure",
             "TimeoutError": "performance",
             "MemoryError": "resource",
@@ -216,19 +299,25 @@ class ErrorHandler:
             "PermissionError": "security",
             "FileNotFoundError": "configuration"
         }
-        
-        return categories.get(error_type, "unknown")
 
     async def get_error_statistics(self) -> Dict:
         """Get error statistics for monitoring"""
+        return self._build_error_statistics()
+
+    def _build_error_statistics(self) -> Dict:
+        """Build error statistics dictionary"""
         return {
             "total_errors_last_hour": 3,
             "error_rate_percentage": 0.5,
             "most_common_error": "ConnectionError",
             "recovery_success_rate": 85.2,
-            "errors_by_category": {
-                "infrastructure": 2,
-                "performance": 1,
-                "input": 0
-            }
+            "errors_by_category": self._build_category_counts()
+        }
+
+    def _build_category_counts(self) -> Dict[str, int]:
+        """Build error category counts"""
+        return {
+            "infrastructure": 2,
+            "performance": 1,
+            "input": 0
         }

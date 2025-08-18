@@ -6,7 +6,7 @@ This module provides enterprise-grade policy management with:
 - Dynamic policy updates and validation
 - Integration with all resilience components
 
-All functions are ≤8 lines per MANDATORY requirements.
+All functions are <=8 lines per MANDATORY requirements.
 """
 
 from enum import Enum
@@ -96,25 +96,50 @@ class UnifiedPolicyManager:
         self._create_standard_template()
         self._create_experimental_template()
     
+    def _get_critical_circuit_defaults(self) -> Dict[str, Any]:
+        """Get circuit defaults for critical services."""
+        return {
+            "failure_threshold": 3,
+            "recovery_timeout": 15.0,
+            "timeout_seconds": 5.0,
+            "adaptive_threshold": True
+        }
+    
+    def _get_critical_retry_defaults(self) -> Dict[str, Any]:
+        """Get retry defaults for critical services."""
+        return {
+            "max_attempts": 5,
+            "base_delay": 0.5,
+            "max_delay": 30.0
+        }
+    
     def _create_critical_template(self) -> None:
         """Create template for critical services."""
         template = PolicyTemplate(
             name="critical_service",
             description="High availability policy for critical services",
             service_tier=ServiceTier.CRITICAL,
-            circuit_defaults={
-                "failure_threshold": 3,
-                "recovery_timeout": 15.0,
-                "timeout_seconds": 5.0,
-                "adaptive_threshold": True
-            },
-            retry_defaults={
-                "max_attempts": 5,
-                "base_delay": 0.5,
-                "max_delay": 30.0
-            }
+            circuit_defaults=self._get_critical_circuit_defaults(),
+            retry_defaults=self._get_critical_retry_defaults()
         )
         self.templates["critical_service"] = template
+    
+    def _get_essential_circuit_defaults(self) -> Dict[str, Any]:
+        """Get circuit defaults for essential services."""
+        return {
+            "failure_threshold": 5,
+            "recovery_timeout": 30.0,
+            "timeout_seconds": 10.0,
+            "adaptive_threshold": True
+        }
+    
+    def _get_essential_retry_defaults(self) -> Dict[str, Any]:
+        """Get retry defaults for essential services."""
+        return {
+            "max_attempts": 3,
+            "base_delay": 1.0,
+            "max_delay": 60.0
+        }
     
     def _create_essential_template(self) -> None:
         """Create template for essential services."""
@@ -122,19 +147,27 @@ class UnifiedPolicyManager:
             name="essential_service",
             description="Balanced policy for essential services",
             service_tier=ServiceTier.ESSENTIAL,
-            circuit_defaults={
-                "failure_threshold": 5,
-                "recovery_timeout": 30.0,
-                "timeout_seconds": 10.0,
-                "adaptive_threshold": True
-            },
-            retry_defaults={
-                "max_attempts": 3,
-                "base_delay": 1.0,
-                "max_delay": 60.0
-            }
+            circuit_defaults=self._get_essential_circuit_defaults(),
+            retry_defaults=self._get_essential_retry_defaults()
         )
         self.templates["essential_service"] = template
+    
+    def _get_standard_circuit_defaults(self) -> Dict[str, Any]:
+        """Get circuit defaults for standard services."""
+        return {
+            "failure_threshold": 10,
+            "recovery_timeout": 60.0,
+            "timeout_seconds": 15.0,
+            "adaptive_threshold": False
+        }
+    
+    def _get_standard_retry_defaults(self) -> Dict[str, Any]:
+        """Get retry defaults for standard services."""
+        return {
+            "max_attempts": 2,
+            "base_delay": 2.0,
+            "max_delay": 120.0
+        }
     
     def _create_standard_template(self) -> None:
         """Create template for standard services."""
@@ -142,19 +175,27 @@ class UnifiedPolicyManager:
             name="standard_service",
             description="Standard policy for regular services",
             service_tier=ServiceTier.STANDARD,
-            circuit_defaults={
-                "failure_threshold": 10,
-                "recovery_timeout": 60.0,
-                "timeout_seconds": 15.0,
-                "adaptive_threshold": False
-            },
-            retry_defaults={
-                "max_attempts": 2,
-                "base_delay": 2.0,
-                "max_delay": 120.0
-            }
+            circuit_defaults=self._get_standard_circuit_defaults(),
+            retry_defaults=self._get_standard_retry_defaults()
         )
         self.templates["standard_service"] = template
+    
+    def _get_experimental_circuit_defaults(self) -> Dict[str, Any]:
+        """Get experimental circuit defaults."""
+        return {
+            "failure_threshold": 20,
+            "recovery_timeout": 120.0,
+            "timeout_seconds": 30.0,
+            "adaptive_threshold": False
+        }
+    
+    def _get_experimental_retry_defaults(self) -> Dict[str, Any]:
+        """Get experimental retry defaults."""
+        return {
+            "max_attempts": 1,
+            "base_delay": 5.0,
+            "max_delay": 300.0
+        }
     
     def _create_experimental_template(self) -> None:
         """Create template for experimental services."""
@@ -162,19 +203,34 @@ class UnifiedPolicyManager:
             name="experimental_service",
             description="Lenient policy for experimental services",
             service_tier=ServiceTier.EXPERIMENTAL,
-            circuit_defaults={
-                "failure_threshold": 20,
-                "recovery_timeout": 120.0,
-                "timeout_seconds": 30.0,
-                "adaptive_threshold": False
-            },
-            retry_defaults={
-                "max_attempts": 1,
-                "base_delay": 5.0,
-                "max_delay": 300.0
-            }
+            circuit_defaults=self._get_experimental_circuit_defaults(),
+            retry_defaults=self._get_experimental_retry_defaults()
         )
         self.templates["experimental_service"] = template
+    
+    def _validate_template_exists(self, template_name: str) -> PolicyTemplate:
+        """Validate template exists and return it."""
+        template = self.templates.get(template_name)
+        if not template:
+            raise ValueError(f"Template not found: {template_name}")
+        return template
+    
+    def _build_policy_from_configs(
+        self,
+        service_name: str,
+        template: PolicyTemplate,
+        environment: EnvironmentType,
+        circuit_config: CircuitConfig,
+        retry_config: RetryConfig
+    ) -> ResiliencePolicy:
+        """Build policy from configurations."""
+        return ResiliencePolicy(
+            name=service_name,
+            service_tier=template.service_tier,
+            environment=environment,
+            circuit_config=circuit_config,
+            retry_config=retry_config
+        )
     
     def create_policy_from_template(
         self, 
@@ -184,23 +240,23 @@ class UnifiedPolicyManager:
         overrides: Optional[Dict[str, Any]] = None
     ) -> ResiliencePolicy:
         """Create policy from template with optional overrides."""
-        template = self.templates.get(template_name)
-        if not template:
-            raise ValueError(f"Template not found: {template_name}")
-        
+        template = self._validate_template_exists(template_name)
         circuit_config = self._create_circuit_config(service_name, template, overrides)
         retry_config = self._create_retry_config(template, overrides)
-        
-        policy = ResiliencePolicy(
-            name=service_name,
-            service_tier=template.service_tier,
-            environment=environment,
-            circuit_config=circuit_config,
-            retry_config=retry_config
+        policy = self._build_policy_from_configs(
+            service_name, template, environment, circuit_config, retry_config
         )
-        
         self.policies[service_name] = policy
         return policy
+    
+    def _apply_circuit_overrides(
+        self, 
+        config_dict: Dict[str, Any], 
+        overrides: Optional[Dict[str, Any]]
+    ) -> None:
+        """Apply circuit configuration overrides."""
+        if overrides and "circuit" in overrides:
+            config_dict.update(overrides["circuit"])
     
     def _create_circuit_config(
         self, 
@@ -210,10 +266,17 @@ class UnifiedPolicyManager:
     ) -> CircuitConfig:
         """Create circuit breaker config from template."""
         config_dict = template.circuit_defaults.copy()
-        if overrides and "circuit" in overrides:
-            config_dict.update(overrides["circuit"])
-        
+        self._apply_circuit_overrides(config_dict, overrides)
         return CircuitConfig(name=service_name, **config_dict)
+    
+    def _apply_retry_overrides(
+        self, 
+        config_dict: Dict[str, Any], 
+        overrides: Optional[Dict[str, Any]]
+    ) -> None:
+        """Apply retry configuration overrides."""
+        if overrides and "retry" in overrides:
+            config_dict.update(overrides["retry"])
     
     def _create_retry_config(
         self, 
@@ -222,14 +285,24 @@ class UnifiedPolicyManager:
     ) -> RetryConfig:
         """Create retry config from template."""
         config_dict = template.retry_defaults.copy()
-        if overrides and "retry" in overrides:
-            config_dict.update(overrides["retry"])
-        
+        self._apply_retry_overrides(config_dict, overrides)
         return RetryConfig(**config_dict)
     
     def get_policy(self, service_name: str) -> Optional[ResiliencePolicy]:
         """Get policy for service."""
         return self.policies.get(service_name)
+    
+    def _apply_enabled_update(self, policy: ResiliencePolicy, updates: Dict[str, Any]) -> None:
+        """Apply enabled status update."""
+        if "enabled" in updates:
+            policy.enabled = updates["enabled"]
+    
+    def _apply_config_updates(self, policy: ResiliencePolicy, updates: Dict[str, Any]) -> None:
+        """Apply configuration updates to policy."""
+        if "circuit" in updates:
+            self._update_circuit_config(policy.circuit_config, updates["circuit"])
+        if "retry" in updates:
+            self._update_retry_config(policy.retry_config, updates["retry"])
     
     def update_policy(
         self, 
@@ -240,16 +313,8 @@ class UnifiedPolicyManager:
         policy = self.policies.get(service_name)
         if not policy:
             return False
-        
-        if "enabled" in updates:
-            policy.enabled = updates["enabled"]
-        
-        if "circuit" in updates:
-            self._update_circuit_config(policy.circuit_config, updates["circuit"])
-        
-        if "retry" in updates:
-            self._update_retry_config(policy.retry_config, updates["retry"])
-        
+        self._apply_enabled_update(policy, updates)
+        self._apply_config_updates(policy, updates)
         logger.info(f"Updated policy for service: {service_name}")
         return True
     
@@ -331,30 +396,49 @@ class UnifiedPolicyManager:
             "backoff_strategy": config.backoff_strategy.value
         }
     
-    def validate_policy(self, policy: ResiliencePolicy) -> List[str]:
-        """Validate policy configuration."""
-        errors = []
-        
+    def _validate_circuit_timeout(self, policy: ResiliencePolicy, errors: List[str]) -> None:
+        """Validate circuit timeout configuration."""
         if policy.circuit_config.timeout_seconds <= 0:
             errors.append("Circuit timeout must be positive")
-        
+    
+    def _validate_retry_attempts(self, policy: ResiliencePolicy, errors: List[str]) -> None:
+        """Validate retry attempts configuration."""
         if policy.retry_config.max_attempts <= 0:
             errors.append("Max retry attempts must be positive")
-        
+    
+    def _validate_retry_delays(self, policy: ResiliencePolicy, errors: List[str]) -> None:
+        """Validate retry delay configuration."""
         if policy.retry_config.base_delay >= policy.retry_config.max_delay:
             errors.append("Base delay must be less than max delay")
-        
+    
+    def validate_policy(self, policy: ResiliencePolicy) -> List[str]:
+        """Validate policy configuration."""
+        errors: List[str] = []
+        self._validate_circuit_timeout(policy, errors)
+        self._validate_retry_attempts(policy, errors)
+        self._validate_retry_delays(policy, errors)
         return errors
     
-    def get_policy_summary(self) -> Dict[str, Any]:
-        """Get summary of all policies."""
+    def _calculate_policy_counts(self) -> tuple[int, int]:
+        """Calculate total and enabled policy counts."""
         total_policies = len(self.policies)
         enabled_policies = sum(1 for p in self.policies.values() if p.enabled)
-        
+        return total_policies, enabled_policies
+    
+    def _calculate_tier_counts(self) -> Dict[str, int]:
+        """Calculate policy counts by service tier."""
         tier_counts = {}
         for tier in ServiceTier:
             tier_counts[tier.value] = len(self.get_policies_by_tier(tier))
-        
+        return tier_counts
+    
+    def _build_summary_dict(
+        self,
+        total_policies: int,
+        enabled_policies: int,
+        tier_counts: Dict[str, int]
+    ) -> Dict[str, Any]:
+        """Build summary dictionary from counts."""
         return {
             "total_policies": total_policies,
             "enabled_policies": enabled_policies,
@@ -362,6 +446,12 @@ class UnifiedPolicyManager:
             "policies_by_tier": tier_counts,
             "available_templates": list(self.templates.keys())
         }
+    
+    def get_policy_summary(self) -> Dict[str, Any]:
+        """Get summary of all policies."""
+        total_policies, enabled_policies = self._calculate_policy_counts()
+        tier_counts = self._calculate_tier_counts()
+        return self._build_summary_dict(total_policies, enabled_policies, tier_counts)
 
 
 # Global policy manager instance
@@ -389,15 +479,20 @@ def create_database_service_policy(
     )
 
 
+def _get_llm_service_overrides() -> Dict[str, Dict[str, Any]]:
+    """Get configuration overrides for LLM services."""
+    return {
+        "circuit": {"timeout_seconds": 30.0, "failure_threshold": 5},
+        "retry": {"max_attempts": 4, "base_delay": 2.0, "max_delay": 120.0}
+    }
+
+
 def create_llm_service_policy(
     service_name: str, 
     environment: EnvironmentType = EnvironmentType.PRODUCTION
 ) -> ResiliencePolicy:
     """Create policy for LLM services."""
-    overrides = {
-        "circuit": {"timeout_seconds": 30.0, "failure_threshold": 5},
-        "retry": {"max_attempts": 4, "base_delay": 2.0, "max_delay": 120.0}
-    }
+    overrides = _get_llm_service_overrides()
     return policy_manager.create_policy_from_template(
         service_name, "essential_service", environment, overrides
     )

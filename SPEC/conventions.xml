@@ -3,11 +3,12 @@
     <metadata>
         <name>Coding Conventions</name>
         <type>conventions</type>
-        <version>2.1</version>
-        <last_updated>2025-08-16</last_updated>
+        <version>2.2</version>
+        <last_updated>2025-08-18</last_updated>
         <description>
             MANDATORY coding standards for the Netra AI platform.
             These conventions ensure consistency, maintainability, and prevent regressions.
+            Includes agent naming conventions to distinguish between LLM-based agents, infrastructure components, and utility modules.
             Updated to reflect current architectural compliance status: 37.7% (6,433 violations).
         </description>
     </metadata>
@@ -231,6 +232,80 @@
             <types>PascalCase with I/T prefix: IUser, TResponse</types>
         </convention>
     </naming>
+
+    <agent-naming-conventions>
+        <convention id="agent-classification" priority="CRITICAL">
+            <title>Agent Component Classification</title>
+            <description>Clear naming patterns to distinguish between different component types in the Netra platform</description>
+            
+            <agent-suffix>
+                <description>Reserved ONLY for LLM-based SubAgents that extend BaseSubAgent</description>
+                <pattern>*SubAgent or *Agent</pattern>
+                <examples>
+                    <example>TriageSubAgent: LLM-powered triage operations</example>
+                    <example>DataSubAgent: LLM-powered data analysis</example>
+                    <example>ReportingSubAgent: LLM-powered report generation</example>
+                </examples>
+                <requirement>Must extend BaseSubAgent and use LLM capabilities</requirement>
+            </agent-suffix>
+            
+            <executor-suffix>
+                <description>Infrastructure pattern implementations for orchestration and management</description>
+                <pattern>*Executor or *Manager</pattern>
+                <examples>
+                    <example>BroadcastExecutor: Message broadcasting infrastructure</example>
+                    <example>MCPManager: MCP protocol management</example>
+                    <example>ExecutionManager: Task execution coordination</example>
+                </examples>
+                <responsibility>Handles infrastructure patterns, orchestration, and system coordination</responsibility>
+            </executor-suffix>
+            
+            <service-suffix>
+                <description>Specialized processing units for domain-specific operations</description>
+                <pattern>*Service</pattern>
+                <examples>
+                    <example>GitHubAnalyzerService: Specialized GitHub analysis</example>
+                    <example>DemoService: Demo functionality processing</example>
+                    <example>ValidationService: Data validation operations</example>
+                </examples>
+                <responsibility>Focused processing units for specific business domains</responsibility>
+            </service-suffix>
+            
+            <utility-naming>
+                <description>Descriptive names for utility and support modules</description>
+                <patterns>
+                    <pattern>*Dispatcher: Request routing and dispatching</pattern>
+                    <pattern>*Handler: Event and error handling</pattern>
+                    <pattern>*Validator: Data validation operations</pattern>
+                    <pattern>*Processor: Data processing operations</pattern>
+                </patterns>
+                <examples>
+                    <example>ToolDispatcher: Routes tool requests to appropriate handlers</example>
+                    <example>StateManager: Manages application state</example>
+                    <example>ErrorHandler: Centralized error processing</example>
+                    <example>MessageValidator: Validates incoming messages</example>
+                </examples>
+                <avoid>Using "Agent" suffix for utility modules</avoid>
+            </utility-naming>
+        </convention>
+        
+        <convention id="naming-enforcement" priority="HIGH">
+            <title>Naming Convention Enforcement</title>
+            <description>Guidelines for consistent application of naming patterns</description>
+            <rules>
+                <rule>Use descriptive, intention-revealing names</rule>
+                <rule>Match suffix to actual component responsibility</rule>
+                <rule>Avoid generic names like "Handler" or "Manager" without context</rule>
+                <rule>Maintain consistency within related component groups</rule>
+            </rules>
+            <verification>
+                <check>Component functionality matches naming suffix</check>
+                <check>LLM usage justifies "Agent" suffix</check>
+                <check>Infrastructure components use appropriate "Executor/Manager" suffixes</check>
+                <check>Business logic components use "Service" suffix</check>
+            </verification>
+        </convention>
+    </agent-naming-conventions>
 
     <logging>
         <convention id="backend-logging">

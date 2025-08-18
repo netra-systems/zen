@@ -39,6 +39,7 @@ export { DEFAULT_CONFIG, INITIAL_STATS } from './types';
 
 // Convenience exports for backward compatibility
 import { CoreReconciliationService } from './core';
+import { MessageMatcher } from './matcher';
 export { CoreReconciliationService as ReconciliationService };
 
 /**

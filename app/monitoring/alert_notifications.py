@@ -16,10 +16,25 @@ logger = central_logger.get_logger(__name__)
 
 def create_default_notification_configs() -> Dict[NotificationChannel, NotificationConfig]:
     """Create default notification channel configurations."""
+    return _build_all_notification_configs()
+
+def _build_all_notification_configs() -> Dict[NotificationChannel, NotificationConfig]:
+    """Build all notification channel configurations."""
+    basic_configs = _build_basic_configs()
+    extended_configs = _build_extended_configs()
+    return {**basic_configs, **extended_configs}
+
+def _build_basic_configs() -> Dict[NotificationChannel, NotificationConfig]:
+    """Build basic notification configurations."""
     return {
         NotificationChannel.LOG: _create_log_config(),
         NotificationChannel.EMAIL: _create_email_config(),
-        NotificationChannel.SLACK: _create_slack_config(),
+        NotificationChannel.SLACK: _create_slack_config()
+    }
+
+def _build_extended_configs() -> Dict[NotificationChannel, NotificationConfig]:
+    """Build extended notification configurations."""
+    return {
         NotificationChannel.WEBHOOK: _create_webhook_config(),
         NotificationChannel.DATABASE: _create_database_config()
     }
@@ -37,13 +52,16 @@ def _create_log_config() -> NotificationConfig:
 
 def _create_email_config() -> NotificationConfig:
     """Create email notification configuration."""
-    return NotificationConfig(
-        channel=NotificationChannel.EMAIL,
-        enabled=False,
-        rate_limit_per_hour=20,
-        min_level=AlertLevel.ERROR,
-        config=_get_email_default_config()
-    )
+    config_params = _get_email_config_params()
+    return NotificationConfig(**config_params)
+
+def _get_email_config_params() -> Dict[str, Any]:
+    """Get email configuration parameters."""
+    return {
+        "channel": NotificationChannel.EMAIL, "enabled": False,
+        "rate_limit_per_hour": 20, "min_level": AlertLevel.ERROR,
+        "config": _get_email_default_config()
+    }
 
 def _get_email_default_config() -> Dict[str, Any]:
     """Get default email configuration."""
@@ -52,13 +70,16 @@ def _get_email_default_config() -> Dict[str, Any]:
 
 def _create_slack_config() -> NotificationConfig:
     """Create Slack notification configuration."""
-    return NotificationConfig(
-        channel=NotificationChannel.SLACK,
-        enabled=False,
-        rate_limit_per_hour=50,
-        min_level=AlertLevel.WARNING,
-        config=_get_slack_default_config()
-    )
+    config_params = _get_slack_config_params()
+    return NotificationConfig(**config_params)
+
+def _get_slack_config_params() -> Dict[str, Any]:
+    """Get Slack configuration parameters."""
+    return {
+        "channel": NotificationChannel.SLACK, "enabled": False,
+        "rate_limit_per_hour": 50, "min_level": AlertLevel.WARNING,
+        "config": _get_slack_default_config()
+    }
 
 def _get_slack_default_config() -> Dict[str, Any]:
     """Get default Slack configuration."""
@@ -67,13 +88,16 @@ def _get_slack_default_config() -> Dict[str, Any]:
 
 def _create_webhook_config() -> NotificationConfig:
     """Create webhook notification configuration."""
-    return NotificationConfig(
-        channel=NotificationChannel.WEBHOOK,
-        enabled=False,
-        rate_limit_per_hour=100,
-        min_level=AlertLevel.WARNING,
-        config=_get_webhook_default_config()
-    )
+    config_params = _get_webhook_config_params()
+    return NotificationConfig(**config_params)
+
+def _get_webhook_config_params() -> Dict[str, Any]:
+    """Get webhook configuration parameters."""
+    return {
+        "channel": NotificationChannel.WEBHOOK, "enabled": False,
+        "rate_limit_per_hour": 100, "min_level": AlertLevel.WARNING,
+        "config": _get_webhook_default_config()
+    }
 
 def _get_webhook_default_config() -> Dict[str, Any]:
     """Get default webhook configuration."""
@@ -221,11 +245,22 @@ class NotificationSender:
 
     def _prepare_alert_data(self, alert: Alert) -> Dict[str, Any]:
         """Prepare alert data for database insertion."""
+        basic_data = self._get_alert_basic_data(alert)
+        metadata_data = self._get_alert_metadata_data(alert)
+        return {**basic_data, **metadata_data}
+
+    def _get_alert_basic_data(self, alert: Alert) -> Dict[str, Any]:
+        """Get basic alert data fields."""
         return {
             'alert_id': alert.alert_id,
             'level': alert.level.value,
             'title': alert.title,
-            'message': alert.message,
+            'message': alert.message
+        }
+
+    def _get_alert_metadata_data(self, alert: Alert) -> Dict[str, Any]:
+        """Get alert metadata and additional fields."""
+        return {
             'component': alert.agent_name or 'system',
             'timestamp': alert.timestamp,
             'metadata': str(alert.metadata) if alert.metadata else None,
@@ -331,10 +366,14 @@ class NotificationDeliveryManager:
     ) -> None:
         """Process notification for a single channel."""
         config = configs.get(channel)
-        
+        await self._handle_channel_delivery(alert, channel, config)
+
+    async def _handle_channel_delivery(
+        self, alert: Alert, channel: NotificationChannel, config: Optional[NotificationConfig]
+    ) -> None:
+        """Handle delivery for specific channel."""
         if not self._should_deliver_notification(alert, channel, config):
             return
-        
         await self._send_single_notification(alert, channel, config)
     
     def register_notification_handler(

@@ -40,4 +40,4 @@ create_backups_bucket = true
 
 # Auth service configuration
 jwt_secret = "staging-jwt-secret-change-in-production"
-auth_database_url = "postgresql://auth:authpass@localhost:5432/auth_staging"
+auth_database_url = "postgresql://auth:${var.db_password}@/auth_staging?host=/cloudsql/${var.project_id}:${var.region}:netra-staging-db"

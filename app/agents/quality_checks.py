@@ -23,15 +23,20 @@ class QualityValidator(QualityValidatorInterface):
     def __init__(self, quality_gate_service: Optional[QualityGateService],
                  strict_mode: bool = False):
         """Initialize quality validator."""
+        self._initialize_services(quality_gate_service, strict_mode)
+        self.quality_stats = self._initialize_stats()
+    
+    def _initialize_services(self, quality_gate_service: Optional[QualityGateService], strict_mode: bool) -> None:
+        """Initialize quality gate services."""
         self.quality_gate_service = quality_gate_service
         self.strict_mode = strict_mode
         self._core_validator = CoreQualityValidator(quality_gate_service, strict_mode)
-        self.quality_stats: Dict[str, int] = {
-            'total_validations': 0,
-            'passed': 0,
-            'failed': 0,
-            'retried': 0,
-            'fallbacks_used': 0
+    
+    def _initialize_stats(self) -> Dict[str, int]:
+        """Initialize quality statistics."""
+        return {
+            'total_validations': 0, 'passed': 0, 'failed': 0,
+            'retried': 0, 'fallbacks_used': 0
         }
     
     async def validate_agent_output(self, 
@@ -46,11 +51,25 @@ class QualityValidator(QualityValidatorInterface):
         if not agent_output:
             return None
         
+        return await self._validate_and_finalize(agent_output, agent_name, context, state)
+    
+    async def _validate_and_finalize(self, agent_output: str, agent_name: str, 
+                                   context: AgentExecutionContext, state: DeepAgentState) -> ValidationResult:
+        """Execute validation and finalize result."""
+        validation_result = await self._execute_validation(agent_output, agent_name, context, state)
+        return self._finalize_validation(validation_result, agent_name)
+    
+    async def _execute_validation(
+        self, agent_output: str, agent_name: str, context: AgentExecutionContext, state: DeepAgentState
+    ) -> ValidationResult:
+        """Execute validation process."""
         content_type = self._get_content_type_for_agent(agent_name)
-        validation_result = await self._perform_validation(
+        return await self._perform_validation(
             agent_output, content_type, context, agent_name, state
         )
-        
+    
+    def _finalize_validation(self, validation_result: ValidationResult, agent_name: str) -> ValidationResult:
+        """Finalize validation with stats and logging."""
         self._update_validation_stats(validation_result)
         self._log_validation_result(validation_result, agent_name)
         return validation_result
@@ -120,14 +139,18 @@ class QualityValidator(QualityValidatorInterface):
     
     def _get_output_extractor(self, agent_name: str):
         """Get output extractor function for agent."""
-        agent_output_map = {
+        agent_extractors = self._build_agent_extractor_map()
+        return agent_extractors.get(agent_name)
+    
+    def _build_agent_extractor_map(self) -> Dict[str, Any]:
+        """Build mapping of agent names to output extractors."""
+        return {
             'TriageSubAgent': lambda s: s.triage_result.get('summary', '') if hasattr(s, 'triage_result') else None,
             'DataSubAgent': lambda s: s.data_result.get('data', '') if hasattr(s, 'data_result') else None,
             'OptimizationsCoreSubAgent': lambda s: s.optimizations_result.get('recommendations', '') if hasattr(s, 'optimizations_result') else None,
             'ActionsToMeetGoalsSubAgent': lambda s: s.actions_result.get('actions', '') if hasattr(s, 'actions_result') else None,
             'ReportingSubAgent': lambda s: s.report_result.get('report', '') if hasattr(s, 'report_result') else None
         }
-        return agent_output_map.get(agent_name)
     
     def _convert_output_to_string(self, output: Any) -> Optional[str]:
         """Convert output to string if needed."""
@@ -158,14 +181,17 @@ class QualityValidator(QualityValidatorInterface):
             return self._create_default_validation_result(content)
         
         content_type_enum = self._convert_content_type_string(content_type)
-        validation_result = await self._core_validator.validate_content(
+        return await self._execute_core_validation(content, content_type_enum, context)
+    
+    async def _execute_core_validation(self, content: str, content_type_enum, 
+                                     context: Optional[Dict[str, Any]]) -> QualityValidationResult:
+        """Execute core validation process."""
+        return await self._core_validator.validate_content(
             content=content,
             content_type=content_type_enum,
             context=context or {},
             strict_mode=self.strict_mode
         )
-        
-        return validation_result
     
     def _convert_content_type_string(self, content_type: Optional[str]) -> ContentType:
         """Convert string content type to ContentType enum"""
@@ -178,19 +204,41 @@ class QualityValidator(QualityValidatorInterface):
     
     def _create_default_validation_result(self, content: str) -> QualityValidationResult:
         """Create default validation result when no quality gate service available"""
-        from datetime import datetime, UTC
+        metrics = self._build_default_metrics(content)
+        return self._build_default_validation_result(metrics)
+    
+    def _build_default_metrics(self, content: str):
+        """Build default quality metrics."""
         from app.schemas.quality_types import QualityMetrics, QualityLevel
-        
-        metrics = QualityMetrics(
-            overall_score=50.0, quality_level=QualityLevel.ACCEPTABLE,
-            specificity_score=50.0, actionability_score=50.0,
-            quantification_score=50.0, relevance_score=50.0,
-            completeness_score=50.0, novelty_score=50.0, clarity_score=50.0,
-            word_count=len(content.split()), generic_phrase_count=0,
-            circular_reasoning_detected=False, hallucination_risk=0.0,
-            redundancy_ratio=0.0, issues=[], suggestions=[]
-        )
-        
+        base_scores = self._get_default_scores()
+        additional_metrics = self._get_default_additional_metrics(content)
+        return QualityMetrics(**base_scores, **additional_metrics)
+    
+    def _get_default_scores(self) -> Dict[str, Any]:
+        """Get default scoring values."""
+        return {
+            'overall_score': 50.0, 'quality_level': self._get_default_quality_level(),
+            'specificity_score': 50.0, 'actionability_score': 50.0,
+            'quantification_score': 50.0, 'relevance_score': 50.0,
+            'completeness_score': 50.0, 'novelty_score': 50.0, 'clarity_score': 50.0
+        }
+    
+    def _get_default_quality_level(self):
+        """Get default quality level."""
+        from app.schemas.quality_types import QualityLevel
+        return QualityLevel.ACCEPTABLE
+    
+    def _get_default_additional_metrics(self, content: str) -> Dict[str, Any]:
+        """Get default additional metrics."""
+        return {
+            'word_count': len(content.split()), 'generic_phrase_count': 0,
+            'circular_reasoning_detected': False, 'hallucination_risk': 0.0,
+            'redundancy_ratio': 0.0, 'issues': [], 'suggestions': []
+        }
+    
+    def _build_default_validation_result(self, metrics) -> QualityValidationResult:
+        """Build default validation result structure."""
+        from app.schemas.quality_types import QualityValidationResult
         return QualityValidationResult(
             passed=True, metrics=metrics, retry_suggested=False,
             retry_prompt_adjustments=[], validation_duration_ms=0.0

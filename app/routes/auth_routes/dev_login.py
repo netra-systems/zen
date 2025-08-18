@@ -28,12 +28,7 @@ async def get_or_create_dev_user(db: AsyncSession, email: str):
     return user
 
 
-async def handle_dev_login(
-    dev_login_request: DevLoginRequest, 
-    oauth_config,
-    db: AsyncSession, 
-    security_service: SecurityService
-):
+async def handle_dev_login(dev_login_request: DevLoginRequest, oauth_config, db: AsyncSession, security_service: SecurityService):
     """Handle development login request."""
     validate_dev_login_allowed(oauth_config)
     user = await get_or_create_dev_user(db, dev_login_request.email)

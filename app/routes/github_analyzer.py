@@ -16,7 +16,7 @@ from app.schemas.github_analyzer import (
     AIOperationsMap
 )
 from app.schemas.core_models import User
-from app.agents.github_analyzer import GitHubAnalyzerAgent
+from app.agents.github_analyzer import GitHubAnalyzerService
 from app.agents.supervisor.agent_execution_core import AgentExecutionCore
 from app.llm.llm_manager import LLMManager
 from app.agents.tool_dispatcher import ToolDispatcher
@@ -60,17 +60,21 @@ def _build_analysis_response(analysis_id: str, request: AnalysisRequest) -> Anal
         analyzed_at=datetime.utcnow(), status="started"
     )
 
+async def _process_analysis_request(request: AnalysisRequest, background_tasks: BackgroundTasks, current_user: User, db: AsyncSession) -> AnalysisResponse:
+    """Process analysis request with validation and background task setup."""
+    _validate_user_permissions(current_user)
+    analysis_id = str(uuid.uuid4())
+    _store_analysis_initial_status(analysis_id, request, current_user.id)
+    _start_background_analysis(background_tasks, analysis_id, request, current_user.id, db)
+    return _build_analysis_response(analysis_id, request)
+
 @router.post("/analyze", response_model=AnalysisResponse)
 async def analyze_repository(
     request: AnalysisRequest, background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db_session)
 ) -> AnalysisResponse:
     """Analyze a GitHub repository for AI operations."""
-    _validate_user_permissions(current_user)
-    analysis_id = str(uuid.uuid4())
-    _store_analysis_initial_status(analysis_id, request, current_user.id)
-    _start_background_analysis(background_tasks, analysis_id, request, current_user.id, db)
-    return _build_analysis_response(analysis_id, request)
+    return await _process_analysis_request(request, background_tasks, current_user, db)
 
 
 def _validate_analysis_exists(analysis_id: str) -> None:
@@ -119,20 +123,22 @@ def _build_analysis_results_response(analysis_id: str, status_data: Dict[str, An
         status="completed"
     )
 
-@router.get("/analysis/{analysis_id}/results", response_model=AnalysisResponse)
-async def get_analysis_results(
-    analysis_id: str, current_user: User = Depends(get_current_user)
-) -> AnalysisResponse:
-    """Get results of a completed repository analysis."""
+async def _get_validated_analysis_results(analysis_id: str, current_user: User) -> AnalysisResponse:
+    """Get validated analysis results with access checks."""
     _validate_analysis_exists(analysis_id)
     status_data = analysis_store[analysis_id]
     _validate_analysis_access(status_data, current_user)
     _validate_analysis_completed(status_data)
     return _build_analysis_results_response(analysis_id, status_data)
 
+@router.get("/analysis/{analysis_id}/results", response_model=AnalysisResponse)
+async def get_analysis_results(analysis_id: str, current_user: User = Depends(get_current_user)) -> AnalysisResponse:
+    """Get results of a completed repository analysis."""
+    return await _get_validated_analysis_results(analysis_id, current_user)
+
 
 async def _run_analysis_workflow(
-    analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerAgent
+    analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService
 ) -> None:
     """Run the analysis workflow."""
     result = await _execute_repository_analysis(analysis_id, request, analyzer)
@@ -140,38 +146,40 @@ async def _run_analysis_workflow(
     await _cleanup_analysis_resources(analyzer)
     logger.info(f"Analysis {analysis_id} completed successfully")
 
-async def run_analysis(
-    analysis_id: str, request: AnalysisRequest, user_id: str, db: AsyncSession
-) -> None:
-    """Run repository analysis in background."""
+async def _run_analysis_safe(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService) -> None:
+    """Run analysis with error handling."""
     try:
-        analyzer = await _initialize_analysis_components(analysis_id)
         await _run_analysis_workflow(analysis_id, request, analyzer)
     except Exception as e:
         await _handle_analysis_error(analysis_id, e)
 
+async def run_analysis(analysis_id: str, request: AnalysisRequest, user_id: str, db: AsyncSession) -> None:
+    """Run repository analysis in background."""
+    analyzer = await _initialize_analysis_components(analysis_id)
+    await _run_analysis_safe(analysis_id, request, analyzer)
 
-async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerAgent:
+
+async def _initialize_analysis_components(analysis_id: str) -> GitHubAnalyzerService:
     """Initialize analysis components and update progress."""
-    _update_analysis_status(analysis_id, "running", 10, "Initializing agent")
+    _update_analysis_status(analysis_id, "running", 10, "Initializing service")
     llm_manager = LLMManager()
     tool_dispatcher = ToolDispatcher()
-    analyzer = GitHubAnalyzerAgent(llm_manager, tool_dispatcher)
+    analyzer = GitHubAnalyzerService(llm_manager, tool_dispatcher)
     _update_analysis_status(analysis_id, "running", 20, "Starting analysis")
     return analyzer
 
 
-async def _execute_repository_analysis(
-    analysis_id: str, 
-    request: AnalysisRequest, 
-    analyzer: GitHubAnalyzerAgent
-) -> Any:
-    """Execute the repository analysis with proper context."""
+async def _setup_analysis_environment(request: AnalysisRequest) -> tuple:
+    """Setup analysis state and context."""
     from app.agents.state import DeepAgentState
     state = DeepAgentState()
     context = _build_analysis_context(request)
-    result = await analyzer.execute(state, context)
-    return result
+    return state, context
+
+async def _execute_repository_analysis(analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerService) -> Any:
+    """Execute the repository analysis with proper context."""
+    state, context = await _setup_analysis_environment(request)
+    return await analyzer.execute(state, context)
 
 
 def _build_analysis_context(request: AnalysisRequest) -> Dict[str, Any]:
@@ -202,7 +210,7 @@ async def _finalize_analysis_result(analysis_id: str, result: Any) -> None:
     _process_analysis_result(analysis_id, result)
 
 
-async def _cleanup_analysis_resources(analyzer: GitHubAnalyzerAgent) -> None:
+async def _cleanup_analysis_resources(analyzer: GitHubAnalyzerService) -> None:
     """Clean up analysis resources."""
     await analyzer.github_client.cleanup()
 
@@ -261,13 +269,15 @@ def _build_delete_response() -> Dict[str, str]:
     """Build delete success response."""
     return {"message": "Analysis deleted successfully"}
 
-@router.delete("/analysis/{analysis_id}")
-async def delete_analysis(
-    analysis_id: str, current_user: User = Depends(get_current_user)
-) -> Dict[str, str]:
-    """Delete an analysis."""
+async def _delete_analysis_safe(analysis_id: str, current_user: User) -> Dict[str, str]:
+    """Delete analysis with validation and access checks."""
     _validate_analysis_exists(analysis_id)
     status_data = analysis_store[analysis_id]
     _validate_analysis_access(status_data, current_user)
     _delete_analysis_from_store(analysis_id)
     return _build_delete_response()
+
+@router.delete("/analysis/{analysis_id}")
+async def delete_analysis(analysis_id: str, current_user: User = Depends(get_current_user)) -> Dict[str, str]:
+    """Delete an analysis."""
+    return await _delete_analysis_safe(analysis_id, current_user)

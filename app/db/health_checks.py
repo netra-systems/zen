@@ -22,15 +22,23 @@ class DatabaseHealthChecker:
         """Get default database list if none provided."""
         return databases if databases else ["postgres", "clickhouse", "redis"]
     
-    def _initialize_health_check_results(self) -> Dict:
-        """Initialize health check results structure."""
+    def _set_check_timestamp(self) -> None:
+        """Set the last check time to current UTC time."""
         self.last_check_time = datetime.now(UTC)
+    
+    def _create_base_results_structure(self) -> Dict:
+        """Create base health check results structure."""
         return {
             "overall_status": "healthy",
             "timestamp": self.last_check_time.isoformat(),
             "database_checks": {},
             "issues": []
         }
+    
+    def _initialize_health_check_results(self) -> Dict:
+        """Initialize health check results structure."""
+        self._set_check_timestamp()
+        return self._create_base_results_structure()
     
     async def _process_single_database_check(self, db: str, results: Dict) -> None:
         """Process health check for single database."""

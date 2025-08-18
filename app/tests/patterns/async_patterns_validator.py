@@ -1,17 +1,18 @@
 """
-Comprehensive Async Test Patterns Validator
+Comprehensive Async Test Patterns Validator - Main Module
 Validates all async testing patterns follow best practices
 Maximum 300 lines, functions ≤8 lines
 """
 
 import ast
 import asyncio
-import inspect
-import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+from typing import Dict, List, Any
 from dataclasses import dataclass
-import pytest
+
+from .async_pattern_analyzer import AsyncPatternAnalyzer
+from .async_resource_detector import AsyncResourceLeakDetector  
+from .async_performance_analyzer import AsyncPerformanceAnalyzer
 
 
 @dataclass
@@ -22,73 +23,6 @@ class ValidationResult:
     is_valid: bool
     issues: List[str]
     recommendations: List[str]
-
-
-class AsyncPatternAnalyzer(ast.NodeVisitor):
-    """AST analyzer for async test patterns"""
-    
-    def __init__(self):
-        self.issues: List[str] = []
-        self.async_functions: List[str] = []
-        self.pytest_asyncio_decorators: List[int] = []
-        self.async_mocks: List[str] = []
-    
-    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        """Visit function definitions to check async patterns"""
-        if self._is_async_function(node):
-            self.async_functions.append(node.name)
-            self._check_function_patterns(node)
-        self.generic_visit(node)
-    
-    def visit_AsyncFunctionDef(self, node: ast.AsyncFunctionDef) -> None:
-        """Visit async function definitions"""
-        self.async_functions.append(node.name)
-        self._check_async_function_patterns(node)
-        self.generic_visit(node)
-    
-    def _is_async_function(self, node: ast.FunctionDef) -> bool:
-        """Check if function is async test function"""
-        return (node.name.startswith('test_') and 
-                any(isinstance(decorator, ast.Name) and 
-                    decorator.id == 'asyncio' for decorator in node.decorator_list))
-    
-    def _check_function_patterns(self, node: ast.FunctionDef) -> None:
-        """Check function-level async patterns"""
-        self._check_pytest_asyncio_decorator(node)
-        self._check_function_length(node)
-    
-    def _check_async_function_patterns(self, node: ast.AsyncFunctionDef) -> None:
-        """Check async function specific patterns"""
-        self._check_await_usage(node)
-        self._check_exception_handling(node)
-    
-    def _check_pytest_asyncio_decorator(self, node: ast.FunctionDef) -> None:
-        """Check for redundant pytest.mark.asyncio decorators"""
-        for decorator in node.decorator_list:
-            if (isinstance(decorator, ast.Attribute) and
-                isinstance(decorator.value, ast.Attribute) and
-                getattr(decorator.value.attr, 'id', None) == 'mark'):
-                self.pytest_asyncio_decorators.append(node.lineno)
-    
-    def _check_function_length(self, node: ast.FunctionDef) -> None:
-        """Check function length compliance (≤8 lines)"""
-        if hasattr(node, 'end_lineno') and node.end_lineno:
-            length = node.end_lineno - node.lineno
-            if length > 8:
-                self.issues.append(f"Function {node.name} exceeds 8 lines ({length})")
-    
-    def _check_await_usage(self, node: ast.AsyncFunctionDef) -> None:
-        """Check proper await usage in async functions"""
-        # Count await statements
-        await_count = sum(1 for _ in ast.walk(node) if isinstance(_, ast.Await))
-        if await_count == 0:
-            self.issues.append(f"Async function {node.name} has no await statements")
-    
-    def _check_exception_handling(self, node: ast.AsyncFunctionDef) -> None:
-        """Check async exception handling patterns"""
-        try_blocks = [n for n in ast.walk(node) if isinstance(n, ast.Try)]
-        if len(try_blocks) == 0 and 'error' in node.name.lower():
-            self.issues.append(f"Error test {node.name} should have exception handling")
 
 
 class AsyncTestPatternValidator:
@@ -121,28 +55,43 @@ class AsyncTestPatternValidator:
     def _validate_file(self, test_file: Path) -> ValidationResult:
         """Validate single test file"""
         try:
-            with open(test_file, 'r', encoding='utf-8') as f:
-                content = f.read()
-            
-            tree = ast.parse(content)
-            analyzer = AsyncPatternAnalyzer()
-            analyzer.visit(tree)
-            
-            return ValidationResult(
-                test_file=str(test_file),
-                pattern_type="async_test",
-                is_valid=len(analyzer.issues) == 0,
-                issues=analyzer.issues,
-                recommendations=self._generate_recommendations(analyzer)
-            )
+            content = self._read_file_content(test_file)
+            analyzer = self._analyze_file_content(content)
+            return self._create_success_result(test_file, analyzer)
         except Exception as e:
-            return ValidationResult(
-                test_file=str(test_file),
-                pattern_type="async_test",
-                is_valid=False,
-                issues=[f"Parse error: {str(e)}"],
-                recommendations=["Fix syntax errors"]
-            )
+            return self._create_error_result(test_file, e)
+    
+    def _read_file_content(self, test_file: Path) -> str:
+        """Read file content safely"""
+        with open(test_file, 'r', encoding='utf-8') as f:
+            return f.read()
+    
+    def _analyze_file_content(self, content: str) -> AsyncPatternAnalyzer:
+        """Analyze file content with AST"""
+        tree = ast.parse(content)
+        analyzer = AsyncPatternAnalyzer()
+        analyzer.visit(tree)
+        return analyzer
+    
+    def _create_success_result(self, test_file: Path, analyzer: AsyncPatternAnalyzer) -> ValidationResult:
+        """Create successful validation result"""
+        return ValidationResult(
+            test_file=str(test_file),
+            pattern_type="async_test",
+            is_valid=len(analyzer.issues) == 0,
+            issues=analyzer.issues,
+            recommendations=self._generate_recommendations(analyzer)
+        )
+    
+    def _create_error_result(self, test_file: Path, error: Exception) -> ValidationResult:
+        """Create error validation result"""
+        return ValidationResult(
+            test_file=str(test_file),
+            pattern_type="async_test",
+            is_valid=False,
+            issues=[f"Parse error: {str(error)}"],
+            recommendations=["Fix syntax errors"]
+        )
     
     def _generate_recommendations(self, analyzer: AsyncPatternAnalyzer) -> List[str]:
         """Generate recommendations based on analysis"""
@@ -164,130 +113,127 @@ class AsyncTestPatternValidator:
             summary["failed_files"] += 1
         
         summary["total_issues"] += len(result.issues)
-
-
-class AsyncResourceLeakDetector:
-    """Detect async resource leaks in tests"""
     
-    def __init__(self):
-        self.initial_state: Dict[str, Any] = {}
-        self.final_state: Dict[str, Any] = {}
+    def generate_validation_report(self) -> Dict[str, Any]:
+        """Generate comprehensive validation report"""
+        summary_stats = self._calculate_summary_stats()
+        all_issues = self._aggregate_all_issues()
+        recommendations = self._compile_all_recommendations()
+        return self._format_validation_report(summary_stats, all_issues, recommendations)
     
-    async def start_monitoring(self) -> None:
-        """Start monitoring async resources"""
-        self.initial_state = await self._capture_state()
-    
-    async def stop_monitoring(self) -> Dict[str, Any]:
-        """Stop monitoring and detect leaks"""
-        self.final_state = await self._capture_state()
-        return self._detect_leaks()
-    
-    async def _capture_state(self) -> Dict[str, Any]:
-        """Capture current async state"""
-        loop = asyncio.get_event_loop()
+    def _calculate_summary_stats(self) -> Dict[str, Any]:
+        """Calculate validation summary statistics"""
+        total_files = len(self.results)
+        passed_files = sum(1 for result in self.results if result.is_valid)
+        failed_files = total_files - passed_files
+        success_rate = (passed_files / total_files * 100) if total_files > 0 else 0
         return {
-            "tasks": len(asyncio.all_tasks()),
-            "handles": len(getattr(loop, '_ready', [])),
-            "open_files": len(getattr(loop, '_fd_map', {}))
+            "total_files": total_files,
+            "passed_files": passed_files,
+            "failed_files": failed_files,
+            "success_rate": success_rate
         }
     
-    def _detect_leaks(self) -> Dict[str, Any]:
-        """Detect resource leaks between states"""
-        leaks = {}
-        for resource, initial_count in self.initial_state.items():
-            final_count = self.final_state.get(resource, 0)
-            if final_count > initial_count:
-                leaks[resource] = final_count - initial_count
-        
+    def _aggregate_all_issues(self) -> List[str]:
+        """Aggregate issues from all validation results"""
+        all_issues = []
+        for result in self.results:
+            all_issues.extend(result.issues)
+        return all_issues
+    
+    def _format_validation_report(self, summary: Dict, issues: List, recommendations: List) -> Dict[str, Any]:
+        """Format final validation report"""
         return {
-            "has_leaks": len(leaks) > 0,
-            "leaks": leaks,
-            "recommendations": self._get_leak_recommendations(leaks)
+            "summary": summary,
+            "issues": issues,
+            "recommendations": recommendations
         }
     
-    def _get_leak_recommendations(self, leaks: Dict[str, int]) -> List[str]:
-        """Get recommendations for fixing leaks"""
-        recommendations = []
-        
-        if "tasks" in leaks:
-            recommendations.append("Cancel background tasks in test cleanup")
-        
-        if "handles" in leaks:
-            recommendations.append("Close async handles and connections")
-        
-        return recommendations
-
-
-class AsyncPerformanceAnalyzer:
-    """Analyze async test performance"""
+    def _compile_all_recommendations(self) -> List[str]:
+        """Compile all recommendations from validation results"""
+        all_recommendations = []
+        for result in self.results:
+            all_recommendations.extend(result.recommendations)
+        return list(set(all_recommendations))
     
-    def __init__(self):
-        self.performance_data: Dict[str, Any] = {}
+    def check_test_coverage(self, test_files: List[Path]) -> Dict[str, Any]:
+        """Check test coverage for async patterns"""
+        coverage_data = self._initialize_coverage_data()
+        self._aggregate_file_coverage(test_files, coverage_data)
+        self._calculate_coverage_percentage(coverage_data)
+        return coverage_data
     
-    async def analyze_test_performance(self, test_func) -> Dict[str, Any]:
-        """Analyze performance of async test function"""
-        import time
-        
-        start_time = time.time()
-        start_tasks = len(asyncio.all_tasks())
-        
+    def _initialize_coverage_data(self) -> Dict[str, Any]:
+        """Initialize coverage data structure"""
+        return {
+            "async_tests": 0,
+            "sync_tests": 0,
+            "mixed_tests": 0,
+            "coverage_percentage": 0.0
+        }
+    
+    def _aggregate_file_coverage(self, test_files: List[Path], coverage_data: Dict) -> None:
+        """Aggregate coverage data from all files"""
+        for test_file in test_files:
+            file_coverage = self._analyze_file_coverage(test_file)
+            coverage_data["async_tests"] += file_coverage["async_count"]
+            coverage_data["sync_tests"] += file_coverage["sync_count"]
+            coverage_data["mixed_tests"] += file_coverage["mixed_count"]
+    
+    def _calculate_coverage_percentage(self, coverage_data: Dict) -> None:
+        """Calculate async test coverage percentage"""
+        total_tests = sum([coverage_data["async_tests"], coverage_data["sync_tests"], coverage_data["mixed_tests"]])
+        coverage_data["coverage_percentage"] = (coverage_data["async_tests"] / total_tests * 100) if total_tests > 0 else 0
+    
+    def _analyze_file_coverage(self, test_file: Path) -> Dict[str, Any]:
+        """Analyze coverage patterns in a single file"""
         try:
-            await test_func()
-            success = True
-            error = None
-        except Exception as e:
-            success = False
-            error = str(e)
-        
-        end_time = time.time()
-        end_tasks = len(asyncio.all_tasks())
-        
-        return {
-            "duration": end_time - start_time,
-            "success": success,
-            "error": error,
-            "task_creation": end_tasks - start_tasks,
-            "recommendations": self._get_performance_recommendations(end_time - start_time)
-        }
+            content = self._read_file_content(test_file)
+            tree = ast.parse(content)
+            return self._count_test_patterns(tree)
+        except Exception:
+            return {"async_count": 0, "sync_count": 0, "mixed_count": 0}
     
-    def _get_performance_recommendations(self, duration: float) -> List[str]:
-        """Get performance recommendations"""
-        recommendations = []
-        
-        if duration > 1.0:
-            recommendations.append("Consider breaking down long tests")
-        
-        if duration > 5.0:
-            recommendations.append("Test may need timeout handling")
-        
-        return recommendations
+    def _count_test_patterns(self, tree: ast.AST) -> Dict[str, int]:
+        """Count different test patterns in AST"""
+        async_count = len([n for n in ast.walk(tree) if isinstance(n, ast.AsyncFunctionDef) and n.name.startswith('test_')])
+        sync_count = len([n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name.startswith('test_') and not any(isinstance(d, ast.Name) and d.id == 'asyncio' for d in n.decorator_list)])
+        mixed_count = 0  # Mixed patterns not implemented yet
+        return {"async_count": async_count, "sync_count": sync_count, "mixed_count": mixed_count}
 
 
 async def validate_async_test_suite() -> Dict[str, Any]:
     """Validate entire async test suite"""
-    validator = AsyncTestPatternValidator()
-    leak_detector = AsyncResourceLeakDetector()
-    performance_analyzer = AsyncPerformanceAnalyzer()
-    
-    # Start monitoring
-    await leak_detector.start_monitoring()
-    
-    # Validate patterns
+    validators = _initialize_validators()
+    await validators["leak_detector"].start_monitoring()
+    validation_results = _run_pattern_validation(validators["validator"])
+    leak_results = await validators["leak_detector"].stop_monitoring()
+    return _compile_final_report(validation_results, leak_results)
+
+
+def _initialize_validators() -> Dict[str, Any]:
+    """Initialize all validator components"""
+    return {
+        "validator": AsyncTestPatternValidator(),
+        "leak_detector": AsyncResourceLeakDetector(),
+        "performance_analyzer": AsyncPerformanceAnalyzer()
+    }
+
+
+def _run_pattern_validation(validator: AsyncTestPatternValidator) -> Dict[str, Any]:
+    """Run pattern validation on project"""
     project_path = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1"
-    validation_results = validator.validate_project(project_path)
-    
-    # Check for leaks
-    leak_results = await leak_detector.stop_monitoring()
-    
-    # Compile final report
-    report = {
+    return validator.validate_project(project_path)
+
+
+def _compile_final_report(validation_results: Dict, leak_results: Dict) -> Dict[str, Any]:
+    """Compile final validation report"""
+    return {
         "pattern_validation": validation_results,
         "resource_leaks": leak_results,
         "overall_status": "PASS" if validation_results["failed_files"] == 0 else "FAIL",
         "recommendations": _compile_recommendations(validation_results, leak_results)
     }
-    
-    return report
 
 
 def _compile_recommendations(validation_results: Dict, leak_results: Dict) -> List[str]:

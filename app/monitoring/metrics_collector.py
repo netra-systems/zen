@@ -82,12 +82,16 @@ class MetricsCollector:
     
     def _create_collection_tasks(self) -> List[asyncio.Task]:
         """Create all collection tasks."""
-        task_creators = [
+        task_creators = self._get_task_creators()
+        return [asyncio.create_task(creator()) for creator in task_creators]
+
+    def _get_task_creators(self) -> List:
+        """Get list of task creator functions."""
+        return [
             self._collect_system_metrics, self._collect_database_metrics,
             self._collect_websocket_metrics, self._collect_memory_metrics,
             self._cleanup_old_metrics
         ]
-        return [asyncio.create_task(creator()) for creator in task_creators]
     
     async def stop_collection(self) -> None:
         """Stop metric collection."""
@@ -98,11 +102,15 @@ class MetricsCollector:
     async def _cancel_collection_tasks(self) -> None:
         """Cancel all collection tasks."""
         for task in self._collection_tasks:
-            task.cancel()
-            try:
-                await task
-            except asyncio.CancelledError:
-                pass
+            await self._cancel_single_task(task)
+
+    async def _cancel_single_task(self, task: asyncio.Task) -> None:
+        """Cancel a single collection task."""
+        task.cancel()
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
     
     async def _collect_system_metrics(self) -> None:
         """Collect system resource metrics."""
@@ -125,9 +133,24 @@ class MetricsCollector:
 
     def _collect_system_stats(self) -> Dict[str, Any]:
         """Collect raw system statistics."""
+        return self._gather_all_system_stats()
+
+    def _gather_all_system_stats(self) -> Dict[str, Any]:
+        """Gather all system statistics from psutil."""
+        cpu_data = self._get_cpu_data()
+        io_data = self._get_io_data()
+        return {**cpu_data, **io_data}
+
+    def _get_cpu_data(self) -> Dict[str, Any]:
+        """Get CPU and memory data."""
         return {
             "cpu_percent": psutil.cpu_percent(interval=1),
-            "memory": psutil.virtual_memory(),
+            "memory": psutil.virtual_memory()
+        }
+
+    def _get_io_data(self) -> Dict[str, Any]:
+        """Get I/O and network data."""
+        return {
             "disk_io": psutil.disk_io_counters(),
             "net_io": psutil.net_io_counters(),
             "connections": len(psutil.net_connections())
@@ -138,24 +161,42 @@ class MetricsCollector:
         memory = stats["memory"]
         disk_io = stats["disk_io"]
         net_io = stats["net_io"]
-        
-        return SystemResourceMetrics(
-            cpu_percent=stats["cpu_percent"], memory_percent=memory.percent,
-            memory_available_mb=memory.available / (1024 * 1024),
-            disk_io_read_mb=disk_io.read_bytes / (1024 * 1024) if disk_io else 0,
-            disk_io_write_mb=disk_io.write_bytes / (1024 * 1024) if disk_io else 0,
-            network_bytes_sent=net_io.bytes_sent if net_io else 0,
-            network_bytes_recv=net_io.bytes_recv if net_io else 0,
-            active_connections=stats["connections"]
-        )
+        return self._create_system_metrics(stats, memory, disk_io, net_io)
+
+    def _create_system_metrics(self, stats: Dict, memory, disk_io, net_io) -> SystemResourceMetrics:
+        """Create SystemResourceMetrics from extracted components."""
+        basic_metrics = self._get_basic_system_metrics(stats, memory)
+        io_metrics = self._get_io_system_metrics(disk_io, net_io)
+        return SystemResourceMetrics(**basic_metrics, **io_metrics, active_connections=stats["connections"])
+
+    def _get_basic_system_metrics(self, stats: Dict, memory) -> Dict[str, float]:
+        """Get basic system metrics (CPU and memory)."""
+        return {
+            "cpu_percent": stats["cpu_percent"], 
+            "memory_percent": memory.percent,
+            "memory_available_mb": memory.available / (1024 * 1024)
+        }
+
+    def _get_io_system_metrics(self, disk_io, net_io) -> Dict[str, float]:
+        """Get I/O system metrics (disk and network)."""
+        return {
+            "disk_io_read_mb": disk_io.read_bytes / (1024 * 1024) if disk_io else 0,
+            "disk_io_write_mb": disk_io.write_bytes / (1024 * 1024) if disk_io else 0,
+            "network_bytes_sent": net_io.bytes_sent if net_io else 0,
+            "network_bytes_recv": net_io.bytes_recv if net_io else 0
+        }
     
     def _record_system_metrics(self, metrics: SystemResourceMetrics) -> None:
         """Record system metrics to buffer."""
+        self._record_individual_system_metrics(metrics)
+        self._metrics_buffer["system_resources"].append(metrics)
+
+    def _record_individual_system_metrics(self, metrics: SystemResourceMetrics) -> None:
+        """Record individual system metric values."""
         self._record_metric("system.cpu_percent", metrics.cpu_percent)
         self._record_metric("system.memory_percent", metrics.memory_percent)
         self._record_metric("system.memory_available_mb", metrics.memory_available_mb)
         self._record_metric("system.active_connections", metrics.active_connections)
-        self._metrics_buffer["system_resources"].append(metrics)
     
     async def _collect_database_metrics(self) -> None:
         """Collect database performance metrics."""
@@ -181,6 +222,10 @@ class MetricsCollector:
         from app.db.postgres import get_pool_status
         pool_status = get_pool_status()
         perf_stats = performance_manager.get_performance_stats()
+        return self._build_db_stats_dict(pool_status, perf_stats)
+
+    def _build_db_stats_dict(self, pool_status: Dict, perf_stats: Dict) -> Dict[str, Any]:
+        """Build database statistics dictionary."""
         return {
             "pool_status": pool_status, "perf_stats": perf_stats,
             "query_stats": perf_stats.get("query_optimizer", {})
@@ -188,18 +233,41 @@ class MetricsCollector:
 
     def _build_database_metrics(self, stats: Dict[str, Any]) -> DatabaseMetrics:
         """Build DatabaseMetrics from raw stats."""
+        pool_data = self._extract_pool_data(stats)
+        query_data = self._extract_query_data(stats)
+        return self._create_database_metrics(pool_data, query_data, stats)
+        
+    def _extract_pool_data(self, stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract pool status data from stats."""
         pool_status = stats["pool_status"]
         sync_pool = pool_status.get("sync", {})
         async_pool = pool_status.get("async", {})
-        query_stats = stats["query_stats"]
+        return {"sync_pool": sync_pool, "async_pool": async_pool}
         
+    def _extract_query_data(self, stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract query statistics from stats."""
+        return stats["query_stats"]
+        
+    def _create_database_metrics(self, pool_data: Dict, query_data: Dict, stats: Dict) -> DatabaseMetrics:
+        """Create DatabaseMetrics from extracted data."""
+        sync_pool, async_pool = pool_data["sync_pool"], pool_data["async_pool"]
+        connection_data = self._calculate_connection_data(sync_pool, async_pool)
+        return self._build_database_metrics_instance(connection_data, query_data, stats)
+
+    def _calculate_connection_data(self, sync_pool: Dict, async_pool: Dict) -> Dict[str, int]:
+        """Calculate connection data from pool information."""
+        return {
+            "active_connections": sync_pool.get("total", 0) + async_pool.get("total", 0),
+            "pool_size": sync_pool.get("size", 0) + async_pool.get("size", 0),
+            "pool_overflow": sync_pool.get("overflow", 0) + async_pool.get("overflow", 0)
+        }
+
+    def _build_database_metrics_instance(self, connection_data: Dict, query_data: Dict, stats: Dict) -> DatabaseMetrics:
+        """Build DatabaseMetrics instance from processed data."""
         return DatabaseMetrics(
-            timestamp=datetime.now(),
-            active_connections=(sync_pool.get("total", 0) + async_pool.get("total", 0)),
-            pool_size=(sync_pool.get("size", 0) + async_pool.get("size", 0)),
-            pool_overflow=(sync_pool.get("overflow", 0) + async_pool.get("overflow", 0)),
-            total_queries=query_stats.get("total_queries", 0), avg_query_time=0.0,
-            slow_queries=query_stats.get("slow_queries", 0),
+            timestamp=datetime.now(), **connection_data,
+            total_queries=query_data.get("total_queries", 0), avg_query_time=0.0,
+            slow_queries=query_data.get("slow_queries", 0),
             cache_hit_rate=self._calculate_cache_hit_ratio(stats["perf_stats"])
         )
     
@@ -220,15 +288,16 @@ class MetricsCollector:
     async def _collect_single_websocket_metrics_cycle(self) -> None:
         """Collect WebSocket metrics for one cycle."""
         try:
-            metrics = self._gather_websocket_metrics()
+            metrics = await self._gather_websocket_metrics()
             self._record_websocket_metrics(metrics)
         except Exception as e:
             logger.error(f"Error collecting WebSocket metrics: {e}")
     
-    def _gather_websocket_metrics(self) -> WebSocketMetrics:
+    async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
-        from app.websocket.connection import connection_manager
-        conn_stats = connection_manager.get_stats()
+        from app.websocket.connection_manager import get_connection_manager
+        conn_manager = get_connection_manager()
+        conn_stats = await conn_manager.get_stats()
         return self._build_websocket_metrics(conn_stats)
 
     def _build_websocket_metrics(self, conn_stats: Dict[str, Any]) -> WebSocketMetrics:
@@ -349,10 +418,21 @@ class MetricsCollector:
     
     def _calculate_summary_stats(self, values: List[float]) -> Dict[str, float]:
         """Calculate summary statistics for metric values."""
+        basic_stats = self._get_basic_stats(values)
+        extended_stats = self._get_extended_stats(values)
+        return {**basic_stats, **extended_stats}
+
+    def _get_basic_stats(self, values: List[float]) -> Dict[str, float]:
+        """Get basic statistical measures."""
         return {
             "count": len(values),
             "min": min(values),
-            "max": max(values),
+            "max": max(values)
+        }
+
+    def _get_extended_stats(self, values: List[float]) -> Dict[str, float]:
+        """Get extended statistical measures."""
+        return {
             "avg": sum(values) / len(values),
             "current": values[-1] if values else 0.0
         }

@@ -28,16 +28,33 @@ class BroadcastMetrics:
     
     def __init__(self) -> None:
         """Initialize broadcast metrics tracking."""
-        self.stats = {
-            "total_broadcasts": 0,
-            "successful_sends": 0,
-            "failed_sends": 0,
-            "room_broadcasts": 0,
-            "global_broadcasts": 0,
-            "job_broadcasts": 0,
-            "average_room_size": 0.0
+        self._initialize_broadcast_stats()
+        self._initialize_room_tracking()
+
+    def _initialize_broadcast_stats(self) -> None:
+        """Initialize core broadcast statistics."""
+        base_stats = self._get_base_broadcast_stats()
+        extended_stats = self._get_extended_broadcast_stats()
+        self.stats = {**base_stats, **extended_stats}
+
+    def _get_base_broadcast_stats(self) -> Dict[str, Any]:
+        """Get base broadcast statistics dictionary."""
+        return {
+            "total_broadcasts": 0, "successful_sends": 0, "failed_sends": 0,
+            "room_broadcasts": 0
         }
-        self.room_stats: Dict[str, Dict[str, int]] = defaultdict(lambda: {"messages": 0, "members": 0})
+
+    def _get_extended_broadcast_stats(self) -> Dict[str, Any]:
+        """Get extended broadcast statistics dictionary."""
+        return {
+            "global_broadcasts": 0, "job_broadcasts": 0, "average_room_size": 0.0
+        }
+
+    def _initialize_room_tracking(self) -> None:
+        """Initialize room-specific tracking data."""
+        self.room_stats: Dict[str, Dict[str, int]] = defaultdict(
+            lambda: {"messages": 0, "members": 0}
+        )
 
     def record_broadcast(self, broadcast_type: str, recipients: int, successful: int) -> None:
         """Record broadcast operation with metrics."""
@@ -136,6 +153,10 @@ class UnifiedBroadcastingManager:
     def __init__(self, manager) -> None:
         """Initialize with reference to unified manager."""
         self.manager = manager
+        self._initialize_components()
+
+    def _initialize_components(self) -> None:
+        """Initialize broadcasting components."""
         self.room_manager = RoomManager()
         self.metrics = BroadcastMetrics()
 
@@ -149,7 +170,7 @@ class UnifiedBroadcastingManager:
 
     async def _prepare_message_for_broadcast(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         """Prepare and validate message for broadcasting."""
-        prepared = self.manager.messaging._prepare_and_validate_message(message)
+        prepared = self.manager.messaging.message_handler.prepare_and_validate_message(message)
         if prepared:
             prepared["broadcast_timestamp"] = time.time()
         return prepared
@@ -278,16 +299,16 @@ class UnifiedBroadcastingManager:
     # Batch notification methods for efficiency
     async def notify_batch_complete(self, job_id: str, batch_num: int, batch_size: int) -> bool:
         """Send batch completion notification."""
-        batch_message = {
+        batch_message = self._create_batch_completion_message(job_id, batch_num, batch_size)
+        return await self.broadcast_to_job(job_id, batch_message)
+
+    def _create_batch_completion_message(self, job_id: str, batch_num: int, batch_size: int) -> Dict[str, Any]:
+        """Create batch completion message structure."""
+        return {
             "type": "batch_complete",
-            "payload": {
-                "job_id": job_id,
-                "batch_num": batch_num,
-                "batch_size": batch_size
-            },
+            "payload": {"job_id": job_id, "batch_num": batch_num, "batch_size": batch_size},
             "timestamp": time.time()
         }
-        return await self.broadcast_to_job(job_id, batch_message)
 
     # Administrative broadcasting methods
     async def broadcast_system_announcement(self, announcement: str, priority: bool = False) -> BroadcastResult:
@@ -312,11 +333,19 @@ class UnifiedBroadcastingManager:
 
     def get_broadcasting_stats(self) -> Dict[str, Any]:
         """Get comprehensive broadcasting statistics."""
-        room_stats = {
+        room_stats = self._create_room_statistics()
+        return self._combine_stats_with_metrics(room_stats)
+
+    def _create_room_statistics(self) -> Dict[str, Any]:
+        """Create room management statistics."""
+        return {
             "total_rooms": self.room_manager.get_total_rooms(),
             "room_details": {room_id: self.room_manager.get_room_count(room_id) 
                            for room_id in self.room_manager.room_members.keys()}
         }
+
+    def _combine_stats_with_metrics(self, room_stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Combine room stats with broadcast metrics."""
         return {
             **self.metrics.get_metrics(),
             "room_management": room_stats

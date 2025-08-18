@@ -39,7 +39,7 @@ class AdaptiveCircuitBreaker:
     
     def _initialize_metrics(self) -> None:
         """Initialize metrics tracking."""
-        self.total_requests = self.successful_requests = self.failed_requests = self.slow_requests = 0
+        self.total_calls = self.successful_calls = self.failed_calls = self.slow_requests = 0
         self.adaptive_failure_threshold = self.config.failure_threshold
         self.recent_response_times: List[float] = []
     
@@ -56,7 +56,7 @@ class AdaptiveCircuitBreaker:
     
     async def call(self, operation: Callable, *args, **kwargs) -> Any:
         """Execute operation with circuit breaker protection."""
-        self.total_requests += 1
+        self.total_calls += 1
         if not self.should_allow_request():
             raise CircuitBreakerOpenError(f"Circuit breaker {self.name} is open")
         return await self._execute_protected_operation(operation, *args, **kwargs)
@@ -65,14 +65,22 @@ class AdaptiveCircuitBreaker:
         """Execute operation with timing and error handling."""
         start_time = datetime.now()
         try:
-            result = await operation(*args, **kwargs)
-            response_time = self._calculate_response_time(start_time)
-            self._record_success(response_time)
-            return result
+            return await self._execute_operation_and_record_success(operation, start_time, *args, **kwargs)
         except Exception as e:
-            response_time = self._calculate_response_time(start_time)
-            self._record_failure(response_time)
+            self._handle_operation_exception(e, start_time)
             raise e
+
+    async def _execute_operation_and_record_success(self, operation: Callable, start_time: datetime, *args, **kwargs) -> Any:
+        """Execute operation and record success metrics."""
+        result = await operation(*args, **kwargs)
+        response_time = self._calculate_response_time(start_time)
+        self._record_success(response_time)
+        return result
+
+    def _handle_operation_exception(self, error: Exception, start_time: datetime) -> None:
+        """Handle operation exception and record failure."""
+        response_time = self._calculate_response_time(start_time)
+        self._record_failure(response_time)
     
     def _calculate_response_time(self, start_time: datetime) -> float:
         """Calculate response time in seconds."""
@@ -80,13 +88,17 @@ class AdaptiveCircuitBreaker:
     
     def should_allow_request(self) -> bool:
         """Check if request should be allowed through circuit."""
-        if self.state == CircuitBreakerState.CLOSED:
-            return True
-        elif self.state == CircuitBreakerState.OPEN:
-            return self._handle_open_state()
-        elif self.state == CircuitBreakerState.HALF_OPEN:
-            return True
-        return False
+        state_handlers = self._get_state_handlers()
+        handler = state_handlers.get(self.state, lambda: False)
+        return handler()
+    
+    def _get_state_handlers(self) -> Dict:
+        """Get mapping of circuit states to handler functions."""
+        return {
+            CircuitBreakerState.CLOSED: lambda: True,
+            CircuitBreakerState.OPEN: self._handle_open_state,
+            CircuitBreakerState.HALF_OPEN: lambda: True
+        }
     
     def _handle_open_state(self) -> bool:
         """Handle request when circuit is open."""
@@ -97,7 +109,7 @@ class AdaptiveCircuitBreaker:
     
     def _record_success(self, response_time: float) -> None:
         """Record successful operation."""
-        self.successful_requests += 1
+        self.successful_calls += 1
         self._track_response_time(response_time)
         self._handle_success_by_state()
     
@@ -124,7 +136,7 @@ class AdaptiveCircuitBreaker:
     
     def _record_failure(self, response_time: float) -> None:
         """Record failed operation."""
-        self.failed_requests += 1
+        self.failed_calls += 1
         self.failure_count += 1
         self.last_failure_time = datetime.now()
         self._adapt_threshold_if_enabled()
@@ -253,11 +265,22 @@ class AdaptiveCircuitBreaker:
     
     def _build_metrics_dict(self) -> Dict[str, Any]:
         """Build comprehensive metrics dictionary."""
+        basic_metrics = self._get_basic_metrics()
+        calculated_metrics = self._get_calculated_metrics()
+        return {**basic_metrics, **calculated_metrics}
+
+    def _get_basic_metrics(self) -> Dict[str, Any]:
+        """Get basic circuit breaker metrics."""
         return {
             'name': self.name, 'state': self.state.value,
             'failure_count': self.failure_count, 'success_count': self.success_count,
-            'total_requests': self.total_requests, 'successful_requests': self.successful_requests,
-            'failed_requests': self.failed_requests, 'slow_requests': self.slow_requests,
+            'total_calls': self.total_calls, 'successful_calls': self.successful_calls,
+            'failed_calls': self.failed_calls, 'slow_requests': self.slow_requests
+        }
+
+    def _get_calculated_metrics(self) -> Dict[str, Any]:
+        """Get calculated metrics for circuit breaker."""
+        return {
             'failure_rate': self._calculate_failure_rate(),
             'adaptive_threshold': self.adaptive_failure_threshold,
             'last_state_change': self.last_state_change.isoformat(),
@@ -267,7 +290,7 @@ class AdaptiveCircuitBreaker:
     
     def _calculate_failure_rate(self) -> float:
         """Calculate current failure rate."""
-        return self.failed_requests / max(self.total_requests, 1)
+        return self.failed_calls / max(self.total_calls, 1)
     
     def _get_last_health_status(self) -> Optional[str]:
         """Get last health status as string."""

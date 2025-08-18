@@ -65,19 +65,24 @@ class EnterpriseHealthTelemetry:
     def record_health_check(self, results: Dict[str, HealthCheckResult]) -> None:
         """Record health check results for telemetry analysis."""
         timestamp = datetime.now(UTC)
-        
-        # Calculate availability metrics
         availability = self._calculate_availability(results)
+        self._record_availability_metric(availability, timestamp)
+        self._record_all_component_metrics(results, timestamp)
+        self._check_sla_compliance(availability, timestamp)
+        self._last_health_check = timestamp
+    
+    def _record_availability_metric(self, availability: float, timestamp: datetime) -> None:
+        """Record availability metric."""
         self._record_metric(MetricType.AVAILABILITY, availability, timestamp)
-        
-        # Record component-specific metrics
+    
+    def _record_all_component_metrics(
+        self, 
+        results: Dict[str, HealthCheckResult], 
+        timestamp: datetime
+    ) -> None:
+        """Record metrics for all components."""
         for component_name, result in results.items():
             self._record_component_metrics(component_name, result, timestamp)
-        
-        # Check for SLA violations
-        self._check_sla_compliance(availability, timestamp)
-        
-        self._last_health_check = timestamp
     
     def _calculate_availability(self, results: Dict[str, HealthCheckResult]) -> float:
         """Calculate current availability percentage."""
@@ -94,15 +99,30 @@ class EnterpriseHealthTelemetry:
         timestamp: datetime
     ) -> None:
         """Record metrics for individual component."""
-        # Response time metric
+        self._record_response_time_metric(component_name, result, timestamp)
+        self._record_error_rate_metric(component_name, result, timestamp)
+    
+    def _record_response_time_metric(
+        self, 
+        component_name: str, 
+        result: HealthCheckResult, 
+        timestamp: datetime
+    ) -> None:
+        """Record response time metric for component."""
         self._record_metric(
             MetricType.RESPONSE_TIME, 
             result.response_time_ms, 
             timestamp, 
             component_name
         )
-        
-        # Error rate metric (1.0 for failure, 0.0 for success)
+    
+    def _record_error_rate_metric(
+        self, 
+        component_name: str, 
+        result: HealthCheckResult, 
+        timestamp: datetime
+    ) -> None:
+        """Record error rate metric for component."""
         error_rate = 0.0 if result.success else 1.0
         self._record_metric(
             MetricType.ERROR_RATE, 
@@ -119,16 +139,28 @@ class EnterpriseHealthTelemetry:
         component_name: Optional[str] = None
     ) -> None:
         """Record a health metric."""
-        metric = HealthMetric(
+        metric = self._create_health_metric(metric_type, value, timestamp, component_name)
+        self._append_metric_and_cleanup(metric)
+    
+    def _create_health_metric(
+        self, 
+        metric_type: MetricType, 
+        value: float, 
+        timestamp: datetime, 
+        component_name: Optional[str]
+    ) -> HealthMetric:
+        """Create a health metric instance."""
+        return HealthMetric(
             metric_type=metric_type,
             value=value,
             timestamp=timestamp,
             service_name=self.service_name,
             component_name=component_name
         )
+    
+    def _append_metric_and_cleanup(self, metric: HealthMetric) -> None:
+        """Append metric and cleanup old metrics."""
         self._metrics.append(metric)
-        
-        # Keep only last 24 hours of metrics
         self._cleanup_old_metrics()
     
     def _check_sla_compliance(self, availability: float, timestamp: datetime) -> None:
@@ -140,34 +172,49 @@ class EnterpriseHealthTelemetry:
     
     def _record_sla_violation(self, availability: float, timestamp: datetime) -> None:
         """Record an SLA violation event."""
-        # Check if we already have an active violation
-        active_violations = [v for v in self._violations if not v.resolved]
-        
+        active_violations = self._get_active_violations()
         if not active_violations:
-            violation = SLAViolation(
-                violation_id=f"{self.service_name}_{int(timestamp.timestamp())}",
-                service_name=self.service_name,
-                component_name="system",
-                violation_type="availability_below_sla",
-                start_time=timestamp,
-                impact_severity=self._determine_severity(availability)
-            )
+            violation = self._create_sla_violation(availability, timestamp)
             self._violations.append(violation)
-            logger.warning(f"SLA violation detected: {availability:.2f}% < {self.sla_target}%")
+            self._log_sla_violation(availability)
+    
+    def _get_active_violations(self) -> List[SLAViolation]:
+        """Get list of currently active violations."""
+        return [v for v in self._violations if not v.resolved]
+    
+    def _create_sla_violation(self, availability: float, timestamp: datetime) -> SLAViolation:
+        """Create new SLA violation instance."""
+        return SLAViolation(
+            violation_id=f"{self.service_name}_{int(timestamp.timestamp())}",
+            service_name=self.service_name,
+            component_name="system",
+            violation_type="availability_below_sla",
+            start_time=timestamp,
+            impact_severity=self._determine_severity(availability)
+        )
+    
+    def _log_sla_violation(self, availability: float) -> None:
+        """Log SLA violation warning."""
+        logger.warning(f"SLA violation detected: {availability:.2f}% < {self.sla_target}%")
     
     def _resolve_active_violations(self, timestamp: datetime) -> None:
         """Resolve any active SLA violations."""
         for violation in self._violations:
             if not violation.resolved:
-                violation.end_time = timestamp
-                violation.resolved = True
-                
-                # Calculate recovery time
-                if violation.start_time:
-                    recovery_time = (timestamp - violation.start_time).total_seconds() * 1000
-                    self._record_metric(MetricType.RECOVERY_TIME, recovery_time, timestamp)
-                
-                logger.info(f"SLA violation resolved: {violation.violation_id}")
+                self._resolve_single_violation(violation, timestamp)
+    
+    def _resolve_single_violation(self, violation: SLAViolation, timestamp: datetime) -> None:
+        """Resolve a single SLA violation."""
+        violation.end_time = timestamp
+        violation.resolved = True
+        self._record_recovery_time(violation, timestamp)
+        logger.info(f"SLA violation resolved: {violation.violation_id}")
+    
+    def _record_recovery_time(self, violation: SLAViolation, timestamp: datetime) -> None:
+        """Record recovery time for resolved violation."""
+        if violation.start_time:
+            recovery_time = (timestamp - violation.start_time).total_seconds() * 1000
+            self._record_metric(MetricType.RECOVERY_TIME, recovery_time, timestamp)
     
     def _determine_severity(self, availability: float) -> str:
         """Determine severity of SLA violation."""
@@ -192,7 +239,10 @@ class EnterpriseHealthTelemetry:
     def get_enterprise_metrics(self) -> Dict[str, Any]:
         """Get Enterprise-grade metrics for SLA monitoring."""
         recent_metrics = self._get_recent_metrics(hours=1)
-        
+        return self._build_enterprise_metrics_dict(recent_metrics)
+    
+    def _build_enterprise_metrics_dict(self, recent_metrics: List[HealthMetric]) -> Dict[str, Any]:
+        """Build enterprise metrics dictionary."""
         return {
             "current_availability": self._get_current_availability(),
             "sla_target": self.sla_target,
@@ -212,15 +262,21 @@ class EnterpriseHealthTelemetry:
     
     def _get_current_availability(self) -> float:
         """Get current availability percentage."""
-        recent_availability = [
+        recent_availability = self._get_recent_availability_metrics()
+        return self._extract_latest_availability(recent_availability)
+    
+    def _get_recent_availability_metrics(self) -> List[HealthMetric]:
+        """Get recent availability metrics."""
+        return [
             m for m in self._get_recent_metrics(hours=1) 
             if m.metric_type == MetricType.AVAILABILITY
         ]
-        
-        if not recent_availability:
+    
+    def _extract_latest_availability(self, availability_metrics: List[HealthMetric]) -> float:
+        """Extract latest availability value or return default."""
+        if not availability_metrics:
             return 100.0
-        
-        return recent_availability[-1].value
+        return availability_metrics[-1].value
     
     def _is_sla_compliant(self) -> bool:
         """Check if currently SLA compliant."""
@@ -233,26 +289,38 @@ class EnterpriseHealthTelemetry:
     
     def _get_average_response_time(self, metrics: List[HealthMetric]) -> float:
         """Calculate average response time from metrics."""
-        response_times = [
+        response_times = self._extract_response_times(metrics)
+        return self._calculate_average(response_times)
+    
+    def _extract_response_times(self, metrics: List[HealthMetric]) -> List[float]:
+        """Extract response time values from metrics."""
+        return [
             m.value for m in metrics 
             if m.metric_type == MetricType.RESPONSE_TIME
         ]
-        
-        if not response_times:
+    
+    def _calculate_average(self, values: List[float]) -> float:
+        """Calculate average of values or return 0.0 if empty."""
+        if not values:
             return 0.0
-        
-        return sum(response_times) / len(response_times)
+        return sum(values) / len(values)
     
     def _get_error_rate(self, metrics: List[HealthMetric]) -> float:
         """Calculate error rate percentage from metrics."""
-        error_metrics = [
+        error_metrics = self._extract_error_metrics(metrics)
+        return self._calculate_error_rate_percentage(error_metrics)
+    
+    def _extract_error_metrics(self, metrics: List[HealthMetric]) -> List[HealthMetric]:
+        """Extract error rate metrics from all metrics."""
+        return [
             m for m in metrics 
             if m.metric_type == MetricType.ERROR_RATE
         ]
-        
+    
+    def _calculate_error_rate_percentage(self, error_metrics: List[HealthMetric]) -> float:
+        """Calculate error rate percentage from error metrics."""
         if not error_metrics:
             return 0.0
-        
         total_errors = sum(m.value for m in error_metrics)
         return (total_errors / len(error_metrics)) * 100.0
 

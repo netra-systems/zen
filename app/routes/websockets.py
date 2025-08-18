@@ -82,12 +82,14 @@ async def _handle_websocket_disconnect(e: WebSocketDisconnect, user_id_str: str,
     reason = e.reason or "Client disconnect"
     await manager.disconnect_user(user_id_str, websocket, code=e.code, reason=reason)
 
+def _is_websocket_connected(websocket: WebSocket) -> bool:
+    """Check if WebSocket is connected."""
+    return hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED
+
 async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: WebSocket):
     """Handle WebSocket error."""
     logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
-    # Only try to disconnect if WebSocket is connected (not connecting or already disconnected)
-    if (hasattr(websocket, 'application_state') and 
-        websocket.application_state == WebSocketState.CONNECTED):
+    if _is_websocket_connected(websocket):
         await manager.disconnect_user(user_id_str, websocket, code=1011, reason="Server error")
 
 async def _setup_websocket_auth(websocket: WebSocket):

@@ -12,228 +12,15 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
-import json
 import time
-from typing import Dict, Any, List, Optional, Set
-from collections import defaultdict, deque
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+from typing import Dict, Any
 
 from app.logging_config import central_logger
 from app.websocket.connection import ConnectionInfo
+from .telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
+from .job_queue import JobQueueManager
 
 logger = central_logger.get_logger(__name__)
-
-
-@dataclass
-class ConnectionMetrics:
-    """Connection-level metrics for telemetry."""
-    connection_id: str
-    user_id: str
-    connected_at: float
-    last_activity: float
-    messages_sent: int
-    messages_received: int
-    errors: int
-    bytes_sent: int
-    bytes_received: int
-
-
-@dataclass
-class JobMetrics:
-    """Job-level metrics for workflow tracking."""
-    job_id: str
-    created_at: float
-    last_activity: float
-    messages_queued: int
-    messages_processed: int
-    active_connections: int
-    completion_status: str  # "active", "completed", "failed", "cancelled"
-
-
-class TelemetryCollector:
-    """Real-time telemetry collection and aggregation."""
-    
-    def __init__(self) -> None:
-        """Initialize telemetry collector with metrics storage."""
-        self.connection_metrics: Dict[str, ConnectionMetrics] = {}
-        self.job_metrics: Dict[str, JobMetrics] = {}
-        self.system_metrics = {
-            "start_time": time.time(),
-            "total_connections": 0,
-            "peak_connections": 0,
-            "total_messages": 0,
-            "total_errors": 0,
-            "uptime_seconds": 0.0
-        }
-        self.performance_history: deque = deque(maxlen=1000)
-
-    def track_connection(self, conn_info: ConnectionInfo) -> None:
-        """Start tracking connection metrics."""
-        metrics = ConnectionMetrics(
-            connection_id=conn_info.connection_id,
-            user_id=conn_info.user_id,
-            connected_at=time.time(),
-            last_activity=time.time(),
-            messages_sent=0,
-            messages_received=0,
-            errors=0,
-            bytes_sent=0,
-            bytes_received=0
-        )
-        self.connection_metrics[conn_info.connection_id] = metrics
-        self.system_metrics["total_connections"] += 1
-        self._update_peak_connections()
-
-    def _update_peak_connections(self) -> None:
-        """Update peak connections metric."""
-        current_count = len(self.connection_metrics)
-        if current_count > self.system_metrics["peak_connections"]:
-            self.system_metrics["peak_connections"] = current_count
-
-    def update_connection_activity(self, connection_id: str, message_type: str, byte_count: int = 0) -> None:
-        """Update connection activity metrics."""
-        if connection_id not in self.connection_metrics:
-            return
-        metrics = self.connection_metrics[connection_id]
-        metrics.last_activity = time.time()
-        if message_type == "sent":
-            metrics.messages_sent += 1
-            metrics.bytes_sent += byte_count
-        elif message_type == "received":
-            metrics.messages_received += 1
-            metrics.bytes_received += byte_count
-        elif message_type == "error":
-            metrics.errors += 1
-
-    def track_job(self, job_id: str) -> None:
-        """Start tracking job metrics."""
-        self.job_metrics[job_id] = JobMetrics(
-            job_id=job_id,
-            created_at=time.time(),
-            last_activity=time.time(),
-            messages_queued=0,
-            messages_processed=0,
-            active_connections=0,
-            completion_status="active"
-        )
-
-    def update_job_activity(self, job_id: str, activity_type: str, count: int = 1) -> None:
-        """Update job activity metrics."""
-        if job_id not in self.job_metrics:
-            self.track_job(job_id)
-        metrics = self.job_metrics[job_id]
-        metrics.last_activity = time.time()
-        if activity_type == "queued":
-            metrics.messages_queued += count
-        elif activity_type == "processed":
-            metrics.messages_processed += count
-        elif activity_type == "connection_count":
-            metrics.active_connections = count
-
-    def record_performance_sample(self, sample_data: Dict[str, float]) -> None:
-        """Record performance sample for trending analysis."""
-        sample_with_timestamp = {**sample_data, "timestamp": time.time()}
-        self.performance_history.append(sample_with_timestamp)
-
-    def get_telemetry_snapshot(self) -> Dict[str, Any]:
-        """Get current telemetry snapshot."""
-        self._update_system_metrics()
-        return {
-            "system_metrics": self.system_metrics.copy(),
-            "connection_summary": self._get_connection_summary(),
-            "job_summary": self._get_job_summary(),
-            "performance_trends": self._get_performance_trends()
-        }
-
-    def _update_system_metrics(self) -> None:
-        """Update calculated system metrics."""
-        self.system_metrics["uptime_seconds"] = time.time() - self.system_metrics["start_time"]
-        self.system_metrics["active_connections"] = len(self.connection_metrics)
-
-    def _get_connection_summary(self) -> Dict[str, Any]:
-        """Get summarized connection metrics."""
-        if not self.connection_metrics:
-            return {"active": 0, "total_messages": 0, "total_errors": 0}
-        total_sent = sum(m.messages_sent for m in self.connection_metrics.values())
-        total_received = sum(m.messages_received for m in self.connection_metrics.values())
-        total_errors = sum(m.errors for m in self.connection_metrics.values())
-        return {
-            "active": len(self.connection_metrics),
-            "total_messages_sent": total_sent,
-            "total_messages_received": total_received,
-            "total_errors": total_errors
-        }
-
-    def _get_job_summary(self) -> Dict[str, Any]:
-        """Get summarized job metrics."""
-        if not self.job_metrics:
-            return {"active_jobs": 0, "completed_jobs": 0}
-        active_jobs = sum(1 for m in self.job_metrics.values() if m.completion_status == "active")
-        completed_jobs = sum(1 for m in self.job_metrics.values() if m.completion_status == "completed")
-        return {"active_jobs": active_jobs, "completed_jobs": completed_jobs, "total_jobs": len(self.job_metrics)}
-
-    def _get_performance_trends(self) -> List[Dict[str, Any]]:
-        """Get recent performance trend data."""
-        return list(self.performance_history)[-10:]  # Last 10 samples
-
-
-class JobQueueManager:
-    """Job-based message queue management with zero-loss guarantees."""
-    
-    def __init__(self) -> None:
-        """Initialize job queue manager."""
-        self.job_queues: Dict[str, deque] = defaultdict(lambda: deque(maxlen=10000))
-        self.job_states: Dict[str, Dict[str, Any]] = {}
-        self.active_sends: Dict[str, int] = defaultdict(int)
-        self._queue_lock = asyncio.Lock()
-
-    async def queue_message(self, job_id: str, message: Dict[str, Any], priority: bool = False) -> None:
-        """Queue message for job with optional priority."""
-        async with self._queue_lock:
-            queued_message = {**message, "queued_at": time.time(), "priority": priority}
-            if priority:
-                self.job_queues[job_id].appendleft(queued_message)
-            else:
-                self.job_queues[job_id].append(queued_message)
-
-    async def get_next_message(self, job_id: str) -> Optional[Dict[str, Any]]:
-        """Get next message from job queue."""
-        async with self._queue_lock:
-            queue = self.job_queues[job_id]
-            return queue.popleft() if queue else None
-
-    def get_queue_size(self, job_id: str) -> int:
-        """Get current queue size for job."""
-        return len(self.job_queues[job_id])
-
-    def increment_active_send(self, job_id: str) -> None:
-        """Track active send operation for job."""
-        self.active_sends[job_id] += 1
-
-    def decrement_active_send(self, job_id: str) -> None:
-        """Complete active send operation for job."""
-        if self.active_sends[job_id] > 0:
-            self.active_sends[job_id] -= 1
-
-    def set_job_state(self, job_id: str, state: Dict[str, Any]) -> None:
-        """Set job state data."""
-        self.job_states[job_id] = {**state, "updated_at": time.time()}
-
-    def get_job_state(self, job_id: str) -> Dict[str, Any]:
-        """Get job state data."""
-        return self.job_states.get(job_id, {})
-
-    def get_queue_stats(self) -> Dict[str, Any]:
-        """Get comprehensive queue statistics."""
-        total_queued = sum(len(queue) for queue in self.job_queues.values())
-        total_active = sum(self.active_sends.values())
-        return {
-            "total_jobs": len(self.job_queues),
-            "total_queued_messages": total_queued,
-            "total_active_sends": total_active,
-            "jobs_with_queue": sum(1 for queue in self.job_queues.values() if len(queue) > 0)
-        }
 
 
 class UnifiedStateManager:
@@ -269,8 +56,7 @@ class UnifiedStateManager:
         connection_count = len(self.manager.connection_manager.active_connections)
         queue_stats = self.queue_manager.get_queue_stats()
         sample = {
-            "active_connections": connection_count,
-            "total_queued": queue_stats["total_queued_messages"],
+            "active_connections": connection_count, "total_queued": queue_stats["total_queued_messages"],
             "memory_usage": self._estimate_memory_usage()
         }
         self.telemetry.record_performance_sample(sample)
@@ -294,17 +80,24 @@ class UnifiedStateManager:
         try:
             connection_count = len(self.manager.connection_manager.active_connections)
             error_rate = self._calculate_error_rate()
-            if error_rate > 0.1 or connection_count > 10000:  # Health thresholds
-                self.health_status = {"status": "degraded", "last_check": time.time()}
-            else:
-                self.health_status = {"status": "healthy", "last_check": time.time()}
+            self._update_health_status(connection_count, error_rate)
         except Exception as e:
             self.health_status = {"status": "unhealthy", "last_check": time.time(), "error": str(e)}
+
+    def _update_health_status(self, connection_count: int, error_rate: float) -> None:
+        """Update health status based on metrics."""
+        current_time = time.time()
+        if error_rate > 0.1 or connection_count > 10000:  # Health thresholds
+            self.health_status = {"status": "degraded", "last_check": current_time}
+        else:
+            self.health_status = {"status": "healthy", "last_check": current_time}
 
     def _calculate_error_rate(self) -> float:
         """Calculate current error rate from telemetry."""
         connection_summary = self.telemetry._get_connection_summary()
-        total_messages = connection_summary.get("total_messages_sent", 0) + connection_summary.get("total_messages_received", 0)
+        total_sent = connection_summary.get("total_messages_sent", 0)
+        total_received = connection_summary.get("total_messages_received", 0)
+        total_messages = total_sent + total_received
         total_errors = connection_summary.get("total_errors", 0)
         return total_errors / max(total_messages, 1)
 
@@ -362,10 +155,8 @@ class UnifiedStateManager:
     async def persist_state(self) -> None:
         """Persist critical state data for recovery."""
         state_data = {
-            "timestamp": time.time(),
-            "job_states": self.queue_manager.job_states,
-            "health_status": self.health_status,
-            "system_metrics": self.telemetry.system_metrics
+            "timestamp": time.time(), "job_states": self.queue_manager.job_states,
+            "health_status": self.health_status, "system_metrics": self.telemetry.system_metrics
         }
         # In production, this would write to persistent storage
         logger.info(f"Persisting WebSocket state: {len(state_data['job_states'])} jobs")
@@ -381,3 +172,13 @@ class UnifiedStateManager:
     def get_health_status(self) -> Dict[str, Any]:
         """Get current system health status."""
         return self.health_status.copy()
+
+
+# Re-export classes for backward compatibility
+from .telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
+from .job_queue import JobQueueManager
+
+__all__ = [
+    "UnifiedStateManager", "TelemetryCollector", "ConnectionMetrics", 
+    "JobMetrics", "JobQueueManager"
+]

@@ -5,9 +5,8 @@ from unittest.mock import Mock, patch
 from datetime import datetime, UTC
 
 # Import the components we're testing
-from app.core.agent_reliability_mixin import (
-    AgentReliabilityMixin, AgentError, AgentHealthStatus
-)
+from app.core.agent_reliability_mixin import AgentReliabilityMixin
+from app.core.agent_reliability_types import AgentError, AgentHealthStatus
 from app.core.error_codes import ErrorSeverity
 
 

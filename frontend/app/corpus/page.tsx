@@ -13,6 +13,7 @@ import { CorpusSearch } from './components/corpus-search';
 import { CorpusVersions } from './components/corpus-versions';
 import { CorpusPermissions } from './components/corpus-permissions';
 import { useCorpusState } from './hooks/use-corpus-state';
+import { TabType } from './types/corpus';
 import { corpusData, statsData, STORAGE_USED_PERCENTAGE } from './data/corpus-data';
 
 
@@ -54,8 +55,12 @@ const LoadingScreen = () => {
 };
 
 const CorpusTabs = ({ corpusState }: { corpusState: ReturnType<typeof useCorpusState> }) => {
+  const handleTabChange = (value: string) => {
+    corpusState.setActiveTab(value as TabType);
+  };
+
   return (
-    <Tabs value={corpusState.activeTab} onValueChange={corpusState.setActiveTab}>
+    <Tabs value={corpusState.activeTab} onValueChange={handleTabChange}>
       <TabsList className="grid w-full grid-cols-4">
         <TabsTrigger value="browse">Browse</TabsTrigger>
         <TabsTrigger value="search">Search</TabsTrigger>

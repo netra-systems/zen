@@ -49,16 +49,21 @@ class UnifiedDatabaseHealthChecker(BaseHealthChecker):
     
     def _create_error_result(self, error_msg: str) -> HealthCheckResult:
         """Create error result for health check."""
+        error_details = self._build_error_details(error_msg)
         return HealthCheckResult(
             status="unhealthy",
             response_time=0.0,
-            details={
-                "component_name": self.name,
-                "success": False,
-                "health_score": 0.0,
-                "error_message": error_msg
-            }
+            details=error_details
         )
+    
+    def _build_error_details(self, error_msg: str) -> Dict[str, Any]:
+        """Build error details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": False,
+            "health_score": 0.0,
+            "error_message": error_msg
+        }
 
 
 class ServiceHealthChecker(BaseHealthChecker):
@@ -72,14 +77,21 @@ class ServiceHealthChecker(BaseHealthChecker):
     async def check_health(self) -> HealthCheckResult:
         """Check service health via HTTP endpoint."""
         start_time = time.time()
-        
         try:
             result = await self._check_service_endpoint()
-            response_time = (time.time() - start_time) * 1000
+            response_time = self._calculate_response_time(start_time)
             return self._create_service_result(result, response_time)
         except Exception as e:
-            response_time = (time.time() - start_time) * 1000
-            return self._create_service_error(str(e), response_time)
+            return self._handle_service_exception(e, start_time)
+    
+    def _calculate_response_time(self, start_time: float) -> float:
+        """Calculate response time in milliseconds."""
+        return (time.time() - start_time) * 1000
+    
+    def _handle_service_exception(self, error: Exception, start_time: float) -> HealthCheckResult:
+        """Handle service check exception."""
+        response_time = self._calculate_response_time(start_time)
+        return self._create_service_error(str(error), response_time)
     
     async def _check_service_endpoint(self) -> Dict[str, Any]:
         """Check service endpoint with HTTP client."""
@@ -92,32 +104,45 @@ class ServiceHealthChecker(BaseHealthChecker):
     
     def _create_service_result(self, result: Dict[str, Any], response_time: float) -> HealthCheckResult:
         """Create service health result from endpoint response."""
-        success = result.get("status") in ["healthy", "ok", "running"]
+        success = self._determine_service_success(result)
         health_score = 1.0 if success else 0.0
-        
+        details = self._build_service_details(success, health_score, result)
         return HealthCheckResult(
             status="healthy" if success else "unhealthy",
-            response_time=response_time / 1000,  # Convert ms to seconds
-            details={
-                "component_name": self.name,
-                "success": success,
-                "health_score": health_score,
-                "metadata": result
-            }
+            response_time=response_time / 1000,
+            details=details
         )
+    
+    def _determine_service_success(self, result: Dict[str, Any]) -> bool:
+        """Determine if service is successful from result."""
+        return result.get("status") in ["healthy", "ok", "running"]
+    
+    def _build_service_details(self, success: bool, health_score: float, result: Dict[str, Any]) -> Dict[str, Any]:
+        """Build service details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": success,
+            "health_score": health_score,
+            "metadata": result
+        }
     
     def _create_service_error(self, error_msg: str, response_time: float) -> HealthCheckResult:
         """Create error result for service check."""
+        details = self._build_service_error_details(error_msg)
         return HealthCheckResult(
             status="unhealthy",
-            response_time=response_time / 1000,  # Convert ms to seconds
-            details={
-                "component_name": self.name,
-                "success": False,
-                "health_score": 0.0,
-                "error_message": error_msg
-            }
+            response_time=response_time / 1000,
+            details=details
         )
+    
+    def _build_service_error_details(self, error_msg: str) -> Dict[str, Any]:
+        """Build service error details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": False,
+            "health_score": 0.0,
+            "error_message": error_msg
+        }
 
 
 class DependencyHealthChecker(BaseHealthChecker):
@@ -131,24 +156,35 @@ class DependencyHealthChecker(BaseHealthChecker):
     async def check_health(self) -> HealthCheckResult:
         """Check dependency health based on type."""
         start_time = time.time()
-        
         try:
             result = await self._perform_dependency_check()
-            response_time = (time.time() - start_time) * 1000
+            response_time = self._calculate_response_time_ms(start_time)
             return self._create_dependency_result(result, response_time)
         except Exception as e:
-            response_time = (time.time() - start_time) * 1000
-            return self._create_dependency_error(str(e), response_time)
+            return self._handle_dependency_exception(e, start_time)
+    
+    def _calculate_response_time_ms(self, start_time: float) -> float:
+        """Calculate response time in milliseconds."""
+        return (time.time() - start_time) * 1000
+    
+    def _handle_dependency_exception(self, error: Exception, start_time: float) -> HealthCheckResult:
+        """Handle dependency check exception."""
+        response_time = self._calculate_response_time_ms(start_time)
+        return self._create_dependency_error(str(error), response_time)
     
     async def _perform_dependency_check(self) -> bool:
         """Perform dependency-specific health check."""
         if self.dependency_name == "websocket":
-            result = await check_websocket_health()
-            return result.details.get("success", result.status == "healthy")
+            return await self._check_websocket_dependency()
         elif self.dependency_name == "llm":
             return await self._check_llm_connectivity()
         else:
             return await self._check_generic_dependency()
+    
+    async def _check_websocket_dependency(self) -> bool:
+        """Check websocket dependency health."""
+        result = await check_websocket_health()
+        return result.details.get("success", result.status == "healthy")
     
     async def _check_llm_connectivity(self) -> bool:
         """Check LLM service connectivity."""
@@ -166,28 +202,38 @@ class DependencyHealthChecker(BaseHealthChecker):
     
     def _create_dependency_result(self, success: bool, response_time: float) -> HealthCheckResult:
         """Create dependency health result."""
+        details = self._build_dependency_details(success)
         return HealthCheckResult(
             status="healthy" if success else "unhealthy",
-            response_time=response_time / 1000,  # Convert ms to seconds
-            details={
-                "component_name": self.name,
-                "success": success,
-                "health_score": 1.0 if success else 0.0
-            }
+            response_time=response_time / 1000,
+            details=details
         )
+    
+    def _build_dependency_details(self, success: bool) -> Dict[str, Any]:
+        """Build dependency details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": success,
+            "health_score": 1.0 if success else 0.0
+        }
     
     def _create_dependency_error(self, error_msg: str, response_time: float) -> HealthCheckResult:
         """Create error result for dependency check."""
+        details = self._build_dependency_error_details(error_msg)
         return HealthCheckResult(
             status="unhealthy",
-            response_time=response_time / 1000,  # Convert ms to seconds
-            details={
-                "component_name": self.name,
-                "success": False,
-                "health_score": 0.0,
-                "error_message": error_msg
-            }
+            response_time=response_time / 1000,
+            details=details
         )
+    
+    def _build_dependency_error_details(self, error_msg: str) -> Dict[str, Any]:
+        """Build dependency error details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": False,
+            "health_score": 0.0,
+            "error_message": error_msg
+        }
 
 
 class CircuitBreakerHealthChecker(BaseHealthChecker):
@@ -206,23 +252,28 @@ class CircuitBreakerHealthChecker(BaseHealthChecker):
         """Perform health check with circuit breaker protection."""
         if self._should_skip_check():
             return self._create_circuit_open_result()
-        
         try:
             result = await self.wrapped_checker.check_health()
             await self._handle_check_result(result)
             return result
         except Exception as e:
-            await self._handle_check_failure()
-            return self._create_circuit_error_result(str(e))
+            return await self._handle_circuit_exception(e)
+    
+    async def _handle_circuit_exception(self, error: Exception) -> HealthCheckResult:
+        """Handle circuit breaker exception."""
+        await self._handle_check_failure()
+        return self._create_circuit_error_result(str(error))
     
     def _should_skip_check(self) -> bool:
         """Check if circuit breaker should skip the health check."""
         if not self.circuit_open:
             return False
-        
         if self.last_failure_time is None:
             return False
-        
+        return self._is_within_recovery_timeout()
+    
+    def _is_within_recovery_timeout(self) -> bool:
+        """Check if still within recovery timeout period."""
         time_since_failure = (datetime.now(UTC) - self.last_failure_time).total_seconds()
         return time_since_failure < self.recovery_timeout
     
@@ -246,29 +297,39 @@ class CircuitBreakerHealthChecker(BaseHealthChecker):
     
     def _create_circuit_open_result(self) -> HealthCheckResult:
         """Create result when circuit breaker is open."""
+        details = self._build_circuit_open_details()
         return HealthCheckResult(
             status="unhealthy",
             response_time=0.0,
-            details={
-                "component_name": self.name,
-                "success": False,
-                "health_score": 0.0,
-                "error_message": "Circuit breaker open - service unavailable"
-            }
+            details=details
         )
+    
+    def _build_circuit_open_details(self) -> Dict[str, Any]:
+        """Build circuit open details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": False,
+            "health_score": 0.0,
+            "error_message": "Circuit breaker open - service unavailable"
+        }
     
     def _create_circuit_error_result(self, error_msg: str) -> HealthCheckResult:
         """Create error result for circuit breaker failure."""
+        details = self._build_circuit_error_details(error_msg)
         return HealthCheckResult(
             status="unhealthy",
             response_time=0.0,
-            details={
-                "component_name": self.name,
-                "success": False,
-                "health_score": 0.0,
-                "error_message": f"Circuit breaker error: {error_msg}"
-            }
+            details=details
         )
+    
+    def _build_circuit_error_details(self, error_msg: str) -> Dict[str, Any]:
+        """Build circuit error details dictionary."""
+        return {
+            "component_name": self.name,
+            "success": False,
+            "health_score": 0.0,
+            "error_message": f"Circuit breaker error: {error_msg}"
+        }
 
 
 # Alias for unified health system compatibility

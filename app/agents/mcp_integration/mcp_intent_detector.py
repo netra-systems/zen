@@ -7,8 +7,12 @@ Follows strict 8-line function design and 300-line limit.
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 import re
+import time
 
 from app.logging_config import central_logger
+from app.agents.base.interface import AgentExecutionMixin, ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.error_handler import ExecutionErrorHandler
 
 logger = central_logger.get_logger(__name__)
 
@@ -146,13 +150,15 @@ class MCPParameterExtractor:
         return params
 
 
-class MCPIntentDetector:
-    """Main MCP intent detector."""
+class MCPIntentDetector(AgentExecutionMixin):
+    """Main MCP intent detector with execution monitoring."""
     
     def __init__(self):
         self.keyword_matcher = MCPKeywordMatcher()
         self.server_matcher = MCPServerMatcher()
         self.parameter_extractor = MCPParameterExtractor()
+        self.execution_monitor = ExecutionMonitor()
+        self.error_handler = ExecutionErrorHandler()
     
     def detect_intent(self, request: str) -> MCPIntent:
         """Detect MCP intent from user request."""
@@ -169,7 +175,11 @@ class MCPIntentDetector:
         tool_name = self.keyword_matcher.extract_tool_name(request)
         parameters = self._extract_all_parameters(request)
         confidence = self._calculate_confidence(indicators, server_name, tool_name)
-        
+        return self._create_intent_object(server_name, tool_name, confidence, parameters)
+    
+    def _create_intent_object(self, server_name: Optional[str], tool_name: Optional[str],
+                            confidence: float, parameters: Dict[str, str]) -> MCPIntent:
+        """Create MCPIntent object with validated parameters."""
         return MCPIntent(
             requires_mcp=True,
             server_name=server_name,
@@ -204,3 +214,40 @@ class MCPIntentDetector:
         if intent.requires_mcp:
             return True, intent.server_name, intent.tool_name
         return False, None, None
+    
+    async def detect_intent_with_reliability(self, request: str, run_id: str) -> ExecutionResult:
+        """Detect MCP intent with execution monitoring and error handling."""
+        start_time = time.time()
+        context = self._create_detection_context(request, run_id)
+        self.execution_monitor.start_execution(context)
+        
+        try:
+            intent = await self._execute_detection_with_monitoring(request)
+            return self._create_success_detection_result(intent, start_time)
+        except Exception as e:
+            return await self._handle_detection_error(e, context)
+    
+    def _create_detection_context(self, request: str, run_id: str) -> ExecutionContext:
+        """Create execution context for intent detection."""
+        from app.agents.state import DeepAgentState
+        state = DeepAgentState(agent_name="MCPIntentDetector")
+        state.current_request = request
+        return self.create_execution_context(state, run_id)
+    
+    async def _execute_detection_with_monitoring(self, request: str) -> MCPIntent:
+        """Execute detection with monitoring wrapper."""
+        intent = self.detect_intent(request)
+        return intent
+    
+    def _create_success_detection_result(self, intent: MCPIntent, start_time: float) -> ExecutionResult:
+        """Create successful detection result."""
+        execution_time_ms = (time.time() - start_time) * 1000
+        return self.create_success_result(
+            {"intent": intent, "requires_mcp": intent.requires_mcp},
+            execution_time_ms
+        )
+    
+    async def _handle_detection_error(self, error: Exception, context: ExecutionContext) -> ExecutionResult:
+        """Handle detection error with fallback strategies."""
+        self.execution_monitor.record_error(context, error)
+        return await self.error_handler.handle_execution_error(error, context)

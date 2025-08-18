@@ -49,6 +49,7 @@ load_dotenv()
 from .runner import UnifiedTestRunner
 from .test_config import TEST_LEVELS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
 from .test_discovery import TestDiscovery
+from .feature_flags import get_feature_flag_manager
 
 def handle_test_discovery(args):
     """Handle test discovery and listing."""
@@ -476,6 +477,25 @@ def print_header():
     print("=" * 80)
     print("NETRA AI PLATFORM - UNIFIED TEST RUNNER")
     print("=" * 80)
+    print_feature_flag_summary()
+
+def print_feature_flag_summary():
+    """Print feature flag summary if any flags are configured"""
+    manager = get_feature_flag_manager()
+    summary = manager.get_feature_summary()
+    
+    if summary["total"] > 0:
+        print("\nFEATURE FLAGS:")
+        if summary["enabled"]:
+            print(f"  [ENABLED] ({len(summary['enabled'])}): {', '.join(summary['enabled'][:3])}{' ...' if len(summary['enabled']) > 3 else ''}")
+        if summary["in_development"]:
+            print(f"  [IN DEV] ({len(summary['in_development'])}): {', '.join(summary['in_development'][:3])}{' ...' if len(summary['in_development']) > 3 else ''}")
+        if summary["disabled"]:
+            print(f"  [DISABLED] ({len(summary['disabled'])}): {', '.join(summary['disabled'][:3])}{' ...' if len(summary['disabled']) > 3 else ''}")
+        if summary["experimental"]:
+            print(f"  [EXPERIMENTAL] ({len(summary['experimental'])}): {', '.join(summary['experimental'][:3])}{' ...' if len(summary['experimental']) > 3 else ''}")
+        print("  Use feature flags for TDD: tests can be written before implementation")
+        print("=" * 80)
 
 def configure_staging_if_requested(args):
     """Configure staging environment if requested"""

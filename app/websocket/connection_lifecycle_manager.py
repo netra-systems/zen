@@ -36,7 +36,10 @@ class ConnectionLifecycleManager:
         """Execute connection addition with safety mechanisms."""
         add_operation = self._create_add_connection_operation(websocket, user_id, connection_id)
         fallback_operation = self._create_add_connection_fallback(user_id, connection_id)
-        
+        return await self._execute_reliability_operation(add_operation, fallback_operation)
+
+    async def _execute_reliability_operation(self, add_operation, fallback_operation) -> bool:
+        """Execute reliability operation with fallback."""
         return await self.reliability.execute_safely(
             add_operation,
             "add_connection",
@@ -114,14 +117,18 @@ class ConnectionLifecycleManager:
     async def remove_connection(self, connection_id: str) -> bool:
         """Remove a connection with cleanup."""
         try:
-            return await self.reliability.execute_safely(
-                lambda: self._execute_connection_removal(connection_id),
-                "remove_connection",
-                timeout=5.0
-            )
+            return await self._execute_removal_safely(connection_id)
         except Exception as e:
             logger.error(f"Error removing connection {connection_id}: {e}")
             return False
+
+    async def _execute_removal_safely(self, connection_id: str) -> bool:
+        """Execute connection removal with reliability protection."""
+        return await self.reliability.execute_safely(
+            lambda: self._execute_connection_removal(connection_id),
+            "remove_connection",
+            timeout=5.0
+        )
 
     async def _execute_connection_removal(self, connection_id: str) -> bool:
         """Execute the connection removal process."""

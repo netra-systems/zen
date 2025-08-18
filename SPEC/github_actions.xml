@@ -11,7 +11,7 @@
     <critical_reminders>
         <reminder priority="HIGHEST">
             ⚠️ BEFORE ANY GITHUB ACTIONS WORK:
-            1. CHECK learnings.xml for "GitHub Actions Deployment Permission Error" (2025-08-13)
+            1. CHECK learnings/github_actions.xml for "GitHub Actions Deployment Permission Error" (2025-08-13)
             2. ALWAYS define explicit permissions block
             3. NEVER rely on default GITHUB_TOKEN permissions
             4. ALWAYS use warp-custom-default runner for ALL jobs
@@ -118,7 +118,7 @@ on:
                 <message>Resource not accessible by integration</message>
                 <cause>Missing 'deployments: write' permission</cause>
                 <solution>Add explicit permissions block with deployments: write</solution>
-                <reference>See learnings.xml - GitHub Actions Deployment Permission Error</reference>
+                <reference>See learnings/github_actions.xml - GitHub Actions Deployment Permission Error</reference>
             </error>
             
             <error id="403-pr-comment">
@@ -282,7 +282,7 @@ concurrency:
             <title>Best Practices</title>
             
             <practice id="always-check-learnings">
-                <rule>ALWAYS check learnings.xml before modifying workflows</rule>
+                <rule>ALWAYS check learnings/github_actions.xml before modifying workflows</rule>
                 <reason>Contains fixes for recurring issues and known gotchas</reason>
             </practice>
             
@@ -380,7 +380,7 @@ concurrency:
 
     <references>
         <reference>
-            <spec>learnings.xml</spec>
+            <spec>learnings/github_actions.xml</spec>
             <section>GitHub Actions Deployment Permission Error (2025-08-13)</section>
             <importance>CRITICAL - This is a recurring issue</importance>
         </reference>

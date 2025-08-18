@@ -27,7 +27,7 @@
                 <name>Use Specs for Detailed Content</name>
                 <description>Detailed information belongs in SPEC/*.xml files, not CLAUDE.md</description>
                 <guidelines>
-                    <guideline>Move historical learnings to learnings.xml</guideline>
+                    <guideline>Move historical learnings to learnings/ directory</guideline>
                     <guideline>Move domain-specific details to relevant domain specs</guideline>
                     <guideline>Move troubleshooting patterns to dedicated specs</guideline>
                     <guideline>Keep only quick-fix reminders in CLAUDE.md</guideline>
@@ -52,12 +52,12 @@
             <trigger id="new-pattern">
                 <name>New Pattern Discovered</name>
                 <action>Add to relevant spec, link from CLAUDE.md if critical</action>
-                <example>Discovering a new React gotcha → Add to learnings.xml</example>
+                <example>Discovering a new React gotcha → Add to learnings/frontend.xml</example>
             </trigger>
             
             <trigger id="repeated-issue">
                 <name>Issue Occurs Multiple Times</name>
-                <action>Document in learnings.xml with clear solution</action>
+                <action>Document in learnings/ (appropriate category file) with clear solution</action>
                 <example>Same error hitting multiple developers → Document fix</example>
             </trigger>
             
@@ -98,7 +98,7 @@
                 <categories>
                     <category>Core Principles - Keep in CLAUDE.md</category>
                     <category>Quick Reference - Keep in CLAUDE.md</category>
-                    <category>Historical Fixes - Move to learnings.xml</category>
+                    <category>Historical Fixes - Move to learnings/ directory</category>
                     <category>Domain Details - Move to domain specs</category>
                     <category>Outdated - Remove entirely</category>
                 </categories>
@@ -170,7 +170,7 @@
                 <good>
                     <example>✅ Quick command: `python test_runner.py --level smoke`</example>
                     <example>✅ Brief gotcha: "Use generateUniqueId() not Date.now()"</example>
-                    <example>✅ Link to detail: "See [`learnings.xml`](SPEC/learnings.xml)"</example>
+                    <example>✅ Link to detail: "See [`learnings/index.xml`](SPEC/learnings/index.xml)"</example>
                 </good>
                 <bad>
                     <example>❌ Long historical narrative about a bug fix</example>
@@ -192,7 +192,7 @@
                 <name>Clear Naming</name>
                 <description>Spec names should immediately convey their purpose</description>
                 <examples>
-                    <good>learnings.xml, clickhouse.xml, testing.xml</good>
+                    <good>learnings/testing.xml, clickhouse.xml, testing.xml</good>
                     <bad>misc.xml, utils.xml, other.xml</bad>
                 </examples>
             </rule>

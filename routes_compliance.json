@@ -1,0 +1,34 @@
+{
+  "total_violations": 0,
+  "compliance_score": 100.0,
+  "timestamp": "2025-08-18 08:22:44",
+  "violations_by_type": {},
+  "violations": [],
+  "summary": {
+    "total_files_checked": 0,
+    "files_with_violations": 0,
+    "max_file_lines": 300,
+    "max_function_lines": 8,
+    "compliance_score": 100.0
+  },
+  "category_scores": {
+    "real_system": {
+      "violations": 0,
+      "files_with_violations": 0,
+      "total_files": 0,
+      "score": 100.0
+    },
+    "test_files": {
+      "violations": 0,
+      "files_with_violations": 0,
+      "total_files": 0,
+      "score": 100.0
+    },
+    "other": {
+      "violations": 0,
+      "files_with_violations": 0,
+      "total_files": 0,
+      "score": 100.0
+    }
+  }
+}

@@ -28,18 +28,30 @@ def _should_skip_initialization() -> bool:
         return True
     return False
 
-def _check_clickhouse_mode() -> bool:
-    """Check ClickHouse mode configuration."""
+def _get_clickhouse_mode_from_env() -> str:
+    """Get ClickHouse mode from environment variable."""
     import os
-    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
-    
-    if clickhouse_mode == "disabled":
+    return os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+
+def _should_skip_for_disabled_mode(mode: str) -> bool:
+    """Check if should skip for disabled mode."""
+    if mode == "disabled":
         logger.info("ClickHouse is disabled (mode: disabled) - skipping initialization")
         return True
-    elif clickhouse_mode == "mock":
+    return False
+
+def _should_skip_for_mock_mode(mode: str) -> bool:
+    """Check if should skip for mock mode."""
+    if mode == "mock":
         logger.info("ClickHouse is running in mock mode - skipping initialization")
         return True
     return False
+
+def _check_clickhouse_mode() -> bool:
+    """Check ClickHouse mode configuration."""
+    mode = _get_clickhouse_mode_from_env()
+    return (_should_skip_for_disabled_mode(mode) or 
+            _should_skip_for_mock_mode(mode))
 
 def _check_development_config() -> bool:
     """Check development environment configuration."""

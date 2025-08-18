@@ -1,4 +1,5 @@
 import type { ErrorReport } from './error-boundary-types';
+import { logger } from '@/utils/debug-logger';
 
 export class ErrorReporter {
   private static readonly MAX_STORED_ERRORS = 10;
@@ -22,13 +23,13 @@ export class ErrorReporter {
 
   static logToDevelopment(error: Error, errorInfo: React.ErrorInfo): void {
     if (process.env.NODE_ENV === 'development') {
-      console.error('Chat Error Boundary caught:', error, errorInfo);
+      logger.error('Chat Error Boundary caught:', error, errorInfo);
     }
   }
 
   static sendToProduction(errorReport: ErrorReport): void {
     if (process.env.NODE_ENV === 'production') {
-      console.error('Error Report:', errorReport);
+      logger.error('Error Report:', errorReport);
     }
   }
 

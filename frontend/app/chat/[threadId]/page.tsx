@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 import MainChat from '@/components/chat/MainChat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useThreadSwitching } from '@/hooks/useThreadSwitching';
-import { validateThreadId, handleDeepLink } from '@/services/urlSyncService';
+import { validateThreadId } from '@/services/urlSyncService';
 import { motion } from 'framer-motion';
 import { Loader2, AlertCircle } from 'lucide-react';
 

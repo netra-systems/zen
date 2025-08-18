@@ -3,6 +3,8 @@
  * Centralized configuration for auth service endpoints
  */
 
+import { logger } from '@/utils/debug-logger';
+
 interface AuthServiceConfig {
   baseUrl: string;
   endpoints: {
@@ -90,11 +92,25 @@ export class AuthServiceClient {
    * Get auth configuration from service
    */
   async getConfig() {
-    const response = await fetch(this.config.endpoints.config);
-    if (!response.ok) {
-      throw new Error('Failed to fetch auth configuration');
+    try {
+      const response = await fetch(this.config.endpoints.config, {
+        signal: AbortSignal.timeout(3000) // 3 second timeout
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: Failed to fetch auth configuration`);
+      }
+      return response.json();
+    } catch (error) {
+      logger.warn('Auth service unavailable, using offline configuration:', error);
+      
+      // Return offline configuration for development
+      return {
+        development_mode: process.env.NODE_ENV === 'development',
+        google_client_id: this.config.oauth.googleClientId || '',
+        oauth_enabled: false,
+        offline_mode: true
+      };
     }
-    return response.json();
   }
   
   /**

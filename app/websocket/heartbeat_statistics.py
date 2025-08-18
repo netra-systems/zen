@@ -54,11 +54,22 @@ class HeartbeatStatistics:
     def build_connection_info(self, conn_id: str, conn_info, 
                             missed_count: int, config, task) -> Dict[str, Any]:
         """Build heartbeat info for specific connection."""
+        base_info = self._build_basic_connection_info(conn_id, conn_info)
+        heartbeat_info = self._build_heartbeat_details(missed_count, config, task)
+        return {**base_info, **heartbeat_info}
+    
+    def _build_basic_connection_info(self, conn_id: str, conn_info) -> Dict[str, Any]:
+        """Build basic connection information."""
         return {
             "connection_id": conn_id,
             "is_alive": True,  # Determined by caller
             "last_ping": self._format_timestamp(conn_info.last_ping),
-            "last_pong": self._format_timestamp(conn_info.last_pong),
+            "last_pong": self._format_timestamp(conn_info.last_pong)
+        }
+    
+    def _build_heartbeat_details(self, missed_count: int, config, task) -> Dict[str, Any]:
+        """Build heartbeat-specific details."""
+        return {
             "missed_heartbeats": missed_count,
             "max_missed_heartbeats": config.max_missed_heartbeats,
             "heartbeat_active": not task.done()

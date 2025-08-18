@@ -3,17 +3,41 @@
  * Handles Jest mocks and test configuration
  */
 
-import { mockRouter, mockPathname, mockThreads, createMockThread } from './mockData';
+// Hoist all mocks to the top for proper Jest handling
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+const mockRouter = { push: jest.fn() };
+const mockPathname = '/chat';
 
-// CRITICAL: Jest mocks must be hoisted before imports
-jest.mock('@/store/threadStore');
-jest.mock('@/store/chat');
-jest.mock('@/store/authStore');
-jest.mock('@/services/threadService');
+// Mock all stores and hooks BEFORE imports
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+jest.mock('@/services/threadService', () => ({
+  ThreadService: {
+    listThreads: jest.fn(),
+    getThreadMessages: jest.fn(),
+    createThread: jest.fn(),
+    updateThread: jest.fn(),
+    deleteThread: jest.fn(),
+  }
+}));
+
 jest.mock('next/navigation', () => ({
   useRouter: () => mockRouter,
   usePathname: () => mockPathname,
 }));
+
 jest.mock('framer-motion', () => ({
   motion: {
     div: ({ children, ...props }: any) => React.createElement('div', props, children),
@@ -21,54 +45,61 @@ jest.mock('framer-motion', () => ({
   AnimatePresence: ({ children }: any) => children,
 }));
 
+// AuthGate mock - always render children
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => children
+}));
+
 import React from 'react';
 import '@testing-library/jest-dom';
-import { 
-  createMockThreadStore,
-  createMockChatStore,
-  createMockAuthStore
-} from '../../utils/storeMocks.helper';
+import { mockThreads, createMockThread } from './mockData';
 
 // Store hook imports after mocks
-import { useThreadStore } from '@/store/threadStore';
-import { useChatStore } from '@/store/chat';
-import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
 
-// Create authenticated mock instances
-export let mockThreadStore: ReturnType<typeof createMockThreadStore>;
-export let mockChatStore: ReturnType<typeof createMockChatStore>;
-export let mockAuthStore: ReturnType<typeof createMockAuthStore>;
+// Mock store data
+const mockStore = {
+  isProcessing: false,
+  messages: [],
+  threads: mockThreads,
+  currentThreadId: 'thread-1',
+  isThreadLoading: false,
+  loadingStates: {
+    isLoading: false,
+    shouldShowLoading: false,
+    shouldShowEmptyState: false,
+    shouldShowExamplePrompts: false,
+    loadingMessage: ''
+  },
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateThreads: jest.fn(),
+  setCurrentThreadId: jest.fn(),
+};
 
 // Initialize with authenticated state
 const initializeAuthenticatedMocks = () => {
-  mockThreadStore = createMockThreadStore({
-    threads: mockThreads,
-    currentThread: mockThreads[0],
-    currentThreadId: 'thread-1'
-  });
-
-  mockChatStore = createMockChatStore();
-
-  // CRITICAL: Set isAuthenticated to true for tests
-  mockAuthStore = createMockAuthStore({
-    isAuthenticated: true,
-    user: { id: 'user-1', email: 'test@example.com' },
-    token: 'mock-token'
+  // Set up default mock return values
+  mockUseUnifiedChatStore.mockReturnValue(mockStore);
+  
+  mockUseLoadingState.mockReturnValue({
+    shouldShowLoading: false,
+    shouldShowEmptyState: false,
+    shouldShowExamplePrompts: false,
+    loadingMessage: ''
   });
   
-  // Ensure the mocks return the authenticated state immediately
-  (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
-  (useThreadStore as jest.Mock).mockReturnValue(mockThreadStore);
-  (useChatStore as jest.Mock).mockReturnValue(mockChatStore);
+  mockUseThreadNavigation.mockReturnValue({
+    currentThreadId: 'thread-1',
+    isNavigating: false,
+    navigateToThread: jest.fn(),
+    createNewThread: jest.fn()
+  });
 };
 
 // Configure mock implementations
 const configureMockImplementations = () => {
-  (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
-  (useChatStore as jest.Mock).mockImplementation(() => mockChatStore);
-  (useAuthStore as jest.Mock).mockImplementation(() => mockAuthStore);
-
   // Configure service mocks
   (ThreadService as any).listThreads = jest.fn().mockResolvedValue(mockThreads);
   (ThreadService as any).getThreadMessages = jest.fn().mockResolvedValue({ messages: [] });
@@ -93,7 +124,7 @@ export class ChatHistoryTestSetup {
   }
 
   afterEach() {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
     
     // Reset any modified state
     this.mockThreads = [...mockThreads];
@@ -104,36 +135,26 @@ export class ChatHistoryTestSetup {
     currentThreadId?: string | null;
     isAuthenticated?: boolean;
   }) {
+    const updatedStore = { ...mockStore };
+    
     if (config.threads !== undefined) {
-      mockThreadStore = {
-        ...mockThreadStore,
-        threads: config.threads,
-        ...(config.currentThreadId !== undefined && { currentThreadId: config.currentThreadId }),
-      };
-      (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
+      updatedStore.threads = config.threads;
       this.mockThreads = [...config.threads];
-    } else if (config.currentThreadId !== undefined) {
-      mockThreadStore = {
-        ...mockThreadStore,
-        currentThreadId: config.currentThreadId,
-      };
-      (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
     }
-
-    if (config.isAuthenticated !== undefined) {
-      mockAuthStore = {
-        ...mockAuthStore,
-        isAuthenticated: config.isAuthenticated,
-        ...(config.isAuthenticated && { 
-          user: { id: 'user-1', email: 'test@example.com' },
-          token: 'mock-token' 
-        }),
-        ...(!config.isAuthenticated && { 
-          user: null,
-          token: null 
-        }),
-      };
-      (useAuthStore as jest.Mock).mockImplementation(() => mockAuthStore);
+    
+    if (config.currentThreadId !== undefined) {
+      updatedStore.currentThreadId = config.currentThreadId;
+    }
+    
+    mockUseUnifiedChatStore.mockReturnValue(updatedStore);
+    
+    if (config.currentThreadId !== undefined) {
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: config.currentThreadId,
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
     }
   }
 
@@ -144,19 +165,20 @@ export class ChatHistoryTestSetup {
   }
 
   mockLoadingState(isLoading: boolean = true) {
-    mockThreadStore = {
-      ...mockThreadStore,
-      loading: isLoading,
-    };
-    (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: isLoading,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: isLoading ? 'Loading...' : ''
+    });
+    
+    const updatedStore = { ...mockStore, isThreadLoading: isLoading };
+    mockUseUnifiedChatStore.mockReturnValue(updatedStore);
   }
 
   mockErrorState(error: string) {
-    mockThreadStore = {
-      ...mockThreadStore,
-      error,
-    };
-    (useThreadStore as jest.Mock).mockImplementation(() => mockThreadStore);
+    const updatedStore = { ...mockStore, error };
+    mockUseUnifiedChatStore.mockReturnValue(updatedStore);
   }
 
   getCurrentMockThreads() {
@@ -171,8 +193,9 @@ export class ChatHistoryTestSetup {
 export const createTestSetup = () => new ChatHistoryTestSetup();
 
 // Export commonly used items
-export { useThreadStore, useChatStore, useAuthStore, ThreadService };
+export { ThreadService };
 export { mockRouter, mockPathname, createMockThread };
+export { mockUseUnifiedChatStore, mockUseLoadingState, mockUseThreadNavigation };
 
 // Initialize mocks at module level
 initializeAuthenticatedMocks();

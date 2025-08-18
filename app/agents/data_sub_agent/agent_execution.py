@@ -41,7 +41,8 @@ class ExecutionManager:
         execution_engine = self._create_execution_engine()
         data_ops, metrics_analyzer = self._create_operation_modules()
         await self._run_analysis_execution(execution_engine, state, run_id, stream_updates, data_ops, metrics_analyzer)
-        return self._finalize_analysis_result(state, start_time)
+        result = await self._finalize_analysis_result(state, run_id, start_time)
+        return result
     
     async def _run_analysis_execution(self, execution_engine, state: DeepAgentState, 
                                     run_id: str, stream_updates: bool, data_ops, metrics_analyzer) -> None:
@@ -50,12 +51,38 @@ class ExecutionManager:
             state, run_id, stream_updates, self.agent._send_update, data_ops, metrics_analyzer
         )
     
-    def _finalize_analysis_result(self, state: DeepAgentState, start_time: float) -> TypedAgentResult:
-        """Finalize and return analysis result."""
+    async def _finalize_analysis_result(self, state: DeepAgentState, run_id: str, start_time: float) -> TypedAgentResult:
+        """Finalize and return analysis result with completion message."""
         data_result = self._ensure_data_result(state.data_result)
         state.data_result = data_result
         state.step_count += 1
+        
+        # Send completion message
+        await self._send_completion_message(run_id, data_result)
+        
         return self._create_success_result(start_time, data_result)
+        
+    async def _send_completion_message(self, run_id: str, result: dict) -> None:
+        """Send agent completion message via WebSocket."""
+        try:
+            # Send completion message through WebSocket manager directly
+            if hasattr(self.agent, 'websocket_manager') and self.agent.websocket_manager:
+                completion_message = {
+                    "type": "agent_completed",
+                    "payload": {
+                        "run_id": run_id,
+                        "result": result,
+                        "agent_name": "DataSubAgent",
+                        "timestamp": time.time()
+                    }
+                }
+                # Try both send_message and send_to_thread methods as per test expectations
+                if hasattr(self.agent.websocket_manager, 'send_message'):
+                    await self.agent.websocket_manager.send_message(run_id, completion_message)
+                elif hasattr(self.agent.websocket_manager, 'send_to_thread'):
+                    await self.agent.websocket_manager.send_to_thread(run_id, completion_message)
+        except Exception as e:
+            logger.debug(f"Failed to send completion message: {e}")
     
     def _create_execution_engine(self) -> ExecutionEngine:
         """Create and configure execution engine."""

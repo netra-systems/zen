@@ -4,7 +4,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import json
 
 from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
-from app.agents.state import DeepAgentState
+from app.agents.actions_goals_plan_builder import ActionPlanBuilder
+from app.agents.state import DeepAgentState, ActionPlanResult
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.agents.base.errors import ValidationError
 from app.llm.llm_manager import LLMManager
 from app.agents.tool_dispatcher import ToolDispatcher
 
@@ -47,8 +50,12 @@ def mock_fallback_strategy():
 def actions_agent(mock_llm_manager, mock_tool_dispatcher):
     """Create ActionsToMeetGoalsSubAgent instance for testing"""
     with patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_reliability_wrapper') as mock_reliability, \
-         patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_fallback_strategy') as mock_fallback:
+         patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_fallback_strategy') as mock_fallback, \
+         patch('app.agents.actions_to_meet_goals_sub_agent.ExecutionMonitor') as mock_monitor, \
+         patch('app.agents.actions_to_meet_goals_sub_agent.ReliabilityManager') as mock_reliability_mgr, \
+         patch('app.agents.actions_to_meet_goals_sub_agent.BaseExecutionEngine') as mock_exec_engine:
         
+        # Mock legacy components
         mock_reliability.return_value = MagicMock()
         mock_reliability.return_value.execute_safely = AsyncMock()
         mock_reliability.return_value.get_health_status = MagicMock(return_value={"status": "healthy"})
@@ -58,6 +65,15 @@ def actions_agent(mock_llm_manager, mock_tool_dispatcher):
         mock_fallback.return_value = MagicMock()
         mock_fallback.return_value.execute_with_fallback = AsyncMock()
         mock_fallback.return_value.create_default_fallback_result = MagicMock()
+        
+        # Mock modern components
+        mock_monitor.return_value.get_health_status = MagicMock(return_value={"status": "healthy"})
+        mock_monitor.return_value.get_agent_metrics = MagicMock(return_value={"metrics": {}})
+        
+        mock_reliability_mgr.return_value.get_health_status = MagicMock(return_value={"status": "healthy"})
+        mock_reliability_mgr.return_value.get_circuit_breaker_status = MagicMock(return_value={"state": "closed"})
+        
+        mock_exec_engine.return_value.execute = AsyncMock()
         
         agent = ActionsToMeetGoalsSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent._send_update = AsyncMock()
@@ -464,6 +480,10 @@ class TestHealthAndStatus:
         status = actions_agent.get_circuit_breaker_status()
         assert isinstance(status, dict)
 
+    def test_get_performance_metrics_returns_dict(self, actions_agent):
+        metrics = actions_agent.get_performance_metrics()
+        assert isinstance(metrics, dict)
+
 
 class TestReliabilityIntegration:
     """Test reliability wrapper integration"""
@@ -487,3 +507,7 @@ class TestReliabilityIntegration:
         call_args = actions_agent.reliability.execute_safely.call_args
         assert "timeout" in call_args[1]
         assert call_args[1]["timeout"] == 45.0
+
+
+# Note: Modern execution pattern tests moved to test_actions_sub_agent_modern.py
+# Note: ActionPlanBuilder tests moved to test_actions_plan_builder.py

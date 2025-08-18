@@ -86,10 +86,22 @@ class RecoveryMixin:
         monitoring_callback: Optional[Any] = None
     ) -> Dict[str, Any]:
         """Generate data with monitoring support"""
+        job_id = self._initialize_job_id(job_id)
+        self._add_job_to_monitoring(job_id)
+        await self._simulate_generation()
+        result = self._create_generation_result(job_id, config)
+        self._update_job_completion(job_id)
+        await self._notify_monitoring_callback(monitoring_callback, result)
+        return result
+    
+    def _initialize_job_id(self, job_id: Optional[str]) -> str:
+        """Initialize job_id if none provided"""
         if job_id is None:
             job_id = str(datetime.now(UTC).timestamp())
-        
-        # Add job to active_jobs for monitoring
+        return job_id
+    
+    def _add_job_to_monitoring(self, job_id: str) -> None:
+        """Add job to active_jobs for monitoring"""
         if hasattr(self, 'active_jobs'):
             self.active_jobs[job_id] = {
                 "state": "running",
@@ -97,26 +109,34 @@ class RecoveryMixin:
                 "estimated_completion": datetime.now(UTC).isoformat(),
                 "job_id": job_id
             }
-        
-        # Simulate async generation with a small delay
+    
+    async def _simulate_generation(self) -> None:
+        """Simulate async generation with a small delay"""
         await asyncio.sleep(0.2)
-        
-        result = {
+    
+    def _create_generation_result(self, job_id: str, config: Any) -> Dict[str, Any]:
+        """Create result dictionary for generation"""
+        return {
             "job_id": job_id,
             "status": "completed",
             "records_generated": getattr(config, 'num_traces', 100),
             "monitored": True
         }
-        
-        # Update job status to completed after the delay
+    
+    def _update_job_completion(self, job_id: str) -> None:
+        """Update job status to completed"""
         if hasattr(self, 'active_jobs'):
             self.active_jobs[job_id]["state"] = "completed"
             self.active_jobs[job_id]["progress_percentage"] = 100
-        
+    
+    async def _notify_monitoring_callback(
+        self, 
+        monitoring_callback: Optional[Any], 
+        result: Dict[str, Any]
+    ) -> None:
+        """Call monitoring callback if provided"""
         if monitoring_callback:
             await monitoring_callback(result)
-            
-        return result
     
     async def generate_with_checkpoints(self, config: Any) -> List[Dict]:
         """Generate data with checkpoint support"""

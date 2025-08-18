@@ -9,6 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Send, Sparkles, Zap, TrendingUp, Shield, Database, Brain } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/debug-logger';
 
 export const ExamplePrompts: React.FC = () => {
   const { sendMessage } = useWebSocket();
@@ -19,7 +20,7 @@ export const ExamplePrompts: React.FC = () => {
   const handlePromptClick = (prompt: string) => {
     // Check if user is authenticated
     if (!isAuthenticated) {
-      console.error('User must be authenticated to send messages');
+      logger.error('User must be authenticated to send messages');
       return;
     }
     // Add user message to chat immediately

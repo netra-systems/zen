@@ -409,15 +409,15 @@ ORDER BY timestamp;
 
 ```
 ├── app/                      # Backend application
-│   ├── agents/              # Multi-agent system
-│   │   ├── supervisor.py    # Legacy supervisor
+│   ├── agents/              # Multi-agent system (consolidated modules)
 │   │   ├── supervisor_consolidated.py  # Enhanced supervisor with hooks
-│   │   ├── orchestration/   # Orchestration components
 │   │   ├── triage_sub_agent.py
-│   │   ├── data_sub_agent.py
 │   │   ├── optimizations_core_sub_agent.py
 │   │   ├── actions_to_meet_goals_sub_agent.py
 │   │   ├── reporting_sub_agent.py
+│   │   ├── corpus_admin_sub_agent.py
+│   │   ├── supply_researcher_sub_agent.py
+│   │   ├── synthetic_data_sub_agent.py
 │   │   └── tool_dispatcher.py
 │   ├── routes/              # API endpoints
 │   │   ├── auth/           # OAuth and JWT authentication
@@ -465,8 +465,23 @@ ORDER BY timestamp;
 │   ├── agents/           # Agent tests
 │   ├── routes/           # API tests
 │   └── services/         # Service tests
+├── app/tests/            # Comprehensive test suite
+│   ├── auth_integration/ # Auth integration tests
+│   ├── config/          # Test configuration
+│   ├── critical/        # Critical path tests
+│   ├── integration/     # Integration tests
+│   └── unit/            # Unit tests
+├── agent_to_agent/       # Agent communication reports
+├── agent_to_agent_status_updates/ # Agent status reports
+│   ├── STARTUP/         # Startup fix reports
+│   └── TESTS/           # Test fix reports
 ├── docs/                  # Documentation
 ├── SPEC/                  # XML specifications
+│   └── learnings/       # Modular learnings by category
+│       ├── index.xml    # Master learnings index
+│       ├── testing.xml  # Testing-related learnings
+│       ├── startup.xml  # Startup insights
+│       └── *.xml        # Category-specific learnings
 ├── scripts/              # Utility scripts
 ├── config/               # Configuration files
 ├── database_scripts/     # Database setup & migrations
@@ -701,6 +716,29 @@ tests/
 ```
 
 ## 🚀 Deployment
+
+### GCP Staging Deployment (Recommended for Testing)
+
+```bash
+# One-time setup
+.\setup-gcp-staging-resources.ps1
+
+# Deploy to staging
+.\deploy-staging-automated.ps1
+
+# Fast deployment (skip health checks)
+.\deploy-staging-automated.ps1 -SkipHealthChecks
+
+# Deploy with resource pre-creation
+.\deploy-staging-automated.ps1 -PreCreateResources
+```
+
+**Features**:
+- Auto-scaling (0-10 instances)
+- Automatic API enablement
+- Environment-specific builds
+- Versioned deployments
+- See [Developer Deployment Guide](docs/DEVELOPER_DEPLOYMENT_GUIDE.md) for details
 
 ### Docker Deployment
 

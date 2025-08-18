@@ -1,6 +1,6 @@
 """Configuration validation utilities."""
 
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from pydantic import ValidationError
 from app.logging_config import central_logger as logger
 
@@ -24,82 +24,123 @@ class ConfigValidator:
     def validate_config(self, config: AppConfig) -> None:
         """Validate the complete configuration object."""
         try:
-            self._validate_database_config(config)
-            self._validate_auth_config(config)
-            self._validate_llm_config(config)
-            self._validate_external_services(config)
+            self._validate_all_config_sections(config)
             self._logger.info("Configuration validation completed successfully")
-            
         except ConfigurationValidationError as e:
-            self._logger.error(f"Configuration validation failed: {e}")
-            raise
+            self._handle_config_validation_error(e)
         except Exception as e:
-            self._logger.error(f"Unexpected error during validation: {e}")
-            raise ConfigurationValidationError(f"Validation failed: {e}")
+            self._handle_unexpected_validation_error(e)
+    
+    def _validate_all_config_sections(self, config: AppConfig) -> None:
+        """Validate all configuration sections."""
+        self._validate_database_config(config)
+        self._validate_auth_config(config)
+        self._validate_llm_config(config)
+        self._validate_external_services(config)
+    
+    def _handle_config_validation_error(self, error: ConfigurationValidationError) -> None:
+        """Handle configuration validation errors."""
+        self._logger.error(f"Configuration validation failed: {error}")
+        raise
+    
+    def _handle_unexpected_validation_error(self, error: Exception) -> None:
+        """Handle unexpected validation errors."""
+        self._logger.error(f"Unexpected error during validation: {error}")
+        raise ConfigurationValidationError(f"Validation failed: {error}")
     
     def _validate_database_config(self, config: AppConfig) -> None:
         """Validate database configuration."""
         errors = []
-        
-        # Check database URL (more lenient for staging/Cloud Run)
-        import os
-        is_cloud_run = os.getenv("K_SERVICE") is not None
-        
-        if not config.database_url:
-            # In Cloud Run/staging, database URL might be set via env var
-            if not is_cloud_run and config.environment not in ["staging", "development"]:
-                errors.append("Database URL is not configured")
-        elif config.environment != "testing" and not config.database_url.startswith(("postgresql://", "postgresql+asyncpg://")):
-            # Allow SQLite for testing environment
-            errors.append("Database URL must be a PostgreSQL connection string")
-            
-        # Skip ClickHouse validation if ClickHouse is disabled in dev mode
-        if hasattr(config, 'dev_mode_clickhouse_enabled') and not config.dev_mode_clickhouse_enabled:
-            self._logger.info("ClickHouse disabled in dev mode - skipping ClickHouse validation")
-        # Check ClickHouse configurations
-        elif config.clickhouse_logging.enabled:
-            clickhouse_configs = [
-                ("clickhouse_native", config.clickhouse_native),
-                ("clickhouse_https", config.clickhouse_https)
-            ]
-            
-            for name, ch_config in clickhouse_configs:
-                if not ch_config.host:
-                    errors.append(f"{name} host is not configured")
-                # Only require passwords in actual production, not staging
-                if not ch_config.password and config.environment == "production":
-                    errors.append(f"{name} password is required in production")
-        
+        self._validate_database_url(config, errors)
+        self._validate_clickhouse_config(config, errors)
         if errors:
             raise ConfigurationValidationError(f"Database configuration errors: {', '.join(errors)}")
+    
+    def _validate_database_url(self, config: AppConfig, errors: list) -> None:
+        """Validate database URL configuration."""
+        import os
+        is_cloud_run = os.getenv("K_SERVICE") is not None
+        self._check_database_url_presence(config, errors, is_cloud_run)
+        self._check_database_url_format(config, errors)
+    
+    def _check_database_url_presence(self, config: AppConfig, errors: list, is_cloud_run: bool) -> None:
+        """Check if database URL is present when required."""
+        if not config.database_url:
+            if not is_cloud_run and config.environment not in ["staging", "development"]:
+                errors.append("Database URL is not configured")
+    
+    def _check_database_url_format(self, config: AppConfig, errors: list) -> None:
+        """Check database URL format requirements."""
+        if config.database_url and config.environment != "testing":
+            if not config.database_url.startswith(("postgresql://", "postgresql+asyncpg://")):
+                errors.append("Database URL must be a PostgreSQL connection string")
+    
+    def _validate_clickhouse_config(self, config: AppConfig, errors: list) -> None:
+        """Validate ClickHouse configuration if enabled."""
+        if self._should_skip_clickhouse_validation(config):
+            return
+        if config.clickhouse_logging.enabled:
+            self._check_clickhouse_hosts_and_passwords(config, errors)
+    
+    def _should_skip_clickhouse_validation(self, config: AppConfig) -> bool:
+        """Check if ClickHouse validation should be skipped."""
+        if hasattr(config, 'dev_mode_clickhouse_enabled') and not config.dev_mode_clickhouse_enabled:
+            self._logger.info("ClickHouse disabled in dev mode - skipping ClickHouse validation")
+            return True
+        return False
+    
+    def _check_clickhouse_hosts_and_passwords(self, config: AppConfig, errors: list) -> None:
+        """Check ClickHouse host and password configurations."""
+        clickhouse_configs = [
+            ("clickhouse_native", config.clickhouse_native),
+            ("clickhouse_https", config.clickhouse_https)
+        ]
+        for name, ch_config in clickhouse_configs:
+            self._validate_single_clickhouse_config(name, ch_config, config.environment, errors)
+    
+    def _validate_single_clickhouse_config(self, name: str, ch_config: Any, environment: str, errors: list) -> None:
+        """Validate a single ClickHouse configuration."""
+        if not ch_config.host:
+            errors.append(f"{name} host is not configured")
+        if not ch_config.password and environment == "production":
+            errors.append(f"{name} password is required in production")
     
     def _validate_auth_config(self, config: AppConfig) -> None:
         """Validate authentication configuration."""
         errors = []
-        
-        # Check JWT configuration
+        self._validate_jwt_config(config, errors)
+        self._validate_fernet_config(config, errors)
+        self._validate_oauth_config(config, errors)
+        if errors:
+            raise ConfigurationValidationError(f"Authentication configuration errors: {', '.join(errors)}")
+    
+    def _validate_jwt_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate JWT configuration."""
         if not config.jwt_secret_key:
             errors.append("JWT secret key is not configured")
         elif config.environment == "production":
-            # Check for weak or default secrets in production
-            if len(config.jwt_secret_key) < 32:
-                errors.append("JWT secret key must be at least 32 characters in production")
-            if "development" in config.jwt_secret_key.lower() or "test" in config.jwt_secret_key.lower():
-                errors.append("JWT secret key appears to be a development/test key - not suitable for production")
-            
-        # Check Fernet key
+            self._validate_production_jwt_key(config, errors)
+    
+    def _validate_production_jwt_key(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate JWT key for production environment."""
+        if len(config.jwt_secret_key) < 32:
+            errors.append("JWT secret key must be at least 32 characters in production")
+        if "development" in config.jwt_secret_key.lower() or "test" in config.jwt_secret_key.lower():
+            errors.append("JWT secret key appears to be a development/test key - not suitable for production")
+    
+    def _validate_fernet_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate Fernet key configuration."""
         if not config.fernet_key:
             errors.append("Fernet key is not configured")
-            
-        # Check OAuth configuration
+    
+    def _validate_oauth_config(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate OAuth configuration."""
         oauth = config.oauth_config
-        if not oauth.client_id and config.environment not in ["testing", "development", "staging"]:
+        dev_environments = ["testing", "development", "staging"]
+        if not oauth.client_id and config.environment not in dev_environments:
             errors.append("OAuth client ID is not configured")
-        if not oauth.client_secret and config.environment not in ["testing", "development", "staging"]:
+        if not oauth.client_secret and config.environment not in dev_environments:
             errors.append("OAuth client secret is not configured")
-            
-        if errors:
-            raise ConfigurationValidationError(f"Authentication configuration errors: {', '.join(errors)}")
     
     def _validate_llm_config(self, config: AppConfig) -> None:
         """Validate LLM configuration - only Gemini API key is required."""
@@ -179,31 +220,56 @@ class ConfigValidator:
     def _validate_external_services(self, config: AppConfig) -> None:
         """Validate external service configurations."""
         errors = []
-        
-        # Skip Redis validation if Redis is disabled in dev mode
-        if hasattr(config, 'dev_mode_redis_enabled') and not config.dev_mode_redis_enabled:
-            self._logger.info("Redis disabled in dev mode - skipping Redis validation")
-        # Check Redis configuration (if used)
-        elif hasattr(config, 'redis') and config.redis:
-            if not config.redis.host:
-                errors.append("Redis host is not configured")
-            if not config.redis.password and config.environment == "production":
-                errors.append("Redis password is required in production")
-        
-        # Check Langfuse configuration (if used for monitoring)
-        if config.langfuse:
-            if not config.langfuse.secret_key and config.environment == "production":
-                self._logger.warning("Langfuse secret key not configured - monitoring may be limited")
-            if not config.langfuse.public_key and config.environment == "production":
-                self._logger.warning("Langfuse public key not configured - monitoring may be limited")
+        self._validate_redis_configuration(config, errors)
+        self._validate_langfuse_configuration(config)
         
         if errors:
             raise ConfigurationValidationError(f"External service configuration errors: {', '.join(errors)}")
     
+    def _validate_redis_configuration(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate Redis configuration if enabled."""
+        if self._should_skip_redis_validation(config):
+            self._logger.info("Redis disabled in dev mode - skipping Redis validation")
+            return
+        
+        if hasattr(config, 'redis') and config.redis:
+            self._check_redis_host_and_password(config, errors)
+    
+    def _should_skip_redis_validation(self, config: AppConfig) -> bool:
+        """Check if Redis validation should be skipped."""
+        return hasattr(config, 'dev_mode_redis_enabled') and not config.dev_mode_redis_enabled
+    
+    def _check_redis_host_and_password(self, config: AppConfig, errors: List[str]) -> None:
+        """Check Redis host and password configuration."""
+        if not config.redis.host:
+            errors.append("Redis host is not configured")
+        if not config.redis.password and config.environment == "production":
+            errors.append("Redis password is required in production")
+    
+    def _validate_langfuse_configuration(self, config: AppConfig) -> None:
+        """Validate Langfuse configuration for monitoring."""
+        if not config.langfuse:
+            return
+        
+        if config.environment == "production":
+            self._check_langfuse_keys(config)
+    
+    def _check_langfuse_keys(self, config: AppConfig) -> None:
+        """Check Langfuse key configuration for production."""
+        if not config.langfuse.secret_key:
+            self._logger.warning("Langfuse secret key not configured - monitoring may be limited")
+        if not config.langfuse.public_key:
+            self._logger.warning("Langfuse public key not configured - monitoring may be limited")
+    
     def get_validation_report(self, config: AppConfig) -> List[str]:
         """Get a detailed validation report without raising exceptions."""
         report = []
-        
+        self._add_validation_status_to_report(config, report)
+        self._add_informational_items_to_report(config, report)
+        return report
+    
+    def _add_validation_status_to_report(self, config: AppConfig, report: List[str]) -> None:
+        """Add validation status to report."""
         try:
             self.validate_config(config)
             report.append("✓ All configuration checks passed")
@@ -211,11 +277,17 @@ class ConfigValidator:
             report.append(f"✗ Configuration validation failed: {e}")
         except Exception as e:
             report.append(f"✗ Unexpected validation error: {e}")
-        
-        # Add informational items
+    
+    def _add_informational_items_to_report(self, config: AppConfig, report: List[str]) -> None:
+        """Add informational items to validation report."""
         report.append(f"Environment: {config.environment}")
         report.append(f"Database: {'Configured' if config.database_url else 'Not configured'}")
         report.append(f"LLM Configs: {len(config.llm_configs)} configured")
-        report.append(f"Auth: {'JWT+OAuth' if config.jwt_secret_key and config.oauth_config.client_id else 'Partial'}")
-        
-        return report
+        auth_status = self._get_auth_status(config)
+        report.append(f"Auth: {auth_status}")
+    
+    def _get_auth_status(self, config: AppConfig) -> str:
+        """Get authentication configuration status."""
+        if config.jwt_secret_key and config.oauth_config.client_id:
+            return "JWT+OAuth"
+        return "Partial"

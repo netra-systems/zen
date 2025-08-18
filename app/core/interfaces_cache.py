@@ -22,14 +22,22 @@ class CacheManager:
     
     def __init__(self, max_size: int = 1000, ttl_seconds: int = 3600, agent=None):
         """Initialize cache manager with memory limits and optional agent reference."""
+        self._set_basic_properties(max_size, ttl_seconds, agent)
+        self._initialize_cache_structures()
+        self._init_schema_cache()
+    
+    def _set_basic_properties(self, max_size: int, ttl_seconds: int, agent) -> None:
+        """Set basic cache properties."""
         self.max_size = max_size
         self.ttl_seconds = ttl_seconds
         self.agent = agent
+    
+    def _initialize_cache_structures(self) -> None:
+        """Initialize cache data structures."""
         self._cache: Dict[str, Dict] = {}
         self._access_times: Dict[str, datetime] = {}
         self._weak_refs: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
         self._lock = asyncio.Lock()
-        self._init_schema_cache()
     
     def _init_schema_cache(self) -> None:
         """Initialize schema-specific cache if agent is provided."""
@@ -43,13 +51,21 @@ class CacheManager:
     async def get(self, key: str) -> Optional[Any]:
         """Get value from cache with expiration check."""
         async with self._lock:
-            if key not in self._cache:
-                return None
-            if self._is_expired(key):
-                self._remove_entry(key)
-                return None
-            self._update_access_time(key)
-            return self._cache[key]['value']
+            return await self._get_from_cache_with_validation(key)
+    
+    async def _get_from_cache_with_validation(self, key: str) -> Optional[Any]:
+        """Get from cache with expiration and access time updates."""
+        if key not in self._cache:
+            return None
+        return self._handle_cache_hit(key)
+    
+    def _handle_cache_hit(self, key: str) -> Optional[Any]:
+        """Handle cache hit with expiration check."""
+        if self._is_expired(key):
+            self._remove_entry(key)
+            return None
+        self._update_access_time(key)
+        return self._cache[key]['value']
     
     async def set(self, key: str, value: Any) -> None:
         """Set value in cache with eviction and TTL."""
@@ -79,10 +95,16 @@ class CacheManager:
         """Get cached schema information with TTL and cache invalidation."""
         if not self.agent:
             return None
-        
+        return await self._get_schema_with_cache_logic(table_name, force_refresh)
+    
+    async def _get_schema_with_cache_logic(self, table_name: str, force_refresh: bool) -> Optional[Dict[str, Any]]:
+        """Handle schema cache logic with validation and refresh."""
         self._ensure_schema_cache_initialized()
         current_time = time.time()
-        
+        return await self._check_cache_or_fetch(table_name, force_refresh, current_time)
+    
+    async def _check_cache_or_fetch(self, table_name: str, force_refresh: bool, current_time: float) -> Optional[Dict[str, Any]]:
+        """Check cache validity or fetch new schema."""
         if not force_refresh and self._is_schema_cache_valid(table_name, current_time):
             return self.agent._schema_cache[table_name]
         
@@ -90,9 +112,16 @@ class CacheManager:
     
     async def invalidate_schema_cache(self, table_name: Optional[str] = None) -> None:
         """Invalidate schema cache for specific table or all tables."""
-        if not self.agent or not hasattr(self.agent, '_schema_cache'):
+        if not self._can_invalidate_schema_cache():
             return
-        
+        self._perform_cache_invalidation(table_name)
+    
+    def _can_invalidate_schema_cache(self) -> bool:
+        """Check if schema cache can be invalidated."""
+        return self.agent and hasattr(self.agent, '_schema_cache')
+    
+    def _perform_cache_invalidation(self, table_name: Optional[str]) -> None:
+        """Perform the actual cache invalidation."""
         if table_name:
             self._invalidate_single_table_cache(table_name)
         else:
@@ -135,7 +164,10 @@ class CacheManager:
         """Evict least recently used entries."""
         if not self._access_times:
             return
-        
+        self._evict_keys_by_access_time()
+    
+    def _evict_keys_by_access_time(self) -> None:
+        """Evict keys based on access time order."""
         sorted_keys = sorted(self._access_times.keys(), key=lambda k: self._access_times[k])
         evict_count = len(self._cache) - self.max_size + 1
         
@@ -164,7 +196,10 @@ class CacheManager:
         """Fetch fresh schema and update cache."""
         if not hasattr(self.agent, 'clickhouse_ops'):
             return None
-        
+        return await self._get_and_cache_schema(table_name, current_time)
+    
+    async def _get_and_cache_schema(self, table_name: str, current_time: float) -> Optional[Dict[str, Any]]:
+        """Get schema from ClickHouse and cache it."""
         schema = await self.agent.clickhouse_ops.get_table_schema(table_name)
         if schema:
             self._update_schema_cache(table_name, schema, current_time)
@@ -225,9 +260,16 @@ class CacheManager:
     
     def _get_schema_cache_stats(self) -> Dict[str, Any]:
         """Get schema cache statistics."""
-        if not self.agent or not hasattr(self.agent, '_schema_cache'):
+        if not self._has_schema_cache():
             return {'schema_cache_size': 0, 'schema_cache_enabled': False}
-        
+        return self._build_schema_stats()
+    
+    def _has_schema_cache(self) -> bool:
+        """Check if agent has schema cache."""
+        return self.agent and hasattr(self.agent, '_schema_cache')
+    
+    def _build_schema_stats(self) -> Dict[str, Any]:
+        """Build schema cache statistics dictionary."""
         return {
             'schema_cache_size': len(self.agent._schema_cache),
             'schema_cache_enabled': True,
@@ -329,17 +371,27 @@ class ResourceMonitor:
     async def record_request(self, config_name: str, success: bool, duration_ms: float) -> None:
         """Record request metrics for monitoring."""
         async with self._lock:
-            if config_name not in self._metrics:
-                self._metrics[config_name] = self._init_metrics()
-            
-            metrics = self._metrics[config_name]
-            metrics['total_requests'] += 1
-            metrics['total_duration_ms'] += duration_ms
-            
-            if success:
-                metrics['successful_requests'] += 1
-            else:
-                metrics['failed_requests'] += 1
+            self._ensure_metrics_exist(config_name)
+            self._update_metrics(config_name, success, duration_ms)
+    
+    def _ensure_metrics_exist(self, config_name: str) -> None:
+        """Ensure metrics dictionary exists for config."""
+        if config_name not in self._metrics:
+            self._metrics[config_name] = self._init_metrics()
+    
+    def _update_metrics(self, config_name: str, success: bool, duration_ms: float) -> None:
+        """Update metrics with request data."""
+        metrics = self._metrics[config_name]
+        metrics['total_requests'] += 1
+        metrics['total_duration_ms'] += duration_ms
+        self._update_success_metrics(metrics, success)
+    
+    def _update_success_metrics(self, metrics: Dict, success: bool) -> None:
+        """Update success/failure metrics."""
+        if success:
+            metrics['successful_requests'] += 1
+        else:
+            metrics['failed_requests'] += 1
     
     def _init_metrics(self) -> Dict:
         """Initialize metrics dictionary."""
@@ -351,18 +403,29 @@ class ResourceMonitor:
     async def get_metrics(self) -> Dict[str, Any]:
         """Get comprehensive resource usage metrics."""
         async with self._lock:
-            pool_metrics = {name: {'max_concurrent': pool.max_concurrent, 'requests_per_minute': pool.requests_per_minute}
-                           for name, pool in self.request_pools.items()}
-            
-            cache_metrics = {}
-            for name, cache in self.cache_managers.items():
-                cache_metrics[name] = await cache.get_stats()
-            
-            return {
-                'pools': pool_metrics,
-                'caches': cache_metrics,
-                'metrics': self._metrics.copy()
-            }
+            pool_metrics = self._get_pool_metrics()
+            cache_metrics = await self._get_cache_metrics()
+            return self._build_metrics_response(pool_metrics, cache_metrics)
+    
+    def _get_pool_metrics(self) -> Dict[str, Dict[str, int]]:
+        """Get request pool metrics."""
+        return {name: {'max_concurrent': pool.max_concurrent, 'requests_per_minute': pool.requests_per_minute}
+               for name, pool in self.request_pools.items()}
+    
+    async def _get_cache_metrics(self) -> Dict[str, Any]:
+        """Get cache manager metrics."""
+        cache_metrics = {}
+        for name, cache in self.cache_managers.items():
+            cache_metrics[name] = await cache.get_stats()
+        return cache_metrics
+    
+    def _build_metrics_response(self, pool_metrics: Dict, cache_metrics: Dict) -> Dict[str, Any]:
+        """Build final metrics response dictionary."""
+        return {
+            'pools': pool_metrics,
+            'caches': cache_metrics,
+            'metrics': self._metrics.copy()
+        }
     
     async def cleanup(self) -> None:
         """Cleanup all managed resources."""

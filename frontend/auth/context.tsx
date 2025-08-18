@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStore.login({
         id: userData.id || (userData as any).sub || '',
         email: userData.email,
-        name: userData.full_name || (userData as any).name,
+        full_name: userData.full_name || (userData as any).name,
         role: (userData as any).role
       }, tokenData);
     } else {
@@ -94,10 +94,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     } catch (error) {
-      logger.error('Failed to fetch auth config', error as Error, {
+      logger.error('Failed to fetch auth config - backend may be offline', error as Error, {
         component: 'AuthContext',
         action: 'fetch_auth_config_failed'
       });
+      
+      // Graceful degradation - create offline auth config
+      const offlineConfig: AuthConfigResponse = {
+        development_mode: process.env.NODE_ENV === 'development',
+        google_client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '',
+        endpoints: {
+          login: '/auth/login',
+          logout: '/auth/logout',
+          callback: '/auth/callback',
+          token: '/auth/token',
+          user: '/auth/me',
+          ...(process.env.NODE_ENV === 'development' && { dev_login: '/auth/dev_login' })
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      };
+      
+      setAuthConfig(offlineConfig);
+      
+      // In development mode with backend offline, allow proceeding without auth
+      if (process.env.NODE_ENV === 'development') {
+        logger.info('Backend offline - running in development mode without authentication', {
+          component: 'AuthContext',
+          action: 'offline_development_mode'
+        });
+      }
     } finally {
       setLoading(false);
     }

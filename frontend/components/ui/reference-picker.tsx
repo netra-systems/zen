@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { logger } from '@/utils/debug-logger';
 
 import { ReferenceItem as Reference } from '@/types/Reference';
 
@@ -23,7 +24,7 @@ const ReferencePicker: React.FC<ReferencePickerProps> = ({ onSelect }) => {
         const data = await response.json();
         setReferences(data.references);
       } catch (error) {
-        console.error('Error fetching references:', error);
+        logger.error('Error fetching references:', error);
       }
       setLoading(false);
     };

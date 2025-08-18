@@ -16,7 +16,7 @@ function readBackendInfo() {
       const content = fs.readFileSync(discoveryFile, 'utf8');
       return JSON.parse(content);
     } catch (error) {
-      console.error('Error reading backend discovery file:', error);
+      // console output removed: console.log('Error reading backend discovery file:', error);
     }
   }
   
@@ -33,10 +33,10 @@ function startFrontend() {
   if (backendInfo) {
     apiUrl = backendInfo.api_url;
     wsUrl = backendInfo.ws_url;
-    console.log(`🔍 Backend discovered at ${apiUrl}`);
+    // console output removed: console.log(`🔍 Backend discovered at ${apiUrl}`);
   } else {
-    console.log('⚠️  No backend discovery info found, using defaults');
-    console.log('   Start the backend first with: python run_server.py --dynamic-port');
+    // console output removed: console.log('⚠️  No backend discovery info found, using defaults');
+    // console output removed: console.log('   Start the backend first with: python run_server.py --dynamic-port');
   }
   
   // Set environment variables
@@ -46,13 +46,13 @@ function startFrontend() {
     NEXT_PUBLIC_WS_URL: wsUrl
   };
   
-  console.log(`📡 Frontend connecting to backend at:`);
-  console.log(`   API: ${apiUrl}`);
-  console.log(`   WebSocket: ${wsUrl}`);
+  // console output removed: console.log(`📡 Frontend connecting to backend at:`);
+  // console output removed: console.log(`   API: ${apiUrl}`);
+  // console output removed: console.log(`   WebSocket: ${wsUrl}`);
   
   // Determine the npm command based on the first argument
   const command = process.argv[2] || 'dev';  // 'dev' for hot reload, 'start' for production mode
-  console.log(`   Mode: ${command === 'dev' ? 'Development (with hot reload)' : 'Production (no hot reload)'}`);
+  // console output removed: console.log(`   Mode: ${command === 'dev' ? 'Development (with hot reload)' : 'Production (no hot reload)'}`);
   
   // Start Next.js
   const child = spawn('npm', ['run', command], {
@@ -62,7 +62,7 @@ function startFrontend() {
   });
   
   child.on('error', (error) => {
-    console.error('Failed to start frontend:', error);
+    // console output removed: console.log('Failed to start frontend:', error);
     process.exit(1);
   });
   

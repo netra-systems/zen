@@ -36,36 +36,18 @@ class ToolRegistrationMixin:
 
     def _create_create_thread_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create create thread tool definition."""
-        return self._build_unified_tool(
-            "create_thread",
-            "Create a new conversation thread",
-            "Thread Management",
-            ["basic"],
-            self._get_create_thread_schema(),
-            self._create_thread_handler
-        )
+        config = self._get_create_thread_config()
+        return self._build_unified_tool(*config)
 
     def _create_get_thread_history_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create get thread history tool definition."""
-        return self._build_unified_tool(
-            "get_thread_history",
-            "Get message history for a thread",
-            "Thread Management",
-            ["basic"],
-            self._get_thread_history_schema(),
-            self._get_thread_history_handler
-        )
+        config = self._get_thread_history_config()
+        return self._build_unified_tool(*config)
 
     def _create_list_agents_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create list agents tool definition."""
-        return self._build_unified_tool(
-            "list_agents",
-            "List available agents",
-            "Agent Operations",
-            ["basic"],
-            self._get_list_agents_schema(),
-            self._list_agents_handler
-        )
+        config = self._get_list_agents_config()
+        return self._build_unified_tool(*config)
 
     def _get_create_thread_schema(self) -> dict:
         """Get create thread tool schema."""
@@ -110,25 +92,13 @@ class ToolRegistrationMixin:
 
     def _create_analyze_workload_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create analyze workload tool definition."""
-        return self._build_unified_tool(
-            "analyze_workload",
-            "Analyze AI workload characteristics",
-            "Analytics",
-            ["analytics"],
-            self._get_analyze_workload_schema(),
-            self._analyze_workload_handler
-        )
+        config = self._get_analyze_workload_config()
+        return self._build_unified_tool(*config)
 
     def _create_query_corpus_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create query corpus tool definition."""
-        return self._build_unified_tool(
-            "query_corpus",
-            "Search document corpus",
-            "Analytics",
-            ["analytics"],
-            self._get_query_corpus_schema(),
-            self._query_corpus_handler
-        )
+        config = self._get_query_corpus_config()
+        return self._build_unified_tool(*config)
 
     def _get_analyze_workload_schema(self) -> dict:
         """Get analyze workload tool schema."""
@@ -163,25 +133,13 @@ class ToolRegistrationMixin:
 
     def _create_synthetic_data_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create synthetic data tool definition."""
-        return self._build_unified_tool(
-            "generate_synthetic_data",
-            "Generate synthetic test data",
-            "Data Management",
-            ["data_management"],
-            self._get_synthetic_data_schema(),
-            self._generate_synthetic_data_handler
-        )
+        config = self._get_synthetic_data_config()
+        return self._build_unified_tool(*config)
 
     def _create_corpus_manager_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create corpus manager tool definition."""
-        return self._build_unified_tool(
-            "corpus_manager",
-            "Create and manage document corpora",
-            "Data Management",
-            ["data_management"],
-            self._get_corpus_manager_schema(),
-            self._corpus_manager_handler
-        )
+        config = self._get_corpus_manager_config()
+        return self._build_unified_tool(*config)
 
     def _get_synthetic_data_schema(self) -> dict:
         """Get synthetic data tool schema."""
@@ -219,16 +177,8 @@ class ToolRegistrationMixin:
 
     def _create_optimization_tool(self: "UnifiedToolRegistry", tool_name: str) -> UnifiedTool:
         """Create optimization tool definition."""
-        description = f"Advanced {tool_name.replace('_', ' ')} tool"
-        handler = getattr(self, f"_{tool_name}_handler", self._generic_optimization_handler)
-        return self._build_unified_tool(
-            tool_name,
-            description,
-            "Advanced Optimization",
-            ["advanced_optimization"],
-            self._get_optimization_tool_schema(),
-            handler
-        )
+        config = self._get_optimization_tool_config(tool_name)
+        return self._build_unified_tool(*config)
 
     def _get_optimization_tool_schema(self) -> dict:
         """Get optimization tool schema."""
@@ -261,36 +211,18 @@ class ToolRegistrationMixin:
     
     def _create_system_configurator_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create system configurator tool definition"""
-        return self._build_unified_tool(
-            "system_configurator",
-            "Configure system settings",
-            "System Management",
-            ["system_management"],
-            self._get_system_configurator_schema(),
-            self._system_configurator_handler
-        )
+        config = self._get_system_configurator_config()
+        return self._build_unified_tool(*config)
     
     def _create_user_admin_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create user admin tool definition"""
-        return self._build_unified_tool(
-            "user_admin",
-            "User management operations",
-            "System Management",
-            ["system_management"],
-            self._get_user_admin_schema(),
-            self._user_admin_handler
-        )
+        config = self._get_user_admin_config()
+        return self._build_unified_tool(*config)
     
     def _create_log_analyzer_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create log analyzer tool definition"""
-        return self._build_unified_tool(
-            "log_analyzer",
-            "Analyze system logs",
-            "System Management",
-            ["system_management"],
-            self._get_log_analyzer_schema(),
-            self._log_analyzer_handler
-        )
+        config = self._get_log_analyzer_config()
+        return self._build_unified_tool(*config)
     
     def _get_system_configurator_schema(self) -> dict:
         """Get system configurator input schema"""
@@ -320,14 +252,8 @@ class ToolRegistrationMixin:
 
     def _create_debug_panel_tool(self: "UnifiedToolRegistry") -> UnifiedTool:
         """Create debug panel tool definition."""
-        return self._build_unified_tool(
-            "debug_panel",
-            "Access debug information",
-            "Developer Tools",
-            ["developer_tools"],
-            self._get_debug_panel_schema(),
-            self._debug_panel_handler
-        )
+        config = self._get_debug_panel_config()
+        return self._build_unified_tool(*config)
 
     def _get_debug_panel_schema(self) -> dict:
         """Get debug panel tool schema."""
@@ -338,12 +264,8 @@ class ToolRegistrationMixin:
                            permissions: list, schema: dict, handler) -> UnifiedTool:
         """Build unified tool with standard parameters."""
         return UnifiedTool(
-            name=name,
-            description=description,
-            category=category,
-            permissions_required=permissions,
-            input_schema=schema,
-            handler=handler
+            name=name, description=description, category=category,
+            permissions_required=permissions, input_schema=schema, handler=handler
         )
     
     def _build_schema(self, properties: dict) -> dict:
@@ -433,3 +355,95 @@ class ToolRegistrationMixin:
             "component": {"type": "string", "description": "Component to debug"},
             "action": {"type": "string", "enum": ["status", "logs", "metrics"]}
         }
+    
+    def _get_create_thread_config(self) -> tuple:
+        """Get create thread tool configuration."""
+        return (
+            "create_thread", "Create a new conversation thread",
+            "Thread Management", ["basic"], self._get_create_thread_schema(),
+            self._create_thread_handler
+        )
+    
+    def _get_thread_history_config(self) -> tuple:
+        """Get thread history tool configuration."""
+        return (
+            "get_thread_history", "Get message history for a thread",
+            "Thread Management", ["basic"], self._get_thread_history_schema(),
+            self._get_thread_history_handler
+        )
+    
+    def _get_list_agents_config(self) -> tuple:
+        """Get list agents tool configuration."""
+        return (
+            "list_agents", "List available agents", "Agent Operations",
+            ["basic"], self._get_list_agents_schema(), self._list_agents_handler
+        )
+    
+    def _get_analyze_workload_config(self) -> tuple:
+        """Get analyze workload tool configuration."""
+        return (
+            "analyze_workload", "Analyze AI workload characteristics",
+            "Analytics", ["analytics"], self._get_analyze_workload_schema(),
+            self._analyze_workload_handler
+        )
+    
+    def _get_query_corpus_config(self) -> tuple:
+        """Get query corpus tool configuration."""
+        return (
+            "query_corpus", "Search document corpus", "Analytics",
+            ["analytics"], self._get_query_corpus_schema(), self._query_corpus_handler
+        )
+    
+    def _get_synthetic_data_config(self) -> tuple:
+        """Get synthetic data tool configuration."""
+        return (
+            "generate_synthetic_data", "Generate synthetic test data",
+            "Data Management", ["data_management"], self._get_synthetic_data_schema(),
+            self._generate_synthetic_data_handler
+        )
+    
+    def _get_corpus_manager_config(self) -> tuple:
+        """Get corpus manager tool configuration."""
+        return (
+            "corpus_manager", "Create and manage document corpora",
+            "Data Management", ["data_management"], self._get_corpus_manager_schema(),
+            self._corpus_manager_handler
+        )
+    
+    def _get_optimization_tool_config(self, tool_name: str) -> tuple:
+        """Get optimization tool configuration."""
+        description = f"Advanced {tool_name.replace('_', ' ')} tool"
+        handler = getattr(self, f"_{tool_name}_handler", self._generic_optimization_handler)
+        return (
+            tool_name, description, "Advanced Optimization", ["advanced_optimization"],
+            self._get_optimization_tool_schema(), handler
+        )
+    
+    def _get_system_configurator_config(self) -> tuple:
+        """Get system configurator tool configuration."""
+        return (
+            "system_configurator", "Configure system settings", "System Management",
+            ["system_management"], self._get_system_configurator_schema(),
+            self._system_configurator_handler
+        )
+    
+    def _get_user_admin_config(self) -> tuple:
+        """Get user admin tool configuration."""
+        return (
+            "user_admin", "User management operations", "System Management",
+            ["system_management"], self._get_user_admin_schema(), self._user_admin_handler
+        )
+    
+    def _get_log_analyzer_config(self) -> tuple:
+        """Get log analyzer tool configuration."""
+        return (
+            "log_analyzer", "Analyze system logs", "System Management",
+            ["system_management"], self._get_log_analyzer_schema(), self._log_analyzer_handler
+        )
+    
+    def _get_debug_panel_config(self) -> tuple:
+        """Get debug panel tool configuration."""
+        return (
+            "debug_panel", "Access debug information", "Developer Tools",
+            ["developer_tools"], self._get_debug_panel_schema(), self._debug_panel_handler
+        )

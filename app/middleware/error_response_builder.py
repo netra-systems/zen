@@ -4,7 +4,7 @@ Provides functions to build various types of responses including
 error responses, recovery responses, and circuit breaker responses.
 """
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
@@ -35,6 +35,10 @@ def create_recovery_response(
     """Create response after successful recovery."""
     content = build_recovery_content(context, recovery_result)
     headers = build_recovery_headers(context, recovery_result)
+    return _build_recovery_json_response(content, headers)
+
+def _build_recovery_json_response(content: Dict[str, Any], headers: Dict[str, str]) -> JSONResponse:
+    """Build JSON response for recovery result."""
     return JSONResponse(status_code=200, content=content, headers=headers)
 
 
@@ -73,6 +77,10 @@ def create_error_response(
     operation_id: str
 ) -> JSONResponse:
     """Create final error response after all recovery attempts failed."""
+    return _build_final_error_response(request, error, operation_id)
+
+def _build_final_error_response(request: Request, error: Exception, operation_id: str) -> JSONResponse:
+    """Build final error response with all components."""
     status_code = determine_error_status_code(error)
     error_response = build_complete_error_response(error, operation_id, request)
     headers = build_error_response_headers(operation_id, error)

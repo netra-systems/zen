@@ -29,15 +29,27 @@ def calculate_estimated_duration(num_traces: int) -> int:
     return int(num_traces / 100)
 
 
-def extract_result_fields(result: Dict, num_traces: int) -> Dict:
-    """Extract fields for generation response."""
+def _get_result_basic_fields(result: Dict) -> Dict:
+    """Get basic result fields."""
+    return {"job_id": result["job_id"], "status": result["status"]}
+
+def _get_result_extended_fields(result: Dict, num_traces: int) -> Dict:
+    """Get extended result fields."""
     return {
-        "job_id": result["job_id"],
-        "status": result["status"],
         "websocket_channel": result["websocket_channel"],
         "table_name": result["table_name"],
         "estimated_duration_seconds": calculate_estimated_duration(num_traces)
     }
+
+def _build_result_fields_dict(result: Dict, num_traces: int) -> Dict:
+    """Build result fields dictionary."""
+    basic = _get_result_basic_fields(result)
+    extended = _get_result_extended_fields(result, num_traces)
+    return {**basic, **extended}
+
+def extract_result_fields(result: Dict, num_traces: int) -> Dict:
+    """Extract fields for generation response."""
+    return _build_result_fields_dict(result, num_traces)
 
 
 async def fetch_and_validate_job_status(job_id: str, user_id: int) -> Dict:
@@ -98,10 +110,8 @@ def build_cancel_response(job_id: str, status: Dict) -> Dict:
     }
 
 
-async def get_preview_samples_safely(
-    corpus_id: Optional[str], workload_type: str, sample_size: int
-) -> List[Dict]:
-    """Get preview samples safely."""
+async def _call_preview_service(corpus_id: Optional[str], workload_type: str, sample_size: int) -> List[Dict]:
+    """Call preview service with parameters."""
     from app.services.synthetic_data_service import synthetic_data_service
     return await synthetic_data_service.get_preview(
         corpus_id=corpus_id,
@@ -109,16 +119,30 @@ async def get_preview_samples_safely(
         sample_size=sample_size
     )
 
+async def get_preview_samples_safely(
+    corpus_id: Optional[str], workload_type: str, sample_size: int
+) -> List[Dict]:
+    """Get preview samples safely."""
+    return await _call_preview_service(corpus_id, workload_type, sample_size)
 
-def calculate_characteristics(samples: List[Dict]) -> Dict:
-    """Calculate sample characteristics."""
-    if not samples:
-        return {"avg_latency_ms": 0, "tool_diversity": 0, "sample_count": 0}
+
+def _get_empty_characteristics() -> Dict:
+    """Get empty characteristics dictionary."""
+    return {"avg_latency_ms": 0, "tool_diversity": 0, "sample_count": 0}
+
+def _build_characteristics_dict(samples: List[Dict]) -> Dict:
+    """Build characteristics dictionary from samples."""
     return {
         "avg_latency_ms": _calculate_avg_latency(samples),
         "tool_diversity": _calculate_tool_diversity(samples),
         "sample_count": len(samples)
     }
+
+def calculate_characteristics(samples: List[Dict]) -> Dict:
+    """Calculate sample characteristics."""
+    if not samples:
+        return _get_empty_characteristics()
+    return _build_characteristics_dict(samples)
 
 
 def _calculate_avg_latency(samples: List[Dict]) -> float:
@@ -164,17 +188,30 @@ def _generate_random_created_date() -> str:
     from datetime import datetime, UTC, timedelta
     return (datetime.now(UTC) - timedelta(days=random.randint(1, 365))).isoformat()
 
-def _create_single_user_record(i: int, first_names: List[str], last_names: List[str], domains: List[str], statuses: List[str]) -> Dict:
-    """Create single user record."""
-    import random
+def _build_user_basic_fields(i: int, first_names: List[str], last_names: List[str], domains: List[str]) -> Dict:
+    """Build basic user fields."""
     return {
         "user_id": _generate_random_user_id(),
         "name": _generate_random_name(first_names, last_names),
+        "email": _generate_random_email(i, domains)
+    }
+
+
+def _build_user_additional_fields(statuses: List[str]) -> Dict:
+    """Build additional user fields."""
+    import random
+    return {
         "age": random.randint(18, 75),
-        "email": _generate_random_email(i, domains),
         "created_at": _generate_random_created_date(),
         "status": random.choice(statuses)
     }
+
+
+def _create_single_user_record(i: int, first_names: List[str], last_names: List[str], domains: List[str], statuses: List[str]) -> Dict:
+    """Create single user record."""
+    basic_fields = _build_user_basic_fields(i, first_names, last_names, domains)
+    additional_fields = _build_user_additional_fields(statuses)
+    return {**basic_fields, **additional_fields}
 
 def generate_test_user_data(count: int) -> List[Dict]:
     """Generate realistic test user data records using production-quality patterns."""

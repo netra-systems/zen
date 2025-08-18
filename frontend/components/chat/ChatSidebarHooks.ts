@@ -6,6 +6,7 @@
 import { useState, useEffect } from 'react';
 import { Thread, ThreadService } from '@/services/threadService';
 import { ChatSidebarState, FilterType } from './ChatSidebarTypes';
+import { logger } from '@/utils/debug-logger';
 
 export const useChatSidebarState = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,7 +48,7 @@ export const useThreadLoader = (
 
   const handleLoadError = (error: unknown) => {
     const errorMessage = error instanceof Error ? error.message : 'Failed to load threads';
-    console.error('Failed to load threads:', errorMessage);
+    logger.error('Failed to load threads:', errorMessage);
     setLoadError(errorMessage);
     setThreads([]);
   };

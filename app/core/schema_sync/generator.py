@@ -62,14 +62,21 @@ class TypeScriptGenerator:
     def _convert_json_schema_type_to_typescript(self, field_schema: Dict[str, Any]) -> str:
         """Convert JSON schema type to TypeScript type."""
         field_type = field_schema.get('type', 'any')
-        
+        return self._get_typescript_type_for_schema(field_type, field_schema)
+    
+    def _get_typescript_type_for_schema(self, field_type: str, field_schema: Dict[str, Any]) -> str:
+        """Get TypeScript type based on schema type."""
         if field_type == 'string':
             return self._handle_string_type(field_schema)
         elif field_type in ['number', 'integer']:
             return 'number'
         elif field_type == 'boolean':
             return 'boolean'
-        elif field_type == 'array':
+        return self._get_complex_typescript_type(field_type, field_schema)
+    
+    def _get_complex_typescript_type(self, field_type: str, field_schema: Dict[str, Any]) -> str:
+        """Get TypeScript type for complex schema types."""
+        if field_type == 'array':
             return self._handle_array_type(field_schema)
         elif field_type == 'object':
             return self._handle_object_type(field_schema)

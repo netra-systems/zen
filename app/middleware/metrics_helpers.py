@@ -223,11 +223,32 @@ class BatchResultProcessor:
         throughput: float
     ) -> Dict[str, Union[int, float]]:
         """Create batch operation metadata."""
+        return BatchResultProcessor._build_batch_metadata_dict(
+            batch_size, successful_items, failed_items, execution_time_ms, throughput
+        )
+    
+    @staticmethod
+    def _build_batch_metadata_dict(
+        batch_size: int, 
+        successful_items: int, 
+        failed_items: int, 
+        execution_time_ms: float,
+        throughput: float
+    ) -> Dict[str, Union[int, float]]:
+        """Build batch metadata dictionary."""
+        return BatchResultProcessor._create_metadata_dict(
+            batch_size, successful_items, failed_items, execution_time_ms, throughput
+        )
+
+    @staticmethod
+    def _create_metadata_dict(
+        batch_size: int, successful_items: int, failed_items: int,
+        execution_time_ms: float, throughput: float
+    ) -> Dict[str, Union[int, float]]:
+        """Create metadata dictionary with all fields."""
         return {
-            "batch_size": batch_size,
-            "successful_items": successful_items,
-            "failed_items": failed_items,
-            "execution_time_ms": execution_time_ms,
+            "batch_size": batch_size, "successful_items": successful_items,
+            "failed_items": failed_items, "execution_time_ms": execution_time_ms,
             "throughput_items_per_second": throughput
         }
     
@@ -239,11 +260,16 @@ class BatchResultProcessor:
         execution_time_ms: float
     ) -> Dict[str, Any]:
         """Create batch operation result."""
+        return BatchResultProcessor._build_result_dict(
+            result, successful_items, failed_items, execution_time_ms
+        )
+
+    @staticmethod
+    def _build_result_dict(result: Any, successful_items: int, failed_items: int, execution_time_ms: float) -> Dict[str, Any]:
+        """Build batch result dictionary."""
         return {
-            "result": result,
-            "successful_items": successful_items,
-            "failed_items": failed_items,
-            "execution_time_ms": execution_time_ms
+            "result": result, "successful_items": successful_items,
+            "failed_items": failed_items, "execution_time_ms": execution_time_ms
         }
 
 

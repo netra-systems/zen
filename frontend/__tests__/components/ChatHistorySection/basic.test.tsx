@@ -3,26 +3,82 @@
  * Tests for basic rendering, display, and thread highlighting
  */
 
+// Hoist all mocks to the top for proper Jest handling
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// AuthGate mock - always render children
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => children
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => React.createElement('div', props, children),
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
-import { createTestSetup, mockThreads, useThreadStore, useAuthStore } from './setup';
-import { AuthenticatedChatHistorySection, renderWithAuth } from './testWrapper';
+import { createTestSetup, mockThreads } from './setup';
+
+const mockStore = {
+  isProcessing: false,
+  messages: [],
+  threads: mockThreads,
+  currentThreadId: 'thread-1',
+  isThreadLoading: false,
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateThreads: jest.fn(),
+  setCurrentThreadId: jest.fn(),
+};
 
 describe('ChatHistorySection - Basic Functionality', () => {
-  const testSetup = createTestSetup();
-
   beforeEach(() => {
-    testSetup.beforeEach();
+    jest.clearAllMocks();
+    
+    // Set up default mock return values
+    mockUseUnifiedChatStore.mockReturnValue(mockStore);
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: ''
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread-1',
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+      createNewThread: jest.fn()
+    });
   });
 
   afterEach(() => {
-    testSetup.afterEach();
+    jest.clearAllMocks();
   });
 
   describe('History item rendering', () => {
     it('should render all conversation threads', () => {
-      renderWithAuth();
+      render(<ChatHistorySection />);
       
       expect(screen.getByText('First Conversation')).toBeInTheDocument();
       expect(screen.getByText('Second Conversation')).toBeInTheDocument();
@@ -41,7 +97,17 @@ describe('ChatHistorySection - Basic Functionality', () => {
 
     it('should highlight the current active thread', () => {
       // Configure store to have currentThreadId set
-      testSetup.configureStoreMocks({ currentThreadId: 'thread-1' });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        currentThreadId: 'thread-1'
+      });
+      
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
       
       render(<ChatHistorySection />);
       
@@ -59,7 +125,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
     });
 
     it('should render empty state when no threads exist', () => {
-      testSetup.configureStoreMocks({ threads: [] });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: []
+      });
 
       render(<ChatHistorySection />);
       
@@ -78,7 +147,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
         { ...mockThreads[0], title: null },
       ];
       
-      testSetup.configureStoreMocks({ threads: threadsWithNullTitle });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: threadsWithNullTitle
+      });
 
       render(<ChatHistorySection />);
       
@@ -90,7 +162,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
         { ...mockThreads[0], title: '' },
       ];
       
-      testSetup.configureStoreMocks({ threads: threadsWithEmptyTitle });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: threadsWithEmptyTitle
+      });
 
       render(<ChatHistorySection />);
       
@@ -114,7 +189,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
         { ...mockThreads[0], title: 'This is a very long conversation title that should be handled properly by the component without breaking the layout or causing any display issues' },
       ];
       
-      testSetup.configureStoreMocks({ threads: threadsWithLongTitle });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: threadsWithLongTitle
+      });
 
       render(<ChatHistorySection />);
       
@@ -130,7 +208,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
         { ...mockThreads[2], title: 'Oldest Thread', created_at: Math.floor(Date.now() / 1000) - 7200 },
       ];
       
-      testSetup.configureStoreMocks({ threads: orderedThreads });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: orderedThreads
+      });
       
       render(<ChatHistorySection />);
       
@@ -145,7 +226,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
         { ...mockThreads[0], created_at: null, updated_at: null },
       ];
       
-      testSetup.configureStoreMocks({ threads: threadsWithMissingTimestamp });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: threadsWithMissingTimestamp
+      });
 
       render(<ChatHistorySection />);
       
@@ -192,7 +276,17 @@ describe('ChatHistorySection - Basic Functionality', () => {
 
   describe('Loading and error states', () => {
     it('should show loading state when threads are being fetched', () => {
-      testSetup.mockLoadingState(true);
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: true,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: 'Loading...'
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        isThreadLoading: true
+      });
       
       render(<ChatHistorySection />);
       
@@ -202,7 +296,10 @@ describe('ChatHistorySection - Basic Functionality', () => {
     });
 
     it('should handle error state gracefully', () => {
-      testSetup.mockErrorState('Failed to load threads');
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        error: 'Failed to load threads'
+      });
       
       render(<ChatHistorySection />);
       
@@ -212,11 +309,14 @@ describe('ChatHistorySection - Basic Functionality', () => {
 
     it('should recover from error state when data is available', () => {
       // First render with error
-      testSetup.mockErrorState('Network error');
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        error: 'Network error'
+      });
       const { rerender } = render(<ChatHistorySection />);
       
       // Then render with data
-      testSetup.beforeEach(); // Reset to normal state
+      mockUseUnifiedChatStore.mockReturnValue(mockStore);
       rerender(<ChatHistorySection />);
       
       expect(screen.getByText('First Conversation')).toBeInTheDocument();

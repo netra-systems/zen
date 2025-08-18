@@ -248,6 +248,52 @@
             </learning_ids>
         </category>
         <category>
+            <name>Frontend</name>
+            <file>learnings/frontend.xml</file>
+            <path>SPEC/learnings/frontend.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>zustand-selector-infinite-loop</id>
+                <id>websocket-race-condition-solution</id>
+                <id>websocket-client-handshake-improvements</id>
+                <id>module-default-export-initialization</id>
+            </learning_ids>
+            <important_note>Module initialization and state management patterns</important_note>
+        </category>
+        <category>
+            <name>Frontend Comprehensive Checkup</name>
+            <file>learnings/frontend_comprehensive_checkup.xml</file>
+            <path>SPEC/learnings/frontend_comprehensive_checkup.xml</path>
+            <learning_count>25</learning_count>
+            <learning_ids>
+                <id>FC-001</id>
+                <id>FC-002</id>
+                <id>FC-003</id>
+                <id>SP-001</id>
+                <id>SP-002</id>
+                <id>SP-003</id>
+                <id>TS-001</id>
+                <id>TS-002</id>
+                <id>TS-003</id>
+                <id>PO-001</id>
+                <id>PO-002</id>
+                <id>PO-003</id>
+                <id>TF-001</id>
+                <id>TF-002</id>
+                <id>TF-003</id>
+                <id>BA-001</id>
+                <id>BA-002</id>
+                <id>BA-003</id>
+                <id>RS-001</id>
+                <id>RS-002</id>
+                <id>RS-003</id>
+                <id>MR-001</id>
+                <id>MR-002</id>
+                <id>MR-003</id>
+            </learning_ids>
+            <important_note>CRITICAL: 6 files exceed 300-line limit blocking Enterprise sales. Build config bypasses type safety. Comprehensive fixes and patterns documented.</important_note>
+        </category>
+        <category>
             <name>E2E Testing</name>
             <file>learnings/e2e_testing.xml</file>
             <path>SPEC/learnings/e2e_testing.xml</path>
@@ -297,6 +343,20 @@
                 <id>llm-api-keys</id>
             </learning_ids>
         </category>
+        <category>
+            <name>Startup</name>
+            <file>learnings/startup.xml</file>
+            <path>SPEC/learnings/startup.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>startup-clickhouse-port-configuration</id>
+                <id>startup-secrets-env-var-mapping</id>
+                <id>startup-redis-local-fallback</id>
+                <id>startup-app-state-initialization</id>
+                <id>startup-comprehensive-fix-process</id>
+            </learning_ids>
+            <important_note>CRITICAL: Startup errors often cascade - fix configuration first, then secrets, then connections</important_note>
+        </category>
     </categories>
     
     <usage>
@@ -307,7 +367,7 @@
     </usage>
     
     <statistics>
-        <total_categories>19</total_categories>
-        <total_learnings>75</total_learnings>
+        <total_categories>21</total_categories>
+        <total_learnings>105</total_learnings>
     </statistics>
 </specification>

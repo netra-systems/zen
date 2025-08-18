@@ -3,6 +3,101 @@
  * Tests for Store, Router, Service Worker, Theme, and Configuration initialization
  */
 
+// JEST MODULE HOISTING - Mocks BEFORE imports
+// Create stateful mock stores
+let mockAuthState = {
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  loading: false,
+  login: jest.fn((user, token) => {
+    mockAuthState.user = user;
+    mockAuthState.token = token;
+    mockAuthState.isAuthenticated = true;
+  }),
+  logout: jest.fn(() => {
+    mockAuthState.user = null;
+    mockAuthState.token = null;
+    mockAuthState.isAuthenticated = false;
+  }),
+  subscribe: jest.fn()
+};
+
+let mockChatState = {
+  messages: [],
+  isLoading: false,
+  addMessage: jest.fn(),
+  clearMessages: jest.fn(),
+  subscribe: jest.fn()
+};
+
+const mockAuthStore = {
+  getState: jest.fn(() => mockAuthState),
+  subscribe: jest.fn()
+};
+
+const mockChatStore = {
+  getState: jest.fn(() => mockChatState),
+  subscribe: jest.fn()
+};
+
+// Mock stores BEFORE imports
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockAuthStore
+}));
+
+jest.mock('@/store/chatStore', () => ({
+  useChatStore: mockChatStore
+}));
+
+// Mock Next.js router
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    pathname: '/',
+    query: {},
+    asPath: '/'
+  }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams()
+}));
+
+// Mock global fetch
+global.fetch = jest.fn();
+
+// Mock WebSocket
+global.WebSocket = jest.fn(() => ({
+  send: jest.fn(),
+  close: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  readyState: WebSocket.OPEN
+})) as any;
+
+// Mock navigator.serviceWorker
+Object.defineProperty(navigator, 'serviceWorker', {
+  value: {
+    register: jest.fn(),
+    ready: Promise.resolve()
+  },
+  writable: true
+});
+
+// Mock window.matchMedia
+Object.defineProperty(window, 'matchMedia', {
+  value: jest.fn().mockImplementation(query => ({
+    matches: query === '(prefers-color-scheme: dark)',
+    media: query,
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn()
+  })),
+  writable: true
+});
+
+// Import global test setup
+import '../setup/startup-setup';
+
 import React from 'react';
 import '@testing-library/jest-dom';
 
@@ -17,16 +112,20 @@ import {
 } from './helpers/startup-test-utilities';
 
 import {
-  initializeAllMocks,
   mockProductionEnvironment
 } from './helpers/startup-test-mocks';
-
-// Initialize all mocks
-initializeAllMocks();
 
 describe('Frontend System Startup - Initialization', () => {
   beforeEach(() => {
     setupTestEnvironment();
+    jest.clearAllMocks();
+    // Reset mock store states
+    mockAuthState.user = null;
+    mockAuthState.token = null;
+    mockAuthState.isAuthenticated = false;
+    mockAuthState.loading = false;
+    mockChatState.messages = [];
+    mockChatState.isLoading = false;
   });
 
   afterEach(() => {
@@ -46,11 +145,8 @@ describe('Frontend System Startup - Initialization', () => {
     };
 
     const getStoreStates = () => {
-      const useAuthStore = require('@/store/authStore').useAuthStore;
-      const useChatStore = require('@/store/chatStore').useChatStore;
-      
-      const authState = useAuthStore.getState();
-      const chatState = useChatStore.getState();
+      const authState = mockAuthStore.getState();
+      const chatState = mockChatStore.getState();
       
       return { authState, chatState };
     };
@@ -78,17 +174,15 @@ describe('Frontend System Startup - Initialization', () => {
     };
 
     const restoreStateFromStorage = () => {
-      const useAuthStore = require('@/store/authStore').useAuthStore;
-      
       const token = localStorage.getItem('jwt_token');
       const userStr = localStorage.getItem('user');
       
       if (token && userStr) {
         const user = JSON.parse(userStr);
-        useAuthStore.getState().login(user, token);
+        mockAuthStore.getState().login(user, token);
       }
       
-      return useAuthStore.getState();
+      return mockAuthStore.getState();
     };
 
     const verifyRestoredState = (state: any, expectedUser: any) => {
@@ -102,8 +196,7 @@ describe('Frontend System Startup - Initialization', () => {
     });
 
     const testStoreHydration = () => {
-      const useAuthStore = require('@/store/authStore').useAuthStore;
-      const initialState = useAuthStore.getState();
+      const initialState = mockAuthStore.getState();
       
       expect(initialState).toBeDefined();
       expect(typeof initialState.login).toBe('function');
@@ -115,11 +208,8 @@ describe('Frontend System Startup - Initialization', () => {
     });
 
     const testStoreSubscriptions = () => {
-      const useAuthStore = require('@/store/authStore').useAuthStore;
-      const useChatStore = require('@/store/chatStore').useChatStore;
-      
-      expect(useAuthStore.subscribe).toBeDefined();
-      expect(useChatStore.subscribe).toBeDefined();
+      expect(mockAuthStore.subscribe).toBeDefined();
+      expect(mockChatStore.subscribe).toBeDefined();
     };
   });
 
@@ -331,11 +421,10 @@ describe('Frontend System Startup - Initialization', () => {
     });
 
     const testStateSynchronization = () => {
-      const useAuthStore = require('@/store/authStore').useAuthStore;
       const mockUser = createMockUser();
       
-      useAuthStore.getState().login(mockUser, 'test-token');
-      const state = useAuthStore.getState();
+      mockAuthStore.getState().login(mockUser, 'test-token');
+      const state = mockAuthStore.getState();
       
       expect(state.user).toEqual(mockUser);
       expect(state.isAuthenticated).toBe(true);
@@ -346,11 +435,8 @@ describe('Frontend System Startup - Initialization', () => {
     });
 
     const testCrossStoreCommunication = () => {
-      const useAuthStore = require('@/store/authStore').useAuthStore;
-      const useChatStore = require('@/store/chatStore').useChatStore;
-      
-      const authState = useAuthStore.getState();
-      const chatState = useChatStore.getState();
+      const authState = mockAuthStore.getState();
+      const chatState = mockChatStore.getState();
       
       expect(authState).toBeDefined();
       expect(chatState).toBeDefined();

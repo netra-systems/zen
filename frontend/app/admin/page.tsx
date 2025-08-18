@@ -1,0 +1,175 @@
+'use client';
+
+import { NextPage } from 'next';
+import { authService } from '@/auth';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { User } from '@/types/registry';
+import type { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
+import { Shield, Settings, Users, Database, Activity, FileText, LucideIcon } from 'lucide-react';
+
+interface AdminStat {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+interface AdminSection {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  color: string;
+}
+import { motion } from 'framer-motion';
+
+const AdminPage: NextPage = () => {
+  const { user, loading } = authService.useAuth();
+  const router = useRouter();
+
+  useAuth(loading, user, router);
+
+  if (loading || !user) {
+    return <LoadingScreen />;
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <AdminHeader />
+      <AdminQuickStats />
+      <AdminDashboard />
+    </div>
+  );
+};
+
+const useAuth = (loading: boolean, user: User | null, router: AppRouterInstance) => {
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [loading, user, router]);
+};
+
+const LoadingScreen = () => {
+  return (
+    <div className="flex items-center justify-center h-screen">
+      <p>Loading...</p>
+    </div>
+  );
+};
+
+const AdminHeader = () => {
+  return (
+    <div className="flex items-center space-x-4 mb-8">
+      <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center">
+        <Shield className="w-6 h-6 text-white" />
+      </div>
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
+        <p className="text-gray-600">System administration and management</p>
+      </div>
+    </div>
+  );
+};
+
+const AdminQuickStats = () => {
+  const stats = [
+    { label: 'Active Users', value: '42', icon: Users, color: 'bg-blue-500' },
+    { label: 'System Health', value: '98%', icon: Activity, color: 'bg-green-500' },
+    { label: 'Storage Used', value: '67%', icon: Database, color: 'bg-yellow-500' },
+    { label: 'Active Sessions', value: '18', icon: FileText, color: 'bg-purple-500' }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat, index) => createStatCard(stat, index))}
+    </div>
+  );
+};
+
+const createStatCard = (stat: AdminStat, index: number) => {
+  const Icon = stat.icon;
+  return (
+    <motion.div
+      key={stat.label}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      className="bg-white rounded-lg shadow-sm border border-gray-100 p-6"
+    >
+      <div className="flex items-center space-x-4">
+        <div className={`w-12 h-12 ${stat.color} rounded-lg flex items-center justify-center`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <div>
+          <p className="text-sm text-gray-600">{stat.label}</p>
+          <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+const AdminDashboard = () => {
+  const adminSections = [
+    {
+      title: 'System Settings',
+      description: 'Configure system-wide settings and preferences',
+      icon: Settings,
+      color: 'bg-blue-500',
+      href: '#'
+    },
+    {
+      title: 'User Management',
+      description: 'Manage user accounts, permissions, and access',
+      icon: Users,
+      color: 'bg-green-500',
+      href: '#'
+    },
+    {
+      title: 'Database Admin',
+      description: 'Monitor and manage database operations',
+      icon: Database,
+      color: 'bg-purple-500',
+      href: '#'
+    },
+    {
+      title: 'System Monitoring',
+      description: 'View system health, logs, and performance metrics',
+      icon: Activity,
+      color: 'bg-orange-500',
+      href: '#'
+    }
+  ];
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {adminSections.map((section, index) => createAdminSectionCard(section, index))}
+    </div>
+  );
+};
+
+const createAdminSectionCard = (section: AdminSection, index: number) => {
+  const Icon = section.icon;
+  return (
+    <motion.div
+      key={section.title}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow cursor-pointer"
+    >
+      <div className="flex items-start space-x-4">
+        <div className={`w-12 h-12 ${section.color} rounded-lg flex items-center justify-center`}>
+          <Icon className="w-6 h-6 text-white" />
+        </div>
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">{section.title}</h3>
+          <p className="text-sm text-gray-600">{section.description}</p>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+export default AdminPage;

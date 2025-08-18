@@ -33,7 +33,7 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
     ) -> "ToolDispatchResponse":
         """Execute tool with state and comprehensive error handling"""
         try:
-            result = await self._core_engine.execute_with_state(tool, tool_name, parameters, state, run_id)
+            result = await self._execute_tool_with_core_engine(tool, tool_name, parameters, state, run_id)
             return self._create_success_response(result["result"], tool_name, run_id)
         except Exception as e:
             return self._create_error_response(e, tool_name, run_id)
@@ -62,26 +62,42 @@ class ToolExecutionEngine(ToolExecutionEngineInterface):
     ) -> ToolExecuteResponse:
         """Execute a tool by name with parameters - implements ToolExecutionEngineInterface"""
         try:
-            # Create a basic tool instance
-            tool = ProductionTool(tool_name)
-            
-            # Execute using core engine infrastructure
-            if hasattr(tool, 'arun'):
-                result = await tool.arun(parameters)
-            else:
-                result = tool(parameters)
-            
-            return ToolExecuteResponse(
-                success=True,
-                data=result,
-                message="Tool executed successfully",
-                metadata={"tool_name": tool_name}
-            )
+            result = await self._execute_production_tool(tool_name, parameters)
+            return self._create_success_tool_response(result, tool_name)
         except Exception as e:
             logger.error(f"Tool execution failed: {tool_name} - {e}")
-            return ToolExecuteResponse(
-                success=False,
-                data=None,
-                message=str(e),
-                metadata={"tool_name": tool_name}
-            )
+            return self._create_error_tool_response(e, tool_name)
+    
+    async def _execute_production_tool(self, tool_name: str, parameters: Dict[str, Any]) -> Any:
+        """Execute production tool instance."""
+        tool = ProductionTool(tool_name)
+        
+        if hasattr(tool, 'arun'):
+            return await tool.arun(parameters)
+        else:
+            return tool(parameters)
+    
+    def _create_success_tool_response(self, result: Any, tool_name: str) -> ToolExecuteResponse:
+        """Create successful tool execution response."""
+        return ToolExecuteResponse(
+            success=True,
+            data=result,
+            message="Tool executed successfully",
+            metadata={"tool_name": tool_name}
+        )
+    
+    def _create_error_tool_response(self, error: Exception, tool_name: str) -> ToolExecuteResponse:
+        """Create error tool execution response."""
+        return ToolExecuteResponse(
+            success=False,
+            data=None,
+            message=str(error),
+            metadata={"tool_name": tool_name}
+        )
+    
+    async def _execute_tool_with_core_engine(
+        self, tool: Any, tool_name: str, parameters: Dict[str, Any], 
+        state: DeepAgentState, run_id: str
+    ) -> Dict[str, Any]:
+        """Execute tool using core engine."""
+        return await self._core_engine.execute_with_state(tool, tool_name, parameters, state, run_id)

@@ -8,6 +8,8 @@
  * @compliance type_safety.xml - Strongly typed retry management
  */
 
+import { logger } from '@/utils/debug-logger';
+
 /**
  * Frontend retry configuration options
  */
@@ -133,7 +135,7 @@ const waitForDelay = (delayMs: number): Promise<void> => {
  */
 const logRetrySuccess = (attempt: number, startTime: number): void => {
   const elapsed = Date.now() - startTime;
-  console.log(`Operation succeeded on attempt ${attempt} after ${elapsed}ms`);
+  logger.debug(`Operation succeeded on attempt ${attempt} after ${elapsed}ms`);
 };
 
 /**
@@ -144,7 +146,7 @@ const logRetryFailure = (
   maxAttempts: number,
   error: unknown
 ): void => {
-  console.error(`Operation failed after ${attempt}/${maxAttempts} attempts:`, error);
+  logger.error(`Operation failed after ${attempt}/${maxAttempts} attempts:`, error);
 };
 
 /**

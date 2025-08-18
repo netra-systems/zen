@@ -39,12 +39,16 @@ class CircuitBreaker:
         if self.state == CircuitState.CLOSED:
             return True
         elif self.state == CircuitState.OPEN:
-            if self._should_attempt_recovery():
-                self._transition_to_half_open_sync()
-                return True
-            return False
+            return self._handle_open_state_execution()
         else:  # HALF_OPEN
             return self._half_open_calls < self.config.half_open_max_calls
+    
+    def _handle_open_state_execution(self) -> bool:
+        """Handle execution check for open state."""
+        if self._should_attempt_recovery():
+            self._transition_to_half_open_sync()
+            return True
+        return False
     
     def _transition_to_half_open_sync(self) -> None:
         """Synchronous transition to HALF_OPEN state."""

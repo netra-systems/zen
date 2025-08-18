@@ -90,6 +90,51 @@ class TimeSeriesStorage:
         # Fall back to local storage
         return await self._get_local_series(series_key, start_time, end_time, limit)
     
+    def _build_redis_query_params(
+        self, series_key: str, start_time: Optional[datetime], end_time: Optional[datetime]
+    ) -> tuple[str, str | float, str | float]:
+        """Build Redis query parameters for time range"""
+        redis_key = f"timeseries:{series_key}"
+        min_score = start_time.timestamp() if start_time else "-inf"
+        max_score = end_time.timestamp() if end_time else "+inf"
+        return redis_key, min_score, max_score
+    
+    async def _fetch_raw_redis_data(
+        self, redis_key: str, min_score: str | float, max_score: str | float
+    ) -> List[tuple[str, float]]:
+        """Fetch raw time-series data from Redis"""
+        return await self.redis_manager.zrangebyscore(
+            redis_key, min_score, max_score, withscores=True
+        )
+    
+    def _parse_redis_point_data(self, data_json: str) -> Optional[TimeSeriesPoint]:
+        """Parse a single Redis data point into TimeSeriesPoint"""
+        try:
+            data = json.loads(data_json)
+            return TimeSeriesPoint(
+                timestamp=datetime.fromisoformat(data["timestamp"]),
+                value=data["value"],
+                tags=json.loads(data["tags"])
+            )
+        except Exception as e:
+            logger.warning(f"Failed to parse Redis point: {str(e)}")
+            return None
+    
+    def _convert_redis_points(self, raw_data: List[tuple[str, float]]) -> List[TimeSeriesPoint]:
+        """Convert raw Redis data to TimeSeriesPoint objects"""
+        points = []
+        for data_json, score in raw_data:
+            point = self._parse_redis_point_data(data_json)
+            if point:
+                points.append(point)
+        return points
+    
+    def _apply_series_limit(self, points: List[TimeSeriesPoint], limit: Optional[int]) -> List[TimeSeriesPoint]:
+        """Apply limit and sort time-series points"""
+        if limit:
+            points = points[-limit:]
+        return sorted(points, key=lambda x: x.timestamp)
+    
     async def _get_redis_series(
         self,
         series_key: str,
@@ -99,34 +144,12 @@ class TimeSeriesStorage:
     ) -> List[TimeSeriesPoint]:
         """Get series data from Redis"""
         try:
-            redis_key = f"timeseries:{series_key}"
-            
-            min_score = start_time.timestamp() if start_time else "-inf"
-            max_score = end_time.timestamp() if end_time else "+inf"
-            
-            raw_data = await self.redis_manager.zrangebyscore(
-                redis_key, min_score, max_score, withscores=True
+            redis_key, min_score, max_score = self._build_redis_query_params(
+                series_key, start_time, end_time
             )
-            
-            points = []
-            for data_json, score in raw_data:
-                try:
-                    data = json.loads(data_json)
-                    point = TimeSeriesPoint(
-                        timestamp=datetime.fromisoformat(data["timestamp"]),
-                        value=data["value"],
-                        tags=json.loads(data["tags"])
-                    )
-                    points.append(point)
-                except Exception as e:
-                    logger.warning(f"Failed to parse Redis point: {str(e)}")
-                    continue
-            
-            # Apply limit if specified
-            if limit:
-                points = points[-limit:]
-            
-            return sorted(points, key=lambda x: x.timestamp)
+            raw_data = await self._fetch_raw_redis_data(redis_key, min_score, max_score)
+            points = self._convert_redis_points(raw_data)
+            return self._apply_series_limit(points, limit)
         except Exception as e:
             logger.error(f"Failed to get series from Redis: {str(e)}")
             return []

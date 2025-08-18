@@ -29,41 +29,64 @@ class CompactAlertManager:
         metrics_collector: Optional[AgentMetricsCollector] = None,
         evaluation_interval: int = 30
     ):
+        self._setup_basic_config(metrics_collector, evaluation_interval)
+        self._initialize_all_components()
+
+    def _setup_basic_config(
+        self, metrics_collector: Optional[AgentMetricsCollector], evaluation_interval: int
+    ) -> None:
+        """Setup basic configuration parameters."""
         self.metrics_collector = metrics_collector or agent_metrics_collector
         self.evaluation_interval = evaluation_interval
+
+    def _initialize_all_components(self) -> None:
+        """Initialize all manager components."""
+        self._initialize_core_managers()
+        self._setup_defaults()
+
+    def _initialize_core_managers(self) -> None:
+        """Initialize core manager components."""
+        self._initialize_components()
+        self._initialize_storage()
+        self._initialize_configs()
+        self._initialize_state()
         
-        # Core components
+    def _initialize_components(self):
+        """Initialize core alert manager components."""
         self.evaluator = AlertEvaluator(self.metrics_collector)
         self.notifier = NotificationDeliveryManager()
         
-        # Alert storage
+    def _initialize_storage(self):
+        """Initialize alert storage containers."""
         self.active_alerts: Dict[str, Alert] = {}
         self.alert_history: List[Alert] = []
         self.max_history_size = 10000
         
-        # Rules and configuration
+    def _initialize_configs(self):
+        """Initialize alert rules and configurations."""
         self.alert_rules: Dict[str, AlertRule] = {}
         self.notification_configs: Dict[NotificationChannel, NotificationConfig] = {}
         
-        # Alert suppression and cooldown
+    def _initialize_state(self):
+        """Initialize monitoring and suppression state."""
         self.suppressed_rules: Set[str] = set()
         self.cooldown_tracker: Dict[str, datetime] = {}
-        
-        # Monitoring state
         self._monitoring_task: Optional[asyncio.Task] = None
         self._running = False
-        
-        # Initialize defaults
-        self._setup_defaults()
 
     def _setup_defaults(self) -> None:
         """Setup default rules and configurations."""
-        # Setup default alert rules
+        self._load_default_rules()
+        self._load_default_notifications()
+
+    def _load_default_rules(self) -> None:
+        """Load default alert rules into manager."""
         default_rules = create_default_alert_rules()
         for rule_id, rule in default_rules.items():
             self.alert_rules[rule_id] = rule
-        
-        # Setup default notification configs
+
+    def _load_default_notifications(self) -> None:
+        """Load default notification configurations."""
         self.notification_configs = create_default_notification_configs()
 
     async def start_monitoring(self) -> None:
@@ -88,7 +111,10 @@ class CompactAlertManager:
         """Cancel and wait for monitoring task completion."""
         if not self._monitoring_task:
             return
-        
+        await self._cancel_and_wait_for_task()
+
+    async def _cancel_and_wait_for_task(self) -> None:
+        """Cancel monitoring task and wait for completion."""
         self._monitoring_task.cancel()
         try:
             await self._monitoring_task
@@ -99,21 +125,32 @@ class CompactAlertManager:
         """Main monitoring loop that evaluates alert rules."""
         while self._running:
             try:
-                await self._evaluate_all_rules()
-                await asyncio.sleep(self.evaluation_interval)
+                await self._execute_monitoring_cycle()
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Error in alert monitoring loop: {e}")
-                await asyncio.sleep(5)
+                await self._handle_monitoring_error(e)
+
+    async def _execute_monitoring_cycle(self) -> None:
+        """Execute single monitoring cycle."""
+        await self._evaluate_all_rules()
+        await asyncio.sleep(self.evaluation_interval)
+
+    async def _handle_monitoring_error(self, error: Exception) -> None:
+        """Handle monitoring loop error."""
+        logger.error(f"Error in alert monitoring loop: {error}")
+        await asyncio.sleep(5)
 
     async def _evaluate_all_rules(self) -> None:
         """Evaluate all enabled alert rules."""
         for rule_id, rule in self.alert_rules.items():
-            if await self._should_skip_rule(rule_id, rule):
-                continue
-            
-            await self._evaluate_single_rule(rule_id, rule)
+            await self._process_rule_if_enabled(rule_id, rule)
+
+    async def _process_rule_if_enabled(self, rule_id: str, rule: AlertRule) -> None:
+        """Process rule if it's enabled and not in cooldown."""
+        if await self._should_skip_rule(rule_id, rule):
+            return
+        await self._evaluate_single_rule(rule_id, rule)
 
     async def _should_skip_rule(self, rule_id: str, rule: AlertRule) -> bool:
         """Check if rule should be skipped."""
@@ -124,11 +161,15 @@ class CompactAlertManager:
     async def _evaluate_single_rule(self, rule_id: str, rule: AlertRule) -> None:
         """Evaluate a single alert rule."""
         try:
-            alert = await self.evaluator.evaluate_rule(rule)
-            if alert:
-                await self._process_triggered_alert(alert, rule)
+            await self._check_and_process_rule(rule, rule_id)
         except Exception as e:
             logger.error(f"Error evaluating rule {rule_id}: {e}")
+
+    async def _check_and_process_rule(self, rule: AlertRule, rule_id: str) -> None:
+        """Check rule and process if alert is triggered."""
+        alert = await self.evaluator.evaluate_rule(rule)
+        if alert:
+            await self._process_triggered_alert(alert, rule)
 
     async def _process_triggered_alert(self, alert: Alert, rule: AlertRule) -> None:
         """Process a triggered alert."""
@@ -141,7 +182,10 @@ class CompactAlertManager:
         """Store alert in active and history collections."""
         self.active_alerts[alert.alert_id] = alert
         self.alert_history.append(alert)
-        
+        self._trim_history_if_needed()
+
+    def _trim_history_if_needed(self) -> None:
+        """Trim alert history if it exceeds maximum size."""
         if len(self.alert_history) > self.max_history_size:
             self.alert_history = self.alert_history[-self.max_history_size:]
 
@@ -159,11 +203,13 @@ class CompactAlertManager:
         """Check if rule is in cooldown period."""
         if rule_id not in self.cooldown_tracker:
             return False
-        
+        return self._validate_cooldown_for_rule(rule_id)
+
+    def _validate_cooldown_for_rule(self, rule_id: str) -> bool:
+        """Validate cooldown for specific rule."""
         rule = self.alert_rules.get(rule_id)
         if not rule:
             return False
-        
         return self._check_cooldown_time(rule_id, rule)
 
     def _check_cooldown_time(self, rule_id: str, rule: AlertRule) -> bool:
@@ -199,46 +245,89 @@ class CompactAlertManager:
     # Alert management methods
     async def resolve_alert(self, alert_id: str, resolved_by: str = "system") -> bool:
         """Mark alert as resolved."""
-        if alert_id in self.active_alerts:
-            alert = self.active_alerts[alert_id]
-            alert.resolved = True
-            alert.resolved_at = datetime.now(UTC)
-            alert.metadata["resolved_by"] = resolved_by
-            
-            # Remove from active alerts
-            del self.active_alerts[alert_id]
-            
-            logger.info(f"Alert {alert_id} resolved by {resolved_by}")
-            return True
-        
-        return False
+        if alert_id not in self.active_alerts:
+            return False
+        return self._resolve_active_alert(alert_id, resolved_by)
+
+    def _resolve_active_alert(self, alert_id: str, resolved_by: str) -> bool:
+        """Resolve an active alert and remove from active list."""
+        alert = self.active_alerts[alert_id]
+        self._mark_alert_resolved(alert, resolved_by)
+        del self.active_alerts[alert_id]
+        logger.info(f"Alert {alert_id} resolved by {resolved_by}")
+        return True
+
+    def _mark_alert_resolved(self, alert: Alert, resolved_by: str) -> None:
+        """Mark alert as resolved with metadata."""
+        alert.resolved = True
+        alert.resolved_at = datetime.now(UTC)
+        alert.metadata["resolved_by"] = resolved_by
 
     def get_active_alerts(self, level: Optional[AlertLevel] = None) -> List[Alert]:
         """Get active alerts, optionally filtered by level."""
         alerts = list(self.active_alerts.values())
-        
+        filtered_alerts = self._filter_alerts_by_level(alerts, level)
+        return sorted(filtered_alerts, key=lambda x: x.timestamp, reverse=True)
+
+    def _filter_alerts_by_level(self, alerts: List[Alert], level: Optional[AlertLevel]) -> List[Alert]:
+        """Filter alerts by level if specified."""
         if level:
-            alerts = [a for a in alerts if a.level == level]
-        
-        return sorted(alerts, key=lambda x: x.timestamp, reverse=True)
+            return [a for a in alerts if a.level == level]
+        return alerts
 
     def get_alert_summary(self) -> Dict[str, Any]:
         """Get summary of alert system status."""
+        return self._build_summary_data()
+
+    def _build_summary_data(self) -> Dict[str, Any]:
+        """Build alert summary data."""
         active_count = len(self.active_alerts)
+        level_counts = self._calculate_level_counts()
+        return self._build_alert_summary(active_count, level_counts)
+        
+    def _calculate_level_counts(self) -> Dict[str, int]:
+        """Calculate count of alerts by level."""
         level_counts = {}
-        
         for alert in self.active_alerts.values():
-            level = alert.level.value
-            level_counts[level] = level_counts.get(level, 0) + 1
+            self._increment_level_count(level_counts, alert.level.value)
+        return level_counts
+
+    def _increment_level_count(self, level_counts: Dict[str, int], level: str) -> None:
+        """Increment count for specific alert level."""
+        level_counts[level] = level_counts.get(level, 0) + 1
         
+    def _build_alert_summary(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
+        """Build alert summary dictionary."""
+        alert_stats = self._get_alert_stats(active_count, level_counts)
+        system_stats = self._get_system_stats()
+        return {**alert_stats, **system_stats}
+
+    def _get_system_stats(self) -> Dict[str, Any]:
+        """Get system-level statistics."""
+        rule_stats = self._get_rule_stats()
+        channel_stats = self._get_channel_stats()
+        return {**rule_stats, **channel_stats}
+
+    def _get_alert_stats(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
+        """Get alert statistics."""
+        return {"active_alerts": active_count, "alerts_by_level": level_counts}
+
+    def _get_rule_stats(self) -> Dict[str, Any]:
+        """Get rule statistics."""
+        enabled_count = len([r for r in self.alert_rules.values() if r.enabled])
+        return self._build_rule_stats_dict(enabled_count)
+
+    def _build_rule_stats_dict(self, enabled_count: int) -> Dict[str, Any]:
+        """Build rule statistics dictionary."""
         return {
-            "active_alerts": active_count,
-            "alerts_by_level": level_counts,
             "suppressed_rules": len(self.suppressed_rules),
-            "total_rules": len(self.alert_rules),
-            "enabled_rules": len([r for r in self.alert_rules.values() if r.enabled]),
-            "notification_channels": len([c for c in self.notification_configs.values() if c.enabled])
+            "total_rules": len(self.alert_rules), "enabled_rules": enabled_count
         }
+
+    def _get_channel_stats(self) -> Dict[str, Any]:
+        """Get notification channel statistics."""
+        enabled_channels = len([c for c in self.notification_configs.values() if c.enabled])
+        return {"notification_channels": enabled_channels}
 
     # Notification handler registration
     def register_notification_handler(self, channel: NotificationChannel, handler) -> None:

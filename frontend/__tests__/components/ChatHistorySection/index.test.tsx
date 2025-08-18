@@ -6,8 +6,36 @@
  * and under 300 lines per file.
  */
 
+// Hoist all mocks to the top for proper Jest handling
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// AuthGate mock - always render children
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => children
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => React.createElement('div', props, children),
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 // Import all test modules
-import './setup'; // Setup utilities only
 import './basic.test';
 import './interaction.test';
 import './edge-cases.test';
@@ -20,5 +48,3 @@ import './performance-accessibility.test';
 // The original file structure is preserved by importing all the modular components,
 // ensuring that existing test runners and CI/CD pipelines continue to work without
 // modification while providing better organization and maintainability.
-
-export * from './setup';

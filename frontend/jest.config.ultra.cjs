@@ -164,11 +164,6 @@ const config = {
   ],
 };
 
-console.log(`🚀 Ultra Jest Config Initialized`);
-console.log(`   CPU Cores: ${cpuCount} | Workers: ${calculateOptimalWorkers()}`);
-console.log(`   Memory: ${Math.round(memoryRatio * 100)}% free | Cache: ${cacheHash}`);
-if (enableSharding) {
-  console.log(`   Sharding: ${shardIndex}/${shardTotal}`);
-}
+// Ultra Jest Config Initialized - console logs removed for cleaner output
 
 module.exports = createJestConfig(config);

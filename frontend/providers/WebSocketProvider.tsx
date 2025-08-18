@@ -4,6 +4,7 @@ import { webSocketService, WebSocketStatus } from '../services/webSocketService'
 import { WebSocketMessage, Message } from '@/types/registry';
 import { config as appConfig } from '@/config';
 import { logger } from '@/lib/logger';
+import { logger as debugLogger } from '@/utils/debug-logger';
 import { WebSocketContextType, WebSocketProviderProps } from '../types/websocket-context-types';
 import { reconciliationService, OptimisticMessage } from '../services/reconciliation';
 
@@ -69,7 +70,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
 
   // Memoized status handler
   const handleStatusChange = useCallback((newStatus: WebSocketStatus) => {
-    console.log('[WebSocketProvider] Status changed to:', newStatus);
+    debugLogger.debug('[WebSocketProvider] Status changed to:', newStatus);
     setStatus(newStatus);
   }, []);
 

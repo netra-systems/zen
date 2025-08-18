@@ -6,6 +6,7 @@ import { Message } from '@/types/chat';
 import { ThreadService } from '@/services/threadService';
 import { generateUniqueId } from '@/lib/utils';
 import { MESSAGE_INPUT_CONSTANTS } from '../constants';
+import { logger } from '@/utils/debug-logger';
 
 const { CHAR_LIMIT } = MESSAGE_INPUT_CONSTANTS;
 
@@ -24,7 +25,7 @@ export const useMessageSender = () => {
       setCurrentThread(newThread.id);
       return newThread.id;
     } catch (error) {
-      console.error('Failed to create thread:', error);
+      logger.error('Failed to create thread:', error);
       throw error;
     }
   };
@@ -71,7 +72,7 @@ export const useMessageSender = () => {
     onHideOverlays: () => void
   ) => {
     if (!isAuthenticated) {
-      console.error('User must be authenticated to send messages');
+      logger.error('User must be authenticated to send messages');
       return;
     }
     
@@ -96,7 +97,7 @@ export const useMessageSender = () => {
       
       setTimeout(() => onSendingChange(false), 100);
     } catch (error) {
-      console.error('Failed to send message:', error);
+      logger.error('Failed to send message:', error);
       onSendingChange(false);
     }
   };

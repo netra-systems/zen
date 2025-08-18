@@ -93,8 +93,11 @@ class DatabaseConfigManager:
     def _get_postgres_url(self) -> Optional[str]:
         """Get PostgreSQL URL from environment or defaults."""
         url = os.environ.get("DATABASE_URL")
-        if not url:
+        if url:
+            self._logger.info(f"Loading DATABASE_URL from environment: {url[:30]}...")
+        else:
             url = self._get_default_postgres_url()
+            self._logger.info(f"Using default database URL for {self._environment}")
         return url
     
     def _get_default_postgres_url(self) -> str:
@@ -128,7 +131,7 @@ class DatabaseConfigManager:
         """Get ClickHouse configuration from environment."""
         return {
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
-            "port": os.environ.get("CLICKHOUSE_PORT", "8123"),
+            "port": os.environ.get("CLICKHOUSE_HTTP_PORT", "8123"),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": os.environ.get("CLICKHOUSE_PASSWORD", ""),
             "database": os.environ.get("CLICKHOUSE_DB", "default")
@@ -143,7 +146,7 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse native connection."""
         if hasattr(config, 'clickhouse_native'):
             config.clickhouse_native.host = ch_config["host"]
-            config.clickhouse_native.port = int(ch_config["port"])
+            config.clickhouse_native.port = int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000"))
             config.clickhouse_native.user = ch_config["user"]
             config.clickhouse_native.password = ch_config["password"]
             config.clickhouse_native.database = ch_config["database"]
@@ -152,7 +155,7 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse HTTPS connection."""
         if hasattr(config, 'clickhouse_https'):
             config.clickhouse_https.host = ch_config["host"]
-            config.clickhouse_https.port = int(ch_config.get("https_port", "8443"))
+            config.clickhouse_https.port = int(ch_config["port"])  # Use HTTP port for development
             config.clickhouse_https.user = ch_config["user"]
             config.clickhouse_https.password = ch_config["password"]
             config.clickhouse_https.database = ch_config["database"]

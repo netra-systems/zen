@@ -90,15 +90,18 @@ def _get_corpus_file_path(job_path: str) -> str:
     """Get corpus file path from job path."""
     return os.path.join(job_path, "content_corpus.json")
 
-def _build_corpus_entry(job_id: str, corpus_dir: str) -> Optional[Dict]:
-    """Build corpus entry if valid."""
+def _validate_corpus_job_path(job_id: str, corpus_dir: str) -> Optional[str]:
+    """Validate corpus job path and return corpus file if exists."""
     job_path = _get_job_path(job_id, corpus_dir)
     if not _check_corpus_path_validity(job_path):
         return None
     corpus_file = _get_corpus_file_path(job_path)
-    if os.path.exists(corpus_file):
-        return _create_corpus_entry_dict(job_id, corpus_file)
-    return None
+    return corpus_file if os.path.exists(corpus_file) else None
+
+def _build_corpus_entry(job_id: str, corpus_dir: str) -> Optional[Dict]:
+    """Build corpus entry if valid."""
+    corpus_file = _validate_corpus_job_path(job_id, corpus_dir)
+    return _create_corpus_entry_dict(job_id, corpus_file) if corpus_file else None
 
 def _collect_corpus_entries(corpus_dir: str) -> List[Dict]:
     """Collect all valid corpus entries."""
@@ -137,15 +140,18 @@ def _get_log_file_path(job_path: str) -> str:
     """Get log file path from job path."""
     return os.path.join(job_path, "synthetic_logs.json")
 
-def _build_log_set_entry(job_id: str, log_set_dir: str) -> Optional[Dict]:
-    """Build log set entry if valid."""
+def _validate_log_job_path(job_id: str, log_set_dir: str) -> Optional[str]:
+    """Validate log job path and return log file if exists."""
     job_path = _get_log_job_path(job_id, log_set_dir)
     if not _check_log_path_validity(job_path):
         return None
     log_file = _get_log_file_path(job_path)
-    if os.path.exists(log_file):
-        return _create_log_entry_dict(job_id, log_file)
-    return None
+    return log_file if os.path.exists(log_file) else None
+
+def _build_log_set_entry(job_id: str, log_set_dir: str) -> Optional[Dict]:
+    """Build log set entry if valid."""
+    log_file = _validate_log_job_path(job_id, log_set_dir)
+    return _create_log_entry_dict(job_id, log_file) if log_file else None
 
 def _collect_log_set_entries(log_set_dir: str) -> List[Dict]:
     """Collect all valid log set entries."""

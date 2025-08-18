@@ -37,15 +37,31 @@ class AlertEngine:
         trend: Optional[ErrorTrend] = None
     ) -> List[ErrorAlert]:
         """Evaluate pattern against all active alert rules."""
-        alerts = []
-        for rule in self._get_active_rules():
-            if self._should_evaluate_rule(rule):
-                alert = self._evaluate_single_rule(rule, pattern, trend)
-                if alert:
-                    alerts.append(alert)
-                    self._set_rule_cooldown(rule.rule_id)
+        alerts = self._process_rules_for_pattern(pattern, trend)
         self.alerts.extend(alerts)
         return alerts
+    
+    def _process_rules_for_pattern(
+        self, pattern: ErrorPattern, trend: Optional[ErrorTrend]
+    ) -> List[ErrorAlert]:
+        """Process all rules for given pattern."""
+        alerts = []
+        for rule in self._get_active_rules():
+            alert = self._check_rule_against_pattern(rule, pattern, trend)
+            if alert:
+                alerts.append(alert)
+        return alerts
+    
+    def _check_rule_against_pattern(
+        self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]
+    ) -> Optional[ErrorAlert]:
+        """Check single rule against pattern."""
+        if not self._should_evaluate_rule(rule):
+            return None
+        alert = self._evaluate_single_rule(rule, pattern, trend)
+        if alert:
+            self._set_rule_cooldown(rule.rule_id)
+        return alert
     
     def _setup_default_rules(self) -> None:
         """Setup comprehensive default alert rules."""
@@ -58,49 +74,69 @@ class AlertEngine:
     
     def _create_high_error_rate_rule(self) -> AlertRule:
         """Create high error rate alert rule."""
-        return AlertRule(
-            rule_id='high_error_rate',
-            name='High Error Rate',
-            description='Error rate exceeds threshold',
-            condition='pattern.count > 50 and window_minutes <= 60',
-            severity=AlertSeverity.HIGH,
-            threshold_count=50,
-            time_window_minutes=60
-        )
+        config = self._get_high_error_rate_config()
+        return AlertRule(**config)
+
+    def _get_high_error_rate_config(self) -> Dict[str, Any]:
+        """Get configuration for high error rate rule."""
+        return {
+            'rule_id': 'high_error_rate',
+            'name': 'High Error Rate',
+            'description': 'Error rate exceeds threshold',
+            'condition': 'pattern.count > 50 and window_minutes <= 60',
+            'severity': AlertSeverity.HIGH,
+            'threshold_count': 50,
+            'time_window_minutes': 60
+        }
     
     def _create_critical_spike_rule(self) -> AlertRule:
         """Create critical error spike alert rule."""
-        return AlertRule(
-            rule_id='critical_error_spike',
-            name='Critical Error Spike',
-            description='Sudden spike in critical errors',
-            condition='trend.is_spike and pattern.severity_distribution.get("critical", 0) > 0',
-            severity=AlertSeverity.CRITICAL,
-            time_window_minutes=30
-        )
+        config = self._get_critical_spike_config()
+        return AlertRule(**config)
+
+    def _get_critical_spike_config(self) -> Dict[str, Any]:
+        """Get configuration for critical spike rule."""
+        return {
+            'rule_id': 'critical_error_spike',
+            'name': 'Critical Error Spike',
+            'description': 'Sudden spike in critical errors',
+            'condition': 'trend.is_spike and pattern.severity_distribution.get("critical", 0) > 0',
+            'severity': AlertSeverity.CRITICAL,
+            'time_window_minutes': 30
+        }
     
     def _create_sustained_error_rule(self) -> AlertRule:
         """Create sustained error pattern alert rule."""
-        return AlertRule(
-            rule_id='sustained_errors',
-            name='Sustained Error Pattern',
-            description='Errors occurring consistently over time',
-            condition='trend.is_sustained and pattern.count > 20',
-            severity=AlertSeverity.MEDIUM,
-            time_window_minutes=120
-        )
+        config = self._get_sustained_error_config()
+        return AlertRule(**config)
+
+    def _get_sustained_error_config(self) -> Dict[str, Any]:
+        """Get configuration for sustained error rule."""
+        return {
+            'rule_id': 'sustained_errors',
+            'name': 'Sustained Error Pattern',
+            'description': 'Errors occurring consistently over time',
+            'condition': 'trend.is_sustained and pattern.count > 20',
+            'severity': AlertSeverity.MEDIUM,
+            'time_window_minutes': 120
+        }
     
     def _create_new_pattern_rule(self) -> AlertRule:
         """Create new error pattern alert rule."""
-        return AlertRule(
-            rule_id='new_error_pattern',
-            name='New Error Pattern',
-            description='Previously unseen error pattern',
-            condition='pattern.count >= 5 and pattern_age_minutes < 30',
-            severity=AlertSeverity.MEDIUM,
-            threshold_count=5,
-            time_window_minutes=30
-        )
+        config = self._get_new_pattern_config()
+        return AlertRule(**config)
+
+    def _get_new_pattern_config(self) -> Dict[str, Any]:
+        """Get configuration for new pattern rule."""
+        return {
+            'rule_id': 'new_error_pattern',
+            'name': 'New Error Pattern',
+            'description': 'Previously unseen error pattern',
+            'condition': 'pattern.count >= 5 and pattern_age_minutes < 30',
+            'severity': AlertSeverity.MEDIUM,
+            'threshold_count': 5,
+            'time_window_minutes': 30
+        }
     
     def _get_active_rules(self) -> List[AlertRule]:
         """Get all active alert rules."""
@@ -129,6 +165,10 @@ class AlertEngine:
         """Check if rule is in cooldown period."""
         if rule_id not in self.alert_history:
             return False
+        return self._check_cooldown_period(rule_id)
+    
+    def _check_cooldown_period(self, rule_id: str) -> bool:
+        """Check if cooldown period is still active."""
         rule = self.rules[rule_id]
         last_alert = self.alert_history[rule_id]
         cooldown_period = timedelta(minutes=rule.cooldown_minutes)
@@ -141,6 +181,19 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> bool:
         """Evaluate rule condition with proper context."""
+        return self._safe_evaluate_condition(rule, pattern, trend)
+
+    def _safe_evaluate_condition(
+        self,
+        rule: AlertRule,
+        pattern: ErrorPattern,
+        trend: Optional[ErrorTrend]
+    ) -> bool:
+        """Safely evaluate rule condition with error handling."""
+        return self._execute_condition_evaluation(rule, pattern, trend)
+    
+    def _execute_condition_evaluation(self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]) -> bool:
+        """Execute condition evaluation with error handling."""
         try:
             context = self._build_evaluation_context(rule, pattern, trend)
             return eval(rule.condition, {'__builtins__': {}}, context)
@@ -155,6 +208,15 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> Dict[str, Any]:
         """Build context dictionary for rule evaluation."""
+        return self._create_context_dict(rule, pattern, trend)
+
+    def _create_context_dict(
+        self,
+        rule: AlertRule,
+        pattern: ErrorPattern,
+        trend: Optional[ErrorTrend]
+    ) -> Dict[str, Any]:
+        """Create context dictionary with all evaluation variables."""
         return {
             'pattern': pattern,
             'trend': trend,
@@ -173,15 +235,32 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> ErrorAlert:
         """Create alert from rule and pattern data."""
-        alert_id = str(uuid.uuid4())
+        alert_id = self._generate_alert_id()
         message = self._generate_alert_message(rule, pattern, trend)
-        return ErrorAlert(
-            alert_id=alert_id,
-            rule=rule,
-            pattern=pattern,
-            trend=trend,
-            message=message
-        )
+        return self._build_error_alert(alert_id, rule, pattern, trend, message)
+
+    def _generate_alert_id(self) -> str:
+        """Generate unique alert identifier."""
+        return str(uuid.uuid4())
+
+    def _build_error_alert(
+        self,
+        alert_id: str,
+        rule: AlertRule,
+        pattern: ErrorPattern,
+        trend: Optional[ErrorTrend],
+        message: str
+    ) -> ErrorAlert:
+        """Build ErrorAlert object with provided components."""
+        alert_params = self._prepare_alert_params(alert_id, rule, pattern, trend, message)
+        return ErrorAlert(**alert_params)
+    
+    def _prepare_alert_params(self, alert_id: str, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend], message: str) -> Dict[str, Any]:
+        """Prepare parameters for ErrorAlert creation."""
+        return {
+            'alert_id': alert_id, 'rule': rule, 'pattern': pattern,
+            'trend': trend, 'message': message
+        }
     
     def _generate_alert_message(
         self,
@@ -190,6 +269,15 @@ class AlertEngine:
         trend: Optional[ErrorTrend]
     ) -> str:
         """Generate comprehensive alert message."""
+        return self._combine_message_parts(rule, pattern, trend)
+
+    def _combine_message_parts(
+        self,
+        rule: AlertRule,
+        pattern: ErrorPattern,
+        trend: Optional[ErrorTrend]
+    ) -> str:
+        """Combine base and trend message parts into final message."""
         base_parts = self._build_base_message_parts(rule, pattern)
         trend_parts = self._build_trend_message_parts(trend)
         return " | ".join(base_parts + trend_parts)
@@ -207,11 +295,26 @@ class AlertEngine:
         """Build trend-specific message components."""
         if not trend:
             return []
+        return self._collect_trend_indicators(trend)
+
+    def _collect_trend_indicators(self, trend: ErrorTrend) -> List[str]:
+        """Collect all trend indicator messages."""
         parts = []
-        if trend.is_spike:
-            parts.append("⚠️ Error spike detected")
-        if trend.is_sustained:
-            parts.append("📈 Sustained error pattern")
-        if trend.projection:
-            parts.append(f"Projected: {trend.projection} errors next window")
+        parts.extend(self._get_spike_indicators(trend))
+        parts.extend(self._get_sustained_indicators(trend))
+        parts.extend(self._get_projection_indicators(trend))
         return parts
+
+    def _get_spike_indicators(self, trend: ErrorTrend) -> List[str]:
+        """Get spike indicator messages."""
+        return ["⚠️ Error spike detected"] if trend.is_spike else []
+
+    def _get_sustained_indicators(self, trend: ErrorTrend) -> List[str]:
+        """Get sustained pattern indicator messages."""
+        return ["📈 Sustained error pattern"] if trend.is_sustained else []
+
+    def _get_projection_indicators(self, trend: ErrorTrend) -> List[str]:
+        """Get projection indicator messages."""
+        if trend.projection:
+            return [f"Projected: {trend.projection} errors next window"]
+        return []

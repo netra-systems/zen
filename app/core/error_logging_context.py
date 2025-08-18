@@ -77,11 +77,23 @@ class ErrorContextManager:
         parent: DetailedErrorContext
     ) -> DetailedErrorContext:
         """Copy relevant fields from parent context."""
+        self._copy_identification_fields(context, parent)
+        self._copy_session_fields(context, parent)
+        return context
+    
+    def _copy_identification_fields(
+        self, context: DetailedErrorContext, parent: DetailedErrorContext
+    ) -> None:
+        """Copy identification fields from parent."""
         context.correlation_id = parent.correlation_id
         context.trace_id = parent.trace_id
+    
+    def _copy_session_fields(
+        self, context: DetailedErrorContext, parent: DetailedErrorContext
+    ) -> None:
+        """Copy session-related fields from parent."""
         context.session_id = parent.session_id
         context.user_id = parent.user_id
-        return context
     
     @contextmanager
     def error_context(self, **context_kwargs):
@@ -113,29 +125,67 @@ class ErrorContextManager:
     
     def _get_severity_mapping(self) -> dict:
         """Get error type to severity mapping."""
+        critical_errors = self._get_critical_severity_errors()
+        high_errors = self._get_high_severity_errors()
+        medium_errors = self._get_medium_severity_errors()
+        return {**critical_errors, **high_errors, **medium_errors}
+    
+    def _get_critical_severity_errors(self) -> dict:
+        """Get critical severity error mappings."""
         return {
             'MemoryError': ErrorSeverity.CRITICAL,
             'SystemExit': ErrorSeverity.CRITICAL,
+        }
+    
+    def _get_high_severity_errors(self) -> dict:
+        """Get high severity error mappings."""
+        return {
             'KeyboardInterrupt': ErrorSeverity.HIGH,
             'ConnectionError': ErrorSeverity.HIGH,
-            'TimeoutError': ErrorSeverity.MEDIUM,
             'ValueError': ErrorSeverity.HIGH,
             'TypeError': ErrorSeverity.HIGH,
+            'PermissionError': ErrorSeverity.HIGH,
+        }
+    
+    def _get_medium_severity_errors(self) -> dict:
+        """Get medium severity error mappings."""
+        return {
+            'TimeoutError': ErrorSeverity.MEDIUM,
             'AttributeError': ErrorSeverity.MEDIUM,
             'KeyError': ErrorSeverity.MEDIUM,
             'FileNotFoundError': ErrorSeverity.MEDIUM,
-            'PermissionError': ErrorSeverity.HIGH,
         }
     
     def _get_category_mapping(self) -> dict:
         """Get error type to category mapping."""
+        security_errors = self._get_security_category_errors()
+        infra_errors = self._get_infrastructure_category_errors()
+        app_errors = self._get_application_category_errors()
+        system_errors = self._get_system_category_errors()
+        return {**security_errors, **infra_errors, **app_errors, **system_errors}
+    
+    def _get_security_category_errors(self) -> dict:
+        """Get security category error mappings."""
+        return {'PermissionError': ErrorCategory.SECURITY}
+    
+    def _get_infrastructure_category_errors(self) -> dict:
+        """Get infrastructure category error mappings."""
         return {
-            'PermissionError': ErrorCategory.SECURITY,
             'ConnectionError': ErrorCategory.INFRASTRUCTURE,
             'TimeoutError': ErrorCategory.INFRASTRUCTURE,
+        }
+    
+    def _get_application_category_errors(self) -> dict:
+        """Get application category error mappings."""
+        return {
             'ValueError': ErrorCategory.APPLICATION,
             'TypeError': ErrorCategory.APPLICATION,
             'KeyError': ErrorCategory.APPLICATION,
+        }
+    
+    def _get_system_category_errors(self) -> dict:
+        """Get system category error mappings."""
+        return {
             'FileNotFoundError': ErrorCategory.SYSTEM,
             'MemoryError': ErrorCategory.SYSTEM,
         }
@@ -180,12 +230,14 @@ class RecoveryLogger:
         context: Optional[ErrorContext] = None
     ) -> DetailedErrorContext:
         """Create context for business impact logging."""
+        context = self._get_or_create_context(error, context)
+        enhanced_context = self._enhance_business_context(context, impact_description, affected_users, financial_impact)
+        return enhanced_context
+    
+    def _get_or_create_context(self, error: Exception, context: Optional[ErrorContext]) -> DetailedErrorContext:
+        """Get existing context or create new one."""
         if context is None:
-            context = self.context_manager.create_context(error)
-        
-        context = self._enhance_business_context(
-            context, impact_description, affected_users, financial_impact
-        )
+            return self.context_manager.create_context(error)
         return context
     
     def log_security_incident_context(
@@ -210,17 +262,26 @@ class RecoveryLogger:
         details: Optional[dict]
     ) -> DetailedErrorContext:
         """Build context for recovery logging."""
-        return DetailedErrorContext(
-            correlation_id=recovery_context.operation_id,
-            operation_type=recovery_context.operation_type,
-            operation_id=recovery_context.operation_id,
-            severity=ErrorSeverity.INFO if success else ErrorSeverity.WARNING,
-            category=ErrorCategory.SYSTEM,
-            metadata=self._build_recovery_metadata(
-                recovery_action, success, recovery_context, details
-            ),
-            tags=['recovery', 'automation']
-        )
+        context_data = self._prepare_recovery_context_data(recovery_context, recovery_action, success, details)
+        return DetailedErrorContext(**context_data)
+    
+    def _prepare_recovery_context_data(
+        self, recovery_context: RecoveryContext, recovery_action: str, success: bool, details: Optional[dict]
+    ) -> dict:
+        """Prepare recovery context data dictionary."""
+        basic_data = self._get_recovery_basic_data(recovery_context, success)
+        metadata = self._build_recovery_metadata(recovery_action, success, recovery_context, details)
+        return {**basic_data, 'metadata': metadata, 'tags': ['recovery', 'automation']}
+    
+    def _get_recovery_basic_data(self, recovery_context: RecoveryContext, success: bool) -> dict:
+        """Get basic recovery context data."""
+        return {
+            'correlation_id': recovery_context.operation_id,
+            'operation_type': recovery_context.operation_type,
+            'operation_id': recovery_context.operation_id,
+            'severity': ErrorSeverity.INFO if success else ErrorSeverity.WARNING,
+            'category': ErrorCategory.SYSTEM
+        }
     
     def _enhance_business_context(
         self,
@@ -244,15 +305,27 @@ class RecoveryLogger:
         risk_level: str
     ) -> DetailedErrorContext:
         """Enhance context with security incident information."""
+        self._apply_security_settings(context)
+        self._add_security_metadata(context, incident_type, risk_level)
+        self._add_security_tags(context, risk_level)
+        return context
+    
+    def _apply_security_settings(self, context: DetailedErrorContext) -> None:
+        """Apply security-specific severity and category."""
         context.severity = ErrorSeverity.HIGH
         context.category = ErrorCategory.SECURITY
+    
+    def _add_security_metadata(self, context: DetailedErrorContext, incident_type: str, risk_level: str) -> None:
+        """Add security incident metadata to context."""
         context.metadata.update({
             'incident_type': incident_type,
             'risk_level': risk_level,
             'requires_investigation': True
         })
+    
+    def _add_security_tags(self, context: DetailedErrorContext, risk_level: str) -> None:
+        """Add security-related tags to context."""
         context.tags.extend(['security', 'incident', risk_level])
-        return context
     
     def _build_recovery_metadata(
         self,

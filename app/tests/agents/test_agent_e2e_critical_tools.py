@@ -15,6 +15,7 @@ from app.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase
 
 class TestAgentE2ECriticalTools(AgentE2ETestBase):
     """Critical tests for tool integration and state management"""
+    @pytest.mark.asyncio
     async def test_4_tool_dispatcher_integration(self, setup_agent_infrastructure):
         """
         Test Case 4: Tool Dispatcher Integration
@@ -66,6 +67,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         assert state.data_result != None
         assert "tool_outputs" in state.data_result
         assert len(state.data_result["tool_outputs"]) == 2
+    @pytest.mark.asyncio
     async def test_5_state_persistence_and_recovery(self, setup_agent_infrastructure):
         """
         Test Case 5: State Persistence and Recovery
@@ -99,14 +101,12 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
                 return DeepAgentState(**saved_states[run_id]["state"])
             return None
             
-        with patch.object(state_persistence_service, 'save_agent_state', mock_save_state):
-            with patch.object(state_persistence_service, 'load_agent_state', mock_load_state):
-                # Mock state persistence service methods
-                with patch.object(state_persistence_service, 'save_agent_state', AsyncMock(side_effect=mock_save_state)):
-                    with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(side_effect=mock_load_state)):
-                        with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                            # First run - state should be saved
-                            state1 = await supervisor.run("Initial request", thread_id, user_id, run_id)
+        # Mock state persistence service methods
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock(side_effect=mock_save_state)):
+            with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(side_effect=mock_load_state)):
+                with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
+                    # First run - state should be saved
+                    state1 = await supervisor.run("Initial request", thread_id, user_id, run_id)
                 
                 # Verify state was saved
                 assert run_id in saved_states
@@ -181,6 +181,7 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
                         except:
                             continue
 
+    @pytest.mark.asyncio
     async def test_6_error_handling_and_recovery(self, setup_agent_infrastructure):
         """
         Test Case 6: Error Handling and Recovery

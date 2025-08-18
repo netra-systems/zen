@@ -36,7 +36,13 @@ class AnalysisOperations:
         z_score_threshold: float = 2.0
     ) -> Dict[str, Any]:
         """Delegate anomaly detection to specialized detector."""
-        return await self.anomaly_detector.detect_anomalies(user_id, metric_name, time_range, z_score_threshold)
+        result = await self.anomaly_detector.detect_anomalies(
+            user_id, metric_name, time_range, z_score_threshold
+        )
+        # Convert AnomalyDetectionResponse to dict for backward compatibility
+        if hasattr(result, 'model_dump'):
+            return result.model_dump()
+        return result
     
     async def analyze_correlations(
         self,

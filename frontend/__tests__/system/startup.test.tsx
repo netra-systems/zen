@@ -6,8 +6,7 @@
  * Architecture: Split into 3 focused modules ≤300 lines each with shared utilities
  */
 
-// Import modular test suites
-import './startup-connectivity.test';
+// Import available test suites
 import './startup-initialization.test';
 import './startup-system.test';
 

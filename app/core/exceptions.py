@@ -32,7 +32,7 @@ from app.core.exceptions_database import (
     RecordAlreadyExistsError, DatabaseConstraintError as ConstraintViolationError
 )
 from app.core.exceptions_service import (
-    ServiceError, ServiceTimeoutError, ExternalServiceError
+    ServiceError, ServiceTimeoutError, ExternalServiceError, ProcessingError
 )
 from app.core.exceptions_agent import (
     AgentError, AgentExecutionError, AgentTimeoutError, LLMError,
@@ -61,7 +61,7 @@ __all__ = [
     'RecordAlreadyExistsError', 'ConstraintViolationError',
     
     # Service
-    'ServiceError', 'ServiceTimeoutError', 'ExternalServiceError',
+    'ServiceError', 'ServiceTimeoutError', 'ExternalServiceError', 'ProcessingError',
     
     # Agent/LLM
     'AgentError', 'AgentExecutionError', 'AgentTimeoutError', 'LLMError',

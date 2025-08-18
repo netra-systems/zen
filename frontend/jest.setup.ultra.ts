@@ -205,7 +205,7 @@ process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
 
 // Fast fail for promise rejections
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Promise Rejection:', reason);
+  // console mocked: console.log('Unhandled Promise Rejection:', reason);
   process.exit(1);
 });
 
@@ -288,4 +288,4 @@ if (process.env.JEST_ULTRA_SILENT === 'true') {
   console.error = jest.fn();
 }
 
-console.log('🚀 Ultra Jest Setup Loaded - Maximum Performance Mode');
+// console mocked: console.log('🚀 Ultra Jest Setup Loaded - Maximum Performance Mode');

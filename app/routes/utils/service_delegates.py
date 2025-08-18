@@ -58,17 +58,30 @@ def delegate_metrics_history(circuit_name: str, hours: int) -> List[Dict[str, An
         handle_circuit_breaker_error(e, "metrics history")
 
 
-def _format_single_event(event) -> Dict[str, Any]:
-    """Format single event for response."""
+def _format_event_basic_fields(event) -> Dict[str, Any]:
+    """Format basic event fields."""
     return {
         "circuit_name": event.circuit_name,
         "old_state": event.old_state,
         "new_state": event.new_state,
-        "timestamp": event.timestamp.isoformat(),
+        "timestamp": event.timestamp.isoformat()
+    }
+
+
+def _format_event_metric_fields(event) -> Dict[str, Any]:
+    """Format event metric fields."""
+    return {
         "failure_count": event.failure_count,
         "success_rate": event.success_rate,
         "metadata": event.metadata
     }
+
+
+def _format_single_event(event) -> Dict[str, Any]:
+    """Format single event for response."""
+    basic_fields = _format_event_basic_fields(event)
+    metric_fields = _format_event_metric_fields(event)
+    return {**basic_fields, **metric_fields}
 
 
 def _format_events_list(events) -> List[Dict[str, Any]]:
@@ -76,31 +89,61 @@ def _format_events_list(events) -> List[Dict[str, Any]]:
     return [_format_single_event(event) for event in events]
 
 
+def _format_alert_basic_info(alert) -> Dict[str, Any]:
+    """Format alert basic information."""
+    return {
+        "circuit_name": alert.circuit_name,
+        "severity": alert.severity.value,
+        "message": alert.message,
+        "timestamp": alert.timestamp.isoformat()
+    }
+
+
+def _format_alert_status_info(alert) -> Dict[str, Any]:
+    """Format alert status information."""
+    return {
+        "state": alert.state,
+        "metrics": alert.metrics
+    }
+
+
+def _format_single_alert(alert) -> Dict[str, Any]:
+    """Format single alert for response."""
+    basic_info = _format_alert_basic_info(alert)
+    status_info = _format_alert_status_info(alert)
+    return {**basic_info, **status_info}
+
+
 def _format_alerts_list(alerts) -> List[Dict[str, Any]]:
     """Format alerts list for response."""
-    return [
-        {
-            "circuit_name": alert.circuit_name,
-            "severity": alert.severity.value,
-            "message": alert.message,
-            "timestamp": alert.timestamp.isoformat(),
-            "state": alert.state,
-            "metrics": alert.metrics
-        }
-        for alert in alerts
-    ]
+    return [_format_single_alert(alert) for alert in alerts]
+
+
+def _format_metrics_timing_info(metrics) -> Dict[str, Any]:
+    """Format metrics timing information."""
+    return {
+        "timestamp": metrics["timestamp"].isoformat(),
+        "state": metrics["state"]
+    }
+
+
+def _format_metrics_performance_info(metrics) -> Dict[str, Any]:
+    """Format metrics performance information."""
+    return {
+        "success_rate": metrics["success_rate"],
+        "total_calls": metrics["total_calls"],
+        "rejected_calls": metrics["rejected_calls"],
+        "timeouts": metrics["timeouts"]
+    }
+
+
+def _format_single_metrics_entry(metrics) -> Dict[str, Any]:
+    """Format single metrics entry for response."""
+    timing_info = _format_metrics_timing_info(metrics)
+    performance_info = _format_metrics_performance_info(metrics)
+    return {**timing_info, **performance_info}
 
 
 def _format_metrics_history(history) -> List[Dict[str, Any]]:
     """Format metrics history for response."""
-    return [
-        {
-            "timestamp": metrics["timestamp"].isoformat(),
-            "state": metrics["state"],
-            "success_rate": metrics["success_rate"],
-            "total_calls": metrics["total_calls"],
-            "rejected_calls": metrics["rejected_calls"],
-            "timeouts": metrics["timeouts"]
-        }
-        for metrics in history
-    ]
+    return [_format_single_metrics_entry(metrics) for metrics in history]

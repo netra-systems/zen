@@ -105,7 +105,10 @@ class QueryOptimizer:
     def _determine_cache_ttl(self, query: str) -> int:
         """Determine appropriate cache TTL based on query type."""
         query_lower = query.strip().lower()
-        
+        return self._get_ttl_for_query_type(query_lower)
+    
+    def _get_ttl_for_query_type(self, query_lower: str) -> int:
+        """Get TTL based on query type keywords."""
         if 'user' in query_lower or 'session' in query_lower:
             return 60  # User data: 1 minute
         elif 'config' in query_lower or 'setting' in query_lower:
@@ -117,22 +120,28 @@ class QueryOptimizer:
     
     def _update_query_metrics(self, query_hash: str, execution_time: float):
         """Update query execution metrics."""
+        metrics = self._get_or_create_metrics(query_hash)
+        self._update_timing_metrics(metrics, execution_time)
+        self._check_slow_query_threshold(execution_time, query_hash)
+    
+    def _get_or_create_metrics(self, query_hash: str) -> QueryMetrics:
+        """Get existing metrics or create new ones."""
         if query_hash not in self.query_metrics:
             self.query_metrics[query_hash] = QueryMetrics(query_hash=query_hash)
-        
-        metrics = self.query_metrics[query_hash]
+        return self.query_metrics[query_hash]
+    
+    def _update_timing_metrics(self, metrics: QueryMetrics, execution_time: float) -> None:
+        """Update timing-related metrics."""
         metrics.execution_count += 1
         metrics.total_execution_time += execution_time
-        metrics.avg_execution_time = (
-            metrics.total_execution_time / metrics.execution_count
-        )
+        metrics.avg_execution_time = metrics.total_execution_time / metrics.execution_count
         metrics.max_execution_time = max(metrics.max_execution_time, execution_time)
         metrics.min_execution_time = min(metrics.min_execution_time, execution_time)
-        
+    
+    def _check_slow_query_threshold(self, execution_time: float, query_hash: str) -> None:
+        """Check and log slow queries."""
         if execution_time > self._slow_query_threshold:
-            logger.warning(
-                f"Slow query detected: {execution_time:.2f}s (hash: {query_hash})"
-            )
+            logger.warning(f"Slow query detected: {execution_time:.2f}s (hash: {query_hash})")
     
     def _update_cache_hit_metrics(self, query_hash: str):
         """Update cache hit metrics."""

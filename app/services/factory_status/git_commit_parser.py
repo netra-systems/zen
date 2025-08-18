@@ -5,6 +5,7 @@ Module follows 300-line limit with 8-line function limit.
 """
 
 import re
+import subprocess
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
@@ -89,34 +90,41 @@ class GitCommitParser:
         """Fetch raw commit data from git asynchronously."""
         cmd = self._build_git_command(since)
         try:
-            proc = await asyncio.create_subprocess_exec(
-                *cmd, stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
-            )
-            stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=3.0)
+            proc = await self._create_subprocess(cmd)
+            stdout = await self._get_subprocess_output(proc)
             return self._split_commits(stdout.decode())
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, Exception):
             return []
-        except Exception:
-            return []
+    
+    async def _create_subprocess(self, cmd: List[str]):
+        """Create subprocess for git command."""
+        return await asyncio.create_subprocess_exec(
+            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        )
+    
+    async def _get_subprocess_output(self, proc):
+        """Get subprocess output with timeout."""
+        stdout, _ = await asyncio.wait_for(proc.communicate(), timeout=3.0)
+        return stdout
     
     def _get_mock_commits(self, hours: int) -> List[CommitInfo]:
         """Get mock commits when git is unavailable."""
         mock_data = self.mock_generator.generate_mock_commits(hours)
         commits = []
         for data in mock_data:
-            commits.append(CommitInfo(
-                hash=data["hash"],
-                author=data["author"],
-                email=data["email"],
-                timestamp=data["timestamp"],
-                message=data["message"],
-                commit_type=self._classify_commit(data["message"]),
-                files_changed=data["files_changed"],
-                insertions=data["insertions"],
-                deletions=data["deletions"]
-            ))
+            commit = self._create_commit_from_mock_data(data)
+            commits.append(commit)
         return commits
+    
+    def _create_commit_from_mock_data(self, data: Dict) -> CommitInfo:
+        """Create CommitInfo from mock data."""
+        return CommitInfo(
+            hash=data["hash"], author=data["author"], email=data["email"],
+            timestamp=data["timestamp"], message=data["message"],
+            commit_type=self._classify_commit(data["message"]),
+            files_changed=data["files_changed"], insertions=data["insertions"],
+            deletions=data["deletions"]
+        )
     
     def _build_git_command(self, since: str) -> List[str]:
         """Build git log command with parameters."""
@@ -130,11 +138,24 @@ class GitCommitParser:
         commits = []
         current = []
         for line in output.strip().split("\n"):
-            if "|" in line and len(current) > 0:
-                commits.append("\n".join(current))
+            if self._is_new_commit_line(line, current):
+                commits = self._add_current_commit(commits, current)
                 current = [line]
             else:
                 current.append(line)
+        return self._finalize_commit_list(commits, current)
+    
+    def _is_new_commit_line(self, line: str, current: List[str]) -> bool:
+        """Check if line starts a new commit."""
+        return "|" in line and len(current) > 0
+    
+    def _add_current_commit(self, commits: List[str], current: List[str]) -> List[str]:
+        """Add current commit to commits list."""
+        commits.append("\n".join(current))
+        return commits
+    
+    def _finalize_commit_list(self, commits: List[str], current: List[str]) -> List[str]:
+        """Finalize the commits list with remaining current."""
         if current:
             commits.append("\n".join(current))
         return commits
@@ -153,40 +174,46 @@ class GitCommitParser:
         lines = raw.strip().split("\n")
         if not lines:
             return None
-        
         header = self._parse_header(lines[0])
         if not header:
             return None
-            
-        stats = self._parse_stats(lines[1:])
-        commit_type = self._classify_commit(header["message"])
-        
-        return self._create_commit_info(header, stats, commit_type)
+        return self._build_commit_info(header, lines[1:])
     
     def _parse_header(self, line: str) -> Optional[Dict]:
         """Parse commit header line."""
         parts = line.split("|")
         if len(parts) < 5:
             return None
+        return self._create_header_dict(parts)
+    
+    def _create_header_dict(self, parts: List[str]) -> Dict:
+        """Create header dictionary from parts."""
         return {
-            "hash": parts[0],
-            "author": parts[1],
-            "email": parts[2],
-            "timestamp": int(parts[3]),
-            "message": parts[4]
+            "hash": parts[0], "author": parts[1], "email": parts[2],
+            "timestamp": int(parts[3]), "message": parts[4]
         }
+    
+    def _build_commit_info(self, header: Dict, stat_lines: List[str]) -> CommitInfo:
+        """Build CommitInfo from header and stats."""
+        stats = self._parse_stats(stat_lines)
+        commit_type = self._classify_commit(header["message"])
+        return self._create_commit_info(header, stats, commit_type)
     
     def _parse_stats(self, lines: List[str]) -> Dict:
         """Parse file change statistics."""
         stats = {"files": 0, "insertions": 0, "deletions": 0}
         for line in lines:
             if "\t" in line:
-                parts = line.split("\t")
-                if len(parts) >= 2:
-                    stats["files"] += 1
-                    stats["insertions"] += self._safe_int(parts[0])
-                    stats["deletions"] += self._safe_int(parts[1])
+                self._update_stats_from_line(stats, line)
         return stats
+    
+    def _update_stats_from_line(self, stats: Dict, line: str) -> None:
+        """Update stats from a single line."""
+        parts = line.split("\t")
+        if len(parts) >= 2:
+            stats["files"] += 1
+            stats["insertions"] += self._safe_int(parts[0])
+            stats["deletions"] += self._safe_int(parts[1])
     
     def _safe_int(self, value: str) -> int:
         """Safely convert string to int."""
@@ -207,15 +234,10 @@ class GitCommitParser:
                            commit_type: CommitType) -> CommitInfo:
         """Create CommitInfo from parsed data."""
         return CommitInfo(
-            hash=header["hash"],
-            author=header["author"],
-            email=header["email"],
-            timestamp=datetime.fromtimestamp(header["timestamp"]),
-            message=header["message"],
-            commit_type=commit_type,
-            files_changed=stats["files"],
-            insertions=stats["insertions"],
-            deletions=stats["deletions"]
+            hash=header["hash"], author=header["author"], email=header["email"],
+            timestamp=datetime.fromtimestamp(header["timestamp"]), message=header["message"],
+            commit_type=commit_type, files_changed=stats["files"],
+            insertions=stats["insertions"], deletions=stats["deletions"]
         )
     
     def get_commit_by_hash(self, commit_hash: str) -> Optional[CommitInfo]:
@@ -230,11 +252,19 @@ class GitCommitParser:
     def get_branch_commits(self, branch: str, hours: int = 24) -> List[CommitInfo]:
         """Get commits from specific branch."""
         since = self._calculate_since_date(hours)
-        cmd = ["git", "log", branch, f"--since=\"{since}\"",
-               "--format=%H|%an|%ae|%at|%s", "--numstat"]
+        cmd = self._build_branch_command(branch, since)
         result = subprocess.run(cmd, capture_output=True, text=True)
         raw_commits = self._split_commits(result.stdout)
         commits = self._parse_commits(raw_commits)
+        return self._set_branch_on_commits(commits, branch)
+    
+    def _build_branch_command(self, branch: str, since: str) -> List[str]:
+        """Build git command for branch commits."""
+        return ["git", "log", branch, f"--since=\"{since}\"",
+                "--format=%H|%an|%ae|%at|%s", "--numstat"]
+    
+    def _set_branch_on_commits(self, commits: List[CommitInfo], branch: str) -> List[CommitInfo]:
+        """Set branch name on all commits."""
         for commit in commits:
             commit.branch = branch
         return commits
@@ -259,26 +289,43 @@ class GitCommitParser:
     
     def _commit_to_dict(self, commit: CommitInfo) -> Dict:
         """Convert CommitInfo to dictionary."""
+        base_data = self._get_commit_base_data(commit)
+        stats_data = self._get_commit_stats_data(commit)
+        return {**base_data, **stats_data}
+    
+    def _get_commit_base_data(self, commit: CommitInfo) -> Dict:
+        """Get base commit data."""
         return {
-            "hash": commit.hash,
-            "author": commit.author,
-            "email": commit.email,
-            "timestamp": commit.timestamp.isoformat(),
-            "message": commit.message,
-            "type": commit.commit_type.value,
-            "files_changed": commit.files_changed,
-            "insertions": commit.insertions,
-            "deletions": commit.deletions,
-            "branch": commit.branch
+            "hash": commit.hash, "author": commit.author, "email": commit.email,
+            "timestamp": commit.timestamp.isoformat(), "message": commit.message,
+            "type": commit.commit_type.value, "branch": commit.branch
+        }
+    
+    def _get_commit_stats_data(self, commit: CommitInfo) -> Dict:
+        """Get commit statistics data."""
+        return {
+            "files_changed": commit.files_changed, "insertions": commit.insertions,
+            "deletions": commit.deletions
         }
     
     def analyze_commit_patterns(self, hours: int = 168) -> Dict:
         """Analyze commit patterns over time."""
         commits = self.get_commits(hours)
+        basic_stats = self._get_basic_commit_stats(commits)
+        advanced_stats = self._get_advanced_commit_stats(commits)
+        return {**basic_stats, **advanced_stats}
+    
+    def _get_basic_commit_stats(self, commits: List[CommitInfo]) -> Dict:
+        """Get basic commit statistics."""
         return {
             "total_commits": len(commits),
             "commits_by_type": self._count_by_type(commits),
-            "commits_by_author": self._count_by_author(commits),
+            "commits_by_author": self._count_by_author(commits)
+        }
+    
+    def _get_advanced_commit_stats(self, commits: List[CommitInfo]) -> Dict:
+        """Get advanced commit statistics."""
+        return {
             "peak_hours": self._find_peak_hours(commits),
             "average_changes": self._calculate_avg_changes(commits)
         }
@@ -311,14 +358,22 @@ class GitCommitParser:
         """Calculate average changes per commit."""
         if not commits:
             return {"files": 0, "insertions": 0, "deletions": 0}
-        
-        total_files = sum(c.files_changed for c in commits)
-        total_insertions = sum(c.insertions for c in commits)
-        total_deletions = sum(c.deletions for c in commits)
+        totals = self._sum_commit_changes(commits)
         count = len(commits)
-        
+        return self._compute_averages(totals, count)
+    
+    def _sum_commit_changes(self, commits: List[CommitInfo]) -> Dict:
+        """Sum all changes across commits."""
         return {
-            "files": round(total_files / count, 2),
-            "insertions": round(total_insertions / count, 2),
-            "deletions": round(total_deletions / count, 2)
+            "files": sum(c.files_changed for c in commits),
+            "insertions": sum(c.insertions for c in commits),
+            "deletions": sum(c.deletions for c in commits)
+        }
+    
+    def _compute_averages(self, totals: Dict, count: int) -> Dict:
+        """Compute averages from totals and count."""
+        return {
+            "files": round(totals["files"] / count, 2),
+            "insertions": round(totals["insertions"] / count, 2),
+            "deletions": round(totals["deletions"] / count, 2)
         }

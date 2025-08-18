@@ -11,15 +11,22 @@ from .schemas import ToolExecutionRequest
 logger = central_logger
 
 
+def build_tool_execution_params(
+    request: ToolExecutionRequest, current_user: User
+) -> Dict[str, Any]:
+    """Build tool execution parameters."""
+    return {
+        "tool_name": request.tool_name, "arguments": request.arguments,
+        "user": current_user
+    }
+
+
 async def execute_tool_through_registry(
     tool_registry, request: ToolExecutionRequest, current_user: User
 ) -> ToolExecutionResult:
     """Execute tool through registry."""
-    return await tool_registry.execute_tool(
-        tool_name=request.tool_name,
-        arguments=request.arguments,
-        user=current_user
-    )
+    params = build_tool_execution_params(request, current_user)
+    return await tool_registry.execute_tool(**params)
 
 
 def build_base_tool_response(result: ToolExecutionResult) -> Dict[str, Any]:

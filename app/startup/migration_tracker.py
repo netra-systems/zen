@@ -13,7 +13,6 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import alembic.config
-from pydantic import BaseModel, Field
 
 from app.core.exceptions import NetraException
 from app.db.migration_utils import (
@@ -23,26 +22,8 @@ from app.db.migration_utils import (
     get_sync_database_url,
     needs_migration,
 )
-
-
-class FailedMigration(BaseModel):
-    """Failed migration record with error details."""
-    
-    migration_id: str = Field(..., description="Migration identifier")
-    error_message: str = Field(..., description="Error details")
-    timestamp: datetime = Field(default_factory=datetime.now)
-    stack_trace: Optional[str] = Field(None, description="Full stack trace")
-
-
-class MigrationState(BaseModel):
-    """Migration state tracking model."""
-    
-    current_version: Optional[str] = Field(None, description="Current DB revision")
-    applied_migrations: List[str] = Field(default_factory=list)
-    pending_migrations: List[str] = Field(default_factory=list)
-    failed_migrations: List[FailedMigration] = Field(default_factory=list)
-    last_check: Optional[datetime] = Field(None, description="Last check timestamp")
-    auto_run_enabled: bool = Field(True, description="Auto-run in dev environment")
+from .migration_models import FailedMigration, MigrationState
+from .migration_state_manager import MigrationStateManager
 
 
 class MigrationTracker:
@@ -53,6 +34,7 @@ class MigrationTracker:
         self.environment = environment
         self.logger = logging.getLogger(__name__)
         self.state_file = Path(".netra/migration_state.json")
+        self.state_manager = MigrationStateManager(self.state_file, self.logger)
         self._ensure_netra_dir()
 
     def _ensure_netra_dir(self) -> None:
@@ -61,32 +43,11 @@ class MigrationTracker:
 
     async def _load_state(self) -> MigrationState:
         """Load migration state from file."""
-        if not self.state_file.exists():
-            return MigrationState()
-        try:
-            content = await self._read_file_async()
-            return MigrationState.model_validate(json.loads(content))
-        except Exception as e:
-            self.logger.warning(f"Failed to load state: {e}")
-            return MigrationState()
-
-    async def _read_file_async(self) -> str:
-        """Read state file asynchronously."""
-        loop = asyncio.get_event_loop()
-        return await loop.run_in_executor(None, self.state_file.read_text)
+        return await self.state_manager.load_state()
 
     async def _save_state(self, state: MigrationState) -> None:
         """Save migration state to file."""
-        try:
-            content = state.model_dump_json(indent=2)
-            await self._write_file_async(content)
-        except Exception as e:
-            self.logger.error(f"Failed to save state: {e}")
-
-    async def _write_file_async(self, content: str) -> None:
-        """Write state file asynchronously."""
-        loop = asyncio.get_event_loop()
-        await loop.run_in_executor(None, self.state_file.write_text, content)
+        await self.state_manager.save_state(state)
 
     def _get_alembic_config(self) -> alembic.config.Config:
         """Get Alembic configuration."""
@@ -96,12 +57,17 @@ class MigrationTracker:
     async def check_migrations(self) -> MigrationState:
         """Check for pending migrations."""
         state = await self._load_state()
+        return await self._perform_migration_check(state)
+
+    async def _perform_migration_check(self, state: MigrationState) -> MigrationState:
+        """Perform migration check with error handling."""
         try:
             cfg = self._get_alembic_config()
             await self._update_migration_state(cfg, state)
             return state
         except Exception as e:
             await self._handle_migration_check_error(state, e)
+            return state
 
     async def _update_migration_state(self, cfg: alembic.config.Config, state: MigrationState) -> None:
         """Update migration state with current and head revisions."""
@@ -179,20 +145,30 @@ class MigrationTracker:
     async def _execute_migrations(self, state: MigrationState) -> bool:
         """Execute migrations with error handling."""
         try:
-            self.logger.info("Executing migrations...")
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(None, self._run_alembic_upgrade)
-            
-            state.applied_migrations.extend(state.pending_migrations)
-            state.pending_migrations.clear()
-            await self._save_state(state)
-            
-            self.logger.info("Migrations completed successfully")
-            return True
+            return await self._perform_migration_execution(state)
         except Exception as e:
-            await self._record_failure(state, "MIGRATION_EXECUTION", str(e))
-            self.logger.error(f"Migration execution failed: {e}")
-            return False
+            return await self._handle_migration_execution_error(state, e)
+            
+    async def _perform_migration_execution(self, state: MigrationState) -> bool:
+        """Perform the actual migration execution."""
+        self.logger.info("Executing migrations...")
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._run_alembic_upgrade)
+        await self._update_migration_state(state)
+        self.logger.info("Migrations completed successfully")
+        return True
+        
+    async def _update_migration_state(self, state: MigrationState) -> None:
+        """Update migration state after successful execution."""
+        state.applied_migrations.extend(state.pending_migrations)
+        state.pending_migrations.clear()
+        await self._save_state(state)
+        
+    async def _handle_migration_execution_error(self, state: MigrationState, error: Exception) -> bool:
+        """Handle migration execution errors."""
+        await self._record_failure(state, "MIGRATION_EXECUTION", str(error))
+        self.logger.error(f"Migration execution failed: {error}")
+        return False
 
     def _run_alembic_upgrade(self) -> None:
         """Run Alembic upgrade command."""
@@ -202,20 +178,34 @@ class MigrationTracker:
     async def rollback_migration(self, steps: int = 1) -> bool:
         """Rollback migrations by specified steps."""
         try:
-            self.logger.info(f"Rolling back {steps} migration(s)")
-            loop = asyncio.get_event_loop()
-            target = f"-{steps}"
-            await loop.run_in_executor(None, self._run_alembic_downgrade, target)
-            
-            state = await self._load_state()
-            state.current_version = None  # Force refresh on next check
-            await self._save_state(state)
-            
-            self.logger.info("Rollback completed successfully")
-            return True
+            return await self._perform_rollback_execution(steps)
         except Exception as e:
-            self.logger.error(f"Rollback failed: {e}")
-            return False
+            return self._handle_rollback_error(e)
+            
+    async def _perform_rollback_execution(self, steps: int) -> bool:
+        """Perform the actual rollback execution."""
+        self.logger.info(f"Rolling back {steps} migration(s)")
+        target = f"-{steps}"
+        await self._execute_rollback(target)
+        await self._update_rollback_state()
+        self.logger.info("Rollback completed successfully")
+        return True
+
+    async def _execute_rollback(self, target: str) -> None:
+        """Execute rollback with target."""
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._run_alembic_downgrade, target)
+        
+    async def _update_rollback_state(self) -> None:
+        """Update state after successful rollback."""
+        state = await self._load_state()
+        state.current_version = None  # Force refresh on next check
+        await self._save_state(state)
+        
+    def _handle_rollback_error(self, error: Exception) -> bool:
+        """Handle rollback execution errors."""
+        self.logger.error(f"Rollback failed: {error}")
+        return False
 
     def _run_alembic_downgrade(self, target: str) -> None:
         """Run Alembic downgrade command."""
@@ -226,29 +216,36 @@ class MigrationTracker:
         """Validate database schema integrity."""
         try:
             state = await self.check_migrations()
-            if state.pending_migrations:
-                self.logger.warning("Schema validation: pending migrations found")
-                return False
-            if state.failed_migrations:
-                self.logger.warning("Schema validation: failed migrations found")
-                return False
-            self.logger.info("Schema validation: passed")
-            return True
+            return self._validate_migration_state(state)
         except Exception as e:
             self.logger.error(f"Schema validation failed: {e}")
             return False
 
+    def _validate_migration_state(self, state: MigrationState) -> bool:
+        """Validate migration state for schema integrity."""
+        if self._has_validation_issues(state):
+            return False
+        self.logger.info("Schema validation: passed")
+        return True
+
+    def _has_validation_issues(self, state: MigrationState) -> bool:
+        """Check if state has validation issues."""
+        if state.pending_migrations:
+            self.logger.warning("Schema validation: pending migrations found")
+            return True
+        if state.failed_migrations:
+            self.logger.warning("Schema validation: failed migrations found")
+            return True
+        return False
+
     async def get_migration_status(self) -> Dict[str, any]:
         """Get comprehensive migration status."""
         state = await self.check_migrations()
-        return {
-            "current_version": state.current_version,
-            "pending_count": len(state.pending_migrations),
-            "failed_count": len(state.failed_migrations),
-            "last_check": state.last_check,
-            "auto_run_enabled": state.auto_run_enabled,
-            "environment": self.environment
-        }
+        return self._build_status_dict(state)
+
+    def _build_status_dict(self, state: MigrationState) -> Dict[str, any]:
+        """Build migration status dictionary."""
+        return self.state_manager.build_status_dict(state, self.environment)
 
     async def clear_failed_migrations(self) -> None:
         """Clear failed migration records."""

@@ -26,21 +26,27 @@ class QualityAggregator:
     
     def calculate_metrics(self) -> QualityMetrics:
         """Calculate comprehensive quality metrics."""
-        coverage = self.coverage_calc.calculate_coverage()
-        docs = self.doc_assessor.assess_quality()
-        architecture = self.compliance_checker.check_compliance()
-        debt = self.debt_calc.calculate_debt()
-        
-        overall_score = self._calculate_overall_score(
-            coverage, docs, architecture, debt
-        )
+        quality_components = self._gather_all_quality_components()
+        overall_score = self._calculate_overall_score(**quality_components)
+        return self._build_quality_metrics(quality_components, overall_score)
+    
+    def _gather_all_quality_components(self) -> dict:
+        """Gather all quality components from calculators."""
+        return {
+            'coverage': self.coverage_calc.calculate_coverage(),
+            'docs': self.doc_assessor.assess_quality(),
+            'architecture': self.compliance_checker.check_compliance(),
+            'debt': self.debt_calc.calculate_debt()
+        }
+    
+    def _build_quality_metrics(self, components: dict, overall_score: float) -> QualityMetrics:
+        """Build final quality metrics object."""
         quality_level = self._determine_quality_level(overall_score)
-        
         return QualityMetrics(
-            test_coverage=coverage,
-            documentation=docs,
-            architecture=architecture,
-            technical_debt=debt,
+            test_coverage=components['coverage'],
+            documentation=components['docs'],
+            architecture=components['architecture'],
+            technical_debt=components['debt'],
             overall_quality_score=overall_score,
             quality_level=quality_level
         )
@@ -50,17 +56,18 @@ class QualityAggregator:
                                arch: ArchitectureCompliance,
                                debt: TechnicalDebt) -> float:
         """Calculate overall quality score."""
-        coverage_score = coverage.overall_coverage
-        docs_score = self._get_docs_score(docs.documentation_quality)
-        arch_score = arch.compliance_score
-        debt_score = self._get_debt_score(debt.debt_score)
-        
-        return self._weighted_average([
-            (coverage_score, 0.3),
-            (docs_score, 0.2),
-            (arch_score, 0.3),
-            (debt_score, 0.2)
-        ])
+        component_scores = self._extract_component_scores(coverage, docs, arch, debt)
+        return self._weighted_average(component_scores)
+    
+    def _extract_component_scores(self, coverage: TestCoverageMetrics, docs: DocumentationMetrics,
+                                 arch: ArchitectureCompliance, debt: TechnicalDebt) -> list:
+        """Extract numeric scores from all quality components."""
+        return [
+            (coverage.overall_coverage, 0.3),
+            (self._get_docs_score(docs.documentation_quality), 0.2),
+            (arch.compliance_score, 0.3),
+            (self._get_debt_score(debt.debt_score), 0.2)
+        ]
     
     def _get_docs_score(self, quality: QualityLevel) -> float:
         """Convert documentation quality to numeric score."""

@@ -7,6 +7,7 @@ import { useChatStore } from '@/store/chat';
 import { useAuthStore } from '@/store/authStore';
 import { ThreadService } from '@/services/threadService';
 import { motion, AnimatePresence } from 'framer-motion';
+import { logger } from '@/utils/debug-logger';
 import { 
   Plus, 
   MessageSquare,
@@ -51,7 +52,7 @@ export const ChatHistorySection: React.FC = () => {
       setThreads(fetchedThreads);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation history';
-      console.error('Failed to load threads:', errorMessage);
+      logger.error('Failed to load threads:', errorMessage);
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -66,7 +67,7 @@ export const ChatHistorySection: React.FC = () => {
       await handleSelectThread(newThread.id);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to create new conversation';
-      console.error('Failed to create thread:', errorMessage);
+      logger.error('Failed to create thread:', errorMessage);
       setError(errorMessage);
     } finally {
       setIsCreatingNew(false);
@@ -92,7 +93,7 @@ export const ChatHistorySection: React.FC = () => {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation';
-      console.error('Failed to load thread messages:', errorMessage);
+      logger.error('Failed to load thread messages:', errorMessage);
       setError(errorMessage);
     }
   };
@@ -110,7 +111,7 @@ export const ChatHistorySection: React.FC = () => {
       setEditingTitle('');
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to update thread title';
-      console.error('Failed to update thread title:', errorMessage);
+      logger.error('Failed to update thread title:', errorMessage);
       setError(errorMessage);
     }
   };
@@ -127,7 +128,7 @@ export const ChatHistorySection: React.FC = () => {
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to delete conversation';
-      console.error('Failed to delete thread:', errorMessage);
+      logger.error('Failed to delete thread:', errorMessage);
       setError(errorMessage);
     }
   };

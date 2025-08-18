@@ -35,7 +35,7 @@ class DataAnalysisRecoveryStrategy(BaseAgentRecoveryStrategy):
     
     def _categorize_data_failure(self, error_message: str, assessment: Dict[str, Any]) -> None:
         """Categorize data analysis failure type."""
-        if 'clickhouse' in error_message or 'database' in error_message:
+        if self._is_database_error(error_message):
             self._set_database_failure(assessment)
         elif 'timeout' in error_message:
             self._set_query_timeout_failure(assessment)
@@ -43,6 +43,10 @@ class DataAnalysisRecoveryStrategy(BaseAgentRecoveryStrategy):
             self._set_memory_failure(assessment)
         elif 'data' in error_message:
             self._set_data_quality_failure(assessment)
+    
+    def _is_database_error(self, error_message: str) -> bool:
+        """Check if error is database-related."""
+        return 'clickhouse' in error_message or 'database' in error_message
     
     def _set_database_failure(self, assessment: Dict[str, Any]) -> None:
         """Set assessment for database failure."""

@@ -34,11 +34,19 @@ class HeartbeatManager:
     
     def _initialize_modules(self) -> None:
         """Initialize component modules."""
+        self._initialize_core_modules()
+        self._initialize_helper_modules()
+    
+    def _initialize_core_modules(self) -> None:
+        """Initialize statistics and loop operations modules."""
         self.statistics = HeartbeatStatistics()
         self.loop_ops = HeartbeatLoopOperations(
             self.connection_manager, self.config, 
             self.statistics, self.missed_heartbeats
         )
+    
+    def _initialize_helper_modules(self) -> None:
+        """Initialize error recovery and cleanup modules."""
         self.error_recovery = HeartbeatErrorRecovery(self.error_handler, self.statistics)
         self.cleanup = HeartbeatCleanup(
             self.connection_manager, self.heartbeat_tasks, self.missed_heartbeats

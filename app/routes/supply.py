@@ -48,27 +48,23 @@ def read_supply_option(option_id: int, db: DbDep):
         raise HTTPException(status_code=404, detail="Supply option not found")
     return db_option
 
+def _build_research_response() -> Dict[str, Any]:
+    """Build supplier research response."""
+    return {"suppliers": [{"name": "Supplier A", "score": 0.92}, {"name": "Supplier B", "score": 0.85}], "total": 2}
+
 @router.post("/api/supply/research")
 async def research_suppliers(request: ResearchRequest) -> Dict[str, Any]:
     """Research suppliers based on query and filters"""
-    return {
-        "suppliers": [
-            {"name": "Supplier A", "score": 0.92},
-            {"name": "Supplier B", "score": 0.85}
-        ],
-        "total": 2
-    }
+    return _build_research_response()
+
+def _build_enrichment_response(supplier_id: str) -> Dict[str, Any]:
+    """Build supplier enrichment response."""
+    return {"supplier_id": supplier_id, "enriched_data": {"financial_health": "good", "certifications": ["ISO9001"]}}
 
 @router.post("/api/supply/enrich")
 async def enrich_supplier(request: EnrichRequest) -> Dict[str, Any]:
     """Enrich supplier data"""
-    return {
-        "supplier_id": request.supplier_id,
-        "enriched_data": {
-            "financial_health": "good",
-            "certifications": ["ISO9001"]
-        }
-    }
+    return _build_enrichment_response(request.supplier_id)
 
 async def validate_supply_chain(chain_data: Dict[str, Any]) -> Dict[str, Any]:
     """Validate supply chain configuration"""

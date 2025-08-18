@@ -166,21 +166,37 @@ class HealthMonitor:
             return {"status": "no_data", "agents": {}}
         
         latest_status = self.system_health_history[-1]
-        
+        return self._build_system_status_dict(latest_status)
+    
+    def _build_system_status_dict(self, latest_status) -> Dict[str, Any]:
+        """Build system status dictionary from latest status."""
+        basic_status = self._create_basic_status_dict(latest_status)
+        basic_status["agent_details"] = self._create_agent_details_dict()
+        return basic_status
+    
+    def _create_basic_status_dict(self, latest_status) -> Dict[str, Any]:
+        """Create basic status dictionary."""
         return {
             "system_health": latest_status.health_level.value,
             "agents_in_fallback": latest_status.agents_in_fallback,
             "total_agents": latest_status.total_agents,
             "cascade_prevention_active": latest_status.cascade_prevention_active,
             "emergency_mode_active": latest_status.emergency_mode_active,
-            "last_updated": latest_status.last_health_check.isoformat(),
-            "agent_details": {
-                name: {
-                    "health_score": status.health_score,
-                    "circuit_breaker_open": status.circuit_breaker_open,
-                    "fallback_active": status.fallback_active,
-                    "recent_failures": status.recent_failures
-                }
-                for name, status in self.coordinator.agent_statuses.items()
-            }
+            "last_updated": latest_status.last_health_check.isoformat()
+        }
+    
+    def _create_agent_details_dict(self) -> Dict[str, Dict[str, Any]]:
+        """Create agent details dictionary."""
+        return {
+            name: self._create_agent_status_dict(status)
+            for name, status in self.coordinator.agent_statuses.items()
+        }
+    
+    def _create_agent_status_dict(self, status) -> Dict[str, Any]:
+        """Create single agent status dictionary."""
+        return {
+            "health_score": status.health_score,
+            "circuit_breaker_open": status.circuit_breaker_open,
+            "fallback_active": status.fallback_active,
+            "recent_failures": status.recent_failures
         }

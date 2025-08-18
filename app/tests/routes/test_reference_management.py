@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock, MagicMock
 from app.main import app
+from app.db.session import get_db_session
 from datetime import datetime
 
 class TestReferenceManagement:
@@ -19,7 +20,7 @@ class TestReferenceManagement:
             "version": "1.0"
         }
         
-        with patch('app.routes.references.get_db_session') as mock_db:
+        with patch('app.db.session.get_db_session') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -34,33 +35,46 @@ class TestReferenceManagement:
     
     def test_get_reference_by_id(self):
         """Test retrieving a reference by ID"""
-        client = TestClient(app)
+        # Setup mock reference with proper structure
+        mock_reference = MagicMock()
+        mock_reference.id = "ref-123"
+        mock_reference.name = "test_reference"
+        mock_reference.friendly_name = "Test Reference"
+        mock_reference.type = "document"
+        mock_reference.value = "Test content"
+        mock_reference.description = "Test description"
+        mock_reference.version = "1.0"
+        mock_reference.created_at = datetime.now()
+        mock_reference.updated_at = datetime.now()
         
-        mock_reference = {
-            "id": "ref-123",
-            "name": "test_reference",
-            "friendly_name": "Test Reference",
-            "type": "document",
-            "value": "Test content",
-            "description": "Test description",
-            "version": "1.0",
-            "created_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
-        }
+        # Setup mock session - use regular MagicMock with specific async methods
+        mock_session = MagicMock()
         
-        with patch('app.routes.references.get_db_session') as mock_db:
-            mock_session = AsyncMock()
-            mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-            mock_db.return_value.__aexit__ = AsyncMock()
-            
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = mock_reference
-            mock_session.execute = AsyncMock(return_value=mock_result)
-            
+        # Setup proper mock chain for result.scalars().first()
+        mock_scalars = MagicMock()
+        mock_scalars.first.return_value = mock_reference
+        mock_result = MagicMock()
+        mock_result.scalars.return_value = mock_scalars
+        
+        # Mock execute as an async method that returns the result
+        mock_session.execute = AsyncMock(return_value=mock_result)
+        
+        # Setup mock context manager
+        async def mock_get_db_session():
+            yield mock_session
+        
+        # Override dependency
+        app.dependency_overrides[get_db_session] = mock_get_db_session
+        
+        try:
+            client = TestClient(app)
             response = client.get("/api/references/ref-123")
             
             assert response.status_code == 200
             assert response.json()["id"] == "ref-123"
+        finally:
+            # Clean up dependency override
+            app.dependency_overrides = {}
     
     def test_search_references(self):
         """Test searching references with filters"""
@@ -87,7 +101,7 @@ class TestReferenceManagement:
             }
         ]
         
-        with patch('app.routes.references.get_db_session') as mock_db:
+        with patch('app.db.session.get_db_session') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -110,7 +124,7 @@ class TestReferenceManagement:
             "value": "Updated content"
         }
         
-        with patch('app.routes.references.get_db_session') as mock_db:
+        with patch('app.db.session.get_db_session') as mock_db:
             mock_session = AsyncMock()
             mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
             mock_db.return_value.__aexit__ = AsyncMock()
@@ -129,21 +143,31 @@ class TestReferenceManagement:
     
     def test_delete_reference(self):
         """Test deleting a reference"""
-        client = TestClient(app)
+        # Setup mock session
+        mock_session = AsyncMock()
+        mock_reference = MagicMock()
+        mock_result = MagicMock()
+        mock_result.scalar_one_or_none.return_value = mock_reference
+        mock_session.execute = AsyncMock(return_value=mock_result)
+        mock_session.delete = AsyncMock()
+        mock_session.commit = AsyncMock()
         
-        with patch('app.routes.references.get_db_session') as mock_db:
-            mock_session = AsyncMock()
-            mock_db.return_value.__aenter__ = AsyncMock(return_value=mock_session)
-            mock_db.return_value.__aexit__ = AsyncMock()
-            
-            mock_reference = MagicMock()
-            mock_result = MagicMock()
-            mock_result.scalar_one_or_none.return_value = mock_reference
-            mock_session.execute = AsyncMock(return_value=mock_result)
-            mock_session.delete = MagicMock()
-            mock_session.commit = AsyncMock()
-            
+        # Setup mock context manager - session should be a context manager itself
+        mock_session.__aenter__ = AsyncMock(return_value=mock_session)
+        mock_session.__aexit__ = AsyncMock(return_value=None)
+        
+        async def mock_get_db_session():
+            yield mock_session
+        
+        # Override dependency
+        app.dependency_overrides[get_db_session] = mock_get_db_session
+        
+        try:
+            client = TestClient(app)
             response = client.delete("/api/references/ref-123")
             
             assert response.status_code == 204
             mock_session.delete.assert_called_once_with(mock_reference)
+        finally:
+            # Clean up dependency override
+            app.dependency_overrides = {}

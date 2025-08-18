@@ -4,7 +4,6 @@ Implements individual connection reconnection logic with exponential backoff.
 """
 
 import asyncio
-import random
 import time
 from datetime import datetime, timezone
 from typing import Optional, Callable, Any, Dict, List
@@ -13,6 +12,10 @@ from app.logging_config import central_logger
 from .reconnection_types import (
     ReconnectionState, DisconnectReason, ReconnectionConfig,
     ReconnectionAttempt, ReconnectionMetrics
+)
+from .reconnection_status import ReconnectionStatusReporter
+from .reconnection_helpers import (
+    ReconnectionDelayCalculator, ReconnectionAttemptHelper, ReconnectionMetricsHelper
 )
 
 logger = central_logger.get_logger(__name__)
@@ -26,21 +29,44 @@ class WebSocketReconnectionManager:
         self.config = config or ReconnectionConfig()
         self.state = ReconnectionState.DISCONNECTED
         self.reconnection_task: Optional[asyncio.Task] = None
+        self._setup_callbacks()
+        self._initialize_tracking_state()
+        self._setup_helpers()
+
+    def _setup_callbacks(self) -> None:
+        """Setup callback attributes."""
         self.connect_callback: Optional[Callable] = None
         self.disconnect_callback: Optional[Callable] = None
         self.state_change_callback: Optional[Callable] = None
-        self._initialize_tracking_state()
 
     def _initialize_tracking_state(self) -> None:
         """Initialize reconnection tracking state."""
+        self._setup_attempt_tracking()
+        self._setup_time_tracking()
+        self._setup_metrics_and_flags()
+
+    def _setup_attempt_tracking(self) -> None:
+        """Setup attempt tracking state."""
         self.current_attempt = 0
         self.current_delay_ms = self.config.initial_delay_ms
+
+    def _setup_time_tracking(self) -> None:
+        """Setup time tracking state."""
         self.last_disconnect_time: Optional[datetime] = None
         self.last_successful_connect_time: Optional[datetime] = None
         self.attempt_history: List[ReconnectionAttempt] = []
+
+    def _setup_metrics_and_flags(self) -> None:
+        """Setup metrics and control flags."""
         self.metrics = ReconnectionMetrics()
         self._stop_reconnecting = False
         self._permanent_failure = False
+
+    def _setup_helpers(self) -> None:
+        """Setup helper classes."""
+        self.delay_calculator = ReconnectionDelayCalculator(self.config)
+        self.attempt_helper = ReconnectionAttemptHelper(self.connection_id, self.config)
+        self.status_reporter = ReconnectionStatusReporter(self)
 
     async def handle_disconnect(self, reason: DisconnectReason, error_message: Optional[str] = None) -> None:
         """Handle disconnection and start reconnection process."""
@@ -128,14 +154,18 @@ class WebSocketReconnectionManager:
     async def _reconnection_loop(self) -> None:
         """Main reconnection loop with exponential backoff."""
         while self._should_continue_reconnection():
-            attempt = await self._prepare_reconnection_attempt()
-            should_continue = await self._execute_backoff_delay(attempt)
-            if not should_continue:
-                break
-            success = await self._attempt_connection(attempt)
+            success = await self._process_reconnection_iteration()
             if success:
                 return
         await self._finalize_reconnection_loop()
+
+    async def _process_reconnection_iteration(self) -> bool:
+        """Process a single reconnection iteration."""
+        attempt = await self._prepare_reconnection_attempt()
+        should_continue = await self._execute_backoff_delay(attempt)
+        if not should_continue:
+            return False
+        return await self._attempt_connection(attempt)
 
     def _should_continue_reconnection(self) -> bool:
         """Check if reconnection should continue."""
@@ -148,23 +178,13 @@ class WebSocketReconnectionManager:
         self.current_attempt += 1
         self.metrics.total_reconnection_attempts += 1
         delay_ms = self._calculate_backoff_delay()
-        attempt = self._create_attempt_record(delay_ms)
-        self._log_reconnection_attempt(delay_ms)
+        attempt = self.attempt_helper.create_attempt_record(self.current_attempt, delay_ms)
+        self.attempt_helper.log_reconnection_attempt(self.current_attempt, delay_ms)
         return attempt
 
-    def _create_attempt_record(self, delay_ms: int) -> ReconnectionAttempt:
-        """Create reconnection attempt record."""
-        return ReconnectionAttempt(
-            attempt_number=self.current_attempt,
-            timestamp=datetime.now(timezone.utc),
-            delay_ms=delay_ms,
-            reason=f"Attempt {self.current_attempt}/{self.config.max_attempts}"
-        )
-
-    def _log_reconnection_attempt(self, delay_ms: int) -> None:
-        """Log reconnection attempt information."""
-        logger.info(f"Reconnection attempt {self.current_attempt}/{self.config.max_attempts} "
-                   f"for {self.connection_id} in {delay_ms}ms")
+    def _calculate_backoff_delay(self) -> int:
+        """Calculate exponential backoff delay with jitter."""
+        return self.delay_calculator.calculate_backoff_delay(self.current_attempt, self.current_delay_ms)
 
     async def _execute_backoff_delay(self, attempt: ReconnectionAttempt) -> bool:
         """Execute backoff delay and check if should continue."""
@@ -178,6 +198,10 @@ class WebSocketReconnectionManager:
         """Attempt to reconnect and handle result."""
         start_time = time.time()
         await self._set_connecting_state()
+        return await self._execute_connection_attempt(attempt, start_time)
+
+    async def _execute_connection_attempt(self, attempt: ReconnectionAttempt, start_time: float) -> bool:
+        """Execute connection attempt and handle result."""
         try:
             await self._execute_connection_callback()
             await self._handle_connection_success(attempt, start_time)
@@ -199,7 +223,7 @@ class WebSocketReconnectionManager:
     async def _handle_connection_success(self, attempt: ReconnectionAttempt, start_time: float) -> None:
         """Handle successful connection attempt."""
         attempt.success = True
-        attempt.duration_ms = (time.time() - start_time) * 1000
+        attempt.duration_ms = ReconnectionMetricsHelper.calculate_attempt_duration_ms(start_time)
         self.attempt_history.append(attempt)
         self.metrics.successful_reconnections += 1
         await self.handle_successful_connection()
@@ -209,16 +233,11 @@ class WebSocketReconnectionManager:
         """Handle failed connection attempt."""
         attempt.success = False
         attempt.error_message = str(error)
-        attempt.duration_ms = (time.time() - start_time) * 1000
+        attempt.duration_ms = ReconnectionMetricsHelper.calculate_attempt_duration_ms(start_time)
         self.attempt_history.append(attempt)
         self.metrics.failed_reconnections += 1
-        self._log_connection_failure(error)
+        self.attempt_helper.log_connection_failure(self.current_attempt, error)
         await self._set_reconnecting_state()
-
-    def _log_connection_failure(self, error: Exception) -> None:
-        """Log connection failure."""
-        logger.warning(f"Reconnection attempt {self.current_attempt} failed for "
-                     f"{self.connection_id}: {error}")
 
     async def _set_reconnecting_state(self) -> None:
         """Set state to reconnecting and notify."""
@@ -245,17 +264,6 @@ class WebSocketReconnectionManager:
         self.state = ReconnectionState.DISCONNECTED
         await self._notify_state_change()
 
-    def _calculate_backoff_delay(self) -> int:
-        """Calculate exponential backoff delay with jitter."""
-        delay = min(
-            self.current_delay_ms * (self.config.backoff_multiplier ** (self.current_attempt - 1)),
-            self.config.max_delay_ms
-        )
-        jitter_range = delay * self.config.jitter_factor
-        jitter = random.uniform(-jitter_range, jitter_range)
-        final_delay = max(0, delay + jitter)
-        return int(final_delay)
-
     async def _schedule_delay_reset(self) -> None:
         """Schedule delay reset after successful connection period."""
         await asyncio.sleep(self.config.reset_delay_after_success_ms / 1000.0)
@@ -267,16 +275,15 @@ class WebSocketReconnectionManager:
         """Update average reconnection time."""
         successful_count = self.metrics.successful_reconnections
         current_avg = self.metrics.average_reconnection_time_ms
-        self.metrics.average_reconnection_time_ms = (
-            (current_avg * (successful_count - 1) + duration_ms) / successful_count
+        self.metrics.average_reconnection_time_ms = ReconnectionMetricsHelper.update_average_reconnection_time(
+            current_avg, successful_count, duration_ms
         )
         self._update_longest_downtime()
 
     def _update_longest_downtime(self) -> None:
         """Update longest downtime metric."""
-        if self.last_disconnect_time:
-            downtime_ms = (datetime.now(timezone.utc) - self.last_disconnect_time).total_seconds() * 1000
-            self.metrics.longest_downtime_ms = max(self.metrics.longest_downtime_ms, downtime_ms)
+        downtime_ms = ReconnectionMetricsHelper.calculate_downtime_ms(self.last_disconnect_time)
+        self.metrics.longest_downtime_ms = max(self.metrics.longest_downtime_ms, downtime_ms)
 
     async def _notify_state_change(self) -> None:
         """Notify about state changes."""
@@ -289,42 +296,14 @@ class WebSocketReconnectionManager:
             except Exception as e:
                 logger.error(f"State change callback error for {self.connection_id}: {e}")
 
+    # Status and metrics methods - delegated to status reporter
     def get_status(self) -> Dict[str, Any]:
         """Get current reconnection status."""
-        return {
-            "connection_id": self.connection_id,
-            "state": self.state.value,
-            "current_attempt": self.current_attempt,
-            "max_attempts": self.config.max_attempts,
-            "permanent_failure": self._permanent_failure,
-            "reconnection_enabled": self.config.enabled,
-            "last_disconnect_time": self.last_disconnect_time.isoformat() if self.last_disconnect_time else None,
-            "last_successful_connect_time": self.last_successful_connect_time.isoformat() if self.last_successful_connect_time else None,
-            "next_attempt_delay_ms": self._calculate_backoff_delay() if self.state == ReconnectionState.RECONNECTING else None
-        }
+        return self.status_reporter.get_status()
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get comprehensive reconnection metrics."""
-        return {
-            "metrics": self.metrics.__dict__,
-            "config": self.config.__dict__,
-            "recent_attempts": self._format_recent_attempts(),
-            "status": self.get_status()
-        }
-
-    def _format_recent_attempts(self) -> List[Dict[str, Any]]:
-        """Format recent attempts for metrics."""
-        return [
-            {
-                "attempt_number": attempt.attempt_number,
-                "timestamp": attempt.timestamp.isoformat(),
-                "delay_ms": attempt.delay_ms,
-                "success": attempt.success,
-                "duration_ms": attempt.duration_ms,
-                "error_message": attempt.error_message
-            }
-            for attempt in self.attempt_history[-10:]  # Last 10 attempts
-        ]
+        return self.status_reporter.get_metrics()
 
     def clear_history(self) -> None:
         """Clear attempt history and reset metrics."""
@@ -335,4 +314,6 @@ class WebSocketReconnectionManager:
     def update_config(self, new_config: ReconnectionConfig) -> None:
         """Update reconnection configuration."""
         self.config = new_config
+        self.delay_calculator = ReconnectionDelayCalculator(new_config)
+        self.attempt_helper = ReconnectionAttemptHelper(self.connection_id, new_config)
         logger.info(f"Updated reconnection configuration for {self.connection_id}: {new_config}")

@@ -28,14 +28,22 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
         """Collect error metrics from requests."""
         start_time = time.time()
         try:
-            response = await call_next(request)
-            duration = time.time() - start_time
-            self._record_request_metric(request, response.status_code, duration)
-            return response
+            return await self._handle_successful_request(request, call_next, start_time)
         except Exception as error:
-            duration = time.time() - start_time
-            self._record_error_metric(request, error, duration)
+            await self._handle_error_request(request, error, start_time)
             raise error
+
+    async def _handle_successful_request(self, request: Request, call_next: Callable, start_time: float) -> Response:
+        """Handle successful request processing."""
+        response = await call_next(request)
+        duration = time.time() - start_time
+        self._record_request_metric(request, response.status_code, duration)
+        return response
+
+    async def _handle_error_request(self, request: Request, error: Exception, start_time: float) -> None:
+        """Handle error request processing."""
+        duration = time.time() - start_time
+        self._record_error_metric(request, error, duration)
     
     def _record_request_metric(
         self,
@@ -45,6 +53,10 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
     ) -> None:
         """Record request completion metrics."""
         self._reset_counters_if_needed()
+        self._process_request_metrics(request, duration, status_code)
+
+    def _process_request_metrics(self, request: Request, duration: float, status_code: int) -> None:
+        """Process request metrics recording."""
         self._record_success_metric(request)
         self._log_slow_request_if_needed(request, duration, status_code)
     
@@ -74,6 +86,10 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
     ) -> None:
         """Record error metrics."""
         self._reset_counters_if_needed()
+        self._process_error_metrics(request, error, duration)
+
+    def _process_error_metrics(self, request: Request, error: Exception, duration: float) -> None:
+        """Process error metrics recording."""
         metric_key = self._build_error_metric_key(request, error)
         self.error_counts[metric_key] = self.error_counts.get(metric_key, 0) + 1
         self._log_error_metric(metric_key, duration, error)

@@ -33,12 +33,16 @@ class WebSocketConnectionManager:
         config: Optional[ReconnectionConfig] = None
     ):
         """Initialize connection manager."""
-        self.connection_id = connection_id
-        self.url = url
-        self.config = config or ReconnectionConfig()
+        self._init_basic_properties(connection_id, url, config)
         self._initialize_state()
         self._initialize_components()
         self._setup_event_handlers()
+    
+    def _init_basic_properties(self, connection_id: str, url: str, config: Optional[ReconnectionConfig]) -> None:
+        """Initialize basic connection properties."""
+        self.connection_id = connection_id
+        self.url = url
+        self.config = config or ReconnectionConfig()
     
     def _initialize_state(self) -> None:
         """Initialize connection state variables."""
@@ -59,10 +63,17 @@ class WebSocketConnectionManager:
     
     def _setup_event_handlers(self) -> None:
         """Setup event handlers for components."""
+        self._setup_internal_handlers()
+        self._setup_external_handlers()
+    
+    def _setup_internal_handlers(self) -> None:
+        """Setup internal component event handlers."""
         self.heartbeat_manager.on_heartbeat_timeout = self._handle_connection_error
         self.reconnection_handler.on_reconnect_success = self._on_reconnection_success
         self.reconnection_handler.on_reconnect_failure = self._on_reconnection_failure
-        # External event handlers
+    
+    def _setup_external_handlers(self) -> None:
+        """Setup external event handler placeholders."""
         self.on_connect: Optional[Callable] = None
         self.on_disconnect: Optional[Callable] = None
         self.on_message: Optional[Callable] = None
@@ -79,25 +90,33 @@ class WebSocketConnectionManager:
     async def _attempt_connection(self) -> bool:
         """Attempt WebSocket connection establishment."""
         try:
-            import websockets
-            self.websocket = await asyncio.wait_for(
-                websockets.connect(self.url),
-                timeout=self.config.timeout_seconds
-            )
+            await self._establish_websocket_connection()
             return await self._handle_successful_connection()
         except Exception as e:
             return await self._handle_connection_failure(e)
     
+    async def _establish_websocket_connection(self) -> None:
+        """Establish WebSocket connection with timeout."""
+        import websockets
+        self.websocket = await asyncio.wait_for(
+            websockets.connect(self.url),
+            timeout=self.config.timeout_seconds
+        )
+    
     async def _handle_successful_connection(self) -> bool:
         """Handle successful WebSocket connection."""
-        self.state = ConnectionState.CONNECTED
-        self.metrics.connect_time = datetime.now()
-        self.reconnection_handler.reset_attempts()
-        self.last_error = None
+        self._update_connection_state()
         await self._setup_connection()
         await self._notify_connection_success()
         logger.info(f"WebSocket connected: {self.connection_id}")
         return True
+    
+    def _update_connection_state(self) -> None:
+        """Update connection state after successful connection."""
+        self.state = ConnectionState.CONNECTED
+        self.metrics.connect_time = datetime.now()
+        self.reconnection_handler.reset_attempts()
+        self.last_error = None
     
     async def _setup_connection(self) -> None:
         """Setup connection handlers and restore state."""

@@ -136,6 +136,10 @@ class OAuthCredentialManager:
         credential = self._try_primary_credential(env_var)
         if not credential:
             credential = self._get_fallback_credential(cred_type)
+        return self._validate_credential_result(credential, env_var)
+    
+    def _validate_credential_result(self, credential: str, env_var: str) -> str:
+        """Validate credential result and log if missing."""
         if not credential:
             self._log_missing_credential(env_var)
         return credential
@@ -185,12 +189,15 @@ class OAuthConfigGenerator:
             config_map = self._create_config_mapping()
             config_func = config_map.get(environment, self._get_fallback_oauth_config)
             config = config_func()
-            
-            if not self._validate_config_for_env(config, environment):
-                return self._handle_config_validation_failure(environment)
-            return config
+            return self._validate_and_return_config(config, environment)
         except Exception as e:
             return self._handle_config_exception(e)
+    
+    def _validate_and_return_config(self, config: OAuthConfig, environment: Environment) -> OAuthConfig:
+        """Validate config and return or fallback."""
+        if not self._validate_config_for_env(config, environment):
+            return self._handle_config_validation_failure(environment)
+        return config
     
     def _get_dev_credentials(self) -> tuple[str, str]:
         """Get development OAuth credentials."""
@@ -201,6 +208,10 @@ class OAuthConfigGenerator:
     def _get_dev_oauth_config(self) -> OAuthConfig:
         """Get development OAuth configuration."""
         client_id, client_secret = self._get_dev_credentials()
+        return self._build_dev_config(client_id, client_secret)
+    
+    def _build_dev_config(self, client_id: str, client_secret: str) -> OAuthConfig:
+        """Build development OAuth configuration."""
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=self._get_dev_redirect_uris(),
@@ -217,6 +228,10 @@ class OAuthConfigGenerator:
     def _get_test_oauth_config(self) -> OAuthConfig:
         """Get testing OAuth configuration."""
         client_id, client_secret = self._get_test_credentials()
+        return self._build_test_config(client_id, client_secret)
+    
+    def _build_test_config(self, client_id: str, client_secret: str) -> OAuthConfig:
+        """Build testing OAuth configuration."""
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=["http://test.local:8000/api/auth/callback"],
@@ -239,6 +254,10 @@ class OAuthConfigGenerator:
         client_id, client_secret = self._get_staging_credentials()
         if self._check_pr_environment():
             return self._get_pr_oauth_config(client_id, client_secret)
+        return self._build_staging_config(client_id, client_secret)
+    
+    def _build_staging_config(self, client_id: str, client_secret: str) -> OAuthConfig:
+        """Build staging OAuth configuration."""
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=self._get_staging_redirect_uris(),
@@ -255,6 +274,10 @@ class OAuthConfigGenerator:
     def _get_prod_oauth_config(self) -> OAuthConfig:
         """Get production OAuth configuration."""
         client_id, client_secret = self._get_prod_credentials()
+        return self._build_prod_config(client_id, client_secret)
+    
+    def _build_prod_config(self, client_id: str, client_secret: str) -> OAuthConfig:
+        """Build production OAuth configuration."""
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=self._get_prod_redirect_uris(),
@@ -274,6 +297,10 @@ class OAuthConfigGenerator:
         pr_number = os.getenv("PR_NUMBER", "")
         proxy_url = "https://auth.staging.netrasystems.ai"
         origins = self._build_pr_origins(proxy_url, pr_number)
+        return self._build_pr_config(client_id, client_secret, proxy_url, origins)
+    
+    def _build_pr_config(self, client_id: str, client_secret: str, proxy_url: str, origins: List[str]) -> OAuthConfig:
+        """Build PR OAuth configuration."""
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=[f"{proxy_url}/callback"], javascript_origins=origins,

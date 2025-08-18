@@ -49,11 +49,16 @@ class AgentTools:
                                       config: Optional[Dict[str, Any]]) -> str:
         """Perform the actual agent execution"""
         thread_id = await self._create_agent_thread(server, agent_name)
-        result = await server.agent_service.execute_agent(
+        result = await self._execute_agent_service(server, agent_name, thread_id, input_data, config)
+        return self._format_agent_result(thread_id, result)
+    
+    async def _execute_agent_service(self, server, agent_name: str, thread_id: Optional[str],
+                                    input_data: Dict[str, Any], config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Execute agent via service"""
+        return await server.agent_service.execute_agent(
             agent_name=agent_name, thread_id=thread_id,
             input_data=input_data, config=config or {}
         )
-        return self._format_agent_result(thread_id, result)
     
     def _handle_agent_error(self, error: Exception) -> str:
         """Handle agent execution errors"""
@@ -83,13 +88,21 @@ class AgentTools:
         @self.mcp.tool()
         async def get_agent_status(run_id: str) -> str:
             """Check the status of an agent execution"""
-            if not server.agent_service:
-                return json.dumps({"error": "Agent service not available"})
-            try:
-                status = await server.agent_service.get_run_status(run_id)
-                return json.dumps(status, indent=2)
-            except Exception as e:
-                return json.dumps({"error": str(e)})
+            return await self._get_agent_run_status(server, run_id)
+    
+    async def _get_agent_run_status(self, server, run_id: str) -> str:
+        """Get agent run status with error handling"""
+        if not server.agent_service:
+            return json.dumps({"error": "Agent service not available"})
+        try:
+            return await self._fetch_agent_status(server, run_id)
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+    
+    async def _fetch_agent_status(self, server, run_id: str) -> str:
+        """Fetch status from agent service"""
+        status = await server.agent_service.get_run_status(run_id)
+        return json.dumps(status, indent=2)
     
     def _register_list_agents_tool(self, server):
         """Register list agents tool"""
@@ -97,9 +110,15 @@ class AgentTools:
         async def list_agents(category: Optional[str] = None) -> str:
             """List available Netra agents"""
             agents = self._get_available_agents()
-            if category:
-                agents = [a for a in agents if a["category"] == category]
-            return json.dumps(agents, indent=2)
+            filtered_agents = self._filter_agents_by_category(agents, category)
+            return json.dumps(filtered_agents, indent=2)
+    
+    def _filter_agents_by_category(self, agents: List[Dict[str, str]], 
+                                  category: Optional[str]) -> List[Dict[str, str]]:
+        """Filter agents by category if specified"""
+        if category:
+            return [a for a in agents if a["category"] == category]
+        return agents
     
     def _get_available_agents(self) -> List[Dict[str, str]]:
         """Get list of available agents"""
@@ -108,18 +127,35 @@ class AgentTools:
     
     def _collect_agent_groups(self) -> List[List[Dict[str, str]]]:
         """Collect all agent groups"""
+        core_groups = self._get_core_agent_groups()
+        extended_groups = self._get_extended_agent_groups()
+        return core_groups + extended_groups
+    
+    def _get_core_agent_groups(self) -> List[List[Dict[str, str]]]:
+        """Get core agent groups"""
         return [
             self._get_orchestration_agents(), self._get_analysis_agents(),
-            self._get_data_agents(), self._get_optimization_agents(),
-            self._get_planning_agents(), self._get_reporting_agents()
+            self._get_data_agents()
+        ]
+    
+    def _get_extended_agent_groups(self) -> List[List[Dict[str, str]]]:
+        """Get extended agent groups"""
+        return [
+            self._get_optimization_agents(), self._get_planning_agents(),
+            self._get_reporting_agents()
         ]
     
     def _flatten_agent_groups(self, groups: List[List[Dict[str, str]]]) -> List[Dict[str, str]]:
         """Flatten grouped agents into single list"""
         result = []
+        self._extend_result_with_groups(result, groups)
+        return result
+    
+    def _extend_result_with_groups(self, result: List[Dict[str, str]], 
+                                  groups: List[List[Dict[str, str]]]) -> None:
+        """Extend result list with agent groups"""
         for group in groups:
             result.extend(group)
-        return result
     
     def _get_orchestration_agents(self) -> List[Dict[str, str]]:
         """Get orchestration category agents"""

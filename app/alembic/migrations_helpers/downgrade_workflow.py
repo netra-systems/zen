@@ -6,21 +6,29 @@ Handles the teardown process during migration downgrade
 from alembic import op
 
 
-def downgrade() -> None:
-    """Downgrade schema."""
+def _drop_initial_tables() -> None:
+    """Drop initial tables."""
     op.drop_table('steps')
     op.drop_table('messages')
     op.drop_table('analysis_results')
     op.drop_table('secrets')
+
+def downgrade() -> None:
+    """Downgrade schema."""
+    _drop_initial_tables()
     _downgrade_p2()
 
+
+def _drop_corpora_analyses() -> None:
+    """Drop corpora and analyses tables."""
+    op.drop_index(op.f('ix_corpora_name'), table_name='corpora')
+    op.drop_table('corpora')
+    op.drop_index(op.f('ix_analyses_name'), table_name='analyses')
 
 def _downgrade_p2() -> None:
     """Downgrade part 2."""
     op.drop_table('runs')
-    op.drop_index(op.f('ix_corpora_name'), table_name='corpora')
-    op.drop_table('corpora')
-    op.drop_index(op.f('ix_analyses_name'), table_name='analyses')
+    _drop_corpora_analyses()
     _downgrade_p3()
 
 
@@ -33,12 +41,16 @@ def _downgrade_p3() -> None:
     _downgrade_p4()
 
 
-def _downgrade_p4() -> None:
-    """Downgrade part 4."""
-    op.drop_table('threads')
+def _drop_supply_tables() -> None:
+    """Drop supply-related tables."""
     op.drop_index(op.f('ix_supply_options_name'), table_name='supply_options')
     op.drop_table('supply_options')
     op.drop_index(op.f('ix_supplies_name'), table_name='supplies')
+
+def _downgrade_p4() -> None:
+    """Downgrade part 4."""
+    op.drop_table('threads')
+    _drop_supply_tables()
     _downgrade_p5()
 
 

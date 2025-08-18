@@ -16,8 +16,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Any, Protocol, Union
 from pydantic import BaseModel, Field
 
-from app.core.resilience.monitor import AlertSeverity as CanonicalAlertSeverity
-from app.core.shared_health_types import HealthStatus
+from app.core.resilience.monitor import AlertSeverity as CanonicalAlertSeverity, HealthStatus
 
 
 # === Core Monitoring Enums ===
@@ -329,19 +328,35 @@ def create_threshold_alert(
     alert_id: Optional[str] = None
 ) -> ThresholdAlert:
     """Factory function for threshold alerts."""
-    import uuid
-    
-    return ThresholdAlert(
-        alert_id=alert_id or f"threshold_{component}_{metric_name}_{int(datetime.now().timestamp())}",
-        timestamp=datetime.now(),
-        severity=severity,
-        message=f"{component} {metric_name} threshold violation: {current_value} vs {threshold_value}",
-        component=component,
-        metric_name=metric_name,
-        current_value=current_value,
-        threshold_value=threshold_value,
-        threshold_type=">" if current_value > threshold_value else "<"
+    alert_params = _build_threshold_alert_params(
+        component, metric_name, current_value, threshold_value, severity, alert_id
     )
+    return ThresholdAlert(**alert_params)
+
+def _build_threshold_alert_params(
+    component: str, metric_name: str, current_value: float, 
+    threshold_value: float, severity: AlertSeverity, alert_id: Optional[str]
+) -> Dict[str, Any]:
+    """Build threshold alert parameters."""
+    base_params = _get_base_alert_params(component, metric_name, alert_id)
+    threshold_params = _get_threshold_params(current_value, threshold_value)
+    return {**base_params, "severity": severity, **threshold_params}
+
+def _get_base_alert_params(component: str, metric_name: str, alert_id: Optional[str]) -> Dict[str, Any]:
+    """Get base alert parameters."""
+    alert_id = alert_id or f"threshold_{component}_{metric_name}_{int(datetime.now().timestamp())}"
+    return {
+        "alert_id": alert_id, "timestamp": datetime.now(),
+        "message": f"{component} {metric_name} threshold violation",
+        "component": component, "metric_name": metric_name
+    }
+
+def _get_threshold_params(current_value: float, threshold_value: float) -> Dict[str, Any]:
+    """Get threshold-specific parameters."""
+    return {
+        "current_value": current_value, "threshold_value": threshold_value,
+        "threshold_type": ">" if current_value > threshold_value else "<"
+    }
 
 
 def create_performance_alert(
@@ -353,15 +368,28 @@ def create_performance_alert(
     alert_id: Optional[str] = None
 ) -> PerformanceAlert:
     """Factory function for performance alerts."""
-    import uuid
-    
-    return PerformanceAlert(
-        alert_id=alert_id or f"perf_{component}_{metric_name}_{int(datetime.now().timestamp())}",
-        timestamp=datetime.now(),
-        severity=severity,
-        message=f"{component} performance issue: {metric_name} = {current_value} (threshold: {threshold})",
-        component=component,
-        metric_name=metric_name,
-        current_value=current_value,
-        threshold=threshold
+    alert_params = _build_performance_alert_params(
+        component, metric_name, current_value, threshold, severity, alert_id
     )
+    return PerformanceAlert(**alert_params)
+
+def _build_performance_alert_params(
+    component: str, metric_name: str, current_value: float, 
+    threshold: float, severity: AlertSeverity, alert_id: Optional[str]
+) -> Dict[str, Any]:
+    """Build performance alert parameters."""
+    base_params = _get_performance_base_params(component, metric_name, alert_id)
+    performance_params = _get_performance_metrics(current_value, threshold)
+    return {**base_params, "severity": severity, **performance_params}
+
+def _get_performance_base_params(component: str, metric_name: str, alert_id: Optional[str]) -> Dict[str, Any]:
+    """Get performance alert base parameters."""
+    alert_id = alert_id or f"perf_{component}_{metric_name}_{int(datetime.now().timestamp())}"
+    return {"alert_id": alert_id, "timestamp": datetime.now(), "component": component}
+
+def _get_performance_metrics(current_value: float, threshold: float) -> Dict[str, Any]:
+    """Get performance metrics parameters."""
+    return {
+        "current_value": current_value, "threshold": threshold,
+        "message": f"performance issue: current = {current_value} (threshold: {threshold})"
+    }

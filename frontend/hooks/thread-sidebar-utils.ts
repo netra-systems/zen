@@ -8,6 +8,8 @@
  * @compliance type_safety.xml - Strongly typed utility functions
  */
 
+import { logger } from '@/utils/debug-logger';
+
 import { ThreadService } from '@/services/threadService';
 
 // ============================================
@@ -16,7 +18,7 @@ import { ThreadService } from '@/services/threadService';
 
 export const handleLoadThreadsError = (error: unknown, setError: (error: string) => void): void => {
   const errorMessage = error instanceof Error ? error.message : 'Failed to load conversation history';
-  console.error('Failed to load threads:', errorMessage);
+  logger.error('Failed to load threads:', errorMessage);
   setError(errorMessage);
 };
 
@@ -25,7 +27,7 @@ export const handleCreateThreadError = (
   setError: (error: string) => void
 ): void => {
   const errorMessage = creationState.error || 'Failed to create new conversation';
-  console.error('Failed to create thread:', errorMessage);
+  logger.error('Failed to create thread:', errorMessage);
   setError(errorMessage);
 };
 
@@ -34,7 +36,7 @@ export const handleSelectThreadError = (
   setError: (error: string) => void
 ): void => {
   const errorMessage = switchingState.error || 'Failed to load conversation';
-  console.error('Failed to load thread messages:', errorMessage);
+  logger.error('Failed to load thread messages:', errorMessage);
   setError(errorMessage);
 };
 
@@ -43,7 +45,7 @@ export const handleUpdateTitleError = (
   setError: (error: string) => void
 ): void => {
   const errorMessage = error instanceof Error ? error.message : 'Failed to update thread title';
-  console.error('Failed to update thread title:', errorMessage);
+  logger.error('Failed to update thread title:', errorMessage);
   setError(errorMessage);
 };
 
@@ -52,7 +54,7 @@ export const handleDeleteThreadError = (
   setError: (error: string) => void
 ): void => {
   const errorMessage = error instanceof Error ? error.message : 'Failed to delete conversation';
-  console.error('Failed to delete thread:', errorMessage);
+  logger.error('Failed to delete thread:', errorMessage);
   setError(errorMessage);
 };
 

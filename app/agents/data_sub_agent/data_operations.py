@@ -1,13 +1,40 @@
-"""Data processing operations coordinator with proper type safety."""
+"""Data processing operations coordinator with BaseExecutionInterface modernization.
 
+Modernized with:
+- BaseExecutionInterface implementation
+- ReliabilityManager integration
+- ExecutionMonitor support
+- Structured error handling
+- Zero breaking changes
+
+Business Value: Enhanced reliability and monitoring for data operations.
+"""
+
+import time
 from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
 from app.logging_config import central_logger as logger
+from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.schemas.shared_types import RetryConfig
+from .performance_analysis import PerformanceAnalysisOperations
+from .anomaly_detection import AnomalyDetectionOperations
+from .correlation_analysis import CorrelationAnalysisOperations
+from .usage_analysis import UsageAnalysisOperations
 
 
-class DataOperations:
-    """Coordinates data processing operations with strong typing."""
+class DataOperations(BaseExecutionInterface):
+    """Coordinates data processing operations with modern execution patterns.
+    
+    Enhanced with:
+    - BaseExecutionInterface compliance
+    - ReliabilityManager for fault tolerance
+    - ExecutionMonitor for performance tracking
+    - Structured error handling
+    """
     
     def __init__(
         self,
@@ -16,7 +43,9 @@ class DataOperations:
         clickhouse_ops: Any,
         redis_manager: Any
     ) -> None:
+        super().__init__("DataOperations")
         self._assign_dependencies(query_builder, analysis_engine, clickhouse_ops, redis_manager)
+        self._initialize_all_components()
     
     def _assign_dependencies(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any, redis_manager: Any) -> None:
         """Assign injected dependencies to instance variables."""
@@ -24,6 +53,18 @@ class DataOperations:
         self.analysis_engine = analysis_engine
         self.clickhouse_ops = clickhouse_ops
         self.redis_manager = redis_manager
+
+    def _initialize_all_components(self) -> None:
+        """Initialize all components including operation modules and modern components."""
+        self._initialize_operation_modules()
+        self._initialize_modern_components()
+        
+    def _initialize_operation_modules(self) -> None:
+        """Initialize specialized operation modules."""
+        self.performance_ops = PerformanceAnalysisOperations(self.query_builder, self.clickhouse_ops, self.redis_manager)
+        self.anomaly_ops = AnomalyDetectionOperations(self.query_builder, self.clickhouse_ops, self.redis_manager)
+        self.correlation_ops = CorrelationAnalysisOperations(self.query_builder, self.clickhouse_ops, self.redis_manager)
+        self.usage_ops = UsageAnalysisOperations(self.query_builder, self.clickhouse_ops, self.redis_manager)
     
     async def analyze_performance_metrics(
         self,
@@ -32,33 +73,8 @@ class DataOperations:
         time_range: Tuple[datetime, datetime]
     ) -> Dict[str, Any]:
         """Analyze performance metrics from ClickHouse."""
-        params = self._build_query_params(time_range, user_id, workload_id)
-        data = await self._fetch_performance_data(params)
-        return self._handle_performance_result(data, time_range, params['aggregation'])
-    
-    def _build_query_params(self, time_range: Tuple[datetime, datetime], user_id: int, workload_id: Optional[str]) -> Dict[str, Any]:
-        """Build query parameters for performance analysis."""
-        start_time, end_time = time_range
-        aggregation = self._determine_aggregation_level(start_time, end_time)
-        return {
-            'start_time': start_time, 'end_time': end_time, 'aggregation': aggregation,
-            'user_id': user_id, 'workload_id': workload_id
-        }
-    
-    async def _fetch_performance_data(self, params: Dict[str, Any]) -> Optional[List[Dict[str, Any]]]:
-        """Fetch performance data using query parameters."""
-        query = self._build_performance_query(
-            params['user_id'], params['workload_id'], params['start_time'], params['end_time'], params['aggregation']
-        )
-        cache_key = self._create_cache_key("perf_metrics", params['user_id'], params['workload_id'], params['start_time'], params['end_time'])
-        return await self._fetch_cached_data(query, cache_key)
-    
-    def _handle_performance_result(self, data: Optional[List[Dict[str, Any]]], time_range: Tuple[datetime, datetime], aggregation: str) -> Dict[str, Any]:
-        """Handle performance analysis result."""
-        if not data:
-            return self._create_no_data_response("No performance metrics found")
-        return self._process_performance_data(data, time_range, aggregation)
-    
+        return await self.performance_ops.analyze_performance_metrics(user_id, workload_id, time_range)
+
     async def detect_anomalies(
         self,
         user_id: int,
@@ -67,17 +83,8 @@ class DataOperations:
         z_score_threshold: float = 2.0
     ) -> Dict[str, Any]:
         """Detect anomalies in metric data."""
-        start_time, end_time = time_range
-        
-        query = self._build_anomaly_query(user_id, metric_name, start_time, end_time, z_score_threshold)
-        cache_key = self._create_anomaly_cache_key(user_id, metric_name, start_time, z_score_threshold)
-        data = await self._fetch_cached_data(query, cache_key)
-        
-        if not data:
-            return self._create_no_anomalies_response(metric_name, z_score_threshold)
-        
-        return self._process_anomaly_data(data, metric_name, z_score_threshold)
-    
+        return await self.anomaly_ops.detect_anomalies(user_id, metric_name, time_range, z_score_threshold)
+
     async def analyze_correlations(
         self,
         user_id: int,
@@ -85,224 +92,194 @@ class DataOperations:
         time_range: Tuple[datetime, datetime]
     ) -> Dict[str, Any]:
         """Analyze correlations between multiple metrics."""
-        if len(metrics) < 2:
-            return {"error": "At least 2 metrics required for correlation analysis"}
-        
-        start_time, end_time = time_range
-        correlations = {}
-        
-        for i in range(len(metrics)):
-            for j in range(i + 1, len(metrics)):
-                metric1, metric2 = metrics[i], metrics[j]
-                correlation = await self._calculate_pairwise_correlation(
-                    user_id, metric1, metric2, start_time, end_time
-                )
-                if correlation:
-                    correlations[f"{metric1}_vs_{metric2}"] = correlation
-        
-        return self._format_correlation_results(correlations, metrics, time_range)
-    
+        return await self.correlation_ops.analyze_correlations(user_id, metrics, time_range)
+
     async def analyze_usage_patterns(
         self,
         user_id: int,
         days_back: int = 30
     ) -> Dict[str, Any]:
         """Analyze usage patterns over time."""
-        query = self._build_usage_patterns_query(user_id, days_back)
-        cache_key = f"usage_patterns:{user_id}:{days_back}"
-        data = await self._fetch_cached_data(query, cache_key)
-        
-        if not data:
-            return {"status": "no_data", "message": "No usage data available"}
-        
-        return self._process_usage_patterns(data, days_back)
+        return await self.usage_ops.analyze_usage_patterns(user_id, days_back)
     
-    def _determine_aggregation_level(self, start_time: datetime, end_time: datetime) -> str:
-        """Determine appropriate aggregation level based on time range."""
-        time_diff = (end_time - start_time).total_seconds()
-        if time_diff <= 3600:  # 1 hour
-            return "minute"
-        elif time_diff <= 86400:  # 1 day
-            return "hour"
-        else:
-            return "day"
+    def _initialize_modern_components(self) -> None:
+        """Initialize modern execution components."""
+        circuit_config = self._create_circuit_config()
+        retry_config = self._create_retry_config()
+        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        self.execution_monitor = ExecutionMonitor()
     
-    def _build_performance_query(
-        self,
-        user_id: int,
-        workload_id: Optional[str],
-        start_time: datetime,
-        end_time: datetime,
-        aggregation: str
-    ) -> str:
-        """Build performance metrics query."""
-        return self.query_builder.build_performance_metrics_query(
-            user_id, workload_id, start_time, end_time, aggregation
+    def _create_circuit_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            name="DataOperations",
+            failure_threshold=5,
+            recovery_timeout=60
         )
     
-    def _build_anomaly_query(
-        self,
-        user_id: int,
-        metric_name: str,
-        start_time: datetime,
-        end_time: datetime,
-        z_score_threshold: float
-    ) -> str:
-        """Build anomaly detection query."""
-        return self.query_builder.build_anomaly_detection_query(
-            user_id, metric_name, start_time, end_time, z_score_threshold
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
+            max_retries=3,
+            base_delay=1.0,
+            max_delay=10.0
         )
     
-    def _build_usage_patterns_query(self, user_id: int, days_back: int) -> str:
-        """Build usage patterns query."""
-        return self.query_builder.build_usage_patterns_query(user_id, days_back)
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for data operations."""
+        try:
+            return await self._check_dependencies_available(context)
+        except Exception as e:
+            logger.error(f"Precondition validation failed: {e}")
+            return False
     
-    def _create_cache_key(
-        self,
-        prefix: str,
-        user_id: int,
-        workload_id: Optional[str],
-        start_time: datetime,
-        end_time: datetime
-    ) -> str:
-        """Create cache key for query results."""
-        return f"{prefix}:{user_id}:{workload_id}:{start_time.isoformat()}:{end_time.isoformat()}"
+    async def _check_dependencies_available(self, context: ExecutionContext) -> bool:
+        """Check if all required dependencies are available."""
+        if not self.clickhouse_ops:
+            return False
+        if not self.query_builder:
+            return False
+        return True
     
-    def _create_anomaly_cache_key(
-        self,
-        user_id: int,
-        metric_name: str,
-        start_time: datetime,
-        z_score_threshold: float
-    ) -> str:
-        """Create cache key for anomaly detection."""
-        return f"anomalies:{user_id}:{metric_name}:{start_time.isoformat()}:{z_score_threshold}"
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute data operations core logic with modern patterns."""
+        operation_type = self._extract_operation_type(context)
+        operation_params = self._extract_operation_params(context)
+        
+        return await self._execute_operation_by_type(operation_type, operation_params)
     
-    async def _fetch_cached_data(self, query: str, cache_key: str) -> Optional[List[Dict[str, Any]]]:
-        """Fetch data with caching support."""
-        return await self.clickhouse_ops.fetch_data(query, cache_key, self.redis_manager)
+    def _extract_operation_type(self, context: ExecutionContext) -> str:
+        """Extract operation type from execution context."""
+        return context.metadata.get("operation_type", "performance_analysis")
     
-    def _create_no_data_response(self, message: str) -> Dict[str, Any]:
-        """Create standardized no data response."""
-        return {"status": "no_data", "message": message}
+    def _extract_operation_params(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Extract operation parameters from context."""
+        return context.metadata.get("operation_params", {})
     
-    def _create_no_anomalies_response(self, metric_name: str, threshold: float) -> Dict[str, Any]:
-        """Create no anomalies response."""
+    async def _execute_operation_by_type(self, operation_type: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute specific operation based on type."""
+        operation_map = self._get_operation_mapping()
+        operation_func = operation_map.get(operation_type)
+        
+        if not operation_func:
+            return self._create_unsupported_operation_result(operation_type)
+        
+        return await operation_func(params)
+    
+    def _get_operation_mapping(self) -> Dict[str, Any]:
+        """Get mapping of operation types to functions."""
         return {
-            "status": "no_anomalies",
-            "message": f"No anomalies detected for {metric_name}",
-            "threshold": threshold
+            "performance_analysis": self._execute_performance_analysis,
+            "anomaly_detection": self._execute_anomaly_detection,
+            "correlation_analysis": self._execute_correlation_analysis,
+            "usage_analysis": self._execute_usage_analysis
         }
     
-    def _process_performance_data(
-        self,
-        data: List[Dict[str, Any]],
-        time_range: Tuple[datetime, datetime],
-        aggregation: str
-    ) -> Dict[str, Any]:
-        """Process performance metrics data."""
-        from .performance_data_processor import PerformanceDataProcessor
-        processor = PerformanceDataProcessor(self.analysis_engine)
-        return processor.process_performance_data(data, time_range, aggregation)
-    
-    def _process_anomaly_data(
-        self,
-        data: List[Dict[str, Any]],
-        metric_name: str,
-        z_score_threshold: float
-    ) -> Dict[str, Any]:
-        """Process anomaly detection data."""
+    def _create_unsupported_operation_result(self, operation_type: str) -> Dict[str, Any]:
+        """Create result for unsupported operation type."""
         return {
-            "status": "anomalies_found",
-            "metric": metric_name,
-            "threshold": z_score_threshold,
-            "anomaly_count": len(data),
-            "anomalies": [
-                {
-                    "timestamp": row['timestamp'],
-                    "value": row['metric_value'],
-                    "z_score": row['z_score'],
-                    "severity": "high" if abs(row['z_score']) > 3 else "medium"
-                }
-                for row in data[:50]  # Limit to top 50 anomalies
-            ]
+            "status": "error",
+            "error": f"Unsupported operation type: {operation_type}"
         }
     
-    async def _calculate_pairwise_correlation(
-        self,
-        user_id: int,
-        metric1: str,
-        metric2: str,
-        start_time: datetime,
-        end_time: datetime
-    ) -> Optional[Dict[str, Any]]:
-        """Calculate correlation between two metrics."""
-        query = self.query_builder.build_correlation_analysis_query(
-            user_id, metric1, metric2, start_time, end_time
+    async def _execute_performance_analysis(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute performance analysis operation."""
+        user_id = params.get("user_id")
+        workload_id = params.get("workload_id")
+        time_range = params.get("time_range")
+        
+        return await self.performance_ops.analyze_performance_metrics(
+            user_id, workload_id, time_range
         )
-        
-        data = await self._fetch_cached_data(query, None)
-        if not data or data[0]['sample_size'] <= 10:
-            return None
-        
-        corr_data = data[0]
-        corr_coef = corr_data['correlation_coefficient']
-        
-        return self._format_correlation_result(corr_data, corr_coef)
     
-    def _format_correlation_result(self, corr_data: Dict[str, Any], corr_coef: float) -> Dict[str, Any]:
-        """Format correlation analysis result."""
-        strength = self._interpret_correlation_strength(corr_coef)
+    async def _execute_anomaly_detection(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute anomaly detection operation."""
+        user_id = params.get("user_id")
+        metric_name = params.get("metric_name")
+        time_range = params.get("time_range")
+        threshold = params.get("z_score_threshold", 2.0)
         
+        return await self.anomaly_ops.detect_anomalies(
+            user_id, metric_name, time_range, threshold
+        )
+    
+    async def _execute_correlation_analysis(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute correlation analysis operation."""
+        user_id = params.get("user_id")
+        metrics = params.get("metrics", [])
+        time_range = params.get("time_range")
+        
+        return await self.correlation_ops.analyze_correlations(
+            user_id, metrics, time_range
+        )
+    
+    async def _execute_usage_analysis(self, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute usage analysis operation."""
+        user_id = params.get("user_id")
+        days_back = params.get("days_back", 30)
+        
+        return await self.usage_ops.analyze_usage_patterns(user_id, days_back)
+    
+    async def execute_with_modern_patterns(self, context: ExecutionContext) -> ExecutionResult:
+        """Execute with modern reliability and monitoring patterns."""
+        self.execution_monitor.start_execution(context)
+        
+        async def execute_func() -> ExecutionResult:
+            return await self._execute_with_timing(context)
+        
+        result = await self.reliability_manager.execute_with_reliability(context, execute_func)
+        self.execution_monitor.complete_execution(context, result)
+        return result
+    
+    async def _execute_with_timing(self, context: ExecutionContext) -> ExecutionResult:
+        """Execute with execution timing tracking."""
+        start_time = time.time()
+        try:
+            result = await self.execute_core_logic(context)
+            execution_time = (time.time() - start_time) * 1000
+            return self._create_success_execution_result(result, execution_time)
+        except Exception as e:
+            execution_time = (time.time() - start_time) * 1000
+            return self._create_error_execution_result(str(e), execution_time)
+    
+    def _create_success_execution_result(self, result: Dict[str, Any], execution_time: float) -> ExecutionResult:
+        """Create successful execution result."""
+        return ExecutionResult(
+            success=True,
+            status=ExecutionStatus.COMPLETED,
+            result=result,
+            execution_time_ms=execution_time
+        )
+    
+    def _create_error_execution_result(self, error: str, execution_time: float) -> ExecutionResult:
+        """Create error execution result."""
+        return ExecutionResult(
+            success=False,
+            status=ExecutionStatus.FAILED,
+            error=error,
+            execution_time_ms=execution_time
+        )
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status."""
+        reliability_health = self.reliability_manager.get_health_status()
+        monitor_health = self.execution_monitor.get_health_status()
+        return self._build_health_status_response(reliability_health, monitor_health)
+        
+    def _build_health_status_response(self, reliability_health: Dict[str, Any], 
+                                    monitor_health: Dict[str, Any]) -> Dict[str, Any]:
+        """Build health status response dictionary."""
         return {
-            "coefficient": corr_coef,
-            "strength": strength,
-            "direction": "positive" if corr_coef > 0 else "negative",
-            "sample_size": corr_data['sample_size'],
-            "metric1_stats": {
-                "mean": corr_data['metric1_avg'],
-                "std": corr_data['metric1_std']
-            },
-            "metric2_stats": {
-                "mean": corr_data['metric2_avg'],
-                "std": corr_data['metric2_std']
-            }
+            "component": "DataOperations",
+            "status": self._determine_overall_health(reliability_health, monitor_health),
+            "reliability": reliability_health,
+            "monitoring": monitor_health
         }
     
-    def _interpret_correlation_strength(self, coefficient: float) -> str:
-        """Interpret correlation coefficient strength."""
-        abs_coef = abs(coefficient)
-        if abs_coef > 0.7:
-            return "strong"
-        elif abs_coef > 0.4:
-            return "moderate"
-        else:
-            return "weak"
-    
-    def _format_correlation_results(
-        self,
-        correlations: Dict[str, Any],
-        metrics: List[str],
-        time_range: Tuple[datetime, datetime]
-    ) -> Dict[str, Any]:
-        """Format final correlation analysis results."""
-        start_time, end_time = time_range
+    def _determine_overall_health(self, reliability_health: Dict[str, Any], 
+                                monitor_health: Dict[str, Any]) -> str:
+        """Determine overall health status."""
+        reliability_status = reliability_health.get("overall_health", "degraded")
+        monitor_status = monitor_health.get("status", "degraded")
         
-        return {
-            "time_range": {
-                "start": start_time.isoformat(),
-                "end": end_time.isoformat()
-            },
-            "metrics_analyzed": metrics,
-            "correlations": correlations,
-            "strongest_correlation": max(
-                correlations.items(),
-                key=lambda x: abs(x[1]['coefficient'])
-            ) if correlations else None
-        }
-    
-    def _process_usage_patterns(self, data: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
-        """Process usage patterns data."""
-        from .usage_pattern_processor import UsagePatternProcessor
-        processor = UsagePatternProcessor()
-        return processor.process_patterns(data, days_back)
+        return "healthy" if reliability_status == "healthy" and monitor_status == "healthy" else "degraded"

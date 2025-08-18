@@ -3,21 +3,104 @@
  * Tests for edge cases, error handling, and comprehensive scenarios
  */
 
+// Hoist all mocks to the top for proper Jest handling
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+const mockThreadService = {
+  listThreads: jest.fn(),
+  getThreadMessages: jest.fn(),
+  createThread: jest.fn(),
+  updateThread: jest.fn(),
+  deleteThread: jest.fn(),
+};
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+jest.mock('@/services/threadService', () => ({
+  ThreadService: mockThreadService
+}));
+
+// AuthGate mock - always render children
+jest.mock('@/components/auth/AuthGate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => children
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => React.createElement('div', props, children),
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
-import { createTestSetup, mockThreads, ThreadService } from './setup';
+import { mockThreads } from './setup';
+
+const mockStore = {
+  isProcessing: false,
+  messages: [],
+  threads: mockThreads,
+  currentThreadId: 'thread-1',
+  isThreadLoading: false,
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateThreads: jest.fn(),
+  setCurrentThreadId: jest.fn(),
+};
+
+const createMockThread = (overrides: any = {}) => ({
+  id: `thread-${Math.random().toString(36).substr(2, 9)}`,
+  title: 'Test Conversation',
+  created_at: Math.floor(Date.now() / 1000),
+  updated_at: Math.floor(Date.now() / 1000),
+  user_id: 'user-1',
+  message_count: 0,
+  status: 'active' as const,
+  ...overrides,
+});
 
 describe('ChatHistorySection - Edge Cases', () => {
-  const testSetup = createTestSetup();
-
   beforeEach(() => {
-    testSetup.beforeEach();
+    jest.clearAllMocks();
+    
+    // Set up default mock return values
+    mockUseUnifiedChatStore.mockReturnValue(mockStore);
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: ''
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread-1',
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+      createNewThread: jest.fn()
+    });
+    
+    // Configure service mocks with default behavior
+    mockThreadService.listThreads.mockResolvedValue(mockThreads);
+    mockThreadService.deleteThread.mockResolvedValue({ success: true });
   });
 
   afterEach(() => {
-    testSetup.afterEach();
+    jest.clearAllMocks();
   });
 
   describe('Data edge cases', () => {
@@ -45,7 +128,10 @@ describe('ChatHistorySection - Edge Cases', () => {
         { ...mockThreads[2], title: 'Thread with <HTML> & XML entities' },
       ];
       
-      testSetup.configureStoreMocks({ threads: specialThreads });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: specialThreads
+      });
       
       render(<ChatHistorySection />);
       
@@ -61,7 +147,10 @@ describe('ChatHistorySection - Edge Cases', () => {
         { id: null, title: 'Thread with null ID' }, // Invalid ID
       ];
       
-      testSetup.configureStoreMocks({ threads: malformedThreads });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: malformedThreads
+      });
       
       // Should not crash
       expect(() => render(<ChatHistorySection />)).not.toThrow();
@@ -75,7 +164,10 @@ describe('ChatHistorySection - Edge Cases', () => {
         { ...mockThreads[1], created_at: new Date('1970-01-01').getTime() / 1000 },
       ];
       
-      testSetup.configureStoreMocks({ threads: oldThreads });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: oldThreads
+      });
       
       render(<ChatHistorySection />);
       
@@ -94,7 +186,10 @@ describe('ChatHistorySection - Edge Cases', () => {
         { ...mockThreads[0], created_at: futureDate, updated_at: futureDate },
       ];
       
-      testSetup.configureStoreMocks({ threads: futureThreads });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: futureThreads
+      });
       
       render(<ChatHistorySection />);
       
@@ -126,7 +221,10 @@ describe('ChatHistorySection - Edge Cases', () => {
           title: `${thread.title} - Update ${i}`
         }));
         
-        testSetup.configureStoreMocks({ threads: newThreads });
+        mockUseUnifiedChatStore.mockReturnValue({
+          ...mockStore,
+          threads: newThreads
+        });
         rerender(<ChatHistorySection />);
         
         await act(async () => {
@@ -168,8 +266,11 @@ describe('ChatHistorySection - Edge Cases', () => {
       expect(document.activeElement).toBe(firstThread);
       
       // Update threads
-      const updatedThreads = [...mockThreads, testSetup.createMockThread({ title: 'New Thread' })];
-      testSetup.configureStoreMocks({ threads: updatedThreads });
+      const updatedThreads = [...mockThreads, createMockThread({ title: 'New Thread' })];
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: updatedThreads
+      });
       
       // Focus should be maintained or handled gracefully
       await waitFor(() => {
@@ -208,7 +309,7 @@ describe('ChatHistorySection - Edge Cases', () => {
 
   describe('Concurrent operations', () => {
     it('should handle simultaneous delete and switch operations', async () => {
-      (ThreadService.deleteThread as jest.Mock).mockImplementation(
+      mockThreadService.deleteThread.mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve({ success: true }), 100))
       );
       
@@ -237,8 +338,11 @@ describe('ChatHistorySection - Edge Cases', () => {
         await userEvent.type(searchInput, 'First');
         
         // Update threads simultaneously
-        const newThreads = [...mockThreads, testSetup.createMockThread({ title: 'First New Thread' })];
-        testSetup.configureStoreMocks({ threads: newThreads });
+        const newThreads = [...mockThreads, createMockThread({ title: 'First New Thread' })];
+        mockUseUnifiedChatStore.mockReturnValue({
+          ...mockStore,
+          threads: newThreads
+        });
         
         // Should handle both operations
         await waitFor(() => {
@@ -250,7 +354,7 @@ describe('ChatHistorySection - Edge Cases', () => {
 
   describe('Network and API edge cases', () => {
     it('should handle API timeout gracefully', async () => {
-      (ThreadService.listThreads as jest.Mock).mockImplementation(
+      mockThreadService.listThreads.mockImplementation(
         () => new Promise((_, reject) => 
           setTimeout(() => reject(new Error('Timeout')), 100)
         )
@@ -269,7 +373,7 @@ describe('ChatHistorySection - Edge Cases', () => {
     });
 
     it('should handle malformed API responses', async () => {
-      (ThreadService.listThreads as jest.Mock).mockResolvedValue(null);
+      mockThreadService.listThreads.mockResolvedValue(null);
       
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
@@ -285,7 +389,7 @@ describe('ChatHistorySection - Edge Cases', () => {
 
     it('should retry failed operations appropriately', async () => {
       let callCount = 0;
-      (ThreadService.listThreads as jest.Mock).mockImplementation(() => {
+      mockThreadService.listThreads.mockImplementation(() => {
         callCount++;
         if (callCount < 3) {
           return Promise.reject(new Error('Network error'));
@@ -317,7 +421,7 @@ describe('ChatHistorySection - Edge Cases', () => {
     });
 
     it('should handle unmounting during async operations', async () => {
-      (ThreadService.listThreads as jest.Mock).mockImplementation(
+      mockThreadService.listThreads.mockImplementation(
         () => new Promise(resolve => setTimeout(() => resolve(mockThreads), 200))
       );
       

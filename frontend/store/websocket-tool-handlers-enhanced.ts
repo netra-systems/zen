@@ -57,6 +57,18 @@ export const getActiveToolsFromStatuses = (statuses: ToolExecutionStatus[]): str
 };
 
 /**
+ * Merges existing active tools with tools from statuses (backward compatibility)
+ */
+export const mergeActiveToolsWithStatuses = (
+  existingActiveTools: string[],
+  toolStatuses: ToolExecutionStatus[]
+): string[] => {
+  const statusTools = getActiveToolsFromStatuses(toolStatuses);
+  const allTools = [...existingActiveTools, ...statusTools];
+  return Array.from(new Set(allTools)); // Remove duplicates
+};
+
+/**
  * Updates fast layer with enhanced tool tracking
  */
 export const updateFastLayerWithEnhancedTools = (
@@ -65,7 +77,8 @@ export const updateFastLayerWithEnhancedTools = (
   timestamp: number,
   set: (partial: Partial<UnifiedChatState>) => void
 ): void => {
-  const activeTools = getActiveToolsFromStatuses(toolStatuses);
+  const existingActiveTools = fastLayerData.activeTools || [];
+  const activeTools = mergeActiveToolsWithStatuses(existingActiveTools, toolStatuses);
   set({
     fastLayerData: {
       ...fastLayerData,
@@ -105,6 +118,16 @@ export const removeToolFromStatuses = (
   toolName: string
 ): ToolExecutionStatus[] => {
   return statuses.filter(status => status.name !== toolName);
+};
+
+/**
+ * Removes tool from active tools array (backward compatibility)
+ */
+export const removeToolFromActiveTools = (
+  activeTools: string[],
+  toolName: string
+): string[] => {
+  return activeTools.filter(tool => tool !== toolName);
 };
 
 /**
@@ -194,5 +217,14 @@ const completeToolExecution = (
   const toolTracker = getGlobalToolTracker();
   toolTracker.completeTool(toolName);
   const updatedStatuses = removeToolFromStatuses(currentFastLayer.toolStatuses || [], toolName);
-  updateFastLayerWithEnhancedTools(currentFastLayer, updatedStatuses, Date.now(), set);
+  const updatedActiveTools = removeToolFromActiveTools(currentFastLayer.activeTools || [], toolName);
+  
+  set({
+    fastLayerData: {
+      ...currentFastLayer,
+      toolStatuses: updatedStatuses,
+      activeTools: updatedActiveTools,
+      timestamp: Date.now()
+    }
+  });
 };

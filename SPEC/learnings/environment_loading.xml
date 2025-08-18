@@ -203,4 +203,62 @@
       <practice>Provide summary statistics for overview</practice>
     </prevention>
   </learning>
+
+  <learning id="config-placeholder-replacement">
+    <date>2025-08-18</date>
+    <category>Environment Loading</category>
+    <title>Configuration Placeholders Not Being Replaced</title>
+    
+    <problem>
+      <description>Configuration schemas had hardcoded placeholders not replaced by environment variables</description>
+      <symptoms>
+        <symptom>ClickHouse connection failing with "clickhouse_host_url_placeholder"</symptom>
+        <symptom>Redis connection failing with placeholder values</symptom>
+        <symptom>Environment variables present in .env but not used</symptom>
+        <symptom>Config using placeholder defaults instead of env values</symptom>
+      </symptoms>
+      <impact>
+        <item>Services unable to start due to invalid connection strings</item>
+        <item>Development environment broken despite correct .env file</item>
+        <item>Confusion about why env vars aren't being used</item>
+      </impact>
+    </problem>
+
+    <solution>
+      <description>Modified DevelopmentConfig to load configuration from environment variables</description>
+      <implementation>
+        <step>Added _load_clickhouse_config method to read CLICKHOUSE_* env vars</step>
+        <step>Added _load_redis_config method to read REDIS_* env vars or parse REDIS_URL</step>
+        <step>Override default placeholder configs with env values in __init__</step>
+        <step>Ensure env vars take precedence over hardcoded defaults</step>
+      </implementation>
+      <code_changes>
+        <file>app/configuration/schemas.py - DevelopmentConfig class</file>
+      </code_changes>
+    </solution>
+
+    <result>
+      <outcome>Configuration properly loads from environment variables</outcome>
+      <benefits>
+        <benefit>Services connect to correct hosts specified in .env</benefit>
+        <benefit>Development environment works with local Docker services</benefit>
+        <benefit>Clear precedence: env vars override default placeholders</benefit>
+        <benefit>Both URL format and individual env vars supported</benefit>
+      </benefits>
+    </result>
+
+    <prevention>
+      <practice>Never use placeholder values as actual defaults in config schemas</practice>
+      <practice>Always load service configs from environment in __init__</practice>
+      <practice>Test configuration loading with actual env values</practice>
+      <practice>Support both URL format and individual env vars for flexibility</practice>
+      <practice>Ensure all configuration classes properly override defaults with env values</practice>
+    </prevention>
+
+    <related>
+      <spec>SPEC/configuration.xml</spec>
+      <file>app/configuration/schemas.py</file>
+      <file>app/core/configuration/database.py</file>
+    </related>
+  </learning>
 </learnings>

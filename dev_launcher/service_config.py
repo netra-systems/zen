@@ -68,10 +68,10 @@ class ServicesConfiguration:
     # Core services with their configurations
     redis: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="redis",
-        mode=ResourceMode.LOCAL if os.environ.get("REDIS_MODE", "shared").lower() == "local" else ResourceMode.SHARED,
+        mode=ResourceMode.LOCAL if os.environ.get("REDIS_MODE", "local").lower() == "local" else ResourceMode.SHARED,
         local_config={
-            "host": "localhost",
-            "port": 6379,
+            "host": os.environ.get("REDIS_HOST", "localhost"),
+            "port": int(os.environ.get("REDIS_PORT", "6379")),
             "db": 0
         },
         shared_config={
@@ -85,16 +85,17 @@ class ServicesConfiguration:
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="clickhouse",
-        mode=ResourceMode.LOCAL if os.environ.get("CLICKHOUSE_MODE", "shared").lower() == "local" else ResourceMode.SHARED,
+        mode=ResourceMode.LOCAL if os.environ.get("CLICKHOUSE_MODE", "local").lower() == "local" else ResourceMode.SHARED,
         local_config={
-            "host": "localhost",
-            "port": 9000,
-            "user": "default",
-            "password": "netra_dev_password",
-            "database": "netra_dev"
+            "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
+            "port": int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000")),
+            "http_port": int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")),
+            "user": os.environ.get("CLICKHOUSE_USER", "default"),
+            "password": os.environ.get("CLICKHOUSE_PASSWORD", "netra_dev_password"),
+            "database": os.environ.get("CLICKHOUSE_DB", "netra_dev")
         },
         shared_config={
-            "host": "clickhouse_host_url_placeholder",
+            "host": os.environ.get("CLICKHOUSE_SHARED_HOST", "clickhouse_host_url_placeholder"),
             "port": 8443,
             "user": "default",
             "password": "46YQC0J~6SfZ.",
@@ -198,6 +199,9 @@ class ServicesConfiguration:
         elif self.clickhouse.mode == ResourceMode.LOCAL:
             password_part = f":{ch_config['password']}" if ch_config.get('password') else ""
             env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}{password_part}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
+            # Also set HTTP port for local mode
+            if 'http_port' in ch_config:
+                env_vars["CLICKHOUSE_HTTP_PORT"] = str(ch_config['http_port'])
     
     def _add_postgres_url(self, env_vars: Dict[str, str]):
         """Add PostgreSQL URL to environment variables."""

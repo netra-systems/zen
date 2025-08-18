@@ -25,6 +25,7 @@ class ExecutionStatus(Enum):
     FAILED = "failed"
     RETRYING = "retrying"
     FALLBACK = "fallback"
+    DEGRADED = "degraded"
 
 
 @dataclass

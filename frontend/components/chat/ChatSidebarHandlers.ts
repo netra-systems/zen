@@ -6,6 +6,7 @@
 import { ThreadService } from '@/services/threadService';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketMessage } from '@/types/registry';
+import { logger } from '@/utils/debug-logger';
 
 interface WebSocketSender {
   sendMessage: (message: WebSocketMessage) => void;
@@ -75,7 +76,7 @@ export const createNewChatHandler = (
       setActiveThreadInStore(newThread.id);
       await loadThreads();
     } catch (error) {
-      console.error('Failed to create thread:', error);
+      logger.error('Failed to create thread:', error);
     } finally {
       setIsCreatingThread(false);
     }
@@ -102,9 +103,9 @@ export const createThreadClickHandler = (
       loadMessagesIntoStore(convertedMessages);
       
       connectToNewThread(threadId);
-      console.log('Switched to thread:', threadId, 'with', convertedMessages.length, 'messages');
+      logger.debug('Switched to thread:', threadId, 'with', convertedMessages.length, 'messages');
     } catch (error) {
-      console.error('Failed to switch thread:', error);
+      logger.error('Failed to switch thread:', error);
       setThreadLoadingState(false);
     }
   };

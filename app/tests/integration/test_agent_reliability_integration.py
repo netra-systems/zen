@@ -8,7 +8,8 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Import components for integration testing
-from app.core.agent_reliability_mixin import AgentReliabilityMixin, AgentError, AgentHealthStatus
+from app.core.agent_reliability_mixin import AgentReliabilityMixin
+from app.core.agent_reliability_types import AgentError, AgentHealthStatus
 from app.core.fallback_coordinator import FallbackCoordinator
 from app.core.json_parsing_utils import comprehensive_json_fix, safe_json_parse
 

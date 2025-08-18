@@ -26,7 +26,7 @@ from .models import (
     ConnectionStatus,
     MCPTransport,
     MCPAuthConfig,
-    RetryConfig,
+    MCPRetryConfig,
 )
 
 __all__ = [
@@ -42,5 +42,5 @@ __all__ = [
     "ConnectionStatus",
     "MCPTransport",
     "MCPAuthConfig",
-    "RetryConfig",
+    "MCPRetryConfig",
 ]

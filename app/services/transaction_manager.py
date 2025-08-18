@@ -140,47 +140,63 @@ class ClickHouseOperationManager:
         if operation_id not in self.operation_records:
             self.operation_records[operation_id] = []
         
-        self.operation_records[operation_id].append({
+        record = self._create_insert_record(table, data)
+        self.operation_records[operation_id].append(record)
+        logger.debug(f"Recorded ClickHouse insert: {operation_id}")
+    
+    def _create_insert_record(self, table: str, data: Dict) -> Dict:
+        """Create insert record for compensation."""
+        return {
             'action': 'insert',
             'table': table,
             'data': data,
             'timestamp': datetime.now()
-        })
-        logger.debug(f"Recorded ClickHouse insert: {operation_id}")
+        }
     
     async def compensate_inserts(self, operation_id: str) -> bool:
         """Compensate ClickHouse inserts by marking as deleted."""
         if operation_id not in self.operation_records:
             return True
         
+        return await self._attempt_compensation(operation_id)
+    
+    async def _attempt_compensation(self, operation_id: str) -> bool:
+        """Attempt compensation with error handling."""
         try:
-            client = await get_clickhouse_client()
-            for record in self.operation_records[operation_id]:
-                if record['action'] == 'insert':
-                    # Mark as deleted with metadata
-                    await self._mark_as_deleted(client, record)
-            
-            del self.operation_records[operation_id]
-            logger.debug(f"Compensated ClickHouse operations: {operation_id}")
-            return True
+            success = await self._execute_compensation(operation_id)
+            self._handle_successful_compensation(operation_id, success)
+            return success
         except Exception as e:
             logger.error(f"ClickHouse compensation failed: {e}")
             return False
     
+    def _handle_successful_compensation(self, operation_id: str, success: bool) -> None:
+        """Handle successful compensation cleanup."""
+        if success:
+            del self.operation_records[operation_id]
+            logger.debug(f"Compensated ClickHouse operations: {operation_id}")
+    
+    async def _execute_compensation(self, operation_id: str) -> bool:
+        """Execute compensation for operation records."""
+        client = await get_clickhouse_client()
+        for record in self.operation_records[operation_id]:
+            if record['action'] == 'insert':
+                await self._mark_as_deleted(client, record)
+        return True
+    
     async def _mark_as_deleted(self, client, record: Dict) -> None:
         """Mark ClickHouse record as deleted."""
-        table = record['table']
-        data = record['data']
-        
-        # Create compensation record
-        compensation_data = {
-            **data,
+        compensation_data = self._create_compensation_data(record['data'])
+        deleted_table = f"{record['table']}_deleted"
+        await client.insert(deleted_table, [compensation_data])
+    
+    def _create_compensation_data(self, original_data: Dict) -> Dict:
+        """Create compensation record data."""
+        return {
+            **original_data,
             'deleted_at': datetime.now(),
             'deleted_by_compensation': True
         }
-        
-        # Insert compensation record
-        await client.insert(f"{table}_deleted", [compensation_data])
 
 
 class TransactionManager:
@@ -188,37 +204,48 @@ class TransactionManager:
     
     def __init__(self):
         """Initialize transaction manager."""
+        self._initialize_managers()
+        self._register_default_handlers()
+    
+    def _initialize_managers(self) -> None:
+        """Initialize core manager components."""
         self.active_transactions: Dict[str, Transaction] = {}
         self.compensation_registry = CompensationRegistry()
         self.postgres_manager = PostgresOperationManager()
         self.clickhouse_manager = ClickHouseOperationManager()
-        
-        # Register default compensation handlers
-        self._register_default_handlers()
     
     def _register_default_handlers(self) -> None:
         """Register default compensation handlers."""
-        self.compensation_registry.register(
-            OperationType.DATABASE_WRITE,
-            self._compensate_postgres_write
-        )
-        self.compensation_registry.register(
-            OperationType.DATABASE_READ,
-            self._compensate_postgres_read
-        )
+        handlers = self._get_default_handler_mappings()
+        self._register_handlers(handlers)
+    
+    def _get_default_handler_mappings(self) -> List:
+        """Get default handler mappings."""
+        return [
+            (OperationType.DATABASE_WRITE, self._compensate_postgres_write),
+            (OperationType.DATABASE_READ, self._compensate_postgres_read)
+        ]
+    
+    def _register_handlers(self, handlers: List) -> None:
+        """Register all handlers from list."""
+        for operation_type, handler in handlers:
+            self.compensation_registry.register(operation_type, handler)
     
     async def begin_transaction(self, metadata: Optional[Dict] = None) -> str:
         """Begin a new distributed transaction."""
         transaction_id = str(uuid.uuid4())
-        transaction = Transaction(
+        transaction = self._create_new_transaction(transaction_id, metadata)
+        self.active_transactions[transaction_id] = transaction
+        logger.info(f"Started transaction: {transaction_id}")
+        return transaction_id
+    
+    def _create_new_transaction(self, transaction_id: str, metadata: Optional[Dict]) -> Transaction:
+        """Create new transaction instance."""
+        return Transaction(
             transaction_id=transaction_id,
             state=TransactionState.ACTIVE,
             metadata=metadata or {}
         )
-        
-        self.active_transactions[transaction_id] = transaction
-        logger.info(f"Started transaction: {transaction_id}")
-        return transaction_id
     
     async def add_operation(
         self,
@@ -227,39 +254,58 @@ class TransactionManager:
         metadata: Optional[Dict] = None
     ) -> str:
         """Add operation to transaction."""
+        self._validate_transaction_exists(transaction_id)
+        operation = self._create_and_add_operation(transaction_id, operation_type, metadata)
+        await self._initialize_operation(transaction_id, operation)
+        logger.debug(f"Added operation {operation.operation_id} to transaction {transaction_id}")
+        return operation.operation_id
+    
+    def _create_and_add_operation(self, transaction_id: str, operation_type: OperationType, metadata: Optional[Dict]) -> Operation:
+        """Create new operation and add to transaction."""
+        operation = self._create_new_operation(operation_type, metadata)
+        transaction = self.active_transactions[transaction_id]
+        transaction.operations.append(operation)
+        return operation
+    
+    def _validate_transaction_exists(self, transaction_id: str) -> None:
+        """Validate transaction exists in active transactions."""
         if transaction_id not in self.active_transactions:
             raise ValueError(f"Transaction not found: {transaction_id}")
-        
-        operation_id = str(uuid.uuid4())
-        operation = Operation(
-            operation_id=operation_id,
+    
+    def _create_new_operation(self, operation_type: OperationType, metadata: Optional[Dict]) -> Operation:
+        """Create new operation instance."""
+        return Operation(
+            operation_id=str(uuid.uuid4()),
             operation_type=operation_type,
             metadata=metadata or {}
         )
-        
-        transaction = self.active_transactions[transaction_id]
-        transaction.operations.append(operation)
-        
-        # Initialize operation-specific resources
-        await self._initialize_operation(transaction_id, operation)
-        
-        logger.debug(f"Added operation {operation_id} to transaction {transaction_id}")
-        return operation_id
     
     async def complete_operation(self, transaction_id: str, operation_id: str) -> None:
         """Mark operation as completed."""
+        transaction = self._get_transaction(transaction_id)
+        operation = self._get_operation(transaction, operation_id)
+        
+        self._mark_operation_completed(operation)
+        logger.debug(f"Completed operation {operation_id}")
+    
+    def _get_transaction(self, transaction_id: str) -> Transaction:
+        """Get transaction or raise error."""
         transaction = self.active_transactions.get(transaction_id)
         if not transaction:
             raise ValueError(f"Transaction not found: {transaction_id}")
-        
+        return transaction
+    
+    def _get_operation(self, transaction: Transaction, operation_id: str) -> Operation:
+        """Get operation or raise error."""
         operation = self._find_operation(transaction, operation_id)
         if not operation:
             raise ValueError(f"Operation not found: {operation_id}")
-        
+        return operation
+    
+    def _mark_operation_completed(self, operation: Operation) -> None:
+        """Mark operation as completed with timestamp."""
         operation.state = OperationState.COMPLETED
         operation.completed_at = datetime.now()
-        
-        logger.debug(f"Completed operation {operation_id}")
     
     async def fail_operation(
         self,
@@ -268,46 +314,53 @@ class TransactionManager:
         error: str
     ) -> None:
         """Mark operation as failed."""
-        transaction = self.active_transactions.get(transaction_id)
-        if not transaction:
-            raise ValueError(f"Transaction not found: {transaction_id}")
+        transaction = self._get_transaction(transaction_id)
+        operation = self._get_operation(transaction, operation_id)
         
-        operation = self._find_operation(transaction, operation_id)
-        if not operation:
-            raise ValueError(f"Operation not found: {operation_id}")
-        
+        self._mark_operation_failed(operation, error)
+        logger.warning(f"Failed operation {operation_id}: {error}")
+    
+    def _mark_operation_failed(self, operation: Operation, error: str) -> None:
+        """Mark operation as failed with error and timestamp."""
         operation.state = OperationState.FAILED
         operation.error = error
         operation.completed_at = datetime.now()
-        
-        logger.warning(f"Failed operation {operation_id}: {error}")
     
     async def commit_transaction(self, transaction_id: str) -> bool:
         """Commit transaction if all operations succeeded."""
-        transaction = self.active_transactions.get(transaction_id)
-        if not transaction:
-            raise ValueError(f"Transaction not found: {transaction_id}")
+        transaction = self._get_transaction(transaction_id)
         
-        # Check if all operations completed successfully
-        if transaction.failed_operations:
-            logger.warning(f"Cannot commit transaction with failed operations")
+        if not self._can_commit_transaction(transaction):
             return False
         
+        return await self._attempt_commit(transaction_id)
+    
+    async def _attempt_commit(self, transaction_id: str) -> bool:
+        """Attempt to commit transaction with error handling."""
         try:
-            # Commit PostgreSQL transactions
-            await self.postgres_manager.commit_operation(transaction_id)
-            
-            transaction.state = TransactionState.COMMITTED
-            logger.info(f"Committed transaction: {transaction_id}")
-            
-            # Clean up after successful commit
-            await self._cleanup_transaction(transaction_id)
+            await self._execute_commit(transaction_id)
             return True
-            
         except Exception as e:
             logger.error(f"Commit failed for transaction {transaction_id}: {e}")
             await self.rollback_transaction(transaction_id)
             return False
+    
+    def _can_commit_transaction(self, transaction: Transaction) -> bool:
+        """Check if transaction can be committed."""
+        if transaction.failed_operations:
+            logger.warning("Cannot commit transaction with failed operations")
+            return False
+        return True
+    
+    async def _execute_commit(self, transaction_id: str) -> None:
+        """Execute transaction commit."""
+        await self.postgres_manager.commit_operation(transaction_id)
+        
+        transaction = self.active_transactions[transaction_id]
+        transaction.state = TransactionState.COMMITTED
+        logger.info(f"Committed transaction: {transaction_id}")
+        
+        await self._cleanup_transaction(transaction_id)
     
     async def rollback_transaction(self, transaction_id: str) -> None:
         """Rollback entire transaction with compensation."""
@@ -317,37 +370,49 @@ class TransactionManager:
             return
         
         logger.info(f"Rolling back transaction: {transaction_id}")
-        
+        await self._perform_rollback(transaction_id, transaction)
+        await self._cleanup_transaction(transaction_id)
+    
+    async def _perform_rollback(self, transaction_id: str, transaction: Transaction) -> None:
+        """Perform rollback operations with error handling."""
         try:
-            # Rollback PostgreSQL operations
-            await self.postgres_manager.rollback_operation(transaction_id)
-            
-            # Compensate completed operations in reverse order
-            for operation in reversed(transaction.completed_operations):
-                await self._compensate_operation(operation)
-            
+            await self._execute_rollback(transaction_id, transaction)
             transaction.state = TransactionState.ROLLED_BACK
             logger.info(f"Successfully rolled back transaction: {transaction_id}")
-            
         except Exception as e:
             logger.error(f"Rollback failed for transaction {transaction_id}: {e}")
             transaction.state = TransactionState.FAILED
+    
+    async def _execute_rollback(self, transaction_id: str, transaction: Transaction) -> None:
+        """Execute transaction rollback operations."""
+        await self.postgres_manager.rollback_operation(transaction_id)
         
-        finally:
-            await self._cleanup_transaction(transaction_id)
+        # Compensate completed operations in reverse order
+        for operation in reversed(transaction.completed_operations):
+            await self._compensate_operation(operation)
     
     async def rollback_operation(self, operation_id: str) -> None:
         """Rollback specific operation across all transactions."""
+        operation = self._find_operation_across_transactions(operation_id)
+        if operation:
+            await self._rollback_single_operation(operation)
+            logger.info(f"Rolled back operation: {operation_id}")
+        else:
+            logger.warning(f"Operation not found for rollback: {operation_id}")
+    
+    def _find_operation_across_transactions(self, operation_id: str) -> Optional[Operation]:
+        """Find operation across all active transactions."""
         for transaction in self.active_transactions.values():
             operation = self._find_operation(transaction, operation_id)
             if operation:
-                if operation.state == OperationState.COMPLETED:
-                    await self._compensate_operation(operation)
-                operation.state = OperationState.COMPENSATED
-                logger.info(f"Rolled back operation: {operation_id}")
-                return
-        
-        logger.warning(f"Operation not found for rollback: {operation_id}")
+                return operation
+        return None
+    
+    async def _rollback_single_operation(self, operation: Operation) -> None:
+        """Rollback a single operation."""
+        if operation.state == OperationState.COMPLETED:
+            await self._compensate_operation(operation)
+        operation.state = OperationState.COMPENSATED
     
     async def _initialize_operation(
         self,
@@ -355,14 +420,18 @@ class TransactionManager:
         operation: Operation
     ) -> None:
         """Initialize operation-specific resources."""
-        if operation.operation_type in [
-            OperationType.DATABASE_WRITE,
-            OperationType.DATABASE_READ
-        ]:
+        if self._is_database_operation(operation):
             await self.postgres_manager.begin_operation(
                 transaction_id,
                 operation.operation_id
             )
+    
+    def _is_database_operation(self, operation: Operation) -> bool:
+        """Check if operation requires database initialization."""
+        return operation.operation_type in [
+            OperationType.DATABASE_WRITE,
+            OperationType.DATABASE_READ
+        ]
     
     def _find_operation(
         self,
@@ -379,14 +448,18 @@ class TransactionManager:
         """Execute compensation for completed operation."""
         handler = self.compensation_registry.get_handler(operation.operation_type)
         if handler:
-            try:
-                await handler(operation)
-                operation.state = OperationState.COMPENSATED
-                logger.debug(f"Compensated operation: {operation.operation_id}")
-            except Exception as e:
-                logger.error(f"Compensation failed for {operation.operation_id}: {e}")
+            await self._execute_compensation_handler(handler, operation)
         else:
             logger.warning(f"No compensation handler for {operation.operation_type}")
+    
+    async def _execute_compensation_handler(self, handler: Callable, operation: Operation) -> None:
+        """Execute compensation handler with error handling."""
+        try:
+            await handler(operation)
+            operation.state = OperationState.COMPENSATED
+            logger.debug(f"Compensated operation: {operation.operation_id}")
+        except Exception as e:
+            logger.error(f"Compensation failed for {operation.operation_id}: {e}")
     
     async def _compensate_postgres_write(self, operation: Operation) -> None:
         """Compensate PostgreSQL write operation."""
@@ -412,12 +485,20 @@ class TransactionManager:
         transaction_id = await self.begin_transaction(metadata)
         try:
             yield transaction_id
-            success = await self.commit_transaction(transaction_id)
-            if not success:
-                raise RuntimeError("Transaction commit failed")
+            await self._finalize_transaction(transaction_id)
         except Exception as e:
-            await self.rollback_transaction(transaction_id)
-            raise e
+            await self._handle_transaction_error(transaction_id, e)
+    
+    async def _handle_transaction_error(self, transaction_id: str, error: Exception) -> None:
+        """Handle transaction context manager error."""
+        await self.rollback_transaction(transaction_id)
+        raise error
+    
+    async def _finalize_transaction(self, transaction_id: str) -> None:
+        """Finalize transaction with commit."""
+        success = await self.commit_transaction(transaction_id)
+        if not success:
+            raise RuntimeError("Transaction commit failed")
 
 
 # Global transaction manager instance

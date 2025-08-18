@@ -57,32 +57,51 @@ class ContentProcessor:
         """Generate specific feedback based on quality metrics"""
         feedback_parts = []
         
-        # Identify the main issues
+        self._check_specificity_issues(metrics, feedback_parts)
+        self._check_actionability_issues(metrics, feedback_parts)
+        self._check_quantification_issues(metrics, feedback_parts)
+        self._check_logic_issues(metrics, feedback_parts)
+        self._check_generic_content_issues(metrics, feedback_parts)
+        
+        return self._format_quality_feedback(feedback_parts)
+    
+    def _check_specificity_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
+        """Check and add specificity-related feedback"""
         if metrics.specificity_score < 0.5:
             feedback_parts.append(
                 "📊 **Specificity Issue**: The response lacked specific details and metrics."
             )
-        
+    
+    def _check_actionability_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
+        """Check and add actionability-related feedback"""
         if metrics.actionability_score < 0.5:
             feedback_parts.append(
                 "🎯 **Actionability Issue**: The response didn't provide clear action steps."
             )
-        
+    
+    def _check_quantification_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
+        """Check and add quantification-related feedback"""
         if metrics.quantification_score < 0.5:
             feedback_parts.append(
                 "📈 **Quantification Issue**: Missing numerical values and measurements."
             )
-        
+    
+    def _check_logic_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
+        """Check and add logic-related feedback"""
         if metrics.circular_reasoning_detected:
             feedback_parts.append(
                 "🔄 **Logic Issue**: Circular reasoning detected in the response."
             )
-        
+    
+    def _check_generic_content_issues(self, metrics: QualityMetrics, feedback_parts: list) -> None:
+        """Check and add generic content feedback"""
         if metrics.generic_phrase_count > 3:
             feedback_parts.append(
                 f"📝 **Generic Content**: Found {metrics.generic_phrase_count} generic phrases."
             )
-        
+    
+    def _format_quality_feedback(self, feedback_parts: list) -> str:
+        """Format the final quality feedback string"""
         if feedback_parts:
             return "**Quality Issues Detected:**\n" + "\n".join(feedback_parts)
         

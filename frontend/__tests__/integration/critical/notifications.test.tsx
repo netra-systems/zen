@@ -58,7 +58,7 @@ describe('Notification System Integration', () => {
       const flushQueue = () => {
         while (notificationQueue.length > 0) {
           const notification = notificationQueue.shift();
-          console.log('Flushed notification:', notification);
+          // test debug removed: console.log('Flushed notification:', notification);
         }
       };
       

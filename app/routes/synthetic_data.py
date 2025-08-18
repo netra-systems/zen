@@ -203,14 +203,18 @@ async def get_templates(db: AsyncSession = Depends(get_db_dependency)):
     return await _fetch_templates(db)
 
 
-async def _fetch_templates(db: AsyncSession) -> Dict:
-    """Fetch synthetic data templates"""
+async def _get_templates_safe(db: AsyncSession) -> Dict:
+    """Get templates with error handling."""
     try:
         templates = await SyntheticDataService.get_available_templates(db)
         return {"templates": templates, "status": "ok"}
     except Exception as e:
         logger.error(f"Error fetching templates: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+async def _fetch_templates(db: AsyncSession) -> Dict:
+    """Fetch synthetic data templates"""
+    return await _get_templates_safe(db)
 
 
 

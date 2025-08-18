@@ -22,11 +22,16 @@ class AsyncBatchProcessor:
         """Process items in batches."""
         if not items:
             return []
-        
+        return await self._execute_batch_processing(items, processor, progress_callback)
+    
+    async def _execute_batch_processing(
+        self, items: List[T], processor: Callable[[List[T]], Awaitable[Any]], 
+        progress_callback: Callable[[int, int], None]
+    ) -> List[Any]:
+        """Execute the batch processing pipeline."""
         batches = self._create_batches(items)
         tasks = self._create_batch_tasks(batches, processor, progress_callback)
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
         return self._validate_results(results)
     
     def _create_batches(self, items: List[T]) -> List[List[T]]:
@@ -44,9 +49,18 @@ class AsyncBatchProcessor:
     ) -> List[asyncio.Task]:
         """Create tasks for processing batches."""
         return [
-            asyncio.create_task(self._process_batch(batch, i, len(batches), processor, progress_callback))
+            self._create_single_batch_task(batch, i, len(batches), processor, progress_callback)
             for i, batch in enumerate(batches)
         ]
+    
+    def _create_single_batch_task(
+        self, batch: List[T], batch_index: int, total_batches: int,
+        processor: Callable[[List[T]], Awaitable[Any]], progress_callback: Callable[[int, int], None]
+    ) -> asyncio.Task:
+        """Create a single batch processing task."""
+        return asyncio.create_task(
+            self._process_batch(batch, batch_index, total_batches, processor, progress_callback)
+        )
     
     async def _process_batch(
         self,
@@ -58,9 +72,18 @@ class AsyncBatchProcessor:
     ) -> Any:
         """Process a single batch."""
         async with self._semaphore:
-            result = await processor(batch_items)
-            self._report_progress(progress_callback, batch_index, total_batches)
-            return result
+            return await self._execute_batch_with_progress(
+                batch_items, batch_index, total_batches, processor, progress_callback
+            )
+    
+    async def _execute_batch_with_progress(
+        self, batch_items: List[T], batch_index: int, total_batches: int,
+        processor: Callable[[List[T]], Awaitable[Any]], progress_callback: Callable[[int, int], None]
+    ) -> Any:
+        """Execute batch processing and report progress."""
+        result = await processor(batch_items)
+        self._report_progress(progress_callback, batch_index, total_batches)
+        return result
     
     def _report_progress(
         self, 

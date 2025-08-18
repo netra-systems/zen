@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { logger } from '@/utils/debug-logger';
 
 export default function AuthCallbackClient() {
   const router = useRouter();
@@ -13,7 +14,7 @@ export default function AuthCallbackClient() {
       const error = searchParams.get('message');
 
       if (error) {
-        console.error('OAuth error:', error);
+        logger.error('OAuth error:', error);
         router.push('/login?error=' + encodeURIComponent(error));
         return;
       }
@@ -25,7 +26,7 @@ export default function AuthCallbackClient() {
         // Redirect to main page or dashboard
         router.push('/');
       } else {
-        console.error('No token received');
+        logger.error('No token received');
         router.push('/login?error=no_token');
       }
     };

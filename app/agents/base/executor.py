@@ -87,7 +87,7 @@ class BaseExecutionEngine:
         except AgentExecutionError as e:
             return self._create_error_result(context, str(e))
         except Exception as e:
-            return await self.error_handler.handle_unexpected_error(context, e)
+            return await self.error_handler.handle_execution_error(e, context)
     
     async def _execute_agent_workflow(self, agent: 'BaseExecutionInterface',
                                     context: ExecutionContext) -> ExecutionResult:
@@ -142,7 +142,7 @@ class BaseExecutionEngine:
         """Handle execution failure with structured error handling."""
         logger.error(f"Execution failed for {context.agent_name}: {error}")
         self.monitor.record_error(context, error)
-        return await self.error_handler.handle_execution_error(context, error)
+        return await self.error_handler.handle_execution_error(error, context)
     
     async def _finalize_execution(self, context: ExecutionContext,
                                 result: ExecutionResult) -> None:

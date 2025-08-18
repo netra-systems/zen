@@ -22,26 +22,34 @@ def log_callback_initiation(request: Request) -> None:
     logger.info(f"Environment: {auth_client.detect_environment().value}")
 
 
+def _create_oauth_error_exception(error: str, error_desc: str) -> HTTPException:
+    """Create OAuth error exception."""
+    logger.error(f"OAuth error: {error} - {error_desc}")
+    return HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST, 
+        detail=f"{error}: {error_desc}"
+    )
+
 def validate_callback_params(request: Request) -> None:
     """Validate callback parameters for errors."""
     if error := request.query_params.get("error"):
         error_desc = request.query_params.get("error_description", "OAuth error")
-        logger.error(f"OAuth error: {error} - {error_desc}")
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, 
-            detail=f"{error}: {error_desc}"
-        )
+        raise _create_oauth_error_exception(error, error_desc)
 
 
-async def exchange_oauth_tokens(request: Request) -> tuple:
-    """Exchange OAuth authorization code for tokens and user info."""
-    token = await oauth_client.google.authorize_access_token(request)
-    user_info = await oauth_client.google.parse_id_token(request, token)
+def _validate_user_info(user_info: dict) -> None:
+    """Validate user info from OAuth provider."""
     if not user_info or 'email' not in user_info:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, 
             detail="Invalid user info from provider"
         )
+
+async def exchange_oauth_tokens(request: Request) -> tuple:
+    """Exchange OAuth authorization code for tokens and user info."""
+    token = await oauth_client.google.authorize_access_token(request)
+    user_info = await oauth_client.google.parse_id_token(request, token)
+    _validate_user_info(user_info)
     return token, user_info
 
 
@@ -63,15 +71,24 @@ async def get_or_create_user(db: AsyncSession, user_info: dict):
     return user
 
 
-async def process_oauth_callback(
-    request: Request, db: AsyncSession, security_service: SecurityService
-) -> RedirectResponse:
-    """Process OAuth callback and create user session."""
+def _create_user_access_token(security_service: SecurityService, user) -> str:
+    """Create access token for user."""
+    return security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
+
+async def _execute_oauth_flow(request: Request, db: AsyncSession) -> tuple:
+    """Execute OAuth token exchange and user creation flow."""
     log_callback_initiation(request)
     validate_callback_params(request)
     token, user_info = await exchange_oauth_tokens(request)
     user = await get_or_create_user(db, user_info)
-    access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
+    return user
+
+async def process_oauth_callback(
+    request: Request, db: AsyncSession, security_service: SecurityService
+) -> RedirectResponse:
+    """Process OAuth callback and create user session."""
+    user = await _execute_oauth_flow(request, db)
+    access_token = _create_user_access_token(security_service, user)
     return build_callback_redirect(access_token)
 
 
@@ -91,13 +108,17 @@ def _build_callback_url_with_params(auth_service_url: str, query_string: str) ->
         callback_url += f"?{query_string}"
     return callback_url
 
-async def handle_callback_request(
-    request: Request, db: AsyncSession, security_service: SecurityService
-):
-    """Forward OAuth callback to auth service."""
+def _build_callback_redirect_response(request: Request) -> 'RedirectResponse':
+    """Build callback redirect response."""
     from fastapi.responses import RedirectResponse
     environment = auth_client.detect_environment()
     auth_service_url = _determine_callback_auth_service_url(environment)
     query_string = str(request.url.query)
     callback_url = _build_callback_url_with_params(auth_service_url, query_string)
     return RedirectResponse(url=callback_url, status_code=302)
+
+async def handle_callback_request(
+    request: Request, db: AsyncSession, security_service: SecurityService
+):
+    """Forward OAuth callback to auth service."""
+    return _build_callback_redirect_response(request)

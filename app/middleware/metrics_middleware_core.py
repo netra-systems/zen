@@ -51,7 +51,13 @@ class MetricsMiddlewareCore:
         name_from_class = AgentNameExtractor.extract_from_class_name(args)
         if name_from_class:
             return name_from_class
-        name_from_kwargs = AgentNameExtractor.extract_from_kwargs(kwargs, AgentNameExtractor.get_default_kwargs_keys())
+        return self._extract_from_kwargs_or_function(func, kwargs)
+    
+    def _extract_from_kwargs_or_function(self, func: Callable, kwargs: dict) -> str:
+        """Extract name from kwargs or function module."""
+        name_from_kwargs = AgentNameExtractor.extract_from_kwargs(
+            kwargs, AgentNameExtractor.get_default_kwargs_keys()
+        )
         if name_from_kwargs:
             return name_from_kwargs
         return AgentNameExtractor.extract_from_function_module(func)

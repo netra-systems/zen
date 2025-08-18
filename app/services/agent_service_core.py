@@ -65,6 +65,13 @@ class AgentService(IAgentService):
     ) -> None:
         """Handles a message from the WebSocket."""
         logger.info(f"handle_websocket_message called for user_id: {user_id}")
+        await self._handle_message_with_error_handling(user_id, message, db_session)
+    
+    async def _handle_message_with_error_handling(
+        self, user_id: str, message: Union[str, Dict[str, Any]], 
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle message with comprehensive error handling."""
         try:
             await self._process_websocket_message(user_id, message, db_session)
         except json.JSONDecodeError as e:
@@ -85,6 +92,15 @@ class AgentService(IAgentService):
     async def _route_message_by_type(self, user_id: str, message_type: str, payload: Dict[str, Any], 
                                     db_session: Optional[AsyncSession]) -> None:
         """Route message to appropriate handler based on type."""
+        if await self._handle_standard_message_types(user_id, message_type, payload, db_session):
+            return
+        await self._route_thread_messages(user_id, message_type, payload, db_session)
+    
+    async def _handle_standard_message_types(
+        self, user_id: str, message_type: str, payload: Dict[str, Any], 
+        db_session: Optional[AsyncSession]
+    ) -> bool:
+        """Handle standard message types, return True if handled."""
         if message_type == "start_agent":
             await self.message_handler.handle_start_agent(user_id, payload, db_session)
         elif message_type == "user_message":
@@ -94,11 +110,21 @@ class AgentService(IAgentService):
         elif message_type == "stop_agent":
             await self.message_handler.handle_stop_agent(user_id)
         else:
-            await self._route_thread_messages(user_id, message_type, payload, db_session)
+            return False
+        return True
     
     async def _route_thread_messages(self, user_id: str, message_type: str, payload: Dict[str, Any], 
                                     db_session: Optional[AsyncSession]) -> None:
         """Route thread-related messages."""
+        if await self._handle_thread_message_types(user_id, message_type, payload, db_session):
+            return
+        logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
+    
+    async def _handle_thread_message_types(
+        self, user_id: str, message_type: str, payload: Dict[str, Any], 
+        db_session: Optional[AsyncSession]
+    ) -> bool:
+        """Handle thread message types, return True if handled."""
         if message_type == "create_thread":
             await self.message_handler.handle_create_thread(user_id, payload, db_session)
         elif message_type == "switch_thread":
@@ -108,7 +134,8 @@ class AgentService(IAgentService):
         elif message_type == "list_threads":
             await self.message_handler.handle_list_threads(user_id, db_session)
         else:
-            logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
+            return False
+        return True
     
     async def _handle_json_decode_error(self, user_id: str, e: json.JSONDecodeError) -> None:
         """Handle JSON decode error with user notification."""

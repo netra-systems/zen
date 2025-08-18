@@ -160,8 +160,8 @@ async def _cancel_pending_tasks() -> None:
         # Silently handle any cancellation errors
         pass
 
-@pytest.fixture(scope="function")
-def setup_real_infrastructure(event_loop):
+@pytest_asyncio.fixture(scope="function")
+async def setup_real_infrastructure():
     """Setup infrastructure with real LLM calls enabled"""
     config = get_config()
     db_session = _create_mock_db_session()
@@ -180,5 +180,5 @@ def setup_real_infrastructure(event_loop):
     
     yield infrastructure
     
-    # Cleanup async resources using event loop
-    event_loop.run_until_complete(_cleanup_infrastructure(infrastructure))
+    # Cleanup async resources
+    await _cleanup_infrastructure(infrastructure)

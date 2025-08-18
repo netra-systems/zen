@@ -233,17 +233,17 @@ class TestOptimizer {
   async executeOptimizedTests(options = {}) {
     const plan = await this.generateOptimizedTestPlan(options);
     
-    console.log('🚀 Test Optimization Plan');
-    console.log('='.repeat(60));
-    console.log(`System: ${this.cpuCount} CPUs, ${Math.round(this.freeMemory / 1024 / 1024 / 1024)}GB free memory`);
-    console.log(`Strategy: ${plan.strategy.maxWorkers} workers, ${plan.strategy.cacheStrategy} cache`);
-    console.log(`Estimated time: ${Math.round(plan.estimatedTime / 1000)}s`);
+    // console output removed: console.log('🚀 Test Optimization Plan');
+    // console output removed: console.log('='.repeat(60));
+    // console output removed: console.log(`System: ${this.cpuCount} CPUs, ${Math.round(this.freeMemory / 1024 / 1024 / 1024)}GB free memory`);
+    // console output removed: console.log(`Strategy: ${plan.strategy.maxWorkers} workers, ${plan.strategy.cacheStrategy} cache`);
+    // console output removed: console.log(`Estimated time: ${Math.round(plan.estimatedTime / 1000)}s`);
     
     if (this.gitChanges.length > 0) {
-      console.log(`Changed files: ${this.gitChanges.length}`);
+      // console output removed: console.log(`Changed files: ${this.gitChanges.length}`);
     }
     
-    console.log('='.repeat(60));
+    // console output removed: console.log('='.repeat(60));
 
     let totalStartTime = Date.now();
     let totalTests = 0;
@@ -251,8 +251,8 @@ class TestOptimizer {
     let totalFailed = 0;
 
     for (const phase of plan.phases) {
-      console.log(`\n📋 Phase: ${phase.description}`);
-      console.log(`   Tests: ${phase.tests.length}, Priority: ${phase.priority}`);
+      // console output removed: console.log(`\n📋 Phase: ${phase.description}`);
+      // console output removed: console.log(`   Tests: ${phase.tests.length}, Priority: ${phase.priority}`);
       
       const phaseStartTime = Date.now();
       
@@ -263,29 +263,29 @@ class TestOptimizer {
         totalFailed += result.failed;
         
         const phaseDuration = Date.now() - phaseStartTime;
-        console.log(`   ✅ Completed in ${phaseDuration}ms`);
+        // console output removed: console.log(`   ✅ Completed in ${phaseDuration}ms`);
         
         // Fail fast if requested
         if (result.failed > 0 && options.bail) {
-          console.log(`❌ Stopping due to failures (--bail)`);
+          // console output removed: console.log(`❌ Stopping due to failures (--bail)`);
           break;
         }
         
       } catch (error) {
-        console.log(`   ❌ Phase failed: ${error.message}`);
+        // console output removed: console.log(`   ❌ Phase failed: ${error.message}`);
         if (options.bail) break;
       }
     }
 
     const totalDuration = Date.now() - totalStartTime;
     
-    console.log('\n' + '='.repeat(60));
-    console.log('🏁 FINAL RESULTS');
-    console.log('='.repeat(60));
-    console.log(`Total: ${totalTests} tests in ${totalDuration}ms`);
-    console.log(`Passed: ${totalPassed}, Failed: ${totalFailed}`);
-    console.log(`Performance: ${Math.round(totalTests / (totalDuration / 1000))} tests/second`);
-    console.log('='.repeat(60));
+    // console output removed: console.log('\n' + '='.repeat(60));
+    // console output removed: console.log('🏁 FINAL RESULTS');
+    // console output removed: console.log('='.repeat(60));
+    // console output removed: console.log(`Total: ${totalTests} tests in ${totalDuration}ms`);
+    // console output removed: console.log(`Passed: ${totalPassed}, Failed: ${totalFailed}`);
+    // console output removed: console.log(`Performance: ${Math.round(totalTests / (totalDuration / 1000))} tests/second`);
+    // console output removed: console.log('='.repeat(60));
 
     return { totalTests, totalPassed, totalFailed, totalDuration };
   }
@@ -370,7 +370,7 @@ async function main() {
   };
 
   if (args.includes('--help')) {
-    console.log(`
+    // console output removed: console.log(`
 Ultra Test Optimizer - Intelligent Jest Execution
 
 Usage: node test-optimizer.js [options]
@@ -398,7 +398,7 @@ Features:
     
     process.exit(results.totalFailed > 0 ? 1 : 0);
   } catch (error) {
-    console.error('❌ Test optimization failed:', error.message);
+    // console output removed: console.log('❌ Test optimization failed:', error.message);
     process.exit(1);
   }
 }

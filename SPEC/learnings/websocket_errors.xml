@@ -191,13 +191,179 @@ if (not conn_info.is_closing and
         </learning>
     </learnings>
     
+    <learnings>
+        <learning>
+            <id>websocket-metrics-async-coroutine-error</id>
+            <date>2025-08-18</date>
+            <category>WebSocket/Metrics Collection</category>
+            <severity>high</severity>
+            <title>WebSocket Metrics Collection: Coroutine Not Awaited Error</title>
+            
+            <problem>
+                <description>Metrics collector fails when gathering WebSocket stats due to missing await</description>
+                <error_message>'coroutine' object has no attribute 'get'</error_message>
+                <symptoms>
+                    <symptom>ERROR logged in metrics_collector at line 294</symptom>
+                    <symptom>Occurs during periodic WebSocket metrics collection</symptom>
+                    <symptom>Metrics collection silently fails every interval</symptom>
+                </symptoms>
+                <root_cause>connection_manager.get_stats() is an async method but was called without await</root_cause>
+                <impact>WebSocket metrics not collected, preventing monitoring and alerting</impact>
+            </problem>
+            
+            <solution>
+                <description>Make metrics gathering method async and properly await async calls</description>
+                <implementation>
+                    <step>Changed _gather_websocket_metrics from sync to async method</step>
+                    <step>Added await when calling connection_manager.get_stats()</step>
+                    <step>Updated _collect_single_websocket_metrics_cycle to await the gather method</step>
+                </implementation>
+                <code_changes>
+                    <file>app/monitoring/metrics_collector.py</file>
+                    <change>Changed _gather_websocket_metrics to async method</change>
+                    <change>Added await for connection_manager.get_stats() call</change>
+                    <change>Added await when calling _gather_websocket_metrics</change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <recommendation>Always check if methods return coroutines and need await</recommendation>
+                <recommendation>Use type hints to clarify async vs sync methods</recommendation>
+                <recommendation>Enable asyncio warnings during development</recommendation>
+                <pattern>
+                    <name>Async Metrics Collection Pattern</name>
+                    <code><![CDATA[
+async def _gather_websocket_metrics(self) -> WebSocketMetrics:
+    """Gather WebSocket metrics from connection manager."""
+    from app.websocket.connection import connection_manager
+    conn_stats = await connection_manager.get_stats()  # Note the await!
+    return self._build_websocket_metrics(conn_stats)
+                    ]]></code>
+                </pattern>
+            </prevention>
+            
+            <testing>
+                <test_file>app/tests/unit/monitoring/test_metrics_collector.py</test_file>
+                <test_cases>
+                    <test>test_websocket_metrics_collection_async</test>
+                    <test>test_gather_websocket_metrics_awaits_stats</test>
+                    <test>test_metrics_collection_handles_async_errors</test>
+                </test_cases>
+            </testing>
+            
+            <affected_files>
+                <file>app/monitoring/metrics_collector.py</file>
+                <file>app/websocket/connection.py</file>
+                <file>app/websocket/connection_manager.py</file>
+            </affected_files>
+            
+            <related_patterns>
+                <pattern>Async/await patterns in monitoring</pattern>
+                <pattern>Coroutine handling in periodic tasks</pattern>
+                <pattern>Type safety for async methods</pattern>
+            </related_patterns>
+            
+            <business_impact>
+                <impact>Restores WebSocket monitoring for production reliability</impact>
+                <impact>Enables performance tracking for customer segments</impact>
+                <impact>Critical for detecting connection issues affecting revenue</impact>
+            </business_impact>
+        </learning>
+        
+        <learning>
+            <id>websocket-connection-manager-initialization-error</id>
+            <date>2025-08-18</date>
+            <category>WebSocket/Initialization</category>
+            <severity>critical</severity>
+            <title>WebSocket Connection Manager: NoneType Error During Metrics Collection</title>
+            
+            <problem>
+                <description>Metrics collector and health checkers fail with NoneType error when accessing connection_manager</description>
+                <error_message>'NoneType' object has no attribute 'get_stats'</error_message>
+                <symptoms>
+                    <symptom>ERROR logged in metrics_collector at line 294</symptom>
+                    <symptom>Occurs during metrics collection startup</symptom>
+                    <symptom>Health checks fail with similar NoneType errors</symptom>
+                </symptoms>
+                <root_cause>connection_manager singleton is initialized as None and not properly accessed via lazy initialization</root_cause>
+                <impact>Complete failure of WebSocket monitoring and health checks at startup</impact>
+            </problem>
+            
+            <solution>
+                <description>Use get_connection_manager() lazy initialization instead of direct import</description>
+                <implementation>
+                    <step>Changed metrics_collector.py to import get_connection_manager instead of connection_manager</step>
+                    <step>Updated health_checkers.py to use get_connection_manager() for lazy initialization</step>
+                    <step>Fixed connection.py to initialize connection_manager using get_connection_manager()</step>
+                    <step>Made _get_websocket_stats_and_score async to properly await async calls</step>
+                </implementation>
+                <code_changes>
+                    <file>app/monitoring/metrics_collector.py</file>
+                    <change>Import get_connection_manager instead of connection_manager</change>
+                    <change>Call get_connection_manager() to get initialized instance</change>
+                    <file>app/core/health_checkers.py</file>
+                    <change>Changed to use get_connection_manager() for lazy initialization</change>
+                    <change>Made _get_websocket_stats_and_score async and await its calls</change>
+                    <file>app/websocket/connection.py</file>
+                    <change>Initialize connection_manager using get_connection_manager()</change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <recommendation>Always use get_connection_manager() for singleton access</recommendation>
+                <recommendation>Never import connection_manager directly from connection_manager.py</recommendation>
+                <recommendation>Document singleton pattern usage in module docstrings</recommendation>
+                <pattern>
+                    <name>Safe Connection Manager Access Pattern</name>
+                    <code><![CDATA[
+from app.websocket.connection_manager import get_connection_manager
+
+async def use_connection_manager():
+    conn_manager = get_connection_manager()  # Ensures initialization
+    stats = await conn_manager.get_stats()
+                    ]]></code>
+                </pattern>
+            </prevention>
+            
+            <testing>
+                <test_file>test_websocket_metrics_fix.py</test_file>
+                <test_cases>
+                    <test>Connection manager properly initialized via get_connection_manager()</test>
+                    <test>Metrics collection works without NoneType errors</test>
+                    <test>Health checks function correctly with lazy initialization</test>
+                </test_cases>
+            </testing>
+            
+            <affected_files>
+                <file>app/monitoring/metrics_collector.py</file>
+                <file>app/core/health_checkers.py</file>
+                <file>app/websocket/connection.py</file>
+                <file>app/websocket/connection_manager.py</file>
+            </affected_files>
+            
+            <related_patterns>
+                <pattern>Singleton pattern with lazy initialization</pattern>
+                <pattern>Module-level variable initialization</pattern>
+                <pattern>Async service initialization</pattern>
+            </related_patterns>
+            
+            <business_impact>
+                <impact>Restores critical WebSocket monitoring at startup</impact>
+                <impact>Enables health checks for production readiness</impact>
+                <impact>Prevents revenue loss from undetected connection failures</impact>
+            </business_impact>
+        </learning>
+    </learnings>
+    
     <summary>
-        <total_learnings>3</total_learnings>
+        <total_learnings>5</total_learnings>
         <categories>
             <category>WebSocket/Error Handling</category>
             <category>WebSocket/Implementation Details</category>
             <category>WebSocket/Race Conditions</category>
+            <category>WebSocket/Metrics Collection</category>
+            <category>WebSocket/Initialization</category>
         </categories>
-        <key_takeaway>Always validate WebSocket connection state before performing operations to prevent secondary errors and handle race conditions with proper state flags</key_takeaway>
+        <key_takeaway>Always validate WebSocket connection state before operations, handle race conditions with proper state flags, ensure async methods are properly awaited in monitoring systems, and use proper singleton initialization patterns for connection managers</key_takeaway>
     </summary>
 </specification>

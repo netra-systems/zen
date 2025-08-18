@@ -1,0 +1,1542 @@
+[
+  {
+    "group_id": 1,
+    "files": [
+      {
+        "path": "app/core/adaptive_circuit_breaker_core.py",
+        "violations": [
+          {
+            "function": "_build_metrics_dict",
+            "lines": 11,
+            "line_number": 258
+          },
+          {
+            "function": "_execute_protected_operation",
+            "lines": 10,
+            "line_number": 64
+          }
+        ]
+      },
+      {
+        "path": "app/core/agent_error_handler.py",
+        "violations": [
+          {
+            "function": "create_error_record",
+            "lines": 10,
+            "line_number": 24
+          }
+        ]
+      },
+      {
+        "path": "app/core/agent_health_monitor.py",
+        "violations": [
+          {
+            "function": "_build_health_status",
+            "lines": 12,
+            "line_number": 57
+          }
+        ]
+      },
+      {
+        "path": "app/core/agent_recovery_registry.py",
+        "violations": [
+          {
+            "function": "batch_recover_operations",
+            "lines": 24,
+            "line_number": 110
+          },
+          {
+            "function": "_register_default_strategies",
+            "lines": 14,
+            "line_number": 38
+          },
+          {
+            "function": "get_registry_status",
+            "lines": 9,
+            "line_number": 85
+          }
+        ]
+      },
+      {
+        "path": "app/core/agent_reliability_mixin.py",
+        "violations": [
+          {
+            "function": "_handle_operation_failure",
+            "lines": 11,
+            "line_number": 97
+          },
+          {
+            "function": "execute_with_reliability",
+            "lines": 9,
+            "line_number": 62
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 2,
+    "files": [
+      {
+        "path": "app/core/alert_manager.py",
+        "violations": [
+          {
+            "function": "create_status_change_alert",
+            "lines": 11,
+            "line_number": 45
+          },
+          {
+            "function": "create_threshold_alert",
+            "lines": 11,
+            "line_number": 59
+          },
+          {
+            "function": "_attempt_recovery",
+            "lines": 10,
+            "line_number": 119
+          },
+          {
+            "function": "_determine_recovery_action",
+            "lines": 10,
+            "line_number": 170
+          }
+        ]
+      },
+      {
+        "path": "app/core/async_resource_manager.py",
+        "violations": [
+          {
+            "function": "shutdown",
+            "lines": 10,
+            "line_number": 144
+          },
+          {
+            "function": "submit_background_task",
+            "lines": 9,
+            "line_number": 107
+          }
+        ]
+      },
+      {
+        "path": "app/core/async_retry_logic.py",
+        "violations": [
+          {
+            "function": "_retry_with_backoff",
+            "lines": 15,
+            "line_number": 56
+          },
+          {
+            "function": "acquire",
+            "lines": 12,
+            "line_number": 228
+          },
+          {
+            "function": "call",
+            "lines": 10,
+            "line_number": 109
+          }
+        ]
+      },
+      {
+        "path": "app/core/circuit_breaker_core.py",
+        "violations": [
+          {
+            "function": "_execute_with_monitoring",
+            "lines": 10,
+            "line_number": 154
+          }
+        ]
+      },
+      {
+        "path": "app/core/circuit_breaker_registry_adaptive.py",
+        "violations": [
+          {
+            "function": "circuit_breaker_sync",
+            "lines": 10,
+            "line_number": 138
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 3,
+    "files": [
+      {
+        "path": "app/core/config_validator.py",
+        "violations": [
+          {
+            "function": "_validate_external_services",
+            "lines": 21,
+            "line_number": 209
+          },
+          {
+            "function": "get_validation_report",
+            "lines": 17,
+            "line_number": 233
+          },
+          {
+            "function": "validate_config",
+            "lines": 13,
+            "line_number": 24
+          },
+          {
+            "function": "_scan_for_api_keys",
+            "lines": 10,
+            "line_number": 179
+          }
+        ]
+      },
+      {
+        "path": "app/core/configuration/base.py",
+        "violations": [
+          {
+            "function": "_get_config_class_for_environment",
+            "lines": 10,
+            "line_number": 111
+          },
+          {
+            "function": "get_config_summary",
+            "lines": 9,
+            "line_number": 172
+          }
+        ]
+      },
+      {
+        "path": "app/core/configuration/database.py",
+        "violations": [
+          {
+            "function": "_validate_postgres_consistency",
+            "lines": 9,
+            "line_number": 197
+          }
+        ]
+      },
+      {
+        "path": "app/core/configuration/secrets.py",
+        "violations": [
+          {
+            "function": "_get_environment_variable_mapping",
+            "lines": 9,
+            "line_number": 236
+          },
+          {
+            "function": "_retrieve_gcp_secrets",
+            "lines": 9,
+            "line_number": 271
+          },
+          {
+            "function": "_parse_secret_file",
+            "lines": 9,
+            "line_number": 298
+          }
+        ]
+      },
+      {
+        "path": "app/core/configuration/services.py",
+        "violations": [
+          {
+            "function": "_validate_llm_consistency",
+            "lines": 9,
+            "line_number": 217
+          },
+          {
+            "function": "_validate_oauth_consistency",
+            "lines": 9,
+            "line_number": 240
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 4,
+    "files": [
+      {
+        "path": "app/core/database_connection_manager.py",
+        "violations": [
+          {
+            "function": "_build_pool_status",
+            "lines": 10,
+            "line_number": 172
+          },
+          {
+            "function": "_monitoring_loop",
+            "lines": 9,
+            "line_number": 90
+          }
+        ]
+      },
+      {
+        "path": "app/core/database_recovery_core.py",
+        "violations": [
+          {
+            "function": "_perform_failover",
+            "lines": 12,
+            "line_number": 171
+          },
+          {
+            "function": "_test_new_connections",
+            "lines": 9,
+            "line_number": 60
+          }
+        ]
+      },
+      {
+        "path": "app/core/degradation_manager.py",
+        "violations": [
+          {
+            "function": "restore_service",
+            "lines": 10,
+            "line_number": 127
+          },
+          {
+            "function": "degrade_service",
+            "lines": 9,
+            "line_number": 97
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_aggregation_alerts.py",
+        "violations": [
+          {
+            "function": "_get_high_error_rate_config",
+            "lines": 9,
+            "line_number": 80
+          },
+          {
+            "function": "_get_new_pattern_config",
+            "lines": 9,
+            "line_number": 129
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_aggregation_core.py",
+        "violations": [
+          {
+            "function": "_try_process_patterns",
+            "lines": 9,
+            "line_number": 246
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 5,
+    "files": [
+      {
+        "path": "app/core/error_aggregation_metrics.py",
+        "violations": [
+          {
+            "function": "_create_high_error_rate_rule",
+            "lines": 9,
+            "line_number": 42
+          },
+          {
+            "function": "_create_new_pattern_rule",
+            "lines": 9,
+            "line_number": 76
+          },
+          {
+            "function": "_build_alert_rule",
+            "lines": 9,
+            "line_number": 88
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_aggregation_trend.py",
+        "violations": [
+          {
+            "function": "_build_error_trend",
+            "lines": 9,
+            "line_number": 121
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_handlers.py",
+        "violations": [
+          {
+            "function": "_construct_netra_error_response",
+            "lines": 9,
+            "line_number": 150
+          },
+          {
+            "function": "_build_unknown_error_response",
+            "lines": 9,
+            "line_number": 226
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_handlers/processors.py",
+        "violations": [
+          {
+            "function": "_create_validation_response",
+            "lines": 10,
+            "line_number": 148
+          },
+          {
+            "function": "_handle_integrity_error",
+            "lines": 10,
+            "line_number": 171
+          },
+          {
+            "function": "_handle_general_db_error",
+            "lines": 10,
+            "line_number": 184
+          },
+          {
+            "function": "_handle_unknown_exception",
+            "lines": 10,
+            "line_number": 229
+          },
+          {
+            "function": "_map_status_to_error_code",
+            "lines": 9,
+            "line_number": 207
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_handlers_database.py",
+        "violations": [
+          {
+            "function": "_create_integrity_error_response",
+            "lines": 9,
+            "line_number": 49
+          },
+          {
+            "function": "_create_general_db_error_response",
+            "lines": 9,
+            "line_number": 61
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 6,
+    "files": [
+      {
+        "path": "app/core/error_handlers_http.py",
+        "violations": [
+          {
+            "function": "_build_http_response",
+            "lines": 9,
+            "line_number": 71
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_handlers_netra.py",
+        "violations": [
+          {
+            "function": "_construct_netra_error_response",
+            "lines": 10,
+            "line_number": 69
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_handlers_validation.py",
+        "violations": [
+          {
+            "function": "_build_response",
+            "lines": 9,
+            "line_number": 55
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_logging_context.py",
+        "violations": [
+          {
+            "function": "_build_recovery_context",
+            "lines": 11,
+            "line_number": 255
+          },
+          {
+            "function": "_enhance_security_context",
+            "lines": 9,
+            "line_number": 290
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_logging_helpers.py",
+        "violations": [
+          {
+            "function": "log_database_error",
+            "lines": 11,
+            "line_number": 33
+          },
+          {
+            "function": "log_agent_error",
+            "lines": 10,
+            "line_number": 13
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 7,
+    "files": [
+      {
+        "path": "app/core/error_metric_calculator.py",
+        "violations": [
+          {
+            "function": "_compute_slope",
+            "lines": 10,
+            "line_number": 40
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_processors.py",
+        "violations": [
+          {
+            "function": "_get_handler_map",
+            "lines": 10,
+            "line_number": 79
+          },
+          {
+            "function": "_create_unknown_error_response",
+            "lines": 9,
+            "line_number": 132
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_recovery.py",
+        "violations": [
+          {
+            "function": "execute",
+            "lines": 9,
+            "line_number": 94
+          },
+          {
+            "function": "execute",
+            "lines": 9,
+            "line_number": 121
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_report_generator.py",
+        "violations": [
+          {
+            "function": "generate_summary_report",
+            "lines": 14,
+            "line_number": 20
+          },
+          {
+            "function": "_calculate_summary_metrics",
+            "lines": 10,
+            "line_number": 40
+          },
+          {
+            "function": "generate_detailed_report",
+            "lines": 10,
+            "line_number": 76
+          }
+        ]
+      },
+      {
+        "path": "app/core/error_trend_analyzer.py",
+        "violations": [
+          {
+            "function": "_create_trend_parameters",
+            "lines": 9,
+            "line_number": 64
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 8,
+    "files": [
+      {
+        "path": "app/core/exceptions_agent.py",
+        "violations": [
+          {
+            "function": "__init__",
+            "lines": 10,
+            "line_number": 19
+          },
+          {
+            "function": "severity",
+            "lines": 9,
+            "line_number": 32
+          }
+        ]
+      },
+      {
+        "path": "app/core/fallback_coordinator.py",
+        "violations": [
+          {
+            "function": "reset_agent_status",
+            "lines": 25,
+            "line_number": 164
+          },
+          {
+            "function": "__init__",
+            "lines": 12,
+            "line_number": 25
+          }
+        ]
+      },
+      {
+        "path": "app/core/fallback_coordinator_emergency.py",
+        "violations": [
+          {
+            "function": "_init_emergency_responses",
+            "lines": 21,
+            "line_number": 19
+          }
+        ]
+      },
+      {
+        "path": "app/core/fallback_coordinator_health.py",
+        "violations": [
+          {
+            "function": "get_system_status",
+            "lines": 22,
+            "line_number": 163
+          },
+          {
+            "function": "_calculate_system_metrics",
+            "lines": 9,
+            "line_number": 114
+          },
+          {
+            "function": "_create_system_status",
+            "lines": 9,
+            "line_number": 126
+          }
+        ]
+      },
+      {
+        "path": "app/core/fallback_utils.py",
+        "violations": [
+          {
+            "function": "safe_websocket_send",
+            "lines": 9,
+            "line_number": 48
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 9,
+    "files": [
+      {
+        "path": "app/core/health/interface.py",
+        "violations": [
+          {
+            "function": "_map_failure_rate_to_status",
+            "lines": 9,
+            "line_number": 177
+          }
+        ]
+      },
+      {
+        "path": "app/core/health/responses.py",
+        "violations": [
+          {
+            "function": "_calculate_sla_status",
+            "lines": 15,
+            "line_number": 135
+          },
+          {
+            "function": "create_enterprise_response",
+            "lines": 11,
+            "line_number": 109
+          }
+        ]
+      },
+      {
+        "path": "app/core/health/telemetry.py",
+        "violations": [
+          {
+            "function": "_build_enterprise_metrics_dict",
+            "lines": 11,
+            "line_number": 244
+          }
+        ]
+      },
+      {
+        "path": "app/core/health/telemetry_core.py",
+        "violations": [
+          {
+            "function": "_build_enterprise_metrics_dict",
+            "lines": 11,
+            "line_number": 207
+          }
+        ]
+      },
+      {
+        "path": "app/core/input_validators.py",
+        "violations": [
+          {
+            "function": "_validate_context",
+            "lines": 10,
+            "line_number": 194
+          },
+          {
+            "function": "_initialize_components",
+            "lines": 9,
+            "line_number": 40
+          },
+          {
+            "function": "_create_cached_result_copy",
+            "lines": 9,
+            "line_number": 83
+          },
+          {
+            "function": "_apply_custom_rules",
+            "lines": 9,
+            "line_number": 257
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 10,
+    "files": [
+      {
+        "path": "app/core/interfaces_data.py",
+        "violations": [
+          {
+            "function": "_send_corpus_notification",
+            "lines": 21,
+            "line_number": 271
+          },
+          {
+            "function": "_execute_table_size_query",
+            "lines": 15,
+            "line_number": 229
+          },
+          {
+            "function": "fetch_data",
+            "lines": 13,
+            "line_number": 53
+          },
+          {
+            "function": "get_table_schema",
+            "lines": 9,
+            "line_number": 41
+          },
+          {
+            "function": "_execute_schema_query",
+            "lines": 9,
+            "line_number": 123
+          },
+          {
+            "function": "_try_get_cached_data",
+            "lines": 9,
+            "line_number": 135
+          }
+        ]
+      },
+      {
+        "path": "app/core/interfaces_execution.py",
+        "violations": [
+          {
+            "function": "create_strategy",
+            "lines": 18,
+            "line_number": 262
+          },
+          {
+            "function": "execute_pipeline",
+            "lines": 14,
+            "line_number": 344
+          },
+          {
+            "function": "_execute_step",
+            "lines": 10,
+            "line_number": 124
+          },
+          {
+            "function": "_execute_step_async",
+            "lines": 9,
+            "line_number": 156
+          },
+          {
+            "function": "_execute_conditional_step",
+            "lines": 9,
+            "line_number": 209
+          }
+        ]
+      },
+      {
+        "path": "app/core/interfaces_observability.py",
+        "violations": [
+          {
+            "function": "__init__",
+            "lines": 11,
+            "line_number": 41
+          }
+        ]
+      },
+      {
+        "path": "app/core/interfaces_repository.py",
+        "violations": [
+          {
+            "function": "get_db_session",
+            "lines": 9,
+            "line_number": 32
+          }
+        ]
+      },
+      {
+        "path": "app/core/interfaces_tools.py",
+        "violations": [
+          {
+            "function": "_perform_all_validations",
+            "lines": 14,
+            "line_number": 89
+          },
+          {
+            "function": "execute_with_permissions",
+            "lines": 13,
+            "line_number": 49
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 11,
+    "files": [
+      {
+        "path": "app/core/interfaces_validation.py",
+        "violations": [
+          {
+            "function": "_try_validation_fixes",
+            "lines": 15,
+            "line_number": 67
+          },
+          {
+            "function": "_build_error_classification_chain",
+            "lines": 12,
+            "line_number": 138
+          },
+          {
+            "function": "_try_relaxed_validation",
+            "lines": 11,
+            "line_number": 94
+          },
+          {
+            "function": "_create_validation_report",
+            "lines": 11,
+            "line_number": 114
+          },
+          {
+            "function": "handle_document_validation_error",
+            "lines": 10,
+            "line_number": 39
+          }
+        ]
+      },
+      {
+        "path": "app/core/json_parsing_utils.py",
+        "violations": [
+          {
+            "function": "ensure_agent_response_is_json",
+            "lines": 9,
+            "line_number": 241
+          }
+        ]
+      },
+      {
+        "path": "app/core/json_utils.py",
+        "violations": [
+          {
+            "function": "_convert_datetime_fields",
+            "lines": 9,
+            "line_number": 75
+          },
+          {
+            "function": "default",
+            "lines": 9,
+            "line_number": 21
+          }
+        ]
+      },
+      {
+        "path": "app/core/logging_context.py",
+        "violations": [
+          {
+            "function": "_create_async_wrapper",
+            "lines": 14,
+            "line_number": 114
+          },
+          {
+            "function": "_create_sync_wrapper",
+            "lines": 14,
+            "line_number": 132
+          },
+          {
+            "function": "async_wrapper",
+            "lines": 12,
+            "line_number": 117
+          },
+          {
+            "function": "sync_wrapper",
+            "lines": 12,
+            "line_number": 135
+          },
+          {
+            "function": "_configure_specific_loggers",
+            "lines": 9,
+            "line_number": 249
+          }
+        ]
+      },
+      {
+        "path": "app/core/logging_formatters.py",
+        "violations": [
+          {
+            "function": "add_file_handler",
+            "lines": 15,
+            "line_number": 240
+          },
+          {
+            "function": "_create_log_entry",
+            "lines": 11,
+            "line_number": 146
+          },
+          {
+            "function": "_filter_value",
+            "lines": 10,
+            "line_number": 107
+          },
+          {
+            "function": "_add_json_console_handler",
+            "lines": 9,
+            "line_number": 216
+          },
+          {
+            "function": "_add_readable_console_handler",
+            "lines": 9,
+            "line_number": 228
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 12,
+    "files": [
+      {
+        "path": "app/core/memory_recovery_strategies.py",
+        "violations": [
+          {
+            "function": "_monitoring_loop",
+            "lines": 10,
+            "line_number": 84
+          }
+        ]
+      },
+      {
+        "path": "app/core/memory_strategies/cache_clearing_strategy.py",
+        "violations": [
+          {
+            "function": "_clear_single_cache",
+            "lines": 12,
+            "line_number": 69
+          },
+          {
+            "function": "_clear_all_caches",
+            "lines": 9,
+            "line_number": 57
+          }
+        ]
+      },
+      {
+        "path": "app/core/memory_strategies/connection_pool_strategy.py",
+        "violations": [
+          {
+            "function": "execute",
+            "lines": 12,
+            "line_number": 101
+          },
+          {
+            "function": "_process_single_pool",
+            "lines": 9,
+            "line_number": 72
+          }
+        ]
+      },
+      {
+        "path": "app/core/performance_batch_processor.py",
+        "violations": [
+          {
+            "function": "_flush_batch",
+            "lines": 12,
+            "line_number": 66
+          },
+          {
+            "function": "_prepare_batch_for_flush",
+            "lines": 12,
+            "line_number": 81
+          },
+          {
+            "function": "_schedule_timer_flush",
+            "lines": 10,
+            "line_number": 53
+          }
+        ]
+      },
+      {
+        "path": "app/core/performance_cache.py",
+        "violations": [
+          {
+            "function": "set",
+            "lines": 18,
+            "line_number": 67
+          },
+          {
+            "function": "get",
+            "lines": 11,
+            "line_number": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 13,
+    "files": [
+      {
+        "path": "app/core/performance_query_optimizer.py",
+        "violations": [
+          {
+            "function": "_execute_with_timing",
+            "lines": 16,
+            "line_number": 72
+          },
+          {
+            "function": "execute_with_cache",
+            "lines": 10,
+            "line_number": 50
+          },
+          {
+            "function": "get_performance_report",
+            "lines": 9,
+            "line_number": 152
+          }
+        ]
+      },
+      {
+        "path": "app/core/quality_metrics.py",
+        "violations": [
+          {
+            "function": "__init__",
+            "lines": 13,
+            "line_number": 34
+          }
+        ]
+      },
+      {
+        "path": "app/core/quality_types.py",
+        "violations": [
+          {
+            "function": "__init__",
+            "lines": 13,
+            "line_number": 37
+          }
+        ]
+      },
+      {
+        "path": "app/core/reliability_retry.py",
+        "violations": [
+          {
+            "function": "execute_with_retry",
+            "lines": 9,
+            "line_number": 38
+          },
+          {
+            "function": "_handle_retry_delay",
+            "lines": 9,
+            "line_number": 101
+          }
+        ]
+      },
+      {
+        "path": "app/core/reliability_utils.py",
+        "violations": [
+          {
+            "function": "create_agent_reliability_wrapper",
+            "lines": 13,
+            "line_number": 8
+          },
+          {
+            "function": "create_tool_reliability_wrapper",
+            "lines": 13,
+            "line_number": 25
+          },
+          {
+            "function": "create_default_tool_result",
+            "lines": 10,
+            "line_number": 42
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 14,
+    "files": [
+      {
+        "path": "app/core/request_context.py",
+        "violations": [
+          {
+            "function": "create_request_logging_middleware",
+            "lines": 9,
+            "line_number": 71
+          }
+        ]
+      },
+      {
+        "path": "app/core/resilience/fallback.py",
+        "violations": [
+          {
+            "function": "execute_fallback",
+            "lines": 16,
+            "line_number": 189
+          },
+          {
+            "function": "_try_fallback_handler",
+            "lines": 13,
+            "line_number": 212
+          },
+          {
+            "function": "get_metrics",
+            "lines": 9,
+            "line_number": 232
+          }
+        ]
+      },
+      {
+        "path": "app/core/resilience/monitor.py",
+        "violations": [
+          {
+            "function": "_create_alert_instance",
+            "lines": 10,
+            "line_number": 299
+          }
+        ]
+      },
+      {
+        "path": "app/core/resilience/retry_manager.py",
+        "violations": [
+          {
+            "function": "execute_with_retry",
+            "lines": 17,
+            "line_number": 81
+          },
+          {
+            "function": "get_metrics",
+            "lines": 12,
+            "line_number": 194
+          },
+          {
+            "function": "_record_attempt",
+            "lines": 10,
+            "line_number": 157
+          },
+          {
+            "function": "_calculate_delay",
+            "lines": 9,
+            "line_number": 133
+          },
+          {
+            "function": "_apply_jitter",
+            "lines": 9,
+            "line_number": 145
+          }
+        ]
+      },
+      {
+        "path": "app/core/retry_strategy_executor.py",
+        "violations": [
+          {
+            "function": "exponential_backoff_retry",
+            "lines": 18,
+            "line_number": 12
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 15,
+    "files": [
+      {
+        "path": "app/core/retry_strategy_manager.py",
+        "violations": [
+          {
+            "function": "execute_retry_attempt",
+            "lines": 9,
+            "line_number": 167
+          }
+        ]
+      },
+      {
+        "path": "app/core/schema_sync/extractor.py",
+        "violations": [
+          {
+            "function": "extract_schemas_from_module",
+            "lines": 17,
+            "line_number": 35
+          },
+          {
+            "function": "extract_all_schemas",
+            "lines": 12,
+            "line_number": 55
+          },
+          {
+            "function": "extract_schema_from_model",
+            "lines": 10,
+            "line_number": 22
+          }
+        ]
+      },
+      {
+        "path": "app/core/schema_sync/generator.py",
+        "violations": [
+          {
+            "function": "generate_typescript_interface",
+            "lines": 15,
+            "line_number": 21
+          },
+          {
+            "function": "_generate_property_lines",
+            "lines": 12,
+            "line_number": 47
+          },
+          {
+            "function": "_handle_object_type",
+            "lines": 12,
+            "line_number": 101
+          },
+          {
+            "function": "_extract_enums_from_schemas",
+            "lines": 11,
+            "line_number": 158
+          },
+          {
+            "function": "_generate_file_header",
+            "lines": 10,
+            "line_number": 124
+          }
+        ]
+      },
+      {
+        "path": "app/core/schema_sync/synchronizer.py",
+        "violations": [
+          {
+            "function": "sync_schemas",
+            "lines": 22,
+            "line_number": 39
+          },
+          {
+            "function": "_validate_changes",
+            "lines": 18,
+            "line_number": 75
+          },
+          {
+            "function": "__init__",
+            "lines": 9,
+            "line_number": 23
+          },
+          {
+            "function": "_load_previous_schemas",
+            "lines": 9,
+            "line_number": 124
+          }
+        ]
+      },
+      {
+        "path": "app/core/schema_sync/utils.py",
+        "violations": [
+          {
+            "function": "_log_sync_results",
+            "lines": 16,
+            "line_number": 130
+          },
+          {
+            "function": "validate_schema",
+            "lines": 15,
+            "line_number": 18
+          },
+          {
+            "function": "create_sync_command",
+            "lines": 14,
+            "line_number": 50
+          },
+          {
+            "function": "_has_unsafe_patterns",
+            "lines": 14,
+            "line_number": 77
+          },
+          {
+            "function": "_has_safe_patterns",
+            "lines": 11,
+            "line_number": 95
+          },
+          {
+            "function": "is_migration_safe",
+            "lines": 9,
+            "line_number": 37
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 16,
+    "files": [
+      {
+        "path": "app/core/secret_manager_auth.py",
+        "violations": [
+          {
+            "function": "invalidate_sms_code",
+            "lines": 9,
+            "line_number": 126
+          }
+        ]
+      },
+      {
+        "path": "app/core/secret_manager_core.py",
+        "violations": [
+          {
+            "function": "__init__",
+            "lines": 15,
+            "line_number": 23
+          },
+          {
+            "function": "get_secret",
+            "lines": 13,
+            "line_number": 40
+          },
+          {
+            "function": "rotate_secret",
+            "lines": 13,
+            "line_number": 56
+          },
+          {
+            "function": "_register_secret",
+            "lines": 12,
+            "line_number": 113
+          },
+          {
+            "function": "_log_access",
+            "lines": 10,
+            "line_number": 227
+          }
+        ]
+      },
+      {
+        "path": "app/core/secret_manager_helpers.py",
+        "violations": [
+          {
+            "function": "log_critical_failures",
+            "lines": 12,
+            "line_number": 63
+          },
+          {
+            "function": "prepare_secrets_dict",
+            "lines": 11,
+            "line_number": 48
+          }
+        ]
+      },
+      {
+        "path": "app/core/secret_manager_types.py",
+        "violations": [
+          {
+            "function": "__init__",
+            "lines": 9,
+            "line_number": 24
+          }
+        ]
+      },
+      {
+        "path": "app/core/type_validation_errors.py",
+        "violations": [
+          {
+            "function": "generate_validation_report",
+            "lines": 19,
+            "line_number": 27
+          },
+          {
+            "function": "_create_mismatch_entry",
+            "lines": 12,
+            "line_number": 98
+          },
+          {
+            "function": "_create_severity_section",
+            "lines": 11,
+            "line_number": 72
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 17,
+    "files": [
+      {
+        "path": "app/core/type_validation_helpers.py",
+        "violations": [
+          {
+            "function": "parse_typescript_file",
+            "lines": 10,
+            "line_number": 20
+          }
+        ]
+      },
+      {
+        "path": "app/core/type_validation_rules.py",
+        "violations": [
+          {
+            "function": "check_field_compatibility",
+            "lines": 16,
+            "line_number": 14
+          },
+          {
+            "function": "_determine_mismatch_severity",
+            "lines": 13,
+            "line_number": 131
+          },
+          {
+            "function": "_generate_type_suggestion",
+            "lines": 13,
+            "line_number": 176
+          },
+          {
+            "function": "_get_default_type_mappings",
+            "lines": 12,
+            "line_number": 194
+          },
+          {
+            "function": "_is_critical_mismatch",
+            "lines": 11,
+            "line_number": 150
+          },
+          {
+            "function": "_normalize_backend_type",
+            "lines": 9,
+            "line_number": 40
+          }
+        ]
+      },
+      {
+        "path": "app/core/type_validators.py",
+        "violations": [
+          {
+            "function": "strict_types",
+            "lines": 15,
+            "line_number": 60
+          },
+          {
+            "function": "wrapper",
+            "lines": 13,
+            "line_number": 64
+          },
+          {
+            "function": "validate",
+            "lines": 11,
+            "line_number": 168
+          }
+        ]
+      },
+      {
+        "path": "app/core/unified_logging.py",
+        "violations": [
+          {
+            "function": "_configure_handlers",
+            "lines": 11,
+            "line_number": 60
+          }
+        ]
+      },
+      {
+        "path": "app/core/websocket_connection_manager.py",
+        "violations": [
+          {
+            "function": "get_status",
+            "lines": 15,
+            "line_number": 261
+          },
+          {
+            "function": "_send_message_now",
+            "lines": 11,
+            "line_number": 195
+          },
+          {
+            "function": "_message_handler_loop",
+            "lines": 9,
+            "line_number": 209
+          },
+          {
+            "function": "_process_received_message",
+            "lines": 9,
+            "line_number": 221
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "group_id": 18,
+    "files": [
+      {
+        "path": "app/core/websocket_heartbeat_manager.py",
+        "violations": [
+          {
+            "function": "_heartbeat_loop",
+            "lines": 12,
+            "line_number": 49
+          }
+        ]
+      },
+      {
+        "path": "app/core/websocket_message_handler.py",
+        "violations": [
+          {
+            "function": "process_received_message",
+            "lines": 11,
+            "line_number": 71
+          }
+        ]
+      },
+      {
+        "path": "app/core/websocket_reconnection_handler.py",
+        "violations": [
+          {
+            "function": "_reconnection_loop",
+            "lines": 17,
+            "line_number": 43
+          },
+          {
+            "function": "_calculate_reconnection_delay",
+            "lines": 9,
+            "line_number": 67
+          }
+        ]
+      }
+    ]
+  }
+]

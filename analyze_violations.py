@@ -1,97 +1,129 @@
-#!/usr/bin/env python
-"""Analyze compliance violations in backend."""
+#!/usr/bin/env python3
+"""
+Script to analyze function violations in app/agents/
+Finds functions that exceed 8 lines and files with most violations.
+"""
 import os
-import ast
-import json
+import re
+from pathlib import Path
+from typing import Dict, List, Tuple
 
-def count_lines(file_path):
-    """Count lines in a file."""
-    try:
-        with open(file_path, 'r', encoding='utf-8') as f:
-            return len(f.readlines())
-    except:
-        return 0
-
-def analyze_functions(file_path):
-    """Analyze functions in a Python file."""
+def count_function_lines(file_path: str) -> List[Tuple[str, int, int]]:
+    """Count lines for each function in a file."""
     violations = []
+    
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
-            content = f.read()
-        tree = ast.parse(content)
+            lines = f.readlines()
+    except Exception:
+        return violations
+    
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
         
-        for node in ast.walk(tree):
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if hasattr(node, 'lineno') and hasattr(node, 'end_lineno'):
-                    line_count = node.end_lineno - node.lineno + 1
-                    if line_count > 8:
-                        violations.append({
-                            'name': node.name,
-                            'lines': line_count,
-                            'start': node.lineno,
-                            'end': node.end_lineno
-                        })
-    except:
-        pass
+        # Find function definitions
+        match = re.match(r'^(async\s+)?def\s+(\w+)\s*\(', line)
+        if match:
+            func_name = match.group(2)
+            start_line = i + 1  # 1-based line numbering
+            
+            # Count lines until next function or class or end of indentation
+            func_lines = 1
+            i += 1
+            
+            # Skip function signature if it spans multiple lines
+            while i < len(lines) and lines[i].strip().endswith('):') == False and '(' in lines[start_line-1]:
+                if ')' in lines[i]:
+                    break
+                i += 1
+                func_lines += 1
+            
+            # Count function body lines
+            if i < len(lines):
+                base_indent = len(lines[i]) - len(lines[i].lstrip())
+                i += 1
+                func_lines += 1
+                
+                while i < len(lines):
+                    line = lines[i]
+                    
+                    # Empty line
+                    if not line.strip():
+                        i += 1
+                        func_lines += 1
+                        continue
+                    
+                    current_indent = len(line) - len(line.lstrip())
+                    
+                    # If we've gone back to base level or less, function is done
+                    if current_indent <= base_indent and line.strip():
+                        # Check if it's another def/class/decorator
+                        if (re.match(r'^(async\s+)?def\s+', line.strip()) or 
+                            re.match(r'^class\s+', line.strip()) or
+                            line.strip().startswith('@')):
+                            break
+                    
+                    i += 1
+                    func_lines += 1
+            
+            # Count as violation if > 8 lines
+            if func_lines > 8:
+                violations.append((func_name, start_line, func_lines))
+        else:
+            i += 1
+    
     return violations
 
-def analyze_backend():
-    """Analyze backend for compliance violations."""
-    results = {
-        'file_violations': [],
-        'function_violations': []
-    }
+def analyze_agents_directory():
+    """Analyze all Python files in app/agents/ directory."""
+    agents_path = Path("app/agents")
+    file_violations = {}
     
-    # Walk through app directory
-    for root, dirs, files in os.walk('app'):
-        # Skip __pycache__ and .pyc files
-        dirs[:] = [d for d in dirs if d != '__pycache__']
-        
-        for file in files:
-            if file.endswith('.py'):
-                file_path = os.path.join(root, file)
-                
-                # Check file size
-                lines = count_lines(file_path)
-                if lines > 300:
-                    results['file_violations'].append({
-                        'file': file_path,
-                        'lines': lines
-                    })
-                
-                # Check function sizes
-                func_violations = analyze_functions(file_path)
-                for v in func_violations:
-                    v['file'] = file_path
-                    results['function_violations'].append(v)
+    for py_file in agents_path.rglob("*.py"):
+        if py_file.name == "__init__.py":
+            continue
+            
+        violations = count_function_lines(str(py_file))
+        if violations:
+            file_violations[str(py_file)] = violations
     
-    # Sort by size
-    results['file_violations'].sort(key=lambda x: x['lines'], reverse=True)
-    results['function_violations'].sort(key=lambda x: x['lines'], reverse=True)
-    
-    return results
+    return file_violations
 
 def main():
-    print("Analyzing backend compliance...")
-    results = analyze_backend()
+    """Main analysis function."""
+    print("ANALYZING function violations in app/agents/...")
+    print("=" * 60)
     
-    # Save to JSON
-    with open('violations.json', 'w') as f:
-        json.dump(results, f, indent=2)
+    violations = analyze_agents_directory()
     
-    print(f"\nFound {len(results['file_violations'])} file violations (>300 lines)")
-    print(f"Found {len(results['function_violations'])} function violations (>8 lines)")
+    if not violations:
+        print("No violations found!")
+        return
     
-    # Show top violations
-    if results['file_violations']:
-        print("\nTop 5 file violations:")
-        for v in results['file_violations'][:5]:
-            print(f"  {v['lines']:4d} lines: {v['file']}")
+    # Sort files by number of violations
+    sorted_files = sorted(violations.items(), key=lambda x: len(x[1]), reverse=True)
     
-    if results['function_violations']:
-        print("\nTop 5 function violations:")
-        for v in results['function_violations'][:5]:
-            print(f"  {v['lines']:4d} lines: {v['name']} in {v['file']}")
+    print(f"\nTOP 10 FILES WITH MOST VIOLATIONS:")
+    print("=" * 60)
+    
+    total_violations = 0
+    for i, (file_path, file_violations) in enumerate(sorted_files[:10]):
+        violation_count = len(file_violations)
+        total_violations += violation_count
+        
+        print(f"\n{i+1}. {file_path}")
+        print(f"   Violations: {violation_count}")
+        
+        # Show top 3 worst functions in each file
+        sorted_funcs = sorted(file_violations, key=lambda x: x[2], reverse=True)
+        for func_name, line_num, line_count in sorted_funcs[:3]:
+            print(f"   - {func_name}() at line {line_num}: {line_count} lines (violation: +{line_count-8})")
+    
+    print(f"\nSUMMARY:")
+    print(f"   Total files with violations: {len(violations)}")
+    print(f"   Total function violations: {total_violations}")
+    print(f"   Files analyzed: {len(list(Path('app/agents').rglob('*.py')))}")
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

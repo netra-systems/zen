@@ -18,8 +18,15 @@ class ScheduleManager:
     
     def _initialize_default_schedules(self):
         """Initialize default research schedules"""
+        self._create_daily_pricing_schedule()
+        self._create_weekly_capability_schedule()
+        self._create_weekly_model_schedule()
+        self._create_monthly_market_schedule()
         
-        # Daily pricing check at 2 AM UTC
+        logger.info(f"Initialized {len(self.schedules)} default research schedules")
+    
+    def _create_daily_pricing_schedule(self):
+        """Create daily pricing check schedule at 2 AM UTC"""
         self.schedules.append(ResearchSchedule(
             name="daily_pricing_check",
             frequency=ScheduleFrequency.DAILY,
@@ -27,8 +34,9 @@ class ScheduleManager:
             hour=2,
             enabled=True
         ))
-        
-        # Weekly capability scan on Mondays at 9 AM UTC
+    
+    def _create_weekly_capability_schedule(self):
+        """Create weekly capability scan on Mondays at 9 AM UTC"""
         self.schedules.append(ResearchSchedule(
             name="weekly_capability_scan",
             frequency=ScheduleFrequency.WEEKLY,
@@ -37,8 +45,9 @@ class ScheduleManager:
             hour=9,
             enabled=True
         ))
-        
-        # Weekly new model check on Fridays at 10 AM UTC
+    
+    def _create_weekly_model_schedule(self):
+        """Create weekly new model check on Fridays at 10 AM UTC"""
         self.schedules.append(ResearchSchedule(
             name="weekly_new_models",
             frequency=ScheduleFrequency.WEEKLY,
@@ -47,8 +56,9 @@ class ScheduleManager:
             hour=10,
             enabled=True
         ))
-        
-        # Monthly market overview on 1st at midnight UTC
+    
+    def _create_monthly_market_schedule(self):
+        """Create monthly market overview on 1st at midnight UTC"""
         self.schedules.append(ResearchSchedule(
             name="monthly_market_report",
             frequency=ScheduleFrequency.MONTHLY,
@@ -57,8 +67,6 @@ class ScheduleManager:
             hour=0,
             enabled=True
         ))
-        
-        logger.info(f"Initialized {len(self.schedules)} default research schedules")
     
     def add_schedule(self, schedule: ResearchSchedule):
         """Add a new research schedule"""

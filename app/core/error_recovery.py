@@ -178,13 +178,17 @@ class ErrorRecoveryCircuitBreaker(CoreCircuitBreaker):
                  timeout: int = 60,
                  name: str = "error_recovery_circuit"):
         """Initialize circuit breaker with error recovery defaults."""
-        config = CircuitConfig(
+        config = self._create_circuit_config(name, failure_threshold, timeout)
+        super().__init__(config)
+    
+    def _create_circuit_config(self, name: str, failure_threshold: int, timeout: int) -> CircuitConfig:
+        """Create circuit configuration with recovery defaults."""
+        return CircuitConfig(
             name=name,
             failure_threshold=failure_threshold,
             recovery_timeout=float(timeout),
             timeout_seconds=float(timeout)
         )
-        super().__init__(config)
     
     def should_allow_request(self) -> bool:
         """Synchronous check if request should be allowed through."""
@@ -208,13 +212,15 @@ class ErrorRecoveryManager:
     
     def __init__(self):
         """Initialize error recovery manager."""
+        self._init_storage_attributes()
+        self._setup_default_strategies()
+    
+    def _init_storage_attributes(self) -> None:
+        """Initialize storage attributes for recovery manager."""
         self.compensation_actions: List[CompensationAction] = []
         self.retry_strategies: Dict[OperationType, RetryStrategy] = {}
         self.circuit_breakers: Dict[str, ErrorRecoveryCircuitBreaker] = {}
         self.active_operations: Dict[str, RecoveryContext] = {}
-        
-        # Initialize default retry strategies
-        self._setup_default_strategies()
     
     def _setup_default_strategies(self) -> None:
         """Set up default retry strategies for different operation types."""

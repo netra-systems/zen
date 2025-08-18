@@ -3,6 +3,47 @@
  * 30 critical integration tests for complete system coverage
  */
 
+// Declare mocks first (Jest Module Hoisting)
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseAgent = jest.fn();
+const mockUseAuthStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+
+// Mock hooks before imports
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+
+jest.mock('@/hooks/useAgent', () => ({
+  useAgent: mockUseAgent
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// Mock AuthGate to always render children
+jest.mock('@/components/auth/AuthGate', () => {
+  return function MockAuthGate({ children }: { children: React.ReactNode }) {
+    return <>{children}</>;
+  };
+});
+
+// Now imports
 import React from 'react';
 import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
@@ -13,8 +54,7 @@ import { AgentProvider } from '@/providers/AgentProvider';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useAgent } from '@/hooks/useAgent';
 import { useAuthStore } from '@/store/authStore';
-import { useChatStore } from '@/store/chatStore';
-import { useThreadStore } from '@/store/threadStore';
+import { useUnifiedChatStore } from '@/store/unified-chat';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
 
 import { TestProviders } from '../test-utils/providers';
@@ -126,6 +166,42 @@ describe('Comprehensive Frontend Integration Tests', () => {
     resetTestStores();
     setupMockFetch();
     global.fetch = jest.fn();
+    
+    // Setup hook mocks
+    mockUseUnifiedChatStore.mockReturnValue({
+      messages: [],
+      threads: [],
+      addMessage: jest.fn(),
+      updateThread: jest.fn(),
+      fastLayerData: null,
+      updateFastLayer: jest.fn()
+    });
+    
+    mockUseWebSocket.mockReturnValue({
+      sendMessage: jest.fn(),
+      isConnected: true,
+      connectionState: 'connected'
+    });
+    
+    mockUseAgent.mockReturnValue({
+      isProcessing: false,
+      sendMessage: jest.fn()
+    });
+    
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: '1', email: 'test@example.com' }
+    });
+    
+    mockUseLoadingState.mockReturnValue({
+      isLoading: false,
+      setLoading: jest.fn()
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread-1',
+      navigateToThread: jest.fn()
+    });
   });
 
   afterEach(() => {

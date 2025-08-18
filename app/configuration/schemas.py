@@ -44,7 +44,7 @@ SECRET_CONFIG: List[SecretReference] = [
 
 
 class RedisConfig(BaseModel):
-    host: str = 'redis-10504.fcrce190.us-east-1-1.ec2.redns.redis-cloud.com'
+    host: str = '________________________placeholder_redis_host________________________'
     port: int = 10504
     username: str = "default"
     password: Optional[str] = None
@@ -150,7 +150,7 @@ class AppConfig(BaseModel):
     fernet_key: str = None
     jwt_secret_key: str = None
     api_base_url: str = "http://localhost:8000"
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+    database_url: str = None  # Will be loaded from environment or config manager
     redis_url: str = None  # Added for staging/production Redis URL
     clickhouse_url: str = None  # Added for staging/production ClickHouse URL
     log_level: str = "DEBUG"
@@ -242,12 +242,12 @@ class AppConfig(BaseModel):
 class DevelopmentConfig(AppConfig):
     """Development-specific settings can override defaults."""
     debug: bool = True
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
+    database_url: str = None  # Will be loaded from environment
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
     secret_key: str = os.environ.get("SECRET_KEY", "development_secret_key_that_is_at_least_32_characters_long_for_validation")
-    jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
-    fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
+    jwt_secret_key: str = os.environ.get("JWT_SECRET_KEY", "development_secret_key_for_jwt_do_not_use_in_production")
+    fernet_key: str = os.environ.get("FERNET_KEY", "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=")  # Generated with Fernet.generate_key()
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
@@ -273,17 +273,21 @@ class DevelopmentConfig(AppConfig):
     def __init__(self, **data):
         import os
         self._load_database_url(data, os)
+        self._load_clickhouse_config(data, os)
+        self._load_redis_config(data, os)
         service_modes = self._get_service_modes(os)
         self._configure_service_flags(data, service_modes)
         self._log_service_configuration(service_modes)
         super().__init__(**data)
     
     def _load_database_url(self, data: dict, os_module) -> None:
-        """Load database URL from environment if not provided."""
-        if 'database_url' not in data:
-            env_db_url = os_module.environ.get('DATABASE_URL')
-            if env_db_url:
-                data['database_url'] = env_db_url
+        """Load database URL from environment - always prefer environment over defaults."""
+        env_db_url = os_module.environ.get('DATABASE_URL')
+        if env_db_url:
+            data['database_url'] = env_db_url
+        elif 'database_url' not in data or data.get('database_url') is None:
+            # Fallback only if no env var and no value provided
+            data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     
     def _get_service_modes(self, os_module) -> dict:
         """Get service modes from environment variables."""
@@ -292,6 +296,59 @@ class DevelopmentConfig(AppConfig):
             'clickhouse': os_module.environ.get("CLICKHOUSE_MODE", "shared").lower(),
             'llm': os_module.environ.get("LLM_MODE", "shared").lower()
         }
+    
+    def _load_clickhouse_config(self, data: dict, os_module) -> None:
+        """Load ClickHouse configuration from environment variables."""
+        ch_host = os_module.environ.get('CLICKHOUSE_HOST', 'localhost')
+        ch_http_port = int(os_module.environ.get('CLICKHOUSE_HTTP_PORT', '8123'))
+        ch_native_port = int(os_module.environ.get('CLICKHOUSE_NATIVE_PORT', '9000'))
+        ch_user = os_module.environ.get('CLICKHOUSE_USER', 'default')
+        ch_password = os_module.environ.get('CLICKHOUSE_PASSWORD', '')
+        ch_db = os_module.environ.get('CLICKHOUSE_DB', 'default')
+        
+        # Override ClickHouse native config
+        if 'clickhouse_native' not in data:
+            data['clickhouse_native'] = ClickHouseNativeConfig(
+                host=ch_host,
+                port=ch_native_port,
+                user=ch_user,
+                password=ch_password,
+                database=ch_db
+            )
+        
+        # Override ClickHouse HTTPS config
+        if 'clickhouse_https' not in data:
+            data['clickhouse_https'] = ClickHouseHTTPSConfig(
+                host=ch_host,
+                port=ch_http_port,
+                user=ch_user,
+                password=ch_password,
+                database=ch_db
+            )
+    
+    def _load_redis_config(self, data: dict, os_module) -> None:
+        """Load Redis configuration from environment variables."""
+        redis_url = os_module.environ.get('REDIS_URL')
+        if redis_url:
+            # Parse Redis URL if provided
+            from urllib.parse import urlparse
+            parsed = urlparse(redis_url)
+            redis_host = parsed.hostname or 'localhost'
+            redis_port = parsed.port or 6379
+            redis_password = parsed.password
+        else:
+            # Use individual env vars
+            redis_host = os_module.environ.get('REDIS_HOST', 'localhost')
+            redis_port = int(os_module.environ.get('REDIS_PORT', '6379'))
+            redis_password = os_module.environ.get('REDIS_PASSWORD')
+        
+        # Override Redis config
+        if 'redis' not in data:
+            data['redis'] = RedisConfig(
+                host=redis_host,
+                port=redis_port,
+                password=redis_password
+            )
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
         """Configure service enabled flags based on modes."""

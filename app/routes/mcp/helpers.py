@@ -158,7 +158,13 @@ async def record_successful_execution(
     """Record successful tool execution"""
     if not request.session_id:
         return
-    
+    await _record_execution(request, db, mcp_service, current_user, result, execution_time_ms)
+
+
+async def _record_execution(
+    request, db, mcp_service, current_user, result, execution_time_ms
+) -> None:
+    """Record execution in database"""
     execution = _create_success_execution(
         request, current_user, result, execution_time_ms
     )
@@ -191,7 +197,6 @@ async def record_failed_execution(
     """Record failed tool execution"""
     if not request.session_id:
         return
-    
     execution = _create_failed_execution(request, current_user, error, start_time)
     await mcp_service.record_tool_execution(db, execution)
 

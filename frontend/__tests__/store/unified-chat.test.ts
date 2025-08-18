@@ -1,3 +1,14 @@
+// JEST MODULE HOISTING - Mocks BEFORE imports
+// Mock global fetch and WebSocket
+global.fetch = jest.fn();
+global.WebSocket = jest.fn(() => ({
+  send: jest.fn(),
+  close: jest.fn(),
+  addEventListener: jest.fn(),
+  removeEventListener: jest.fn(),
+  readyState: WebSocket.OPEN
+})) as any;
+
 import { act, renderHook } from '@testing-library/react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import type {

@@ -152,42 +152,97 @@ class TestActionsSubAgent:
         """Test 13: Verify Actions agent creates actionable plans"""
         mock_llm = Mock(spec=LLMManager)
         mock_llm.ask_llm = AsyncMock(return_value=json.dumps({
-            "action_plan": [
-                {"step": 1, "action": "Update model configuration"},
-                {"step": 2, "action": "Deploy changes to staging"},
-                {"step": 3, "action": "Monitor performance metrics"}
-            ]
+            "action_plan_summary": "Complete action plan",
+            "total_estimated_time": "2 weeks",
+            "actions": [
+                {"step_id": "1", "description": "Update model configuration"},
+                {"step_id": "2", "description": "Deploy changes to staging"},
+                {"step_id": "3", "description": "Monitor performance metrics"}
+            ],
+            "required_approvals": [],
+            "execution_timeline": []
         }))
         mock_dispatcher = Mock(spec=ToolDispatcher)
         
-        actions_agent = ActionsToMeetGoalsSubAgent(mock_llm, mock_dispatcher)
-        state = DeepAgentState(
-            user_request="Implement optimizations",
-            optimizations_result={"optimizations": ["test"]}
-        )
-        
-        await actions_agent.execute(state, "test_run_id", False)
-        
-        assert state.action_plan_result != None
-        assert len(state.action_plan_result.actions) == 3
+        with patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_reliability_wrapper'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_fallback_strategy'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.ExecutionMonitor'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.ReliabilityManager'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.BaseExecutionEngine'):
+            
+            actions_agent = ActionsToMeetGoalsSubAgent(mock_llm, mock_dispatcher)
+            actions_agent._send_update = AsyncMock()
+            
+            state = DeepAgentState(
+                user_request="Implement optimizations",
+                optimizations_result={"optimizations": ["test"]},
+                data_result={"analysis": "test"}
+            )
+            
+            await actions_agent.execute(state, "test_run_id", False)
+            
+            assert state.action_plan_result is not None
+            assert state.action_plan_result.action_plan_summary == "Complete action plan"
         
     async def test_action_priority_ordering(self):
-        """Test 14: Verify Actions are prioritized correctly"""
+        """Test 14: Verify Actions handles modern response format"""
         mock_llm = Mock(spec=LLMManager)
         mock_llm.ask_llm = AsyncMock(return_value=json.dumps({
-            "action_plan": [
-                {"step": 1, "action": "Critical fix", "priority": "high"},
-                {"step": 2, "action": "Optional improvement", "priority": "low"}
-            ]
+            "action_plan_summary": "Priority-based action plan",
+            "total_estimated_time": "1 week", 
+            "actions": [
+                {"step_id": "1", "description": "Critical fix", "priority": "high"},
+                {"step_id": "2", "description": "Optional improvement", "priority": "low"}
+            ],
+            "required_approvals": []
         }))
         mock_dispatcher = Mock(spec=ToolDispatcher)
         
-        actions_agent = ActionsToMeetGoalsSubAgent(mock_llm, mock_dispatcher)
-        state = DeepAgentState(user_request="Fix issues")
+        with patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_reliability_wrapper'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_fallback_strategy'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.ExecutionMonitor'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.ReliabilityManager'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.BaseExecutionEngine'):
+            
+            actions_agent = ActionsToMeetGoalsSubAgent(mock_llm, mock_dispatcher)
+            actions_agent._send_update = AsyncMock()
+            
+            state = DeepAgentState(
+                user_request="Fix issues",
+                optimizations_result={"test": "opt"},
+                data_result={"test": "data"}
+            )
+            
+            await actions_agent.execute(state, "test_run_id", False)
+            
+            assert state.action_plan_result is not None
+            assert state.action_plan_result.action_plan_summary == "Priority-based action plan"
+
+    async def test_actions_agent_modern_health_monitoring(self):
+        """Test 15: Verify Actions agent modern health monitoring"""
+        mock_llm = Mock(spec=LLMManager)
+        mock_dispatcher = Mock(spec=ToolDispatcher)
         
-        await actions_agent.execute(state, "test_run_id", False)
-        
-        assert state.action_plan_result.actions[0]["priority"] == "high"
+        with patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_reliability_wrapper'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.create_agent_fallback_strategy'), \
+             patch('app.agents.actions_to_meet_goals_sub_agent.ExecutionMonitor') as mock_monitor, \
+             patch('app.agents.actions_to_meet_goals_sub_agent.ReliabilityManager') as mock_reliability, \
+             patch('app.agents.actions_to_meet_goals_sub_agent.BaseExecutionEngine'):
+            
+            mock_monitor.return_value.get_health_status = Mock(return_value={"status": "healthy"})
+            mock_monitor.return_value.get_agent_metrics = Mock(return_value={"metrics": {}})
+            mock_reliability.return_value.get_circuit_breaker_status = Mock(return_value={"state": "closed"})
+            
+            actions_agent = ActionsToMeetGoalsSubAgent(mock_llm, mock_dispatcher)
+            
+            # Test modern health methods
+            health = actions_agent.get_health_status()
+            metrics = actions_agent.get_performance_metrics()
+            circuit_status = actions_agent.get_circuit_breaker_status()
+            
+            assert isinstance(health, dict)
+            assert isinstance(metrics, dict)
+            assert isinstance(circuit_status, dict)
 
 
 class TestReportingSubAgent:

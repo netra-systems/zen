@@ -24,13 +24,21 @@ class RequestBatcher:
         """Add request to batch and return future."""
         future = asyncio.Future()
         async with self._lock:
-            self._pending_requests.append({
-                'request': request,
-                'future': future
-            })
-            if len(self._pending_requests) >= self.batch_size:
-                self._batch_event.set()
+            self._add_pending_request(request, future)
+            self._check_batch_ready()
         return future
+    
+    def _add_pending_request(self, request: Dict, future: asyncio.Future) -> None:
+        """Add request to pending list."""
+        self._pending_requests.append({
+            'request': request,
+            'future': future
+        })
+    
+    def _check_batch_ready(self) -> None:
+        """Check if batch is ready and trigger event."""
+        if len(self._pending_requests) >= self.batch_size:
+            self._batch_event.set()
     
     async def process_batches(self, processor) -> None:
         """Process batches continuously."""

@@ -17,7 +17,7 @@ class UltraConfigValidator {
   }
 
   async validateAll() {
-    console.log('🔍 Validating Ultra Test Configuration...\n');
+    // console output removed: console.log('🔍 Validating Ultra Test Configuration...\n');
 
     try {
       await this.validateConfigurationLoad();
@@ -29,13 +29,13 @@ class UltraConfigValidator {
       this.printResults();
       return this.results.errors.length === 0;
     } catch (error) {
-      console.error('❌ Validation failed:', error.message);
+      // console output removed: console.log('❌ Validation failed:', error.message);
       return false;
     }
   }
 
   async validateConfigurationLoad() {
-    console.log('📋 Validating Jest ultra configuration...');
+    // console output removed: console.log('📋 Validating Jest ultra configuration...');
     
     try {
       // Try to load the ultra config
@@ -52,19 +52,19 @@ class UltraConfigValidator {
         throw new Error('Config did not return an object');
       }
 
-      console.log('   ✅ Configuration loads successfully');
-      console.log(`   📊 Projects: ${config.projects?.length || 'none'}`);
-      console.log(`   💾 Cache directory: ${config.cacheDirectory || 'default'}`);
+      // console output removed: console.log('   ✅ Configuration loads successfully');
+      // console output removed: console.log(`   📊 Projects: ${config.projects?.length || 'none'}`);
+      // console output removed: console.log(`   💾 Cache directory: ${config.cacheDirectory || 'default'}`);
       
       this.results.configurationLoad = true;
     } catch (error) {
-      console.log(`   ❌ Configuration load failed: ${error.message}`);
+      // console output removed: console.log(`   ❌ Configuration load failed: ${error.message}`);
       this.results.errors.push(`Config load: ${error.message}`);
     }
   }
 
   async validateSetupLoad() {
-    console.log('\n🛠️  Validating Jest ultra setup...');
+    // console output removed: console.log('\n🛠️  Validating Jest ultra setup...');
     
     try {
       const setupPath = path.join(__dirname, 'jest.setup.ultra.ts');
@@ -91,18 +91,18 @@ class UltraConfigValidator {
         throw new Error(`Missing optimizations: ${missingOptimizations.join(', ')}`);
       }
 
-      console.log('   ✅ Setup file contains all required optimizations');
-      console.log(`   🔧 Optimizations: ${requiredOptimizations.length} implemented`);
+      // console output removed: console.log('   ✅ Setup file contains all required optimizations');
+      // console output removed: console.log(`   🔧 Optimizations: ${requiredOptimizations.length} implemented`);
       
       this.results.setupLoad = true;
     } catch (error) {
-      console.log(`   ❌ Setup validation failed: ${error.message}`);
+      // console output removed: console.log(`   ❌ Setup validation failed: ${error.message}`);
       this.results.errors.push(`Setup: ${error.message}`);
     }
   }
 
   async validateReporterLoad() {
-    console.log('\n📊 Validating ultra reporter...');
+    // console output removed: console.log('\n📊 Validating ultra reporter...');
     
     try {
       const reporterPath = path.join(__dirname, 'jest-ultra-reporter.js');
@@ -124,18 +124,18 @@ class UltraConfigValidator {
         throw new Error('Reporter missing required methods');
       }
 
-      console.log('   ✅ Reporter loads and instantiates correctly');
-      console.log('   📈 Performance tracking enabled');
+      // console output removed: console.log('   ✅ Reporter loads and instantiates correctly');
+      // console output removed: console.log('   📈 Performance tracking enabled');
       
       this.results.reporterLoad = true;
     } catch (error) {
-      console.log(`   ❌ Reporter validation failed: ${error.message}`);
+      // console output removed: console.log(`   ❌ Reporter validation failed: ${error.message}`);
       this.results.errors.push(`Reporter: ${error.message}`);
     }
   }
 
   async validateSampleTestExecution() {
-    console.log('\n🧪 Validating sample test execution...');
+    // console output removed: console.log('\n🧪 Validating sample test execution...');
     
     try {
       // Create a minimal test file for validation
@@ -173,20 +173,20 @@ describe('Ultra Config Validation', () => {
       fs.unlinkSync(testPath);
 
       if (result.success) {
-        console.log('   ✅ Sample test executed successfully');
-        console.log(`   ⚡ Execution time: ${result.duration}ms`);
+        // console output removed: console.log('   ✅ Sample test executed successfully');
+        // console output removed: console.log(`   ⚡ Execution time: ${result.duration}ms`);
         this.results.sampleTestExecution = true;
       } else {
         throw new Error(`Test execution failed: ${result.error}`);
       }
     } catch (error) {
-      console.log(`   ❌ Sample test execution failed: ${error.message}`);
+      // console output removed: console.log(`   ❌ Sample test execution failed: ${error.message}`);
       this.results.errors.push(`Sample test: ${error.message}`);
     }
   }
 
   async performBaslineTest() {
-    console.log('\n⚡ Performing performance baseline test...');
+    // console output removed: console.log('\n⚡ Performing performance baseline test...');
     
     try {
       // Run a subset of existing tests with both configs to compare
@@ -198,7 +198,7 @@ describe('Ultra Config Validation', () => {
       ]);
 
       if (ultraResult.success) {
-        console.log(`   ✅ Ultra config baseline: ${ultraResult.duration}ms`);
+        // console output removed: console.log(`   ✅ Ultra config baseline: ${ultraResult.duration}ms`);
         
         this.results.performanceBaseline = {
           ultra: ultraResult.duration,
@@ -207,17 +207,17 @@ describe('Ultra Config Validation', () => {
 
         // Provide performance feedback
         if (ultraResult.duration < 5000) {
-          console.log('   🚀 Excellent performance (< 5s)');
+          // console output removed: console.log('   🚀 Excellent performance (< 5s)');
         } else if (ultraResult.duration < 10000) {
-          console.log('   ⚡ Good performance (< 10s)');
+          // console output removed: console.log('   ⚡ Good performance (< 10s)');
         } else {
-          console.log('   ⚠️  Performance could be improved (> 10s)');
+          // console output removed: console.log('   ⚠️  Performance could be improved (> 10s)');
         }
       } else {
         throw new Error(`Baseline test failed: ${ultraResult.error}`);
       }
     } catch (error) {
-      console.log(`   ❌ Baseline test failed: ${error.message}`);
+      // console output removed: console.log(`   ❌ Baseline test failed: ${error.message}`);
       this.results.errors.push(`Baseline: ${error.message}`);
     }
   }
@@ -265,9 +265,9 @@ describe('Ultra Config Validation', () => {
   }
 
   printResults() {
-    console.log('\n' + '='.repeat(60));
-    console.log('🏁 ULTRA CONFIGURATION VALIDATION RESULTS');
-    console.log('='.repeat(60));
+    // console output removed: console.log('\n' + '='.repeat(60));
+    // console output removed: console.log('🏁 ULTRA CONFIGURATION VALIDATION RESULTS');
+    // console output removed: console.log('='.repeat(60));
 
     const checks = [
       { name: 'Configuration Load', status: this.results.configurationLoad },
@@ -278,30 +278,30 @@ describe('Ultra Config Validation', () => {
 
     checks.forEach(check => {
       const status = check.status ? '✅ PASS' : '❌ FAIL';
-      console.log(`${status} ${check.name}`);
+      // console output removed: console.log(`${status} ${check.name}`);
     });
 
     if (this.results.performanceBaseline) {
-      console.log(`\n⚡ Performance Baseline: ${this.results.performanceBaseline.ultra}ms`);
+      // console output removed: console.log(`\n⚡ Performance Baseline: ${this.results.performanceBaseline.ultra}ms`);
     }
 
     if (this.results.errors.length > 0) {
-      console.log('\n❌ Errors found:');
+      // console output removed: console.log('\n❌ Errors found:');
       this.results.errors.forEach(error => {
-        console.log(`   • ${error}`);
+        // console output removed: console.log(`   • ${error}`);
       });
-      console.log('\n💡 Run the following to fix common issues:');
-      console.log('   npm install');
-      console.log('   npm run test:clear-cache');
+      // console output removed: console.log('\n💡 Run the following to fix common issues:');
+      // console output removed: console.log('   npm install');
+      // console output removed: console.log('   npm run test:clear-cache');
     } else {
-      console.log('\n🎉 All validations passed! Ultra configuration ready for use.');
-      console.log('\n🚀 Quick start commands:');
-      console.log('   npm run test:ultra          # Ultra-fast test execution');
-      console.log('   npm run test:optimize       # Smart test optimization');
-      console.log('   npm run test:shard          # Sharded parallel execution');
+      // console output removed: console.log('\n🎉 All validations passed! Ultra configuration ready for use.');
+      // console output removed: console.log('\n🚀 Quick start commands:');
+      // console output removed: console.log('   npm run test:ultra          # Ultra-fast test execution');
+      // console output removed: console.log('   npm run test:optimize       # Smart test optimization');
+      // console output removed: console.log('   npm run test:shard          # Sharded parallel execution');
     }
 
-    console.log('='.repeat(60));
+    // console output removed: console.log('='.repeat(60));
   }
 }
 

@@ -50,17 +50,29 @@ def get_latest_report_id() -> Optional[str]:
     return _latest_report_id
 
 
-def build_metric_mapping(builder: ReportBuilder, hours: int) -> Dict[str, Any]:
-    """Build metric mapping dictionary."""
+def _build_velocity_metrics(builder, hours: int) -> Dict[str, Any]:
+    """Build velocity metric functions."""
     return {
         "commits_per_hour": lambda: builder.velocity_calc.calculate_velocity(hours).commits_per_hour,
         "commits_per_day": lambda: builder.velocity_calc.calculate_velocity(hours).commits_per_day,
-        "velocity_trend": lambda: builder.velocity_calc.calculate_velocity(hours).velocity_trend,
+        "velocity_trend": lambda: builder.velocity_calc.calculate_velocity(hours).velocity_trend
+    }
+
+
+def _build_additional_metrics(builder: ReportBuilder, hours: int) -> Dict[str, Any]:
+    """Build additional metric functions."""
+    return {
         "quality_score": lambda: builder.quality_calc.calculate_quality(hours).quality_score,
         "business_value": lambda: builder.business_calc.calculate_business_value(hours).overall_value_score,
         "active_branches": lambda: builder.branch_tracker.calculate_metrics().active_branches,
         "technical_debt": lambda: builder.quality_calc.calculate_quality(hours).technical_debt.debt_ratio
     }
+
+def build_metric_mapping(builder: ReportBuilder, hours: int) -> Dict[str, Any]:
+    """Build metric mapping dictionary."""
+    velocity_metrics = _build_velocity_metrics(builder, hours)
+    additional_metrics = _build_additional_metrics(builder, hours)
+    return {**velocity_metrics, **additional_metrics}
 
 
 def validate_metric_exists(metric_name: str, metric_map: Dict) -> None:

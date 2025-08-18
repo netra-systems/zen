@@ -1,240 +1,375 @@
-"""Performance metrics analysis module for DataSubAgent."""
+"""Modern Performance Analyzer with BaseExecutionInterface
 
-from typing import Dict, List, Any, Tuple, Optional
+Modernized performance metrics analysis with:
+- BaseExecutionInterface integration
+- Reliability patterns and error handling
+- Performance monitoring
+- Circuit breaker protection
+- Standardized execution patterns
+
+Business Value: Standardizes performance analysis execution.
+BVJ: Growth & Enterprise | Increase Reliability | +10% system uptime
+"""
+
+import time
+from typing import Dict, List, Any, Tuple, Optional, Protocol
 from datetime import datetime
+from dataclasses import dataclass
 
 from app.logging_config import central_logger as logger
+from app.agents.state import DeepAgentState
+
+# Modern Base Components
+from app.agents.base.interface import (
+    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
+    WebSocketManagerProtocol
+)
+from app.agents.base.executor import BaseExecutionEngine
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.schemas.shared_types import RetryConfig
+
+# Helper Modules
+from app.agents.data_sub_agent.performance_analysis_helpers import PerformanceAnalysisHelpers
+from app.agents.data_sub_agent.performance_analysis_validation import (
+    PerformanceAnalysisValidator, PerformanceQueryBuilder, PerformanceErrorHandlers
+)
 
 
-class PerformanceAnalyzer:
-    """Focused performance metrics analysis operations."""
+@dataclass
+class PerformanceAnalysisContext:
+    """Context for performance analysis operations."""
+    user_id: int
+    workload_id: Optional[str]
+    time_range: Tuple[datetime, datetime]
+    aggregation_level: Optional[str] = None
+    requires_caching: bool = True
     
-    def __init__(self, query_builder: Any, analysis_engine: Any, clickhouse_ops: Any, redis_manager: Any) -> None:
+
+class ModernPerformanceAnalyzer(BaseExecutionInterface):
+    """Modern performance analyzer with standardized execution patterns.
+    
+    Provides reliable performance metrics analysis with:
+    - Circuit breaker protection for external services
+    - Retry logic for transient failures  
+    - Comprehensive monitoring and metrics
+    - Standardized error handling and recovery
+    """
+    
+    def __init__(self, query_builder: Any, analysis_engine: Any, 
+                 clickhouse_ops: Any, redis_manager: Any,
+                 websocket_manager: Optional[WebSocketManagerProtocol] = None,
+                 reliability_manager: Optional[ReliabilityManager] = None):
+        super().__init__("ModernPerformanceAnalyzer", websocket_manager)
+        self._set_core_dependencies(query_builder, analysis_engine, clickhouse_ops, redis_manager)
+        self._initialize_execution_engine(reliability_manager)
+        self._initialize_helper_components()
+    
+    def _set_core_dependencies(self, query_builder: Any, analysis_engine: Any,
+                              clickhouse_ops: Any, redis_manager: Any) -> None:
+        """Set core dependencies for the analyzer."""
         self.query_builder = query_builder
         self.analysis_engine = analysis_engine
         self.clickhouse_ops = clickhouse_ops
         self.redis_manager = redis_manager
     
+    def _initialize_execution_engine(self, reliability_manager: Optional[ReliabilityManager]) -> None:
+        """Initialize execution engine with reliability patterns."""
+        if not reliability_manager:
+            reliability_manager = self._create_default_reliability_manager()
+        
+        monitor = ExecutionMonitor(max_history_size=1000)
+        self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
+        self.monitor = monitor
+    
+    def _create_default_reliability_manager(self) -> ReliabilityManager:
+        """Create default reliability manager with performance analysis optimized settings."""
+        circuit_config = self._create_circuit_breaker_config()
+        retry_config = self._create_retry_config()
+        return ReliabilityManager(circuit_config, retry_config)
+    
+    def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            name="performance_analysis",
+            failure_threshold=3,
+            recovery_timeout=30
+        )
+    
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(max_retries=2, base_delay=1.0, max_delay=10.0)
+    
+    def _initialize_helper_components(self) -> None:
+        """Initialize helper components for modular architecture."""
+        self.helpers = PerformanceAnalysisHelpers(self.analysis_engine)
+        self.validator = PerformanceAnalysisValidator(self.clickhouse_ops, self.redis_manager)
+        self.query_builder_helper = PerformanceQueryBuilder(self.query_builder)
+    
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for performance analysis."""
+        try:
+            return await self._perform_validation_workflow(context)
+        except Exception as e:
+            return self._handle_validation_error(e)
+    
+    async def _perform_validation_workflow(self, context: ExecutionContext) -> bool:
+        """Perform the validation workflow."""
+        analysis_context = self._extract_analysis_context(context)
+        validation_checks = await self._run_validation_checks(analysis_context)
+        is_valid = all(validation_checks.values())
+        await self.validator.log_validation_result(context, is_valid, validation_checks)
+        return is_valid
+    
+    async def _run_validation_checks(self, analysis_context) -> Dict[str, bool]:
+        """Run validation checks for analysis context."""
+        return await self.validator.run_validation_checks(
+            analysis_context.user_id, analysis_context.workload_id, analysis_context.time_range
+        )
+    
+    def _handle_validation_error(self, error: Exception) -> bool:
+        """Handle validation error and return False."""
+        logger.error(f"Precondition validation failed: {error}", exc_info=True)
+        return False
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute performance analysis core logic with modern patterns."""
+        analysis_context = self._extract_analysis_context(context)
+        await self._track_execution_start(context, analysis_context)
+        return await self._execute_with_error_handling(context, analysis_context)
+    
+    async def _execute_with_error_handling(self, context: ExecutionContext,
+                                          analysis_context: PerformanceAnalysisContext) -> Dict[str, Any]:
+        """Execute analysis workflow with error handling."""
+        try:
+            result = await self._execute_analysis_workflow(context, analysis_context)
+            return await self._finalize_successful_execution(context, result)
+        except Exception as e:
+            return await self._handle_execution_error(context, e)
+    
     async def analyze_performance_metrics(
-        self,
-        user_id: int,
-        workload_id: Optional[str],
+        self, user_id: int, workload_id: Optional[str], 
         time_range: Tuple[datetime, datetime]
     ) -> Dict[str, Any]:
-        """Analyze performance metrics from ClickHouse."""
-        return await self._execute_performance_analysis(user_id, workload_id, time_range)
+        """Legacy interface for backward compatibility."""
+        context = self._create_legacy_context(user_id, workload_id, time_range)
+        result = await self.execution_engine.execute(self, context)
+        return self._process_legacy_result(result)
     
-    async def _execute_performance_analysis(
-        self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime]
-    ) -> Dict[str, Any]:
-        """Execute complete performance analysis workflow."""
-        data = await self._fetch_metrics_data(user_id, workload_id, time_range)
+    def _create_legacy_context(self, user_id: int, workload_id: Optional[str],
+                              time_range: Tuple[datetime, datetime]) -> ExecutionContext:
+        """Create execution context for legacy interface."""
+        state = self.validator.create_legacy_state(user_id, workload_id, time_range)
+        return self._create_legacy_execution_context(state)
+    
+    def _create_legacy_execution_context(self, state) -> ExecutionContext:
+        """Create execution context for legacy interface."""
+        return ExecutionContext(
+            run_id=f"legacy_perf_{int(time.time())}",
+            agent_name=self.agent_name,
+            state=state,
+            stream_updates=False
+        )
+    
+    def _process_legacy_result(self, result) -> Dict[str, Any]:
+        """Process result from legacy execution."""
+        return result.result if result.success else self._create_error_response(result)
+    
+    async def execute_with_modern_patterns(self, state: DeepAgentState, run_id: str,
+                                         stream_updates: bool = False) -> ExecutionResult:
+        """Execute using modern execution patterns with full orchestration."""
+        context = self._create_modern_context(state, run_id, stream_updates)
+        return await self.execution_engine.execute(self, context)
+    
+    def _create_modern_context(self, state: DeepAgentState, run_id: str,
+                              stream_updates: bool) -> ExecutionContext:
+        """Create execution context for modern patterns."""
+        context_params = self._build_modern_context_params(run_id, state, stream_updates)
+        return ExecutionContext(**context_params)
+    
+    def _build_modern_context_params(self, run_id: str, state: DeepAgentState,
+                                    stream_updates: bool) -> Dict[str, Any]:
+        """Build parameters for modern execution context."""
+        return {
+            "run_id": run_id, "agent_name": self.agent_name,
+            "state": state, "stream_updates": stream_updates
+        }
+    
+    def _extract_analysis_context(self, context: ExecutionContext) -> PerformanceAnalysisContext:
+        """Extract performance analysis context from execution context."""
+        state = context.state
+        user_id = getattr(state, 'user_id', 0)
+        workload_id, time_range = self._extract_metadata_params(context)
+        if not time_range:
+            time_range = self._create_default_time_range()
+        return self._build_analysis_context(user_id, workload_id, time_range)
+    
+    def _extract_metadata_params(self, context: ExecutionContext) -> Tuple[Optional[str], Optional[Tuple]]:
+        """Extract workload_id and time_range from metadata."""
+        if not context.metadata:
+            return None, None
+        workload_id = context.metadata.get('workload_id')
+        time_range = context.metadata.get('time_range')
+        return workload_id, time_range
+    
+    def _create_default_time_range(self) -> Tuple[datetime, datetime]:
+        """Create default time range for last 24 hours."""
+        end_time = datetime.utcnow()
+        start_time = end_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        return (start_time, end_time)
+    
+    def _build_analysis_context(self, user_id: int, workload_id: Optional[str], 
+                               time_range: Tuple[datetime, datetime]) -> PerformanceAnalysisContext:
+        """Build PerformanceAnalysisContext from extracted parameters."""
+        return PerformanceAnalysisContext(
+            user_id=user_id,
+            workload_id=workload_id,
+            time_range=time_range
+        )
+    
+    async def _track_execution_start(self, context: ExecutionContext,
+                                   analysis_context: PerformanceAnalysisContext) -> None:
+        """Track execution start with monitoring integration."""
+        self.monitor.start_execution(context)
+        await self.send_status_update(context, "initializing", "Preparing performance analysis")
+        start_time, end_time = analysis_context.time_range
+        logger.info(f"Starting performance analysis for user {analysis_context.user_id}, "
+                   f"time range: {start_time} to {end_time}")
+    
+    async def _execute_analysis_workflow(self, context: ExecutionContext,
+                                       analysis_context: PerformanceAnalysisContext) -> Dict[str, Any]:
+        """Execute analysis workflow with enhanced monitoring."""
+        data = await self._fetch_metrics_data_with_monitoring(analysis_context, context)
+        return await self._process_fetched_data(context, data, analysis_context)
+    
+    async def _process_fetched_data(self, context: ExecutionContext, data: Optional[List[Dict]],
+                                   analysis_context: PerformanceAnalysisContext) -> Dict[str, Any]:
+        """Process fetched data and create analysis result."""
         if not data:
-            return self._create_no_data_response()
-        return self._analyze_metrics_data(data, time_range)
+            return PerformanceErrorHandlers.create_no_data_response()
+        result = self._analyze_metrics_data_comprehensive(data, analysis_context.time_range)
+        self._record_analysis_metrics(context, result, analysis_context)
+        return result
     
-    def _analyze_metrics_data(self, data: List[Dict], time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
-        """Analyze metrics data and add comprehensive analysis."""
-        metric_values = self._extract_metric_values(data)
-        result = self._build_base_result(time_range, data, metric_values)
+    async def _finalize_successful_execution(self, context: ExecutionContext,
+                                           result: Dict[str, Any]) -> Dict[str, Any]:
+        """Finalize successful execution with metrics tracking."""
+        await self.send_status_update(context, "completed", "Performance analysis completed")
+        logger.info(f"Performance analysis completed successfully for {context.run_id}")
+        return result
+    
+    async def _handle_execution_error(self, context: ExecutionContext, error: Exception) -> Dict[str, Any]:
+        """Handle execution errors with comprehensive error tracking."""
+        self.monitor.record_error(context, error)
+        error_result = PerformanceErrorHandlers.create_error_response_from_exception(error)
+        await self.send_status_update(context, "failed", f"Analysis failed: {str(error)}")
+        logger.error(f"Performance analysis failed for {context.run_id}: {error}", exc_info=True)
+        return error_result
+    
+    async def _fetch_metrics_data_with_monitoring(self, analysis_context: PerformanceAnalysisContext,
+                                                context: ExecutionContext) -> Optional[List[Dict]]:
+        """Fetch metrics data with enhanced monitoring and error handling."""
+        start_time, end_time = analysis_context.time_range
+        query_params = self._build_query_parameters(analysis_context, start_time, end_time)
+        return await self._execute_data_fetch(context, query_params)
+    
+    async def _execute_data_fetch(self, context: ExecutionContext, query_params: Dict[str, str]) -> Optional[List[Dict]]:
+        """Execute data fetch with status update."""
+        await self.send_status_update(context, "fetching_data", "Fetching performance metrics")
+        return await self.clickhouse_ops.fetch_data(
+            query_params['query'], query_params['cache_key'], self.redis_manager
+        )
+    
+    def _build_query_parameters(self, analysis_context: PerformanceAnalysisContext,
+                               start_time: datetime, end_time: datetime) -> Dict[str, str]:
+        """Build query and cache key parameters."""
+        aggregation = self.query_builder_helper.determine_aggregation_level(start_time, end_time)
+        query = self._build_performance_query(analysis_context, start_time, end_time, aggregation)
+        cache_key = self._build_cache_key(analysis_context, start_time, end_time)
+        return {'query': query, 'cache_key': cache_key}
+    
+    def _build_performance_query(self, analysis_context: PerformanceAnalysisContext,
+                                start_time: datetime, end_time: datetime, aggregation: str) -> str:
+        """Build performance query."""
+        return self.query_builder_helper.build_performance_query(
+            analysis_context.user_id, analysis_context.workload_id, 
+            start_time, end_time, aggregation
+        )
+    
+    def _build_cache_key(self, analysis_context: PerformanceAnalysisContext,
+                        start_time: datetime, end_time: datetime) -> str:
+        """Build cache key for query."""
+        return self.query_builder_helper.build_cache_key(
+            analysis_context.user_id, analysis_context.workload_id, 
+            start_time, end_time
+        )
+    
+    def _analyze_metrics_data_comprehensive(self, data: List[Dict], time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
+        """Analyze metrics data with comprehensive analysis components."""
+        metric_values = self.helpers.extract_metric_values(data)
+        result = self.helpers.build_base_result(time_range, data, metric_values)
         self._add_all_analysis_components(result, data, metric_values)
         return result
     
     def _add_all_analysis_components(self, result: Dict, data: List[Dict], metric_values: Dict) -> None:
         """Add all analysis components to result."""
-        self._add_trend_analysis(result, data, metric_values)
-        self._add_seasonality_analysis(result, data, metric_values)
-        self._add_outlier_analysis(result, data, metric_values)
+        self.helpers.add_trend_analysis(result, data, metric_values)
+        self.helpers.add_seasonality_analysis(result, data, metric_values)
+        self.helpers.add_outlier_analysis(result, data, metric_values)
     
-    async def _fetch_metrics_data(self, user_id: int, workload_id: Optional[str], time_range: Tuple[datetime, datetime]) -> Optional[List[Dict]]:
-        """Fetch metrics data from ClickHouse."""
-        start_time, end_time = time_range
-        aggregation = self._determine_aggregation_level(start_time, end_time)
-        query = self._build_performance_query(user_id, workload_id, start_time, end_time, aggregation)
-        cache_key = self._build_cache_key(user_id, workload_id, start_time, end_time)
-        return await self.clickhouse_ops.fetch_data(query, cache_key, self.redis_manager)
+    def _record_analysis_metrics(self, context: ExecutionContext, result: Dict[str, Any],
+                               analysis_context: PerformanceAnalysisContext) -> None:
+        """Record analysis-specific metrics for performance tracking."""
+        metrics = self._build_analysis_metrics(result, analysis_context)
+        context.metadata.update(metrics)
     
-    def _build_performance_query(self, user_id: int, workload_id: Optional[str], 
-                                start_time: datetime, end_time: datetime, aggregation: str) -> str:
-        """Build performance metrics query."""
-        return self.query_builder.build_performance_metrics_query(
-            user_id, workload_id, start_time, end_time, aggregation
-        )
+    def _build_analysis_metrics(self, result: Dict[str, Any],
+                               analysis_context: PerformanceAnalysisContext) -> Dict[str, Any]:
+        """Build metrics dictionary for analysis tracking."""
+        base_metrics = self._create_base_metrics(analysis_context)
+        performance_metrics = self._create_performance_metrics(result, analysis_context)
+        return {**base_metrics, **performance_metrics}
     
-    def _build_cache_key(self, user_id: int, workload_id: Optional[str], 
-                        start_time: datetime, end_time: datetime) -> str:
-        """Build cache key for performance metrics."""
-        return f"perf_metrics:{user_id}:{workload_id}:{start_time.isoformat()}:{end_time.isoformat()}"
-    
-    def _determine_aggregation_level(self, start_time: datetime, end_time: datetime) -> str:
-        """Determine appropriate aggregation level based on time range."""
-        time_diff = (end_time - start_time).total_seconds()
-        if time_diff <= 3600:
-            return "minute"
-        elif time_diff <= 86400:
-            return "hour"
-        return "day"
-    
-    def _create_no_data_response(self) -> Dict[str, Any]:
-        """Create response for no data found."""
+    def _create_base_metrics(self, analysis_context: PerformanceAnalysisContext) -> Dict[str, Any]:
+        """Create base metrics from analysis context."""
         return {
-            "status": "no_data",
-            "message": "No performance metrics found for the specified criteria"
+            "user_id": analysis_context.user_id,
+            "workload_id": analysis_context.workload_id,
+            "analysis_success": True
         }
     
-    def _extract_metric_values(self, data: List[Dict]) -> Dict[str, List]:
-        """Extract metric values from data for analysis."""
+    def _create_performance_metrics(self, result: Dict[str, Any],
+                                   analysis_context: PerformanceAnalysisContext) -> Dict[str, Any]:
+        """Create performance-related metrics."""
         return {
-            "latencies": self._extract_latency_values(data),
-            "throughputs": self._extract_throughput_values(data),
-            "error_rates": self._extract_error_rate_values(data),
-            "costs": self._extract_cost_values(data)
+            "data_points": len(result.get("raw_data", [])),
+            "time_range_hours": self.validator.calculate_time_range_hours(analysis_context.time_range)
         }
     
-    def _extract_latency_values(self, data: List[Dict]) -> List[float]:
-        """Extract latency values from data."""
-        return [row.get('latency_p50', 0) for row in data if row.get('latency_p50')]
-    
-    def _extract_throughput_values(self, data: List[Dict]) -> List[float]:
-        """Extract throughput values from data."""
-        return [row.get('avg_throughput', 0) for row in data if row.get('avg_throughput')]
-    
-    def _extract_error_rate_values(self, data: List[Dict]) -> List[float]:
-        """Extract error rate values from data."""
-        return [row.get('error_rate', 0) for row in data]
-    
-    def _extract_cost_values(self, data: List[Dict]) -> List[float]:
-        """Extract cost values from data."""
-        return [row.get('total_cost', 0) for row in data]
-    
-    def _build_base_result(self, time_range: Tuple[datetime, datetime], data: List[Dict], metric_values: Dict) -> Dict[str, Any]:
-        """Build base result structure with time range and statistics."""
-        start_time, end_time = time_range
-        aggregation = self._determine_aggregation_level(start_time, end_time)
-        time_range_info = self._create_time_range_info(start_time, end_time, aggregation)
-        statistics = self._compute_metric_statistics(data, metric_values)
-        raw_data = self._limit_raw_data(data)
-        return {**time_range_info, **statistics, "raw_data": raw_data}
-    
-    def _create_time_range_info(self, start_time: datetime, end_time: datetime, aggregation: str) -> Dict[str, Any]:
-        """Create time range information structure."""
+    def _create_error_response(self, result: ExecutionResult) -> Dict[str, Any]:
+        """Create error response from execution result."""
         return {
-            "time_range": {
-                "start": start_time.isoformat(),
-                "end": end_time.isoformat(),
-                "aggregation_level": aggregation
-            }
+            "status": "error",
+            "error": result.error,
+            "execution_time_ms": result.execution_time_ms,
+            "retry_count": result.retry_count
         }
     
-    def _limit_raw_data(self, data: List[Dict]) -> List[Dict]:
-        """Limit raw data to first 100 entries."""
-        return data[:100]
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive health status including all components."""
+        base_status = self._get_base_health_status()
+        performance_status = PerformanceErrorHandlers.get_performance_components_health()
+        return {**base_status, **performance_status}
     
-    def _compute_metric_statistics(self, data: List[Dict], metric_values: Dict) -> Dict[str, Any]:
-        """Compute statistics for all metrics."""
+    def _get_base_health_status(self) -> Dict[str, Any]:
+        """Get base health status for core components."""
         return {
-            "summary": self._build_summary_stats(data, metric_values["costs"]),
-            "latency": self._compute_latency_stats(metric_values["latencies"]),
-            "throughput": self._compute_throughput_stats(metric_values["throughputs"]),
-            "error_rate": self._compute_error_rate_stats(metric_values["error_rates"])
+            "agent_name": self.agent_name,
+            "execution_engine": self.execution_engine.get_health_status(),
+            "monitor": self.monitor.get_health_status()
         }
-    
-    def _compute_latency_stats(self, latencies: List[float]) -> Dict[str, Any]:
-        """Compute latency statistics."""
-        return self.analysis_engine.calculate_statistics(latencies)
-    
-    def _compute_throughput_stats(self, throughputs: List[float]) -> Dict[str, Any]:
-        """Compute throughput statistics."""
-        return self.analysis_engine.calculate_statistics(throughputs)
-    
-    def _compute_error_rate_stats(self, error_rates: List[float]) -> Dict[str, Any]:
-        """Compute error rate statistics."""
-        return self.analysis_engine.calculate_statistics(error_rates)
-    
-    def _build_summary_stats(self, data: List[Dict], costs: List) -> Dict[str, Any]:
-        """Build summary statistics."""
-        return {
-            "total_events": self._sum_total_events(data),
-            "unique_workloads": self._get_max_unique_workloads(data),
-            "total_cost": sum(costs)
-        }
-    
-    def _sum_total_events(self, data: List[Dict]) -> int:
-        """Sum total events from data."""
-        return sum(row.get('event_count', 0) for row in data)
-    
-    def _get_max_unique_workloads(self, data: List[Dict]) -> int:
-        """Get maximum unique workloads from data."""
-        return max(row.get('unique_workloads', 0) for row in data) if data else 0
-    
-    def _add_trend_analysis(self, result: Dict, data: List[Dict], metric_values: Dict) -> None:
-        """Add trend analysis if enough data points."""
-        if len(data) >= 3:
-            timestamps = self._extract_timestamps(data)
-            result["trends"] = self._build_trend_data(metric_values, timestamps)
-    
-    def _extract_timestamps(self, data: List[Dict]) -> List[datetime]:
-        """Extract timestamps from data."""
-        return [datetime.fromisoformat(row['time_bucket']) for row in data]
-    
-    def _build_trend_data(self, metric_values: Dict, timestamps: List[datetime]) -> Dict[str, Any]:
-        """Build trend analysis data."""
-        return {
-            "latency": self._detect_latency_trend(metric_values["latencies"], timestamps),
-            "throughput": self._detect_throughput_trend(metric_values["throughputs"], timestamps),
-            "cost": self._detect_cost_trend(metric_values["costs"], timestamps)
-        }
-    
-    def _detect_latency_trend(self, latencies: List[float], timestamps: List[datetime]) -> Dict[str, Any]:
-        """Detect latency trend."""
-        return self.analysis_engine.detect_trend(latencies[:len(timestamps)], timestamps)
-    
-    def _detect_throughput_trend(self, throughputs: List[float], timestamps: List[datetime]) -> Dict[str, Any]:
-        """Detect throughput trend."""
-        return self.analysis_engine.detect_trend(throughputs[:len(timestamps)], timestamps)
-    
-    def _detect_cost_trend(self, costs: List[float], timestamps: List[datetime]) -> Dict[str, Any]:
-        """Detect cost trend."""
-        return self.analysis_engine.detect_trend(costs, timestamps)
-    
-    def _add_seasonality_analysis(self, result: Dict, data: List[Dict], metric_values: Dict) -> None:
-        """Add seasonality detection if enough data."""
-        if len(data) >= 24:
-            timestamps = self._extract_timestamps(data)
-            seasonality = self._detect_seasonality(metric_values["latencies"], timestamps)
-            result["seasonality"] = seasonality
-    
-    def _detect_seasonality(self, latencies: List[float], timestamps: List[datetime]) -> Dict[str, Any]:
-        """Detect seasonality in latency data."""
-        return self.analysis_engine.detect_seasonality(latencies[:len(timestamps)], timestamps)
-    
-    def _add_outlier_analysis(self, result: Dict, data: List[Dict], metric_values: Dict) -> None:
-        """Add outlier analysis to results."""
-        outlier_indices = self._identify_outliers(metric_values["latencies"])
-        if outlier_indices:
-            outlier_data = self._build_outlier_data(data, metric_values["latencies"], outlier_indices)
-            result["outliers"] = {"latency_outliers": outlier_data}
-    
-    def _identify_outliers(self, latencies: List[float]) -> List[int]:
-        """Identify outliers in latency data."""
-        return self.analysis_engine.identify_outliers(latencies)
-    
-    def _build_outlier_data(self, data: List[Dict], latencies: List, outlier_indices: List[int]) -> List[Dict]:
-        """Build outlier data for response."""
-        return [
-            self._create_outlier_entry(data, latencies, i)
-            for i in outlier_indices[:10]
-        ]
-    
-    def _create_outlier_entry(self, data: List[Dict], latencies: List, index: int) -> Dict[str, Any]:
-        """Create single outlier entry."""
-        percentile_rank = self._calculate_percentile_rank(latencies, index)
-        return {
-            "timestamp": data[index]['time_bucket'],
-            "value": latencies[index],
-            "percentile_rank": percentile_rank
-        }
-    
-    def _calculate_percentile_rank(self, latencies: List, index: int) -> float:
-        """Calculate percentile rank for outlier."""
-        return 100 * sum(1 for v in latencies if v < latencies[index]) / len(latencies)
+
+
+# Legacy alias for backward compatibility
+PerformanceAnalyzer = ModernPerformanceAnalyzer

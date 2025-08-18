@@ -6,17 +6,11 @@ from datetime import datetime, timezone
 
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, ValidationError, ConfigDict
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from pydantic import ValidationError
+from sqlalchemy.exc import SQLAlchemyError
 from starlette.status import (
-    HTTP_400_BAD_REQUEST,
-    HTTP_401_UNAUTHORIZED,
-    HTTP_403_FORBIDDEN,
-    HTTP_404_NOT_FOUND,
-    HTTP_409_CONFLICT,
     HTTP_422_UNPROCESSABLE_ENTITY,
     HTTP_500_INTERNAL_SERVER_ERROR,
-    HTTP_503_SERVICE_UNAVAILABLE,
 )
 
 from app.logging_config import central_logger
@@ -24,33 +18,12 @@ from .exceptions import (
     NetraException,
     ErrorCode,
     ErrorSeverity,
-    ErrorDetails,
-    AuthenticationError,
-    AuthorizationError,
-    DatabaseError,
-    DatabaseConnectionError,
-    RecordNotFoundError,
-    RecordAlreadyExistsError,
-    ConstraintViolationError,
-    ServiceError,
-    ServiceTimeoutError,
-    ValidationError as NetraValidationError,
 )
-
-
-class ErrorResponse(BaseModel):
-    """Standardized error response model."""
-    
-    error: bool = True
-    error_code: str
-    message: str
-    user_message: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
-    trace_id: str
-    timestamp: str
-    request_id: Optional[str] = None
-    
-    model_config = ConfigDict(use_enum_values=True)
+from .error_response import ErrorResponse
+from .error_handlers_validation import ValidationErrorHandler
+from .error_handlers_database import DatabaseErrorHandler
+from .error_handlers_http import HttpErrorHandler
+from .error_handlers_status_mapping import StatusCodeMapper
 
 
 class ApiErrorHandler:
@@ -58,6 +31,14 @@ class ApiErrorHandler:
     
     def __init__(self):
         self._logger = central_logger.get_logger(__name__)
+        self._init_handlers()
+    
+    def _init_handlers(self):
+        """Initialize specialized error handlers."""
+        self._validation_handler = ValidationErrorHandler(self._logger)
+        self._database_handler = DatabaseErrorHandler(self._logger)
+        self._http_handler = HttpErrorHandler(self._logger)
+        self._status_mapper = StatusCodeMapper()
     
     def handle_exception(
         self,
@@ -66,9 +47,23 @@ class ApiErrorHandler:
         trace_id: Optional[str] = None
     ) -> ErrorResponse:
         """Handle any exception and return standardized error response."""
-        trace_id = self._prepare_trace_id(trace_id)
+        return self._process_exception_with_context(exc, request, trace_id)
+    
+    def _process_exception_with_context(
+        self, 
+        exc: Exception, 
+        request: Optional[Request], 
+        trace_id: Optional[str]
+    ) -> ErrorResponse:
+        """Process exception with trace ID and request context."""
+        context_data = self._prepare_exception_context(trace_id, request)
+        return self._route_exception_to_handler(exc, context_data['trace_id'], context_data['request_id'])
+    
+    def _prepare_exception_context(self, trace_id: Optional[str], request: Optional[Request]) -> Dict[str, Optional[str]]:
+        """Prepare exception context data."""
+        prepared_trace_id = self._prepare_trace_id(trace_id)
         request_id = self._extract_request_id(request)
-        return self._route_exception_to_handler(exc, trace_id, request_id)
+        return {'trace_id': prepared_trace_id, 'request_id': request_id}
     
     def _prepare_trace_id(self, trace_id: Optional[str]) -> str:
         """Prepare trace ID for exception handling."""
@@ -87,21 +82,33 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Route exception to appropriate handler based on type."""
-        handler_map = self._get_exception_handler_map()
-        handler = self._find_exception_handler(exc, handler_map)
+        handler = self._select_exception_handler(exc)
         return handler(exc, trace_id, request_id)
+    
+    def _select_exception_handler(self, exc: Exception) -> callable:
+        """Select appropriate handler for exception type."""
+        handler_map = self._get_exception_handler_map()
+        return self._find_exception_handler(exc, handler_map)
     
     def _get_exception_handler_map(self) -> Dict[type, callable]:
         """Get mapping of exception types to handler methods."""
+        return self._build_handler_map()
+    
+    def _build_handler_map(self) -> Dict[type, callable]:
+        """Build exception handler mapping."""
         return {
             NetraException: self._handle_netra_exception,
-            ValidationError: self._handle_pydantic_validation_error,
-            SQLAlchemyError: self._handle_sqlalchemy_error,
-            HTTPException: self._handle_http_exception,
+            ValidationError: self._handle_validation_delegation,
+            SQLAlchemyError: self._handle_database_delegation,
+            HTTPException: self._handle_http_delegation,
         }
     
     def _find_exception_handler(self, exc: Exception, handler_map: Dict) -> callable:
         """Find appropriate handler for exception type."""
+        return self._search_handlers(exc, handler_map)
+    
+    def _search_handlers(self, exc: Exception, handler_map: Dict) -> callable:
+        """Search for matching handler in handler map."""
         for exc_type, handler in handler_map.items():
             if isinstance(exc, exc_type):
                 return handler
@@ -114,9 +121,22 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Handle custom Netra exceptions."""
+        return self._process_netra_exception(exc, trace_id, request_id)
+    
+    def _process_netra_exception(
+        self, 
+        exc: NetraException, 
+        trace_id: str, 
+        request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Process Netra exception with logging and response creation."""
+        self._handle_netra_exception_data(exc, trace_id)
+        return self._create_netra_error_response(exc, trace_id, request_id)
+    
+    def _handle_netra_exception_data(self, exc: NetraException, trace_id: str) -> None:
+        """Handle Netra exception data updates and logging."""
         self._update_exception_trace_id(exc, trace_id)
         self._log_error(exc, exc.error_details.severity)
-        return self._create_netra_error_response(exc, trace_id, request_id)
     
     def _update_exception_trace_id(self, exc: NetraException, trace_id: str) -> None:
         """Update trace ID in exception details."""
@@ -130,150 +150,67 @@ class ApiErrorHandler:
     ) -> ErrorResponse:
         """Create error response for Netra exception."""
         error_code_value = self._extract_error_code_value(exc.error_details.code)
-        return ErrorResponse(
-            error_code=error_code_value,
-            message=exc.error_details.message,
-            user_message=exc.error_details.user_message,
-            details=exc.error_details.details,
-            trace_id=trace_id,
-            timestamp=exc.error_details.timestamp.isoformat(),
-            request_id=request_id
+        return self._build_netra_response(exc, error_code_value, trace_id, request_id)
+    
+    def _build_netra_response(
+        self, exc: NetraException, error_code_value: str, trace_id: str, request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Build ErrorResponse from Netra exception details."""
+        return self._construct_netra_error_response(
+            exc, error_code_value, trace_id, request_id
         )
+    
+    def _construct_netra_error_response(
+        self, 
+        exc: NetraException, 
+        error_code_value: str, 
+        trace_id: str, 
+        request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Construct ErrorResponse with Netra exception data."""
+        response_params = self._prepare_netra_response_params(exc, error_code_value, trace_id, request_id)
+        return ErrorResponse(**response_params)
+    
+    def _prepare_netra_response_params(
+        self, exc: NetraException, error_code_value: str, trace_id: str, request_id: Optional[str]
+    ) -> Dict[str, Any]:
+        """Prepare parameters for Netra error response."""
+        return {
+            'error_code': error_code_value, 'message': exc.error_details.message,
+            'user_message': exc.error_details.user_message, 'details': exc.error_details.details,
+            'trace_id': trace_id, 'timestamp': exc.error_details.timestamp.isoformat(), 'request_id': request_id
+        }
     
     def _extract_error_code_value(self, code) -> str:
         """Extract string value from error code."""
         return code if isinstance(code, str) else code.value
     
-    def _handle_pydantic_validation_error(
+    def _handle_validation_delegation(
         self,
         exc: ValidationError,
         trace_id: str,
         request_id: Optional[str]
     ) -> ErrorResponse:
-        """Handle Pydantic validation errors."""
-        validation_errors = self._extract_validation_errors(exc)
-        self._logger.warning(f"Validation error: {validation_errors}")
-        return self._create_validation_error_response(
-            validation_errors, trace_id, request_id
-        )
+        """Delegate validation error handling."""
+        return self._validation_handler.handle_validation_error(exc, trace_id, request_id)
     
-    def _extract_validation_errors(self, exc: ValidationError) -> list:
-        """Extract validation errors from Pydantic exception."""
-        validation_errors = []
-        for error in exc.errors():
-            field = " -> ".join(str(loc) for loc in error["loc"])
-            validation_errors.append(f"{field}: {error['msg']}")
-        return validation_errors
-    
-    def _create_validation_error_response(
-        self,
-        validation_errors: list,
-        trace_id: str,
-        request_id: Optional[str]
-    ) -> ErrorResponse:
-        """Create error response for validation errors."""
-        return ErrorResponse(
-            error_code=ErrorCode.VALIDATION_ERROR.value,
-            message="Request validation failed",
-            user_message="Please check your input and try again",
-            details={
-                "validation_errors": validation_errors,
-                "error_count": len(validation_errors)
-            },
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
-        )
-    
-    def _handle_sqlalchemy_error(
+    def _handle_database_delegation(
         self,
         exc: SQLAlchemyError,
         trace_id: str,
         request_id: Optional[str]
     ) -> ErrorResponse:
-        """Handle SQLAlchemy database errors."""
-        if isinstance(exc, IntegrityError):
-            return self._handle_integrity_error(exc, trace_id, request_id)
-        return self._handle_general_db_error(exc, trace_id, request_id)
+        """Delegate database error handling."""
+        return self._database_handler.handle_database_error(exc, trace_id, request_id)
     
-    def _handle_integrity_error(
-        self,
-        exc: IntegrityError,
-        trace_id: str,
-        request_id: Optional[str]
-    ) -> ErrorResponse:
-        """Handle database integrity constraint violations."""
-        self._logger.warning(f"Database integrity error: {exc}")
-        return ErrorResponse(
-            error_code=ErrorCode.DATABASE_CONSTRAINT_VIOLATION.value,
-            message="Database constraint violation",
-            user_message="The operation could not be completed due to data constraints",
-            details={"error_type": "constraint_violation"},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
-        )
-    
-    def _handle_general_db_error(
-        self,
-        exc: SQLAlchemyError,
-        trace_id: str,
-        request_id: Optional[str]
-    ) -> ErrorResponse:
-        """Handle general SQLAlchemy database errors."""
-        self._logger.error(f"Database error: {str(exc)}", exc_info=True)
-        return ErrorResponse(
-            error_code=ErrorCode.DATABASE_QUERY_FAILED.value,
-            message="Database operation failed",
-            user_message="A database error occurred. Please try again",
-            details={"error_type": type(exc).__name__},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
-        )
-    
-    def _handle_http_exception(
+    def _handle_http_delegation(
         self,
         exc: HTTPException,
         trace_id: str,
         request_id: Optional[str]
     ) -> ErrorResponse:
-        """Handle FastAPI HTTP exceptions."""
-        error_code = self._map_http_status_to_error_code(exc.status_code)
-        self._logger.warning(f"HTTP exception {exc.status_code}: {exc.detail}")
-        return self._create_http_error_response(
-            exc, error_code, trace_id, request_id
-        )
-    
-    def _map_http_status_to_error_code(self, status_code: int) -> ErrorCode:
-        """Map HTTP status codes to internal error codes."""
-        status_to_error_code = {
-            HTTP_401_UNAUTHORIZED: ErrorCode.AUTHENTICATION_FAILED,
-            HTTP_403_FORBIDDEN: ErrorCode.AUTHORIZATION_FAILED,
-            HTTP_404_NOT_FOUND: ErrorCode.RECORD_NOT_FOUND,
-            HTTP_409_CONFLICT: ErrorCode.RECORD_ALREADY_EXISTS,
-            HTTP_422_UNPROCESSABLE_ENTITY: ErrorCode.VALIDATION_ERROR,
-            HTTP_503_SERVICE_UNAVAILABLE: ErrorCode.SERVICE_UNAVAILABLE,
-        }
-        return status_to_error_code.get(status_code, ErrorCode.INTERNAL_ERROR)
-    
-    def _create_http_error_response(
-        self,
-        exc: HTTPException,
-        error_code: ErrorCode,
-        trace_id: str,
-        request_id: Optional[str]
-    ) -> ErrorResponse:
-        """Create error response for HTTP exceptions."""
-        return ErrorResponse(
-            error_code=error_code.value,
-            message=str(exc.detail),
-            user_message=str(exc.detail),
-            details={"status_code": exc.status_code, "headers": dict(exc.headers) if exc.headers else None},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
-        )
+        """Delegate HTTP error handling."""
+        return self._http_handler.handle_http_error(exc, trace_id, request_id)
     
     def _handle_unknown_exception(
         self,
@@ -282,8 +219,21 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Handle unknown exceptions."""
-        self._logger.error(f"Unhandled exception: {exc}", exc_info=True)
+        return self._process_unknown_exception(exc, trace_id, request_id)
+    
+    def _process_unknown_exception(
+        self, 
+        exc: Exception, 
+        trace_id: str, 
+        request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Process unknown exception with logging."""
+        self._log_unknown_exception(exc)
         return self._create_unknown_error_response(trace_id, request_id)
+    
+    def _log_unknown_exception(self, exc: Exception) -> None:
+        """Log unknown exception with full details."""
+        self._logger.error(f"Unhandled exception: {exc}", exc_info=True)
     
     def _create_unknown_error_response(
         self,
@@ -291,15 +241,20 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Create error response for unknown exceptions."""
-        return ErrorResponse(
-            error_code=ErrorCode.INTERNAL_ERROR.value,
-            message="An internal server error occurred",
-            user_message="Something went wrong. Please try again later",
-            details={"error_id": trace_id},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
-        )
+        return self._build_unknown_error_response(trace_id, request_id)
+    
+    def _build_unknown_error_response(self, trace_id: str, request_id: Optional[str]) -> ErrorResponse:
+        """Build unknown exception error response."""
+        response_params = self._prepare_unknown_response_params(trace_id, request_id)
+        return ErrorResponse(**response_params)
+    
+    def _prepare_unknown_response_params(self, trace_id: str, request_id: Optional[str]) -> Dict[str, Any]:
+        """Prepare parameters for unknown error response."""
+        return {
+            'error_code': ErrorCode.INTERNAL_ERROR.value, 'message': "An internal server error occurred",
+            'user_message': "Something went wrong. Please try again later", 'details': {"error_id": trace_id},
+            'trace_id': trace_id, 'timestamp': datetime.now(timezone.utc).isoformat(), 'request_id': request_id
+        }
     
     def _log_error(self, exc: Exception, severity: Union[ErrorSeverity, str]):
         """Log error based on severity level."""
@@ -315,73 +270,29 @@ class ApiErrorHandler:
     
     def _get_log_method(self, severity_value: str):
         """Get appropriate logging method for severity level."""
-        log_methods = {
-            ErrorSeverity.CRITICAL.value: lambda msg: self._logger.critical(msg, exc_info=True),
-            ErrorSeverity.HIGH.value: lambda msg: self._logger.error(msg, exc_info=True),
+        log_methods = self._build_log_methods_map()
+        return log_methods.get(severity_value, self._logger.info)
+    
+    def _build_log_methods_map(self) -> Dict[str, callable]:
+        """Build mapping of severity values to log methods."""
+        return {
+            ErrorSeverity.CRITICAL.value: self._critical_log,
+            ErrorSeverity.HIGH.value: self._error_log,
             ErrorSeverity.MEDIUM.value: self._logger.warning,
             ErrorSeverity.LOW.value: self._logger.info
         }
-        return log_methods.get(severity_value, self._logger.info)
+    
+    def _critical_log(self, msg: str):
+        """Log critical error with stack trace."""
+        self._logger.critical(msg, exc_info=True)
+    
+    def _error_log(self, msg: str):
+        """Log error with stack trace."""
+        self._logger.error(msg, exc_info=True)
     
     def get_http_status_code(self, error_code: ErrorCode) -> int:
         """Map error codes to HTTP status codes."""
-        status_map = self._get_error_status_map()
-        return status_map.get(error_code, HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    def _get_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get error code to HTTP status mapping."""
-        auth_map = self._get_auth_error_status_map()
-        db_map = self._get_db_error_status_map()
-        validation_map = self._get_validation_error_status_map()
-        service_map = self._get_service_error_status_map()
-        websocket_map = self._get_websocket_error_status_map()
-        file_map = self._get_file_error_status_map()
-        return {**auth_map, **db_map, **validation_map, **service_map, **websocket_map, **file_map}
-    
-    def _get_auth_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get authentication/authorization error status mapping."""
-        return {
-            ErrorCode.AUTHENTICATION_FAILED: HTTP_401_UNAUTHORIZED,
-            ErrorCode.AUTHORIZATION_FAILED: HTTP_403_FORBIDDEN,
-            ErrorCode.TOKEN_EXPIRED: HTTP_401_UNAUTHORIZED,
-            ErrorCode.TOKEN_INVALID: HTTP_401_UNAUTHORIZED,
-        }
-    
-    def _get_db_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get database error status mapping."""
-        return {
-            ErrorCode.RECORD_NOT_FOUND: HTTP_404_NOT_FOUND,
-            ErrorCode.RECORD_ALREADY_EXISTS: HTTP_409_CONFLICT,
-            ErrorCode.DATABASE_CONSTRAINT_VIOLATION: HTTP_409_CONFLICT,
-            ErrorCode.DATABASE_CONNECTION_FAILED: HTTP_503_SERVICE_UNAVAILABLE,
-        }
-    
-    def _get_validation_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get validation error status mapping."""
-        return {
-            ErrorCode.VALIDATION_ERROR: HTTP_400_BAD_REQUEST,
-            ErrorCode.DATA_VALIDATION_ERROR: HTTP_400_BAD_REQUEST,
-        }
-    
-    def _get_service_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get service error status mapping."""
-        return {
-            ErrorCode.SERVICE_UNAVAILABLE: HTTP_503_SERVICE_UNAVAILABLE,
-            ErrorCode.SERVICE_TIMEOUT: HTTP_503_SERVICE_UNAVAILABLE,
-        }
-    
-    def _get_websocket_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get WebSocket error status mapping."""
-        return {
-            ErrorCode.WEBSOCKET_AUTHENTICATION_FAILED: HTTP_401_UNAUTHORIZED,
-        }
-    
-    def _get_file_error_status_map(self) -> Dict[ErrorCode, int]:
-        """Get file error status mapping."""
-        return {
-            ErrorCode.FILE_NOT_FOUND: HTTP_404_NOT_FOUND,
-            ErrorCode.FILE_ACCESS_DENIED: HTTP_403_FORBIDDEN,
-        }
+        return self._status_mapper.get_http_status_code(error_code)
 
 
 # Global error handler instance
@@ -438,7 +349,6 @@ def _create_json_response(status_code: int, error_response: ErrorResponse) -> JS
 async def validation_exception_handler(request: Request, exc: ValidationError) -> JSONResponse:
     """FastAPI exception handler for validation errors."""
     error_response = handle_exception(exc, request)
-    
     return JSONResponse(
         status_code=HTTP_422_UNPROCESSABLE_ENTITY,
         content=error_response.model_dump()
@@ -448,7 +358,6 @@ async def validation_exception_handler(request: Request, exc: ValidationError) -
 async def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
     """FastAPI exception handler for HTTP exceptions."""
     error_response = handle_exception(exc, request)
-    
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response.model_dump()
@@ -458,7 +367,6 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 async def general_exception_handler(request: Request, exc: Exception) -> JSONResponse:
     """FastAPI exception handler for general exceptions."""
     error_response = handle_exception(exc, request)
-    
     return JSONResponse(
         status_code=HTTP_500_INTERNAL_SERVER_ERROR,
         content=error_response.model_dump()

@@ -43,11 +43,19 @@ if (typeof window !== 'undefined') {
     observe() {}
     unobserve() {}
   } as any;
+  
+  // Mock animation frame APIs
+  global.requestAnimationFrame = (callback: FrameRequestCallback) => {
+    return setTimeout(callback, 16) as any;
+  };
+  global.cancelAnimationFrame = (handle: number) => {
+    clearTimeout(handle);
+  };
 }
 
 // Fast fail for unhandled promises
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Promise Rejection:', reason);
+  // console mocked: console.log('Unhandled Promise Rejection:', reason);
   process.exit(1);
 });
 

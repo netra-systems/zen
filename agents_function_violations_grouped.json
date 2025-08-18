@@ -1,0 +1,1293 @@
+{
+  "app\\agents\\actions_to_meet_goals_sub_agent.py": [
+    {
+      "function": "execute",
+      "lines": 31,
+      "location": ""
+    },
+    {
+      "function": "__init__",
+      "lines": 30,
+      "location": ""
+    },
+    {
+      "function": "execute_core_logic",
+      "lines": 24,
+      "location": ""
+    },
+    {
+      "function": "_get_llm_response",
+      "lines": 19,
+      "location": ""
+    },
+    {
+      "function": "send_status_update",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\supervisor_consolidated.py": [
+    {
+      "function": "execute",
+      "lines": 25,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\agent.py": [
+    {
+      "function": "execute",
+      "lines": 24,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\corpus_request_processor.py": [
+    {
+      "function": "check_entry_conditions",
+      "lines": 24,
+      "location": ""
+    },
+    {
+      "function": "get_health_status",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\anomaly_detector.py": [
+    {
+      "function": "execute_core_logic",
+      "lines": 24,
+      "location": ""
+    },
+    {
+      "function": "_create_anomaly_response_object",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_anomaly_detail_object",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_fetch_anomaly_data",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_create_no_anomalies_response",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\corpus_operation_executor.py": [
+    {
+      "function": "execute_corpus_operation_workflow",
+      "lines": 21,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_profile_parser.py": [
+    {
+      "function": "extract_time_range_from_text",
+      "lines": 19,
+      "location": ""
+    },
+    {
+      "function": "build_profile_from_text_analysis",
+      "lines": 18,
+      "location": ""
+    },
+    {
+      "function": "extract_volume_from_text",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\demo_service\\core.py": [
+    {
+      "function": "_build_demo_prompt_content",
+      "lines": 19,
+      "location": ""
+    },
+    {
+      "function": "_create_process_context",
+      "lines": 15,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_sub_agent.py": [
+    {
+      "function": "__init__",
+      "lines": 18,
+      "location": ""
+    },
+    {
+      "function": "_execute_main_flow",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "execute",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\performance_analyzer.py": [
+    {
+      "function": "_extract_analysis_context",
+      "lines": 18,
+      "location": ""
+    },
+    {
+      "function": "_fetch_metrics_data_with_monitoring",
+      "lines": 13,
+      "location": ""
+    },
+    {
+      "function": "validate_preconditions",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "analyze_performance_metrics",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\demo_service\\reporting.py": [
+    {
+      "function": "_build_reporting_prompt_content",
+      "lines": 16,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\llm_processor.py": [
+    {
+      "function": "_get_llm_response_with_json_instruction",
+      "lines": 16,
+      "location": ""
+    },
+    {
+      "function": "_create_basic_triage_fallback",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_try_structured_then_fallback_llm",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_execute_structured_llm_with_retries",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\config.py": [
+    {
+      "function": "from_env",
+      "lines": 15,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\data_sub_agent_core.py": [
+    {
+      "function": "_perform_analysis",
+      "lines": 15,
+      "location": ""
+    }
+  ],
+  "app\\agents\\admin_tool_executors.py": [
+    {
+      "function": "_update_system_setting",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "_generate_synthetic_data",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_create_user",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_grant_permission",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_create_corpus",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_get_system_settings",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\reporting_sub_agent.py": [
+    {
+      "function": "execute",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "execute_core_logic",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\supervisor_admin_init.py": [
+    {
+      "function": "handle_admin_request",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "_create_supervisor_instance",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_validate_command_type",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\base\\monitoring.py": [
+    {
+      "function": "_get_health_metrics",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "_determine_overall_health",
+      "lines": 13,
+      "location": ""
+    },
+    {
+      "function": "get_agent_performance_stats",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "get_aggregated_metrics",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\corpus_upload_handlers.py": [
+    {
+      "function": "_create_chunked_success_response",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "_try_alternative_upload",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_try_recovery_methods",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_multipart_success_response",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_try_chunked_upload",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_upload_error_context",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\data_fetching.py": [
+    {
+      "function": "execute_with_modern_patterns",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "_route_operation",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\data_fetching_operations.py": [
+    {
+      "function": "_build_workload_list_query",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "_build_availability_query",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\error_reporting.py": [
+    {
+      "function": "calculate_success_rate",
+      "lines": 14,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\fallback.py": [
+    {
+      "function": "fallback_categorization",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "get_fallback_categories",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\processing_monitoring.py": [
+    {
+      "function": "create_error_fallback_result",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "create_fallback_result_with_monitoring",
+      "lines": 14,
+      "location": ""
+    },
+    {
+      "function": "build_enhanced_metadata_updates",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\agent_error_handler.py": [
+    {
+      "function": "_determine_error_severity",
+      "lines": 13,
+      "location": ""
+    },
+    {
+      "function": "_get_last_error_info",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data\\core.py": [
+    {
+      "function": "_create_synthetic_context",
+      "lines": 13,
+      "location": ""
+    },
+    {
+      "function": "_initialize_components",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_execute_generation_workflow",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\error_recovery.py": [
+    {
+      "function": "fallback_entity_extraction",
+      "lines": 13,
+      "location": ""
+    },
+    {
+      "function": "should_attempt_recovery",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\base_agent.py": [
+    {
+      "function": "__init__",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\optimizations_core_sub_agent.py": [
+    {
+      "function": "execute_core_logic",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "execute",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\quality_checks.py": [
+    {
+      "function": "validate_content",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "validate_agent_output",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\base\\retry_manager.py": [
+    {
+      "function": "_execute_retry_loop",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\corpus_error_compensation.py": [
+    {
+      "function": "execute",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\agent.py": [
+    {
+      "function": "__getattr__",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_analyze_performance_metrics",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_setup_delegation_support",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\clickhouse_operations.py": [
+    {
+      "function": "_cache_result_with_reliability",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "execute_core_logic",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_perform_schema_query",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_check_cache_with_reliability",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_perform_database_query",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\execution_fallbacks.py": [
+    {
+      "function": "_generate_llm_insights",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_create_emergency_data_fallback",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "handle_execution_error",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_parse_llm_fallback_response",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\fallback_providers.py": [
+    {
+      "function": "_create_execution_context",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "get_operation_status",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\demo_service\\triage.py": [
+    {
+      "function": "get_health_status",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_create_execution_context",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\pattern_matcher.py": [
+    {
+      "function": "scan_content",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_add_pattern_matches",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_estimate_complexity",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\scanner_core.py": [
+    {
+      "function": "_complete_scan",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "_collect_priority_samples",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\mcp_integration\\base_mcp_agent.py": [
+    {
+      "function": "get_health_status",
+      "lines": 12,
+      "location": ""
+    }
+  ],
+  "app\\agents\\mcp_integration\\execution_orchestrator.py": [
+    {
+      "function": "_create_reliability_manager",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "orchestrate_mcp_execution",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "get_comprehensive_health_status",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\supervisor\\observability_example.py": [
+    {
+      "function": "example_global_helper_usage",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "example_direct_usage",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\intent_detection.py": [
+    {
+      "function": "determine_intent",
+      "lines": 12,
+      "location": ""
+    },
+    {
+      "function": "get_intent_keywords",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\quality_hooks.py": [
+    {
+      "function": "_record_quality_event",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_perform_validation",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_extract_agent_output",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_should_retry_based_on_quality",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\state.py": [
+    {
+      "function": "clear_sensitive_data",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_merged_results",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_metrics_handler.py": [
+    {
+      "function": "create_error_result",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent.py": [
+    {
+      "function": "_init_legacy_reliability",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_modern_reliability_manager",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "get_health_status",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_get_or_compute_triage_result",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\utils_json_extraction.py": [
+    {
+      "function": "extract_partial_json",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "execute_strategies",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "try_extraction_strategies",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\utils_json_parsers.py": [
+    {
+      "function": "try_close_truncated_array",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "try_parse_complex_value",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\analysis_engine_helpers.py": [
+    {
+      "function": "_build_trend_result",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_identify_iqr_outliers",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_identify_zscore_outliers",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_calculate_linear_regression",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\data_fetching_recovery.py": [
+    {
+      "function": "_calculate_reduced_range",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_error_context",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_lookup_cached_data",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\performance_analysis_validation.py": [
+    {
+      "function": "run_validation_checks",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\usage_pattern_analyzer.py": [
+    {
+      "function": "_calculate_usage_summary",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\usage_pattern_processor.py": [
+    {
+      "function": "_format_pattern_result",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_create_pattern_summary",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\demo_service\\optimization.py": [
+    {
+      "function": "_create_legacy_execution_context",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\html_formatter.py": [
+    {
+      "function": "_get_html_template",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\metrics_calculator.py": [
+    {
+      "function": "calculate_metrics",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\pattern_scanner.py": [
+    {
+      "function": "detect_patterns",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_process_files_in_batches",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_analyze_file",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\mcp_integration\\context_manager.py": [
+    {
+      "function": "_create_new_connection",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "_execute_tool_safely",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\mcp_integration\\mcp_intent_detector.py": [
+    {
+      "function": "find_matching_server",
+      "lines": 11,
+      "location": ""
+    },
+    {
+      "function": "detect_intent_with_reliability",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\result_processor.py": [
+    {
+      "function": "create_error_result",
+      "lines": 11,
+      "location": ""
+    }
+  ],
+  "app\\agents\\admin_tool_permissions.py": [
+    {
+      "function": "create_permission_check",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "get_user_permissions_summary",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\quality_supervisor.py": [
+    {
+      "function": "get_quality_dashboard",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "get_configuration",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_generator.py": [
+    {
+      "function": "generate_data",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\admin_tool_dispatcher\\corpus_tools.py": [
+    {
+      "function": "_build_tool_mapping",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_build_tool_descriptions",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\admin_tool_dispatcher\\modern_execution_helpers.py": [
+    {
+      "function": "create_success_response_from_result",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "create_dispatch_context",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "create_failure_response_from_result",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\admin_tool_dispatcher\\tool_handlers_core.py": [
+    {
+      "function": "execute_core_logic",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "execute_core_logic",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "create_modern_tool_handler",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "execute_core_logic",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\base\\example_integration.py": [
+    {
+      "function": "_check_triage_cache",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_cache_triage_result",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\base\\interface.py": [
+    {
+      "function": "create_execution_context",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\corpus_indexing_handlers.py": [
+    {
+      "function": "_attempt_alternative_index",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\agent_cache.py": [
+    {
+      "function": "_get_schema_with_monitoring",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "invalidate_schema_cache",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_fetch_and_cache_schema",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\correlation_analyzer.py": [
+    {
+      "function": "_calculate_single_correlation",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_create_analysis_context",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\execution_analysis.py": [
+    {
+      "function": "_route_analysis_by_intent",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\execution_core.py": [
+    {
+      "function": "_execute_core_analysis",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "execute_core_logic",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\execution_parameters.py": [
+    {
+      "function": "_build_params_from_dict",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\extended_operations.py": [
+    {
+      "function": "process_with_retry",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "process_with_cache",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "process_batch_safe",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "enrich_data_extended",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\metric_percentile_analyzer.py": [
+    {
+      "function": "_format_percentiles_result",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\github_client.py": [
+    {
+      "function": "_parse_http_url",
+      "lines": 10,
+      "location": ""
+    },
+    {
+      "function": "_parse_git_url",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_parse_owner_repo_format",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "cleanup",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\tool_processing_core.py": [
+    {
+      "function": "_extract_tool_details",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\supervisor\\state_checkpoint_manager.py": [
+    {
+      "function": "_persist_state_data",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\entity_extractor.py": [
+    {
+      "function": "_get_model_patterns",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\intent_detector.py": [
+    {
+      "function": "_get_intent_keywords",
+      "lines": 10,
+      "location": ""
+    }
+  ],
+  "app\\agents\\agent_observability.py": [
+    {
+      "function": "_calculate_data_size",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\error_decorators.py": [
+    {
+      "function": "_execute_with_retry",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\error_recovery_strategy.py": [
+    {
+      "function": "_get_base_delays",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\production_tool.py": [
+    {
+      "function": "_execute_internal",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_batch_processor.py": [
+    {
+      "function": "_process_single_batch",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_sub_agent_validation.py": [
+    {
+      "function": "validate_dependencies",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "record_validation_metrics",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\synthetic_data_sub_agent_workflow.py": [
+    {
+      "function": "_execute_direct_generation",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\base\\executor.py": [
+    {
+      "function": "_create_success_result",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_create_error_result",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\corpus_admin\\validators.py": [
+    {
+      "function": "generate_approval_message",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\clickhouse_recovery.py": [
+    {
+      "function": "_try_recovery_methods",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\delegation.py": [
+    {
+      "function": "execute_core_logic",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_analyze_usage_patterns",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\fallback_helpers.py": [
+    {
+      "function": "_build_baseline_metrics",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_build_system_patterns",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\data_sub_agent\\llm_query_detector.py": [
+    {
+      "function": "is_likely_llm_generated",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_infer_return_structure",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\github_analyzer\\recommendation_generator.py": [
+    {
+      "function": "generate_recommendations",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\supervisor\\supervisor_utilities.py": [
+    {
+      "function": "get_health_status",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\supply_researcher\\research_engine.py": [
+    {
+      "function": "_get_template_for_type",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_get_pricing_template",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_get_capabilities_template",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_get_market_overview_template",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "_create_response",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\agent.py": [
+    {
+      "function": "_create_execution_context",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\entity_extraction.py": [
+    {
+      "function": "extract_numbers",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\error_core.py": [
+    {
+      "function": "_attempt_operation_with_retry_logic",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\error_types.py": [
+    {
+      "function": "execute",
+      "lines": 9,
+      "location": ""
+    },
+    {
+      "function": "execute",
+      "lines": 9,
+      "location": ""
+    }
+  ],
+  "app\\agents\\triage_sub_agent\\tool_recommendation.py": [
+    {
+      "function": "get_tool_mapping",
+      "lines": 9,
+      "location": ""
+    }
+  ]
+}

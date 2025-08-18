@@ -12,6 +12,7 @@
 
 import { generateUniqueId } from '@/lib/utils';
 import type { ChatMessage, MessageRole } from '@/types/registry';
+import { logger } from '@/utils/debug-logger';
 
 // ============================================================================
 // Core Types and Interfaces
@@ -83,7 +84,7 @@ export class OptimisticMessageManager {
       try {
         callback(this.state);
       } catch (error) {
-        console.error('OptimisticMessageManager callback error:', error);
+        logger.error('OptimisticMessageManager callback error:', error);
       }
     });
   }

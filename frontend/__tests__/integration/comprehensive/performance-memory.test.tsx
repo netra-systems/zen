@@ -157,10 +157,10 @@ describe('Performance and Memory Management Test Suite', () => {
     it('should validate modular test benefits', () => {
       const modularBenefits = {
         maintainability: 'Each module <300 lines for easy maintenance',
-        testability: 'Isolated test suites with clear boundaries',
-        scalability: 'Add new performance tests without affecting existing ones',
-        debuggability: 'Granular test execution and failure isolation',
-        reusability: 'Shared utilities across multiple test modules'
+        testability: 'Isolated test suites <300 lines with clear boundaries',
+        scalability: 'Add new performance tests <300 lines without affecting existing ones',
+        debuggability: 'Granular test execution <300 lines and failure isolation',
+        reusability: 'Shared utilities <300 lines across multiple test modules'
       };
       
       Object.entries(modularBenefits).forEach(([key, value]) => {

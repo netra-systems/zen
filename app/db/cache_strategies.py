@@ -178,16 +178,21 @@ class QueryPatternTracker:
         """Track query pattern frequency."""
         self.query_patterns[pattern] = self.query_patterns.get(pattern, 0) + 1
 
-    def track_query_duration(self, pattern: str, duration: float) -> None:
-        """Track query duration for pattern."""
+    def _ensure_pattern_list_exists(self, pattern: str) -> None:
+        """Ensure pattern list exists in query_durations."""
         if pattern not in self.query_durations:
             self.query_durations[pattern] = []
-        
-        self.query_durations[pattern].append(duration)
-        
-        # Keep only recent durations
+
+    def _trim_old_durations(self, pattern: str) -> None:
+        """Trim old durations to keep only recent 10."""
         if len(self.query_durations[pattern]) > 10:
             self.query_durations[pattern] = self.query_durations[pattern][-10:]
+
+    def track_query_duration(self, pattern: str, duration: float) -> None:
+        """Track query duration for pattern."""
+        self._ensure_pattern_list_exists(pattern)
+        self.query_durations[pattern].append(duration)
+        self._trim_old_durations(pattern)
 
     def get_top_query_patterns(self, limit: int = 10) -> List[tuple]:
         """Get top query patterns by frequency."""
@@ -197,18 +202,26 @@ class QueryPatternTracker:
             reverse=True
         )[:limit]
 
-    def get_avg_durations(self, limit: int = 10) -> List[tuple]:
-        """Get average durations for patterns."""
+    def _calculate_pattern_averages(self) -> Dict[str, float]:
+        """Calculate average durations for all patterns."""
         avg_durations = {}
         for pattern, durations in self.query_durations.items():
             if durations:
                 avg_durations[pattern] = sum(durations) / len(durations)
-        
+        return avg_durations
+
+    def _sort_and_limit_averages(self, avg_durations: Dict[str, float], limit: int) -> List[tuple]:
+        """Sort averages by duration and apply limit."""
         return sorted(
             avg_durations.items(),
             key=lambda x: x[1],
             reverse=True
         )[:limit]
+
+    def get_avg_durations(self, limit: int = 10) -> List[tuple]:
+        """Get average durations for patterns."""
+        avg_durations = self._calculate_pattern_averages()
+        return self._sort_and_limit_averages(avg_durations, limit)
 
     def build_metrics_summary(self) -> Dict[str, Any]:
         """Build query pattern metrics summary."""

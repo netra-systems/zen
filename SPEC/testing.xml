@@ -73,6 +73,20 @@
             <location>app/tests/*_critical.py</location>
             <coverage_target>100%</coverage_target>
         </category>
+        
+        <category name="tdd">
+            <description>Test-driven development tests for features in development</description>
+            <location>Tests marked with @tdd_test decorator</location>
+            <coverage_target>Skipped until feature enabled</coverage_target>
+            <note>Enables TDD workflow while maintaining 100% CI/CD pass rate</note>
+        </category>
+        
+        <category name="feature_flagged">
+            <description>Tests controlled by feature flags based on development status</description>
+            <location>Tests marked with @feature_flag decorator</location>
+            <coverage_target>Based on feature status</coverage_target>
+            <note>Provides clear visibility of feature readiness and dependencies</note>
+        </category>
     </test_categories>
     
     <unified_test_runner>

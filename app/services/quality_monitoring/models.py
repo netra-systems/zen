@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass, field
 
-from app.core.resilience.monitor import AlertSeverity
+from app.core.health_types import AlertSeverity
 
 
 

@@ -46,7 +46,12 @@ class SupplyResearchEngine:
     
     def _get_template_for_type(self, research_type: ResearchType) -> str:
         """Get research template for specific type"""
-        template_map = {
+        template_map = self._build_template_map()
+        return template_map.get(research_type, self._get_market_overview_template())
+    
+    def _build_template_map(self) -> Dict[ResearchType, str]:
+        """Build mapping of research types to templates"""
+        return {
             ResearchType.PRICING: self._get_pricing_template(),
             ResearchType.CAPABILITIES: self._get_capabilities_template(),
             ResearchType.AVAILABILITY: self._get_availability_template(),
@@ -54,30 +59,39 @@ class SupplyResearchEngine:
             ResearchType.DEPRECATION: self._get_deprecation_template(),
             ResearchType.MARKET_OVERVIEW: self._get_market_overview_template()
         }
-        return template_map.get(research_type, self._get_market_overview_template())
     
     def _get_pricing_template(self) -> str:
         """Get pricing research template"""
+        header = "What is the {timeframe} pricing structure for {provider} {model_name} including:\n"
+        details = self._get_pricing_details()
+        footer = "Please provide official documentation links and pricing pages."
+        return header + details + footer
+    
+    def _get_pricing_details(self) -> str:
+        """Get pricing template detail lines"""
         return (
-            "What is the {timeframe} pricing structure for {provider} {model_name} including:\n"
             "- Cost per million input tokens in USD\n"
             "- Cost per million output tokens in USD\n"
             "- Volume discounts or enterprise pricing tiers\n"
             "- Batch processing rates if available\n"
             "- Fine-tuning costs if applicable\n"
-            "Please provide official documentation links and pricing pages."
         )
     
     def _get_capabilities_template(self) -> str:
         """Get capabilities research template"""
+        header = "What are the technical capabilities of {provider} {model_name}:\n"
+        details = self._get_capabilities_details()
+        footer = "Include comparisons with previous versions."
+        return header + details + footer
+    
+    def _get_capabilities_details(self) -> str:
+        """Get capabilities template detail lines"""
         return (
-            "What are the technical capabilities of {provider} {model_name}:\n"
             "- Maximum context window size (in tokens)\n"
             "- Maximum output token limit\n"
             "- Supported languages and modalities (text, vision, audio)\n"
             "- Special features (function calling, JSON mode, etc.)\n"
             "- Performance benchmarks (MMLU, HumanEval, etc.)\n"
-            "Include comparisons with previous versions."
         )
     
     def _get_availability_template(self) -> str:
@@ -115,14 +129,19 @@ class SupplyResearchEngine:
     
     def _get_market_overview_template(self) -> str:
         """Get market overview research template"""
+        header = "Provide a comprehensive overview of the {timeframe} AI model market:\n"
+        details = self._get_market_overview_details()
+        footer = "Focus on production-ready API services."
+        return header + details + footer
+    
+    def _get_market_overview_details(self) -> str:
+        """Get market overview template detail lines"""
         return (
-            "Provide a comprehensive overview of the {timeframe} AI model market:\n"
             "- Pricing changes across OpenAI, Anthropic, Google, and others\n"
             "- New model releases and announcements\n"
             "- Deprecated or sunset models\n"
             "- Performance comparisons\n"
             "- Market trends and competitive positioning\n"
-            "Focus on production-ready API services."
         )
     
     def _create_continue_payload(self, session_id: str) -> Dict[str, Any]:
@@ -148,8 +167,14 @@ class SupplyResearchEngine:
     def _create_response(self, query: str) -> Dict[str, Any]:
         """Create response structure for research results"""
         import uuid
+        session_id = str(uuid.uuid4())
+        response_data = self._build_response_data(query, session_id)
+        return response_data
+    
+    def _build_response_data(self, query: str, session_id: str) -> Dict[str, Any]:
+        """Build response data dictionary"""
         return {
-            "session_id": str(uuid.uuid4()),
+            "session_id": session_id,
             "status": "completed",
             "research_plan": f"Researching: {query[:100]}...",
             "questions_answered": [],

@@ -2,6 +2,7 @@ import { WebSocketMessage, AuthMessage, PingMessage, PongMessage } from '@/types
 import { UnifiedWebSocketEvent } from '../types/unified-chat';
 import { config } from '@/config';
 import { logger } from '@/lib/logger';
+import { logger as debugLogger } from '@/utils/debug-logger';
 
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
@@ -117,7 +118,7 @@ class WebSocketService {
   }
 
   private handleConnectionOpen(url: string, options: WebSocketOptions): void {
-    console.log('[WebSocketService] Connection opened to:', url);
+    debugLogger.debug('[WebSocketService] Connection opened to:', url);
     this.state = 'connected';
     this.status = 'OPEN';
     this.onStatusChange?.(this.status);
@@ -283,7 +284,7 @@ class WebSocketService {
       this.ws = new WebSocket(url);
 
       this.ws.onopen = () => {
-        console.log('[WebSocketService] Connection opened to:', url);
+        debugLogger.debug('[WebSocketService] Connection opened to:', url);
         this.state = 'connected';
         this.status = 'OPEN';
         this.onStatusChange?.(this.status);

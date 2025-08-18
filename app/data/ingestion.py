@@ -19,12 +19,20 @@ def _handle_list_value(value) -> Any:
 
 def _handle_json_string_value(value) -> Any:
     """Handle JSON string value transformation."""
-    if isinstance(value, str) and (value.startswith('{') or value.startswith('[')):
-        try:
-            return json.loads(value)
-        except json.JSONDecodeError:
-            pass
-    return value
+    if not _is_json_string(value):
+        return value
+    return _parse_json_safely(value)
+
+def _is_json_string(value) -> bool:
+    """Check if value is a JSON string."""
+    return isinstance(value, str) and (value.startswith('{') or value.startswith('['))
+
+def _parse_json_safely(value: str) -> Any:
+    """Parse JSON string safely with fallback."""
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        return value
 
 def _transform_value(value) -> Any:
     """Apply auto-corrections to individual values."""
@@ -77,6 +85,10 @@ def _flatten_json_first_level(nested_json: Dict[str, Any], sep: str = '_') -> Di
     items = _init_flattening_result(nested_json)
     if not items and not isinstance(nested_json, dict):
         return items
+    return _process_all_dict_items(nested_json, items, sep)
+
+def _process_all_dict_items(nested_json: Dict[str, Any], items: Dict[str, Any], sep: str) -> Dict[str, Any]:
+    """Process all dictionary items for flattening."""
     for k, v in nested_json.items():
         if isinstance(v, dict):
             _process_nested_dict_item(items, k, v, sep)
@@ -87,9 +99,13 @@ def _flatten_json_first_level(nested_json: Dict[str, Any], sep: str = '_') -> Di
 def _validate_ingestion_input(records: list[dict]) -> bool:
     """Validate ingestion input and log warnings if invalid."""
     if not records or not isinstance(records, list):
-        central_logger.get_logger(__name__).warning("No records provided or format is incorrect. Skipping ingestion.")
+        _log_invalid_input_warning()
         return False
     return True
+
+def _log_invalid_input_warning() -> None:
+    """Log warning for invalid input."""
+    central_logger.get_logger(__name__).warning("No records provided or format is incorrect. Skipping ingestion.")
 
 def _prepare_flattened_records(records: list[dict]) -> list[dict]:
     """Prepare flattened records from input records."""
@@ -98,9 +114,13 @@ def _prepare_flattened_records(records: list[dict]) -> list[dict]:
 def _validate_prepared_data(data_for_insert: list[list]) -> bool:
     """Validate prepared data and log warnings if empty."""
     if not data_for_insert:
-        central_logger.get_logger(__name__).warning("Data preparation resulted in no records to insert for this batch.")
+        _log_empty_data_warning()
         return False
     return True
+
+def _log_empty_data_warning() -> None:
+    """Log warning for empty prepared data."""
+    central_logger.get_logger(__name__).warning("Data preparation resulted in no records to insert for this batch.")
 
 async def _execute_data_insertion(client: ClickHouseDatabase, table_name: str, data_for_insert: list[list], ordered_columns: list[str], record_count: int) -> int:
     """Execute the actual data insertion with logging."""
@@ -112,7 +132,15 @@ async def ingest_records(client: ClickHouseDatabase, records: list[dict], table_
     """Ingests a list of in-memory records into a specified ClickHouse table using an active client."""
     if not _validate_ingestion_input(records):
         return 0
-    central_logger.get_logger(__name__).info(f"Ingesting batch of {len(records)} records into '{table_name}'...")
+    _log_ingestion_start(len(records), table_name)
+    return await _process_ingestion_workflow(client, records, table_name)
+
+def _log_ingestion_start(record_count: int, table_name: str) -> None:
+    """Log ingestion process start."""
+    central_logger.get_logger(__name__).info(f"Ingesting batch of {record_count} records into '{table_name}'...")
+
+async def _process_ingestion_workflow(client: ClickHouseDatabase, records: list[dict], table_name: str) -> int:
+    """Process the ingestion workflow."""
     flattened_records = _prepare_flattened_records(records)
     ordered_columns, data_for_insert = prepare_data_for_insert(flattened_records)
     if not _validate_prepared_data(data_for_insert):

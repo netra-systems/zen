@@ -94,3 +94,15 @@ class LLMRateLimitError(LLMRequestError):
             user_message="Too many requests. Please wait a moment and try again",
             **kwargs
         )
+
+
+class ProcessingError(ServiceError):
+    """Raised when data processing operations fail."""
+    
+    def __init__(self, message: str = None, **kwargs):
+        super().__init__(
+            message=message or "Data processing failed",
+            code=ErrorCode.DATA_VALIDATION_ERROR,
+            severity=ErrorSeverity.HIGH,
+            **kwargs
+        )
