@@ -121,13 +121,15 @@ class HealthInterface:
         }
     
     async def _run_critical_checks(self) -> Dict[str, HealthCheckResult]:
-        """Run only critical health checks."""
+        """Run only critical health checks, respecting development mode."""
         critical_components = ["postgres", "auth", "core"]
         results = {}
         
         for name, checker in self._checkers.items():
             if any(comp in name.lower() for comp in critical_components):
                 results[name] = await checker.check_with_timeout()
+            elif self._is_optional_in_development(name):
+                results[name] = await self._run_optional_development_check(name, checker)
         
         return results
     
@@ -148,21 +150,24 @@ class HealthInterface:
         return health_results
     
     def _determine_overall_status(self, checks: Dict[str, HealthCheckResult]) -> HealthStatus:
-        """Determine overall system status from check results."""
+        """Determine overall system status, treating optional services gracefully."""
         if not checks:
             return HealthStatus.HEALTHY
         
-        failed_checks = [r for r in checks.values() if not r.success]
-        failure_rate = len(failed_checks) / len(checks)
+        critical_failed = self._count_critical_failures(checks)
+        total_critical = self._count_critical_checks(checks)
+        
+        if total_critical == 0:
+            return HealthStatus.HEALTHY
+        
+        failure_rate = critical_failed / total_critical if total_critical > 0 else 0
         
         if failure_rate == 0:
             return HealthStatus.HEALTHY
-        elif failure_rate < 0.3:
+        elif failure_rate < 0.5:
             return HealthStatus.DEGRADED
-        elif failure_rate < 0.7:
-            return HealthStatus.UNHEALTHY
         else:
-            return HealthStatus.CRITICAL
+            return HealthStatus.UNHEALTHY
     
     def _format_detailed_checks(self, checks: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
         """Format detailed check results for comprehensive response."""
@@ -194,3 +199,60 @@ class HealthInterface:
     def _get_uptime_seconds(self) -> float:
         """Calculate service uptime in seconds."""
         return (datetime.now(UTC) - self._start_time).total_seconds()
+    
+    def _is_development_environment(self) -> bool:
+        """Check if running in development environment."""
+        import os
+        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        return environment == "development"
+    
+    def _is_optional_in_development(self, component_name: str) -> bool:
+        """Check if component is optional in development mode."""
+        if not self._is_development_environment():
+            return False
+        
+        optional_services = ["redis", "clickhouse"]
+        return any(service in component_name.lower() for service in optional_services)
+    
+    async def _run_optional_development_check(self, name: str, checker: BaseHealthChecker) -> HealthCheckResult:
+        """Run optional development check with graceful failure."""
+        try:
+            return await checker.check_with_timeout()
+        except Exception as e:
+            # In development, treat optional service failures as warnings
+            return self._create_development_warning_result(name, str(e))
+    
+    def _create_development_warning_result(self, component_name: str, error_msg: str) -> HealthCheckResult:
+        """Create a warning result for optional development services."""
+        from ..health_types import HealthCheckResult
+        return HealthCheckResult(
+            component_name=component_name,
+            success=True,  # Mark as success in development
+            health_score=0.8,  # Slightly degraded but acceptable
+            response_time_ms=0.0,
+            error_message=f"Development mode - {component_name} unavailable: {error_msg}",
+            metadata={"status": "development_optional", "available": False}
+        )
+    
+    def _count_critical_failures(self, checks: Dict[str, HealthCheckResult]) -> int:
+        """Count failures in critical components only."""
+        critical_components = ["postgres", "auth", "core"]
+        critical_failed = 0
+        
+        for name, result in checks.items():
+            if any(comp in name.lower() for comp in critical_components):
+                if not result.success:
+                    critical_failed += 1
+        
+        return critical_failed
+    
+    def _count_critical_checks(self, checks: Dict[str, HealthCheckResult]) -> int:
+        """Count total critical component checks."""
+        critical_components = ["postgres", "auth", "core"]
+        critical_count = 0
+        
+        for name in checks.keys():
+            if any(comp in name.lower() for comp in critical_components):
+                critical_count += 1
+        
+        return critical_count

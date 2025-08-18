@@ -55,7 +55,7 @@ def test_launcher_imports():
         from dev_launcher.process_manager import ProcessManager
         from dev_launcher.health_monitor import HealthMonitor
         from dev_launcher.log_streamer import LogManager
-        from dev_launcher.secret_manager import SecretLoader
+        from dev_launcher.secret_loader import SecretLoader
         print("[PASS] All modules import successfully")
     except ImportError as e:
         print(f"[FAIL] Import error: {e}")
@@ -90,7 +90,7 @@ def test_launcher_dry_run():
 
 def test_service_discovery():
     """Test service discovery file operations."""
-    from dev_launcher.secret_manager import ServiceDiscovery
+    from dev_launcher.service_discovery import ServiceDiscovery
     
     with tempfile.TemporaryDirectory() as tmpdir:
         sd = ServiceDiscovery(Path(tmpdir))

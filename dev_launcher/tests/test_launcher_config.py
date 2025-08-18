@@ -17,7 +17,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig, find_project_root
-from dev_launcher.secret_manager import ServiceDiscovery
+from dev_launcher.service_discovery import ServiceDiscovery
 # Remove service_config import until module exists
 
 

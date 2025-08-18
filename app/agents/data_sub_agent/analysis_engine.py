@@ -8,6 +8,14 @@ import numpy as np
 class AnalysisEngine:
     """Advanced data analysis capabilities"""
     
+    async def process_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process data and return result for streaming."""
+        return {
+            "status": "success" if data.get("valid", True) else "error",
+            "data": data,
+            "processed": True
+        }
+    
     @staticmethod
     def calculate_statistics(values: List[float]) -> Dict[str, float]:
         """Calculate comprehensive statistics for a metric"""

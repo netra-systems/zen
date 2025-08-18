@@ -25,7 +25,8 @@ class TestDataSubAgentAnalysis:
         assert "message" in result
     async def test_analyze_performance_metrics_minute_aggregation(self, agent, sample_performance_data):
         """Test analyzing performance metrics with minute aggregation"""
-        with patch.object(agent, '_fetch_clickhouse_data', new_callable=AsyncMock) as mock_fetch:
+        # Patch the actual clickhouse_ops.fetch_data method that's used by the performance analyzer
+        with patch.object(agent.clickhouse_ops, 'fetch_data', new_callable=AsyncMock) as mock_fetch:
             mock_fetch.return_value = sample_performance_data
             
             # Time range less than 1 hour for minute aggregation

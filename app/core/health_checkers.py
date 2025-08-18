@@ -21,12 +21,13 @@ async def check_postgres_health() -> HealthCheckResult:
     
     try:
         from app.db.postgres import async_engine
+        from sqlalchemy import text
         
         if async_engine is None:
             return _create_failed_result("postgres", "Database engine not initialized")
         
         async with async_engine.begin() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         
         response_time = (time.time() - start_time) * 1000
         return _create_success_result("postgres", response_time)
@@ -41,6 +42,11 @@ async def check_clickhouse_health() -> HealthCheckResult:
     start_time = time.time()
     
     try:
+        # Check if ClickHouse is disabled in development
+        import os
+        if _is_development_mode() and _is_clickhouse_disabled():
+            return _create_disabled_result("clickhouse", "ClickHouse disabled in development")
+        
         from app.db.clickhouse import get_clickhouse_client
         
         async with get_clickhouse_client() as client:
@@ -51,6 +57,9 @@ async def check_clickhouse_health() -> HealthCheckResult:
         
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
+        # In development mode, treat ClickHouse as optional
+        if _is_development_mode():
+            return _create_disabled_result("clickhouse", f"ClickHouse unavailable in development: {str(e)}")
         return _create_failed_result("clickhouse", str(e), response_time)
 
 
@@ -195,3 +204,18 @@ def _create_websocket_health_result(stats: Dict[str, Any], health_score: float, 
         response_time_ms=response_time,
         metadata=stats
     )
+
+
+def _is_development_mode() -> bool:
+    """Check if running in development mode."""
+    import os
+    environment = os.environ.get("ENVIRONMENT", "development").lower()
+    return environment == "development"
+
+
+def _is_clickhouse_disabled() -> bool:
+    """Check if ClickHouse is disabled in environment."""
+    import os
+    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+    skip_clickhouse = os.environ.get("SKIP_CLICKHOUSE_INIT", "false").lower()
+    return clickhouse_mode == "disabled" or skip_clickhouse == "true"

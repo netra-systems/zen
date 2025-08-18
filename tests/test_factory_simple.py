@@ -6,53 +6,49 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-print("AI Factory Status Report - Simple Validation Test")
-print("=" * 60)
 
-try:
-    # Test imports
-    print("\n1. Testing imports...")
+def test_imports():
+    """Test that all factory status modules can be imported."""
     from app.services.factory_status.git_commit_parser import GitCommitParser
     from app.services.factory_status.git_diff_analyzer import GitDiffAnalyzer
     from app.services.factory_status.git_branch_tracker import GitBranchTracker
     from app.services.factory_status.report_builder import ReportBuilder
-    print("   [OK] All modules imported successfully")
-    
-    # Test basic initialization
-    print("\n2. Testing initialization...")
+    assert GitCommitParser
+    assert GitDiffAnalyzer
+    assert GitBranchTracker
+    assert ReportBuilder
+
+
+def test_report_builder_initialization():
+    """Test that ReportBuilder can be initialized."""
+    from app.services.factory_status.report_builder import ReportBuilder
     builder = ReportBuilder()
-    print("   [OK] Report builder initialized")
-    
-    # Test git commit parser
-    print("\n3. Testing git commit parser...")
+    assert builder is not None
+
+
+def test_git_commit_parser():
+    """Test git commit parser basic functionality."""
+    from app.services.factory_status.git_commit_parser import GitCommitParser
     parser = GitCommitParser()
     commits = parser.get_commits(1)  # Just last hour to be fast
-    print(f"   [OK] Found {len(commits)} commits in last hour")
-    
-    # Test report generation with minimal time range
-    print("\n4. Generating minimal report (1 hour)...")
+    assert isinstance(commits, list)
+
+
+def test_report_generation():
+    """Test minimal report generation."""
+    from app.services.factory_status.report_builder import ReportBuilder
+    builder = ReportBuilder()
     report = builder.build_report(hours=1)
-    print(f"   [OK] Report generated: {report.report_id}")
-    print(f"   [OK] Productivity Score: {report.executive_summary.productivity_score}/10")
-    print(f"   [OK] Business Value Score: {report.executive_summary.business_value_score}/10")
-    
-    # Export summary
-    print("\n5. Testing export...")
+    assert report is not None
+    assert hasattr(report, 'report_id')
+    assert hasattr(report, 'executive_summary')
+
+
+def test_export_functionality():
+    """Test report export functionality."""
+    from app.services.factory_status.report_builder import ReportBuilder
+    builder = ReportBuilder()
+    report = builder.build_report(hours=1)
     summary = builder.export_summary(report)
-    print(f"   [OK] Summary exported ({len(summary)} chars)")
-    
-    print("\n" + "=" * 60)
-    print("[SUCCESS] Basic validation passed!")
-    print("\nThe AI Factory Status Report system is operational.")
-    print("\nKey components verified:")
-    print("- Git analysis modules")
-    print("- Metrics calculation")  
-    print("- Report generation")
-    print("- Export functionality")
-    
-except Exception as e:
-    print(f"\n[ERROR]: {e}")
-    import traceback
-    traceback.print_exc()
-    print("\n[FAILED] Validation failed")
-    sys.exit(1)
+    assert isinstance(summary, str)
+    assert len(summary) > 0

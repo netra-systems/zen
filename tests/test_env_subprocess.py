@@ -7,7 +7,7 @@ import sys
 
 # Load secrets first
 sys.path.insert(0, '.')
-from dev_launcher.secret_manager import SecretLoader
+from dev_launcher.secret_loader import SecretLoader
 
 # Load all secrets
 sl = SecretLoader(verbose=False)

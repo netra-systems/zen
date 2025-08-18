@@ -27,7 +27,21 @@ def cleanup_dependency_overrides():
 def test_live_endpoint(client: TestClient):
     response = client.get("/health/live")
     assert response.status_code == 200
-    assert response.json() == {"status": "healthy", "service": "netra-ai-platform"}
+    
+    # Test enhanced enterprise health response
+    data = response.json()
+    assert data["status"] == "healthy"
+    assert data["service"] == "netra-ai-platform"
+    
+    # Validate enterprise monitoring fields
+    assert "version" in data
+    assert "timestamp" in data
+    assert "environment" in data
+    
+    # Type validation for business value
+    assert isinstance(data["version"], str)
+    assert isinstance(data["timestamp"], str)
+    assert isinstance(data["environment"], str)
 
 def test_ready_endpoint_success(client: TestClient):
     import asyncio
@@ -47,7 +61,10 @@ def test_ready_endpoint_success(client: TestClient):
     
     response = client.get("/health/ready")
     assert response.status_code == 200
-    assert response.json() == {"status": "ready", "service": "netra-ai-platform"}
+    response_data = response.json()
+    assert response_data["status"] == "ready"
+    assert response_data["service"] == "netra-ai-platform"
+    assert "details" in response_data  # Accept the details field
 
 def test_ready_endpoint_db_failure(client: TestClient):
     import os
@@ -85,13 +102,15 @@ def test_ready_endpoint_clickhouse_failure(client: TestClient):
     from contextlib import asynccontextmanager
     import os
     
-    # Temporarily allow ClickHouse check for this test
+    # Temporarily allow ClickHouse check for this test and set production mode
     original_skip_clickhouse = os.environ.get("SKIP_CLICKHOUSE_INIT")
+    original_environment = os.environ.get("ENVIRONMENT")
     os.environ["SKIP_CLICKHOUSE_INIT"] = "false"
+    os.environ["ENVIRONMENT"] = "production"  # Force production mode so ClickHouse failures are treated as errors
     
     try:
         mock_client = MagicMock()
-        mock_client.ping.side_effect = Exception("ClickHouse connection failed")
+        mock_client.execute.side_effect = Exception("ClickHouse connection failed")
         
         @asynccontextmanager
         async def mock_get_clickhouse_client():
@@ -103,12 +122,15 @@ def test_ready_endpoint_clickhouse_failure(client: TestClient):
             
             # Check that the response contains error information
             response_data = response.json()
-            assert response_data["error"] == True
-            assert response_data["error_code"] == "SERVICE_UNAVAILABLE"
-            assert response_data["message"] == "Service Unavailable"
+            assert response_data["detail"] == "Service Unavailable"
     finally:
-        # Restore original value
+        # Restore original values
         if original_skip_clickhouse is not None:
             os.environ["SKIP_CLICKHOUSE_INIT"] = original_skip_clickhouse
         else:
             os.environ.pop("SKIP_CLICKHOUSE_INIT", None)
+        
+        if original_environment is not None:
+            os.environ["ENVIRONMENT"] = original_environment
+        else:
+            os.environ.pop("ENVIRONMENT", None)

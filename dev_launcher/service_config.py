@@ -68,7 +68,7 @@ class ServicesConfiguration:
     # Core services with their configurations
     redis: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="redis",
-        mode=ResourceMode.SHARED,
+        mode=ResourceMode.LOCAL if os.environ.get("REDIS_MODE", "shared").lower() == "local" else ResourceMode.SHARED,
         local_config={
             "host": "localhost",
             "port": 6379,
@@ -85,13 +85,13 @@ class ServicesConfiguration:
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="clickhouse",
-        mode=ResourceMode.SHARED,
+        mode=ResourceMode.LOCAL if os.environ.get("CLICKHOUSE_MODE", "shared").lower() == "local" else ResourceMode.SHARED,
         local_config={
             "host": "localhost",
             "port": 9000,
             "user": "default",
-            "password": "",
-            "database": "default"
+            "password": "netra_dev_password",
+            "database": "netra_dev"
         },
         shared_config={
             "host": "xedvrr4c3r.us-central1.gcp.clickhouse.cloud",
@@ -196,7 +196,8 @@ class ServicesConfiguration:
             protocol = "clickhouse+https" if ch_config.get("secure") else "clickhouse"
             env_vars["CLICKHOUSE_URL"] = f"{protocol}://{ch_config['user']}:{ch_config['password']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
         elif self.clickhouse.mode == ResourceMode.LOCAL:
-            env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
+            password_part = f":{ch_config['password']}" if ch_config.get('password') else ""
+            env_vars["CLICKHOUSE_URL"] = f"clickhouse://{ch_config['user']}{password_part}@{ch_config['host']}:{ch_config['port']}/{ch_config['database']}"
     
     def _add_postgres_url(self, env_vars: Dict[str, str]):
         """Add PostgreSQL URL to environment variables."""

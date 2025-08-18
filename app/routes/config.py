@@ -94,3 +94,21 @@ def verify_admin_token(token: str) -> bool:
     # Simple validation - in production this would verify against actual auth
     return token == "admin-token"
 
+async def backup_config() -> Dict[str, Any]:
+    """Create configuration backup with ID and timestamp."""
+    from app.services.config_service import create_backup
+    try:
+        result = await create_backup()
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Backup failed: {str(e)}")
+
+async def restore_config(backup_id: str) -> Dict[str, Any]:
+    """Restore configuration from backup ID."""
+    from app.services.config_service import restore_from_backup
+    try:
+        result = await restore_from_backup(backup_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Restore failed: {str(e)}")
+
