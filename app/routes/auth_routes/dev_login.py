@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.user_service import user_service
 from app.services.security_service import SecurityService
 from app.schemas.registry import UserCreate
-from app.schemas.Auth import DevLoginRequest
+from app.schemas.auth_types import DevLoginRequest
 from .token_management import create_token_response
 
 

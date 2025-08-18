@@ -21,8 +21,10 @@
     <requirement priority="MANDATORY">
       <title>Single Source of Auth Truth</title>
       <description>
-        ALL authentication throughout the ENTIRE system MUST use app/auth_integration/.
+        🔴 CRITICAL: ALL authentication throughout the ENTIRE system MUST use app/auth_integration/.
         NO duplicate auth logic allowed anywhere. NO exceptions.
+        The legacy app/auth/ directory is DEPRECATED and MUST be removed.
+        Any references to app.auth.* MUST be replaced with app.auth_integration.*
       </description>
     </requirement>
     

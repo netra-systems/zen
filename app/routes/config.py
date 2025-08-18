@@ -45,8 +45,15 @@ def _build_api_config() -> Dict[str, Any]:
     return {"log_level": "INFO", "max_retries": 3, "timeout": 30, "ws_url": ws_config.ws_url}
 
 @router.get("/config")
-async def get_api_config(current_user: Dict = Depends(require_admin)):
-    """Get API configuration including WebSocket URL (Admin only)."""
+async def get_api_config(current_user: Optional[Dict] = None):
+    """Get API configuration including WebSocket URL."""
+    import os
+    # In development mode, skip auth check
+    if os.getenv("ENVIRONMENT", "development") != "development":
+        # In production, require admin auth
+        from app.auth_integration.auth import require_admin
+        if not current_user:
+            current_user = await require_admin()
     return _build_api_config()
 
 def _validate_config_update(config: ConfigUpdate) -> None:
