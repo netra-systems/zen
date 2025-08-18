@@ -19,12 +19,16 @@ class TemplateManager:
     def _initialize_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
         """Initialize response templates by content type and failure reason"""
         templates = {}
+        self._add_all_templates(templates)
+        return templates
+    
+    def _add_all_templates(self, templates: dict) -> None:
+        """Add all template categories to templates dict."""
         templates.update(self._get_optimization_templates())
         templates.update(self._get_data_analysis_templates())
         templates.update(self._get_action_plan_templates())
         templates.update(self._get_report_templates())
         templates.update(self._get_system_templates())
-        return templates
     
     def _get_optimization_templates(self) -> Dict[Tuple[ContentType, FailureReason], List[str]]:
         """Get optimization-related templates."""
@@ -315,20 +319,18 @@ class TemplateManager:
     
     def get_template(self, content_type: ContentType, failure_reason: FailureReason, retry_count: int = 0) -> str:
         """Get template for content type and failure reason"""
-        # Try specific combination first
-        key = (content_type, failure_reason)
-        if key in self._templates:
-            templates = self._templates[key]
-        # Fall back to general templates
-        elif (ContentType.GENERAL, failure_reason) in self._templates:
-            templates = self._templates[(ContentType.GENERAL, failure_reason)]
-        else:
-            # Use a generic template
-            templates = [self._get_generic_template()]
-        
-        # Select template based on retry count (cycle through if retrying)
+        templates = self._find_matching_templates(content_type, failure_reason)
         template_index = retry_count % len(templates)
         return templates[template_index]
+    
+    def _find_matching_templates(self, content_type: ContentType, failure_reason: FailureReason) -> List[str]:
+        """Find matching templates for content type and failure reason."""
+        key = (content_type, failure_reason)
+        if key in self._templates:
+            return self._templates[key]
+        elif (ContentType.GENERAL, failure_reason) in self._templates:
+            return self._templates[(ContentType.GENERAL, failure_reason)]
+        return [self._get_generic_template()]
     
     def _get_generic_template(self) -> str:
         """Get a generic fallback template"""
@@ -340,4 +342,123 @@ class TemplateManager:
             "• Desired outcomes or improvements\n"
             "• Any constraints or requirements\n"
             "This will help me generate actionable recommendations."
+        )
+    
+    def _get_optimization_info_request_template(self) -> str:
+        """Get optimization info request template."""
+        return (
+            "I need more specific information about your {context} to provide actionable optimization recommendations. "
+            "Could you provide:\n"
+            "• Current performance metrics (latency, throughput)\n"
+            "• Resource constraints (memory, compute)\n"
+            "• Target improvements (e.g., 20% latency reduction)\n"
+            "This will help me generate specific, measurable optimization strategies."
+        )
+    
+    def _get_optimization_context_template(self) -> str:
+        """Get optimization context template."""
+        return (
+            "The optimization analysis for {context} requires additional context. "
+            "To provide value-driven recommendations, I need:\n"
+            "• Baseline performance data\n"
+            "• System architecture details\n"
+            "• Specific bottlenecks you're experiencing\n"
+            "With this information, I can suggest targeted optimizations with expected improvements."
+        )
+    
+    def _get_optimization_stepwise_template(self) -> str:
+        """Get optimization stepwise template."""
+        return (
+            "After multiple attempts to optimize {context}, let's try a different approach. "
+            "Please consider:\n"
+            "• Breaking the optimization into smaller, more focused tasks\n"
+            "• Providing a simplified version of your requirements\n"
+            "• Starting with basic performance profiling first\n"
+            "• Describing the most critical performance issue only\n"
+            "Sometimes a step-by-step approach yields better results."
+        )
+    
+    def _get_optimization_key_info_template(self) -> str:
+        """Get optimization key info template."""
+        return (
+            "To optimize {context} effectively, I need key information:\n"
+            "• Model/system specifications\n"
+            "• Current configuration parameters\n"
+            "• Performance requirements\n"
+            "• Available resources\n"
+            "Please provide these details for targeted optimization recommendations."
+        )
+    
+    def _get_optimization_setup_template(self) -> str:
+        """Get optimization setup template."""
+        return (
+            "Optimization requires understanding your specific setup. For {context}, please share:\n"
+            "• Current implementation details\n"
+            "• Performance metrics you're tracking\n"
+            "• Constraints or limitations\n"
+            "This enables me to provide quantified improvement strategies."
+        )
+    
+    def _get_concrete_optimization_template(self) -> str:
+        """Get concrete optimization template."""
+        return (
+            "Let me provide a more concrete optimization approach for {context}:\n"
+            "1. **Measure**: First, profile your current system using tools like [specific profiler]\n"
+            "2. **Identify**: Look for bottlenecks in [specific areas]\n"
+            "3. **Apply**: Implement specific techniques like [concrete optimization]\n"
+            "4. **Verify**: Measure improvements against baseline\n"
+            "Would you like me to elaborate on any of these steps?"
+        )
+    
+    def _get_practical_optimization_template(self) -> str:
+        """Get practical optimization template."""
+        return (
+            "I'll be more specific about optimizing {context}. Here's a practical approach:\n"
+            "• **Quick win**: [Specific easy optimization]\n"
+            "• **Medium effort**: [Specific moderate optimization]\n"
+            "• **Major improvement**: [Specific significant optimization]\n"
+            "Each includes measurable impact. Which would you like to explore first?"
+        )
+    
+    def _get_data_analysis_parameters_template(self) -> str:
+        """Get data analysis parameters template."""
+        return (
+            "The data analysis for {context} needs more specific parameters:\n"
+            "• Data volume and format\n"
+            "• Key metrics to analyze\n"
+            "• Time range or scope\n"
+            "• Expected insights or patterns\n"
+            "This will enable a focused, valuable analysis."
+        )
+    
+    def _get_data_analysis_objectives_template(self) -> str:
+        """Get data analysis objectives template."""
+        return (
+            "To analyze {context} effectively, please provide:\n"
+            "• Sample data or schema\n"
+            "• Analysis objectives\n"
+            "• Historical context if available\n"
+            "• Specific questions to answer\n"
+            "This ensures the analysis delivers actionable insights."
+        )
+    
+    def _get_data_processing_issue_template(self) -> str:
+        """Get data processing issue template."""
+        return (
+            "I encountered an issue processing the data for {context}. "
+            "This typically occurs with:\n"
+            "• Inconsistent data formats\n"
+            "• Missing required fields\n"
+            "• Encoding issues\n"
+            "Could you verify the data format and provide a sample?"
+        )
+    
+    def _get_data_parsing_failure_template(self) -> str:
+        """Get data parsing failure template."""
+        return (
+            "Data parsing failed for {context}. Common causes:\n"
+            "• Malformed JSON/CSV\n"
+            "• Unexpected data types\n"
+            "• Schema mismatches\n"
+            "Please check the data structure and try again with validated input."
         )
