@@ -3,7 +3,9 @@
 import React from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useAuthStore } from '@/store/authStore';
+import { useAuthState } from '@/hooks/useAuthState';
 import { useWebSocket } from '@/hooks/useWebSocket';
+import { AuthGate } from '@/components/auth/AuthGate';
 import { 
   useChatSidebarState, 
   useThreadLoader, 
@@ -26,6 +28,7 @@ export const ChatSidebar: React.FC = () => {
   const { isProcessing, activeThreadId } = useUnifiedChatStore();
   const { sendMessage } = useWebSocket();
   const { isDeveloperOrHigher } = useAuthStore();
+  const { isAuthenticated, userTier } = useAuthState();
   const isAdmin = isDeveloperOrHigher();
   
   const {
@@ -79,57 +82,96 @@ export const ChatSidebar: React.FC = () => {
 
   return (
     <div className="w-80 h-full bg-white/95 backdrop-blur-md border-r border-gray-200 flex flex-col">
-      {/* Header with New Chat Button */}
-      <div className="p-4 border-b border-gray-200">
-        <NewChatButton
-          isCreatingThread={isCreatingThread}
-          isProcessing={isProcessing}
-          onNewChat={handleNewChat}
+      {/* Header with New Chat Button - Auth Protected */}
+      <AuthGate 
+        showLoginPrompt={false}
+        fallback={
+          <div className="p-4 border-b border-gray-200">
+            <div className="w-full py-2 px-4 text-center text-gray-500 border border-gray-300 rounded-lg bg-gray-50">
+              Sign in to start chatting
+            </div>
+          </div>
+        }
+      >
+        <div className="p-4 border-b border-gray-200">
+          <NewChatButton
+            isCreatingThread={isCreatingThread}
+            isProcessing={isProcessing}
+            onNewChat={handleNewChat}
+          />
+        </div>
+      </AuthGate>
+
+      {/* Admin Controls - Developer+ Only */}
+      <AuthGate requireTier="Mid" showLoginPrompt={false}>
+        <AdminControls
+          isAdmin={isAdmin}
+          showAllThreads={showAllThreads}
+          filterType={filterType}
+          onToggleAllThreads={() => setShowAllThreads(!showAllThreads)}
+          onFilterChange={handleFilterChange}
         />
-      </div>
+      </AuthGate>
 
-      {/* Admin Controls */}
-      <AdminControls
-        isAdmin={isAdmin}
-        showAllThreads={showAllThreads}
-        filterType={filterType}
-        onToggleAllThreads={() => setShowAllThreads(!showAllThreads)}
-        onFilterChange={handleFilterChange}
-      />
+      {/* Search Bar - Auth Protected */}
+      <AuthGate 
+        showLoginPrompt={false}
+        fallback={
+          <div className="p-4">
+            <div className="w-full py-2 px-3 text-gray-400 border border-gray-200 rounded-lg bg-gray-50">
+              🔍 Search (Sign in required)
+            </div>
+          </div>
+        }
+      >
+        <SearchBar
+          searchQuery={searchQuery}
+          showAllThreads={showAllThreads}
+          onSearchChange={setSearchQuery}
+        />
+      </AuthGate>
 
-      {/* Search Bar */}
-      <SearchBar
-        searchQuery={searchQuery}
-        showAllThreads={showAllThreads}
-        onSearchChange={setSearchQuery}
-      />
+      {/* Thread List - Auth Protected */}
+      <AuthGate 
+        showLoginPrompt={false}
+        fallback={
+          <div className="flex-1 p-4 text-center text-gray-500">
+            <div className="mb-4">💬</div>
+            <p className="text-sm">Your chat history will appear here</p>
+            <p className="text-xs text-gray-400 mt-2">Sign in to view conversations</p>
+          </div>
+        }
+      >
+        <ThreadList
+          threads={paginatedThreads}
+          isLoadingThreads={isLoadingThreads}
+          loadError={loadError}
+          activeThreadId={activeThreadId}
+          isProcessing={isProcessing}
+          showAllThreads={showAllThreads}
+          onThreadClick={handleThreadClick}
+          onRetryLoad={loadThreads}
+        />
+      </AuthGate>
 
-      {/* Thread List */}
-      <ThreadList
-        threads={paginatedThreads}
-        isLoadingThreads={isLoadingThreads}
-        loadError={loadError}
-        activeThreadId={activeThreadId}
-        isProcessing={isProcessing}
-        showAllThreads={showAllThreads}
-        onThreadClick={handleThreadClick}
-        onRetryLoad={loadThreads}
-      />
+      {/* Pagination Controls - Auth Protected */}
+      <AuthGate showLoginPrompt={false}>
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </AuthGate>
 
-      {/* Pagination Controls */}
-      <PaginationControls
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
-
-      {/* Footer with Thread Count and Quick Actions */}
-      <Footer
-        threads={threads}
-        paginatedThreads={paginatedThreads}
-        threadsPerPage={threadsPerPage}
-        isAdmin={isAdmin}
-      />
+      {/* Footer with Thread Count and Quick Actions - Auth Protected */}
+      <AuthGate showLoginPrompt={false}>
+        <Footer
+          threads={threads}
+          paginatedThreads={paginatedThreads}
+          threadsPerPage={threadsPerPage}
+          isAdmin={isAdmin}
+        />
+      </AuthGate>
     </div>
   );
 };

@@ -74,6 +74,24 @@
             </learning_ids>
         </category>
         <category>
+            <name>GitHub Actions</name>
+            <file>learnings/github_actions.xml</file>
+            <path>SPEC/learnings/github_actions.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>artifact-actions-v4-upgrade</id>
+                <id>cache-action-version-consistency</id>
+                <id>test-exit-code-propagation</id>
+                <id>optimal-test-runner-parameters</id>
+            </learning_ids>
+            <important_note>CRITICAL: Test failures must propagate - see test-exit-code-propagation learning</important_note>
+            <references>
+                <ref>.github/workflows/test-standard-template.yml</ref>
+                <ref>.github/workflows/test-runner-validation.yml</ref>
+                <ref>.github/workflows/WORKFLOW_FIX_SUMMARY.md</ref>
+            </references>
+        </category>
+        <category>
             <name>Database/AsyncIO</name>
             <file>learnings/database_asyncio.xml</file>
             <path>SPEC/learnings/database_asyncio.xml</path>

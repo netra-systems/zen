@@ -461,8 +461,10 @@ def _apply_speed_optimizations(cmd: List[str], speed_opts: Dict[str, bool]) -> L
     """
     optimized_cmd = cmd.copy()
     
-    # Check if we're using the backend test runner
+    # Check what type of test runner we're using
     is_backend_runner = any('test_backend.py' in str(c) for c in cmd)
+    is_frontend_simple_runner = any('test_frontend_simple.py' in str(c) for c in cmd)
+    is_frontend_runner = any('test_frontend.py' in str(c) for c in cmd)
     
     if is_backend_runner:
         # Backend runner has specific flags
@@ -479,6 +481,15 @@ def _apply_speed_optimizations(cmd: List[str], speed_opts: Dict[str, bool]) -> L
         
         # Backend runner doesn't have direct skip slow support
         # Would need to use --markers flag
+    elif is_frontend_simple_runner:
+        # Simple frontend runner only accepts --level and additional args
+        # Don't add any speed optimization flags as they're not supported
+        pass
+    elif is_frontend_runner:
+        # Full frontend runner supports more options
+        if speed_opts.get('fast_fail', False):
+            # Frontend runner might support some Jest options
+            pass  # Would need to check what's supported
     else:
         # Standard pytest flags for other runners
         if speed_opts.get('no_warnings', False):

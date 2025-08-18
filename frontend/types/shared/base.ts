@@ -7,13 +7,49 @@
  * - Functions ≤8 lines each
  */
 
-import { MessageRole, MessageType } from './enums';
+import { MessageType, AgentStatus, WebSocketMessageType } from './enums';
 
-// ============================================================================
-// BASE INTERFACES - Foundation Types
-// ============================================================================
+// CORE ENUMS
 
-export interface BaseMessage {
+export enum MessageRole {
+  USER = 'user',
+  ASSISTANT = 'assistant',
+  SYSTEM = 'system',
+  AGENT = 'agent'
+}
+
+export enum MessageStatus {
+  PENDING = 'pending',
+  SENDING = 'sending',
+  SENT = 'sent',
+  DELIVERED = 'delivered',
+  READ = 'read',
+  FAILED = 'failed',
+  RETRYING = 'retrying'
+}
+
+// BASE INTERFACES
+
+export interface BaseEntity {
+  id: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface BaseTimestampEntity extends BaseEntity {
+  created_at: string;
+  updated_at: string;
+  version?: number;
+}
+
+export interface BaseMetadata {
+  version?: string;
+  source?: string;
+  tags?: string[];
+  custom_fields?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+export interface BaseMessage extends BaseEntity {
   id: string;
   content: string;
   role?: MessageRole;
@@ -31,9 +67,7 @@ export interface BaseWebSocketPayload {
   message_id?: string;
 }
 
-// ============================================================================
 // SHARED METADATA INTERFACES
-// ============================================================================
 
 export interface MessageAttachment {
   id: string;
@@ -84,9 +118,7 @@ export interface MessageMetadata {
   [key: string]: unknown;
 }
 
-// ============================================================================
 // USER AND AUTH TYPES
-// ============================================================================
 
 export interface User {
   id: string;
@@ -119,9 +151,37 @@ export interface AuthConfigResponse {
   logout_url?: string;
 }
 
-// ============================================================================
+// COMMON TYPE ALIASES & UTILITY TYPES
+
+export type ID = string;
+export type Timestamp = string | number | Date;
+export type OptionalFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
+export type Nullable<T> = T | null;
+export type Optional<T> = T | undefined;
+
+// Generic status types
+export type OperationStatus = 'idle' | 'loading' | 'success' | 'error';
+export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'error';
+// TYPE REGISTRY - Runtime type information
+
+export const TYPE_REGISTRY = {
+  BASE_ENTITY: 'BaseEntity',
+  BASE_TIMESTAMP_ENTITY: 'BaseTimestampEntity', 
+  BASE_MESSAGE: 'BaseMessage',
+  BASE_METADATA: 'BaseMetadata',
+  USER: 'User',
+  MESSAGE_ATTACHMENT: 'MessageAttachment',
+  MESSAGE_REACTION: 'MessageReaction',
+  MESSAGE_METADATA: 'MessageMetadata',
+  BASE_WEBSOCKET_PAYLOAD: 'BaseWebSocketPayload',
+  AUTH_CONFIG_RESPONSE: 'AuthConfigResponse',
+  AUTH_ENDPOINTS: 'AuthEndpoints'
+} as const;
+
+export type TypeRegistryKey = keyof typeof TYPE_REGISTRY;
+export type TypeRegistryValue = typeof TYPE_REGISTRY[TypeRegistryKey];
 // UTILITY HELPER FUNCTIONS - Each ≤8 lines
-// ============================================================================
 
 export function createBaseMessage(
   role: MessageRole,
@@ -184,14 +244,58 @@ export function hasRequiredMessageFields(obj: unknown): obj is BaseMessage {
   return typeof msg.id === 'string' && typeof msg.content === 'string';
 }
 
-// ============================================================================
-// DEFAULT EXPORT FOR CONVENIENCE
-// ============================================================================
+export function createBaseEntity(id?: string): BaseEntity {
+  const timestamp = new Date().toISOString();
+  return {
+    id: id || `entity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    created_at: timestamp,
+    updated_at: timestamp
+  };
+}
+
+export function createTimestampEntity(id?: string): BaseTimestampEntity {
+  const timestamp = new Date().toISOString();
+  return {
+    id: id || `ts_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    created_at: timestamp,
+    updated_at: timestamp,
+    version: 1
+  };
+}
+
+export function createBaseMetadata(source?: string): BaseMetadata {
+  return {
+    version: '1.0.0',
+    source: source || 'system',
+    tags: [],
+    custom_fields: {}
+  };
+}
+
+export function getTypeFromRegistry(key: TypeRegistryKey): TypeRegistryValue {
+  return TYPE_REGISTRY[key];
+}
+
+export function isValidEntity(obj: unknown): obj is BaseEntity {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const entity = obj as BaseEntity;
+  return typeof entity.id === 'string';
+}
+
+// DEFAULT EXPORT
 
 export default {
   createBaseMessage,
   createMessageAttachment,
   createMessageReaction,
+  createBaseEntity,
+  createTimestampEntity,
+  createBaseMetadata,
   isValidUser,
-  hasRequiredMessageFields
+  hasRequiredMessageFields,
+  isValidEntity,
+  getTypeFromRegistry,
+  TYPE_REGISTRY,
+  MessageRole,
+  MessageStatus
 };

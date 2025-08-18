@@ -280,8 +280,8 @@ def _add_bad_test_detection_args(args, pytest_args):
     # Bad test detection disabled - using single test_results.json
     # pytest_args.extend(["-p", "test_framework.pytest_bad_test_plugin"])
     
-    # Add component info
-    pytest_args.extend(["--test-component", "backend"])
+    # Component info not needed since plugin is disabled
+    # pytest_args.extend(["--test-component", "backend"])
 
 
 def setup_reports_directory(args, isolation_manager=None) -> Path:

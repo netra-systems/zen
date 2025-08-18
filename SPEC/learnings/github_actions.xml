@@ -121,6 +121,133 @@
         </learning>
     </learnings>
     
+    <learnings>
+        <learning>
+            <id>test-exit-code-propagation</id>
+            <category>github-actions</category>
+            <severity>CRITICAL</severity>
+            <date>2025-08-18</date>
+            <issue>
+                <description>Test failures not propagating correctly in GitHub Actions workflows</description>
+                <symptoms>
+                    <symptom>Tests show "[FAIL] TESTS FAILED with exit code 4" but workflow shows success</symptom>
+                    <symptom>PR merge not blocked despite test failures</symptom>
+                    <symptom>Commit status shows success when tests fail</symptom>
+                </symptoms>
+                <error_message>[FAIL] TESTS FAILED with exit code 4 after 1.21s (but workflow continues as success)</error_message>
+            </issue>
+            
+            <root_cause>
+                <description>Test commands not explicitly handling exit codes</description>
+                <details>
+                    <detail>Missing || exit $? to propagate test_runner.py exit codes</detail>
+                    <detail>Some steps using continue-on-error: true which masks failures</detail>
+                    <detail>No proper error annotations for GitHub Actions</detail>
+                    <detail>Final status calculation not exiting with failure code</detail>
+                </details>
+            </root_cause>
+            
+            <solution>
+                <description>Explicitly handle and propagate exit codes in all test steps</description>
+                <implementation>
+                    <step>Add || exit $? to all test_runner.py commands</step>
+                    <step>Remove continue-on-error: true from test steps</step>
+                    <step>Add error annotations with ::error::</step>
+                    <step>Ensure final status step exits with failure code</step>
+                </implementation>
+                <code_changes>
+                    <change>
+                        <file>.github/workflows/test-runner.yml</file>
+                        <before>python test_runner.py --level smoke</before>
+                        <after>python test_runner.py --level smoke --no-coverage --fast-fail || exit $?</after>
+                    </change>
+                    <change>
+                        <file>.github/workflows/test-smoke-simple.yml</file>
+                        <before>continue-on-error: true</before>
+                        <after># Removed continue-on-error to propagate failures</after>
+                    </change>
+                </code_changes>
+            </solution>
+            
+            <files_affected>
+                <file>.github/workflows/test-runner.yml</file>
+                <file>.github/workflows/test-smoke-simple.yml</file>
+                <file>.github/workflows/frontend-tests-ultra.yml</file>
+                <file>.github/workflows/architecture-compliance.yml</file>
+                <file>.github/workflows/code-quality.yml</file>
+            </files_affected>
+            
+            <prevention>
+                <description>Use standardized templates and validation</description>
+                <best_practices>
+                    <practice>Always use || exit $? with test commands</practice>
+                    <practice>Never use continue-on-error: true in test steps</practice>
+                    <practice>Use test-standard-template.yml as reference</practice>
+                    <practice>Run test-runner-validation.yml to verify propagation</practice>
+                    <practice>Add CI flags: --no-coverage --fast-fail --ci --no-warnings</practice>
+                </best_practices>
+            </prevention>
+            
+            <business_impact>
+                <impact>CRITICAL - Broken code could be deployed to production</impact>
+                <details>
+                    <detail>Failed tests don't block PR merges</detail>
+                    <detail>Broken code reaches main branch</detail>
+                    <detail>Customer-facing bugs in production</detail>
+                    <detail>Loss of trust in CI/CD pipeline</detail>
+                </details>
+            </business_impact>
+            
+            <references>
+                <reference>.github/workflows/test-standard-template.yml</reference>
+                <reference>.github/workflows/test-runner-validation.yml</reference>
+                <reference>.github/workflows/WORKFLOW_FIX_SUMMARY.md</reference>
+            </references>
+        </learning>
+        
+        <learning>
+            <id>optimal-test-runner-parameters</id>
+            <category>github-actions</category>
+            <severity>HIGH</severity>
+            <date>2025-08-18</date>
+            <issue>
+                <description>Tests running slowly in CI, coverage slowing feedback loops</description>
+                <symptoms>
+                    <symptom>Test runs taking too long for PR feedback</symptom>
+                    <symptom>Coverage calculation adding unnecessary overhead</symptom>
+                    <symptom>Tests continuing after first failure</symptom>
+                </symptoms>
+            </issue>
+            
+            <solution>
+                <description>Use optimized test_runner.py parameters for CI</description>
+                <implementation>
+                    <step>Add --no-coverage for PR validation</step>
+                    <step>Add --fast-fail to stop on first failure</step>
+                    <step>Add --ci for CI optimizations</step>
+                    <step>Add --no-warnings to reduce noise</step>
+                </implementation>
+                <code_changes>
+                    <change>
+                        <file>.github/workflows/*.yml</file>
+                        <before>python test_runner.py --level integration</before>
+                        <after>python test_runner.py --level integration --no-coverage --fast-fail --ci --no-warnings</after>
+                    </change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <description>Document standard CI parameters in specs</description>
+                <best_practices>
+                    <practice>Use --no-coverage for PR tests</practice>
+                    <practice>Use --fast-fail for quick feedback</practice>
+                    <practice>Only run coverage on main branch</practice>
+                    <practice>Document in testing.xml spec</practice>
+                </best_practices>
+            </prevention>
+        </learning>
+    </learnings>
+    
     <best_practices>
         <practice>
             <name>Action Version Management</name>

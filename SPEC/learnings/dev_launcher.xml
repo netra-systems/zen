@@ -8,16 +8,20 @@
     </problem>
     <cause>
       The startup check in app/startup_checks/environment_checks.py requires SECRET_KEY 
-      to be longer than 32 characters, not exactly 32 characters.
+      to be longer than 32 characters. Additionally, the DevelopmentConfig class was not
+      reading SECRET_KEY from environment variables.
     </cause>
     <solution>
-      Generate a longer SECRET_KEY (64+ characters) using:
-      python -c "import secrets; print(secrets.token_urlsafe(48))"
-      Then update the SECRET_KEY in .env.development.local
+      1. Generate a longer SECRET_KEY (64+ characters) using:
+         python -c "import secrets; print(secrets.token_urlsafe(48))"
+      2. Update SECRET_KEY in both .env and .env.development.local files
+      3. Ensure DevelopmentConfig reads SECRET_KEY from environment:
+         secret_key: str = os.environ.get("SECRET_KEY", "default_long_key...")
     </solution>
     <prevention>
-      Ensure all generated SECRET_KEYs are at least 64 characters long to provide
-      sufficient entropy and avoid boundary condition issues.
+      - Ensure all generated SECRET_KEYs are at least 64 characters long
+      - Always configure config classes to read from environment variables
+      - Keep .env and .env.development.local files in sync for critical settings
     </prevention>
   </learning>
 
