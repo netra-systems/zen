@@ -105,17 +105,18 @@ async def check_websocket_health() -> HealthCheckResult:
     """Check WebSocket connection manager health."""
     start_time = time.time()
     try:
-        stats, health_score = _get_websocket_stats_and_score()
+        stats, health_score = await _get_websocket_stats_and_score()
         response_time = (time.time() - start_time) * 1000
         return _create_websocket_health_result(stats, health_score, response_time)
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
         return _create_failed_result("websocket", str(e), response_time)
 
-def _get_websocket_stats_and_score() -> tuple[Dict[str, Any], float]:
+async def _get_websocket_stats_and_score() -> tuple[Dict[str, Any], float]:
     """Get WebSocket connection stats and calculate health score."""
-    from app.websocket.connection import connection_manager
-    stats = connection_manager.get_stats()
+    from app.websocket.connection_manager import get_connection_manager
+    conn_manager = get_connection_manager()
+    stats = await conn_manager.get_stats()
     health_score = _calculate_websocket_health_score(stats)
     return stats, health_score
 

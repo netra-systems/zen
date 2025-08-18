@@ -2,14 +2,42 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../test-utils/providers';
 
-// Mock dependencies with dynamic jest.Mock functions
+// Mock dependencies with dynamic jest.Mock functions - DEFINE FIRST
 const mockUseUnifiedChatStore = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseEventProcessor = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+
+// Mock the modules
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore
 }));
 
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: mockUseEventProcessor
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
 // Export mock functions for test control
-export { mockUseUnifiedChatStore, mockUseWebSocket, mockUseLoadingState, mockUseEventProcessor };
+export { 
+  mockUseUnifiedChatStore, 
+  mockUseWebSocket, 
+  mockUseLoadingState, 
+  mockUseEventProcessor,
+  mockUseThreadNavigation
+};
 
 // Export default mock store data for test use
 export const mockStore = {
@@ -27,18 +55,6 @@ export const mockStore = {
   clearMessages: jest.fn(),
   updateLayerData: jest.fn(),
 };
-const mockUseWebSocket = jest.fn();
-jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: mockUseWebSocket
-}));
-const mockUseLoadingState = jest.fn();
-jest.mock('@/hooks/useLoadingState', () => ({
-  useLoadingState: mockUseLoadingState
-}));
-const mockUseEventProcessor = jest.fn();
-jest.mock('@/hooks/useEventProcessor', () => ({
-  useEventProcessor: mockUseEventProcessor
-}));
 jest.mock('@/components/chat/ChatHeader', () => ({
   ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
 }));
@@ -120,6 +136,13 @@ export const setupMocks = () => {
     processedEvents: [],
     isProcessing: false,
     stats: { processed: 0, failed: 0 }
+  });
+  
+  mockUseThreadNavigation.mockReturnValue({
+    currentThreadId: null,
+    isNavigating: false,
+    navigateToThread: jest.fn(),
+    createNewThread: jest.fn()
   });
 
   jest.useFakeTimers();

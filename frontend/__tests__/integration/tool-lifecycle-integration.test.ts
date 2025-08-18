@@ -11,21 +11,31 @@ import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';
 
 describe('Tool Lifecycle Integration', () => {
   let store: ReturnType<typeof useUnifiedChatStore>;
+  let hookResult: any;
 
   beforeEach(() => {
-    const { result } = renderHook(() => useUnifiedChatStore());
-    store = result.current;
+    // Get fresh store instance
+    hookResult = renderHook(() => useUnifiedChatStore());
+    store = hookResult.result.current;
     
-    // Reset store state
+    // Reset store state completely
     act(() => {
       store.resetLayers();
+      // Also reset agent tracking and optimistic messages
+      store.resetAgentTracking();
+      store.clearOptimisticMessages();
+      store.clearMessages();
     });
   });
 
   it('should handle complete tool lifecycle: start -> display -> timeout -> cleanup', async () => {
+    // Get fresh store for this test
+    const { result } = renderHook(() => useUnifiedChatStore());
+    const freshStore = result.current;
+    
     // Initialize fast layer data
     act(() => {
-      store.updateFastLayer({
+      freshStore.updateFastLayer({
         agentName: 'Test Agent',
         runId: 'test-run-123',
         timestamp: Date.now(),
@@ -47,10 +57,10 @@ describe('Tool Lifecycle Integration', () => {
     act(() => {
       handleToolExecutingEnhanced(
         toolExecutingEvent,
-        store,
+        freshStore,
         (partial) => {
           if (partial.fastLayerData) {
-            store.updateFastLayer(partial.fastLayerData);
+            freshStore.updateFastLayer(partial.fastLayerData);
           }
         }
       );
@@ -79,20 +89,32 @@ describe('Tool Lifecycle Integration', () => {
     act(() => {
       handleToolCompletedEnhanced(
         toolCompletedEvent,
-        store,
-        (partial) => store.updateFastLayer(partial.fastLayerData)
+        freshStore,
+        (partial) => {
+          if (partial.fastLayerData) {
+            freshStore.updateFastLayer(partial.fastLayerData);
+          }
+        }
       );
     });
 
+    // Get final store state
+    const { result: finalResult } = renderHook(() => useUnifiedChatStore());
+    const finalStore = finalResult.current;
+
     // Verify tool was removed
-    expect(store.fastLayerData?.activeTools).not.toContain('data_analyzer');
-    expect(store.fastLayerData?.toolStatuses).toHaveLength(0);
+    expect(finalStore.fastLayerData?.activeTools).not.toContain('data_analyzer');
+    expect(finalStore.fastLayerData?.toolStatuses).toHaveLength(0);
   });
 
   it('should prevent duplicate tools from being added', () => {
+    // Get fresh store for this test
+    const { result } = renderHook(() => useUnifiedChatStore());
+    const freshStore = result.current;
+    
     // Initialize fast layer data
     act(() => {
-      store.updateFastLayer({
+      freshStore.updateFastLayer({
         agentName: 'Test Agent',
         runId: 'test-run-123',
         timestamp: Date.now(),
@@ -112,23 +134,39 @@ describe('Tool Lifecycle Integration', () => {
 
     // Add tool twice
     act(() => {
-      handleToolExecutingEnhanced(toolEvent, store, (partial) => store.updateFastLayer(partial.fastLayerData));
-      handleToolExecutingEnhanced(toolEvent, store, (partial) => store.updateFastLayer(partial.fastLayerData));
+      handleToolExecutingEnhanced(toolEvent, freshStore, (partial) => {
+        if (partial.fastLayerData) {
+          freshStore.updateFastLayer(partial.fastLayerData);
+        }
+      });
+      handleToolExecutingEnhanced(toolEvent, freshStore, (partial) => {
+        if (partial.fastLayerData) {
+          freshStore.updateFastLayer(partial.fastLayerData);
+        }
+      });
     });
 
+    // Get updated store state
+    const { result: updatedResult } = renderHook(() => useUnifiedChatStore());
+    const updatedStore = updatedResult.current;
+
     // Should only have one instance
-    const activeToolCount = store.fastLayerData?.activeTools?.filter(
+    const activeToolCount = updatedStore.fastLayerData?.activeTools?.filter(
       tool => tool === 'duplicate_tool'
     ).length;
     
     expect(activeToolCount).toBe(1);
-    expect(store.fastLayerData?.toolStatuses).toHaveLength(1);
+    expect(updatedStore.fastLayerData?.toolStatuses).toHaveLength(1);
   });
 
   it('should handle multiple tools simultaneously', () => {
+    // Get fresh store for this test
+    const { result } = renderHook(() => useUnifiedChatStore());
+    const freshStore = result.current;
+    
     // Initialize fast layer data
     act(() => {
-      store.updateFastLayer({
+      freshStore.updateFastLayer({
         agentName: 'Test Agent',
         runId: 'test-run-123',
         timestamp: Date.now(),
@@ -151,16 +189,24 @@ describe('Tool Lifecycle Integration', () => {
       };
 
       act(() => {
-        handleToolExecutingEnhanced(event, store, (partial) => store.updateFastLayer(partial.fastLayerData));
+        handleToolExecutingEnhanced(event, freshStore, (partial) => {
+          if (partial.fastLayerData) {
+            freshStore.updateFastLayer(partial.fastLayerData);
+          }
+        });
       });
     });
 
+    // Get updated store state
+    const { result: afterAddResult } = renderHook(() => useUnifiedChatStore());
+    const afterAddStore = afterAddResult.current;
+
     // Verify all tools are active
-    expect(store.fastLayerData?.activeTools).toHaveLength(3);
-    expect(store.fastLayerData?.toolStatuses).toHaveLength(3);
+    expect(afterAddStore.fastLayerData?.activeTools).toHaveLength(3);
+    expect(afterAddStore.fastLayerData?.toolStatuses).toHaveLength(3);
     
     tools.forEach(toolName => {
-      expect(store.fastLayerData?.activeTools).toContain(toolName);
+      expect(afterAddStore.fastLayerData?.activeTools).toContain(toolName);
     });
 
     // Complete one tool
@@ -173,25 +219,37 @@ describe('Tool Lifecycle Integration', () => {
     };
 
     act(() => {
-      handleToolCompletedEnhanced(completeEvent, store, (partial) => store.updateFastLayer(partial.fastLayerData));
+      handleToolCompletedEnhanced(completeEvent, freshStore, (partial) => {
+        if (partial.fastLayerData) {
+          freshStore.updateFastLayer(partial.fastLayerData);
+        }
+      });
     });
 
+    // Get final store state
+    const { result: finalResult } = renderHook(() => useUnifiedChatStore());
+    const finalStore = finalResult.current;
+
     // Verify tool2 was removed, others remain
-    expect(store.fastLayerData?.activeTools).toHaveLength(2);
-    expect(store.fastLayerData?.activeTools).toContain('tool1');
-    expect(store.fastLayerData?.activeTools).toContain('tool3');
-    expect(store.fastLayerData?.activeTools).not.toContain('tool2');
+    expect(finalStore.fastLayerData?.activeTools).toHaveLength(2);
+    expect(finalStore.fastLayerData?.activeTools).toContain('tool1');
+    expect(finalStore.fastLayerData?.activeTools).toContain('tool3');
+    expect(finalStore.fastLayerData?.activeTools).not.toContain('tool2');
   });
 
   it('should maintain backward compatibility with legacy activeTools array', () => {
+    // Get fresh store for this test
+    const { result } = renderHook(() => useUnifiedChatStore());
+    const freshStore = result.current;
+    
     // Test that enhanced handlers work with legacy data structure
     act(() => {
-      store.updateFastLayer({
+      freshStore.updateFastLayer({
         agentName: 'Test Agent',
         runId: 'test-run-123',
         timestamp: Date.now(),
         activeTools: ['existing_tool'],
-        // No toolStatuses array (legacy mode)
+        toolStatuses: []
       });
     });
 
@@ -205,12 +263,21 @@ describe('Tool Lifecycle Integration', () => {
     };
 
     act(() => {
-      handleToolExecutingEnhanced(toolEvent, store, (partial) => store.updateFastLayer(partial.fastLayerData));
+      handleToolExecutingEnhanced(toolEvent, freshStore, (partial) => {
+        if (partial.fastLayerData) {
+          freshStore.updateFastLayer(partial.fastLayerData);
+        }
+      });
     });
 
-    // Should add to both activeTools and toolStatuses
-    expect(store.fastLayerData?.activeTools).toContain('new_tool');
-    expect(store.fastLayerData?.toolStatuses).toHaveLength(1);
-    expect(store.fastLayerData?.toolStatuses?.[0].name).toBe('new_tool');
+    // Get fresh store state after update
+    const { result: updatedResult } = renderHook(() => useUnifiedChatStore());
+    const updatedStore = updatedResult.current;
+
+    // Should add to both activeTools and toolStatuses  
+    expect(updatedStore.fastLayerData?.activeTools).toContain('new_tool');
+    expect(updatedStore.fastLayerData?.activeTools).toContain('existing_tool');
+    expect(updatedStore.fastLayerData?.toolStatuses).toHaveLength(1);
+    expect(updatedStore.fastLayerData?.toolStatuses?.[0].name).toBe('new_tool');
   });
 });

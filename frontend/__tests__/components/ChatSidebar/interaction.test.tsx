@@ -38,6 +38,15 @@ jest.mock('@/services/threadService', () => ({
   }
 }));
 
+// Mock WebSocket hook for handlers
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn(() => ({
+    sendMessage: jest.fn(),
+    isConnected: true,
+    connectionStatus: 'connected'
+  }))
+}));
+
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import * as ChatSidebarHooksModule from '@/components/chat/ChatSidebarHooks';
 import { 

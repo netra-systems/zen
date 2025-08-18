@@ -3,27 +3,70 @@
  * Tests for input validation, sanitization, and character limits
  */
 
+// Mock dependencies BEFORE imports
+const mockSendMessage = jest.fn();
+const mockUseWebSocket = jest.fn();
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseThreadStore = jest.fn();
+const mockUseAuthStore = jest.fn();
+const mockGenerateUniqueId = jest.fn();
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: mockUseThreadStore
+}));
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+jest.mock('@/lib/utils', () => ({
+  generateUniqueId: mockGenerateUniqueId,
+  cn: jest.fn((...classes) => classes.filter(Boolean).join(' '))
+}));
+jest.mock('@/components/chat/utils/messageInputUtils', () => ({
+  getPlaceholder: jest.fn((isAuthenticated, isProcessing, messageLength) => {
+    if (!isAuthenticated) return 'Please sign in to send messages';
+    if (isProcessing) return 'Agent is thinking...';
+    if (messageLength > 9000) return `${10000 - messageLength} characters remaining`;
+    return 'Type a message...';
+  }),
+  getTextareaClassName: jest.fn(() => 'mocked-textarea-class'),
+  getCharCountClassName: jest.fn(() => 'mocked-char-count-class'),
+  shouldShowCharCount: jest.fn((messageLength) => messageLength > 8000),
+  isMessageDisabled: jest.fn((isProcessing, isAuthenticated, isSending) => {
+    return isProcessing || !isAuthenticated || isSending;
+  }),
+  canSendMessage: jest.fn((isDisabled, message, messageLength) => {
+    return !isDisabled && !!message.trim() && messageLength <= 10000;
+  })
+}));
+jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+  useMessageHistory: jest.fn(() => ({
+    messageHistory: [],
+    addToHistory: jest.fn(),
+    navigateHistory: jest.fn(() => '')
+  }))
+}));
+jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+  useTextareaResize: jest.fn(() => ({ rows: 1 }))
+}));
+jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+  useMessageSending: jest.fn(() => ({
+    isSending: false,
+    handleSend: jest.fn()
+  }))
+}));
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
-import { useWebSocket } from '@/hooks/useWebSocket';
-import { useChatStore } from '@/store/chat';
-import { useThreadStore } from '@/store/threadStore';
-import { useAuthStore } from '@/store/authStore';
-import { generateUniqueId } from '@/lib/utils';
-
-// Mock dependencies
-jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: jest.fn()
-}));
-jest.mock('@/store/chat');
-jest.mock('@/store/threadStore');
-jest.mock('@/store/authStore');
-jest.mock('@/lib/utils');
 
 describe('MessageInput - Input Validation and Sanitization', () => {
-  const mockSendMessage = jest.fn();
   const mockChatStore = {
     setProcessing: jest.fn(),
     addMessage: jest.fn()
@@ -37,27 +80,28 @@ describe('MessageInput - Input Validation and Sanitization', () => {
     jest.clearAllMocks();
     
     // Setup default mocks
-    (useWebSocket as jest.Mock).mockReturnValue({
+    mockUseWebSocket.mockReturnValue({
       sendMessage: mockSendMessage,
     });
     
-    (useChatStore as jest.Mock).mockReturnValue({
-      setProcessing: mockChatStore.setProcessing,
+    mockUseUnifiedChatStore.mockReturnValue({
+      activeThreadId: 'thread-1',
       isProcessing: false,
+      setProcessing: mockChatStore.setProcessing,
       addMessage: mockChatStore.addMessage,
     });
     
-    (useThreadStore as jest.Mock).mockReturnValue({
+    mockUseThreadStore.mockReturnValue({
       currentThreadId: 'thread-1',
       setCurrentThread: mockThreadStore.setCurrentThread,
       addThread: mockThreadStore.addThread,
     });
     
-    (useAuthStore as jest.Mock).mockReturnValue({
+    mockUseAuthStore.mockReturnValue({
       isAuthenticated: true,
     });
     
-    (generateUniqueId as jest.Mock).mockImplementation((prefix) => `${prefix}-${Date.now()}`);
+    mockGenerateUniqueId.mockImplementation((prefix) => `${prefix}-${Date.now()}`);
   });
 
   describe('Input validation and sanitization', () => {
@@ -187,9 +231,10 @@ describe('MessageInput - Input Validation and Sanitization', () => {
     });
 
     it('should prevent sending when processing', async () => {
-      (useChatStore as jest.Mock).mockReturnValue({
-        setProcessing: mockChatStore.setProcessing,
+      mockUseUnifiedChatStore.mockReturnValue({
+        activeThreadId: 'thread-1',
         isProcessing: true,
+        setProcessing: mockChatStore.setProcessing,
         addMessage: mockChatStore.addMessage,
       });
       
@@ -202,7 +247,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
     });
 
     it('should prevent sending when not authenticated', async () => {
-      (useAuthStore as jest.Mock).mockReturnValue({
+      mockUseAuthStore.mockReturnValue({
         isAuthenticated: false,
       });
       

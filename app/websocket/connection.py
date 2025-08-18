@@ -11,7 +11,10 @@ from app.logging_config import central_logger
 
 # Import all modern components
 from app.websocket.connection_info import ConnectionInfo
-from app.websocket.connection_manager import ModernConnectionManager, connection_manager
+from app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
+
+# Initialize connection_manager using lazy initialization
+connection_manager = get_connection_manager()
 
 # Import legacy components for backward compatibility
 from app.websocket.connection_info import (

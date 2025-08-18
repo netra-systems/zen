@@ -8,7 +8,12 @@ from app.llm.llm_manager import LLMManager
 
 @pytest.mark.asyncio
 @patch('app.agents.triage_sub_agent.agent.TriageSubAgent.execute')
-async def test_supervisor_flow(mock_triage_execute):
+@patch('app.agents.data_sub_agent.agent.DataSubAgent.execute') 
+@patch('app.agents.optimizations_core_sub_agent.OptimizationsCoreSubAgent.execute')
+@patch('app.agents.actions_to_meet_goals_sub_agent.ActionsToMeetGoalsSubAgent.execute')
+@patch('app.agents.reporting_sub_agent.ReportingSubAgent.execute')
+async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute, 
+                              mock_optimizations_execute, mock_data_execute, mock_triage_execute):
     # Mock LLMManager
     llm_manager = MagicMock(spec=LLMManager)
     llm_manager.ask_llm = AsyncMock()
@@ -54,6 +59,48 @@ async def test_supervisor_flow(mock_triage_execute):
         state.step_count += 1
     
     mock_triage_execute.side_effect = mock_triage_execute_impl
+    
+    # Mock the data agent execute method
+    async def mock_data_execute_impl(state, run_id, stream_updates):
+        from app.agents.state import DataResult
+        state.data_result = DataResult(data="Some data", confidence_score=0.8)
+        state.step_count += 1
+    
+    mock_data_execute.side_effect = mock_data_execute_impl
+    
+    # Mock the optimizations agent execute method  
+    async def mock_optimizations_execute_impl(state, run_id, stream_updates):
+        from app.agents.state import OptimizationsResult
+        state.optimizations_result = OptimizationsResult(
+            optimization_type="performance",
+            recommendations=["Optimization 1", "Optimization 2"],
+            confidence_score=0.9
+        )
+        state.step_count += 1
+    
+    mock_optimizations_execute.side_effect = mock_optimizations_execute_impl
+    
+    # Mock the actions agent execute method
+    async def mock_actions_execute_impl(state, run_id, stream_updates):
+        from app.agents.state import ActionPlanResult
+        state.action_plan_result = ActionPlanResult(
+            action_plan=["Action 1", "Action 2"],
+            confidence_score=0.85
+        )
+        state.step_count += 1
+    
+    mock_actions_execute.side_effect = mock_actions_execute_impl
+    
+    # Mock the reporting agent execute method
+    async def mock_reporting_execute_impl(state, run_id, stream_updates):
+        from app.agents.state import ReportResult
+        state.report_result = ReportResult(
+            report="This is the final report.",
+            confidence_score=0.9
+        )
+        state.step_count += 1
+    
+    mock_reporting_execute.side_effect = mock_reporting_execute_impl
 
     # Create Supervisor
     supervisor = Supervisor(
@@ -74,13 +121,28 @@ async def test_supervisor_flow(mock_triage_execute):
     # Assertions
     assert final_state.user_request == user_request
     
-    # triage_result is a TriageResult object, not a dict - check the category field
+    # Verify triage_result is properly set with typed object
     assert final_state.triage_result is not None
     assert final_state.triage_result.category == "Data Analysis"
+    assert final_state.triage_result.confidence_score == 0.9
     
-    # The other results may also be typed objects, not dictionaries
-    # For now, just verify they are not None to confirm execution completed
+    # Verify data_result is properly set with typed object
     assert final_state.data_result is not None
+    assert final_state.data_result.data == "Some data"
+    assert final_state.data_result.confidence_score == 0.8
+    
+    # Verify optimizations_result is properly set with typed object (this was the failing assertion)
     assert final_state.optimizations_result is not None  
+    assert final_state.optimizations_result.optimization_type == "performance"
+    assert final_state.optimizations_result.recommendations == ["Optimization 1", "Optimization 2"]
+    assert final_state.optimizations_result.confidence_score == 0.9
+    
+    # Verify action_plan_result is properly set with typed object
     assert final_state.action_plan_result is not None
+    assert final_state.action_plan_result.action_plan == ["Action 1", "Action 2"]
+    assert final_state.action_plan_result.confidence_score == 0.85
+    
+    # Verify report_result is properly set with typed object
     assert final_state.report_result is not None
+    assert final_state.report_result.report == "This is the final report."
+    assert final_state.report_result.confidence_score == 0.9

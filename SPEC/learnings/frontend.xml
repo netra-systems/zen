@@ -700,5 +700,80 @@ export type {
                 <tag>configuration</tag>
             </tags>
         </learning>
+        
+        <learning>
+            <id>module-export-import-pattern</id>
+            <date>2025-08-18</date>
+            <category>Module Management</category>
+            <severity>high</severity>
+            <title>Re-exported Symbols Must Be Imported for Use in Default Exports</title>
+            
+            <problem>
+                <description>Re-exported symbols from other modules are not available in module scope for use in default exports</description>
+                <error_message>ReferenceError: MessageMatcher is not defined</error_message>
+                <impact>Build failures and runtime errors when accessing undefined symbols</impact>
+                <root_cause>export { Symbol } from './module' only re-exports, does not import into current module scope</root_cause>
+            </problem>
+            
+            <solution>
+                <description>Import symbols explicitly when needed in module scope, not just re-export</description>
+                <implementation>
+                    <step>If symbol needed in default export, use explicit import statement</step>
+                    <step>Keep re-export for API consistency</step>
+                    <step>Import statement makes symbol available in module scope</step>
+                </implementation>
+                <code_example>
+// WRONG - Re-export does not import into module scope
+export { MessageMatcher } from './matcher';
+
+export default {
+  MessageMatcher, // ReferenceError: MessageMatcher is not defined
+  // ...
+};
+
+// CORRECT - Import for module scope, re-export for API
+export { MessageMatcher } from './matcher';
+import { MessageMatcher } from './matcher';
+
+export default {
+  MessageMatcher, // Now available in scope
+  // ...
+};
+
+// ALTERNATIVE - Use only imports if not re-exporting
+import { MessageMatcher } from './matcher';
+
+export { MessageMatcher };
+
+export default {
+  MessageMatcher,
+  // ...
+};
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>Always import symbols needed in module scope</rule>
+                <rule>Re-export is for API surface only, not module scope</rule>
+                <rule>Check all default exports reference imported symbols</rule>
+                <rule>Consider using namespace imports for aggregation modules</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/services/reconciliation/index.ts</file>
+            </affected_files>
+            
+            <references>
+                <reference>ES6 Module re-export vs import semantics</reference>
+                <reference>TypeScript module resolution</reference>
+            </references>
+            
+            <tags>
+                <tag>modules</tag>
+                <tag>exports</tag>
+                <tag>imports</tag>
+                <tag>typescript</tag>
+            </tags>
+        </learning>
     </learnings>
 </specification>

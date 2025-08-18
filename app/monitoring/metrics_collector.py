@@ -295,8 +295,9 @@ class MetricsCollector:
     
     async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
-        from app.websocket.connection import connection_manager
-        conn_stats = await connection_manager.get_stats()
+        from app.websocket.connection_manager import get_connection_manager
+        conn_manager = get_connection_manager()
+        conn_stats = await conn_manager.get_stats()
         return self._build_websocket_metrics(conn_stats)
 
     def _build_websocket_metrics(self, conn_stats: Dict[str, Any]) -> WebSocketMetrics:

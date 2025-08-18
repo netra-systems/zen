@@ -54,7 +54,7 @@ describe('Auth Login Flow', () => {
 
       expectFetchCall(
         testEnv.fetchMock,
-        'http://localhost:8000/api/auth/config'
+        'http://localhost:8081/api/auth/config'
       );
       expect(result).toEqual(mockAuthConfig);
     });

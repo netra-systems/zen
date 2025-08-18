@@ -3,7 +3,7 @@
 Main PostgreSQL index optimizer with modular architecture.
 """
 
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Set
 from sqlalchemy import text
 
 from app.logging_config import central_logger
@@ -16,6 +16,7 @@ from app.db.index_optimizer_core import (
 )
 from .postgres_index_creator import PostgreSQLIndexCreator
 from .postgres_index_loader import PostgreSQLIndexLoader, PostgreSQLPerformanceAnalyzer
+from .postgres_table_checker import PostgreSQLTableChecker
 
 logger = central_logger.get_logger(__name__)
 
@@ -27,6 +28,7 @@ class PostgreSQLIndexOptimizer:
         self.index_creator = PostgreSQLIndexCreator()
         self.index_loader = PostgreSQLIndexLoader()
         self.performance_analyzer = PostgreSQLPerformanceAnalyzer()
+        self.table_checker = PostgreSQLTableChecker()
         self._setup_performance_indexes()
     
     def _get_user_table_indexes(self) -> List[tuple]:
@@ -40,25 +42,35 @@ class PostgreSQLIndexOptimizer:
     
     def _get_audit_log_indexes(self) -> List[tuple]:
         """Get audit log index definitions."""
-        return [
-            ("corpus_audit_logs", ["timestamp"], "btree", "Time-based queries"),
-            ("corpus_audit_logs", ["user_id", "timestamp"], "btree", "User history"),
-            ("corpus_audit_logs", ["action", "status"], "btree", "Action filtering"),
-            ("corpus_audit_logs", ["corpus_id", "action"], "btree", "Corpus ops"),
-        ]
+        # Note: corpus_audit_logs table doesn't exist yet
+        # These will be created when the table is added
+        return []
     
     def _get_secret_management_indexes(self) -> List[tuple]:
         """Get secret management index definitions."""
         return [
-            ("secret", ["user_id"], "btree", "User secret lookups"),
-            ("secret", ["provider", "is_active"], "btree", "Provider filtering"),
+            ("secrets", ["user_id"], "btree", "User secret lookups"),
         ]
     
     def _get_agent_state_indexes(self) -> List[tuple]:
         """Get agent state index definitions."""
+        # Note: agent_states table doesn't exist yet
+        # These will be created when the table is added
+        return []
+    
+    def _get_message_indexes(self) -> List[tuple]:
+        """Get message table index definitions."""
         return [
-            ("agent_states", ["user_id", "updated_at"], "btree", "User states"),
-            ("agent_states", ["session_id"], "btree", "Session lookups"),
+            ("messages", ["thread_id", "created_at"], "btree", "Thread messages"),
+            ("messages", ["role"], "btree", "Message role filtering"),
+            ("messages", ["assistant_id"], "btree", "Assistant messages"),
+        ]
+    
+    def _get_thread_indexes(self) -> List[tuple]:
+        """Get thread table index definitions."""
+        return [
+            ("threads", ["created_at"], "btree", "Thread creation time"),
+            ("threads", ["id", "created_at"], "btree", "Thread lookup"),
         ]
     
     def _setup_performance_indexes(self):
@@ -68,6 +80,9 @@ class PostgreSQLIndexOptimizer:
         indexes.extend(self._get_audit_log_indexes())
         indexes.extend(self._get_secret_management_indexes())
         indexes.extend(self._get_agent_state_indexes())
+        # Add indexes for existing tables
+        indexes.extend(self._get_message_indexes())
+        indexes.extend(self._get_thread_indexes())
         self._performance_indexes = indexes
     
     async def _load_and_register_existing_indexes(self, session) -> None:
@@ -95,6 +110,9 @@ class PostgreSQLIndexOptimizer:
         """Create all performance indexes."""
         results = {}
         for table_name, columns, index_type, reason in self._performance_indexes:
+            if not self.table_checker.table_exists(table_name):
+                logger.info(f"Skipping index creation for non-existent table: {table_name}")
+                continue
             index_name, result = await self._create_single_performance_index(table_name, columns, index_type, reason)
             results[index_name] = result.success
             await self._log_index_creation_result(result, index_name, table_name, columns, reason)
@@ -107,6 +125,7 @@ class PostgreSQLIndexOptimizer:
             return {}
         
         async with get_async_db() as session:
+            await self.table_checker.load_existing_tables(session)
             await self._load_and_register_existing_indexes(session)
             return await self._create_all_performance_indexes(session)
     

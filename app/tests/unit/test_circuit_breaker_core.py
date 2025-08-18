@@ -114,9 +114,9 @@ class TestCircuitBreakerInitialization:
 
     def test_circuit_breaker_metrics_initialization(self, circuit_breaker):
         """Circuit breaker initializes metrics to zero."""
-        assert circuit_breaker.total_requests == 0
-        assert circuit_breaker.successful_requests == 0
-        assert circuit_breaker.failed_requests == 0
+        assert circuit_breaker.total_calls == 0
+        assert circuit_breaker.successful_calls == 0
+        assert circuit_breaker.failed_calls == 0
 
     @pytest.mark.asyncio
     async def test_circuit_breaker_with_health_checker(self, circuit_with_health, mock_health_checker):
@@ -177,16 +177,16 @@ class TestOperationExecution:
         """Successful operation returns result and updates metrics."""
         result = await circuit_breaker.call(simulate_async_operation)
         assert result == "success"
-        assert circuit_breaker.successful_requests == 1
-        assert circuit_breaker.total_requests == 1
+        assert circuit_breaker.successful_calls == 1
+        assert circuit_breaker.total_calls == 1
 
     @pytest.mark.asyncio
     async def test_failed_operation_execution(self, circuit_breaker):
         """Failed operation raises exception and updates metrics."""
         with pytest.raises(RuntimeError, match="Operation failed"):
             await circuit_breaker.call(simulate_failing_operation)
-        assert circuit_breaker.failed_requests == 1
-        assert circuit_breaker.total_requests == 1
+        assert circuit_breaker.failed_calls == 1
+        assert circuit_breaker.total_calls == 1
 
     @pytest.mark.asyncio
     async def test_open_circuit_rejects_calls(self, circuit_breaker):
@@ -259,7 +259,7 @@ class TestMetricsAndStatus:
         """Metrics include all expected fields."""
         simulate_operation_failure(circuit_breaker)
         metrics = circuit_breaker.get_metrics()
-        expected_fields = ['name', 'state', 'failure_count', 'total_requests', 'failure_rate']
+        expected_fields = ['name', 'state', 'failure_count', 'total_calls', 'failure_rate']
         for field in expected_fields:
             assert field in metrics
 
@@ -274,8 +274,8 @@ class TestMetricsAndStatus:
         simulate_operation_success(circuit_breaker)
         simulate_operation_failure(circuit_breaker)
         metrics = circuit_breaker.get_metrics()
-        # Circuit tracks failed_requests vs total_requests
-        expected_rate = circuit_breaker.failed_requests / max(circuit_breaker.total_requests, 1)
+        # Circuit tracks failed_calls vs total_calls
+        expected_rate = circuit_breaker.failed_calls / max(circuit_breaker.total_calls, 1)
         assert metrics['failure_rate'] == expected_rate
 
     def test_metrics_track_state_changes(self, circuit_breaker):
@@ -328,6 +328,6 @@ class TestCleanup:
     def test_public_record_methods_work(self, circuit_breaker):
         """Public record methods work for compatibility."""
         circuit_breaker.record_success()
-        assert circuit_breaker.successful_requests > 0
+        assert circuit_breaker.successful_calls > 0
         circuit_breaker.record_failure("test_error")
-        assert circuit_breaker.failed_requests > 0
+        assert circuit_breaker.failed_calls > 0

@@ -9,17 +9,20 @@ import gzip
 import pickle
 from datetime import datetime
 from typing import Any, Dict, List
+from pydantic import BaseModel
 from app.schemas.agent_state import (
     SerializationFormat, StateValidationResult
 )
 
 
 class DateTimeEncoder(json.JSONEncoder):
-    """JSON encoder for datetime objects."""
+    """JSON encoder for datetime objects and Pydantic models."""
     
     def default(self, obj: Any) -> Any:
         if isinstance(obj, datetime):
             return obj.isoformat()
+        elif isinstance(obj, BaseModel):
+            return obj.model_dump()
         return super().default(obj)
 
 

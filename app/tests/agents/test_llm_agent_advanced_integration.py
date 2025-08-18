@@ -84,17 +84,17 @@ async def _test_llm_retry_mechanism(llm_manager):
     return result
 
 
-def _verify_retry_result(result, call_count):
+def _verify_retry_result(result, call_counter):
     """Verify retry mechanism worked correctly"""
     assert result["content"] == "Successful response after retry"
-    assert call_count == 2
+    assert call_counter["count"] == 2
 
 
 async def test_real_llm_interaction():
     """Test real LLM interaction with proper error handling"""
-    llm_manager, call_count = setup_mock_llm_with_retry()
+    llm_manager, call_counter = setup_mock_llm_with_retry()
     result = await _test_llm_retry_mechanism(llm_manager)
-    _verify_retry_result(result, call_count)
+    _verify_retry_result(result, call_counter)
 
 
 async def _execute_llm_tool_flow(dispatcher, llm_response):

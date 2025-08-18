@@ -16,6 +16,12 @@ export function middleware(request: NextRequest) {
     response.headers.set('X-Frame-Options', 'DENY');
     response.headers.set('X-XSS-Protection', '1; mode=block');
     response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  } else {
+    // Development mode: Allow localhost connections
+    response.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self' http: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline' http: https:; style-src 'self' 'unsafe-inline' http: https:; img-src 'self' data: http: https:; connect-src 'self' http: https: ws: wss:; font-src 'self' http: https:; media-src 'self' http: https:; frame-src 'self' http: https:;"
+    );
   }
 
   return response;

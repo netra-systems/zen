@@ -161,15 +161,14 @@ def verify_concurrent_results(results, expected_count):
 def setup_mock_llm_with_retry():
     """Setup mock LLM with retry behavior"""
     llm_manager = Mock(spec=LLMManager)
-    call_count = 0
+    call_counter = {"count": 0}
     async def mock_llm_call(*args, **kwargs):
-        nonlocal call_count
-        call_count += 1
-        if call_count == 1:
+        call_counter["count"] += 1
+        if call_counter["count"] == 1:
             raise Exception("LLM call timed out")
         return {"content": "Successful response after retry", "tool_calls": []}
     llm_manager.call_llm = AsyncMock(side_effect=mock_llm_call)
-    return llm_manager, call_count
+    return llm_manager, call_counter
 
 
 def create_tool_execution_mocks():
