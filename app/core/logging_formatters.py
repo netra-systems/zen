@@ -227,22 +227,9 @@ class LogHandlerConfig:
     
     def _add_readable_console_handler(self, should_log_func):
         """Add human-readable console handler."""
-        def format_with_caller(record):
-            # Use caller info if available, otherwise use standard
-            extra = record.get('extra', {})
-            if 'caller_module' in extra and 'caller_function' in extra and 'caller_line' in extra:
-                location = f"{extra['caller_module']}:{extra['caller_function']}:{extra['caller_line']}"
-            else:
-                location = f"{record['name']}:{record['function']}:{record['line']}"
-            
-            time_str = record['time'].strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-            level = record['level'].name
-            message = self.formatter._filter.filter_message(record['message'])
-            return f"{time_str} | {level:8} | {location} | {message}\n"
-        
         logger.add(
             sys.stderr,
-            format=format_with_caller,
+            format=self.formatter.get_console_format(),
             level=self.level,
             filter=should_log_func,
             enqueue=True,

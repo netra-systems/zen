@@ -110,16 +110,7 @@ class UnifiedLogger:
     
     def _emit_log(self, level: str, message: str, exc_info: bool, context: Dict[str, Any]):
         """Emit log message with proper exception handling."""
-        # Get caller frame info for accurate location reporting
-        import inspect
-        frame = inspect.currentframe()
-        caller_frame = frame.f_back.f_back.f_back if frame else None
-        if caller_frame:
-            context['caller_module'] = caller_frame.f_globals.get('__name__', 'unknown')
-            context['caller_function'] = caller_frame.f_code.co_name
-            context['caller_line'] = caller_frame.f_lineno
-        
-        log_method = getattr(logger.opt(depth=3), level)
+        log_method = getattr(logger, level)
         if exc_info and self._has_exception_info():
             log_method(message, exc_info=True, **context)
         else:

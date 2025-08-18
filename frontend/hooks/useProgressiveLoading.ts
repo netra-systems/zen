@@ -65,7 +65,7 @@ const usePhaseTransition = (
   setPhase: (phase: ProgressivePhase) => void,
   config: Required<LoadingConfig>
 ) => {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   
   const scheduleTransition = useCallback((nextPhase: ProgressivePhase, delay: number) => {
     clearTimeout(timeoutRef.current);
