@@ -28,6 +28,11 @@ class BroadcastMetrics:
     
     def __init__(self) -> None:
         """Initialize broadcast metrics tracking."""
+        self._initialize_broadcast_stats()
+        self._initialize_room_tracking()
+
+    def _initialize_broadcast_stats(self) -> None:
+        """Initialize core broadcast statistics."""
         self.stats = {
             "total_broadcasts": 0,
             "successful_sends": 0,
@@ -37,7 +42,12 @@ class BroadcastMetrics:
             "job_broadcasts": 0,
             "average_room_size": 0.0
         }
-        self.room_stats: Dict[str, Dict[str, int]] = defaultdict(lambda: {"messages": 0, "members": 0})
+
+    def _initialize_room_tracking(self) -> None:
+        """Initialize room-specific tracking data."""
+        self.room_stats: Dict[str, Dict[str, int]] = defaultdict(
+            lambda: {"messages": 0, "members": 0}
+        )
 
     def record_broadcast(self, broadcast_type: str, recipients: int, successful: int) -> None:
         """Record broadcast operation with metrics."""

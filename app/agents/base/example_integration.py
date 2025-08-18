@@ -243,12 +243,23 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive agent health status."""
+        base_status = self._get_base_health_info()
+        component_status = self._get_component_health_info()
+        return {**base_status, **component_status}
+        
+    def _get_base_health_info(self) -> Dict[str, Any]:
+        """Get base agent health information."""
         return {
             "agent_name": self.agent_name,
+            "cache_available": self.redis_manager is not None
+        }
+        
+    def _get_component_health_info(self) -> Dict[str, Any]:
+        """Get component health information."""
+        return {
             "execution_engine": self.execution_engine.get_health_status(),
             "reliability": self.reliability_manager.get_health_status(),
-            "monitor": self.monitor.get_health_status(),
-            "cache_available": self.redis_manager is not None
+            "monitor": self.monitor.get_health_status()
         }
     
     def get_performance_metrics(self) -> Dict[str, Any]:
@@ -359,12 +370,8 @@ class AgentMigrationGuide:
     def get_performance_benefits() -> Dict[str, str]:
         """Get expected performance benefits from migration."""
         return {
-            "error_handling": "Structured error handling with fallback strategies",
-            "monitoring": "Comprehensive performance and health monitoring",
-            "reliability": "Circuit breaker and retry patterns for resilience",
-            "consistency": "Standardized execution patterns across all agents",
-            "maintainability": "Centralized improvements benefit all agents",
-            "scalability": "Better resource management and rate limiting"
+            **_get_reliability_benefits(),
+            **_get_system_benefits()
         }
 
         

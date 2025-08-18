@@ -120,15 +120,19 @@ class MessageProcessingPipeline:
     async def _execute_with_reliability(self, process_func, fallback_func, conn_info: ConnectionInfo) -> bool:
         """Execute message processing with reliability protection."""
         try:
-            success = await self.config.reliability.execute_safely(
-                process_func,
-                "handle_message",
-                fallback=fallback_func,
-                timeout=10.0
-            )
-            if not success:
-                self.config.stats["messages_failed"] += 1
-            return success
+            return await self._execute_safely_with_stats(process_func, fallback_func)
         except Exception as e:
-            logger.error(f"Unexpected error handling message from {conn_info.connection_id}: {error}")
+            logger.error(f"Unexpected error handling message from {conn_info.connection_id}: {e}")
             return False
+
+    async def _execute_safely_with_stats(self, process_func, fallback_func) -> bool:
+        """Execute safely and update statistics on failure."""
+        success = await self.config.reliability.execute_safely(
+            process_func,
+            "handle_message",
+            fallback=fallback_func,
+            timeout=10.0
+        )
+        if not success:
+            self.config.stats["messages_failed"] += 1
+        return success

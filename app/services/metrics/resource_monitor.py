@@ -60,12 +60,16 @@ class ResourceMonitor:
         """Main monitoring loop"""
         while self._monitoring_active:
             try:
-                await self._collect_resource_metrics()
-                await asyncio.sleep(self.sampling_interval)
+                await self._execute_monitoring_cycle()
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 await self._handle_monitoring_error(e)
+    
+    async def _execute_monitoring_cycle(self):
+        """Execute single monitoring cycle."""
+        await self._collect_resource_metrics()
+        await asyncio.sleep(self.sampling_interval)
     
     async def _collect_resource_metrics(self):
         """Collect current resource usage metrics"""
@@ -444,10 +448,16 @@ class ResourceMonitor:
         severity: str
     ) -> Dict[str, Any]:
         """Build alert dictionary"""
-        base_alert = {"resource": resource_type, "current_value": latest.current_value}
-        meta_alert = {"threshold": threshold, "unit": latest.unit}
-        time_alert = {"timestamp": latest.timestamp, "severity": severity}
-        return {**base_alert, **meta_alert, **time_alert}
+        alert_components = self._get_alert_components(resource_type, latest, threshold, severity)
+        return {**alert_components['base'], **alert_components['meta'], **alert_components['time']}
+    
+    def _get_alert_components(self, resource_type: str, latest, threshold: float, severity: str) -> Dict[str, Dict[str, Any]]:
+        """Get alert dictionary components."""
+        return {
+            'base': {"resource": resource_type, "current_value": latest.current_value},
+            'meta': {"threshold": threshold, "unit": latest.unit},
+            'time': {"timestamp": latest.timestamp, "severity": severity}
+        }
     
     def get_monitor_status(self) -> Dict[str, Any]:
         """Get monitoring system status"""

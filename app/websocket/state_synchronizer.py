@@ -282,7 +282,10 @@ class ConnectionStateSynchronizer:
     def get_sync_stats(self) -> Dict[str, Any]:
         """Get synchronization statistics."""
         sync_counts = self._calculate_sync_statistics()
-        
+        return self._build_sync_stats_dict(sync_counts)
+    
+    def _build_sync_stats_dict(self, sync_counts: Dict[str, Any]) -> Dict[str, Any]:
+        """Build synchronization statistics dictionary."""
         return {
             "total_monitored_connections": sync_counts["total"],
             "synced_connections": sync_counts["synced"],

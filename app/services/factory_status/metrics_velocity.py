@@ -141,11 +141,15 @@ class VelocityCalculator:
         if len(daily_data) < 3:
             return TrendDirection.STABLE, 0.0
         
+        trend_data = self._prepare_trend_data(daily_data)
+        slope = self._linear_regression_slope(trend_data['x_values'], trend_data['y_values'])
+        return self._classify_trend(slope, trend_data['y_values'])
+    
+    def _prepare_trend_data(self, daily_data: Dict[str, List[CommitInfo]]) -> Dict[str, List]:
+        """Prepare data for trend calculation."""
         x_values = list(range(len(daily_data)))
         y_values = [len(commits) for commits in daily_data.values()]
-        
-        slope = self._linear_regression_slope(x_values, y_values)
-        return self._classify_trend(slope, y_values)
+        return {'x_values': x_values, 'y_values': y_values}
     
     def _linear_regression_slope(self, x_vals: List[int], y_vals: List[int]) -> float:
         """Calculate linear regression slope."""
@@ -199,6 +203,11 @@ class VelocityCalculator:
         """Build velocity metrics object."""
         period_count = self._get_period_count(period, hours)
         metrics_data = self._calculate_metrics_data(commits, period_count)
+        return self._create_velocity_metrics(period, trend, commits, metrics_data)
+    
+    def _create_velocity_metrics(self, period: VelocityPeriod, trend: Tuple[TrendDirection, float], 
+                               commits: List[CommitInfo], metrics_data: Dict[str, float]) -> VelocityMetrics:
+        """Create velocity metrics from components."""
         return VelocityMetrics(
             period=period,
             trend_direction=trend[0],
@@ -246,6 +255,10 @@ class VelocityCalculator:
         """Analyze peak activity data."""
         peak_hour = max(hourly_data.keys(), key=lambda h: len(hourly_data[h]))
         peak_commits = hourly_data[peak_hour]
+        return self._build_peak_activity_data(commits, peak_hour, peak_commits)
+    
+    def _build_peak_activity_data(self, commits: List[CommitInfo], peak_hour: int, peak_commits: List) -> dict:
+        """Build peak activity data dictionary."""
         return {
             'hour': peak_hour,
             'day_of_week': self._find_peak_day(commits),
@@ -334,11 +347,21 @@ class VelocityCalculator:
     def _calculate_delivery_stats(self, times: List[int], baseline: float) -> Dict[str, float]:
         """Calculate delivery speed statistics."""
         avg_days = statistics.mean(times)
+        basic_stats = self._get_basic_delivery_stats(times, avg_days)
+        return {**basic_stats, **self._get_advanced_delivery_stats(times, baseline, avg_days)}
+    
+    def _get_basic_delivery_stats(self, times: List[int], avg_days: float) -> Dict[str, float]:
+        """Get basic delivery statistics."""
         return {
             'average_feature_days': avg_days,
             'median_feature_days': statistics.median(times),
             'fastest_feature_days': min(times),
-            'slowest_feature_days': max(times),
+            'slowest_feature_days': max(times)
+        }
+    
+    def _get_advanced_delivery_stats(self, times: List[int], baseline: float, avg_days: float) -> Dict[str, float]:
+        """Get advanced delivery statistics."""
+        return {
             'baseline_comparison': (baseline - avg_days) / baseline * 100,
             'delivery_consistency': self._calculate_consistency(times)
         }
@@ -367,6 +390,10 @@ class VelocityCalculator:
     def _calculate_baseline_data(self, commits: List[CommitInfo], historical_days: int) -> Dict[str, Any]:
         """Calculate baseline data from commits."""
         feature_commits = [c for c in commits if c.commit_type == CommitType.FEATURE]
+        return self._build_baseline_metrics(commits, feature_commits, historical_days)
+    
+    def _build_baseline_metrics(self, commits: List[CommitInfo], feature_commits: List, historical_days: int) -> Dict[str, Any]:
+        """Build baseline metrics dictionary."""
         return {
             'period_days': historical_days,
             'commits_per_day': len(commits) / historical_days,
@@ -378,11 +405,19 @@ class VelocityCalculator:
     def compare_to_baseline(self, current: VelocityMetrics, 
                            baseline: VelocityBaseline) -> Dict[str, float]:
         """Compare current velocity to baseline."""
-        comparisons = [
+        comparisons = self._build_baseline_comparisons(current, baseline)
+        return self._process_baseline_comparisons(comparisons)
+    
+    def _build_baseline_comparisons(self, current: VelocityMetrics, baseline: VelocityBaseline) -> List[Tuple[str, float, float]]:
+        """Build baseline comparison tuples."""
+        return [
             ('commits_vs_baseline', current.commits_per_period, baseline.commits_per_day),
             ('lines_vs_baseline', current.lines_per_period, baseline.lines_per_day),
             ('features_vs_baseline', current.features_per_period, baseline.features_per_week / 7)
         ]
+    
+    def _process_baseline_comparisons(self, comparisons: List[Tuple[str, float, float]]) -> Dict[str, float]:
+        """Process baseline comparisons into results."""
         return {name: self._calculate_percentage_change(current_val, baseline_val)
                 for name, current_val, baseline_val in comparisons}
     

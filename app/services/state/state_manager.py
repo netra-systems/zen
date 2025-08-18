@@ -250,12 +250,16 @@ class StateManager:
     async def _invoke_listener(self, listener, key: str, old_value: Any, new_value: Any):
         """Invoke individual listener with error handling"""
         try:
-            if asyncio.iscoroutinefunction(listener):
-                await listener(key, old_value, new_value)
-            else:
-                listener(key, old_value, new_value)
+            await self._execute_listener(listener, key, old_value, new_value)
         except Exception as e:
             logger.error(f"Error notifying listener for key {key}: {e}")
+    
+    async def _execute_listener(self, listener, key: str, old_value: Any, new_value: Any):
+        """Execute listener based on its type."""
+        if asyncio.iscoroutinefunction(listener):
+            await listener(key, old_value, new_value)
+        else:
+            listener(key, old_value, new_value)
     
     async def _create_snapshot(self) -> StateSnapshot:
         """Create a state snapshot"""
@@ -286,15 +290,20 @@ class StateManager:
 
     def _build_snapshot(self, snapshot_id: str, data: Dict[str, Any]) -> StateSnapshot:
         """Build snapshot object from data"""
+        metadata = self._create_snapshot_metadata(data)
         return StateSnapshot(
             id=snapshot_id,
             timestamp=datetime.now(timezone.utc),
             data=data,
-            metadata={
-                "storage": self.storage.value,
-                "size": len(data)
-            }
+            metadata=metadata
         )
+    
+    def _create_snapshot_metadata(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Create snapshot metadata dictionary."""
+        return {
+            "storage": self.storage.value,
+            "size": len(data)
+        }
     
     async def _restore_snapshot(self, snapshot: StateSnapshot) -> None:
         """Restore from a snapshot"""

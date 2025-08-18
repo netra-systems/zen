@@ -47,10 +47,8 @@ class ConnectionMemoryTracker:
         """Add message to connection buffer with size limits."""
         if not self._validate_connection_exists(connection_id):
             return False
-        
         buffer = self.message_buffers[connection_id]
         message_size = self._calculate_message_size(message)
-        
         self._enforce_message_count_limit(connection_id, buffer)
         self._add_message_and_update_size(connection_id, buffer, message, message_size)
         return True

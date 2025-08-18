@@ -263,7 +263,7 @@ class LLMCacheManager:
         """Trigger cache eviction based on strategy"""
         evictions = await self.eviction_manager.trigger_eviction(self.strategy)
         self.stats.evictions += evictions
-    
+
     async def _invalidation_worker(self) -> None:
         """Background worker for cache invalidation"""
         while True:
@@ -273,18 +273,18 @@ class LLMCacheManager:
                 break
             except Exception as e:
                 logger.error(f"Invalidation worker error: {e}")
-    
+
     async def _process_invalidation_queue(self) -> None:
         """Process one item from invalidation queue"""
         key = await self._invalidation_queue.get()
         await self.redis.delete(key)
         self._update_invalidation_stats()
-    
+
     def _update_invalidation_stats(self) -> None:
         """Update invalidation statistics"""
         self.stats.invalidations += 1
         self.stats.cache_size = max(0, self.stats.cache_size - 1)
-    
+
     async def _eviction_worker(self) -> None:
         """Background worker for cache eviction"""
         while True:
@@ -294,13 +294,13 @@ class LLMCacheManager:
                 break
             except Exception as e:
                 logger.error(f"Eviction worker error: {e}")
-    
+
     async def _process_eviction_cycle(self) -> None:
         """Process one eviction cycle"""
         await asyncio.sleep(300)
         if self.stats.cache_size > self.max_size * 0.95:
             await self._trigger_eviction()
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""
         return self.stats.to_dict()

@@ -21,6 +21,11 @@ class ErrorHandler:
     ) -> None:
         """Handle generation job error with full recovery process"""
         await self._log_error(job_id, error)
+        await self._process_error_by_severity(job_id, error, db, synthetic_data_id, active_jobs)
+    
+    async def _process_error_by_severity(self, job_id: str, error: Exception, db: Optional[Session], 
+                                       synthetic_data_id: Optional[str], active_jobs: Dict) -> None:
+        """Process error based on severity level."""
         if self._is_critical_error(error):
             await self._handle_critical_error(job_id, error, db, synthetic_data_id, active_jobs)
         else:
@@ -87,12 +92,19 @@ class ErrorHandler:
 
     def _build_error_payload(self, job_id: str, error: Exception) -> Dict:
         """Build error notification payload"""
+        error_info = self._get_error_info(error)
         return {
             "job_id": job_id,
-            "error_type": type(error).__name__,
-            "error_message": str(error),
+            **error_info,
             "recoverable": self._is_recoverable_error(error),
             "suggested_action": self._get_suggested_action(error)
+        }
+    
+    def _get_error_info(self, error: Exception) -> Dict[str, str]:
+        """Get basic error information."""
+        return {
+            "error_type": type(error).__name__,
+            "error_message": str(error)
         }
 
     def _is_critical_error(self, error: Exception) -> bool:
@@ -102,13 +114,10 @@ class ErrorHandler:
 
     def _get_critical_error_types(self) -> List[str]:
         """Get list of critical error types"""
-        return [
-            "OutOfMemoryError",
-            "PermissionError", 
-            "FileNotFoundError",
-            "ValidationError",
-            "ValueError"
-        ]
+        memory_errors = ["OutOfMemoryError"]
+        permission_errors = ["PermissionError", "FileNotFoundError"]
+        validation_errors = ["ValidationError", "ValueError"]
+        return memory_errors + permission_errors + validation_errors
 
     def _is_recoverable_error(self, error: Exception) -> bool:
         """Determine if error is recoverable"""
@@ -132,9 +141,20 @@ class ErrorHandler:
 
     def _build_action_suggestions(self) -> Dict[str, str]:
         """Build dictionary of error action suggestions"""
+        connection_suggestions = self._get_connection_suggestions()
+        resource_suggestions = self._get_resource_suggestions()
+        return {**connection_suggestions, **resource_suggestions}
+    
+    def _get_connection_suggestions(self) -> Dict[str, str]:
+        """Get connection-related error suggestions."""
         return {
             "ConnectionError": "Check database connectivity and retry",
-            "TimeoutError": "Reduce batch size and retry",
+            "TimeoutError": "Reduce batch size and retry"
+        }
+    
+    def _get_resource_suggestions(self) -> Dict[str, str]:
+        """Get resource-related error suggestions."""
+        return {
             "MemoryError": "Reduce generation parameters",
             "ValidationError": "Check input parameters",
             "PermissionError": "Verify database permissions"
@@ -147,6 +167,10 @@ class ErrorHandler:
         active_jobs: Dict
     ) -> None:
         """Attempt automatic error recovery if possible"""
+        await self._route_recovery_by_type(job_id, error, active_jobs)
+    
+    async def _route_recovery_by_type(self, job_id: str, error: Exception, active_jobs: Dict) -> None:
+        """Route recovery based on error type."""
         if self._is_recoverable_error(error):
             await self._handle_recoverable_error(job_id, error, active_jobs)
         else:
@@ -190,10 +214,18 @@ class ErrorHandler:
         """Schedule job retry with recovery strategy"""
         import asyncio
         
+        await self._apply_retry_delay(strategy)
+        await self._execute_retry_schedule(job_id, strategy, active_jobs)
+    
+    async def _apply_retry_delay(self, strategy: Dict) -> None:
+        """Apply retry delay if specified in strategy."""
+        import asyncio
         delay = strategy.get("delay_seconds", 0)
         if delay > 0:
             await asyncio.sleep(delay)
-
+    
+    async def _execute_retry_schedule(self, job_id: str, strategy: Dict, active_jobs: Dict) -> None:
+        """Execute the retry scheduling."""
         await self._mark_job_for_retry(job_id, strategy, active_jobs)
         central_logger.info(f"Scheduled retry for job {job_id} with strategy: {strategy}")
 

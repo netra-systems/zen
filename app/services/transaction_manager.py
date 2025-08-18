@@ -158,6 +158,10 @@ class ClickHouseOperationManager:
         if operation_id not in self.operation_records:
             return True
         
+        return await self._attempt_compensation(operation_id)
+    
+    async def _attempt_compensation(self, operation_id: str) -> bool:
+        """Attempt compensation with error handling."""
         try:
             success = await self._execute_compensation(operation_id)
             self._handle_successful_compensation(operation_id, success)
@@ -200,13 +204,15 @@ class TransactionManager:
     
     def __init__(self):
         """Initialize transaction manager."""
+        self._initialize_managers()
+        self._register_default_handlers()
+    
+    def _initialize_managers(self) -> None:
+        """Initialize core manager components."""
         self.active_transactions: Dict[str, Transaction] = {}
         self.compensation_registry = CompensationRegistry()
         self.postgres_manager = PostgresOperationManager()
         self.clickhouse_manager = ClickHouseOperationManager()
-        
-        # Register default compensation handlers
-        self._register_default_handlers()
     
     def _register_default_handlers(self) -> None:
         """Register default compensation handlers."""

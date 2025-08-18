@@ -110,7 +110,10 @@ class WebSocketRecoveryManager:
         if not handler:
             logger.warning(f"No handler for recovery strategy: {strategy}")
             return None
-        
+        return await self._execute_handler_with_logging(handler, strategy, context)
+    
+    async def _execute_handler_with_logging(self, handler: Callable, strategy: RecoveryStrategy, context: RecoveryContext) -> bool:
+        """Execute recovery handler and log success if applicable."""
         success = await handler(context)
         if success:
             logger.info(f"Recovery successful using {strategy}")
@@ -123,15 +126,21 @@ class WebSocketRecoveryManager:
     async def _execute_recovery_strategies(self, context: RecoveryContext) -> bool:
         """Execute recovery strategies in sequence."""
         for strategy in context.strategies:
-            try:
-                success = await self._try_single_recovery_strategy(strategy, context)
-                if success:
-                    return True
-            except Exception as e:
-                logger.error(f"Recovery strategy {strategy} failed: {e}")
+            success = await self._try_strategy_with_error_handling(strategy, context)
+            if success:
+                return True
         
         self._log_all_strategies_failed(context.connection_id)
         return False
+    
+    async def _try_strategy_with_error_handling(self, strategy: RecoveryStrategy, context: RecoveryContext) -> bool:
+        """Try a single recovery strategy with error handling."""
+        try:
+            success = await self._try_single_recovery_strategy(strategy, context)
+            return bool(success)
+        except Exception as e:
+            logger.error(f"Recovery strategy {strategy} failed: {e}")
+            return False
     
     async def _immediate_recovery(self, context: RecoveryContext) -> bool:
         """Attempt immediate recovery."""
@@ -237,12 +246,23 @@ class WebSocketRecoveryManager:
     
     def _build_recovery_status_dict(self, context: RecoveryContext) -> Dict[str, Any]:
         """Build recovery status dictionary from context."""
+        base_fields = self._build_context_fields(context)
+        strategy_fields = self._build_strategy_fields(context)
+        return {**base_fields, **strategy_fields}
+    
+    def _build_context_fields(self, context: RecoveryContext) -> Dict[str, Any]:
+        """Build context-related fields for recovery status."""
         return {
             "connection_id": context.connection_id,
             "attempt_count": context.attempt_count,
             "max_attempts": context.max_attempts,
             "last_attempt": context.last_attempt,
-            "backoff_delay": context.backoff_delay,
+            "backoff_delay": context.backoff_delay
+        }
+    
+    def _build_strategy_fields(self, context: RecoveryContext) -> Dict[str, Any]:
+        """Build strategy-related fields for recovery status."""
+        return {
             "strategies": [s.value for s in context.strategies],
             "has_state_snapshot": context.state_snapshot is not None
         }

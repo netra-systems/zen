@@ -288,12 +288,7 @@ class DatabaseConnectionManager:
         self.recovery_strategies.append(strategy)
         self.recovery_strategies.sort(key=lambda s: s.get_priority())
     
-    def register_pool(
-        self,
-        pool_id: str,
-        pool: Any,
-        config: DatabaseConfig
-    ) -> None:
+    def register_pool(self, pool_id: str, pool: Any, config: DatabaseConfig) -> None:
         """Register database pool for monitoring."""
         self._store_pool_data(pool_id, pool, config)
         self._set_pool_identification(pool, pool_id)
@@ -387,12 +382,7 @@ class DatabaseConnectionManager:
         """Log health check errors for a pool."""
         logger.error(f"Pool health check failed {pool_id}: {error}")
     
-    async def _attempt_recovery(
-        self,
-        pool_id: str,
-        pool: Any,
-        metrics: PoolMetrics
-    ) -> bool:
+    async def _attempt_recovery(self, pool_id: str, pool: Any, metrics: PoolMetrics) -> bool:
         """Attempt to recover unhealthy pool."""
         config = self.configs[pool_id]
         self._log_recovery_attempt(pool_id, metrics)

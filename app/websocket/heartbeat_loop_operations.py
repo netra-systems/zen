@@ -33,12 +33,16 @@ class HeartbeatLoopOperations:
         try:
             should_continue = await self._execute_heartbeat_cycle(conn_info)
             return should_continue
-        except asyncio.CancelledError:
-            raise
-        except ConnectionError as e:
-            return self._handle_connection_error(conn_info, e)
         except Exception as e:
-            return not self._should_break_on_error(conn_info, e)
+            return self._handle_heartbeat_exception(conn_info, e)
+    
+    def _handle_heartbeat_exception(self, conn_info: ConnectionInfo, error: Exception) -> bool:
+        """Handle exceptions from heartbeat cycle execution."""
+        if isinstance(error, asyncio.CancelledError):
+            raise error
+        if isinstance(error, ConnectionError):
+            return self._handle_connection_error(conn_info, error)
+        return not self._should_break_on_error(conn_info, error)
     
     def _handle_connection_error(self, conn_info: ConnectionInfo, error: ConnectionError) -> bool:
         """Handle connection error and return should continue flag."""
