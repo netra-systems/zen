@@ -51,6 +51,7 @@ from app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHe
 from app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
 from app.agents.supervisor.agent_routing import SupervisorAgentRouter
 from app.agents.supervisor.supervisor_completion_helpers import SupervisorCompletionHelpers
+from app.agents.supervisor.initialization_helpers import SupervisorInitializationHelpers
 
 logger = central_logger.get_logger(__name__)
 
@@ -64,9 +65,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
                  tool_dispatcher: ToolDispatcher):
         self._init_base(llm_manager, websocket_manager)
         self._init_services(db_session, websocket_manager, tool_dispatcher)
-        self._init_components(llm_manager, tool_dispatcher, websocket_manager)
-        self._init_modern_execution_infrastructure()
-        self._init_supervisor_state()
+        self._init_all_components(llm_manager, tool_dispatcher, websocket_manager)
     
     def _init_base(self, llm_manager: LLMManager, websocket_manager: 'WebSocketManager') -> None:
         """Initialize base agent with modern execution interface."""
@@ -83,22 +82,21 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         self.tool_dispatcher = tool_dispatcher
         self.state_persistence = state_persistence_service
     
-    def _init_components(self, llm_manager: LLMManager,
-                        tool_dispatcher: ToolDispatcher,
-                        websocket_manager: 'WebSocketManager') -> None:
-        """Initialize modular components."""
+    def _init_all_components(self, llm_manager: LLMManager,
+                           tool_dispatcher: ToolDispatcher,
+                           websocket_manager: 'WebSocketManager') -> None:
+        """Initialize all modular components and infrastructure."""
         self._init_registry(llm_manager, tool_dispatcher, websocket_manager)
         self._init_execution_components(websocket_manager)
         self._init_state_components()
+        self._init_modern_execution_infrastructure()
+        self._init_supervisor_state()
         self._init_supporting_components()
 
     def _init_modern_execution_infrastructure(self) -> None:
         """Initialize modern execution infrastructure."""
         self.monitor = ExecutionMonitor()
-        self.reliability_manager = ReliabilityManager(
-            circuit_breaker_config={"failure_threshold": 5, "recovery_timeout": 60},
-            retry_config={"max_retries": 3, "base_delay": 1.0, "max_delay": 10.0}
-        )
+        self.reliability_manager = SupervisorInitializationHelpers.create_reliability_manager()
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
         self.error_handler = ExecutionErrorHandler()
     
@@ -131,12 +129,9 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         """Initialize supporting components."""
         self.pipeline_builder = PipelineBuilder()
         self.flow_logger = get_supervisor_flow_logger()
-        self.utilities = SupervisorUtilities(self.hooks, self.registry, self.engine,
-            self.monitor, self.reliability_manager, self.execution_engine, self.error_handler)
-        self.execution_helpers = SupervisorExecutionHelpers(self)
-        self.workflow_executor = SupervisorWorkflowExecutor(self)
-        self.agent_router = SupervisorAgentRouter(self)
-        self.completion_helpers = SupervisorCompletionHelpers(self)
+        self.utilities = SupervisorInitializationHelpers.init_utilities_for_supervisor(self)
+        helpers = SupervisorInitializationHelpers.init_helper_components(self)
+        self.execution_helpers, self.workflow_executor, self.agent_router, self.completion_helpers = helpers
 
     @asynccontextmanager
     async def _create_db_session_factory(self):
@@ -208,8 +203,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
     
     async def _execute_orchestration_workflow(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute orchestration workflow with monitoring."""
-        state = context.state
-        updated_state = await self._run_supervisor_workflow(state, context.run_id)
+        updated_state = await self._run_supervisor_workflow(context.state, context.run_id)
         return {"supervisor_result": "completed", "updated_state": updated_state}
 
     async def execute(self, state: DeepAgentState, 
@@ -278,25 +272,6 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
             flow_id, user_prompt, thread_id, user_id, run_id
         )
 
-    
-    async def _route_to_agent(self, state: DeepAgentState, 
-                             context: 'AgentExecutionContext', 
-                             agent_name: str) -> 'AgentExecutionResult':
-        """Route request to specific agent with basic execution."""
-        return await self.agent_router.route_to_agent(state, context, agent_name)
-    
-    async def _route_to_agent_with_retry(self, state: DeepAgentState,
-                                        context: 'AgentExecutionContext',
-                                        agent_name: str) -> 'AgentExecutionResult':
-        """Route request to agent with retry logic."""
-        return await self.agent_router.route_to_agent_with_retry(state, context, agent_name)
-    
-    async def _route_to_agent_with_circuit_breaker(self, state: DeepAgentState,
-                                                  context: 'AgentExecutionContext',
-                                                  agent_name: str) -> 'AgentExecutionResult':
-        """Route request to agent with circuit breaker protection."""
-        return await self.agent_router.route_to_agent_with_circuit_breaker(state, context, agent_name)
-    
     async def _run_hooks(self, event: str, state: DeepAgentState, **kwargs) -> None:
         """Run registered hooks for an event."""
         await self.utilities.run_hooks(event, state, **kwargs)

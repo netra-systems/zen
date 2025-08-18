@@ -1,47 +1,148 @@
 # AI AGENT MODIFICATION METADATA
 # ================================
-# Timestamp: 2025-08-15T12:00:00.000000+00:00
-# Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Split demo_agent.py into modular architecture
-# Git: pr-10-anthony-branch | Current | Clean
-# Change: Refactor | Scope: Component | Risk: Low
-# Session: Architecture Compliance Fix
+# Timestamp: 2025-08-18T10:00:00.000000+00:00
+# Agent: AGT-106 Ultra Think Elite Engineer
+# Context: Modernize with BaseExecutionInterface pattern
+# Git: 8-18-25-AM | Current | Clean
+# Change: Modernize | Scope: Interface | Risk: Low
+# Session: Demo Agent Modernization
 # Review: Pending | Score: TBD
 # ================================
-"""Demo optimization agent for generating specific recommendations."""
+"""Demo optimization agent with modern execution patterns.
+
+Modernized with BaseExecutionInterface for:
+- Standardized execution workflow
+- Reliability patterns integration
+- Comprehensive monitoring
+- Error handling and recovery
+
+Business Value: Improves demo reliability for customer experience.
+"""
 
 from typing import Dict, Any, Optional, List
+import time
 
-from app.agents.base import BaseSubAgent
+# Modern execution interface imports
+from app.agents.base.interface import (
+    BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
+)
+from app.agents.base.executor import BaseExecutionEngine
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+
+# Legacy compatibility imports
 from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
+from app.schemas.shared_types import RetryConfig
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
 
-class DemoOptimizationAgent(BaseSubAgent):
-    """Specialized optimization agent for demo scenarios."""
+class DemoOptimizationAgent(BaseExecutionInterface):
+    """Modernized optimization agent for demo scenarios.
     
-    def __init__(self, llm_manager: LLMManager, websocket_manager: WebSocketManager):
-        super().__init__(llm_manager, websocket_manager)
-        self.agent_name = "DemoOptimizationAgent"
+    Uses BaseExecutionInterface for standardized execution patterns.
+    """
+    
+    def __init__(self, llm_manager: LLMManager, 
+                 websocket_manager: Optional[WebSocketManagerProtocol] = None):
+        super().__init__("DemoOptimizationAgent", websocket_manager)
+        self.llm_manager = llm_manager
+        self._engine = self._create_execution_engine()
+        self._initialize_reliability_components()
+    
+    def _create_execution_engine(self) -> BaseExecutionEngine:
+        """Create execution engine with reliability patterns."""
+        reliability_manager = self._create_reliability_manager()
+        monitor = ExecutionMonitor()
+        return BaseExecutionEngine(reliability_manager, monitor)
+    
+    def _create_reliability_manager(self) -> ReliabilityManager:
+        """Create reliability manager with circuit breaker and retry."""
+        circuit_config = self._create_circuit_config()
+        retry_config = self._create_retry_config()
+        return ReliabilityManager(circuit_config, retry_config)
+    
+    def _create_circuit_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
+            name="demo_optimization",
+            failure_threshold=3,
+            recovery_timeout=30
+        )
+    
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(max_retries=2, base_delay=1.0)
+    
+    def _initialize_reliability_components(self) -> None:
+        """Initialize reliability monitoring components."""
+        self.error_handler = ExecutionErrorHandler()
+        self.monitor = ExecutionMonitor()
         
-    async def process(
-        self,
-        message: str,
-        context: Optional[Dict[str, Any]] = None
-    ) -> Dict[str, Any]:
-        """
-        Generate specific optimization recommendations for demos.
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute optimization recommendation generation."""
+        state = context.state
+        message = self._extract_message_from_state(state)
+        context_data = self._extract_context_from_state(state)
         
-        This agent creates detailed, actionable optimization strategies
-        with quantified benefits.
+        return await self._process_optimization_request(message, context_data)
+    
+    def _extract_message_from_state(self, state) -> str:
+        """Extract message from execution state."""
+        return getattr(state, 'message', '')
+    
+    def _extract_context_from_state(self, state) -> Dict[str, Any]:
+        """Extract context data from execution state."""
+        return getattr(state, 'context', {})
+    
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """
-        try:
-            return await self._process_optimization_request(message, context)
-        except Exception as e:
-            return self._create_error_response(e)
+        Validate execution preconditions for optimization agent.
+        
+        Ensures LLM manager is available and request data is valid.
+        """
+        return self._validate_llm_manager() and self._validate_context(context)
+    
+    def _validate_llm_manager(self) -> bool:
+        """Validate LLM manager availability."""
+        return self.llm_manager is not None
+    
+    def _validate_context(self, context: ExecutionContext) -> bool:
+        """Validate execution context has required data."""
+        return context.state is not None
+    
+    # Legacy compatibility method
+    async def process(self, message: str, 
+                     context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+        """Legacy process method for backward compatibility."""
+        exec_context = self._create_legacy_execution_context(message, context)
+        result = await self._engine.execute(self, exec_context)
+        return self._format_legacy_result(result)
+    
+    def _create_legacy_execution_context(self, message: str, 
+                                       context: Optional[Dict[str, Any]]) -> ExecutionContext:
+        """Create execution context from legacy parameters."""
+        from app.agents.state import DeepAgentState
+        
+        state = DeepAgentState()
+        state.message = message
+        state.context = context or {}
+        
+        return ExecutionContext(
+            run_id=f"demo_opt_{int(time.time())}",
+            agent_name=self.agent_name,
+            state=state
+        )
+    
+    def _format_legacy_result(self, result) -> Dict[str, Any]:
+        """Format execution result for legacy compatibility."""
+        if result.success:
+            return result.result
+        else:
+            return self._create_error_response_dict(result.error)
             
     async def _process_optimization_request(
         self,
@@ -51,6 +152,11 @@ class DemoOptimizationAgent(BaseSubAgent):
         """Process the optimization request with LLM generation."""
         prompt = self._prepare_optimization_prompt(message, context)
         response = await self._generate_llm_response(prompt)
+        return self._create_optimization_response(response, context)
+    
+    def _create_optimization_response(self, response: str, 
+                                    context: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Create optimization response with industry context."""
         industry = self._get_industry_from_context(context)
         return self._create_success_response(response, industry)
         
@@ -116,14 +222,18 @@ Use industry-specific terminology and examples."""
             "industry": industry
         }
         
-    def _create_error_response(self, error: Exception) -> Dict[str, Any]:
-        """Create an error response dict."""
-        logger.error(f"Demo optimization error: {str(error)}")
+    def _create_error_response_dict(self, error: str) -> Dict[str, Any]:
+        """Create legacy-compatible error response dict."""
+        logger.error(f"Demo optimization error: {error}")
         return {
             "status": "error",
-            "error": str(error),
+            "error": error,
             "agent": self.agent_name
         }
+    
+    def _create_error_response(self, error: Exception) -> Dict[str, Any]:
+        """Create an error response dict (legacy compatibility)."""
+        return self._create_error_response_dict(str(error))
         
     def get_optimization_strategies(self) -> List[str]:
         """Get list of available optimization strategy types."""
@@ -143,3 +253,12 @@ Use industry-specific terminology and examples."""
             "Medium-term (1-2 months)",
             "Long-term (3-6 months)"
         ]
+    
+    def get_health_status(self) -> Dict[str, Any]:
+        """Get agent health status for monitoring."""
+        return {
+            "agent_name": self.agent_name,
+            "execution_engine": self._engine.get_health_status(),
+            "llm_manager": "available" if self.llm_manager else "unavailable",
+            "reliability_patterns": "enabled"
+        }

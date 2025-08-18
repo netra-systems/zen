@@ -27,8 +27,16 @@ class SystemPerformanceMonitor:
     def _init_core_components(self) -> None:
         """Initialize core monitoring components."""
         self.metrics_collector = MetricsCollector()
+        self._init_performance_components()
+        self._init_measurement_components()
+
+    def _init_performance_components(self) -> None:
+        """Initialize performance-related components."""
         self.alert_manager = PerformanceAlertManager(self.metrics_collector)
         self.dashboard = PerformanceDashboard(self.metrics_collector)
+
+    def _init_measurement_components(self) -> None:
+        """Initialize measurement and overview components."""
         self.operation_measurement = OperationMeasurement(self.metrics_collector)
         self.system_overview = SystemOverview(self.metrics_collector)
     
@@ -59,18 +67,26 @@ class SystemPerformanceMonitor:
     async def stop_monitoring(self) -> None:
         """Stop performance monitoring."""
         self._shutdown = True
+        await self._stop_all_monitoring_components()
+        logger.info("Performance monitoring stopped")
+
+    async def _stop_all_monitoring_components(self) -> None:
+        """Stop all monitoring components."""
         await self._stop_monitoring_task()
         await self._stop_metrics_collection()
-        logger.info("Performance monitoring stopped")
     
     async def _stop_monitoring_task(self) -> None:
         """Stop monitoring task gracefully."""
         if self._monitoring_task:
-            self._monitoring_task.cancel()
-            try:
-                await self._monitoring_task
-            except asyncio.CancelledError:
-                pass
+            await self._cancel_and_wait_monitoring_task()
+
+    async def _cancel_and_wait_monitoring_task(self) -> None:
+        """Cancel monitoring task and wait for completion."""
+        self._monitoring_task.cancel()
+        try:
+            await self._monitoring_task
+        except asyncio.CancelledError:
+            pass
     
     async def _stop_metrics_collection(self) -> None:
         """Stop metrics collection process."""
@@ -125,10 +141,16 @@ class SystemPerformanceMonitor:
 
     def _format_alert_message(self, alert_name: str, severity: str, metric_summary: Dict, alert_data: Dict) -> str:
         """Format alert message with details."""
-        return (f"Performance Alert [{severity.upper()}]: {alert_name} "
-                f"- Current: {metric_summary.get('current', 'N/A')}, "
-                f"Avg: {metric_summary.get('avg', 'N/A')}, "
-                f"Threshold: {alert_data['rule']['threshold']}")
+        base_message = f"Performance Alert [{severity.upper()}]: {alert_name}"
+        details = self._format_metric_details(metric_summary, alert_data)
+        return f"{base_message} - {details}"
+
+    def _format_metric_details(self, metric_summary: Dict, alert_data: Dict) -> str:
+        """Format metric details for alert message."""
+        current = metric_summary.get('current', 'N/A')
+        avg = metric_summary.get('avg', 'N/A')
+        threshold = alert_data['rule']['threshold']
+        return f"Current: {current}, Avg: {avg}, Threshold: {threshold}"
     
     def get_performance_dashboard(self) -> Dict[str, Any]:
         """Get comprehensive performance dashboard data."""

@@ -22,7 +22,7 @@ from sqlalchemy.orm import Session
 
 from app.db.models_postgres import User
 from app.logging_config import central_logger
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, AgentExecutionMixin
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.error_handler import ExecutionErrorHandler
@@ -32,7 +32,7 @@ from app.agents.base.circuit_breaker import CircuitBreakerConfig
 logger = central_logger
 
 
-class ModernToolHandler(BaseExecutionInterface):
+class ModernToolHandler(BaseExecutionInterface, AgentExecutionMixin):
     """Modern tool handler with BaseExecutionInterface pattern."""
     
     def __init__(self, tool_name: str, websocket_manager=None):
@@ -286,18 +286,10 @@ async def execute_corpus_manager(action: str, user: User, db: Session, **kwargs)
     result = await handler.execute_core_logic(context)
     return result
 
-def get_corpus_action_handlers() -> Dict[str, Callable]:
-    """Legacy function - use CorpusManagerHandler instead"""
-    return {'create': handle_corpus_create, 'list': handle_corpus_list, 'validate': handle_corpus_validate}
-
-async def handle_corpus_create(user: User, db: Session, **kwargs) -> Dict[str, Any]:
-    """Legacy function"""
-    params = extract_corpus_create_params(kwargs, user)
-    result = await _execute_corpus_creation(params, db)
-    return _create_corpus_response(result)
 
 
-# Core utility functions for tool handlers
+
+# Core utility functions
 def extract_corpus_create_params(kwargs: Dict[str, Any], user: User) -> Dict[str, Any]:
     """Extract parameters for corpus creation."""
     from .tool_handler_helpers import build_corpus_create_params_base, add_corpus_description
@@ -369,96 +361,66 @@ def get_tool_executor(tool_name: str) -> Optional[Callable]:
     }.get(tool_name)
 
 
-async def execute_admin_tool(tool_name: str, 
-                            user: User, 
-                            db: Session, 
-                            action: str, 
-                            **kwargs) -> Dict[str, Any]:
-    """Execute admin tool with appropriate handler"""
-    from .tool_handler_helpers import check_tool_executor_exists
-    executor = get_tool_executor(tool_name)
-    check_tool_executor_exists(executor)
-    return await executor(action, user, db, **kwargs)
+async def execute_admin_tool(tool_name: str, user: User, db: Session, action: str, **kwargs) -> Dict[str, Any]:
+    """Modern admin tool execution with BaseExecutionInterface"""
+    handler = create_modern_tool_handler(tool_name)
+    from app.agents.state import DeepAgentState
+    context = handler.create_execution_context(
+        DeepAgentState(params={'action': action, 'user': user, 'db': db, 'kwargs': kwargs}), 
+        f"{tool_name}_{action}"
+    )
+    return await handler.execute_core_logic(context)
 
 
-# Helper functions for corpus operations
+# Essential utility functions (consolidated for 300-line limit)
 async def _execute_corpus_creation(params: Dict[str, Any], db: Session) -> Any:
-    """Execute corpus creation with service"""
     from app.services import corpus_service
     return await corpus_service.create_corpus(**params, db=db)
 
-
 def _create_corpus_response(result: Any) -> Dict[str, Any]:
-    """Create corpus success response"""
     from .tool_handler_helpers import create_corpus_success_response
     return create_corpus_success_response(result)
 
-
-# Helper functions for synthetic operations
 def _create_synthetic_service(db: Session):
-    """Create synthetic data service instance"""
     from app.services.synthetic_data_service import SyntheticDataService
     return SyntheticDataService(db)
 
-
 def _create_synthetic_response(result: Any) -> Dict[str, Any]:
-    """Create synthetic success response"""
     from .tool_handler_helpers import create_synthetic_success_response
     return create_synthetic_success_response(result)
 
-
-# Helper functions for user operations
 def _prepare_user_create_params(kwargs: Dict[str, Any], db: Session) -> Dict[str, Any]:
-    """Prepare user creation parameters"""
     from .tool_handler_helpers import build_user_create_params
     params = build_user_create_params(kwargs)
     params["db"] = db
     return params
 
-
 async def _execute_user_creation(params: Dict[str, Any]) -> Any:
-    """Execute user creation with service"""
     from app.services import user_service
     return await user_service.create_user(**params)
 
-
 def _create_user_response(result: Any) -> Dict[str, Any]:
-    """Create user success response"""
     from .tool_handler_helpers import create_user_success_response
     return create_user_success_response(result)
 
-
-# Helper functions for permission operations
 def _extract_permission_params(kwargs: Dict[str, Any]) -> tuple:
-    """Extract permission parameters"""
-    user_email = kwargs.get('user_email')
-    permission = kwargs.get('permission')
-    return user_email, permission
-
+    return kwargs.get('user_email'), kwargs.get('permission')
 
 async def _grant_user_permission(user_email: str, permission: str, db: Session) -> bool:
-    """Grant user permission via service"""
     from app.services.permission_service import PermissionService
     return await PermissionService.grant_permission(user_email, permission, db)
 
-
 def _create_permission_response(success: bool) -> Dict[str, Any]:
-    """Create permission grant response"""
     from .tool_handler_helpers import create_permission_grant_response
     return create_permission_grant_response(success)
 
-
-# Helper functions for log analysis operations
 async def _execute_debug_analysis(db: Session, user: User) -> dict:
-    """Execute debug analysis with service"""
     from app.services.debug_service import DebugService
     from .tool_handler_helpers import build_debug_service_params
     service = DebugService(db)
     service_params = build_debug_service_params(user)
     return await service.get_debug_info(**service_params)
 
-
 def _create_log_analysis_response(query: str, time_range: str, result: dict) -> Dict[str, Any]:
-    """Create log analysis response"""
     from .tool_handler_helpers import create_log_analysis_result
     return create_log_analysis_result(query, time_range, result)

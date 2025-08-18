@@ -248,30 +248,15 @@ class SyntheticDataAgentCore(BaseExecutionInterface):
         """Send completion update."""
         if not context.stream_updates:
             return
-        
         completion_data = self._build_completion_data(result, duration)
         await self._send_update(context.run_id, completion_data)
     
     def _build_completion_data(self, result: SyntheticDataResult, duration: int) -> Dict[str, Any]:
         """Build completion update data dictionary."""
         records_count = result.generation_status.records_generated
-        sample_data = self._get_sample_data(result)
-        message = self._format_completion_message(records_count, duration)
-        
-        return {
-            "status": "completed",
-            "message": message,
-            "result": result.model_dump(),
-            "sample_data": sample_data
-        }
-    
-    def _get_sample_data(self, result: SyntheticDataResult) -> Optional[List[Any]]:
-        """Get sample data from result."""
-        return result.sample_data[:5] if result.sample_data else None
-    
-    def _format_completion_message(self, records_count: int, duration: int) -> str:
-        """Format completion message."""
-        return f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+        sample_data = result.sample_data[:5] if result.sample_data else None
+        message = f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms"
+        return {"status": "completed", "message": message, "result": result.model_dump(), "sample_data": sample_data}
     
     def _log_completion(self, run_id: str, result: SyntheticDataResult) -> None:
         """Log successful completion."""
@@ -283,44 +268,29 @@ class SyntheticDataAgentCore(BaseExecutionInterface):
     async def _handle_execution_error(self, error: Exception, context: SyntheticDataExecutionContext) -> None:
         """Handle execution errors."""
         logger.error(f"Synthetic data generation failed for run_id {context.run_id}: {error}")
-        
         error_result = self._create_error_result(error)
         context.state.synthetic_data_result = error_result.model_dump()
         await self._send_error_update_if_needed(context, error)
     
     def _create_error_result(self, error: Exception) -> SyntheticDataResult:
         """Create error result."""
-        return SyntheticDataResult(
-            success=False,
-            workload_profile=None,
-            generation_status=GenerationStatus(
-                status="failed",
-                errors=[str(error)]
-            )
-        )
+        return SyntheticDataResult(success=False, workload_profile=None,
+                                 generation_status=GenerationStatus(status="failed", errors=[str(error)]))
     
     async def _send_error_update_if_needed(self, context: SyntheticDataExecutionContext, error: Exception) -> None:
         """Send error update if streaming enabled."""
         if context.stream_updates:
-            await self._send_update(context.run_id, {
-                "status": "error",
-                "message": f"❌ Synthetic data generation failed: {str(error)}",
-                "error": str(error)
-            })
+            await self._send_update(context.run_id, {"status": "error",
+                                                   "message": f"❌ Synthetic data generation failed: {str(error)}",
+                                                   "error": str(error)})
     
     async def _send_update(self, run_id: str, update: Dict[str, Any]) -> None:
         """Send update via callback (placeholder for actual websocket integration)."""
-        # This would be integrated with actual websocket manager
         logger.debug(f"Update for {run_id}: {update.get('status', 'unknown')}")
     
     async def _handle_approval_flow(self, profile: WorkloadProfile, state: DeepAgentState,
                                    run_id: str, stream_updates: bool) -> None:
         """Handle approval request flow (legacy compatibility method)."""
-        context = SyntheticDataExecutionContext(
-            run_id=run_id,
-            agent_name=self.agent_name,
-            state=state,
-            stream_updates=stream_updates,
-            workload_profile=profile
-        )
+        context = SyntheticDataExecutionContext(run_id=run_id, agent_name=self.agent_name,
+                                               state=state, stream_updates=stream_updates, workload_profile=profile)
         await self._process_approval_workflow(context)

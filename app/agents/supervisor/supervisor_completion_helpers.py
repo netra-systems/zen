@@ -34,3 +34,20 @@ class SupervisorCompletionHelpers:
     def get_reliability_status(self) -> Dict[str, Any]:
         """Get circuit breaker status from reliability manager."""
         return self.utilities.get_circuit_breaker_status()
+    
+    def create_reliability_manager(self):
+        """Create reliability manager with circuit breaker and retry configs."""
+        from app.agents.base.reliability_manager import ReliabilityManager
+        circuit_config = {"failure_threshold": 5, "recovery_timeout": 60}
+        retry_config = {"max_retries": 3, "base_delay": 1.0, "max_delay": 10.0}
+        return ReliabilityManager(circuit_breaker_config=circuit_config, retry_config=retry_config)
+    
+    def create_supporting_helpers(self, supervisor):
+        """Create supervisor supporting helper components."""
+        from app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
+        from app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
+        from app.agents.supervisor.agent_routing import SupervisorAgentRouter
+        return (SupervisorExecutionHelpers(supervisor), 
+                SupervisorWorkflowExecutor(supervisor),
+                SupervisorAgentRouter(supervisor))
+    
