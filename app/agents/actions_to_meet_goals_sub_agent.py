@@ -20,6 +20,8 @@ from app.agents.base.interface import (
 from app.agents.base.executor import BaseExecutionEngine
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.circuit_breaker import CircuitBreakerConfig
+from app.schemas.shared_types import RetryConfig
 from app.agents.base.errors import (
     ExecutionErrorHandler, ValidationError,
     AgentExecutionError
@@ -56,8 +58,15 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         # Modern execution infrastructure
         self.monitor = ExecutionMonitor()
         self.reliability_manager = ReliabilityManager(
-            circuit_breaker_config={"failure_threshold": 5, "recovery_timeout": 60},
-            retry_config={"max_retries": 3, "base_delay": 1.0}
+            circuit_breaker_config=CircuitBreakerConfig(
+                name="ActionsToMeetGoalsSubAgent",
+                failure_threshold=5,
+                recovery_timeout=60
+            ),
+            retry_config=RetryConfig(
+                max_retries=3,
+                base_delay=1.0
+            )
         )
         self.execution_engine = BaseExecutionEngine(
             self.reliability_manager, self.monitor

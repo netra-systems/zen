@@ -519,7 +519,7 @@ async def _route_google_api_method(client, endpoint: str, method_upper: str,
         return await client.get(endpoint, "google_api", headers=headers, **kwargs)
     elif method_upper == "POST":
         return await client.post(endpoint, "google_api", headers=headers, **kwargs)
-    return await client._request(method_upper.lower(), endpoint, "google_api", headers=headers, **kwargs)
+    return await client._request(method_upper, endpoint, "google_api", headers=headers, **kwargs)
 
 
 async def call_openai_api(endpoint: str,

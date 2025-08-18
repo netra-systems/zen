@@ -81,17 +81,25 @@ class ModernStateManager(BaseExecutionInterface):
         
     def _init_reliability_manager(self) -> None:
         """Initialize reliability manager for state operations."""
-        circuit_config = CircuitBreakerConfig(
+        circuit_config = self._create_circuit_config()
+        retry_config = self._create_retry_config()
+        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
+        
+    def _create_circuit_config(self) -> CircuitBreakerConfig:
+        """Create circuit breaker configuration."""
+        return CircuitBreakerConfig(
             name=f"StateManager-{self.agent_type}",
             failure_threshold=3,
             recovery_timeout=15
         )
-        retry_config = RetryConfig(
+        
+    def _create_retry_config(self) -> RetryConfig:
+        """Create retry configuration."""
+        return RetryConfig(
             max_retries=2,
             base_delay=0.5,
             max_delay=5.0
         )
-        self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
         
     def _init_monitoring(self) -> None:
         """Initialize execution monitoring."""
@@ -110,9 +118,17 @@ class ModernStateManager(BaseExecutionInterface):
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute state management core logic."""
         operation_type = context.metadata.get('operation_type')
+        return await self._route_operation_by_type(operation_type, context)
+        
+    async def _route_operation_by_type(self, operation_type: str, context: ExecutionContext) -> Dict[str, Any]:
+        """Route operation based on type."""
         if operation_type == StateOperationType.SAVE.value:
             return await self._perform_save_operation(context)
-        elif operation_type == StateOperationType.LOAD.value:
+        return await self._route_non_save_operations(operation_type, context)
+        
+    async def _route_non_save_operations(self, operation_type: str, context: ExecutionContext) -> Dict[str, Any]:
+        """Route non-save operations."""
+        if operation_type == StateOperationType.LOAD.value:
             return await self._perform_load_operation(context)
         elif operation_type == StateOperationType.RECOVER.value:
             return await self._perform_recovery_operation(context)
@@ -160,11 +176,17 @@ class StateManagementMixin:
         """Save agent state for recovery and persistence with modern patterns."""
         state_manager = self._get_state_manager()
         context = self._create_save_context()
+        result = await self._execute_save_with_reliability(state_manager, context)
+        await self._handle_save_result(result)
         
-        result = await state_manager.reliability_manager.execute_with_reliability(
+    async def _execute_save_with_reliability(self, state_manager, context):
+        """Execute save operation with reliability patterns."""
+        return await state_manager.reliability_manager.execute_with_reliability(
             context, lambda: self._execute_save_operation()
         )
         
+    async def _handle_save_result(self, result) -> None:
+        """Handle the result of save operation."""
         if result.success:
             logger.info(f"Saved state for {self.agent_type}")
         else:
@@ -173,8 +195,15 @@ class StateManagementMixin:
     def _create_save_context(self) -> ExecutionContext:
         """Create execution context for save operation."""
         agent_id = getattr(self, 'agent_id', 'default')
-        state = getattr(self, 'state', DeepAgentState(user_request="state_save"))
+        state = self._get_or_create_state()
+        return self._build_save_execution_context(agent_id, state)
         
+    def _get_or_create_state(self):
+        """Get existing state or create default state."""
+        return getattr(self, 'state', DeepAgentState(user_request="state_save"))
+        
+    def _build_save_execution_context(self, agent_id: str, state) -> ExecutionContext:
+        """Build execution context for save operation."""
         return ExecutionContext(
             run_id=f"save_{agent_id}_{int(time.time())}",
             agent_name=f"StateManager-{self.agent_type}",
@@ -186,24 +215,39 @@ class StateManagementMixin:
         """Execute the actual save operation."""
         start_time = time.time()
         try:
-            self._prepare_state_for_saving()
-            await self._persist_state_to_redis()
-            execution_time = (time.time() - start_time) * 1000
-            
-            return ExecutionResult(
-                success=True,
-                status=ExecutionStatus.COMPLETED,
-                execution_time_ms=execution_time,
-                result={'operation': 'save', 'status': 'success'}
-            )
+            return await self._perform_save_steps(start_time)
         except Exception as e:
-            execution_time = (time.time() - start_time) * 1000
-            return ExecutionResult(
-                success=False,
-                status=ExecutionStatus.FAILED,
-                error=str(e),
-                execution_time_ms=execution_time
-            )
+            return self._create_failed_save_result(start_time, e)
+            
+    async def _perform_save_steps(self, start_time: float) -> ExecutionResult:
+        """Perform the save operation steps."""
+        self._prepare_state_for_saving()
+        await self._persist_state_to_redis()
+        execution_time = (time.time() - start_time) * 1000
+        return self._create_successful_save_result(execution_time)
+        
+    def _create_successful_save_result(self, execution_time: float) -> ExecutionResult:
+        """Create successful save operation result."""
+        return ExecutionResult(
+            success=True,
+            status=ExecutionStatus.COMPLETED,
+            execution_time_ms=execution_time,
+            result={'operation': 'save', 'status': 'success'}
+        )
+        
+    def _create_failed_save_result(self, start_time: float, error: Exception) -> ExecutionResult:
+        """Create failed save operation result."""
+        execution_time = (time.time() - start_time) * 1000
+        return self._build_failed_result(execution_time, error)
+        
+    def _build_failed_result(self, execution_time: float, error: Exception) -> ExecutionResult:
+        """Build failed execution result."""
+        return ExecutionResult(
+            success=False,
+            status=ExecutionStatus.FAILED,
+            error=str(error),
+            execution_time_ms=execution_time
+        )
     
     def _prepare_state_for_saving(self) -> None:
         """Prepare state data for saving."""
@@ -236,11 +280,17 @@ class StateManagementMixin:
         """Load agent state from storage with modern patterns."""
         state_manager = self._get_state_manager()
         context = self._create_load_context()
+        result = await self._execute_load_with_reliability(state_manager, context)
+        await self._handle_load_result(result)
         
-        result = await state_manager.reliability_manager.execute_with_reliability(
+    async def _execute_load_with_reliability(self, state_manager, context):
+        """Execute load operation with reliability patterns."""
+        return await state_manager.reliability_manager.execute_with_reliability(
             context, lambda: self._execute_load_operation()
         )
         
+    async def _handle_load_result(self, result) -> None:
+        """Handle the result of load operation."""
         if result.success:
             logger.info(f"Loaded state for {self.agent_type}")
         else:
@@ -251,7 +301,10 @@ class StateManagementMixin:
         """Create execution context for load operation."""
         agent_id = getattr(self, 'agent_id', 'default')
         state = DeepAgentState(user_request="state_load")
+        return self._build_load_execution_context(agent_id, state)
         
+    def _build_load_execution_context(self, agent_id: str, state) -> ExecutionContext:
+        """Build execution context for load operation."""
         return ExecutionContext(
             run_id=f"load_{agent_id}_{int(time.time())}",
             agent_name=f"StateManager-{self.agent_type}",
@@ -263,24 +316,30 @@ class StateManagementMixin:
         """Execute the actual load operation."""
         start_time = time.time()
         try:
-            state_data = await self._fetch_state_from_redis()
-            await self._process_loaded_state(state_data)
-            execution_time = (time.time() - start_time) * 1000
-            
-            return ExecutionResult(
-                success=True,
-                status=ExecutionStatus.COMPLETED,
-                execution_time_ms=execution_time,
-                result={'operation': 'load', 'status': 'success'}
-            )
+            return await self._perform_load_steps(start_time)
         except Exception as e:
-            execution_time = (time.time() - start_time) * 1000
-            return ExecutionResult(
-                success=False,
-                status=ExecutionStatus.FAILED,
-                error=str(e),
-                execution_time_ms=execution_time
-            )
+            return self._create_failed_load_result(start_time, e)
+            
+    async def _perform_load_steps(self, start_time: float) -> ExecutionResult:
+        """Perform the load operation steps."""
+        state_data = await self._fetch_state_from_redis()
+        await self._process_loaded_state(state_data)
+        execution_time = (time.time() - start_time) * 1000
+        return self._create_successful_load_result(execution_time)
+        
+    def _create_successful_load_result(self, execution_time: float) -> ExecutionResult:
+        """Create successful load operation result."""
+        return ExecutionResult(
+            success=True,
+            status=ExecutionStatus.COMPLETED,
+            execution_time_ms=execution_time,
+            result={'operation': 'load', 'status': 'success'}
+        )
+        
+    def _create_failed_load_result(self, start_time: float, error: Exception) -> ExecutionResult:
+        """Create failed load operation result."""
+        execution_time = (time.time() - start_time) * 1000
+        return self._build_failed_result(execution_time, error)
 
     async def _fetch_state_from_redis(self) -> Optional[bytes]:
         """Fetch state data from Redis."""
@@ -319,11 +378,17 @@ class StateManagementMixin:
         """Recover from failure and resume from checkpoint with modern patterns."""
         state_manager = self._get_state_manager()
         context = self._create_recovery_context()
+        result = await self._execute_recovery_with_reliability(state_manager, context)
+        self._handle_recovery_result(result)
         
-        result = await state_manager.reliability_manager.execute_with_reliability(
+    async def _execute_recovery_with_reliability(self, state_manager, context):
+        """Execute recovery operation with reliability patterns."""
+        return await state_manager.reliability_manager.execute_with_reliability(
             context, lambda: self._execute_recovery_operation()
         )
         
+    def _handle_recovery_result(self, result) -> None:
+        """Handle the result of recovery operation."""
         if result.success:
             logger.info(f"Recovery completed for {self.agent_type}")
         else:
@@ -333,7 +398,10 @@ class StateManagementMixin:
         """Create execution context for recovery operation."""
         agent_id = getattr(self, 'agent_id', 'default')
         state = DeepAgentState(user_request="state_recovery")
+        return self._build_recovery_execution_context(agent_id, state)
         
+    def _build_recovery_execution_context(self, agent_id: str, state) -> ExecutionContext:
+        """Build execution context for recovery operation."""
         return ExecutionContext(
             run_id=f"recovery_{agent_id}_{int(time.time())}",
             agent_name=f"StateManager-{self.agent_type}",
@@ -345,25 +413,31 @@ class StateManagementMixin:
         """Execute the actual recovery operation."""
         start_time = time.time()
         try:
-            await self.load_state()
-            await self._recover_incomplete_tasks()
-            await self._resume_from_checkpoint()
-            execution_time = (time.time() - start_time) * 1000
-            
-            return ExecutionResult(
-                success=True,
-                status=ExecutionStatus.COMPLETED,
-                execution_time_ms=execution_time,
-                result={'operation': 'recovery', 'status': 'success'}
-            )
+            return await self._perform_recovery_steps(start_time)
         except Exception as e:
-            execution_time = (time.time() - start_time) * 1000
-            return ExecutionResult(
-                success=False,
-                status=ExecutionStatus.FAILED,
-                error=str(e),
-                execution_time_ms=execution_time
-            )
+            return self._create_failed_recovery_result(start_time, e)
+            
+    async def _perform_recovery_steps(self, start_time: float) -> ExecutionResult:
+        """Perform the recovery operation steps."""
+        await self.load_state()
+        await self._recover_incomplete_tasks()
+        await self._resume_from_checkpoint()
+        execution_time = (time.time() - start_time) * 1000
+        return self._create_successful_recovery_result(execution_time)
+        
+    def _create_successful_recovery_result(self, execution_time: float) -> ExecutionResult:
+        """Create successful recovery operation result."""
+        return ExecutionResult(
+            success=True,
+            status=ExecutionStatus.COMPLETED,
+            execution_time_ms=execution_time,
+            result={'operation': 'recovery', 'status': 'success'}
+        )
+        
+    def _create_failed_recovery_result(self, start_time: float, error: Exception) -> ExecutionResult:
+        """Create failed recovery operation result."""
+        execution_time = (time.time() - start_time) * 1000
+        return self._build_failed_result(execution_time, error)
 
     async def _recover_incomplete_tasks(self) -> None:
         """Recover and resume incomplete tasks from state."""
@@ -445,52 +519,102 @@ class StateManagementMixin:
     async def create_checkpoint(self, checkpoint_name: str) -> bool:
         """Create a named checkpoint for recovery."""
         try:
-            if not hasattr(self, '_checkpoints'):
-                self._checkpoints = []
-            
-            checkpoint = {
-                'name': checkpoint_name,
-                'timestamp': datetime.now(timezone.utc).isoformat(),
-                'state_snapshot': getattr(self, 'state', {}),
-                'metadata': {'agent_type': self.agent_type}
-            }
-            
-            self._checkpoints.append(checkpoint)
-            await self.save_state()
-            
-            logger.info(f"Created checkpoint '{checkpoint_name}' for {self.agent_type}")
-            return True
-            
+            return await self._perform_checkpoint_creation(checkpoint_name)
         except Exception as e:
-            logger.error(f"Failed to create checkpoint '{checkpoint_name}': {e}")
-            return False
+            return self._handle_checkpoint_error(checkpoint_name, e)
+            
+    async def _perform_checkpoint_creation(self, checkpoint_name: str) -> bool:
+        """Perform the checkpoint creation steps."""
+        self._ensure_checkpoints_list_exists()
+        checkpoint = self._build_checkpoint_data(checkpoint_name)
+        self._checkpoints.append(checkpoint)
+        await self.save_state()
+        logger.info(f"Created checkpoint '{checkpoint_name}' for {self.agent_type}")
+        return True
+        
+    def _ensure_checkpoints_list_exists(self) -> None:
+        """Ensure checkpoints list exists."""
+        if not hasattr(self, '_checkpoints'):
+            self._checkpoints = []
+            
+    def _build_checkpoint_data(self, checkpoint_name: str) -> Dict[str, Any]:
+        """Build checkpoint data dictionary."""
+        return {
+            'name': checkpoint_name,
+            'timestamp': datetime.now(timezone.utc).isoformat(),
+            'state_snapshot': getattr(self, 'state', {}),
+            'metadata': {'agent_type': self.agent_type}
+        }
+        
+    def _handle_checkpoint_error(self, checkpoint_name: str, error: Exception) -> bool:
+        """Handle checkpoint creation error."""
+        logger.error(f"Failed to create checkpoint '{checkpoint_name}': {error}")
+        return False
 
     async def cleanup_old_states(self, retention_hours: int = 24) -> int:
         """Clean up old state data beyond retention period."""
         try:
-            redis_manager = RedisManager()
-            cutoff_time = datetime.now(timezone.utc).timestamp() - (retention_hours * 3600)
-            
-            # This is a simplified cleanup - in production would scan Redis keys
-            logger.info(f"State cleanup completed for {self.agent_type} (retention: {retention_hours}h)")
-            return 0  # Return count of cleaned up items
-            
+            return await self._perform_cleanup_operation(retention_hours)
         except Exception as e:
-            logger.error(f"Failed to cleanup old states: {e}")
-            return 0
+            return self._handle_cleanup_error(e)
+            
+    async def _perform_cleanup_operation(self, retention_hours: int) -> int:
+        """Perform the cleanup operation."""
+        redis_manager = RedisManager()
+        cutoff_time = self._calculate_cutoff_time(retention_hours)
+        # Simplified cleanup - in production would scan Redis keys
+        logger.info(f"State cleanup completed for {self.agent_type} (retention: {retention_hours}h)")
+        return 0  # Return count of cleaned up items
+        
+    def _calculate_cutoff_time(self, retention_hours: int) -> float:
+        """Calculate cutoff time for cleanup."""
+        return datetime.now(timezone.utc).timestamp() - (retention_hours * 3600)
+        
+    def _handle_cleanup_error(self, error: Exception) -> int:
+        """Handle cleanup error."""
+        logger.error(f"Failed to cleanup old states: {error}")
+        return 0
             
     def get_health_status(self) -> Dict[str, Any]:
         """Get state manager health status."""
         metrics = self.get_state_metrics()
+        return self._build_health_status_dict(metrics)
         
+    def _build_health_status_dict(self, metrics: StateMetrics) -> Dict[str, Any]:
+        """Build health status dictionary from metrics."""
+        success_rate = self._calculate_success_rate(metrics)
+        health_status = self._determine_health_status(metrics)
+        return self._create_health_status_response(metrics, success_rate, health_status)
+        
+    def _calculate_success_rate(self, metrics: StateMetrics) -> float:
+        """Calculate success rate from metrics."""
+        return (metrics.successful_operations / max(metrics.total_operations, 1)) * 100
+        
+    def _determine_health_status(self, metrics: StateMetrics) -> str:
+        """Determine overall health status."""
+        return 'healthy' if metrics.successful_operations > metrics.failed_operations else 'degraded'
+        
+    def _create_health_status_response(self, metrics: StateMetrics, success_rate: float, health_status: str) -> Dict[str, Any]:
+        """Create complete health status response."""
+        base_status = self._build_base_health_status(metrics, success_rate)
+        extended_status = self._add_extended_health_status(metrics, health_status)
+        return {**base_status, **extended_status}
+        
+    def _build_base_health_status(self, metrics: StateMetrics, success_rate: float) -> Dict[str, Any]:
+        """Build base health status information."""
         return {
             'agent_type': self.agent_type,
             'total_operations': metrics.total_operations,
-            'success_rate': (metrics.successful_operations / max(metrics.total_operations, 1)) * 100,
-            'last_operation': metrics.last_operation_time.isoformat() if metrics.last_operation_time else None,
+            'success_rate': success_rate,
+            'last_operation': metrics.last_operation_time.isoformat() if metrics.last_operation_time else None
+        }
+        
+    def _add_extended_health_status(self, metrics: StateMetrics, health_status: str) -> Dict[str, Any]:
+        """Add extended health status information."""
+        return {
             'checkpoint_count': metrics.checkpoint_count,
             'recovery_count': metrics.recovery_count,
-            'status': 'healthy' if metrics.successful_operations > metrics.failed_operations else 'degraded'
+            'status': health_status
         }
 
 

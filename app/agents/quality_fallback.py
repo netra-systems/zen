@@ -44,7 +44,10 @@ class QualityFallbackManager:
         """Generate fallback response on error"""
         if not self.fallback_service:
             return
-        
+        await self._safe_generate_error_fallback(context, error, agent_name)
+    
+    async def _safe_generate_error_fallback(self, context: AgentExecutionContext, error: Exception, agent_name: str) -> None:
+        """Safely generate error fallback with exception handling"""
         try:
             await self._generate_error_fallback(context, error, agent_name)
         except Exception as e:
@@ -55,32 +58,61 @@ class QualityFallbackManager:
                                      error: Exception,
                                      agent_name: str) -> None:
         """Generate fallback for error conditions"""
-        fallback_context = self._create_error_fallback_context(
-            context, error, agent_name
-        )
-        
-        fallback_response = await self.fallback_service.generate_fallback(
+        fallback_context = self._create_error_fallback_context(context, error, agent_name)
+        fallback_response = await self._get_error_fallback_response(fallback_context)
+        self._store_error_fallback(context, fallback_response, agent_name)
+    
+    async def _get_error_fallback_response(self, fallback_context) -> Dict[str, Any]:
+        """Get fallback response from service"""
+        return await self.fallback_service.generate_fallback(
             fallback_context,
             include_diagnostics=True,
             include_recovery=True
         )
-        
-        self._store_error_fallback(context, fallback_response, agent_name)
     
     def _create_error_fallback_context(self,
                                      context: AgentExecutionContext,
                                      error: Exception,
                                      agent_name: str) -> FallbackContext:
         """Create fallback context for error conditions"""
-        return FallbackContext(
-            agent_name=agent_name,
-            content_type=self._get_content_type_for_agent(agent_name),
-            failure_reason=FailureReason.LLM_ERROR,
-            user_request=context.metadata.get('user_request', ''),
-            attempted_action=f"Execute {agent_name}",
-            error_details=str(error),
-            retry_count=context.retry_count
+        return self._build_error_fallback_context(
+            agent_name, context, error
         )
+    
+    def _build_error_fallback_context(self,
+                                     agent_name: str,
+                                     context: AgentExecutionContext,
+                                     error: Exception) -> FallbackContext:
+        """Build fallback context with error details"""
+        return self._construct_error_fallback_context(
+            agent_name, context, error
+        )
+    
+    def _construct_error_fallback_context(self,
+                                         agent_name: str,
+                                         context: AgentExecutionContext,
+                                         error: Exception) -> FallbackContext:
+        """Construct fallback context object"""
+        basic_params = self._get_basic_error_context_params(agent_name, context)
+        error_params = self._get_error_context_params(error, context)
+        return FallbackContext(**basic_params, **error_params)
+    
+    def _get_basic_error_context_params(self, agent_name: str, context: AgentExecutionContext) -> Dict[str, Any]:
+        """Get basic error context parameters"""
+        return {
+            'agent_name': agent_name,
+            'content_type': self._get_content_type_for_agent(agent_name),
+            'failure_reason': FailureReason.LLM_ERROR,
+            'user_request': context.metadata.get('user_request', ''),
+        }
+    
+    def _get_error_context_params(self, error: Exception, context: AgentExecutionContext) -> Dict[str, Any]:
+        """Get error-specific context parameters"""
+        return {
+            'attempted_action': f"Execute {context.metadata.get('agent_name', 'agent')}",
+            'error_details': str(error),
+            'retry_count': context.retry_count
+        }
     
     def _store_error_fallback(self,
                             context: AgentExecutionContext,
@@ -98,16 +130,31 @@ class QualityFallbackManager:
                                            validation_result: ValidationResult,
                                            agents: Dict[str, Any]) -> None:
         """Retry agent execution with quality-based prompt adjustments"""
+        await self._safe_retry_with_adjustments(context, agent_name, state, validation_result, agents)
+    
+    async def _safe_retry_with_adjustments(self,
+                                         context: AgentExecutionContext,
+                                         agent_name: str,
+                                         state: DeepAgentState,
+                                         validation_result: ValidationResult,
+                                         agents: Dict[str, Any]) -> None:
+        """Safely retry with adjustments and exception handling"""
         try:
-            self._increment_retry_stats()
-            agent = self._get_agent(agents, agent_name)
-            
-            if agent:
-                await self._execute_retry_with_adjustments(
-                    agent, validation_result, state, context
-                )
+            await self._perform_retry_with_adjustments(context, agent_name, state, validation_result, agents)
         except Exception as e:
             logger.error(f"Error in quality retry: {str(e)}")
+    
+    async def _perform_retry_with_adjustments(self,
+                                            context: AgentExecutionContext,
+                                            agent_name: str,
+                                            state: DeepAgentState,
+                                            validation_result: ValidationResult,
+                                            agents: Dict[str, Any]) -> None:
+        """Perform retry with quality adjustments"""
+        self._increment_retry_stats()
+        agent = self._get_agent(agents, agent_name)
+        if agent:
+            await self._execute_retry_with_adjustments(agent, validation_result, state, context)
     
     def _increment_retry_stats(self) -> None:
         """Increment retry statistics"""
@@ -117,35 +164,41 @@ class QualityFallbackManager:
         """Get agent from agents dictionary"""
         return agents.get(agent_name)
     
-    async def _execute_retry_with_adjustments(self,
-                                            agent: Any,
-                                            validation_result: ValidationResult,
-                                            state: DeepAgentState,
-                                            context: AgentExecutionContext) -> None:
+    async def _execute_retry_with_adjustments(self, agent: Any, validation_result: ValidationResult, state: DeepAgentState, context: AgentExecutionContext) -> None:
         """Execute retry with quality adjustments"""
         original_prompt = self._apply_prompt_adjustments(agent, validation_result)
-        
-        logger.info(f"Retrying {agent.__class__.__name__} with quality adjustments")
-        
-        await agent.execute(state, context.run_id, stream_updates=True)
-        
+        await self._perform_agent_retry(agent, state, context)
         self._restore_original_prompt(agent, original_prompt)
+    
+    async def _perform_agent_retry(self, agent: Any, state: DeepAgentState, context: AgentExecutionContext) -> None:
+        """Perform agent retry execution"""
+        logger.info(f"Retrying {agent.__class__.__name__} with quality adjustments")
+        await agent.execute(state, context.run_id, stream_updates=True)
     
     def _apply_prompt_adjustments(self,
                                 agent: Any,
                                 validation_result: ValidationResult) -> Optional[str]:
         """Apply prompt adjustments to agent"""
-        if not validation_result.retry_prompt_adjustments:
+        if not self._should_apply_adjustments(validation_result):
             return None
-        
+        return self._modify_agent_prompt(agent, validation_result)
+    
+    def _should_apply_adjustments(self, validation_result: ValidationResult) -> bool:
+        """Check if adjustments should be applied"""
+        return bool(validation_result.retry_prompt_adjustments)
+    
+    def _modify_agent_prompt(self, agent: Any, validation_result: ValidationResult) -> Optional[str]:
+        """Modify agent prompt with quality instructions"""
         original_prompt = getattr(agent, 'prompt_template', None)
         if not original_prompt:
             return None
-        
+        self._update_agent_prompt_template(agent, original_prompt, validation_result)
+        return original_prompt
+    
+    def _update_agent_prompt_template(self, agent: Any, original_prompt: str, validation_result: ValidationResult) -> None:
+        """Update agent prompt template with quality requirements"""
         quality_instructions = self._get_quality_instructions(validation_result)
         agent.prompt_template = f"{original_prompt}\n\nQUALITY REQUIREMENTS:\n{quality_instructions}"
-        
-        return original_prompt
     
     def _get_quality_instructions(self, validation_result: ValidationResult) -> str:
         """Get quality instructions from validation result"""
@@ -158,55 +211,63 @@ class QualityFallbackManager:
         if original_prompt and hasattr(agent, 'prompt_template'):
             agent.prompt_template = original_prompt
     
-    async def apply_fallback_response(self,
-                                    context: AgentExecutionContext,
-                                    agent_name: str,
-                                    state: DeepAgentState,
-                                    validation_result: ValidationResult) -> None:
+    async def apply_fallback_response(self, context: AgentExecutionContext, agent_name: str, state: DeepAgentState, validation_result: ValidationResult) -> None:
         """Apply fallback response when quality is too low"""
         if not self.fallback_service:
             return
-        
+        await self._safe_apply_quality_fallback(context, agent_name, state, validation_result)
+    
+    async def _safe_apply_quality_fallback(self,
+                                         context: AgentExecutionContext,
+                                         agent_name: str,
+                                         state: DeepAgentState,
+                                         validation_result: ValidationResult) -> None:
+        """Safely apply quality fallback with exception handling"""
         try:
-            await self._generate_quality_fallback(
-                context, agent_name, state, validation_result
-            )
+            await self._generate_quality_fallback(context, agent_name, state, validation_result)
         except Exception as e:
             logger.error(f"Error applying fallback: {str(e)}")
     
-    async def _generate_quality_fallback(self,
-                                       context: AgentExecutionContext,
-                                       agent_name: str,
-                                       state: DeepAgentState,
-                                       validation_result: ValidationResult) -> None:
+    async def _generate_quality_fallback(self, context: AgentExecutionContext, agent_name: str, state: DeepAgentState, validation_result: ValidationResult) -> None:
         """Generate fallback for quality issues"""
-        fallback_context = self._create_quality_fallback_context(
-            agent_name, state, validation_result, context
-        )
-        
-        fallback_response = await self.fallback_service.generate_fallback(
+        fallback_context = self._create_quality_fallback_context(agent_name, state, validation_result, context)
+        fallback_response = await self._get_quality_fallback_response(fallback_context)
+        self._apply_quality_fallback_response(state, agent_name, fallback_response)
+    
+    async def _get_quality_fallback_response(self, fallback_context) -> Dict[str, Any]:
+        """Get quality fallback response from service"""
+        return await self.fallback_service.generate_fallback(
             fallback_context,
             include_diagnostics=True,
             include_recovery=True
         )
-        
-        self._apply_quality_fallback_response(state, agent_name, fallback_response)
     
-    def _create_quality_fallback_context(self,
-                                       agent_name: str,
-                                       state: DeepAgentState,
-                                       validation_result: ValidationResult,
-                                       context: AgentExecutionContext) -> FallbackContext:
+    def _create_quality_fallback_context(self, agent_name: str, state: DeepAgentState, validation_result: ValidationResult, context: AgentExecutionContext) -> FallbackContext:
         """Create fallback context for quality issues"""
-        return FallbackContext(
-            agent_name=agent_name,
-            content_type=self._get_content_type_for_agent(agent_name),
-            failure_reason=FailureReason.LOW_QUALITY,
-            user_request=state.user_request,
-            attempted_action=f"Generate {agent_name} output",
-            quality_metrics=validation_result.metrics,
-            retry_count=context.retry_count
-        )
+        return self._build_quality_fallback_context(agent_name, state, validation_result, context)
+    
+    def _build_quality_fallback_context(self, agent_name: str, state: DeepAgentState, validation_result: ValidationResult, context: AgentExecutionContext) -> FallbackContext:
+        """Build fallback context with quality details"""
+        basic_params = self._get_basic_quality_context_params(agent_name, state)
+        quality_params = self._get_quality_context_params(validation_result, context)
+        return FallbackContext(**basic_params, **quality_params)
+    
+    def _get_basic_quality_context_params(self, agent_name: str, state: DeepAgentState) -> Dict[str, Any]:
+        """Get basic quality context parameters"""
+        return {
+            'agent_name': agent_name,
+            'content_type': self._get_content_type_for_agent(agent_name),
+            'failure_reason': FailureReason.LOW_QUALITY,
+            'user_request': state.user_request,
+        }
+    
+    def _get_quality_context_params(self, validation_result: ValidationResult, context: AgentExecutionContext) -> Dict[str, Any]:
+        """Get quality-specific context parameters"""
+        return {
+            'attempted_action': f"Generate {context.metadata.get('agent_name', 'agent')} output",
+            'quality_metrics': validation_result.metrics,
+            'retry_count': context.retry_count
+        }
     
     def _apply_quality_fallback_response(self,
                                        state: DeepAgentState,
@@ -215,7 +276,10 @@ class QualityFallbackManager:
         """Apply quality fallback response to state"""
         self._replace_agent_output(state, agent_name, fallback_response['response'])
         self._mark_fallback_used(state, agent_name)
-        
+        self._update_fallback_stats_and_log(agent_name)
+    
+    def _update_fallback_stats_and_log(self, agent_name: str) -> None:
+        """Update fallback statistics and log the operation"""
         self.fallback_stats['fallbacks_used'] += 1
         logger.info(f"Applied fallback response for {agent_name} due to low quality")
     
@@ -229,9 +293,24 @@ class QualityFallbackManager:
     
     def _get_agent_update_map(self) -> Dict[str, callable]:
         """Get mapping of agent names to state update functions"""
+        return self._create_agent_update_mappings()
+    
+    def _create_agent_update_mappings(self) -> Dict[str, callable]:
+        """Create agent update function mappings"""
+        mappings = self._get_basic_agent_mappings()
+        mappings.update(self._get_extended_agent_mappings())
+        return mappings
+    
+    def _get_basic_agent_mappings(self) -> Dict[str, callable]:
+        """Get basic agent mappings"""
         return {
             'TriageSubAgent': lambda s, o: setattr(s, 'triage_result', {'summary': o, 'category': 'Fallback'}),
-            'DataSubAgent': lambda s, o: setattr(s, 'data_result', {'data': o}),
+            'DataSubAgent': lambda s, o: setattr(s, 'data_result', {'data': o})
+        }
+    
+    def _get_extended_agent_mappings(self) -> Dict[str, callable]:
+        """Get extended agent mappings"""
+        return {
             'OptimizationsCoreSubAgent': lambda s, o: setattr(s, 'optimizations_result', {'recommendations': o}),
             'ActionsToMeetGoalsSubAgent': lambda s, o: setattr(s, 'actions_result', {'actions': o}),
             'ReportingSubAgent': lambda s, o: setattr(s, 'report_result', {'report': o})
@@ -245,14 +324,29 @@ class QualityFallbackManager:
     
     def _get_content_type_for_agent(self, agent_name: str) -> ContentType:
         """Map agent name to content type"""
-        mapping = {
+        mapping = self._create_content_type_mappings()
+        return mapping.get(agent_name, ContentType.GENERAL)
+    
+    def _create_content_type_mappings(self) -> Dict[str, ContentType]:
+        """Create content type mappings for agents"""
+        mappings = self._get_basic_content_mappings()
+        mappings.update(self._get_extended_content_mappings())
+        return mappings
+    
+    def _get_basic_content_mappings(self) -> Dict[str, ContentType]:
+        """Get basic content type mappings"""
+        return {
             'TriageSubAgent': ContentType.TRIAGE,
-            'DataSubAgent': ContentType.DATA_ANALYSIS,
+            'DataSubAgent': ContentType.DATA_ANALYSIS
+        }
+    
+    def _get_extended_content_mappings(self) -> Dict[str, ContentType]:
+        """Get extended content type mappings"""
+        return {
             'OptimizationsCoreSubAgent': ContentType.OPTIMIZATION,
             'ActionsToMeetGoalsSubAgent': ContentType.ACTION_PLAN,
             'ReportingSubAgent': ContentType.REPORT
         }
-        return mapping.get(agent_name, ContentType.GENERAL)
     
     def get_fallback_stats(self) -> Dict[str, int]:
         """Get fallback statistics"""

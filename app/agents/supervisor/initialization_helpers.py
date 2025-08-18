@@ -18,8 +18,10 @@ class SupervisorInitializationHelpers:
     def create_reliability_manager():
         """Create reliability manager with circuit breaker and retry configs."""
         from app.agents.base.reliability_manager import ReliabilityManager
-        circuit_config = {"failure_threshold": 5, "recovery_timeout": 60}
-        retry_config = {"max_retries": 3, "base_delay": 1.0, "max_delay": 10.0}
+        from app.agents.base.circuit_breaker import CircuitBreakerConfig
+        from app.schemas.shared_types import RetryConfig
+        circuit_config = CircuitBreakerConfig(name="Supervisor", failure_threshold=5, recovery_timeout=60)
+        retry_config = RetryConfig(max_retries=3, base_delay=1.0, max_delay=10.0)
         return ReliabilityManager(circuit_breaker_config=circuit_config, retry_config=retry_config)
     
     @staticmethod

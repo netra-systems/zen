@@ -168,23 +168,32 @@ async def _cleanup_client_connection(client):
     await client.disconnect()
     logger.info("[ClickHouse] REAL connection closed")
 
+async def _setup_real_client():
+    """Set up real ClickHouse client configuration and logging."""
+    config, use_secure = _get_connection_config()
+    _log_connection_attempt(config, use_secure)
+    return config, use_secure
+
+async def _connect_and_yield_client(config, use_secure):
+    """Connect to ClickHouse and yield client."""
+    client = _create_intercepted_client(config, use_secure)
+    try:
+        async for c in _test_and_yield_client(client):
+            yield c
+    finally:
+        await _cleanup_client_connection(client)
+
 async def _create_real_client():
     """Create and manage REAL ClickHouse client.
     
     This is the default behavior - connects to actual ClickHouse instance.
     """
-    config, use_secure = _get_connection_config()
-    _log_connection_attempt(config, use_secure)
-    
+    config, use_secure = await _setup_real_client()
     try:
-        client = _create_intercepted_client(config, use_secure)
-        async for c in _test_and_yield_client(client):
+        async for c in _connect_and_yield_client(config, use_secure):
             yield c
     except Exception as e:
         _handle_connection_error(e)
-    finally:
-        if 'client' in locals():
-            await _cleanup_client_connection(client)
 
 
 class ClickHouseService:

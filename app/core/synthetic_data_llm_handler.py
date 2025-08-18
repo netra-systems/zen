@@ -191,10 +191,7 @@ class PromptBuilder:
         Returns:
             Formatted parsing prompt
         """
-        fields_spec = PromptBuilder._get_prompt_fields_spec()
-        base_prompt = PromptBuilder._create_base_prompt(user_request)
-        instructions = "Default volume to 1000 if not specified."
-        return PromptBuilder._format_parsing_prompt(base_prompt, fields_spec, instructions)
+        return PromptBuilder._build_complete_parsing_prompt(user_request)
     
     @staticmethod
     def _create_base_prompt(user_request: str) -> str:
@@ -210,24 +207,53 @@ class PromptBuilder:
         return f"Analyze this request for synthetic data parameters: {user_request}"
     
     @staticmethod
-    def _format_parsing_prompt(base_prompt: str, fields_spec: str, instructions: str) -> str:
+    def _build_complete_parsing_prompt(user_request: str) -> str:
+        """
+        Build complete parsing prompt with all components.
+        
+        Args:
+            user_request: User's synthetic data request
+            
+        Returns:
+            Complete formatted prompt
+        """
+        components = PromptBuilder._gather_prompt_components(user_request)
+        return PromptBuilder._format_parsing_prompt(components)
+    
+    @staticmethod
+    def _gather_prompt_components(user_request: str) -> dict:
+        """
+        Gather all components needed for parsing prompt.
+        
+        Args:
+            user_request: User's request string
+            
+        Returns:
+            Dictionary of prompt components
+        """
+        return {
+            'base': PromptBuilder._create_base_prompt(user_request),
+            'fields': PromptBuilder._get_prompt_fields_spec(),
+            'instructions': "Default volume to 1000 if not specified."
+        }
+    
+    @staticmethod
+    def _format_parsing_prompt(components: dict) -> str:
         """
         Format complete parsing prompt with sections.
         
         Args:
-            base_prompt: Base analysis prompt
-            fields_spec: Field specifications
-            instructions: Additional instructions
+            components: Dictionary with base, fields, instructions
             
         Returns:
             Complete formatted prompt
         """
         return f"""
-{base_prompt}
+{components['base']}
 
-{fields_spec}
+{components['fields']}
 
-{instructions}
+{components['instructions']}
 """
     
     @staticmethod
@@ -238,10 +264,35 @@ class PromptBuilder:
         Returns:
             Fields specification for JSON response
         """
-        field_types = "workload_type (inference_logs|training_data|performance_metrics|cost_data|custom)"
-        ranges = "volume (100-1000000), time_range_days (1-365)"
-        options = "distribution (normal|uniform|exponential), noise_level (0.0-0.5), custom_parameters"
-        return f"Return JSON with fields: {field_types}, {ranges}, {options}."
+        spec_parts = PromptBuilder._build_fields_spec_parts()
+        return PromptBuilder._format_fields_spec(spec_parts)
+    
+    @staticmethod
+    def _build_fields_spec_parts() -> dict:
+        """
+        Build individual parts of fields specification.
+        
+        Returns:
+            Dictionary of specification parts
+        """
+        return {
+            'types': "workload_type (inference_logs|training_data|performance_metrics|cost_data|custom)",
+            'ranges': "volume (100-1000000), time_range_days (1-365)",
+            'options': "distribution (normal|uniform|exponential), noise_level (0.0-0.5), custom_parameters"
+        }
+    
+    @staticmethod
+    def _format_fields_spec(spec_parts: dict) -> str:
+        """
+        Format fields specification from parts.
+        
+        Args:
+            spec_parts: Dictionary with types, ranges, options
+            
+        Returns:
+            Formatted fields specification
+        """
+        return f"Return JSON with fields: {spec_parts['types']}, {spec_parts['ranges']}, {spec_parts['options']}."
 
 
 # Factory function for easy instantiation

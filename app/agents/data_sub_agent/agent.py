@@ -87,6 +87,12 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.cache_manager = self.helpers.cache_manager
         self.data_processor = self.helpers.data_processor
         self.corpus_operations = self.helpers.corpus_operations
+        # Expose core components for test compatibility
+        self.query_builder = self.core.query_builder
+        self.analysis_engine = self.core.analysis_engine
+        self.clickhouse_ops = self.core.clickhouse_ops
+        self.redis_manager = self.core.redis_manager
+        self.cache_ttl = self.core.cache_ttl
         
     # Modern BaseExecutionInterface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
@@ -133,6 +139,28 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         """Send real-time update via WebSocket."""
         await self.helpers.send_websocket_update(run_id, update)
     
+    async def _analyze_performance_metrics(self, user_id: int, workload_id: str, time_range) -> Dict[str, Any]:
+        """Analyze performance metrics for given parameters."""
+        try:
+            data = await self._fetch_clickhouse_data(
+                f"SELECT * FROM performance_metrics WHERE user_id = {user_id} AND workload_id = '{workload_id}'",
+                cache_key=f"perf_metrics_{user_id}_{workload_id}"
+            )
+            if not data:
+                return {"status": "no_data", "message": "No performance data found for the specified parameters"}
+            return {"status": "success", "data": data, "metrics_count": len(data)}
+        except Exception as e:
+            logger.error(f"Error analyzing performance metrics: {e}")
+            return {"status": "error", "message": str(e)}
+    
+    async def _get_cached_schema(self, table_name: str) -> Optional[Dict[str, Any]]:
+        """Get cached schema information for a table."""
+        return await self.helpers.get_cached_schema(table_name)
+    
+    def _validate_data(self, data: Dict[str, Any]) -> bool:
+        """Validate data has required fields."""
+        return self.helpers.validate_data(data)
+    
     # Health and status monitoring
     def get_health_status(self) -> Dict[str, Any]:
         """Get comprehensive agent health status."""
@@ -148,7 +176,17 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     # Dynamic delegation for backward compatibility
     def __getattr__(self, name: str):
         """Dynamic delegation to helpers for backward compatibility."""
-        if hasattr(self.helpers, name):
-            return getattr(self.helpers, name)
+        # Prevent recursion for internal attributes and cache attributes
+        if name.startswith('_') or name in ('helpers', 'agent'):
+            raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{name}'")
+        
+        # Safely check helpers to avoid recursion
+        try:
+            helpers = object.__getattribute__(self, 'helpers')
+            if hasattr(helpers, name):
+                return getattr(helpers, name)
+        except AttributeError:
+            pass
+            
         raise AttributeError(f"'{self.__class__.__name__}' has no attribute '{name}'")
 

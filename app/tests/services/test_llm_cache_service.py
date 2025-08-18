@@ -9,7 +9,7 @@ async def test_llm_cache_service_initialization():
     assert cache_service.enabled == True
     assert cache_service.cache_core.cache_prefix == "llm_cache:"
 async def test_cache_set_and_get():
-    with patch('app.services.llm_cache_service.redis_manager') as mock_redis_manager:
+    with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
         mock_redis_client = AsyncMock()
         mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
@@ -26,7 +26,7 @@ async def test_cache_set_and_get():
         mock_redis_client.set = AsyncMock(return_value=True)
         
         cache_service = LLMCacheService()
-        cache_service.redis_manager = mock_redis_manager
+        cache_service.cache_core.redis_manager = mock_redis_manager
         
         key = "test_prompt_hash"
         value = {"response": "Test LLM response", "tokens": 100}
@@ -49,7 +49,7 @@ async def test_cache_expiration():
     retrieved_value = await cache_service.get_cached_response("test_prompt", "test_llm", {})
     # May be None if Redis clears it
 async def test_cache_size_limit():
-    with patch('app.services.llm_cache_service.redis_manager') as mock_redis_manager:
+    with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
         mock_redis_client = AsyncMock()
         mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
@@ -66,7 +66,7 @@ async def test_cache_size_limit():
         mock_redis_client.set = AsyncMock(return_value=True)
         
         cache_service = LLMCacheService()
-        cache_service.redis_manager = mock_redis_manager
+        cache_service.cache_core.redis_manager = mock_redis_manager
         
         await cache_service.cache_response("prompt1", "response1", "llm1", {})
         await cache_service.cache_response("prompt2", "response2", "llm1", {})
@@ -75,7 +75,7 @@ async def test_cache_size_limit():
         # Test that caching works
         assert await cache_service.get_cached_response("prompt3", "llm1", {}) != None
 async def test_cache_stats():
-    with patch('app.services.llm_cache_service.redis_manager') as mock_redis_manager:
+    with patch('app.services.llm_cache_core.redis_manager') as mock_redis_manager:
         # Create mock Redis client
         mock_redis_client = AsyncMock()
         mock_redis_manager.get_client = AsyncMock(return_value=mock_redis_client)
@@ -87,7 +87,7 @@ async def test_cache_stats():
         mock_redis_client.keys = AsyncMock(return_value=["llm_stats:llm1"])
         
         cache_service = LLMCacheService()
-        cache_service.redis_manager = mock_redis_manager
+        cache_service.cache_core.redis_manager = mock_redis_manager
         
         await cache_service.cache_response("prompt1", "response1", "llm1", {})
         await cache_service.get_cached_response("prompt1", "llm1", {})

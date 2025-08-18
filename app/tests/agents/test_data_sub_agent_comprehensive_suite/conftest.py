@@ -20,7 +20,7 @@ def mock_dependencies():
 def agent(mock_dependencies):
     """Create DataSubAgent instance with mocked dependencies"""
     mock_llm_manager, mock_tool_dispatcher = mock_dependencies
-    with patch('app.agents.data_sub_agent.agent.RedisManager'):
+    with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager'):
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
     return agent
 

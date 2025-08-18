@@ -24,7 +24,7 @@ from app.agents.base.interface import (
 from app.agents.base.executor import BaseExecutionEngine
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.errors import ExecutionErrorHandler
-from app.core.exceptions_system import NetraException
+from app.core.exceptions import NetraException
 
 # Import modular helpers
 from .analysis_engine_helpers import (

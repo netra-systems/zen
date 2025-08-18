@@ -19,7 +19,8 @@ from datetime import datetime, UTC, timedelta
 from typing import Dict, Any
 from unittest.mock import Mock, patch
 
-from app.core.agent_reliability_mixin import AgentReliabilityMixin, AgentHealthStatus
+from app.core.agent_reliability_mixin import AgentReliabilityMixin
+from app.core.agent_reliability_types import AgentHealthStatus
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
