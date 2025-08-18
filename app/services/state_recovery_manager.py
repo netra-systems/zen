@@ -18,7 +18,7 @@ from app.redis_manager import redis_manager
 logger = central_logger.get_logger(__name__)
 
 
-class StateRecoveryManager:
+class ServiceStateRecoveryManager:
     """Manages state recovery operations and logging."""
     
     def __init__(self):
@@ -97,4 +97,4 @@ class StateRecoveryManager:
             await redis_client.delete(redis_key)
 
 # Global instance
-state_recovery_manager = StateRecoveryManager()
+state_recovery_manager = ServiceStateRecoveryManager()

@@ -9,7 +9,7 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
-from app.agents.supervisor.flow_logger import SupervisorFlowLogger, FlowState, TodoState
+from app.agents.supervisor.flow_logger import SupervisorPipelineLogger, FlowState, TodoState
 from app.agents.supervisor.execution_engine import ExecutionEngine
 from app.agents.supervisor.execution_context import (
     AgentExecutionContext, AgentExecutionResult, PipelineStep
@@ -86,7 +86,7 @@ class TestSupervisorObservabilityIntegration:
     @patch('app.agents.supervisor.flow_logger.logger')
     async def test_end_to_end_flow_logging(self, mock_logger, mock_registry, mock_websocket_manager):
         """Test complete flow logging during supervisor execution."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Simulate complete supervisor flow
         steps = ["agent1", "agent2"]
@@ -104,7 +104,7 @@ class TestSupervisorObservabilityIntegration:
     @patch('app.agents.supervisor.flow_logger.logger')
     async def test_inter_agent_communication_logging(self, mock_logger, mock_registry):
         """Test inter-agent communication is properly logged."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Test different types of inter-agent communication
         flow_logger.log_inter_agent_communication("agent1", "agent2", "data_handoff")
@@ -120,7 +120,7 @@ class TestSupervisorObservabilityIntegration:
     @patch('app.agents.supervisor.flow_logger.logger')
     async def test_pipeline_execution_logging_with_metrics(self, mock_logger):
         """Test pipeline execution logging with performance metrics."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Log various pipeline steps with different metrics
         test_cases = [
@@ -138,7 +138,7 @@ class TestSupervisorObservabilityIntegration:
     @patch('app.agents.supervisor.flow_logger.logger')
     async def test_todo_lifecycle_during_execution(self, mock_logger):
         """Test TODO lifecycle management during supervisor execution."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Create multiple TODOs and track their lifecycle
         todos = [
@@ -163,7 +163,7 @@ class TestSupervisorObservabilityIntegration:
     @patch('app.agents.supervisor.flow_logger.logger')
     async def test_observability_with_agent_failures(self, mock_logger, mock_registry):
         """Test observability logging handles agent failures gracefully."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Simulate pipeline with failing agent
         steps = ["agent1", "failing_agent", "agent2"]
@@ -196,7 +196,7 @@ class TestSupervisorObservabilityIntegration:
     async def test_correlation_tracking_across_agents(self, mock_logger):
         """Test correlation ID tracking across multiple agent executions."""
         correlation_id = "correlation-abc-123"
-        flow_logger = SupervisorFlowLogger(correlation_id, "run-456")
+        flow_logger = SupervisorPipelineLogger(correlation_id, "run-456")
         
         # Simulate multiple agent interactions
         agents = ["agent1", "agent2", "agent3"]
@@ -215,7 +215,7 @@ class TestSupervisorObservabilityIntegration:
     @patch('app.agents.supervisor.flow_logger.logger')
     async def test_performance_metrics_collection(self, mock_logger):
         """Test collection and logging of performance metrics."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Log performance metrics for different scenarios
         performance_scenarios = [
@@ -233,7 +233,7 @@ class TestSupervisorObservabilityIntegration:
 
     async def test_flow_state_progression_validation(self):
         """Test that flow state progresses correctly through execution phases."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Verify initial state
         assert flow_logger.flow_state == FlowState.PENDING
@@ -253,7 +253,7 @@ class TestSupervisorObservabilityIntegration:
 
     async def test_summary_generation_accuracy(self):
         """Test that flow summaries contain accurate execution data."""
-        flow_logger = SupervisorFlowLogger("correlation-123", "run-456")
+        flow_logger = SupervisorPipelineLogger("correlation-123", "run-456")
         
         # Create some activity
         flow_logger.create_todo("todo1", "Test task", "agent1")

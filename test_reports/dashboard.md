@@ -1,37 +1,37 @@
 # Test Dashboard
-**Level**: unit | **Time**: 2025-08-17 17:48:50
+Updated: 2025-08-17 18:07:47
 
-## Overall Status: ❌ Failed - 1 test(s) failed
+## Last 3 Runs
 
-## Component Summary
+| Run | Time | Total | ✅ Pass | ❌ Fail | ⏭️ Skip | Trend |
+|-----|------|-------|---------|---------|---------|-------|
+| 1 | 08/17 18:07 | 2 | 0 | 0 | 1 | ➡️ |
+| 2 | 08/17 18:07 | 2 | 0 | 0 | 1 | ➡️ |
+| 3 | 08/17 18:06 | 1 | 0 | 0 | 0 | — |
 
-| Component | Status | Tests | Passed | Failed | Errors | Import Errors | Duration |
-|-----------|--------|-------|--------|--------|--------|---------------|----------|
-| Backend | ❌ failed | 41 | 39 | 1 | 0 | 0 | 41.63s |
-| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
-| E2E | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
+## Latest Run Details
 
-## 🔴 Issues Detected
+| Component | Status | Tests | Pass Rate | Duration |
+|-----------|--------|-------|-----------|----------|
+| Backend | ❌ | 2 | 0.0% | 75.5s |
+| Frontend | ❌ | 0 | 0.0% | 0.0s |
+| E2E | ❌ | 0 | 0.0% | 0.0s |
 
-- backend: 1 test(s) failed
-- frontend: Test collection failed
-- e2e: Test collection failed
+## Key Metrics
 
-## Statistics
-
-- **Total Tests**: 41
-- **Passed**: 39
-- **Failed**: 1
-- **Errors**: 0
-- **Skipped**: 1
-- **Total Duration**: 41.63s
-- **Pass Rate**: 95.1%
+- **Total Failures (last 3 runs)**: 0
+- **Average Duration**: 38.3s
+- **Flaky Tests**: 0
 
 ## Quick Actions
 
 ```bash
-# Run specific test levels
-python test_runner.py --level unit
+# Run smoke tests
 python test_runner.py --level smoke
+
+# Run comprehensive tests
 python test_runner.py --level comprehensive
+
+# View critical changes
+cat test_reports/latest/critical_changes.md
 ```

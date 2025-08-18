@@ -8,7 +8,7 @@ from app.db.clickhouse_init import create_workload_events_table_if_missing
 from app.logging_config import central_logger as logger
 
 
-class ClickHouseOperations:
+class DataSubAgentClickHouseOperations:
     """Handle ClickHouse database operations."""
     
     def _validate_table_name(self, table_name: str) -> bool:

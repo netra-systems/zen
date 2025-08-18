@@ -1,6 +1,6 @@
 """Usage pattern analysis module for DataSubAgent."""
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Any, Optional, Tuple
 
 from app.logging_config import central_logger as logger
 

@@ -12,6 +12,12 @@ class JobOperations(CoreServiceBase):
         status = self.job_manager.get_job_status(job_id, self.active_jobs)
         if status:
             return self._transform_status_to_admin_format(status)
+        
+        # Check if job_id exists in active jobs and provide default status
+        if job_id in self.active_jobs:
+            default_status = {"status": "running", "progress": 0}
+            return self._transform_status_to_admin_format(default_status)
+            
         return None
 
     async def cancel_job(self, job_id: str, reason: str = None) -> Dict:

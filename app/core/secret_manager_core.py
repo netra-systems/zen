@@ -95,13 +95,33 @@ class EnhancedSecretManager:
         
         logger.info(f"Cleaned up access log, kept {len(self.access_log)} entries")
     
+    def get_audit_logs(self, secret_name: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Get audit logs for secret access."""
+        if secret_name:
+            return [
+                entry for entry in self.access_log
+                if entry["secret_name"] == secret_name
+            ]
+        return self.access_log.copy()
+    
+    def _mark_secret_expired(self, secret_name: str) -> None:
+        """Mark a secret as expired for testing purposes."""
+        if secret_name in self.metadata:
+            self.metadata[secret_name].is_expired = True
+            logger.info(f"Marked secret {secret_name} as expired")
+    
     def _register_secret(self, name: str, value: str, access_level: SecretAccessLevel,
-                        rotation_days: int = 90) -> None:
+                        rotation_days: int = 90, expires_in_hours: Optional[int] = None) -> None:
         """Register a secret with metadata."""
         encrypted_value = self.encryption.encrypt_secret(value)
         self.secrets[name] = encrypted_value
         
         metadata = SecretMetadata(name, access_level, self.environment, rotation_days)
+        
+        # Set expiration if specified
+        if expires_in_hours:
+            metadata.expires_at = datetime.now(timezone.utc) + timedelta(hours=expires_in_hours)
+        
         self.metadata[name] = metadata
         
         logger.info(f"Registered secret {name} with access level {access_level}")

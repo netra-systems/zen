@@ -10,6 +10,7 @@ from enum import Enum
 
 class ValidationLevel(str, Enum):
     """Input validation strictness levels."""
+    PERMISSIVE = "permissive"  # Minimal validation, allows most content
     BASIC = "basic"          # Basic format validation
     MODERATE = "moderate"    # Additional security checks
     STRICT = "strict"        # Maximum security validation
@@ -180,10 +181,11 @@ class ValidationConstraints:
     def _get_max_length(self) -> int:
         """Get maximum input length based on validation level."""
         length_limits = {
-            ValidationLevel.BASIC: 100000,     # 100KB
-            ValidationLevel.MODERATE: 50000,   # 50KB
-            ValidationLevel.STRICT: 10000,     # 10KB
-            ValidationLevel.PARANOID: 1000     # 1KB
+            ValidationLevel.PERMISSIVE: 1000000,  # 1MB - very permissive
+            ValidationLevel.BASIC: 100000,       # 100KB
+            ValidationLevel.MODERATE: 50000,     # 50KB
+            ValidationLevel.STRICT: 10000,       # 10KB
+            ValidationLevel.PARANOID: 1000       # 1KB
         }
         return length_limits[self.validation_level]
 

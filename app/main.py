@@ -1,6 +1,15 @@
 """
 Main FastAPI application module.
 Entry point for the Netra AI Optimization Platform.
+
+🔴 CRITICAL AUTH ARCHITECTURE:
+- This is the MAIN BACKEND service, NOT the auth service
+- Auth service runs SEPARATELY on port 8001 (see app/auth/auth_service.py)
+- This backend ONLY uses auth_integration to connect to auth service
+- NEVER implement authentication logic here
+- All auth operations go through auth_client
+
+See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 import sys
 import os

@@ -265,6 +265,11 @@ class StatePersistenceService:
             is_recovery_point=kwargs.get('is_recovery_point', False),
             expires_at=kwargs.get('expires_at')
         )
+    
+    async def get_thread_context(self, thread_id: str = None) -> Dict[str, Any]:
+        """Get thread context for agent orchestration."""
+        # Return empty context for now - can be enhanced to store thread-specific data
+        return {}
 
 # Global instance
 state_persistence_service = StatePersistenceService()

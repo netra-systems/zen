@@ -8,7 +8,7 @@ from app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionRespo
 from .agent import DataSubAgent
 from .query_builder import QueryBuilder
 from .analysis_engine import AnalysisEngine
-from .clickhouse_operations import ClickHouseOperations
+from .clickhouse_operations import DataSubAgentClickHouseOperations
 from .data_operations import DataOperations
 from .metrics_analyzer import MetricsAnalyzer
 from .performance_data_processor import PerformanceDataProcessor
@@ -27,7 +27,7 @@ __all__ = [
     'AnomalyDetectionResponse',
     'QueryBuilder',
     'AnalysisEngine',
-    'ClickHouseOperations',
+    'DataSubAgentClickHouseOperations',
     'DataOperations',
     'ExecutionEngine',
     'MetricsAnalyzer',

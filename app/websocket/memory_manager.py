@@ -37,6 +37,7 @@ class ConnectionMemoryTracker:
     def __init__(self):
         self.connection_refs: weakref.WeakSet[ConnectionInfo] = weakref.WeakSet()
         self.message_buffers: Dict[str, List[Any]] = {}
+        self.buffer_sizes: Dict[str, float] = {}  # Cache buffer sizes
         self.buffer_limits = {
             "max_messages_per_connection": 1000,
             "max_buffer_size_mb": 10.0,
@@ -47,11 +48,13 @@ class ConnectionMemoryTracker:
         """Track connection memory usage."""
         self.connection_refs.add(conn_info)
         self.message_buffers[conn_info.connection_id] = []
+        self.buffer_sizes[conn_info.connection_id] = 0.0
         logger.debug(f"Started tracking memory for connection {conn_info.connection_id}")
     
     def untrack_connection(self, connection_id: str) -> None:
         """Stop tracking connection and cleanup buffers."""
         self.message_buffers.pop(connection_id, None)
+        self.buffer_sizes.pop(connection_id, None)
         logger.debug(f"Stopped tracking memory for connection {connection_id}")
     
     def add_message_to_buffer(self, connection_id: str, message: Any) -> bool:
@@ -60,32 +63,39 @@ class ConnectionMemoryTracker:
             return False
         
         buffer = self.message_buffers[connection_id]
+        message_size = sys.getsizeof(message) / (1024 * 1024)  # Calculate once
         
-        # Check message count limit
+        # Check message count limit and remove oldest if needed
         if len(buffer) >= self.buffer_limits["max_messages_per_connection"]:
-            # Remove oldest message
-            buffer.pop(0)
+            removed_msg = buffer.pop(0)
+            self.buffer_sizes[connection_id] -= sys.getsizeof(removed_msg) / (1024 * 1024)
         
         buffer.append(message)
+        self.buffer_sizes[connection_id] += message_size
         
-        # Check buffer size limit
-        buffer_size_mb = self._estimate_buffer_size(buffer)
-        if buffer_size_mb > self.buffer_limits["max_buffer_size_mb"]:
-            # Reduce buffer size by half
-            buffer[:] = buffer[len(buffer)//2:]
-            logger.warning(f"Reduced buffer size for {connection_id} due to memory limit")
+        # Check buffer size limit with cached value
+        if self.buffer_sizes[connection_id] > self.buffer_limits["max_buffer_size_mb"]:
+            self._reduce_buffer_size(connection_id)
         
         return True
     
-    def _estimate_buffer_size(self, buffer: List[Any]) -> float:
-        """Estimate buffer size in MB."""
-        total_size = sum(sys.getsizeof(item) for item in buffer)
-        return total_size / (1024 * 1024)
+    def _reduce_buffer_size(self, connection_id: str) -> None:
+        """Reduce buffer size efficiently when over limit."""
+        buffer = self.message_buffers[connection_id]
+        target_size = len(buffer) // 2
+        
+        # Remove first half of messages and recalculate size
+        removed_messages = buffer[:target_size]
+        buffer[:] = buffer[target_size:]
+        
+        # Recalculate cached size after bulk removal
+        self.buffer_sizes[connection_id] = sum(sys.getsizeof(msg) for msg in buffer) / (1024 * 1024)
+        logger.warning(f"Reduced buffer size for {connection_id} to {len(buffer)} messages")
     
     def get_connection_memory_info(self, connection_id: str) -> Dict[str, Any]:
         """Get memory information for a specific connection."""
         buffer = self.message_buffers.get(connection_id, [])
-        buffer_size_mb = self._estimate_buffer_size(buffer)
+        buffer_size_mb = self.buffer_sizes.get(connection_id, 0.0)
         
         return {
             "connection_id": connection_id,
@@ -187,14 +197,14 @@ class WebSocketMemoryManager:
     
     def _is_connection_stale(self, connection_id: str) -> bool:
         """Check if connection buffer exceeds size limit."""
-        info = self.memory_tracker.get_connection_memory_info(connection_id)
-        return info["buffer_size_mb"] > self.memory_tracker.buffer_limits["max_buffer_size_mb"]
+        buffer_size_mb = self.memory_tracker.buffer_sizes.get(connection_id, 0.0)
+        return buffer_size_mb > self.memory_tracker.buffer_limits["max_buffer_size_mb"]
     
     def _remove_stale_connections(self, stale_connections: List[str]) -> tuple[int, float]:
         """Remove stale connections and return cleanup metrics."""
         freed_memory_mb = 0.0
         for connection_id in stale_connections:
-            buffer_size = self.memory_tracker.get_connection_memory_info(connection_id)["buffer_size_mb"]
+            buffer_size = self.memory_tracker.buffer_sizes.get(connection_id, 0.0)
             self.memory_tracker.untrack_connection(connection_id)
             freed_memory_mb += buffer_size
         return len(stale_connections), freed_memory_mb
@@ -224,13 +234,10 @@ class WebSocketMemoryManager:
             logger.debug(f"Garbage collection stats: {collections}")
     
     async def _collect_metrics(self) -> None:
-        """Collect current memory metrics."""
-        # Get memory info (simplified for this implementation)
-        total_memory_mb = sys.getsizeof(self) / (1024 * 1024)
-        connection_memory_mb = sum(
-            self.memory_tracker.get_connection_memory_info(cid)["buffer_size_mb"]
-            for cid in self.memory_tracker.message_buffers.keys()
-        )
+        """Collect current memory metrics efficiently."""
+        # Use cached buffer sizes for efficiency
+        connection_memory_mb = sum(self.memory_tracker.buffer_sizes.values())
+        total_memory_mb = connection_memory_mb + (len(self.memory_tracker.message_buffers) * 0.1)  # Estimate
         
         metrics = MemoryMetrics(
             total_memory_mb=total_memory_mb,

@@ -11,7 +11,7 @@ from app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 
-class StateRecoveryManager:
+class AgentStateRecoveryManager:
     """Manages state recovery and rollback operations."""
     
     def __init__(self, db_session):

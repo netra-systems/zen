@@ -4,20 +4,20 @@ Provides global access functions for supervisor flow logging without requiring
 direct instance management. Each function must be ≤8 lines as per architecture requirements.
 """
 from typing import Optional, List
-from .flow_logger import SupervisorFlowLogger
+from .flow_logger import SupervisorPipelineLogger
 
 # Global supervisor flow logger instance
-_global_flow_logger: Optional[SupervisorFlowLogger] = None
+_global_flow_logger: Optional[SupervisorPipelineLogger] = None
 
 
-def set_global_flow_logger(correlation_id: str, run_id: str) -> SupervisorFlowLogger:
+def set_global_flow_logger(correlation_id: str, run_id: str) -> SupervisorPipelineLogger:
     """Set and return the global supervisor flow logger instance."""
     global _global_flow_logger
-    _global_flow_logger = SupervisorFlowLogger(correlation_id, run_id)
+    _global_flow_logger = SupervisorPipelineLogger(correlation_id, run_id)
     return _global_flow_logger
 
 
-def get_global_flow_logger() -> Optional[SupervisorFlowLogger]:
+def get_global_flow_logger() -> Optional[SupervisorPipelineLogger]:
     """Get the global supervisor flow logger instance."""
     return _global_flow_logger
 

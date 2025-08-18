@@ -9,7 +9,7 @@ from datetime import datetime
 
 from app.logging_config import central_logger as logger
 from .ai_map_builder import AIMapBuilder
-from .metrics_calculator import MetricsCalculator
+from .metrics_calculator import GitHubAnalyzerMetricsCalculator
 from .recommendation_generator import RecommendationGenerator
 from .markdown_formatter import MarkdownFormatter
 from .html_formatter import HTMLFormatter
@@ -23,7 +23,7 @@ class AIOperationsMapFormatter:
         self.output_formats = ["json", "markdown", "html"]
         self.default_format = "json"
         self.ai_map_builder = AIMapBuilder()
-        self.metrics_calculator = MetricsCalculator()
+        self.metrics_calculator = GitHubAnalyzerMetricsCalculator()
         self.recommendation_generator = RecommendationGenerator()
         self.markdown_formatter = MarkdownFormatter()
         self.html_formatter = HTMLFormatter()

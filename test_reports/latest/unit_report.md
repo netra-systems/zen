@@ -1,15 +1,15 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-17T11:57:37.225608  
+**Generated:** 2025-08-17T18:05:08.762784  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 **Purpose:** Development validation, component testing
 
 ## Test Summary
 
-**Total Tests:** 0  
-**Passed:** 0  
-**Failed:** 0  
-**Skipped:** 0  
+**Total Tests:** 402  
+**Passed:** 389  
+**Failed:** 3  
+**Skipped:** 10  
 **Errors:** 0  
 **Overall Status:** [FAILED]
 
@@ -17,8 +17,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.92s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.26s | [FAILED] |
+| Backend   | 402 | 389 | 3 | 10 | 0 | 51.47s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.16s | [FAILED] |
 
 ## Environment and Configuration
 
@@ -27,8 +27,8 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 8.18s
-- **Exit Code:** 15
+- **Total Duration:** 51.62s
+- **Exit Code:** 2
 
 ### Backend Configuration
 ```
@@ -58,105 +58,110 @@ Test Configuration:
 Running command:
   pytest app/tests/services app/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services -p test_framework.pytest_bad_test_plugin --test-component backend
 ================================================================================
-Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
-Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
-Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
-================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 7.04s
-[Coverage] Coverage Report: reports/coverage/html/index.html
-================================================================================
+[BAD TEST DETECTOR] Initialized for backend tests
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO
+created: 4/4 workers
+4 workers [2484 items]
 
-2025-08-17 11:57:33.266 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-17 11:57:33.267 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-17 11:57:33.267 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-17 11:57:33.267 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-17 11:57:33.267 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-17 11:57:33.267 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 12 env vars
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 8 secrets from environment variables
-2025-08-17 11:57:33.268 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: jwt-secret-key, fernet-key
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 8 secrets loaded
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 8 secrets
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 8 secrets (from 8 loaded)
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 2 (jwt-secret-key, fernet-key)
-2025-08-17 11:57:33.268 | WARNING  | app.core.unified_logging:_emit_log:117 | Critical secrets not found in loaded secrets: 1 (gemini-api-key)
-2025-08-17 11:57:33.268 | WARNING  | app.core.unified_logging:_emit_log:117 | LLM configuration warnings: Gemini API key is not configured (required for all LLM operations)
-2025-08-17 11:57:33.268 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
-2025-08-17 11:57:33.300 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
-2025-08-17 11:57:33.300 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
-2025-08-17 11:57:33.300 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
-2025-08-17 11:57:33.342 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
-2025-08-17 11:57:33.591 | INFO     | app.db.postgres_core:_create_and_setup_engine:258 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
-2025-08-17 11:57:33.793 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
-2025-08-17 11:57:34.799 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
-2025-08-17 11:57:34.860 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
-2025-08-17 11:57:35.082 | INFO     | logging:handle:1028 | Session middleware config: same_site=lax, https_only=False, environment=development
-2025-08-17 11:57:35.149 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
-2025-08-17 11:57:35.921 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-2025-08-17 11:57:36.003 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
-2025-08-17 11:57:36.003 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
-2025-08-17 11:57:36.003 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
-app\tests\conftest.py:52: in <module>
-    from app.main import app
-app\main.py:71: in <module>
-    app = create_app()
-          ^^^^^^^^^^^^
-app\core\app_factory.py:277: in create_app
-    _configure_app_routes(app)
-app\core\app_factory.py:290: in _configure_app_routes
-    register_api_routes(app)
-app\core\app_factory.py:95: in register_api_routes
-    _import_and_register_routes(app)
-app\core\app_factory.py:100: in _import_and_register_routes
-    route_modules = _import_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^
-app\core\app_factory.py:190: in _import_route_modules
-    factory_routers = _import_factory_routers()
-                      ^^^^^^^^^^^^^^^^^^^^^^^^^
-app\core\app_factory.py:165: in _import_factory_routers
-    status_routers = _import_factory_status_routers()
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-app\core\app_factory.py:172: in _import_factory_status_routers
-    from app.routes.factory_status import router as factory_status_router
-app\routes\factory_status\router.py:9: in <module>
-    from .report_routes import (
-app\routes\factory_status\report_routes.py:9: in <module>
-    from .business_logic import get_cached_reports, get_latest_report_id, generate_new_report
-app\routes\factory_status\business_logic.py:5: in <module>
-    from app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
-app\services\factory_status\report_builder.py:12: in <module>
-    from app.services.factory_status.git_commit_parser import GitCommitParser
-app\services\factory_status\git_commit_parser.py:14: in <module>
-    from app.services.factory_status.mock_data_generator import MockDataGenerator
-E   ModuleNotFoundError: No module named 'app.services.factory_status.mock_data_generator'
---- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=4, microseconds=783171), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=54668, name='MainProcess'), 'thread': (id=1444, name='MainThread'), 'time': datetime(2025, 8, 17, 11, 57, 36, 428686, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
-Traceback (most recent call last):
-  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
-    self._sink.write(message)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
-    self._stream.write(message)
-ValueError: I/O operation on closed file.
---- End of logging error ---
+scheduling tests via LoadScheduling
 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_compliance_aware_generation 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_disconnect_handling 
+app\tests\services\test_corpus_audit.py::TestCorpusAuditRepository::test_search_records_with_filters 
+[gw1][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_compliance_aware_generation 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_cost_optimized_generation 
+[gw1][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_cost_optimized_generation 
+app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_versioned_corpus_generation 
+[gw1][36m [  0%] [0m[33mSKIPPED[0m app\tests\services\synthetic_data\test_advanced_features.py::TestAdvancedFeatures::test_versioned_corpus_generation 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_temporal_patterns 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_websocket_disconnect_handling 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_concurrent_agent_execution 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_concurrent_agent_execution 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_message_parsing_string_input 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_message_parsing_string_input 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_temporal_patterns 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_tool_invocations 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_message_parsing_dict_input 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_tool_invocations 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceOrchestration::test_message_parsing_dict_input 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_errors 
+app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceBasic::test_run_agent_with_request_model 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_not_found 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_errors 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_trace_hierarchies 
+app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_basic.py::TestAgentServiceBasic::test_run_agent_with_request_model 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_trace_hierarchies 
+app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_agent_service_initialization 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditRepository::test_search_records_with_filters 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_agent_service_initialization 
+[gw0][36m [  0%] [0m[32mPASSED[0m app\tests\services\agents\test_tools.py::test_tool_dispatcher_tool_error 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_domain_specific 
+app\tests\services\test_corpus_audit.py::TestCorpusAuditRepository::test_count_records_success 
+app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_agent_run_execution_basic 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_domain_specific 
+app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_agent_run_execution_basic 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_distribution 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditRepository::test_count_records_success 
+app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_agent_run_with_model_dump_fallback 
+app\tests\services\test_corpus_audit.py::TestCorpusAuditRepository::test_get_summary_stats_success 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_distribution 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditRepository::test_get_summary_stats_success 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_custom_tools 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_agent_run_with_model_dump_fallback 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_with_custom_tools 
+app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_success 
+app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_websocket_message_handling_start_agent 
+app\tests\services\synthetic_data\test_advanced_generation.py::TestAdvancedGenerationMethods::test_generate_incremental 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_websocket_message_handling_start_agent 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\test_tool_builder.py::test_tool_builder_and_dispatcher 
+[gw3][36m [  1%] [0m[32mPASSED[0m app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_success 
+app\tests\services\test_agent_service_orchestration_core.py::TestAgentServiceOrchestrationCore::test_websocket_message_handling_user_message 
+app\tests\services\test_corpus_audit.py::TestCorpusAuditLogger::test_log_operation_with_duration 
+app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\services\apex_optimizer_agent\tools\test_advanced_optimization_for_core_function.py::test_advanced_optimization_for_core_function_tool 
+app\tests\services\apex_optimizer_agent\tools\test_base.py::TestToolMetadata::test_tool_metadata_creation_basic 
+[gw0][36m [  1%] [0m[32mPAS...(truncated)
 ```
 
 ### Frontend Output
 ```
 
-'hooks' is not recognized as an internal or external command,
-operable program or batch file.
+usage: test_frontend.py [-h]
+                        [--category {unit,integration,components,hooks,store,websocket,auth,e2e,smoke}]
+                        [--keyword KEYWORD] [--e2e] [--cypress-open] [--watch]
+                        [--coverage] [--update-snapshots] [--lint] [--fix]
+                        [--type-check] [--build] [--check-deps]
+                        [--install-deps] [--verbose] [--isolation]
+                        [--cleanup-on-exit]
+                        [tests ...]
+test_frontend.py: error: unrecognized arguments: --no-cov -x --maxfail=1
 
 ```
+
+## Error Summary
+
+### Backend Errors
+- [gw1][36m [  6%] [0m[31mFAILED[0m app\tests\services\synthetic_data\test_error_recovery.py::TestErrorRecovery::test_clickhouse_connection_recovery
+- [gw0][36m [ 11%] [0m[31mFAILED[0m app\tests\services\synthetic_data\test_admin_visibility.py::TestAdminVisibility::test_generation_job_monitoring
+- [gw2][36m [ 12%] [0m[31mFAILED[0m app\tests\services\test_circuit_breaker_integration.py::TestDatabaseClientCircuitBreaker::test_db_circuit_breaker_fallback
+- 2025-08-17 18:04:59.570 | ERROR    | app.ws_manager_messaging:_validate_dict_message:70 | Message validation failed: Invalid message type: generation:started
+- [31mFAILED[0m app\tests\services\synthetic_data\test_error_recovery.py::[1mTestErrorRecovery::test_clickhouse_connection_recovery[0m - AttributeError: 'SyntheticDataService' object has no attribute 'ingest_with_retry'
+- [31mFAILED[0m app\tests\services\synthetic_data\test_admin_visibility.py::[1mTestAdminVisibility::test_generation_job_monitoring[0m - TypeError: 'NoneType' object is not subscriptable
+- [31mFAILED[0m app\tests\services\test_circuit_breaker_integration.py::[1mTestDatabaseClientCircuitBreaker::test_db_circuit_breaker_fallback[0m - assert 0 == 1
+- [FAIL] TESTS FAILED with exit code 2 after 50.47s
+
+
 ---
 *Generated by Netra AI Unified Test Runner v3.0*

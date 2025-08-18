@@ -21,7 +21,7 @@ from app.schemas.config_types import Environment
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["EnvironmentAuthConfig", "Environment", "OAuthConfig", "auth_env_config"]
+__all__ = ["EnvironmentAuthConfig", "AuthEnvironmentConfig", "Environment", "OAuthConfig", "auth_env_config"]
 
 
 @dataclass
@@ -353,3 +353,6 @@ class EnvironmentAuthConfig:
 
 # Create singleton instance for global access
 auth_env_config = EnvironmentAuthConfig()
+
+# Alias for compatibility with different naming conventions
+AuthEnvironmentConfig = EnvironmentAuthConfig

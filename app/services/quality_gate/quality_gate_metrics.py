@@ -11,7 +11,7 @@ from .metrics_specialized import SpecializedMetricsCalculator
 logger = central_logger.get_logger(__name__)
 
 
-class MetricsCalculator:
+class QualityGateMetricsCalculator:
     """Main coordinator for quality metrics calculations"""
     
     def __init__(self, patterns: QualityPatterns, redis_manager=None):

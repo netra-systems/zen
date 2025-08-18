@@ -10,7 +10,7 @@ from pathlib import Path
 
 from app.logging_config import central_logger as logger
 from .ai_pattern_definitions import AIPatternDefinitions
-from .pattern_matcher import PatternMatcher
+from .pattern_matcher import GitHubAnalyzerPatternMatcher
 
 
 class PatternScanner:
@@ -19,7 +19,7 @@ class PatternScanner:
     def __init__(self):
         """Initialize scanner with dependencies."""
         self.pattern_definitions = AIPatternDefinitions()
-        self.pattern_matcher = PatternMatcher()
+        self.pattern_matcher = GitHubAnalyzerPatternMatcher()
         self.patterns = self.pattern_definitions.get_all_patterns()
         self.file_extensions = self._init_extensions()
     

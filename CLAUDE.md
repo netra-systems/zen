@@ -366,12 +366,15 @@ Ensures every feature directly creates and captures value proportional to a cust
 - Database via repositories only
 - NetraException for errors
 
+### Engineering Coding Process
+
+
 ## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
 
 ### Growth Control Patterns
 - **SUBDIVISION**: Split files approaching 250 lines BEFORE they hit 300
 - **EXTRACTION**: Extract functions approaching 6 lines BEFORE they hit 8
-- **Healthy GROWTH**: Subdivide concepts. Use existing modules.
+- **Healthy GROWTH ONLY**: Subdivide concepts. Use existing modules.
 - **COMPOSITION**: Use small focused components, not monoliths
 
 ### Critical References

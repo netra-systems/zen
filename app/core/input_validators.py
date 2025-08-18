@@ -61,8 +61,17 @@ class EnhancedInputValidator:
                 cache_key = f"{input_value}:{field_name}:{context}"
                 if cache_key in self._cache:
                     cached_result = self._cache[cache_key]
-                    cached_result.from_cache = True
-                    return cached_result
+                    # Create copy to avoid modifying cached object
+                    result_copy = SecurityValidationResult(
+                        is_valid=cached_result.is_valid,
+                        errors=cached_result.errors.copy(),
+                        warnings=cached_result.warnings.copy(),
+                        sanitized_value=cached_result.sanitized_value,
+                        confidence_score=cached_result.confidence_score,
+                        threats_detected=cached_result.threats_detected.copy(),
+                        from_cache=True
+                    )
+                    return result_copy
             
             result = self._perform_comprehensive_validation(input_value, field_name, context)
             result.from_cache = False
@@ -102,6 +111,7 @@ class EnhancedInputValidator:
         """Perform basic validation checks."""
         self._check_length(input_value, result)
         self._check_encoding(input_value, result)
+        self._check_validation_level_constraints(input_value, result)
     
     def _detect_and_process_threats(self, input_value: str, result: BaseValidationResult, 
                                    field_name: str) -> List[SecurityThreat]:
@@ -240,6 +250,33 @@ class EnhancedInputValidator:
             except Exception as e:
                 logger.warning(f"Custom rule '{rule_name}' failed with error: {e}")
                 result.warnings.append(f"Custom rule '{rule_name}' evaluation failed")
+    
+    def _check_validation_level_constraints(self, input_value: str, result: BaseValidationResult) -> None:
+        """Check validation level specific constraints."""
+        from .validation_rules import ValidationLevel
+        
+        if self.validation_level == ValidationLevel.STRICT:
+            self._check_strict_html_content(input_value, result)
+        elif self.validation_level == ValidationLevel.PARANOID:
+            self._check_paranoid_constraints(input_value, result)
+    
+    def _check_strict_html_content(self, input_value: str, result: BaseValidationResult) -> None:
+        """Check for HTML content in strict mode."""
+        import re
+        html_pattern = re.compile(r'<[^>]+>', re.IGNORECASE)
+        if html_pattern.search(input_value):
+            result.is_valid = False
+            result.errors.append("HTML content not allowed in strict validation mode")
+            result.confidence_score = 0.0
+    
+    def _check_paranoid_constraints(self, input_value: str, result: BaseValidationResult) -> None:
+        """Apply paranoid level constraints."""
+        suspicious_chars = self.constraints.suspicious_chars
+        found_chars = set(input_value) & suspicious_chars
+        if found_chars:
+            result.is_valid = False
+            result.errors.append(f"Suspicious characters not allowed: {found_chars}")
+            result.confidence_score = 0.0
 
 
 # Validation decorators for easy use

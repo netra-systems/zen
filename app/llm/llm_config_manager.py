@@ -82,7 +82,7 @@ class LLMConfigManager:
         """Create mock LLM for development environment."""
         try:
             from app.tests.helpers.llm_mocks import MockLLM
-            return MockLLM()
+            return MockLLM("mock-dev-model")
         except ImportError:
             logger.warning("MockLLM not available - using None")
             return None

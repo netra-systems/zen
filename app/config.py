@@ -1,6 +1,15 @@
 """Simplified configuration management with validation and reduced circular dependencies.
 
 Refactored into modular components for better maintainability and adherence to 300-line limit.
+
+🔴 CRITICAL AUTH ARCHITECTURE WARNING:
+- This config is for the MAIN BACKEND only
+- Auth service has its OWN configuration
+- Auth service runs SEPARATELY on port 8001
+- NEVER add auth implementation config here
+- Auth connection config goes in AUTH_SERVICE_URL env var
+
+See: app/auth_integration/CRITICAL_AUTH_ARCHITECTURE.md
 """
 
 from app.config_manager import ConfigManager

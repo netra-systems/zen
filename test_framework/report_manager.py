@@ -13,14 +13,14 @@ from .report_generators import (
     generate_markdown_report, status_badge, calculate_total_counts
 )
 from .unified_reporter import UnifiedReporter
-from .enhanced_reporter import EnhancedReporter
+from .comprehensive_reporter import ComprehensiveTestReporter
 
 
 def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, reports_dir: Path, staging_mode: bool = False):
-    """Save test report using enhanced reporting system."""
-    # Use enhanced reporter for clearer reporting
-    enhanced = EnhancedReporter(reports_dir)
-    report = enhanced.generate_report(results, level)
+    """Save test report using comprehensive reporting system."""
+    # Use comprehensive reporter for clear, accurate reporting
+    comprehensive = ComprehensiveTestReporter(reports_dir)
+    comprehensive.generate_comprehensive_report(results=results, level=level, config=config, exit_code=exit_code)
     
     # Also use unified reporter for backward compatibility
     unified = UnifiedReporter(reports_dir)
@@ -35,10 +35,10 @@ def save_test_report(results: Dict, level: str, config: Dict, exit_code: int, re
         f.write(md_content)
     
     print(f"\n[REPORT] Test reports saved:")
-    print(f"  - Unified: {reports_dir / 'unified_report.md'}")
     print(f"  - Dashboard: {reports_dir / 'dashboard.md'}")
+    print(f"  - Summary: {reports_dir / 'summary.md'}")
+    print(f"  - Unified: {reports_dir / 'unified_report.md'}")
     print(f"  - Deltas: {reports_dir / 'latest/delta_summary.md'}")
-    print(f"  - Critical: {reports_dir / 'latest/critical_changes.md'}")
 
 
 def print_summary(results: Dict):

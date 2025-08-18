@@ -29,7 +29,7 @@ class ClickHouseOperationError(Exception):
     pass
 
 
-class ClickHouseOperations:
+class CoreClickHouseOperations:
     """Unified ClickHouse operations for data fetching and corpus management."""
     
     def __init__(self):
@@ -295,9 +295,9 @@ class ClickHouseOperations:
 
 
 # Factory functions
-def create_clickhouse_operations() -> ClickHouseOperations:
+def create_clickhouse_operations() -> CoreClickHouseOperations:
     """Create ClickHouse operations instance."""
-    return ClickHouseOperations()
+    return CoreClickHouseOperations()
 
 
 def create_clickhouse_operation_error(operation: str, error: Exception) -> ClickHouseOperationError:

@@ -1,21 +1,21 @@
 {
-  "timestamp": "2025-08-17T17:48:50.496305",
-  "level": "unit",
+  "timestamp": "2025-08-17T17:53:40.728103",
+  "level": "integration",
   "components": {
     "backend": {
-      "total": 41,
-      "passed": 39,
-      "failed": 1,
-      "skipped": 1,
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
       "errors": 0,
-      "import_errors": 0,
-      "duration": 41.62786936759949,
-      "status": "failed",
-      "exit_code": 2,
-      "pass_rate": 95.1219512195122,
+      "import_errors": 40,
+      "duration": 110.93669867515564,
+      "status": "import_error",
+      "exit_code": 1,
+      "pass_rate": 0.0,
       "has_issues": true,
-      "status_icon": "\u274c",
-      "summary_text": "39 passed, 1 failed, 1 skipped"
+      "status_icon": "\ud83d\udd34",
+      "summary_text": "Import errors (40)"
     },
     "frontend": {
       "total": 0,
@@ -48,9 +48,9 @@
       "summary_text": "No tests ran"
     }
   },
-  "overall_status": "\u274c Failed - 1 test(s) failed",
+  "overall_status": "\ud83d\udd34 Import Errors - Tests Cannot Run",
   "issues": [
-    "backend: 1 test(s) failed",
+    "backend: 40 import error(s)",
     "frontend: Test collection failed",
     "e2e: Test collection failed"
   ]

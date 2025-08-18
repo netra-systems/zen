@@ -14,7 +14,7 @@ from .observability_todo_tracker import TodoTracker
 logger = central_logger.get_logger(__name__)
 
 
-class SupervisorFlowLogger:
+class SupervisorObservabilityLogger:
     """Manages flow observability for supervisor operations."""
     
     def __init__(self, enabled: bool = True):
@@ -171,12 +171,12 @@ class SupervisorFlowLogger:
 
 
 # Global supervisor flow logger instance
-_supervisor_flow_logger: Optional[SupervisorFlowLogger] = None
+_supervisor_flow_logger: Optional[SupervisorObservabilityLogger] = None
 
 
-def get_supervisor_flow_logger() -> SupervisorFlowLogger:
+def get_supervisor_flow_logger() -> SupervisorObservabilityLogger:
     """Get the global supervisor flow logger instance."""
     global _supervisor_flow_logger
     if _supervisor_flow_logger is None:
-        _supervisor_flow_logger = SupervisorFlowLogger()
+        _supervisor_flow_logger = SupervisorObservabilityLogger()
     return _supervisor_flow_logger

@@ -10,7 +10,7 @@ from .metrics_business_value_types import (
     BusinessValueMetrics, BusinessObjective, CustomerImpactMetrics,
     RevenueMetrics, ComplianceSecurityMetrics, InnovationMetrics
 )
-from .metrics_pattern_utils import PatternMatcher
+from .metrics_pattern_utils import BusinessValuePatternMatcher
 from .metrics_customer_impact import CustomerImpactCalculator
 from .metrics_revenue import RevenueCalculator
 from .metrics_compliance_security import ComplianceSecurityCalculator
@@ -24,7 +24,7 @@ class BusinessValueAggregator:
     def __init__(self, repo_path: str = "."):
         """Initialize business value aggregator."""
         self.commit_parser = GitCommitParser(repo_path)
-        self.pattern_matcher = PatternMatcher()
+        self.pattern_matcher = BusinessValuePatternMatcher()
         self.customer_calc = CustomerImpactCalculator(repo_path)
         self.revenue_calc = RevenueCalculator(repo_path)
         self.security_calc = ComplianceSecurityCalculator(repo_path)

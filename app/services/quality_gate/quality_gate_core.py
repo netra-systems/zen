@@ -11,7 +11,7 @@ from app.redis_manager import RedisManager
 
 from .quality_gate_models import ContentType, QualityLevel, QualityMetrics, ValidationResult
 from .quality_gate_patterns import QualityPatterns
-from .quality_gate_metrics import MetricsCalculator
+from .quality_gate_metrics import QualityGateMetricsCalculator
 from .quality_gate_validators import QualityValidator
 
 logger = central_logger.get_logger(__name__)
@@ -35,7 +35,7 @@ class QualityGateService:
     def _init_components(self, redis_manager: Optional[RedisManager]) -> None:
         """Initialize quality gate components."""
         self.patterns = QualityPatterns()
-        self.metrics_calculator = MetricsCalculator(self.patterns, redis_manager)
+        self.metrics_calculator = QualityGateMetricsCalculator(self.patterns, redis_manager)
         self.validator = QualityValidator()
     
     async def validate_content(

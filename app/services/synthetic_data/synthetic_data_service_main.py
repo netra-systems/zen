@@ -1,5 +1,6 @@
 """Main Synthetic Data Service - Orchestrates all modular functionality"""
 
+import asyncio
 from typing import Dict, List, Optional, Any, Union
 from sqlalchemy.orm import Session
 from app import schemas
@@ -103,6 +104,28 @@ class SyntheticDataService:
     ) -> Dict:
         """Ingest batch to ClickHouse"""
         return await self.advanced.ingest_batch(records, table_name)
+
+    async def ingest_with_retry(
+        self,
+        records: List[Dict],
+        max_retries: int = 3,
+        retry_delay_ms: int = 100
+    ) -> Dict:
+        """Ingest batch with retry mechanism for error recovery"""
+        retry_count = 0
+        last_error = None
+        
+        for attempt in range(max_retries + 1):
+            try:
+                result = await self.ingest_batch(records)
+                return {"success": True, "retry_count": retry_count, "result": result}
+            except Exception as e:
+                last_error = e
+                retry_count += 1
+                if attempt < max_retries:
+                    await asyncio.sleep(retry_delay_ms / 1000)
+                    
+        return {"success": False, "retry_count": retry_count, "error": str(last_error)}
 
     async def generate_incremental(
         self,

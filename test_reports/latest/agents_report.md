@@ -1,23 +1,23 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-16T10:43:01.551313  
+**Generated:** 2025-08-17T18:06:35.237516  
 **Test Level:** agents - Agent-specific unit tests (2-3 minutes)  
 **Purpose:** Quick validation of agent functionality during development
 
 ## Test Summary
 
-**Total Tests:** 0  
-**Passed:** 0  
-**Failed:** 0  
+**Total Tests:** 26  
+**Passed:** 22  
+**Failed:** 3  
 **Skipped:** 0  
-**Errors:** 0  
+**Errors:** 1  
 **Overall Status:** [FAILED]
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.11s | [FAILED] |
+| Backend   | 26 | 22 | 3 | 0 | 1 | 22.63s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,12 +27,12 @@
 - **Purpose:** Quick validation of agent functionality during development
 - **Timeout:** 180s
 - **Coverage Enabled:** No
-- **Total Duration:** 6.11s
-- **Exit Code:** 4
+- **Total Duration:** 22.63s
+- **Exit Code:** 2
 
 ### Backend Configuration
 ```
-app/tests/agents/test_data_sub_agent.py tests/test_actions_sub_agent.py -v --fail-fast --parallel=4
+--category agent -v --fail-fast --parallel=4 --markers not real_services
 ```
 
 ### Frontend Configuration
@@ -49,98 +49,103 @@ Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-ge
 NETRA AI PLATFORM - BACKEND TEST RUNNER
 ================================================================================
 Test Configuration:
-  Category: all
+  Category: agent
   Parallel: 4
   Coverage: disabled
   Fail Fast: enabled
   Environment: testing
 
 Running command:
-  pytest app/tests/agents/test_data_sub_agent.py tests/test_actions_sub_agent.py -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings
+  pytest app/tests/agents app/tests/services/agents app/tests/services/apex_optimizer_agent -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services -p test_framework.pytest_bad_test_plugin --test-component backend
 ================================================================================
-Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
-Loaded .env.development file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development
-Loaded .env.development.local file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env.development.local
-================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.27s
-================================================================================
+[BAD TEST DETECTOR] Initialized for backend tests
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.4.2', 'langsmith': '0.4.10', 'asyncio': '0.21.1', 'cov': '6.2.1', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'mock': '3.14.1', 'timeout': '2.4.0', 'xdist': '3.8.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.4.2, langsmith-0.4.10, asyncio-0.21.1, cov-6.2.1, html-4.1.1, json-report-1.5.0, metadata-3.1.1, mock-3.14.1, timeout-2.4.0, xdist-3.8.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO
+created: 4/4 workers
+4 workers [791 items]
 
-2025-08-16 10:42:58.392 | INFO     | app.core.unified_logging:_emit_log:117 | Loading configuration for: testing
-2025-08-16 10:42:58.393 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set database_url from DATABASE_URL
-2025-08-16 10:42:58.393 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set redis_url from REDIS_URL
-2025-08-16 10:42:58.393 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set clickhouse_url from CLICKHOUSE_URL
-2025-08-16 10:42:58.394 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set secret_key from SECRET_KEY
-2025-08-16 10:42:58.394 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set jwt_secret_key from JWT_SECRET_KEY
-2025-08-16 10:42:58.394 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set fernet_key from FERNET_KEY
-2025-08-16 10:42:58.394 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set log_level from LOG_LEVEL
-2025-08-16 10:42:58.394 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set environment from ENVIRONMENT
-2025-08-16 10:42:58.394 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse host: localhost
-2025-08-16 10:42:58.395 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse port: 9000
-2025-08-16 10:42:58.395 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse password
-2025-08-16 10:42:58.395 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set ClickHouse user: default
-2025-08-16 10:42:58.395 | DEBUG    | app.core.unified_logging:_emit_log:117 | Set Gemini API key for LLM configs
-2025-08-16 10:42:58.395 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 13 env vars
-2025-08-16 10:42:58.396 | INFO     | app.core.unified_logging:_emit_log:117 | Loading secrets...
-2025-08-16 10:42:58.396 | INFO     | app.core.unified_logging:_emit_log:117 | Starting secret=REDACTED process for environment: development
-2025-08-16 10:42:58.397 | INFO     | app.core.unified_logging:_emit_log:117 | Loaded 9 secrets from environment variables
-2025-08-16 10:42:58.397 | DEBUG    | app.core.unified_logging:_emit_log:117 | Critical secrets present in env: gemini-api-key, jwt-secret-key, fernet-key
-2025-08-16 10:42:58.397 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
-2025-08-16 10:42:58.398 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
-2025-08-16 10:42:58.398 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
-2025-08-16 10:42:58.399 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 3 (gemini-api-key, jwt-secret-key, fernet-key)
-2025-08-16 10:42:58.400 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
-2025-08-16 10:42:58.417 | DEBUG    | logging:handle:1028 | loaded lazy attr 'SafeConfigParser': <class 'configparser.ConfigParser'>
-2025-08-16 10:42:58.417 | DEBUG    | logging:handle:1028 | loaded lazy attr 'NativeStringIO': <class '_io.StringIO'>
-2025-08-16 10:42:58.417 | DEBUG    | logging:handle:1028 | loaded lazy attr 'BytesIO': <class '_io.BytesIO'>
-2025-08-16 10:42:58.435 | DEBUG    | logging:handle:1028 | registered 'bcrypt' handler: <class 'passlib.handlers.bcrypt.bcrypt'>
-2025-08-16 10:42:58.768 | INFO     | app.db.postgres_core:_create_and_setup_engine:258 | PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling
-2025-08-16 10:42:58.885 | DEBUG    | app.services.metrics.agent_metrics:__init__:24 | Initialized AgentMetricsCollector with buffer size 5000
-2025-08-16 10:42:59.362 | DEBUG    | logging:handle:1028 | Using orjson library for writing JSON byte strings
-2025-08-16 10:42:59.427 | DEBUG    | logging:handle:1028 | Looking up time zone info from registry
-2025-08-16 10:42:59.863 | INFO     | app.core.unified_logging:_emit_log:117 | SyntheticDataService initialized successfully
-2025-08-16 10:43:00.333 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-16 10:43:00.347 | INFO     | logging:handle:1028 | UnifiedToolRegistry initialized
-2025-08-16 10:43:00.371 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-2025-08-16 10:43:00.402 | INFO     | app.services.quality_gate.quality_gate_core:__init__:34 | Quality Gate Service initialized
-2025-08-16 10:43:00.402 | INFO     | app.services.quality_monitoring.service:__init__:48 | Quality Monitoring Service initialized
-2025-08-16 10:43:00.402 | INFO     | app.services.fallback_response.response_generator:__init__:25 | Response Generator initialized
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\tests\conftest.py'.
-app\tests\conftest.py:52: in <module>
-    from app.main import app
-app\main.py:48: in <module>
-    app = create_app()
-          ^^^^^^^^^^^^
-app\core\app_factory.py:168: in create_app
-    register_api_routes(app)
-app\core\app_factory.py:77: in register_api_routes
-    _import_and_register_routes(app)
-app\core\app_factory.py:82: in _import_and_register_routes
-    route_modules = _import_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^
-app\core\app_factory.py:100: in _import_route_modules
-    from app.routes.factory_status import router as factory_status_router
-app\routes\factory_status.py:14: in <module>
-    from app.services.factory_status.factory_status_integration import (
-app\services\factory_status\factory_status_integration.py:9: in <module>
-    from app.services.factory_status.spec_compliance_scorer import (
-app\services\factory_status\spec_compliance_scorer.py:15: in <module>
-    from app.core.interfaces_monitoring import ComplianceMetrics
-E   ModuleNotFoundError: No module named 'app.core.interfaces_monitoring'
---- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=3, microseconds=468006), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=2716, name='MainProcess'), 'thread': (id=38324, name='MainThread'), 'time': datetime(2025, 8, 16, 10, 43, 0, 924718, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
-Traceback (most recent call last):
-  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
-    self._sink.write(message)
-  File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_simple_sinks.py", line 16, in write
-    self._stream.write(message)
-ValueError: I/O operation on closed file.
---- End of logging error ---
+scheduling tests via LoadScheduling
 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestAnalysisEngine::test_identify_outliers_zscore_no_variance <- tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_with_cache_different_keys 
+app\tests\agents\test_agent_e2e_critical_collab.py::TestAgentE2ECriticalCollaboration::test_7_authentication_and_authorization 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_insufficient_data 
+[gw3][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_with_cache_different_keys 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestAnalysisEngine::test_identify_outliers_zscore_no_variance <- tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_and_stream 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestAnalysisEngine::test_identify_outliers_invalid_method <- tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestAnalysisEngine::test_identify_outliers_invalid_method <- tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_initialization <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py 
+[gw2][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_initialization <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_insufficient_data 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_no_time_variation 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_initialization_redis_failure <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_no_time_variation 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_increasing 
+[gw1][36m [  0%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_increasing 
+[gw2][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_initialization_redis_failure <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_decreasing 
+app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_get_cached_schema_success <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_decreasing 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_weak 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_trend_weak 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_insufficient_data 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_insufficient_data 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_insufficient_hourly_coverage 
+[gw0][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical_collab.py::TestAgentE2ECriticalCollaboration::test_7_authentication_and_authorization 
+[gw2][36m [  1%] [0m[31mERROR[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_get_cached_schema_success <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_insufficient_hourly_coverage 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_with_pattern 
+[gw1][36m [  1%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_with_pattern 
+app\tests\agents\test_agent_e2e_critical_collab.py::TestAgentE2ECriticalCollaboration::test_8_multi_agent_collaboration 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_no_pattern 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_detect_seasonality_no_pattern 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_insufficient_data 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_insufficient_data 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_iqr_method 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_iqr_method 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_zscore_method 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_zscore_method 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_zscore_no_variance 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_zscore_no_variance 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_invalid_method 
+[gw1][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_analysis_engine.py::TestAnalysisEngine::test_identify_outliers_invalid_method 
+app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_analysis.py::TestDataSubAgentAnalysis::test_analyze_performance_metrics_no_data 
+[gw0][36m [  2%] [0m[32mPASSED[0m app\tests\agents\test_agent_e2e_critical_collab.py::TestAgentE2ECriticalCollaboration::test_8_multi_agent_collaboration 
+app\tests\agents\test_agent_e2e_critical_core.py::TestAgentE2ECriticalCore::test_1_complete_agent_lifecycle_request_to_completion 
+[gw3][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_and_stream 
+[gw0][36m [  3%] [0m[31mFAILED[0m app\te...(truncated)
 ```
 
 ### Frontend Output
 ```
 
 ```
+
+## Error Summary
+
+### Backend Errors
+- [gw2][36m [  1%] [0m[31mERROR[0m app\tests\agents\test_data_sub_agent_comprehensive.py::TestDataSubAgentBasic::test_get_cached_schema_success <- tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_basic.py
+- [gw3][36m [  2%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_and_stream
+- [gw0][36m [  3%] [0m[31mFAILED[0m app\tests\agents\test_agent_e2e_critical_core.py::TestAgentE2ECriticalCore::test_1_complete_agent_lifecycle_request_to_completion
+- [gw1][36m [  3%] [0m[31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_analysis.py::TestDataSubAgentAnalysis::test_analyze_performance_metrics_minute_aggregation Loaded .env file from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\.env
+- =================================== ERRORS ====================================
+- [31m[1m___ ERROR at setup of TestDataSubAgentBasic.test_get_cached_schema_success ____[0m
+- 2025-08-17 18:06:31.757 | ERROR    | app.core.unified_logging:_emit_log:115 | ClickHouse query failed: HTTPDriver for https://xedvrr4c3r.us-central1.gcp.clickhouse.cloud:8443 received ClickHouse error code 386
+- 2025-08-17 18:06:32.372 | ERROR    | logging:handle:1028 | Task was destroyed but it is pending!
+- [31m[1mERROR   [0m asyncio:base_events.py:1821 Task was destroyed but it is pending!
+- [31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_processing.py::[1mTestDataSubAgentProcessing::test_process_and_stream[0m - KeyError: 'processed'
+- [31mFAILED[0m app\tests\agents\test_agent_e2e_critical_core.py::[1mTestAgentE2ECriticalCore::test_1_complete_agent_lifecycle_request_to_completion[0m - ValueError: not enough values to unpack (expected 2, got 0)
+- [31mFAILED[0m app\tests\agents\test_data_sub_agent_comprehensive_suite\test_data_sub_agent_analysis.py::[1mTestDataSubAgentAnalysis::test_analyze_performance_metrics_minute_aggregation[0m - AssertionError: assert 'time_range' in {'status': 'no_data', 'message': 'No performance metrics found for the specified criteria'}
+- [31mERROR[0m app\tests\agents\test_data_sub_agent_comprehensive.py::[1mTestDataSubAgentBasic::test_get_cached_schema_success[0m
+- [FAIL] TESTS FAILED with exit code 2 after 21.59s
+
+
 ---
 *Generated by Netra AI Unified Test Runner v3.0*

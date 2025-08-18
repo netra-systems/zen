@@ -19,7 +19,7 @@ from app.agents.input_validation import validate_agent_input
 
 from .query_builder import QueryBuilder
 from .analysis_engine import AnalysisEngine
-from .clickhouse_operations import ClickHouseOperations
+from .clickhouse_operations import DataSubAgentClickHouseOperations
 from .extended_operations import ExtendedOperations
 from .delegation import AgentDelegation
 
@@ -71,7 +71,7 @@ class DataSubAgent(BaseSubAgent):
         """Initialize core components."""
         self.query_builder = QueryBuilder()
         self.analysis_engine = AnalysisEngine()
-        self.clickhouse_ops = ClickHouseOperations()
+        self.clickhouse_ops = DataSubAgentClickHouseOperations()
         self.cache_ttl = agent_config.cache.default_ttl
         self.extended_ops = ExtendedOperations(self)
         self.delegation = AgentDelegation(self, self.extended_ops)

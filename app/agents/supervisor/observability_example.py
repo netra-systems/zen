@@ -8,13 +8,13 @@ from .observability_helpers import (
     log_todo_added, log_todo_started, log_todo_completed, log_todo_failed,
     log_flow_started, log_step_started, log_step_completed, log_decision_made
 )
-from .flow_logger import SupervisorFlowLogger
+from .flow_logger import SupervisorPipelineLogger
 
 
 def example_direct_usage():
-    """Example of direct usage with SupervisorFlowLogger instance."""
+    """Example of direct usage with SupervisorPipelineLogger instance."""
     # Create logger instance
-    logger = SupervisorFlowLogger('correlation-123', 'run-456')
+    logger = SupervisorPipelineLogger('correlation-123', 'run-456')
     
     # Track TODO items
     logger.log_todo_added('task-1', 'Initialize database', 'high', ['task-0'])

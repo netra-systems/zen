@@ -36,7 +36,7 @@ class TodoState(Enum):
     SKIPPED = "skipped"
 
 
-class SupervisorFlowLogger:
+class SupervisorPipelineLogger:
     """Manages structured logging for supervisor execution flows."""
     
     def __init__(self, correlation_id: str, run_id: str):
