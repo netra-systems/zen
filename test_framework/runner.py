@@ -19,6 +19,7 @@ from .failing_tests_manager import (
     load_failing_tests, update_failing_tests, show_failing_tests, 
     clear_failing_tests, organize_failures_by_category
 )
+from .feature_flags import FeatureFlagManager, FeatureStatus
 
 # Import comprehensive reporter
 from .comprehensive_reporter import ComprehensiveTestReporter
@@ -45,6 +46,7 @@ class UnifiedTestRunner:
         self._setup_directories()
         self.comprehensive_reporter = ComprehensiveTestReporter(self.reports_dir)
         self.staging_mode = False
+        self.feature_manager = FeatureFlagManager()
     
     def run_backend_tests(self, args: List[str], timeout: int = 300, real_llm_config: Optional[Dict] = None, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
         """Run backend tests and update results."""
@@ -150,3 +152,27 @@ class UnifiedTestRunner:
         backend_coverage = self.results["backend"].get("coverage")
         frontend_coverage = self.results["frontend"].get("coverage")
         return backend_coverage or frontend_coverage
+    
+    def get_feature_summary(self) -> Dict:
+        """Get summary of feature flag status."""
+        return {
+            "enabled": list(self.feature_manager.get_enabled_features()),
+            "in_development": list(self.feature_manager.get_in_development_features()),
+            "disabled": list(self.feature_manager.get_disabled_features()),
+            "total": len(self.feature_manager.flags)
+        }
+    
+    def print_feature_summary(self):
+        """Print feature flag summary."""
+        summary = self.get_feature_summary()
+        if summary["total"] > 0:
+            print("\n" + "="*60)
+            print("FEATURE FLAGS SUMMARY")
+            print("="*60)
+            if summary["enabled"]:
+                print(f"✅ Enabled: {', '.join(summary['enabled'])}")
+            if summary["in_development"]:
+                print(f"🚧 In Development: {', '.join(summary['in_development'])}")
+            if summary["disabled"]:
+                print(f"❌ Disabled: {', '.join(summary['disabled'])}")
+            print("="*60)
