@@ -40,9 +40,12 @@
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
-            <learning_count>1</learning_count>
+            <learning_count>4</learning_count>
             <learning_ids>
                 <id>staging-env-var-suffix-handling</id>
+                <id>cors-devlauncher-middleware-configuration</id>
+                <id>staging-cors-missing-env-var</id>
+                <id>gemini-api-key-paradox</id>
             </learning_ids>
         </category>
         <category>
@@ -262,6 +265,18 @@
                 <id>cache-action-version-consistency</id>
             </learning_ids>
         </category>
+        <category>
+            <name>Dev Launcher</name>
+            <file>learnings/dev_launcher.xml</file>
+            <path>SPEC/learnings/dev_launcher.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>secret-key-length</id>
+                <id>alembic-helper-files</id>
+                <id>non-critical-service-failures</id>
+                <id>llm-api-keys</id>
+            </learning_ids>
+        </category>
     </categories>
     
     <usage>
@@ -272,7 +287,7 @@
     </usage>
     
     <statistics>
-        <total_categories>18</total_categories>
-        <total_learnings>71</total_learnings>
+        <total_categories>19</total_categories>
+        <total_learnings>75</total_learnings>
     </statistics>
 </specification>

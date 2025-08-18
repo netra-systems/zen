@@ -1,28 +1,42 @@
 /**
- * Shared Enums: Core System Enumerations
+ * Core System Enums - Foundation Types
+ * 
+ * This module contains all fundamental enum definitions used throughout the Netra frontend.
+ * These enums serve as the single source of truth for type constants and are aligned
+ * with the Python backend for consistency.
  * 
  * CRITICAL ARCHITECTURAL COMPLIANCE:
- * - Single source of truth for all enums
  * - Maximum file size: 300 lines
- * - Backend-aligned enum values
+ * - All functions: ≤8 lines
+ * - Single source of truth for all enum definitions
+ * 
+ * BVJ: Consistent enums = fewer bugs = better user experience
  */
 
 // ============================================================================
 // CORE DOMAIN ENUMS - Aligned with Python backend
 // ============================================================================
 
+/**
+ * Message types used throughout the chat and communication system.
+ * Aligned with backend MessageType enum for consistency.
+ */
 export enum MessageType {
   USER = 'user',
   ASSISTANT = 'assistant',
-  AGENT = 'agent', 
+  AGENT = 'agent',
   SYSTEM = 'system',
   ERROR = 'error',
   TOOL = 'tool'
 }
 
+/**
+ * Agent status values representing the complete lifecycle of agent operations.
+ * Used for tracking agent state in real-time operations.
+ */
 export enum AgentStatus {
   IDLE = 'idle',
-  INITIALIZING = 'initializing', 
+  INITIALIZING = 'initializing',
   ACTIVE = 'active',
   THINKING = 'thinking',
   PLANNING = 'planning',
@@ -38,9 +52,9 @@ export enum AgentStatus {
 }
 
 /**
- * Comprehensive WebSocket Message Types - SINGLE SOURCE OF TRUTH
- * Consolidated from backend_schema_auto_generated.ts and enhanced for all WebSocket operations
- * DO NOT duplicate these types anywhere else in the frontend
+ * Comprehensive WebSocket message types for all real-time communication.
+ * This enum defines every possible WebSocket message type in the system.
+ * DO NOT duplicate these types elsewhere in the frontend.
  */
 export enum WebSocketMessageType {
   // Client to server
@@ -104,102 +118,115 @@ export enum WebSocketMessageType {
 }
 
 // ============================================================================
-// UTILITY TYPE ALIASES
+// VALIDATION HELPERS - All functions ≤8 lines
 // ============================================================================
 
-export type MessageRole = 'user' | 'assistant' | 'system';
-export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
-
-// ============================================================================
-// VALIDATION HELPERS - Each function ≤8 lines
-// ============================================================================
-
+/**
+ * Validates if a string is a valid MessageType enum value.
+ * @param value - The string to validate
+ * @returns True if valid MessageType, false otherwise
+ */
 export function isValidMessageType(value: string): value is MessageType {
   return Object.values(MessageType).includes(value as MessageType);
 }
 
+/**
+ * Validates if a string is a valid AgentStatus enum value.
+ * @param value - The string to validate
+ * @returns True if valid AgentStatus, false otherwise
+ */
 export function isValidAgentStatus(value: string): value is AgentStatus {
   return Object.values(AgentStatus).includes(value as AgentStatus);
 }
 
-export function isValidWebSocketMessageType(
-  value: string
-): value is WebSocketMessageType {
-  return Object.values(WebSocketMessageType).includes(
-    value as WebSocketMessageType
-  );
+/**
+ * Validates if a string is a valid WebSocketMessageType enum value.
+ * @param value - The string to validate
+ * @returns True if valid WebSocketMessageType, false otherwise
+ */
+export function isValidWebSocketMessageType(value: string): value is WebSocketMessageType {
+  return Object.values(WebSocketMessageType).includes(value as WebSocketMessageType);
 }
 
-export function isValidMessageRole(value: string): value is MessageRole {
-  return ['user', 'assistant', 'system'].includes(value);
-}
-
-export function isValidMessageStatus(value: string): value is MessageStatus {
-  const validStatuses = ['pending', 'sent', 'delivered', 'read', 'failed'];
-  return validStatuses.includes(value);
-}
-
-// ============================================================================
-// TYPE REGISTRY MAP
-// ============================================================================
-
-export const TYPE_REGISTRY = {
-  MessageType,
-  AgentStatus,
-  WebSocketMessageType,
-} as const;
-
-export type RegisteredTypeName = keyof typeof TYPE_REGISTRY;
-
-// ============================================================================
-// ENUM UTILITIES - Each function ≤8 lines
-// ============================================================================
-
+/**
+ * Gets all values of the MessageType enum.
+ * @returns Array of all MessageType values
+ */
 export function getMessageTypeValues(): MessageType[] {
   return Object.values(MessageType);
 }
 
+/**
+ * Gets all values of the AgentStatus enum.
+ * @returns Array of all AgentStatus values
+ */
 export function getAgentStatusValues(): AgentStatus[] {
   return Object.values(AgentStatus);
 }
 
+/**
+ * Gets all values of the WebSocketMessageType enum.
+ * @returns Array of all WebSocketMessageType values
+ */
 export function getWebSocketMessageTypeValues(): WebSocketMessageType[] {
   return Object.values(WebSocketMessageType);
 }
 
-export function isActiveAgentStatus(status: AgentStatus): boolean {
-  const activeStatuses = [
-    AgentStatus.ACTIVE,
-    AgentStatus.THINKING,
-    AgentStatus.PLANNING,
-    AgentStatus.EXECUTING,
-    AgentStatus.RUNNING
-  ];
-  return activeStatuses.includes(status);
-}
-
-export function isCompletedAgentStatus(status: AgentStatus): boolean {
-  const completedStatuses = [
-    AgentStatus.COMPLETED,
-    AgentStatus.FAILED,
-    AgentStatus.ERROR,
-    AgentStatus.CANCELLED
-  ];
-  return completedStatuses.includes(status);
+/**
+ * Generic enum key extraction utility.
+ * @param enumObj - The enum object
+ * @param value - The enum value
+ * @returns The key name or undefined
+ */
+export function getEnumKey<T extends Record<string, string>>(
+  enumObj: T,
+  value: string
+): keyof T | undefined {
+  const entries = Object.entries(enumObj);
+  const entry = entries.find(([_, v]) => v === value);
+  return entry?.[0] as keyof T | undefined;
 }
 
 // ============================================================================
-// DEFAULT EXPORT FOR CONVENIENCE
+// ENUM REGISTRY - Runtime reflection support
+// ============================================================================
+
+/**
+ * Registry of all enums for runtime access.
+ * Note: TypeScript enums are runtime objects, so this works.
+ */
+export const ENUM_REGISTRY = {
+  MessageType,
+  AgentStatus,
+  WebSocketMessageType
+} as const;
+
+/**
+ * Type definition for registered enum names.
+ */
+export type RegisteredEnumName = keyof typeof ENUM_REGISTRY;
+
+// ============================================================================
+// DEFAULT EXPORT - All enums and utilities
 // ============================================================================
 
 export default {
+  // Enums
   MessageType,
   AgentStatus,
   WebSocketMessageType,
+  
+  // Validation functions
   isValidMessageType,
   isValidAgentStatus,
   isValidWebSocketMessageType,
-  isValidMessageRole,
-  isValidMessageStatus,
-  TYPE_REGISTRY
+  
+  // Utility functions
+  getMessageTypeValues,
+  getAgentStatusValues,
+  getWebSocketMessageTypeValues,
+  getEnumKey,
+  
+  // Registry
+  ENUM_REGISTRY
 };

@@ -326,6 +326,56 @@ concurrency:
                 </code>
             </technique>
         </section>
+        
+        <section id="exit-code-propagation" order="10">
+            <title>Test Failure Propagation</title>
+            <description>Ensuring test failures properly propagate and block merges</description>
+            
+            <requirement id="exit-code-handling" priority="CRITICAL">
+                <title>Exit Code Handling</title>
+                <rule>All test commands MUST explicitly handle exit codes</rule>
+                <rule>Use || exit $? to propagate test_runner.py exit codes</rule>
+                <rule>NEVER use continue-on-error: true in test steps</rule>
+                <examples>
+                    <correct>
+                        python test_runner.py --level smoke --no-coverage --fast-fail || exit $?
+                    </correct>
+                    <incorrect>
+                        python test_runner.py --level smoke  # May not propagate failure
+                    </incorrect>
+                </examples>
+            </requirement>
+            
+            <requirement id="error-annotations" priority="HIGH">
+                <title>GitHub Actions Annotations</title>
+                <rule>Use ::error:: for test failures</rule>
+                <rule>Use ::warning:: for quality issues</rule>
+                <rule>Use ::notice:: for success messages</rule>
+                <examples>
+                    <code>
+                        if [ $TEST_EXIT_CODE -ne 0 ]; then
+                          echo "::error::Tests failed with exit code $TEST_EXIT_CODE"
+                          exit 1
+                        fi
+                    </code>
+                </examples>
+            </requirement>
+            
+            <reference>
+                <workflow>.github/workflows/test-standard-template.yml</workflow>
+                <description>Reference implementation with best practices</description>
+            </reference>
+            
+            <reference>
+                <workflow>.github/workflows/test-runner-validation.yml</workflow>
+                <description>Validates exit code propagation</description>
+            </reference>
+            
+            <reference>
+                <documentation>.github/workflows/WORKFLOW_FIX_SUMMARY.md</documentation>
+                <description>Complete documentation of workflow fixes</description>
+            </reference>
+        </section>
     </sections>
 
     <references>
@@ -335,7 +385,16 @@ concurrency:
             <importance>CRITICAL - This is a recurring issue</importance>
         </reference>
         <reference>
+            <spec>testing.xml</spec>
+            <section>unified_test_runner</section>
+            <importance>Test runner parameters and usage</importance>
+        </reference>
+        <reference>
             <documentation>https://docs.github.com/en/actions/security-guides/automatic-token-authentication</documentation>
+        </reference>
+        <reference>
+            <internal_doc>.github/workflows/WORKFLOW_FIX_SUMMARY.md</internal_doc>
+            <description>Comprehensive guide to workflow fixes and best practices</description>
         </reference>
     </references>
 </specification>

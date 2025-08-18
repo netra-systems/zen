@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import type { PersistentResponseCardProps } from '@/types/component-props';
@@ -10,6 +10,9 @@ import { CollapsedSummary, CollapseHeader, useAutoCollapse } from '@/components/
 import { LayerManager } from '@/components/chat/features/LayerManager';
 import { DEFAULT_UNIFIED_CHAT_CONFIG } from '@/types/component-props';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import AgentStatusIndicator from './AgentStatusIndicator';
+import { useAgentUpdates, type UseAgentUpdatesReturn } from '@/hooks/useAgentUpdates';
+import { agentUpdateStream } from '@/services/agent-update-stream';
 
 export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
   fastLayerData,
@@ -21,6 +24,13 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
 }) => {
   const { adminConfig, isAdminAction } = useAdminDetection(slowLayerData);
   const hasCompletedAgents = Boolean(slowLayerData?.completedAgents?.length);
+  const [progressState, setProgressState] = useState({ progress: 0, isAnimating: false });
+  
+  // Initialize continuous agent updates
+  const agentUpdates = useAgentUpdates({
+    enablePerformanceMonitoring: true,
+    onUpdate: handleAgentUpdate
+  });
   
   // Auto-collapse with proper delay
   useAutoCollapse(
@@ -29,6 +39,26 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
     () => onToggleCollapse?.(),
     DEFAULT_UNIFIED_CHAT_CONFIG.autoCollapseDelay
   );
+  
+  // Handle continuous agent updates
+  function handleAgentUpdate(update: any): void {
+    if (update.progress) {
+      setProgressState({ progress: update.progress, isAnimating: true });
+    }
+  }
+  
+  // Sync with WebSocket events for continuous updates
+  useEffect(() => {
+    if (isProcessing) {
+      agentUpdateStream.start();
+    }
+    
+    return () => {
+      if (!isProcessing) {
+        agentUpdateStream.stop();
+      }
+    };
+  }, [isProcessing]);
 
   // Show collapsed summary when appropriate
   if (isCollapsed && slowLayerData?.finalReport) {
@@ -42,27 +72,43 @@ export const PersistentResponseCard: React.FC<PersistentResponseCardProps> = ({
   }
 
   return (
-    <ResponseCardContainer isAdminAction={isAdminAction}>
-      <AdminSection
-        isAdminAction={isAdminAction}
-        adminConfig={adminConfig}
-        isProcessing={isProcessing}
-        slowLayerData={slowLayerData}
-      />
-      <CollapseSection
-        showHeader={Boolean(slowLayerData?.finalReport && onToggleCollapse)}
-        isCollapsed={isCollapsed}
-        isAdminAction={isAdminAction}
-        onToggleCollapse={onToggleCollapse!}
-      />
-      <LayersSection
-        fastLayerData={fastLayerData}
-        mediumLayerData={mediumLayerData}
-        slowLayerData={slowLayerData}
-        isProcessing={isProcessing}
-        isCollapsed={isCollapsed}
-      />
-    </ResponseCardContainer>
+    <>
+      <ResponseCardContainer isAdminAction={isAdminAction}>
+        <AdminSection
+          isAdminAction={isAdminAction}
+          adminConfig={adminConfig}
+          isProcessing={isProcessing}
+          slowLayerData={slowLayerData}
+        />
+        <ProgressIndicatorSection
+          progressState={progressState}
+          isProcessing={isProcessing}
+          isCollapsed={isCollapsed}
+        />
+        <CollapseSection
+          showHeader={Boolean(slowLayerData?.finalReport && onToggleCollapse)}
+          isCollapsed={isCollapsed}
+          isAdminAction={isAdminAction}
+          onToggleCollapse={onToggleCollapse!}
+        />
+        <LayersSection
+          fastLayerData={fastLayerData}
+          mediumLayerData={mediumLayerData}
+          slowLayerData={slowLayerData}
+          isProcessing={isProcessing}
+          isCollapsed={isCollapsed}
+        />
+      </ResponseCardContainer>
+      
+      {isProcessing && (
+        <AgentStatusIndicator
+          position="top-right"
+          showProgress={true}
+          showToolExecution={true}
+          compact={false}
+        />
+      )}
+    </>
   );
 };
 
@@ -125,6 +171,28 @@ const CollapseSection: React.FC<{
   />
 );
 
+const ProgressIndicatorSection: React.FC<{
+  progressState: { progress: number; isAnimating: boolean };
+  isProcessing: boolean;
+  isCollapsed: boolean;
+}> = ({ progressState, isProcessing, isCollapsed }) => {
+  if (isCollapsed || !isProcessing) return null;
+  
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: 'auto' }}
+      exit={{ opacity: 0, height: 0 }}
+      className="px-4 pb-2"
+    >
+      <ContinuousProgressBar
+        progress={progressState.progress}
+        isAnimating={progressState.isAnimating}
+      />
+    </motion.div>
+  );
+};
+
 const LayersSection: React.FC<{
   fastLayerData: any;
   mediumLayerData: any;
@@ -181,4 +249,26 @@ const getAdminStatus = (isProcessing: boolean, slowLayerData: any): string => {
 
 const getAdminMetadata = (slowLayerData: any) => {
   return slowLayerData?.finalReport?.technical_details || null;
+};
+
+const ContinuousProgressBar: React.FC<{
+  progress: number;
+  isAnimating: boolean;
+}> = ({ progress, isAnimating }) => {
+  return (
+    <div className="w-full bg-gray-200 rounded-full h-1 overflow-hidden">
+      <motion.div
+        className="h-full bg-gradient-to-r from-blue-500 to-purple-600"
+        initial={{ width: 0 }}
+        animate={{ 
+          width: `${Math.min(Math.max(progress, 0), 100)}%`,
+          scale: isAnimating ? [1, 1.02, 1] : 1
+        }}
+        transition={{ 
+          width: { duration: 0.5, ease: 'easeOut' },
+          scale: { duration: 0.3, ease: 'easeInOut' }
+        }}
+      />
+    </div>
+  );
 };

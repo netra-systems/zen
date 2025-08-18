@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="dev-launcher">
+  <title>Dev Launcher Startup Issues and Solutions</title>
+  
+  <learning id="secret-key-length">
+    <problem>
+      Backend fails to start with error: "SECRET_KEY must be at least 32 characters"
+    </problem>
+    <cause>
+      The startup check in app/startup_checks/environment_checks.py requires SECRET_KEY 
+      to be longer than 32 characters, not exactly 32 characters.
+    </cause>
+    <solution>
+      Generate a longer SECRET_KEY (64+ characters) using:
+      python -c "import secrets; print(secrets.token_urlsafe(48))"
+      Then update the SECRET_KEY in .env.development.local
+    </solution>
+    <prevention>
+      Ensure all generated SECRET_KEYs are at least 64 characters long to provide
+      sufficient entropy and avoid boundary condition issues.
+    </prevention>
+  </learning>
+
+  <learning id="alembic-helper-files">
+    <problem>
+      Alembic fails with: "Could not determine revision id from filename agent_tables.py"
+    </problem>
+    <cause>
+      Helper files (agent_tables.py, analysis_tables.py, etc.) were placed in the 
+      alembic/versions directory. Alembic expects only proper migration files with
+      revision variables in the versions directory.
+    </cause>
+    <solution>
+      Move helper files to a separate directory:
+      1. Create app/alembic/migrations_helpers/ directory
+      2. Move all helper files (*_tables.py, *_workflow.py, migration_metadata.py) to this directory
+      3. Update imports in migration files to reference the new location using relative imports
+    </solution>
+    <prevention>
+      Never place non-migration files in alembic/versions/. Only files with proper
+      Alembic migration structure (revision, down_revision, upgrade(), downgrade()) 
+      should be in the versions directory.
+    </prevention>
+  </learning>
+
+  <learning id="non-critical-service-failures">
+    <problem>
+      ClickHouse connection failures appear as errors but are not critical for development
+    </problem>
+    <insight>
+      ClickHouse is optional for development. The application continues to run despite
+      connection failures, but the error messages can be confusing.
+    </insight>
+    <recommendation>
+      These warnings can be safely ignored in development. ClickHouse features will be
+      limited but the core application functionality remains available.
+    </recommendation>
+  </learning>
+
+  <learning id="llm-api-keys">
+    <problem>
+      Multiple LLM configuration failures due to missing API keys
+    </problem>
+    <insight>
+      LLM API keys (GEMINI_API_KEY, etc.) are optional for basic development but required
+      for agent functionality. The application starts successfully without them.
+    </insight>
+    <recommendation>
+      Add LLM API keys to .env.development.local when working on agent features:
+      - GEMINI_API_KEY for Google AI
+      - ANTHROPIC_API_KEY for Claude
+      - OPENAI_API_KEY for OpenAI
+    </recommendation>
+  </learning>
+
+  <best-practices>
+    <practice>
+      Always check startup logs for critical vs non-critical failures. 
+      Critical failures prevent the application from starting.
+    </practice>
+    <practice>
+      Keep .env.development.local properly configured with valid SECRET_KEY 
+      and database connections.
+    </practice>
+    <practice>
+      Organize Alembic migrations properly - only migration files in versions/, 
+      helper modules in separate directories.
+    </practice>
+  </best-practices>
+</learnings>
