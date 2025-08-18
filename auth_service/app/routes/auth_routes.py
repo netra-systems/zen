@@ -6,13 +6,15 @@ from fastapi import APIRouter, Request, Header, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional
 import logging
+import os
 
 from ..services.auth_service import AuthService
 from ..models.auth_models import (
     LoginRequest, LoginResponse,
     TokenRequest, TokenResponse,
     RefreshRequest, ServiceTokenRequest,
-    ServiceTokenResponse, HealthResponse
+    ServiceTokenResponse, HealthResponse,
+    AuthEndpoints, AuthConfigResponse
 )
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,58 @@ def get_client_info(request: Request) -> dict:
         "ip": request.client.host,
         "user_agent": request.headers.get("user-agent")
     }
+
+def _detect_environment() -> str:
+    """Detect the current environment"""
+    env = os.getenv("ENVIRONMENT", "development").lower()
+    if env in ["staging", "production", "development"]:
+        return env
+    return "development"
+
+def _determine_urls() -> tuple[str, str]:
+    """Determine auth service and frontend URLs based on environment"""
+    env = _detect_environment()
+    if env == 'staging':
+        return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
+    elif env == 'production':
+        return 'https://auth.netrasystems.ai', 'https://netrasystems.ai'
+    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081'), 'http://localhost:3000'
+
+@router.get("/config", response_model=AuthConfigResponse)
+async def get_auth_config(request: Request):
+    """Returns authentication configuration for frontend integration"""
+    try:
+        auth_url, frontend_url = _determine_urls()
+        env = _detect_environment()
+        dev_mode = env == "development"
+        
+        # Build endpoints
+        endpoints = AuthEndpoints(
+            login=f"{auth_url}/auth/login",
+            logout=f"{auth_url}/auth/logout",
+            callback=f"{frontend_url}/auth/callback",
+            token=f"{auth_url}/auth/token",
+            user=f"{auth_url}/auth/verify",
+            dev_login=f"{auth_url}/auth/dev_login" if dev_mode else None,
+            validate_token=f"{auth_url}/auth/validate",
+            refresh=f"{auth_url}/auth/refresh",
+            health=f"{auth_url}/auth/health"
+        )
+        
+        # Build response
+        return AuthConfigResponse(
+            google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+            endpoints=endpoints,
+            development_mode=dev_mode,
+            authorized_javascript_origins=[frontend_url],
+            authorized_redirect_uris=[f"{frontend_url}/auth/callback"],
+            pr_number=os.getenv("PR_NUMBER"),
+            use_proxy=False,
+            proxy_url=None
+        )
+    except Exception as e:
+        logger.error(f"Auth config endpoint failed: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve auth configuration: {str(e)}")
 
 @router.post("/login", response_model=LoginResponse)
 async def login(
