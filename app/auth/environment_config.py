@@ -21,7 +21,7 @@ from app.schemas.config_types import Environment
 
 logger = logging.getLogger(__name__)
 
-__all__ = ["EnvironmentAuthConfig", "Environment", "OAuthConfig"]
+__all__ = ["EnvironmentAuthConfig", "Environment", "OAuthConfig", "auth_env_config"]
 
 
 @dataclass
@@ -85,7 +85,10 @@ class EnvironmentAuthConfig:
             "staging": Environment.STAGING,
             "production": Environment.PRODUCTION,
         }
-        return env_mapping.get(env_str, Environment.DEVELOPMENT)
+        result = env_mapping.get(env_str, Environment.DEVELOPMENT)
+        if env_str not in env_mapping:
+            logger.warning(f"Unknown environment '{env_str}', defaulting to development")
+        return result
         
     def _is_testing_environment(self) -> bool:
         """Check if TESTING flag indicates testing environment."""
@@ -259,7 +262,10 @@ class EnvironmentAuthConfig:
         primary_value = os.getenv(primary_var, "")
         if primary_value:
             return primary_value
-        return self._get_fallback_oauth_credential(cred_type)
+        fallback_value = self._get_fallback_oauth_credential(cred_type)
+        if not fallback_value:
+            logger.error(f"Missing OAuth credential: {primary_var}")
+        return fallback_value
         
     def _get_fallback_oauth_credential(self, cred_type: str) -> str:
         """Get fallback OAuth credential from generic environment variables."""
@@ -315,14 +321,35 @@ class EnvironmentAuthConfig:
         
     def get_frontend_config(self) -> Dict[str, Any]:
         """Get frontend configuration including PR-specific data."""
+        oauth_config = self.get_oauth_config()
         config = {
             "environment": self.environment.value,
-            "pr_number": self.pr_number if self.is_pr_environment else None,
-            "use_proxy": False,
-            "proxy_url": ""
+            "google_client_id": oauth_config.client_id,
+            "allow_dev_login": oauth_config.allow_dev_login,
+            "javascript_origins": oauth_config.javascript_origins,
+            "use_proxy": oauth_config.use_proxy,
+            "proxy_url": oauth_config.proxy_url
         }
-        oauth_config = self.get_oauth_config()
-        if oauth_config.use_proxy:
-            config["use_proxy"] = True
-            config["proxy_url"] = oauth_config.proxy_url
+        if self.is_pr_environment and self.pr_number:
+            config["pr_number"] = self.pr_number
         return config
+
+    def validate_redirect_uri(self, uri: str) -> bool:
+        """Validate redirect URI for current environment."""
+        oauth_config = self.get_oauth_config()
+        return uri in oauth_config.redirect_uris
+
+    def get_oauth_state_data(self) -> Dict[str, Any]:
+        """Get OAuth state data for CSRF protection."""
+        import time
+        state_data = {
+            "environment": self.environment.value,
+            "timestamp": int(time.time())
+        }
+        if self.is_pr_environment and self.pr_number:
+            state_data["pr_number"] = self.pr_number
+        return state_data
+
+
+# Create singleton instance for global access
+auth_env_config = EnvironmentAuthConfig()

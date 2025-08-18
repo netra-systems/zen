@@ -1,31 +1,31 @@
 # Test Dashboard
-**Level**: integration | **Time**: 2025-08-17 17:40:45
+**Level**: unit | **Time**: 2025-08-17 17:48:50
 
-## Overall Status: ❌ Failed - 2 test(s) failed
+## Overall Status: ❌ Failed - 1 test(s) failed
 
 ## Component Summary
 
 | Component | Status | Tests | Passed | Failed | Errors | Import Errors | Duration |
 |-----------|--------|-------|--------|--------|--------|---------------|----------|
-| Backend | ❌ failed | 44 | 42 | 2 | 0 | 0 | 30.57s |
-| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.14s |
+| Backend | ❌ failed | 41 | 39 | 1 | 0 | 0 | 41.63s |
+| Frontend | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
 | E2E | ⚫ collection_failed | 0 | 0 | 0 | 0 | 0 | 0.00s |
 
 ## 🔴 Issues Detected
 
-- backend: 2 test(s) failed
+- backend: 1 test(s) failed
 - frontend: Test collection failed
 - e2e: Test collection failed
 
 ## Statistics
 
-- **Total Tests**: 44
-- **Passed**: 42
-- **Failed**: 2
+- **Total Tests**: 41
+- **Passed**: 39
+- **Failed**: 1
 - **Errors**: 0
-- **Skipped**: 0
-- **Total Duration**: 30.72s
-- **Pass Rate**: 95.5%
+- **Skipped**: 1
+- **Total Duration**: 41.63s
+- **Pass Rate**: 95.1%
 
 ## Quick Actions
 

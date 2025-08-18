@@ -19,23 +19,36 @@ class TechnicalDebtCalculator:
     
     def calculate_debt(self) -> TechnicalDebt:
         """Calculate technical debt metrics."""
-        code_smells = self._count_code_smells()
-        duplication = self._calculate_duplication()
-        hotspots = self._find_complexity_hotspots()
-        deprecated = self._count_deprecated_usage()
-        todos = self._count_todo_items()
-        
-        debt_score = self._calculate_debt_score(
-            code_smells, duplication, len(hotspots), deprecated, todos
-        )
+        metrics = self._collect_debt_metrics()
+        debt_score = self._calculate_debt_score_from_metrics(metrics)
         debt_trend = self._calculate_debt_trend()
-        
+        return self._build_technical_debt(metrics, debt_score, debt_trend)
+
+    def _collect_debt_metrics(self) -> dict:
+        """Collect all debt metrics."""
+        return {
+            'code_smells': self._count_code_smells(),
+            'duplication': self._calculate_duplication(),
+            'hotspots': self._find_complexity_hotspots(),
+            'deprecated': self._count_deprecated_usage(),
+            'todos': self._count_todo_items()
+        }
+
+    def _calculate_debt_score_from_metrics(self, metrics: dict) -> float:
+        """Calculate debt score from collected metrics."""
+        return self._calculate_debt_score(
+            metrics['code_smells'], metrics['duplication'], 
+            len(metrics['hotspots']), metrics['deprecated'], metrics['todos']
+        )
+
+    def _build_technical_debt(self, metrics: dict, debt_score: float, debt_trend: float) -> TechnicalDebt:
+        """Build TechnicalDebt object from metrics."""
         return TechnicalDebt(
-            code_smells=code_smells,
-            duplication_percentage=duplication,
-            complexity_hotspots=hotspots,
-            deprecated_usage=deprecated,
-            todo_count=todos,
+            code_smells=metrics['code_smells'],
+            duplication_percentage=metrics['duplication'],
+            complexity_hotspots=metrics['hotspots'],
+            deprecated_usage=metrics['deprecated'],
+            todo_count=metrics['todos'],
             debt_score=debt_score,
             debt_trend=debt_trend
         )
@@ -82,11 +95,14 @@ class TechnicalDebtCalculator:
     
     def _extract_large_files(self, output: str) -> List[str]:
         """Extract files exceeding complexity threshold."""
-        large_files = []
         if not output:
-            return large_files
-        
+            return []
         lines = output.strip().split("\n")
+        return self._process_file_lines(lines)
+
+    def _process_file_lines(self, lines: List[str]) -> List[str]:
+        """Process lines to extract large files."""
+        large_files = []
         for line in lines:
             parts = line.strip().split()
             if self._is_large_file(parts):

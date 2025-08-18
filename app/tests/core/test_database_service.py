@@ -92,7 +92,7 @@ class TestDatabaseService:
 
     def _setup_error_context_mock(self):
         """Helper: Setup error context mock."""
-        return patch('app.core.error_context.ErrorContext.get_all_context', return_value={})
+        return patch('app.schemas.shared_types.ErrorContext.get_all_context', return_value={})
 
     def _verify_error_handling(self, mock_session):
         """Helper: Verify error handling calls."""

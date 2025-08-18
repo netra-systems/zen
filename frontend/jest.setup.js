@@ -11,6 +11,10 @@ process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
 // Mock scrollIntoView
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
+// Mock requestAnimationFrame and cancelAnimationFrame
+global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 0));
+global.cancelAnimationFrame = jest.fn(id => clearTimeout(id));
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {

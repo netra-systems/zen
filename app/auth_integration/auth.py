@@ -1,6 +1,26 @@
 """
-Auth Dependencies - FastAPI dependency injection for authentication
-Uses the standalone auth service for all auth operations
+🔴 CRITICAL: Auth Integration Module - DO NOT IMPLEMENT AUTH LOGIC HERE
+
+This module ONLY provides FastAPI dependency injection for authentication.
+It connects to an EXTERNAL auth service via auth_client.
+
+ARCHITECTURE:
+- Auth Service: Separate microservice at AUTH_SERVICE_URL (e.g., http://localhost:8001)
+- This Module: ONLY integration point - NO auth logic
+- auth_client: HTTP client that calls the external auth service
+
+⚠️ NEVER IMPLEMENT HERE:
+- Token generation/validation logic
+- Password hashing/verification (except legacy compatibility)
+- OAuth provider integration
+- User authentication logic
+
+✅ ONLY DO HERE:
+- Call auth_client methods
+- FastAPI dependency injection
+- Convert auth service responses to User objects
+
+See: CRITICAL_AUTH_ARCHITECTURE.md for full details
 """
 from typing import Optional, Annotated, Dict, Any
 from fastapi import Depends, HTTPException, status

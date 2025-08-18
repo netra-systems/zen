@@ -86,7 +86,7 @@ class LLMCacheService:
         
         return {
             "success": True,
-            "warmed_up_items": warmed_up_count,
+            "warmed_up": warmed_up_count,
             "patterns": patterns,
             "priority": priority
         }

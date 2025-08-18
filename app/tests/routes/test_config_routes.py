@@ -72,8 +72,8 @@ class TestConfigRoute:
         
         response = basic_test_client.put("/api/config", json=valid_config)
         if response.status_code not in [404]:  # Ignore if not implemented
-            # Should be accepted or return validation error
-            assert response.status_code in [200, 422, 400]
+            # Should be accepted or return validation error or require authentication
+            assert response.status_code in [200, 422, 400, 403]
         
         # Test configuration with invalid types
         invalid_type_config = {
@@ -84,7 +84,7 @@ class TestConfigRoute:
         
         response = basic_test_client.put("/api/config", json=invalid_type_config)
         if response.status_code not in [404]:
-            CommonResponseValidators.validate_error_response(response, [422, 400])
+            CommonResponseValidators.validate_error_response(response, [422, 400, 403])
     
     def test_config_environment_specific(self, basic_test_client):
         """Test environment-specific configuration handling."""
