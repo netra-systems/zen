@@ -91,13 +91,6 @@ class ClickHouseHTTPSConfig(BaseModel):
     database: str = "default"
 
 
-class ClickHouseHTTPSDevConfig(BaseModel):
-    host: str = "xedvrr4c3r.us-central1.gcp.clickhouse.cloud"
-    port: int = 8443
-    user: str = "development_user"
-    password: str = ""
-    database: str = "development"
-    superuser: bool = True
 
 
 class ClickHouseLoggingConfig(BaseModel):
@@ -148,7 +141,6 @@ class AppConfig(BaseModel):
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
     clickhouse_native: ClickHouseNativeConfig = ClickHouseNativeConfig()
     clickhouse_https: ClickHouseHTTPSConfig = ClickHouseHTTPSConfig()
-    clickhouse_https_dev: ClickHouseHTTPSDevConfig = ClickHouseHTTPSDevConfig()
     clickhouse_logging: ClickHouseLoggingConfig = ClickHouseLoggingConfig()
     langfuse: LangfuseConfig = LangfuseConfig()
     ws_config: WebSocketConfig = Field(default_factory=WebSocketConfig)
