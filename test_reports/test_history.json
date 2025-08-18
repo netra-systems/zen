@@ -418,5 +418,117 @@
       "duration": 48.41372013092041,
       "pass_rate": 96.81372549019608
     }
+  },
+  {
+    "timestamp": "2025-08-17T18:34:16.642665",
+    "level": "real_e2e",
+    "exit_code": 1,
+    "stats": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0,
+      "duration": 9.956595659255981,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:34:16.679067",
+    "level": "real_e2e",
+    "exit_code": 1,
+    "stats": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0,
+      "duration": 9.956595659255981,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:34:58.207847",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 7.356793403625488,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:34:58.238075",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 7.356793403625488,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:35:49.608325",
+    "level": "unit",
+    "exit_code": 2,
+    "stats": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0,
+      "duration": 31.630451679229736,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:35:49.643266",
+    "level": "unit",
+    "exit_code": 2,
+    "stats": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "errors": 1,
+      "skipped": 0,
+      "duration": 31.630451679229736,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:41:25.100370",
+    "level": "unit",
+    "exit_code": 2,
+    "stats": {
+      "total": 408,
+      "passed": 395,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 10,
+      "duration": 54.10316276550293,
+      "pass_rate": 96.81372549019608
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:41:25.137143",
+    "level": "unit",
+    "exit_code": 2,
+    "stats": {
+      "total": 408,
+      "passed": 395,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 10,
+      "duration": 54.10316276550293,
+      "pass_rate": 96.81372549019608
+    }
   }
 ]

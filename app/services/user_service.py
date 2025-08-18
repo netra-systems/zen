@@ -5,20 +5,55 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 import bcrypt
 from fastapi.encoders import jsonable_encoder
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
+from passlib.context import CryptContext
 
 # Direct bcrypt usage for better compatibility
+# Provide passlib interface for testing compatibility
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> User:
         result = await db.execute(select(User).filter(User.email == email))
         return result.scalars().first()
+    
+    async def get(self, db: AsyncSession, id: Union[str, int]) -> Optional[User]:
+        """Get user by ID for backward compatibility."""
+        result = await db.execute(select(User).filter(User.id == id))
+        return result.scalars().first()
+    
+    async def remove(self, db: AsyncSession, *, id: Union[str, int]) -> Optional[User]:
+        """Remove user by ID for backward compatibility."""
+        obj = await self.get(db, id=id)
+        if obj:
+            db.delete(obj)
+            await db.commit()
+        return obj
+    
+    async def update(self, db: AsyncSession, *, db_obj: User, obj_in: Union[UserUpdate, Dict[str, Any]]) -> User:
+        """Update user for backward compatibility."""
+        obj_data = jsonable_encoder(db_obj)
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.model_dump(exclude_unset=True)
+        for field in obj_data:
+            if field in update_data:
+                setattr(db_obj, field, update_data[field])
+        db.add(db_obj)
+        await db.commit()
+        await db.refresh(db_obj)
+        return db_obj
+    
+    async def get_multi(self, db: AsyncSession, *, skip: int = 0, limit: int = 100) -> List[User]:
+        """Get multiple users with pagination for backward compatibility."""
+        result = await db.execute(select(User).offset(skip).limit(limit))
+        return result.scalars().all()
 
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
         obj_in_data = jsonable_encoder(obj_in)
         del obj_in_data['password']
-        salt = bcrypt.gensalt()
-        hashed_password = bcrypt.hashpw(obj_in.password.encode('utf-8'), salt).decode('utf-8')
+        hashed_password = pwd_context.hash(obj_in.password)
         db_obj = User(**obj_in_data, hashed_password=hashed_password)
         db.add(db_obj)
         await db.commit()
@@ -85,5 +120,6 @@ __all__ = [
     'CRUDUser',
     'get_all_users',
     'update_user_role',
-    'bulk_update_users'
+    'bulk_update_users',
+    'pwd_context'
 ]

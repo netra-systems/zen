@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-17T18:01:29.544818  
+**Generated:** 2025-08-17T18:34:58.239596  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 **Purpose:** Pre-commit validation, basic health checks
 
@@ -17,7 +17,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 7 | 7 | 0 | 0 | 0 | 9.68s | [PASSED] |
+| Backend   | 7 | 7 | 0 | 0 | 0 | 7.36s | [PASSED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## Environment and Configuration
@@ -27,7 +27,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** No
-- **Total Duration:** 9.68s
+- **Total Duration:** 7.36s
 - **Exit Code:** 0
 
 ### Backend Configuration
@@ -81,25 +81,23 @@ BAD TEST DETECTION REPORT
 ================================================================================
 
 Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 92
+Total Test Runs Analyzed: 108
 
 ================================================================================
 
 
 
-[32m============================== [32m[1m7 passed[0m[32m in 0.57s[0m[32m ==============================[0m
+[32m============================== [32m[1m7 passed[0m[32m in 0.39s[0m[32m ==============================[0m
 ================================================================================
-[PASS] ALL TESTS PASSED in 8.54s
+[PASS] ALL TESTS PASSED in 6.28s
 ================================================================================
 
-2025-08-17 18:01:28.317 | INFO     | app.core.unified_logging:_emit_log:117 | Using only environment variables for secrets (local development mode): 9 secrets loaded
-2025-08-17 18:01:28.317 | INFO     | app.core.unified_logging:_emit_log:117 | Applying 9 secrets
-2025-08-17 18:01:28.317 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
-2025-08-17 18:01:28.318 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 2 (jwt-secret-key, fernet-key)
-2025-08-17 18:01:28.318 | WARNING  | app.core.unified_logging:_emit_log:117 | Critical secrets not found in loaded secrets: 1 (gemini-api-key)
-2025-08-17 18:01:28.318 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
+2025-08-17 18:34:57.016 | INFO     | app.core.unified_logging:_emit_log:117 | Applied 9 secrets (from 9 loaded)
+2025-08-17 18:34:57.017 | INFO     | app.core.unified_logging:_emit_log:117 | Critical secrets loaded: 2 (jwt-secret-key, fernet-key)
+2025-08-17 18:34:57.017 | WARNING  | app.core.unified_logging:_emit_log:117 | Critical secrets not found in loaded secrets: 1 (gemini-api-key)
+2025-08-17 18:34:57.018 | INFO     | app.core.unified_logging:_emit_log:117 | Configuration validation completed successfully
 --- Logging error in Loguru Handler #1 ---
-Record was: {'elapsed': datetime.timedelta(seconds=5, microseconds=666440), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=46944, name='MainProcess'), 'thread': (id=39976, name='MainThread'), 'time': datetime(2025, 8, 17, 18, 1, 28, 837398, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
+Record was: {'elapsed': datetime.timedelta(seconds=4, microseconds=166701), 'exception': None, 'extra': {}, 'file': (name='__init__.py', path='C:\\Users\\antho\\miniconda3\\Lib\\logging\\__init__.py'), 'function': 'handle', 'level': (name='INFO', no=20, icon='\u2139\ufe0f'), 'line': 1028, 'message': 'Multiprocessing resources cleaned up', 'module': '__init__', 'name': 'logging', 'process': (id=39096, name='MainProcess'), 'thread': (id=48980, name='MainThread'), 'time': datetime(2025, 8, 17, 18, 34, 57, 545424, tzinfo=datetime.timezone(datetime.timedelta(days=-1, seconds=61200), 'Pacific Daylight Time'))}
 Traceback (most recent call last):
   File "C:\Users\antho\miniconda3\Lib\site-packages\loguru\_handler.py", line 315, in _queued_writer
     self._sink.write(message)

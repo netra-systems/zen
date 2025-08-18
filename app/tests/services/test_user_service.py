@@ -53,7 +53,7 @@ class TestUserService:
         """Test creating a new user with password hashing"""
         # Arrange
         user_create = UserCreate(**sample_user_data)
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database refresh to set user attributes
         async def mock_refresh(obj):
@@ -84,7 +84,7 @@ class TestUserService:
     async def test_get_user_by_email(self, mock_db_session, sample_user):
         """Test retrieving a user by email"""
         # Arrange
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query result
         mock_result = Mock()
@@ -110,7 +110,7 @@ class TestUserService:
     async def test_get_user_by_email_not_found(self, mock_db_session):
         """Test retrieving a user by email when user doesn't exist"""
         # Arrange
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query result to return None
         mock_result = Mock()
@@ -128,7 +128,7 @@ class TestUserService:
     async def test_update_user(self, mock_db_session, sample_user):
         """Test updating user information"""
         # Arrange
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         update_data = UserUpdate(
             email=sample_user.email,  # Required field for UserUpdate
             full_name="Updated Name"
@@ -161,7 +161,7 @@ class TestUserService:
     async def test_delete_user(self, mock_db_session, sample_user):
         """Test deleting a user"""
         # Arrange
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Mock the get method to return the sample user
         with patch.object(crud_user, 'get', AsyncMock(return_value=sample_user)):
@@ -180,7 +180,7 @@ class TestUserService:
     async def test_get_user_by_id(self, mock_db_session, sample_user):
         """Test retrieving a user by ID"""
         # Arrange
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Mock the database query - need to mock scalars().first() not scalar_one_or_none()
         mock_result = Mock()
@@ -202,7 +202,7 @@ class TestUserService:
     async def test_get_multiple_users(self, mock_db_session):
         """Test retrieving multiple users with pagination"""
         # Arrange
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Create multiple sample users
         users = [
@@ -257,7 +257,7 @@ class TestUserService:
         """Test that creating a user with duplicate email handles error appropriately"""
         # Arrange
         user_create = UserCreate(**sample_user_data)
-        crud_user = CRUDUser(User)
+        crud_user = CRUDUser("test_user_service", User)
         
         # Mock database to raise integrity error
         from sqlalchemy.exc import IntegrityError
@@ -276,7 +276,7 @@ class TestUserService:
         # Assert
         assert user_service != None
         assert isinstance(user_service, CRUDUser)
-        assert user_service.model == User
+        assert user_service._model_class == User
 
 
 if __name__ == "__main__":
