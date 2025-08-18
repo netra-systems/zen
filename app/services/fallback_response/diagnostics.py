@@ -20,37 +20,61 @@ class DiagnosticsManager:
     def _initialize_diagnostic_tips(self) -> Dict[FailureReason, List[str]]:
         """Initialize diagnostic tips for each failure reason"""
         return {
-            FailureReason.LOW_QUALITY: [
-                "Tip: Provide specific metrics and constraints for better recommendations",
-                "Tip: Include current performance baselines for targeted optimization",
-                "Tip: Specify measurable goals (e.g., '20% latency reduction')"
-            ],
-            FailureReason.PARSING_ERROR: [
-                "Tip: Validate JSON structure before submission",
-                "Tip: Check for special characters in input data",
-                "Tip: Ensure consistent data types across fields"
-            ],
-            FailureReason.CONTEXT_MISSING: [
-                "Tip: Include system specifications in your request",
-                "Tip: Provide current configuration details",
-                "Tip: Share relevant performance metrics"
-            ],
-            FailureReason.CIRCULAR_REASONING: [
-                "Tip: Ask for specific optimization techniques",
-                "Tip: Request quantified recommendations",
-                "Tip: Focus on measurable improvements"
-            ],
-            FailureReason.HALLUCINATION_RISK: [
-                "Tip: Verify all metrics against your actual data",
-                "Tip: Cross-reference recommendations with documentation",
-                "Tip: Start with small-scale testing"
-            ],
-            FailureReason.GENERIC_CONTENT: [
-                "Tip: Provide domain-specific context",
-                "Tip: Include technical constraints",
-                "Tip: Specify your optimization priorities"
-            ]
+            FailureReason.LOW_QUALITY: self._get_low_quality_tips(),
+            FailureReason.PARSING_ERROR: self._get_parsing_error_tips(),
+            FailureReason.CONTEXT_MISSING: self._get_context_missing_tips(),
+            FailureReason.CIRCULAR_REASONING: self._get_circular_reasoning_tips(),
+            FailureReason.HALLUCINATION_RISK: self._get_hallucination_risk_tips(),
+            FailureReason.GENERIC_CONTENT: self._get_generic_content_tips()
         }
+    
+    def _get_low_quality_tips(self) -> List[str]:
+        """Get diagnostic tips for low quality failures"""
+        return [
+            "Tip: Provide specific metrics and constraints for better recommendations",
+            "Tip: Include current performance baselines for targeted optimization",
+            "Tip: Specify measurable goals (e.g., '20% latency reduction')"
+        ]
+    
+    def _get_parsing_error_tips(self) -> List[str]:
+        """Get diagnostic tips for parsing error failures"""
+        return [
+            "Tip: Validate JSON structure before submission",
+            "Tip: Check for special characters in input data",
+            "Tip: Ensure consistent data types across fields"
+        ]
+    
+    def _get_context_missing_tips(self) -> List[str]:
+        """Get diagnostic tips for context missing failures"""
+        return [
+            "Tip: Include system specifications in your request",
+            "Tip: Provide current configuration details",
+            "Tip: Share relevant performance metrics"
+        ]
+    
+    def _get_circular_reasoning_tips(self) -> List[str]:
+        """Get diagnostic tips for circular reasoning failures"""
+        return [
+            "Tip: Ask for specific optimization techniques",
+            "Tip: Request quantified recommendations",
+            "Tip: Focus on measurable improvements"
+        ]
+    
+    def _get_hallucination_risk_tips(self) -> List[str]:
+        """Get diagnostic tips for hallucination risk failures"""
+        return [
+            "Tip: Verify all metrics against your actual data",
+            "Tip: Cross-reference recommendations with documentation",
+            "Tip: Start with small-scale testing"
+        ]
+    
+    def _get_generic_content_tips(self) -> List[str]:
+        """Get diagnostic tips for generic content failures"""
+        return [
+            "Tip: Provide domain-specific context",
+            "Tip: Include technical constraints",
+            "Tip: Specify your optimization priorities"
+        ]
     
     def _initialize_recovery_suggestions(self) -> Dict[ContentType, List[Dict[str, str]]]:
         """Initialize recovery suggestions by content type"""

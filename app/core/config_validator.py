@@ -24,18 +24,29 @@ class ConfigValidator:
     def validate_config(self, config: AppConfig) -> None:
         """Validate the complete configuration object."""
         try:
-            self._validate_database_config(config)
-            self._validate_auth_config(config)
-            self._validate_llm_config(config)
-            self._validate_external_services(config)
+            self._validate_all_config_sections(config)
             self._logger.info("Configuration validation completed successfully")
-            
         except ConfigurationValidationError as e:
-            self._logger.error(f"Configuration validation failed: {e}")
-            raise
+            self._handle_config_validation_error(e)
         except Exception as e:
-            self._logger.error(f"Unexpected error during validation: {e}")
-            raise ConfigurationValidationError(f"Validation failed: {e}")
+            self._handle_unexpected_validation_error(e)
+    
+    def _validate_all_config_sections(self, config: AppConfig) -> None:
+        """Validate all configuration sections."""
+        self._validate_database_config(config)
+        self._validate_auth_config(config)
+        self._validate_llm_config(config)
+        self._validate_external_services(config)
+    
+    def _handle_config_validation_error(self, error: ConfigurationValidationError) -> None:
+        """Handle configuration validation errors."""
+        self._logger.error(f"Configuration validation failed: {error}")
+        raise
+    
+    def _handle_unexpected_validation_error(self, error: Exception) -> None:
+        """Handle unexpected validation errors."""
+        self._logger.error(f"Unexpected error during validation: {error}")
+        raise ConfigurationValidationError(f"Validation failed: {error}")
     
     def _validate_database_config(self, config: AppConfig) -> None:
         """Validate database configuration."""
@@ -209,31 +220,56 @@ class ConfigValidator:
     def _validate_external_services(self, config: AppConfig) -> None:
         """Validate external service configurations."""
         errors = []
-        
-        # Skip Redis validation if Redis is disabled in dev mode
-        if hasattr(config, 'dev_mode_redis_enabled') and not config.dev_mode_redis_enabled:
-            self._logger.info("Redis disabled in dev mode - skipping Redis validation")
-        # Check Redis configuration (if used)
-        elif hasattr(config, 'redis') and config.redis:
-            if not config.redis.host:
-                errors.append("Redis host is not configured")
-            if not config.redis.password and config.environment == "production":
-                errors.append("Redis password is required in production")
-        
-        # Check Langfuse configuration (if used for monitoring)
-        if config.langfuse:
-            if not config.langfuse.secret_key and config.environment == "production":
-                self._logger.warning("Langfuse secret key not configured - monitoring may be limited")
-            if not config.langfuse.public_key and config.environment == "production":
-                self._logger.warning("Langfuse public key not configured - monitoring may be limited")
+        self._validate_redis_configuration(config, errors)
+        self._validate_langfuse_configuration(config)
         
         if errors:
             raise ConfigurationValidationError(f"External service configuration errors: {', '.join(errors)}")
     
+    def _validate_redis_configuration(self, config: AppConfig, errors: List[str]) -> None:
+        """Validate Redis configuration if enabled."""
+        if self._should_skip_redis_validation(config):
+            self._logger.info("Redis disabled in dev mode - skipping Redis validation")
+            return
+        
+        if hasattr(config, 'redis') and config.redis:
+            self._check_redis_host_and_password(config, errors)
+    
+    def _should_skip_redis_validation(self, config: AppConfig) -> bool:
+        """Check if Redis validation should be skipped."""
+        return hasattr(config, 'dev_mode_redis_enabled') and not config.dev_mode_redis_enabled
+    
+    def _check_redis_host_and_password(self, config: AppConfig, errors: List[str]) -> None:
+        """Check Redis host and password configuration."""
+        if not config.redis.host:
+            errors.append("Redis host is not configured")
+        if not config.redis.password and config.environment == "production":
+            errors.append("Redis password is required in production")
+    
+    def _validate_langfuse_configuration(self, config: AppConfig) -> None:
+        """Validate Langfuse configuration for monitoring."""
+        if not config.langfuse:
+            return
+        
+        if config.environment == "production":
+            self._check_langfuse_keys(config)
+    
+    def _check_langfuse_keys(self, config: AppConfig) -> None:
+        """Check Langfuse key configuration for production."""
+        if not config.langfuse.secret_key:
+            self._logger.warning("Langfuse secret key not configured - monitoring may be limited")
+        if not config.langfuse.public_key:
+            self._logger.warning("Langfuse public key not configured - monitoring may be limited")
+    
     def get_validation_report(self, config: AppConfig) -> List[str]:
         """Get a detailed validation report without raising exceptions."""
         report = []
-        
+        self._add_validation_status_to_report(config, report)
+        self._add_informational_items_to_report(config, report)
+        return report
+    
+    def _add_validation_status_to_report(self, config: AppConfig, report: List[str]) -> None:
+        """Add validation status to report."""
         try:
             self.validate_config(config)
             report.append("✓ All configuration checks passed")
@@ -241,11 +277,17 @@ class ConfigValidator:
             report.append(f"✗ Configuration validation failed: {e}")
         except Exception as e:
             report.append(f"✗ Unexpected validation error: {e}")
-        
-        # Add informational items
+    
+    def _add_informational_items_to_report(self, config: AppConfig, report: List[str]) -> None:
+        """Add informational items to validation report."""
         report.append(f"Environment: {config.environment}")
         report.append(f"Database: {'Configured' if config.database_url else 'Not configured'}")
         report.append(f"LLM Configs: {len(config.llm_configs)} configured")
-        report.append(f"Auth: {'JWT+OAuth' if config.jwt_secret_key and config.oauth_config.client_id else 'Partial'}")
-        
-        return report
+        auth_status = self._get_auth_status(config)
+        report.append(f"Auth: {auth_status}")
+    
+    def _get_auth_status(self, config: AppConfig) -> str:
+        """Get authentication configuration status."""
+        if config.jwt_secret_key and config.oauth_config.client_id:
+            return "JWT+OAuth"
+        return "Partial"

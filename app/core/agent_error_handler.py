@@ -30,15 +30,25 @@ class AgentErrorHandler:
 
     def _build_error_attributes(self, operation_name: str, error: Exception, context: Optional[Dict[str, Any]], agent_name: str) -> Dict[str, Any]:
         """Build error attributes dictionary for AgentError creation."""
+        base_attrs = self._get_basic_error_attributes(operation_name, error, agent_name)
+        timing_attrs = self._get_error_timing_attributes(error)
+        return {**base_attrs, **timing_attrs, 'context': context or {}}
+
+    def _get_basic_error_attributes(self, operation_name: str, error: Exception, agent_name: str) -> Dict[str, Any]:
+        """Get basic error attributes."""
         return {
             'error_id': f"{int(time.time() * 1000)}_{len(self.error_history)}",
             'agent_name': agent_name,
             'operation': operation_name,
             'error_type': type(error).__name__,
-            'message': str(error),
+            'message': str(error)
+        }
+
+    def _get_error_timing_attributes(self, error: Exception) -> Dict[str, Any]:
+        """Get error timing and severity attributes."""
+        return {
             'timestamp': datetime.now(timezone.utc),
-            'severity': self.classify_error_severity(error),
-            'context': context or {}
+            'severity': self.classify_error_severity(error)
         }
 
     def add_error_to_history(self, error_record: AgentError) -> None:

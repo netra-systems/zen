@@ -36,8 +36,11 @@ def _configure_async_connection_timeouts(dbapi_conn: Connection):
         _execute_and_commit_timeout_config(dbapi_conn, cursor)
     except Exception as e:
         _handle_timeout_config_error(dbapi_conn, e)
-    finally:
-        cursor.close()
+    _close_cursor_safely(cursor)
+
+def _close_cursor_safely(cursor):
+    """Safely close database cursor."""
+    cursor.close()
 
 def _execute_and_commit_timeout_config(dbapi_conn: Connection, cursor):
     """Execute timeout statements and commit transaction."""
@@ -68,49 +71,77 @@ def _monitor_async_pool_usage(pool):
             logger.warning(f"Async connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
 
 
-def setup_async_engine_events(engine: AsyncEngine):
-    """Setup async engine connection events."""
+def _create_async_connect_handler(engine: AsyncEngine):
+    """Create async connection event handler."""
     @event.listens_for(engine.sync_engine, "connect")
     def receive_async_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
         _set_connection_pid(dbapi_conn, connection_record)
         _configure_async_connection_timeouts(dbapi_conn)
         _log_async_connection_established(connection_record)
 
+def _create_async_checkout_handler(engine: AsyncEngine):
+    """Create async checkout event handler."""
     @event.listens_for(engine.sync_engine, "checkout")
     def receive_async_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
         _monitor_async_pool_usage(engine.pool)
-        # Only log checkout events if explicitly enabled in config
-        if settings.log_async_checkout:
-            pid = connection_record.info.get('pid', 'unknown')
-            logger.debug(f"Async connection checked out from pool: PID={pid}")
+        _log_async_checkout_if_enabled(connection_record)
 
+def _log_async_checkout_if_enabled(connection_record: ConnectionPoolEntry):
+    """Log async checkout if enabled in settings."""
+    if settings.log_async_checkout:
+        pid = connection_record.info.get('pid', 'unknown')
+        logger.debug(f"Async connection checked out from pool: PID={pid}")
+
+def setup_async_engine_events(engine: AsyncEngine):
+    """Setup async engine connection events."""
+    _create_async_connect_handler(engine)
+    _create_async_checkout_handler(engine)
+
+
+def _configure_sync_connection_timeouts(dbapi_conn: Connection):
+    """Configure statement and transaction timeouts for sync connection."""
+    with dbapi_conn.cursor() as cursor:
+        cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
+        cursor.execute("SET idle_in_transaction_session_timeout = 60000")
+        cursor.execute("SET lock_timeout = 10000")
+
+def _set_sync_connection_pid_and_configure(dbapi_conn: Connection, connection_record: ConnectionPoolEntry):
+    """Set PID and configure timeouts for sync connection."""
+    connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
+    _configure_sync_connection_timeouts(dbapi_conn)
+
+def _log_sync_connection_if_enabled(connection_record: ConnectionPoolEntry):
+    """Log sync connection establishment if enabled."""
+    if settings.log_async_checkout:
+        logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
+
+def _check_sync_pool_usage_warning(pool):
+    """Check and warn if sync pool usage is high."""
+    if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
+        active = pool.size() - pool.checkedin() + pool.overflow()
+        if active > (DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW) * 0.8:
+            logger.warning(f"Connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
+
+def _log_sync_checkout_if_enabled(connection_record: ConnectionPoolEntry):
+    """Log sync checkout if enabled in settings."""
+    if settings.log_async_checkout:
+        logger.debug(f"Connection checked out from pool: {connection_record.info.get('pid')}")
+
+def _create_sync_connect_handler(engine):
+    """Create sync connection event handler."""
+    @event.listens_for(engine, "connect")
+    def receive_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
+        _set_sync_connection_pid_and_configure(dbapi_conn, connection_record)
+        _log_sync_connection_if_enabled(connection_record)
+
+def _create_sync_checkout_handler(engine):
+    """Create sync checkout event handler."""
+    @event.listens_for(engine, "checkout")
+    def receive_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
+        _check_sync_pool_usage_warning(engine.pool)
+        _log_sync_checkout_if_enabled(connection_record)
 
 def setup_sync_engine_events(engine):
     """Setup synchronous engine connection events."""
-    def _configure_connection_timeouts(dbapi_conn: Connection):
-        """Configure statement and transaction timeouts for connection."""
-        with dbapi_conn.cursor() as cursor:
-            cursor.execute(f"SET statement_timeout = {DatabaseConfig.STATEMENT_TIMEOUT}")
-            cursor.execute("SET idle_in_transaction_session_timeout = 60000")
-            cursor.execute("SET lock_timeout = 10000")
-    
-    @event.listens_for(engine, "connect")
-    def receive_connect(dbapi_conn: Connection, connection_record: ConnectionPoolEntry) -> None:
-        connection_record.info['pid'] = dbapi_conn.get_backend_pid() if hasattr(dbapi_conn, 'get_backend_pid') else None
-        _configure_connection_timeouts(dbapi_conn)
-        if settings.log_async_checkout:
-            logger.debug(f"Database connection established with safety limits: {connection_record.info.get('pid')}")
-    
-    def _check_pool_usage_warning(pool):
-        """Check and warn if pool usage is high."""
-        if hasattr(pool, 'size') and hasattr(pool, 'overflow'):
-            active = pool.size() - pool.checkedin() + pool.overflow()
-            if active > (DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW) * 0.8:
-                logger.warning(f"Connection pool usage high: {active}/{DatabaseConfig.POOL_SIZE + DatabaseConfig.MAX_OVERFLOW}")
-    
-    @event.listens_for(engine, "checkout")
-    def receive_checkout(dbapi_conn: Connection, connection_record: ConnectionPoolEntry, connection_proxy: _ConnectionFairy) -> None:
-        _check_pool_usage_warning(engine.pool)
-        # Only log checkout events if explicitly enabled in config
-        if settings.log_async_checkout:
-            logger.debug(f"Connection checked out from pool: {connection_record.info.get('pid')}")
+    _create_sync_connect_handler(engine)
+    _create_sync_checkout_handler(engine)

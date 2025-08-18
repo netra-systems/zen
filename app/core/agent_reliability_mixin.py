@@ -69,6 +69,16 @@ class AgentReliabilityMixin:
     ) -> Any:
         """Execute operation with full reliability protection."""
         start_time = time.time()
+        return await self._execute_with_error_handling(
+            operation, operation_name, fallback, timeout, start_time, context
+        )
+
+    async def _execute_with_error_handling(
+        self, operation: Callable[[], Awaitable[Any]], operation_name: str,
+        fallback: Optional[Callable[[], Awaitable[Any]]], timeout: Optional[float],
+        start_time: float, context: Optional[Dict[str, Any]]
+    ) -> Any:
+        """Execute operation with error handling and fallback."""
         try:
             return await self._execute_operation_safely(
                 operation, operation_name, fallback, timeout, start_time
@@ -102,11 +112,23 @@ class AgentReliabilityMixin:
         context: Optional[Dict[str, Any]]
     ) -> Any:
         """Handle operation failure with recording and recovery."""
+        await self._record_operation_failure(operation_name, error, start_time, context)
+        return await self._attempt_recovery_or_reraise(operation_name, error, context)
+
+    async def _record_operation_failure(
+        self, operation_name: str, error: Exception, start_time: float, context: Optional[Dict[str, Any]]
+    ) -> None:
+        """Record the failed operation for monitoring."""
         execution_time = time.time() - start_time
         agent_name = self._get_agent_name()
         await self.error_handler.record_failed_operation(
             operation_name, error, execution_time, context, agent_name
         )
+
+    async def _attempt_recovery_or_reraise(
+        self, operation_name: str, error: Exception, context: Optional[Dict[str, Any]]
+    ) -> Any:
+        """Attempt recovery or re-raise the original error."""
         recovery_result = await self.recovery_manager.attempt_operation_recovery(
             operation_name, error, context, self.error_handler.error_history
         )

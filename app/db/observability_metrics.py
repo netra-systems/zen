@@ -166,23 +166,34 @@ class PerformanceCalculator:
         return second_avg - first_avg
     
     @staticmethod
-    def calculate_trends(recent_metrics: List[DatabaseMetrics]) -> Dict[str, float]:
-        """Calculate performance trends."""
-        if len(recent_metrics) < 2:
-            return {'query_time_trend': 0.0, 'connection_trend': 0.0}
-        
-        first_half, second_half = PerformanceCalculator._split_metrics_by_time(recent_metrics)
-        query_time_trend = PerformanceCalculator._calculate_query_time_trend(first_half, second_half)
-        connection_trend = PerformanceCalculator._calculate_connection_trend(first_half, second_half)
-        
+    def _build_trends_result(query_time_trend: float, connection_trend: float) -> Dict[str, float]:
+        """Build trends result dictionary."""
         return {
             'query_time_trend': query_time_trend,
             'connection_trend': connection_trend
         }
+    
+    @staticmethod
+    def calculate_trends(recent_metrics: List[DatabaseMetrics]) -> Dict[str, float]:
+        """Calculate performance trends."""
+        if len(recent_metrics) < 2:
+            return {'query_time_trend': 0.0, 'connection_trend': 0.0}
+        first_half, second_half = PerformanceCalculator._split_metrics_by_time(recent_metrics)
+        query_time_trend = PerformanceCalculator._calculate_query_time_trend(first_half, second_half)
+        connection_trend = PerformanceCalculator._calculate_connection_trend(first_half, second_half)
+        return PerformanceCalculator._build_trends_result(query_time_trend, connection_trend)
 
 
 class MetricsSummaryBuilder:
     """Build performance summaries from metrics."""
+    
+    @staticmethod
+    def _gather_summary_components(recent_metrics: List[DatabaseMetrics]) -> tuple:
+        """Gather all summary components."""
+        averages = MetricsSummaryBuilder._calculate_averages(recent_metrics)
+        trends = PerformanceCalculator.calculate_trends(recent_metrics)
+        totals = MetricsSummaryBuilder._calculate_totals(recent_metrics)
+        return averages, trends, totals
     
     @staticmethod
     def build_performance_summary(recent_metrics: List[DatabaseMetrics]) -> Dict[str, Any]:
@@ -190,9 +201,7 @@ class MetricsSummaryBuilder:
         if not recent_metrics:
             return {}
         
-        averages = MetricsSummaryBuilder._calculate_averages(recent_metrics)
-        trends = PerformanceCalculator.calculate_trends(recent_metrics)
-        totals = MetricsSummaryBuilder._calculate_totals(recent_metrics)
+        averages, trends, totals = MetricsSummaryBuilder._gather_summary_components(recent_metrics)
         return MetricsSummaryBuilder._build_summary_dict(averages, trends, totals)
     
     @staticmethod
@@ -226,21 +235,27 @@ class MetricsSummaryBuilder:
         return summary
 
     @staticmethod
-    def build_dashboard_data(
-        current_metrics: DatabaseMetrics,
-        metrics_history: List[DatabaseMetrics],
-        alerts: List[Dict[str, Any]],
-        cache_metrics: Dict[str, Any],
-        transaction_stats: Dict[str, Any]
-    ) -> Dict[str, Any]:
-        """Build comprehensive dashboard data."""
-        performance_summary = MetricsSummaryBuilder.build_performance_summary(metrics_history)
-        
+    def _build_dashboard_base_data(current_metrics: DatabaseMetrics, metrics_history: List[DatabaseMetrics], alerts: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Build base dashboard data components."""
         return {
             'current_metrics': current_metrics.to_dict(),
             'metrics_history': [m.to_dict() for m in metrics_history],
-            'recent_alerts': alerts,
+            'recent_alerts': alerts
+        }
+    
+    @staticmethod
+    def _add_dashboard_extras(base_data: Dict[str, Any], performance_summary: Dict[str, Any], cache_metrics: Dict[str, Any], transaction_stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Add extra components to dashboard data."""
+        base_data.update({
             'performance_summary': performance_summary,
             'cache_metrics': cache_metrics,
             'transaction_stats': transaction_stats
-        }
+        })
+        return base_data
+    
+    @staticmethod
+    def build_dashboard_data(current_metrics: DatabaseMetrics, metrics_history: List[DatabaseMetrics], alerts: List[Dict[str, Any]], cache_metrics: Dict[str, Any], transaction_stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Build comprehensive dashboard data."""
+        performance_summary = MetricsSummaryBuilder.build_performance_summary(metrics_history)
+        base_data = MetricsSummaryBuilder._build_dashboard_base_data(current_metrics, metrics_history, alerts)
+        return MetricsSummaryBuilder._add_dashboard_extras(base_data, performance_summary, cache_metrics, transaction_stats)

@@ -70,29 +70,38 @@ def _is_development_with_mock() -> bool:
         return getattr(settings, 'use_mock_clickhouse', False)
     return False
 
+def _should_use_mock_clickhouse() -> bool:
+    """Check conditions for using mock ClickHouse."""
+    return _is_testing_environment() or _is_development_with_mock()
+
+def _get_mock_usage_conditions() -> str:
+    """Get description of when mock ClickHouse is used."""
+    return "Returns True ONLY when: testing OR development+mock enabled. Default: REAL"
+
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
     
-    Returns True ONLY when:
-    - Environment is "testing" OR
-    - Environment is "development" AND mock is explicitly enabled
-    
-    Default: Use REAL ClickHouse
+    Returns True based on environment conditions described in _get_mock_usage_conditions().
     """
-    return _is_testing_environment() or _is_development_with_mock()
+    return _should_use_mock_clickhouse()
 
+
+def _get_unified_config():
+    """Get unified configuration instance."""
+    from app.config import get_config
+    return get_config()
+
+def _extract_https_config(config):
+    """Extract HTTPS configuration from unified config."""
+    return config.clickhouse_https
 
 def get_clickhouse_config():
     """Get ClickHouse configuration from unified config system.
     
     Returns appropriate config for real ClickHouse connection.
-    Uses unified configuration system for consistency.
     """
-    from app.config import get_config
-    config = get_config()
-    
-    # Use HTTPS config as default (can be switched based on needs)
-    return config.clickhouse_https
+    config = _get_unified_config()
+    return _extract_https_config(config)
 
 
 async def _create_mock_client():
@@ -132,16 +141,30 @@ def _get_connection_config():
     use_secure = app_config.clickhouse_mode != "local"
     return config, use_secure
 
+def _get_connection_details(config) -> dict:
+    """Extract connection details from config."""
+    return {
+        'host': config.host,
+        'port': config.port,
+        'user': config.user,
+        'password': config.password
+    }
+
+def _add_database_and_security(details: dict, config, use_secure: bool) -> dict:
+    """Add database and security settings to connection details."""
+    details['database'] = config.database
+    details['secure'] = use_secure
+    return details
+
+def _build_client_params(config, use_secure: bool) -> dict:
+    """Build parameters for ClickHouse client creation."""
+    details = _get_connection_details(config)
+    return _add_database_and_security(details, config, use_secure)
+
 def _create_base_client(config, use_secure: bool):
     """Create base ClickHouse client instance."""
-    return ClickHouseDatabase(
-        host=config.host,
-        port=config.port,
-        user=config.user,
-        password=config.password,
-        database=config.database,
-        secure=use_secure
-    )
+    params = _build_client_params(config, use_secure)
+    return ClickHouseDatabase(**params)
 
 async def _test_and_yield_client(client):
     """Test connection and yield client."""
@@ -216,16 +239,30 @@ class ClickHouseService:
         logger.info("[ClickHouse Service] Initializing with MOCK client")
         self._client = MockClickHouseDatabase()
 
+    def _get_base_connection_params(self, config) -> dict:
+        """Get base connection parameters from config."""
+        return {
+            'host': config.host,
+            'port': config.port,
+            'user': config.user,
+            'password': config.password
+        }
+
+    def _add_database_security_params(self, params: dict, config) -> dict:
+        """Add database and security parameters."""
+        params['database'] = config.database
+        params['secure'] = True
+        return params
+
+    def _prepare_database_params(self, config) -> dict:
+        """Prepare parameters for ClickHouse database creation."""
+        params = self._get_base_connection_params(config)
+        return self._add_database_security_params(params, config)
+
     def _build_clickhouse_database(self, config) -> ClickHouseDatabase:
         """Build ClickHouse database client."""
-        return ClickHouseDatabase(
-            host=config.host,
-            port=config.port,
-            user=config.user,
-            password=config.password,
-            database=config.database,
-            secure=True
-        )
+        params = self._prepare_database_params(config)
+        return ClickHouseDatabase(**params)
     
     async def _initialize_real_client(self):
         """Initialize real ClickHouse client."""

@@ -71,13 +71,23 @@ async def _retry_with_backoff(
             return await func(*args, **kwargs)
         except exceptions as e:
             last_exception = e
-            if attempt == max_attempts - 1:
+            if _is_final_attempt(attempt, max_attempts):
                 break
             
-            await asyncio.sleep(current_delay)
+            await _sleep_with_backoff(current_delay)
             current_delay = _calculate_next_delay(current_delay, backoff_factor)
     
     raise last_exception
+
+
+def _is_final_attempt(attempt: int, max_attempts: int) -> bool:
+    """Check if this is the final retry attempt."""
+    return attempt == max_attempts - 1
+
+
+async def _sleep_with_backoff(delay: float) -> None:
+    """Sleep for the specified delay period."""
+    await asyncio.sleep(delay)
 
 
 def _calculate_next_delay(current_delay: float, backoff_factor: float) -> float:

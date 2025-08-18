@@ -71,16 +71,23 @@ class UploadErrorHandler:
         original_error: Exception
     ) -> ErrorContext:
         """Create error context for upload failures."""
+        additional_data = self._build_upload_error_data(filename, file_size, original_error)
         return ErrorContext(
             agent_name="corpus_admin_agent",
             operation_name="document_upload",
             run_id=run_id,
-            additional_data={
-                'filename': filename,
-                'file_size': file_size,
-                'original_error': str(original_error)
-            }
+            additional_data=additional_data
         )
+    
+    def _build_upload_error_data(
+        self, filename: str, file_size: int, original_error: Exception
+    ) -> Dict[str, Any]:
+        """Build additional data for upload error context."""
+        return {
+            'filename': filename,
+            'file_size': file_size,
+            'original_error': str(original_error)
+        }
     
     async def _attempt_upload_recovery(
         self,
@@ -100,18 +107,10 @@ class UploadErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Try alternative upload methods in sequence."""
-        # Try alternative upload method
-        alternative_result = await self._try_alternative_upload(
-            filename, file_size, run_id
-        )
+        alternative_result = await self._try_alternative_upload(filename, file_size, run_id)
         if alternative_result:
             return alternative_result
-        
-        # Try chunked upload
-        chunked_result = await self._try_chunked_upload(
-            filename, file_size, run_id
-        )
-        return chunked_result
+        return await self._try_chunked_upload(filename, file_size, run_id)
     
     def _is_file_too_large(self, filename: str, file_size: int) -> bool:
         """Check if file size exceeds limits."""
@@ -174,27 +173,39 @@ class UploadErrorHandler:
     ) -> Optional[Dict[str, Any]]:
         """Try alternative upload method."""
         try:
-            # Try multipart upload if available
-            if self.file_manager and hasattr(self.file_manager, 'multipart_upload'):
-                result = await self.file_manager.multipart_upload(filename)
-                if result:
-                    return self._create_multipart_success_response(
-                        filename, file_size, run_id
-                    )
+            return await self._attempt_multipart_upload(filename, file_size, run_id)
         except Exception as e:
             logger.debug(f"Alternative upload failed: {e}")
-        
+            return None
+    
+    async def _attempt_multipart_upload(
+        self, filename: str, file_size: int, run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Attempt multipart upload if available."""
+        if not (self.file_manager and hasattr(self.file_manager, 'multipart_upload')):
+            return None
+        result = await self.file_manager.multipart_upload(filename)
+        if result:
+            return self._create_multipart_success_response(filename, file_size, run_id)
         return None
     
     def _create_multipart_success_response(
         self, filename: str, file_size: int, run_id: str
     ) -> Dict[str, Any]:
         """Create success response for multipart upload."""
+        self._log_multipart_success(filename, run_id)
+        return self._build_multipart_response_data(filename, file_size)
+    
+    def _log_multipart_success(self, filename: str, run_id: str) -> None:
+        """Log successful multipart upload."""
         logger.info(
             f"Document uploaded using multipart method",
             filename=filename,
             run_id=run_id
         )
+    
+    def _build_multipart_response_data(self, filename: str, file_size: int) -> Dict[str, Any]:
+        """Build multipart upload response data."""
         return {
             'success': True,
             'method': 'multipart_upload',
@@ -225,13 +236,27 @@ class UploadErrorHandler:
         self, filename: str, file_size: int, chunk_size: int, run_id: str
     ) -> Dict[str, Any]:
         """Create success response for chunked upload."""
-        chunks = file_size // chunk_size + 1
+        chunks = self._calculate_chunk_count(file_size, chunk_size)
+        self._log_chunked_success(filename, chunks, run_id)
+        return self._build_chunked_response_data(filename, file_size, chunks)
+    
+    def _calculate_chunk_count(self, file_size: int, chunk_size: int) -> int:
+        """Calculate number of chunks needed for file."""
+        return file_size // chunk_size + 1
+    
+    def _log_chunked_success(self, filename: str, chunks: int, run_id: str) -> None:
+        """Log successful chunked upload."""
         logger.info(
             f"Document uploaded using chunked method",
             filename=filename,
             chunks=chunks,
             run_id=run_id
         )
+    
+    def _build_chunked_response_data(
+        self, filename: str, file_size: int, chunks: int
+    ) -> Dict[str, Any]:
+        """Build chunked upload response data."""
         return {
             'success': True,
             'method': 'chunked_upload',

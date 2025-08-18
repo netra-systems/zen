@@ -72,12 +72,32 @@ def should_continue_on_error(environment: str) -> bool:
     return environment != "production"
 
 
+def _is_database_url_empty(database_url: Optional[str]) -> bool:
+    """Check if database URL is None or empty."""
+    return not database_url
+
+
+def _is_database_in_mock_mode(database_url: str) -> bool:
+    """Check if database URL indicates mock mode."""
+    return "mock" in database_url.lower()
+
+
+def _log_and_return_for_empty_url(logger: logging.Logger) -> bool:
+    """Log warning for empty database URL and return False."""
+    logger.warning("No database URL configured")
+    return False
+
+
+def _log_and_return_for_mock_mode(logger: logging.Logger) -> bool:
+    """Log info for mock mode and return False."""
+    logger.info("Database in mock mode - skipping migrations")
+    return False
+
+
 def validate_database_url(database_url: Optional[str], logger: logging.Logger) -> bool:
     """Validate database URL is configured."""
-    if not database_url:
-        logger.warning("No database URL configured")
-        return False
-    if "mock" in database_url.lower():
-        logger.info("Database in mock mode - skipping migrations")
-        return False
+    if _is_database_url_empty(database_url):
+        return _log_and_return_for_empty_url(logger)
+    if _is_database_in_mock_mode(database_url):
+        return _log_and_return_for_mock_mode(logger)
     return True

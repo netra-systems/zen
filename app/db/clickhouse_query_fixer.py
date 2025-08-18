@@ -33,18 +33,26 @@ def _log_query_fix(query: str, fixed_query: str):
     logger.debug(f"Original: {query[:200]}...")
     logger.debug(f"Fixed: {fixed_query[:200]}...")
 
+def _fix_special_metrics_pattern(query: str) -> str:
+    """Fix special case of toFloat64OrZero(metrics.value[idx])."""
+    special_pattern = r'toFloat64OrZero\(\s*metrics\.value\[([^\]]+)\]\s*\)'
+    return re.sub(special_pattern, r'arrayElement(metrics.value, \1)', query)
+
+def _fix_regular_array_patterns(query: str) -> str:
+    """Fix regular array access patterns."""
+    pattern = _get_array_pattern()
+    return re.sub(pattern, _replace_array_access, query)
+
+def _log_fix_if_changed(original_query: str, fixed_query: str) -> None:
+    """Log query fix if changes were made."""
+    if fixed_query != original_query:
+        _log_query_fix(original_query, fixed_query)
+
 def fix_clickhouse_array_syntax(query: str) -> str:
     """Fix ClickHouse queries with incorrect array indexing syntax."""
-    # First fix the special case of toFloat64OrZero(metrics.value[idx])
-    special_pattern = r'toFloat64OrZero\(\s*metrics\.value\[([^\]]+)\]\s*\)'
-    fixed_query = re.sub(special_pattern, r'arrayElement(metrics.value, \1)', query)
-    
-    # Then fix regular array access patterns
-    pattern = _get_array_pattern()
-    fixed_query = re.sub(pattern, _replace_array_access, fixed_query)
-    
-    if fixed_query != query:
-        _log_query_fix(query, fixed_query)
+    fixed_query = _fix_special_metrics_pattern(query)
+    fixed_query = _fix_regular_array_patterns(fixed_query)
+    _log_fix_if_changed(query, fixed_query)
     return fixed_query
 
 
@@ -78,38 +86,86 @@ def _has_sql_injection_patterns(query: str) -> bool:
     injection_patterns = [r';\s*DROP\s+TABLE', r';\s*DELETE\s+FROM', r';\s*INSERT\s+INTO']
     return any(re.search(pattern, query, re.IGNORECASE) for pattern in injection_patterns)
 
-def _has_malformed_syntax(query: str) -> bool:
-    """Check for basic SQL syntax errors."""
-    query_normalized = ' '.join(query.split())  # Normalize whitespace
-    malformed_patterns = [
+def _normalize_query_whitespace(query: str) -> str:
+    """Normalize whitespace in query for consistent pattern matching."""
+    return ' '.join(query.split())
+
+def _get_malformed_sql_patterns() -> list[str]:
+    """Get list of patterns that indicate malformed SQL syntax."""
+    return [
         r'^\s*SELECT\s+FROM\s+',  # Missing field(s) - starts with SELECT FROM
         r'^\s*SELECT\s+\*\s+\w+\s*$',  # Missing FROM keyword - SELECT * table
         r'\bFROM\s*$',  # Missing table name after FROM
         r'\bWHERE\s*$'  # Incomplete WHERE clause
     ]
-    return any(re.search(pattern, query_normalized, re.IGNORECASE) for pattern in malformed_patterns)
 
-def _validate_query_content(query: str) -> tuple[bool, str]:
-    """Validate query content for various issues."""
+def _check_patterns_match(query_normalized: str, patterns: list[str]) -> bool:
+    """Check if any malformed patterns match the normalized query."""
+    return any(re.search(pattern, query_normalized, re.IGNORECASE) for pattern in patterns)
+
+def _has_malformed_syntax(query: str) -> bool:
+    """Check for basic SQL syntax errors."""
+    query_normalized = _normalize_query_whitespace(query)
+    malformed_patterns = _get_malformed_sql_patterns()
+    return _check_patterns_match(query_normalized, malformed_patterns)
+
+def _check_empty_query(query: str) -> tuple[bool, str]:
+    """Check if query is empty or whitespace only."""
     if _is_empty_or_whitespace(query):
         return False, "Query cannot be empty"
+    return True, ""
+
+def _check_malformed_syntax(query: str) -> tuple[bool, str]:
+    """Check for malformed SQL syntax."""
     if _has_malformed_syntax(query):
         return False, "Query contains malformed SQL syntax"
+    return True, ""
+
+def _check_nested_array_syntax(query: str) -> tuple[bool, str]:
+    """Check for nested field access with invalid array syntax."""
     if _has_nested_field_access(query) and _has_invalid_array_syntax(query):
         return False, "Query contains deeply nested field access with incorrect array syntax"
+    return True, ""
+
+def _check_injection_patterns(query: str) -> tuple[bool, str]:
+    """Check for SQL injection patterns."""
     if _has_sql_injection_patterns(query):
         return False, "Query contains potential SQL injection patterns"
     return True, ""
 
-def validate_clickhouse_query(query: str) -> tuple[bool, str]:
-    """Validate a ClickHouse query for common syntax errors."""
+def _validate_query_content(query: str) -> tuple[bool, str]:
+    """Validate query content for various issues."""
+    for check_func in [_check_empty_query, _check_malformed_syntax, _check_nested_array_syntax, _check_injection_patterns]:
+        is_valid, error_msg = check_func(query)
+        if not is_valid:
+            return False, error_msg
+    return True, ""
+
+def _check_content_validity(query: str) -> tuple[bool, str]:
+    """Check content validity and return result."""
     content_valid, content_error = _validate_query_content(query)
     if not content_valid:
         return False, content_error
+    return True, ""
+
+def _check_array_syntax_validity(query: str) -> tuple[bool, str]:
+    """Check array syntax validity."""
     if _has_invalid_array_syntax(query):
         return False, "Query uses incorrect array syntax. Use arrayElement() instead of []"
+    return True, ""
+
+def _finalize_validation(query: str) -> tuple[bool, str]:
+    """Finalize validation with metrics access check."""
     _validate_metrics_access(query)
     return True, ""
+
+def validate_clickhouse_query(query: str) -> tuple[bool, str]:
+    """Validate a ClickHouse query for common syntax errors."""
+    is_valid, error_msg = _check_content_validity(query)
+    if not is_valid:
+        return False, error_msg
+    is_valid, error_msg = _check_array_syntax_validity(query)
+    return (False, error_msg) if not is_valid else _finalize_validation(query)
 
 
 class ClickHouseQueryInterceptor:

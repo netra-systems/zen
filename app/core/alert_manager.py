@@ -46,28 +46,56 @@ class HealthAlertManager:
         """Generate alert for component status change."""
         severity = self._get_alert_severity(current.status)
         message = self._create_status_change_message(previous, current)
+        alert_id = self._generate_status_change_alert_id(current.name)
+        metadata = self._create_status_metadata(previous, current)
         
+        return self._build_status_change_alert(alert_id, current.name, severity, message, metadata)
+    
+    def _generate_status_change_alert_id(self, component_name: str) -> str:
+        """Generate unique alert ID for status change."""
+        return f"status_change_{component_name}_{int(time.time())}"
+    
+    def _build_status_change_alert(self, alert_id: str, component: str, severity: str, message: str, metadata: Dict[str, Any]) -> SystemAlert:
+        """Build SystemAlert object for status change."""
         return SystemAlert(
-            alert_id=f"status_change_{current.name}_{int(time.time())}",
-            component=current.name,
+            alert_id=alert_id,
+            component=component,
             severity=severity,
             message=message,
             timestamp=datetime.now(UTC),
-            metadata=self._create_status_metadata(previous, current)
+            metadata=metadata
         )
     
     async def create_threshold_alert(self, component: str, metric: str, value: float, threshold: float) -> SystemAlert:
         """Generate alert for threshold violation."""
         severity = self._determine_threshold_severity(value, threshold)
-        message = f"{component} {metric} exceeded threshold: {value:.2f} > {threshold:.2f}"
+        message = self._create_threshold_message(component, metric, value, threshold)
+        alert_id = self._generate_threshold_alert_id(component, metric)
+        metadata = self._create_threshold_metadata(metric, value, threshold)
         
+        return self._build_threshold_alert(alert_id, component, severity, message, metadata)
+    
+    def _create_threshold_message(self, component: str, metric: str, value: float, threshold: float) -> str:
+        """Create message for threshold violation alert."""
+        return f"{component} {metric} exceeded threshold: {value:.2f} > {threshold:.2f}"
+    
+    def _generate_threshold_alert_id(self, component: str, metric: str) -> str:
+        """Generate unique alert ID for threshold violation."""
+        return f"threshold_{component}_{metric}_{int(time.time())}"
+    
+    def _create_threshold_metadata(self, metric: str, value: float, threshold: float) -> Dict[str, Any]:
+        """Create metadata for threshold alert."""
+        return {"metric": metric, "value": value, "threshold": threshold}
+    
+    def _build_threshold_alert(self, alert_id: str, component: str, severity: str, message: str, metadata: Dict[str, Any]) -> SystemAlert:
+        """Build SystemAlert object for threshold violation."""
         return SystemAlert(
-            alert_id=f"threshold_{component}_{metric}_{int(time.time())}",
+            alert_id=alert_id,
             component=component,
             severity=severity,
             message=message,
             timestamp=datetime.now(UTC),
-            metadata={"metric": metric, "value": value, "threshold": threshold}
+            metadata=metadata
         )
     
     def get_recent_alerts(self, hours: int = 24) -> List[SystemAlert]:
@@ -118,16 +146,28 @@ class HealthAlertManager:
     
     async def _attempt_recovery(self, alert: SystemAlert) -> None:
         """Attempt automatic recovery based on alert."""
-        if alert.severity not in ["error", "critical"]:
+        if not self._should_attempt_recovery_for_alert(alert):
             return
         
         recovery_action = self._determine_recovery_action(alert)
-        if recovery_action and recovery_action in self.recovery_actions:
-            try:
-                await self.recovery_actions[recovery_action](alert)
-                logger.info(f"Recovery action executed: {recovery_action}")
-            except Exception as e:
-                logger.error(f"Recovery action failed: {recovery_action}, error: {e}")
+        if self._is_recovery_action_available(recovery_action):
+            await self._execute_recovery_action(recovery_action, alert)
+    
+    def _should_attempt_recovery_for_alert(self, alert: SystemAlert) -> bool:
+        """Check if recovery should be attempted for alert severity."""
+        return alert.severity in ["error", "critical"]
+    
+    def _is_recovery_action_available(self, recovery_action: Optional[str]) -> bool:
+        """Check if recovery action is available for execution."""
+        return recovery_action and recovery_action in self.recovery_actions
+    
+    async def _execute_recovery_action(self, recovery_action: str, alert: SystemAlert) -> None:
+        """Execute the specified recovery action."""
+        try:
+            await self.recovery_actions[recovery_action](alert)
+            logger.info(f"Recovery action executed: {recovery_action}")
+        except Exception as e:
+            logger.error(f"Recovery action failed: {recovery_action}, error: {e}")
     
     def _get_alert_severity(self, status: HealthStatus) -> str:
         """Get alert severity based on health status."""
@@ -171,14 +211,26 @@ class HealthAlertManager:
         """Determine appropriate recovery action for alert."""
         component = alert.component.lower()
         
-        if "memory" in component or "cpu" in component:
+        if self._is_resource_related_component(component):
             return RecoveryAction.CLEAR_CACHE.value
-        elif "database" in component or "redis" in component:
+        elif self._is_service_related_component(component):
             return RecoveryAction.RESTART_SERVICE.value
-        elif alert.severity == "critical":
+        elif self._is_critical_alert(alert):
             return RecoveryAction.NOTIFY_ADMIN.value
         
         return None
+    
+    def _is_resource_related_component(self, component: str) -> bool:
+        """Check if component is resource-related (memory/CPU)."""
+        return "memory" in component or "cpu" in component
+    
+    def _is_service_related_component(self, component: str) -> bool:
+        """Check if component is service-related (database/redis)."""
+        return "database" in component or "redis" in component
+    
+    def _is_critical_alert(self, alert: SystemAlert) -> bool:
+        """Check if alert is critical severity."""
+        return alert.severity == "critical"
     
     def _setup_default_recovery_actions(self) -> None:
         """Setup default recovery action handlers."""

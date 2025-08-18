@@ -242,16 +242,29 @@ class AdaptiveTTLCalculator:
     """Calculate adaptive TTL based on query characteristics."""
     
     @staticmethod
+    def _get_base_calculation_values(
+        query: str, duration: float, query_patterns: Dict[str, int], config: QueryCacheConfig
+    ) -> tuple[int, float]:
+        """Get base values for TTL calculation."""
+        base_ttl = config.default_ttl
+        pattern = QueryPatternAnalyzer.normalize_query_pattern(query)
+        multipliers = AdaptiveTTLCalculator._calculate_multipliers(pattern, duration, query_patterns, config)
+        return base_ttl, multipliers
+    
+    @staticmethod
+    def _apply_final_adjustments(query: str, base_ttl: int, multipliers: float) -> int:
+        """Apply final adjustments to TTL calculation."""
+        adjusted_ttl = int(base_ttl * multipliers)
+        final_ttl = AdaptiveTTLCalculator.apply_time_sensitivity_limit(query, adjusted_ttl)
+        return max(final_ttl, 30)
+    
+    @staticmethod
     def _compute_adaptive_ttl(
         query: str, duration: float, query_patterns: Dict[str, int], config: QueryCacheConfig
     ) -> int:
         """Compute final adaptive TTL value."""
-        base_ttl = config.default_ttl
-        pattern = QueryPatternAnalyzer.normalize_query_pattern(query)
-        multipliers = AdaptiveTTLCalculator._calculate_multipliers(pattern, duration, query_patterns, config)
-        adjusted_ttl = int(base_ttl * multipliers)
-        final_ttl = AdaptiveTTLCalculator.apply_time_sensitivity_limit(query, adjusted_ttl)
-        return max(final_ttl, 30)
+        base_ttl, multipliers = AdaptiveTTLCalculator._get_base_calculation_values(query, duration, query_patterns, config)
+        return AdaptiveTTLCalculator._apply_final_adjustments(query, base_ttl, multipliers)
     
     @staticmethod
     def _calculate_multipliers(pattern: str, duration: float, query_patterns: Dict[str, int], config: QueryCacheConfig) -> float:

@@ -35,69 +35,89 @@ class CoreMetricsCalculator:
     async def calculate_basic_metrics(self, content: str) -> QualityMetrics:
         """Calculate basic text analysis metrics"""
         metrics = QualityMetrics()
-        
-        # Basic text analysis
+        self._calculate_text_stats(metrics, content)
+        self._calculate_numeric_values(metrics, content)
+        self._check_generic_phrases(metrics, content)
+        self._check_vague_terms(metrics, content)
+        self._check_circular_reasoning(metrics, content)
+        return metrics
+    
+    def _calculate_text_stats(self, metrics: QualityMetrics, content: str) -> None:
+        """Calculate word and sentence counts"""
         metrics.word_count = len(content.split())
         metrics.sentence_count = len(re.split(r'[.!?]+', content))
-        
-        # Count numeric values (including percentages, decimals, etc.)
+    
+    def _calculate_numeric_values(self, metrics: QualityMetrics, content: str) -> None:
+        """Count numeric values in content"""
         numeric_pattern = r'\b\d+(?:\.\d+)?(?:%|ms|GB|MB|KB|s|x|M|K)?\b'
         numeric_matches = re.findall(numeric_pattern, content)
         metrics.numeric_values_count = len(numeric_matches)
-        
-        # Check for generic phrases
+    
+    def _check_generic_phrases(self, metrics: QualityMetrics, content: str) -> None:
+        """Check for generic phrases and update metrics"""
         generic_matches = self.generic_pattern.findall(content)
         metrics.generic_phrase_count = len(generic_matches)
         if metrics.generic_phrase_count > 0:
             metrics.issues.append(f"Contains {metrics.generic_phrase_count} generic phrases")
-        
-        # Check for vague terms
+    
+    def _check_vague_terms(self, metrics: QualityMetrics, content: str) -> None:
+        """Check for vague terms and update issues"""
         vague_matches = self.vague_pattern.findall(content)
         if vague_matches:
             metrics.issues.append(f"Contains {len(vague_matches)} vague optimization terms without specifics")
-        
-        # Check for circular reasoning
+    
+    def _check_circular_reasoning(self, metrics: QualityMetrics, content: str) -> None:
+        """Check for circular reasoning and update metrics"""
         circular_matches = self.circular_pattern.findall(content)
         metrics.circular_reasoning_detected = len(circular_matches) > 0
         if metrics.circular_reasoning_detected:
             metrics.issues.append("Circular reasoning detected")
-        
-        return metrics
     
     async def calculate_specificity(self, content: str, content_type: ContentType) -> float:
         """Calculate how specific and detailed the content is"""
         score = 0.0
         content_lower = content.lower()
-        
-        # Check for domain-specific terms
+        score += self._calculate_domain_terms_score(content_lower)
+        score += self._calculate_numeric_metrics_score(content)
+        score += self._calculate_parameters_score(content)
+        score -= self._apply_vague_penalty(content)
+        score += self._calculate_content_type_specificity_bonus(content_type, content, content_lower)
+        return max(0.0, min(1.0, score))
+    
+    def _calculate_domain_terms_score(self, content_lower: str) -> float:
+        """Calculate score for domain-specific terms"""
         domain_term_count = sum(1 for term in self.patterns.DOMAIN_TERMS if term in content_lower)
-        score += min(domain_term_count * 0.05, 0.3)  # Up to 0.3 for domain terms
-        
-        # Check for numeric values (specific metrics)
+        return min(domain_term_count * 0.05, 0.3)
+    
+    def _calculate_numeric_metrics_score(self, content: str) -> float:
+        """Calculate score for numeric metrics"""
         numeric_pattern = r'\b\d+\.?\d*\s*(ms|%|x|GB|MB|KB|tokens?|requests?|QPS|RPS|FLOPS)\b'
         numeric_matches = re.findall(numeric_pattern, content, re.IGNORECASE)
-        score += min(len(numeric_matches) * 0.1, 0.3)  # Up to 0.3 for metrics
-        
-        # Check for specific parameter names or configurations
+        return min(len(numeric_matches) * 0.1, 0.3)
+    
+    def _calculate_parameters_score(self, content: str) -> float:
+        """Calculate score for parameter configurations"""
         param_pattern = r'(batch_size|learning_rate|temperature|top_[pk]|max_tokens|num_beams|context_window)\s*[=:]\s*\d+'
         param_matches = re.findall(param_pattern, content, re.IGNORECASE)
-        score += min(len(param_matches) * 0.15, 0.3)  # Up to 0.3 for parameters
-        
-        # Penalty for vague language
-        if self.vague_pattern.search(content):
-            score -= 0.2
-        
-        # Content type specific bonuses
+        return min(len(param_matches) * 0.15, 0.3)
+    
+    def _apply_vague_penalty(self, content: str) -> float:
+        """Apply penalty for vague language"""
+        return 0.2 if self.vague_pattern.search(content) else 0.0
+    
+    def _calculate_content_type_specificity_bonus(self, content_type: ContentType, content: str, content_lower: str) -> float:
+        """Calculate content type specific specificity bonuses"""
         if content_type == ContentType.OPTIMIZATION:
-            # Optimization content should mention specific techniques
-            optimization_terms = ["quantization", "pruning", "distillation", "caching", "batching", "parallelization"]
-            opt_count = sum(1 for term in optimization_terms if term in content_lower)
-            score += min(opt_count * 0.1, 0.2)
+            return self._calculate_optimization_specificity_bonus(content_lower)
         elif content_type == ContentType.ERROR_MESSAGE:
-            # ERROR_MESSAGE content should contain specific error indicators
-            score += self._calculate_error_specificity(content, content_lower)
-        
-        return max(0.0, min(1.0, score))
+            return self._calculate_error_specificity(content, content_lower)
+        return 0.0
+    
+    def _calculate_optimization_specificity_bonus(self, content_lower: str) -> float:
+        """Calculate optimization specific bonus"""
+        optimization_terms = ["quantization", "pruning", "distillation", "caching", "batching", "parallelization"]
+        opt_count = sum(1 for term in optimization_terms if term in content_lower)
+        return min(opt_count * 0.1, 0.2)
     
     async def calculate_actionability(self, content: str, content_type: ContentType) -> float:
         """Calculate how actionable the content is"""
@@ -221,36 +241,55 @@ class CoreMetricsCalculator:
     async def calculate_clarity(self, content: str) -> float:
         """Calculate clarity and readability of content"""
         score = 1.0
-        
         words = content.split()
-        sentences = re.split(r'[.!?]+', content)
-        sentences = [s for s in sentences if s.strip()]
-        
-        if sentences:
-            avg_sentence_length = len(words) / len(sentences)
-            if avg_sentence_length > 40:
-                score -= 0.5  # Heavy penalty for very long sentences
-            elif avg_sentence_length > 30:
-                score -= 0.2  # Moderate penalty for long sentences
-        
-        # Check for excessive jargon without explanation
+        sentences = [s for s in re.split(r'[.!?]+', content) if s.strip()]
+        score -= self._calculate_sentence_length_penalty(words, sentences)
+        score -= self._calculate_jargon_penalty(content)
+        score -= self._calculate_punctuation_penalty(content, sentences)
+        score += self._calculate_structure_bonus(content)
+        return max(0.0, min(1.0, score))
+    
+    def _calculate_sentence_length_penalty(self, words: list, sentences: list) -> float:
+        """Calculate penalty for long sentences"""
+        if not sentences:
+            return 0.0
+        avg_sentence_length = len(words) / len(sentences)
+        return self._get_length_penalty(avg_sentence_length)
+    
+    def _get_length_penalty(self, avg_length: float) -> float:
+        """Get penalty based on average sentence length"""
+        if avg_length > 40:
+            return 0.5
+        elif avg_length > 30:
+            return 0.2
+        return 0.0
+    
+    def _calculate_jargon_penalty(self, content: str) -> float:
+        """Calculate penalty for excessive jargon"""
         jargon_pattern = r'\b[A-Z]{3,}\b'
         jargon_matches = re.findall(jargon_pattern, content)
-        if len(jargon_matches) > 5:
-            score -= 0.1
-        
-        # Check for nested parentheses or excessive punctuation
+        return 0.1 if len(jargon_matches) > 5 else 0.0
+    
+    def _calculate_punctuation_penalty(self, content: str, sentences: list) -> float:
+        """Calculate penalty for excessive punctuation"""
+        penalty = 0.0
+        penalty += self._calculate_parentheses_penalty(content, sentences)
+        penalty += self._calculate_comma_penalty(content, sentences)
+        return penalty
+    
+    def _calculate_parentheses_penalty(self, content: str, sentences: list) -> float:
+        """Calculate penalty for excessive parentheses"""
         paren_count = content.count('(')
-        if paren_count > 2 and sentences:  # 3+ parentheses in a sentence is confusing
-            score -= min(paren_count * 0.02, 0.1)  # Progressive penalty
-        if content.count(',') > len(sentences) * 3:
-            score -= 0.1
-        
-        # Check for clear structure markers
-        if any(marker in content.lower() for marker in ['first', 'second', 'finally', 'in summary']):
-            score += 0.1
-        
-        return max(0.0, min(1.0, score))
+        return min(paren_count * 0.02, 0.1) if paren_count > 2 and sentences else 0.0
+    
+    def _calculate_comma_penalty(self, content: str, sentences: list) -> float:
+        """Calculate penalty for excessive commas"""
+        return 0.1 if content.count(',') > len(sentences) * 3 else 0.0
+    
+    def _calculate_structure_bonus(self, content: str) -> float:
+        """Calculate bonus for clear structure markers"""
+        structure_markers = ['first', 'second', 'finally', 'in summary']
+        return 0.1 if any(marker in content.lower() for marker in structure_markers) else 0.0
     
     async def calculate_redundancy(self, content: str) -> float:
         """Calculate redundancy ratio in content"""

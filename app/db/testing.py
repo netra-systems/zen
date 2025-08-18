@@ -4,14 +4,23 @@ from app.config import settings
 from app.db.base import Base
 
 # Convert database URL to async format if needed
-def get_async_database_url():
-    db_url = settings.database_url
+def _convert_postgresql_url(db_url: str) -> str:
+    """Convert postgresql:// to postgresql+asyncpg://"""
     if db_url.startswith("postgresql://"):
-        # Replace with asyncpg driver
-        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://")
-    elif db_url.startswith("postgres://"):
-        # Handle older postgres:// format
-        db_url = db_url.replace("postgres://", "postgresql+asyncpg://")
+        return db_url.replace("postgresql://", "postgresql+asyncpg://")
+    return db_url
+
+def _convert_postgres_url(db_url: str) -> str:
+    """Convert postgres:// to postgresql+asyncpg://"""
+    if db_url.startswith("postgres://"):
+        return db_url.replace("postgres://", "postgresql+asyncpg://")
+    return db_url
+
+def get_async_database_url() -> str:
+    """Convert database URL to async format if needed"""
+    db_url = settings.database_url
+    db_url = _convert_postgresql_url(db_url)
+    db_url = _convert_postgres_url(db_url)
     return db_url
 
 engine = create_async_engine(get_async_database_url(), echo=False, future=True)

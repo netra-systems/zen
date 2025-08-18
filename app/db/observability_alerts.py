@@ -37,11 +37,9 @@ class ConnectionAlertChecker:
     def create_connection_usage_alert(usage_rate: float, threshold: float) -> Dict[str, Any]:
         """Create connection usage alert."""
         return {
-            'type': 'connection_usage_high',
-            'severity': 'warning',
+            'type': 'connection_usage_high', 'severity': 'warning',
             'message': f'Connection usage at {usage_rate:.1%}',
-            'value': usage_rate,
-            'threshold': threshold
+            'value': usage_rate, 'threshold': threshold
         }
 
     @staticmethod
@@ -61,22 +59,18 @@ class QueryAlertChecker:
     def create_slow_query_alert(avg_time: float, threshold: float) -> Dict[str, Any]:
         """Create slow query alert."""
         return {
-            'type': 'slow_queries',
-            'severity': 'warning',
+            'type': 'slow_queries', 'severity': 'warning',
             'message': f'Average query time {avg_time:.2f}s',
-            'value': avg_time,
-            'threshold': threshold
+            'value': avg_time, 'threshold': threshold
         }
 
     @staticmethod
     def create_slow_query_rate_alert(rate: float, threshold: float) -> Dict[str, Any]:
         """Create slow query rate alert."""
         return {
-            'type': 'slow_query_rate_high',
-            'severity': 'warning',
+            'type': 'slow_query_rate_high', 'severity': 'warning',
             'message': f'Slow query rate at {rate:.1%}',
-            'value': rate,
-            'threshold': threshold
+            'value': rate, 'threshold': threshold
         }
 
     @staticmethod
@@ -109,11 +103,9 @@ class CacheAlertChecker:
     def create_cache_hit_rate_alert(hit_rate: float, threshold: float) -> Dict[str, Any]:
         """Create cache hit rate alert."""
         return {
-            'type': 'cache_hit_rate_low',
-            'severity': 'info',
+            'type': 'cache_hit_rate_low', 'severity': 'info',
             'message': f'Cache hit rate at {hit_rate:.1%}',
-            'value': hit_rate,
-            'threshold': threshold
+            'value': hit_rate, 'threshold': threshold
         }
 
     @staticmethod
@@ -131,11 +123,9 @@ class TransactionAlertChecker:
     def create_active_transactions_alert(count: int, threshold: int) -> Dict[str, Any]:
         """Create active transactions alert."""
         return {
-            'type': 'active_transactions_high',
-            'severity': 'critical',
+            'type': 'active_transactions_high', 'severity': 'critical',
             'message': f'{count} active transactions',
-            'value': count,
-            'threshold': threshold
+            'value': count, 'threshold': threshold
         }
 
     @staticmethod
@@ -158,17 +148,21 @@ class AlertHandler:
         alert['timestamp'] = datetime.now().isoformat()
 
     @staticmethod
-    def log_alert_by_severity(alert: Dict[str, Any]) -> None:
-        """Log alert based on severity."""
-        severity = alert['severity']
-        message = alert['message']
-        
+    def _log_with_severity_level(severity: str, message: str) -> None:
+        """Log message with appropriate severity level."""
         if severity == 'critical':
             logger.critical(f"Database Alert: {message}")
         elif severity == 'warning':
             logger.warning(f"Database Alert: {message}")
         else:
             logger.info(f"Database Alert: {message}")
+
+    @staticmethod
+    def log_alert_by_severity(alert: Dict[str, Any]) -> None:
+        """Log alert based on severity."""
+        severity = alert['severity']
+        message = alert['message']
+        AlertHandler._log_with_severity_level(severity, message)
 
     @staticmethod
     async def call_alert_callback(alert: Dict[str, Any], callback) -> None:

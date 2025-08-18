@@ -46,18 +46,32 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     
     def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher):
         """Initialize with modern execution patterns."""
+        self._initialize_base_classes(llm_manager)
+        self.tool_dispatcher = tool_dispatcher
+        self._setup_modern_execution_infrastructure()
+        self._setup_backward_compatibility()
+
+    def _initialize_base_classes(self, llm_manager: LLMManager) -> None:
+        """Initialize base classes for the agent."""
         BaseSubAgent.__init__(
             self, llm_manager, 
             name="ActionsToMeetGoalsSubAgent", 
             description="This agent creates a plan of action."
         )
         BaseExecutionInterface.__init__(self, "ActionsToMeetGoalsSubAgent")
-        
-        self.tool_dispatcher = tool_dispatcher
-        
-        # Modern execution infrastructure
+
+    def _setup_modern_execution_infrastructure(self) -> None:
+        """Setup modern execution infrastructure components."""
         self.monitor = ExecutionMonitor()
-        self.reliability_manager = ReliabilityManager(
+        self.reliability_manager = self._create_reliability_manager()
+        self.execution_engine = BaseExecutionEngine(
+            self.reliability_manager, self.monitor
+        )
+        self.error_handler = ExecutionErrorHandler()
+
+    def _create_reliability_manager(self) -> ReliabilityManager:
+        """Create configured reliability manager."""
+        return ReliabilityManager(
             circuit_breaker_config=CircuitBreakerConfig(
                 name="ActionsToMeetGoalsSubAgent",
                 failure_threshold=5,
@@ -68,14 +82,12 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
                 base_delay=1.0
             )
         )
-        self.execution_engine = BaseExecutionEngine(
-            self.reliability_manager, self.monitor
-        )
-        self.error_handler = ExecutionErrorHandler()
-        
-        # Backward compatibility
-        self.reliability = create_agent_reliability_wrapper("ActionsToMeetGoalsSubAgent")
-        self.fallback_strategy = create_agent_fallback_strategy("ActionsToMeetGoalsSubAgent")
+
+    def _setup_backward_compatibility(self) -> None:
+        """Setup backward compatibility components."""
+        agent_name = "ActionsToMeetGoalsSubAgent"
+        self.reliability = create_agent_reliability_wrapper(agent_name)
+        self.fallback_strategy = create_agent_fallback_strategy(agent_name)
 
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
         """Validate execution preconditions."""
@@ -88,30 +100,29 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
 
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute core action plan generation logic."""
-        state = context.state
-        run_id = context.run_id
-        
-        # Send processing update
         await self.send_status_update(
             context, "executing", 
             "Creating action plan based on optimization strategies..."
         )
-        
-        # Generate action plan
+        action_plan_result = await self._execute_action_plan_generation(context)
+        await self._update_state_and_notify(context, action_plan_result)
+        return {"action_plan_result": action_plan_result}
+
+    async def _execute_action_plan_generation(self, context: ExecutionContext) -> ActionPlanResult:
+        """Generate action plan from state data."""
+        state = context.state
+        run_id = context.run_id
         prompt = self._build_action_plan_prompt(state)
         llm_response = await self._get_llm_response(prompt, run_id)
-        action_plan_result = await self._process_llm_response(llm_response, run_id)
-        
-        # Update state
-        state.action_plan_result = action_plan_result
-        
-        # Send completion update
+        return await self._process_llm_response(llm_response, run_id)
+
+    async def _update_state_and_notify(self, context: ExecutionContext, action_plan_result: ActionPlanResult) -> None:
+        """Update state with result and send completion notification."""
+        context.state.action_plan_result = action_plan_result
         await self.send_status_update(
             context, "completed",
             "Action plan created successfully"
         )
-        
-        return {"action_plan_result": action_plan_result}
 
     async def send_status_update(
         self, context: ExecutionContext, 
@@ -119,15 +130,24 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
     ) -> None:
         """Send status update via WebSocket."""
         if context.stream_updates:
-            status_map = {
-                "executing": "processing",
-                "completed": "processed",
-                "failed": "error"
-            }
-            await self._send_update(context.run_id, {
-                "status": status_map.get(status, status),
-                "message": message
-            })
+            mapped_status = self._map_status_to_websocket_format(status)
+            await self._send_mapped_update(context.run_id, mapped_status, message)
+
+    def _map_status_to_websocket_format(self, status: str) -> str:
+        """Map internal status to websocket format."""
+        status_map = {
+            "executing": "processing",
+            "completed": "processed",
+            "failed": "error"
+        }
+        return status_map.get(status, status)
+
+    async def _send_mapped_update(self, run_id: str, status: str, message: str) -> None:
+        """Send the mapped status update."""
+        await self._send_update(run_id, {
+            "status": status,
+            "message": message
+        })
 
     @validate_agent_input('ActionsToMeetGoalsSubAgent')
     async def execute(
@@ -135,37 +155,50 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
         run_id: str, stream_updates: bool
     ) -> None:
         """Modernized execute using BaseExecutionEngine."""
+        self._log_execution_start(run_id)
+        context = self._create_execution_context(state, run_id, stream_updates)
+        await self._execute_with_modern_pattern_and_fallback(context, state, run_id, stream_updates)
+        self._log_execution_end(run_id)
+
+    def _log_execution_start(self, run_id: str) -> None:
+        """Log execution start communication."""
         log_agent_communication(
             "Supervisor", "ActionsToMeetGoalsSubAgent", 
             run_id, "execute_request"
         )
-        
-        # Create execution context
-        context = ExecutionContext(
+
+    def _create_execution_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> ExecutionContext:
+        """Create execution context for the request."""
+        return ExecutionContext(
             run_id=run_id,
             agent_name=self.name,
             state=state,
             stream_updates=stream_updates,
             metadata={"description": self.description}
         )
-        
+
+    async def _execute_with_modern_pattern_and_fallback(
+        self, context: ExecutionContext, state: DeepAgentState, 
+        run_id: str, stream_updates: bool
+    ) -> None:
+        """Execute with modern pattern and fallback on failure."""
         try:
-            # Execute with modern pattern
-            result = await self.execution_engine.execute(self, context)
-            
-            # Handle result
-            if not result.success:
-                await self._handle_execution_failure(result, state, run_id)
-            
+            await self._execute_with_modern_pattern(context, state, run_id)
         except Exception as e:
-            # Fallback to legacy execution
             await self._execute_fallback_workflow(state, run_id, stream_updates)
-            
-        finally:
-            log_agent_communication(
-                "ActionsToMeetGoalsSubAgent", "Supervisor",
-                run_id, "execute_response"
-            )
+
+    async def _execute_with_modern_pattern(self, context: ExecutionContext, state: DeepAgentState, run_id: str) -> None:
+        """Execute using modern execution pattern."""
+        result = await self.execution_engine.execute(self, context)
+        if not result.success:
+            await self._handle_execution_failure(result, state, run_id)
+
+    def _log_execution_end(self, run_id: str) -> None:
+        """Log execution end communication."""
+        log_agent_communication(
+            "ActionsToMeetGoalsSubAgent", "Supervisor",
+            run_id, "execute_response"
+        )
 
     async def _handle_execution_failure(
         self, result: ExecutionResult,
@@ -198,25 +231,38 @@ class ActionsToMeetGoalsSubAgent(BaseExecutionInterface, BaseSubAgent):
 
     async def _get_llm_response(self, prompt: str, run_id: str) -> str:
         """Get LLM response with monitoring."""
-        correlation_id = generate_llm_correlation_id()
-        start_llm_heartbeat(correlation_id, "ActionsToMeetGoalsSubAgent")
+        correlation_id = self._prepare_llm_request(prompt, run_id)
         try:
-            self._log_prompt_size(prompt, run_id)
-            log_agent_input(
-                "ActionsToMeetGoalsSubAgent", "LLM",
-                len(prompt), correlation_id
-            )
-            response = await self.llm_manager.ask_llm(
-                prompt, llm_config_name='actions_to_meet_goals'
-            )
-            log_agent_output(
-                "LLM", "ActionsToMeetGoalsSubAgent",
-                len(response) if response else 0,
-                "success", correlation_id
-            )
+            response = await self._execute_llm_request(prompt, correlation_id)
+            self._finalize_llm_request_success(response, correlation_id)
             return response
         finally:
             stop_llm_heartbeat(correlation_id)
+
+    def _prepare_llm_request(self, prompt: str, run_id: str) -> str:
+        """Prepare LLM request with logging and monitoring setup."""
+        correlation_id = generate_llm_correlation_id()
+        start_llm_heartbeat(correlation_id, "ActionsToMeetGoalsSubAgent")
+        self._log_prompt_size(prompt, run_id)
+        log_agent_input(
+            "ActionsToMeetGoalsSubAgent", "LLM",
+            len(prompt), correlation_id
+        )
+        return correlation_id
+
+    async def _execute_llm_request(self, prompt: str, correlation_id: str) -> str:
+        """Execute the actual LLM request."""
+        return await self.llm_manager.ask_llm(
+            prompt, llm_config_name='actions_to_meet_goals'
+        )
+
+    def _finalize_llm_request_success(self, response: str, correlation_id: str) -> None:
+        """Finalize successful LLM request with output logging."""
+        log_agent_output(
+            "LLM", "ActionsToMeetGoalsSubAgent",
+            len(response) if response else 0,
+            "success", correlation_id
+        )
 
     async def _process_llm_response(
         self, llm_response: str, run_id: str

@@ -29,29 +29,46 @@ class PostgreSQLIndexOptimizer:
         self.performance_analyzer = PostgreSQLPerformanceAnalyzer()
         self._setup_performance_indexes()
     
-    def _setup_performance_indexes(self):
-        """Setup predefined performance indexes."""
-        self._performance_indexes = [
-            # User table optimizations
+    def _get_user_table_indexes(self) -> List[tuple]:
+        """Get user table index definitions."""
+        return [
             ("userbase", ["email"], "btree", "Unique email lookups"),
             ("userbase", ["created_at"], "btree", "User creation time queries"),
             ("userbase", ["plan_tier", "is_active"], "btree", "Plan filtering"),
             ("userbase", ["role", "is_developer"], "btree", "Role access control"),
-            
-            # Audit log optimizations  
+        ]
+    
+    def _get_audit_log_indexes(self) -> List[tuple]:
+        """Get audit log index definitions."""
+        return [
             ("corpus_audit_logs", ["timestamp"], "btree", "Time-based queries"),
             ("corpus_audit_logs", ["user_id", "timestamp"], "btree", "User history"),
             ("corpus_audit_logs", ["action", "status"], "btree", "Action filtering"),
             ("corpus_audit_logs", ["corpus_id", "action"], "btree", "Corpus ops"),
-            
-            # Secret management
+        ]
+    
+    def _get_secret_management_indexes(self) -> List[tuple]:
+        """Get secret management index definitions."""
+        return [
             ("secret", ["user_id"], "btree", "User secret lookups"),
             ("secret", ["provider", "is_active"], "btree", "Provider filtering"),
-            
-            # Agent state optimizations
+        ]
+    
+    def _get_agent_state_indexes(self) -> List[tuple]:
+        """Get agent state index definitions."""
+        return [
             ("agent_states", ["user_id", "updated_at"], "btree", "User states"),
             ("agent_states", ["session_id"], "btree", "Session lookups"),
         ]
+    
+    def _setup_performance_indexes(self):
+        """Setup predefined performance indexes."""
+        indexes = []
+        indexes.extend(self._get_user_table_indexes())
+        indexes.extend(self._get_audit_log_indexes())
+        indexes.extend(self._get_secret_management_indexes())
+        indexes.extend(self._get_agent_state_indexes())
+        self._performance_indexes = indexes
     
     async def _load_and_register_existing_indexes(self, session) -> None:
         """Load existing indexes and register them."""

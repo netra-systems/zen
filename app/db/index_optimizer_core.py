@@ -70,17 +70,28 @@ class QueryAnalyzer:
     """SQL query analysis utilities."""
     
     @staticmethod
-    def extract_where_conditions(query: str) -> List[str]:
-        """Extract WHERE clause equality conditions."""
+    def _extract_where_clause(query_lower: str) -> Optional[str]:
+        """Extract WHERE clause from lowercased query."""
         import re
-        query_lower = query.lower()
         where_match = re.search(
             r'where\s+(.+?)(?:\s+order\s+by|\s+group\s+by|\s+limit|$)', 
             query_lower
         )
-        if where_match:
-            where_clause = where_match.group(1)
-            return re.findall(r'(\w+)\s*=\s*', where_clause)
+        return where_match.group(1) if where_match else None
+    
+    @staticmethod
+    def _find_equality_columns(where_clause: str) -> List[str]:
+        """Find columns with equality conditions in WHERE clause."""
+        import re
+        return re.findall(r'(\w+)\s*=\s*', where_clause)
+    
+    @staticmethod
+    def extract_where_conditions(query: str) -> List[str]:
+        """Extract WHERE clause equality conditions."""
+        query_lower = query.lower()
+        where_clause = QueryAnalyzer._extract_where_clause(query_lower)
+        if where_clause:
+            return QueryAnalyzer._find_equality_columns(where_clause)
         return []
     
     @staticmethod
