@@ -44,6 +44,13 @@ def get_config() -> AppConfig:
     **PREFERRED METHOD**: Use this for all new code.
     Single source of truth for Enterprise reliability.
     """
+    import os
+    import sys
+    # Debug logging for Gemini API key issue
+    if 'GEMINI_API_KEY' in os.environ:
+        print(f"[CONFIG] GEMINI_API_KEY found in environment", file=sys.stderr)
+    else:
+        print(f"[CONFIG] WARNING: GEMINI_API_KEY not in environment!", file=sys.stderr)
     return get_unified_config()
 
 def reload_config():
@@ -56,7 +63,18 @@ def validate_configuration() -> tuple[bool, list]:
 
 # BACKWARD COMPATIBILITY: Legacy access methods
 config_manager = unified_config_manager  # Export unified manager
-settings = get_config()  # Auto-load settings
+
+# LAZY LOADING: Don't auto-load at import time to allow environment setup
+_settings_cache = None
+
+def __getattr__(name):
+    """Lazy load settings on first access."""
+    global _settings_cache
+    if name == "settings":
+        if _settings_cache is None:
+            _settings_cache = get_config()
+        return _settings_cache
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 # LEGACY FALLBACK: Only used if unified system fails
 def get_legacy_config() -> AppConfig:

@@ -79,11 +79,17 @@ class UnifiedMessagingManager:
         self.validator = MessageValidator()
         self.user_queues: Dict[str, MessageQueue] = {}
         self.message_stats = {"sent": 0, "received": 0, "failed": 0, "validated": 0}
-        self._start_queue_processor()
+        self._queue_processor_started = False
 
-    def _start_queue_processor(self) -> None:
-        """Start background queue processing for zero-loss delivery."""
-        asyncio.create_task(self._process_queues_continuously())
+    def _ensure_queue_processor_started(self) -> None:
+        """Lazily start queue processor when first needed."""
+        if not self._queue_processor_started:
+            try:
+                asyncio.create_task(self._process_queues_continuously())
+                self._queue_processor_started = True
+            except RuntimeError:
+                # No event loop running yet, will start later
+                pass
 
     async def _process_queues_continuously(self) -> None:
         """Continuously process message queues for reliable delivery."""
@@ -119,6 +125,7 @@ class UnifiedMessagingManager:
                           message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
                           retry: bool = True) -> bool:
         """Send message to user with zero-loss guarantee."""
+        self._ensure_queue_processor_started()
         validated_message = self._prepare_and_validate_message(message)
         if not validated_message:
             return False

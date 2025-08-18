@@ -28,9 +28,10 @@ class BadTestDetector:
     
     def _get_default_data_file(self) -> Path:
         """Get default data file path."""
+        # Now using single test_results.json file
         reports_dir = Path(__file__).parent.parent / "test_reports"
         reports_dir.mkdir(exist_ok=True)
-        return reports_dir / "bad_tests.json"
+        return reports_dir / "test_results.json"
     
     def _generate_run_id(self) -> str:
         """Generate unique run ID."""

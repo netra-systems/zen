@@ -44,12 +44,24 @@ class QueryExecutor:
         return _read_operation
 
     @staticmethod
-    async def execute_read_query(query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
-        """Execute read query with circuit breaker protection."""
-        read_circuit = await CircuitBreakerManager.get_read_circuit()
-        try:
+    async def create_postgres_operation(query: str, params: Optional[Dict[str, Any]]):
+        """Create postgres operation that handles connection and delegates to read circuit."""
+        async def _postgres_operation():
+            read_circuit = await CircuitBreakerManager.get_read_circuit()
             read_operation = await QueryExecutor.create_read_operation(query, params)
             return await read_circuit.call(read_operation)
+        return _postgres_operation
+
+    @staticmethod
+    async def execute_read_query(query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Execute read query with circuit breaker protection."""
+        postgres_circuit = await CircuitBreakerManager.get_postgres_circuit()
+        read_circuit = await CircuitBreakerManager.get_read_circuit()
+        
+        # Use postgres circuit for connection-level operations
+        try:
+            postgres_operation = await QueryExecutor.create_postgres_operation(query, params)
+            return await postgres_circuit.call(postgres_operation)
         except CircuitBreakerOpenError:
             return await QueryExecutor.handle_read_circuit_open()
 

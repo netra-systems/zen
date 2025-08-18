@@ -75,15 +75,13 @@ class UnifiedTestRunner:
     
     def save_test_report(self, level: str, config: Dict, output: str, exit_code: int):
         """Save test report to test_reports directory with comprehensive reporting."""
-        # Use comprehensive reporter
+        # Use comprehensive reporter ONLY - single source of truth
         self.comprehensive_reporter.generate_comprehensive_report(
             level=level,
             results=self.results,
             config=config,
             exit_code=exit_code
         )
-        # Also save traditional reports for backward compatibility
-        save_test_report(self.results, level, config, exit_code, self.reports_dir, self.staging_mode)
     
     
     def generate_json_report(self, level: str, config: Dict, exit_code: int) -> Dict:

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning category="configuration_secrets" date="2025-08-18" priority="CRITICAL">
+  <title>GEMINI API Key Loading Paradox - RESOLVED</title>
+  
+  <problem>
+    <symptom>Dev launcher shows loading GEMINI_API_KEY successfully but backend reports "Required secrets missing: ['gemini-api-key']"</symptom>
+    <symptom>Logging shows app.core.unified_logging instead of actual module locations</symptom>
+    <impact>Backend fails to start due to missing secrets that are actually present</impact>
+  </problem>
+  
+  <root_cause>
+    <issue type="timing">
+      Configuration loading happens at module import time, not runtime.
+      app/config.py line 59 executes "settings = get_config()" immediately on import.
+      This happens BEFORE subprocess environment is fully available.
+    </issue>
+    <issue type="logging">
+      Unified logging wrapper doesn't preserve caller frame information.
+      All logs appear to come from unified_logging module instead of actual callers.
+    </issue>
+  </root_cause>
+  
+  <solution>
+    <fix file="app/config.py">
+      Changed from eager loading (settings = get_config()) to lazy loading.
+      Used __getattr__ to load settings only on first access.
+      This allows environment variables to be fully set before configuration loads.
+    </fix>
+    <fix file="app/core/unified_logging.py">
+      Added frame inspection to capture actual caller location.
+      Used logger.opt(depth=3) to skip wrapper frames.
+      Added caller_module, caller_function, caller_line to context.
+    </fix>
+    <fix file="app/core/logging_formatters.py">
+      Updated console format to use caller info from context.
+      Changed from {name}:{function}:{line} to {extra[caller_module]}:{extra[caller_function]}:{extra[caller_line]}.
+    </fix>
+  </solution>
+  
+  <lessons>
+    <lesson>NEVER load configuration at module import time - always use lazy loading</lesson>
+    <lesson>Module-level code executes immediately on import, before subprocess env is ready</lesson>
+    <lesson>When wrapping loggers, preserve caller frame information for debugging</lesson>
+    <lesson>Environment variables in subprocesses may not be immediately available at import time</lesson>
+  </lessons>
+  
+  <prevention>
+    <guideline>Always use lazy initialization for configuration that depends on environment</guideline>
+    <guideline>Never execute configuration loading at module level</guideline>
+    <guideline>Use __getattr__ or property decorators for lazy attribute access</guideline>
+    <guideline>Test subprocess environment inheritance with timing scenarios</guideline>
+  </prevention>
+  
+  <verification>
+    <test>Run dev_launcher.py and verify no "Required secrets missing" error</test>
+    <test>Check logs show actual module names like app.core.configuration.secrets:113</test>
+    <test>Verify GEMINI_API_KEY is available when config is accessed</test>
+  </verification>
+</learning>

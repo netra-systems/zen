@@ -313,7 +313,11 @@ def _create_agent_registry() -> Dict[str, Mock]:
 def _apply_state_kwargs(state: DeepAgentState, kwargs: Dict[str, Any]) -> None:
     """Apply keyword arguments to state"""
     for key, value in kwargs.items():
-        if key not in ['thread_id', 'user_id']:
+        if key == 'thread_id':
+            state.chat_thread_id = value
+        elif key == 'user_id':
+            state.user_id = value
+        elif hasattr(state, key):
             setattr(state, key, value)
 
 

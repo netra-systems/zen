@@ -246,6 +246,10 @@ class AdaptiveCircuitBreaker:
         """Get circuit breaker metrics."""
         return self._build_metrics_dict()
     
+    def get_status(self) -> Dict[str, Any]:
+        """Get circuit breaker status (compatibility method)."""
+        return self.get_metrics()
+    
     
     def _build_metrics_dict(self) -> Dict[str, Any]:
         """Build comprehensive metrics dictionary."""

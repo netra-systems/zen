@@ -180,10 +180,11 @@ class LogFormatter:
     
     def _get_base_console_format(self) -> str:
         """Get the base console format string."""
+        # Use caller info if available, otherwise fall back to standard location
         return (
             "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
             "<level>{level: <8}</level> | "
-            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> | "
+            "<cyan>{extra[caller_module]:.0}</cyan>{name}<cyan>{extra[caller_function]:.0}</cyan>{function}:<cyan>{extra[caller_line]:.0}</cyan>{line} | "
             "<level>{message}</level>"
         )
     

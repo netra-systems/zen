@@ -245,12 +245,18 @@ class UnifiedStateManager:
         self.telemetry = TelemetryCollector()
         self.queue_manager = JobQueueManager()
         self.health_status = {"status": "healthy", "last_check": time.time()}
-        self._start_background_tasks()
+        self._background_tasks_started = False
 
-    def _start_background_tasks(self) -> None:
-        """Start background telemetry and health monitoring tasks."""
-        asyncio.create_task(self._telemetry_update_loop())
-        asyncio.create_task(self._health_monitoring_loop())
+    def _ensure_background_tasks_started(self) -> None:
+        """Lazily start background tasks when first needed."""
+        if not self._background_tasks_started:
+            try:
+                asyncio.create_task(self._telemetry_update_loop())
+                asyncio.create_task(self._health_monitoring_loop())
+                self._background_tasks_started = True
+            except RuntimeError:
+                # No event loop running yet, will start later
+                pass
 
     async def _telemetry_update_loop(self) -> None:
         """Continuously update telemetry metrics."""
@@ -305,6 +311,7 @@ class UnifiedStateManager:
     # Connection state management
     def track_new_connection(self, conn_info: ConnectionInfo) -> None:
         """Track new connection in state manager."""
+        self._ensure_background_tasks_started()
         self.telemetry.track_connection(conn_info)
 
     def update_connection_activity(self, connection_id: str, activity_type: str, byte_count: int = 0) -> None:

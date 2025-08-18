@@ -169,85 +169,73 @@ class WebSocketManager:
         return self._unified_manager.get_queue_size(job_id)
 
     async def notify_batch_complete(self, job_id: str, batch_num: int, batch_size: int) -> bool:
-        """Send batch completion notification to job connections."""
-        message = {
-            "type": "batch_complete",
-            "job_id": job_id,
-            "batch_num": batch_num,
-            "batch_size": batch_size
-        }
-        return await self.broadcast_to_job(job_id, message)
+        """CONSOLIDATED: Delegate to unified batch notification."""
+        return await self._unified_manager.broadcasting.notify_batch_complete(job_id, batch_num, batch_size)
 
     async def notify_error(self, job_id: str, error_data: Dict[str, Any]) -> bool:
-        """Send error notification to job connections."""
-        return await self.broadcast_to_job(job_id, error_data)
+        """CONSOLIDATED: Delegate to unified error notification."""
+        return await self._unified_manager.broadcasting.notify_job_error(job_id, error_data)
 
     async def notify_completion(self, job_id: str, completion_data: Dict[str, Any]) -> bool:
-        """Send completion notification to job connections."""
-        return await self.broadcast_to_job(job_id, completion_data)
+        """CONSOLIDATED: Delegate to unified completion notification."""
+        return await self._unified_manager.broadcasting.notify_job_completion(job_id, completion_data)
 
     def set_job_state(self, job_id: str, state: Dict[str, Any]) -> None:
-        """Store job state."""
-        if not hasattr(self.core, 'job_states'):
-            self.core.job_states = {}
-        self.core.job_states[job_id] = state
+        """CONSOLIDATED: Delegate to unified job state management."""
+        self._unified_manager.state.set_job_state(job_id, state)
 
     def get_job_state(self, job_id: str) -> Dict[str, Any]:
-        """Retrieve job state."""
-        return getattr(self.core, 'job_states', {}).get(job_id, {})
+        """CONSOLIDATED: Delegate to unified job state management."""
+        return self._unified_manager.state.get_job_state(job_id)
 
     async def start_heartbeat(self, job_id: str, interval_seconds: int = 30) -> None:
-        """Start heartbeat for job connections."""
-        self._update_heartbeat_config(interval_seconds)
-        room_connections = self.core.room_manager.get_room_connections(job_id)
-        await self._start_heartbeats_for_room(room_connections)
+        """CONSOLIDATED: Heartbeat management via unified system."""
+        # For backward compatibility, log the heartbeat request
+        logger.info(f"Heartbeat requested for job {job_id} with interval {interval_seconds}s")
+        # The unified system handles heartbeats automatically
 
     def _update_heartbeat_config(self, interval_seconds: int) -> None:
-        """Update heartbeat configuration if needed."""
-        if interval_seconds != self.core.heartbeat_manager.config.interval_seconds:
-            self.core.heartbeat_manager.config.interval_seconds = interval_seconds
+        """DEPRECATED: Heartbeat configuration handled by unified system."""
+        pass
 
     async def _start_heartbeats_for_room(self, room_connections) -> None:
-        """Start heartbeats for all connections in room."""
-        for user_id in room_connections:
-            user_connections = self.core.connection_manager.get_user_connections(user_id)
-            for conn_info in user_connections:
-                await self.core.heartbeat_manager.start_heartbeat_for_connection(conn_info)
+        """DEPRECATED: Heartbeat management handled by unified system."""
+        pass
 
-    # Agent compatibility methods (required by BaseAgent)
+    # CONSOLIDATED: Agent compatibility methods delegating to unified system
     async def send_message(self, user_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
                           retry: bool = True) -> bool:
-        """Send message - alias for send_message_to_user (agent compatibility)."""
+        """CONSOLIDATED: Agent compatibility alias."""
         return await self.send_message_to_user(user_id, message, retry)
     
     async def send_error(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
-        """Send error - alias for send_error_to_user (agent compatibility)."""
+        """CONSOLIDATED: Agent compatibility alias."""
         return await self.send_error_to_user(user_id, error_message, sub_agent_name)
     
     async def send_agent_update(self, user_id: str, sub_agent_name: str, state: Dict[str, Any]) -> None:
-        """Send agent update - alias for send_sub_agent_update (agent compatibility)."""
+        """CONSOLIDATED: Agent compatibility alias."""
         await self.send_sub_agent_update(user_id, sub_agent_name, state)
 
-    # Legacy method names for backward compatibility
+    # CONSOLIDATED: Legacy method aliases for backward compatibility
     async def connect(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
-        """Connect to a job - alias for connect_to_job."""
+        """CONSOLIDATED: Legacy compatibility alias."""
         return await self.connect_to_job(websocket, job_id)
 
     async def disconnect(self, job_id: str) -> None:
-        """Disconnect from a job - alias for disconnect_from_job."""
+        """CONSOLIDATED: Legacy compatibility alias."""
         await self.disconnect_from_job(job_id)
 
 
-# Global manager instance with lazy initialization
+# CONSOLIDATED: Global manager instance delegating to unified system
 _manager: Optional[WebSocketManager] = None
 
 def get_manager() -> WebSocketManager:
-    """Get WebSocket manager instance with lazy initialization."""
+    """CONSOLIDATED: Get consolidated WebSocket manager delegating to unified system."""
     global _manager
     if _manager is None:
         _manager = WebSocketManager()
     return _manager
 
-# Initialize on first access to maintain compatibility
+# CONSOLIDATED: Maintain compatibility while using unified system
 manager = get_manager()
 ws_manager = manager  # Alias for compatibility

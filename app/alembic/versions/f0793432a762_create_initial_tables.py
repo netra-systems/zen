@@ -8,11 +8,11 @@ Re-exports migration functions from focused modules for Alembic compatibility.
 """
 
 # Import metadata and functions from focused modules
-from .migration_metadata import (
+from ..migrations_helpers.migration_metadata import (
     revision, down_revision, branch_labels, depends_on
 )
-from .upgrade_workflow import upgrade
-from .downgrade_workflow import downgrade
+from ..migrations_helpers.upgrade_workflow import upgrade
+from ..migrations_helpers.downgrade_workflow import downgrade
 
 # Re-export for Alembic compatibility
 __all__ = ['revision', 'down_revision', 'branch_labels', 'depends_on', 'upgrade', 'downgrade']

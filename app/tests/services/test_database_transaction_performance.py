@@ -211,14 +211,44 @@ async def _test_deadlock_scenarios(repository, sessions: List[AsyncMock]) -> Lis
     """Test deadlock recovery scenarios"""
     recovery_times = []
     
-    for session in sessions:
+    for i, session in enumerate(sessions):
         start = time.time()
-        # Simulate deadlock recovery
-        await repository.create(session, name='Deadlock Test')
+        # Simulate actual deadlock scenarios
+        await _simulate_deadlock_recovery(repository, session, i)
         recovery_time = time.time() - start
         recovery_times.append(recovery_time)
     
     return recovery_times
+
+
+async def _simulate_deadlock_recovery(repository, session: AsyncMock, scenario_index: int) -> None:
+    """Simulate deadlock scenarios and test recovery mechanisms"""
+    from sqlalchemy.exc import OperationalError
+    
+    # Simulate different deadlock scenarios
+    if scenario_index % 3 == 0:
+        # Scenario 1: Transient deadlock that resolves on retry
+        session.flush.side_effect = [
+            OperationalError("deadlock detected", None, None),
+            None  # Success on retry
+        ]
+    elif scenario_index % 3 == 1:
+        # Scenario 2: Lock timeout that requires rollback
+        session.flush.side_effect = [
+            OperationalError("lock wait timeout", None, None),
+            None  # Success after rollback
+        ]
+    else:
+        # Scenario 3: Normal operation (no deadlock)
+        session.flush.side_effect = None
+    
+    # Attempt operation with retry logic
+    try:
+        await repository.create(session, name=f'Deadlock Test {scenario_index}')
+    except OperationalError:
+        # Simulate recovery attempt
+        await session.rollback()
+        await repository.create(session, name=f'Deadlock Test {scenario_index} Retry')
 
 
 def _create_pool_sessions(pool_size: int) -> List[AsyncMock]:

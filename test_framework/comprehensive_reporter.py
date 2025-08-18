@@ -324,19 +324,6 @@ class ComprehensiveTestReporter:
     
     def cleanup_old_reports(self, keep_days: int = 7):
         """Clean up old report files - NO LONGER NEEDED."""
-        # Delete all legacy report files
-        legacy_files = [
-            "dashboard.md", "summary.md", "test_state.json", 
-            "test_history.json", "bad_tests.json"
-        ]
-        
-        for filename in legacy_files:
-            file_path = self.reports_dir / filename
-            if file_path.exists():
-                file_path.unlink()
-        
-        # Delete latest directory
-        latest_dir = self.reports_dir / "latest"
-        if latest_dir.exists():
-            import shutil
-            shutil.rmtree(latest_dir)
+        # This method is kept for backward compatibility but does nothing
+        # All test results are now in a single test_results.json file
+        pass
