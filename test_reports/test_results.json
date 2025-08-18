@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-17T20:33:34.906477",
-    "total_runs": 73
+    "last_update": "2025-08-17T20:36:34.080526",
+    "total_runs": 75
   },
   "current_state": {
-    "overall_status": "[FAILED] 87 failures",
-    "last_run_level": "integration",
-    "last_run_time": "2025-08-17T20:33:34.906477",
-    "last_exit_code": 15
+    "overall_status": "[ERRORS] 1 errors",
+    "last_run_level": "smoke",
+    "last_run_time": "2025-08-17T20:36:34.080526",
+    "last_exit_code": 4
   },
   "known_test_counts": {
     "smoke:backend": {
@@ -17,7 +17,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 1,
-      "last_update": "2025-08-17T20:22:09.572838"
+      "last_update": "2025-08-17T20:36:34.080526"
     },
     "unit:backend": {
       "total": 503,
@@ -33,7 +33,7 @@
       "failed": 2,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-17T20:33:34.906477"
+      "last_update": "2025-08-17T20:35:50.630121"
     },
     "smoke:frontend": {
       "total": 59,
@@ -49,7 +49,7 @@
       "failed": 85,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-17T20:33:34.906477"
+      "last_update": "2025-08-17T20:35:50.630121"
     },
     "comprehensive-backend:backend": {
       "total": 2,
@@ -91,7 +91,7 @@
       "actual": 1,
       "passed": 0,
       "failed": 0,
-      "last_run": "2025-08-17T20:22:09.572838",
+      "last_run": "2025-08-17T20:36:34.080526",
       "status": "[NO TESTS]"
     },
     "unit": {
@@ -109,7 +109,7 @@
       "actual": 185,
       "passed": 98,
       "failed": 87,
-      "last_run": "2025-08-17T20:33:34.906477",
+      "last_run": "2025-08-17T20:35:50.630121",
       "status": "[FAILED] 87 failures"
     },
     "critical": {
@@ -234,32 +234,29 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 44,
-        "passed": 42,
-        "failed": 2,
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
         "skipped": 0,
-        "errors": 0,
+        "errors": 1,
         "import_errors": 2,
         "status": "import_error",
-        "test_files": 8
+        "test_files": 5
       },
-      "last_duration": 27.31112790107727,
-      "last_run": "2025-08-17T20:33:34.906477"
+      "last_duration": 5.991427898406982,
+      "last_run": "2025-08-17T20:36:34.080526"
     },
     "frontend": {
-      "status": "failed",
+      "status": "skipped",
       "last_counts": {
-        "total": 141,
-        "passed": 56,
-        "failed": 85,
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
         "skipped": 0,
-        "errors": 0,
-        "import_errors": 0,
-        "test_files": 76,
-        "status": "failed"
+        "errors": 0
       },
-      "last_duration": 75.06061029434204,
-      "last_run": "2025-08-17T20:33:34.906477"
+      "last_duration": 0,
+      "last_run": "2025-08-17T20:36:34.080526"
     },
     "e2e": {
       "status": "pending",
@@ -271,60 +268,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-17T20:33:34.906477"
+      "last_run": "2025-08-17T20:36:34.080526"
     }
   },
-  "failing_tests": [
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_cache_routes.py::TestLLMCacheRoute::test_cache_backup_restore",
-      "timestamp": "2025-08-17T20:33:34.906477"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\test_health.py::test_ready_endpoint_clickhouse_failure <- ..\\integration_tests\\test_health.py",
-      "timestamp": "2025-08-17T20:33:34.906477"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_cache_routes.py::\u001b[1mTestLLMCacheRoute::test_cache_backup_restore\u001b[0m - ImportError: cannot import name 'backup_cache' from 'app.routes.llm_cache' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes\\llm_cache.py)",
-      "timestamp": "2025-08-17T20:33:34.906477"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\test_health.py::\u001b[1mtest_ready_endpoint_clickhouse_failure\u001b[0m - assert 200 == 503",
-      "timestamp": "2025-08-17T20:33:34.906477"
-    }
-  ],
+  "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-17T19:57:01.992976",
-      "level": "unit",
-      "exit_code": 2,
-      "status": "[FAILED] 3 failures",
-      "statistics": {
-        "total_tests_known": 503,
-        "total_tests_run": 503,
-        "total_passed": 485,
-        "total_failed": 3,
-        "total_skipped": 15,
-        "pass_rate": 96.42
-      }
-    },
-    {
-      "timestamp": "2025-08-17T19:58:58.960903",
-      "level": "comprehensive-backend",
-      "exit_code": 2,
-      "status": "[ERRORS] 1 errors",
-      "statistics": {
-        "total_tests_known": 503,
-        "total_tests_run": 2,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 1,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-17T20:00:31.875778",
       "level": "unit",
@@ -576,15 +524,43 @@
         "total_skipped": 0,
         "pass_rate": 52.97
       }
+    },
+    {
+      "timestamp": "2025-08-17T20:35:50.630121",
+      "level": "integration",
+      "exit_code": 15,
+      "status": "[FAILED] 87 failures",
+      "statistics": {
+        "total_tests_known": 503,
+        "total_tests_run": 185,
+        "total_passed": 98,
+        "total_failed": 87,
+        "total_skipped": 0,
+        "pass_rate": 52.97
+      }
+    },
+    {
+      "timestamp": "2025-08-17T20:36:34.080526",
+      "level": "smoke",
+      "exit_code": 4,
+      "status": "[ERRORS] 1 errors",
+      "statistics": {
+        "total_tests_known": 503,
+        "total_tests_run": 1,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 503,
-    "total_tests_run": 185,
-    "total_passed": 98,
-    "total_failed": 87,
+    "total_tests_run": 1,
+    "total_passed": 0,
+    "total_failed": 0,
     "total_skipped": 0,
-    "pass_rate": 52.97
+    "pass_rate": 0.0
   },
   "version": "1.0",
   "tests": {},
