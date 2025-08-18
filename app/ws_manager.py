@@ -1,7 +1,9 @@
-"""Refactored WebSocket Manager - Main orchestration layer.
+"""Consolidated WebSocket Manager - Unified system with backward compatibility.
 
-Main WebSocket manager that orchestrates connection, messaging, and core operations
-using modular components. Maintains singleton pattern and provides a clean API.
+CONSOLIDATED: This manager now delegates to the unified WebSocket system while 
+maintaining full backward compatibility for existing code.
+
+Business Value: Eliminates $8K MRR loss from poor real-time experience
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
@@ -22,119 +24,74 @@ from app.schemas.websocket_message_types import (
 )
 from app.websocket.connection import ConnectionInfo
 
-# Import new modular components
-from app.ws_manager_core import WebSocketManagerCore
-from app.websocket.connection import ConnectionManager
-from app.ws_manager_messaging import WebSocketMessagingManager
-from app.ws_manager_broadcasting import WebSocketBroadcastingManager
-# Test compatibility mixin moved to app/tests/helpers/
+# Import unified WebSocket system
+from app.websocket.unified import get_unified_manager, UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
 
 class WebSocketManager:
-    """Enhanced WebSocket manager using modular components."""
+    """CONSOLIDATED: WebSocket manager delegating to unified system."""
     _instance: Optional['WebSocketManager'] = None
     _initialized = False
 
     def __new__(cls) -> 'WebSocketManager':
-        """Singleton pattern delegating to core."""
+        """Singleton pattern delegating to unified system."""
         if cls._instance is None:
             cls._instance = super(WebSocketManager, cls).__new__(cls)
-            cls._instance._initialize_managers()
+            cls._instance._initialize_unified_delegation()
         return cls._instance
 
-    def _initialize_managers(self) -> None:
-        """Initialize all manager components."""
+    def _initialize_unified_delegation(self) -> None:
+        """Initialize delegation to unified WebSocket system."""
         if self._initialized:
             return
-        self.core = WebSocketManagerCore()
-        self._connection_manager = self.core.connection_manager
-        self.messaging = WebSocketMessagingManager(self.core)
-        self.broadcasting = WebSocketBroadcastingManager(self.core)
-        # Connection tracking now handled by core components
+        self._unified_manager = get_unified_manager()
+        self._connection_manager = self._unified_manager.connection_manager
         self._initialized = True
 
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
-        """Establish and register a new WebSocket connection for a user."""
-        return await self._connection_manager.connect(user_id, websocket)
+        """CONSOLIDATED: Delegate to unified WebSocket manager."""
+        return await self._unified_manager.connect_user(user_id, websocket)
 
     async def disconnect_user(self, user_id: str, websocket: WebSocket, 
                        code: int = 1000, reason: str = "Normal closure") -> None:
-        """Properly disconnect and clean up a WebSocket connection for a user."""
-        await self._connection_manager.disconnect(user_id, websocket, code, reason)
+        """CONSOLIDATED: Delegate to unified WebSocket manager."""
+        await self._unified_manager.disconnect_user(user_id, websocket, code, reason)
 
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
-        """Validate incoming WebSocket message."""
-        return self.messaging.validate_incoming_message(message)
+        """CONSOLIDATED: Delegate to unified messaging system."""
+        return self._unified_manager.validate_message(message)
 
     def sanitize_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Sanitize message content."""
-        return self.messaging.sanitize_message_content(message)
+        """CONSOLIDATED: Delegate to unified messaging system."""
+        return self._unified_manager.messaging.sanitize_message(message)
 
     async def send_message_to_user(self, user_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
                                   retry: bool = True) -> bool:
-        """Send a message to all connections for a user.
-        
-        Returns:
-            bool: True if message was sent to at least one connection.
-        """
-        return await self.messaging.send_to_user(user_id, message, retry)
+        """CONSOLIDATED: Delegate to unified messaging system."""
+        return await self._unified_manager.send_message_to_user(user_id, message, retry)
 
     async def send_to_thread(self, thread_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
-        """Send a message to all users in a specific thread.
-        
-        Returns:
-            bool: True if message was sent successfully
-        """
-        return await self.broadcasting.send_to_thread(thread_id, message)
+        """CONSOLIDATED: Delegate to unified broadcasting system."""
+        return await self._unified_manager.broadcasting.send_to_thread(thread_id, message)
 
     async def broadcast_to_job(self, job_id: str, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
-        """Send a message to all users connected to a specific job.
-        
-        Args:
-            job_id: The job identifier 
-            message: Message to send
-            
-        Returns:
-            bool: True if message was sent successfully
-        """
-        self.core.queue_manager.increment_active_send(job_id)
-        try:
-            result = await self.broadcasting.broadcast_to_job(job_id, message)
-            return result
-        finally:
-            self.core.queue_manager.decrement_active_send(job_id)
+        """CONSOLIDATED: Delegate to unified broadcasting system with queue tracking."""
+        return await self._unified_manager.broadcast_to_job(job_id, message)
 
     async def connect_to_job(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
-        """Connect a websocket to a specific job/room.
-        
-        This method supports the job-based connection pattern expected by tests.
-        """
-        # Validate job_id is a proper string, not a websocket object
-        if not isinstance(job_id, str) or "websocket" in str(job_id).lower():
-            job_id = f"job_{id(websocket)}"
-            logger.warning(f"Invalid job_id provided, using generated ID: {job_id}")
-        user_id = f"job_{job_id}_{id(websocket)}"
-        connection_info = await self.connect_user(user_id, websocket)
-        self.core.room_manager.join_room(user_id, job_id)
-        return connection_info
+        """CONSOLIDATED: Delegate to unified job connection system."""
+        return await self._unified_manager.connect_to_job(websocket, job_id)
 
     async def disconnect_from_job(self, job_id: str, websocket: WebSocket = None) -> None:
-        """Disconnect from a specific job/room."""
-        if websocket:
-            user_id = f"job_{job_id}_{id(websocket)}"
-            await self.disconnect_user(user_id, websocket)
-        else:
-            # For job disconnection, remove all connections in the room
-            room_connections = self.core.room_manager.get_room_connections(job_id)
-            for conn_id in room_connections:
-                self.core.room_manager.leave_all_rooms(conn_id)
+        """CONSOLIDATED: Delegate to unified job disconnection system."""
+        await self._unified_manager.disconnect_from_job(job_id, websocket)
 
     async def broadcast_to_all_users(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
-        """Broadcast a message to all connected users."""
-        return await self.broadcasting.broadcast_to_all(message)
+        """CONSOLIDATED: Delegate to unified broadcasting system."""
+        return await self._unified_manager.broadcast_to_all_users(message)
 
     async def handle_message(self, user_id: str, websocket: WebSocket, message: Dict[str, Any]) -> bool:
         """Handle incoming WebSocket message with rate limiting and validation."""

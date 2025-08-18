@@ -8,6 +8,7 @@ import type {
 } from './layer-types';
 import type { UnifiedWebSocketEvent, ChatMessage } from './websocket-event-types';
 import type { MCPUIState } from './mcp-types';
+import type { OptimisticMessage } from '@/services/optimistic-updates';
 
 // ============================================
 // Agent Execution Tracking
@@ -63,6 +64,12 @@ export interface ConnectionActions {
 export interface AgentTrackingState {
   executedAgents: Map<string, AgentExecution>;
   agentIterations: Map<string, number>;
+}
+
+export interface OptimisticState {
+  optimisticMessages: Map<string, OptimisticMessage>;
+  pendingUserMessage: OptimisticMessage | null;
+  pendingAiMessage: OptimisticMessage | null;
 }
 
 export interface DebugState {
@@ -145,6 +152,13 @@ export interface AgentTrackingActions {
   resetAgentTracking: () => void;
 }
 
+export interface OptimisticActions {
+  addOptimisticMessage: (message: OptimisticMessage) => void;
+  updateOptimisticMessage: (localId: string, updates: Partial<OptimisticMessage>) => void;
+  removeOptimisticMessage: (localId: string) => void;
+  clearOptimisticMessages: () => void;
+}
+
 // ============================================
 // Combined Store Types
 // ============================================
@@ -155,6 +169,7 @@ export interface UnifiedChatState extends
   ThreadState,
   ConnectionState,
   AgentTrackingState,
+  OptimisticState,
   DebugState,
   PerformanceState,
   LegacySubAgentState,
@@ -165,7 +180,8 @@ export interface UnifiedChatState extends
   MessageActions,
   ThreadActions,
   LegacySubAgentActions,
-  AgentTrackingActions {}
+  AgentTrackingActions,
+  OptimisticActions {}
 
 // ============================================
 // Store Configuration
