@@ -183,6 +183,31 @@
         Use single source of truth for OAuth configuration - prefer environment-specific config over static settings.
       </prevention>
     </lesson>
+    <lesson id="database-connection-staging">
+      <problem>Staging backend database connection regression - DATABASE_URL not passed to Cloud Run</problem>
+      <root_cause>
+        The deploy-staging-reliable.ps1 script was missing DATABASE_URL and other critical
+        environment variables when deploying to Cloud Run. The terraform configuration
+        expected these but the PowerShell deployment script didn't include them.
+      </root_cause>
+      <solution>
+        1. Updated deploy-staging-reliable.ps1 to include secrets via --set-secrets flag
+        2. Created setup-staging-database-secret.ps1 to manage DATABASE_URL in Secret Manager
+        3. Fixed gcloud command syntax: use --set-secrets not --update-secrets
+      </solution>
+      <key_files>
+        - deploy-staging-reliable.ps1
+        - setup-staging-database-secret.ps1
+        - docs/deployment/GCP_STAGING_DEPLOYMENT.md
+      </key_files>
+      <commands>
+        # Setup database secret first
+        .\setup-staging-database-secret.ps1
+        
+        # Deploy with secrets properly configured
+        .\deploy-staging-reliable.ps1
+      </commands>
+    </lesson>
   </staging_deployment>
   
   <quick_commands>
