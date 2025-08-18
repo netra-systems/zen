@@ -5,8 +5,8 @@ Minimal authentication service for Netra
 import os
 import logging
 from contextlib import asynccontextmanager
-from typing import Optional
-from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
+from datetime import datetime, timedelta, UTC
 
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -36,6 +36,33 @@ ph = PasswordHasher()
 # Security
 security = HTTPBearer()
 
+# Unified Health System (simplified for standalone service)
+class SimpleHealthInterface:
+    """Simplified health interface for standalone auth service."""
+    
+    def __init__(self, service_name: str, version: str = "1.0.0"):
+        self.service_name = service_name
+        self.version = version
+        self.start_time = datetime.now(UTC)
+    
+    def get_basic_health(self) -> Dict[str, Any]:
+        """Get basic health status."""
+        return {
+            "status": "healthy",
+            "service": self.service_name,
+            "version": self.version,
+            "environment": os.getenv("ENVIRONMENT", "development"),
+            "timestamp": datetime.now(UTC).isoformat(),
+            "uptime_seconds": self._get_uptime_seconds()
+        }
+    
+    def _get_uptime_seconds(self) -> float:
+        """Calculate service uptime in seconds."""
+        return (datetime.now(UTC) - self.start_time).total_seconds()
+
+# Initialize health interface
+health_interface = SimpleHealthInterface("auth-service", "1.0.0")
+
 # Pydantic models
 class LoginRequest(BaseModel):
     email: str
@@ -55,6 +82,8 @@ class HealthResponse(BaseModel):
     service: str
     version: str
     environment: str
+    timestamp: str
+    uptime_seconds: Optional[float] = None
 
 # Temporary in-memory user store (replace with database in production)
 USERS_DB = {
@@ -169,15 +198,10 @@ async def root():
         }
     }
 
-@app.get("/health", response_model=HealthResponse)
-async def health():
-    """Health check endpoint"""
-    return HealthResponse(
-        status="healthy",
-        service="auth-service",
-        version="1.0.0",
-        environment=os.getenv("ENVIRONMENT", "development")
-    )
+@app.get("/health")
+async def health() -> Dict[str, Any]:
+    """Health check endpoint with unified health system"""
+    return health_interface.get_basic_health()
 
 @app.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):

@@ -96,9 +96,11 @@ class WebSocketMessageType(str, Enum):
     MESSAGE_RECEIVED = "message_received"
     
     # Synthetic data generation messages
+    GENERATION_STARTED = "generation_started"
     GENERATION_PROGRESS = "generation_progress"
     GENERATION_COMPLETE = "generation_complete"
     GENERATION_ERROR = "generation_error"
+    GENERATION_CANCELLED = "generation_cancelled"
     BATCH_COMPLETE = "batch_complete"
     
     # MCP integration messages
@@ -184,9 +186,11 @@ MessageTypeLiteral = Literal[
     "connection_established",
     "stream_chunk",
     "stream_complete",
+    "generation_started",
     "generation_progress",
     "generation_complete",
     "generation_error",
+    "generation_cancelled",
     "batch_complete"
 ]
 

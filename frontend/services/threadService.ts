@@ -1,6 +1,6 @@
 import { apiClient } from '@/services/apiClientWrapper';
 import { Thread, ThreadMetadata, createThreadWithTitle } from '@/types/registry';
-import type { MessageMetadata } from '@/types/chat';
+import type { MessageMetadata } from '@/types/registry';
 
 export interface ThreadMessage {
   id: string;

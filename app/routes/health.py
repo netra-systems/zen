@@ -8,25 +8,42 @@ from app.services.schema_validation_service import SchemaValidationService
 from app.config import settings
 from app.dependencies import get_db_dependency
 
+# Unified Health System imports
+from app.core.health import (
+    HealthInterface, HealthLevel, DatabaseHealthChecker, 
+    DependencyHealthChecker, HealthResponseBuilder
+)
+
 import asyncio
 from typing import Dict, Any
 
 router = APIRouter()
 logger = central_logger.get_logger(__name__)
 
+# Initialize unified health interface
+health_interface = HealthInterface("netra-ai-platform", "1.0.0")
+response_builder = HealthResponseBuilder("netra-ai-platform", "1.0.0")
+
+# Register health checkers
+health_interface.register_checker(DatabaseHealthChecker("postgres"))
+health_interface.register_checker(DatabaseHealthChecker("clickhouse"))
+health_interface.register_checker(DatabaseHealthChecker("redis"))
+health_interface.register_checker(DependencyHealthChecker("websocket"))
+health_interface.register_checker(DependencyHealthChecker("llm"))
+
 @router.get("/")
-async def health() -> Dict[str, str]:
+async def health() -> Dict[str, Any]:
     """
     Basic health check endpoint - returns healthy if the application is running.
     """
-    return {"status": "healthy"}
+    return await health_interface.get_health_status(HealthLevel.BASIC)
 
 @router.get("/live")
-async def live() -> Dict[str, str]:
+async def live() -> Dict[str, Any]:
     """
     Liveness probe to check if the application is running.
     """
-    return {"status": "healthy", "service": "netra-ai-platform"}
+    return response_builder.create_basic_response("healthy")
 
 async def _check_postgres_connection(db: AsyncSession) -> None:
     """Check Postgres database connection."""
@@ -60,14 +77,18 @@ async def _handle_clickhouse_error(error: Exception) -> None:
         raise
 
 @router.get("/ready")
-async def ready(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, str]:
+async def ready(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, Any]:
     """
     Readiness probe to check if the application is ready to serve requests.
     """
     try:
-        await _check_postgres_connection(db)
-        await _check_clickhouse_connection()
-        return {"status": "ready", "service": "netra-ai-platform"}
+        # Use unified health system for readiness check
+        health_status = await health_interface.get_health_status(HealthLevel.STANDARD)
+        
+        if health_status["status"] in ["healthy", "degraded"]:
+            return {"status": "ready", "service": "netra-ai-platform", "details": health_status}
+        else:
+            raise HTTPException(status_code=503, detail="Service Unavailable")
     except Exception as e:
         logger.error(f"Readiness probe failed: {e}")
         raise HTTPException(status_code=503, detail="Service Unavailable")
@@ -241,9 +262,33 @@ async def comprehensive_health() -> Dict[str, Any]:
     Get comprehensive system health report including all components.
     """
     try:
-        health_monitor = get_enhanced_health_monitor()
-        return await health_monitor.get_comprehensive_health_report()
+        # Use unified health system for comprehensive monitoring
+        comprehensive_status = await health_interface.get_health_status(HealthLevel.COMPREHENSIVE)
+        
+        # Add Enterprise SLA monitoring data
+        availability_percentage = _calculate_availability(comprehensive_status)
+        enterprise_response = response_builder.create_enterprise_response(
+            status=comprehensive_status["status"],
+            uptime_seconds=comprehensive_status["uptime_seconds"],
+            detailed_checks={},  # Will be populated from comprehensive_status
+            metrics=comprehensive_status["metrics"],
+            availability_percentage=availability_percentage
+        )
+        
+        return enterprise_response
     except Exception as e:
         logger.error(f"Comprehensive health check failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+def _calculate_availability(health_status: Dict[str, Any]) -> float:
+    """Calculate current availability percentage for Enterprise SLA."""
+    if "checks" not in health_status:
+        return 100.0
+    
+    checks = health_status["checks"]
+    if not checks:
+        return 100.0
+    
+    successful_checks = sum(1 for check_result in checks.values() if check_result)
+    return (successful_checks / len(checks)) * 100.0
 

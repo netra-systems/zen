@@ -227,7 +227,7 @@ async def get_compliance_dashboard(
 
 def _is_dev_environment() -> bool:
     """Check if running in development environment."""
-    env = os.getenv("ENVIRONMENT", "production")
+    env = os.getenv("ENVIRONMENT", "staging")  # Default to staging for safety
     return env in ["development", "dev", "local"]
 
 

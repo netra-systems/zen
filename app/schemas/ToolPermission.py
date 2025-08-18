@@ -63,7 +63,7 @@ class ToolExecutionContext(BaseModel):
     user_roles: List[str] = Field(default_factory=list, description="User's roles")
     feature_flags: Dict[str, bool] = Field(default_factory=dict, description="User's feature flags")
     is_developer: bool = Field(default=False, description="Is user a developer")
-    environment: str = Field(default="production", description="Current environment")
+    environment: str = Field(default="staging", description="Current environment")  # Default to staging for safety
 
 
 class PermissionCheckResult(BaseModel):

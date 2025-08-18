@@ -25,6 +25,18 @@
             <important_note>See also SPEC/shared_auth_integration.xml for MANDATORY shared auth service requirements</important_note>
         </category>
         <category>
+            <name>Environment Detection</name>
+            <file>learnings/environment_detection.xml</file>
+            <path>SPEC/learnings/environment_detection.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>ENV-001</id>
+                <id>ENV-002</id>
+                <id>ENV-003</id>
+            </learning_ids>
+            <important_note>CRITICAL: Environment defaults must NEVER be "production" - always default to staging for safety</important_note>
+        </category>
+        <category>
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>
@@ -198,7 +210,7 @@
             <name>Testing</name>
             <file>learnings/testing.xml</file>
             <path>SPEC/learnings/testing.xml</path>
-            <learning_count>8</learning_count>
+            <learning_count>10</learning_count>
             <learning_ids>
                 <id>clickhouse-regex-deep-nested-fields</id>
                 <id>clickhouse-function-wrapper-preservation</id>
@@ -208,6 +220,8 @@
                 <id>frontend-component-test-setup</id>
                 <id>windows-jest-bus-error-fix</id>
                 <id>websocket-mock-server-conflicts</id>
+                <id>frontend-testing-complete-guide</id>
+                <id>test-modularization-300-line-compliance</id>
             </learning_ids>
         </category>
         <category>
@@ -258,7 +272,7 @@
     </usage>
     
     <statistics>
-        <total_categories>17</total_categories>
-        <total_learnings>66</total_learnings>
+        <total_categories>18</total_categories>
+        <total_learnings>71</total_learnings>
     </statistics>
 </specification>

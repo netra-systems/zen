@@ -48,7 +48,7 @@ class JobManager:
     async def _send_started_notification(self, job_id: str, job_data: Dict) -> None:
         """Send job started notification"""
         await manager.broadcasting.broadcast_to_all({
-            "type": "generation:started",
+            "type": "generation_started",
             "payload": {
                 "job_id": job_id,
                 "total_records": job_data["config"].num_logs,
@@ -80,7 +80,7 @@ class JobManager:
             progress = self.calculate_progress(job_id, active_jobs)
             payload = self._create_progress_payload(job_id, active_jobs, progress, batch_num)
             await manager.broadcasting.broadcast_to_all({
-                "type": "generation:progress",
+                "type": "generation_progress",
                 "payload": payload
             })
 
@@ -139,7 +139,7 @@ class JobManager:
         duration = self._calculate_duration(job_data)
         
         await manager.broadcasting.broadcast_to_all({
-            "type": "generation:complete",
+            "type": "generation_complete",
             "payload": {
                 "job_id": job_id,
                 "total_records": job_data["records_generated"],
@@ -177,7 +177,7 @@ class JobManager:
         """Send job cancellation notification"""
         job_data = active_jobs[job_id]
         await manager.broadcasting.broadcast_to_all({
-            "type": "generation:cancelled",
+            "type": "generation_cancelled",
             "payload": {
                 "job_id": job_id,
                 "records_completed": job_data.get("records_generated", 0),
@@ -204,7 +204,7 @@ class JobManager:
     async def send_error_notification(self, job_id: str, error: Exception) -> None:
         """Send error notification via WebSocket"""
         await manager.broadcasting.broadcast_to_all({
-            "type": "generation:error",
+            "type": "generation_error",
             "payload": {
                 "job_id": job_id,
                 "error_type": "generation_failure",

@@ -75,7 +75,9 @@ class EnvironmentDetector:
         k_revision = os.getenv("K_REVISION", "")
         if k_service or k_revision:
             return self._detect_cloud_run_environment(k_service, k_revision)
-        return Environment.DEVELOPMENT
+        # Default to staging for safety if we can't determine environment
+        logger.warning("Could not detect environment from Cloud Run variables, defaulting to staging")
+        return Environment.STAGING
     
     def _detect_cloud_run_environment(self, k_service: str, k_revision: str) -> Environment:
         """Detect environment from Cloud Run service names."""
@@ -88,7 +90,9 @@ class EnvironmentDetector:
     def _is_production_service(self, name: str) -> bool:
         """Check if service name indicates production."""
         name_lower = name.lower()
-        return any(prod in name_lower for prod in ["prod", "backend"])
+        # More precise production detection - must explicitly have 'prod' or 'production'
+        # 'backend' alone is not enough as staging can have backends too
+        return any(prod in name_lower for prod in ["prod", "production"])
     
     def _is_staging_service(self, name: str) -> bool:
         """Check if service name indicates staging."""

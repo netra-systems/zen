@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings category="environment-detection">
+  <meta>
+    <title>Environment Detection and Configuration Learnings</title>
+    <created>2025-08-18</created>
+    <criticality>HIGH</criticality>
+    <tags>environment, staging, production, configuration, auth</tags>
+  </meta>
+
+  <critical_issue id="ENV-001">
+    <title>Environment Detection Defaults Must Never Be Production</title>
+    <problem>
+      Multiple services defaulted to "production" when ENVIRONMENT variable was not set,
+      causing staging deployments to incorrectly identify as production.
+    </problem>
+    <root_causes>
+      <cause>Terraform variable default was "production" instead of "staging"</cause>
+      <cause>Backend services defaulted to "production" when env var missing</cause>
+      <cause>Frontend used NODE_ENV for environment detection (only has "development" or "production")</cause>
+    </root_causes>
+    <solution>
+      Always default to "staging" for safety when environment cannot be determined.
+      Production should be explicitly set, never a default.
+    </solution>
+    <files_fixed>
+      <file>terraform-gcp/variables.tf:35</file>
+      <file>app/middleware/tool_permission_middleware.py:226</file>
+      <file>app/routes/factory_compliance.py:230</file>
+      <file>app/services/factory_status/factory_status_integration.py:197</file>
+      <file>app/services/factory_status/spec_compliance_scorer.py:213</file>
+      <file>app/schemas/ToolPermission.py:66</file>
+    </files_fixed>
+    <prevention>
+      <rule>NEVER use "production" as a default environment value</rule>
+      <rule>Always default to "staging" or "development" for safety</rule>
+      <rule>Production environment must be explicitly configured</rule>
+    </prevention>
+  </critical_issue>
+
+  <critical_issue id="ENV-002">
+    <title>Frontend Environment Detection Must Use NEXT_PUBLIC_ENVIRONMENT</title>
+    <problem>
+      Frontend was using NODE_ENV for environment detection, but Next.js only
+      supports "development" and "production" for NODE_ENV, not "staging".
+    </problem>
+    <solution>
+      Use process.env.NEXT_PUBLIC_ENVIRONMENT as primary environment indicator.
+      NODE_ENV should only be used to detect development vs built code.
+    </solution>
+    <files_fixed>
+      <file>frontend/lib/auth-service-config.ts:37-43</file>
+      <file>frontend/lib/secure-api-config.ts:55-71</file>
+    </files_fixed>
+    <prevention>
+      <rule>Always use NEXT_PUBLIC_ENVIRONMENT for staging/production detection in frontend</rule>
+      <rule>NODE_ENV only indicates development vs production build, not deployment environment</rule>
+    </prevention>
+  </critical_issue>
+
+  <critical_issue id="ENV-003">
+    <title>Cloud Run Service Name Detection Too Broad</title>
+    <problem>
+      Backend considered any service with "backend" in name as production,
+      which would misclassify staging backends (e.g., "staging-backend").
+    </problem>
+    <solution>
+      Production detection must explicitly look for "prod" or "production" keywords.
+      Service name patterns must be specific and unambiguous.
+    </solution>
+    <files_fixed>
+      <file>app/clients/auth_client_config.py:90-95</file>
+    </files_fixed>
+    <prevention>
+      <rule>Service name detection must be explicit and unambiguous</rule>
+      <rule>Don't use generic terms like "backend" for environment detection</rule>
+      <rule>Staging services should contain "staging" in name</rule>
+      <rule>Production services should contain "prod" or "production" in name</rule>
+    </prevention>
+  </critical_issue>
+
+  <best_practices>
+    <practice id="BP-001">
+      <title>Environment Variable Hierarchy</title>
+      <description>
+        Follow this hierarchy for environment detection:
+        1. Explicit ENVIRONMENT variable (highest priority)
+        2. Cloud Run K_SERVICE/K_REVISION variables
+        3. Default to staging (never production)
+      </description>
+    </practice>
+    
+    <practice id="BP-002">
+      <title>Standardized Environment Values</title>
+      <description>
+        Use only these environment values consistently:
+        - "development" (local development)
+        - "staging" (staging deployment)
+        - "production" (production deployment)
+        - "testing" (test runs only)
+      </description>
+    </practice>
+
+    <practice id="BP-003">
+      <title>URL Configuration Pattern</title>
+      <description>
+        Always handle all environment cases explicitly:
+        - development: localhost URLs
+        - staging: *.staging.netrasystems.ai
+        - production: *.netrasystems.ai
+        - Default to staging URLs for safety
+      </description>
+    </practice>
+  </best_practices>
+
+  <regression_prevention>
+    <test id="TEST-001">
+      <name>Environment Detection Unit Tests</name>
+      <description>
+        Add unit tests that verify environment detection logic:
+        - Test with missing ENVIRONMENT variable
+        - Test with various K_SERVICE names
+        - Verify defaults are never "production"
+      </description>
+    </test>
+
+    <test id="TEST-002">
+      <name>Configuration Validation Tests</name>
+      <description>
+        Add tests that validate configuration for each environment:
+        - Verify correct URLs are generated
+        - Check OAuth configuration matches environment
+        - Ensure no production URLs in staging config
+      </description>
+    </test>
+
+    <check id="CHECK-001">
+      <name>Pre-deployment Environment Check</name>
+      <description>
+        Add startup check that logs and validates:
+        - Current detected environment
+        - Configuration URLs being used
+        - OAuth settings for environment
+      </description>
+    </check>
+  </regression_prevention>
+
+  <monitoring>
+    <alert id="ALERT-001">
+      <name>Environment Mismatch Detection</name>
+      <description>
+        Monitor for signs of environment mismatch:
+        - Auth service reporting different environment than backend
+        - Frontend calling wrong environment URLs
+        - OAuth redirects to wrong domains
+      </description>
+    </alert>
+  </monitoring>
+
+  <common_pitfalls>
+    <pitfall id="PIT-001">
+      <description>Using NODE_ENV for deployment environment detection</description>
+      <reason>NODE_ENV only has "development" and "production" in Next.js</reason>
+      <solution>Use NEXT_PUBLIC_ENVIRONMENT instead</solution>
+    </pitfall>
+
+    <pitfall id="PIT-002">
+      <description>Defaulting to production for "safety"</description>
+      <reason>Production should be explicit, not a fallback</reason>
+      <solution>Default to staging or development</solution>
+    </pitfall>
+
+    <pitfall id="PIT-003">
+      <description>Inconsistent environment variable names</description>
+      <reason>Different services use different variable names</reason>
+      <solution>Standardize on ENVIRONMENT variable across all services</solution>
+    </pitfall>
+  </common_pitfalls>
+
+  <action_items>
+    <item priority="HIGH">
+      <description>Audit all environment detection code for production defaults</description>
+      <command>grep -r "default.*production" --include="*.py" --include="*.ts" --include="*.tf"</command>
+    </item>
+    
+    <item priority="HIGH">
+      <description>Add environment validation to all service startup</description>
+      <location>app/startup_checks/</location>
+    </item>
+
+    <item priority="MEDIUM">
+      <description>Create centralized environment detection service</description>
+      <location>app/core/environment_detector.py</location>
+    </item>
+
+    <item priority="MEDIUM">
+      <description>Standardize environment variable usage across codebase</description>
+      <variables>ENVIRONMENT (backend), NEXT_PUBLIC_ENVIRONMENT (frontend)</variables>
+    </item>
+  </action_items>
+</learnings>

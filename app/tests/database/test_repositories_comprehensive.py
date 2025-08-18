@@ -179,7 +179,7 @@ class TestUserRepositoryAuth:
     async def test_password_hashing(self):
         from app.services.database.user_repository import UserRepository
         from app.schemas.database_schemas import User
-        import bcrypt
+        from argon2 import PasswordHasher
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = UserRepository()
@@ -191,9 +191,9 @@ class TestUserRepositoryAuth:
             "name": "Test User"
         }
         
-        # Mock bcrypt
-        with patch('bcrypt.hashpw') as mock_hash:
-            mock_hash.return_value = b'hashed_password'
+        # Mock argon2 hasher
+        with patch('argon2.PasswordHasher.hash') as mock_hash:
+            mock_hash.return_value = 'hashed_password'
             mock_session.execute.return_value.scalar_one_or_none.return_value = User(
                 id="user123",
                 email=user_data["email"],
@@ -207,17 +207,18 @@ class TestUserRepositoryAuth:
     async def test_authentication_flow(self):
         from app.services.database.user_repository import UserRepository
         from app.schemas.database_schemas import User
-        import bcrypt
+        from argon2 import PasswordHasher
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = UserRepository()
         
         # Test successful authentication
-        hashed = bcrypt.hashpw(b"correct_password", bcrypt.gensalt())
+        ph = PasswordHasher()
+        hashed = ph.hash("correct_password")
         mock_session.execute.return_value.scalar_one_or_none.return_value = User(
             id="user123",
             email="test@example.com",
-            password_hash=hashed.decode('utf-8')
+            password_hash=hashed
         )
         
         authenticated = await repo.authenticate(
