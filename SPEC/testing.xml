@@ -79,6 +79,31 @@
         <description>Single entry point for all Netra AI Platform testing with automatic report generation</description>
         <path>test_runner.py</path>
         
+        <github_actions_integration>
+            <description>Test runner is integrated with GitHub Actions workflows for CI/CD</description>
+            <reference>
+                <workflow>.github/workflows/test-runner.yml</workflow>
+                <description>Main test execution workflow</description>
+            </reference>
+            <reference>
+                <workflow>.github/workflows/test-standard-template.yml</workflow>
+                <description>Template for creating new test workflows</description>
+            </reference>
+            <reference>
+                <workflow>.github/workflows/test-runner-validation.yml</workflow>
+                <description>Validates test runner exit code propagation</description>
+            </reference>
+            <reference>
+                <documentation>.github/workflows/WORKFLOW_FIX_SUMMARY.md</documentation>
+                <description>Complete guide to workflow fixes and best practices</description>
+            </reference>
+            <exit_code_handling>
+                <rule>Test runner returns non-zero exit codes on failure</rule>
+                <rule>Workflows must use || exit $? to propagate failures</rule>
+                <rule>Never use continue-on-error in test steps</rule>
+            </exit_code_handling>
+        </github_actions_integration>
+        
         <test_levels>
             <level name="smoke" recommended="pre_commit">
                 <description>Quick smoke tests for basic functionality (< 30 seconds)</description>
@@ -87,6 +112,7 @@
                 <timeout>30</timeout>
                 <coverage>false</coverage>
                 <components>backend+frontend</components>
+                <ci_flags>--no-coverage --fast-fail --ci --no-warnings</ci_flags>
             </level>
             
             <level name="unit">
@@ -97,6 +123,7 @@
                 <coverage>true</coverage>
                 <components>backend+frontend</components>
                 <note>Coverage summary generated for unit level and above</note>
+                <ci_flags>--no-coverage --fast-fail --ci --no-warnings</ci_flags>
             </level>
             
             <level name="integration">
@@ -107,6 +134,7 @@
                 <coverage>true</coverage>
                 <components>backend+frontend</components>
                 <note>Coverage summary generated for unit level and above</note>
+                <ci_flags>--no-coverage --fast-fail --ci --no-warnings</ci_flags>
             </level>
             
             <level name="comprehensive">
