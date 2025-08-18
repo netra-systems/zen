@@ -8,6 +8,8 @@ from typing import Dict
 from dataclasses import dataclass, field
 from enum import Enum
 
+from app.core.resilience.monitor import AlertSeverity
+
 
 class MetricType(str, Enum):
     """Types of metrics collected."""
@@ -17,12 +19,6 @@ class MetricType(str, Enum):
     TIMER = "timer"
 
 
-class AlertSeverity(str, Enum):
-    """Alert severity levels."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
 
 
 @dataclass

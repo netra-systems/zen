@@ -158,34 +158,38 @@ class ConfigurationValidator:
     
     def _validate_postgres_url(self, url: str) -> List[str]:
         """Validate database URL format and requirements."""
-        errors = []
-        
         try:
             parsed = urlparse(url)
-            valid_schemes = ["postgresql", "postgresql+asyncpg"]
-            
-            # Allow SQLite URLs in testing environments
-            if self._environment == "testing":
-                valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
-            
-            if parsed.scheme not in valid_schemes:
-                if parsed.scheme.startswith("sqlite") and self._environment != "testing":
-                    errors.append("SQLite URLs only allowed in testing environment")
-                else:
-                    errors.append("Invalid database URL scheme")
-            
-            # Skip host validation for SQLite URLs
-            if not parsed.scheme.startswith("sqlite") and not parsed.netloc:
-                errors.append("Database URL missing host information")
-            
-            # Skip security checks for SQLite URLs
-            if not parsed.scheme.startswith("sqlite"):
-                errors.extend(self._check_database_security_requirements(parsed))
-            
+            errors = self._validate_url_scheme(parsed)
+            errors.extend(self._validate_url_host(parsed))
+            errors.extend(self._validate_url_security(parsed))
+            return errors
         except Exception:
-            errors.append("Invalid database URL format")
+            return ["Invalid database URL format"]
+    
+    def _validate_url_scheme(self, parsed_url) -> List[str]:
+        """Validate database URL scheme."""
+        valid_schemes = ["postgresql", "postgresql+asyncpg"]
+        if self._environment == "testing":
+            valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
         
-        return errors
+        if parsed_url.scheme not in valid_schemes:
+            if parsed_url.scheme.startswith("sqlite") and self._environment != "testing":
+                return ["SQLite URLs only allowed in testing environment"]
+            return ["Invalid database URL scheme"]
+        return []
+    
+    def _validate_url_host(self, parsed_url) -> List[str]:
+        """Validate database URL host information."""
+        if not parsed_url.scheme.startswith("sqlite") and not parsed_url.netloc:
+            return ["Database URL missing host information"]
+        return []
+    
+    def _validate_url_security(self, parsed_url) -> List[str]:
+        """Validate database URL security requirements."""
+        if not parsed_url.scheme.startswith("sqlite"):
+            return self._check_database_security_requirements(parsed_url)
+        return []
     
     def _validate_clickhouse_config(self, config: AppConfig) -> List[str]:
         """Validate ClickHouse configuration."""
@@ -412,9 +416,14 @@ class ConfigurationValidator:
     
     def _calculate_completeness_bonus(self, config: AppConfig) -> int:
         """Calculate bonus points for configuration completeness."""
-        bonus = 0
-        
-        # Bonus for having all critical fields configured
+        present, total = self._count_critical_fields(config)
+        if total > 0:
+            completeness_ratio = present / total
+            return int(completeness_ratio * 10)
+        return 0
+    
+    def _count_critical_fields(self, config: AppConfig) -> Tuple[int, int]:
+        """Count present and total critical fields."""
         critical_fields_present = 0
         total_critical_fields = 0
         
@@ -424,11 +433,7 @@ class ConfigurationValidator:
                 if hasattr(config, field) and getattr(config, field):
                     critical_fields_present += 1
         
-        if total_critical_fields > 0:
-            completeness_ratio = critical_fields_present / total_critical_fields
-            bonus = int(completeness_ratio * 10)
-        
-        return bonus
+        return critical_fields_present, total_critical_fields
     
     def _is_valid_url(self, url: str) -> bool:
         """Check if URL format is valid."""

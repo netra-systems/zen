@@ -34,52 +34,89 @@ class AuthServiceClient:
             )
         return self._client
     
-    async def validate_token(self, token: str) -> Optional[Dict]:
-        """Validate access token with caching."""
+    async def _check_auth_service_enabled(self, token: str) -> Optional[Dict]:
+        """Check if auth service is enabled, return local validation if not."""
         if not self.settings.enabled:
             return await self._local_validate(token)
+        return None
+    
+    async def _try_cached_token(self, token: str) -> Optional[Dict]:
+        """Try to get token from cache."""
+        return self.token_cache.get_cached_token(token)
+    
+    async def _validate_with_circuit_breaker(self, token: str) -> Optional[Dict]:
+        """Validate token using circuit breaker."""
+        return await self.circuit_manager.call_with_breaker(
+            self._validate_token_remote, token
+        )
+    
+    async def _cache_validation_result(self, token: str, result: Optional[Dict]) -> Optional[Dict]:
+        """Cache validation result if successful."""
+        if result:
+            self.token_cache.cache_token(token, result)
+        return result
+    
+    async def _handle_validation_error(self, token: str, error: Exception) -> Optional[Dict]:
+        """Handle validation error and fallback."""
+        logger.error(f"Token validation failed: {error}")
+        return await self._local_validate(token)
+    
+    async def validate_token(self, token: str) -> Optional[Dict]:
+        """Validate access token with caching."""
+        disabled_result = await self._check_auth_service_enabled(token)
+        if disabled_result is not None:
+            return disabled_result
         
-        # Check cache first
-        cached = self.token_cache.get_cached_token(token)
+        cached = await self._try_cached_token(token)
         if cached:
             return cached
         
-        # Call auth service with circuit breaker
         try:
-            result = await self.circuit_manager.call_with_breaker(
-                self._validate_token_remote, token
-            )
-            if result:
-                self.token_cache.cache_token(token, result)
-            return result
+            result = await self._validate_with_circuit_breaker(token)
+            return await self._cache_validation_result(token, result)
         except Exception as e:
-            logger.error(f"Token validation failed: {e}")
-            return await self._local_validate(token)
+            return await self._handle_validation_error(token, e)
+    
+    async def _build_validation_request(self, token: str) -> Dict:
+        """Build validation request payload."""
+        return {"token": token}
+    
+    async def _parse_validation_response(self, data: Dict) -> Dict:
+        """Parse validation response data."""
+        return {
+            "valid": data.get("valid", False),
+            "user_id": data.get("user_id"),
+            "email": data.get("email"),
+            "permissions": data.get("permissions", [])
+        }
     
     async def _validate_token_remote(self, token: str) -> Optional[Dict]:
         """Remote token validation."""
         client = await self._get_client()
+        request_data = await self._build_validation_request(token)
         
         try:
-            response = await client.post(
-                "/auth/validate",
-                json={"token": token}
-            )
-            
+            response = await client.post("/auth/validate", json=request_data)
             if response.status_code == 200:
-                data = response.json()
-                return {
-                    "valid": data.get("valid", False),
-                    "user_id": data.get("user_id"),
-                    "email": data.get("email"),
-                    "permissions": data.get("permissions", [])
-                }
-            
+                return await self._parse_validation_response(response.json())
             return None
-            
         except Exception as e:
             logger.error(f"Remote validation error: {e}")
             raise
+    
+    async def _build_login_request(self, email: str, password: str, provider: str) -> Dict:
+        """Build login request payload."""
+        return {
+            "email": email,
+            "password": password,
+            "provider": provider
+        }
+    
+    async def _execute_login_request(self, request_data: Dict) -> Optional[Dict]:
+        """Execute login request."""
+        client = await self._get_client()
+        response = await client.post("/auth/login", json=request_data)
+        return response.json() if response.status_code == 200 else None
     
     async def login(self, email: str, password: str, 
                    provider: str = "local") -> Optional[Dict]:
@@ -87,99 +124,100 @@ class AuthServiceClient:
         if not self.settings.enabled:
             return None
         
-        client = await self._get_client()
-        
+        request_data = await self._build_login_request(email, password, provider)
         try:
-            response = await client.post(
-                "/auth/login",
-                json={
-                    "email": email,
-                    "password": password,
-                    "provider": provider
-                }
-            )
-            
-            if response.status_code == 200:
-                return response.json()
-            
+            return await self._execute_login_request(request_data)
         except Exception as e:
             logger.error(f"Login failed: {e}")
-        
-        return None
+            return None
+    
+    async def _build_logout_headers(self, token: str) -> Dict[str, str]:
+        """Build logout request headers."""
+        return {"Authorization": f"Bearer {token}"}
+    
+    async def _build_logout_payload(self, session_id: Optional[str]) -> Dict:
+        """Build logout request payload."""
+        return {"session_id": session_id} if session_id else {}
+    
+    async def _execute_logout_request(self, token: str, session_id: Optional[str]) -> bool:
+        """Execute logout request."""
+        client = await self._get_client()
+        headers = await self._build_logout_headers(token)
+        payload = await self._build_logout_payload(session_id)
+        response = await client.post("/auth/logout", headers=headers, json=payload)
+        return response.status_code == 200
     
     async def logout(self, token: str, session_id: Optional[str] = None) -> bool:
         """User logout through auth service."""
         if not self.settings.enabled:
             return True
         
-        client = await self._get_client()
-        
         try:
-            response = await client.post(
-                "/auth/logout",
-                headers={"Authorization": f"Bearer {token}"},
-                json={"session_id": session_id} if session_id else {}
-            )
-            
-            # Clear token from cache
+            result = await self._execute_logout_request(token, session_id)
             self.token_cache.invalidate_cached_token(token)
-            
-            return response.status_code == 200
-            
+            return result
         except Exception as e:
             logger.error(f"Logout failed: {e}")
             return False
+    
+    async def _build_refresh_request(self, refresh_token: str) -> Dict:
+        """Build refresh token request payload."""
+        return {"refresh_token": refresh_token}
+    
+    async def _execute_refresh_request(self, request_data: Dict) -> Optional[Dict]:
+        """Execute refresh token request."""
+        client = await self._get_client()
+        response = await client.post("/auth/refresh", json=request_data)
+        return response.json() if response.status_code == 200 else None
     
     async def refresh_token(self, refresh_token: str) -> Optional[Dict]:
         """Refresh access token."""
         if not self.settings.enabled:
             return None
         
-        client = await self._get_client()
-        
+        request_data = await self._build_refresh_request(refresh_token)
         try:
-            response = await client.post(
-                "/auth/refresh",
-                json={"refresh_token": refresh_token}
-            )
-            
-            if response.status_code == 200:
-                return response.json()
-            
+            return await self._execute_refresh_request(request_data)
         except Exception as e:
             logger.error(f"Token refresh failed: {e}")
-        
+            return None
+    
+    async def _check_service_token_prereqs(self) -> bool:
+        """Check service token prerequisites."""
+        if not self.settings.enabled:
+            return False
+        if not self.settings.is_service_secret_configured():
+            logger.warning("Service secret not configured")
+            return False
+        return True
+    
+    async def _build_service_token_request(self) -> Dict:
+        """Build service token request payload."""
+        service_id, service_secret = self.settings.get_service_credentials()
+        return {
+            "service_id": service_id,
+            "service_secret": service_secret
+        }
+    
+    async def _execute_service_token_request(self, request_data: Dict) -> Optional[str]:
+        """Execute service token request."""
+        client = await self._get_client()
+        response = await client.post("/auth/service-token", json=request_data)
+        if response.status_code == 200:
+            return response.json().get("token")
         return None
     
     async def create_service_token(self) -> Optional[str]:
         """Get service-to-service auth token."""
-        if not self.settings.enabled:
+        if not await self._check_service_token_prereqs():
             return None
         
-        if not self.settings.is_service_secret_configured():
-            logger.warning("Service secret not configured")
-            return None
-        
-        client = await self._get_client()
-        service_id, service_secret = self.settings.get_service_credentials()
-        
+        request_data = await self._build_service_token_request()
         try:
-            response = await client.post(
-                "/auth/service-token",
-                json={
-                    "service_id": service_id,
-                    "service_secret": service_secret
-                }
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                return data.get("token")
-            
+            return await self._execute_service_token_request(request_data)
         except Exception as e:
             logger.error(f"Service token creation failed: {e}")
-        
-        return None
+            return None
     
     async def _local_validate(self, token: str) -> Optional[Dict]:
         """Local token validation fallback."""

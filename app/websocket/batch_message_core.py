@@ -62,12 +62,18 @@ class MessageBatcher:
                                           priority: int, connection_id: Optional[str]) -> bool:
         """Queue message to target connections."""
         connections = self.connection_manager.get_user_connections(user_id)
-        if not connections:
-            self._log_no_connections(user_id)
+        if not self._validate_connections_exist(user_id, connections):
             return False
         
         target_connections = self._get_target_connections(connection_id, connections)
         await self._queue_to_connections(message, user_id, priority, target_connections)
+        return True
+    
+    def _validate_connections_exist(self, user_id: str, connections: List[ConnectionInfo]) -> bool:
+        """Validate that connections exist for user."""
+        if not connections:
+            self._log_no_connections(user_id)
+            return False
         return True
     
     def _log_no_connections(self, user_id: str) -> None:
@@ -91,12 +97,18 @@ class MessageBatcher:
     def _create_pending_message(self, message: Union[Dict[str, Any], ServerMessage], 
                                conn_id: str, user_id: str, priority: int) -> PendingMessage:
         """Create pending message instance."""
-        return PendingMessage(
-            content=message,
-            connection_id=conn_id,
-            user_id=user_id,
-            priority=priority
-        )
+        params = self._prepare_message_params(message, conn_id, user_id, priority)
+        return PendingMessage(**params)
+    
+    def _prepare_message_params(self, message: Union[Dict[str, Any], ServerMessage], 
+                               conn_id: str, user_id: str, priority: int) -> Dict[str, Any]:
+        """Prepare parameters for pending message creation."""
+        return {
+            "content": message,
+            "connection_id": conn_id,
+            "user_id": user_id,
+            "priority": priority
+        }
     
     def _add_to_pending_queue(self, conn_id: str, pending_msg: PendingMessage) -> None:
         """Add message to pending queue for connection."""
@@ -115,7 +127,10 @@ class MessageBatcher:
         """Evaluate batch and decide whether to flush."""
         pending = self._pending_messages[connection_id]
         should_flush = self._strategy_manager.should_flush_batch(pending)
-        
+        await self._execute_flush_decision(connection_id, should_flush)
+    
+    async def _execute_flush_decision(self, connection_id: str, should_flush: bool) -> None:
+        """Execute the flush decision for a connection."""
         if should_flush:
             await self._flush_batch(connection_id)
         else:
@@ -138,9 +153,18 @@ class MessageBatcher:
     
     def _extract_pending_batch(self, connection_id: str) -> List[PendingMessage]:
         """Extract pending batch and clear queue."""
-        if connection_id not in self._pending_messages or not self._pending_messages[connection_id]:
+        if not self._has_pending_messages(connection_id):
             return []
         
+        return self._extract_and_cleanup_batch(connection_id)
+    
+    def _has_pending_messages(self, connection_id: str) -> bool:
+        """Check if connection has pending messages."""
+        return (connection_id in self._pending_messages and 
+                bool(self._pending_messages[connection_id]))
+    
+    def _extract_and_cleanup_batch(self, connection_id: str) -> List[PendingMessage]:
+        """Extract batch and perform cleanup."""
         batch = self._pending_messages[connection_id].copy()
         self._pending_messages[connection_id].clear()
         self._cleanup_timer(connection_id)
@@ -160,10 +184,20 @@ class MessageBatcher:
     async def _execute_batch_send(self, connection_id: str, batch: List[PendingMessage]) -> None:
         """Execute batch send to connection."""
         connection_info = self.connection_manager.get_connection_by_id(connection_id)
-        if not connection_info:
-            self._log_connection_not_found(connection_id)
+        if not self._validate_connection_exists(connection_id, connection_info):
             return
         
+        await self._send_and_update_metrics(connection_info, batch, connection_id)
+    
+    def _validate_connection_exists(self, connection_id: str, connection_info) -> bool:
+        """Validate connection exists for batch send."""
+        if not connection_info:
+            self._log_connection_not_found(connection_id)
+            return False
+        return True
+    
+    async def _send_and_update_metrics(self, connection_info, batch: List[PendingMessage], connection_id: str) -> None:
+        """Send batch and update metrics."""
         await send_batch_to_connection(connection_info, batch, connection_id, self.config)
         self._update_send_metrics(batch)
     
@@ -249,13 +283,15 @@ class MessageBatcher:
 
     def _get_core_metrics(self) -> Dict[str, Any]:
         """Get core batching metrics."""
-        return {
-            "total_batches": self._metrics.total_batches,
-            "total_messages": self._metrics.total_messages,
-            "avg_batch_size": self._metrics.avg_batch_size,
-            "avg_wait_time": self._metrics.avg_wait_time,
-            "throughput_per_second": self._metrics.throughput_per_second
-        }
+        metric_fields = self._collect_metric_fields()
+        return {field: getattr(self._metrics, field) for field in metric_fields}
+    
+    def _collect_metric_fields(self) -> List[str]:
+        """Collect core metric field names."""
+        return [
+            "total_batches", "total_messages", "avg_batch_size",
+            "avg_wait_time", "throughput_per_second"
+        ]
 
 
     def _get_queue_metrics(self) -> Dict[str, Any]:

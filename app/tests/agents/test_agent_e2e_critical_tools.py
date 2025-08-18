@@ -121,6 +121,66 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
                     
                     # Verify state continuity
                     assert state2.user_request == "Follow-up request"
+    def _get_sub_agents(self, supervisor):
+        """Get sub-agents from supervisor based on implementation"""
+        if hasattr(supervisor, '_impl') and supervisor._impl:
+            if hasattr(supervisor._impl, 'agents'):
+                return list(supervisor._impl.agents.values())
+            else:
+                return supervisor._impl.sub_agents
+        else:
+            return supervisor.sub_agents
+
+    def _setup_error_agent(self, supervisor):
+        """Setup sub-agent to simulate error"""
+        sub_agents = self._get_sub_agents(supervisor)
+        sub_agents[2].execute = AsyncMock(side_effect=Exception("Sub-agent failure"))
+
+    async def _capture_error_messages(self, websocket_manager):
+        """Setup error message capture"""
+        error_messages = []
+        async def capture_error(rid, msg):
+            if msg.get("type") == "error":
+                error_messages.append(msg)
+        websocket_manager.send_message = AsyncMock(side_effect=capture_error)
+        return error_messages
+
+    async def _execute_with_error(self, supervisor, run_id):
+        """Execute supervisor with expected error"""
+        try:
+            await supervisor.run("Test with error", supervisor.thread_id, supervisor.user_id, run_id)
+        except Exception:
+            pass  # Expected to fail
+
+    def _verify_error_handling(self, websocket_manager, error_messages):
+        """Verify error handling behavior"""
+        assert websocket_manager.send_message.called or len(error_messages) >= 0
+
+    def _setup_retry_mechanism(self, supervisor):
+        """Setup retry mechanism for testing"""
+        supervisor._retry_count = 0
+        max_retries = 3
+        async def retry_execute(state, rid, stream):
+            supervisor._retry_count += 1
+            if supervisor._retry_count < max_retries:
+                raise Exception("Temporary failure")
+            return state
+        sub_agents = self._get_sub_agents(supervisor)
+        sub_agents[2].execute = retry_execute
+        return max_retries
+
+    async def _test_retry_execution(self, supervisor, run_id, max_retries):
+        """Test retry execution mechanism"""
+        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
+            with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
+                with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
+                    for i in range(max_retries):
+                        try:
+                            await supervisor.run("Test with retry", supervisor.thread_id, supervisor.user_id, run_id + f"_retry_{i}")
+                            break
+                        except:
+                            continue
+
     async def test_6_error_handling_and_recovery(self, setup_agent_infrastructure):
         """
         Test Case 6: Error Handling and Recovery
@@ -131,70 +191,14 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         infra = setup_agent_infrastructure
         supervisor = infra["supervisor"]
         websocket_manager = infra["websocket_manager"]
-        
         run_id = str(uuid.uuid4())
-        
-        # Mock state persistence for error handling test
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                    # Simulate error in one sub-agent
-                    if hasattr(supervisor, '_impl') and supervisor._impl:
-                        if hasattr(supervisor._impl, 'agents'):
-                            sub_agents = list(supervisor._impl.agents.values())
-                        else:
-                            sub_agents = supervisor._impl.sub_agents
-                    else:
-                        sub_agents = supervisor.sub_agents
-                    sub_agents[2].execute = AsyncMock(side_effect=Exception("Sub-agent failure"))
-        
-        error_messages = []
-        
-        async def capture_error(rid, msg):
-            if msg.get("type") == "error":
-                error_messages.append(msg)
-        
-        websocket_manager.send_message = AsyncMock(side_effect=capture_error)
-        
-        # Execute with error
-        try:
-            await supervisor.run("Test with error", supervisor.thread_id, supervisor.user_id, run_id)
-        except Exception:
-            pass  # Expected to fail
-        
-        # Error handling implementation may vary, check if any messages were sent
-        # The error might be logged rather than sent as a specific error message
-        assert websocket_manager.send_message.called or len(error_messages) >= 0
-        
-        # Test retry mechanism
-        retry_count = 0
-        max_retries = 3
-        
-        async def retry_execute(state, rid, stream):
-            nonlocal retry_count
-            retry_count += 1
-            if retry_count < max_retries:
-                raise Exception("Temporary failure")
-            return state
-            
-        if hasattr(supervisor, '_impl') and supervisor._impl:
-            if hasattr(supervisor._impl, 'agents'):
-                sub_agents = list(supervisor._impl.agents.values())
-            else:
-                sub_agents = supervisor._impl.sub_agents
-        else:
-            sub_agents = supervisor.sub_agents
-        sub_agents[2].execute = retry_execute
-        
-        # Should succeed after retries
-        with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
-            with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
-                with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
-                    for i in range(max_retries):
-                        try:
-                            await supervisor.run("Test with retry", supervisor.thread_id, supervisor.user_id, run_id + f"_retry_{i}")
-                            break
-                        except:
-                            continue
-                    
-        assert retry_count >= 1
+                    self._setup_error_agent(supervisor)
+        error_messages = await self._capture_error_messages(websocket_manager)
+        await self._execute_with_error(supervisor, run_id)
+        self._verify_error_handling(websocket_manager, error_messages)
+        max_retries = self._setup_retry_mechanism(supervisor)
+        await self._test_retry_execution(supervisor, run_id, max_retries)
+        assert supervisor._retry_count >= 1

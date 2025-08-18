@@ -28,10 +28,21 @@ class PerformanceDashboard:
     
     def get_dashboard_data(self) -> Dict[str, Any]:
         """Get comprehensive performance dashboard data."""
+        core_data = self._get_core_dashboard_data()
+        service_data = self._get_service_dashboard_data()
+        return {**core_data, **service_data}
+
+    def _get_core_dashboard_data(self) -> Dict[str, Any]:
+        """Get core dashboard data components."""
         return {
             "timestamp": self._get_current_timestamp(),
             "system": self._get_system_dashboard_data(),
-            "memory": self._get_memory_dashboard_data(),
+            "memory": self._get_memory_dashboard_data()
+        }
+
+    def _get_service_dashboard_data(self) -> Dict[str, Any]:
+        """Get service-related dashboard data."""
+        return {
             "database": self._get_database_dashboard_data(),
             "websockets": self._get_websocket_dashboard_data(),
             "performance_optimization": self._get_optimization_data()
@@ -155,23 +166,29 @@ class SystemOverview:
         """Determine overall system health status."""
         cpu_summary = self.metrics_collector.get_metric_summary("system.cpu_percent")
         memory_summary = self.metrics_collector.get_metric_summary("system.memory_percent")
-        
+        return self._evaluate_system_metrics(cpu_summary, memory_summary)
+
+    def _evaluate_system_metrics(
+        self, cpu_summary: Optional[Dict[str, float]], memory_summary: Optional[Dict[str, float]]
+    ) -> str:
+        """Evaluate system metrics for health status."""
         if not cpu_summary or not memory_summary:
             return "unknown"
-        
         return self._calculate_health_status(cpu_summary, memory_summary)
     
     def _calculate_health_status(self, cpu_summary: Dict[str, float], memory_summary: Dict[str, float]) -> str:
         """Calculate health status from metrics."""
         cpu_current = cpu_summary.get("current", 0)
         memory_current = memory_summary.get("current", 0)
-        
+        return self._classify_health_level(cpu_current, memory_current)
+
+    def _classify_health_level(self, cpu_current: float, memory_current: float) -> str:
+        """Classify health level based on resource usage."""
         if cpu_current > 90 or memory_current > 90:
             return "critical"
         elif cpu_current > 75 or memory_current > 75:
             return "warning"
-        else:
-            return "healthy"
+        return "healthy"
     
     def _get_resource_utilization(self) -> Dict[str, Any]:
         """Get current resource utilization."""

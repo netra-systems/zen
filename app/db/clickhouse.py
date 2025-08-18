@@ -60,6 +60,16 @@ class MockClickHouseDatabase:
         return None
 
 
+def _is_testing_environment() -> bool:
+    """Check if running in testing environment."""
+    return settings.environment == "testing"
+
+def _is_development_with_mock() -> bool:
+    """Check if development environment with mock enabled."""
+    if settings.environment == "development":
+        return getattr(settings, 'use_mock_clickhouse', False)
+    return False
+
 def use_mock_clickhouse() -> bool:
     """Determine if mock ClickHouse should be used.
     
@@ -69,45 +79,30 @@ def use_mock_clickhouse() -> bool:
     
     Default: Use REAL ClickHouse
     """
-    if settings.environment == "testing":
-        return True
-    
-    if settings.environment == "development":
-        # Check for explicit mock flag (defaults to False - use real)
-        return getattr(settings, 'use_mock_clickhouse', False)
-    
-    # Production always uses real
-    return False
+    return _is_testing_environment() or _is_development_with_mock()
 
 
 def get_clickhouse_config():
-    """Get ClickHouse configuration based on environment.
+    """Get ClickHouse configuration from unified config system.
     
     Returns appropriate config for real ClickHouse connection.
-    Uses environment variables for all settings.
+    Uses unified configuration system for consistency.
     """
-    import os
-    from app.schemas.Config import ClickHouseHTTPSConfig
+    from app.config import get_config
+    config = get_config()
     
-    # Determine which port to use based on mode
-    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
-    
-    if clickhouse_mode == "local":
-        # For local mode, use HTTP port (8123)
-        port = int(os.environ.get("CLICKHOUSE_HTTP_PORT", "8123"))
-    else:
-        # For shared/cloud mode, use HTTPS port (8443)
-        port = 8443
-    
-    # Always use environment variables for configuration
-    return ClickHouseHTTPSConfig(
-        host=os.environ.get("CLICKHOUSE_HOST", "localhost"),
-        port=port,
-        user=os.environ.get("CLICKHOUSE_USER", "default"),
-        password=os.environ.get("CLICKHOUSE_PASSWORD", "netra_dev_password"),
-        database=os.environ.get("CLICKHOUSE_DB", "netra_dev")
-    )
+    # Use HTTPS config as default (can be switched based on needs)
+    return config.clickhouse_https
 
+
+async def _create_mock_client():
+    """Create and manage mock ClickHouse client."""
+    logger.info(f"[ClickHouse] Using MOCK client for {settings.environment}")
+    client = MockClickHouseDatabase()
+    try:
+        yield client
+    finally:
+        await client.disconnect()
 
 @asynccontextmanager
 async def get_clickhouse_client():
@@ -122,56 +117,53 @@ async def get_clickhouse_client():
             results = await client.execute("SELECT * FROM events")
     """
     if use_mock_clickhouse():
-        # Use mock for testing
-        logger.info(f"[ClickHouse] Using MOCK client for {settings.environment}")
-        client = MockClickHouseDatabase()
-        try:
+        async for client in _create_mock_client():
             yield client
-        finally:
-            await client.disconnect()
     else:
-        # Use REAL ClickHouse (default)
         async for client in _create_real_client():
             yield client
 
+
+def _get_connection_config():
+    """Get ClickHouse connection configuration."""
+    config = get_clickhouse_config()
+    from app.config import get_config
+    app_config = get_config()
+    use_secure = app_config.clickhouse_mode != "local"
+    return config, use_secure
+
+def _create_base_client(config, use_secure: bool):
+    """Create base ClickHouse client instance."""
+    return ClickHouseDatabase(
+        host=config.host,
+        port=config.port,
+        user=config.user,
+        password=config.password,
+        database=config.database,
+        secure=use_secure
+    )
+
+async def _test_and_yield_client(client):
+    """Test connection and yield client."""
+    await client.test_connection()
+    logger.info("[ClickHouse] REAL connection established")
+    yield client
 
 async def _create_real_client():
     """Create and manage REAL ClickHouse client.
     
     This is the default behavior - connects to actual ClickHouse instance.
     """
-    import os
-    config = get_clickhouse_config()
-    
-    # Determine if we should use secure connection
-    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
-    use_secure = clickhouse_mode != "local"
-    
+    config, use_secure = _get_connection_config()
     logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure})")
     
     try:
-        # Create real client
-        base_client = ClickHouseDatabase(
-            host=config.host,
-            port=config.port,
-            user=config.user,
-            password=config.password,
-            database=config.database,
-            secure=use_secure
-        )
-        
-        # Wrap with query interceptor for compatibility
+        base_client = _create_base_client(config, use_secure)
         client = ClickHouseQueryInterceptor(base_client)
-        
-        # Test connection
-        await client.test_connection()
-        logger.info("[ClickHouse] REAL connection established")
-        
-        yield client
-        
+        async for c in _test_and_yield_client(client):
+            yield c
     except Exception as e:
         logger.error(f"[ClickHouse] REAL connection failed: {str(e)}")
-        # Don't fall back to mock - fail explicitly
         raise
     finally:
         if 'client' in locals():
@@ -194,24 +186,32 @@ class ClickHouseService:
         self.force_mock = force_mock
         self._client = None
     
+    def _initialize_mock_client(self):
+        """Initialize mock ClickHouse client."""
+        logger.info("[ClickHouse Service] Initializing with MOCK client")
+        self._client = MockClickHouseDatabase()
+
+    async def _initialize_real_client(self):
+        """Initialize real ClickHouse client."""
+        logger.info("[ClickHouse Service] Initializing with REAL client")
+        config = get_clickhouse_config()
+        base_client = ClickHouseDatabase(
+            host=config.host,
+            port=config.port,
+            user=config.user,
+            password=config.password,
+            database=config.database,
+            secure=True
+        )
+        self._client = ClickHouseQueryInterceptor(base_client)
+        await self._client.test_connection()
+
     async def initialize(self):
         """Initialize ClickHouse connection."""
         if self.force_mock or use_mock_clickhouse():
-            logger.info("[ClickHouse Service] Initializing with MOCK client")
-            self._client = MockClickHouseDatabase()
+            self._initialize_mock_client()
         else:
-            logger.info("[ClickHouse Service] Initializing with REAL client")
-            config = get_clickhouse_config()
-            base_client = ClickHouseDatabase(
-                host=config.host,
-                port=config.port,
-                user=config.user,
-                password=config.password,
-                database=config.database,
-                secure=True
-            )
-            self._client = ClickHouseQueryInterceptor(base_client)
-            await self._client.test_connection()
+            await self._initialize_real_client()
     
     async def execute(self, query: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """Execute query on ClickHouse."""

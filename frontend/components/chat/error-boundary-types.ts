@@ -24,7 +24,7 @@ export interface ErrorReport {
   errorCount: number;
 }
 
-export interface RetryConfig {
+export interface ErrorBoundaryRetryConfig {
   maxRetries: number;
   retryDelay: number;
   useExponentialBackoff: boolean;
@@ -40,7 +40,7 @@ export interface ErrorHandlerHookReturn {
   resetError: () => void;
 }
 
-export const DEFAULT_RETRY_CONFIG: RetryConfig = {
+export const DEFAULT_RETRY_CONFIG: ErrorBoundaryRetryConfig = {
   maxRetries: 3,
   retryDelay: 1000,
   useExponentialBackoff: true,

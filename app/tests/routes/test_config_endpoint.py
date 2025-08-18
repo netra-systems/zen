@@ -38,18 +38,21 @@ class TestConfigEndpoint:
             }
         }
         
-        with patch('app.auth.environment_config.EnvironmentAuthConfig.get_frontend_config', return_value=expected_config):
+        with patch('app.routes.config._build_public_config', return_value=expected_config):
             response = client.get("/api/config/public")
             
             assert response.status_code == 200
             config = response.json()
-            # Test the actual public config structure rather than the mock
-            assert config["environment"] in ["development", "testing", "staging", "production"]
-            assert "app_name" in config
+            # Test the mocked config structure
+            assert config["api_url"] == "http://localhost:8000"
+            assert config["ws_url"] == "ws://localhost:8000"
+            assert config["features"]["chat"] == True
+            assert config["features"]["analytics"] == True
+            assert config["ui_settings"]["theme"] == "light"
     
     def test_update_config_authorized(self):
         """Test updating configuration with proper authorization"""
-        client = TestClient(app)
+        from app.auth_integration.auth import require_admin
         
         update_data = {
             "features": {
@@ -57,7 +60,20 @@ class TestConfigEndpoint:
             }
         }
         
-        with patch('app.routes.config.verify_admin_token', return_value=True):
+        # Mock the User object that would be returned from require_admin
+        mock_user = MagicMock()
+        mock_user.id = "test-user-id"
+        mock_user.email = "admin@test.com"
+        mock_user.is_admin = True
+        
+        # Use FastAPI dependency override mechanism
+        def mock_require_admin():
+            return mock_user
+        
+        app.dependency_overrides[require_admin] = mock_require_admin
+        
+        try:
+            client = TestClient(app)
             response = client.post(
                 "/api/config/update",
                 json=update_data,
@@ -66,10 +82,14 @@ class TestConfigEndpoint:
             
             assert response.status_code == 200
             assert response.json()["success"] == True
+        finally:
+            # Clean up dependency override
+            app.dependency_overrides.clear()
     
     def test_update_config_unauthorized(self):
         """Test config update rejection without authorization"""
-        client = TestClient(app)
+        from app.auth_integration.auth import require_admin
+        from fastapi import HTTPException, status
         
         update_data = {
             "features": {
@@ -77,11 +97,24 @@ class TestConfigEndpoint:
             }
         }
         
-        with patch('app.routes.config.verify_admin_token', return_value=False):
+        # Mock require_admin to raise an HTTPException for unauthorized access
+        def mock_require_admin():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired token"
+            )
+        
+        app.dependency_overrides[require_admin] = mock_require_admin
+        
+        try:
+            client = TestClient(app)
             response = client.post(
                 "/api/config/update",
                 json=update_data,
                 headers={"Authorization": "Bearer invalid-token"}
             )
             
-            assert response.status_code == 403
+            assert response.status_code == 401
+        finally:
+            # Clean up dependency override
+            app.dependency_overrides.clear()

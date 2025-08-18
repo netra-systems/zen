@@ -27,6 +27,14 @@ class CorpusManager:
             models.Corpus.id == corpus_id
         ).first()
     
+    def _apply_filters(self, query, status: Optional[str], user_id: Optional[str]):
+        """Apply filters to corpus query"""
+        if status:
+            query = query.filter(models.Corpus.status == status)
+        if user_id:
+            query = query.filter(models.Corpus.created_by_id == user_id)
+        return query
+
     async def get_corpora(
         self,
         db: Session,
@@ -37,13 +45,8 @@ class CorpusManager:
     ) -> List[models.Corpus]:
         """Get list of corpora with filtering"""
         query = db.query(models.Corpus)
-        
-        if status:
-            query = query.filter(models.Corpus.status == status)
-        if user_id:
-            query = query.filter(models.Corpus.created_by_id == user_id)
-        
-        return query.offset(skip).limit(limit).all()
+        filtered_query = self._apply_filters(query, status, user_id)
+        return filtered_query.offset(skip).limit(limit).all()
     
     def _validate_corpus_exists(self, db_corpus, corpus_id: str) -> None:
         """Validate that corpus exists for update"""
@@ -87,6 +90,38 @@ class CorpusManager:
         self._save_updated_metadata(db_corpus, updated_metadata)
         return self._commit_corpus_update(db, db_corpus)
     
+    def _generate_clone_ids(self) -> tuple[str, str]:
+        """Generate corpus ID and table name for cloning"""
+        import uuid
+        corpus_id = str(uuid.uuid4())
+        table_name = f"netra_content_corpus_{corpus_id.replace('-', '_')}"
+        return corpus_id, table_name
+
+    def _create_clone_metadata(self, source_corpus: models.Corpus) -> str:
+        """Create metadata for cloned corpus"""
+        from .base import ContentSource
+        metadata = {
+            "content_source": ContentSource.IMPORT.value, "cloned_from": source_corpus.id,
+            "created_at": datetime.now(UTC).isoformat(), "version": 1
+        }
+        return json.dumps(metadata)
+
+    def _create_corpus_model(self, corpus_id: str, table_name: str, new_name: str, 
+                           source_corpus: models.Corpus, user_id: str, metadata: str) -> models.Corpus:
+        """Create corpus model instance"""
+        from .base import CorpusStatus
+        return models.Corpus(
+            id=corpus_id, name=new_name, description=f"Clone of {source_corpus.name}",
+            table_name=table_name, status=CorpusStatus.CREATING.value, created_by_id=user_id,
+            domain=source_corpus.domain, metadata_=metadata)
+
+    def _save_corpus(self, db: Session, db_corpus: models.Corpus) -> models.Corpus:
+        """Save corpus to database"""
+        db.add(db_corpus)
+        db.commit()
+        db.refresh(db_corpus)
+        return db_corpus
+
     async def clone_corpus(
         self,
         db: Session,
@@ -94,117 +129,79 @@ class CorpusManager:
         new_name: str,
         user_id: str
     ) -> models.Corpus:
-        """
-        Create a new corpus record for cloning
-        
-        Args:
-            db: Database session
-            source_corpus: Source corpus to clone
-            new_name: Name for the new corpus
-            user_id: User creating the clone
-            
-        Returns:
-            Created corpus model
-        """
-        import uuid
-        from .base import CorpusStatus, ContentSource
-        
-        # Generate unique table name
-        corpus_id = str(uuid.uuid4())
-        table_name = f"netra_content_corpus_{corpus_id.replace('-', '_')}"
-        
-        # Create PostgreSQL record
-        db_corpus = models.Corpus(
-            id=corpus_id,
-            name=new_name,
-            description=f"Clone of {source_corpus.name}",
-            table_name=table_name,
-            status=CorpusStatus.CREATING.value,
-            created_by_id=user_id,
-            domain=source_corpus.domain,
-            metadata_=json.dumps({
-                "content_source": ContentSource.IMPORT.value,
-                "cloned_from": source_corpus.id,
-                "created_at": datetime.now(UTC).isoformat(),
-                "version": 1
-            })
-        )
-        db.add(db_corpus)
-        db.commit()
-        db.refresh(db_corpus)
-        
-        return db_corpus
+        """Create a new corpus record for cloning"""
+        corpus_id, table_name = self._generate_clone_ids()
+        metadata = self._create_clone_metadata(source_corpus)
+        db_corpus = self._create_corpus_model(corpus_id, table_name, new_name, source_corpus, user_id, metadata)
+        return self._save_corpus(db, db_corpus)
     
+    def _update_corpus_status_query(self, db: Session, corpus_id: str, status: str) -> int:
+        """Execute corpus status update query"""
+        return db.query(models.Corpus).filter(
+            models.Corpus.id == corpus_id
+        ).update({"status": status})
+
+    def _handle_successful_status_update(self, db: Session, corpus_id: str, status: str) -> bool:
+        """Handle successful status update"""
+        db.commit()
+        central_logger.info(f"Updated corpus {corpus_id} status to {status}")
+        return True
+
+    def _handle_status_update_error(self, db: Session, corpus_id: str, error: Exception) -> bool:
+        """Handle status update error"""
+        central_logger.error(f"Failed to update corpus {corpus_id} status: {str(error)}")
+        db.rollback()
+        return False
+
     async def set_corpus_status(
         self,
         db: Session,
         corpus_id: str,
         status: str
     ) -> bool:
-        """
-        Update corpus status
-        
-        Args:
-            db: Database session
-            corpus_id: Corpus ID
-            status: New status
-            
-        Returns:
-            True if updated successfully
-        """
+        """Update corpus status"""
         try:
-            updated = db.query(models.Corpus).filter(
-                models.Corpus.id == corpus_id
-            ).update({"status": status})
-            
+            updated = self._update_corpus_status_query(db, corpus_id, status)
             if updated:
-                db.commit()
-                central_logger.info(f"Updated corpus {corpus_id} status to {status}")
-                return True
-            
+                return self._handle_successful_status_update(db, corpus_id, status)
             return False
-            
         except Exception as e:
-            central_logger.error(f"Failed to update corpus {corpus_id} status: {str(e)}")
-            db.rollback()
-            return False
+            return self._handle_status_update_error(db, corpus_id, e)
     
+    def _delete_corpus_from_db(self, db: Session, db_corpus: models.Corpus) -> None:
+        """Delete corpus from database"""
+        db.delete(db_corpus)
+        db.commit()
+
+    async def _send_deletion_notification(self, corpus_id: str) -> None:
+        """Send corpus deletion notification"""
+        await manager.broadcasting.broadcast_to_all({
+            "type": "corpus:deleted", "payload": {"corpus_id": corpus_id}
+        })
+
+    def _handle_deletion_error(self, db: Session, corpus_id: str, error: Exception) -> bool:
+        """Handle corpus deletion error"""
+        central_logger.error(f"Failed to delete corpus record {corpus_id}: {str(error)}")
+        db.rollback()
+        return False
+
+    async def _perform_corpus_deletion(self, db: Session, db_corpus: models.Corpus, corpus_id: str) -> bool:
+        """Perform corpus deletion with notification"""
+        self._delete_corpus_from_db(db, db_corpus)
+        await self._send_deletion_notification(corpus_id)
+        central_logger.info(f"Deleted corpus record {corpus_id}")
+        return True
+
     async def delete_corpus_record(
         self,
         db: Session,
         corpus_id: str
     ) -> bool:
-        """
-        Delete corpus record from PostgreSQL
-        
-        Args:
-            db: Database session
-            corpus_id: Corpus ID
-            
-        Returns:
-            True if deleted successfully
-        """
+        """Delete corpus record from PostgreSQL"""
         try:
             db_corpus = await self.get_corpus(db, corpus_id)
-            
             if not db_corpus:
                 return False
-            
-            db.delete(db_corpus)
-            db.commit()
-            
-            # Send deletion notification
-            await manager.broadcasting.broadcast_to_all({
-                "type": "corpus:deleted",
-                "payload": {
-                    "corpus_id": corpus_id
-                }
-            })
-            
-            central_logger.info(f"Deleted corpus record {corpus_id}")
-            return True
-            
+            return await self._perform_corpus_deletion(db, db_corpus, corpus_id)
         except Exception as e:
-            central_logger.error(f"Failed to delete corpus record {corpus_id}: {str(e)}")
-            db.rollback()
-            return False
+            return self._handle_deletion_error(db, corpus_id, e)

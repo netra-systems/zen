@@ -69,6 +69,26 @@ class CacheStorage:
             query_durations[pattern] = query_durations[pattern][-10:]
 
     @staticmethod
+    def _prepare_cache_data(query: str, params: Optional[Dict], duration: Optional[float], config: QueryCacheConfig) -> tuple:
+        """Prepare cache key and duration data."""
+        cache_key = CacheKeyGenerator.generate_cache_key(query, params, config.cache_prefix)
+        query_duration = duration or 0.0
+        return cache_key, query_duration
+    
+    @staticmethod
+    async def _store_cache_data(redis, cache_key: str, entry: CacheEntry, tags: Optional[Set[str]], config: QueryCacheConfig, ttl: int) -> None:
+        """Store cache entry and tag associations."""
+        await CacheStorage.store_cache_entry(redis, cache_key, entry, ttl)
+        if tags:
+            await CacheStorage.store_tag_associations(redis, tags, cache_key, config.cache_prefix, ttl)
+    
+    @staticmethod
+    def _update_metrics_and_log(metrics: CacheMetrics, ttl: int) -> None:
+        """Update cache metrics and log success."""
+        metrics.cache_size += 1
+        logger.debug(f"Cached query result with TTL {ttl}s")
+    
+    @staticmethod
     async def cache_result(
         redis,
         query: str,
@@ -86,27 +106,13 @@ class CacheStorage:
             return False
         
         try:
-            cache_key = CacheKeyGenerator.generate_cache_key(query, params, config.cache_prefix)
-            query_duration = duration or 0.0
-            
-            # Update tracking
+            cache_key, query_duration = CacheStorage._prepare_cache_data(query, params, duration, config)
             CacheStorage.update_pattern_tracking(query, query_duration, query_patterns, query_durations)
-            
-            # Calculate TTL
             ttl = AdaptiveTTLCalculator.calculate_adaptive_ttl(query, query_duration, query_patterns, config)
-            
-            # Create and store cache entry
             entry = CacheStorage.create_cache_entry(cache_key, result, ttl, query_duration, tags)
-            await CacheStorage.store_cache_entry(redis, cache_key, entry, ttl)
-            
-            # Store tag associations
-            if tags:
-                await CacheStorage.store_tag_associations(tags, cache_key, config.cache_prefix, ttl)
-            
-            metrics.cache_size += 1
-            logger.debug(f"Cached query result with TTL {ttl}s")
+            await CacheStorage._store_cache_data(redis, cache_key, entry, tags, config, ttl)
+            CacheStorage._update_metrics_and_log(metrics, ttl)
             return True
-            
         except Exception as e:
             logger.error(f"Error caching query result: {e}")
             return False

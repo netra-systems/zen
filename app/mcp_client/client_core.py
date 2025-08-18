@@ -125,6 +125,16 @@ class MCPClient:
     ) -> MCPToolResult:
         """Perform the actual tool execution steps."""
         context = self._create_operation_context(connection, "execute_tool")
+        return await self._execute_tool_with_context(connection, tool_name, arguments, context)
+
+    async def _execute_tool_with_context(
+        self, 
+        connection: MCPConnection, 
+        tool_name: str, 
+        arguments: Dict[str, Any], 
+        context: MCPOperationContext
+    ) -> MCPToolResult:
+        """Execute tool with context and process result."""
         result = await self._send_tool_execution(connection, tool_name, arguments, context)
         await self._process_tool_result(result, connection, tool_name)
         return result

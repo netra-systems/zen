@@ -16,6 +16,7 @@ from dataclasses import dataclass
 
 from app.logging_config import central_logger
 from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.core.error_codes import ErrorSeverity
 
 logger = central_logger.get_logger(__name__)
 
@@ -35,12 +36,6 @@ class ErrorCategory(Enum):
     UNKNOWN = "unknown"
 
 
-class ErrorSeverity(Enum):
-    """Error severity levels."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
 
 
 @dataclass
@@ -53,16 +48,46 @@ class ErrorClassification:
     recovery_time_seconds: Optional[int] = None
 
 
-class AgentExecutionError(Exception):
-    """Base exception for agent execution errors."""
+# Import AgentExecutionError from canonical location - CONSOLIDATED
+from app.core.exceptions_agent import AgentExecutionError as CoreAgentExecutionError
+
+class AgentExecutionError(CoreAgentExecutionError):
+    """Compatibility wrapper for AgentExecutionError - delegates to canonical implementation."""
     
     def __init__(self, message: str, category: ErrorCategory = ErrorCategory.UNKNOWN,
                  severity: ErrorSeverity = ErrorSeverity.MEDIUM, 
                  is_retryable: bool = True):
-        super().__init__(message)
-        self.category = category
-        self.severity = severity
-        self.is_retryable = is_retryable
+        # Convert local enums to core severity if needed
+        from app.core.error_codes import ErrorSeverity as CoreErrorSeverity
+        core_severity = self._convert_severity(severity)
+        
+        # Use canonical implementation with agent-specific interface
+        super().__init__(message=message, severity=core_severity)
+        
+        # Store local category and retryable flag for compatibility
+        self._local_category = category
+        self._is_retryable = is_retryable
+    
+    def _convert_severity(self, local_severity):
+        """Convert local ErrorSeverity to core ErrorSeverity."""
+        from app.core.error_codes import ErrorSeverity as CoreErrorSeverity
+        severity_mapping = {
+            ErrorSeverity.LOW: CoreErrorSeverity.LOW,
+            ErrorSeverity.MEDIUM: CoreErrorSeverity.MEDIUM,
+            ErrorSeverity.HIGH: CoreErrorSeverity.HIGH,
+            ErrorSeverity.CRITICAL: CoreErrorSeverity.CRITICAL,
+        }
+        return severity_mapping.get(local_severity, CoreErrorSeverity.MEDIUM)
+    
+    @property
+    def category(self):
+        """Get local category for backward compatibility."""
+        return self._local_category
+    
+    @property
+    def is_retryable(self):
+        """Get retryable flag for backward compatibility."""
+        return self._is_retryable
 
 
 class ValidationError(AgentExecutionError):
@@ -80,11 +105,8 @@ class ExternalServiceError(AgentExecutionError):
         self.service_name = service_name
 
 
-class LLMError(AgentExecutionError):
-    """Error for LLM service failures."""
-    
-    def __init__(self, message: str):
-        super().__init__(message, ErrorCategory.LLM, ErrorSeverity.HIGH, True)
+# Import LLMError from canonical location - CONSOLIDATED
+from app.core.exceptions_agent import LLMError
 
 
 class DatabaseError(AgentExecutionError):

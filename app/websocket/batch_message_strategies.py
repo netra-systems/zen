@@ -25,15 +25,18 @@ class BatchingStrategyManager:
 
     def _evaluate_strategy_condition(self, pending: List[PendingMessage]) -> bool:
         """Evaluate flush condition based on current strategy."""
-        strategy_checks = {
+        strategy_checks = self._get_strategy_checks()
+        check_function = strategy_checks.get(self.config.strategy)
+        return check_function(pending) if check_function else False
+    
+    def _get_strategy_checks(self) -> dict:
+        """Get mapping of strategy types to check functions."""
+        return {
             BatchingStrategy.SIZE_BASED: self._check_size_based_flush,
             BatchingStrategy.TIME_BASED: self._check_time_based_flush,
             BatchingStrategy.PRIORITY: self._check_priority_based_flush,
             BatchingStrategy.ADAPTIVE: self._check_adaptive_flush
         }
-        
-        check_function = strategy_checks.get(self.config.strategy)
-        return check_function(pending) if check_function else False
     
     def _check_size_based_flush(self, pending: List[PendingMessage]) -> bool:
         """Check size-based flush condition."""

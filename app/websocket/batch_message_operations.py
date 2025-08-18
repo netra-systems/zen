@@ -22,9 +22,13 @@ async def send_batch_to_connection(
     config
 ) -> None:
     """Send a batch of messages to a connection."""
-    if not batch:
+    if not _validate_batch_not_empty(batch):
         return
     await _process_batch_send(connection_info, batch, connection_id, config)
+
+def _validate_batch_not_empty(batch: List[PendingMessage]) -> bool:
+    """Validate that batch is not empty."""
+    return bool(batch)
 
 
 async def _process_batch_send(
@@ -35,6 +39,16 @@ async def _process_batch_send(
 ) -> None:
     """Process batch send with error handling."""
     start_time = time.time()
+    await _execute_batch_with_error_handling(connection_info, batch, start_time, connection_id, config)
+
+async def _execute_batch_with_error_handling(
+    connection_info: ConnectionInfo,
+    batch: List[PendingMessage],
+    start_time: float,
+    connection_id: str,
+    config
+) -> None:
+    """Execute batch with comprehensive error handling."""
     try:
         await _execute_batch_with_metrics(connection_info, batch, start_time, connection_id)
     except Exception as e:
@@ -49,6 +63,15 @@ async def _execute_batch_with_metrics(
 ) -> None:
     """Execute batch send and update metrics."""
     await execute_batch_send(connection_info, batch)
+    _update_metrics_and_log(connection_info, batch, start_time, connection_id)
+
+def _update_metrics_and_log(
+    connection_info: ConnectionInfo,
+    batch: List[PendingMessage],
+    start_time: float,
+    connection_id: str
+) -> None:
+    """Update metrics and log successful send."""
     update_connection_metrics(connection_info, batch, start_time)
     log_successful_send(batch, connection_id)
 
@@ -60,8 +83,12 @@ async def _handle_batch_send_error(
     config
 ) -> None:
     """Handle error during batch send."""
-    logger.error(f"Error sending batch to {connection_id}: {error}")
+    _log_batch_error(error, connection_id)
     await handle_send_error(batch, config)
+
+def _log_batch_error(error: Exception, connection_id: str) -> None:
+    """Log batch send error."""
+    logger.error(f"Error sending batch to {connection_id}: {error}")
 
 
 async def execute_batch_send(connection_info: ConnectionInfo, batch: List[PendingMessage]) -> None:

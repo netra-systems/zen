@@ -7,7 +7,7 @@ Contains all Pydantic models for configuration validation.
 import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
-from app.schemas.Auth import AuthEndpoints, AuthConfigResponse, DevUser
+from app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
 from app.schemas.registry import User
 from app.schemas.llm_types import LLMProvider
 
@@ -176,6 +176,20 @@ class AppConfig(BaseModel):
     
     # SubAgent Communication Logging Settings (INFO level)
     subagent_logging_enabled: bool = True  # Enable/disable subagent communication logging
+    
+    # Service modes configuration (local/shared/mock/disabled)
+    redis_mode: str = Field(
+        default="shared",
+        description="Redis service mode: local, shared, mock, or disabled"
+    )
+    clickhouse_mode: str = Field(
+        default="shared", 
+        description="ClickHouse service mode: local, shared, mock, or disabled"
+    )
+    llm_mode: str = Field(
+        default="shared",
+        description="LLM service mode: local, shared, mock, or disabled"
+    )
     
     # Service configuration is now managed through dev_launcher service config
     # Services use the mode specified in the launcher (local/shared/mock)

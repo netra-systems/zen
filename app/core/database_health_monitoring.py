@@ -13,7 +13,10 @@ from .database_types import DatabaseType, PoolHealth, PoolMetrics
 logger = central_logger.get_logger(__name__)
 
 
-class DatabaseHealthChecker:
+# Import DatabaseHealthChecker from canonical location - CONSOLIDATED
+from app.db.health_checks import DatabaseHealthChecker as CoreDatabaseHealthChecker
+
+class PoolHealthChecker:
     """Health checker for database connections - ≤8 lines per function."""
     
     def __init__(self, db_type: DatabaseType):

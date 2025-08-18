@@ -118,19 +118,32 @@ class OptimizationTools:
     async def _execute_pipeline_agent(self, server, input_data: Dict[str, Any], 
                                      goals: List[str], thread_id: Optional[str]):
         """Execute the pipeline agent with configuration"""
+        agent_config = self._prepare_pipeline_config(input_data, goals)
         return await server.agent_service.execute_agent(
             agent_name="SupervisorAgent",
             thread_id=thread_id,
-            input_data={**input_data, "optimization_goals": goals},
-            config={"pipeline_mode": True}
+            **agent_config
         )
     
     def _format_pipeline_result(self, thread_id: Optional[str], result: Dict[str, Any], 
                                goals: List[str]) -> str:
         """Format pipeline execution result"""
-        return json.dumps({
+        result_data = self._build_pipeline_result_data(thread_id, result, goals)
+        return json.dumps(result_data, indent=2)
+    
+    def _prepare_pipeline_config(self, input_data: Dict[str, Any], goals: List[str]) -> Dict[str, Any]:
+        """Prepare pipeline agent configuration"""
+        return {
+            "input_data": {**input_data, "optimization_goals": goals},
+            "config": {"pipeline_mode": True}
+        }
+    
+    def _build_pipeline_result_data(self, thread_id: Optional[str], result: Dict[str, Any], 
+                                   goals: List[str]) -> Dict[str, Any]:
+        """Build pipeline result data structure"""
+        return {
             "status": "pipeline_started",
             "thread_id": thread_id,
             "run_id": result.get("run_id"),
             "optimization_goals": goals
-        }, indent=2)
+        }

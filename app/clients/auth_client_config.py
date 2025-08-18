@@ -52,31 +52,47 @@ class EnvironmentDetector:
             return Environment.TESTING
         return self._detect_from_cloud_run()
     
-    def _parse_environment(self, env_str: str) -> Environment:
-        """Parse environment string to enum."""
-        env_map = {
+    def _create_env_mapping(self) -> dict:
+        """Create environment string to enum mapping."""
+        return {
             "development": Environment.DEVELOPMENT,
             "testing": Environment.TESTING,
             "staging": Environment.STAGING,
             "production": Environment.PRODUCTION,
         }
-        if env_str in env_map:
-            return env_map[env_str]
+    
+    def _handle_unknown_environment(self, env_str: str) -> Environment:
+        """Handle unknown environment string."""
         logger.warning(f"Unknown environment '{env_str}', defaulting to development")
         return Environment.DEVELOPMENT
+    
+    def _parse_environment(self, env_str: str) -> Environment:
+        """Parse environment string to enum."""
+        env_map = self._create_env_mapping()
+        if env_str in env_map:
+            return env_map[env_str]
+        return self._handle_unknown_environment(env_str)
     
     def _check_testing_flag(self) -> bool:
         """Check if TESTING flag is set."""
         return os.getenv("TESTING") in ["true", "1"]
     
-    def _detect_from_cloud_run(self) -> Environment:
-        """Detect environment from Cloud Run variables."""
+    def _get_cloud_run_vars(self) -> tuple[str, str]:
+        """Get Cloud Run environment variables."""
         k_service = os.getenv("K_SERVICE", "")
         k_revision = os.getenv("K_REVISION", "")
+        return k_service, k_revision
+    
+    def _log_cloud_run_fallback(self) -> None:
+        """Log fallback to staging for Cloud Run detection."""
+        logger.warning("Could not detect environment from Cloud Run variables, defaulting to staging")
+    
+    def _detect_from_cloud_run(self) -> Environment:
+        """Detect environment from Cloud Run variables."""
+        k_service, k_revision = self._get_cloud_run_vars()
         if k_service or k_revision:
             return self._detect_cloud_run_environment(k_service, k_revision)
-        # Default to staging for safety if we can't determine environment
-        logger.warning("Could not detect environment from Cloud Run variables, defaulting to staging")
+        self._log_cloud_run_fallback()
         return Environment.STAGING
     
     def _detect_cloud_run_environment(self, k_service: str, k_revision: str) -> Environment:
@@ -102,14 +118,26 @@ class EnvironmentDetector:
 class OAuthCredentialManager:
     """Manages OAuth credential retrieval with fallback chain."""
     
+    def _build_env_var_name(self, cred_type: str, env_suffix: str) -> str:
+        """Build environment variable name for credential."""
+        return f"GOOGLE_OAUTH_CLIENT_{cred_type}_{env_suffix}"
+    
+    def _try_primary_credential(self, env_var: str) -> str:
+        """Try to get primary credential from environment."""
+        return os.getenv(env_var, "")
+    
+    def _log_missing_credential(self, env_var: str) -> None:
+        """Log missing credential warning."""
+        logger.error(f"Missing OAuth credential: {env_var}")
+    
     def get_oauth_credential(self, env_suffix: str, cred_type: str) -> str:
         """Get OAuth credential with fallback chain."""
-        env_var = f"GOOGLE_OAUTH_CLIENT_{cred_type}_{env_suffix}"
-        credential = os.getenv(env_var, "")
+        env_var = self._build_env_var_name(cred_type, env_suffix)
+        credential = self._try_primary_credential(env_var)
         if not credential:
             credential = self._get_fallback_credential(cred_type)
         if not credential:
-            logger.error(f"Missing OAuth credential: {env_var}")
+            self._log_missing_credential(env_var)
         return credential
     
     def _get_fallback_credential(self, cred_type: str) -> str:
@@ -127,33 +155,52 @@ class OAuthConfigGenerator:
     def __init__(self):
         self.credential_manager = OAuthCredentialManager()
     
+    def _create_config_mapping(self) -> dict:
+        """Create environment to config function mapping."""
+        return {
+            Environment.DEVELOPMENT: self._get_dev_oauth_config,
+            Environment.TESTING: self._get_test_oauth_config,
+            Environment.STAGING: self._get_staging_oauth_config,
+            Environment.PRODUCTION: self._get_prod_oauth_config,
+        }
+    
+    def _validate_config_for_env(self, config: OAuthConfig, environment: Environment) -> bool:
+        """Validate config for production environments."""
+        critical_envs = [Environment.STAGING, Environment.PRODUCTION]
+        return not (not config.client_id and environment in critical_envs)
+    
+    def _handle_config_validation_failure(self, environment: Environment) -> OAuthConfig:
+        """Handle config validation failure."""
+        logger.error(f"Missing OAuth client ID for environment: {environment.value}")
+        return self._get_fallback_oauth_config()
+    
+    def _handle_config_exception(self, error: Exception) -> OAuthConfig:
+        """Handle config generation exception."""
+        logger.error(f"Failed to get OAuth config: {error}", exc_info=True)
+        return self._get_fallback_oauth_config()
+    
     def get_oauth_config(self, environment: Environment) -> OAuthConfig:
         """Get OAuth configuration for current environment."""
         try:
-            config_map = {
-                Environment.DEVELOPMENT: self._get_dev_oauth_config,
-                Environment.TESTING: self._get_test_oauth_config,
-                Environment.STAGING: self._get_staging_oauth_config,
-                Environment.PRODUCTION: self._get_prod_oauth_config,
-            }
-            
+            config_map = self._create_config_mapping()
             config_func = config_map.get(environment, self._get_fallback_oauth_config)
             config = config_func()
             
-            # Validate critical configuration
-            if not config.client_id and environment in [Environment.STAGING, Environment.PRODUCTION]:
-                logger.error(f"Missing OAuth client ID for environment: {environment.value}")
-                return self._get_fallback_oauth_config()
-            
+            if not self._validate_config_for_env(config, environment):
+                return self._handle_config_validation_failure(environment)
             return config
         except Exception as e:
-            logger.error(f"Failed to get OAuth config: {e}", exc_info=True)
-            return self._get_fallback_oauth_config()
+            return self._handle_config_exception(e)
+    
+    def _get_dev_credentials(self) -> tuple[str, str]:
+        """Get development OAuth credentials."""
+        client_id = self.credential_manager.get_oauth_credential("DEV", "CLIENT_ID")
+        client_secret = self.credential_manager.get_oauth_credential("DEV", "CLIENT_SECRET")
+        return client_id, client_secret
     
     def _get_dev_oauth_config(self) -> OAuthConfig:
         """Get development OAuth configuration."""
-        client_id = self.credential_manager.get_oauth_credential("DEV", "CLIENT_ID")
-        client_secret = self.credential_manager.get_oauth_credential("DEV", "CLIENT_SECRET")
+        client_id, client_secret = self._get_dev_credentials()
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=self._get_dev_redirect_uris(),
@@ -161,10 +208,15 @@ class OAuthConfigGenerator:
             allow_dev_login=True, allow_mock_auth=True, use_proxy=False
         )
     
-    def _get_test_oauth_config(self) -> OAuthConfig:
-        """Get testing OAuth configuration."""
+    def _get_test_credentials(self) -> tuple[str, str]:
+        """Get testing OAuth credentials."""
         client_id = self.credential_manager.get_oauth_credential("TEST", "CLIENT_ID")
         client_secret = self.credential_manager.get_oauth_credential("TEST", "CLIENT_SECRET")
+        return client_id, client_secret
+    
+    def _get_test_oauth_config(self) -> OAuthConfig:
+        """Get testing OAuth configuration."""
+        client_id, client_secret = self._get_test_credentials()
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=["http://test.local:8000/api/auth/callback"],
@@ -172,12 +224,20 @@ class OAuthConfigGenerator:
             allow_dev_login=False, allow_mock_auth=True, use_proxy=False
         )
     
-    def _get_staging_oauth_config(self) -> OAuthConfig:
-        """Get staging OAuth configuration."""
+    def _get_staging_credentials(self) -> tuple[str, str]:
+        """Get staging OAuth credentials."""
         client_id = self.credential_manager.get_oauth_credential("STAGING", "CLIENT_ID")
         client_secret = self.credential_manager.get_oauth_credential("STAGING", "CLIENT_SECRET")
-        is_pr_environment = bool(os.getenv("PR_NUMBER"))
-        if is_pr_environment:
+        return client_id, client_secret
+    
+    def _check_pr_environment(self) -> bool:
+        """Check if running in PR environment."""
+        return bool(os.getenv("PR_NUMBER"))
+    
+    def _get_staging_oauth_config(self) -> OAuthConfig:
+        """Get staging OAuth configuration."""
+        client_id, client_secret = self._get_staging_credentials()
+        if self._check_pr_environment():
             return self._get_pr_oauth_config(client_id, client_secret)
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
@@ -186,10 +246,15 @@ class OAuthConfigGenerator:
             allow_dev_login=False, allow_mock_auth=False, use_proxy=False
         )
     
-    def _get_prod_oauth_config(self) -> OAuthConfig:
-        """Get production OAuth configuration."""
+    def _get_prod_credentials(self) -> tuple[str, str]:
+        """Get production OAuth credentials."""
         client_id = self.credential_manager.get_oauth_credential("PROD", "CLIENT_ID")
         client_secret = self.credential_manager.get_oauth_credential("PROD", "CLIENT_SECRET")
+        return client_id, client_secret
+    
+    def _get_prod_oauth_config(self) -> OAuthConfig:
+        """Get production OAuth configuration."""
+        client_id, client_secret = self._get_prod_credentials()
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=self._get_prod_redirect_uris(),
@@ -197,13 +262,18 @@ class OAuthConfigGenerator:
             allow_dev_login=False, allow_mock_auth=False, use_proxy=False
         )
     
+    def _build_pr_origins(self, proxy_url: str, pr_number: str) -> List[str]:
+        """Build PR environment JavaScript origins."""
+        origins = [proxy_url]
+        if pr_number:
+            origins.append(f"https://pr-{pr_number}.staging.netrasystems.ai")
+        return origins
+    
     def _get_pr_oauth_config(self, client_id: str, client_secret: str) -> OAuthConfig:
         """Get PR environment OAuth configuration with proxy."""
         pr_number = os.getenv("PR_NUMBER", "")
         proxy_url = "https://auth.staging.netrasystems.ai"
-        origins = [proxy_url]
-        if pr_number:
-            origins.append(f"https://pr-{pr_number}.staging.netrasystems.ai")
+        origins = self._build_pr_origins(proxy_url, pr_number)
         return OAuthConfig(
             client_id=client_id, client_secret=client_secret,
             redirect_uris=[f"{proxy_url}/callback"], javascript_origins=origins,
@@ -248,18 +318,16 @@ class OAuthConfigGenerator:
                 "https://auth.netrasystems.ai",
                 "https://app.netrasystems.ai"]
     
-    def _get_fallback_oauth_config(self) -> OAuthConfig:
-        """Get fallback OAuth configuration when normal config fails."""
-        logger.warning("Using fallback OAuth configuration")
-        
-        # Try to get basic credentials with fallbacks
-        client_id = (
+    def _get_fallback_client_id(self) -> str:
+        """Get fallback client ID with multiple attempts."""
+        return (
             os.getenv("GOOGLE_CLIENT_ID") or 
             os.getenv("GOOGLE_OAUTH_CLIENT_ID") or 
             ""
         )
-        
-        # Basic configuration that allows the service to start
+    
+    def _create_fallback_config(self, client_id: str) -> OAuthConfig:
+        """Create fallback configuration object."""
         return OAuthConfig(
             client_id=client_id,
             client_secret="",  # Empty but service can still start
@@ -269,3 +337,9 @@ class OAuthConfigGenerator:
             allow_mock_auth=False,
             use_proxy=False
         )
+    
+    def _get_fallback_oauth_config(self) -> OAuthConfig:
+        """Get fallback OAuth configuration when normal config fails."""
+        logger.warning("Using fallback OAuth configuration")
+        client_id = self._get_fallback_client_id()
+        return self._create_fallback_config(client_id)

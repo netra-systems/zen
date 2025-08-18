@@ -133,11 +133,14 @@ def _calculate_overall_health_score(health_scores: Dict[str, float]) -> float:
 def _create_system_health_result(metrics: Dict[str, Any], overall_score: float, response_time: float) -> HealthCheckResult:
     """Create HealthCheckResult for system resources."""
     return HealthCheckResult(
-        component_name="system_resources",
-        success=True,
-        health_score=overall_score,
-        response_time_ms=response_time,
-        metadata=_create_system_metadata(metrics)
+        status="healthy",
+        response_time=response_time / 1000,  # Convert ms to seconds
+        details={
+            "component_name": "system_resources",
+            "success": True,
+            "health_score": overall_score,
+            "metadata": _create_system_metadata(metrics)
+        }
     )
 
 def _create_system_metadata(metrics: Dict[str, Any]) -> Dict[str, Any]:
@@ -154,32 +157,42 @@ def _create_system_metadata(metrics: Dict[str, Any]) -> Dict[str, Any]:
 def _create_success_result(component: str, response_time: float) -> HealthCheckResult:
     """Create a successful health check result."""
     return HealthCheckResult(
-        component_name=component,
-        success=True,
-        health_score=1.0,
-        response_time_ms=response_time
+        status="healthy",
+        response_time=response_time / 1000,  # Convert ms to seconds
+        details={
+            "component_name": component,
+            "success": True,
+            "health_score": 1.0
+        }
     )
 
 
 def _create_failed_result(component: str, error: str, response_time: float = 0.0) -> HealthCheckResult:
     """Create a failed health check result."""
     return HealthCheckResult(
-        component_name=component,
-        success=False,
-        health_score=0.0,
-        response_time_ms=response_time,
-        error_message=error
+        status="unhealthy",
+        response_time=response_time / 1000,  # Convert ms to seconds
+        details={
+            "component_name": component,
+            "success": False,
+            "health_score": 0.0,
+            "error_message": error
+        }
     )
 
 
 def _create_disabled_result(component: str, reason: str) -> HealthCheckResult:
     """Create a disabled service health check result."""
     return HealthCheckResult(
-        component_name=component,
-        success=True,
-        health_score=1.0,
-        response_time_ms=0.0,
-        metadata={"status": "disabled", "reason": reason}
+        status="healthy",
+        response_time=0.0,
+        details={
+            "component_name": component,
+            "success": True,
+            "health_score": 1.0,
+            "status": "disabled",
+            "reason": reason
+        }
     )
 
 
@@ -198,11 +211,14 @@ def _calculate_websocket_health_score(stats: Dict[str, Any]) -> float:
 def _create_websocket_health_result(stats: Dict[str, Any], health_score: float, response_time: float) -> HealthCheckResult:
     """Create HealthCheckResult for WebSocket health check."""
     return HealthCheckResult(
-        component_name="websocket",
-        success=True,
-        health_score=health_score,
-        response_time_ms=response_time,
-        metadata=stats
+        status="healthy",
+        response_time=response_time / 1000,  # Convert ms to seconds
+        details={
+            "component_name": "websocket",
+            "success": True,
+            "health_score": health_score,
+            "metadata": stats
+        }
     )
 
 

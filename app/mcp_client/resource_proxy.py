@@ -39,11 +39,13 @@ class MCPResourceProxy:
         """Fetch specific resource content from MCP server."""
         if not self.validate_uri(uri):
             raise NetraException(f"Invalid resource URI: {uri}", ErrorCode.VALIDATION_ERROR)
-        
+        return await self._fetch_resource_with_cache(connection, uri)
+    
+    async def _fetch_resource_with_cache(self, connection: MCPConnection, uri: str) -> MCPResource:
+        """Fetch resource with cache check."""
         cache_key = f"{connection.server_name}:{uri}"
         if cache_key in self._content_cache:
             return self._content_cache[cache_key]
-        
         return await self._fetch_and_cache_resource(connection, uri, cache_key)
     
     def validate_uri(self, uri: str) -> bool:

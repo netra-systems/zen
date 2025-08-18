@@ -18,7 +18,7 @@ class TestThreadRepositoryOperations:
     
     async def test_thread_crud_operations(self):
         from app.services.database.thread_repository import ThreadRepository
-        from app.schemas.database_schemas import Thread
+        from app.schemas.registry import Thread
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
@@ -63,7 +63,7 @@ class TestThreadRepositoryOperations:
     
     async def test_soft_delete_functionality(self):
         from app.services.database.thread_repository import ThreadRepository
-        from app.schemas.database_schemas import Thread
+        from app.schemas.registry import Thread
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = ThreadRepository()
@@ -101,7 +101,7 @@ class TestMessageRepositoryQueries:
     
     async def test_message_pagination(self):
         from app.services.database.message_repository import MessageRepository
-        from app.schemas.database_schemas import Message
+        from app.schemas.registry import Message
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
@@ -137,7 +137,7 @@ class TestMessageRepositoryQueries:
     
     async def test_complex_message_queries(self):
         from app.services.database.message_repository import MessageRepository
-        from app.schemas.database_schemas import Message
+        from app.schemas.registry import Message
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MessageRepository()
@@ -178,7 +178,7 @@ class TestUserRepositoryAuth:
     
     async def test_password_hashing(self):
         from app.services.database.user_repository import UserRepository
-        from app.schemas.database_schemas import User
+        from app.schemas.registry import User
         from argon2 import PasswordHasher
         
         mock_session = AsyncMock(spec=AsyncSession)
@@ -206,7 +206,7 @@ class TestUserRepositoryAuth:
     
     async def test_authentication_flow(self):
         from app.services.database.user_repository import UserRepository
-        from app.schemas.database_schemas import User
+        from app.schemas.registry import User
         from argon2 import PasswordHasher
         
         mock_session = AsyncMock(spec=AsyncSession)
@@ -244,7 +244,7 @@ class TestOptimizationRepositoryStorage:
     
     async def test_optimization_versioning(self):
         from app.services.database.optimization_repository import OptimizationRepository
-        from app.schemas.database_schemas import Optimization
+        from app.schemas.registry import Optimization
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
@@ -284,7 +284,7 @@ class TestOptimizationRepositoryStorage:
     
     async def test_optimization_history(self):
         from app.services.database.optimization_repository import OptimizationRepository
-        from app.schemas.database_schemas import Optimization
+        from app.schemas.registry import Optimization
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = OptimizationRepository()
@@ -308,7 +308,7 @@ class TestMetricRepositoryAggregation:
     
     async def test_metric_aggregation(self):
         from app.services.database.metric_repository import MetricRepository
-        from app.schemas.database_schemas import Metric
+        from app.schemas.registry import Metric
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()
@@ -340,7 +340,7 @@ class TestMetricRepositoryAggregation:
     
     async def test_time_series_queries(self):
         from app.services.database.metric_repository import MetricRepository
-        from app.schemas.database_schemas import Metric
+        from app.schemas.registry import Metric
         
         mock_session = AsyncMock(spec=AsyncSession)
         repo = MetricRepository()

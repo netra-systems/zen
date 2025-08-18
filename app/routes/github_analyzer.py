@@ -31,138 +31,122 @@ router = APIRouter(prefix="/api/github", tags=["github_analyzer"])
 analysis_store: Dict[str, Dict[str, Any]] = {}
 
 
-@router.post("/analyze", response_model=AnalysisResponse)
-async def analyze_repository(
-    request: AnalysisRequest,
-    background_tasks: BackgroundTasks,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db_session)
-) -> AnalysisResponse:
-    """Analyze a GitHub repository for AI operations."""
-    
-    # Validate user permissions
+def _validate_user_permissions(current_user: User) -> None:
+    """Validate user has required permissions for analysis."""
     if not current_user.has_role("corpus_admin"):
         raise HTTPException(
-            status_code=403,
-            detail="Insufficient permissions for repository analysis"
+            status_code=403, detail="Insufficient permissions for repository analysis"
         )
-    
-    # Generate analysis ID
-    analysis_id = str(uuid.uuid4())
-    
-    # Store initial status
+
+def _store_analysis_initial_status(analysis_id: str, request: AnalysisRequest, user_id: str) -> None:
+    """Store initial analysis status."""
     analysis_store[analysis_id] = {
-        "status": "started",
-        "progress": 0,
-        "message": "Initializing analysis",
-        "started_at": datetime.utcnow(),
-        "repository_url": request.repository_url,
-        "user_id": current_user.id
+        "status": "started", "progress": 0, "message": "Initializing analysis",
+        "started_at": datetime.utcnow(), "repository_url": request.repository_url,
+        "user_id": user_id
     }
-    
-    # Start analysis in background
-    background_tasks.add_task(
-        run_analysis,
-        analysis_id,
-        request,
-        current_user.id,
-        db
-    )
-    
+
+def _start_background_analysis(
+    background_tasks: BackgroundTasks, analysis_id: str, request: AnalysisRequest,
+    user_id: str, db: AsyncSession
+) -> None:
+    """Start analysis in background task."""
+    background_tasks.add_task(run_analysis, analysis_id, request, user_id, db)
+
+def _build_analysis_response(analysis_id: str, request: AnalysisRequest) -> AnalysisResponse:
+    """Build analysis response."""
     return AnalysisResponse(
-        success=True,
-        analysis_id=analysis_id,
-        repository_url=request.repository_url,
-        analyzed_at=datetime.utcnow(),
-        status="started"
+        success=True, analysis_id=analysis_id, repository_url=request.repository_url,
+        analyzed_at=datetime.utcnow(), status="started"
     )
 
+@router.post("/analyze", response_model=AnalysisResponse)
+async def analyze_repository(
+    request: AnalysisRequest, background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db_session)
+) -> AnalysisResponse:
+    """Analyze a GitHub repository for AI operations."""
+    _validate_user_permissions(current_user)
+    analysis_id = str(uuid.uuid4())
+    _store_analysis_initial_status(analysis_id, request, current_user.id)
+    _start_background_analysis(background_tasks, analysis_id, request, current_user.id, db)
+    return _build_analysis_response(analysis_id, request)
+
+
+def _validate_analysis_exists(analysis_id: str) -> None:
+    """Validate analysis exists in store."""
+    if analysis_id not in analysis_store:
+        raise HTTPException(status_code=404, detail="Analysis not found")
+
+def _validate_analysis_access(status_data: Dict[str, Any], current_user: User) -> None:
+    """Validate user has access to analysis."""
+    if status_data.get("user_id") != current_user.id:
+        if not current_user.has_role("admin"):
+            raise HTTPException(status_code=403, detail="Access denied to this analysis")
+
+def _build_analysis_status_response(analysis_id: str, status_data: Dict[str, Any]) -> AnalysisStatus:
+    """Build analysis status response."""
+    return AnalysisStatus(
+        analysis_id=analysis_id, status=status_data["status"],
+        progress=status_data.get("progress", 0), message=status_data.get("message", ""),
+        started_at=status_data["started_at"], completed_at=status_data.get("completed_at")
+    )
 
 @router.get("/analysis/{analysis_id}/status", response_model=AnalysisStatus)
 async def get_analysis_status(
-    analysis_id: str,
-    current_user: User = Depends(get_current_user)
+    analysis_id: str, current_user: User = Depends(get_current_user)
 ) -> AnalysisStatus:
     """Get status of a repository analysis."""
-    
-    if analysis_id not in analysis_store:
-        raise HTTPException(
-            status_code=404,
-            detail="Analysis not found"
-        )
-    
+    _validate_analysis_exists(analysis_id)
     status_data = analysis_store[analysis_id]
-    
-    # Verify user owns this analysis
-    if status_data.get("user_id") != current_user.id:
-        if not current_user.has_role("admin"):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied to this analysis"
-            )
-    
-    return AnalysisStatus(
-        analysis_id=analysis_id,
-        status=status_data["status"],
-        progress=status_data.get("progress", 0),
-        message=status_data.get("message", ""),
-        started_at=status_data["started_at"],
-        completed_at=status_data.get("completed_at")
-    )
+    _validate_analysis_access(status_data, current_user)
+    return _build_analysis_status_response(analysis_id, status_data)
 
 
-@router.get("/analysis/{analysis_id}/results", response_model=AnalysisResponse)
-async def get_analysis_results(
-    analysis_id: str,
-    current_user: User = Depends(get_current_user)
-) -> AnalysisResponse:
-    """Get results of a completed repository analysis."""
-    
-    if analysis_id not in analysis_store:
-        raise HTTPException(
-            status_code=404,
-            detail="Analysis not found"
-        )
-    
-    status_data = analysis_store[analysis_id]
-    
-    # Verify user owns this analysis
-    if status_data.get("user_id") != current_user.id:
-        if not current_user.has_role("admin"):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied to this analysis"
-            )
-    
+def _validate_analysis_completed(status_data: Dict[str, Any]) -> None:
+    """Validate analysis is completed."""
     if status_data["status"] != "completed":
         raise HTTPException(
             status_code=400,
             detail=f"Analysis not completed. Current status: {status_data['status']}"
         )
-    
+
+def _build_analysis_results_response(analysis_id: str, status_data: Dict[str, Any]) -> AnalysisResponse:
+    """Build analysis results response."""
     return AnalysisResponse(
-        success=True,
-        analysis_id=analysis_id,
-        repository_url=status_data["repository_url"],
-        analyzed_at=status_data["completed_at"],
-        result=status_data.get("result"),
+        success=True, analysis_id=analysis_id, repository_url=status_data["repository_url"],
+        analyzed_at=status_data["completed_at"], result=status_data.get("result"),
         status="completed"
     )
 
+@router.get("/analysis/{analysis_id}/results", response_model=AnalysisResponse)
+async def get_analysis_results(
+    analysis_id: str, current_user: User = Depends(get_current_user)
+) -> AnalysisResponse:
+    """Get results of a completed repository analysis."""
+    _validate_analysis_exists(analysis_id)
+    status_data = analysis_store[analysis_id]
+    _validate_analysis_access(status_data, current_user)
+    _validate_analysis_completed(status_data)
+    return _build_analysis_results_response(analysis_id, status_data)
+
+
+async def _run_analysis_workflow(
+    analysis_id: str, request: AnalysisRequest, analyzer: GitHubAnalyzerAgent
+) -> None:
+    """Run the analysis workflow."""
+    result = await _execute_repository_analysis(analysis_id, request, analyzer)
+    await _finalize_analysis_result(analysis_id, result)
+    await _cleanup_analysis_resources(analyzer)
+    logger.info(f"Analysis {analysis_id} completed successfully")
 
 async def run_analysis(
-    analysis_id: str,
-    request: AnalysisRequest,
-    user_id: str,
-    db: AsyncSession
+    analysis_id: str, request: AnalysisRequest, user_id: str, db: AsyncSession
 ) -> None:
     """Run repository analysis in background."""
     try:
         analyzer = await _initialize_analysis_components(analysis_id)
-        result = await _execute_repository_analysis(analysis_id, request, analyzer)
-        await _finalize_analysis_result(analysis_id, result)
-        await _cleanup_analysis_resources(analyzer)
-        logger.info(f"Analysis {analysis_id} completed successfully")
+        await _run_analysis_workflow(analysis_id, request, analyzer)
     except Exception as e:
         await _handle_analysis_error(analysis_id, e)
 
@@ -200,14 +184,22 @@ def _build_analysis_context(request: AnalysisRequest) -> Dict[str, Any]:
     }
 
 
-async def _finalize_analysis_result(analysis_id: str, result: Any) -> None:
-    """Update final analysis status based on result."""
+def _set_analysis_completion(analysis_id: str) -> None:
+    """Set analysis completion status."""
     _update_analysis_status(analysis_id, "completed", 100, "Analysis completed")
     analysis_store[analysis_id]["completed_at"] = datetime.utcnow()
+
+def _process_analysis_result(analysis_id: str, result: Any) -> None:
+    """Process analysis result based on success status."""
     if result.success:
         analysis_store[analysis_id]["result"] = result.data
     else:
         _mark_analysis_failed(analysis_id, result.error)
+
+async def _finalize_analysis_result(analysis_id: str, result: Any) -> None:
+    """Update final analysis status based on result."""
+    _set_analysis_completion(analysis_id)
+    _process_analysis_result(analysis_id, result)
 
 
 async def _cleanup_analysis_resources(analyzer: GitHubAnalyzerAgent) -> None:
@@ -235,50 +227,47 @@ def _mark_analysis_failed(analysis_id: str, error: str) -> None:
     analysis_store[analysis_id]["error"] = error
 
 
-@router.get("/analyses", response_model=List[Dict[str, Any]])
-async def list_analyses(
-    current_user: User = Depends(get_current_user)
-) -> List[Dict[str, Any]]:
-    """List all analyses for the current user."""
-    
+def _check_user_access_to_analysis(data: Dict[str, Any], current_user: User) -> bool:
+    """Check if user has access to analysis."""
+    return data.get("user_id") == current_user.id or current_user.has_role("admin")
+
+def _build_analysis_summary(analysis_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    """Build analysis summary for listing."""
+    return {
+        "analysis_id": analysis_id, "repository_url": data["repository_url"],
+        "status": data["status"], "started_at": data["started_at"],
+        "completed_at": data.get("completed_at")
+    }
+
+def _collect_user_analyses(current_user: User) -> List[Dict[str, Any]]:
+    """Collect analyses accessible to user."""
     user_analyses = []
-    
     for analysis_id, data in analysis_store.items():
-        if data.get("user_id") == current_user.id or current_user.has_role("admin"):
-            user_analyses.append({
-                "analysis_id": analysis_id,
-                "repository_url": data["repository_url"],
-                "status": data["status"],
-                "started_at": data["started_at"],
-                "completed_at": data.get("completed_at")
-            })
-    
+        if _check_user_access_to_analysis(data, current_user):
+            user_analyses.append(_build_analysis_summary(analysis_id, data))
     return user_analyses
 
+@router.get("/analyses", response_model=List[Dict[str, Any]])
+async def list_analyses(current_user: User = Depends(get_current_user)) -> List[Dict[str, Any]]:
+    """List all analyses for the current user."""
+    return _collect_user_analyses(current_user)
+
+
+def _delete_analysis_from_store(analysis_id: str) -> None:
+    """Delete analysis from store."""
+    del analysis_store[analysis_id]
+
+def _build_delete_response() -> Dict[str, str]:
+    """Build delete success response."""
+    return {"message": "Analysis deleted successfully"}
 
 @router.delete("/analysis/{analysis_id}")
 async def delete_analysis(
-    analysis_id: str,
-    current_user: User = Depends(get_current_user)
+    analysis_id: str, current_user: User = Depends(get_current_user)
 ) -> Dict[str, str]:
     """Delete an analysis."""
-    
-    if analysis_id not in analysis_store:
-        raise HTTPException(
-            status_code=404,
-            detail="Analysis not found"
-        )
-    
+    _validate_analysis_exists(analysis_id)
     status_data = analysis_store[analysis_id]
-    
-    # Verify user owns this analysis
-    if status_data.get("user_id") != current_user.id:
-        if not current_user.has_role("admin"):
-            raise HTTPException(
-                status_code=403,
-                detail="Access denied to this analysis"
-            )
-    
-    del analysis_store[analysis_id]
-    
-    return {"message": "Analysis deleted successfully"}
+    _validate_analysis_access(status_data, current_user)
+    _delete_analysis_from_store(analysis_id)
+    return _build_delete_response()

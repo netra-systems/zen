@@ -5,6 +5,8 @@ This module addresses gaps identified in test realism analysis and provides
 realistic patterns for LLM responses, logs, workloads, and performance scenarios.
 """
 
+from typing import Dict, List, Any, Optional
+
 from .models import RealisticDataPatterns, RealisticTestDataConfigManager
 from .llm_response_generator import LLMResponseGenerator
 from .log_generator import LogGenerator
@@ -23,25 +25,45 @@ class RealisticTestDataService:
         self.workload_simulator = WorkloadSimulator()
         self.performance_simulator = PerformanceSimulator()
     
-    def generate_realistic_llm_response(self, *args, **kwargs):
+    def generate_realistic_llm_response(
+        self,
+        model: str = "gpt-4",
+        prompt_tokens: Optional[int] = None,
+        include_errors: bool = True
+    ) -> Dict[str, Any]:
         """Generate a realistic LLM response with production-like characteristics"""
-        return self.llm_generator.generate_realistic_llm_response(*args, **kwargs)
+        return self.llm_generator.generate_realistic_llm_response(model, prompt_tokens, include_errors)
     
-    def generate_realistic_log_data(self, *args, **kwargs):
+    def generate_realistic_log_data(
+        self,
+        pattern: str = "normal_operation",
+        duration_hours: int = 24,
+        volume: int = 10000
+    ) -> List[Dict[str, Any]]:
         """Generate realistic log data with specific patterns"""
-        return self.log_generator.generate_realistic_log_data(*args, **kwargs)
+        return self.log_generator.generate_realistic_log_data(pattern, duration_hours, volume)
     
-    def generate_workload_simulation(self, *args, **kwargs):
+    def generate_workload_simulation(
+        self,
+        workload_type: str = "ecommerce",
+        duration_days: int = 7,
+        include_seasonality: bool = True
+    ) -> Dict[str, Any]:
         """Generate realistic workload simulation data"""
-        return self.workload_simulator.generate_workload_simulation(*args, **kwargs)
+        return self.workload_simulator.generate_workload_simulation(workload_type, duration_days, include_seasonality)
     
-    def simulate_performance_degradation(self, *args, **kwargs):
+    def simulate_performance_degradation(
+        self,
+        base_metrics: Dict[str, float],
+        scenario: str = "cascading_failure",
+        duration_minutes: int = 60
+    ) -> List[Dict[str, Any]]:
         """Simulate performance degradation over time"""
-        return self.performance_simulator.simulate_performance_degradation(*args, **kwargs)
+        return self.performance_simulator.simulate_performance_degradation(base_metrics, scenario, duration_minutes)
     
-    def simulate_bottleneck_analysis(self, *args, **kwargs):
+    def simulate_bottleneck_analysis(self, service_metrics: Dict[str, Dict[str, float]]) -> Dict[str, Any]:
         """Simulate bottleneck analysis across services"""
-        return self.performance_simulator.simulate_bottleneck_analysis(*args, **kwargs)
+        return self.performance_simulator.simulate_bottleneck_analysis(service_metrics)
 
 
 __all__ = [

@@ -78,42 +78,74 @@ class SecurityHeadersConfig:
     @staticmethod
     def _get_production_csp() -> str:
         """Get production Content Security Policy."""
-        directives = [
+        base_directives = SecurityHeadersConfig._get_production_base_directives()
+        security_directives = SecurityHeadersConfig._get_production_security_directives()
+        return "; ".join(base_directives + security_directives)
+    
+    @staticmethod
+    def _get_production_base_directives() -> list:
+        """Get base production CSP directives."""
+        return [
             "default-src 'self'",
             "script-src 'self' https://apis.google.com",
             "style-src 'self' https://fonts.googleapis.com",
             "font-src 'self' https://fonts.gstatic.com",
             "img-src 'self' data: https:",
-            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai",
+            "connect-src 'self' https://api.netrasystems.ai wss://api.netrasystems.ai"
+        ]
+    
+    @staticmethod
+    def _get_production_security_directives() -> list:
+        """Get security production CSP directives."""
+        return [
             "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'",
             "upgrade-insecure-requests"
         ]
-        return "; ".join(directives)
     
     @staticmethod
     def _get_staging_csp() -> str:
         """Get staging Content Security Policy."""
-        directives = [
+        base_directives = SecurityHeadersConfig._get_staging_base_directives()
+        security_directives = SecurityHeadersConfig._get_staging_security_directives()
+        return "; ".join(base_directives + security_directives)
+    
+    @staticmethod
+    def _get_staging_base_directives() -> list:
+        """Get base staging CSP directives."""
+        return [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
             "style-src 'self' 'unsafe-inline' https:",
             "font-src 'self' https: data:",
             "img-src 'self' data: https:",
-            "connect-src 'self' https: wss:",
-            "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'"
+            "connect-src 'self' https: wss:"
         ]
-        return "; ".join(directives)
+    
+    @staticmethod
+    def _get_staging_security_directives() -> list:
+        """Get security staging CSP directives."""
+        return ["frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'"]
     
     @staticmethod
     def _get_development_csp() -> str:
         """Get development Content Security Policy."""
-        directives = [
+        base_directives = SecurityHeadersConfig._get_development_base_directives()
+        security_directives = SecurityHeadersConfig._get_development_security_directives()
+        return "; ".join(base_directives + security_directives)
+    
+    @staticmethod
+    def _get_development_base_directives() -> list:
+        """Get base development CSP directives."""
+        return [
             "default-src 'self' 'unsafe-inline' 'unsafe-eval'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' http: https:",
             "style-src 'self' 'unsafe-inline' http: https:",
             "font-src 'self' http: https: data:",
             "img-src 'self' data: http: https:",
-            "connect-src 'self' http: https: ws: wss:",
-            "frame-ancestors 'self'", "base-uri 'self'", "form-action 'self'"
+            "connect-src 'self' http: https: ws: wss:"
         ]
-        return "; ".join(directives)
+    
+    @staticmethod
+    def _get_development_security_directives() -> list:
+        """Get security development CSP directives."""
+        return ["frame-ancestors 'self'", "base-uri 'self'", "form-action 'self'"]

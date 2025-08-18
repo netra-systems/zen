@@ -9,7 +9,10 @@ from app.logging_config import central_logger
 logger = central_logger
 
 
-class RateLimiter:
+# Import general RateLimiter from canonical location - CONSOLIDATED  
+from app.websocket.rate_limiter import RateLimiter as CoreRateLimiter
+
+class ToolPermissionRateLimiter:
     """Handles rate limiting functionality"""
 
     def __init__(self, redis_client: Optional[redis.Redis] = None):
@@ -132,3 +135,7 @@ class RateLimiter:
         else:
             return None, None
         return key, ttl
+
+
+# Alias for tool permission system compatibility
+RateLimiter = ToolPermissionRateLimiter

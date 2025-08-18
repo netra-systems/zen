@@ -228,8 +228,12 @@ class AlertManager:
             title=rule.name, message=message, timestamp=datetime.now(UTC),
             agent_name=agent_name, metric_name=rule.rule_id,
             current_value=current_value, threshold_value=rule.threshold_value,
-            metadata={"rule_description": rule.description}
+            metadata=self._create_alert_metadata(rule)
         )
+
+    def _create_alert_metadata(self, rule: AlertRule) -> Dict[str, str]:
+        """Create metadata for alert."""
+        return {"rule_description": rule.description}
 
     def _extract_alert_values(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> tuple:
         """Extract current value and agent name for alert."""
@@ -247,11 +251,18 @@ class AlertManager:
     def _extract_agent_alert_values(self, rule: AlertRule, metrics_data: Dict[str, Any]) -> tuple:
         """Extract alert values for agent-specific rules."""
         agent_metrics = metrics_data.get("agent_metrics", {})
+        
         for agent_name, metrics in agent_metrics.items():
-            if self.rule_evaluator._check_agent_against_rule(rule, metrics, rule.threshold_value):
+            if self._check_agent_rule_match(rule, metrics):
                 value = self.rule_evaluator.get_metric_value_for_rule(rule.rule_id, metrics)
                 return value, agent_name
         return None, None
+
+    def _check_agent_rule_match(self, rule: AlertRule, metrics: Dict[str, Any]) -> bool:
+        """Check if agent metrics match rule condition."""
+        return self.rule_evaluator._check_agent_against_rule(
+            rule, metrics, rule.threshold_value
+        )
 
     def _generate_alert_message(
         self, 
@@ -261,10 +272,20 @@ class AlertManager:
     ) -> str:
         """Generate human-readable alert message."""
         base_msg = rule.description
-        
+        return self._append_metric_details(base_msg, current_value, agent_name, rule)
+
+    def _append_metric_details(
+        self, 
+        base_msg: str, 
+        current_value: Optional[float], 
+        agent_name: Optional[str], 
+        rule: AlertRule
+    ) -> str:
+        """Append metric details to base message."""
         if current_value is not None:
-            base_msg += self._format_metric_details(current_value, agent_name, rule.threshold_value)
-        
+            base_msg += self._format_metric_details(
+                current_value, agent_name, rule.threshold_value
+            )
         return base_msg
 
     def _format_metric_details(
@@ -308,9 +329,13 @@ class AlertManager:
         
         alert = self.active_alerts[alert_id]
         self._mark_alert_resolved(alert, resolved_by)
+        self._remove_active_alert(alert_id, resolved_by)
+        return True
+
+    def _remove_active_alert(self, alert_id: str, resolved_by: str) -> None:
+        """Remove alert from active collection and log."""
         del self.active_alerts[alert_id]
         logger.info(f"Alert {alert_id} resolved by {resolved_by}")
-        return True
 
     def _mark_alert_resolved(self, alert: Alert, resolved_by: str) -> None:
         """Mark alert as resolved with metadata."""
@@ -331,7 +356,10 @@ class AlertManager:
         """Get summary of alert system status."""
         active_count = len(self.active_alerts)
         level_counts = self._calculate_level_counts()
-        
+        return self._build_summary_dict(active_count, level_counts)
+
+    def _build_summary_dict(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
+        """Build summary dictionary with all status information."""
         return {
             "active_alerts": active_count,
             "alerts_by_level": level_counts,

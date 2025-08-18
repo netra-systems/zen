@@ -14,30 +14,48 @@ from app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, validate_
 class TestLLMMetricsAggregation:
     """Test LLM-specific metrics and optimizations"""
     
+    def _get_llm_models(self) -> List[str]:
+        """Get list of LLM models for testing"""
+        return ["gpt-4", "gpt-3.5-turbo", "claude-3", "gemini-pro"]
+
+    def _get_workload_types(self) -> List[str]:
+        """Get list of workload types for testing"""
+        return ["chat", "completion", "embedding", "analysis"]
+
+    def _get_temperature_options(self) -> List[float]:
+        """Get temperature options for testing"""
+        return [0.0, 0.3, 0.7, 1.0]
+
+    def _create_single_metric(self, i: int, count: int, models: List[str]) -> Dict:
+        """Create a single metric record"""
+        workload_types = self._get_workload_types()
+        temp_options = self._get_temperature_options()
+        return {
+            "timestamp": datetime.now() - timedelta(minutes=count-i),
+            "model": random.choice(models),
+            "request_id": str(uuid.uuid4()),
+            "input_tokens": random.randint(100, 2000),
+            "output_tokens": random.randint(50, 1000),
+            "latency_ms": random.uniform(500, 5000),
+            "cost_cents": random.uniform(0.1, 5.0),
+            "success": random.random() > 0.05,
+            "temperature": random.choice(temp_options),
+            "user_id": random.randint(1, 50),
+            "workload_type": random.choice(workload_types)
+        }
+
     def generate_llm_metrics(self, count: int) -> List[Dict]:
         """Generate realistic LLM metrics"""
-        models = ["gpt-4", "gpt-3.5-turbo", "claude-3", "gemini-pro"]
-        
+        models = self._get_llm_models()
         metrics = []
         for i in range(count):
-            metrics.append({
-                "timestamp": datetime.now() - timedelta(minutes=count-i),
-                "model": random.choice(models),
-                "request_id": str(uuid.uuid4()),
-                "input_tokens": random.randint(100, 2000),
-                "output_tokens": random.randint(50, 1000),
-                "latency_ms": random.uniform(500, 5000),
-                "cost_cents": random.uniform(0.1, 5.0),
-                "success": random.random() > 0.05,  # 95% success rate
-                "temperature": random.choice([0.0, 0.3, 0.7, 1.0]),
-                "user_id": random.randint(1, 50),
-                "workload_type": random.choice(["chat", "completion", "embedding", "analysis"])
-            })
+            metric = self._create_single_metric(i, count, models)
+            metrics.append(metric)
         return metrics
     
-    def test_llm_cost_optimization_query(self):
-        """Test query for LLM cost optimization analysis"""
-        query = """
+    def _create_model_costs_cte(self):
+        """Create model costs CTE portion of optimization query"""
+        return """
         WITH model_costs AS (
             SELECT 
                 model,
@@ -52,7 +70,11 @@ class TestLLMMetricsAggregation:
             WHERE timestamp >= now() - INTERVAL 7 DAY
                 AND success = true
             GROUP BY model, workload_type
-        ),
+        )"""
+
+    def _create_optimization_opportunities_cte(self):
+        """Create optimization opportunities CTE"""
+        return """,
         optimization_opportunities AS (
             SELECT 
                 workload_type,
@@ -73,19 +95,36 @@ class TestLLMMetricsAggregation:
                   LIMIT 1)) * request_count as potential_savings
             FROM model_costs mc1
             WHERE request_count > 100
-        )
+        )"""
+
+    def _create_final_select_query(self):
+        """Create final SELECT for optimization query"""
+        return """
         SELECT * FROM optimization_opportunities
         WHERE potential_savings > 0
         ORDER BY potential_savings DESC
         """
-        
-        # This complex query should be valid
+
+    def _build_complete_optimization_query(self):
+        """Build complete LLM cost optimization query"""
+        model_costs = self._create_model_costs_cte()
+        opportunities = self._create_optimization_opportunities_cte()
+        final_select = self._create_final_select_query()
+        return model_costs + opportunities + final_select
+
+    def _validate_optimization_query(self, query):
+        """Validate the LLM optimization query"""
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid, f"LLM optimization query failed: {error}"
 
-    async def test_llm_usage_patterns(self):
-        """Test LLM usage pattern analysis"""
-        query = """
+    def test_llm_cost_optimization_query(self):
+        """Test query for LLM cost optimization analysis"""
+        query = self._build_complete_optimization_query()
+        self._validate_optimization_query(query)
+
+    def _get_usage_patterns_query(self):
+        """Get LLM usage patterns analysis query"""
+        return """
         SELECT 
             toHour(timestamp) as hour,
             model,
@@ -101,9 +140,16 @@ class TestLLMMetricsAggregation:
         GROUP BY hour, model, workload_type
         ORDER BY hour DESC, total_cost DESC
         """
-        
+
+    def _validate_usage_patterns_query(self, query):
+        """Validate usage patterns query"""
         is_valid, error = validate_clickhouse_query(query)
         assert is_valid
+
+    async def test_llm_usage_patterns(self):
+        """Test LLM usage pattern analysis"""
+        query = self._get_usage_patterns_query()
+        self._validate_usage_patterns_query(query)
 
 
 class TestPerformanceMetricsWithClickHouse:

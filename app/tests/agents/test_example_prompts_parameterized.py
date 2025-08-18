@@ -18,6 +18,56 @@ from app.tests.agents.test_example_prompts_runner import TestRunner
 from app.services.quality_gate_service import ContentType
 
 
+@pytest_asyncio.fixture
+async def real_infrastructure():
+    """Module-level async fixture for real infrastructure setup"""
+    infrastructure = setup_real_infrastructure()
+    yield infrastructure
+    # Cleanup async resources to prevent pending task warnings
+    await _cleanup_infrastructure_global(infrastructure)
+
+
+async def _cleanup_infrastructure_global(infrastructure: Dict[str, Any]) -> None:
+    """Global cleanup function for infrastructure"""
+    try:
+        # Shutdown WebSocket manager and its async components
+        websocket_manager = infrastructure.get("websocket_manager")
+        if websocket_manager:
+            await websocket_manager.shutdown()
+        
+        # Close mock database session
+        db_session = infrastructure.get("db_session")
+        if db_session and hasattr(db_session, 'close'):
+            await db_session.close()
+        
+        # Cancel any remaining async tasks
+        await _cancel_pending_tasks_global()
+        
+    except Exception as e:
+        # Log cleanup errors but don't fail the test
+        print(f"Warning: Error during infrastructure cleanup: {e}")
+
+
+async def _cancel_pending_tasks_global() -> None:
+    """Global function to cancel any remaining pending tasks"""
+    try:
+        # Get all pending tasks in the current event loop
+        pending_tasks = [task for task in asyncio.all_tasks() 
+                        if not task.done() and task != asyncio.current_task()]
+        
+        if pending_tasks:
+            # Cancel all pending tasks
+            for task in pending_tasks:
+                task.cancel()
+            
+            # Wait briefly for cancellations to complete
+            await asyncio.gather(*pending_tasks, return_exceptions=True)
+            
+    except Exception:
+        # Silently handle any cancellation errors
+        pass
+
+
 # Map prompts to their context types
 PROMPT_CONTEXT_MAPPING = {
     0: "cost_reduction",      # Cost reduction prompt
@@ -47,21 +97,13 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
     
-    @pytest.fixture
-    async def setup_real_infrastructure(self):
-        """Setup infrastructure for testing with proper async cleanup"""
-        infrastructure = setup_real_infrastructure()
-        yield infrastructure
-        # Cleanup async resources to prevent pending task warnings
-        await self._cleanup_infrastructure(infrastructure)
-    
     @pytest.mark.parametrize("prompt_index", range(9))
     @pytest.mark.parametrize("variation_num", range(10))
     async def test_prompt_variations(
         self, 
         prompt_index: int, 
         variation_num: int,
-        setup_real_infrastructure
+        real_infrastructure
     ):
         """
         Test each prompt with 10 variations.
@@ -70,7 +112,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         Args:
             prompt_index: Index of the prompt (0-8)
             variation_num: Variation number (0-9)
-            setup_real_infrastructure: Fixture providing test infrastructure
+            real_infrastructure: Fixture providing test infrastructure
         """
         # Get the base prompt
         base_prompt = EXAMPLE_PROMPTS[prompt_index]
@@ -91,7 +133,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         result = await self.test_runner.run_single_test(
             prompt=test_prompt,
             context=context,
-            infra=setup_real_infrastructure
+            infra=real_infrastructure
         )
         
         # Assertions
@@ -124,7 +166,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         self, 
         prompt_index: int, 
         expected_type: str,
-        setup_real_infrastructure
+        real_infrastructure
     ):
         """Test that each prompt gets the correct context type"""
         context_type = PROMPT_CONTEXT_MAPPING.get(prompt_index)
@@ -136,7 +178,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         assert isinstance(context, dict), "Context should be a dictionary"
     
     @pytest.mark.slow
-    async def test_all_prompts_summary(self, setup_real_infrastructure):
+    async def test_all_prompts_summary(self, real_infrastructure):
         """Run a summary test of all prompts with basic validation"""
         results = []
         
@@ -148,7 +190,7 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
             result = await self.test_runner.run_single_test(
                 prompt=prompt,
                 context=context,
-                infra=setup_real_infrastructure
+                infra=real_infrastructure
             )
             results.append(result)
         
@@ -168,45 +210,6 @@ class TestExamplePromptsParameterized(ExamplePromptsTestBase):
         
         if analysis["failed_tests"]:
             print(f"  Failed tests: {analysis['failed_tests']}")
-    
-    async def _cleanup_infrastructure(self, infrastructure: Dict[str, Any]) -> None:
-        """Cleanup all async resources properly to prevent pending task warnings"""
-        try:
-            # Shutdown WebSocket manager and its async components
-            websocket_manager = infrastructure.get("websocket_manager")
-            if websocket_manager:
-                await websocket_manager.shutdown()
-            
-            # Close mock database session
-            db_session = infrastructure.get("db_session")
-            if db_session and hasattr(db_session, 'close'):
-                await db_session.close()
-            
-            # Cancel any remaining async tasks
-            await self._cancel_pending_tasks()
-            
-        except Exception as e:
-            # Log cleanup errors but don't fail the test
-            print(f"Warning: Error during infrastructure cleanup: {e}")
-    
-    async def _cancel_pending_tasks(self) -> None:
-        """Cancel any remaining pending tasks to prevent warnings"""
-        try:
-            # Get all pending tasks in the current event loop
-            pending_tasks = [task for task in asyncio.all_tasks() 
-                            if not task.done() and task != asyncio.current_task()]
-            
-            if pending_tasks:
-                # Cancel all pending tasks
-                for task in pending_tasks:
-                    task.cancel()
-                
-                # Wait briefly for cancellations to complete
-                await asyncio.gather(*pending_tasks, return_exceptions=True)
-                
-        except Exception:
-            # Silently handle any cancellation errors
-            pass
 
 
 # Additional focused test groups for specific scenarios
@@ -220,19 +223,11 @@ class TestPromptGroups(ExamplePromptsTestBase):
         self.context_generator = ContextGenerator()
         self.test_runner = TestRunner()
     
-    @pytest.fixture
-    async def setup_real_infrastructure(self):
-        """Setup infrastructure for testing with proper async cleanup"""
-        infrastructure = setup_real_infrastructure()
-        yield infrastructure
-        # Cleanup async resources to prevent pending task warnings
-        await self._cleanup_infrastructure(infrastructure)
-    
     @pytest.mark.parametrize("prompt_index", [0, 6])  # Cost-related prompts
     async def test_cost_optimization_prompts(
         self, 
         prompt_index: int,
-        setup_real_infrastructure
+        real_infrastructure
     ):
         """Test prompts related to cost optimization"""
         prompt = EXAMPLE_PROMPTS[prompt_index]
@@ -241,7 +236,7 @@ class TestPromptGroups(ExamplePromptsTestBase):
         result = await self.test_runner.run_single_test(
             prompt=prompt,
             context=context,
-            infra=setup_real_infrastructure
+            infra=real_infrastructure
         )
         
         assert result["success"]
@@ -251,7 +246,7 @@ class TestPromptGroups(ExamplePromptsTestBase):
     async def test_performance_optimization_prompts(
         self, 
         prompt_index: int,
-        setup_real_infrastructure
+        real_infrastructure
     ):
         """Test prompts related to performance optimization"""
         prompt = EXAMPLE_PROMPTS[prompt_index]
@@ -260,48 +255,9 @@ class TestPromptGroups(ExamplePromptsTestBase):
         result = await self.test_runner.run_single_test(
             prompt=prompt,
             context=context,
-            infra=setup_real_infrastructure
+            infra=real_infrastructure
         )
         
         assert result["success"]
         assert any(word in result["response"].lower() 
                   for word in ["latency", "performance", "speed", "optimization"])
-    
-    async def _cleanup_infrastructure(self, infrastructure: Dict[str, Any]) -> None:
-        """Cleanup all async resources properly to prevent pending task warnings"""
-        try:
-            # Shutdown WebSocket manager and its async components
-            websocket_manager = infrastructure.get("websocket_manager")
-            if websocket_manager:
-                await websocket_manager.shutdown()
-            
-            # Close mock database session
-            db_session = infrastructure.get("db_session")
-            if db_session and hasattr(db_session, 'close'):
-                await db_session.close()
-            
-            # Cancel any remaining async tasks
-            await self._cancel_pending_tasks()
-            
-        except Exception as e:
-            # Log cleanup errors but don't fail the test
-            print(f"Warning: Error during infrastructure cleanup: {e}")
-    
-    async def _cancel_pending_tasks(self) -> None:
-        """Cancel any remaining pending tasks to prevent warnings"""
-        try:
-            # Get all pending tasks in the current event loop
-            pending_tasks = [task for task in asyncio.all_tasks() 
-                            if not task.done() and task != asyncio.current_task()]
-            
-            if pending_tasks:
-                # Cancel all pending tasks
-                for task in pending_tasks:
-                    task.cancel()
-                
-                # Wait briefly for cancellations to complete
-                await asyncio.gather(*pending_tasks, return_exceptions=True)
-                
-        except Exception:
-            # Silently handle any cancellation errors
-            pass

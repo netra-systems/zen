@@ -65,12 +65,20 @@ class ThreadTools:
         @self.mcp.tool()
         async def get_thread_history(thread_id: str, limit: int = 50) -> str:
             """Get thread message history"""
-            if not server.thread_service:
-                return json.dumps({"error": "Thread service not available"})
-            try:
-                messages = await server.thread_service.get_thread_messages(
-                    thread_id=thread_id, limit=limit
-                )
-                return json.dumps(messages, indent=2)
-            except Exception as e:
-                return json.dumps({"error": str(e)})
+            return await self._execute_thread_history_query(server, thread_id, limit)
+    
+    async def _execute_thread_history_query(self, server, thread_id: str, limit: int) -> str:
+        """Execute thread history query with error handling"""
+        if not server.thread_service:
+            return json.dumps({"error": "Thread service not available"})
+        try:
+            return await self._fetch_thread_messages(server, thread_id, limit)
+        except Exception as e:
+            return json.dumps({"error": str(e)})
+    
+    async def _fetch_thread_messages(self, server, thread_id: str, limit: int) -> str:
+        """Fetch thread messages from service"""
+        messages = await server.thread_service.get_thread_messages(
+            thread_id=thread_id, limit=limit
+        )
+        return json.dumps(messages, indent=2)

@@ -44,12 +44,14 @@ class RedisManager:
         """Determine Redis service availability based on environment configuration."""
         if self._is_redis_disabled_by_flag():
             return False
-        
+        return self._check_redis_mode_and_development()
+
+    def _check_redis_mode_and_development(self):
+        """Check Redis mode and development settings."""
         redis_mode = self._get_redis_mode()
         mode_result = self._handle_redis_mode(redis_mode)
         if mode_result is not None:
             return mode_result
-            
         return self._check_development_redis()
 
     def _create_redis_client(self):
@@ -125,12 +127,16 @@ class RedisManager:
     async def get_list(self, key: str, limit: int = None):
         """Get list items from Redis"""
         if self.redis_client:
-            try:
-                return await self._fetch_list_items(key, limit)
-            except Exception as e:
-                logger.warning(f"Failed to get list {key}: {e}")
-                return []
+            return await self._get_list_with_error_handling(key, limit)
         return []
+
+    async def _get_list_with_error_handling(self, key: str, limit: int):
+        """Get list with error handling."""
+        try:
+            return await self._fetch_list_items(key, limit)
+        except Exception as e:
+            logger.warning(f"Failed to get list {key}: {e}")
+            return []
 
     async def _push_and_trim_list(self, key: str, value: str, max_size: int):
         """Push item and trim list if needed."""

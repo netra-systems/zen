@@ -16,49 +16,55 @@ class PolicyProposer(BaseTool):
         status="in_review"
     )
 
+    def _get_member_spans(self, pattern: DiscoveredPattern, span_map: Dict[str, UnifiedLogEntry]) -> List[UnifiedLogEntry]:
+        """Get member spans for a pattern"""
+        return [span_map[sid] for sid in pattern.member_span_ids if sid in span_map]
+
+    async def _simulate_all_outcomes(self, context: ToolContext, pattern: DiscoveredPattern, 
+                                   all_options: List, user_goal: str, representative_span: UnifiedLogEntry) -> List:
+        """Simulate outcomes for all supply options"""
+        sim_tasks = [self._simulate_policy_outcome(context, pattern, supply, user_goal, representative_span) for supply in all_options]
+        policy_outcomes = [o for o in await asyncio.gather(*sim_tasks) if o]
+        return sorted(policy_outcomes, key=lambda x: x.utility_score, reverse=True)
+
+    def _calculate_baseline_metrics(self, member_spans: List[UnifiedLogEntry]) -> Dict[str, float]:
+        """Calculate baseline metrics for member spans"""
+        return {
+            "avg_cost_usd": sum(s.finops.total_cost_usd for s in member_spans) / len(member_spans),
+            "avg_latency_ms": sum(s.performance.latency_ms.total_e2e_ms for s in member_spans) / len(member_spans),
+            "avg_quality_score": sum(s.quality.score for s in member_spans) if all(s.quality for s in member_spans) else 0.8,
+        }
+
+    def _calculate_pattern_impact(self, member_spans: List[UnifiedLogEntry], span_map: Dict[str, UnifiedLogEntry]) -> float:
+        """Calculate pattern impact fraction"""
+        pattern_spend = sum(s.finops.total_cost_usd for s in member_spans)
+        all_spans_spend = sum(s.finops.total_cost_usd for s in span_map.values())
+        return (pattern_spend / all_spans_spend) if all_spans_spend > 0 else 0
+
+    def _create_learned_policy(self, pattern: DiscoveredPattern, sorted_outcomes: List, 
+                             baseline_metrics: Dict, pattern_impact_fraction: float) -> LearnedPolicy:
+        """Create a learned policy from outcomes"""
+        return LearnedPolicy(
+            pattern_name=pattern.pattern_name, optimal_supply_option_name=sorted_outcomes[0].supply_option_name,
+            predicted_outcome=sorted_outcomes[0], alternative_outcomes=sorted_outcomes[1:4],
+            baseline_metrics=baseline_metrics, pattern_impact_fraction=pattern_impact_fraction)
+
     async def run(
         self, context: ToolContext, patterns: List[DiscoveredPattern], span_map: Dict[str, UnifiedLogEntry]
     ) -> Tuple[List[LearnedPolicy], List[PredictedOutcome]]:
         """Finds the best routing policies through simulation."""
-        policies = []
-        outcomes = []
-        all_options = await self._get_supply_catalog(context)
-
+        policies, outcomes, all_options = [], [], await self._get_supply_catalog(context)
         for pattern in patterns:
-            member_spans = [span_map[sid] for sid in pattern.member_span_ids if sid in span_map]
+            member_spans = self._get_member_spans(pattern, span_map)
             if not member_spans:
                 continue
-
-            representative_span = member_spans[0]
-            user_goal = representative_span.request.user_goal
-
-            sim_tasks = [self._simulate_policy_outcome(context, pattern, supply, user_goal, representative_span) for supply in all_options]
-            policy_outcomes = [o for o in await asyncio.gather(*sim_tasks) if o]
-
-            if not policy_outcomes:
+            sorted_outcomes = await self._simulate_all_outcomes(context, pattern, all_options, member_spans[0].request.user_goal, member_spans[0])
+            if not sorted_outcomes:
                 continue
-
-            sorted_outcomes = sorted(policy_outcomes, key=lambda x: x.utility_score, reverse=True)
             outcomes.extend(sorted_outcomes)
-
-            baseline_metrics = {
-                "avg_cost_usd": sum(s.finops.total_cost_usd for s in member_spans) / len(member_spans),
-                "avg_latency_ms": sum(s.performance.latency_ms.total_e2e_ms for s in member_spans) / len(member_spans),
-                "avg_quality_score": sum(s.quality.score for s in member_spans) if all(s.quality for s in member_spans) else 0.8,
-            }
-
-            pattern_spend = sum(s.finops.total_cost_usd for s in member_spans)
-            all_spans_spend = sum(s.finops.total_cost_usd for s in span_map.values())
-            pattern_impact_fraction = (pattern_spend / all_spans_spend) if all_spans_spend > 0 else 0
-
-            policies.append(LearnedPolicy(
-                pattern_name=pattern.pattern_name,
-                optimal_supply_option_name=sorted_outcomes[0].supply_option_name,
-                predicted_outcome=sorted_outcomes[0],
-                alternative_outcomes=sorted_outcomes[1:4],
-                baseline_metrics=baseline_metrics,
-                pattern_impact_fraction=pattern_impact_fraction
-            ))
+            baseline_metrics = self._calculate_baseline_metrics(member_spans)
+            pattern_impact_fraction = self._calculate_pattern_impact(member_spans, span_map)
+            policies.append(self._create_learned_policy(pattern, sorted_outcomes, baseline_metrics, pattern_impact_fraction))
         return policies, outcomes
 
     async def _simulate_policy_outcome(self, context: ToolContext, pattern: DiscoveredPattern, supply_option: SupplyOption, user_goal: str, span: UnifiedLogEntry) -> PredictedOutcome:

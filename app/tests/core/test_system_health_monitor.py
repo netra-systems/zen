@@ -7,7 +7,8 @@ from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, UTC
 
 from app.core.system_health_monitor import SystemHealthMonitor, system_health_monitor
-from app.core.health_types import HealthStatus, ComponentHealth, HealthCheckResult
+from app.core.shared_health_types import HealthStatus, ComponentHealth
+from app.schemas.core_models import HealthCheckResult
 
 
 class TestSystemHealthMonitor:

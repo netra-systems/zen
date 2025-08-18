@@ -11,7 +11,7 @@ interface AuthServiceConfig {
     callback: string;
     token: string;
     refresh: string;
-    validate: string;
+    validate_token: string;
     config: string;
     session: string;
     me: string;
@@ -55,7 +55,7 @@ export function getAuthServiceConfig(): AuthServiceConfig {
       callback: `${baseUrl}/auth/callback`,
       token: `${baseUrl}/auth/token`,
       refresh: `${baseUrl}/auth/refresh`,
-      validate: `${baseUrl}/auth/validate`,
+      validate_token: `${baseUrl}/auth/validate`,
       config: `${baseUrl}/auth/config`,
       session: `${baseUrl}/auth/session`,
       me: `${baseUrl}/auth/me`,
@@ -154,7 +154,7 @@ export class AuthServiceClient {
    * Validate token
    */
   async validateToken(token: string) {
-    const response = await fetch(this.config.endpoints.validate, {
+    const response = await fetch(this.config.endpoints.validate_token, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

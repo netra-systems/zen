@@ -20,61 +20,72 @@ logger = central_logger.get_logger(__name__)
 class PostgreSQLSlowQueryAnalyzer:
     """Analyze slow PostgreSQL queries for index recommendations."""
     
+    def _build_slow_queries_sql(self) -> text:
+        """Build SQL query for slow query analysis."""
+        return text("""
+            SELECT query, calls, total_time, mean_time, rows
+            FROM pg_stat_statements 
+            WHERE mean_time > 100  -- queries slower than 100ms
+            ORDER BY mean_time DESC
+            LIMIT 20
+        """)
+    
     async def get_slow_queries(self, session) -> List[Tuple]:
         """Get slow queries from pg_stat_statements."""
         try:
-            slow_queries_query = text("""
-                SELECT query, calls, total_time, mean_time, rows
-                FROM pg_stat_statements 
-                WHERE mean_time > 100  -- queries slower than 100ms
-                ORDER BY mean_time DESC
-                LIMIT 20
-            """)
+            slow_queries_query = self._build_slow_queries_sql()
             result = await session.execute(slow_queries_query)
             return result.fetchall()
         except Exception as e:
             logger.debug(f"pg_stat_statements not available: {e}")
             return []
     
+    def _extract_query_info(self, query_data: Tuple) -> Tuple[str, str, float]:
+        """Extract basic query information."""
+        query, calls, total_time, mean_time, rows = query_data
+        table_name = QueryAnalyzer.extract_table_name(query)
+        return query, table_name, mean_time
+    
+    def _generate_where_recommendation(self, query: str, table_name: str, mean_time: float) -> IndexRecommendation:
+        """Generate WHERE clause index recommendation."""
+        where_conditions = QueryAnalyzer.extract_where_conditions(query)
+        benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
+        priority = PerformanceMetrics.get_priority_from_benefit(benefit)
+        return IndexRecommendation(
+            table_name=table_name,
+            columns=where_conditions[:3],
+            reason=f"WHERE clause equality: {', '.join(where_conditions)}",
+            estimated_benefit=benefit,
+            priority=priority
+        )
+    
+    def _generate_order_recommendation(self, query: str, table_name: str, mean_time: float) -> IndexRecommendation:
+        """Generate ORDER BY index recommendation."""
+        order_columns = QueryAnalyzer.extract_order_by_columns(query)
+        benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
+        priority = PerformanceMetrics.get_priority_from_benefit(benefit)
+        return IndexRecommendation(
+            table_name=table_name,
+            columns=order_columns[:2],
+            reason=f"ORDER BY optimization: {', '.join(order_columns)}",
+            estimated_benefit=benefit,
+            priority=priority
+        )
+    
     def analyze_single_query(self, query_data: Tuple) -> List[IndexRecommendation]:
         """Analyze single query and generate recommendations."""
-        query, calls, total_time, mean_time, rows = query_data
         recommendations = []
-        
-        # Extract table and conditions
-        table_name = QueryAnalyzer.extract_table_name(query)
+        query, table_name, mean_time = self._extract_query_info(query_data)
         if not table_name:
             return recommendations
         
-        # WHERE clause recommendations
         where_conditions = QueryAnalyzer.extract_where_conditions(query)
         if where_conditions:
-            benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
-            priority = PerformanceMetrics.get_priority_from_benefit(benefit)
-            
-            rec = IndexRecommendation(
-                table_name=table_name,
-                columns=where_conditions[:3],  # Limit to 3 columns
-                reason=f"WHERE clause equality: {', '.join(where_conditions)}",
-                estimated_benefit=benefit,
-                priority=priority
-            )
-            recommendations.append(rec)
+            recommendations.append(self._generate_where_recommendation(query, table_name, mean_time))
         
-        # ORDER BY recommendations
         order_columns = QueryAnalyzer.extract_order_by_columns(query)
         if order_columns:
-            benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
-            priority = PerformanceMetrics.get_priority_from_benefit(benefit)
-            
-            rec = IndexRecommendation(
-                table_name=table_name,
-                columns=order_columns[:2],  # Limit to 2 columns for ORDER BY
-                reason=f"ORDER BY optimization: {', '.join(order_columns)}",
-                estimated_benefit=benefit,
-                priority=priority
-            )
-            recommendations.append(rec)
+            recommendations.append(self._generate_order_recommendation(query, table_name, mean_time))
         
         return recommendations
     
@@ -92,15 +103,20 @@ class PostgreSQLSlowQueryAnalyzer:
 class PostgreSQLRecommendationProvider:
     """Provide general PostgreSQL index recommendations."""
     
-    def get_general_recommendations(self) -> List[IndexRecommendation]:
-        """Get general index recommendations for common patterns."""
+    def _get_user_table_recommendations(self) -> List[IndexRecommendation]:
+        """Get user-related table recommendations."""
         return [
             IndexRecommendation(
                 table_name="userbase",
                 columns=["email"], 
                 reason="Frequent user lookups by email",
                 priority=1
-            ),
+            )
+        ]
+    
+    def _get_audit_table_recommendations(self) -> List[IndexRecommendation]:
+        """Get audit log table recommendations."""
+        return [
             IndexRecommendation(
                 table_name="corpus_audit_logs",
                 columns=["timestamp"],
@@ -112,7 +128,12 @@ class PostgreSQLRecommendationProvider:
                 columns=["user_id", "action"],
                 reason="User action filtering",
                 priority=2
-            ),
+            )
+        ]
+    
+    def _get_other_table_recommendations(self) -> List[IndexRecommendation]:
+        """Get other table recommendations."""
+        return [
             IndexRecommendation(
                 table_name="secret",
                 columns=["user_id"],
@@ -127,15 +148,28 @@ class PostgreSQLRecommendationProvider:
             )
         ]
     
-    def get_composite_index_recommendations(self) -> List[IndexRecommendation]:
-        """Get composite index recommendations for complex queries."""
+    def get_general_recommendations(self) -> List[IndexRecommendation]:
+        """Get general index recommendations for common patterns."""
+        recommendations = []
+        recommendations.extend(self._get_user_table_recommendations())
+        recommendations.extend(self._get_audit_table_recommendations())
+        recommendations.extend(self._get_other_table_recommendations())
+        return recommendations
+    
+    def _get_user_composite_recommendations(self) -> List[IndexRecommendation]:
+        """Get composite recommendations for user tables."""
         return [
             IndexRecommendation(
                 table_name="userbase",
                 columns=["plan_tier", "plan_expires_at", "is_active"],
                 reason="Plan expiration queries",
                 priority=2
-            ),
+            )
+        ]
+    
+    def _get_audit_composite_recommendations(self) -> List[IndexRecommendation]:
+        """Get composite recommendations for audit tables."""
+        return [
             IndexRecommendation(
                 table_name="corpus_audit_logs", 
                 columns=["user_id", "action", "timestamp"],
@@ -149,6 +183,13 @@ class PostgreSQLRecommendationProvider:
                 priority=3
             )
         ]
+    
+    def get_composite_index_recommendations(self) -> List[IndexRecommendation]:
+        """Get composite index recommendations for complex queries."""
+        recommendations = []
+        recommendations.extend(self._get_user_composite_recommendations())
+        recommendations.extend(self._get_audit_composite_recommendations())
+        return recommendations
     
     def get_all_recommendations(self) -> List[IndexRecommendation]:
         """Get all general recommendations."""

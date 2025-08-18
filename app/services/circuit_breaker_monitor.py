@@ -12,17 +12,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 
 from app.core.circuit_breaker import circuit_registry, CircuitState
+from app.core.resilience.monitor import AlertSeverity
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
-
-
-class AlertSeverity(Enum):
-    """Alert severity levels."""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
 
 
 @dataclass
@@ -63,40 +56,56 @@ class CircuitBreakerMonitor:
         """Add alert handler for notifications."""
         self._alert_handlers.append(handler)
     
-    async def start_monitoring(self, interval_seconds: float = 5.0) -> None:
-        """Start continuous circuit breaker monitoring."""
+    def _is_already_monitoring(self) -> bool:
+        """Check if monitoring is already active"""
         if self._monitoring_active:
             logger.warning("Circuit breaker monitoring already active")
-            return
-        
+            return True
+        return False
+
+    def _start_monitor_task(self, interval_seconds: float) -> None:
+        """Start the monitoring task"""
         self._monitoring_active = True
-        self._monitor_task = asyncio.create_task(
-            self._monitor_loop(interval_seconds)
-        )
+        self._monitor_task = asyncio.create_task(self._monitor_loop(interval_seconds))
         logger.info(f"Circuit breaker monitoring started (interval: {interval_seconds}s)")
+
+    async def start_monitoring(self, interval_seconds: float = 5.0) -> None:
+        """Start continuous circuit breaker monitoring."""
+        if self._is_already_monitoring():
+            return
+        self._start_monitor_task(interval_seconds)
     
-    async def stop_monitoring(self) -> None:
-        """Stop circuit breaker monitoring."""
-        self._monitoring_active = False
+    async def _cancel_monitor_task(self) -> None:
+        """Cancel the monitoring task"""
         if self._monitor_task:
             self._monitor_task.cancel()
             try:
                 await self._monitor_task
             except asyncio.CancelledError:
                 pass
+
+    async def stop_monitoring(self) -> None:
+        """Stop circuit breaker monitoring."""
+        self._monitoring_active = False
+        await self._cancel_monitor_task()
         logger.info("Circuit breaker monitoring stopped")
     
+    async def _monitor_iteration(self, interval_seconds: float) -> None:
+        """Single monitoring iteration"""
+        try:
+            await self._check_circuit_states()
+            await asyncio.sleep(interval_seconds)
+        except Exception as e:
+            logger.error(f"Circuit breaker monitoring error: {e}")
+            await asyncio.sleep(interval_seconds)
+
     async def _monitor_loop(self, interval_seconds: float) -> None:
         """Main monitoring loop."""
         while self._monitoring_active:
             try:
-                await self._check_circuit_states()
-                await asyncio.sleep(interval_seconds)
+                await self._monitor_iteration(interval_seconds)
             except asyncio.CancelledError:
                 break
-            except Exception as e:
-                logger.error(f"Circuit breaker monitoring error: {e}")
-                await asyncio.sleep(interval_seconds)
     
     async def _check_circuit_states(self) -> None:
         """Check all circuit breaker states for changes."""
@@ -105,34 +114,46 @@ class CircuitBreakerMonitor:
         for circuit_name, status in all_status.items():
             await self._process_circuit_status(circuit_name, status)
     
-    async def _process_circuit_status(self, circuit_name: str, status: Dict[str, Any]) -> None:
-        """Process individual circuit status."""
+    def _get_circuit_states(self, circuit_name: str, status: Dict[str, Any]) -> tuple[str, str]:
+        """Get current and old states for circuit"""
         current_state = status.get("state", "unknown")
         old_state = self._last_states.get(circuit_name, "unknown")
-        
-        # Check for state changes
+        return current_state, old_state
+
+    async def _process_state_change(self, circuit_name: str, old_state: str, current_state: str, status: Dict[str, Any]) -> None:
+        """Process circuit state change if needed"""
         if old_state != current_state:
             await self._handle_state_change(circuit_name, old_state, current_state, status)
-        
-        # Check for alerts based on current status
+
+    async def _process_circuit_status(self, circuit_name: str, status: Dict[str, Any]) -> None:
+        """Process individual circuit status."""
+        current_state, old_state = self._get_circuit_states(circuit_name, status)
+        await self._process_state_change(circuit_name, old_state, current_state, status)
         await self._check_alerts(circuit_name, status)
-        
         self._last_states[circuit_name] = current_state
     
+    def _record_state_change_event(self, circuit_name: str, old_state: str, new_state: str, status: Dict[str, Any]) -> None:
+        """Record state change event"""
+        from .circuit_breaker_helpers import create_state_change_event
+        event = create_state_change_event(circuit_name, old_state, new_state, status)
+        self._events.append(event)
+        self._trim_events()
+        logger.info(f"Circuit breaker state change: {circuit_name} {old_state} -> {new_state}")
+
+    async def _handle_circuit_open_alert(self, circuit_name: str, new_state: str, status: Dict[str, Any]) -> None:
+        """Handle alert creation for circuit open state"""
+        from .circuit_breaker_helpers import should_create_open_circuit_alert
+        if should_create_open_circuit_alert(new_state):
+            await self._create_open_circuit_alert(circuit_name, new_state, status)
+
     async def _handle_state_change(self, 
                                   circuit_name: str, 
                                   old_state: str, 
                                   new_state: str,
                                   status: Dict[str, Any]) -> None:
         """Handle circuit breaker state change."""
-        from .circuit_breaker_helpers import create_state_change_event, should_create_open_circuit_alert
-        event = create_state_change_event(circuit_name, old_state, new_state, status)
-        self._events.append(event)
-        self._trim_events()
-        logger.info(f"Circuit breaker state change: {circuit_name} {old_state} -> {new_state}")
-        
-        if should_create_open_circuit_alert(new_state):
-            await self._create_open_circuit_alert(circuit_name, new_state, status)
+        self._record_state_change_event(circuit_name, old_state, new_state, status)
+        await self._handle_circuit_open_alert(circuit_name, new_state, status)
     
     async def _create_open_circuit_alert(self, circuit_name: str, new_state: str, status: Dict[str, Any]) -> None:
         """Create alert for opened circuit breaker."""
@@ -164,6 +185,26 @@ class CircuitBreakerMonitor:
         if should_alert_high_rejection_rate(rejection_rate, metrics_data["rejected_calls"]):
             await self._create_alert(circuit_name, AlertSeverity.HIGH, f"High rejection rate: {rejection_rate:.2%}", metrics_data["state"], {"rejected_calls": metrics_data["rejected_calls"]})
     
+    def _build_alert(self, circuit_name: str, severity: AlertSeverity, message: str, state: str, metrics: Dict[str, Any]) -> CircuitBreakerAlert:
+        """Build circuit breaker alert"""
+        return CircuitBreakerAlert(
+            circuit_name=circuit_name, severity=severity, message=message,
+            timestamp=datetime.now(UTC), state=state, metrics=metrics
+        )
+
+    def _store_alert(self, alert: CircuitBreakerAlert) -> None:
+        """Store alert and trim list"""
+        self._alerts.append(alert)
+        self._trim_alerts()
+
+    async def _dispatch_alert_to_handlers(self, alert: CircuitBreakerAlert) -> None:
+        """Dispatch alert to all handlers"""
+        for handler in self._alert_handlers:
+            try:
+                await asyncio.create_task(self._call_handler(handler, alert))
+            except Exception as e:
+                logger.error(f"Alert handler error: {e}")
+
     async def _create_alert(self, 
                            circuit_name: str,
                            severity: AlertSeverity,
@@ -171,24 +212,9 @@ class CircuitBreakerMonitor:
                            state: str,
                            metrics: Dict[str, Any]) -> None:
         """Create and dispatch alert."""
-        alert = CircuitBreakerAlert(
-            circuit_name=circuit_name,
-            severity=severity,
-            message=message,
-            timestamp=datetime.now(UTC),
-            state=state,
-            metrics=metrics
-        )
-        
-        self._alerts.append(alert)
-        self._trim_alerts()
-        
-        # Dispatch to handlers
-        for handler in self._alert_handlers:
-            try:
-                await asyncio.create_task(self._call_handler(handler, alert))
-            except Exception as e:
-                logger.error(f"Alert handler error: {e}")
+        alert = self._build_alert(circuit_name, severity, message, state, metrics)
+        self._store_alert(alert)
+        await self._dispatch_alert_to_handlers(alert)
     
     async def _call_handler(self, handler: Callable, alert: CircuitBreakerAlert) -> None:
         """Call alert handler safely."""

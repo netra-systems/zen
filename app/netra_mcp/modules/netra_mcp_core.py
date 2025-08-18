@@ -52,21 +52,8 @@ class NetraMCPServer:
         llm_manager=None
     ):
         """Inject service dependencies"""
-        if agent_service:
-            self.agent_service = agent_service
-        if thread_service:
-            self.thread_service = thread_service
-        if corpus_service:
-            self.corpus_service = corpus_service
-        if synthetic_data_service:
-            self.synthetic_data_service = synthetic_data_service
-        if security_service:
-            self.security_service = security_service
-        if supply_catalog_service:
-            self.supply_catalog_service = supply_catalog_service
-        if llm_manager:
-            self.llm_manager = llm_manager
-            
+        self._inject_core_services(agent_service, thread_service, corpus_service)
+        self._inject_extended_services(synthetic_data_service, security_service, supply_catalog_service, llm_manager)
         logger.info("MCP Server services configured")
     
     def _register_components(self):
@@ -85,3 +72,24 @@ class NetraMCPServer:
     def get_app(self):
         """Get the FastMCP app instance for running"""
         return self.mcp
+    
+    def _inject_core_services(self, agent_service, thread_service, corpus_service) -> None:
+        """Inject core services"""
+        if agent_service:
+            self.agent_service = agent_service
+        if thread_service:
+            self.thread_service = thread_service
+        if corpus_service:
+            self.corpus_service = corpus_service
+    
+    def _inject_extended_services(self, synthetic_data_service, security_service, 
+                                 supply_catalog_service, llm_manager) -> None:
+        """Inject extended services"""
+        if synthetic_data_service:
+            self.synthetic_data_service = synthetic_data_service
+        if security_service:
+            self.security_service = security_service
+        if supply_catalog_service:
+            self.supply_catalog_service = supply_catalog_service
+        if llm_manager:
+            self.llm_manager = llm_manager

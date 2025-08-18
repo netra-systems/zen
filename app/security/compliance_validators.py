@@ -19,38 +19,36 @@ class ComplianceValidator:
         """Get overall compliance summary."""
         total_checks = len(self.check_manager.checks)
         status_counts = self._count_by_status()
-        compliance_percentage = self._calculate_compliance_percentage(
-            status_counts['compliant'], total_checks
-        )
-        
+        compliance_percentage = self._calculate_compliance_percentage(status_counts['compliant'], total_checks)
+        return self._build_summary_dict(total_checks, status_counts, compliance_percentage)
+    
+    def _build_summary_dict(self, total_checks: int, status_counts: Dict[str, int], 
+                           compliance_percentage: float) -> Dict[str, Any]:
+        """Build the compliance summary dictionary."""
         return {
-            "total_checks": total_checks,
-            "compliant": status_counts['compliant'],
-            "non_compliant": status_counts['non_compliant'],
-            "partially_compliant": status_counts['partially_compliant'],
-            "needs_review": status_counts['needs_review'],
-            "compliance_percentage": compliance_percentage,
+            "total_checks": total_checks, "compliant": status_counts['compliant'],
+            "non_compliant": status_counts['non_compliant'], "partially_compliant": status_counts['partially_compliant'],
+            "needs_review": status_counts['needs_review'], "compliance_percentage": compliance_percentage,
             "status_breakdown": status_counts
         }
     
     def _count_by_status(self) -> Dict[str, int]:
         """Count checks by status."""
-        counts = {
-            'compliant': 0, 'non_compliant': 0,
-            'partially_compliant': 0, 'needs_review': 0
-        }
-        
+        counts = {'compliant': 0, 'non_compliant': 0, 'partially_compliant': 0, 'needs_review': 0}
         for check in self.check_manager.checks.values():
-            if check.status == ComplianceStatus.COMPLIANT:
-                counts['compliant'] += 1
-            elif check.status == ComplianceStatus.NON_COMPLIANT:
-                counts['non_compliant'] += 1
-            elif check.status == ComplianceStatus.PARTIALLY_COMPLIANT:
-                counts['partially_compliant'] += 1
-            elif check.status == ComplianceStatus.NEEDS_REVIEW:
-                counts['needs_review'] += 1
-        
+            self._increment_status_count(counts, check.status)
         return counts
+    
+    def _increment_status_count(self, counts: Dict[str, int], status: ComplianceStatus) -> None:
+        """Increment the appropriate status count."""
+        if status == ComplianceStatus.COMPLIANT:
+            counts['compliant'] += 1
+        elif status == ComplianceStatus.NON_COMPLIANT:
+            counts['non_compliant'] += 1
+        elif status == ComplianceStatus.PARTIALLY_COMPLIANT:
+            counts['partially_compliant'] += 1
+        elif status == ComplianceStatus.NEEDS_REVIEW:
+            counts['needs_review'] += 1
     
     def _calculate_compliance_percentage(self, compliant: int, total: int) -> float:
         """Calculate compliance percentage."""
@@ -164,16 +162,18 @@ class ComplianceValidator:
     
     def _build_remediation_item(self, index: int, item: Dict[str, Any]) -> List[str]:
         """Build single remediation item text."""
-        lines = [
+        header_lines = self._build_item_header(index, item)
+        step_lines = self._build_item_steps(item['remediation_steps'])
+        return header_lines + step_lines + [""]
+    
+    def _build_item_header(self, index: int, item: Dict[str, Any]) -> List[str]:
+        """Build remediation item header."""
+        return [
             f"{index}. {item['title']} [{item['priority'].upper()} PRIORITY]",
-            f"   Status: {item['status']}",
-            f"   Standard: {item['standard']}",
-            f"   Effort: {item['estimated_effort']}",
-            f"   Steps:"
+            f"   Status: {item['status']}", f"   Standard: {item['standard']}",
+            f"   Effort: {item['estimated_effort']}", f"   Steps:"
         ]
-        
-        for step in item['remediation_steps']:
-            lines.append(f"     - {step}")
-        lines.append("")
-        
-        return lines
+    
+    def _build_item_steps(self, steps: List[str]) -> List[str]:
+        """Build remediation item steps."""
+        return [f"     - {step}" for step in steps]

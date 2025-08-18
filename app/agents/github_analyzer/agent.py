@@ -73,39 +73,85 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         """Execute repository analysis."""
         try:
             await self._validate_input(context)
-            repo_url = context.get("repository_url")
-            
-            # Report progress via WebSocket
-            await self._report_progress(state, "Starting analysis", 0)
-            
-            # Phase 1: Clone/access repository
-            repo_path = await self._access_repository(repo_url, state)
-            await self._report_progress(state, "Repository accessed", 20)
-            
-            # Phase 2: Scan for AI patterns
-            ai_patterns = await self._scan_patterns(repo_path, state)
-            await self._report_progress(state, "Patterns detected", 40)
-            
-            # Phase 3: Extract configurations
-            configs = await self._extract_configs(repo_path, state)
-            await self._report_progress(state, "Configurations extracted", 60)
-            
-            # Phase 4: Map LLM calls and tools
-            llm_map = await self._map_llm_usage(ai_patterns, state)
-            tool_map = await self._analyze_tools(ai_patterns, state)
-            await self._report_progress(state, "Mapping complete", 80)
-            
-            # Phase 5: Generate output map
-            result_map = await self._generate_map(
-                repo_url, ai_patterns, configs, llm_map, tool_map
-            )
-            await self._report_progress(state, "Analysis complete", 100)
-            
-            return self._create_success_result(result_map)
-            
+            return await self._execute_analysis_phases(state, context)
         except Exception as e:
             logger.error(f"Analysis failed: {str(e)}")
             return self._create_error_result(str(e))
+    
+    async def _execute_analysis_phases(
+        self, 
+        state: DeepAgentState, 
+        context: Dict[str, Any]
+    ) -> TypedAgentResult:
+        """Execute all analysis phases."""
+        await self._report_progress(state, "Starting analysis", 0)
+        repo_url = context.get("repository_url")
+        
+        repo_path = await self._execute_phase_1(repo_url, state)
+        ai_patterns = await self._execute_phase_2(repo_path, state)
+        configs = await self._execute_phase_3(repo_path, state)
+        llm_map, tool_map = await self._execute_phase_4(ai_patterns, state)
+        result_map = await self._execute_phase_5(
+            repo_url, ai_patterns, configs, llm_map, tool_map, state
+        )
+        return self._create_success_result(result_map)
+    
+    async def _execute_phase_1(
+        self, 
+        repo_url: str, 
+        state: DeepAgentState
+    ) -> str:
+        """Phase 1: Clone/access repository."""
+        repo_path = await self._access_repository(repo_url, state)
+        await self._report_progress(state, "Repository accessed", 20)
+        return repo_path
+    
+    async def _execute_phase_2(
+        self, 
+        repo_path: str, 
+        state: DeepAgentState
+    ) -> Dict[str, Any]:
+        """Phase 2: Scan for AI patterns."""
+        ai_patterns = await self._scan_patterns(repo_path, state)
+        await self._report_progress(state, "Patterns detected", 40)
+        return ai_patterns
+    
+    async def _execute_phase_3(
+        self, 
+        repo_path: str, 
+        state: DeepAgentState
+    ) -> Dict[str, Any]:
+        """Phase 3: Extract configurations."""
+        configs = await self._extract_configs(repo_path, state)
+        await self._report_progress(state, "Configurations extracted", 60)
+        return configs
+    
+    async def _execute_phase_4(
+        self, 
+        ai_patterns: Dict[str, Any], 
+        state: DeepAgentState
+    ) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        """Phase 4: Map LLM calls and tools."""
+        llm_map = await self._map_llm_usage(ai_patterns, state)
+        tool_map = await self._analyze_tools(ai_patterns, state)
+        await self._report_progress(state, "Mapping complete", 80)
+        return llm_map, tool_map
+    
+    async def _execute_phase_5(
+        self,
+        repo_url: str,
+        ai_patterns: Dict[str, Any],
+        configs: Dict[str, Any],
+        llm_map: Dict[str, Any],
+        tool_map: Dict[str, Any],
+        state: DeepAgentState
+    ) -> Dict[str, Any]:
+        """Phase 5: Generate output map."""
+        result_map = await self._generate_map(
+            repo_url, ai_patterns, configs, llm_map, tool_map
+        )
+        await self._report_progress(state, "Analysis complete", 100)
+        return result_map
     
     async def _validate_input(self, context: Dict[str, Any]) -> None:
         """Validate input parameters."""

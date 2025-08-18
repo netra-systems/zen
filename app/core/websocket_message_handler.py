@@ -36,33 +36,59 @@ class WebSocketMessageHandler:
     
     def queue_pending_message(self, message_state: MessageState, max_pending: int) -> bool:
         """Queue message for later sending."""
-        if len(self.pending_messages) < max_pending:
-            self.pending_messages.append(message_state)
-            logger.debug(f"Message queued: {message_state.message_id}")
-            return False
-        else:
-            logger.warning(f"Pending message queue full, dropping: {message_state.message_id}")
-            return False
+        if self._can_queue_message(max_pending):
+            return self._add_to_queue(message_state)
+        return self._handle_queue_full(message_state)
+    
+    def _can_queue_message(self, max_pending: int) -> bool:
+        """Check if message can be queued."""
+        return len(self.pending_messages) < max_pending
+    
+    def _add_to_queue(self, message_state: MessageState) -> bool:
+        """Add message to pending queue."""
+        self.pending_messages.append(message_state)
+        logger.debug(f"Message queued: {message_state.message_id}")
+        return False
+    
+    def _handle_queue_full(self, message_state: MessageState) -> bool:
+        """Handle case when queue is full."""
+        logger.warning(f"Pending message queue full, dropping: {message_state.message_id}")
+        return False
     
     async def execute_message_send(self, websocket, message_state: MessageState) -> bool:
         """Execute the actual message send."""
         message_json = json.dumps(message_state.content)
         await websocket.send(message_json)
-        if message_state.ack_required:
-            self.sent_messages[message_state.message_id] = message_state
+        self._track_sent_message_if_required(message_state)
         logger.debug(f"Message sent: {message_state.message_id}")
         return True
+    
+    def _track_sent_message_if_required(self, message_state: MessageState) -> None:
+        """Track sent message if acknowledgment is required."""
+        if message_state.ack_required:
+            self.sent_messages[message_state.message_id] = message_state
     
     async def process_received_message(self, message: Dict[str, Any], connection_id: str) -> None:
         """Process received message."""
         message_id = message.get('id')
         message_type = message.get('type')
-        if message_type == 'ack' and message_id:
+        
+        if self._is_ack_message(message_type, message_id):
             self.handle_acknowledgment(message_id)
             return
-        if message_type == 'pong':
+        
+        if self._is_pong_message(message_type):
             return  # Handled by heartbeat manager
+        
         await self._handle_regular_message(message, message_id, connection_id)
+    
+    def _is_ack_message(self, message_type: str, message_id: str) -> bool:
+        """Check if message is an acknowledgment."""
+        return message_type == 'ack' and message_id is not None
+    
+    def _is_pong_message(self, message_type: str) -> bool:
+        """Check if message is a pong response."""
+        return message_type == 'pong'
     
     async def _handle_regular_message(self, message: Dict[str, Any], message_id: str, connection_id: str) -> None:
         """Handle regular incoming message."""
@@ -97,11 +123,19 @@ class WebSocketMessageHandler:
     
     async def send_acknowledgment(self, websocket, message_id: str) -> None:
         """Send acknowledgment for received message."""
-        ack_message = {
+        ack_message = self._create_ack_message(message_id)
+        await self._send_ack_message(websocket, ack_message)
+    
+    def _create_ack_message(self, message_id: str) -> Dict[str, Any]:
+        """Create acknowledgment message."""
+        return {
             'type': 'ack',
             'id': message_id,
             'timestamp': datetime.now().isoformat()
         }
+    
+    async def _send_ack_message(self, websocket, ack_message: Dict[str, Any]) -> None:
+        """Send acknowledgment message through websocket."""
         try:
             await websocket.send(json.dumps(ack_message))
         except Exception as e:

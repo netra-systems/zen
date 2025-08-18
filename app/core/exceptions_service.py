@@ -54,16 +54,8 @@ class ExternalServiceError(ServiceError):
         )
 
 
-class AgentExecutionError(NetraException):
-    """Raised when agent execution fails."""
-    
-    def __init__(self, message: str = None, **kwargs):
-        super().__init__(
-            message=message or "Agent execution failed",
-            code=ErrorCode.AGENT_EXECUTION_FAILED,
-            severity=ErrorSeverity.HIGH,
-            **kwargs
-        )
+# Import AgentExecutionError from canonical location - CONSOLIDATED
+from app.core.exceptions_agent import AgentExecutionError
 
 
 class AgentTimeoutError(AgentExecutionError):

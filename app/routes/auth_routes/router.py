@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.clients.auth_client import auth_client
 from app.auth_dependencies import get_db_session, get_security_service
-from app.schemas.Auth import AuthConfigResponse, DevLoginRequest
+from app.schemas.auth_types import AuthConfigResponse, DevLoginRequest
 from app.services.security_service import SecurityService
 
 from .config_handler import build_auth_config_response

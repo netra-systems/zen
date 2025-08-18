@@ -98,23 +98,32 @@ class MigrationTracker:
         state = await self._load_state()
         try:
             cfg = self._get_alembic_config()
-            current = self._get_current_safely(cfg)
-            head = get_head_revision(cfg)
-            
-            state.current_version = current
-            state.last_check = datetime.now()
-            
-            if needs_migration(current, head):
-                state.pending_migrations = [head]
-            else:
-                state.pending_migrations = []
-                
-            await self._save_state(state)
+            await self._update_migration_state(cfg, state)
             return state
         except Exception as e:
-            self.logger.error(f"Migration check failed: {e}")
-            await self._record_failure(state, "CHECK_FAILED", str(e))
-            raise NetraException(f"Migration check failed: {e}")
+            await self._handle_migration_check_error(state, e)
+
+    async def _update_migration_state(self, cfg: alembic.config.Config, state: MigrationState) -> None:
+        """Update migration state with current and head revisions."""
+        current = self._get_current_safely(cfg)
+        head = get_head_revision(cfg)
+        state.current_version = current
+        state.last_check = datetime.now()
+        self._set_pending_migrations(state, current, head)
+        await self._save_state(state)
+
+    def _set_pending_migrations(self, state: MigrationState, current: Optional[str], head: str) -> None:
+        """Set pending migrations based on current and head revisions."""
+        if needs_migration(current, head):
+            state.pending_migrations = [head]
+        else:
+            state.pending_migrations = []
+
+    async def _handle_migration_check_error(self, state: MigrationState, error: Exception) -> None:
+        """Handle migration check errors."""
+        self.logger.error(f"Migration check failed: {error}")
+        await self._record_failure(state, "CHECK_FAILED", str(error))
+        raise NetraException(f"Migration check failed: {error}")
 
     def _get_current_safely(self, cfg: alembic.config.Config) -> Optional[str]:
         """Get current revision safely."""
@@ -138,16 +147,24 @@ class MigrationTracker:
     async def run_migrations(self, force: bool = False) -> bool:
         """Run pending migrations with failure handling."""
         state = await self.check_migrations()
-        
+        should_run = self._check_migration_conditions(state, force)
+        if not should_run:
+            return self._handle_migration_skip(state, force)
+        return await self._execute_migrations(state)
+
+    def _check_migration_conditions(self, state: MigrationState, force: bool) -> bool:
+        """Check if migrations should run."""
+        has_pending = bool(state.pending_migrations)
+        should_auto_run = self._should_auto_run(state)
+        return has_pending or (should_auto_run and force)
+
+    def _handle_migration_skip(self, state: MigrationState, force: bool) -> bool:
+        """Handle migration skip scenarios."""
         if not state.pending_migrations and not force:
             self.logger.info("No pending migrations")
             return True
-            
-        if not self._should_auto_run(state) and not force:
-            self.logger.info("Auto-run disabled, skipping migrations")
-            return False
-            
-        return await self._execute_migrations(state)
+        self.logger.info("Auto-run disabled, skipping migrations")
+        return False
 
     def _should_auto_run(self, state: MigrationState) -> bool:
         """Check if migrations should auto-run."""

@@ -9,9 +9,9 @@
  */
 
 /**
- * Retry configuration options
+ * Frontend retry configuration options
  */
-export interface RetryConfig {
+export interface FrontendFrontendRetryConfig {
   readonly maxAttempts: number;
   readonly baseDelayMs: number;
   readonly maxDelayMs: number;
@@ -37,7 +37,7 @@ export type RetryOperation<T> = () => Promise<T>;
 /**
  * Default retry configuration
  */
-const DEFAULT_CONFIG: RetryConfig = {
+const DEFAULT_CONFIG: FrontendRetryConfig = {
   maxAttempts: 3,
   baseDelayMs: 1000,
   maxDelayMs: 10000,
@@ -50,7 +50,7 @@ const DEFAULT_CONFIG: RetryConfig = {
  */
 export const executeWithRetry = async <T>(
   operation: RetryOperation<T>,
-  config: Partial<RetryConfig> = {}
+  config: Partial<FrontendRetryConfig> = {}
 ): Promise<T> => {
   const fullConfig = { ...DEFAULT_CONFIG, ...config };
   const startTime = Date.now();
@@ -81,7 +81,7 @@ export const executeWithRetry = async <T>(
  */
 const determineShouldRetry = (
   attempt: number,
-  config: RetryConfig,
+  config: FrontendRetryConfig,
   error: unknown
 ): boolean => {
   if (attempt >= config.maxAttempts) return false;
@@ -105,7 +105,7 @@ const isNonRetryableError = (error: unknown): boolean => {
 /**
  * Calculates delay for retry attempt
  */
-const calculateDelay = (attempt: number, config: RetryConfig): number => {
+const calculateDelay = (attempt: number, config: FrontendRetryConfig): number => {
   const exponentialDelay = config.baseDelayMs * Math.pow(config.multiplier, attempt - 1);
   const cappedDelay = Math.min(exponentialDelay, config.maxDelayMs);
   
@@ -151,11 +151,11 @@ const logRetryFailure = (
  * Retry manager class for stateful retry operations
  */
 export class RetryManager {
-  private readonly config: RetryConfig;
+  private readonly config: FrontendRetryConfig;
   private currentAttempt: number = 0;
   private startTime: number = 0;
 
-  constructor(config: Partial<RetryConfig> = {}) {
+  constructor(config: Partial<FrontendRetryConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
@@ -198,6 +198,6 @@ export class RetryManager {
 /**
  * Creates retry manager with config
  */
-export const createRetryManager = (config?: Partial<RetryConfig>): RetryManager => {
+export const createRetryManager = (config?: Partial<FrontendRetryConfig>): RetryManager => {
   return new RetryManager(config);
 };

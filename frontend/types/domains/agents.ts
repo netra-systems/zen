@@ -13,6 +13,7 @@
  */
 
 import { AgentStatus } from '../shared/enums';
+import { AgentResult } from '../backend-sync/payloads';
 
 // ============================================================================
 // TOOL AND EXECUTION TYPES
@@ -47,20 +48,10 @@ export interface AgentMetadata {
 }
 
 /**
- * Standardized result structure for all agent operations.
- * Supports both new format and legacy backend compatibility.
+ * AgentResult is imported from canonical source (backend-sync/payloads).
+ * This ensures consistency with backend schema and prevents duplication.
  */
-export interface AgentResult {
-  success: boolean;
-  output?: string | Record<string, unknown> | Array<unknown> | null;
-  error?: string | null;
-  metrics?: Record<string, number>;
-  artifacts?: string[];
-  execution_time_ms?: number | null;
-  // Backend compatibility
-  message?: string;
-  data?: string | Record<string, unknown> | unknown[];
-}
+// AgentResult - now imported from backend-sync/payloads
 
 // ============================================================================
 // MESSAGE AND COMMUNICATION TYPES

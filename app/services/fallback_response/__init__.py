@@ -5,6 +5,8 @@ This module provides intelligent, context-aware fallback responses when AI gener
 fails or produces low-quality output, replacing generic error messages with helpful alternatives.
 """
 
+from typing import Dict, List, Any
+
 from .models import FailureReason, FallbackContext
 from .templates import TemplateManager
 from .diagnostics import DiagnosticsManager
@@ -52,17 +54,27 @@ class FallbackResponseService:
         # Return descriptions as strings for backward compatibility with tests
         return [s["description"] for s in suggestions]
     
-    async def generate_fallback(self, *args, **kwargs):
+    async def generate_fallback(
+        self,
+        context: FallbackContext,
+        include_diagnostics: bool = True,
+        include_recovery: bool = True
+    ) -> Dict[str, Any]:
         """Generate a context-aware fallback response"""
-        return await self.response_generator.generate_fallback(*args, **kwargs)
+        return await self.response_generator.generate_fallback(context, include_diagnostics, include_recovery)
     
-    async def generate_batch_fallbacks(self, *args, **kwargs):
+    async def generate_batch_fallbacks(self, contexts: List[FallbackContext]) -> List[Dict[str, Any]]:
         """Generate fallback responses for multiple contexts"""
-        return await self.response_generator.generate_batch_fallbacks(*args, **kwargs)
+        return await self.response_generator.generate_batch_fallbacks(contexts)
     
-    def get_fallback_for_json_error(self, *args, **kwargs):
+    def get_fallback_for_json_error(
+        self,
+        agent_name: str,
+        raw_response: str,
+        expected_format: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Generate fallback for JSON parsing errors"""
-        return self.response_generator.get_fallback_for_json_error(*args, **kwargs)
+        return self.response_generator.get_fallback_for_json_error(agent_name, raw_response, expected_format)
 
 
 __all__ = [

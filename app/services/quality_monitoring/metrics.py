@@ -15,7 +15,10 @@ from sqlalchemy import select
 logger = central_logger.get_logger(__name__)
 
 
-class MetricsCollector:
+# Import MetricsCollector from canonical location - CONSOLIDATED
+from app.monitoring.metrics_collector import MetricsCollector as CoreMetricsCollector
+
+class QualityMetricsCollector:
     """Collects and stores quality metrics"""
     
     def __init__(
@@ -174,3 +177,7 @@ class MetricsCollector:
     def get_agent_events(self, agent: str, limit: int = 100) -> List[Dict]:
         """Get events for specific agent"""
         return list(self.metrics_buffer[agent])[-limit:]
+
+
+# Export QualityMetricsCollector as MetricsCollector for compatibility
+MetricsCollector = QualityMetricsCollector

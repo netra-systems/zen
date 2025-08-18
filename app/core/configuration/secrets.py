@@ -42,6 +42,15 @@ class SecretManager:
     
     def _load_secret_mappings(self) -> Dict[str, dict]:
         """Load secret to configuration field mappings."""
+        mappings = {}
+        mappings.update(self._get_llm_secret_mappings())
+        mappings.update(self._get_oauth_secret_mappings())
+        mappings.update(self._get_auth_secret_mappings())
+        mappings.update(self._get_database_secret_mappings())
+        return mappings
+    
+    def _get_llm_secret_mappings(self) -> Dict[str, dict]:
+        """Get LLM-related secret mappings."""
         return {
             "gemini-api-key": {
                 "target_models": ["llm_configs.default", "llm_configs.triage", 
@@ -49,7 +58,12 @@ class SecretManager:
                 "target_field": "api_key",
                 "required": True,
                 "rotation_enabled": True
-            },
+            }
+        }
+    
+    def _get_oauth_secret_mappings(self) -> Dict[str, dict]:
+        """Get OAuth-related secret mappings."""
+        return {
             "google-client-id": {
                 "target_models": ["google_cloud", "oauth_config"],
                 "target_field": "client_id", 
@@ -61,7 +75,12 @@ class SecretManager:
                 "target_field": "client_secret",
                 "required": True,
                 "rotation_enabled": True
-            },
+            }
+        }
+    
+    def _get_auth_secret_mappings(self) -> Dict[str, dict]:
+        """Get authentication secret mappings."""
+        return {
             "jwt-secret-key": {
                 "target_field": "jwt_secret_key",
                 "required": True,
@@ -71,7 +90,12 @@ class SecretManager:
                 "target_field": "fernet_key",
                 "required": True,
                 "rotation_enabled": True
-            },
+            }
+        }
+    
+    def _get_database_secret_mappings(self) -> Dict[str, dict]:
+        """Get database-related secret mappings."""
+        return {
             "clickhouse-default-password": {
                 "target_models": ["clickhouse_native", "clickhouse_https"],
                 "target_field": "password",

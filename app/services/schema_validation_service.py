@@ -160,47 +160,42 @@ class SchemaValidationService:
             return False
     
     @classmethod
+    def _initialize_schema_info(cls) -> Dict[str, Any]:
+        """Initialize schema info structure"""
+        return {"tables": {}, "indexes": {}, "constraints": {}}
+
+    @classmethod
+    def _collect_table_info(cls, inspector, table_name: str) -> Dict[str, Any]:
+        """Collect information for a single table"""
+        columns = inspector.get_columns(table_name)
+        indexes = inspector.get_indexes(table_name)
+        foreign_keys = inspector.get_foreign_keys(table_name)
+        return {"columns": columns, "indexes": indexes, "foreign_keys": foreign_keys}
+
+    @classmethod
+    def _build_schema_info(cls, inspector) -> Dict[str, Any]:
+        """Build complete schema information"""
+        schema_info = cls._initialize_schema_info()
+        table_names = inspector.get_table_names()
+        for table_name in table_names:
+            schema_info["tables"][table_name] = cls._collect_table_info(inspector, table_name)
+        return schema_info
+
+    @classmethod
+    def _get_all_schema_info(cls, sync_conn):
+        """Synchronous schema info gathering function"""
+        inspector = inspect(sync_conn)
+        return cls._build_schema_info(inspector)
+
+    @classmethod
     async def get_schema_info(cls, engine: AsyncEngine) -> Dict[str, Any]:
         """Get detailed schema information"""
-        schema_info = {
-            "tables": {},
-            "indexes": {},
-            "constraints": {}
-        }
-        
+        schema_info = cls._initialize_schema_info()
         try:
             async with engine.connect() as conn:
-                # Define synchronous function to get schema info
-                def get_all_schema_info(sync_conn):
-                    inspector = inspect(sync_conn)
-                    
-                    # Get all tables
-                    table_names = inspector.get_table_names()
-                    
-                    for table_name in table_names:
-                        # Get columns
-                        columns = inspector.get_columns(table_name)
-                        
-                        # Get indexes
-                        indexes = inspector.get_indexes(table_name)
-                        
-                        # Get foreign keys
-                        foreign_keys = inspector.get_foreign_keys(table_name)
-                        
-                        schema_info["tables"][table_name] = {
-                            "columns": columns,
-                            "indexes": indexes,
-                            "foreign_keys": foreign_keys
-                        }
-                    
-                    return schema_info
-                
-                # Run the schema info gathering in sync context
-                await conn.run_sync(get_all_schema_info)
-        
+                schema_info = await conn.run_sync(cls._get_all_schema_info)
         except Exception as e:
             logger.error(f"Failed to get schema info: {e}")
-        
         return schema_info
 
 async def run_comprehensive_validation(engine: AsyncEngine) -> bool:

@@ -1,13 +1,41 @@
 """Test WebSocket URL configuration endpoint regression test."""
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import Mock
 from app.main import app
+from app.auth_integration.auth import require_admin, get_current_user
 
-client = TestClient(app)
+@pytest.fixture
+def admin_client():
+    """Create test client with admin authentication."""
+    mock_admin_user = Mock()
+    mock_admin_user.is_admin = True
+    mock_admin_user.id = "admin_test_user"
+    
+    app.dependency_overrides[require_admin] = lambda: mock_admin_user
+    try:
+        yield TestClient(app)
+    finally:
+        if require_admin in app.dependency_overrides:
+            del app.dependency_overrides[require_admin]
 
-def test_api_config_includes_ws_url():
+@pytest.fixture
+def authenticated_client():
+    """Create test client with basic authentication."""
+    mock_user = Mock()
+    mock_user.id = "test_user"
+    mock_user.is_admin = False
+    
+    app.dependency_overrides[get_current_user] = lambda: mock_user
+    try:
+        yield TestClient(app)
+    finally:
+        if get_current_user in app.dependency_overrides:
+            del app.dependency_overrides[get_current_user]
+
+def test_api_config_includes_ws_url(admin_client):
     """Test that /api/config endpoint returns ws_url field."""
-    response = client.get("/api/config")
+    response = admin_client.get("/api/config")
     assert response.status_code == 200
     
     config = response.json()
@@ -18,9 +46,9 @@ def test_api_config_includes_ws_url():
         "ws_url should start with ws:// or wss://"
     assert "/ws" in config["ws_url"], "ws_url should contain /ws path"
 
-def test_api_config_all_expected_fields():
+def test_api_config_all_expected_fields(admin_client):
     """Test that /api/config returns all expected fields."""
-    response = client.get("/api/config")
+    response = admin_client.get("/api/config")
     assert response.status_code == 200
     
     config = response.json()
@@ -33,9 +61,9 @@ def test_api_config_all_expected_fields():
     assert config["max_retries"] == 3
     assert config["timeout"] == 30
 
-def test_websocket_config_endpoint():
+def test_websocket_config_endpoint(authenticated_client):
     """Test the dedicated /api/config/websocket endpoint."""
-    response = client.get("/api/config/websocket")
+    response = authenticated_client.get("/api/config/websocket")
     assert response.status_code == 200
     
     config = response.json()
@@ -43,10 +71,10 @@ def test_websocket_config_endpoint():
     assert config["ws_url"] is not None
     assert isinstance(config["ws_url"], str)
 
-def test_config_consistency():
+def test_config_consistency(admin_client, authenticated_client):
     """Test that ws_url is consistent across different config endpoints."""
-    api_config_response = client.get("/api/config")
-    ws_config_response = client.get("/api/config/websocket")
+    api_config_response = admin_client.get("/api/config")
+    ws_config_response = authenticated_client.get("/api/config/websocket")
     
     assert api_config_response.status_code == 200
     assert ws_config_response.status_code == 200

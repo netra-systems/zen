@@ -5,7 +5,7 @@ import os
 from typing import Optional
 from fastapi import Request
 from app.clients.auth_client import auth_client
-from app.schemas.Auth import AuthConfigResponse, AuthEndpoints
+from app.schemas.auth_types import AuthConfigResponse, AuthEndpoints
 
 
 def normalize_base_url(request: Request) -> str:

@@ -36,7 +36,11 @@ class BatchedBroadcastManager:
                                priority: int = 1, use_batching: bool = True) -> bool:
         """Broadcast message to user with optional batching."""
         self._stats["total_broadcasts"] += 1
-        
+        return await self._route_message_by_priority(user_id, message, priority, use_batching)
+    
+    async def _route_message_by_priority(self, user_id: str, message: Union[Dict[str, Any], ServerMessage],
+                                        priority: int, use_batching: bool) -> bool:
+        """Route message based on priority and batching settings."""
         if self._should_use_batching(use_batching, priority):
             return await self._send_via_batching(user_id, message, priority)
         else:
@@ -80,11 +84,19 @@ class BatchedBroadcastManager:
         """Send message to single connection."""
         try:
             await conn_info.websocket.send_json(message)
-            conn_info.message_count += 1
-            return True
+            return self._handle_send_success(conn_info)
         except Exception as e:
-            logger.error(f"Error sending direct message to {conn_info.connection_id}: {e}")
-            return False
+            return self._handle_send_error(conn_info, e)
+    
+    def _handle_send_success(self, conn_info) -> bool:
+        """Handle successful message send."""
+        conn_info.message_count += 1
+        return True
+    
+    def _handle_send_error(self, conn_info, error: Exception) -> bool:
+        """Handle message send error."""
+        logger.error(f"Error sending direct message to {conn_info.connection_id}: {error}")
+        return False
     
     async def shutdown(self) -> None:
         """Shutdown broadcast manager."""

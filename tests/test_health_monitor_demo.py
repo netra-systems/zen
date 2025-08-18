@@ -9,7 +9,8 @@ with comprehensive checks for databases, Redis, WebSocket, and system resources.
 import asyncio
 import time
 from app.core.system_health_monitor import SystemHealthMonitor
-from app.core.health_types import HealthStatus, HealthCheckResult
+from app.core.shared_health_types import HealthStatus
+from app.schemas.core_models import HealthCheckResult
 
 
 async def demo_health_checker() -> HealthCheckResult:

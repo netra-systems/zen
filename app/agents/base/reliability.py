@@ -18,32 +18,37 @@ from datetime import datetime, timedelta
 
 from app.logging_config import central_logger
 from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
-# CircuitBreakerConfig and RetryConfig defined locally in this module
+from app.schemas.shared_types import RetryConfig
+# Import CircuitBreaker from canonical location - CONSOLIDATED
+from app.core.circuit_breaker import CircuitBreaker as CoreCircuitBreaker, CircuitConfig
+from app.core.circuit_breaker_types import CircuitState
 
 logger = central_logger.get_logger(__name__)
 
 
+# Legacy config wrapper for backward compatibility
 @dataclass
 class CircuitBreakerConfig:
     """Configuration for circuit breaker behavior."""
     name: str
     failure_threshold: int = 5
     recovery_timeout: int = 60
+    
+    def to_circuit_config(self) -> CircuitConfig:
+        """Convert to canonical CircuitConfig."""
+        return CircuitConfig(
+            name=self.name,
+            failure_threshold=self.failure_threshold,
+            recovery_timeout=float(self.recovery_timeout),
+            timeout_seconds=float(self.recovery_timeout)
+        )
 
 
-@dataclass  
-class RetryConfig:
-    """Configuration for retry behavior."""
-    max_retries: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 30.0
+# RetryConfig imported from canonical location above
 
 
-class CircuitBreakerState(Enum):
-    """Circuit breaker state enumeration."""
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
+# Use canonical CircuitState enum
+CircuitBreakerState = CircuitState
 
 
 @dataclass
@@ -57,106 +62,51 @@ class CircuitBreakerMetrics:
     state_changes: int = 0
 
 
-class CircuitBreaker:
-    """Circuit breaker implementation for agent reliability.
+class CircuitBreaker(CoreCircuitBreaker):
+    """Circuit breaker implementation for agent reliability - delegates to canonical implementation.
     
-    Prevents cascading failures by stopping requests to failing services
-    and allowing time for recovery.
+    Compatibility wrapper that maintains the agent-specific interface while
+    delegating to the canonical CircuitBreaker implementation.
     """
     
     def __init__(self, config: CircuitBreakerConfig):
-        self.config = config
-        self.state = CircuitBreakerState.CLOSED
+        """Initialize with legacy config interface."""
+        core_config = config.to_circuit_config()
+        super().__init__(core_config)
+        self.legacy_config = config
         self.metrics = CircuitBreakerMetrics()
         self._last_state_change = time.time()
         
     async def execute(self, func: Callable[[], Awaitable[Any]]) -> Any:
         """Execute function with circuit breaker protection."""
-        if self._should_block_request():
-            raise CircuitBreakerOpenException("Circuit breaker is open")
-        
         try:
-            result = await func()
-            self._record_success()
-            return result
+            return await self.call(func)
         except Exception as e:
-            self._record_failure()
+            # Update legacy metrics for compatibility
+            self._update_legacy_metrics_on_failure()
             raise
     
-    def _should_block_request(self) -> bool:
-        """Check if request should be blocked."""
-        if self.state == CircuitBreakerState.CLOSED:
-            return False
-        
-        if self.state == CircuitBreakerState.OPEN:
-            return not self._should_attempt_reset()
-        
-        # HALF_OPEN state - allow one request to test
-        return False
-    
-    def _should_attempt_reset(self) -> bool:
-        """Check if circuit breaker should attempt reset."""
-        time_since_change = time.time() - self._last_state_change
-        return time_since_change >= self.config.recovery_timeout
-    
-    def _record_success(self) -> None:
-        """Record successful execution."""
-        self.metrics.successful_requests += 1
-        self.metrics.total_requests += 1
-        self.metrics.consecutive_failures = 0
-        
-        if self.state == CircuitBreakerState.HALF_OPEN:
-            self._transition_to_closed()
-    
-    def _record_failure(self) -> None:
-        """Record failed execution."""
+    def _update_legacy_metrics_on_failure(self) -> None:
+        """Update legacy metrics on failure for compatibility."""
         self.metrics.failed_requests += 1
         self.metrics.total_requests += 1
         self.metrics.consecutive_failures += 1
         self.metrics.last_failure_time = datetime.utcnow()
-        
-        if self._should_open_circuit():
-            self._transition_to_open()
-    
-    def _should_open_circuit(self) -> bool:
-        """Check if circuit should be opened."""
-        return (self.state == CircuitBreakerState.CLOSED and 
-                self.metrics.consecutive_failures >= self.config.failure_threshold)
-    
-    def _transition_to_open(self) -> None:
-        """Transition circuit breaker to open state."""
-        self.state = CircuitBreakerState.OPEN
-        self.metrics.state_changes += 1
-        self._last_state_change = time.time()
-        logger.warning(f"Circuit breaker {self.config.name} opened")
-    
-    def _transition_to_closed(self) -> None:
-        """Transition circuit breaker to closed state."""
-        self.state = CircuitBreakerState.CLOSED
-        self.metrics.state_changes += 1
-        self._last_state_change = time.time()
-        logger.info(f"Circuit breaker {self.config.name} closed")
-    
-    def _transition_to_half_open(self) -> None:
-        """Transition circuit breaker to half-open state."""
-        self.state = CircuitBreakerState.HALF_OPEN
-        self.metrics.state_changes += 1
-        self._last_state_change = time.time()
-        logger.info(f"Circuit breaker {self.config.name} half-open")
     
     def get_status(self) -> Dict[str, Any]:
-        """Get current circuit breaker status."""
+        """Get current circuit breaker status with legacy format."""
+        core_status = super().get_status()
         return {
-            "name": self.config.name,
-            "state": self.state.value,
-            "failure_threshold": self.config.failure_threshold,
-            "recovery_timeout": self.config.recovery_timeout,
+            "name": self.legacy_config.name,
+            "state": core_status["state"],
+            "failure_threshold": self.legacy_config.failure_threshold,
+            "recovery_timeout": self.legacy_config.recovery_timeout,
             "metrics": {
                 "total_requests": self.metrics.total_requests,
                 "successful_requests": self.metrics.successful_requests,
                 "failed_requests": self.metrics.failed_requests,
                 "consecutive_failures": self.metrics.consecutive_failures,
-                "state_changes": self.metrics.state_changes,
+                "state_changes": core_status.get("metrics", {}).get("state_changes", 0),
                 "last_failure": self.metrics.last_failure_time.isoformat() 
                                if self.metrics.last_failure_time else None
             }
@@ -164,9 +114,9 @@ class CircuitBreaker:
     
     def reset(self) -> None:
         """Reset circuit breaker to initial state."""
-        self.state = CircuitBreakerState.CLOSED
         self.metrics = CircuitBreakerMetrics()
         self._last_state_change = time.time()
+        # Reset core circuit breaker state would need to be implemented in core
 
 
 class CircuitBreakerOpenException(Exception):
@@ -259,7 +209,16 @@ class ReliabilityManager:
     
     def __init__(self, circuit_breaker_config: CircuitBreakerConfig,
                  retry_config: RetryConfig):
-        self.circuit_breaker = CircuitBreaker(circuit_breaker_config)
+        # Convert to legacy config format for compatibility
+        if isinstance(circuit_breaker_config, CircuitConfig):
+            legacy_config = CircuitBreakerConfig(
+                name=circuit_breaker_config.name,
+                failure_threshold=circuit_breaker_config.failure_threshold,
+                recovery_timeout=int(circuit_breaker_config.recovery_timeout)
+            )
+        else:
+            legacy_config = circuit_breaker_config
+        self.circuit_breaker = CircuitBreaker(legacy_config)
         self.retry_manager = RetryManager(retry_config)
         self._health_stats = {
             "total_executions": 0,
@@ -369,24 +328,53 @@ class ReliabilityManager:
         self.circuit_breaker.reset()
 
 
+# Import RateLimiter from canonical location - CONSOLIDATED
+from app.websocket.rate_limiter import RateLimiter as CoreRateLimiter
+from app.websocket.connection import ConnectionInfo
+
 class RateLimiter:
-    """Rate limiter for controlling request frequency."""
+    """Agent-specific rate limiter wrapper around WebSocket rate limiter."""
     
     def __init__(self, max_requests: int, time_window: float):
+        """Initialize with agent-specific interface."""
         self.max_requests = max_requests
         self.time_window = time_window
         self._requests = []
         
+        # Use core rate limiter with conversion
+        self.core_limiter = CoreRateLimiter(
+            max_requests=max_requests, 
+            window_seconds=int(time_window)
+        )
+        
+        # Create a mock connection info for agent use
+        self._agent_conn_info = self._create_agent_connection_info()
+        
+    def _create_agent_connection_info(self) -> ConnectionInfo:
+        """Create mock connection info for agent rate limiting."""
+        from datetime import datetime, timezone
+        conn_info = ConnectionInfo(
+            connection_id="agent_rate_limiter",
+            user_id="system_agent",
+            client_info={},
+            connection_time=datetime.now(timezone.utc)
+        )
+        conn_info.rate_limit_count = 0
+        conn_info.rate_limit_window_start = datetime.now(timezone.utc)
+        return conn_info
+        
     async def acquire(self) -> bool:
         """Acquire rate limit permission."""
-        now = time.time()
-        self._cleanup_old_requests(now)
+        # Use core rate limiter logic
+        is_limited = self.core_limiter.is_rate_limited(self._agent_conn_info)
         
-        if len(self._requests) >= self.max_requests:
-            return False
+        # Update local tracking for compatibility
+        if not is_limited:
+            now = time.time()
+            self._cleanup_old_requests(now)
+            self._requests.append(now)
         
-        self._requests.append(now)
-        return True
+        return not is_limited
     
     def _cleanup_old_requests(self, current_time: float) -> None:
         """Remove requests outside time window."""
@@ -396,6 +384,10 @@ class RateLimiter:
     
     def get_status(self) -> Dict[str, Any]:
         """Get rate limiter status."""
+        # Get status from core limiter
+        core_status = self.core_limiter.get_rate_limit_info(self._agent_conn_info)
+        
+        # Maintain compatibility with agent interface
         now = time.time()
         self._cleanup_old_requests(now)
         
@@ -403,5 +395,6 @@ class RateLimiter:
             "current_requests": len(self._requests),
             "max_requests": self.max_requests,
             "time_window": self.time_window,
-            "available_capacity": self.max_requests - len(self._requests)
+            "available_capacity": core_status.get("requests_remaining", 0),
+            "core_status": core_status
         }

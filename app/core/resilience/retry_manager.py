@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
 from dataclasses import dataclass, field
 
 from app.logging_config import central_logger
+from app.schemas.shared_types import RetryConfig
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T')
@@ -38,41 +39,7 @@ class JitterType(Enum):
     DECORRELATED = "decorrelated"
 
 
-@dataclass
-class RetryConfig:
-    """Enterprise retry configuration."""
-    max_attempts: int = 3
-    base_delay: float = 1.0
-    max_delay: float = 60.0
-    backoff_strategy: BackoffStrategy = BackoffStrategy.EXPONENTIAL
-    jitter_type: JitterType = JitterType.EQUAL
-    multiplier: float = 2.0
-    retryable_exceptions: List[type] = field(default_factory=list)
-    
-    def __post_init__(self) -> None:
-        """Validate retry configuration."""
-        self._validate_attempts()
-        self._validate_delays()
-        self._validate_multiplier()
-    
-    def _validate_attempts(self) -> None:
-        """Validate max attempts is positive."""
-        if self.max_attempts <= 0:
-            raise ValueError("max_attempts must be positive")
-    
-    def _validate_delays(self) -> None:
-        """Validate delay values are positive."""
-        if self.base_delay <= 0:
-            raise ValueError("base_delay must be positive")
-        if self.max_delay <= 0:
-            raise ValueError("max_delay must be positive")
-        if self.base_delay > self.max_delay:
-            raise ValueError("base_delay cannot exceed max_delay")
-    
-    def _validate_multiplier(self) -> None:
-        """Validate multiplier is positive."""
-        if self.multiplier <= 0:
-            raise ValueError("multiplier must be positive")
+# RetryConfig imported from canonical source (shared_types.py) above
 
 
 @dataclass

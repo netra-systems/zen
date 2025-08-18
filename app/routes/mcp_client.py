@@ -32,189 +32,235 @@ def get_mcp_client_service() -> IMCPClientService:
     return get_service(IMCPClientService)
 
 
+def _build_register_success_response(request: RegisterServerRequest) -> RegisterServerResponse:
+    """Build successful registration response."""
+    return RegisterServerResponse(
+        success=True, server_id="generated_id",
+        message=f"Server '{request.name}' registered successfully"
+    )
+
+def _handle_register_failure() -> None:
+    """Handle registration failure."""
+    raise HTTPException(status_code=400, detail="Server registration failed")
+
+def _handle_register_service_error(e: ServiceError) -> None:
+    """Handle service error during registration."""
+    logger.error(f"Service error registering server: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_register_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during registration."""
+    logger.error(f"Unexpected error registering server: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
+
 @router.post("/servers", response_model=RegisterServerResponse)
 async def register_server(
-    request: RegisterServerRequest,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
+    request: RegisterServerRequest, mcp_service: IMCPClientService = Depends(get_mcp_client_service),
     token: str = Depends(security)
 ):
     """Register a new external MCP server."""
     try:
         success = await mcp_service.register_server(request.config.model_dump())
-        
         if success:
-            return RegisterServerResponse(
-                success=True,
-                server_id="generated_id",  # Would be actual server ID
-                message=f"Server '{request.name}' registered successfully"
-            )
-        else:
-            raise HTTPException(status_code=400, detail="Server registration failed")
-            
+            return _build_register_success_response(request)
+        _handle_register_failure()
     except ServiceError as e:
-        logger.error(f"Service error registering server: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_register_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error registering server: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_register_unexpected_error(e)
 
+
+def _handle_list_service_error(e: ServiceError) -> None:
+    """Handle service error during server listing."""
+    logger.error(f"Service error listing servers: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_list_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during server listing."""
+    logger.error(f"Unexpected error listing servers: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/servers", response_model=ListServersResponse)
 async def list_servers(
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """List all registered MCP servers."""
     try:
         servers = await mcp_service.list_servers()
         return ListServersResponse(servers=servers)
-        
     except ServiceError as e:
-        logger.error(f"Service error listing servers: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_list_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error listing servers: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_list_unexpected_error(e)
 
+
+def _build_connect_response(server_name: str, connection) -> ConnectServerResponse:
+    """Build connection response."""
+    return ConnectServerResponse(
+        success=True, connection=connection, message=f"Connected to server '{server_name}'"
+    )
+
+def _handle_connect_service_error(e: ServiceError) -> None:
+    """Handle service error during connection."""
+    logger.error(f"Service error connecting to server: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_connect_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during connection."""
+    logger.error(f"Unexpected error connecting to server: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/servers/{server_name}/connect", response_model=ConnectServerResponse)
 async def connect_to_server(
-    server_name: str,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    server_name: str, mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """Connect to an MCP server."""
     try:
         connection = await mcp_service.connect_to_server(server_name)
-        
-        return ConnectServerResponse(
-            success=True,
-            connection=connection,
-            message=f"Connected to server '{server_name}'"
-        )
-        
+        return _build_connect_response(server_name, connection)
     except ServiceError as e:
-        logger.error(f"Service error connecting to server: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_connect_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error connecting to server: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_connect_unexpected_error(e)
 
+
+def _handle_discover_service_error(e: ServiceError) -> None:
+    """Handle service error during tool discovery."""
+    logger.error(f"Service error discovering tools: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_discover_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during tool discovery."""
+    logger.error(f"Unexpected error discovering tools: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/servers/{server_name}/tools", response_model=DiscoverToolsResponse)
 async def discover_tools(
-    server_name: str,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    server_name: str, mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """List tools from external server."""
     try:
         tools = await mcp_service.discover_tools(server_name)
         return DiscoverToolsResponse(tools=tools)
-        
     except ServiceError as e:
-        logger.error(f"Service error discovering tools: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_discover_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error discovering tools: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_discover_unexpected_error(e)
 
+
+def _build_execute_response(request: ExecuteToolRequest, result) -> ExecuteToolResponse:
+    """Build tool execution response."""
+    return ExecuteToolResponse(
+        success=True, result=result, message=f"Tool '{request.tool_name}' executed successfully"
+    )
+
+def _handle_execute_service_error(e: ServiceError) -> None:
+    """Handle service error during tool execution."""
+    logger.error(f"Service error executing tool: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_execute_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during tool execution."""
+    logger.error(f"Unexpected error executing tool: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/tools/execute", response_model=ExecuteToolResponse)
 async def execute_tool(
-    request: ExecuteToolRequest,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    request: ExecuteToolRequest, mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """Execute tool from external server."""
     try:
-        result = await mcp_service.execute_tool(
-            request.server_name,
-            request.tool_name,
-            request.arguments
-        )
-        
-        return ExecuteToolResponse(
-            success=True,
-            result=result,
-            message=f"Tool '{request.tool_name}' executed successfully"
-        )
-        
+        result = await mcp_service.execute_tool(request.server_name, request.tool_name, request.arguments)
+        return _build_execute_response(request, result)
     except ServiceError as e:
-        logger.error(f"Service error executing tool: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_execute_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error executing tool: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_execute_unexpected_error(e)
 
+
+def _handle_resources_service_error(e: ServiceError) -> None:
+    """Handle service error during resource retrieval."""
+    logger.error(f"Service error getting resources: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_resources_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during resource retrieval."""
+    logger.error(f"Unexpected error getting resources: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.get("/servers/{server_name}/resources", response_model=GetResourcesResponse)
 async def get_resources(
-    server_name: str,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    server_name: str, mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """List resources from external server."""
     try:
         resources = await mcp_service.get_resources(server_name)
         return GetResourcesResponse(resources=resources)
-        
     except ServiceError as e:
-        logger.error(f"Service error getting resources: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_resources_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error getting resources: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_resources_unexpected_error(e)
 
+
+def _build_fetch_response(request: FetchResourceRequest, resource) -> FetchResourceResponse:
+    """Build resource fetch response."""
+    return FetchResourceResponse(
+        success=True, resource=resource, message=f"Resource '{request.uri}' fetched successfully"
+    )
+
+def _handle_fetch_service_error(e: ServiceError) -> None:
+    """Handle service error during resource fetching."""
+    logger.error(f"Service error fetching resource: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_fetch_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during resource fetching."""
+    logger.error(f"Unexpected error fetching resource: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.post("/resources/read", response_model=FetchResourceResponse)
 async def fetch_resource(
-    request: FetchResourceRequest,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    request: FetchResourceRequest, mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """Read resource from external server."""
     try:
-        resource = await mcp_service.fetch_resource(
-            request.server_name,
-            request.uri
-        )
-        
-        return FetchResourceResponse(
-            success=True,
-            resource=resource,
-            message=f"Resource '{request.uri}' fetched successfully"
-        )
-        
+        resource = await mcp_service.fetch_resource(request.server_name, request.uri)
+        return _build_fetch_response(request, resource)
     except ServiceError as e:
-        logger.error(f"Service error fetching resource: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_fetch_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error fetching resource: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_fetch_unexpected_error(e)
 
+
+def _build_cache_description(server_name: Optional[str]) -> str:
+    """Build cache description for response."""
+    return f"for server '{server_name}'" if server_name else "all"
+
+def _build_cache_response(server_name: Optional[str]) -> ClearCacheResponse:
+    """Build cache clear response."""
+    cache_desc = _build_cache_description(server_name)
+    return ClearCacheResponse(success=True, message=f"Cache cleared {cache_desc}", cleared_entries=0)
+
+def _handle_cache_service_error(e: ServiceError) -> None:
+    """Handle service error during cache clearing."""
+    logger.error(f"Service error clearing cache: {e}")
+    raise HTTPException(status_code=400, detail=str(e))
+
+def _handle_cache_unexpected_error(e: Exception) -> None:
+    """Handle unexpected error during cache clearing."""
+    logger.error(f"Unexpected error clearing cache: {e}")
+    raise HTTPException(status_code=500, detail="Internal server error")
 
 @router.delete("/cache", response_model=ClearCacheResponse)
 async def clear_cache(
-    server_name: Optional[str] = None,
-    cache_type: Optional[str] = None,
-    mcp_service: IMCPClientService = Depends(get_mcp_client_service),
-    token: str = Depends(security)
+    server_name: Optional[str] = None, cache_type: Optional[str] = None,
+    mcp_service: IMCPClientService = Depends(get_mcp_client_service), token: str = Depends(security)
 ):
     """Clear MCP client cache."""
     try:
         await mcp_service.clear_cache(server_name)
-        
-        cache_desc = f"for server '{server_name}'" if server_name else "all"
-        return ClearCacheResponse(
-            success=True,
-            message=f"Cache cleared {cache_desc}",
-            cleared_entries=0  # Would track actual count
-        )
-        
+        return _build_cache_response(server_name)
     except ServiceError as e:
-        logger.error(f"Service error clearing cache: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        _handle_cache_service_error(e)
     except Exception as e:
-        logger.error(f"Unexpected error clearing cache: {e}")
-        raise HTTPException(status_code=500, detail="Internal server error")
+        _handle_cache_unexpected_error(e)
