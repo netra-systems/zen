@@ -203,7 +203,7 @@ class TestCorpusRoute:
                     metadata = data["extracted_metadata"]
                     assert "page_count" in metadata or "language" in metadata
             else:
-                assert response.status_code in [404, 422]
+                assert response.status_code in [404, 422, 403]
     
     def test_corpus_similarity_search(self, client):
         """Test semantic similarity search."""

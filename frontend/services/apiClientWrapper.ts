@@ -4,6 +4,7 @@
  */
 
 import { secureApiConfig } from '@/lib/secure-api-config';
+import { logger } from '@/utils/debug-logger';
 
 interface ApiResponse<T = any> {
   data: T;
@@ -181,7 +182,7 @@ class ApiClientWrapper {
       }
     } catch (error) {
       if (error instanceof Error) {
-        console.error('API Request failed:', {
+        logger.error('API Request failed:', {
           url: fullUrl.toString(),
           method,
           error: error.message

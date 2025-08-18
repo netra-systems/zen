@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Send, Loader2, Bot, Brain, Zap } from 'lucide-react'
+import { logger } from '@/utils/debug-logger'
 import { demoService } from '@/services/demoService'
 import { useDemoWebSocket } from '@/hooks/useDemoWebSocket'
 
@@ -106,7 +107,7 @@ export default function DemoChat({ industry, onInteraction, useWebSocket = false
   }
 
   const handleMessageError = async (error: unknown, userMessage: string): Promise<void> => {
-    console.error('Demo chat API error:', error)
+    logger.error('Demo chat API error:', error)
     await simulateAgentProgression(setActiveAgent)
     await createFallbackResponseMessage(userMessage)
   }

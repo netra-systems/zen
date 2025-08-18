@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T12:45:49.755874",
-    "total_runs": 17
+    "last_update": "2025-08-18T12:48:26.476064",
+    "total_runs": 19
   },
   "current_state": {
-    "overall_status": "[FAILED] 3 failures",
-    "last_run_level": "agents",
-    "last_run_time": "2025-08-18T12:45:49.755874",
-    "last_exit_code": 2
+    "overall_status": "[ERRORS] 1 errors",
+    "last_run_level": "real_e2e",
+    "last_run_time": "2025-08-18T12:48:26.476064",
+    "last_exit_code": 1
   },
   "known_test_counts": {
     "unit:backend": {
@@ -57,7 +57,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 1,
-      "last_update": "2025-08-18T12:27:38.149736"
+      "last_update": "2025-08-18T12:48:26.476064"
     },
     "agents:backend": {
       "total": 75,
@@ -65,7 +65,7 @@
       "failed": 3,
       "skipped": 0,
       "errors": 1,
-      "last_update": "2025-08-18T12:45:49.755874"
+      "last_update": "2025-08-18T12:47:39.031098"
     }
   },
   "category_results": {
@@ -111,7 +111,7 @@
       "actual": 75,
       "passed": 71,
       "failed": 3,
-      "last_run": "2025-08-18T12:45:49.755874",
+      "last_run": "2025-08-18T12:47:39.031098",
       "status": "[FAILED] 3 failures"
     },
     "websocket": {
@@ -218,17 +218,17 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 75,
-        "passed": 71,
-        "failed": 3,
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
         "skipped": 0,
         "errors": 1,
-        "import_errors": 0,
-        "test_files": 12,
-        "status": "failed"
+        "import_errors": 2,
+        "status": "import_error",
+        "test_files": 0
       },
-      "last_duration": 39.29387450218201,
-      "last_run": "2025-08-18T12:45:49.755874"
+      "last_duration": 8.692280530929565,
+      "last_run": "2025-08-18T12:48:26.476064"
     },
     "frontend": {
       "status": "skipped",
@@ -240,7 +240,7 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T12:45:49.755874"
+      "last_run": "2025-08-18T12:48:26.476064"
     },
     "e2e": {
       "status": "pending",
@@ -252,41 +252,10 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T12:45:49.755874"
+      "last_run": "2025-08-18T12:48:26.476064"
     }
   },
-  "failing_tests": [
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_data_ops.py::TestDataTransformation::test_transform_text_data",
-      "timestamp": "2025-08-18T12:45:49.755874"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_basic.py::TestDataSubAgentBasic::test_fetch_clickhouse_data_with_cache_hit",
-      "timestamp": "2025-08-18T12:45:49.755874"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_agent_e2e_critical_tools.py::TestAgentE2ECriticalTools::test_5_state_persistence_and_recovery Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-18T12:45:49.755874"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_data_ops.py::\u001b[1mTestDataTransformation::test_transform_text_data\u001b[0m - AttributeError: 'DataSubAgent' has no attribute '_transform_data'",
-      "timestamp": "2025-08-18T12:45:49.755874"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_basic.py::\u001b[1mTestDataSubAgentBasic::test_fetch_clickhouse_data_with_cache_hit\u001b[0m - AssertionError: assert None == [{'col1': 'value1'}]",
-      "timestamp": "2025-08-18T12:45:49.755874"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_agent_e2e_critical_tools.py::\u001b[1mTestAgentE2ECriticalTools::test_5_state_persistence_and_recovery\u001b[0m - TypeError: TestAgentE2ECriticalTools.test_5_state_persistence_and_recovery.<locals>.mock_save_state() missing 3 required positional arguments: 'user_id', 'state', and 'db_session'",
-      "timestamp": "2025-08-18T12:45:49.755874"
-    }
-  ],
+  "failing_tests": [],
   "test_history": [
     {
       "timestamp": "2025-08-18T11:41:40.366013",
@@ -525,15 +494,43 @@
         "total_skipped": 0,
         "pass_rate": 94.67
       }
+    },
+    {
+      "timestamp": "2025-08-18T12:47:39.030576",
+      "level": "agents",
+      "exit_code": 2,
+      "status": "[FAILED] 3 failures",
+      "statistics": {
+        "total_tests_known": 191,
+        "total_tests_run": 75,
+        "total_passed": 71,
+        "total_failed": 3,
+        "total_skipped": 0,
+        "pass_rate": 94.67
+      }
+    },
+    {
+      "timestamp": "2025-08-18T12:48:26.476064",
+      "level": "real_e2e",
+      "exit_code": 1,
+      "status": "[ERRORS] 1 errors",
+      "statistics": {
+        "total_tests_known": 191,
+        "total_tests_run": 1,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 191,
-    "total_tests_run": 75,
-    "total_passed": 71,
-    "total_failed": 3,
+    "total_tests_run": 1,
+    "total_passed": 0,
+    "total_failed": 0,
     "total_skipped": 0,
-    "pass_rate": 94.67
+    "pass_rate": 0.0
   },
   "version": "1.0",
   "tests": {},
