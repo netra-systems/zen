@@ -19,6 +19,8 @@ class DatabaseMetrics:
     active_connections: int = 0
     idle_connections: int = 0
     total_connections: int = 0
+    pool_size: int = 0
+    pool_overflow: int = 0
     connection_errors: int = 0
     connection_timeouts: int = 0
     
