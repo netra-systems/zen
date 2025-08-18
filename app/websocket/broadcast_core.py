@@ -33,11 +33,19 @@ class BroadcastManager:
                  reliability_config: Optional[Dict[str, Any]] = None):
         """Initialize broadcast manager with modern agent delegation."""
         self.connection_manager = connection_manager
+        self._initialize_modern_agent(connection_manager, room_manager, reliability_config)
+        self._setup_legacy_compatibility()
+    
+    def _initialize_modern_agent(self, connection_manager: ConnectionManager, 
+                               room_manager: RoomManager, 
+                               reliability_config: Optional[Dict[str, Any]]) -> None:
+        """Initialize the modern agent instance."""
         self._modern_agent = self._init_modern_agent(
             connection_manager, room_manager, reliability_config
         )
-        
-        # Expose legacy properties for backward compatibility
+    
+    def _setup_legacy_compatibility(self) -> None:
+        """Setup legacy property compatibility."""
         self.room_manager = self._modern_agent.room_manager
         self.executor = self._modern_agent.executor
     
@@ -45,11 +53,26 @@ class BroadcastManager:
                           room_manager: RoomManager,
                           reliability_config: Optional[Dict[str, Any]]) -> WebSocketBroadcastAgent:
         """Initialize modern WebSocket broadcast agent."""
-        return WebSocketBroadcastAgent(
-            connection_manager=connection_manager,
-            room_manager=room_manager, 
-            reliability_config=reliability_config
+        agent_params = self._get_agent_init_params(
+            connection_manager, room_manager, reliability_config
         )
+        return WebSocketBroadcastAgent(**agent_params)
+    
+    def _get_agent_init_params(self, connection_manager: ConnectionManager,
+                              room_manager: RoomManager,
+                              reliability_config: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Get parameters for agent initialization."""
+        params = self._build_base_agent_params(connection_manager, room_manager)
+        params["reliability_config"] = reliability_config
+        return params
+    
+    def _build_base_agent_params(self, connection_manager: ConnectionManager,
+                               room_manager: RoomManager) -> Dict[str, Any]:
+        """Build base agent parameters."""
+        return {
+            "connection_manager": connection_manager,
+            "room_manager": room_manager
+        }
 
     async def broadcast_to_all(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> BroadcastResult:
         """Broadcast a message to all connected users with modern reliability."""

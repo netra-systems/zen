@@ -1,12 +1,18 @@
 """
-Execution Helper Functions
+Modern Execution Helper Functions
 
-Additional helpers to ensure all admin tool execution functions 
-are ≤8 lines including multi-line signatures.
+Modernized helpers using ExecutionContext, ExecutionResult patterns.
+Integrated with BaseExecutionInterface for standardized agent execution.
+
+Business Value: Standardizes admin tool execution patterns across all tools.
 """
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Union
 from datetime import datetime, UTC
 from app.schemas.admin_tool_types import ToolResponse, ToolSuccessResponse, ToolFailureResponse
+from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.errors import ExecutionErrorHandler
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.state import DeepAgentState
 
 
 def get_current_utc_time() -> datetime:
@@ -24,125 +30,129 @@ def extract_action_from_kwargs(kwargs: Dict[str, Any]) -> str:
     return kwargs.get('action', 'default')
 
 
-def build_execute_params(tool_name: str, user, db, action: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Build parameters for tool execution"""
-    base_params = _get_base_execute_params(tool_name, user, db, action)
-    return {**base_params, **kwargs}
+def create_execution_context(tool_name: str, user, db, action: str, 
+                           run_id: str, kwargs: Dict[str, Any]) -> ExecutionContext:
+    """Create modern ExecutionContext for tool execution"""
+    state = _create_agent_state(user, db, action, kwargs)
+    return _build_execution_context(tool_name, run_id, state, user)
 
 
-def _get_base_execute_params(tool_name: str, user, db, action: str) -> Dict[str, Any]:
-    """Get base execution parameters"""
-    return {
-        "tool_name": tool_name,
-        "user": user,
-        "db": db, 
-        "action": action
-    }
+def _create_agent_state(user, db, action: str, kwargs: Dict[str, Any]) -> DeepAgentState:
+    """Create agent state from parameters"""
+    params = {**kwargs, 'action': action, 'user': user, 'db': db}
+    return DeepAgentState(params=params)
 
 
-def handle_execution_success(dispatcher, tool_name: str, start_time: datetime, 
-                           result: dict, kwargs: Dict[str, Any]) -> ToolSuccessResponse:
-    """Handle successful tool execution"""
-    from .admin_tool_execution import create_successful_response
-    return create_successful_response(dispatcher, tool_name, start_time, result, **kwargs)
+def _build_execution_context(tool_name: str, run_id: str, 
+                           state: DeepAgentState, user) -> ExecutionContext:
+    """Build ExecutionContext with modern patterns"""
+    user_id = getattr(user, 'id', None) if user else None
+    return ExecutionContext(run_id=run_id, agent_name=tool_name, 
+                          state=state, user_id=user_id, start_time=get_current_utc_time())
 
 
-def handle_execution_error(dispatcher, tool_name: str, 
-                         start_time: datetime, error: Exception) -> ToolFailureResponse:
-    """Handle tool execution error"""
-    from .admin_tool_execution import create_error_response
-    return create_error_response(dispatcher, tool_name, start_time, error)
+def create_execution_result(success: bool, result_data: Optional[Dict[str, Any]] = None,
+                          error: Optional[str] = None, execution_time_ms: float = 0.0) -> ExecutionResult:
+    """Create modern ExecutionResult"""
+    status = _determine_execution_status(success)
+    return _build_execution_result(success, status, result_data, error, execution_time_ms)
 
 
-def build_timing_metadata(start_time: datetime) -> Dict[str, Any]:
-    """Build timing metadata for responses"""
-    completed_time = datetime.now(UTC)
-    execution_time_ms = _calculate_execution_time_ms(start_time, completed_time)
-    return _create_timing_dict(start_time, completed_time, execution_time_ms)
+def _determine_execution_status(success: bool) -> ExecutionStatus:
+    """Determine execution status from success flag"""
+    return ExecutionStatus.COMPLETED if success else ExecutionStatus.FAILED
 
 
-def _calculate_execution_time_ms(start_time: datetime, completed_time: datetime) -> float:
-    """Calculate execution time in milliseconds"""
-    return (completed_time - start_time).total_seconds() * 1000
+def _build_execution_result(success: bool, status: ExecutionStatus, result_data: Optional[Dict[str, Any]],
+                          error: Optional[str], execution_time_ms: float) -> ExecutionResult:
+    """Build ExecutionResult with all parameters"""
+    return ExecutionResult(success=success, status=status, result=result_data,
+                         error=error, execution_time_ms=execution_time_ms)
 
 
-def _create_timing_dict(start_time: datetime, completed_time: datetime, execution_time_ms: float) -> Dict[str, Any]:
-    """Create timing dictionary"""
-    return {
-        "completed_time": completed_time,
-        "execution_time_ms": execution_time_ms,
-        "start_time": start_time
-    }
+async def handle_execution_error(context: ExecutionContext, error: Exception,
+                                error_handler: ExecutionErrorHandler) -> ExecutionResult:
+    """Handle execution error using modern error handler"""
+    return await error_handler.handle_execution_error(error, context)
 
 
-def build_success_response_data(dispatcher, tool_name: str, timing: Dict[str, Any],
-                               result: dict, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Build success response data"""
-    base_data = _build_base_response_data(tool_name, timing, dispatcher.user.id)
-    success_data = _build_success_specific_data(result, dispatcher, tool_name, kwargs)
-    return {**base_data, **success_data}
+def calculate_execution_metrics(context: ExecutionContext) -> Dict[str, float]:
+    """Calculate execution timing metrics"""
+    current_time = get_current_utc_time()
+    execution_time = _calculate_time_delta_ms(context.start_time, current_time)
+    return {'execution_time_ms': execution_time, 'start_timestamp': context.start_time.timestamp()}
 
 
-def _build_base_response_data(tool_name: str, timing: Dict[str, Any], user_id: str) -> Dict[str, Any]:
-    """Build base response data common to success and error"""
-    return {
-        "tool_name": tool_name,
-        "execution_time_ms": timing["execution_time_ms"],
-        "started_at": timing.get("start_time"),
-        "completed_at": timing["completed_time"],
-        "user_id": user_id
-    }
+def _calculate_time_delta_ms(start_time: Optional[datetime], end_time: datetime) -> float:
+    """Calculate time delta in milliseconds"""
+    if not start_time:
+        return 0.0
+    return (end_time - start_time).total_seconds() * 1000
 
 
-def _build_success_specific_data(result: dict, dispatcher, tool_name: str, kwargs: Dict[str, Any]) -> Dict[str, Any]:
-    """Build success-specific response data"""
-    from .admin_tool_execution import create_success_metadata
-    return {
-        "status": "COMPLETED",
-        "result": result,
-        "metadata": create_success_metadata(dispatcher, tool_name, kwargs)
-    }
+def record_execution_metrics(context: ExecutionContext, result: ExecutionResult,
+                           monitor: Optional[ExecutionMonitor] = None) -> None:
+    """Record execution metrics with monitor"""
+    if monitor:
+        monitor.complete_execution(context, result)
+    _log_execution_completion(context, result)
 
 
-def build_error_response_data(dispatcher, tool_name: str, timing: Dict[str, Any],
-                             error: Exception, start_time: datetime) -> Dict[str, Any]:
-    """Build error response data"""
-    from .admin_tool_execution import get_user_id_safe
-    base_data = _build_base_response_data(tool_name, timing, get_user_id_safe(dispatcher))
-    error_data = _build_error_specific_data(error, start_time, timing)
-    return {**base_data, **error_data}
+def convert_execution_result_to_tool_response(result: ExecutionResult, tool_name: str,
+                                            user_id: str) -> Union[ToolSuccessResponse, ToolFailureResponse]:
+    """Convert ExecutionResult to legacy ToolResponse format"""
+    if result.success:
+        return _create_legacy_success_response(result, tool_name, user_id)
+    return _create_legacy_failure_response(result, tool_name, user_id)
 
 
-def _build_error_specific_data(error: Exception, start_time: datetime, timing: Dict[str, Any]) -> Dict[str, Any]:
-    """Build error-specific response data"""
-    return {
-        "status": "FAILED",
-        "started_at": start_time,
-        "error": str(error),
-        "is_recoverable": False
-    }
+def _create_legacy_success_response(result: ExecutionResult, tool_name: str, 
+                                   user_id: str) -> ToolSuccessResponse:
+    """Create legacy success response from ExecutionResult"""
+    response_data = _build_success_response_data(result, tool_name, user_id)
+    return ToolSuccessResponse(**response_data)
 
 
-def create_metadata_dict(dispatcher, tool_name: str, action: str) -> Dict[str, Any]:
-    """Create metadata dictionary"""
-    return {
-        "admin_action": True,
-        "tool": tool_name,
-        "user": dispatcher.user.email,
-        "action": action
-    }
+def _create_legacy_failure_response(result: ExecutionResult, tool_name: str,
+                                   user_id: str) -> ToolFailureResponse:
+    """Create legacy failure response from ExecutionResult"""
+    response_data = _build_failure_response_data(result, tool_name, user_id)
+    return ToolFailureResponse(**response_data)
 
 
-def log_successful_tool_execution(dispatcher, tool_name: str, action: str) -> None:
-    """Log successful tool execution"""
+def _build_success_response_data(result: ExecutionResult, tool_name: str,
+                               user_id: str) -> Dict[str, Any]:
+    """Build success response data from ExecutionResult"""
+    base_data = _get_base_response_data(tool_name, user_id, result.execution_time_ms)
+    return {**base_data, "status": "COMPLETED", "result": result.result or {}}
+
+
+def _build_failure_response_data(result: ExecutionResult, tool_name: str,
+                               user_id: str) -> Dict[str, Any]:
+    """Build failure response data from ExecutionResult"""
+    base_data = _get_base_response_data(tool_name, user_id, result.execution_time_ms)
+    return {**base_data, "status": "FAILED", "error": result.error or "Unknown error"}
+
+
+def _get_base_response_data(tool_name: str, user_id: str, 
+                          execution_time_ms: float) -> Dict[str, Any]:
+    """Get base response data for both success and failure"""
+    current_time = get_current_utc_time()
+    return {"tool_name": tool_name, "user_id": user_id, 
+           "execution_time_ms": execution_time_ms, "completed_at": current_time}
+
+
+def create_execution_metadata(context: ExecutionContext, action: str) -> Dict[str, Any]:
+    """Create execution metadata from context"""
+    return {"admin_action": True, "tool": context.agent_name,
+           "user_id": context.user_id, "action": action, "run_id": context.run_id}
+
+
+def _log_execution_completion(context: ExecutionContext, result: ExecutionResult) -> None:
+    """Log execution completion with result details"""
     from app.logging_config import central_logger
-    central_logger.info(f"Admin tool {tool_name} executed by {dispatcher.user.email}: {action}")
-
-
-def log_failed_tool_execution(tool_name: str, error: Exception) -> None:
-    """Log failed tool execution"""
-    from app.logging_config import central_logger
-    central_logger.error(f"Admin tool {tool_name} failed: {error}", exc_info=True)
+    status = "SUCCESS" if result.success else "FAILED"
+    central_logger.info(f"Tool {context.agent_name} {status} (run_id: {context.run_id})")
 
 
 def get_safe_user_id(dispatcher) -> str:
@@ -150,7 +160,15 @@ def get_safe_user_id(dispatcher) -> str:
     return dispatcher.user.id if dispatcher.user else "unknown"
 
 
-def calculate_timing_ms(start_time: datetime) -> float:
-    """Calculate execution time in milliseconds"""
-    end_time = datetime.now(UTC)
-    return (end_time - start_time).total_seconds() * 1000
+def start_execution_monitoring(context: ExecutionContext, 
+                             monitor: Optional[ExecutionMonitor] = None) -> None:
+    """Start execution monitoring if monitor provided"""
+    if monitor:
+        monitor.start_execution(context)
+    _log_execution_start(context)
+
+
+def _log_execution_start(context: ExecutionContext) -> None:
+    """Log execution start details"""
+    from app.logging_config import central_logger
+    central_logger.debug(f"Starting {context.agent_name} execution (run_id: {context.run_id})")

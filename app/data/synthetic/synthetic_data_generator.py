@@ -103,6 +103,12 @@ class DataFrameBuilder:
     def _create_base_dataframe(self, num_logs: int, app_choices: np.ndarray, model_choices: np.ndarray,
                               apps: list, models: list, prompts: list, responses: list) -> pd.DataFrame:
         """Create base DataFrame with core data."""
+        base_data = self._build_base_data_dict(num_logs, app_choices, apps, model_choices, models, prompts)
+        return pd.DataFrame(base_data)
+
+    def _build_base_data_dict(self, num_logs: int, app_choices: np.ndarray, apps: list, 
+                             model_choices: np.ndarray, models: list, prompts: list) -> dict:
+        """Build the base data dictionary for DataFrame creation."""
         base_data = {
             **DataGenerationHelper._generate_trace_identifiers(num_logs),
             **DataGenerationHelper._generate_app_service_data(app_choices, apps)
@@ -111,7 +117,7 @@ class DataFrameBuilder:
             **DataGenerationHelper._generate_model_data(model_choices, models),
             'user_prompt': prompts
         })
-        return pd.DataFrame(base_data)
+        return base_data
     
     def _add_response_data(self, df: pd.DataFrame, responses: list, num_logs: int) -> pd.DataFrame:
         """Add response and timing data to DataFrame."""

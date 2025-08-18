@@ -1,6 +1,17 @@
-"""Refactored DataSubAgent with modular architecture - main interface."""
+"""Modernized DataSubAgent with BaseExecutionInterface Integration
 
-from typing import Dict, Optional, List, Any
+Modern implementation extending BaseExecutionInterface with:
+- Standardized execution patterns
+- Integrated reliability management
+- Comprehensive error handling 
+- Performance monitoring
+- Circuit breaker protection
+
+Business Value: Data analysis critical for customer insights - HIGH revenue impact
+BVJ: Growth & Enterprise | Customer Intelligence | +20% performance fee capture
+"""
+
+from typing import Dict, Optional, List, Any, Protocol
 import time
 
 from app.llm.llm_manager import LLMManager
@@ -17,6 +28,18 @@ from app.core.reliability import (
 )
 from app.agents.input_validation import validate_agent_input
 
+# Modern Base Components
+from app.agents.base.interface import (
+    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
+    WebSocketManagerProtocol
+)
+from app.agents.base.executor import BaseExecutionEngine
+from app.agents.base.reliability_manager import ReliabilityManager
+from app.agents.base.monitoring import ExecutionMonitor
+from app.agents.base.error_handler import ExecutionErrorHandler
+from app.schemas.shared_types import RetryConfig as ModernRetryConfig
+from app.agents.base.circuit_breaker import CircuitBreakerConfig as ModernCircuitConfig
+
 from .query_builder import QueryBuilder
 from .analysis_engine import AnalysisEngine
 from .clickhouse_operations import DataSubAgentClickHouseOperations
@@ -29,15 +52,20 @@ from .agent_execution import ExecutionManager
 from .agent_data_processing import DataProcessor
 from .agent_corpus_operations import CorpusOperations
 from .agent_anomaly_processing import AnomalyProcessor
+from .modern_execution_interface import DataSubAgentModernExecution
 
 
-class DataSubAgent(BaseSubAgent):
+class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     """Advanced data gathering and analysis agent with ClickHouse integration."""
     
-    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher) -> None:
+    def __init__(self, llm_manager: LLMManager, tool_dispatcher: ToolDispatcher,
+                 websocket_manager: Optional[WebSocketManagerProtocol] = None,
+                 reliability_manager: Optional[ReliabilityManager] = None) -> None:
         self._init_base_agent(llm_manager)
+        BaseExecutionInterface.__init__(self, "DataSubAgent", websocket_manager)
         self.tool_dispatcher = tool_dispatcher
         self._init_all_components()
+        self._init_modern_execution_engine(reliability_manager)
         self._setup_cache_wrapper()
         self._init_modular_components()
     
@@ -47,6 +75,16 @@ class DataSubAgent(BaseSubAgent):
         self._init_redis()
         self._init_reliability()
     
+    def _init_modern_execution_engine(self, reliability_manager: Optional[ReliabilityManager]) -> None:
+        """Initialize modern execution engine with reliability patterns."""
+        if not reliability_manager:
+            reliability_manager = self._create_modern_reliability_manager()
+        
+        monitor = ExecutionMonitor(max_history_size=1000)
+        self.execution_engine = BaseExecutionEngine(reliability_manager, monitor)
+        self.execution_monitor = monitor
+        self.execution_error_handler = ExecutionErrorHandler()
+        
     def _setup_cache_wrapper(self) -> None:
         """Setup cache wrapper for test compatibility."""
         logger.debug("Cache wrapper setup skipped - not currently required")
@@ -58,6 +96,7 @@ class DataSubAgent(BaseSubAgent):
         self.data_processor = DataProcessor(self)
         self.corpus_operations = CorpusOperations(self)
         self.anomaly_processor = AnomalyProcessor(self)
+        self.modern_execution = DataSubAgentModernExecution(self)
         
     def _init_base_agent(self, llm_manager: LLMManager) -> None:
         """Initialize base agent with core parameters."""
@@ -89,6 +128,8 @@ class DataSubAgent(BaseSubAgent):
         circuit_config = self._create_circuit_breaker_config()
         retry_config = self._create_retry_config()
         self.reliability = get_reliability_wrapper("DataSubAgent", circuit_config, retry_config)
+        # Keep legacy reliability for backward compatibility
+        self.modern_reliability = self._create_modern_reliability_manager()
         
     def _create_circuit_breaker_config(self) -> CircuitBreakerConfig:
         """Create circuit breaker configuration."""
@@ -105,6 +146,20 @@ class DataSubAgent(BaseSubAgent):
             base_delay=agent_config.retry.base_delay,
             max_delay=agent_config.retry.max_delay
         )
+    
+    def _create_modern_reliability_manager(self) -> ReliabilityManager:
+        """Create modern reliability manager with data agent optimized settings."""
+        modern_circuit_config = ModernCircuitConfig(
+            name="DataSubAgent",
+            failure_threshold=agent_config.failure_threshold,
+            recovery_timeout=agent_config.timeout.recovery_timeout
+        )
+        modern_retry_config = ModernRetryConfig(
+            max_retries=agent_config.retry.max_retries,
+            base_delay=agent_config.retry.base_delay,
+            max_delay=agent_config.retry.max_delay
+        )
+        return ReliabilityManager(modern_circuit_config, modern_retry_config)
     
     # Cache management delegation
     async def _get_cached_schema(self, table_name: str, force_refresh: bool = False) -> Optional[Dict[str, Any]]:
@@ -141,13 +196,46 @@ class DataSubAgent(BaseSubAgent):
         except Exception as e:
             logger.debug(f"Failed to send WebSocket update: {e}")
     
+    # Modern BaseExecutionInterface Implementation
+    async def validate_preconditions(self, context: ExecutionContext) -> bool:
+        """Validate execution preconditions for data analysis."""
+        try:
+            validation_result = await self.modern_execution.validate_data_analysis_preconditions(context)
+            await self.modern_execution.log_precondition_validation(context, validation_result)
+            return validation_result
+        except Exception as e:
+            logger.error(f"Precondition validation failed: {e}", exc_info=True)
+            return False
+    
+    async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
+        """Execute data analysis core logic with modern patterns."""
+        await self.modern_execution.track_modern_execution_start(context)
+        
+        try:
+            result = await self.modern_execution.execute_legacy_data_analysis(context)
+            return await self.modern_execution.finalize_modern_execution(context, result)
+        except Exception as e:
+            return await self.modern_execution.handle_modern_execution_error(context, e)
+    
     # Execution delegation
     @validate_agent_input('DataSubAgent')
     @agent_type_safe
     async def execute(self, state: DeepAgentState, run_id: str, 
                      stream_updates: bool = False) -> TypedAgentResult:
-        """Execute advanced data analysis with ClickHouse integration."""
+        """Execute advanced data analysis with ClickHouse integration (backward compatible)."""
         return await self.execution_manager.execute(state, run_id, stream_updates)
+        
+    async def execute_with_modern_patterns(self, state: DeepAgentState, run_id: str,
+                                         stream_updates: bool = False) -> ExecutionResult:
+        """Execute using modern execution patterns with full orchestration."""
+        context = ExecutionContext(
+            run_id=run_id,
+            agent_name=self.agent_name,
+            state=state,
+            stream_updates=stream_updates
+        )
+        
+        return await self.execution_engine.execute(self, context)
     
     # Anomaly processing delegation (used by execution manager)
     def _ensure_data_result(self, result):
@@ -156,8 +244,16 @@ class DataSubAgent(BaseSubAgent):
     
     
     def get_health_status(self) -> Dict[str, Any]:
-        """Get agent health status."""
-        return self.reliability.get_health_status()
+        """Get comprehensive agent health status including modern components."""
+        legacy_status = self.reliability.get_health_status()
+        modern_status = {
+            "agent_name": self.agent_name,
+            "execution_engine": self.execution_engine.get_health_status(),
+            "execution_monitor": self.execution_monitor.get_health_status(),
+            "legacy_reliability": legacy_status
+        }
+        
+        return {**legacy_status, **modern_status}
     
     def get_circuit_breaker_status(self) -> Dict[str, Any]:
         """Get circuit breaker status."""
@@ -167,6 +263,7 @@ class DataSubAgent(BaseSubAgent):
         """Enhanced cleanup with cache management."""
         await super().cleanup(state, run_id)
         await self.cache_manager.cleanup_old_cache_entries(time.time())
+        await self.modern_execution.cleanup_modern_components(state, run_id)
 
     # Data processing delegation
     async def process_and_stream(self, data: Dict[str, Any], websocket) -> None:

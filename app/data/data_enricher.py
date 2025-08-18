@@ -73,14 +73,18 @@ class DataEnricher:
 
     def _get_transformation_select_columns(self) -> str:
         """Define the SELECT column transformations for enrichment query."""
-        transformations = [
+        transformations = self._build_transformation_list()
+        return ",\n".join(transformations)
+
+    def _build_transformation_list(self) -> list[str]:
+        """Build list of transformation columns."""
+        return [
             self._get_event_metadata_transformation(),
             self._get_trace_context_transformation(),
             self._get_request_data_transformation(),
             self._get_performance_data_transformation(),
             self._get_remaining_transformations()
         ]
-        return ",\n".join(transformations)
         
     def _get_event_metadata_transformation(self) -> str:
         """Get event metadata transformation."""
@@ -116,6 +120,10 @@ class DataEnricher:
         # nested JSON structures required by the analysis engine's UnifiedLogEntry model.
         # This MUST be adapted based on the customer's actual source table columns.
         select_columns = self._get_transformation_select_columns()
+        return self._format_insert_query(dest_db, enriched_table_name, select_columns, source_db, source_table)
+
+    def _format_insert_query(self, dest_db: str, enriched_table_name: str, select_columns: str, source_db: str, source_table: str) -> str:
+        """Format the INSERT query with proper structure."""
         return f"""
         INSERT INTO `{dest_db}`.`{enriched_table_name}`
         SELECT{select_columns}
