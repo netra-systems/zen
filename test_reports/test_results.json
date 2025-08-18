@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T14:57:43.249017",
-    "total_runs": 72
+    "last_update": "2025-08-18T15:12:32.083477",
+    "total_runs": 75
   },
   "current_state": {
-    "overall_status": "[FAILED] 3 failures",
-    "last_run_level": "agents",
-    "last_run_time": "2025-08-18T14:57:43.249017",
-    "last_exit_code": 2
+    "overall_status": "[UNKNOWN]",
+    "last_run_level": "unit",
+    "last_run_time": "2025-08-18T15:12:32.083477",
+    "last_exit_code": 15
   },
   "known_test_counts": {
     "unit:backend": {
@@ -25,7 +25,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-18T14:26:32.203311"
+      "last_update": "2025-08-18T15:01:43.520884"
     },
     "smoke:backend": {
       "total": 7,
@@ -66,6 +66,14 @@
       "skipped": 2,
       "errors": 1,
       "last_update": "2025-08-18T14:57:43.249017"
+    },
+    "comprehensive-backend:backend": {
+      "total": 1,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "errors": 1,
+      "last_update": "2025-08-18T15:02:32.956386"
     }
   },
   "category_results": {
@@ -81,11 +89,11 @@
     "unit": {
       "description": "Unit tests",
       "expected": 450,
-      "actual": 374,
-      "passed": 357,
-      "failed": 4,
-      "last_run": "2025-08-18T14:49:06.581282",
-      "status": "[FAILED] 4 failures"
+      "actual": 0,
+      "passed": 0,
+      "failed": 0,
+      "last_run": "2025-08-18T15:12:32.083477",
+      "status": "[NO TESTS]"
     },
     "integration": {
       "description": "Integration tests",
@@ -102,7 +110,7 @@
       "actual": 85,
       "passed": 85,
       "failed": 0,
-      "last_run": "2025-08-18T14:26:32.203311",
+      "last_run": "2025-08-18T15:01:43.520884",
       "status": "[PASSED] 85 tests"
     },
     "agents": {
@@ -216,21 +224,6 @@
   },
   "component_results": {
     "backend": {
-      "status": "failed",
-      "last_counts": {
-        "total": 118,
-        "passed": 112,
-        "failed": 3,
-        "skipped": 2,
-        "errors": 1,
-        "import_errors": 0,
-        "test_files": 14,
-        "status": "failed"
-      },
-      "last_duration": 20.490822792053223,
-      "last_run": "2025-08-18T14:57:43.249017"
-    },
-    "frontend": {
       "status": "skipped",
       "last_counts": {
         "total": 0,
@@ -240,7 +233,22 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T14:57:43.249017"
+      "last_run": "2025-08-18T15:12:32.083477"
+    },
+    "frontend": {
+      "status": "failed",
+      "last_counts": {
+        "total": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "import_errors": 0,
+        "test_files": 0,
+        "status": "unknown"
+      },
+      "last_duration": 0.5149593353271484,
+      "last_run": "2025-08-18T15:12:32.083477"
     },
     "e2e": {
       "status": "pending",
@@ -252,84 +260,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T14:57:43.249017"
+      "last_run": "2025-08-18T15:12:32.083477"
     }
   },
-  "failing_tests": [
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_reliability.py::TestErrorHandling::test_retry_on_failure",
-      "timestamp": "2025-08-18T14:57:43.249017"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_processing.py::TestDataSubAgentProcessing::test_process_with_retry_all_failures",
-      "timestamp": "2025-08-18T14:57:43.249017"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_agent_e2e_critical_tools.py::TestAgentE2ECriticalTools::test_5_state_persistence_and_recovery Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-18T14:57:43.249017"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_reliability.py::\u001b[1mTestErrorHandling::test_retry_on_failure\u001b[0m - AssertionError: assert 0 == 3",
-      "timestamp": "2025-08-18T14:57:43.249017"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_processing.py::\u001b[1mTestDataSubAgentProcessing::test_process_with_retry_all_failures\u001b[0m - AssertionError: assert 3 == 2",
-      "timestamp": "2025-08-18T14:57:43.249017"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\agents\\test_agent_e2e_critical_tools.py::\u001b[1mTestAgentE2ECriticalTools::test_5_state_persistence_and_recovery\u001b[0m - TypeError: TestAgentE2ECriticalTools.test_5_state_persistence_and_recovery.<locals>.mock_save_state() missing 3 required positional arguments: 'user_id', 'state', and 'db_session'",
-      "timestamp": "2025-08-18T14:57:43.249017"
-    }
-  ],
+  "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T13:51:47.376802",
-      "level": "unit",
-      "exit_code": 15,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-18T13:55:02.512875",
-      "level": "integration",
-      "exit_code": 1,
-      "status": "[FAILED] 142 failures",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 204,
-        "total_passed": 62,
-        "total_failed": 142,
-        "total_skipped": 0,
-        "pass_rate": 30.39
-      }
-    },
-    {
-      "timestamp": "2025-08-18T14:01:56.088706",
-      "level": "unit",
-      "exit_code": 15,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-18T14:03:39.012266",
       "level": "unit",
@@ -567,15 +502,57 @@
         "total_skipped": 2,
         "pass_rate": 94.92
       }
+    },
+    {
+      "timestamp": "2025-08-18T15:01:43.520884",
+      "level": "critical",
+      "exit_code": 1,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 85,
+        "total_passed": 85,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 100.0
+      }
+    },
+    {
+      "timestamp": "2025-08-18T15:02:32.956386",
+      "level": "comprehensive-backend",
+      "exit_code": 2,
+      "status": "[ERRORS] 1 errors",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 1,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-18T15:12:32.083477",
+      "level": "unit",
+      "exit_code": 15,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 6357,
-    "total_tests_run": 118,
-    "total_passed": 112,
-    "total_failed": 3,
-    "total_skipped": 2,
-    "pass_rate": 94.92
+    "total_tests_run": 0,
+    "total_passed": 0,
+    "total_failed": 0,
+    "total_skipped": 0,
+    "pass_rate": 0.0
   },
   "version": "1.0",
   "tests": {},

@@ -169,6 +169,37 @@ def sample_performance_data():
 
 
 @pytest.fixture
+def sample_anomaly_data():
+    """Sample anomaly detection data for testing"""
+    return [
+        {
+            'timestamp': '2024-01-01T12:00:00',
+            'value': 50.0,
+            'avg_value': 50.0,
+            'std_value': 10.0,
+            'z_score': 0.0
+        },
+        {
+            'timestamp': '2024-01-01T12:01:00',
+            'value': 100.0,
+            'avg_value': 50.0,
+            'std_value': 10.0,
+            'z_score': 5.0
+        }
+    ]
+
+
+@pytest.fixture
+def sample_usage_patterns():
+    """Sample usage pattern data for testing"""
+    return [
+        {'day_of_week': 1, 'hour': 9, 'total_events': 1000, 'avg_latency': 50.0},
+        {'day_of_week': 1, 'hour': 10, 'total_events': 1500, 'avg_latency': 45.0},
+        {'day_of_week': 1, 'hour': 11, 'total_events': 2000, 'avg_latency': 55.0}
+    ]
+
+
+@pytest.fixture
 def setup_real_infrastructure():
     """Setup infrastructure for real LLM tests."""
     config = get_config()

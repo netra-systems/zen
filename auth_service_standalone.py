@@ -73,6 +73,9 @@ class LoginResponse(BaseModel):
     token_type: str = "Bearer"
     expires_in: int
 
+class DevLoginRequest(BaseModel):
+    email: str
+
 class TokenData(BaseModel):
     email: Optional[str] = None
     user_id: Optional[str] = None
@@ -194,7 +197,9 @@ async def root():
         "endpoints": {
             "health": "/health",
             "login": "/auth/login",
-            "verify": "/auth/verify"
+            "verify": "/auth/verify",
+            "logout": "/auth/logout",
+            "dev_login": "/auth/dev_login"
         }
     }
 
@@ -244,6 +249,35 @@ async def verify(token_data: TokenData = Depends(verify_token)):
 async def logout(token_data: TokenData = Depends(verify_token)):
     """Logout endpoint (client should discard token)"""
     return {"message": "Logged out successfully"}
+
+@app.post("/auth/dev_login", response_model=LoginResponse)
+async def dev_login(request: DevLoginRequest):
+    """Development login endpoint - mocks JWT OAuth for testing"""
+    # Only allow in development environment
+    if os.getenv("ENVIRONMENT", "development") not in ["development", "testing"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Dev login is not available in this environment"
+        )
+    
+    # Create or use a dev user
+    dev_user = {
+        "id": f"dev_user_{request.email.replace('@', '_').replace('.', '_')}",
+        "email": request.email,
+        "role": "dev_user"
+    }
+    
+    # Create access token with dev user data
+    access_token = create_access_token(
+        data={"email": dev_user["email"], "user_id": dev_user["id"]}
+    )
+    
+    logger.info(f"Dev login successful for user: {request.email}")
+    
+    return LoginResponse(
+        access_token=access_token,
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
 
 if __name__ == "__main__":
     import uvicorn

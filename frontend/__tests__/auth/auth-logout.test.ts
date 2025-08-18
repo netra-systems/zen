@@ -7,6 +7,8 @@
  * Modular design: ≤300 lines, functions ≤8 lines
  */
 
+// Import test setup with mocks FIRST
+import './auth-test-setup';
 import { authService } from '@/auth';
 import {
   setupAuthTestEnvironment,
@@ -21,7 +23,9 @@ import {
   validateLogoutCall,
   expectLocalStorageRemove,
   validateTokenOperation,
-  validateSecureLogout
+  validateSecureLogout,
+  mockAuthServiceClient,
+  mockLogger
 } from './auth-test-utils';
 
 describe('Auth Logout Flow', () => {
@@ -34,6 +38,18 @@ describe('Auth Logout Flow', () => {
     mockAuthConfig = createMockAuthConfig();
     mockToken = createMockToken();
     resetAuthTestMocks(testEnv);
+    
+    // Reset mocks
+    Object.values(mockAuthServiceClient).forEach(mock => {
+      if (jest.isMockFunction(mock)) {
+        mock.mockReset();
+      }
+    });
+    Object.values(mockLogger).forEach(mock => {
+      if (jest.isMockFunction(mock)) {
+        mock.mockReset();
+      }
+    });
   });
 
   afterAll(() => {
@@ -43,55 +59,49 @@ describe('Auth Logout Flow', () => {
   describe('handleLogout', () => {
     it('should perform logout successfully with token', async () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      testEnv.fetchMock.mockResolvedValue(createSuccessResponse({}));
+      mockAuthServiceClient.logout.mockResolvedValue({});
 
       await authService.handleLogout(mockAuthConfig);
 
-      validateLogoutCall(testEnv.fetchMock, mockAuthConfig, mockToken);
+      expect(mockAuthServiceClient.logout).toHaveBeenCalled();
       validateSecureLogout(testEnv.localStorageMock);
     });
 
     it('should handle logout without token', async () => {
       testEnv.localStorageMock.getItem.mockReturnValue(null);
-      testEnv.fetchMock.mockResolvedValue(createSuccessResponse({}));
+      mockAuthServiceClient.logout.mockResolvedValue({});
 
       await authService.handleLogout(mockAuthConfig);
 
-      validateLogoutCall(testEnv.fetchMock, mockAuthConfig);
+      expect(mockAuthServiceClient.logout).toHaveBeenCalled();
       validateSecureLogout(testEnv.localStorageMock);
     });
 
     it('should handle logout failure and still clear token', async () => {
-      const consoleErrorSpy = mockConsoleMethod('error');
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      testEnv.fetchMock.mockResolvedValue(createErrorResponse(500));
+      mockAuthServiceClient.logout.mockRejectedValue(new Error('Failed to logout'));
 
       await authService.handleLogout(mockAuthConfig);
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(consoleErrorSpy.mock.calls[0][0]).toContain('Logout failed');
+      expect(mockLogger.error).toHaveBeenCalled();
+      expect(mockLogger.error.mock.calls[0][0]).toContain('Error during logout');
       validateSecureLogout(testEnv.localStorageMock);
-
-      restoreConsoleMock(consoleErrorSpy);
     });
 
     it('should handle logout network error and still clear token', async () => {
-      const consoleErrorSpy = mockConsoleMethod('error');
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      testEnv.fetchMock.mockRejectedValue(createNetworkError('Network error'));
+      mockAuthServiceClient.logout.mockRejectedValue(createNetworkError('Network error'));
 
       await authService.handleLogout(mockAuthConfig);
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(consoleErrorSpy.mock.calls[0][0]).toContain('Error during logout');
+      expect(mockLogger.error).toHaveBeenCalled();
+      expect(mockLogger.error.mock.calls[0][0]).toContain('Error during logout');
       validateSecureLogout(testEnv.localStorageMock);
-
-      restoreConsoleMock(consoleErrorSpy);
     });
 
     it('should handle concurrent logout operations', async () => {
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      testEnv.fetchMock.mockResolvedValue(createSuccessResponse({}));
+      mockAuthServiceClient.logout.mockResolvedValue({});
 
       const logoutPromises = [
         authService.handleLogout(mockAuthConfig),
@@ -101,7 +111,7 @@ describe('Auth Logout Flow', () => {
       await Promise.all(logoutPromises);
 
       expect(testEnv.localStorageMock.removeItem).toHaveBeenCalled();
-      expect(testEnv.fetchMock).toHaveBeenCalled();
+      expect(mockAuthServiceClient.logout).toHaveBeenCalled();
     });
   });
 
@@ -239,18 +249,15 @@ describe('Auth Logout Flow', () => {
     });
 
     it('should handle logout failure with dev flag management', async () => {
-      const consoleErrorSpy = mockConsoleMethod('error');
       testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      testEnv.fetchMock.mockResolvedValue(createErrorResponse(500));
+      mockAuthServiceClient.logout.mockRejectedValue(new Error('Failed to logout'));
 
       authService.setDevLogoutFlag();
       await authService.handleLogout(mockAuthConfig);
 
       // Should still clear token even on failure
       validateSecureLogout(testEnv.localStorageMock);
-      expect(consoleErrorSpy).toHaveBeenCalled();
-
-      restoreConsoleMock(consoleErrorSpy);
+      expect(mockLogger.error).toHaveBeenCalled();
     });
   });
 });

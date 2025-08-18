@@ -1,6 +1,6 @@
 {
   "redis": {
-    "mode": "shared"
+    "mode": "local"
   },
   "clickhouse": {
     "mode": "shared"

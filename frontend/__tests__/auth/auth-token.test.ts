@@ -7,6 +7,8 @@
  * Modular design: ≤300 lines, functions ≤8 lines
  */
 
+// Import test setup with mocks FIRST
+import './auth-test-setup';
 import { authService } from '@/auth';
 import {
   setupAuthTestEnvironment,
@@ -188,6 +190,11 @@ describe('Auth Token Management', () => {
   });
 
   describe('useAuth Hook', () => {
+    beforeEach(() => {
+      // Reset the mock before each test
+      mockUseContext.mockReset();
+    });
+
     it('should return auth context when used within provider', () => {
       const mockContext = createMockAuthContext();
       mockUseContext.mockReturnValue(mockContext);
