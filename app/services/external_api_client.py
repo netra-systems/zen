@@ -81,9 +81,18 @@ class ResilientHTTPClient:
                  base_url: Optional[str] = None,
                  default_headers: Optional[Dict[str, str]] = None,
                  timeout: Optional[ClientTimeout] = None):
+        self._init_config(base_url, default_headers, timeout)
+        self._init_internal_state()
+    
+    def _init_config(self, base_url: Optional[str], default_headers: Optional[Dict[str, str]], 
+                     timeout: Optional[ClientTimeout]) -> None:
+        """Initialize client configuration."""
         self.base_url = base_url
         self.default_headers = default_headers or {}
         self.timeout = timeout or ClientTimeout(total=10.0)
+    
+    def _init_internal_state(self) -> None:
+        """Initialize internal state variables."""
         self._circuits: Dict[str, CircuitBreaker] = {}
         self._session: Optional[ClientSession] = None
     
@@ -112,15 +121,35 @@ class ResilientHTTPClient:
     
     def _get_config_by_type(self, api_lower: str) -> CircuitConfig:
         """Get config based on API type matching."""
-        if self._is_google_api(api_lower):
-            return ExternalAPIConfig.GOOGLE_API_CONFIG
-        elif self._is_openai_api(api_lower):
-            return ExternalAPIConfig.OPENAI_API_CONFIG
-        elif self._is_anthropic_api(api_lower):
-            return ExternalAPIConfig.ANTHROPIC_API_CONFIG
-        elif self._is_fast_api(api_lower):
-            return ExternalAPIConfig.FAST_API_CONFIG
+        config_mapping = self._get_api_config_mapping()
+        for api_type, config in config_mapping.items():
+            if self._matches_api_type(api_lower, api_type):
+                return config
         return ExternalAPIConfig.GENERIC_API_CONFIG
+
+    def _get_api_config_mapping(self) -> Dict[str, CircuitConfig]:
+        """Get API type to config mapping"""
+        return {
+            "google": ExternalAPIConfig.GOOGLE_API_CONFIG,
+            "openai": ExternalAPIConfig.OPENAI_API_CONFIG,
+            "anthropic": ExternalAPIConfig.ANTHROPIC_API_CONFIG,
+            "fast": ExternalAPIConfig.FAST_API_CONFIG
+        }
+
+    def _matches_api_type(self, api_lower: str, api_type: str) -> bool:
+        """Check if API matches the given type"""
+        type_checkers = self._get_type_checkers()
+        checker = type_checkers.get(api_type)
+        return checker(api_lower) if checker else False
+    
+    def _get_type_checkers(self) -> Dict[str, callable]:
+        """Get mapping of API types to checker functions."""
+        return {
+            "google": self._is_google_api,
+            "openai": self._is_openai_api,
+            "anthropic": self._is_anthropic_api,
+            "fast": self._is_fast_api
+        }
     
     def _is_google_api(self, api_lower: str) -> bool:
         """Check if API is Google-based."""
@@ -153,7 +182,14 @@ class ResilientHTTPClient:
                    json_data: Optional[Dict[str, Any]] = None,
                    headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """Perform POST request with circuit breaker protection."""
-        return await self._request("POST", url, api_name, 
+        return await self._request_with_body("POST", url, api_name, data, json_data, headers)
+    
+    async def _request_with_body(self, method: str, url: str, api_name: str,
+                                data: Optional[Union[Dict[str, Any], str]], 
+                                json_data: Optional[Dict[str, Any]], 
+                                headers: Optional[Dict[str, str]]) -> Dict[str, Any]:
+        """Execute request with body data."""
+        return await self._request(method, url, api_name, 
                                  data=data, json_data=json_data, headers=headers)
     
     async def put(self, 
@@ -163,8 +199,7 @@ class ResilientHTTPClient:
                   json_data: Optional[Dict[str, Any]] = None,
                   headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """Perform PUT request with circuit breaker protection."""
-        return await self._request("PUT", url, api_name, 
-                                 data=data, json_data=json_data, headers=headers)
+        return await self._request_with_body("PUT", url, api_name, data, json_data, headers)
     
     async def delete(self, 
                      url: str, 
@@ -191,11 +226,19 @@ class ResilientHTTPClient:
                                 json_data: Optional[Dict[str, Any]], headers: Optional[Dict[str, str]]):
         """Create request function for circuit execution."""
         async def _make_request() -> Dict[str, Any]:
-            session = await self._get_session()
-            full_url = self._build_url(url)
-            request_headers = self._merge_headers(headers)
-            return await self._execute_http_request(session, method, full_url, params, data, json_data, request_headers, api_name)
+            return await self._prepare_and_execute_request(method, url, api_name, params, data, json_data, headers)
         return _make_request
+    
+    async def _prepare_and_execute_request(self, method: str, url: str, api_name: str,
+                                          params: Optional[Dict[str, Any]], 
+                                          data: Optional[Union[Dict[str, Any], str]], 
+                                          json_data: Optional[Dict[str, Any]], 
+                                          headers: Optional[Dict[str, str]]) -> Dict[str, Any]:
+        """Prepare request parameters and execute HTTP request."""
+        session = await self._get_session()
+        full_url = self._build_url(url)
+        request_headers = self._merge_headers(headers)
+        return await self._execute_http_request(session, method, full_url, params, data, json_data, request_headers, api_name)
     
     async def _execute_http_request(self, session, method: str, full_url: str, 
                                    params, data, json_data, request_headers, api_name: str) -> Dict[str, Any]:
@@ -285,12 +328,23 @@ class ResilientHTTPClient:
     def _build_health_status(self, api_name: str, circuit_status: Dict[str, Any], 
                             connectivity_status: Dict[str, Any]) -> Dict[str, Any]:
         """Build complete health status response."""
-        return {
-            "api_name": api_name,
-            "circuit": circuit_status,
-            "connectivity": connectivity_status,
-            "overall_health": self._assess_health(circuit_status, connectivity_status)
-        }
+        overall_health = self._assess_health(circuit_status, connectivity_status)
+        return self._create_health_status_dict(api_name, circuit_status, connectivity_status, overall_health)
+    
+    def _create_health_status_dict(self, api_name: str, circuit_status: Dict[str, Any], 
+                                  connectivity_status: Dict[str, Any], overall_health: str) -> Dict[str, Any]:
+        """Create health status dictionary."""
+        base_status = self._get_base_health_fields(api_name, circuit_status)
+        extended_status = self._get_extended_health_fields(connectivity_status, overall_health)
+        return {**base_status, **extended_status}
+    
+    def _get_base_health_fields(self, api_name: str, circuit_status: Dict[str, Any]) -> Dict[str, Any]:
+        """Get base health status fields."""
+        return {"api_name": api_name, "circuit": circuit_status}
+    
+    def _get_extended_health_fields(self, connectivity_status: Dict[str, Any], overall_health: str) -> Dict[str, Any]:
+        """Get extended health status fields."""
+        return {"connectivity": connectivity_status, "overall_health": overall_health}
     
     def _create_unhealthy_status(self, api_name: str, error: str) -> Dict[str, Any]:
         """Create unhealthy status response."""
@@ -381,12 +435,21 @@ class HTTPClientManager:
                    with_retry: bool = False) -> ResilientHTTPClient:
         """Get or create HTTP client."""
         if name not in self._clients:
-            client_class = RetryableHTTPClient if with_retry else ResilientHTTPClient
-            self._clients[name] = client_class(
-                base_url=base_url,
-                default_headers=headers
-            )
+            self._create_new_client(name, base_url, headers, with_retry)
         return self._clients[name]
+    
+    def _create_new_client(self, name: str, base_url: Optional[str], 
+                          headers: Optional[Dict[str, str]], with_retry: bool) -> None:
+        """Create new HTTP client instance."""
+        client_class = self._select_client_class(with_retry)
+        self._clients[name] = client_class(
+            base_url=base_url,
+            default_headers=headers
+        )
+    
+    def _select_client_class(self, with_retry: bool) -> type:
+        """Select appropriate client class."""
+        return RetryableHTTPClient if with_retry else ResilientHTTPClient
     
     async def health_check_all(self) -> Dict[str, Dict[str, Any]]:
         """Health check for all HTTP clients."""
@@ -397,9 +460,17 @@ class HTTPClientManager:
     
     async def close_all(self) -> None:
         """Close all HTTP clients."""
+        await self._close_all_clients()
+        self._clients.clear()
+    
+    async def _close_all_clients(self) -> None:
+        """Close all client connections."""
+        await self._perform_client_closures()
+    
+    async def _perform_client_closures(self) -> None:
+        """Perform individual client closures."""
         for client in self._clients.values():
             await client.close()
-        self._clients.clear()
 
 
 # Global HTTP client manager
@@ -413,6 +484,12 @@ async def get_http_client(name: str = "default",
                          with_retry: bool = False):
     """Context manager for getting HTTP client with cleanup."""
     client = http_client_manager.get_client(name, base_url, headers, with_retry)
+    async with _managed_client_context(client):
+        yield client
+
+@asynccontextmanager
+async def _managed_client_context(client: ResilientHTTPClient):
+    """Manage client context with proper cleanup."""
     try:
         yield client
     finally:
@@ -433,11 +510,16 @@ async def _execute_google_api_call(client, endpoint: str, method: str,
                                   headers: Optional[Dict[str, str]], **kwargs) -> Dict[str, Any]:
     """Execute Google API call with method routing."""
     method_upper = method.upper()
+    return await _route_google_api_method(client, endpoint, method_upper, headers, **kwargs)
+
+async def _route_google_api_method(client, endpoint: str, method_upper: str, 
+                                  headers: Optional[Dict[str, str]], **kwargs) -> Dict[str, Any]:
+    """Route Google API method to appropriate client method."""
     if method_upper == "GET":
         return await client.get(endpoint, "google_api", headers=headers, **kwargs)
     elif method_upper == "POST":
         return await client.post(endpoint, "google_api", headers=headers, **kwargs)
-    return await client._request(method, endpoint, "google_api", headers=headers, **kwargs)
+    return await client._request(method_upper.lower(), endpoint, "google_api", headers=headers, **kwargs)
 
 
 async def call_openai_api(endpoint: str,

@@ -132,15 +132,18 @@ DeveloperDep = Annotated[User, Depends(require_developer)]
 def require_permission(permission: str):
     """Create a dependency that requires a specific permission"""
     async def check_permission(user: User = Depends(get_current_user)) -> User:
-        # Check user permissions
-        if hasattr(user, 'permissions'):
-            if permission not in user.permissions:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail=f"Permission '{permission}' required"
-                )
+        _validate_user_permission(user, permission)
         return user
     return check_permission
+
+def _validate_user_permission(user: User, permission: str) -> None:
+    """Validate that user has the required permission."""
+    if hasattr(user, 'permissions'):
+        if permission not in user.permissions:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission '{permission}' required"
+            )
 
 # Password hashing utilities
 # Initialize Argon2 hasher with recommended settings
@@ -154,26 +157,31 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
     try:
         ph.verify(hashed_password, plain_password)
-        # Check if rehashing is needed (parameters changed)
-        if ph.check_needs_rehash(hashed_password):
-            # Return True but caller should rehash
-            return True
-        return True
+        return _check_password_rehash_needed(hashed_password)
     except (VerifyMismatchError, InvalidHashError):
         return False
+
+def _check_password_rehash_needed(hashed_password: str) -> bool:
+    """Check if password needs rehashing and return True."""
+    if ph.check_needs_rehash(hashed_password):
+        return True
+    return True
 
 # JWT token utilities
 def create_access_token(data: Dict[str, Any], expires_delta: timedelta = None) -> str:
     """Create a JWT access token"""
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    
+    expire = _get_token_expiry(expires_delta)
     to_encode.update({"exp": expire})
+    
     secret_key = os.getenv("JWT_SECRET_KEY", "fallback-secret-key")
     return jwt.encode(to_encode, secret_key, algorithm="HS256")
+
+def _get_token_expiry(expires_delta: Optional[timedelta]) -> datetime:
+    """Get token expiry datetime."""
+    if expires_delta:
+        return datetime.utcnow() + expires_delta
+    return datetime.utcnow() + timedelta(minutes=15)
 
 def validate_token_jwt(token: str) -> Optional[Dict[str, Any]]:
     """Validate and decode a JWT token (local validation)"""
@@ -182,11 +190,19 @@ def validate_token_jwt(token: str) -> Optional[Dict[str, Any]]:
         payload = jwt.decode(token, secret_key, algorithms=["HS256"])
         return payload
     except jwt.ExpiredSignatureError:
-        logger.warning("Token has expired")
-        return None
+        return _handle_expired_token()
     except jwt.JWTError as e:
-        logger.warning(f"Token validation failed: {e}")
-        return None
+        return _handle_jwt_error(e)
+
+def _handle_expired_token() -> None:
+    """Handle expired token scenario."""
+    logger.warning("Token has expired")
+    return None
+
+def _handle_jwt_error(error: Exception) -> None:
+    """Handle JWT validation error."""
+    logger.warning(f"Token validation failed: {error}")
+    return None
 
 # Compatibility aliases for deprecated dependencies
 ActiveUserWsDep = Annotated[User, Depends(get_current_user)]

@@ -57,18 +57,19 @@ async def _find_circuit_status(circuit_name: str) -> Dict[str, Any]:
     matched_name = validate_circuit_exists(all_status, circuit_name)
     return build_circuit_response(matched_name, all_status[matched_name])
 
-@router.get("/status/{circuit_name}")
-async def get_circuit_status(
-    circuit_name: str,
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get status of specific circuit breaker (Authenticated)."""
+async def _get_circuit_status_safe(circuit_name: str) -> Dict[str, Any]:
+    """Get circuit status with error handling."""
     try:
         return await _find_circuit_status(circuit_name)
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         handle_circuit_breaker_error(e, "status")
+
+@router.get("/status/{circuit_name}")
+async def get_circuit_status(circuit_name: str, current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
+    """Get status of specific circuit breaker (Authenticated)."""
+    return await _get_circuit_status_safe(circuit_name)
 
 
 @router.get("/events")
@@ -113,16 +114,18 @@ async def _get_llm_circuits() -> Dict[str, Any]:
     all_status = await delegate_circuit_status()
     return filter_llm_circuits(all_status)
 
-@router.get("/health/llm")
-async def get_llm_health(
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get LLM circuit breaker health (Authenticated)."""
+async def _get_llm_health_safe() -> Dict[str, Any]:
+    """Get LLM health with error handling."""
     try:
         llm_circuits = await _get_llm_circuits()
         return build_service_health_response("llm", llm_circuits)
     except Exception as e:
         handle_circuit_breaker_error(e, "LLM health")
+
+@router.get("/health/llm")
+async def get_llm_health(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
+    """Get LLM circuit breaker health (Authenticated)."""
+    return await _get_llm_health_safe()
 
 
 async def _get_database_health_data() -> tuple[Dict, Dict[str, Any]]:
@@ -131,16 +134,18 @@ async def _get_database_health_data() -> tuple[Dict, Dict[str, Any]]:
     all_status = await delegate_circuit_status()
     return db_health, filter_database_circuits(all_status)
 
-@router.get("/health/database")
-async def get_database_health(
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get database circuit breaker health (Authenticated)."""
+async def _get_database_health_safe() -> Dict[str, Any]:
+    """Get database health with error handling."""
     try:
         db_health, db_circuits = await _get_database_health_data()
         return build_service_health_response("database", db_circuits, db_health)
     except Exception as e:
         handle_circuit_breaker_error(e, "database health")
+
+@router.get("/health/database")
+async def get_database_health(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
+    """Get database circuit breaker health (Authenticated)."""
+    return await _get_database_health_safe()
 
 
 async def _get_external_api_health_data() -> tuple[Dict, Dict[str, Any]]:
@@ -149,16 +154,18 @@ async def _get_external_api_health_data() -> tuple[Dict, Dict[str, Any]]:
     all_status = await delegate_circuit_status()
     return api_health, filter_api_circuits(all_status)
 
-@router.get("/health/external-apis")
-async def get_external_api_health(
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get external API circuit breaker health (Authenticated)."""
+async def _get_external_api_health_safe() -> Dict[str, Any]:
+    """Get external API health with error handling."""
     try:
         api_health, api_circuits = await _get_external_api_health_data()
         return build_service_health_response("external_apis", api_circuits, api_health)
     except Exception as e:
         handle_circuit_breaker_error(e, "external API health")
+
+@router.get("/health/external-apis")
+async def get_external_api_health(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
+    """Get external API circuit breaker health (Authenticated)."""
+    return await _get_external_api_health_safe()
 
 
 async def _build_health_summary_data() -> Dict[str, Any]:
@@ -169,16 +176,18 @@ async def _build_health_summary_data() -> Dict[str, Any]:
     service_summary = build_service_summary(service_health)
     return {"overview": summary, "service_health": service_summary}
 
-@router.get("/health/summary")
-async def get_health_summary(
-    current_user: Dict = Depends(get_current_user)
-) -> Dict[str, Any]:
-    """Get overall circuit breaker health summary (Authenticated)."""
+async def _get_health_summary_safe() -> Dict[str, Any]:
+    """Get health summary with error handling."""
     try:
         summary_data = await _build_health_summary_data()
         return build_timestamped_response(summary_data)
     except Exception as e:
         handle_circuit_breaker_error(e, "health summary")
+
+@router.get("/health/summary")
+async def get_health_summary(current_user: Dict = Depends(get_current_user)) -> Dict[str, Any]:
+    """Get overall circuit breaker health summary (Authenticated)."""
+    return await _get_health_summary_safe()
 
 
 async def _execute_monitoring_start(interval_seconds: float) -> Dict[str, str]:
@@ -190,16 +199,17 @@ async def _execute_monitoring_start(interval_seconds: float) -> Dict[str, str]:
         "message": "Circuit breaker monitoring started"
     }
 
-@router.post("/monitoring/start")
-async def start_monitoring(
-    interval_seconds: float = Query(5.0, ge=1.0, le=60.0),
-    current_user: Dict = Depends(require_admin)
-) -> Dict[str, str]:
-    """Start circuit breaker monitoring (Admin only)."""
+async def _start_monitoring_safe(interval_seconds: float) -> Dict[str, str]:
+    """Start monitoring with error handling."""
     try:
         return await _execute_monitoring_start(interval_seconds)
     except Exception as e:
         handle_circuit_breaker_error(e, "start monitoring")
+
+@router.post("/monitoring/start")
+async def start_monitoring(interval_seconds: float = Query(5.0, ge=1.0, le=60.0), current_user: Dict = Depends(require_admin)) -> Dict[str, str]:
+    """Start circuit breaker monitoring (Admin only)."""
+    return await _start_monitoring_safe(interval_seconds)
 
 
 async def _execute_monitoring_stop() -> Dict[str, str]:

@@ -89,11 +89,9 @@ class SyntheticDataSubAgent(BaseSubAgent):
         """Execute the full generation flow."""
         await self._send_initial_update(run_id, stream_updates)
         workload_profile = await self._determine_workload_profile(state)
-        
         if await self._requires_approval(workload_profile, state):
             await self._handle_approval_flow(workload_profile, state, run_id, stream_updates)
             return
-        
         await self._execute_generation(workload_profile, state, run_id, stream_updates, start_time)
     
     async def _send_initial_update(self, run_id: str, stream_updates: bool) -> None:
@@ -118,13 +116,9 @@ class SyntheticDataSubAgent(BaseSubAgent):
     ) -> None:
         """Handle approval request flow"""
         approval_message = self._generate_approval_message(profile)
-        
-        state.synthetic_data_result = self._create_approval_result(
-            profile, approval_message
-        ).model_dump()
-        
-        if stream_updates:
-            await self._send_approval_update(run_id, profile, approval_message)
+        approval_result = self._create_approval_result(profile, approval_message)
+        state.synthetic_data_result = approval_result.model_dump()
+        await self._send_approval_if_needed(stream_updates, run_id, profile, approval_message)
     
     async def _execute_generation(
         self,
@@ -136,13 +130,8 @@ class SyntheticDataSubAgent(BaseSubAgent):
     ) -> None:
         """Execute the actual data generation"""
         await self._send_generation_update(profile, run_id, stream_updates)
-        
-        result = await self.generator.generate_data(profile, run_id, stream_updates)
-        state.synthetic_data_result = result.model_dump()
-        
-        await self._send_completion_update(result, run_id, stream_updates, start_time)
-        
-        self._log_completion(run_id, result)
+        result = await self._generate_and_store_result(profile, state, run_id, stream_updates)
+        await self._finalize_generation(result, run_id, stream_updates, start_time)
     
     async def _send_generation_update(
         self, profile: WorkloadProfile, run_id: str, stream_updates: bool
@@ -159,14 +148,11 @@ class SyntheticDataSubAgent(BaseSubAgent):
         self, result: SyntheticDataResult, run_id: str, stream_updates: bool, start_time: float
     ) -> None:
         """Send completion update"""
-        if stream_updates:
-            duration = int((time.time() - start_time) * 1000)
-            await self._send_update(run_id, {
-                "status": "completed",
-                "message": f"✅ Successfully generated {result.generation_status.records_generated:,} synthetic records in {duration}ms",
-                "result": result.model_dump(),
-                "sample_data": result.sample_data[:5] if result.sample_data else None
-            })
+        if not stream_updates:
+            return
+        duration = int((time.time() - start_time) * 1000)
+        completion_data = self._build_completion_data(result, duration)
+        await self._send_update(run_id, completion_data)
     
     def _log_completion(self, run_id: str, result: SyntheticDataResult) -> None:
         """Log successful completion"""
@@ -180,15 +166,9 @@ class SyntheticDataSubAgent(BaseSubAgent):
     ) -> None:
         """Handle generation errors"""
         self.logger.error(f"Synthetic data generation failed for run_id {run_id}: {error}")
-        
-        state.synthetic_data_result = self._create_error_result(error).model_dump()
-        
-        if stream_updates:
-            await self._send_update(run_id, {
-                "status": "error",
-                "message": f"❌ Synthetic data generation failed: {str(error)}",
-                "error": str(error)
-            })
+        error_result = self._create_error_result(error)
+        state.synthetic_data_result = error_result.model_dump()
+        await self._send_error_update_if_needed(stream_updates, run_id, error)
 
     async def _determine_workload_profile(self, state: DeepAgentState) -> WorkloadProfile:
         """Determine workload profile from user request"""
@@ -216,13 +196,10 @@ class SyntheticDataSubAgent(BaseSubAgent):
             prompt = self._create_parsing_prompt(user_request)
             response = await self._call_llm_with_logging(prompt)
             params = extract_json_from_response(response)
-            
-            if params:
-                return WorkloadProfile(**params)
+            return self._create_profile_from_params(params)
         except Exception as e:
             self.logger.warning(f"Failed to parse workload profile: {e}")
-        
-        return self._get_default_profile()
+            return self._get_default_profile()
     
     async def _call_llm_with_logging(self, prompt: str) -> str:
         """Call LLM with proper logging and heartbeat."""
@@ -246,31 +223,21 @@ class SyntheticDataSubAgent(BaseSubAgent):
     ) -> str:
         """Execute LLM call with logging."""
         try:
-            log_agent_input(
-                "SyntheticDataSubAgent", "LLM", len(prompt), correlation_id
-            )
-            
-            response = await self.llm_manager.ask_llm(
-                prompt, llm_config_name='default'
-            )
-            
-            log_agent_output(
-                "LLM", "SyntheticDataSubAgent", 
-                len(response), "success", correlation_id
-            )
+            self._log_llm_input(prompt, correlation_id)
+            response = await self.llm_manager.ask_llm(prompt, llm_config_name='default')
+            self._log_llm_success(response, correlation_id)
             return response
         except Exception as e:
-            log_agent_output(
-                "LLM", "SyntheticDataSubAgent", 0, "error", correlation_id
-            )
+            self._log_llm_error(correlation_id)
             raise
     
     def _create_parsing_prompt(self, user_request: str) -> str:
         """Create prompt for parsing user request"""
+        fields_spec = self._get_prompt_fields_spec()
         return f"""
 Analyze this request for synthetic data parameters: {user_request}
 
-Return JSON with fields: workload_type (inference_logs|training_data|performance_metrics|cost_data|custom), volume (100-1000000), time_range_days (1-365), distribution (normal|uniform|exponential), noise_level (0.0-0.5), custom_parameters.
+{fields_spec}
 
 Default volume to 1000 if not specified.
 """
@@ -285,13 +252,10 @@ Default volume to 1000 if not specified.
 
     async def _check_approval_requirements(self, profile: WorkloadProfile, state: DeepAgentState) -> bool:
         """Check if user approval is required for this generation"""
-        if self._is_large_volume(profile):
-            return True
-        if self._is_sensitive_data(profile):
-            return True
-        if self._requires_explicit_approval(state):
-            return True
-        return False
+        large_volume = self._is_large_volume(profile)
+        sensitive_data = self._is_sensitive_data(profile)
+        explicit_approval = self._requires_explicit_approval(state)
+        return large_volume or sensitive_data or explicit_approval
     
     def _is_large_volume(self, profile: WorkloadProfile) -> bool:
         """Check if volume requires approval"""
@@ -312,7 +276,85 @@ Default volume to 1000 if not specified.
     def _generate_approval_message(self, profile: WorkloadProfile) -> str:
         """Generate user-friendly approval message"""
         workload_type = profile.workload_type.value.replace('_', ' ').title()
-        return f"""📊 Synthetic Data Request: {workload_type}, {profile.volume:,} records, {profile.time_range_days} days, {profile.distribution} distribution. Approve to proceed or reply 'modify' to adjust."""
+        base_info = f"{workload_type}, {profile.volume:,} records"
+        timing_info = f"{profile.time_range_days} days, {profile.distribution} distribution"
+        return f"📊 Synthetic Data Request: {base_info}, {timing_info}. Approve to proceed or reply 'modify' to adjust."
+    
+    async def _send_approval_if_needed(
+        self, stream_updates: bool, run_id: str, profile: WorkloadProfile, message: str
+    ) -> None:
+        """Send approval update if streaming enabled."""
+        if stream_updates:
+            await self._send_approval_update(run_id, profile, message)
+    
+    async def _generate_and_store_result(
+        self, profile: WorkloadProfile, state: DeepAgentState, run_id: str, stream_updates: bool
+    ) -> SyntheticDataResult:
+        """Generate data and store result in state."""
+        result = await self.generator.generate_data(profile, run_id, stream_updates)
+        state.synthetic_data_result = result.model_dump()
+        return result
+    
+    async def _finalize_generation(
+        self, result: SyntheticDataResult, run_id: str, stream_updates: bool, start_time: float
+    ) -> None:
+        """Finalize generation with updates and logging."""
+        await self._send_completion_update(result, run_id, stream_updates, start_time)
+        self._log_completion(run_id, result)
+    
+    def _build_completion_data(self, result: SyntheticDataResult, duration: int) -> dict:
+        """Build completion update data dictionary."""
+        records_count = result.generation_status.records_generated
+        sample_data = result.sample_data[:5] if result.sample_data else None
+        return {
+            "status": "completed",
+            "message": f"✅ Successfully generated {records_count:,} synthetic records in {duration}ms",
+            "result": result.model_dump(),
+            "sample_data": sample_data
+        }
+    
+    async def _send_error_update_if_needed(
+        self, stream_updates: bool, run_id: str, error: Exception
+    ) -> None:
+        """Send error update if streaming enabled."""
+        if stream_updates:
+            await self._send_update(run_id, {
+                "status": "error",
+                "message": f"❌ Synthetic data generation failed: {str(error)}",
+                "error": str(error)
+            })
+    
+    def _create_profile_from_params(self, params: Optional[dict]) -> WorkloadProfile:
+        """Create WorkloadProfile from parsed parameters."""
+        if params:
+            return WorkloadProfile(**params)
+        return self._get_default_profile()
+    
+    def _log_llm_input(self, prompt: str, correlation_id: str) -> None:
+        """Log LLM input with correlation ID."""
+        log_agent_input(
+            "SyntheticDataSubAgent", "LLM", len(prompt), correlation_id
+        )
+    
+    def _log_llm_success(self, response: str, correlation_id: str) -> None:
+        """Log successful LLM response."""
+        log_agent_output(
+            "LLM", "SyntheticDataSubAgent", 
+            len(response), "success", correlation_id
+        )
+    
+    def _log_llm_error(self, correlation_id: str) -> None:
+        """Log LLM error response."""
+        log_agent_output(
+            "LLM", "SyntheticDataSubAgent", 0, "error", correlation_id
+        )
+    
+    def _get_prompt_fields_spec(self) -> str:
+        """Get prompt fields specification string."""
+        field_types = "workload_type (inference_logs|training_data|performance_metrics|cost_data|custom)"
+        ranges = "volume (100-1000000), time_range_days (1-365)"
+        options = "distribution (normal|uniform|exponential), noise_level (0.0-0.5), custom_parameters"
+        return f"Return JSON with fields: {field_types}, {ranges}, {options}."
     
     def _create_approval_result(self, profile: WorkloadProfile, message: str) -> SyntheticDataResult:
         """Create approval required result"""
@@ -350,16 +392,28 @@ Default volume to 1000 if not specified.
     async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
         """Cleanup after execution"""
         await super().cleanup(state, run_id)
-        
-        # Log final metrics
-        if (hasattr(state, 'synthetic_data_result') and 
-            state.synthetic_data_result and 
-            isinstance(state.synthetic_data_result, dict)):
-            result = state.synthetic_data_result
-            metadata = result.get('metadata', {})
-            status = result.get('generation_status', {})
-            self.logger.info(
-                f"Synthetic data generation completed: "
-                f"table={metadata.get('table_name')}, "
-                f"records={status.get('records_generated')}"
-            )
+        await self._log_final_metrics(state)
+    
+    async def _log_final_metrics(self, state: DeepAgentState) -> None:
+        """Log final generation metrics."""
+        if not self._has_valid_result(state):
+            return
+        result = state.synthetic_data_result
+        metadata = result.get('metadata', {})
+        status = result.get('generation_status', {})
+        self._log_completion_summary(metadata, status)
+    
+    def _has_valid_result(self, state: DeepAgentState) -> bool:
+        """Check if state has valid synthetic data result."""
+        return (hasattr(state, 'synthetic_data_result') and 
+                state.synthetic_data_result and 
+                isinstance(state.synthetic_data_result, dict))
+    
+    def _log_completion_summary(self, metadata: dict, status: dict) -> None:
+        """Log completion summary with metrics."""
+        table_name = metadata.get('table_name')
+        records = status.get('records_generated')
+        self.logger.info(
+            f"Synthetic data generation completed: "
+            f"table={table_name}, records={records}"
+        )

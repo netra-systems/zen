@@ -38,14 +38,10 @@ def _get_content_type_mapping() -> Dict[str, ContentType]:
 
 def format_validation_response(result, user_id: str) -> QualityValidationResponse:
     """Format validation result into typed response."""
-    return QualityValidationResponse(
-        passed=result.passed,
-        metrics=_build_metrics_dict(result.metrics),
-        retry_suggested=result.retry_suggested,
-        retry_adjustments=result.retry_prompt_adjustments,
-        validation_id=f"val_{int(datetime.now(UTC).timestamp())}",
-        timestamp=datetime.now(UTC)
-    )
+    metrics = _build_metrics_dict(result.metrics)
+    validation_id = f"val_{int(datetime.now(UTC).timestamp())}"
+    timestamp = datetime.now(UTC)
+    return _build_validation_response(result, metrics, validation_id, timestamp)
 
 
 def _build_metrics_dict(metrics) -> Dict[str, Any]:
@@ -128,24 +124,14 @@ def _complete_alert_formatting(alerts: List[QualityAlert], all_alerts: List[Any]
 
 def format_acknowledgement_response(alert_id: str, action: str, user: User) -> AlertAcknowledgementResponse:
     """Format alert acknowledgement response."""
-    return AlertAcknowledgementResponse(
-        success=True,
-        alert_id=alert_id,
-        action=action,
-        user_id=user.id,
-        timestamp=datetime.now(UTC)
-    )
+    timestamp = datetime.now(UTC)
+    return _build_acknowledgement_response(alert_id, action, user.id, timestamp)
 
 
 def format_quality_report(report_type, data: Dict[str, Any], user: User, period_days: int) -> QualityReport:
     """Format quality report response."""
-    return QualityReport(
-        report_type=report_type,
-        generated_at=datetime.now(UTC),
-        generated_by=user.id,
-        period_days=period_days,
-        data=data
-    )
+    generated_at = datetime.now(UTC)
+    return _build_quality_report(report_type, data, user.id, period_days, generated_at)
 
 
 def format_quality_statistics(stats: Dict[str, Any], content_type: str = None) -> QualityStatistics:
@@ -182,13 +168,8 @@ def format_service_health(quality_gate_service, monitoring_service, fallback_ser
 
 def format_error_health(error_msg: str) -> QualityServiceHealth:
     """Format error health response."""
-    return QualityServiceHealth(
-        status="unhealthy",
-        services={},
-        statistics={},
-        timestamp=datetime.now(UTC),
-        error=error_msg
-    )
+    timestamp = datetime.now(UTC)
+    return _build_error_health_response(error_msg, timestamp)
 
 
 def apply_alert_filters(all_alerts: List[Any], severity: str = None, acknowledged: bool = None) -> List[Any]:
@@ -206,3 +187,72 @@ def prepare_user_context(context: Dict[str, Any], user: User) -> Dict[str, Any]:
         context = {}
     context["user_id"] = user.id
     return context
+
+
+def _build_validation_response(result, metrics: Dict[str, Any], validation_id: str, timestamp) -> QualityValidationResponse:
+    """Build validation response object."""
+    response_params = _prepare_validation_response_params(result, metrics, validation_id, timestamp)
+    return QualityValidationResponse(**response_params)
+
+
+def _prepare_validation_response_params(result, metrics: Dict[str, Any], validation_id: str, timestamp) -> Dict[str, Any]:
+    """Prepare validation response parameters."""
+    return {
+        "passed": result.passed,
+        "metrics": metrics,
+        "retry_suggested": result.retry_suggested,
+        "retry_adjustments": result.retry_prompt_adjustments,
+        "validation_id": validation_id,
+        "timestamp": timestamp
+    }
+
+
+def _build_acknowledgement_response(alert_id: str, action: str, user_id: str, timestamp) -> AlertAcknowledgementResponse:
+    """Build acknowledgement response object."""
+    response_params = _prepare_acknowledgement_params(alert_id, action, user_id, timestamp)
+    return AlertAcknowledgementResponse(**response_params)
+
+
+def _prepare_acknowledgement_params(alert_id: str, action: str, user_id: str, timestamp) -> Dict[str, Any]:
+    """Prepare acknowledgement response parameters."""
+    return {
+        "success": True,
+        "alert_id": alert_id,
+        "action": action,
+        "user_id": user_id,
+        "timestamp": timestamp
+    }
+
+
+def _build_quality_report(report_type, data: Dict[str, Any], user_id: str, period_days: int, generated_at) -> QualityReport:
+    """Build quality report object."""
+    report_params = _prepare_quality_report_params(report_type, data, user_id, period_days, generated_at)
+    return QualityReport(**report_params)
+
+
+def _prepare_quality_report_params(report_type, data: Dict[str, Any], user_id: str, period_days: int, generated_at) -> Dict[str, Any]:
+    """Prepare quality report parameters."""
+    return {
+        "report_type": report_type,
+        "generated_at": generated_at,
+        "generated_by": user_id,
+        "period_days": period_days,
+        "data": data
+    }
+
+
+def _build_error_health_response(error_msg: str, timestamp) -> QualityServiceHealth:
+    """Build error health response object."""
+    health_params = _prepare_error_health_params(error_msg, timestamp)
+    return QualityServiceHealth(**health_params)
+
+
+def _prepare_error_health_params(error_msg: str, timestamp) -> Dict[str, Any]:
+    """Prepare error health response parameters."""
+    return {
+        "status": "unhealthy",
+        "services": {},
+        "statistics": {},
+        "timestamp": timestamp,
+        "error": error_msg
+    }

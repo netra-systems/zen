@@ -32,23 +32,18 @@ class ConnectionCleanupMonitor:
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Error in cleanup loop: {e}")
-                await asyncio.sleep(5)  # Brief delay before retry
+                await self._handle_cleanup_error(e)
     
     async def _run_cleanup(self, remove_connection_callback):
         """Run connection cleanup."""
-        start_time = time.time()
-        self.stats["cleanup_runs"] += 1
+        self._track_cleanup_start()
         
         timed_out_connections = self._find_timed_out_connections()
         await self._remove_timed_out_connections(timed_out_connections, remove_connection_callback)
         await self._cleanup_dead_heartbeats()
         self._cleanup_old_errors()
         
-        self.last_cleanup_time = time.time()
-        
-        if timed_out_connections:
-            logger.info(f"Cleanup completed: removed {len(timed_out_connections)} timed out connections")
+        self._track_cleanup_completion(timed_out_connections)
     
     def _find_timed_out_connections(self) -> List[str]:
         """Find connections that have timed out."""
@@ -77,15 +72,42 @@ class ConnectionCleanupMonitor:
         """Clean up old error records."""
         self.error_handler.cleanup_old_errors()
     
-    async def close_all_connections(self, user_connections, connection_timeouts):
-        """Close all active connections."""
-        connections = self.connection_manager.get_all_connections()
+    async def _handle_cleanup_error(self, error: Exception) -> None:
+        """Handle cleanup loop errors."""
+        logger.error(f"Error in cleanup loop: {error}")
+        await asyncio.sleep(5)  # Brief delay before retry
+    
+    def _track_cleanup_start(self) -> None:
+        """Track cleanup start metrics."""
+        self.stats["cleanup_runs"] += 1
+    
+    def _track_cleanup_completion(self, timed_out_connections: List[str]) -> None:
+        """Track cleanup completion and log results."""
+        self.last_cleanup_time = time.time()
         
+        if timed_out_connections:
+            logger.info(f"Cleanup completed: removed {len(timed_out_connections)} timed out connections")
+    
+    async def _close_connection_list(self, connections) -> None:
+        """Close a list of connections safely."""
         for conn_info in connections:
             try:
                 await conn_info.websocket.close()
             except Exception as e:
                 logger.debug(f"Error closing connection {conn_info.connection_id}: {e}")
+    
+    def _build_user_connections_status(self, user_connections: dict) -> dict:
+        """Build user connections status mapping."""
+        return {
+            user_id: len(conn_ids) 
+            for user_id, conn_ids in user_connections.items()
+        }
+    
+    async def close_all_connections(self, user_connections, connection_timeouts):
+        """Close all active connections."""
+        connections = self.connection_manager.get_all_connections()
+        
+        await self._close_connection_list(connections)
         
         # Clear all tracking
         user_connections.clear()
@@ -98,8 +120,5 @@ class ConnectionCleanupMonitor:
             "timeouts": self.stats["timeouts"],
             "last_cleanup": self.last_cleanup_time,
             "active_connections": len(self.connection_manager.get_all_connections()),
-            "user_connections": {
-                user_id: len(conn_ids) 
-                for user_id, conn_ids in user_connections.items()
-            }
+            "user_connections": self._build_user_connections_status(user_connections)
         }

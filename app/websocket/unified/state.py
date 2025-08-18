@@ -58,7 +58,12 @@ class TelemetryCollector:
         """Initialize telemetry collector with metrics storage."""
         self.connection_metrics: Dict[str, ConnectionMetrics] = {}
         self.job_metrics: Dict[str, JobMetrics] = {}
-        self.system_metrics = {
+        self.system_metrics = self._initialize_system_metrics()
+        self.performance_history: deque = deque(maxlen=1000)
+
+    def _initialize_system_metrics(self) -> Dict[str, Any]:
+        """Initialize system metrics dictionary."""
+        return {
             "start_time": time.time(),
             "total_connections": 0,
             "peak_connections": 0,
@@ -66,24 +71,45 @@ class TelemetryCollector:
             "total_errors": 0,
             "uptime_seconds": 0.0
         }
-        self.performance_history: deque = deque(maxlen=1000)
 
     def track_connection(self, conn_info: ConnectionInfo) -> None:
         """Start tracking connection metrics."""
-        metrics = ConnectionMetrics(
-            connection_id=conn_info.connection_id,
-            user_id=conn_info.user_id,
-            connected_at=time.time(),
-            last_activity=time.time(),
-            messages_sent=0,
-            messages_received=0,
-            errors=0,
-            bytes_sent=0,
-            bytes_received=0
-        )
+        metrics = self._create_connection_metrics(conn_info)
         self.connection_metrics[conn_info.connection_id] = metrics
         self.system_metrics["total_connections"] += 1
         self._update_peak_connections()
+
+    def _create_connection_metrics(self, conn_info: ConnectionInfo) -> ConnectionMetrics:
+        """Create new connection metrics instance."""
+        current_time = time.time()
+        return ConnectionMetrics(
+            **self._get_connection_metric_args(conn_info, current_time)
+        )
+
+    def _get_connection_metric_args(self, conn_info: ConnectionInfo, current_time: float) -> Dict[str, Any]:
+        """Get connection metrics constructor arguments."""
+        base_args = self._get_base_connection_args(conn_info, current_time)
+        counter_args = self._get_connection_counter_args()
+        return {**base_args, **counter_args}
+
+    def _get_base_connection_args(self, conn_info: ConnectionInfo, current_time: float) -> Dict[str, Any]:
+        """Get base connection arguments."""
+        return {
+            "connection_id": conn_info.connection_id,
+            "user_id": conn_info.user_id,
+            "connected_at": current_time,
+            "last_activity": current_time
+        }
+
+    def _get_connection_counter_args(self) -> Dict[str, Any]:
+        """Get connection counter arguments."""
+        return {
+            "messages_sent": 0,
+            "messages_received": 0,
+            "errors": 0,
+            "bytes_sent": 0,
+            "bytes_received": 0
+        }
 
     def _update_peak_connections(self) -> None:
         """Update peak connections metric."""
@@ -97,6 +123,10 @@ class TelemetryCollector:
             return
         metrics = self.connection_metrics[connection_id]
         metrics.last_activity = time.time()
+        self._update_activity_metrics(metrics, message_type, byte_count)
+
+    def _update_activity_metrics(self, metrics: ConnectionMetrics, message_type: str, byte_count: int) -> None:
+        """Update specific activity metrics based on message type."""
         if message_type == "sent":
             metrics.messages_sent += 1
             metrics.bytes_sent += byte_count
@@ -108,15 +138,36 @@ class TelemetryCollector:
 
     def track_job(self, job_id: str) -> None:
         """Start tracking job metrics."""
-        self.job_metrics[job_id] = JobMetrics(
-            job_id=job_id,
-            created_at=time.time(),
-            last_activity=time.time(),
-            messages_queued=0,
-            messages_processed=0,
-            active_connections=0,
-            completion_status="active"
-        )
+        metrics = self._create_job_metrics(job_id)
+        self.job_metrics[job_id] = metrics
+
+    def _create_job_metrics(self, job_id: str) -> JobMetrics:
+        """Create new job metrics instance."""
+        current_time = time.time()
+        return JobMetrics(**self._get_job_metric_args(job_id, current_time))
+
+    def _get_job_metric_args(self, job_id: str, current_time: float) -> Dict[str, Any]:
+        """Get job metrics constructor arguments."""
+        base_args = self._get_base_job_args(job_id, current_time)
+        counter_args = self._get_job_counter_args()
+        return {**base_args, **counter_args}
+
+    def _get_base_job_args(self, job_id: str, current_time: float) -> Dict[str, Any]:
+        """Get base job arguments."""
+        return {
+            "job_id": job_id,
+            "created_at": current_time,
+            "last_activity": current_time,
+            "completion_status": "active"
+        }
+
+    def _get_job_counter_args(self) -> Dict[str, Any]:
+        """Get job counter arguments."""
+        return {
+            "messages_queued": 0,
+            "messages_processed": 0,
+            "active_connections": 0
+        }
 
     def update_job_activity(self, job_id: str, activity_type: str, count: int = 1) -> None:
         """Update job activity metrics."""
@@ -124,6 +175,10 @@ class TelemetryCollector:
             self.track_job(job_id)
         metrics = self.job_metrics[job_id]
         metrics.last_activity = time.time()
+        self._update_job_metrics(metrics, activity_type, count)
+
+    def _update_job_metrics(self, metrics: JobMetrics, activity_type: str, count: int) -> None:
+        """Update specific job metrics based on activity type."""
         if activity_type == "queued":
             metrics.messages_queued += count
         elif activity_type == "processed":
@@ -155,6 +210,10 @@ class TelemetryCollector:
         """Get summarized connection metrics."""
         if not self.connection_metrics:
             return {"active": 0, "total_messages": 0, "total_errors": 0}
+        return self._calculate_connection_totals()
+
+    def _calculate_connection_totals(self) -> Dict[str, Any]:
+        """Calculate total connection metrics."""
         total_sent = sum(m.messages_sent for m in self.connection_metrics.values())
         total_received = sum(m.messages_received for m in self.connection_metrics.values())
         total_errors = sum(m.errors for m in self.connection_metrics.values())
@@ -294,12 +353,17 @@ class UnifiedStateManager:
         try:
             connection_count = len(self.manager.connection_manager.active_connections)
             error_rate = self._calculate_error_rate()
-            if error_rate > 0.1 or connection_count > 10000:  # Health thresholds
-                self.health_status = {"status": "degraded", "last_check": time.time()}
-            else:
-                self.health_status = {"status": "healthy", "last_check": time.time()}
+            self._update_health_status(connection_count, error_rate)
         except Exception as e:
             self.health_status = {"status": "unhealthy", "last_check": time.time(), "error": str(e)}
+
+    def _update_health_status(self, connection_count: int, error_rate: float) -> None:
+        """Update health status based on metrics."""
+        current_time = time.time()
+        if error_rate > 0.1 or connection_count > 10000:  # Health thresholds
+            self.health_status = {"status": "degraded", "last_check": current_time}
+        else:
+            self.health_status = {"status": "healthy", "last_check": current_time}
 
     def _calculate_error_rate(self) -> float:
         """Calculate current error rate from telemetry."""

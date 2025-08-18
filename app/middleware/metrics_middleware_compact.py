@@ -30,35 +30,55 @@ class AgentMetricsMiddleware(MetricsMiddlewareCore):
     ):
         """Decorator to track agent operations."""
         def decorator(func: Callable):
-            @wraps(func)
-            async def async_wrapper(*args, **kwargs):
-                if not self._enabled:
-                    return await func(*args, **kwargs)
-                
-                # Extract agent name and operation type
-                agent_name = self._extract_agent_name(func, args, kwargs)
-                op_type = operation_type or self._extract_operation_type(func)
-                
-                return await self.track_operation_with_context(
-                    agent_name, op_type, func, include_performance, 
-                    timeout_seconds, *args, **kwargs
-                )
-            
-            @wraps(func)
-            def sync_wrapper(*args, **kwargs):
-                if not self._enabled:
-                    return func(*args, **kwargs)
-                
-                # For sync functions, wrap in async context
-                return asyncio.run(async_wrapper(*args, **kwargs))
-            
-            # Return appropriate wrapper based on function type
-            if asyncio.iscoroutinefunction(func):
-                return async_wrapper
-            else:
-                return sync_wrapper
-        
+            return self._create_tracking_wrapper(
+                func, operation_type, include_performance, timeout_seconds
+            )
         return decorator
+        
+    def _create_tracking_wrapper(self, func: Callable, operation_type: Optional[str], 
+                               include_performance: bool, timeout_seconds: Optional[float]):
+        """Create tracking wrapper for function."""
+        async_wrapper = self._create_async_wrapper(
+            func, operation_type, include_performance, timeout_seconds
+        )
+        sync_wrapper = self._create_sync_wrapper(func, async_wrapper)
+        return self._select_wrapper(func, async_wrapper, sync_wrapper)
+        
+    def _create_async_wrapper(self, func: Callable, operation_type: Optional[str],
+                            include_performance: bool, timeout_seconds: Optional[float]):
+        """Create async wrapper for function."""
+        @wraps(func)
+        async def async_wrapper(*args, **kwargs):
+            if not self._enabled:
+                return await func(*args, **kwargs)
+            return await self._execute_tracked_operation(
+                func, operation_type, include_performance, timeout_seconds, *args, **kwargs
+            )
+        return async_wrapper
+        
+    def _create_sync_wrapper(self, func: Callable, async_wrapper):
+        """Create sync wrapper for function."""
+        @wraps(func)
+        def sync_wrapper(*args, **kwargs):
+            if not self._enabled:
+                return func(*args, **kwargs)
+            return asyncio.run(async_wrapper(*args, **kwargs))
+        return sync_wrapper
+        
+    def _select_wrapper(self, func: Callable, async_wrapper, sync_wrapper):
+        """Select appropriate wrapper based on function type."""
+        return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
+        
+    async def _execute_tracked_operation(self, func: Callable, operation_type: Optional[str],
+                                       include_performance: bool, timeout_seconds: Optional[float],
+                                       *args, **kwargs):
+        """Execute function with tracking."""
+        agent_name = self._extract_agent_name(func, args, kwargs)
+        op_type = operation_type or self._extract_operation_type(func)
+        return await self.track_operation_with_context(
+            agent_name, op_type, func, include_performance, 
+            timeout_seconds, *args, **kwargs
+        )
     
     async def track_batch_operation(
         self, 

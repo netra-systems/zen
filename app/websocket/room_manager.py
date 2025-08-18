@@ -51,14 +51,28 @@ class RoomManager:
         if room_id not in self.rooms:
             return False
         
-        # Remove all connections from the room
+        self._remove_all_connections_from_room(room_id)
+        self._cleanup_empty_room(room_id)
+        return True
+    
+    def _remove_all_connections_from_room(self, room_id: str):
+        """Remove all connections from a room.
+        
+        Args:
+            room_id: Room to clear
+        """
         connection_ids = self.rooms[room_id].copy()
         for conn_id in connection_ids:
             self._remove_connection_from_room(conn_id, room_id)
+    
+    def _cleanup_empty_room(self, room_id: str):
+        """Clean up and delete an empty room.
         
+        Args:
+            room_id: Room to delete
+        """
         del self.rooms[room_id]
         logger.info(f"Deleted room {room_id}")
-        return True
     
     def join_room(self, connection_id: str, room_id: str) -> bool:
         """Add a connection to a room.
@@ -70,20 +84,31 @@ class RoomManager:
         Returns:
             True if connection was added to room
         """
-        # Create room if it doesn't exist
+        self._ensure_room_exists(room_id)
+        self._add_to_room_mappings(connection_id, room_id)
+        logger.debug(f"Connection {connection_id} joined room {room_id}")
+        return True
+    
+    def _ensure_room_exists(self, room_id: str):
+        """Create room if it doesn't exist.
+        
+        Args:
+            room_id: Room to ensure exists
+        """
         if room_id not in self.rooms:
             self.create_room(room_id)
+    
+    def _add_to_room_mappings(self, connection_id: str, room_id: str):
+        """Add connection to room mappings.
         
-        # Add connection to room
+        Args:
+            connection_id: Connection to add
+            room_id: Room to add to
+        """
         self.rooms[room_id].add(connection_id)
-        
-        # Track rooms for this connection
         if connection_id not in self.connection_rooms:
             self.connection_rooms[connection_id] = set()
         self.connection_rooms[connection_id].add(room_id)
-        
-        logger.debug(f"Connection {connection_id} joined room {room_id}")
-        return True
     
     def leave_room(self, connection_id: str, room_id: str) -> bool:
         """Remove a connection from a room.
@@ -107,25 +132,52 @@ class RoomManager:
         Returns:
             True if connection was removed
         """
-        removed = False
+        removed = self._remove_from_room_set(connection_id, room_id)
+        self._cleanup_connection_rooms(connection_id, room_id)
+        self._log_removal(connection_id, room_id, removed)
+        return removed
+    
+    def _remove_from_room_set(self, connection_id: str, room_id: str) -> bool:
+        """Remove connection from room set.
         
-        if room_id in self.rooms:
-            if connection_id in self.rooms[room_id]:
-                self.rooms[room_id].remove(connection_id)
-                removed = True
-        
-        if connection_id in self.connection_rooms:
-            if room_id in self.connection_rooms[connection_id]:
-                self.connection_rooms[connection_id].remove(room_id)
+        Args:
+            connection_id: Connection to remove
+            room_id: Room to remove from
             
-            # Clean up empty connection room set
-            if not self.connection_rooms[connection_id]:
-                del self.connection_rooms[connection_id]
+        Returns:
+            True if connection was removed
+        """
+        if room_id in self.rooms and connection_id in self.rooms[room_id]:
+            self.rooms[room_id].remove(connection_id)
+            return True
+        return False
+    
+    def _cleanup_connection_rooms(self, connection_id: str, room_id: str):
+        """Clean up connection rooms mapping.
         
+        Args:
+            connection_id: Connection to clean up
+            room_id: Room to remove from connection's rooms
+        """
+        if connection_id not in self.connection_rooms:
+            return
+        
+        if room_id in self.connection_rooms[connection_id]:
+            self.connection_rooms[connection_id].remove(room_id)
+        
+        if not self.connection_rooms[connection_id]:
+            del self.connection_rooms[connection_id]
+    
+    def _log_removal(self, connection_id: str, room_id: str, removed: bool):
+        """Log connection removal from room.
+        
+        Args:
+            connection_id: Connection that was removed
+            room_id: Room it was removed from
+            removed: Whether removal was successful
+        """
         if removed:
             logger.debug(f"Connection {connection_id} left room {room_id}")
-        
-        return removed
     
     def leave_all_rooms(self, connection_id: str):
         """Remove a connection from all rooms it has joined.
@@ -168,10 +220,29 @@ class RoomManager:
         Returns:
             Dictionary with statistics
         """
+        room_stats = self._build_room_stats()
+        return self._build_stats_dict(room_stats)
+    
+    def _build_room_stats(self) -> Dict[str, int]:
+        """Build room connection statistics.
+        
+        Returns:
+            Dictionary mapping room IDs to connection counts
+        """
         room_stats = {}
         for room_id, connections in self.rooms.items():
             room_stats[room_id] = len(connections)
+        return room_stats
+    
+    def _build_stats_dict(self, room_stats: Dict[str, int]) -> Dict[str, Any]:
+        """Build complete statistics dictionary.
         
+        Args:
+            room_stats: Room connection statistics
+            
+        Returns:
+            Complete statistics dictionary
+        """
         return {
             "total_rooms": len(self.rooms),
             "room_connections": room_stats,

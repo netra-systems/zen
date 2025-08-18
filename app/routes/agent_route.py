@@ -1,16 +1,28 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, WebSocket, WebSocketDisconnect
-from fastapi.responses import StreamingResponse
+"""Agent routes - Main agent endpoint handlers."""
+from fastapi import APIRouter, Depends, Request, WebSocket
 from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from app.schemas import RequestModel
-from typing import Dict, Any, Optional, AsyncGenerator, Union
+from typing import Dict, Any, Optional
 from app.services.state_persistence import state_persistence_service
 from app.services.agent_service import get_agent_service, AgentService
 from app.dependencies import get_llm_manager, DbDep
 from app.llm.llm_manager import LLMManager
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, Field
-import json
-from typing import List
+from app.routes.agent_route_validators import (
+    validate_agent_state, validate_agent_state_exists, 
+    build_agent_status_response, build_agent_state_response,
+    build_thread_runs_response, handle_run_agent_error,
+    handle_agent_message_error
+)
+from app.routes.agent_route_streaming import (
+    get_agent_service_for_streaming, create_streaming_response,
+    stream_agent_response
+)
+from app.routes.agent_route_processors import (
+    process_multimodal_message, process_with_context, 
+    process_with_fallback, execute_message_processing
+)
+from app.routes.agent_route_websocket import handle_websocket_exceptions
 
 router = APIRouter()
 
@@ -23,122 +35,41 @@ __all__ = [
     'stream_agent_response'
 ]
 
+
 class MessageRequest(BaseModel):
     message: str = Field(..., min_length=1, description="Message cannot be empty")
     thread_id: Optional[str] = None
 
-class AttachmentData(BaseModel):
-    """Multimodal attachment data model."""
-    type: str
-    url: Optional[str] = None
-    content: Optional[str] = None
-
-class MultimodalInput(BaseModel):
-    """Multimodal input containing text and attachments."""
-    text: str
-    attachments: List[AttachmentData] = []
-
-def _format_chunk_output(chunk) -> str:
-    """Format chunk for streaming output."""
-    if isinstance(chunk, dict):
-        return json.dumps(chunk)
-    elif isinstance(chunk, str):
-        return chunk
-    return json.dumps({"type": "data", "content": str(chunk)})
-
-async def _stream_with_fallback_service(message: str, thread_id: Optional[str]) -> AsyncGenerator[str, None]:
-    """Stream using fallback service for backward compatibility."""
-    from app.services.agent_service import generate_stream
-    async for chunk in generate_stream(message, thread_id):
-        yield _format_chunk_output(chunk)
-    yield json.dumps({"type": "complete", "status": "finished"})
-
-async def _stream_with_agent_service(
-    agent_service: AgentService, message: str, thread_id: Optional[str]
-) -> AsyncGenerator[str, None]:
-    """Stream using provided agent service."""
-    async for chunk in agent_service.generate_stream(message, thread_id):
-        yield _format_chunk_output(chunk)
-    yield json.dumps({"type": "complete", "status": "finished"})
-
-async def _get_stream_generator(
-    agent_service: Optional[AgentService], message: str, thread_id: Optional[str]
-):
-    """Get appropriate stream generator."""
-    if not agent_service:
-        return _stream_with_fallback_service(message, thread_id)
-    return _stream_with_agent_service(agent_service, message, thread_id)
-
-async def _delegate_streaming(
-    agent_service: Optional[AgentService], message: str, thread_id: Optional[str]
-) -> AsyncGenerator[str, None]:
-    """Delegate streaming to appropriate service."""
-    stream_gen = await _get_stream_generator(agent_service, message, thread_id)
-    async for chunk in stream_gen:
-        yield chunk
-
-async def stream_agent_response(
-    message: str,
-    thread_id: Optional[str] = None,
-    agent_service: Optional[AgentService] = None
-) -> AsyncGenerator[str, None]:
-    """Stream agent response using the actual agent service."""
-    async for chunk in _delegate_streaming(agent_service, message, thread_id):
-        yield chunk
 
 def get_agent_supervisor(request: Request) -> Supervisor:
+    """Get agent supervisor from request state."""
     return request.app.state.agent_supervisor
 
-async def _execute_supervisor_run(supervisor: Supervisor, request_model: RequestModel):
+
+async def execute_supervisor_run(supervisor: Supervisor, request_model: RequestModel):
     """Execute supervisor run with request."""
     await supervisor.run(
         request_model.query, request_model.id, stream_updates=True
     )
     return {"run_id": request_model.id, "status": "started"}
 
-def _handle_run_agent_error(e: Exception):
-    """Handle run agent execution errors."""
-    raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/run_agent")
 async def run_agent(request_model: RequestModel, supervisor: Supervisor = Depends(get_agent_supervisor)) -> Dict[str, Any]:
     """Starts the agent to analyze the user's request."""
     try:
-        return await _execute_supervisor_run(supervisor, request_model)
+        return await execute_supervisor_run(supervisor, request_model)
     except Exception as e:
-        _handle_run_agent_error(e)
+        handle_run_agent_error(e)
 
-def _validate_agent_state(state, run_id: str) -> None:
-    """Validate agent state exists and is valid."""
-    if not state or state.get("status") == "not_found":
-        raise HTTPException(status_code=404, detail="Agent run not found")
-
-def _build_agent_status_response(run_id: str, state: Dict) -> Dict[str, Any]:
-    """Build agent status response."""
-    return {
-        "run_id": run_id,
-        "status": state.get("status", "unknown"),
-        "current_step": state.get("current_step", 0),
-        "total_steps": state.get("total_steps", 0),
-    }
 
 @router.get("/{run_id}/status")
 async def get_agent_status(run_id: str, supervisor: Supervisor = Depends(get_agent_supervisor)) -> Dict[str, Any]:
+    """Get agent status for a specific run."""
     state = await supervisor.get_agent_state(run_id)
-    _validate_agent_state(state, run_id)
-    return _build_agent_status_response(run_id, state)
+    validate_agent_state(state, run_id)
+    return build_agent_status_response(run_id, state)
 
-def _validate_agent_state_exists(state, run_id: str) -> None:
-    """Validate agent state exists."""
-    if not state:
-        raise HTTPException(status_code=404, detail="Agent state not found")
-
-def _build_agent_state_response(run_id: str, state) -> Dict[str, Any]:
-    """Build agent state response."""
-    return {
-        "run_id": run_id,
-        "state": state.model_dump()
-    }
 
 @router.get("/{run_id}/state")
 async def get_agent_state(
@@ -147,15 +78,9 @@ async def get_agent_state(
 ) -> Dict[str, Any]:
     """Get the full agent state for a run"""
     state = await state_persistence_service.load_agent_state(run_id, db)
-    _validate_agent_state_exists(state, run_id)
-    return _build_agent_state_response(run_id, state)
+    validate_agent_state_exists(state, run_id)
+    return build_agent_state_response(run_id, state)
 
-def _build_thread_runs_response(thread_id: str, runs) -> Dict[str, Any]:
-    """Build thread runs response."""
-    return {
-        "thread_id": thread_id,
-        "runs": runs
-    }
 
 @router.get("/thread/{thread_id}/runs")
 async def get_thread_runs(
@@ -165,67 +90,17 @@ async def get_thread_runs(
 ) -> Dict[str, Any]:
     """Get all runs for a thread"""
     runs = await state_persistence_service.list_thread_runs(thread_id, db, limit)
-    return _build_thread_runs_response(thread_id, runs)
+    return build_thread_runs_response(thread_id, runs)
 
-
-async def _process_message_with_agent_service(
-    agent_service: AgentService, message: str, thread_id: Optional[str]
-) -> Dict[str, Any]:
-    """Process message using agent service."""
-    return await agent_service.process_message(message, thread_id)
-
-async def _handle_agent_message_error(e: Exception):
-    """Handle agent message processing errors."""
-    raise HTTPException(status_code=500, detail=str(e))
-
-async def _execute_message_processing(
-    agent_service: AgentService, request: MessageRequest
-) -> Dict[str, Any]:
-    """Execute message processing with service."""
-    return await _process_message_with_agent_service(
-        agent_service, request.message, request.thread_id
-    )
 
 @router.post("/message")
 async def process_agent_message(request: MessageRequest, agent_service: AgentService = Depends(get_agent_service)) -> Dict[str, Any]:
     """Process a message through the agent system."""
     try:
-        return await _execute_message_processing(agent_service, request)
+        return await execute_message_processing(agent_service, request.message, request.thread_id)
     except Exception as e:
-        await _handle_agent_message_error(e)
+        await handle_agent_message_error(e)
 
-def _get_agent_service_for_streaming(db_session: DbDep, llm_manager: LLMManager) -> AgentService:
-    """Get agent service for streaming."""
-    return get_agent_service(db_session, llm_manager)
-
-async def _generate_sse_stream(
-    request_model: RequestModel, agent_service: AgentService
-) -> AsyncGenerator[str, None]:
-    """Generate SSE formatted stream."""
-    async for chunk in stream_agent_response(
-        request_model.query, request_model.id, agent_service
-    ):
-        yield f"data: {chunk}\n\n"
-
-def _build_streaming_headers() -> Dict[str, str]:
-    """Build headers for streaming response."""
-    return {
-        "Cache-Control": "no-cache",
-        "Connection": "keep-alive",
-        "X-Accel-Buffering": "no"  # Disable nginx buffering
-    }
-
-def _get_sse_generator(request_model: RequestModel, agent_service: AgentService):
-    """Get SSE stream generator."""
-    return _generate_sse_stream(request_model, agent_service)
-
-def _create_streaming_response(
-    request_model: RequestModel, agent_service: AgentService
-) -> StreamingResponse:
-    """Create streaming response with headers."""
-    generator = _get_sse_generator(request_model, agent_service)
-    headers = _build_streaming_headers()
-    return StreamingResponse(generator, media_type="text/event-stream", headers=headers)
 
 @router.post("/stream")
 async def stream_response(
@@ -234,99 +109,11 @@ async def stream_response(
     llm_manager: LLMManager = Depends(get_llm_manager)
 ):
     """Stream agent response with proper SSE format."""
-    agent_service = _get_agent_service_for_streaming(db_session, llm_manager)
-    return _create_streaming_response(request_model, agent_service)
+    agent_service = get_agent_service_for_streaming(db_session, llm_manager)
+    return create_streaming_response(request_model, agent_service)
 
-async def _process_multimodal_attachments(attachments: List[AttachmentData]) -> Dict[str, Any]:
-    """Process multimodal attachments and return processing metadata."""
-    processed_count = len(attachments)
-    attachment_types = [att.type for att in attachments]
-    return {"processed_attachments": processed_count, "types": attachment_types}
-
-async def _execute_multimodal_processing(multimodal_input: MultimodalInput) -> Dict[str, Any]:
-    """Execute multimodal message processing with attachments."""
-    from app.services.agent_service import process_multimodal
-    attachment_data = await _process_multimodal_attachments(multimodal_input.attachments)
-    result = await process_multimodal(multimodal_input.model_dump())
-    return {**result, **attachment_data}
-
-async def process_multimodal_message(multimodal_input: Union[Dict[str, Any], MultimodalInput]) -> Dict[str, Any]:
-    """Process multimodal message with text and attachments."""
-    if isinstance(multimodal_input, dict):
-        multimodal_input = MultimodalInput(**multimodal_input)
-    return await _execute_multimodal_processing(multimodal_input)
-
-async def _execute_context_processing(message: str, thread_id: str, agent_service: AgentService) -> Dict[str, Any]:
-    """Execute message processing with context management."""
-    result = await agent_service.process_message(message, thread_id)
-    context_data = {"thread_id": thread_id, "message_count": 1}
-    return {**result, "context": context_data}
-
-async def process_with_context(message: str, thread_id: str, agent_service: AgentService) -> Dict[str, Any]:
-    """Process message with context and thread management."""
-    return await _execute_context_processing(message, thread_id, agent_service)
-
-async def _attempt_primary_processing(message: str) -> Dict[str, Any]:
-    """Attempt processing with primary agent."""
-    from app.services.agent_service import get_primary_agent
-    primary_agent = get_primary_agent()
-    return await primary_agent.process_message(message)
-
-async def _attempt_fallback_processing(message: str) -> Dict[str, Any]:
-    """Attempt processing with fallback agent."""
-    from app.services.agent_service import get_fallback_agent
-    fallback_agent = get_fallback_agent()
-    result = await fallback_agent.process_message(message)
-    return {**result, "agent": "fallback", "status": "recovered"}
-
-async def process_with_fallback(message: str) -> Dict[str, Any]:
-    """Process message with fallback and recovery mechanisms."""
-    try:
-        return await _attempt_primary_processing(message)
-    except Exception:
-        return await _attempt_fallback_processing(message)
-
-async def _handle_websocket_json_parse(websocket: WebSocket, data: str) -> Dict:
-    """Handle JSON parsing for WebSocket data."""
-    try:
-        return json.loads(data)
-    except json.JSONDecodeError:
-        await websocket.send_json({"type": "error", "message": "Invalid JSON"})
-        return None
-
-async def _process_websocket_message(websocket: WebSocket, message_data: Dict) -> Dict:
-    """Process valid WebSocket message."""
-    response = {
-        "type": "agent_response", 
-        "response": f"Processed: {message_data.get('message', '')}"
-    }
-    if "thread_id" in message_data:
-        response["thread_id"] = message_data["thread_id"]
-    return response
-
-async def _handle_websocket_error(websocket: WebSocket, e: Exception) -> None:
-    """Handle WebSocket errors gracefully."""
-    try:
-        await websocket.send_json({"type": "error", "message": f"Server error: {str(e)}"})
-    except:
-        pass
-
-async def _process_websocket_loop(websocket: WebSocket) -> None:
-    """Process WebSocket message loop."""
-    while True:
-        data = await websocket.receive_text()
-        message_data = await _handle_websocket_json_parse(websocket, data)
-        if message_data:
-            response = await _process_websocket_message(websocket, message_data)
-            await websocket.send_json(response)
 
 @router.websocket("/ws/agent")
 async def agent_websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for agent communication."""
-    await websocket.accept()
-    try:
-        await _process_websocket_loop(websocket)
-    except WebSocketDisconnect:
-        pass
-    except Exception as e:
-        await _handle_websocket_error(websocket, e)
+    await handle_websocket_exceptions(websocket)

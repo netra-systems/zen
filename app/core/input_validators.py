@@ -55,34 +55,49 @@ class EnhancedInputValidator:
         try:
             if not input_value:
                 return self._create_empty_input_result()
-            
-            # Check cache if enabled
-            if self.enable_caching:
-                cache_key = f"{input_value}:{field_name}:{context}"
-                if cache_key in self._cache:
-                    cached_result = self._cache[cache_key]
-                    # Create copy to avoid modifying cached object
-                    result_copy = SecurityValidationResult(
-                        is_valid=cached_result.is_valid,
-                        errors=cached_result.errors.copy(),
-                        warnings=cached_result.warnings.copy(),
-                        sanitized_value=cached_result.sanitized_value,
-                        confidence_score=cached_result.confidence_score,
-                        threats_detected=cached_result.threats_detected.copy(),
-                        from_cache=True
-                    )
-                    return result_copy
-            
-            result = self._perform_comprehensive_validation(input_value, field_name, context)
-            result.from_cache = False
-            
-            # Cache result if enabled
-            if self.enable_caching:
-                self._cache[cache_key] = result
-                
-            return result
+            return self._validate_with_caching(input_value, field_name, context)
         except Exception as e:
             return self._create_error_result(field_name, e)
+
+    def _validate_with_caching(self, input_value: str, field_name: str,
+                              context: Optional[Dict[str, Any]]) -> SecurityValidationResult:
+        """Validate input with caching support."""
+        cached_result = self._check_validation_cache(input_value, field_name, context)
+        if cached_result:
+            return cached_result
+        result = self._perform_comprehensive_validation(input_value, field_name, context)
+        result.from_cache = False
+        self._store_validation_cache(input_value, field_name, context, result)
+        return result
+
+    def _check_validation_cache(self, input_value: str, field_name: str,
+                               context: Optional[Dict[str, Any]]) -> Optional[SecurityValidationResult]:
+        """Check cache for existing validation result."""
+        if not self.enable_caching:
+            return None
+        cache_key = f"{input_value}:{field_name}:{context}"
+        if cache_key not in self._cache:
+            return None
+        return self._create_cached_result_copy(self._cache[cache_key])
+
+    def _create_cached_result_copy(self, cached_result: SecurityValidationResult) -> SecurityValidationResult:
+        """Create a copy of cached result to avoid modification."""
+        return SecurityValidationResult(
+            is_valid=cached_result.is_valid,
+            errors=cached_result.errors.copy(),
+            warnings=cached_result.warnings.copy(),
+            sanitized_value=cached_result.sanitized_value,
+            confidence_score=cached_result.confidence_score,
+            threats_detected=cached_result.threats_detected.copy(),
+            from_cache=True
+        )
+
+    def _store_validation_cache(self, input_value: str, field_name: str,
+                               context: Optional[Dict[str, Any]], result: SecurityValidationResult) -> None:
+        """Store validation result in cache if enabled."""
+        if self.enable_caching:
+            cache_key = f"{input_value}:{field_name}:{context}"
+            self._cache[cache_key] = result
     
     def _create_empty_input_result(self) -> SecurityValidationResult:
         """Create result for empty input."""

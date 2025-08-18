@@ -137,27 +137,32 @@ class ToolUsageAnalyzer:
         file_path: str
     ) -> Optional[Dict[str, Any]]:
         """Extract tool information from pattern."""
-        category = pattern_info.get("category")
-        content = pattern_info.get("content", "")
-        line = pattern_info.get("line", 0)
-        
-        # Check if this is tool-related
-        if category != "tools" and "tool" not in content.lower():
+        if not self._is_tool_related_pattern(pattern_info):
             return None
         
-        tool_info = {
+        tool_info = self._build_base_tool_info(pattern_info, file_path)
+        details = self._extract_tool_details(tool_info["content"])
+        if details:
+            tool_info.update(details)
+        return tool_info
+    
+    def _is_tool_related_pattern(self, pattern_info: Dict[str, Any]) -> bool:
+        """Check if pattern is tool-related."""
+        category = pattern_info.get("category")
+        content = pattern_info.get("content", "")
+        return category == "tools" or "tool" in content.lower()
+    
+    def _build_base_tool_info(
+        self, pattern_info: Dict[str, Any], file_path: str
+    ) -> Dict[str, Any]:
+        """Build base tool info structure."""
+        content = pattern_info.get("content", "")
+        return {
             "file": file_path,
-            "line": line,
+            "line": pattern_info.get("line", 0),
             "content": content,
             "type": self._identify_tool_type(content)
         }
-        
-        # Extract tool details
-        details = self._extract_tool_details(content)
-        if details:
-            tool_info.update(details)
-        
-        return tool_info
     
     def _identify_tool_type(self, content: str) -> str:
         """Identify type of tool."""
@@ -325,7 +330,6 @@ class ToolUsageAnalyzer:
         total_tools = self._calculate_total_tools(tool_map)
         complexity = self._estimate_complexity(tool_map)
         most_common = self._find_most_common_type(tool_map)
-        
         return self._build_summary_dict(
             tool_map, total_tools, complexity, most_common
         )
@@ -354,13 +358,29 @@ class ToolUsageAnalyzer:
         most_common: Optional[str]
     ) -> Dict[str, Any]:
         """Build summary dictionary."""
+        base_summary = self._create_base_summary(
+            tool_map, total_tools, complexity, most_common
+        )
+        base_summary.update(self._create_feature_summary(tool_map))
+        return base_summary
+    
+    def _create_base_summary(
+        self, tool_map: Dict[str, Any], total_tools: int, 
+        complexity: str, most_common: Optional[str]
+    ) -> Dict[str, Any]:
+        """Create base summary statistics."""
         return {
             "total_tools": total_tools,
             "function_tools": len(tool_map["functions"]),
             "other_tools": len(tool_map["tools"]),
             "tool_types": len(tool_map["tool_categories"]),
             "most_common_type": most_common,
-            "complexity": complexity,
+            "complexity": complexity
+        }
+    
+    def _create_feature_summary(self, tool_map: Dict[str, Any]) -> Dict[str, Any]:
+        """Create feature-specific summary."""
+        return {
             "has_retrieval": self._has_retrieval(tool_map),
             "has_agents": self._has_agents(tool_map)
         }
@@ -369,7 +389,10 @@ class ToolUsageAnalyzer:
         """Estimate tool complexity."""
         total = len(tool_map["tools"]) + len(tool_map["functions"])
         types = len(tool_map["tool_categories"])
-        
+        return self._classify_complexity_level(total, types)
+    
+    def _classify_complexity_level(self, total: int, types: int) -> str:
+        """Classify complexity level based on counts."""
         if total > 20 or types > 5:
             return "high"
         elif total > 5 or types > 2:

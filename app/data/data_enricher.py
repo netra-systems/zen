@@ -63,16 +63,35 @@ class DataEnricher:
 
     def _get_transformation_select_columns(self) -> str:
         """Define the SELECT column transformations for enrichment query."""
-        return """
-            toJSONString(map('log_schema_version', '23.4.0', 'event_id', generateUUIDv4(), 'timestamp_utc', toUnixTimestamp(now()))) as event_metadata,
-            toJSONString(map('trace_id', trace_id, 'span_id', span_id, 'parent_span_id', parent_span_id)) as trace_context,
-            toJSONString(map(
+        event_metadata = self._get_event_metadata_transformation()
+        trace_context = self._get_trace_context_transformation()
+        request_data = self._get_request_data_transformation()
+        performance_data = self._get_performance_data_transformation()
+        return f"{event_metadata},\n{trace_context},\n{request_data},\n{performance_data},\n{self._get_remaining_transformations()}"
+        
+    def _get_event_metadata_transformation(self) -> str:
+        """Get event metadata transformation."""
+        return "toJSONString(map('log_schema_version', '23.4.0', 'event_id', generateUUIDv4(), 'timestamp_utc', toUnixTimestamp(now()))) as event_metadata"
+        
+    def _get_trace_context_transformation(self) -> str:
+        """Get trace context transformation."""
+        return "toJSONString(map('trace_id', trace_id, 'span_id', span_id, 'parent_span_id', parent_span_id)) as trace_context"
+        
+    def _get_request_data_transformation(self) -> str:
+        """Get request data transformation."""
+        return """toJSONString(map(
                 'model', toJSONString(map('provider', model_provider, 'family', model_family, 'name', model_name)),
                 'prompt_text', prompt,
                 'user_goal', user_goal
-            )) as request,
-            toJSONString(map('latency_ms', toJSONString(map('total_e2e_ms', total_latency_ms, 'time_to_first_token_ms', ttft_ms)))) as performance,
-            toJSONString(map('total_cost_usd', cost_usd)) as finops,
+            )) as request"""
+            
+    def _get_performance_data_transformation(self) -> str:
+        """Get performance data transformation."""
+        return "toJSONString(map('latency_ms', toJSONString(map('total_e2e_ms', total_latency_ms, 'time_to_first_token_ms', ttft_ms)))) as performance"
+        
+    def _get_remaining_transformations(self) -> str:
+        """Get remaining data transformations."""
+        return """toJSONString(map('total_cost_usd', cost_usd)) as finops,
             toJSONString(map('usage', toJSONString(map('prompt_tokens', prompt_tokens, 'completion_tokens', completion_tokens, 'total_tokens', prompt_tokens + completion_tokens)))) as response,
             workload_name as workloadName,
             NULL as enriched_metrics,

@@ -47,29 +47,34 @@ class BaseHealthChecker(ABC):
     
     def _create_timeout_result(self) -> HealthCheckResult:
         """Create timeout result for health check."""
+        timeout_details = self._build_timeout_details()
         return HealthCheckResult(
             status="unhealthy",
             response_time=self.timeout,
-            details={
-                "component_name": self.name,
-                "success": False,
-                "health_score": 0.0,
-                "error_message": f"Health check timeout after {self.timeout}s"
-            }
+            details=timeout_details
         )
+    
+    def _build_timeout_details(self) -> Dict[str, Any]:
+        """Build timeout result details."""
+        return {"component_name": self.name, "success": False, "health_score": 0.0,
+                "error_message": f"Health check timeout after {self.timeout}s"}
 
 
 class HealthInterface:
     """Unified health interface for all services."""
     
     def __init__(self, service_name: str, version: str = "1.0.0", sla_target: float = 99.9):
-        self.service_name = service_name
-        self.version = version
-        self.sla_target = sla_target
+        self._initialize_service_properties(service_name, version, sla_target)
+        self._setup_telemetry_registration(service_name, sla_target)
+    
+    def _initialize_service_properties(self, service_name: str, version: str, sla_target: float) -> None:
+        """Initialize core service properties."""
+        self.service_name, self.version, self.sla_target = service_name, version, sla_target
         self._checkers: Dict[str, BaseHealthChecker] = {}
         self._start_time = datetime.now(UTC)
-        
-        # Register with telemetry system for Enterprise monitoring
+    
+    def _setup_telemetry_registration(self, service_name: str, sla_target: float) -> None:
+        """Register with telemetry system for Enterprise monitoring."""
         telemetry_manager.register_service(service_name, sla_target)
     
     def register_checker(self, checker: BaseHealthChecker) -> None:
@@ -99,73 +104,81 @@ class HealthInterface:
         """Get standard health with key component checks."""
         checks = await self._run_critical_checks()
         overall_status = self._determine_overall_status(checks)
-        
-        return {
-            "status": overall_status.value,
-            "service": self.service_name,
-            "version": self.version,
-            "uptime_seconds": self._get_uptime_seconds(),
-            "checks": {name: result.details.get("success", True) for name, result in checks.items()},
-            "timestamp": datetime.now(UTC).isoformat()
-        }
+        return self._build_standard_health_response(overall_status, checks)
+    
+    def _build_standard_health_response(self, status: HealthStatus, checks: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
+        """Build standard health response."""
+        return {"status": status.value, "service": self.service_name, "version": self.version,
+                "uptime_seconds": self._get_uptime_seconds(), "timestamp": datetime.now(UTC).isoformat(),
+                "checks": {name: result.details.get("success", True) for name, result in checks.items()}}
     
     async def _get_comprehensive_health(self) -> Dict[str, Any]:
         """Get comprehensive health with detailed metrics."""
         checks = await self._run_all_checks()
         overall_status = self._determine_overall_status(checks)
-        
-        return {
-            "status": overall_status.value,
-            "service": self.service_name,
-            "version": self.version,
-            "uptime_seconds": self._get_uptime_seconds(),
-            "checks": self._format_detailed_checks(checks),
-            "metrics": await self._get_service_metrics(),
-            "timestamp": datetime.now(UTC).isoformat()
-        }
+        return await self._build_comprehensive_health_response(overall_status, checks)
+    
+    async def _build_comprehensive_health_response(self, status: HealthStatus, checks: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
+        """Build comprehensive health response."""
+        return {"status": status.value, "service": self.service_name, "version": self.version,
+                "uptime_seconds": self._get_uptime_seconds(), "timestamp": datetime.now(UTC).isoformat(),
+                "checks": self._format_detailed_checks(checks), "metrics": await self._get_service_metrics()}
     
     async def _run_critical_checks(self) -> Dict[str, HealthCheckResult]:
         """Run only critical health checks, respecting development mode."""
-        critical_components = ["postgres", "auth", "core"]
         results = {}
-        
         for name, checker in self._checkers.items():
-            if any(comp in name.lower() for comp in critical_components):
-                results[name] = await checker.check_with_timeout()
-            elif self._is_optional_in_development(name):
-                results[name] = await self._run_optional_development_check(name, checker)
-        
+            result = await self._execute_checker_by_criticality(name, checker)
+            if result is not None:
+                results[name] = result
         return results
+    
+    async def _execute_checker_by_criticality(self, name: str, checker: BaseHealthChecker) -> Optional[HealthCheckResult]:
+        """Execute checker based on component criticality."""
+        critical_components = ["postgres", "auth", "core"]
+        if any(comp in name.lower() for comp in critical_components):
+            return await checker.check_with_timeout()
+        elif self._is_optional_in_development(name):
+            return await self._run_optional_development_check(name, checker)
+        return None
     
     async def _run_all_checks(self) -> Dict[str, HealthCheckResult]:
         """Run all registered health checks and record telemetry data."""
-        tasks = {
-            name: checker.check_with_timeout() 
-            for name, checker in self._checkers.items()
-        }
-        
-        results = await asyncio.gather(*tasks.values(), return_exceptions=True)
-        health_results = {name: result for name, result in zip(tasks.keys(), results) 
-                         if isinstance(result, HealthCheckResult)}
-        
-        # Record telemetry data for Enterprise monitoring
-        telemetry_manager.record_health_data(self.service_name, health_results)
-        
+        tasks = self._create_health_check_tasks()
+        health_results = await self._execute_and_filter_results(tasks)
+        self._record_telemetry_data(health_results)
         return health_results
+    
+    def _create_health_check_tasks(self) -> Dict[str, Any]:
+        """Create health check tasks for all registered checkers."""
+        return {name: checker.check_with_timeout() for name, checker in self._checkers.items()}
+    
+    async def _execute_and_filter_results(self, tasks: Dict[str, Any]) -> Dict[str, HealthCheckResult]:
+        """Execute tasks and filter valid health results."""
+        results = await asyncio.gather(*tasks.values(), return_exceptions=True)
+        return {name: result for name, result in zip(tasks.keys(), results) if isinstance(result, HealthCheckResult)}
+    
+    def _record_telemetry_data(self, health_results: Dict[str, HealthCheckResult]) -> None:
+        """Record telemetry data for Enterprise monitoring."""
+        telemetry_manager.record_health_data(self.service_name, health_results)
     
     def _determine_overall_status(self, checks: Dict[str, HealthCheckResult]) -> HealthStatus:
         """Determine overall system status, treating optional services gracefully."""
         if not checks:
             return HealthStatus.HEALTHY
-        
+        return self._calculate_status_from_failure_rate(checks)
+    
+    def _calculate_status_from_failure_rate(self, checks: Dict[str, HealthCheckResult]) -> HealthStatus:
+        """Calculate status based on critical component failure rate."""
         critical_failed = self._count_critical_failures(checks)
         total_critical = self._count_critical_checks(checks)
-        
+        return self._map_failure_rate_to_status(critical_failed, total_critical)
+    
+    def _map_failure_rate_to_status(self, critical_failed: int, total_critical: int) -> HealthStatus:
+        """Map failure rate to health status."""
         if total_critical == 0:
             return HealthStatus.HEALTHY
-        
-        failure_rate = critical_failed / total_critical if total_critical > 0 else 0
-        
+        failure_rate = critical_failed / total_critical
         if failure_rate == 0:
             return HealthStatus.HEALTHY
         elif failure_rate < 0.5:
@@ -176,28 +189,31 @@ class HealthInterface:
     def _format_detailed_checks(self, checks: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
         """Format detailed check results for comprehensive response."""
         return {
-            name: {
-                "success": result.details.get("success", result.status == "healthy"),
-                "health_score": result.details.get("health_score", 1.0 if result.status == "healthy" else 0.0),
-                "response_time_ms": result.response_time * 1000,  # Convert seconds to ms
-                "error": result.details.get("error_message") if result.status != "healthy" else None
-            }
+            name: self._format_single_check_result(result)
             for name, result in checks.items()
         }
     
+    def _format_single_check_result(self, result: HealthCheckResult) -> Dict[str, Any]:
+        """Format single health check result."""
+        return {"success": result.details.get("success", result.status == "healthy"),
+                "health_score": result.details.get("health_score", 1.0 if result.status == "healthy" else 0.0),
+                "response_time_ms": result.response_time * 1000,
+                "error": result.details.get("error_message") if result.status != "healthy" else None}
+    
     async def _get_service_metrics(self) -> Dict[str, Any]:
         """Get service-specific metrics including Enterprise telemetry."""
-        base_metrics = {
-            "total_checks": len(self._checkers),
-            "uptime_seconds": self._get_uptime_seconds(),
-            "circuit_breaker_enabled": True
-        }
-        
-        # Add Enterprise telemetry metrics
+        base_metrics = self._create_base_metrics()
+        return self._enhance_with_enterprise_metrics(base_metrics)
+    
+    def _create_base_metrics(self) -> Dict[str, Any]:
+        """Create base service metrics."""
+        return {"total_checks": len(self._checkers), "uptime_seconds": self._get_uptime_seconds(), "circuit_breaker_enabled": True}
+    
+    def _enhance_with_enterprise_metrics(self, base_metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """Enhance base metrics with Enterprise telemetry."""
         enterprise_metrics = telemetry_manager.get_service_metrics(self.service_name)
         if enterprise_metrics:
             base_metrics.update(enterprise_metrics)
-        
         return base_metrics
     
     def _get_uptime_seconds(self) -> float:
@@ -229,39 +245,38 @@ class HealthInterface:
     def _create_development_warning_result(self, component_name: str, error_msg: str) -> HealthCheckResult:
         """Create a warning result for optional development services."""
         from ..health_types import HealthCheckResult
+        details = self._build_development_warning_details(component_name, error_msg)
         return HealthCheckResult(
-            status="healthy",  # Mark as healthy in development
+            status="healthy",
             response_time=0.0,
-            details={
-                "component_name": component_name,
-                "success": True,
-                "health_score": 0.8,  # Slightly degraded but acceptable
-                "error_message": f"Development mode - {component_name} unavailable: {error_msg}",
-                "status": "development_optional",
-                "available": False
-            }
+            details=details
         )
+    
+    def _build_development_warning_details(self, component_name: str, error_msg: str) -> Dict[str, Any]:
+        """Build development warning result details."""
+        return {"component_name": component_name, "success": True, "health_score": 0.8,
+                "error_message": f"Development mode - {component_name} unavailable: {error_msg}",
+                "status": "development_optional", "available": False}
     
     def _count_critical_failures(self, checks: Dict[str, HealthCheckResult]) -> int:
         """Count failures in critical components only."""
         critical_components = ["postgres", "auth", "core"]
-        critical_failed = 0
-        
-        for name, result in checks.items():
-            if any(comp in name.lower() for comp in critical_components):
-                success = result.details.get("success", result.status == "healthy")
-                if not success:
-                    critical_failed += 1
-        
-        return critical_failed
+        return sum(1 for name, result in checks.items() 
+                  if self._is_critical_component_failed(name, result, critical_components))
+    
+    def _is_critical_component_failed(self, name: str, result: HealthCheckResult, critical_components: List[str]) -> bool:
+        """Check if critical component has failed."""
+        if not any(comp in name.lower() for comp in critical_components):
+            return False
+        success = result.details.get("success", result.status == "healthy")
+        return not success
     
     def _count_critical_checks(self, checks: Dict[str, HealthCheckResult]) -> int:
         """Count total critical component checks."""
         critical_components = ["postgres", "auth", "core"]
-        critical_count = 0
-        
-        for name in checks.keys():
-            if any(comp in name.lower() for comp in critical_components):
-                critical_count += 1
-        
-        return critical_count
+        return sum(1 for name in checks.keys() 
+                  if self._is_critical_component(name, critical_components))
+    
+    def _is_critical_component(self, name: str, critical_components: List[str]) -> bool:
+        """Check if component is critical."""
+        return any(comp in name.lower() for comp in critical_components)

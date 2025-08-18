@@ -45,6 +45,10 @@ class AuthTokenCache:
         if token not in self._token_cache:
             return None
         
+        return self._validate_and_return_cached_token(token)
+    
+    def _validate_and_return_cached_token(self, token: str) -> Optional[Dict]:
+        """Validate cached token and return if valid."""
         cached = self._token_cache[token]
         if cached.is_valid():
             return cached.data
@@ -74,13 +78,17 @@ class AuthCircuitBreakerManager:
     
     def _create_circuit_breaker(self) -> CircuitBreaker:
         """Create circuit breaker for auth service."""
-        config = CircuitConfig(
+        config = self._get_circuit_config()
+        return CircuitBreaker(config)
+    
+    def _get_circuit_config(self) -> CircuitConfig:
+        """Get circuit breaker configuration."""
+        return CircuitConfig(
             name="auth_service",
             failure_threshold=5,
             recovery_timeout=60,
             timeout_seconds=30
         )
-        return CircuitBreaker(config)
     
     async def call_with_breaker(self, func, *args, **kwargs):
         """Execute function call through circuit breaker."""

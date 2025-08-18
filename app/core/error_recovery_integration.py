@@ -33,7 +33,12 @@ class EnhancedErrorRecoverySystem:
     
     def __init__(self):
         """Initialize enhanced error recovery system."""
-        # Core managers
+        self._init_core_managers()
+        self._init_legacy_compatibility()
+        self._init_recovery_stats()
+    
+    def _init_core_managers(self) -> None:
+        """Initialize core recovery managers."""
         self.retry_manager = retry_manager
         self.circuit_breaker_registry = circuit_breaker_registry
         self.degradation_manager = degradation_manager
@@ -41,12 +46,14 @@ class EnhancedErrorRecoverySystem:
         self.websocket_manager = websocket_recovery_manager
         self.database_registry = database_recovery_registry
         self.error_aggregation = error_aggregation_system
-        
-        # Legacy compatibility
+    
+    def _init_legacy_compatibility(self) -> None:
+        """Initialize legacy compatibility components."""
         self.agent_registry = agent_recovery_registry
         self.error_logger = error_logger
-        
-        # Statistics
+    
+    def _init_recovery_stats(self) -> None:
+        """Initialize recovery statistics tracking."""
         self.recovery_stats = {
             'total_recoveries': 0,
             'successful_recoveries': 0,
@@ -64,8 +71,22 @@ class EnhancedErrorRecoverySystem:
         user_id: Optional[str] = None
     ) -> Any:
         """Handle agent error with enhanced recovery pipeline."""
+        await self._process_agent_error_data(agent_type, operation, error, context_data, user_id)
+        return await self._execute_agent_recovery_pipeline(agent_type, operation, error, context_data, user_id)
+    
+    async def _process_agent_error_data(
+        self, agent_type: str, operation: str, error: Exception, 
+        context_data: Optional[Dict], user_id: Optional[str]
+    ) -> None:
+        """Process agent error data for aggregation."""
         error_data = self._prepare_error_data(agent_type, operation, error, context_data, user_id)
         await self.error_aggregation.process_error(error_data)
+    
+    async def _execute_agent_recovery_pipeline(
+        self, agent_type: str, operation: str, error: Exception,
+        context_data: Optional[Dict], user_id: Optional[str]
+    ) -> Any:
+        """Execute agent recovery pipeline with circuit breaker."""
         breaker = self.circuit_breaker_registry.get_breaker(f"agent_{agent_type}")
         return await self._execute_agent_error_recovery(breaker, agent_type, operation, error, context_data, user_id)
     
@@ -88,21 +109,45 @@ class EnhancedErrorRecoverySystem:
         transaction_id: Optional[str] = None
     ) -> Any:
         """Handle database error with enhanced recovery."""
+        await self._process_database_error_data(table_name, operation, error, transaction_id)
+        return await self._execute_database_recovery_pipeline(table_name, operation, error, rollback_data, transaction_id)
+    
+    async def _process_database_error_data(
+        self, table_name: str, operation: str, error: Exception, transaction_id: Optional[str]
+    ) -> None:
+        """Process database error data for aggregation."""
         error_data = self._prepare_database_error_data(table_name, operation, error, transaction_id)
         await self.error_aggregation.process_error(error_data)
+    
+    async def _execute_database_recovery_pipeline(
+        self, table_name: str, operation: str, error: Exception,
+        rollback_data: Optional[Dict], transaction_id: Optional[str]
+    ) -> Any:
+        """Execute database recovery pipeline with circuit breaker."""
         breaker = self.circuit_breaker_registry.get_breaker(f"db_{table_name}")
         return await self._execute_database_error_recovery(breaker, table_name, operation, error, rollback_data, transaction_id)
     
     def _prepare_database_error_data(self, table_name: str, operation: str, error: Exception, transaction_id: Optional[str]) -> Dict[str, Any]:
         """Prepare database error data for aggregation."""
+        base_data = self._get_database_base_error_data(error, operation)
+        return self._add_database_context_data(base_data, table_name, transaction_id)
+    
+    def _get_database_base_error_data(self, error: Exception, operation: str) -> Dict[str, Any]:
+        """Get base database error data."""
         return {
             'error_type': type(error).__name__,
             'module': 'database',
             'function': operation,
-            'message': str(error),
+            'message': str(error)
+        }
+    
+    def _add_database_context_data(self, base_data: Dict[str, Any], table_name: str, transaction_id: Optional[str]) -> Dict[str, Any]:
+        """Add database context data to error data."""
+        base_data.update({
             'table_name': table_name,
             'transaction_id': transaction_id
-        }
+        })
+        return base_data
     
     async def _execute_database_error_recovery(self, breaker, table_name: str, operation: str, error: Exception, rollback_data: Optional[Dict], transaction_id: Optional[str]) -> Any:
         """Execute database error recovery with circuit breaker."""
@@ -123,22 +168,45 @@ class EnhancedErrorRecoverySystem:
         retry_config: Optional[Dict] = None
     ) -> Any:
         """Handle API error with retry and circuit breaking."""
+        await self._process_api_error_data(endpoint, method, error, status_code)
+        return await self._execute_api_recovery_pipeline(endpoint, method, error, status_code)
+    
+    async def _process_api_error_data(
+        self, endpoint: str, method: str, error: Exception, status_code: Optional[int]
+    ) -> None:
+        """Process API error data for aggregation."""
         error_data = self._prepare_api_error_data(endpoint, method, error, status_code)
         await self.error_aggregation.process_error(error_data)
+    
+    async def _execute_api_recovery_pipeline(
+        self, endpoint: str, method: str, error: Exception, status_code: Optional[int]
+    ) -> Any:
+        """Execute API recovery pipeline with retry strategy."""
         breaker = self.circuit_breaker_registry.get_breaker(f"api_{endpoint}")
         retry_strategy = self.retry_manager.get_strategy(OperationType.EXTERNAL_API)
         return await self._execute_api_error_recovery(breaker, endpoint, method, error, status_code, retry_strategy)
     
     def _prepare_api_error_data(self, endpoint: str, method: str, error: Exception, status_code: Optional[int]) -> Dict[str, Any]:
         """Prepare API error data for aggregation."""
+        base_data = self._get_api_base_error_data(error, method)
+        return self._add_api_context_data(base_data, endpoint, status_code)
+    
+    def _get_api_base_error_data(self, error: Exception, method: str) -> Dict[str, Any]:
+        """Get base API error data."""
         return {
             'error_type': type(error).__name__,
             'module': 'api',
             'function': method,
-            'message': str(error),
+            'message': str(error)
+        }
+    
+    def _add_api_context_data(self, base_data: Dict[str, Any], endpoint: str, status_code: Optional[int]) -> Dict[str, Any]:
+        """Add API context data to error data."""
+        base_data.update({
             'endpoint': endpoint,
             'status_code': status_code
-        }
+        })
+        return base_data
     
     async def _execute_api_error_recovery(self, breaker, endpoint: str, method: str, error: Exception, status_code: Optional[int], retry_strategy) -> Any:
         """Execute API error recovery with circuit breaker."""
@@ -157,16 +225,26 @@ class EnhancedErrorRecoverySystem:
         context_data: Optional[Dict] = None
     ) -> Any:
         """Handle WebSocket error with recovery."""
-        error_data = {
+        await self._process_websocket_error_data(connection_id, error)
+        return await self._execute_websocket_recovery()
+    
+    async def _process_websocket_error_data(self, connection_id: str, error: Exception) -> None:
+        """Process WebSocket error data for aggregation."""
+        error_data = self._prepare_websocket_error_data(connection_id, error)
+        await self.error_aggregation.process_error(error_data)
+    
+    def _prepare_websocket_error_data(self, connection_id: str, error: Exception) -> Dict[str, Any]:
+        """Prepare WebSocket error data."""
+        return {
             'error_type': type(error).__name__,
             'module': 'websocket',
             'function': 'connection',
             'message': str(error),
             'connection_id': connection_id
         }
-        await self.error_aggregation.process_error(error_data)
-        
-        # Attempt WebSocket recovery
+    
+    async def _execute_websocket_recovery(self) -> Any:
+        """Execute WebSocket recovery operations."""
         return await self.websocket_manager.recover_all_connections()
     
     async def handle_memory_exhaustion(self, context_data: Optional[Dict] = None) -> bool:
@@ -229,11 +307,16 @@ class EnhancedErrorRecoverySystem:
         user_id: Optional[str]
     ) -> Any:
         """Execute agent recovery with retry strategy."""
+        agent_type_enum = self._get_validated_agent_type(agent_type, error)
+        context = self._build_recovery_context(agent_type, operation, error)
+        return await self.agent_registry.recover_agent_operation(agent_type_enum, context)
+    
+    def _get_validated_agent_type(self, agent_type: str, error: Exception):
+        """Get validated agent type enum or raise error."""
         agent_type_enum = self._get_agent_type_enum(agent_type)
         if not agent_type_enum:
             raise error
-        context = self._build_recovery_context(agent_type, operation, error)
-        return await self.agent_registry.recover_agent_operation(agent_type_enum, context)
+        return agent_type_enum
     
     def _build_recovery_context(self, agent_type: str, operation: str, error: Exception) -> RecoveryContext:
         """Build recovery context for agent operations."""
@@ -254,11 +337,14 @@ class EnhancedErrorRecoverySystem:
         transaction_id: Optional[str]
     ) -> Any:
         """Execute database recovery with rollback if needed."""
-        # Use legacy rollback logic for now
         if rollback_data:
-            logger.info(f"Database rollback needed for {table_name}")
-            return {'status': 'rollback_queued', 'table': table_name}
+            return self._execute_database_rollback(table_name)
         raise error
+    
+    def _execute_database_rollback(self, table_name: str) -> Dict[str, Any]:
+        """Execute database rollback operation."""
+        logger.info(f"Database rollback needed for {table_name}")
+        return {'status': 'rollback_queued', 'table': table_name}
     
     async def _execute_api_recovery(
         self,
@@ -270,9 +356,13 @@ class EnhancedErrorRecoverySystem:
     ) -> Any:
         """Execute API recovery with retry strategy."""
         context = self._build_api_recovery_context(endpoint, method, error, status_code)
+        self._validate_retry_eligibility(context, retry_strategy, error)
+        return await self._execute_api_retry(endpoint, retry_strategy, context)
+    
+    def _validate_retry_eligibility(self, context: RecoveryContext, retry_strategy: Any, error: Exception) -> None:
+        """Validate if retry is eligible, raise error if not."""
         if not retry_strategy.should_retry(context):
             raise error
-        return await self._execute_api_retry(endpoint, retry_strategy, context)
     
     def _build_api_recovery_context(self, endpoint: str, method: str, error: Exception, status_code: Optional[int]) -> RecoveryContext:
         """Build recovery context for API operations."""
@@ -299,11 +389,10 @@ class EnhancedErrorRecoverySystem:
         context_data: Optional[Dict]
     ) -> Any:
         """Attempt graceful degradation for agent."""
-        return await self.degradation_manager.degrade_service(
-            f"agent_{agent_type}",
-            self.degradation_manager.global_degradation_level,
-            context_data or {}
-        )
+        service_name = f"agent_{agent_type}"
+        degradation_level = self.degradation_manager.global_degradation_level
+        context = context_data or {}
+        return await self.degradation_manager.degrade_service(service_name, degradation_level, context)
     
     async def _attempt_database_degradation(
         self,

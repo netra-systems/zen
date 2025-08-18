@@ -37,20 +37,24 @@ async def handle_dashboard_request(monitoring_service: QualityMonitoringService,
         formatted_data = format_dashboard_data(dashboard_data, user, period_hours)
         return _complete_dashboard_data(formatted_data)
     except Exception as e:
-        logger.error(f"Error getting dashboard data: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve dashboard data")
+        _handle_dashboard_error(e)
 
 
 async def handle_content_validation(quality_gate_service: QualityGateService, request: QualityValidationRequest, user: User):
     """Handle content validation request."""
     try:
-        content_type = map_content_type(request.content_type)
-        context = prepare_user_context(request.context, user)
-        result = await _validate_content_with_service(quality_gate_service, request, content_type, context)
+        prepared_data = _prepare_validation_data(request, user)
+        result = await _validate_content_with_service(quality_gate_service, request, prepared_data["content_type"], prepared_data["context"])
         return format_validation_response(result, user.id)
     except Exception as e:
-        logger.error(f"Error validating content: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+        _handle_validation_error(e)
+
+
+def _prepare_validation_data(request: QualityValidationRequest, user: User) -> Dict[str, Any]:
+    """Prepare validation data from request."""
+    content_type = map_content_type(request.content_type)
+    context = prepare_user_context(request.context, user)
+    return {"content_type": content_type, "context": context}
 
 
 async def _validate_content_with_service(quality_gate_service, request, content_type, context):
@@ -66,41 +70,33 @@ async def _validate_content_with_service(quality_gate_service, request, content_
 async def handle_agent_report_request(monitoring_service: QualityMonitoringService, agent_name: str, period_hours: int) -> Dict[str, Any]:
     """Handle agent quality report request."""
     try:
-        report = await monitoring_service.get_agent_report(agent_name, period_hours)
-        if "error" in report:
-            raise HTTPException(status_code=404, detail=report["error"])
-        return report
+        report = await _fetch_agent_report(monitoring_service, agent_name, period_hours)
+        return _validate_agent_report(report)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting agent report: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to generate agent report")
+        _handle_agent_report_error(e)
 
 
 async def handle_alerts_request(monitoring_service: QualityMonitoringService, severity: str, acknowledged: bool, limit: int) -> List[QualityAlert]:
     """Handle quality alerts request."""
     try:
-        all_alerts = list(monitoring_service.alert_history)[-limit:]
+        all_alerts = _get_recent_alerts(monitoring_service, limit)
         filtered_alerts = apply_alert_filters(all_alerts, severity, acknowledged)
-        formatted_alerts = format_alert_list(filtered_alerts)
-        return _complete_alert_formatting(formatted_alerts, filtered_alerts)
+        return _format_and_complete_alerts(filtered_alerts)
     except Exception as e:
-        logger.error(f"Error getting alerts: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve alerts")
+        _handle_alerts_error(e)
 
 
 async def handle_alert_acknowledgement(monitoring_service: QualityMonitoringService, request: AlertAcknowledgement, user: User):
     """Handle alert acknowledgement request."""
     try:
         success = await _process_alert_action(monitoring_service, request)
-        if not success:
-            raise HTTPException(status_code=404, detail="Alert not found")
-        return format_acknowledgement_response(request.alert_id, request.action, user)
+        return _build_acknowledgement_result(success, request, user)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error acknowledging alert: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to acknowledge alert")
+        _handle_acknowledgement_error(e)
 
 
 async def _process_alert_action(monitoring_service: QualityMonitoringService, request: AlertAcknowledgement) -> bool:
@@ -120,20 +116,28 @@ async def handle_report_generation(monitoring_service: QualityMonitoringService,
         data = await _generate_report_data(monitoring_service, report_type, period_hours, period_days)
         return format_quality_report(report_type, data, user, period_days)
     except Exception as e:
-        logger.error(f"Error generating report: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to generate report")
+        _handle_report_generation_error(e)
 
 
 async def _generate_report_data(monitoring_service: QualityMonitoringService, report_type: QualityReportType, period_hours: int, period_days: int) -> Dict[str, Any]:
     """Generate report data based on report type."""
     if report_type == QualityReportType.SUMMARY:
-        return await monitoring_service.get_dashboard_data()
-    elif report_type == QualityReportType.DETAILED:
+        return await _generate_summary_report_data(monitoring_service)
+    if report_type == QualityReportType.DETAILED:
         return await _generate_detailed_report_data(monitoring_service, period_hours, period_days)
-    elif report_type == QualityReportType.TREND_ANALYSIS:
+    if report_type == QualityReportType.TREND_ANALYSIS:
         return await _generate_trend_analysis_data(monitoring_service, period_days)
-    else:
-        return {"error": "Unknown report type"}
+    return _get_unknown_report_type_error()
+
+
+async def _generate_summary_report_data(monitoring_service: QualityMonitoringService) -> Dict[str, Any]:
+    """Generate summary report data."""
+    return await monitoring_service.get_dashboard_data()
+
+
+def _get_unknown_report_type_error() -> Dict[str, str]:
+    """Get unknown report type error response."""
+    return {"error": "Unknown report type"}
 
 
 def _get_default_agent_names() -> List[str]:
@@ -152,11 +156,7 @@ async def _generate_detailed_report_data(monitoring_service: QualityMonitoringSe
     """Generate detailed report data for all agents."""
     agent_reports = await _collect_agent_reports(monitoring_service, period_hours)
     summary = await monitoring_service.get_dashboard_data()
-    return {
-        "summary": summary,
-        "agents": agent_reports,
-        "period_days": period_days
-    }
+    return _build_detailed_report_dict(summary, agent_reports, period_days)
 
 
 async def _create_daily_trend_entry(monitoring_service: QualityMonitoringService, day_offset: int) -> Dict[str, Any]:
@@ -184,39 +184,35 @@ async def _generate_trend_analysis_data(monitoring_service: QualityMonitoringSer
 async def handle_statistics_request(quality_gate_service: QualityGateService, content_type: str) -> QualityStatistics:
     """Handle quality statistics request."""
     try:
-        ct = map_content_type(content_type) if content_type else None
+        ct = _map_content_type_for_stats(content_type)
         stats = await quality_gate_service.get_quality_stats(ct)
-        formatted_stats = format_quality_statistics(stats, content_type)
-        return _complete_statistics_formatting(formatted_stats, stats, content_type)
+        return _format_complete_statistics(stats, content_type)
     except Exception as e:
-        logger.error(f"Error getting statistics: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve statistics")
+        _handle_statistics_error(e)
 
 
 async def handle_start_monitoring(monitoring_service: QualityMonitoringService, background_tasks: BackgroundTasks, user: User, interval_seconds: int) -> Dict[str, Any]:
     """Handle start monitoring request."""
     try:
         _validate_admin_access(user)
-        background_tasks.add_task(monitoring_service.start_monitoring, interval_seconds=interval_seconds)
+        _add_monitoring_task(background_tasks, monitoring_service, interval_seconds)
         return build_monitoring_response(interval_seconds, user)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error starting monitoring: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to start monitoring")
+        _handle_start_monitoring_error(e)
 
 
 async def handle_stop_monitoring(monitoring_service: QualityMonitoringService, user: User) -> Dict[str, Any]:
     """Handle stop monitoring request."""
     try:
         _validate_admin_access(user)
-        await monitoring_service.stop_monitoring()
+        await _stop_monitoring_service(monitoring_service)
         return build_stop_monitoring_response(user)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error stopping monitoring: {str(e)}")
-        raise HTTPException(status_code=500, detail="Failed to stop monitoring")
+        _handle_stop_monitoring_error(e)
 
 
 def _validate_admin_access(user: User) -> None:
@@ -232,3 +228,122 @@ def handle_service_health(quality_gate_service, monitoring_service, fallback_ser
     except Exception as e:
         logger.error(f"Error checking health: {str(e)}")
         return format_error_health(str(e))
+
+
+def _handle_dashboard_error(e: Exception) -> None:
+    """Handle dashboard request error."""
+    logger.error(f"Error getting dashboard data: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to retrieve dashboard data")
+
+
+def _handle_validation_error(e: Exception) -> None:
+    """Handle validation request error."""
+    logger.error(f"Error validating content: {str(e)}")
+    raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+
+
+async def _fetch_agent_report(monitoring_service: QualityMonitoringService, agent_name: str, period_hours: int) -> Dict[str, Any]:
+    """Fetch agent report from monitoring service."""
+    return await monitoring_service.get_agent_report(agent_name, period_hours)
+
+
+def _validate_agent_report(report: Dict[str, Any]) -> Dict[str, Any]:
+    """Validate agent report result."""
+    if "error" in report:
+        raise HTTPException(status_code=404, detail=report["error"])
+    return report
+
+
+def _handle_agent_report_error(e: Exception) -> None:
+    """Handle agent report request error."""
+    logger.error(f"Error getting agent report: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to generate agent report")
+
+
+def _get_recent_alerts(monitoring_service: QualityMonitoringService, limit: int) -> List[Any]:
+    """Get recent alerts from monitoring service."""
+    return list(monitoring_service.alert_history)[-limit:]
+
+
+def _format_and_complete_alerts(filtered_alerts: List[Any]) -> List[QualityAlert]:
+    """Format and complete alert data."""
+    formatted_alerts = format_alert_list(filtered_alerts)
+    return _complete_alert_formatting(formatted_alerts, filtered_alerts)
+
+
+def _handle_alerts_error(e: Exception) -> None:
+    """Handle alerts request error."""
+    logger.error(f"Error getting alerts: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to retrieve alerts")
+
+
+def _build_acknowledgement_result(success: bool, request: AlertAcknowledgement, user: User):
+    """Build acknowledgement result response."""
+    _validate_alert_success(success)
+    return format_acknowledgement_response(request.alert_id, request.action, user)
+
+
+def _validate_alert_success(success: bool) -> None:
+    """Validate alert acknowledgement success."""
+    if not success:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+
+def _handle_acknowledgement_error(e: Exception) -> None:
+    """Handle alert acknowledgement error."""
+    logger.error(f"Error acknowledging alert: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to acknowledge alert")
+
+
+def _handle_report_generation_error(e: Exception) -> None:
+    """Handle report generation error."""
+    logger.error(f"Error generating report: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to generate report")
+
+
+def _build_detailed_report_dict(summary: Dict[str, Any], agent_reports: Dict[str, Any], period_days: int) -> Dict[str, Any]:
+    """Build detailed report dictionary."""
+    return {
+        "summary": summary,
+        "agents": agent_reports,
+        "period_days": period_days
+    }
+
+
+def _map_content_type_for_stats(content_type: str):
+    """Map content type for statistics request."""
+    return map_content_type(content_type) if content_type else None
+
+
+def _format_complete_statistics(stats: Dict[str, Any], content_type: str) -> QualityStatistics:
+    """Format and complete statistics response."""
+    formatted_stats = format_quality_statistics(stats, content_type)
+    return _complete_statistics_formatting(formatted_stats, stats, content_type)
+
+
+def _handle_statistics_error(e: Exception) -> None:
+    """Handle statistics request error."""
+    logger.error(f"Error getting statistics: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to retrieve statistics")
+
+
+def _add_monitoring_task(background_tasks: BackgroundTasks, monitoring_service: QualityMonitoringService, interval_seconds: int) -> None:
+    """Add monitoring task to background tasks."""
+    background_tasks.add_task(monitoring_service.start_monitoring, interval_seconds=interval_seconds)
+
+
+def _handle_start_monitoring_error(e: Exception) -> None:
+    """Handle start monitoring error."""
+    logger.error(f"Error starting monitoring: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to start monitoring")
+
+
+async def _stop_monitoring_service(monitoring_service: QualityMonitoringService) -> None:
+    """Stop monitoring service."""
+    await monitoring_service.stop_monitoring()
+
+
+def _handle_stop_monitoring_error(e: Exception) -> None:
+    """Handle stop monitoring error."""
+    logger.error(f"Error stopping monitoring: {str(e)}")
+    raise HTTPException(status_code=500, detail="Failed to stop monitoring")

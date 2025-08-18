@@ -2,7 +2,7 @@
 Error Handler Module - Comprehensive error handling and recovery
 """
 
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 from sqlalchemy.orm import Session
 from app.logging_config import central_logger
 from app.ws_manager import manager

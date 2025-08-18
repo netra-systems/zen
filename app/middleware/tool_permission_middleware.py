@@ -356,29 +356,38 @@ def create_tool_permission_dependency(
     tool_registry: UnifiedToolRegistry
 ):
     """Create a dependency for checking tool permissions in FastAPI endpoints"""
-    
     async def check_tool_permission(
         tool_name: str,
         action: str = "execute",
         current_user: User = Depends(get_current_user),
         db: Session = Depends(get_db)
     ):
-        """Dependency to check tool permissions"""
-        try:
-            return await _perform_dependency_permission_check(current_user, tool_name, action)
-        except HTTPException:
-            raise
-        except Exception as e:
-            _handle_dependency_error(e)
-    
-    async def _perform_dependency_permission_check(current_user: User, tool_name: str, action: str):
-        """Perform dependency permission check."""
-        context = _create_execution_context_for_dependency(current_user, tool_name, action)
-        permission_result = await permission_service.check_tool_permission(context)
-        _validate_permission_result(permission_result)
-        return permission_result
-    
+        return await _handle_dependency_permission_check(
+            permission_service, current_user, tool_name, action
+        )
     return check_tool_permission
+
+async def _handle_dependency_permission_check(
+    permission_service, current_user: User, tool_name: str, action: str
+):
+    """Handle dependency permission check with error handling."""
+    try:
+        return await _perform_dependency_permission_check(
+            permission_service, current_user, tool_name, action
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        _handle_dependency_error(e)
+
+async def _perform_dependency_permission_check(
+    permission_service, current_user: User, tool_name: str, action: str
+):
+    """Perform dependency permission check."""
+    context = _create_execution_context_for_dependency(current_user, tool_name, action)
+    permission_result = await permission_service.check_tool_permission(context)
+    _validate_permission_result(permission_result)
+    return permission_result
 
 def _create_execution_context_for_dependency(current_user: User, tool_name: str, action: str) -> ToolExecutionContext:
     """Create execution context for dependency check."""

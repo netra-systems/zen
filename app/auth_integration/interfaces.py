@@ -270,9 +270,17 @@ class AuthDependencies:
         token_validator: TokenValidator,
         password_manager: PasswordManager
     ):
+        self._init_core_components(auth_client, session_manager, permission_manager)
+        self._init_utility_components(audit_logger, token_validator, password_manager)
+
+    def _init_core_components(self, auth_client: AuthClient, session_manager: SessionManager, permission_manager: PermissionManager) -> None:
+        """Initialize core auth components."""
         self.auth_client = auth_client
         self.session_manager = session_manager
         self.permission_manager = permission_manager
+
+    def _init_utility_components(self, audit_logger: AuditLogger, token_validator: TokenValidator, password_manager: PasswordManager) -> None:
+        """Initialize utility auth components."""
         self.audit_logger = audit_logger
         self.token_validator = token_validator
         self.password_manager = password_manager

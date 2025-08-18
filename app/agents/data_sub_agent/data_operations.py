@@ -88,19 +88,35 @@ class DataOperations:
         if len(metrics) < 2:
             return {"error": "At least 2 metrics required for correlation analysis"}
         
+        correlations = await self._compute_all_correlations(user_id, metrics, time_range)
+        return self._format_correlation_results(correlations, metrics, time_range)
+    
+    async def _compute_all_correlations(
+        self, user_id: int, metrics: List[str], time_range: Tuple[datetime, datetime]
+    ) -> Dict[str, Any]:
+        """Compute correlations for all metric pairs."""
         start_time, end_time = time_range
         correlations = {}
         
         for i in range(len(metrics)):
-            for j in range(i + 1, len(metrics)):
-                metric1, metric2 = metrics[i], metrics[j]
-                correlation = await self._calculate_pairwise_correlation(
-                    user_id, metric1, metric2, start_time, end_time
-                )
-                if correlation:
-                    correlations[f"{metric1}_vs_{metric2}"] = correlation
-        
-        return self._format_correlation_results(correlations, metrics, time_range)
+            correlations.update(
+                await self._compute_metric_correlations(i, metrics, user_id, start_time, end_time)
+            )
+        return correlations
+    
+    async def _compute_metric_correlations(
+        self, i: int, metrics: List[str], user_id: int, start_time: datetime, end_time: datetime
+    ) -> Dict[str, Any]:
+        """Compute correlations for a specific metric against later metrics."""
+        correlations = {}
+        for j in range(i + 1, len(metrics)):
+            metric1, metric2 = metrics[i], metrics[j]
+            correlation = await self._calculate_pairwise_correlation(
+                user_id, metric1, metric2, start_time, end_time
+            )
+            if correlation:
+                correlations[f"{metric1}_vs_{metric2}"] = correlation
+        return correlations
     
     async def analyze_usage_patterns(
         self,
@@ -212,20 +228,34 @@ class DataOperations:
         z_score_threshold: float
     ) -> Dict[str, Any]:
         """Process anomaly detection data."""
+        base_info = self._build_anomaly_base_info(metric_name, z_score_threshold, len(data))
+        anomalies = self._format_anomaly_entries(data)
+        return {**base_info, "anomalies": anomalies}
+    
+    def _build_anomaly_base_info(self, metric_name: str, threshold: float, count: int) -> Dict[str, Any]:
+        """Build base anomaly information."""
         return {
             "status": "anomalies_found",
             "metric": metric_name,
-            "threshold": z_score_threshold,
-            "anomaly_count": len(data),
-            "anomalies": [
-                {
-                    "timestamp": row['timestamp'],
-                    "value": row['metric_value'],
-                    "z_score": row['z_score'],
-                    "severity": "high" if abs(row['z_score']) > 3 else "medium"
-                }
-                for row in data[:50]  # Limit to top 50 anomalies
-            ]
+            "threshold": threshold,
+            "anomaly_count": count
+        }
+    
+    def _format_anomaly_entries(self, data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Format anomaly entries for response."""
+        return [
+            self._format_single_anomaly(row)
+            for row in data[:50]  # Limit to top 50 anomalies
+        ]
+    
+    def _format_single_anomaly(self, row: Dict[str, Any]) -> Dict[str, Any]:
+        """Format single anomaly entry."""
+        z_score = row['z_score']
+        return {
+            "timestamp": row['timestamp'],
+            "value": row['metric_value'],
+            "z_score": z_score,
+            "severity": "high" if abs(z_score) > 3 else "medium"
         }
     
     async def _calculate_pairwise_correlation(
@@ -252,21 +282,30 @@ class DataOperations:
     
     def _format_correlation_result(self, corr_data: Dict[str, Any], corr_coef: float) -> Dict[str, Any]:
         """Format correlation analysis result."""
-        strength = self._interpret_correlation_strength(corr_coef)
-        
+        base_info = self._build_correlation_base_info(corr_coef, corr_data)
+        stats_info = self._build_correlation_stats(corr_data)
+        return {**base_info, **stats_info}
+    
+    def _build_correlation_base_info(self, corr_coef: float, corr_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Build base correlation information."""
         return {
             "coefficient": corr_coef,
-            "strength": strength,
+            "strength": self._interpret_correlation_strength(corr_coef),
             "direction": "positive" if corr_coef > 0 else "negative",
-            "sample_size": corr_data['sample_size'],
-            "metric1_stats": {
-                "mean": corr_data['metric1_avg'],
-                "std": corr_data['metric1_std']
-            },
-            "metric2_stats": {
-                "mean": corr_data['metric2_avg'],
-                "std": corr_data['metric2_std']
-            }
+            "sample_size": corr_data['sample_size']
+        }
+    
+    def _build_correlation_stats(self, corr_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Build correlation statistics."""
+        metric1_stats = self._build_metric_stats(corr_data, 'metric1')
+        metric2_stats = self._build_metric_stats(corr_data, 'metric2')
+        return {"metric1_stats": metric1_stats, "metric2_stats": metric2_stats}
+    
+    def _build_metric_stats(self, corr_data: Dict[str, Any], metric_prefix: str) -> Dict[str, Any]:
+        """Build stats for a single metric."""
+        return {
+            "mean": corr_data[f'{metric_prefix}_avg'],
+            "std": corr_data[f'{metric_prefix}_std']
         }
     
     def _interpret_correlation_strength(self, coefficient: float) -> str:
@@ -286,20 +325,33 @@ class DataOperations:
         time_range: Tuple[datetime, datetime]
     ) -> Dict[str, Any]:
         """Format final correlation analysis results."""
+        time_info = self._build_time_range_info(time_range)
+        strongest = self._find_strongest_correlation(correlations)
+        return {
+            **time_info,
+            "metrics_analyzed": metrics,
+            "correlations": correlations,
+            "strongest_correlation": strongest
+        }
+    
+    def _build_time_range_info(self, time_range: Tuple[datetime, datetime]) -> Dict[str, Any]:
+        """Build time range information."""
         start_time, end_time = time_range
-        
         return {
             "time_range": {
                 "start": start_time.isoformat(),
                 "end": end_time.isoformat()
-            },
-            "metrics_analyzed": metrics,
-            "correlations": correlations,
-            "strongest_correlation": max(
-                correlations.items(),
-                key=lambda x: abs(x[1]['coefficient'])
-            ) if correlations else None
+            }
         }
+    
+    def _find_strongest_correlation(self, correlations: Dict[str, Any]) -> Optional[Tuple[str, Dict[str, Any]]]:
+        """Find strongest correlation from results."""
+        if not correlations:
+            return None
+        return max(
+            correlations.items(),
+            key=lambda x: abs(x[1]['coefficient'])
+        )
     
     def _process_usage_patterns(self, data: List[Dict[str, Any]], days_back: int) -> Dict[str, Any]:
         """Process usage patterns data."""

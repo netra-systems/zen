@@ -174,20 +174,40 @@ class IndexingErrorHandler:
     ) -> Optional[Dict[str, Any]]:
         """Try alternative indexing method."""
         alternative_type = self.index_alternatives.get(index_type)
-        
-        if alternative_type and self.search_engine:
-            try:
-                result = await self.search_engine.index_document(
-                    document_id, alternative_type
-                )
-                if result:
-                    return self._create_alternative_success_response(
-                        document_id, index_type, alternative_type, run_id
-                    )
-            except Exception as e:
-                logger.debug(f"Alternative indexing failed: {e}")
-        
-        return None
+        return await self._execute_alternative_indexing(
+            document_id, index_type, alternative_type, run_id
+        )
+    
+    async def _execute_alternative_indexing(
+        self,
+        document_id: str,
+        index_type: str,
+        alternative_type: Optional[str],
+        run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Execute alternative indexing if possible."""
+        if not (alternative_type and self.search_engine):
+            return None
+        return await self._attempt_alternative_index(
+            document_id, index_type, alternative_type, run_id
+        )
+    
+    async def _attempt_alternative_index(
+        self,
+        document_id: str,
+        index_type: str,
+        alternative_type: str,
+        run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Attempt indexing with alternative type."""
+        try:
+            result = await self.search_engine.index_document(document_id, alternative_type)
+            return result and self._create_alternative_success_response(
+                document_id, index_type, alternative_type, run_id
+            )
+        except Exception as e:
+            logger.debug(f"Alternative indexing failed: {e}")
+            return None
     
     def _create_alternative_success_response(
         self,
@@ -219,15 +239,20 @@ class IndexingErrorHandler:
     ) -> Dict[str, Any]:
         """Queue document for later indexing."""
         queue_entry = self._create_queue_entry(document_id, index_type, run_id)
-        
-        # Add to indexing queue (implementation would depend on queue system)
+        self._log_queue_action(document_id, index_type, run_id)
+        return self._build_queue_response(queue_entry)
+    
+    def _log_queue_action(self, document_id: str, index_type: str, run_id: str) -> None:
+        """Log queuing action."""
         logger.info(
             f"Document queued for later indexing",
             document_id=document_id,
             index_type=index_type,
             run_id=run_id
         )
-        
+    
+    def _build_queue_response(self, queue_entry: Dict[str, Any]) -> Dict[str, Any]:
+        """Build response for queued document."""
         return {
             'success': True,
             'method': 'queued_for_later',

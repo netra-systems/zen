@@ -29,15 +29,21 @@ async def _handle_websocket_error(websocket: WebSocket, error: str):
     """Handle WebSocket error response."""
     await websocket.send_json({"type": "error", "message": error})
 
-async def _process_agent_message(message: Dict[str, Any]) -> Dict[str, Any]:
-    """Process agent message through WebSocket."""
-    msg_text = message.get("message", "")
-    thread_id = message.get("thread_id")
-    # Simplified processing for WebSocket context
+def _extract_message_data(message: Dict[str, Any]) -> tuple[str, Optional[str]]:
+    """Extract message text and thread ID."""
+    return message.get("message", ""), message.get("thread_id")
+
+def _build_agent_response(msg_text: str, thread_id: Optional[str]) -> Dict[str, Any]:
+    """Build agent response with optional thread ID."""
     response = {"type": "agent_response", "response": f"Processed: {msg_text}"}
     if thread_id:
         response["thread_id"] = thread_id
     return response
+
+async def _process_agent_message(message: Dict[str, Any]) -> Dict[str, Any]:
+    """Process agent message through WebSocket."""
+    msg_text, thread_id = _extract_message_data(message)
+    return _build_agent_response(msg_text, thread_id)
 
 async def _handle_websocket_message_processing(websocket: WebSocket, message: Dict[str, Any]):
     """Handle WebSocket message processing."""
@@ -47,15 +53,19 @@ async def _handle_websocket_message_processing(websocket: WebSocket, message: Di
     response = await _process_agent_message(message)
     await websocket.send_json(response)
 
+async def _process_received_data(websocket: WebSocket, data: str) -> None:
+    """Process received WebSocket data."""
+    message = await _parse_websocket_message(data)
+    if message:
+        await _handle_websocket_message_processing(websocket, message)
+    else:
+        await _handle_websocket_error(websocket, "Invalid JSON")
+
 async def _run_websocket_message_loop(websocket: WebSocket):
     """Run main WebSocket message processing loop."""
     while True:
         data = await websocket.receive_text()
-        message = await _parse_websocket_message(data)
-        if message:
-            await _handle_websocket_message_processing(websocket, message)
-        else:
-            await _handle_websocket_error(websocket, "Invalid JSON")
+        await _process_received_data(websocket, data)
 
 async def _check_test_mode(websocket: WebSocket) -> bool:
     """Check if this is a test environment connection."""
@@ -70,24 +80,48 @@ async def _bypass_auth_for_test(websocket: WebSocket) -> bool:
     # In production, always require authentication
     return False
 
+async def _handle_authenticated_connection(websocket: WebSocket) -> None:
+    """Handle authenticated WebSocket connection."""
+    await websocket.accept()
+    await websocket.send_json({"type": "welcome", "message": "Agent WebSocket connected"})
+    await _run_websocket_message_loop(websocket)
+
+async def _handle_unauthenticated_connection(websocket: WebSocket) -> None:
+    """Handle unauthenticated WebSocket connection."""
+    await websocket.close(code=1008, reason="Authentication required")
+
+async def _process_websocket_connection(websocket: WebSocket) -> None:
+    """Process WebSocket connection with authentication."""
+    if await _bypass_auth_for_test(websocket):
+        await _handle_authenticated_connection(websocket)
+    else:
+        await _handle_unauthenticated_connection(websocket)
+
+async def _handle_websocket_exception(websocket: WebSocket, e: Exception) -> None:
+    """Handle WebSocket exception with logging."""
+    _log_websocket_error(e)
+    await _send_error_response(websocket, e)
+
+
+def _log_websocket_error(e: Exception) -> None:
+    """Log WebSocket error with traceback."""
+    print(f"WebSocket error: {str(e)}")
+    import traceback
+    traceback.print_exc()
+
+
+async def _send_error_response(websocket: WebSocket, e: Exception) -> None:
+    """Send error response to WebSocket client."""
+    try:
+        await _handle_websocket_error(websocket, f"Server error: {str(e)}")
+    except:
+        pass
+
 async def handle_agent_websocket(websocket: WebSocket):
     """Handle agent WebSocket connection and message processing."""
     try:
-        # For test environment, bypass authentication
-        if await _bypass_auth_for_test(websocket):
-            await websocket.accept()
-            await websocket.send_json({"type": "welcome", "message": "Agent WebSocket connected"})
-            await _run_websocket_message_loop(websocket)
-        else:
-            # Production mode - require authentication
-            await websocket.close(code=1008, reason="Authentication required")
+        await _process_websocket_connection(websocket)
     except WebSocketDisconnect:
         pass
     except Exception as e:
-        print(f"WebSocket error: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        try:
-            await _handle_websocket_error(websocket, f"Server error: {str(e)}")
-        except:
-            pass
+        await _handle_websocket_exception(websocket, e)

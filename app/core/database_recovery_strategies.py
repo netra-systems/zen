@@ -58,41 +58,46 @@ class ConnectionPoolRefreshStrategy(DatabaseRecoveryStrategy):
     async def execute_recovery(self, pool: Any, config: DatabaseConfig) -> bool:
         """Refresh connections in pool."""
         try:
-            logger.info(f"Refreshing connection pool: {metrics.pool_id}")
-            
-            # Close idle connections
-            if hasattr(pool, 'expire'):
-                await pool.expire()
-            elif hasattr(pool, '_cleanup'):
-                await pool._cleanup()
-            
-            # Force creation of new connections
-            test_connections = []
-            try:
-                for _ in range(min(3, config.pool_size)):
-                    conn = await pool.acquire()
-                    test_connections.append(conn)
-                
-                # Release test connections
-                for conn in test_connections:
-                    await pool.release(conn)
-                
-                logger.info("Connection pool refresh successful")
-                return True
-                
-            except Exception as e:
-                logger.error(f"Failed to refresh connections: {e}")
-                # Release any acquired connections
-                for conn in test_connections:
-                    try:
-                        await pool.release(conn)
-                    except Exception:
-                        pass
-                return False
-            
+            logger.info(f"Refreshing connection pool: {config.database}")
+            await self._close_idle_connections(pool)
+            return await self._test_connection_refresh(pool, config)
         except Exception as e:
             logger.error(f"Pool refresh failed: {e}")
             return False
+    
+    async def _close_idle_connections(self, pool: Any) -> None:
+        """Close idle connections in the pool."""
+        if hasattr(pool, 'expire'):
+            await pool.expire()
+        elif hasattr(pool, '_cleanup'):
+            await pool._cleanup()
+    
+    async def _test_connection_refresh(self, pool: Any, config: DatabaseConfig) -> bool:
+        """Test connection refresh by creating new connections."""
+        test_connections = []
+        try:
+            await self._acquire_test_connections(pool, config, test_connections)
+            await self._release_test_connections(pool, test_connections)
+            logger.info("Connection pool refresh successful")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to refresh connections: {e}")
+            await self._release_test_connections(pool, test_connections)
+            return False
+    
+    async def _acquire_test_connections(self, pool: Any, config: DatabaseConfig, test_connections: list) -> None:
+        """Acquire test connections for validation."""
+        for _ in range(min(3, config.pool_size)):
+            conn = await pool.acquire()
+            test_connections.append(conn)
+    
+    async def _release_test_connections(self, pool: Any, test_connections: list) -> None:
+        """Release all test connections safely."""
+        for conn in test_connections:
+            try:
+                await pool.release(conn)
+            except Exception:
+                pass
     
     def get_priority(self) -> int:
         """Pool refresh has high priority."""
@@ -112,28 +117,28 @@ class ConnectionPoolRecreateStrategy(DatabaseRecoveryStrategy):
     async def execute_recovery(self, pool: Any, config: DatabaseConfig) -> bool:
         """Recreate the connection pool."""
         try:
-            logger.warning(f"Recreating connection pool: {metrics.pool_id}")
-            
-            # Close all connections
-            if hasattr(pool, 'close'):
-                await pool.close()
-            elif hasattr(pool, 'terminate'):
-                await pool.terminate()
-            
-            # Wait before recreating
+            logger.warning(f"Recreating connection pool: {config.database}")
+            await self._close_all_connections(pool)
             await asyncio.sleep(1.0)
-            
-            # Recreate pool (this depends on the specific pool implementation)
-            if hasattr(pool, 'reconnect'):
-                await pool.reconnect()
-                return True
-            
-            logger.warning("Pool recreation requires manual intervention")
-            return False
-            
+            return await self._attempt_pool_reconnection(pool)
         except Exception as e:
             logger.error(f"Pool recreation failed: {e}")
             return False
+    
+    async def _close_all_connections(self, pool: Any) -> None:
+        """Close all connections in the pool."""
+        if hasattr(pool, 'close'):
+            await pool.close()
+        elif hasattr(pool, 'terminate'):
+            await pool.terminate()
+    
+    async def _attempt_pool_reconnection(self, pool: Any) -> bool:
+        """Attempt to reconnect the pool."""
+        if hasattr(pool, 'reconnect'):
+            await pool.reconnect()
+            return True
+        logger.warning("Pool recreation requires manual intervention")
+        return False
     
     def get_priority(self) -> int:
         """Pool recreation has lower priority."""
@@ -159,30 +164,38 @@ class DatabaseFailoverStrategy(DatabaseRecoveryStrategy):
         """Execute failover to backup database."""
         if not self.backup_configs:
             return False
-        
         try:
-            backup_config = self.backup_configs[self.current_backup_index]
-            self.current_backup_index = (
-                (self.current_backup_index + 1) % len(self.backup_configs)
-            )
-            
-            logger.critical(
-                f"Failing over to backup database: "
-                f"{backup_config.host}:{backup_config.port}"
-            )
-            
-            # Perform actual failover by updating connection configuration
-            try:
-                from app.db.postgres import update_connection_config
-                await update_connection_config(backup_config)
-                logger.info(f"Successfully failed over to backup database")
-                return True
-            except Exception as failover_error:
-                logger.error(f"Failed to update connection config: {failover_error}")
-                return False
-            
+            backup_config = self._get_next_backup_config()
+            self._log_failover_attempt(backup_config)
+            return await self._perform_failover(backup_config)
         except Exception as e:
             logger.error(f"Database failover failed: {e}")
+            return False
+    
+    def _get_next_backup_config(self) -> DatabaseConfig:
+        """Get the next backup configuration in rotation."""
+        backup_config = self.backup_configs[self.current_backup_index]
+        self.current_backup_index = (
+            (self.current_backup_index + 1) % len(self.backup_configs)
+        )
+        return backup_config
+    
+    def _log_failover_attempt(self, backup_config: DatabaseConfig) -> None:
+        """Log the failover attempt."""
+        logger.critical(
+            f"Failing over to backup database: "
+            f"{backup_config.host}:{backup_config.port}"
+        )
+    
+    async def _perform_failover(self, backup_config: DatabaseConfig) -> bool:
+        """Perform the actual failover operation."""
+        try:
+            from app.db.postgres import update_connection_config
+            await update_connection_config(backup_config)
+            logger.info(f"Successfully failed over to backup database")
+            return True
+        except Exception as failover_error:
+            logger.error(f"Failed to update connection config: {failover_error}")
             return False
     
     def get_priority(self) -> int:
@@ -196,21 +209,27 @@ class DatabaseConnectionManager:
     def __init__(self, db_type: DatabaseType):
         """Initialize database connection manager."""
         self.db_type = db_type
+        self._initialize_data_structures()
+        self._initialize_recovery_components()
+        self._initialize_monitoring_settings()
+        self._setup_default_strategies()
+    
+    def _initialize_data_structures(self) -> None:
+        """Initialize core data structures."""
         self.pools: Dict[str, Any] = {}
         self.configs: Dict[str, DatabaseConfig] = {}
         self.metrics_history: Dict[str, List[PoolMetrics]] = {}
-        
-        # Recovery components
-        self.health_checker = DatabaseHealthChecker(db_type)
+    
+    def _initialize_recovery_components(self) -> None:
+        """Initialize recovery and health checking components."""
+        self.health_checker = DatabaseHealthChecker(self.db_type)
         self.recovery_strategies: List[DatabaseRecoveryStrategy] = []
-        
-        # Monitoring
+    
+    def _initialize_monitoring_settings(self) -> None:
+        """Initialize monitoring configuration."""
         self.monitoring_active = False
         self.monitor_task: Optional[asyncio.Task] = None
         self.health_check_interval = 60  # seconds
-        
-        # Setup default recovery strategies
-        self._setup_default_strategies()
     
     def _setup_default_strategies(self) -> None:
         """Setup default recovery strategies."""
@@ -218,8 +237,10 @@ class DatabaseConnectionManager:
             ConnectionPoolRefreshStrategy(),
             ConnectionPoolRecreateStrategy()
         ]
-        
-        # Sort by priority
+        self._sort_strategies_by_priority()
+    
+    def _sort_strategies_by_priority(self) -> None:
+        """Sort recovery strategies by priority."""
         self.recovery_strategies.sort(key=lambda s: s.get_priority())
     
     def add_recovery_strategy(self, strategy: DatabaseRecoveryStrategy) -> None:
@@ -234,15 +255,20 @@ class DatabaseConnectionManager:
         config: DatabaseConfig
     ) -> None:
         """Register database pool for monitoring."""
+        self._store_pool_data(pool_id, pool, config)
+        self._set_pool_identification(pool, pool_id)
+        logger.info(f"Registered database pool: {pool_id}")
+    
+    def _store_pool_data(self, pool_id: str, pool: Any, config: DatabaseConfig) -> None:
+        """Store pool data in internal structures."""
         self.pools[pool_id] = pool
         self.configs[pool_id] = config
         self.metrics_history[pool_id] = []
-        
-        # Set pool ID for identification
+    
+    def _set_pool_identification(self, pool: Any, pool_id: str) -> None:
+        """Set pool identification if supported."""
         if hasattr(pool, '_pool_id'):
             pool._pool_id = pool_id
-        
-        logger.info(f"Registered database pool: {pool_id}")
     
     async def start_monitoring(self) -> None:
         """Start database health monitoring."""
@@ -347,23 +373,41 @@ class DatabaseConnectionManager:
         """Get status of specific pool."""
         if pool_id not in self.metrics_history:
             return None
-        
         history = self.metrics_history[pool_id]
         if not history:
             return None
-        
         latest_metrics = history[-1]
-        
+        return self._build_pool_status_dict(pool_id, latest_metrics)
+    
+    def _build_pool_status_dict(self, pool_id: str, metrics: Any) -> Dict[str, Any]:
+        """Build pool status dictionary from metrics."""
+        basic_info = self._build_basic_pool_info(pool_id, metrics)
+        connection_info = self._build_connection_info(metrics)
+        timing_info = self._build_timing_info(metrics)
+        return {**basic_info, **connection_info, **timing_info}
+    
+    def _build_basic_pool_info(self, pool_id: str, metrics: Any) -> Dict[str, Any]:
+        """Build basic pool information."""
         return {
             'pool_id': pool_id,
             'database_type': self.db_type.value,
-            'health_status': latest_metrics.health_status.value,
-            'total_connections': latest_metrics.total_connections,
-            'active_connections': latest_metrics.active_connections,
-            'idle_connections': latest_metrics.idle_connections,
-            'failed_connections': latest_metrics.failed_connections,
-            'avg_response_time': latest_metrics.avg_response_time,
-            'last_health_check': latest_metrics.last_health_check.isoformat() if latest_metrics.last_health_check else None
+            'health_status': metrics.health_status.value
+        }
+    
+    def _build_connection_info(self, metrics: Any) -> Dict[str, Any]:
+        """Build connection-related information."""
+        return {
+            'total_connections': metrics.total_connections,
+            'active_connections': metrics.active_connections,
+            'idle_connections': metrics.idle_connections,
+            'failed_connections': metrics.failed_connections
+        }
+    
+    def _build_timing_info(self, metrics: Any) -> Dict[str, Any]:
+        """Build timing-related information."""
+        return {
+            'avg_response_time': metrics.avg_response_time,
+            'last_health_check': metrics.last_health_check.isoformat() if metrics.last_health_check else None
         }
     
     def get_all_status(self) -> Dict[str, Any]:

@@ -7,14 +7,19 @@ from fastapi import BackgroundTasks
 from app.services.job_store import job_store
 
 
-async def create_job_entry(job_type: str, params: Dict) -> str:
-    """Create job entry and return job ID."""
-    job_id = str(uuid.uuid4())
-    await job_store.set(job_id, {
+def _build_job_data(job_type: str, params: Dict) -> Dict:
+    """Build job data dictionary."""
+    return {
         "status": "pending", 
         "type": job_type, 
         "params": params
-    })
+    }
+
+async def create_job_entry(job_type: str, params: Dict) -> str:
+    """Create job entry and return job ID."""
+    job_id = str(uuid.uuid4())
+    job_data = _build_job_data(job_type, params)
+    await job_store.set(job_id, job_data)
     return job_id
 
 

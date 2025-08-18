@@ -1,0 +1,80 @@
+"""Thread title generation utilities."""
+from typing import Optional
+from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.services.database.message_repository import MessageRepository
+from app.llm.llm_manager import LLMManager
+from app.ws_manager import ws_manager
+from app.logging_config import central_logger
+import time
+
+logger = central_logger.get_logger(__name__)
+
+
+async def get_first_user_message_safely(db: AsyncSession, thread_id: str):
+    """Get first user message with error handling."""
+    message_repo = MessageRepository()
+    messages = await message_repo.find_by_thread(db, thread_id, limit=5)
+    first_user_message = next((msg for msg in messages if msg.role == "user"), None)
+    if not first_user_message:
+        raise HTTPException(status_code=400, detail="No user message found to generate title from")
+    return first_user_message
+
+
+def build_title_generation_prompt(content: str) -> str:
+    """Build prompt for title generation."""
+    return f"""Generate a concise 3-5 word title for a conversation that starts with this message:
+        
+        "{content[:500]}"
+        
+        Return ONLY the title, no explanation or quotes."""
+
+
+def clean_generated_title(generated_title: str) -> str:
+    """Clean and format generated title."""
+    return generated_title.strip().strip('"').strip("'")[:50]
+
+
+def get_fallback_title() -> str:
+    """Get fallback title when LLM fails."""
+    return f"Chat {int(time.time())}"
+
+
+async def generate_title_with_llm(content: str) -> str:
+    """Generate title using LLM with fallback."""
+    try:
+        llm_manager = LLMManager()
+        prompt = build_title_generation_prompt(content)
+        generated_title = await llm_manager.ask_llm(prompt, "triage")
+        return clean_generated_title(generated_title)
+    except Exception as llm_error:
+        logger.warning(f"LLM title generation failed: {llm_error}")
+        return get_fallback_title()
+
+
+async def update_thread_with_title(db: AsyncSession, thread, title: str) -> None:
+    """Update thread with generated title."""
+    if not thread.metadata_:
+        thread.metadata_ = {}
+    thread.metadata_["title"] = title
+    thread.metadata_["auto_renamed"] = True
+    thread.metadata_["updated_at"] = int(time.time())
+    await db.commit()
+
+
+async def send_thread_rename_notification(user_id: int, thread_id: str, title: str) -> None:
+    """Send WebSocket notification for thread rename."""
+    event = {
+        "type": "thread_renamed", "thread_id": thread_id,
+        "new_title": title, "timestamp": int(time.time())
+    }
+    await ws_manager.send_to_user(str(user_id), event)
+
+
+async def create_final_thread_response(db: AsyncSession, thread, title: str):
+    """Create final ThreadResponse with message count."""
+    from app.services.database.message_repository import MessageRepository
+    from app.routes.utils.thread_builders import build_thread_response
+    message_repo = MessageRepository()
+    message_count = await message_repo.count_by_thread(db, thread.id)
+    return await build_thread_response(thread, message_count, title)

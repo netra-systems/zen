@@ -25,6 +25,13 @@ class RetryStrategy:
                  max_delay: float = 60.0,
                  backoff_factor: float = 2.0,
                  jitter_range: Tuple[float, float] = (0.5, 1.5)):
+        self._set_retry_parameters(
+            max_attempts, base_delay, max_delay, backoff_factor, jitter_range)
+    
+    def _set_retry_parameters(self, max_attempts: int, base_delay: float, 
+                             max_delay: float, backoff_factor: float, 
+                             jitter_range: Tuple[float, float]) -> None:
+        """Set all retry strategy parameters."""
         self.max_attempts = max_attempts
         self.base_delay = base_delay
         self.max_delay = max_delay
@@ -125,9 +132,12 @@ class APISpecificRetryStrategy(RetryStrategy):
 
 def with_enhanced_retry(strategy: Optional[RetryStrategy] = None):
     """Decorator for enhanced retry with custom strategy."""
-    if strategy is None:
-        strategy = RetryStrategy()
-    
+    retry_strategy = strategy if strategy is not None else RetryStrategy()
+    return _create_retry_decorator(retry_strategy)
+
+
+def _create_retry_decorator(strategy: RetryStrategy) -> Callable:
+    """Create retry decorator with strategy."""
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         async def wrapper(*args, **kwargs) -> Any:

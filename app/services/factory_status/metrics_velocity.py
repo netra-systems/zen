@@ -6,7 +6,7 @@ Module follows 300-line limit with 8-line function limit.
 
 import statistics
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 

@@ -216,6 +216,10 @@ class PerformanceMonitor:
     
     def get_current_performance_summary(self) -> Dict[str, Any]:
         """Get current performance summary."""
+        return self._build_performance_summary_dict()
+    
+    def _build_performance_summary_dict(self) -> Dict[str, Any]:
+        """Build performance summary dictionary."""
         return {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "response_time": self._get_response_time_stats(),
@@ -232,6 +236,10 @@ class PerformanceMonitor:
         if not self.message_response_times:
             return {}
         times = list(self.message_response_times)
+        return self._calculate_response_time_metrics(times)
+    
+    def _calculate_response_time_metrics(self, times: List[float]) -> Dict[str, float]:
+        """Calculate response time metrics from times list."""
         return {
             "average_ms": statistics.mean(times),
             "median_ms": statistics.median(times),

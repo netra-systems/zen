@@ -29,6 +29,12 @@ def handle_metric_fetch_error(e: Exception, metric_name: str):
     )
 
 
+async def _fetch_metric_value(metric_name: str, hours: int):
+    """Fetch metric value with builder."""
+    builder = ReportBuilder()
+    return await fetch_metric(builder, metric_name, hours)
+
+
 async def get_specific_metric_handler(
     metric_name: str,
     hours: int = 24,
@@ -36,8 +42,7 @@ async def get_specific_metric_handler(
 ) -> MetricResponse:
     """Get a specific metric from the factory status system."""
     try:
-        builder = ReportBuilder()
-        value = await fetch_metric(builder, metric_name, hours)
+        value = await _fetch_metric_value(metric_name, hours)
         return build_metric_response(metric_name, value, hours)
     except Exception as e:
         handle_metric_fetch_error(e, metric_name)
@@ -54,9 +59,14 @@ def calculate_entry_date(i: int) -> str:
     return (datetime.now() - timedelta(days=i)).date().isoformat()
 
 
+def _calculate_start_hours(i: int) -> int:
+    """Calculate start hours for entry."""
+    return (i + 1) * 24
+
+
 def create_daily_velocity_entry(calculator, i: int) -> Dict[str, Any]:
     """Create single daily velocity entry."""
-    start_hours = (i + 1) * 24
+    start_hours = _calculate_start_hours(i)
     metrics = calculator.calculate_velocity(start_hours)
     return {
         "date": calculate_entry_date(i),
@@ -74,6 +84,11 @@ def collect_daily_velocities(calculator, days: int) -> List[Dict[str, Any]]:
     return daily_velocities
 
 
+def _calculate_overall_trend(daily_velocities: List[Dict[str, Any]]) -> str:
+    """Calculate overall trend from velocities."""
+    return calculate_trend(daily_velocities)
+
+
 def build_velocity_trend_response(
     days: int, daily_velocities: List[Dict[str, Any]]
 ) -> Dict[str, Any]:
@@ -81,7 +96,7 @@ def build_velocity_trend_response(
     return {
         "period_days": days,
         "daily_data": daily_velocities,
-        "overall_trend": calculate_trend(daily_velocities)
+        "overall_trend": _calculate_overall_trend(daily_velocities)
     }
 
 
@@ -101,15 +116,21 @@ def build_business_calculator() -> Any:
     return builder.business_calc
 
 
-def build_business_objectives_response(hours: int, metrics) -> Dict[str, Any]:
-    """Build business objectives response."""
+def _extract_business_scores(metrics) -> Dict[str, Any]:
+    """Extract business metrics scores."""
     return {
-        "period_hours": hours,
-        "objectives": metrics.objective_scores,
         "customer_impact": metrics.customer_impact.score,
         "revenue_impact": metrics.revenue_metrics.revenue_impact_score,
-        "innovation_ratio": metrics.innovation.innovation_ratio,
-        "overall_score": metrics.overall_value_score
+        "innovation_ratio": metrics.innovation.innovation_ratio
+    }
+
+
+def build_business_objectives_response(hours: int, metrics) -> Dict[str, Any]:
+    """Build business objectives response."""
+    scores = _extract_business_scores(metrics)
+    return {
+        "period_hours": hours, "objectives": metrics.objective_scores,
+        "overall_score": metrics.overall_value_score, **scores
     }
 
 
@@ -142,13 +163,20 @@ def build_compliance_details(compliance) -> Dict[str, str]:
     }
 
 
-def build_compliance_response(compliance) -> Dict[str, Any]:
-    """Build complete compliance response."""
+def _extract_compliance_core(compliance) -> Dict[str, Any]:
+    """Extract core compliance data."""
     return {
         "violations": compliance.violations,
         "files_over_limit": compliance.files_over_limit,
-        "functions_over_limit": compliance.functions_over_limit,
-        "compliance_rate": compliance.compliance_rate,
+        "functions_over_limit": compliance.functions_over_limit
+    }
+
+
+def build_compliance_response(compliance) -> Dict[str, Any]:
+    """Build complete compliance response."""
+    core_data = _extract_compliance_core(compliance)
+    return {
+        **core_data, "compliance_rate": compliance.compliance_rate,
         "status": determine_compliance_status(compliance),
         "details": build_compliance_details(compliance)
     }

@@ -179,20 +179,30 @@ class MigrationTracker:
     async def _execute_migrations(self, state: MigrationState) -> bool:
         """Execute migrations with error handling."""
         try:
-            self.logger.info("Executing migrations...")
-            loop = asyncio.get_event_loop()
-            await loop.run_in_executor(None, self._run_alembic_upgrade)
-            
-            state.applied_migrations.extend(state.pending_migrations)
-            state.pending_migrations.clear()
-            await self._save_state(state)
-            
-            self.logger.info("Migrations completed successfully")
-            return True
+            return await self._perform_migration_execution(state)
         except Exception as e:
-            await self._record_failure(state, "MIGRATION_EXECUTION", str(e))
-            self.logger.error(f"Migration execution failed: {e}")
-            return False
+            return await self._handle_migration_execution_error(state, e)
+            
+    async def _perform_migration_execution(self, state: MigrationState) -> bool:
+        """Perform the actual migration execution."""
+        self.logger.info("Executing migrations...")
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._run_alembic_upgrade)
+        await self._update_migration_state(state)
+        self.logger.info("Migrations completed successfully")
+        return True
+        
+    async def _update_migration_state(self, state: MigrationState) -> None:
+        """Update migration state after successful execution."""
+        state.applied_migrations.extend(state.pending_migrations)
+        state.pending_migrations.clear()
+        await self._save_state(state)
+        
+    async def _handle_migration_execution_error(self, state: MigrationState, error: Exception) -> bool:
+        """Handle migration execution errors."""
+        await self._record_failure(state, "MIGRATION_EXECUTION", str(error))
+        self.logger.error(f"Migration execution failed: {error}")
+        return False
 
     def _run_alembic_upgrade(self) -> None:
         """Run Alembic upgrade command."""
@@ -202,20 +212,30 @@ class MigrationTracker:
     async def rollback_migration(self, steps: int = 1) -> bool:
         """Rollback migrations by specified steps."""
         try:
-            self.logger.info(f"Rolling back {steps} migration(s)")
-            loop = asyncio.get_event_loop()
-            target = f"-{steps}"
-            await loop.run_in_executor(None, self._run_alembic_downgrade, target)
-            
-            state = await self._load_state()
-            state.current_version = None  # Force refresh on next check
-            await self._save_state(state)
-            
-            self.logger.info("Rollback completed successfully")
-            return True
+            return await self._perform_rollback_execution(steps)
         except Exception as e:
-            self.logger.error(f"Rollback failed: {e}")
-            return False
+            return self._handle_rollback_error(e)
+            
+    async def _perform_rollback_execution(self, steps: int) -> bool:
+        """Perform the actual rollback execution."""
+        self.logger.info(f"Rolling back {steps} migration(s)")
+        loop = asyncio.get_event_loop()
+        target = f"-{steps}"
+        await loop.run_in_executor(None, self._run_alembic_downgrade, target)
+        await self._update_rollback_state()
+        self.logger.info("Rollback completed successfully")
+        return True
+        
+    async def _update_rollback_state(self) -> None:
+        """Update state after successful rollback."""
+        state = await self._load_state()
+        state.current_version = None  # Force refresh on next check
+        await self._save_state(state)
+        
+    def _handle_rollback_error(self, error: Exception) -> bool:
+        """Handle rollback execution errors."""
+        self.logger.error(f"Rollback failed: {error}")
+        return False
 
     def _run_alembic_downgrade(self, target: str) -> None:
         """Run Alembic downgrade command."""

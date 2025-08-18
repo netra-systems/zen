@@ -139,40 +139,61 @@ class AgentRecoveryRegistry:
     
     def validate_registry(self) -> Dict[str, Any]:
         """Validate registry configuration and completeness."""
-        validation_results = {
+        validation_results = self._init_validation_results()
+        self._check_missing_strategies(validation_results)
+        self._check_missing_configs(validation_results)
+        self._check_config_consistency(validation_results)
+        return validation_results
+    
+    def _init_validation_results(self) -> Dict[str, Any]:
+        """Initialize validation results structure."""
+        return {
             'is_valid': True,
             'issues': [],
             'recommendations': []
         }
-        
-        # Check for missing strategies
+    
+    def _check_missing_strategies(self, validation_results: Dict[str, Any]) -> None:
+        """Check for missing recovery strategies."""
         missing_strategies = set(AgentType) - set(self.strategies.keys())
         if missing_strategies:
-            validation_results['issues'].append({
-                'type': 'missing_strategies',
-                'agents': [agent.value for agent in missing_strategies]
-            })
-            validation_results['is_valid'] = False
-        
-        # Check for missing configs
+            self._add_missing_strategies_issue(validation_results, missing_strategies)
+    
+    def _add_missing_strategies_issue(self, validation_results: Dict[str, Any], missing_strategies: set) -> None:
+        """Add missing strategies issue to validation results."""
+        validation_results['issues'].append({
+            'type': 'missing_strategies',
+            'agents': [agent.value for agent in missing_strategies]
+        })
+        validation_results['is_valid'] = False
+    
+    def _check_missing_configs(self, validation_results: Dict[str, Any]) -> None:
+        """Check for missing recovery configurations."""
         missing_configs = set(AgentType) - set(self.configs.keys())
         if missing_configs:
-            validation_results['issues'].append({
-                'type': 'missing_configs',
-                'agents': [agent.value for agent in missing_configs]
-            })
-            validation_results['is_valid'] = False
-        
-        # Check config consistency
+            self._add_missing_configs_issue(validation_results, missing_configs)
+    
+    def _add_missing_configs_issue(self, validation_results: Dict[str, Any], missing_configs: set) -> None:
+        """Add missing configs issue to validation results."""
+        validation_results['issues'].append({
+            'type': 'missing_configs',
+            'agents': [agent.value for agent in missing_configs]
+        })
+        validation_results['is_valid'] = False
+    
+    def _check_config_consistency(self, validation_results: Dict[str, Any]) -> None:
+        """Check for strategies without corresponding configs."""
         for agent_type in self.strategies.keys():
             if agent_type not in self.configs:
-                validation_results['issues'].append({
-                    'type': 'strategy_without_config',
-                    'agent': agent_type.value
-                })
-                validation_results['is_valid'] = False
-        
-        return validation_results
+                self._add_config_consistency_issue(validation_results, agent_type)
+    
+    def _add_config_consistency_issue(self, validation_results: Dict[str, Any], agent_type: AgentType) -> None:
+        """Add config consistency issue to validation results."""
+        validation_results['issues'].append({
+            'type': 'strategy_without_config',
+            'agent': agent_type.value
+        })
+        validation_results['is_valid'] = False
 
 
 # Global recovery registry instance

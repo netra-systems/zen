@@ -20,26 +20,27 @@ logger = CentralLogger()
 async def main():
     """Run the MCP server"""
     try:
-        logger.info("Starting Netra MCP Server with FastMCP 2...")
-        
-        # Create server instance
-        server = NetraMCPServer(
-            name="netra-mcp-server",
-            version="2.0.0"
-        )
-        
-        # Get the FastMCP app
-        app = server.get_app()
-        
-        # Run the server
-        # FastMCP handles the server lifecycle
-        await app.run()
-        
+        server = await _create_mcp_server()
+        await _run_mcp_server(server)
     except KeyboardInterrupt:
         logger.info("MCP Server stopped by user")
     except Exception as e:
-        logger.error(f"Error running MCP server: {e}", exc_info=True)
-        sys.exit(1)
+        _handle_server_error(e)
+
+async def _create_mcp_server():
+    """Create and configure MCP server instance."""
+    logger.info("Starting Netra MCP Server with FastMCP 2...")
+    return NetraMCPServer(name="netra-mcp-server", version="2.0.0")
+
+async def _run_mcp_server(server):
+    """Run the MCP server with FastMCP app."""
+    app = server.get_app()
+    await app.run()
+
+def _handle_server_error(error):
+    """Handle server startup/runtime errors."""
+    logger.error(f"Error running MCP server: {error}", exc_info=True)
+    sys.exit(1)
 
 
 if __name__ == "__main__":

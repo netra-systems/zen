@@ -271,63 +271,63 @@ class UnifiedMessagingManager:
         }
         return await self.send_to_user(user_id, error_msg)
 
+    def _create_agent_log_message(self, log_level: Literal["debug", "info", "warning", "error", "critical"], 
+                                message: str, sub_agent_name: Optional[str] = None) -> Dict[str, Any]:
+        """Create agent log message structure."""
+        return {
+            "type": "agent_log",
+            "payload": {"level": log_level, "message": message, "sub_agent_name": sub_agent_name, "timestamp": time.time()},
+            "displayed_to_user": True
+        }
+
     async def send_agent_log(self, user_id: str, log_level: Literal["debug", "info", "warning", "error", "critical"], 
                            message: str, sub_agent_name: Optional[str] = None) -> None:
         """Send agent log message for real-time monitoring."""
-        log_msg = {
-            "type": "agent_log",
-            "payload": {
-                "level": log_level,
-                "message": message,
-                "sub_agent_name": sub_agent_name,
-                "timestamp": time.time()
-            },
+        log_msg = self._create_agent_log_message(log_level, message, sub_agent_name)
+        await self.send_to_user(user_id, log_msg)
+
+    def _create_tool_call_message(self, tool_name: str, tool_args: Dict[str, Any], 
+                                sub_agent_name: Optional[str] = None) -> Dict[str, Any]:
+        """Create tool call message structure."""
+        return {
+            "type": "tool_call",
+            "payload": {"tool_name": tool_name, "tool_args": tool_args, "sub_agent_name": sub_agent_name, "timestamp": time.time()},
             "displayed_to_user": True
         }
-        await self.send_to_user(user_id, log_msg)
 
     async def send_tool_call(self, user_id: str, tool_name: str, tool_args: Dict[str, Any], 
                            sub_agent_name: Optional[str] = None) -> None:
         """Send tool call update message."""
-        tool_msg = {
-            "type": "tool_call",
-            "payload": {
-                "tool_name": tool_name,
-                "tool_args": tool_args,
-                "sub_agent_name": sub_agent_name,
-                "timestamp": time.time()
-            },
+        tool_msg = self._create_tool_call_message(tool_name, tool_args, sub_agent_name)
+        await self.send_to_user(user_id, tool_msg)
+
+    def _create_tool_result_message(self, tool_name: str, result: Union[str, Dict[str, Any], List[Any]], 
+                                  sub_agent_name: Optional[str] = None) -> Dict[str, Any]:
+        """Create tool result message structure."""
+        return {
+            "type": "tool_result",
+            "payload": {"tool_name": tool_name, "result": result, "sub_agent_name": sub_agent_name, "timestamp": time.time()},
             "displayed_to_user": True
         }
-        await self.send_to_user(user_id, tool_msg)
 
     async def send_tool_result(self, user_id: str, tool_name: str, 
                              result: Union[str, Dict[str, Any], List[Any]], 
                              sub_agent_name: Optional[str] = None) -> None:
         """Send tool result update message."""
-        result_msg = {
-            "type": "tool_result",
-            "payload": {
-                "tool_name": tool_name,
-                "result": result,
-                "sub_agent_name": sub_agent_name,
-                "timestamp": time.time()
-            },
+        result_msg = self._create_tool_result_message(tool_name, result, sub_agent_name)
+        await self.send_to_user(user_id, result_msg)
+
+    def _create_sub_agent_update_message(self, sub_agent_name: str, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Create sub-agent update message structure."""
+        return {
+            "type": "sub_agent_update",
+            "payload": {"sub_agent_name": sub_agent_name, "state": state, "timestamp": time.time()},
             "displayed_to_user": True
         }
-        await self.send_to_user(user_id, result_msg)
 
     async def send_sub_agent_update(self, user_id: str, sub_agent_name: str, state: Dict[str, Any]) -> None:
         """Send sub-agent status update message."""
-        update_msg = {
-            "type": "sub_agent_update",
-            "payload": {
-                "sub_agent_name": sub_agent_name,
-                "state": state,
-                "timestamp": time.time()
-            },
-            "displayed_to_user": True
-        }
+        update_msg = self._create_sub_agent_update_message(sub_agent_name, state)
         await self.send_to_user(user_id, update_msg)
 
     def get_messaging_stats(self) -> Dict[str, Any]:

@@ -46,11 +46,16 @@ class PostgreSQLSlowQueryAnalyzer:
         table_name = QueryAnalyzer.extract_table_name(query)
         return query, table_name, mean_time
     
-    def _generate_where_recommendation(self, query: str, table_name: str, mean_time: float) -> IndexRecommendation:
-        """Generate WHERE clause index recommendation."""
+    def _extract_where_conditions_data(self, query: str, mean_time: float):
+        """Extract WHERE conditions and performance data."""
         where_conditions = QueryAnalyzer.extract_where_conditions(query)
         benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
         priority = PerformanceMetrics.get_priority_from_benefit(benefit)
+        return where_conditions, benefit, priority
+    
+    def _build_where_recommendation(self, table_name: str, where_conditions: List, 
+                                   benefit: float, priority: int) -> IndexRecommendation:
+        """Build WHERE clause recommendation."""
         return IndexRecommendation(
             table_name=table_name,
             columns=where_conditions[:3],
@@ -59,11 +64,21 @@ class PostgreSQLSlowQueryAnalyzer:
             priority=priority
         )
     
-    def _generate_order_recommendation(self, query: str, table_name: str, mean_time: float) -> IndexRecommendation:
-        """Generate ORDER BY index recommendation."""
+    def _generate_where_recommendation(self, query: str, table_name: str, mean_time: float) -> IndexRecommendation:
+        """Generate WHERE clause index recommendation."""
+        where_conditions, benefit, priority = self._extract_where_conditions_data(query, mean_time)
+        return self._build_where_recommendation(table_name, where_conditions, benefit, priority)
+    
+    def _extract_order_columns_data(self, query: str, mean_time: float):
+        """Extract ORDER BY columns and performance data."""
         order_columns = QueryAnalyzer.extract_order_by_columns(query)
         benefit = PerformanceMetrics.calculate_benefit_estimate(mean_time)
         priority = PerformanceMetrics.get_priority_from_benefit(benefit)
+        return order_columns, benefit, priority
+    
+    def _build_order_recommendation(self, table_name: str, order_columns: List,
+                                   benefit: float, priority: int) -> IndexRecommendation:
+        """Build ORDER BY recommendation."""
         return IndexRecommendation(
             table_name=table_name,
             columns=order_columns[:2],
@@ -72,21 +87,33 @@ class PostgreSQLSlowQueryAnalyzer:
             priority=priority
         )
     
+    def _generate_order_recommendation(self, query: str, table_name: str, mean_time: float) -> IndexRecommendation:
+        """Generate ORDER BY index recommendation."""
+        order_columns, benefit, priority = self._extract_order_columns_data(query, mean_time)
+        return self._build_order_recommendation(table_name, order_columns, benefit, priority)
+    
+    def _add_where_recommendations(self, recommendations: List, query: str, 
+                                  table_name: str, mean_time: float):
+        """Add WHERE clause recommendations if applicable."""
+        where_conditions = QueryAnalyzer.extract_where_conditions(query)
+        if where_conditions:
+            recommendations.append(self._generate_where_recommendation(query, table_name, mean_time))
+    
+    def _add_order_recommendations(self, recommendations: List, query: str,
+                                  table_name: str, mean_time: float):
+        """Add ORDER BY recommendations if applicable."""
+        order_columns = QueryAnalyzer.extract_order_by_columns(query)
+        if order_columns:
+            recommendations.append(self._generate_order_recommendation(query, table_name, mean_time))
+    
     def analyze_single_query(self, query_data: Tuple) -> List[IndexRecommendation]:
         """Analyze single query and generate recommendations."""
         recommendations = []
         query, table_name, mean_time = self._extract_query_info(query_data)
         if not table_name:
             return recommendations
-        
-        where_conditions = QueryAnalyzer.extract_where_conditions(query)
-        if where_conditions:
-            recommendations.append(self._generate_where_recommendation(query, table_name, mean_time))
-        
-        order_columns = QueryAnalyzer.extract_order_by_columns(query)
-        if order_columns:
-            recommendations.append(self._generate_order_recommendation(query, table_name, mean_time))
-        
+        self._add_where_recommendations(recommendations, query, table_name, mean_time)
+        self._add_order_recommendations(recommendations, query, table_name, mean_time)
         return recommendations
     
     def generate_recommendations_from_queries(self, slow_queries: List[Tuple]) -> List[IndexRecommendation]:

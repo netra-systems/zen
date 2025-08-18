@@ -35,28 +35,32 @@ permission_service = ToolPermissionService(redis_client)
 tool_registry = UnifiedToolRegistry(permission_service=permission_service)
 
 
+async def process_list_tools_request(
+    current_user: User, category: Optional[str]
+) -> ToolAvailabilityResponse:
+    """Process list tools request and return response."""
+    tool_data = await gather_tool_data(tool_registry, current_user, category)
+    available_tools, categories, tools_available = tool_data
+    return build_tool_availability_response(
+        available_tools, tools_available, categories, current_user
+    )
+
+
 @router.get("/", summary="List available tools")
 async def list_tools(
-    db: DbDep,
-    category: Optional[str] = Query(None, description="Filter by category"),
+    db: DbDep, category: Optional[str] = Query(None, description="Filter by category"),
     current_user: User = Depends(get_current_user)
 ) -> ToolAvailabilityResponse:
     """Get list of all tools available to the current user"""
     try:
-        available_tools, categories, tools_available = await gather_tool_data(
-            tool_registry, current_user, category
-        )
-        return build_tool_availability_response(
-            available_tools, tools_available, categories, current_user
-        )
+        return await process_list_tools_request(current_user, category)
     except Exception as e:
         handle_list_tools_error(e)
 
 
 @router.post("/execute", summary="Execute a tool")
 async def execute_tool(
-    request: ToolExecutionRequest,
-    db: DbDep,
+    request: ToolExecutionRequest, db: DbDep,
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Execute a tool with permission checking and usage tracking"""
@@ -77,8 +81,7 @@ async def get_tool_categories() -> List[Dict[str, Any]]:
 
 @router.get("/permissions/{tool_name}", summary="Check tool permissions")
 async def check_tool_permissions(
-    tool_name: str,
-    action: str = Query("execute", description="Action to check"),
+    tool_name: str, action: str = Query("execute", description="Action to check"),
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Check if user has permission to use a specific tool"""
@@ -90,27 +93,31 @@ async def check_tool_permissions(
         handle_permission_check_error(e, tool_name)
 
 
+async def process_user_plan_request(
+    current_user: User, db: DbDep
+) -> UserPlanResponse:
+    """Process user plan request and return response."""
+    plan_data = await gather_user_plan_data(current_user, db)
+    current_plan_def, available_upgrades, usage_summary = plan_data
+    return build_user_plan_response(
+        current_user, current_plan_def, available_upgrades, usage_summary
+    )
+
+
 @router.get("/user/plan", summary="Get user plan information")
 async def get_user_plan(
-    db: DbDep,
-    current_user: User = Depends(get_current_user)
+    db: DbDep, current_user: User = Depends(get_current_user)
 ) -> UserPlanResponse:
     """Get current user's plan information and upgrade options"""
     try:
-        current_plan_def, available_upgrades, usage_summary = await gather_user_plan_data(
-            current_user, db
-        )
-        return build_user_plan_response(
-            current_user, current_plan_def, available_upgrades, usage_summary
-        )
+        return await process_user_plan_request(current_user, db)
     except Exception as e:
         handle_user_plan_error(e)
 
 
 @router.post("/migrate-legacy", summary="Migrate from legacy admin system")
 async def migrate_legacy_admin(
-    db: DbDep,
-    current_user: User = Depends(get_current_user)
+    db: DbDep, current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Migrate user from legacy admin system to new tool-based system"""
     try:

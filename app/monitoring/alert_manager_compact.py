@@ -31,30 +31,34 @@ class CompactAlertManager:
     ):
         self.metrics_collector = metrics_collector or agent_metrics_collector
         self.evaluation_interval = evaluation_interval
+        self._initialize_components()
+        self._initialize_storage()
+        self._initialize_configs()
+        self._initialize_state()
+        self._setup_defaults()
         
-        # Core components
+    def _initialize_components(self):
+        """Initialize core alert manager components."""
         self.evaluator = AlertEvaluator(self.metrics_collector)
         self.notifier = NotificationDeliveryManager()
         
-        # Alert storage
+    def _initialize_storage(self):
+        """Initialize alert storage containers."""
         self.active_alerts: Dict[str, Alert] = {}
         self.alert_history: List[Alert] = []
         self.max_history_size = 10000
         
-        # Rules and configuration
+    def _initialize_configs(self):
+        """Initialize alert rules and configurations."""
         self.alert_rules: Dict[str, AlertRule] = {}
         self.notification_configs: Dict[NotificationChannel, NotificationConfig] = {}
         
-        # Alert suppression and cooldown
+    def _initialize_state(self):
+        """Initialize monitoring and suppression state."""
         self.suppressed_rules: Set[str] = set()
         self.cooldown_tracker: Dict[str, datetime] = {}
-        
-        # Monitoring state
         self._monitoring_task: Optional[asyncio.Task] = None
         self._running = False
-        
-        # Initialize defaults
-        self._setup_defaults()
 
     def _setup_defaults(self) -> None:
         """Setup default rules and configurations."""
@@ -225,12 +229,19 @@ class CompactAlertManager:
     def get_alert_summary(self) -> Dict[str, Any]:
         """Get summary of alert system status."""
         active_count = len(self.active_alerts)
-        level_counts = {}
+        level_counts = self._calculate_level_counts()
+        return self._build_alert_summary(active_count, level_counts)
         
+    def _calculate_level_counts(self) -> Dict[str, int]:
+        """Calculate count of alerts by level."""
+        level_counts = {}
         for alert in self.active_alerts.values():
             level = alert.level.value
             level_counts[level] = level_counts.get(level, 0) + 1
+        return level_counts
         
+    def _build_alert_summary(self, active_count: int, level_counts: Dict[str, int]) -> Dict[str, Any]:
+        """Build alert summary dictionary."""
         return {
             "active_alerts": active_count,
             "alerts_by_level": level_counts,

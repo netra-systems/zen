@@ -39,30 +39,27 @@ async def get_public_config():
     return _build_public_config()
 
 
-@router.get("/config")
-async def get_api_config(
-    current_user: Dict = Depends(require_admin)
-):
-    """Get API configuration including WebSocket URL (Admin only)."""
+def _build_api_config() -> Dict[str, Any]:
+    """Build API configuration response."""
     ws_config = settings.ws_config
-    return {
-        "log_level": "INFO",
-        "max_retries": 3,
-        "timeout": 30,
-        "ws_url": ws_config.ws_url
-    }
+    return {"log_level": "INFO", "max_retries": 3, "timeout": 30, "ws_url": ws_config.ws_url}
 
-@router.put("/config")
-async def update_api_config(
-    config: ConfigUpdate,
-    current_user: Dict = Depends(require_admin)
-):
-    """Update configuration with validation (Admin only)."""
+@router.get("/config")
+async def get_api_config(current_user: Dict = Depends(require_admin)):
+    """Get API configuration including WebSocket URL (Admin only)."""
+    return _build_api_config()
+
+def _validate_config_update(config: ConfigUpdate) -> None:
+    """Validate configuration update."""
     if config.log_level and config.log_level not in ["DEBUG", "INFO", "WARNING", "ERROR"]:
         raise HTTPException(status_code=422, detail="Invalid log level")
     if config.max_retries is not None and config.max_retries < 0:
         raise HTTPException(status_code=422, detail="Invalid max_retries")
-    
+
+@router.put("/config")
+async def update_api_config(config: ConfigUpdate, current_user: Dict = Depends(require_admin)):
+    """Update configuration with validation (Admin only)."""
+    _validate_config_update(config)
     return {"success": True, "message": "Configuration updated"}
 
 async def update_config(config_data: Dict[str, Any]) -> Dict[str, bool]:

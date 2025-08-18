@@ -80,10 +80,25 @@ class JWTTokenManager:
                           now: datetime, exp_time: datetime, jti: str,
                           pr_number: Optional[str]) -> Dict[str, Any]:
         """Build JWT payload dictionary."""
+        base_claims = self._get_base_jwt_claims(user_data, environment, pr_number)
+        time_claims = self._get_time_jwt_claims(now, exp_time, jti)
+        return {**base_claims, **time_claims}
+    
+    def _get_base_jwt_claims(self, user_data: Dict[str, Any], environment: str, pr_number: Optional[str]) -> Dict[str, Any]:
+        """Get base JWT claims."""
         return {
-            "user_id": user_data["user_id"], "email": user_data["email"],
-            "environment": environment, "pr_number": pr_number,
-            "iat": int(now.timestamp()), "exp": int(exp_time.timestamp()), "jti": jti
+            "user_id": user_data["user_id"],
+            "email": user_data["email"],
+            "environment": environment,
+            "pr_number": pr_number
+        }
+    
+    def _get_time_jwt_claims(self, now: datetime, exp_time: datetime, jti: str) -> Dict[str, Any]:
+        """Get time-based JWT claims."""
+        return {
+            "iat": int(now.timestamp()),
+            "exp": int(exp_time.timestamp()),
+            "jti": jti
         }
     
     async def validate_jwt(self, token: str) -> TokenClaims:

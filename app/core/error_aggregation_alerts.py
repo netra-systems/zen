@@ -37,15 +37,31 @@ class AlertEngine:
         trend: Optional[ErrorTrend] = None
     ) -> List[ErrorAlert]:
         """Evaluate pattern against all active alert rules."""
-        alerts = []
-        for rule in self._get_active_rules():
-            if self._should_evaluate_rule(rule):
-                alert = self._evaluate_single_rule(rule, pattern, trend)
-                if alert:
-                    alerts.append(alert)
-                    self._set_rule_cooldown(rule.rule_id)
+        alerts = self._process_rules_for_pattern(pattern, trend)
         self.alerts.extend(alerts)
         return alerts
+    
+    def _process_rules_for_pattern(
+        self, pattern: ErrorPattern, trend: Optional[ErrorTrend]
+    ) -> List[ErrorAlert]:
+        """Process all rules for given pattern."""
+        alerts = []
+        for rule in self._get_active_rules():
+            alert = self._check_rule_against_pattern(rule, pattern, trend)
+            if alert:
+                alerts.append(alert)
+        return alerts
+    
+    def _check_rule_against_pattern(
+        self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]
+    ) -> Optional[ErrorAlert]:
+        """Check single rule against pattern."""
+        if not self._should_evaluate_rule(rule):
+            return None
+        alert = self._evaluate_single_rule(rule, pattern, trend)
+        if alert:
+            self._set_rule_cooldown(rule.rule_id)
+        return alert
     
     def _setup_default_rules(self) -> None:
         """Setup comprehensive default alert rules."""
@@ -129,6 +145,10 @@ class AlertEngine:
         """Check if rule is in cooldown period."""
         if rule_id not in self.alert_history:
             return False
+        return self._check_cooldown_period(rule_id)
+    
+    def _check_cooldown_period(self, rule_id: str) -> bool:
+        """Check if cooldown period is still active."""
         rule = self.rules[rule_id]
         last_alert = self.alert_history[rule_id]
         cooldown_period = timedelta(minutes=rule.cooldown_minutes)

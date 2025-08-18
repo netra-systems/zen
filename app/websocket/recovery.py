@@ -104,23 +104,33 @@ class WebSocketRecoveryManager:
         if success or context.attempt_count >= context.max_attempts:
             self.active_recoveries.pop(connection_id, None)
     
+    async def _try_single_recovery_strategy(self, strategy: RecoveryStrategy, context: RecoveryContext) -> Optional[bool]:
+        """Try a single recovery strategy and return success status or None if no handler."""
+        handler = self.recovery_handlers.get(strategy)
+        if not handler:
+            logger.warning(f"No handler for recovery strategy: {strategy}")
+            return None
+        
+        success = await handler(context)
+        if success:
+            logger.info(f"Recovery successful using {strategy}")
+        return success
+
+    def _log_all_strategies_failed(self, connection_id: str) -> None:
+        """Log that all recovery strategies have failed."""
+        logger.warning(f"All recovery strategies failed for {connection_id}")
+
     async def _execute_recovery_strategies(self, context: RecoveryContext) -> bool:
         """Execute recovery strategies in sequence."""
         for strategy in context.strategies:
             try:
-                handler = self.recovery_handlers.get(strategy)
-                if handler:
-                    success = await handler(context)
-                    if success:
-                        logger.info(f"Recovery successful using {strategy}")
-                        return True
-                else:
-                    logger.warning(f"No handler for recovery strategy: {strategy}")
+                success = await self._try_single_recovery_strategy(strategy, context)
+                if success:
+                    return True
             except Exception as e:
                 logger.error(f"Recovery strategy {strategy} failed: {e}")
-                continue
         
-        logger.warning(f"All recovery strategies failed for {context.connection_id}")
+        self._log_all_strategies_failed(context.connection_id)
         return False
     
     async def _immediate_recovery(self, context: RecoveryContext) -> bool:
@@ -130,22 +140,26 @@ class WebSocketRecoveryManager:
         context.last_attempt = time.time()
         return True
     
-    async def _exponential_backoff_recovery(self, context: RecoveryContext) -> bool:
-        """Implement exponential backoff recovery."""
+    async def _handle_backoff_delay(self, context: RecoveryContext) -> None:
+        """Handle exponential backoff delay if needed."""
+        if not context.last_attempt:
+            return
+        
         current_time = time.time()
-        
-        # Check if we need to wait
-        if context.last_attempt:
-            elapsed = current_time - context.last_attempt
-            if elapsed < context.backoff_delay:
-                # Still in backoff period
-                await asyncio.sleep(context.backoff_delay - elapsed)
-        
-        # Update attempt tracking
+        elapsed = current_time - context.last_attempt
+        if elapsed < context.backoff_delay:
+            await asyncio.sleep(context.backoff_delay - elapsed)
+
+    def _update_backoff_attempt(self, context: RecoveryContext) -> None:
+        """Update attempt count and backoff delay."""
         context.attempt_count += 1
         context.last_attempt = time.time()
         context.backoff_delay = min(context.backoff_delay * 2, 60.0)  # Max 60s
-        
+
+    async def _exponential_backoff_recovery(self, context: RecoveryContext) -> bool:
+        """Implement exponential backoff recovery."""
+        await self._handle_backoff_delay(context)
+        self._update_backoff_attempt(context)
         return context.attempt_count <= context.max_attempts
     
     def _get_connection_health(self, connection_id: str) -> float:
@@ -184,18 +198,28 @@ class WebSocketRecoveryManager:
         new_health = self._calculate_new_health_from_severity(health, context.error.severity)
         return self._update_and_validate_health(connection_id, new_health)
     
-    async def _state_sync_recovery(self, context: RecoveryContext) -> bool:
-        """Implement state synchronization recovery."""
+    def _validate_state_snapshot(self, context: RecoveryContext) -> bool:
+        """Validate if state snapshot is available for recovery."""
         if not context.state_snapshot:
             logger.info("No state snapshot available for recovery")
+            return False
+        return True
+
+    def _perform_state_restoration(self, context: RecoveryContext) -> bool:
+        """Perform the actual state restoration process."""
+        # In a real implementation, this would restore the agent state
+        # For now, we'll just log that state sync is available
+        logger.info(f"State snapshot available for recovery: "
+                   f"step_count={context.state_snapshot.step_count}")
+        return True
+
+    async def _state_sync_recovery(self, context: RecoveryContext) -> bool:
+        """Implement state synchronization recovery."""
+        if not self._validate_state_snapshot(context):
             return True  # Not a failure, just no state to recover
         
         try:
-            # In a real implementation, this would restore the agent state
-            # For now, we'll just log that state sync is available
-            logger.info(f"State snapshot available for recovery: "
-                       f"step_count={context.state_snapshot.step_count}")
-            return True
+            return self._perform_state_restoration(context)
         except Exception as e:
             logger.error(f"State sync recovery failed: {e}")
             return False
@@ -211,12 +235,8 @@ class WebSocketRecoveryManager:
         self.connection_health.pop(connection_id, None)
         self.active_recoveries.pop(connection_id, None)
     
-    def get_recovery_status(self, connection_id: str) -> Optional[Dict[str, Any]]:
-        """Get recovery status for a connection."""
-        context = self.active_recoveries.get(connection_id)
-        if not context:
-            return None
-        
+    def _build_recovery_status_dict(self, context: RecoveryContext) -> Dict[str, Any]:
+        """Build recovery status dictionary from context."""
         return {
             "connection_id": context.connection_id,
             "attempt_count": context.attempt_count,
@@ -226,6 +246,13 @@ class WebSocketRecoveryManager:
             "strategies": [s.value for s in context.strategies],
             "has_state_snapshot": context.state_snapshot is not None
         }
+
+    def get_recovery_status(self, connection_id: str) -> Optional[Dict[str, Any]]:
+        """Get recovery status for a connection."""
+        context = self.active_recoveries.get(connection_id)
+        if not context:
+            return None
+        return self._build_recovery_status_dict(context)
     
     def register_recovery_handler(
         self,

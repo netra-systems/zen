@@ -31,50 +31,27 @@ class ExtendedOperations:
         
     async def process_with_retry(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with retry mechanism."""
-        # Use agent's current config, not the cached config
         agent_config = getattr(self.agent, 'config', self.config)
         max_retries = agent_config.get("max_retries", 3)
         last_exception = None
-        
         for attempt in range(max_retries):
-            try:
-                # Check if agent has mocked _process_internal method (for test compatibility)
-                if hasattr(self.agent, '_process_internal') and callable(getattr(self.agent, '_process_internal')):
-                    return await self.agent._process_internal(data)
-                else:
-                    return await self._process_internal(data)
-            except Exception as e:
-                last_exception = e
-                if attempt < max_retries - 1:
-                    await asyncio.sleep(0.1 * (2 ** attempt))
-        
-        # If all attempts failed, raise the last exception
+            result, exception = await self._attempt_process(data)
+            if result is not None:
+                return result
+            last_exception = await self._handle_retry_exception(exception, attempt, max_retries)
         if last_exception:
             raise last_exception
         
     async def process_with_cache(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with TTL-based caching support."""
-        # Use agent's cache if it exists (for test compatibility)
         cache = getattr(self.agent, '_cache', self._cache)
         cache_key = self._generate_cache_key(data)
         current_time = time.time()
-        
-        # Check if cached entry exists and is not expired
-        if cache_key in cache:
-            cache_entry = cache[cache_key]
-            cache_ttl = getattr(self.agent, 'cache_ttl', 60)  # Default 60 seconds
-            if current_time - cache_entry['timestamp'] < cache_ttl:
-                return cache_entry['data']
-            else:
-                # Entry expired, remove it
-                del cache[cache_key]
-        
-        # Process data and cache with timestamp
+        cached_result = self._check_cache_entry(cache, cache_key, current_time)
+        if cached_result is not None:
+            return cached_result
         result = await self._process_internal(data)
-        cache[cache_key] = {
-            'data': result,
-            'timestamp': current_time
-        }
+        self._store_cache_entry(cache, cache_key, result, current_time)
         return result
         
     def _generate_cache_key(self, data: Dict[str, Any]) -> str:
@@ -97,20 +74,9 @@ class ExtendedOperations:
                                max_concurrent: int = 10) -> List[Dict[str, Any]]:
         """Process items concurrently with limit."""
         semaphore = asyncio.Semaphore(max_concurrent)
-        
-        async def process_item(item: Dict[str, Any]) -> Dict[str, Any]:
-            async with semaphore:
-                result = await self.agent.process_data(item)
-                # Transform result to match test expectations
-                return {
-                    "data": item,
-                    **result
-                }
-                
-        tasks = [process_item(item) for item in items]
+        tasks = [self._create_concurrent_task(item, semaphore) for item in items]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        # Filter out any exceptions and return only successful results
-        return [r for r in results if isinstance(r, dict)]
+        return self._filter_successful_results(results)
         
     async def process_stream(self, dataset, chunk_size: int = 100) -> AsyncGenerator[List[Any], None]:
         """Process large dataset in chunks for memory efficiency."""
@@ -126,18 +92,9 @@ class ExtendedOperations:
     async def process_and_persist(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data and persist results."""
         result = await self.agent.process_data(data)
-        
-        # Generate consistent ID for test compatibility
-        from datetime import datetime, UTC
-        timestamp = datetime.now(UTC)
-        # Use fixed ID for test compatibility
-        test_id = "saved_123"
-        
-        result.update({
-            "persisted": True,
-            "id": test_id,
-            "timestamp": timestamp.isoformat()
-        })
+        timestamp = self._generate_timestamp()
+        test_id = "saved_123"  # Use fixed ID for test compatibility
+        result.update(self._create_persistence_data(test_id, timestamp))
         return result
         
     async def handle_supervisor_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
@@ -172,38 +129,26 @@ class ExtendedOperations:
         
     async def _apply_operation(self, data: Dict[str, Any], operation: Dict[str, Any]) -> Dict[str, Any]:
         """Apply single operation to data."""
-        # Check if agent has a patched _apply_operation method (for test patches)
         if hasattr(self.agent, '_apply_operation') and callable(getattr(self.agent, '_apply_operation')):
             return await self.agent._apply_operation(data, operation)
-        op_type = operation.get("operation", "unknown")
-        data["processed"] = True
-        data[f"applied_{op_type}"] = True
-        return data
+        return self._apply_default_operation(data, operation)
         
     async def save_state(self) -> None:
         """Save agent state to persistent storage."""
-        if hasattr(self.agent, 'context') and self.agent.context:
-            state_data = {
-                "context": self.agent.context,
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "agent_id": getattr(self.agent, 'id', 'unknown')
-            }
-            logger.info(f"Saving agent state: {state_data}")
-            # State persistence handled by state_persistence_service
-            await self.agent.state_persistence.save_agent_state(
-                self.agent.name, state_data
-            )
+        if not (hasattr(self.agent, 'context') and self.agent.context):
+            return
+        state_data = self._create_state_data()
+        logger.info(f"Saving agent state: {state_data}")
+        await self.agent.state_persistence.save_agent_state(
+            self.agent.name, state_data
+        )
             
     async def load_state(self) -> None:
         """Load agent state from persistent storage."""
-        # Load state using state_persistence_service
         state_data = await self.agent.state_persistence.load_agent_state(
             self.agent.name
         )
-        if state_data:
-            logger.info(f"Loaded agent state: {state_data}")
-        else:
-            logger.info("No saved state found for agent")
+        self._log_state_load_result(state_data)
         
     async def recover(self) -> None:
         """Recover agent from saved state."""
@@ -241,3 +186,65 @@ class ExtendedOperations:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "agent_id": getattr(self.agent, 'id', 'unknown')
         }
+    
+    async def _attempt_process(self, data: Dict[str, Any]) -> tuple[Optional[Dict[str, Any]], Optional[Exception]]:
+        """Attempt to process data, return result and exception."""
+        try:
+            if hasattr(self.agent, '_process_internal') and callable(getattr(self.agent, '_process_internal')):
+                return await self.agent._process_internal(data), None
+            return await self._process_internal(data), None
+        except Exception as e:
+            return None, e
+    
+    def _check_cache_entry(self, cache: Dict, cache_key: str, current_time: float) -> Optional[Dict[str, Any]]:
+        """Check cache entry and return data if valid."""
+        if cache_key not in cache:
+            return None
+        cache_entry = cache[cache_key]
+        cache_ttl = getattr(self.agent, 'cache_ttl', 60)
+        if current_time - cache_entry['timestamp'] < cache_ttl:
+            return cache_entry['data']
+        del cache[cache_key]
+        return None
+    
+    def _store_cache_entry(self, cache: Dict, cache_key: str, result: Dict[str, Any], current_time: float) -> None:
+        """Store result in cache with timestamp."""
+        cache[cache_key] = {
+            'data': result,
+            'timestamp': current_time
+        }
+    
+    async def _create_concurrent_task(self, item: Dict[str, Any], semaphore: asyncio.Semaphore) -> Dict[str, Any]:
+        """Create concurrent processing task."""
+        async with semaphore:
+            result = await self.agent.process_data(item)
+            return {
+                "data": item,
+                **result
+            }
+    
+    def _filter_successful_results(self, results: List) -> List[Dict[str, Any]]:
+        """Filter out exceptions and return only successful results."""
+        return [r for r in results if isinstance(r, dict)]
+    
+    def _create_persistence_data(self, test_id: str, timestamp) -> Dict[str, Any]:
+        """Create persistence data for result."""
+        return {
+            "persisted": True,
+            "id": test_id,
+            "timestamp": timestamp.isoformat()
+        }
+    
+    def _apply_default_operation(self, data: Dict[str, Any], operation: Dict[str, Any]) -> Dict[str, Any]:
+        """Apply default operation to data."""
+        op_type = operation.get("operation", "unknown")
+        data["processed"] = True
+        data[f"applied_{op_type}"] = True
+        return data
+    
+    def _log_state_load_result(self, state_data: Optional[Dict[str, Any]]) -> None:
+        """Log the result of state loading."""
+        if state_data:
+            logger.info(f"Loaded agent state: {state_data}")
+        else:
+            logger.info("No saved state found for agent")

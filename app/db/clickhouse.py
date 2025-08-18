@@ -149,26 +149,42 @@ async def _test_and_yield_client(client):
     logger.info("[ClickHouse] REAL connection established")
     yield client
 
+def _log_connection_attempt(config, use_secure: bool):
+    """Log ClickHouse connection attempt."""
+    logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure})")
+
+def _create_intercepted_client(config, use_secure: bool):
+    """Create ClickHouse client with query interceptor."""
+    base_client = _create_base_client(config, use_secure)
+    return ClickHouseQueryInterceptor(base_client)
+
+def _handle_connection_error(e: Exception):
+    """Handle ClickHouse connection error."""
+    logger.error(f"[ClickHouse] REAL connection failed: {str(e)}")
+    raise
+
+async def _cleanup_client_connection(client):
+    """Clean up ClickHouse client connection."""
+    await client.disconnect()
+    logger.info("[ClickHouse] REAL connection closed")
+
 async def _create_real_client():
     """Create and manage REAL ClickHouse client.
     
     This is the default behavior - connects to actual ClickHouse instance.
     """
     config, use_secure = _get_connection_config()
-    logger.info(f"[ClickHouse] Connecting to instance at {config.host}:{config.port} (secure={use_secure})")
+    _log_connection_attempt(config, use_secure)
     
     try:
-        base_client = _create_base_client(config, use_secure)
-        client = ClickHouseQueryInterceptor(base_client)
+        client = _create_intercepted_client(config, use_secure)
         async for c in _test_and_yield_client(client):
             yield c
     except Exception as e:
-        logger.error(f"[ClickHouse] REAL connection failed: {str(e)}")
-        raise
+        _handle_connection_error(e)
     finally:
         if 'client' in locals():
-            await client.disconnect()
-            logger.info("[ClickHouse] REAL connection closed")
+            await _cleanup_client_connection(client)
 
 
 class ClickHouseService:
@@ -191,11 +207,9 @@ class ClickHouseService:
         logger.info("[ClickHouse Service] Initializing with MOCK client")
         self._client = MockClickHouseDatabase()
 
-    async def _initialize_real_client(self):
-        """Initialize real ClickHouse client."""
-        logger.info("[ClickHouse Service] Initializing with REAL client")
-        config = get_clickhouse_config()
-        base_client = ClickHouseDatabase(
+    def _build_clickhouse_database(self, config) -> ClickHouseDatabase:
+        """Build ClickHouse database client."""
+        return ClickHouseDatabase(
             host=config.host,
             port=config.port,
             user=config.user,
@@ -203,6 +217,12 @@ class ClickHouseService:
             database=config.database,
             secure=True
         )
+    
+    async def _initialize_real_client(self):
+        """Initialize real ClickHouse client."""
+        logger.info("[ClickHouse Service] Initializing with REAL client")
+        config = get_clickhouse_config()
+        base_client = self._build_clickhouse_database(config)
         self._client = ClickHouseQueryInterceptor(base_client)
         await self._client.test_connection()
 

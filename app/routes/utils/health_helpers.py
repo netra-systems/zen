@@ -18,40 +18,68 @@ async def test_database_connectivity(db: AsyncSession) -> bool:
     return result.scalar() == 1
 
 
+def _get_db_query_fields() -> str:
+    """Get database query field selection."""
+    return "count(*) as active_connections, max(state_change) as last_activity"
+
+def _get_db_query_filter() -> str:
+    """Get database query filter condition."""
+    return "WHERE datname = current_database()"
+
+def _build_db_stats_query() -> str:
+    """Build database statistics query."""
+    fields = _get_db_query_fields()
+    filter_clause = _get_db_query_filter()
+    return f"SELECT {fields} FROM pg_stat_activity {filter_clause}"
+
+
+def _process_db_stats_result(row) -> Dict[str, Any]:
+    """Process database statistics result."""
+    return {
+        "active_connections": row.active_connections,
+        "last_activity": row.last_activity.isoformat() if row.last_activity else None
+    }
+
+
+async def _fetch_db_stats_with_error_handling(db: AsyncSession) -> Dict[str, Any]:
+    """Fetch database statistics with error handling."""
+    try:
+        result = await db.execute(text(_build_db_stats_query()))
+        row = result.first()
+        return _process_db_stats_result(row) if row else {}
+    except Exception as e:
+        logger.warning(f"Could not fetch database statistics: {e}")
+        return {}
+
 async def get_database_statistics(db: AsyncSession) -> Dict[str, Any]:
     """Get database statistics."""
-    stats = {}
-    if async_engine:
-        try:
-            result = await db.execute(text("""
-                SELECT 
-                    count(*) as active_connections,
-                    max(state_change) as last_activity
-                FROM pg_stat_activity 
-                WHERE datname = current_database()
-            """))
-            row = result.first()
-            if row:
-                stats = {
-                    "active_connections": row.active_connections,
-                    "last_activity": row.last_activity.isoformat() if row.last_activity else None
-                }
-        except Exception as e:
-            logger.warning(f"Could not fetch database statistics: {e}")
-    return stats
+    if not async_engine:
+        return {}
+    return await _fetch_db_stats_with_error_handling(db)
+
+
+def _get_database_status(db_connected: bool) -> str:
+    """Get database status string."""
+    return "healthy" if db_connected else "unhealthy"
+
+
+def _build_db_response_fields(db_connected: bool, pool_status: Dict, stats: Dict) -> Dict[str, Any]:
+    """Build database response fields."""
+    return {
+        "status": _get_database_status(db_connected),
+        "connected": db_connected,
+        "pool_status": pool_status,
+        "database_stats": stats
+    }
 
 
 def build_database_health_response(
     db_connected: bool, pool_status: Dict, stats: Dict
 ) -> Dict[str, Any]:
     """Build database health response."""
-    return {
-        "status": "healthy" if db_connected else "unhealthy",
-        "connected": db_connected,
-        "pool_status": pool_status,
-        "database_stats": stats,
-        "timestamp": datetime.now(UTC).isoformat()
-    }
+    response = _build_db_response_fields(db_connected, pool_status, stats)
+    response["timestamp"] = datetime.now(UTC).isoformat()
+    return response
 
 
 def _get_memory_metrics() -> Dict[str, Any]:
@@ -84,17 +112,30 @@ def get_system_metrics() -> Dict[str, Any]:
     }
 
 
-def get_process_metrics() -> Dict[str, Any]:
-    """Get process-specific metrics."""
-    process = psutil.Process()
-    process_memory = process.memory_info()
+def _get_process_memory_metrics(process) -> Dict[str, Any]:
+    """Get process memory metrics."""
+    memory = process.memory_info()
     return {
-        "memory_rss": process_memory.rss,
-        "memory_vms": process_memory.vms,
+        "memory_rss": memory.rss,
+        "memory_vms": memory.vms
+    }
+
+
+def _get_process_performance_metrics(process) -> Dict[str, Any]:
+    """Get process performance metrics."""
+    return {
         "cpu_percent": process.cpu_percent(),
         "num_threads": process.num_threads(),
         "connections": len(process.connections(kind='inet'))
     }
+
+
+def get_process_metrics() -> Dict[str, Any]:
+    """Get process-specific metrics."""
+    process = psutil.Process()
+    memory_metrics = _get_process_memory_metrics(process)
+    performance_metrics = _get_process_performance_metrics(process)
+    return {**memory_metrics, **performance_metrics}
 
 
 def build_system_health_response(system_metrics: Dict, process_metrics: Dict) -> Dict[str, Any]:
@@ -116,8 +157,8 @@ def build_system_error_response(error: str) -> Dict[str, Any]:
     }
 
 
-def get_pool_configuration() -> Dict[str, Any]:
-    """Get pool configuration data."""
+def _get_pool_config_data() -> Dict[str, Any]:
+    """Get pool configuration dictionary."""
     return {
         "pool_size": 20,
         "max_overflow": 30,
@@ -126,17 +167,46 @@ def get_pool_configuration() -> Dict[str, Any]:
         "max_connections": 100
     }
 
+def get_pool_configuration() -> Dict[str, Any]:
+    """Get pool configuration data."""
+    return _get_pool_config_data()
+
+
+def _calculate_active_connections(async_pool: Dict) -> int:
+    """Calculate active connections."""
+    return async_pool["size"] - async_pool["checked_in"]
+
+
+def _calculate_total_capacity(async_pool: Dict) -> int:
+    """Calculate total pool capacity."""
+    return async_pool["size"] + async_pool.get("overflow", 0)
+
+
+def _build_utilization_metrics(active: int, total_capacity: int) -> Dict[str, Any]:
+    """Build utilization metrics dict."""
+    return {
+        "active_connections": active,
+        "utilization_percent": (active / total_capacity) * 100 if total_capacity else 0
+    }
+
+
+def _validate_pool_data(async_pool: Dict) -> bool:
+    """Validate pool has required data."""
+    return async_pool.get("size") is not None and async_pool.get("checked_in") is not None
+
+
+def _process_async_pool(async_pool: Dict) -> Dict[str, Any]:
+    """Process async pool data for utilization."""
+    active = _calculate_active_connections(async_pool)
+    total_capacity = _calculate_total_capacity(async_pool)
+    return _build_utilization_metrics(active, total_capacity)
+
 
 def calculate_pool_utilization(pool_status: Dict) -> Dict[str, Any]:
     """Calculate pool utilization metrics."""
     utilization = {}
     if pool_status.get("async"):
         async_pool = pool_status["async"]
-        if async_pool.get("size") is not None and async_pool.get("checked_in") is not None:
-            active = async_pool["size"] - async_pool["checked_in"]
-            total_capacity = async_pool["size"] + async_pool.get("overflow", 0)
-            utilization = {
-                "active_connections": active,
-                "utilization_percent": (active / total_capacity) * 100 if total_capacity else 0
-            }
+        if _validate_pool_data(async_pool):
+            utilization = _process_async_pool(async_pool)
     return utilization

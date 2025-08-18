@@ -1,286 +1,150 @@
-"""Demo route handlers with ≤8 line functions for enterprise demonstrations."""
+"""Demo route handlers - Main exports."""
 
-from fastapi import HTTPException, BackgroundTasks
-from typing import Optional, Dict, Any, List
-from datetime import datetime, UTC
-import uuid
-
-from app.services.demo_service import DemoService
-from app.logging_config import central_logger
-from app.schemas.demo_schemas import (
-    DemoChatRequest, DemoChatResponse, ROICalculationRequest, ROICalculationResponse,
-    ExportReportRequest, IndustryTemplate, DemoMetrics
+# Import all functions from focused modules
+from app.routes.demo_handlers_chat import (
+    handle_demo_chat, execute_demo_chat_flow, get_or_create_session_id,
+    execute_demo_chat_service, process_chat_request, create_chat_tracking_data,
+    add_chat_tracking_task, track_chat_interaction, create_chat_response
+)
+from app.routes.demo_handlers_roi import (
+    handle_roi_calculation, execute_roi_calculation_flow, execute_roi_calculation,
+    calculate_roi_metrics, create_roi_tracking_data, add_roi_tracking_task,
+    track_roi_calculation
+)
+from app.routes.demo_handlers_templates import (
+    handle_industry_templates, generate_metrics_from_service,
+    handle_synthetic_metrics, build_demo_metrics_response
+)
+from app.routes.demo_handlers_export import (
+    handle_export_report, execute_export_flow, execute_report_generation,
+    build_report_params, generate_demo_report, create_export_tracking_data,
+    add_export_tracking_task, track_report_export, create_export_response
+)
+from app.routes.demo_handlers_session import (
+    handle_session_status, handle_session_feedback
+)
+from app.routes.demo_handlers_analytics import (
+    handle_demo_analytics, get_analytics_from_service
+)
+from app.routes.demo_handlers_utils import (
+    log_and_raise_error, raise_not_found_error, validate_admin_access,
+    build_feedback_success_response, build_tracking_params
 )
 
-
-async def handle_demo_chat(
-    request: DemoChatRequest,
-    background_tasks: BackgroundTasks,
-    demo_service: DemoService,
-    current_user: Optional[Dict]
-) -> DemoChatResponse:
-    """Handle demo chat interactions with industry-specific AI optimization."""
-    session_id = _get_or_create_session_id(request.session_id)
-    result = await _process_chat_request(request, session_id, demo_service, current_user)
-    _track_chat_interaction(background_tasks, demo_service, session_id, request)
-    return _create_chat_response(result, session_id)
-
-
-def _get_or_create_session_id(session_id: Optional[str]) -> str:
-    """Get existing session ID or create a new one."""
-    return session_id or str(uuid.uuid4())
-
-
-async def _execute_demo_chat_service(
-    request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
-) -> Dict[str, Any]:
-    """Execute demo chat through service."""
-    return await demo_service.process_demo_chat(
-        message=request.message, industry=request.industry,
-        session_id=session_id, context=request.context,
-        user_id=current_user.get("id") if current_user else None
-    )
-
-async def _process_chat_request(
-    request: DemoChatRequest, session_id: str, demo_service: DemoService, current_user: Optional[Dict]
-) -> Dict[str, Any]:
-    """Process the demo chat request using demo service."""
-    try:
-        return await _execute_demo_chat_service(request, session_id, demo_service, current_user)
-    except Exception as e:
-        _log_and_raise_error("Demo chat processing failed", e)
+# Export all functions for backward compatibility
+__all__ = [
+    # Chat handlers
+    'handle_demo_chat', 'execute_demo_chat_flow', 'get_or_create_session_id',
+    'execute_demo_chat_service', 'process_chat_request', 'create_chat_tracking_data',
+    'add_chat_tracking_task', 'track_chat_interaction', 'create_chat_response',
+    
+    # ROI handlers
+    'handle_roi_calculation', 'execute_roi_calculation_flow', 'execute_roi_calculation',
+    'calculate_roi_metrics', 'create_roi_tracking_data', 'add_roi_tracking_task',
+    'track_roi_calculation',
+    
+    # Templates and metrics
+    'handle_industry_templates', 'generate_metrics_from_service',
+    'handle_synthetic_metrics', 'build_demo_metrics_response',
+    
+    # Export handlers
+    'handle_export_report', 'execute_export_flow', 'execute_report_generation',
+    'build_report_params', 'generate_demo_report', 'create_export_tracking_data',
+    'add_export_tracking_task', 'track_report_export', 'create_export_response',
+    
+    # Session handlers
+    'handle_session_status', 'handle_session_feedback',
+    
+    # Analytics handlers
+    'handle_demo_analytics', 'get_analytics_from_service',
+    
+    # Utilities
+    'log_and_raise_error', 'raise_not_found_error', 'validate_admin_access',
+    'build_feedback_success_response', 'build_tracking_params'
+]
 
 
-def _create_chat_tracking_data(request: DemoChatRequest) -> Dict[str, Any]:
-    """Create tracking data for chat interaction."""
-    return {"industry": request.industry, "message_length": len(request.message)}
+# Legacy function aliases for backward compatibility
+def _get_or_create_session_id(session_id):
+    """Legacy alias."""
+    return get_or_create_session_id(session_id)
 
 
-def _add_chat_tracking_task(
-    background_tasks: BackgroundTasks, demo_service: DemoService, session_id: str, data: Dict[str, Any]
-) -> None:
-    """Add chat tracking task to background."""
-    background_tasks.add_task(
-        demo_service.track_demo_interaction,
-        session_id=session_id, interaction_type="chat", data=data
-    )
-
-def _track_chat_interaction(
-    background_tasks: BackgroundTasks, demo_service: DemoService, session_id: str, request: DemoChatRequest
-) -> None:
-    """Track demo analytics in background."""
-    data = _create_chat_tracking_data(request)
-    _add_chat_tracking_task(background_tasks, demo_service, session_id, data)
+def _execute_demo_chat_flow(request, background_tasks, demo_service, current_user):
+    """Legacy alias."""
+    return execute_demo_chat_flow(request, background_tasks, demo_service, current_user)
 
 
-def _create_chat_response(result: Dict[str, Any], session_id: str) -> DemoChatResponse:
-    """Create chat response from service result."""
-    return DemoChatResponse(
-        response=result["response"],
-        agents_involved=result["agents"],
-        optimization_metrics=result["metrics"],
-        session_id=session_id
-    )
+def _execute_demo_chat_service(request, session_id, demo_service, current_user):
+    """Legacy alias."""
+    return execute_demo_chat_service(request, session_id, demo_service, current_user)
 
 
-async def handle_industry_templates(
-    industry: str,
-    demo_service: DemoService
-) -> List[IndustryTemplate]:
-    """Get industry-specific demo templates and scenarios."""
-    try:
-        return await demo_service.get_industry_templates(industry)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        _log_and_raise_error("Failed to retrieve templates", e)
+def _process_chat_request(request, session_id, demo_service, current_user):
+    """Legacy alias."""
+    return process_chat_request(request, session_id, demo_service, current_user)
 
 
-async def handle_roi_calculation(
-    request: ROICalculationRequest,
-    background_tasks: BackgroundTasks,
-    demo_service: DemoService
-) -> ROICalculationResponse:
-    """Calculate ROI and cost savings for AI optimization."""
-    result = await _calculate_roi_metrics(request, demo_service)
-    _track_roi_calculation(background_tasks, demo_service, request, result)
-    return ROICalculationResponse(**result)
+def _create_chat_tracking_data(request):
+    """Legacy alias."""
+    return create_chat_tracking_data(request)
 
 
-async def _execute_roi_calculation(
-    request: ROICalculationRequest, demo_service: DemoService
-) -> Dict[str, Any]:
-    """Execute ROI calculation through service."""
-    return await demo_service.calculate_roi(
-        current_spend=request.current_spend, request_volume=request.request_volume,
-        average_latency=request.average_latency, industry=request.industry
-    )
-
-async def _calculate_roi_metrics(
-    request: ROICalculationRequest, demo_service: DemoService
-) -> Dict[str, Any]:
-    """Calculate ROI metrics using demo service."""
-    try:
-        return await _execute_roi_calculation(request, demo_service)
-    except Exception as e:
-        _log_and_raise_error("ROI calculation failed", e)
+def _add_chat_tracking_task(background_tasks, demo_service, session_id, data):
+    """Legacy alias."""
+    return add_chat_tracking_task(background_tasks, demo_service, session_id, data)
 
 
-def _create_roi_tracking_data(request: ROICalculationRequest, result: Dict[str, Any]) -> Dict[str, Any]:
-    """Create tracking data for ROI calculation."""
-    return {"industry": request.industry, "potential_savings": result["annual_savings"]}
+def _track_chat_interaction(background_tasks, demo_service, session_id, request):
+    """Legacy alias."""
+    return track_chat_interaction(background_tasks, demo_service, session_id, request)
 
 
-def _add_roi_tracking_task(
-    background_tasks: BackgroundTasks, demo_service: DemoService, data: Dict[str, Any]
-) -> None:
-    """Add ROI tracking task to background."""
-    background_tasks.add_task(
-        demo_service.track_demo_interaction, session_id=str(uuid.uuid4()),
-        interaction_type="roi_calculation", data=data
-    )
-
-def _track_roi_calculation(
-    background_tasks: BackgroundTasks, demo_service: DemoService,
-    request: ROICalculationRequest, result: Dict[str, Any]
-) -> None:
-    """Track ROI calculation for analytics."""
-    data = _create_roi_tracking_data(request, result)
-    _add_roi_tracking_task(background_tasks, demo_service, data)
+def _create_chat_response(result, session_id):
+    """Legacy alias."""
+    return create_chat_response(result, session_id)
 
 
-async def _generate_metrics_from_service(
-    scenario: str, duration_hours: int, demo_service: DemoService
-) -> Dict[str, Any]:
-    """Generate metrics through demo service."""
-    return await demo_service.generate_synthetic_metrics(
-        scenario=scenario, duration_hours=duration_hours
-    )
-
-async def handle_synthetic_metrics(
-    scenario: str, duration_hours: int, demo_service: DemoService
-) -> DemoMetrics:
-    """Generate synthetic performance metrics for demonstrations."""
-    try:
-        metrics = await _generate_metrics_from_service(scenario, duration_hours, demo_service)
-        return DemoMetrics(**metrics)
-    except Exception as e:
-        _log_and_raise_error("Failed to generate metrics", e)
+def _execute_roi_calculation_flow(request, background_tasks, demo_service):
+    """Legacy alias."""
+    return execute_roi_calculation_flow(request, background_tasks, demo_service)
 
 
-async def handle_export_report(
-    request: ExportReportRequest,
-    background_tasks: BackgroundTasks,
-    demo_service: DemoService,
-    current_user: Optional[Dict]
-) -> Dict[str, str]:
-    """Export demo session as a comprehensive report."""
-    report_url = await _generate_demo_report(request, demo_service, current_user)
-    _track_report_export(background_tasks, demo_service, request)
-    return _create_export_response(report_url)
+def _execute_roi_calculation(request, demo_service):
+    """Legacy alias."""
+    return execute_roi_calculation(request, demo_service)
 
 
-async def _execute_report_generation(
-    request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
-) -> str:
-    """Execute report generation through service."""
-    return await demo_service.generate_report(
-        session_id=request.session_id, format=request.format,
-        include_sections=request.include_sections,
-        user_id=current_user.get("id") if current_user else None
-    )
-
-async def _generate_demo_report(
-    request: ExportReportRequest, demo_service: DemoService, current_user: Optional[Dict]
-) -> str:
-    """Generate the demo report using demo service."""
-    try:
-        return await _execute_report_generation(request, demo_service, current_user)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        _log_and_raise_error("Failed to export report", e)
+def _calculate_roi_metrics(request, demo_service):
+    """Legacy alias."""
+    return calculate_roi_metrics(request, demo_service)
 
 
-def _create_export_tracking_data(request: ExportReportRequest) -> Dict[str, Any]:
-    """Create tracking data for report export."""
-    return {"format": request.format, "sections": request.include_sections}
+def _log_and_raise_error(message, error):
+    """Legacy alias."""
+    return log_and_raise_error(message, error)
 
 
-def _add_export_tracking_task(
-    background_tasks: BackgroundTasks, demo_service: DemoService,
-    session_id: str, data: Dict[str, Any]
-) -> None:
-    """Add export tracking task to background."""
-    background_tasks.add_task(
-        demo_service.track_demo_interaction, session_id=session_id,
-        interaction_type="report_export", data=data
-    )
-
-def _track_report_export(
-    background_tasks: BackgroundTasks, demo_service: DemoService, request: ExportReportRequest
-) -> None:
-    """Track export for analytics."""
-    data = _create_export_tracking_data(request)
-    _add_export_tracking_task(background_tasks, demo_service, request.session_id, data)
+def _raise_not_found_error(message):
+    """Legacy alias."""
+    return raise_not_found_error(message)
 
 
-def _create_export_response(report_url: str) -> Dict[str, str]:
-    """Create export response with report URL."""
-    return {
-        "status": "success",
-        "report_url": report_url,
-        "expires_at": datetime.now(UTC).isoformat()
-    }
+def _validate_admin_access(current_user):
+    """Legacy alias."""
+    return validate_admin_access(current_user)
 
 
-async def handle_session_status(
-    session_id: str,
-    demo_service: DemoService
-) -> Dict[str, Any]:
-    """Get the current status of a demo session."""
-    try:
-        return await demo_service.get_session_status(session_id)
-    except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
-    except Exception as e:
-        _log_and_raise_error("Failed to get session status", e)
+def _generate_metrics_from_service(scenario, duration_hours, demo_service):
+    """Legacy alias."""
+    return generate_metrics_from_service(scenario, duration_hours, demo_service)
 
 
-async def handle_session_feedback(
-    session_id: str,
-    feedback: Dict[str, Any],
-    demo_service: DemoService
-) -> Dict[str, str]:
-    """Submit feedback for a demo session."""
-    try:
-        await demo_service.submit_feedback(session_id, feedback)
-        return {"status": "success", "message": "Feedback received"}
-    except Exception as e:
-        _log_and_raise_error("Failed to submit feedback", e)
+def _build_demo_metrics_response(metrics):
+    """Legacy alias."""
+    return build_demo_metrics_response(metrics)
 
 
-async def handle_demo_analytics(
-    days: int,
-    demo_service: DemoService,
-    current_user: Dict
-) -> Dict[str, Any]:
-    """Get demo analytics summary (admin only)."""
-    _validate_admin_access(current_user)
-    try:
-        return await demo_service.get_analytics_summary(days=days)
-    except Exception as e:
-        _log_and_raise_error("Failed to get analytics", e)
-
-
-def _validate_admin_access(current_user: Dict) -> None:
-    """Validate user has admin access."""
-    if not current_user.get("is_admin", False):
-        raise HTTPException(status_code=403, detail="Admin access required")
-
-
-def _log_and_raise_error(message: str, error: Exception) -> None:
-    """Log error and raise HTTP exception."""
-    logger = central_logger.get_logger(__name__)
-    logger.error(f"{message}: {str(error)}")
-    raise HTTPException(status_code=500, detail=message)
+def _get_analytics_from_service(demo_service, days):
+    """Legacy alias."""
+    return get_analytics_from_service(demo_service, days)

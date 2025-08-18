@@ -28,14 +28,9 @@ class ConnectionMessageHandler:
         conn_info = self._validate_connection(connection_id)
         if not conn_info:
             return False
-        
         self._update_connection_activity(conn_info)
         success = await self._process_message(raw_message, conn_info)
-        
-        if success:
-            self._handle_success(connection_id)
-        
-        return success
+        return self._handle_success_and_return(connection_id, success)
     
     def _validate_connection(self, connection_id: str):
         """Validate connection exists and return connection info."""
@@ -56,22 +51,28 @@ class ConnectionMessageHandler:
             self.message_router.route_message
         )
     
-    def _handle_success(self, connection_id: str) -> None:
-        """Handle successful message processing by updating timeout."""
-        self.connection_timeouts[connection_id] = time.time() + self.connection_timeout
+    def _handle_success_and_return(self, connection_id: str, success: bool) -> bool:
+        """Handle success case and return result."""
+        if success:
+            self.connection_timeouts[connection_id] = time.time() + self.connection_timeout
+        return success
     
     async def send_message(self, connection_id: str, message: dict) -> bool:
         """Send message to connection with reliability protection."""
         try:
-            return await self.reliability.execute_safely(
-                lambda: self._execute_message_send(connection_id, message),
-                "send_message",
-                fallback=lambda: self._handle_send_failure(connection_id),
-                timeout=5.0
-            )
+            return await self._execute_reliable_send(connection_id, message)
         except Exception as e:
             logger.error(f"Error sending message to {connection_id}: {e}")
             return False
+    
+    async def _execute_reliable_send(self, connection_id: str, message: dict) -> bool:
+        """Execute reliable message send operation."""
+        return await self.reliability.execute_safely(
+            lambda: self._execute_message_send(connection_id, message),
+            "send_message",
+            fallback=lambda: self._handle_send_failure(connection_id),
+            timeout=5.0
+        )
     
     async def _execute_message_send(self, connection_id: str, message: dict) -> bool:
         """Execute the message sending process."""
@@ -106,19 +107,24 @@ class ConnectionMessageHandler:
         connections = self.connection_manager.get_all_connections()
         
         for conn_info in connections:
-            # Apply user filter if specified
-            if user_filter and conn_info.user_id != user_filter:
-                continue
-            
-            if send_message_callback:
-                success = await send_message_callback(conn_info.connection_id, message)
-            else:
-                success = await self.send_message(conn_info.connection_id, message)
-            
-            if success:
-                sent_count += 1
+            if self._should_send_to_connection(conn_info, user_filter):
+                sent_count += await self._send_to_connection(conn_info, message, send_message_callback)
         
         return sent_count
+    
+    def _should_send_to_connection(self, conn_info, user_filter: Optional[str]) -> bool:
+        """Check if message should be sent to this connection."""
+        if user_filter and conn_info.user_id != user_filter:
+            return False
+        return True
+    
+    async def _send_to_connection(self, conn_info, message: dict, send_message_callback) -> int:
+        """Send message to specific connection and return count."""
+        if send_message_callback:
+            success = await send_message_callback(conn_info.connection_id, message)
+        else:
+            success = await self.send_message(conn_info.connection_id, message)
+        return 1 if success else 0
     
     def register_message_handler(self, message_type: str, handler):
         """Register a message handler for a specific type."""

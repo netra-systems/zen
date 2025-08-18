@@ -1,6 +1,6 @@
 """Configuration validation utilities."""
 
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from pydantic import ValidationError
 from app.logging_config import central_logger as logger
 
@@ -40,38 +40,59 @@ class ConfigValidator:
     def _validate_database_config(self, config: AppConfig) -> None:
         """Validate database configuration."""
         errors = []
-        
-        # Check database URL (more lenient for staging/Cloud Run)
-        import os
-        is_cloud_run = os.getenv("K_SERVICE") is not None
-        
-        if not config.database_url:
-            # In Cloud Run/staging, database URL might be set via env var
-            if not is_cloud_run and config.environment not in ["staging", "development"]:
-                errors.append("Database URL is not configured")
-        elif config.environment != "testing" and not config.database_url.startswith(("postgresql://", "postgresql+asyncpg://")):
-            # Allow SQLite for testing environment
-            errors.append("Database URL must be a PostgreSQL connection string")
-            
-        # Skip ClickHouse validation if ClickHouse is disabled in dev mode
-        if hasattr(config, 'dev_mode_clickhouse_enabled') and not config.dev_mode_clickhouse_enabled:
-            self._logger.info("ClickHouse disabled in dev mode - skipping ClickHouse validation")
-        # Check ClickHouse configurations
-        elif config.clickhouse_logging.enabled:
-            clickhouse_configs = [
-                ("clickhouse_native", config.clickhouse_native),
-                ("clickhouse_https", config.clickhouse_https)
-            ]
-            
-            for name, ch_config in clickhouse_configs:
-                if not ch_config.host:
-                    errors.append(f"{name} host is not configured")
-                # Only require passwords in actual production, not staging
-                if not ch_config.password and config.environment == "production":
-                    errors.append(f"{name} password is required in production")
-        
+        self._validate_database_url(config, errors)
+        self._validate_clickhouse_config(config, errors)
         if errors:
             raise ConfigurationValidationError(f"Database configuration errors: {', '.join(errors)}")
+    
+    def _validate_database_url(self, config: AppConfig, errors: list) -> None:
+        """Validate database URL configuration."""
+        import os
+        is_cloud_run = os.getenv("K_SERVICE") is not None
+        self._check_database_url_presence(config, errors, is_cloud_run)
+        self._check_database_url_format(config, errors)
+    
+    def _check_database_url_presence(self, config: AppConfig, errors: list, is_cloud_run: bool) -> None:
+        """Check if database URL is present when required."""
+        if not config.database_url:
+            if not is_cloud_run and config.environment not in ["staging", "development"]:
+                errors.append("Database URL is not configured")
+    
+    def _check_database_url_format(self, config: AppConfig, errors: list) -> None:
+        """Check database URL format requirements."""
+        if config.database_url and config.environment != "testing":
+            if not config.database_url.startswith(("postgresql://", "postgresql+asyncpg://")):
+                errors.append("Database URL must be a PostgreSQL connection string")
+    
+    def _validate_clickhouse_config(self, config: AppConfig, errors: list) -> None:
+        """Validate ClickHouse configuration if enabled."""
+        if self._should_skip_clickhouse_validation(config):
+            return
+        if config.clickhouse_logging.enabled:
+            self._check_clickhouse_hosts_and_passwords(config, errors)
+    
+    def _should_skip_clickhouse_validation(self, config: AppConfig) -> bool:
+        """Check if ClickHouse validation should be skipped."""
+        if hasattr(config, 'dev_mode_clickhouse_enabled') and not config.dev_mode_clickhouse_enabled:
+            self._logger.info("ClickHouse disabled in dev mode - skipping ClickHouse validation")
+            return True
+        return False
+    
+    def _check_clickhouse_hosts_and_passwords(self, config: AppConfig, errors: list) -> None:
+        """Check ClickHouse host and password configurations."""
+        clickhouse_configs = [
+            ("clickhouse_native", config.clickhouse_native),
+            ("clickhouse_https", config.clickhouse_https)
+        ]
+        for name, ch_config in clickhouse_configs:
+            self._validate_single_clickhouse_config(name, ch_config, config.environment, errors)
+    
+    def _validate_single_clickhouse_config(self, name: str, ch_config: Any, environment: str, errors: list) -> None:
+        """Validate a single ClickHouse configuration."""
+        if not ch_config.host:
+            errors.append(f"{name} host is not configured")
+        if not ch_config.password and environment == "production":
+            errors.append(f"{name} password is required in production")
     
     def _validate_auth_config(self, config: AppConfig) -> None:
         """Validate authentication configuration."""

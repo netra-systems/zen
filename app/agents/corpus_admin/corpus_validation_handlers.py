@@ -103,18 +103,10 @@ class DocumentValidationErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Attempt validation recovery strategies."""
-        # Try to fix common validation issues
-        fixed_result = await self._try_validation_fixes(
+        fixed_result = await self._try_validation_fixes(filename, validation_errors, run_id)
+        return fixed_result or await self._try_relaxed_validation(
             filename, validation_errors, run_id
         )
-        if fixed_result:
-            return fixed_result
-        
-        # Try relaxed validation
-        relaxed_result = await self._try_relaxed_validation(
-            filename, validation_errors, run_id
-        )
-        return relaxed_result
     
     async def _try_validation_fixes(
         self,
@@ -123,17 +115,25 @@ class DocumentValidationErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Try to automatically fix common validation issues."""
+        fixed_errors = await self._collect_fixable_errors(filename, validation_errors)
+        return self._handle_fixed_errors(filename, fixed_errors, validation_errors, run_id)
+    
+    async def _collect_fixable_errors(self, filename: str, validation_errors: List[str]) -> List[str]:
+        """Collect errors that can be automatically fixed."""
         fixed_errors = []
-        
         for error in validation_errors:
             if await self._can_fix_error(error, filename):
                 fixed_errors.append(error)
-        
+        return fixed_errors
+    
+    def _handle_fixed_errors(
+        self, filename: str, fixed_errors: List[str], validation_errors: List[str], run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Handle result of error fixing attempt."""
         if fixed_errors:
             return self._create_fixes_success_response(
                 filename, fixed_errors, validation_errors, run_id
             )
-        
         return None
     
     async def _can_fix_error(self, error: str, filename: str) -> bool:
@@ -152,8 +152,18 @@ class DocumentValidationErrorHandler:
         run_id: str
     ) -> Dict[str, Any]:
         """Create success response for automatic fixes."""
-        remaining_errors = [e for e in validation_errors if e not in fixed_errors]
-        
+        remaining_errors = self._get_remaining_errors(validation_errors, fixed_errors)
+        self._log_fix_success(filename, fixed_errors, remaining_errors, run_id)
+        return self._build_fix_response(fixed_errors, remaining_errors)
+    
+    def _get_remaining_errors(self, validation_errors: List[str], fixed_errors: List[str]) -> List[str]:
+        """Get remaining errors after fixes."""
+        return [e for e in validation_errors if e not in fixed_errors]
+    
+    def _log_fix_success(
+        self, filename: str, fixed_errors: List[str], remaining_errors: List[str], run_id: str
+    ) -> None:
+        """Log success message for automatic fixes."""
         logger.info(
             f"Fixed validation errors automatically",
             filename=filename,
@@ -161,7 +171,9 @@ class DocumentValidationErrorHandler:
             remaining_count=len(remaining_errors),
             run_id=run_id
         )
-        
+    
+    def _build_fix_response(self, fixed_errors: List[str], remaining_errors: List[str]) -> Dict[str, Any]:
+        """Build response dictionary for fixes."""
         return {
             'success': True,
             'method': 'automatic_fixes',
@@ -197,13 +209,22 @@ class DocumentValidationErrorHandler:
         self, filename: str, non_critical_errors: List[str], run_id: str
     ) -> Dict[str, Any]:
         """Create success response for relaxed validation."""
+        self._log_relaxed_success(filename, non_critical_errors, run_id)
+        return self._build_relaxed_response(non_critical_errors)
+    
+    def _log_relaxed_success(
+        self, filename: str, non_critical_errors: List[str], run_id: str
+    ) -> None:
+        """Log relaxed validation success."""
         logger.info(
             f"Document accepted with relaxed validation",
             filename=filename,
             warning_count=len(non_critical_errors),
             run_id=run_id
         )
-        
+    
+    def _build_relaxed_response(self, non_critical_errors: List[str]) -> Dict[str, Any]:
+        """Build relaxed validation response."""
         return {
             'success': True,
             'method': 'relaxed_validation',
@@ -219,14 +240,22 @@ class DocumentValidationErrorHandler:
     ) -> Dict[str, Any]:
         """Create validation report for manual review."""
         report = self._build_validation_report(filename, validation_errors, run_id)
-        
+        self._log_validation_report(filename, validation_errors, run_id)
+        return self._build_report_response(report)
+    
+    def _log_validation_report(
+        self, filename: str, validation_errors: List[str], run_id: str
+    ) -> None:
+        """Log validation report creation."""
         logger.info(
             f"Created validation report for manual review",
             filename=filename,
             error_count=len(validation_errors),
             run_id=run_id
         )
-        
+    
+    def _build_report_response(self, report: Dict[str, Any]) -> Dict[str, Any]:
+        """Build validation report response."""
         return {
             'success': False,
             'method': 'manual_review_required',

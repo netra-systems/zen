@@ -164,15 +164,32 @@ class ResourceMonitor:
         timestamp: datetime
     ):
         """Store resource metric in history"""
-        metric = ResourceUsage(
-            resource_type=resource_type,
-            current_value=value,
-            unit=unit,
-            timestamp=timestamp
-        )
-        
+        metric = self._create_resource_usage(resource_type, value, unit, timestamp)
         key = resource_type.value
         self._resource_history[key].append(metric)
+
+    def _create_resource_usage(
+        self,
+        resource_type: ResourceType,
+        value: float,
+        unit: str,
+        timestamp: datetime
+    ) -> ResourceUsage:
+        """Create ResourceUsage object"""
+        kwargs = self._build_resource_usage_kwargs(resource_type, value, unit, timestamp)
+        return ResourceUsage(**kwargs)
+
+    def _build_resource_usage_kwargs(
+        self,
+        resource_type: ResourceType,
+        value: float,
+        unit: str,
+        timestamp: datetime
+    ) -> Dict[str, Any]:
+        """Build ResourceUsage constructor kwargs"""
+        base_kwargs = {"resource_type": resource_type, "current_value": value}
+        time_kwargs = {"unit": unit, "timestamp": timestamp}
+        return {**base_kwargs, **time_kwargs}
     
     async def take_operation_snapshot(self, operation_id: str, corpus_id: str):
         """Take resource snapshot at start of operation"""
@@ -182,10 +199,21 @@ class ResourceMonitor:
 
     async def _create_snapshot(self, operation_id: str, corpus_id: str) -> Dict[str, Any]:
         """Create resource usage snapshot"""
+        base_data = self._build_snapshot_base(operation_id, corpus_id)
+        resource_data = await self._collect_snapshot_resources()
+        return {**base_data, **resource_data}
+
+    def _build_snapshot_base(self, operation_id: str, corpus_id: str) -> Dict[str, Any]:
+        """Build base snapshot data"""
         return {
             "operation_id": operation_id,
             "corpus_id": corpus_id,
-            "timestamp": datetime.now(UTC),
+            "timestamp": datetime.now(UTC)
+        }
+
+    async def _collect_snapshot_resources(self) -> Dict[str, Any]:
+        """Collect resource data for snapshot"""
+        return {
             "cpu": await self._get_cpu_usage(),
             "memory": await self._get_memory_usage(),
             "storage": await self._get_storage_usage(),
@@ -214,11 +242,22 @@ class ResourceMonitor:
     async def _build_usage_delta(self, operation_id: str, start_snapshot: Dict, end_snapshot: Dict) -> Dict[str, Any]:
         """Build usage delta from snapshots"""
         end_time = datetime.now(UTC)
+        base_delta = self._build_delta_base(operation_id, start_snapshot, end_time)
+        resource_data = await self._build_delta_resources(start_snapshot, end_snapshot, end_time)
+        return {**base_delta, **resource_data}
+
+    def _build_delta_base(self, operation_id: str, start_snapshot: Dict, end_time: datetime) -> Dict[str, Any]:
+        """Build base delta information"""
         return {
             "operation_id": operation_id,
             "corpus_id": start_snapshot["corpus_id"],
             "start_time": start_snapshot["timestamp"],
-            "end_time": end_time,
+            "end_time": end_time
+        }
+
+    async def _build_delta_resources(self, start_snapshot: Dict, end_snapshot: Dict, end_time: datetime) -> Dict[str, Any]:
+        """Build resource delta information"""
+        return {
             "resource_deltas": self._calculate_deltas(start_snapshot, end_snapshot),
             "peak_usage": await self._get_peak_usage_during_operation(
                 start_snapshot["timestamp"], end_time
@@ -279,17 +318,50 @@ class ResourceMonitor:
         """Get time series data for resource usage"""
         cutoff_time = datetime.now(UTC) - timedelta(minutes=time_range_minutes)
         key = resource_type.value
-        
-        points = []
-        for metric in self._resource_history[key]:
-            if metric.timestamp >= cutoff_time:
-                points.append(TimeSeriesPoint(
-                    timestamp=metric.timestamp,
-                    value=metric.current_value,
-                    tags={"resource": resource_type.value, "unit": metric.unit}
-                ))
-        
+        points = self._build_time_series_points(resource_type, key, cutoff_time)
         return sorted(points, key=lambda x: x.timestamp)
+
+    def _build_time_series_points(
+        self,
+        resource_type: ResourceType,
+        key: str,
+        cutoff_time: datetime
+    ) -> List[TimeSeriesPoint]:
+        """Build time series points from history"""
+        points = []
+        self._process_metrics_for_time_series(points, resource_type, key, cutoff_time)
+        return points
+
+    def _process_metrics_for_time_series(
+        self,
+        points: List[TimeSeriesPoint],
+        resource_type: ResourceType,
+        key: str,
+        cutoff_time: datetime
+    ) -> None:
+        """Process metrics and add valid points to list"""
+        for metric in self._resource_history[key]:
+            self._add_metric_if_valid(points, resource_type, metric, cutoff_time)
+
+    def _add_metric_if_valid(
+        self,
+        points: List[TimeSeriesPoint],
+        resource_type: ResourceType,
+        metric,
+        cutoff_time: datetime
+    ) -> None:
+        """Add metric to points if it meets time criteria"""
+        if metric.timestamp >= cutoff_time:
+            point = self._create_time_series_point(resource_type, metric)
+            points.append(point)
+
+    def _create_time_series_point(self, resource_type: ResourceType, metric) -> TimeSeriesPoint:
+        """Create TimeSeriesPoint from metric"""
+        return TimeSeriesPoint(
+            timestamp=metric.timestamp,
+            value=metric.current_value,
+            tags={"resource": resource_type.value, "unit": metric.unit}
+        )
     
     def get_resource_summary(self, time_range_hours: int = 1) -> Dict[str, Any]:
         """Get resource usage summary"""
@@ -301,14 +373,17 @@ class ResourceMonitor:
 
     def _add_resource_summary(self, summary: Dict, resource_type: str, history, cutoff_time: datetime):
         """Add resource summary for specific type"""
-        recent_metrics = [
-            metric for metric in history
-            if metric.timestamp >= cutoff_time
-        ]
-        
+        recent_metrics = self._filter_recent_metrics(history, cutoff_time)
         if recent_metrics:
             values = [m.current_value for m in recent_metrics]
             summary[resource_type] = self._build_metrics_summary(recent_metrics, values)
+
+    def _filter_recent_metrics(self, history, cutoff_time: datetime) -> List:
+        """Filter metrics within time range"""
+        return [
+            metric for metric in history
+            if metric.timestamp >= cutoff_time
+        ]
 
     def _build_metrics_summary(self, recent_metrics: List, values: List) -> Dict[str, Any]:
         """Build metrics summary dictionary"""
@@ -343,31 +418,54 @@ class ResourceMonitor:
         """Check and add resource alert if threshold exceeded"""
         if not history:
             return
-        
         latest = list(history)[-1]
         threshold = thresholds.get(resource_type)
-        
-        if threshold and latest.current_value > threshold:
+        if self._should_create_alert(threshold, latest):
             alerts.append(self._create_alert(resource_type, latest, threshold))
+
+    def _should_create_alert(self, threshold: Optional[float], latest) -> bool:
+        """Check if alert should be created"""
+        return threshold is not None and latest.current_value > threshold
 
     def _create_alert(self, resource_type: str, latest, threshold: float) -> Dict[str, Any]:
         """Create alert dictionary"""
-        severity = "high" if latest.current_value > threshold * 1.1 else "medium"
-        return {
-            "resource": resource_type,
-            "current_value": latest.current_value,
-            "threshold": threshold,
-            "unit": latest.unit,
-            "timestamp": latest.timestamp,
-            "severity": severity
-        }
+        severity = self._calculate_alert_severity(latest.current_value, threshold)
+        return self._build_alert_dict(resource_type, latest, threshold, severity)
+
+    def _calculate_alert_severity(self, current_value: float, threshold: float) -> str:
+        """Calculate alert severity level"""
+        return "high" if current_value > threshold * 1.1 else "medium"
+
+    def _build_alert_dict(
+        self,
+        resource_type: str,
+        latest,
+        threshold: float,
+        severity: str
+    ) -> Dict[str, Any]:
+        """Build alert dictionary"""
+        base_alert = {"resource": resource_type, "current_value": latest.current_value}
+        meta_alert = {"threshold": threshold, "unit": latest.unit}
+        time_alert = {"timestamp": latest.timestamp, "severity": severity}
+        return {**base_alert, **meta_alert, **time_alert}
     
     def get_monitor_status(self) -> Dict[str, Any]:
         """Get monitoring system status"""
+        basic_status = self._get_basic_status()
+        resource_status = self._get_resource_status()
+        return {**basic_status, **resource_status}
+
+    def _get_basic_status(self) -> Dict[str, Any]:
+        """Get basic monitoring status"""
         return {
             "monitoring_active": self._monitoring_active,
             "sampling_interval": self.sampling_interval,
-            "tracked_resources": list(self._resource_history.keys()),
+            "tracked_resources": list(self._resource_history.keys())
+        }
+
+    def _get_resource_status(self) -> Dict[str, Any]:
+        """Get resource monitoring status"""
+        return {
             "total_samples": self._calculate_total_samples(),
             "active_operation_snapshots": len(self._operation_snapshots),
             "buffer_utilization": self._calculate_buffer_utilization()

@@ -33,19 +33,30 @@ class ErrorTrendAnalyzer:
         """Analyze trend for specific error pattern."""
         pattern_history = self._filter_pattern_history(pattern, error_history)
         time_windows = self._create_time_windows(pattern_history)
-        
+        analysis_results = self._perform_trend_analysis(time_windows)
+        return self._build_error_trend(pattern, time_windows, analysis_results)
+    
+    def _perform_trend_analysis(self, time_windows: TimeWindows) -> dict:
+        """Perform comprehensive trend analysis."""
         metrics = self._calculate_trend_metrics(time_windows)
         patterns = self._detect_patterns(time_windows)
         projection = self._project_future_occurrences(
             time_windows, metrics['growth_rate']
         )
-        
+        return {'metrics': metrics, 'patterns': patterns, 'projection': projection}
+    
+    def _build_error_trend(
+        self, pattern: ErrorPattern, time_windows: TimeWindows, results: dict
+    ) -> ErrorTrend:
+        """Build ErrorTrend object from analysis results."""
+        metrics = results['metrics']
+        patterns = results['patterns']
         return ErrorTrend(
             pattern=pattern,
             time_windows=time_windows,
             growth_rate=metrics['growth_rate'],
             acceleration=metrics['acceleration'],
-            projection=projection,
+            projection=results['projection'],
             is_spike=patterns['is_spike'],
             is_sustained=patterns['is_sustained']
         )
@@ -100,16 +111,21 @@ class ErrorTrendAnalyzer:
         """Build time windows with counts."""
         windows = []
         current_time = start_time
-        
         while current_time < end_time:
             window_end = current_time + window_size
-            count = self._count_errors_in_window(
-                pattern_history, current_time, window_end
-            )
-            windows.append((current_time, count))
+            self._add_window_count(windows, pattern_history, current_time, window_end)
             current_time = window_end
-        
         return windows
+    
+    def _add_window_count(
+        self, windows: list, pattern_history: PatternHistory, 
+        current_time: datetime, window_end: datetime
+    ) -> None:
+        """Add window with error count to windows list."""
+        count = self._count_errors_in_window(
+            pattern_history, current_time, window_end
+        )
+        windows.append((current_time, count))
     
     def _count_errors_in_window(
         self,

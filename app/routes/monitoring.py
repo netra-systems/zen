@@ -116,17 +116,19 @@ def _handle_metrics_history_error(e: Exception) -> None:
     logger.error(f"Error in metrics history endpoint: {e}")
     raise HTTPException(status_code=500, detail=f"Failed to get metrics history: {str(e)}")
 
-@router.get("/metrics-history", response_model=MetricsHistoryResponse)
-async def get_metrics_history(
-    limit: int = Query(100, ge=1, le=1000), current_user: Dict[str, Any] = Depends(get_current_user)
-) -> MetricsHistoryResponse:
-    """Get historical connection metrics for trend analysis."""
+async def _get_metrics_history_safe(limit: int, current_user: Dict[str, Any]) -> MetricsHistoryResponse:
+    """Get metrics history with error handling."""
     try:
         _log_metrics_history_request(current_user, limit)
         metrics_history = connection_metrics.get_metrics_history(limit)
         return _build_metrics_history_response(metrics_history, limit)
     except Exception as e:
         _handle_metrics_history_error(e)
+
+@router.get("/metrics-history", response_model=MetricsHistoryResponse)
+async def get_metrics_history(limit: int = Query(100, ge=1, le=1000), current_user: Dict[str, Any] = Depends(get_current_user)) -> MetricsHistoryResponse:
+    """Get historical connection metrics for trend analysis."""
+    return await _get_metrics_history_safe(limit, current_user)
 
 def _log_summary_stats_request(current_user: Dict[str, Any]) -> None:
     """Log summary stats request."""
@@ -228,14 +230,18 @@ def _handle_ping_error(e: Exception) -> None:
     logger.error(f"Error in ping endpoint: {e}")
     raise HTTPException(status_code=503, detail="Service unavailable")
 
+async def _test_database_connectivity() -> Dict[str, Any]:
+    """Test database connectivity and return response."""
+    connectivity_test = await health_checker._test_connectivity()
+    if connectivity_test["status"] == "healthy":
+        return _build_ping_success_response(connectivity_test)
+    _handle_connectivity_failure()
+
 @router.get("/ping")
 async def ping_database() -> Dict[str, Any]:
     """Simple ping endpoint for basic health checks."""
     try:
-        connectivity_test = await health_checker._test_connectivity()
-        if connectivity_test["status"] == "healthy":
-            return _build_ping_success_response(connectivity_test)
-        _handle_connectivity_failure()
+        return await _test_database_connectivity()
     except HTTPException:
         raise
     except Exception as e:

@@ -188,18 +188,31 @@ class MetricsCollector:
 
     def _build_database_metrics(self, stats: Dict[str, Any]) -> DatabaseMetrics:
         """Build DatabaseMetrics from raw stats."""
+        pool_data = self._extract_pool_data(stats)
+        query_data = self._extract_query_data(stats)
+        return self._create_database_metrics(pool_data, query_data, stats)
+        
+    def _extract_pool_data(self, stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract pool status data from stats."""
         pool_status = stats["pool_status"]
         sync_pool = pool_status.get("sync", {})
         async_pool = pool_status.get("async", {})
-        query_stats = stats["query_stats"]
+        return {"sync_pool": sync_pool, "async_pool": async_pool}
         
+    def _extract_query_data(self, stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract query statistics from stats."""
+        return stats["query_stats"]
+        
+    def _create_database_metrics(self, pool_data: Dict, query_data: Dict, stats: Dict) -> DatabaseMetrics:
+        """Create DatabaseMetrics from extracted data."""
+        sync_pool, async_pool = pool_data["sync_pool"], pool_data["async_pool"]
         return DatabaseMetrics(
             timestamp=datetime.now(),
             active_connections=(sync_pool.get("total", 0) + async_pool.get("total", 0)),
             pool_size=(sync_pool.get("size", 0) + async_pool.get("size", 0)),
             pool_overflow=(sync_pool.get("overflow", 0) + async_pool.get("overflow", 0)),
-            total_queries=query_stats.get("total_queries", 0), avg_query_time=0.0,
-            slow_queries=query_stats.get("slow_queries", 0),
+            total_queries=query_data.get("total_queries", 0), avg_query_time=0.0,
+            slow_queries=query_data.get("slow_queries", 0),
             cache_hit_rate=self._calculate_cache_hit_ratio(stats["perf_stats"])
         )
     

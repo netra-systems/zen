@@ -120,17 +120,18 @@ class UnifiedWebSocketManager:
         """Initialize circuit breaker for resilience."""
         self.circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
-    def _initialize_telemetry(self) -> None:
-        """Initialize real-time telemetry tracking."""
-        self.telemetry = {
-            "connections_opened": 0,
-            "connections_closed": 0,
-            "messages_sent": 0,
-            "messages_received": 0,
-            "errors_handled": 0,
-            "circuit_breaks": 0,
+    def _create_telemetry_config(self) -> Dict[str, Union[int, float]]:
+        """Create initial telemetry configuration dictionary."""
+        return {
+            "connections_opened": 0, "connections_closed": 0,
+            "messages_sent": 0, "messages_received": 0,
+            "errors_handled": 0, "circuit_breaks": 0,
             "start_time": time.time()
         }
+
+    def _initialize_telemetry(self) -> None:
+        """Initialize real-time telemetry tracking."""
+        self.telemetry = self._create_telemetry_config()
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish WebSocket connection with circuit breaker protection."""

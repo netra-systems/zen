@@ -21,12 +21,18 @@ class ErrorAggregationSystem:
     
     def __init__(self):
         """Initialize aggregation system."""
+        self._init_aggregation_components()
+        self._init_processing_control()
+    
+    def _init_aggregation_components(self) -> None:
+        """Initialize core aggregation components."""
         self.aggregator = ErrorAggregator()
         self.trend_analyzer = ErrorTrendAnalyzer()
         self.alert_engine = AlertEngine()
         self.metrics_reporter = MetricsReporter(self.aggregator, self.alert_engine)
-        
-        # Processing control
+    
+    def _init_processing_control(self) -> None:
+        """Initialize processing control variables."""
         self.processing_active = False
         self.process_task: Optional[asyncio.Task] = None
         self.process_interval = 30  # seconds
@@ -80,14 +86,21 @@ class ErrorAggregationSystem:
         """Background processing loop."""
         while self.processing_active:
             try:
-                await self._process_all_patterns()
-                await asyncio.sleep(self.process_interval)
-                
+                await self._execute_processing_cycle()
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Error aggregation processing error: {e}")
-                await asyncio.sleep(self.process_interval)
+                await self._handle_processing_error(e)
+    
+    async def _execute_processing_cycle(self) -> None:
+        """Execute a single processing cycle."""
+        await self._process_all_patterns()
+        await asyncio.sleep(self.process_interval)
+    
+    async def _handle_processing_error(self, error: Exception) -> None:
+        """Handle processing loop errors."""
+        logger.error(f"Error aggregation processing error: {error}")
+        await asyncio.sleep(self.process_interval)
     
     async def _process_all_patterns(self) -> None:
         """Process all current patterns for trends and alerts."""

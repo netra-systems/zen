@@ -1,0 +1,52 @@
+"""MCP resources handlers."""
+from typing import Dict, Any, Optional
+from fastapi import HTTPException
+
+from app.schemas import UserInDB
+from app.services.mcp_service import MCPService
+from app.routes.mcp.models import MCPResourceReadRequest
+from app.routes.mcp.helpers import extract_resources_from_app, get_resource_function
+from app.routes.mcp.utils import (
+    build_list_response, handle_list_error,
+    build_resource_result, handle_resource_error
+)
+
+
+async def handle_resources_listing(
+    mcp_service: MCPService,
+    current_user: Optional[UserInDB]
+) -> Dict[str, Any]:
+    """List available MCP resources"""
+    try:
+        return build_resources_response(mcp_service)
+    except Exception as e:
+        return handle_list_error(e, "resources")
+
+
+async def handle_resource_read(
+    request: MCPResourceReadRequest,
+    mcp_service: MCPService,
+    current_user: UserInDB
+) -> Dict[str, Any]:
+    """Read an MCP resource"""
+    try:
+        return await read_mcp_resource(request, mcp_service)
+    except HTTPException:
+        raise
+    except Exception as e:
+        return handle_resource_error(e)
+
+
+def build_resources_response(mcp_service: MCPService) -> Dict[str, Any]:
+    """Build resources list response"""
+    app = mcp_service.get_fastmcp_app()
+    resources = extract_resources_from_app(app)
+    return build_list_response(resources, "resources")
+
+
+async def read_mcp_resource(request: MCPResourceReadRequest, mcp_service: MCPService) -> Dict[str, Any]:
+    """Read MCP resource by URI"""
+    server = mcp_service.get_mcp_server()
+    resource_func = get_resource_function(server, request.uri)
+    result = await resource_func()
+    return build_resource_result(request.uri, result)

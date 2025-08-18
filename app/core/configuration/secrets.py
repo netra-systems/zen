@@ -63,51 +63,72 @@ class SecretManager:
     
     def _get_oauth_secret_mappings(self) -> Dict[str, dict]:
         """Get OAuth-related secret mappings."""
+        google_client_id = self._get_google_client_id_mapping()
+        google_client_secret = self._get_google_client_secret_mapping()
+        return {"google-client-id": google_client_id, "google-client-secret": google_client_secret}
+    
+    def _get_google_client_id_mapping(self) -> Dict[str, Any]:
+        """Get Google Client ID mapping."""
         return {
-            "google-client-id": {
-                "target_models": ["google_cloud", "oauth_config"],
-                "target_field": "client_id", 
-                "required": True,
-                "rotation_enabled": False
-            },
-            "google-client-secret": {
-                "target_models": ["google_cloud", "oauth_config"],
-                "target_field": "client_secret",
-                "required": True,
-                "rotation_enabled": True
-            }
+            "target_models": ["google_cloud", "oauth_config"],
+            "target_field": "client_id", 
+            "required": True,
+            "rotation_enabled": False
+        }
+    
+    def _get_google_client_secret_mapping(self) -> Dict[str, Any]:
+        """Get Google Client Secret mapping."""
+        return {
+            "target_models": ["google_cloud", "oauth_config"],
+            "target_field": "client_secret",
+            "required": True,
+            "rotation_enabled": True
         }
     
     def _get_auth_secret_mappings(self) -> Dict[str, dict]:
         """Get authentication secret mappings."""
+        jwt_mapping = self._get_jwt_secret_mapping()
+        fernet_mapping = self._get_fernet_secret_mapping()
+        return {"jwt-secret-key": jwt_mapping, "fernet-key": fernet_mapping}
+    
+    def _get_jwt_secret_mapping(self) -> Dict[str, Any]:
+        """Get JWT secret mapping."""
         return {
-            "jwt-secret-key": {
-                "target_field": "jwt_secret_key",
-                "required": True,
-                "rotation_enabled": True
-            },
-            "fernet-key": {
-                "target_field": "fernet_key",
-                "required": True,
-                "rotation_enabled": True
-            }
+            "target_field": "jwt_secret_key",
+            "required": True,
+            "rotation_enabled": True
+        }
+    
+    def _get_fernet_secret_mapping(self) -> Dict[str, Any]:
+        """Get Fernet secret mapping."""
+        return {
+            "target_field": "fernet_key",
+            "required": True,
+            "rotation_enabled": True
         }
     
     def _get_database_secret_mappings(self) -> Dict[str, dict]:
         """Get database-related secret mappings."""
+        clickhouse_mapping = self._get_clickhouse_password_mapping()
+        redis_mapping = self._get_redis_password_mapping()
+        return {"clickhouse-default-password": clickhouse_mapping, "redis-default": redis_mapping}
+    
+    def _get_clickhouse_password_mapping(self) -> Dict[str, Any]:
+        """Get ClickHouse password mapping."""
         return {
-            "clickhouse-default-password": {
-                "target_models": ["clickhouse_native", "clickhouse_https"],
-                "target_field": "password",
-                "required": True,
-                "rotation_enabled": True
-            },
-            "redis-default": {
-                "target_models": ["redis"],
-                "target_field": "password",
-                "required": False,
-                "rotation_enabled": True
-            }
+            "target_models": ["clickhouse_native", "clickhouse_https"],
+            "target_field": "password",
+            "required": True,
+            "rotation_enabled": True
+        }
+    
+    def _get_redis_password_mapping(self) -> Dict[str, Any]:
+        """Get Redis password mapping."""
+        return {
+            "target_models": ["redis"],
+            "target_field": "password",
+            "required": False,
+            "rotation_enabled": True
         }
     
     def populate_secrets(self, config: AppConfig) -> None:

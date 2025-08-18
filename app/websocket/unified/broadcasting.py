@@ -136,6 +136,10 @@ class UnifiedBroadcastingManager:
     def __init__(self, manager) -> None:
         """Initialize with reference to unified manager."""
         self.manager = manager
+        self._initialize_components()
+
+    def _initialize_components(self) -> None:
+        """Initialize broadcasting components."""
         self.room_manager = RoomManager()
         self.metrics = BroadcastMetrics()
 
@@ -278,16 +282,16 @@ class UnifiedBroadcastingManager:
     # Batch notification methods for efficiency
     async def notify_batch_complete(self, job_id: str, batch_num: int, batch_size: int) -> bool:
         """Send batch completion notification."""
-        batch_message = {
+        batch_message = self._create_batch_completion_message(job_id, batch_num, batch_size)
+        return await self.broadcast_to_job(job_id, batch_message)
+
+    def _create_batch_completion_message(self, job_id: str, batch_num: int, batch_size: int) -> Dict[str, Any]:
+        """Create batch completion message structure."""
+        return {
             "type": "batch_complete",
-            "payload": {
-                "job_id": job_id,
-                "batch_num": batch_num,
-                "batch_size": batch_size
-            },
+            "payload": {"job_id": job_id, "batch_num": batch_num, "batch_size": batch_size},
             "timestamp": time.time()
         }
-        return await self.broadcast_to_job(job_id, batch_message)
 
     # Administrative broadcasting methods
     async def broadcast_system_announcement(self, announcement: str, priority: bool = False) -> BroadcastResult:
@@ -312,11 +316,19 @@ class UnifiedBroadcastingManager:
 
     def get_broadcasting_stats(self) -> Dict[str, Any]:
         """Get comprehensive broadcasting statistics."""
-        room_stats = {
+        room_stats = self._create_room_statistics()
+        return self._combine_stats_with_metrics(room_stats)
+
+    def _create_room_statistics(self) -> Dict[str, Any]:
+        """Create room management statistics."""
+        return {
             "total_rooms": self.room_manager.get_total_rooms(),
             "room_details": {room_id: self.room_manager.get_room_count(room_id) 
                            for room_id in self.room_manager.room_members.keys()}
         }
+
+    def _combine_stats_with_metrics(self, room_stats: Dict[str, Any]) -> Dict[str, Any]:
+        """Combine room stats with broadcast metrics."""
         return {
             **self.metrics.get_metrics(),
             "room_management": room_stats

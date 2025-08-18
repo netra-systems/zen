@@ -72,14 +72,19 @@ class FallbackDataProvider:
     
     def _create_performance_from_baseline(self, baseline: Dict) -> Dict[str, Any]:
         """Create performance metrics from baseline data."""
+        metrics = self._extract_baseline_metrics(baseline)
         return {
-            'metrics': {
-                'avg_response_time': baseline.get('avg_response_time', 100),
-                'error_rate': baseline.get('error_rate', 0.01),
-                'throughput': baseline.get('throughput', 1000)
-            },
+            'metrics': metrics,
             'method': 'historical_baseline',
             'data_source': 'cached_baseline'
+        }
+    
+    def _extract_baseline_metrics(self, baseline: Dict) -> Dict[str, Any]:
+        """Extract metrics from baseline data."""
+        return {
+            'avg_response_time': baseline.get('avg_response_time', 100),
+            'error_rate': baseline.get('error_rate', 0.01),
+            'throughput': baseline.get('throughput', 1000)
         }
     
     async def _calculate_system_baseline_metrics(self) -> Dict[str, Any]:
@@ -167,19 +172,22 @@ class FallbackDataProvider:
     
     async def _calculate_cost_from_usage(self, usage: Dict[str, float]) -> Dict[str, Any]:
         """Calculate cost estimates from resource usage."""
-        # Standard cloud pricing rates
-        cpu_cost = usage.get('cpu_usage', 0) * 0.001
-        memory_cost = usage.get('memory_usage', 0) * 0.0005
-        storage_cost = usage.get('storage_usage', 0) * 0.0001
-        
-        total_cost = cpu_cost + memory_cost + storage_cost
-        
+        cost_breakdown = self._compute_individual_costs(usage)
+        total_cost = sum(cost_breakdown.values())
+        return self._build_cost_analysis_response(cost_breakdown, total_cost)
+    
+    def _compute_individual_costs(self, usage: Dict[str, float]) -> Dict[str, float]:
+        """Compute individual resource costs."""
         return {
-            'cost_breakdown': {
-                'cpu_cost': cpu_cost,
-                'memory_cost': memory_cost,
-                'storage_cost': storage_cost
-            },
+            'cpu_cost': usage.get('cpu_usage', 0) * 0.001,
+            'memory_cost': usage.get('memory_usage', 0) * 0.0005,
+            'storage_cost': usage.get('storage_usage', 0) * 0.0001
+        }
+    
+    def _build_cost_analysis_response(self, cost_breakdown: Dict[str, float], total_cost: float) -> Dict[str, Any]:
+        """Build cost analysis response structure."""
+        return {
+            'cost_breakdown': cost_breakdown,
             'total_cost': total_cost,
             'method': 'usage_estimation',
             'data_source': 'resource_monitor'

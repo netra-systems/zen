@@ -305,3 +305,83 @@ class AIMapBuilder:
         if "langchain" in providers:
             frameworks.append("langchain")
         return frameworks
+    
+    def _assemble_ai_map(
+        self, repo_info: dict, ai_infra: dict, code_locations: dict, 
+        security: dict, dependencies: dict
+    ) -> Dict[str, Any]:
+        """Assemble complete AI map from components."""
+        return {
+            "repository_info": repo_info,
+            "ai_infrastructure": ai_infra,
+            "code_locations": code_locations,
+            "security": security,
+            "dependencies": dependencies
+        }
+    
+    def _build_base_infrastructure(
+        self, patterns: Dict[str, Any], llm_mappings: Dict[str, Any], tool_mappings: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Build base infrastructure components."""
+        return {
+            "providers": patterns.get("detected_providers", []),
+            "llm_endpoints": llm_mappings.get("endpoints", []),
+            "models": self._format_models(llm_mappings),
+            "agents": self._extract_agents(patterns, tool_mappings),
+            "tools": tool_mappings.get("tools", []),
+            "functions": tool_mappings.get("functions", [])
+        }
+    
+    def _build_config_infrastructure(self, configurations: Dict[str, Any], patterns: Dict[str, Any]) -> Dict[str, Any]:
+        """Build configuration-related infrastructure."""
+        return {
+            "configurations": self._format_configs(configurations),
+            "patterns": self._summarize_patterns(patterns)
+        }
+    
+    def _is_agent_pattern(self, pattern: Dict[str, Any]) -> bool:
+        """Check if pattern represents an agent."""
+        return pattern.get("category") == "agents"
+    
+    def _build_config_dict(
+        self, env_vars: dict, config_files: list, detected_providers: list
+    ) -> Dict[str, Any]:
+        """Build configuration dictionary."""
+        return {
+            "environment_variables": env_vars,
+            "config_files": config_files,
+            "detected_providers": detected_providers
+        }
+    
+    def _build_config_file_info(self, cf: Dict[str, Any]) -> Dict[str, Any]:
+        """Build configuration file information."""
+        return {
+            "file": cf["file"],
+            "ai_configs": len(cf.get("configs", {}))
+        }
+    
+    def _build_pattern_summary(self, total_patterns: int, pattern_counts: dict, complexity: str) -> Dict[str, Any]:
+        """Build pattern summary dictionary."""
+        return {
+            "total_patterns": total_patterns,
+            "by_provider": pattern_counts,
+            "complexity": complexity
+        }
+    
+    def _init_security_structure(self) -> Dict[str, Any]:
+        """Initialize security analysis structure."""
+        return {
+            "exposed_keys": [],
+            "warnings": [],
+            "recommendations": []
+        }
+    
+    def _build_dependencies_dict(
+        self, libraries: list, providers: set, frameworks: list
+    ) -> Dict[str, Any]:
+        """Build dependencies dictionary."""
+        return {
+            "detected_libraries": libraries,
+            "providers": list(providers),
+            "frameworks": frameworks
+        }

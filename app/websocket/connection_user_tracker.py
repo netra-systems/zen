@@ -40,12 +40,15 @@ class ConnectionUserTracker:
         if user_id not in self.user_connections:
             return []
         
+        return self._build_connection_list(user_id)
+    
+    def _build_connection_list(self, user_id: str) -> List[ConnectionInfo]:
+        """Build list of valid connections for user."""
         connections = []
         for connection_id in self.user_connections[user_id]:
             conn_info = self.connection_manager.get_connection_by_id(connection_id)
             if conn_info:
                 connections.append(conn_info)
-        
         return connections
     
     def get_user_connection_count(self, user_id: str) -> int:

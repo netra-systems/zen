@@ -32,11 +32,15 @@ async def _handle_websocket_exceptions(e: Exception, websocket: WebSocket, sessi
         await _close_websocket_with_error(websocket, e)
 
 async def handle_demo_websocket(
-    websocket: WebSocket,
-    demo_service: DemoService
+    websocket: WebSocket, demo_service: DemoService
 ) -> None:
-    """Main WebSocket endpoint handler for real-time demo interactions."""
+    """Main WebSocket endpoint handler."""
     logger, session_id = await _initialize_websocket_session(websocket)
+    await _manage_websocket_connection(websocket, demo_service, session_id, logger)
+
+
+async def _manage_websocket_connection(websocket: WebSocket, demo_service: DemoService, session_id: str, logger):
+    """Manage WebSocket connection lifecycle."""
     try:
         await _handle_websocket_lifecycle(websocket, demo_service, session_id, logger)
     except Exception as e:
@@ -58,10 +62,7 @@ async def _send_connection_established(websocket: WebSocket, session_id: str) ->
 
 
 async def _handle_websocket_messages(
-    websocket: WebSocket,
-    demo_service: DemoService,
-    session_id: str,
-    logger: Any
+    websocket: WebSocket, demo_service: DemoService, session_id: str, logger: Any
 ) -> None:
     """Handle incoming WebSocket messages."""
     while True:
@@ -83,28 +84,42 @@ async def _route_ping_message(websocket: WebSocket) -> None:
     await _handle_ping_message(websocket)
 
 async def _process_message_by_type(
-    websocket: WebSocket,
-    demo_service: DemoService,
-    session_id: str,
-    message_data: Dict[str, Any]
+    websocket: WebSocket, demo_service: DemoService, session_id: str, message_data: Dict[str, Any]
 ) -> None:
-    """Route message processing based on message type."""
+    """Route message processing by type."""
     message_type = message_data.get("type")
-    if message_type == "chat":
-        await _route_chat_message(websocket, demo_service, session_id, message_data)
-    elif message_type == "metrics":
-        await _route_metrics_message(websocket, demo_service, message_data)
-    elif message_type == "ping":
-        await _route_ping_message(websocket)
+    await _route_message_by_type(websocket, demo_service, session_id, message_data, message_type)
+
+
+async def _route_message_by_type(
+    websocket: WebSocket, demo_service: DemoService, session_id: str,
+    message_data: Dict[str, Any], message_type: str
+) -> None:
+    """Route message to appropriate handler."""
+    routing_map = _build_message_routing_map(websocket, demo_service, session_id, message_data)
+    await _execute_message_route(message_type, routing_map)
+
+
+def _build_message_routing_map(websocket: WebSocket, demo_service: DemoService, session_id: str, message_data: Dict[str, Any]):
+    """Build message routing map for different types."""
+    return {
+        "chat": lambda: _route_chat_message(websocket, demo_service, session_id, message_data),
+        "metrics": lambda: _route_metrics_message(websocket, demo_service, message_data),
+        "ping": lambda: _route_ping_message(websocket)
+    }
+
+
+async def _execute_message_route(message_type: str, routing_map: Dict):
+    """Execute message route based on type."""
+    handler = routing_map.get(message_type)
+    if handler:
+        await handler()
 
 
 async def _handle_chat_message(
-    websocket: WebSocket,
-    demo_service: DemoService,
-    session_id: str,
-    message_data: Dict[str, Any]
+    websocket: WebSocket, demo_service: DemoService, session_id: str, message_data: Dict[str, Any]
 ) -> None:
-    """Handle chat message with agent progression simulation."""
+    """Handle chat message with progression."""
     await _send_processing_started(websocket)
     await _simulate_agent_progression(websocket)
     result = await _process_chat_with_service(demo_service, session_id, message_data)
@@ -128,47 +143,63 @@ async def _simulate_agent_progression(websocket: WebSocket) -> None:
 
 
 async def _send_agent_update(
-    websocket: WebSocket,
-    agent: str,
-    current_index: int,
-    total_agents: int
+    websocket: WebSocket, agent: str, current_index: int, total_agents: int
 ) -> None:
     """Send agent progression update."""
-    await websocket.send_json({
+    progress = (current_index + 1) / total_agents * 100
+    update_data = _build_agent_update_data(agent, progress)
+    await websocket.send_json(update_data)
+
+
+def _build_agent_update_data(agent: str, progress: float) -> Dict[str, Any]:
+    """Build agent update data."""
+    return {
         "type": "agent_update",
         "active_agent": agent,
-        "progress": (current_index + 1) / total_agents * 100,
+        "progress": progress,
         "message": f"Agent {agent} is processing your request..."
-    })
+    }
 
 
 async def _process_chat_with_service(
-    demo_service: DemoService,
-    session_id: str,
-    message_data: Dict[str, Any]
+    demo_service: DemoService, session_id: str, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """Process chat message using demo service."""
-    return await demo_service.process_demo_chat(
-        message=message_data.get("message", ""),
-        industry=message_data.get("industry", "technology"),
-        session_id=session_id,
-        context=message_data.get("context", {})
-    )
+    """Process chat message using service."""
+    chat_params = _extract_chat_parameters(message_data, session_id)
+    return await demo_service.process_demo_chat(**chat_params)
+
+
+def _extract_chat_parameters(message_data: Dict[str, Any], session_id: str) -> Dict[str, Any]:
+    """Extract chat parameters from message."""
+    return {
+        "message": message_data.get("message", ""),
+        "industry": message_data.get("industry", "technology"),
+        "session_id": session_id,
+        "context": message_data.get("context", {})
+    }
 
 
 async def _send_chat_response(
-    websocket: WebSocket,
-    result: Dict[str, Any],
-    session_id: str
+    websocket: WebSocket, result: Dict[str, Any], session_id: str
 ) -> None:
     """Send final chat response to client."""
-    await websocket.send_json({
-        "type": "chat_response",
-        "response": result["response"],
-        "agents_involved": result["agents"],
-        "optimization_metrics": result["metrics"],
-        "session_id": session_id
-    })
+    response_data = _build_chat_response_data(result, session_id)
+    await websocket.send_json(response_data)
+
+
+def _build_chat_response_data(result: Dict[str, Any], session_id: str) -> Dict[str, Any]:
+    """Build chat response data."""
+    response_data = _create_base_chat_response(result)
+    response_data["session_id"] = session_id
+    return response_data
+
+
+def _create_base_chat_response(result: Dict[str, Any]) -> Dict[str, Any]:
+    """Create base chat response structure."""
+    return {
+        "type": "chat_response", "response": result["response"],
+        "agents_involved": result["agents"], "optimization_metrics": result["metrics"]
+    }
 
 
 async def _handle_metrics_message(
@@ -182,13 +213,12 @@ async def _handle_metrics_message(
 
 
 async def _generate_streaming_metrics(
-    demo_service: DemoService,
-    message_data: Dict[str, Any]
+    demo_service: DemoService, message_data: Dict[str, Any]
 ) -> Dict[str, Any]:
-    """Generate synthetic metrics for streaming."""
+    """Generate synthetic metrics."""
+    scenario = message_data.get("scenario", "standard")
     return await demo_service.generate_synthetic_metrics(
-        scenario=message_data.get("scenario", "standard"),
-        duration_hours=1
+        scenario=scenario, duration_hours=1
     )
 
 
@@ -200,20 +230,23 @@ async def _stream_metrics_data(websocket: WebSocket, metrics: Dict[str, Any]) ->
 
 
 async def _send_metrics_update(
-    websocket: WebSocket,
-    metrics: Dict[str, Any],
-    index: int
+    websocket: WebSocket, metrics: Dict[str, Any], index: int
 ) -> None:
     """Send individual metrics update."""
-    timestamp = metrics["timestamps"][index]
-    timestamp_str = _format_timestamp(timestamp)
+    update_data = _build_metrics_update_data(metrics, index)
+    await websocket.send_json(update_data)
+
+
+def _build_metrics_update_data(metrics: Dict[str, Any], index: int) -> Dict[str, Any]:
+    """Build metrics update data."""
+    timestamp_str = _format_timestamp(metrics["timestamps"][index])
     values = _extract_metric_values(metrics["values"], index)
-    
-    await websocket.send_json({
-        "type": "metrics_update",
-        "timestamp": timestamp_str,
-        "values": values
-    })
+    return _create_metrics_response(timestamp_str, values)
+
+
+def _create_metrics_response(timestamp_str: str, values: Dict[str, float]) -> Dict[str, Any]:
+    """Create metrics response structure."""
+    return {"type": "metrics_update", "timestamp": timestamp_str, "values": values}
 
 
 def _format_timestamp(timestamp: Any) -> str:

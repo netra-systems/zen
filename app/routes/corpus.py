@@ -159,17 +159,17 @@ def _handle_search_error(e: Exception):
     """Handle search errors."""
     raise HTTPException(status_code=500, detail=f"Search failed: {str(e)}")
 
-@router.get("/search")
-async def search_corpus(
-    q: str = Query(...),
-    corpus_id: str = Query(default="default"),
-    current_user: User = Depends(get_current_user)
-):
-    """Search corpus documents"""
+async def _search_corpus_safe(corpus_id: str, q: str):
+    """Search corpus with error handling."""
     try:
         return await _execute_corpus_search(corpus_id, q)
     except Exception as e:
         _handle_search_error(e)
+
+@router.get("/search")
+async def search_corpus(q: str = Query(...), corpus_id: str = Query(default="default"), current_user: User = Depends(get_current_user)):
+    """Search corpus documents"""
+    return await _search_corpus_safe(corpus_id, q)
 
 @router.post("/bulk")
 async def bulk_index_documents(request: BulkIndexRequest):

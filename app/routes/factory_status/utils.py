@@ -7,12 +7,18 @@ from app.services.factory_status.report_builder import FactoryStatusReport
 from .models import ReportResponse
 
 
+def _filter_by_start_date(reports: List, start_date: datetime) -> List:
+    """Filter reports by start date."""
+    if start_date:
+        return [r for r in reports if r.generated_at >= start_date]
+    return reports
+
+
 def filter_reports_by_date_range(
     reports: List, start_date: datetime, end_date: datetime
 ) -> List:
     """Filter reports by date range if provided."""
-    if start_date:
-        reports = [r for r in reports if r.generated_at >= start_date]
+    reports = _filter_by_start_date(reports, start_date)
     if end_date:
         reports = [r for r in reports if r.generated_at <= end_date]
     return reports
@@ -37,15 +43,21 @@ def extract_core_report_fields(report: FactoryStatusReport) -> Dict[str, Any]:
     }
 
 
-def extract_metrics_fields(report: FactoryStatusReport) -> Dict[str, Any]:
-    """Extract metrics fields."""
+def _extract_performance_metrics(report: FactoryStatusReport) -> Dict[str, Any]:
+    """Extract performance-related metrics."""
     return {
         "velocity_metrics": report.velocity_metrics,
         "impact_metrics": report.impact_metrics,
-        "quality_metrics": report.quality_metrics,
-        "business_value_metrics": report.business_value_metrics,
-        "branch_metrics": report.branch_metrics,
-        "feature_progress": report.feature_progress,
+        "quality_metrics": report.quality_metrics
+    }
+
+
+def extract_metrics_fields(report: FactoryStatusReport) -> Dict[str, Any]:
+    """Extract metrics fields."""
+    perf_metrics = _extract_performance_metrics(report)
+    return {
+        **perf_metrics, "business_value_metrics": report.business_value_metrics,
+        "branch_metrics": report.branch_metrics, "feature_progress": report.feature_progress,
         "recommendations": report.recommendations
     }
 
@@ -57,14 +69,20 @@ def convert_report_to_response(report: FactoryStatusReport) -> ReportResponse:
     return ReportResponse(**{**core_fields, **metrics_fields})
 
 
+def _extract_summary_scores(summary) -> Dict[str, Any]:
+    """Extract summary scores."""
+    return {
+        "productivity_score": summary.productivity_score,
+        "business_value_score": summary.business_value_score
+    }
+
+
 def serialize_summary(summary) -> Dict[str, Any]:
     """Serialize executive summary."""
+    scores = _extract_summary_scores(summary)
     return {
-        "timestamp": summary.timestamp.isoformat(),
-        "productivity_score": summary.productivity_score,
-        "key_highlights": summary.key_highlights,
-        "action_items": summary.action_items,
-        "business_value_score": summary.business_value_score,
+        "timestamp": summary.timestamp.isoformat(), **scores,
+        "key_highlights": summary.key_highlights, "action_items": summary.action_items,
         "overall_status": summary.overall_status
     }
 

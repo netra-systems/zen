@@ -63,15 +63,23 @@ class ConnectionMemoryTracker:
     
     def add_message_to_buffer(self, connection_id: str, message: Any) -> bool:
         """Add message to connection buffer with size limits."""
-        if connection_id not in self.message_buffers:
+        if not self._validate_connection_exists(connection_id):
             return False
         
         buffer = self.message_buffers[connection_id]
-        message_size = sys.getsizeof(message) / (1024 * 1024)  # Calculate once
+        message_size = self._calculate_message_size(message)
         
         self._enforce_message_count_limit(connection_id, buffer)
         self._add_message_and_update_size(connection_id, buffer, message, message_size)
         return True
+    
+    def _validate_connection_exists(self, connection_id: str) -> bool:
+        """Validate that connection exists in tracked buffers."""
+        return connection_id in self.message_buffers
+    
+    def _calculate_message_size(self, message: Any) -> float:
+        """Calculate message size in MB."""
+        return sys.getsizeof(message) / (1024 * 1024)
     
     def _enforce_message_count_limit(self, connection_id: str, buffer: List[Any]) -> None:
         """Enforce message count limit by removing oldest if needed."""
@@ -278,19 +286,25 @@ class WebSocketMemoryManager:
     
     async def _collect_metrics(self) -> None:
         """Collect current memory metrics efficiently."""
-        # Use cached buffer sizes for efficiency
+        connection_memory_mb, total_memory_mb = self._calculate_memory_values()
+        metrics = self._create_memory_metrics_object(connection_memory_mb, total_memory_mb)
+        self.metrics_history.append(metrics)
+    
+    def _calculate_memory_values(self) -> tuple[float, float]:
+        """Calculate connection and total memory values."""
         connection_memory_mb = sum(self.memory_tracker.buffer_sizes.values())
-        total_memory_mb = connection_memory_mb + (len(self.memory_tracker.message_buffers) * 0.1)  # Estimate
-        
-        metrics = MemoryMetrics(
+        total_memory_mb = connection_memory_mb + (len(self.memory_tracker.message_buffers) * 0.1)
+        return connection_memory_mb, total_memory_mb
+    
+    def _create_memory_metrics_object(self, connection_memory_mb: float, total_memory_mb: float) -> MemoryMetrics:
+        """Create MemoryMetrics object with current values."""
+        return MemoryMetrics(
             total_memory_mb=total_memory_mb,
             connection_memory_mb=connection_memory_mb,
             active_connections=len(self.memory_tracker.message_buffers),
             total_allocations=len(self.memory_tracker.connection_refs),
             gc_collections=sum(gc.get_count())
         )
-        
-        self.metrics_history.append(metrics)
     
     def get_memory_stats(self) -> Dict[str, Any]:
         """Get comprehensive memory statistics."""

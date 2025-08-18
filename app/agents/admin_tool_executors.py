@@ -16,7 +16,7 @@ This module contains the execution logic for individual admin tools.
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
-from typing import Dict
+from typing import Dict, Any
 from app.schemas.shared_types import ToolResult
 from sqlalchemy.orm import Session
 from app.db.models_postgres import User
@@ -194,40 +194,53 @@ class AdminToolExecutors:
     
     async def _analyze_logs(self, **kwargs) -> Dict[str, Any]:
         """Analyze logs with query and time range"""
-        from app.services.debug_service import DebugService
-        
+        query, time_range = self._extract_log_analysis_params(kwargs)
+        debug_result = await self._get_debug_service_logs()
+        return self._build_log_analysis_response(query, time_range, debug_result)
+    
+    def _extract_log_analysis_params(self, kwargs) -> tuple:
+        """Extract log analysis parameters from kwargs"""
         query = kwargs.get('query', '')
         time_range = kwargs.get('time_range', '1h')
-        
+        return query, time_range
+    
+    async def _get_debug_service_logs(self) -> Dict[str, Any]:
+        """Get logs from debug service"""
+        from app.services.debug_service import DebugService
         debug_service = DebugService(self.db)
-        result = await debug_service.get_debug_info(
+        return await debug_service.get_debug_info(
             component='logs', include_logs=True, user_id=self.user.id
         )
-        
+    
+    def _build_log_analysis_response(self, query: str, time_range: str, debug_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Build log analysis response dictionary"""
         return {
-            "status": "success", 
-            "query": query, 
-            "time_range": time_range,
-            "logs": result.get('logs', []),
+            "status": "success", "query": query, "time_range": time_range,
+            "logs": debug_result.get('logs', []),
             "summary": f"Log analysis for query: {query}"
         }
     
     async def _get_recent_logs(self, **kwargs) -> Dict[str, Any]:
         """Get recent log entries"""
-        from app.services.debug_service import DebugService
-        
+        limit, level = self._extract_recent_logs_params(kwargs)
+        debug_result = await self._get_debug_service_logs()
+        logs = self._filter_and_limit_logs(debug_result, limit)
+        return self._build_recent_logs_response(logs, level)
+    
+    def _extract_recent_logs_params(self, kwargs) -> tuple:
+        """Extract recent logs parameters from kwargs"""
         limit = kwargs.get('limit', 100)
         level = kwargs.get('level', 'INFO')
-        
-        debug_service = DebugService(self.db)
-        result = await debug_service.get_debug_info(
-            component='logs', include_logs=True, user_id=self.user.id
-        )
-        
-        logs = result.get('logs', [])[:limit]
+        return limit, level
+    
+    def _filter_and_limit_logs(self, debug_result: Dict[str, Any], limit: int) -> list:
+        """Filter and limit logs from debug result"""
+        logs = debug_result.get('logs', [])
+        return logs[:limit]
+    
+    def _build_recent_logs_response(self, logs: list, level: str) -> Dict[str, Any]:
+        """Build recent logs response dictionary"""
         return {
-            "status": "success",
-            "logs": logs,
-            "count": len(logs),
-            "level": level
+            "status": "success", "logs": logs,
+            "count": len(logs), "level": level
         }

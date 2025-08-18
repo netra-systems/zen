@@ -13,20 +13,28 @@ from .utils import (
 )
 
 
+async def _get_or_generate_latest_report():
+    """Get latest report or generate new one."""
+    latest_id = get_latest_report_id()
+    reports_cache = get_cached_reports()
+    if not latest_id or latest_id not in reports_cache:
+        return await generate_new_report(24)
+    return reports_cache[latest_id]
+
+
 async def get_latest_report_handler(
     current_user: Dict = Depends(get_current_user)
 ) -> ReportResponse:
     """Get the latest factory status report."""
-    latest_id = get_latest_report_id()
-    reports_cache = get_cached_reports()
-    
-    if not latest_id or latest_id not in reports_cache:
-        # Generate new report if none exists
-        report = await generate_new_report(24)
-    else:
-        report = reports_cache[latest_id]
-    
+    report = await _get_or_generate_latest_report()
     return convert_report_to_response(report)
+
+
+def _process_historical_reports(start_date, end_date, limit):
+    """Process historical reports with filters."""
+    reports = list(get_cached_reports().values())
+    filtered_reports = filter_reports_by_date_range(reports, start_date, end_date)
+    return sort_and_limit_reports(filtered_reports, limit)
 
 
 async def get_report_history_handler(
@@ -37,10 +45,16 @@ async def get_report_history_handler(
     current_user: Dict = Depends(get_current_user)
 ) -> List[ReportResponse]:
     """Get historical factory status reports."""
-    reports = list(get_cached_reports().values())
-    filtered_reports = filter_reports_by_date_range(reports, start_date, end_date)
-    limited_reports = sort_and_limit_reports(filtered_reports, limit)
+    limited_reports = _process_historical_reports(start_date, end_date, limit)
     return convert_reports_to_responses(limited_reports)
+
+
+def _handle_generation_error(e: Exception):
+    """Handle report generation error."""
+    raise HTTPException(
+        status_code=500, 
+        detail=f"Failed to generate report: {str(e)}"
+    )
 
 
 async def generate_report_handler(
@@ -52,7 +66,4 @@ async def generate_report_handler(
         report = await generate_new_report(request.hours)
         return convert_report_to_response(report)
     except Exception as e:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to generate report: {str(e)}"
-        )
+        _handle_generation_error(e)

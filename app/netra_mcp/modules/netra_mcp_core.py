@@ -19,12 +19,13 @@ class NetraMCPServer:
     
     def __init__(self, name: str = "netra-mcp-server", version: str = "1.0.0"):
         """Initialize the Netra MCP server"""
-        self.mcp = FastMCP(
-            name=name,
-            version=version
-        )
+        self.mcp = FastMCP(name=name, version=version)
+        self._initialize_service_references()
+        self._initialize_registration_modules()
+        self._register_components()
         
-        # Store service references (will be injected)
+    def _initialize_service_references(self):
+        """Initialize service reference placeholders."""
         self.agent_service = None
         self.thread_service = None
         self.corpus_service = None
@@ -33,13 +34,11 @@ class NetraMCPServer:
         self.supply_catalog_service = None
         self.llm_manager = None
         
-        # Initialize registration modules
+    def _initialize_registration_modules(self):
+        """Initialize MCP registration modules."""
         self.tools = NetraMCPTools(self.mcp)
         self.resources = NetraMCPResources(self.mcp)
         self.prompts = NetraMCPPrompts(self.mcp)
-        
-        # Register all tools, resources, and prompts
-        self._register_components()
         
     def set_services(
         self,

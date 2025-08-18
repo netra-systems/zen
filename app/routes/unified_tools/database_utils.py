@@ -17,16 +17,26 @@ def get_tool_info_for_logging(tool_registry, result: ToolExecutionResult) -> Any
     return tool_registry.tools.get(result.tool_name)
 
 
+def extract_tool_category(tool: Any) -> str:
+    """Extract category from tool or return default."""
+    return tool.category if tool else "unknown"
+
+
+def extract_permission_result(result: ToolExecutionResult) -> Any:
+    """Extract permission check result or return None."""
+    return result.permission_check.dict() if result.permission_check else None
+
+
 def create_tool_usage_log_entry(result: ToolExecutionResult, tool: Any) -> ToolUsageLog:
     """Create tool usage log entry."""
     return ToolUsageLog(
         user_id=result.user_id,
         tool_name=result.tool_name,
-        category=tool.category if tool else "unknown",
+        category=extract_tool_category(tool),
         execution_time_ms=result.execution_time_ms,
         status=result.status,
-        plan_tier="free",  # Would get from user
-        permission_check_result=result.permission_check.dict() if result.permission_check else None
+        plan_tier="free",
+        permission_check_result=extract_permission_result(result)
     )
 
 
@@ -41,14 +51,19 @@ def handle_logging_error(e: Exception) -> None:
     logger.error(f"Error logging tool execution to DB: {e}")
 
 
+async def process_tool_logging(tool_registry, result: ToolExecutionResult, db: AsyncSession) -> None:
+    """Process tool execution logging workflow."""
+    tool = get_tool_info_for_logging(tool_registry, result)
+    log_entry = create_tool_usage_log_entry(result, tool)
+    await save_log_entry_to_db(log_entry, db)
+
+
 async def log_tool_execution_to_db(
     tool_registry, result: ToolExecutionResult, db: AsyncSession
 ) -> None:
     """Log tool execution to database for analytics"""
     try:
-        tool = get_tool_info_for_logging(tool_registry, result)
-        log_entry = create_tool_usage_log_entry(result, tool)
-        await save_log_entry_to_db(log_entry, db)
+        await process_tool_logging(tool_registry, result, db)
     except Exception as e:
         handle_logging_error(e)
 

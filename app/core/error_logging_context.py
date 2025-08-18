@@ -77,11 +77,23 @@ class ErrorContextManager:
         parent: DetailedErrorContext
     ) -> DetailedErrorContext:
         """Copy relevant fields from parent context."""
+        self._copy_identification_fields(context, parent)
+        self._copy_session_fields(context, parent)
+        return context
+    
+    def _copy_identification_fields(
+        self, context: DetailedErrorContext, parent: DetailedErrorContext
+    ) -> None:
+        """Copy identification fields from parent."""
         context.correlation_id = parent.correlation_id
         context.trace_id = parent.trace_id
+    
+    def _copy_session_fields(
+        self, context: DetailedErrorContext, parent: DetailedErrorContext
+    ) -> None:
+        """Copy session-related fields from parent."""
         context.session_id = parent.session_id
         context.user_id = parent.user_id
-        return context
     
     @contextmanager
     def error_context(self, **context_kwargs):
@@ -113,29 +125,67 @@ class ErrorContextManager:
     
     def _get_severity_mapping(self) -> dict:
         """Get error type to severity mapping."""
+        critical_errors = self._get_critical_severity_errors()
+        high_errors = self._get_high_severity_errors()
+        medium_errors = self._get_medium_severity_errors()
+        return {**critical_errors, **high_errors, **medium_errors}
+    
+    def _get_critical_severity_errors(self) -> dict:
+        """Get critical severity error mappings."""
         return {
             'MemoryError': ErrorSeverity.CRITICAL,
             'SystemExit': ErrorSeverity.CRITICAL,
+        }
+    
+    def _get_high_severity_errors(self) -> dict:
+        """Get high severity error mappings."""
+        return {
             'KeyboardInterrupt': ErrorSeverity.HIGH,
             'ConnectionError': ErrorSeverity.HIGH,
-            'TimeoutError': ErrorSeverity.MEDIUM,
             'ValueError': ErrorSeverity.HIGH,
             'TypeError': ErrorSeverity.HIGH,
+            'PermissionError': ErrorSeverity.HIGH,
+        }
+    
+    def _get_medium_severity_errors(self) -> dict:
+        """Get medium severity error mappings."""
+        return {
+            'TimeoutError': ErrorSeverity.MEDIUM,
             'AttributeError': ErrorSeverity.MEDIUM,
             'KeyError': ErrorSeverity.MEDIUM,
             'FileNotFoundError': ErrorSeverity.MEDIUM,
-            'PermissionError': ErrorSeverity.HIGH,
         }
     
     def _get_category_mapping(self) -> dict:
         """Get error type to category mapping."""
+        security_errors = self._get_security_category_errors()
+        infra_errors = self._get_infrastructure_category_errors()
+        app_errors = self._get_application_category_errors()
+        system_errors = self._get_system_category_errors()
+        return {**security_errors, **infra_errors, **app_errors, **system_errors}
+    
+    def _get_security_category_errors(self) -> dict:
+        """Get security category error mappings."""
+        return {'PermissionError': ErrorCategory.SECURITY}
+    
+    def _get_infrastructure_category_errors(self) -> dict:
+        """Get infrastructure category error mappings."""
         return {
-            'PermissionError': ErrorCategory.SECURITY,
             'ConnectionError': ErrorCategory.INFRASTRUCTURE,
             'TimeoutError': ErrorCategory.INFRASTRUCTURE,
+        }
+    
+    def _get_application_category_errors(self) -> dict:
+        """Get application category error mappings."""
+        return {
             'ValueError': ErrorCategory.APPLICATION,
             'TypeError': ErrorCategory.APPLICATION,
             'KeyError': ErrorCategory.APPLICATION,
+        }
+    
+    def _get_system_category_errors(self) -> dict:
+        """Get system category error mappings."""
+        return {
             'FileNotFoundError': ErrorCategory.SYSTEM,
             'MemoryError': ErrorCategory.SYSTEM,
         }

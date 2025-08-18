@@ -1,7 +1,7 @@
 """
 Legacy Migration Logic for Unified Tools API
 """
-from typing import Dict, Any, List, Tuple
+from typing import Dict, Any, List, Tuple, Callable
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.logging_config import central_logger
@@ -14,16 +14,40 @@ def check_user_needs_migration(current_user: User) -> bool:
     return current_user.role in ["admin", "developer", "super_admin"]
 
 
+def get_super_admin_config() -> Tuple[str, List[str]]:
+    """Get super admin plan configuration."""
+    return "enterprise", ["*"]
+
+
+def get_admin_config() -> Tuple[str, List[str]]:
+    """Get admin plan configuration."""
+    return "enterprise", ["data_operations", "advanced_analytics", "advanced_optimization", "system_management"]
+
+
+def get_developer_config() -> Tuple[str, List[str]]:
+    """Get developer plan configuration."""
+    return "developer", ["*"]
+
+
+def get_default_config() -> Tuple[str, List[str]]:
+    """Get default plan configuration."""
+    return "pro", ["data_operations", "advanced_analytics"]
+
+
+def get_role_config_map() -> Dict[str, callable]:
+    """Get role to config function mapping."""
+    return {
+        "super_admin": get_super_admin_config,
+        "admin": get_admin_config,
+        "developer": get_developer_config
+    }
+
+
 def determine_migration_plan_and_flags(role: str) -> Tuple[str, List[str]]:
     """Determine new plan and feature flags based on role."""
-    if role == "super_admin":
-        return "enterprise", ["*"]
-    elif role == "admin":
-        return "enterprise", ["data_operations", "advanced_analytics", "advanced_optimization", "system_management"]
-    elif role == "developer":
-        return "developer", ["*"]
-    else:
-        return "pro", ["data_operations", "advanced_analytics"]
+    config_map = get_role_config_map()
+    config_func = config_map.get(role, get_default_config)
+    return config_func()
 
 
 def update_user_plan_in_db(
@@ -35,17 +59,35 @@ def update_user_plan_in_db(
     db.commit()
 
 
-def build_migration_success_response(
-    current_user: User, new_plan: str, feature_flags: List[str]
-) -> Dict[str, Any]:
-    """Build successful migration response."""
+def build_migration_data_fields(current_user: User, new_plan: str, feature_flags: List[str]) -> Dict[str, Any]:
+    """Build migration data field dictionary."""
     return {
         "status": "migrated",
         "old_role": current_user.role,
         "new_plan": new_plan,
-        "feature_flags": feature_flags,
-        "message": "Successfully migrated to new tool permission system"
+        "feature_flags": feature_flags
     }
+
+
+def create_migration_response_data(
+    current_user: User, new_plan: str, feature_flags: List[str]
+) -> Dict[str, Any]:
+    """Create migration response data dictionary."""
+    return build_migration_data_fields(current_user, new_plan, feature_flags)
+
+
+def add_migration_success_message(response: Dict[str, Any]) -> Dict[str, Any]:
+    """Add success message to migration response."""
+    response["message"] = "Successfully migrated to new tool permission system"
+    return response
+
+
+def build_migration_success_response(
+    current_user: User, new_plan: str, feature_flags: List[str]
+) -> Dict[str, Any]:
+    """Build successful migration response."""
+    response = create_migration_response_data(current_user, new_plan, feature_flags)
+    return add_migration_success_message(response)
 
 
 def build_no_migration_response(current_user: User) -> Dict[str, Any]:

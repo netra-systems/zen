@@ -24,18 +24,26 @@ class HeartbeatLoopOperations:
     async def run_heartbeat_monitoring(self, conn_info: ConnectionInfo) -> None:
         """Run main heartbeat monitoring loop."""
         while self.connection_manager.is_connection_alive(conn_info):
-            try:
-                should_continue = await self._execute_heartbeat_cycle(conn_info)
-                if not should_continue:
-                    break
-            except asyncio.CancelledError:
-                raise
-            except ConnectionError as e:
-                utils.log_connection_closed(conn_info.connection_id, e)
+            should_continue = await self._handle_heartbeat_cycle(conn_info)
+            if not should_continue:
                 break
-            except Exception as e:
-                if self._should_break_on_error(conn_info, e):
-                    break
+    
+    async def _handle_heartbeat_cycle(self, conn_info: ConnectionInfo) -> bool:
+        """Handle single heartbeat cycle with error management."""
+        try:
+            should_continue = await self._execute_heartbeat_cycle(conn_info)
+            return should_continue
+        except asyncio.CancelledError:
+            raise
+        except ConnectionError as e:
+            return self._handle_connection_error(conn_info, e)
+        except Exception as e:
+            return not self._should_break_on_error(conn_info, e)
+    
+    def _handle_connection_error(self, conn_info: ConnectionInfo, error: ConnectionError) -> bool:
+        """Handle connection error and return should continue flag."""
+        utils.log_connection_closed(conn_info.connection_id, error)
+        return False
     
     def _should_break_on_error(self, conn_info: ConnectionInfo, error: Exception) -> bool:
         """Determine if monitoring should break on this error."""

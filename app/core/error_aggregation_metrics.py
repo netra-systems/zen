@@ -94,19 +94,31 @@ class AlertEngine:
         trend: Optional[ErrorTrend] = None
     ) -> List[ErrorAlert]:
         """Evaluate pattern against alert rules."""
-        alerts = []
-        
-        for rule in self.rules.values():
-            if not self._should_evaluate_rule(rule):
-                continue
-            
-            if self._evaluate_rule_condition(rule, pattern, trend):
-                alert = self._create_alert(rule, pattern, trend)
-                alerts.append(alert)
-                self._set_cooldown(rule.rule_id)
-        
+        alerts = self._evaluate_rules_for_pattern(pattern, trend)
         self.alerts.extend(alerts)
         return alerts
+    
+    def _evaluate_rules_for_pattern(
+        self, pattern: ErrorPattern, trend: Optional[ErrorTrend]
+    ) -> List[ErrorAlert]:
+        """Evaluate all rules for given pattern."""
+        alerts = []
+        for rule in self.rules.values():
+            alert = self._check_rule_for_alert(rule, pattern, trend)
+            if alert:
+                alerts.append(alert)
+        return alerts
+    
+    def _check_rule_for_alert(
+        self, rule: AlertRule, pattern: ErrorPattern, trend: Optional[ErrorTrend]
+    ) -> Optional[ErrorAlert]:
+        """Check if rule should trigger alert."""
+        if not self._should_evaluate_rule(rule):
+            return None
+        if not self._evaluate_rule_condition(rule, pattern, trend):
+            return None
+        self._set_cooldown(rule.rule_id)
+        return self._create_alert(rule, pattern, trend)
     
     def _should_evaluate_rule(self, rule: AlertRule) -> bool:
         """Check if rule should be evaluated."""
@@ -116,11 +128,13 @@ class AlertEngine:
         """Check if rule is in cooldown period."""
         if rule_id not in self.alert_history:
             return False
-        
+        return self._check_cooldown_period(rule_id)
+    
+    def _check_cooldown_period(self, rule_id: str) -> bool:
+        """Check if rule is within cooldown period."""
         rule = self.rules[rule_id]
         last_alert = self.alert_history[rule_id]
         cooldown_period = timedelta(minutes=rule.cooldown_minutes)
-        
         return datetime.now() - last_alert < cooldown_period
     
     def _set_cooldown(self, rule_id: str) -> None:

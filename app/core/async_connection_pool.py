@@ -20,11 +20,19 @@ class AsyncConnectionPool:
         max_size: int = 10,
         min_size: int = 1
     ):
+        self._init_connection_handlers(create_connection, close_connection)
+        self._init_size_parameters(max_size, min_size)
+        self._setup_pool()
+    
+    def _init_connection_handlers(self, create_connection: Callable[[], Awaitable[T]], close_connection: Callable[[T], Awaitable[None]]) -> None:
+        """Initialize connection handler functions."""
         self._create_connection = create_connection
         self._close_connection = close_connection
+    
+    def _init_size_parameters(self, max_size: int, min_size: int) -> None:
+        """Initialize pool size parameters."""
         self._max_size = max_size
         self._min_size = min_size
-        self._setup_pool()
     
     def _setup_pool(self):
         """Initialize pool data structures."""
@@ -73,33 +81,48 @@ class AsyncConnectionPool:
     @asynccontextmanager
     async def acquire(self) -> AsyncGenerator[T, None]:
         """Acquire a connection from the pool."""
+        self._validate_pool_state()
+        connection = None
+        try:
+            connection = await self._acquire_connection()
+            yield connection
+        finally:
+            await self._release_connection(connection)
+    
+    def _validate_pool_state(self) -> None:
+        """Validate that pool is not closed."""
         if self._closed:
             raise ServiceError(
                 message="Connection pool is closed",
                 context=ErrorContext.get_all_context()
             )
-        
-        connection = None
-        try:
-            connection = await self._get_available_connection()
-            self._add_to_active(connection)
-            yield connection
-        finally:
-            if connection:
-                self._remove_from_active(connection)
-                await self._return_connection(connection)
+    
+    async def _acquire_connection(self) -> T:
+        """Acquire connection and add to active set."""
+        connection = await self._get_available_connection()
+        self._add_to_active(connection)
+        return connection
+    
+    async def _release_connection(self, connection: T) -> None:
+        """Release connection from active set."""
+        if connection:
+            self._remove_from_active(connection)
+            await self._return_connection(connection)
     
     async def _close_available_connections(self):
         """Close all available connections."""
         while not self._available_connections.empty():
-            try:
-                connection = await asyncio.wait_for(
-                    self._available_connections.get(), 
-                    timeout=1.0
-                )
-                await self._close_connection(connection)
-            except asyncio.TimeoutError:
+            if not await self._try_close_single_available_connection():
                 break
+    
+    async def _try_close_single_available_connection(self) -> bool:
+        """Try to close a single available connection."""
+        try:
+            connection = await asyncio.wait_for(self._available_connections.get(), timeout=1.0)
+            await self._close_connection(connection)
+            return True
+        except asyncio.TimeoutError:
+            return False
     
     async def _close_active_connections(self):
         """Close any remaining active connections."""

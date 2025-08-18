@@ -20,16 +20,20 @@ router = APIRouter()
 
 
 @router.post("/token")
-async def token(
-    form_data: OAuth2PasswordRequestForm = Depends(), 
-    db: AsyncSession = Depends(get_db_session), 
-    security_service: SecurityService = Depends(get_security_service)
-):
+async def token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
     """Authenticate user and return access token."""
     user = await security_service.authenticate_user(db, form_data.username, form_data.password)
     validate_user_auth(user)
     return create_token_response(security_service, user)
 
+
+def _handle_auth_config_error(e: Exception) -> None:
+    """Handle auth config error by logging and raising HTTP exception."""
+    from app.logging_config import central_logger
+    from fastapi import HTTPException
+    logger = central_logger.get_logger(__name__)
+    logger.error(f"Auth config endpoint failed: {str(e)}", exc_info=True)
+    raise HTTPException(status_code=500, detail=f"Failed to retrieve auth configuration: {str(e)}")
 
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):
@@ -37,15 +41,7 @@ async def get_auth_config(request: Request):
     try:
         return build_auth_config_response(request)
     except Exception as e:
-        from app.logging_config import central_logger
-        logger = central_logger.get_logger(__name__)
-        logger.error(f"Auth config endpoint failed: {str(e)}", exc_info=True)
-        
-        from fastapi import HTTPException
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Failed to retrieve auth configuration: {str(e)}"
-        )
+        _handle_auth_config_error(e)
 
 
 @router.get("/login")
@@ -71,12 +67,7 @@ async def logout(request: Request):
 
 
 @router.post("/dev_login")
-async def dev_login(
-    request: Request, 
-    dev_login_request: DevLoginRequest, 
-    db: AsyncSession = Depends(get_db_session), 
-    security_service: SecurityService = Depends(get_security_service)
-):
+async def dev_login(request: Request, dev_login_request: DevLoginRequest, db: AsyncSession = Depends(get_db_session), security_service: SecurityService = Depends(get_security_service)):
     """Handle development login for testing environments."""
     oauth_config = auth_client.get_oauth_config()
     return await handle_dev_login(dev_login_request, oauth_config, db, security_service)
