@@ -29,8 +29,18 @@ class CompactAlertManager:
         metrics_collector: Optional[AgentMetricsCollector] = None,
         evaluation_interval: int = 30
     ):
+        self._setup_basic_config(metrics_collector, evaluation_interval)
+        self._initialize_all_components()
+
+    def _setup_basic_config(
+        self, metrics_collector: Optional[AgentMetricsCollector], evaluation_interval: int
+    ) -> None:
+        """Setup basic configuration parameters."""
         self.metrics_collector = metrics_collector or agent_metrics_collector
         self.evaluation_interval = evaluation_interval
+
+    def _initialize_all_components(self) -> None:
+        """Initialize all manager components."""
         self._initialize_components()
         self._initialize_storage()
         self._initialize_configs()
@@ -103,13 +113,21 @@ class CompactAlertManager:
         """Main monitoring loop that evaluates alert rules."""
         while self._running:
             try:
-                await self._evaluate_all_rules()
-                await asyncio.sleep(self.evaluation_interval)
+                await self._execute_monitoring_cycle()
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                logger.error(f"Error in alert monitoring loop: {e}")
-                await asyncio.sleep(5)
+                await self._handle_monitoring_error(e)
+
+    async def _execute_monitoring_cycle(self) -> None:
+        """Execute single monitoring cycle."""
+        await self._evaluate_all_rules()
+        await asyncio.sleep(self.evaluation_interval)
+
+    async def _handle_monitoring_error(self, error: Exception) -> None:
+        """Handle monitoring loop error."""
+        logger.error(f"Error in alert monitoring loop: {error}")
+        await asyncio.sleep(5)
 
     async def _evaluate_all_rules(self) -> None:
         """Evaluate all enabled alert rules."""
@@ -228,6 +246,10 @@ class CompactAlertManager:
 
     def get_alert_summary(self) -> Dict[str, Any]:
         """Get summary of alert system status."""
+        return self._build_summary_data()
+
+    def _build_summary_data(self) -> Dict[str, Any]:
+        """Build alert summary data."""
         active_count = len(self.active_alerts)
         level_counts = self._calculate_level_counts()
         return self._build_alert_summary(active_count, level_counts)

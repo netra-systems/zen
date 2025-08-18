@@ -170,7 +170,7 @@ class UnifiedBroadcastingManager:
 
     async def _prepare_message_for_broadcast(self, message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> Optional[Dict[str, Any]]:
         """Prepare and validate message for broadcasting."""
-        prepared = self.manager.messaging._prepare_and_validate_message(message)
+        prepared = self.manager.messaging.message_handler.prepare_and_validate_message(message)
         if prepared:
             prepared["broadcast_timestamp"] = time.time()
         return prepared

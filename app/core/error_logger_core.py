@@ -427,6 +427,10 @@ class ErrorLogger:
     ) -> Dict[str, Any]:
         """Prepare structured log data."""
         log_data = context.to_dict()
+        return self._finalize_log_data(log_data, error)
+    
+    def _finalize_log_data(self, log_data: Dict[str, Any], error: Optional[Exception]) -> Dict[str, Any]:
+        """Finalize log data with error information."""
         if error:
             self._add_error_data_to_log(log_data, error)
         return log_data

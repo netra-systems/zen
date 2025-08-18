@@ -79,12 +79,16 @@ class SystemPerformanceMonitor:
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop."""
         while not self._shutdown:
-            try:
-                await self._execute_monitoring_cycle()
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                await self._handle_monitoring_error(e)
+            await self._process_monitoring_iteration()
+
+    async def _process_monitoring_iteration(self) -> None:
+        """Process single monitoring iteration."""
+        try:
+            await self._execute_monitoring_cycle()
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            await self._handle_monitoring_error(e)
     
     async def _execute_monitoring_cycle(self) -> None:
         """Execute one monitoring cycle."""

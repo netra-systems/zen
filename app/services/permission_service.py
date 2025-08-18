@@ -75,24 +75,18 @@ class PermissionService:
     
     @staticmethod
     def detect_developer_status(user: User) -> bool:
-        """
-        Auto-detect if a user should have developer privileges
-        
-        Args:
-            user: User object to check
-            
-        Returns:
-            True if user should be auto-elevated to developer
-        """
-        return (PermissionService._check_dev_mode_enabled(user) or 
-                PermissionService._check_netra_domain(user) or 
-                PermissionService._check_dev_environment(user))
+        """Auto-detect if a user should have developer privileges"""
+        dev_mode = PermissionService._check_dev_mode_enabled(user)
+        netra_domain = PermissionService._check_netra_domain(user)
+        dev_env = PermissionService._check_dev_environment(user)
+        return dev_mode or netra_domain or dev_env
     
     @staticmethod
     def _should_elevate_to_developer(user: User) -> bool:
         """Check if user should be elevated to developer"""
-        return (user.role != "developer" and 
-                user.role not in ["admin", "super_admin"])
+        is_not_developer = user.role != "developer"
+        is_not_elevated = user.role not in ["admin", "super_admin"]
+        return is_not_developer and is_not_elevated
     
     @staticmethod
     def _elevate_user_to_developer(db: Session, user: User) -> None:
@@ -104,19 +98,10 @@ class PermissionService:
     
     @staticmethod
     def update_user_role(db: Session, user: User, check_developer: bool = True) -> User:
-        """
-        Update user role based on detection rules
-        
-        Args:
-            db: Database session
-            user: User to update
-            check_developer: Whether to check for developer auto-elevation
-            
-        Returns:
-            Updated user object
-        """
-        if (check_developer and PermissionService.detect_developer_status(user) and 
-            PermissionService._should_elevate_to_developer(user)):
+        """Update user role based on detection rules"""
+        should_check_dev = check_developer and PermissionService.detect_developer_status(user)
+        should_elevate = PermissionService._should_elevate_to_developer(user)
+        if should_check_dev and should_elevate:
             PermissionService._elevate_user_to_developer(db, user)
         return user
     
@@ -142,15 +127,7 @@ class PermissionService:
     
     @staticmethod
     def get_user_permissions(user: User) -> Set[str]:
-        """
-        Get all permissions for a user based on their role and custom permissions
-        
-        Args:
-            user: User object
-            
-        Returns:
-            Set of permission strings
-        """
+        """Get all permissions for a user based on their role and custom permissions"""
         role_perms = ROLE_PERMISSIONS.get(user.role, set())
         if "*" in role_perms:
             return PermissionService._get_all_permissions_for_superadmin()
@@ -159,86 +136,42 @@ class PermissionService:
     
     @staticmethod
     def has_permission(user: User, permission: str) -> bool:
-        """
-        Check if a user has a specific permission
-        
-        Args:
-            user: User object
-            permission: Permission string to check
-            
-        Returns:
-            True if user has the permission
-        """
+        """Check if a user has a specific permission"""
         permissions = PermissionService.get_user_permissions(user)
         return permission in permissions or "*" in permissions
     
     @staticmethod
     def has_any_permission(user: User, permissions: List[str]) -> bool:
-        """
-        Check if a user has any of the specified permissions
-        
-        Args:
-            user: User object
-            permissions: List of permission strings to check
-            
-        Returns:
-            True if user has at least one of the permissions
-        """
+        """Check if a user has any of the specified permissions"""
         user_perms = PermissionService.get_user_permissions(user)
-        return any(perm in user_perms for perm in permissions) or "*" in user_perms
+        has_wildcard = "*" in user_perms
+        has_specific = any(perm in user_perms for perm in permissions)
+        return has_specific or has_wildcard
     
     @staticmethod
     def has_all_permissions(user: User, permissions: List[str]) -> bool:
-        """
-        Check if a user has all of the specified permissions
-        
-        Args:
-            user: User object
-            permissions: List of permission strings to check
-            
-        Returns:
-            True if user has all of the permissions
-        """
+        """Check if a user has all of the specified permissions"""
         user_perms = PermissionService.get_user_permissions(user)
-        return all(perm in user_perms for perm in permissions) or "*" in user_perms
+        has_wildcard = "*" in user_perms
+        has_all_specific = all(perm in user_perms for perm in permissions)
+        return has_all_specific or has_wildcard
     
     @staticmethod
     def is_admin_or_higher(user: User) -> bool:
-        """
-        Check if user has admin role or higher
-        
-        Args:
-            user: User object
-            
-        Returns:
-            True if user is admin, super_admin, or has equivalent permissions
-        """
-        return user.role in ["admin", "super_admin"] or user.is_superuser
+        """Check if user has admin role or higher"""
+        has_admin_role = user.role in ["admin", "super_admin"]
+        return has_admin_role or user.is_superuser
     
     @staticmethod
     def is_developer_or_higher(user: User) -> bool:
-        """
-        Check if user has developer role or higher
-        
-        Args:
-            user: User object
-            
-        Returns:
-            True if user is developer, admin, super_admin, or has equivalent permissions
-        """
-        return user.role in ["developer", "admin", "super_admin"] or user.is_developer or user.is_superuser
+        """Check if user has developer role or higher"""
+        has_elevated_role = user.role in ["developer", "admin", "super_admin"]
+        has_dev_flags = user.is_developer or user.is_superuser
+        return has_elevated_role or has_dev_flags
     
     @staticmethod
     def get_role_level(role: str) -> int:
-        """
-        Get the numeric level of a role for comparison
-        
-        Args:
-            role: Role string
-            
-        Returns:
-            Numeric level (higher = more permissions)
-        """
+        """Get the numeric level of a role for comparison"""
         return ROLE_HIERARCHY.get(role, 0)
     
     @staticmethod
@@ -259,17 +192,7 @@ class PermissionService:
     
     @staticmethod
     def grant_permission(db: Session, user: User, permission: str) -> User:
-        """
-        Grant a specific permission to a user
-        
-        Args:
-            db: Database session
-            user: User to grant permission to
-            permission: Permission string to grant
-            
-        Returns:
-            Updated user object
-        """
+        """Grant a specific permission to a user"""
         PermissionService._ensure_permissions_structure(user)
         PermissionService._add_permission_if_new(db, user, permission)
         return user
@@ -292,17 +215,7 @@ class PermissionService:
     
     @staticmethod
     def revoke_permission(db: Session, user: User, permission: str) -> User:
-        """
-        Revoke a specific permission from a user
-        
-        Args:
-            db: Database session
-            user: User to revoke permission from
-            permission: Permission string to revoke
-            
-        Returns:
-            Updated user object
-        """
+        """Revoke a specific permission from a user"""
         PermissionService._ensure_revoked_permissions_structure(user)
         PermissionService._add_revoked_permission_if_new(db, user, permission)
         return user
@@ -323,17 +236,7 @@ class PermissionService:
     
     @staticmethod
     def set_user_role(db: Session, user: User, role: str) -> User:
-        """
-        Set a user's role
-        
-        Args:
-            db: Database session
-            user: User to update
-            role: New role to assign
-            
-        Returns:
-            Updated user object
-        """
+        """Set a user's role"""
         PermissionService._validate_role(role)
         old_role = PermissionService._update_user_role_fields(user, role)
         db.commit()

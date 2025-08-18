@@ -36,9 +36,24 @@ def get_special_operation_type(path: str) -> Optional[OperationType]:
 
 def _get_path_operation_mappings() -> Dict[tuple, OperationType]:
     """Get path pattern to operation type mappings."""
+    return _build_all_path_mappings()
+
+def _build_all_path_mappings() -> Dict[tuple, OperationType]:
+    """Build all path operation mappings."""
+    basic_mappings = _get_basic_path_mappings()
+    advanced_mappings = _get_advanced_path_mappings()
+    return {**basic_mappings, **advanced_mappings}
+
+def _get_basic_path_mappings() -> Dict[tuple, OperationType]:
+    """Get basic path operation mappings."""
     return {
         ('/websocket', '/ws'): OperationType.WEBSOCKET_SEND,
-        ('/llm', '/ai', '/agent'): OperationType.LLM_REQUEST,
+        ('/llm', '/ai', '/agent'): OperationType.LLM_REQUEST
+    }
+
+def _get_advanced_path_mappings() -> Dict[tuple, OperationType]:
+    """Get advanced path operation mappings."""
+    return {
         ('/api/external',): OperationType.EXTERNAL_API,
         ('/files', '/upload'): OperationType.FILE_OPERATION,
         ('/cache',): OperationType.CACHE_OPERATION
@@ -177,6 +192,15 @@ def build_recovery_context(
     severity: ErrorSeverity, attempt: int, max_attempts: int, metadata: Dict[str, Any]
 ) -> RecoveryContext:
     """Build recovery context with all parameters."""
+    return _create_recovery_context(
+        operation_id, operation_type, error, severity, attempt, max_attempts, metadata
+    )
+
+def _create_recovery_context(
+    operation_id: str, operation_type: OperationType, error: Exception,
+    severity: ErrorSeverity, attempt: int, max_attempts: int, metadata: Dict[str, Any]
+) -> RecoveryContext:
+    """Create RecoveryContext with provided parameters."""
     return RecoveryContext(
         operation_id=operation_id, operation_type=operation_type, error=error,
         severity=severity, retry_count=attempt, max_retries=max_attempts - 1, metadata=metadata

@@ -31,15 +31,26 @@ def _get_all_default_rules() -> List[AlertRule]:
 
 def _create_high_error_rate_rule() -> AlertRule:
     """Create high error rate alert rule."""
+    config = _get_high_error_rate_rule_config()
+    return _build_high_error_rate_rule(config)
+
+def _get_high_error_rate_rule_config() -> Dict[str, Any]:
+    """Get high error rate rule configuration."""
+    return {
+        "rule_id": "agent_high_error_rate",
+        "name": "High Agent Error Rate",
+        "description": "Agent error rate exceeds threshold",
+        "level": AlertLevel.ERROR,
+        "threshold_value": 0.2
+    }
+
+def _build_high_error_rate_rule(config: Dict[str, Any]) -> AlertRule:
+    """Build high error rate alert rule."""
     return AlertRule(
-        rule_id="agent_high_error_rate",
-        name="High Agent Error Rate",
-        description="Agent error rate exceeds threshold",
-        condition="error_rate > threshold_value",
-        level=AlertLevel.ERROR,
-        threshold_value=0.2,
-        time_window_minutes=5,
-        channels=[NotificationChannel.LOG, NotificationChannel.SLACK]
+        rule_id=config["rule_id"], name=config["name"],
+        description=config["description"], condition="error_rate > threshold_value",
+        level=config["level"], threshold_value=config["threshold_value"],
+        time_window_minutes=5, channels=[NotificationChannel.LOG, NotificationChannel.SLACK]
     )
 
 
@@ -122,6 +133,10 @@ def _get_execution_time_rule_config() -> Dict[str, Any]:
 def _create_validation_error_spike_rule() -> AlertRule:
     """Create validation error spike alert rule."""
     config = _get_validation_error_rule_config()
+    return _build_validation_error_rule(config)
+
+def _build_validation_error_rule(config: Dict[str, Any]) -> AlertRule:
+    """Build validation error spike alert rule."""
     return AlertRule(
         rule_id="agent_validation_error_spike", name="Validation Error Spike",
         description="High number of validation errors", level=AlertLevel.ERROR,
@@ -142,6 +157,10 @@ def _create_system_failure_rate_rule() -> AlertRule:
     """Create system-wide failure rate alert rule."""
     channels = _get_critical_channels()
     config = _get_system_failure_rule_config()
+    return _build_system_failure_rule(channels, config)
+
+def _build_system_failure_rule(channels: List[NotificationChannel], config: Dict[str, Any]) -> AlertRule:
+    """Build system failure rate alert rule."""
     return AlertRule(
         rule_id="system_wide_failure_rate", name="System-wide High Failure Rate",
         description="Overall system failure rate is high", level=AlertLevel.CRITICAL,

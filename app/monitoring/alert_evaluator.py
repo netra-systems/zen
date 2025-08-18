@@ -23,12 +23,16 @@ class AlertEvaluator:
     async def evaluate_rule(self, rule: AlertRule) -> Optional[Alert]:
         """Evaluate a specific alert rule and return alert if triggered."""
         try:
-            metrics_data = await self._get_metrics_for_rule(rule)
-            triggered = await self._evaluate_condition(rule, metrics_data)
-            return self._create_alert_if_triggered(rule, metrics_data, triggered)
+            return await self._process_rule_evaluation(rule)
         except Exception as e:
             logger.error(f"Error evaluating rule {rule.rule_id}: {e}")
             return None
+
+    async def _process_rule_evaluation(self, rule: AlertRule) -> Optional[Alert]:
+        """Process rule evaluation with metrics."""
+        metrics_data = await self._get_metrics_for_rule(rule)
+        triggered = await self._evaluate_condition(rule, metrics_data)
+        return self._create_alert_if_triggered(rule, metrics_data, triggered)
 
     def _create_alert_if_triggered(
         self, rule: AlertRule, metrics_data: Dict[str, Any], triggered: bool
@@ -173,7 +177,12 @@ class AlertEvaluator:
         """Append value details to base message."""
         if current_value is None:
             return base_msg
-        
+        return self._append_formatted_details(base_msg, current_value, agent_name, rule)
+
+    def _append_formatted_details(
+        self, base_msg: str, current_value: float, agent_name: Optional[str], rule: AlertRule
+    ) -> str:
+        """Append formatted details to message."""
         details = self._format_value_details(current_value, agent_name, rule.threshold_value)
         return base_msg + details
 

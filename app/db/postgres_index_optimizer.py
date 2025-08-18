@@ -124,16 +124,18 @@ class PostgreSQLIndexOptimizer:
     
     async def _build_usage_stats_query(self) -> str:
         """Build index usage statistics query."""
-        return """
-            SELECT 
-                indexrelname as index_name,
-                relname as table_name,
-                idx_scan as times_used,
-                idx_tup_read as tuples_read,
-                idx_tup_fetch as tuples_fetched
-            FROM pg_stat_user_indexes
-            ORDER BY idx_scan DESC
-        """
+        select_fields = self._get_usage_stats_select_fields()
+        from_clause = "FROM pg_stat_user_indexes"
+        order_clause = "ORDER BY idx_scan DESC"
+        return f"SELECT {select_fields} {from_clause} {order_clause}"
+    
+    def _get_usage_stats_select_fields(self) -> str:
+        """Get SELECT fields for usage stats query."""
+        return (
+            "indexrelname as index_name, relname as table_name, "
+            "idx_scan as times_used, idx_tup_read as tuples_read, "
+            "idx_tup_fetch as tuples_fetched"
+        )
     
     async def _parse_usage_stats_result(self, result) -> List[Dict[str, Any]]:
         """Parse index usage statistics result."""

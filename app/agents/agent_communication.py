@@ -158,8 +158,8 @@ class AgentCommunicationMixin:
             return True
         except (WebSocketDisconnect, RuntimeError, ConnectionError) as e:
             return await self._handle_websocket_exception(run_id, data, e, retry_count + 1, max_retries)
-        except Exception as e:
-            return self._handle_unexpected_websocket_error(e)
+        except Exception:
+            return self._handle_unexpected_websocket_error_fallback()
     
     async def _handle_websocket_exception(self, run_id: str, data: Dict[str, Any], 
                                         error: Exception, retry_count: int, max_retries: int) -> bool:
@@ -170,6 +170,11 @@ class AgentCommunicationMixin:
     def _handle_unexpected_websocket_error(self, error: Exception) -> bool:
         """Handle unexpected WebSocket errors."""
         self.logger.error(f"Unexpected error in WebSocket update: {error}")
+        return False
+    
+    def _handle_unexpected_websocket_error_fallback(self) -> bool:
+        """Handle unexpected WebSocket errors with fallback."""
+        self.logger.error("Unexpected error in WebSocket update")
         return False
     
     def _build_websocket_message(self, run_id: str, data: Dict[str, Any]) -> WebSocketMessage:

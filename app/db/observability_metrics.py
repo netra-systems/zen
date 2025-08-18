@@ -190,25 +190,40 @@ class MetricsSummaryBuilder:
         if not recent_metrics:
             return {}
         
-        # Calculate averages
-        avg_query_time = sum(m.avg_query_time for m in recent_metrics) / len(recent_metrics)
-        avg_connections = sum(m.active_connections for m in recent_metrics) / len(recent_metrics)
-        avg_cache_hit_rate = sum(m.cache_hit_rate for m in recent_metrics) / len(recent_metrics)
-        
-        # Calculate trends
+        averages = MetricsSummaryBuilder._calculate_averages(recent_metrics)
         trends = PerformanceCalculator.calculate_trends(recent_metrics)
-        
+        totals = MetricsSummaryBuilder._calculate_totals(recent_metrics)
+        return MetricsSummaryBuilder._build_summary_dict(averages, trends, totals)
+    
+    @staticmethod
+    def _calculate_averages(recent_metrics: List[DatabaseMetrics]) -> Dict[str, float]:
+        """Calculate average metrics from recent data."""
+        count = len(recent_metrics)
         return {
-            'avg_query_time': avg_query_time,
-            'avg_connections': avg_connections,
-            'avg_cache_hit_rate': avg_cache_hit_rate,
-            'query_time_trend': trends['query_time_trend'],
-            'connection_trend': trends['connection_trend'],
+            'avg_query_time': sum(m.avg_query_time for m in recent_metrics) / count,
+            'avg_connections': sum(m.active_connections for m in recent_metrics) / count,
+            'avg_cache_hit_rate': sum(m.cache_hit_rate for m in recent_metrics) / count
+        }
+    
+    @staticmethod
+    def _calculate_totals(recent_metrics: List[DatabaseMetrics]) -> Dict[str, int]:
+        """Calculate total metrics from recent data."""
+        return {
             'total_queries': sum(m.total_queries for m in recent_metrics),
             'slow_queries': sum(m.slow_queries for m in recent_metrics),
             'cache_hits': sum(m.cache_hits for m in recent_metrics),
             'cache_misses': sum(m.cache_misses for m in recent_metrics)
         }
+    
+    @staticmethod
+    def _build_summary_dict(averages: Dict[str, float], trends: Dict[str, float], totals: Dict[str, int]) -> Dict[str, Any]:
+        """Build final summary dictionary."""
+        summary = {**averages, **totals}
+        summary.update({
+            'query_time_trend': trends['query_time_trend'],
+            'connection_trend': trends['connection_trend']
+        })
+        return summary
 
     @staticmethod
     def build_dashboard_data(

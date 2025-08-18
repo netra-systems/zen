@@ -41,10 +41,16 @@ class IndexingErrorHandler:
         context = self._create_indexing_error_context(
             document_id, index_type, run_id, original_error
         )
-        error = IndexingError(document_id, index_type, context)
+        error = self._create_indexing_error(document_id, index_type, context)
         return await self._execute_indexing_recovery(
             document_id, index_type, run_id, error, context
         )
+    
+    def _create_indexing_error(
+        self, document_id: str, index_type: str, context: ErrorContext
+    ) -> IndexingError:
+        """Create indexing error instance."""
+        return IndexingError(document_id, index_type, context)
     
     async def _execute_indexing_recovery(
         self,
@@ -81,6 +87,12 @@ class IndexingErrorHandler:
         additional_data = self._build_error_data(
             document_id, index_type, original_error
         )
+        return self._build_error_context(run_id, additional_data)
+    
+    def _build_error_context(
+        self, run_id: str, additional_data: Dict[str, Any]
+    ) -> ErrorContext:
+        """Build error context instance."""
         return ErrorContext(
             agent_name="corpus_admin_agent",
             operation_name="document_indexing",
@@ -111,6 +123,18 @@ class IndexingErrorHandler:
         simplified_result = await self._try_simplified_indexing(
             document_id, index_type, run_id
         )
+        return await self._get_recovery_result(
+            simplified_result, document_id, index_type, run_id
+        )
+    
+    async def _get_recovery_result(
+        self,
+        simplified_result: Optional[Dict[str, Any]],
+        document_id: str,
+        index_type: str,
+        run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Get recovery result or try alternative."""
         return simplified_result or await self._try_alternative_indexing(
             document_id, index_type, run_id
         )
@@ -140,18 +164,43 @@ class IndexingErrorHandler:
     ) -> Optional[Dict[str, Any]]:
         """Execute simplified indexing workflow."""
         try:
-            result = await self.search_engine.index_document_simple(document_id)
-            return result and self._create_simplified_success_response(
-                document_id, index_type, run_id
+            result = await self._try_simple_index(document_id)
+            return self._handle_simple_index_result(
+                result, document_id, index_type, run_id
             )
         except Exception as e:
             logger.debug(f"Simplified indexing failed: {e}")
             return None
     
+    async def _try_simple_index(self, document_id: str) -> Any:
+        """Try simple document indexing."""
+        return await self.search_engine.index_document_simple(document_id)
+    
+    def _handle_simple_index_result(
+        self,
+        result: Any,
+        document_id: str,
+        index_type: str,
+        run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Handle simple indexing result."""
+        return result and self._create_simplified_success_response(
+            document_id, index_type, run_id
+        )
+    
     def _create_simplified_success_response(
         self, document_id: str, index_type: str, run_id: str
     ) -> Dict[str, Any]:
         """Create success response for simplified indexing."""
+        self._log_simplified_success(
+            document_id, index_type, run_id
+        )
+        return self._build_simplified_response(document_id)
+    
+    def _log_simplified_success(
+        self, document_id: str, index_type: str, run_id: str
+    ) -> None:
+        """Log simplified indexing success."""
         logger.info(
             f"Document indexed using simplified method",
             document_id=document_id,
@@ -159,6 +208,9 @@ class IndexingErrorHandler:
             fallback_type='keyword',
             run_id=run_id
         )
+    
+    def _build_simplified_response(self, document_id: str) -> Dict[str, Any]:
+        """Build simplified indexing response."""
         return {
             'success': True,
             'method': 'simplified_indexing',
@@ -173,10 +225,14 @@ class IndexingErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Try alternative indexing method."""
-        alternative_type = self.index_alternatives.get(index_type)
+        alternative_type = self._get_alternative_type(index_type)
         return await self._execute_alternative_indexing(
             document_id, index_type, alternative_type, run_id
         )
+    
+    def _get_alternative_type(self, index_type: str) -> Optional[str]:
+        """Get alternative index type."""
+        return self.index_alternatives.get(index_type)
     
     async def _execute_alternative_indexing(
         self,
@@ -186,11 +242,15 @@ class IndexingErrorHandler:
         run_id: str
     ) -> Optional[Dict[str, Any]]:
         """Execute alternative indexing if possible."""
-        if not (alternative_type and self.search_engine):
+        if not self._can_execute_alternative(alternative_type):
             return None
         return await self._attempt_alternative_index(
             document_id, index_type, alternative_type, run_id
         )
+    
+    def _can_execute_alternative(self, alternative_type: Optional[str]) -> bool:
+        """Check if alternative indexing can be executed."""
+        return bool(alternative_type and self.search_engine)
     
     async def _attempt_alternative_index(
         self,
@@ -201,13 +261,36 @@ class IndexingErrorHandler:
     ) -> Optional[Dict[str, Any]]:
         """Attempt indexing with alternative type."""
         try:
-            result = await self.search_engine.index_document(document_id, alternative_type)
-            return result and self._create_alternative_success_response(
-                document_id, index_type, alternative_type, run_id
+            result = await self._try_alternative_index(
+                document_id, alternative_type
+            )
+            return self._handle_alternative_result(
+                result, document_id, index_type, alternative_type, run_id
             )
         except Exception as e:
             logger.debug(f"Alternative indexing failed: {e}")
             return None
+    
+    async def _try_alternative_index(
+        self, document_id: str, alternative_type: str
+    ) -> Any:
+        """Try alternative document indexing."""
+        return await self.search_engine.index_document(
+            document_id, alternative_type
+        )
+    
+    def _handle_alternative_result(
+        self,
+        result: Any,
+        document_id: str,
+        index_type: str,
+        alternative_type: str,
+        run_id: str
+    ) -> Optional[Dict[str, Any]]:
+        """Handle alternative indexing result."""
+        return result and self._create_alternative_success_response(
+            document_id, index_type, alternative_type, run_id
+        )
     
     def _create_alternative_success_response(
         self,
@@ -217,6 +300,21 @@ class IndexingErrorHandler:
         run_id: str
     ) -> Dict[str, Any]:
         """Create success response for alternative indexing."""
+        self._log_alternative_success(
+            document_id, index_type, alternative_type, run_id
+        )
+        return self._build_alternative_response(
+            document_id, alternative_type
+        )
+    
+    def _log_alternative_success(
+        self,
+        document_id: str,
+        index_type: str,
+        alternative_type: str,
+        run_id: str
+    ) -> None:
+        """Log alternative indexing success."""
         logger.info(
             f"Document indexed using alternative method",
             document_id=document_id,
@@ -224,6 +322,11 @@ class IndexingErrorHandler:
             alternative_type=alternative_type,
             run_id=run_id
         )
+    
+    def _build_alternative_response(
+        self, document_id: str, alternative_type: str
+    ) -> Dict[str, Any]:
+        """Build alternative indexing response."""
         return {
             'success': True,
             'method': 'alternative_indexing',
@@ -267,10 +370,14 @@ class IndexingErrorHandler:
         return {
             'document_id': document_id,
             'index_type': index_type,
-            'queued_at': datetime.now().isoformat(),
+            'queued_at': self._get_current_timestamp(),
             'run_id': run_id,
             'retry_count': 0
         }
+    
+    def _get_current_timestamp(self) -> str:
+        """Get current timestamp as ISO string."""
+        return datetime.now().isoformat()
 
 
 # Factory function for creating indexing handlers

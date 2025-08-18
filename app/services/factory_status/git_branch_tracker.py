@@ -6,7 +6,7 @@ Module follows 300-line limit with 8-line function limit.
 
 import subprocess
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
 from enum import Enum
 
@@ -107,13 +107,20 @@ class GitBranchTracker:
         """Get information about all branches."""
         local_branches = self._get_local_branches()
         remote_branches = self._get_remote_branches()
-        
+        all_branch_names = self._combine_branch_lists(local_branches, remote_branches)
+        return self._process_branch_list(all_branch_names)
+    
+    def _combine_branch_lists(self, local: List[str], remote: List[str]) -> Set[str]:
+        """Combine local and remote branch lists."""
+        return set(local + remote)
+    
+    def _process_branch_list(self, branch_names: Set[str]) -> List[BranchInfo]:
+        """Process branch names into BranchInfo objects."""
         all_branches = []
-        for branch in set(local_branches + remote_branches):
+        for branch in branch_names:
             info = self._analyze_branch(branch)
             if info:
                 all_branches.append(info)
-        
         return all_branches
     
     def _get_local_branches(self) -> List[str]:
@@ -133,24 +140,28 @@ class GitBranchTracker:
         """Analyze a single branch."""
         if not branch:
             return None
-        
-        branch_type = self._classify_branch(branch)
-        last_commit = self._get_last_commit_date(branch)
-        status = self._determine_status(branch, last_commit)
-        commit_count = self._count_commits(branch)
-        author = self._get_branch_author(branch)
-        ahead_behind = self._get_ahead_behind(branch)
-        
+        branch_data = self._gather_branch_data(branch)
+        return self._create_branch_info(branch, branch_data)
+    
+    def _gather_branch_data(self, branch: str) -> Dict[str, Any]:
+        """Gather all data needed for branch analysis."""
+        return {
+            'branch_type': self._classify_branch(branch),
+            'last_commit': self._get_last_commit_date(branch),
+            'commit_count': self._count_commits(branch),
+            'author': self._get_branch_author(branch),
+            'ahead_behind': self._get_ahead_behind(branch)
+        }
+    
+    def _create_branch_info(self, branch: str, data: Dict[str, Any]) -> BranchInfo:
+        """Create BranchInfo object from gathered data."""
+        status = self._determine_status(branch, data['last_commit'])
         return BranchInfo(
-            name=branch,
-            branch_type=branch_type,
-            status=status,
-            last_commit_date=last_commit,
-            commit_count=commit_count,
-            author=author,
-            is_remote=self._is_remote_branch(branch),
-            ahead_behind=ahead_behind,
-            business_value=self._assess_business_value(branch_type, status)
+            name=branch, branch_type=data['branch_type'], status=status,
+            last_commit_date=data['last_commit'], commit_count=data['commit_count'],
+            author=data['author'], is_remote=self._is_remote_branch(branch),
+            ahead_behind=data['ahead_behind'],
+            business_value=self._assess_business_value(data['branch_type'], status)
         )
     
     def _classify_branch(self, branch: str) -> BranchType:
@@ -175,11 +186,13 @@ class GitBranchTracker:
         """Determine branch status."""
         if self._is_merged(branch):
             return BranchStatus.MERGED
-        
+        return self._check_staleness(last_commit)
+    
+    def _check_staleness(self, last_commit: datetime) -> BranchStatus:
+        """Check if branch is stale based on last commit date."""
         days_inactive = (datetime.now() - last_commit).days
         if days_inactive > self.STALE_DAYS:
             return BranchStatus.STALE
-        
         return BranchStatus.ACTIVE
     
     def _is_merged(self, branch: str) -> bool:
@@ -209,13 +222,18 @@ class GitBranchTracker:
         """Get ahead/behind counts relative to main."""
         if branch == self.main_branch:
             return (0, 0)
-        
-        cmd = ["git", "rev-list", "--left-right", "--count",
-               f"{self.main_branch}...{branch}"]
+        return self._calculate_ahead_behind_counts(branch)
+    
+    def _calculate_ahead_behind_counts(self, branch: str) -> Tuple[int, int]:
+        """Calculate actual ahead/behind counts."""
+        cmd = ["git", "rev-list", "--left-right", "--count", f"{self.main_branch}...{branch}"]
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.stdout:
-            parts = result.stdout.strip().split("\t")
+        return self._parse_ahead_behind_output(result.stdout)
+    
+    def _parse_ahead_behind_output(self, output: str) -> Tuple[int, int]:
+        """Parse ahead/behind output from git."""
+        if output:
+            parts = output.strip().split("\t")
             if len(parts) == 2:
                 return (int(parts[1]), int(parts[0]))
         return (0, 0)
@@ -226,13 +244,23 @@ class GitBranchTracker:
         result = subprocess.run(cmd, capture_output=True)
         return bool(result.stdout)
     
-    def _assess_business_value(self, branch_type: BranchType, 
-                              status: BranchStatus) -> str:
+    def _assess_business_value(self, branch_type: BranchType, status: BranchStatus) -> str:
         """Assess business value of branch."""
+        critical_value = self._check_critical_value(branch_type)
+        if critical_value:
+            return critical_value
+        return self._assess_standard_value(branch_type, status)
+    
+    def _check_critical_value(self, branch_type: BranchType) -> Optional[str]:
+        """Check for critical business value types."""
         if branch_type == BranchType.HOTFIX:
             return "Critical - Production fix"
         if branch_type == BranchType.RELEASE:
             return "High - Release preparation"
+        return None
+    
+    def _assess_standard_value(self, branch_type: BranchType, status: BranchStatus) -> str:
+        """Assess standard business value."""
         if branch_type == BranchType.FEATURE and status == BranchStatus.ACTIVE:
             return "Medium - Active development"
         if status == BranchStatus.STALE:
@@ -243,18 +271,24 @@ class GitBranchTracker:
     
     def get_recent_merges(self, days: int = 7) -> List[MergeInfo]:
         """Get recent merge information."""
+        merge_lines = self._fetch_merge_log(days)
+        return self._process_merge_lines(merge_lines)
+    
+    def _fetch_merge_log(self, days: int) -> List[str]:
+        """Fetch merge log entries for specified days."""
         since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
-        cmd = ["git", "log", "--merges", f"--since={since_date}",
-               "--format=%H|%at|%s"]
+        cmd = ["git", "log", "--merges", f"--since={since_date}", "--format=%H|%at|%s"]
         result = subprocess.run(cmd, capture_output=True, text=True)
-        
+        return result.stdout.strip().split("\n") if result.stdout else []
+    
+    def _process_merge_lines(self, lines: List[str]) -> List[MergeInfo]:
+        """Process merge log lines into MergeInfo objects."""
         merges = []
-        for line in result.stdout.strip().split("\n"):
+        for line in lines:
             if line:
                 merge = self._parse_merge(line)
                 if merge:
                     merges.append(merge)
-        
         return merges
     
     def _parse_merge(self, line: str) -> Optional[MergeInfo]:
@@ -262,28 +296,27 @@ class GitBranchTracker:
         parts = line.split("|")
         if len(parts) < 3:
             return None
-        
-        commit_hash = parts[0]
-        timestamp = int(parts[1])
-        message = parts[2]
-        
-        # Extract branch names from merge message
+        return self._create_merge_info(parts)
+    
+    def _create_merge_info(self, parts: List[str]) -> MergeInfo:
+        """Create MergeInfo from parsed parts."""
+        commit_hash, timestamp, message = parts[0], int(parts[1]), parts[2]
+        source, target = self._extract_branch_names(message)
+        return MergeInfo(
+            merge_commit=commit_hash, source_branch=source, target_branch=target,
+            merge_date=datetime.fromtimestamp(timestamp), conflicts_resolved=0,
+            files_changed=self._count_merge_files(commit_hash)
+        )
+    
+    def _extract_branch_names(self, message: str) -> Tuple[str, str]:
+        """Extract source and target branch names from merge message."""
         import re
         match = re.search(r"Merge.* '(.+)' into '(.+)'", message)
         if not match:
             match = re.search(r"Merge branch '(.+)'", message)
-        
         source = match.group(1) if match else "unknown"
         target = match.group(2) if match and match.lastindex > 1 else self.main_branch
-        
-        return MergeInfo(
-            merge_commit=commit_hash,
-            source_branch=source,
-            target_branch=target,
-            merge_date=datetime.fromtimestamp(timestamp),
-            conflicts_resolved=0,  # Would need deeper analysis
-            files_changed=self._count_merge_files(commit_hash)
-        )
+        return source, target
     
     def _count_merge_files(self, commit: str) -> int:
         """Count files changed in merge."""
@@ -294,25 +327,35 @@ class GitBranchTracker:
     def calculate_metrics(self) -> BranchMetrics:
         """Calculate aggregated branch metrics."""
         branches = self.get_all_branches()
-        
-        active = sum(1 for b in branches if b.status == BranchStatus.ACTIVE)
-        merged = sum(1 for b in branches if b.status == BranchStatus.MERGED)
-        stale = sum(1 for b in branches if b.status == BranchStatus.STALE)
-        features = sum(1 for b in branches if b.branch_type == BranchType.FEATURE)
-        
-        avg_lifetime = self._calculate_avg_lifetime(branches)
-        merge_freq = self._calculate_merge_frequency()
-        collab_score = self._calculate_collaboration_score(branches)
-        
+        counts = self._calculate_branch_counts(branches)
+        advanced_metrics = self._calculate_advanced_metrics(branches)
+        return self._create_branch_metrics(branches, counts, advanced_metrics)
+    
+    def _calculate_branch_counts(self, branches: List[BranchInfo]) -> Dict[str, int]:
+        """Calculate basic branch counts."""
+        return {
+            'active': sum(1 for b in branches if b.status == BranchStatus.ACTIVE),
+            'merged': sum(1 for b in branches if b.status == BranchStatus.MERGED),
+            'stale': sum(1 for b in branches if b.status == BranchStatus.STALE),
+            'features': sum(1 for b in branches if b.branch_type == BranchType.FEATURE)
+        }
+    
+    def _calculate_advanced_metrics(self, branches: List[BranchInfo]) -> Dict[str, float]:
+        """Calculate advanced metrics."""
+        return {
+            'avg_lifetime': self._calculate_avg_lifetime(branches),
+            'merge_freq': self._calculate_merge_frequency(),
+            'collab_score': self._calculate_collaboration_score(branches)
+        }
+    
+    def _create_branch_metrics(self, branches: List[BranchInfo], counts: Dict[str, int], 
+                              metrics: Dict[str, float]) -> BranchMetrics:
+        """Create BranchMetrics object from calculated data."""
         return BranchMetrics(
-            total_branches=len(branches),
-            active_branches=active,
-            merged_branches=merged,
-            stale_branches=stale,
-            feature_branches=features,
-            average_branch_lifetime=avg_lifetime,
-            merge_frequency=merge_freq,
-            collaboration_score=collab_score
+            total_branches=len(branches), active_branches=counts['active'],
+            merged_branches=counts['merged'], stale_branches=counts['stale'],
+            feature_branches=counts['features'], average_branch_lifetime=metrics['avg_lifetime'],
+            merge_frequency=metrics['merge_freq'], collaboration_score=metrics['collab_score']
         )
     
     def _calculate_avg_lifetime(self, branches: List[BranchInfo]) -> float:

@@ -112,9 +112,14 @@ class PostgreSQLSlowQueryAnalyzer:
         query, table_name, mean_time = self._extract_query_info(query_data)
         if not table_name:
             return recommendations
+        self._process_query_recommendations(recommendations, query, table_name, mean_time)
+        return recommendations
+    
+    def _process_query_recommendations(self, recommendations: List, query: str, 
+                                      table_name: str, mean_time: float):
+        """Process query recommendations for WHERE and ORDER BY clauses."""
         self._add_where_recommendations(recommendations, query, table_name, mean_time)
         self._add_order_recommendations(recommendations, query, table_name, mean_time)
-        return recommendations
     
     def generate_recommendations_from_queries(self, slow_queries: List[Tuple]) -> List[IndexRecommendation]:
         """Generate recommendations from multiple slow queries."""

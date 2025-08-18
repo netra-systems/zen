@@ -86,13 +86,17 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute triage-specific core logic."""
         user_request = context.state.user_request
-        await self.send_status_update(context, "analyzing", "Analyzing user request...")
+        await self._initiate_triage_analysis(context)
         
         cached_result = await self._try_cache_retrieval(context, user_request)
         if cached_result:
             return cached_result
             
         return await self._perform_full_triage(context, user_request)
+    
+    async def _initiate_triage_analysis(self, context: ExecutionContext) -> None:
+        """Initiate triage analysis with status update."""
+        await self.send_status_update(context, "analyzing", "Analyzing user request...")
         
     async def _try_cache_retrieval(self, context: ExecutionContext, 
                                   user_request: str) -> Optional[Dict[str, Any]]:
@@ -106,12 +110,20 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     async def _perform_full_triage(self, context: ExecutionContext, 
                                   user_request: str) -> Dict[str, Any]:
         """Perform full triage analysis."""
-        await self.send_status_update(context, "processing", "Processing with LLM...")
+        await self._notify_processing_start(context)
         triage_result = await self._perform_llm_triage(user_request)
         await self._cache_triage_result(user_request, triage_result)
         enriched_result = await self._enrich_triage_result(triage_result, context)
-        await self.send_status_update(context, "completed", "Triage analysis complete")
+        await self._notify_processing_complete(context)
         return enriched_result
+    
+    async def _notify_processing_start(self, context: ExecutionContext) -> None:
+        """Notify processing start with status update."""
+        await self.send_status_update(context, "processing", "Processing with LLM...")
+    
+    async def _notify_processing_complete(self, context: ExecutionContext) -> None:
+        """Notify processing completion with status update."""
+        await self.send_status_update(context, "completed", "Triage analysis complete")
     
     # New standardized execute method using the base execution engine
     
@@ -119,8 +131,12 @@ class ModernTriageSubAgent(BaseExecutionInterface):
                      stream_updates: bool = False) -> None:
         """Execute triage with standardized execution engine."""
         context = self._create_execution_context(state, run_id, stream_updates)
-        result = await self.execution_engine.execute(self, context)
+        result = await self._execute_with_engine(context)
         self._set_execution_result(state, result)
+    
+    async def _execute_with_engine(self, context: ExecutionContext):
+        """Execute using the execution engine."""
+        return await self.execution_engine.execute(self, context)
         
     def _create_execution_context(self, state: DeepAgentState, run_id: str,
                                  stream_updates: bool) -> ExecutionContext:
@@ -131,9 +147,24 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     def _get_context_params(self, state: DeepAgentState, run_id: str, 
                            stream_updates: bool) -> Dict[str, Any]:
         """Get execution context parameters."""
+        core_params = self._get_core_context_params(run_id, stream_updates, state)
+        extended_params = self._get_extended_context_params(state)
+        return {**core_params, **extended_params}
+    
+    def _get_core_context_params(self, run_id: str, stream_updates: bool, state: DeepAgentState) -> Dict[str, Any]:
+        """Get core execution context parameters."""
         return {
-            'run_id': run_id, 'agent_name': self.agent_name, 'state': state, 'stream_updates': stream_updates,
-            'thread_id': getattr(state, 'chat_thread_id', None), 'user_id': getattr(state, 'user_id', None)
+            'run_id': run_id,
+            'agent_name': self.agent_name,
+            'state': state,
+            'stream_updates': stream_updates
+        }
+    
+    def _get_extended_context_params(self, state: DeepAgentState) -> Dict[str, Any]:
+        """Get extended execution context parameters."""
+        return {
+            'thread_id': getattr(state, 'chat_thread_id', None),
+            'user_id': getattr(state, 'user_id', None)
         }
         
     def _set_execution_result(self, state: DeepAgentState, 
@@ -258,11 +289,19 @@ class ModernTriageSubAgent(BaseExecutionInterface):
     
     async def check_entry_conditions(self, state: DeepAgentState, run_id: str) -> bool:
         """Backward compatibility method."""
-        context = ExecutionContext(run_id=run_id, agent_name=self.agent_name, state=state)
+        context = self._build_compat_context(run_id, state)
         return await self.validate_preconditions(context)
+    
+    def _build_compat_context(self, run_id: str, state: DeepAgentState) -> ExecutionContext:
+        """Build execution context for backward compatibility."""
+        return ExecutionContext(run_id=run_id, agent_name=self.agent_name, state=state)
     
     async def cleanup(self, state: DeepAgentState, run_id: str) -> None:
         """Cleanup after execution."""
+        await self._perform_cleanup_operations()
+    
+    async def _perform_cleanup_operations(self) -> None:
+        """Perform any required cleanup operations."""
         # Any cleanup logic can be added here
         pass
 
@@ -291,11 +330,15 @@ def migrate_agent_to_base_interface(legacy_agent_class):
     """Helper to migrate legacy agents to use base interface."""
     from typing import Type, get_type_hints
     
-    if issubclass(legacy_agent_class, BaseExecutionInterface):
+    if _is_already_migrated(legacy_agent_class):
         return legacy_agent_class
     _validate_legacy_agent(legacy_agent_class)
     return _create_migrated_agent_wrapper(legacy_agent_class)
     
+def _is_already_migrated(legacy_agent_class) -> bool:
+    """Check if agent class is already migrated."""
+    return issubclass(legacy_agent_class, BaseExecutionInterface)
+
 def _validate_legacy_agent(legacy_agent_class) -> None:
     """Validate legacy agent has required methods."""
     if not hasattr(legacy_agent_class, 'execute'):
@@ -307,11 +350,23 @@ def _create_migrated_agent_wrapper(legacy_agent_class):
     
 def _build_migrated_agent_class(legacy_agent_class):
     """Build the migrated agent class definition."""
-    return type('MigratedAgent', (BaseExecutionInterface,), {
-        '__init__': lambda self, *a, **kw: (super(type(self), self).__init__(legacy_agent_class.__name__), setattr(self, 'legacy_agent', legacy_agent_class(*a, **kw)))[1],
+    class_methods = _build_migrated_class_methods(legacy_agent_class)
+    return type('MigratedAgent', (BaseExecutionInterface,), class_methods)
+
+def _build_migrated_class_methods(legacy_agent_class) -> dict:
+    """Build methods dictionary for migrated agent class."""
+    return {
+        '__init__': _build_init_method(legacy_agent_class),
         'validate_preconditions': lambda self, ctx: _check_legacy_preconditions(self.legacy_agent, ctx),
         'execute_core_logic': lambda self, ctx: _execute_legacy_logic(self.legacy_agent, ctx, legacy_agent_class)
-    })
+    }
+
+def _build_init_method(legacy_agent_class):
+    """Build initialization method for migrated agent."""
+    def init_method(self, *args, **kwargs):
+        super(type(self), self).__init__(legacy_agent_class.__name__)
+        self.legacy_agent = legacy_agent_class(*args, **kwargs)
+    return init_method
     
 async def _check_legacy_preconditions(legacy_agent, context: ExecutionContext) -> bool:
     """Check preconditions for legacy agent."""

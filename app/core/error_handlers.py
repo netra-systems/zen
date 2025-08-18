@@ -66,9 +66,18 @@ class ApiErrorHandler:
         trace_id: Optional[str] = None
     ) -> ErrorResponse:
         """Handle any exception and return standardized error response."""
-        trace_id = self._prepare_trace_id(trace_id)
+        return self._process_exception_with_context(exc, request, trace_id)
+    
+    def _process_exception_with_context(
+        self, 
+        exc: Exception, 
+        request: Optional[Request], 
+        trace_id: Optional[str]
+    ) -> ErrorResponse:
+        """Process exception with trace ID and request context."""
+        prepared_trace_id = self._prepare_trace_id(trace_id)
         request_id = self._extract_request_id(request)
-        return self._route_exception_to_handler(exc, trace_id, request_id)
+        return self._route_exception_to_handler(exc, prepared_trace_id, request_id)
     
     def _prepare_trace_id(self, trace_id: Optional[str]) -> str:
         """Prepare trace ID for exception handling."""
@@ -178,18 +187,26 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Create error response for validation errors."""
+        return self._build_validation_response(validation_errors, trace_id, request_id)
+    
+    def _build_validation_response(self, validation_errors: list, trace_id: str, request_id: Optional[str]) -> ErrorResponse:
+        """Build validation error response with details."""
+        details = self._create_validation_details(validation_errors)
         return ErrorResponse(
             error_code=ErrorCode.VALIDATION_ERROR.value,
             message="Request validation failed",
             user_message="Please check your input and try again",
-            details={
-                "validation_errors": validation_errors,
-                "error_count": len(validation_errors)
-            },
-            trace_id=trace_id,
+            details=details, trace_id=trace_id,
             timestamp=datetime.now(timezone.utc).isoformat(),
             request_id=request_id
         )
+    
+    def _create_validation_details(self, validation_errors: list) -> Dict[str, Any]:
+        """Create validation error details."""
+        return {
+            "validation_errors": validation_errors,
+            "error_count": len(validation_errors)
+        }
     
     def _handle_sqlalchemy_error(
         self,
@@ -210,14 +227,16 @@ class ApiErrorHandler:
     ) -> ErrorResponse:
         """Handle database integrity constraint violations."""
         self._logger.warning(f"Database integrity error: {exc}")
+        return self._create_integrity_error_response(trace_id, request_id)
+    
+    def _create_integrity_error_response(self, trace_id: str, request_id: Optional[str]) -> ErrorResponse:
+        """Create integrity error response."""
         return ErrorResponse(
             error_code=ErrorCode.DATABASE_CONSTRAINT_VIOLATION.value,
             message="Database constraint violation",
             user_message="The operation could not be completed due to data constraints",
-            details={"error_type": "constraint_violation"},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
+            details={"error_type": "constraint_violation"}, trace_id=trace_id,
+            timestamp=datetime.now(timezone.utc).isoformat(), request_id=request_id
         )
     
     def _handle_general_db_error(
@@ -228,14 +247,16 @@ class ApiErrorHandler:
     ) -> ErrorResponse:
         """Handle general SQLAlchemy database errors."""
         self._logger.error(f"Database error: {str(exc)}", exc_info=True)
+        return self._create_general_db_error_response(exc, trace_id, request_id)
+    
+    def _create_general_db_error_response(self, exc: SQLAlchemyError, trace_id: str, request_id: Optional[str]) -> ErrorResponse:
+        """Create general database error response."""
         return ErrorResponse(
             error_code=ErrorCode.DATABASE_QUERY_FAILED.value,
             message="Database operation failed",
             user_message="A database error occurred. Please try again",
-            details={"error_type": type(exc).__name__},
-            trace_id=trace_id,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-            request_id=request_id
+            details={"error_type": type(exc).__name__}, trace_id=trace_id,
+            timestamp=datetime.now(timezone.utc).isoformat(), request_id=request_id
         )
     
     def _handle_http_exception(

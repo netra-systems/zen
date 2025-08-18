@@ -69,7 +69,10 @@ async def _process_analysis_request(request: AnalysisRequest, background_tasks: 
     return _build_analysis_response(analysis_id, request)
 
 @router.post("/analyze", response_model=AnalysisResponse)
-async def analyze_repository(request: AnalysisRequest, background_tasks: BackgroundTasks, current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db_session)) -> AnalysisResponse:
+async def analyze_repository(
+    request: AnalysisRequest, background_tasks: BackgroundTasks,
+    current_user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db_session)
+) -> AnalysisResponse:
     """Analyze a GitHub repository for AI operations."""
     return await _process_analysis_request(request, background_tasks, current_user, db)
 

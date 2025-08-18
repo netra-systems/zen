@@ -51,14 +51,14 @@ class SecretManager:
     
     def _get_llm_secret_mappings(self) -> Dict[str, dict]:
         """Get LLM-related secret mappings."""
+        return {"gemini-api-key": self._get_gemini_api_key_mapping()}
+    
+    def _get_gemini_api_key_mapping(self) -> Dict[str, Any]:
+        """Get Gemini API key mapping configuration."""
         return {
-            "gemini-api-key": {
-                "target_models": ["llm_configs.default", "llm_configs.triage", 
-                                "llm_configs.data", "llm_configs.optimizations_core"],
-                "target_field": "api_key",
-                "required": True,
-                "rotation_enabled": True
-            }
+            "target_models": ["llm_configs.default", "llm_configs.triage", 
+                            "llm_configs.data", "llm_configs.optimizations_core"],
+            "target_field": "api_key", "required": True, "rotation_enabled": True
         }
     
     def _get_oauth_secret_mappings(self) -> Dict[str, dict]:

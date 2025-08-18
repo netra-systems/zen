@@ -28,14 +28,22 @@ class ErrorMetricsMiddleware(BaseHTTPMiddleware):
         """Collect error metrics from requests."""
         start_time = time.time()
         try:
-            response = await call_next(request)
-            duration = time.time() - start_time
-            self._record_request_metric(request, response.status_code, duration)
-            return response
+            return await self._handle_successful_request(request, call_next, start_time)
         except Exception as error:
-            duration = time.time() - start_time
-            self._record_error_metric(request, error, duration)
+            await self._handle_error_request(request, error, start_time)
             raise error
+
+    async def _handle_successful_request(self, request: Request, call_next: Callable, start_time: float) -> Response:
+        """Handle successful request processing."""
+        response = await call_next(request)
+        duration = time.time() - start_time
+        self._record_request_metric(request, response.status_code, duration)
+        return response
+
+    async def _handle_error_request(self, request: Request, error: Exception, start_time: float) -> None:
+        """Handle error request processing."""
+        duration = time.time() - start_time
+        self._record_error_metric(request, error, duration)
     
     def _record_request_metric(
         self,

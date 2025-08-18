@@ -1,8 +1,6 @@
 """LLM Cache Manager - Main cache management service with intelligent caching strategies"""
 
 from typing import Optional, Dict, Any, List
-import hashlib
-import json
 import asyncio
 from app.redis_manager import redis_manager
 from app.logging_config import central_logger
@@ -10,6 +8,8 @@ from .cache_models import CacheStrategy, CacheEntry
 from .cache_statistics import CacheStatistics
 from .cache_eviction import CacheEvictionManager
 from .cache_serialization import CacheSerializer
+from .cache_workers import CacheBackgroundWorkers
+from .cache_helpers import CacheHelpers
 
 logger = central_logger.get_logger(__name__)
 
@@ -20,37 +20,41 @@ class LLMCacheManager:
                  strategy: CacheStrategy = CacheStrategy.ADAPTIVE,
                  max_size: int = 1000,
                  default_ttl: int = 3600):
+        self._init_core_config(strategy, max_size, default_ttl)
+        self._init_cache_components()
+        self._init_background_systems()
+
+    def _init_core_config(self, strategy: CacheStrategy, max_size: int, default_ttl: int) -> None:
+        """Initialize core configuration"""
         self.redis = redis_manager
         self.strategy = strategy
         self.max_size = max_size
         self.default_ttl = default_ttl
         self.stats = CacheStatistics()
+
+    def _init_cache_components(self) -> None:
+        """Initialize cache components"""
         self.cache_prefix = "llm_cache_v2:"
         self.tag_prefix = "llm_tag:"
-        self._invalidation_queue: asyncio.Queue = asyncio.Queue()
-        self._background_tasks: List[asyncio.Task] = []
         self.serializer = CacheSerializer()
         self.eviction_manager = CacheEvictionManager(
             self.redis, self.cache_prefix, self.max_size
         )
+
+    def _init_background_systems(self) -> None:
+        """Initialize background task systems"""
+        self._invalidation_queue: asyncio.Queue = asyncio.Queue()
+        self.workers = CacheBackgroundWorkers(self)
+        self.helpers = CacheHelpers(self)
     
     async def start(self) -> None:
         """Start background tasks"""
-        self._background_tasks.append(
-            asyncio.create_task(self._invalidation_worker())
-        )
-        self._background_tasks.append(
-            asyncio.create_task(self._eviction_worker())
-        )
+        await self.workers.start_background_tasks()
         logger.info("LLM cache manager started")
     
     async def stop(self) -> None:
         """Stop background tasks"""
-        for task in self._background_tasks:
-            task.cancel()
-        
-        await asyncio.gather(*self._background_tasks, return_exceptions=True)
-        self._background_tasks.clear()
+        await self.workers.stop_background_tasks()
         logger.info("LLM cache manager stopped")
     
     def _generate_key(self, 
@@ -58,15 +62,8 @@ class LLMCacheManager:
                      model: str, 
                      params: Optional[Dict[str, Any]] = None) -> str:
         """Generate cache key from parameters"""
-        key_data = {
-            "prompt": prompt,
-            "model": model,
-            "params": params or {}
-        }
-        
-        key_string = json.dumps(key_data, sort_keys=True)
-        key_hash = hashlib.sha256(key_string.encode()).hexdigest()
-        
+        key_data = self.helpers.build_key_data(prompt, model, params)
+        key_hash = self.helpers.hash_key_data(key_data)
         return f"{self.cache_prefix}{model}:{key_hash[:32]}"
     
     async def get_cached_response(self,
@@ -75,33 +72,42 @@ class LLMCacheManager:
                                  params: Optional[Dict[str, Any]] = None) -> Optional[Any]:
         """Get cached response if available"""
         start_time = asyncio.get_event_loop().time()
-        
         try:
-            cache_key = self._generate_key(prompt, model, params)
-            cached_data = await self.redis.get(cache_key)
-            
-            if cached_data:
-                entry = self.serializer.deserialize_entry(cached_data)
-                
-                if not entry.is_expired():
-                    entry.update_access()
-                    await self._update_entry(cache_key, entry)
-                    
-                    self.stats.hits += 1
-                    self.stats.total_latency += asyncio.get_event_loop().time() - start_time
-                    
-                    logger.debug(f"Cache hit for model {model}")
-                    return entry.value
-                else:
-                    await self.invalidate_key(cache_key)
-            
-            self.stats.misses += 1
-            self.stats.total_latency += asyncio.get_event_loop().time() - start_time
-            return None
-            
+            return await self._try_get_cached_response(prompt, model, params, start_time)
         except Exception as e:
             logger.error(f"Error getting cached response: {e}")
             return None
+
+    async def _try_get_cached_response(self, prompt: str, model: str, 
+                                      params: Optional[Dict[str, Any]], start_time: float) -> Optional[Any]:
+        """Try to get cached response with error handling"""
+        cache_key = self._generate_key(prompt, model, params)
+        cached_data = await self.redis.get(cache_key)
+        return await self._process_cached_data(cached_data, cache_key, model, start_time)
+
+    async def _process_cached_data(self, cached_data: Optional[str], cache_key: str, 
+                                  model: str, start_time: float) -> Optional[Any]:
+        """Process cached data and return result"""
+        if cached_data:
+            return await self._handle_cache_hit(cached_data, cache_key, model, start_time)
+        return await self.helpers.handle_cache_miss(start_time)
+
+    async def _handle_cache_hit(self, cached_data: str, cache_key: str, 
+                               model: str, start_time: float) -> Optional[Any]:
+        """Handle cache hit scenario"""
+        entry = self.serializer.deserialize_entry(cached_data)
+        if not entry.is_expired():
+            return await self._process_valid_entry(entry, cache_key, model, start_time)
+        await self.invalidate_key(cache_key)
+        return await self.helpers.handle_cache_miss(start_time)
+
+    async def _process_valid_entry(self, entry: CacheEntry, cache_key: str, 
+                                  model: str, start_time: float) -> Any:
+        """Process valid cache entry"""
+        entry.update_access()
+        await self._update_entry(cache_key, entry)
+        await self.helpers.record_cache_hit(model, start_time)
+        return entry.value
     
     async def cache_response(self,
                            prompt: str,
@@ -112,34 +118,36 @@ class LLMCacheManager:
                            tags: Optional[List[str]] = None) -> bool:
         """Cache a response with optional tags"""
         try:
-            if not self._should_cache(prompt, response):
-                return False
-            
-            cache_key = self._generate_key(prompt, model, params)
-            entry = self._create_cache_entry(cache_key, response, model, prompt, ttl, tags)
-            
-            await self._store_cache_entry(cache_key, entry)
-            await self._handle_tags_and_stats(cache_key, tags, model)
-            
-            return True
-            
+            return await self._try_cache_response(prompt, response, model, params, ttl, tags)
         except Exception as e:
             logger.error(f"Error caching response: {e}")
             return False
+
+    async def _try_cache_response(self, prompt: str, response: Any, model: str,
+                                 params: Optional[Dict[str, Any]], ttl: Optional[int], 
+                                 tags: Optional[List[str]]) -> bool:
+        """Try to cache response with validation"""
+        if not self.helpers.should_cache(prompt, response):
+            return False
+        return await self._execute_cache_storage(prompt, response, model, params, ttl, tags)
+
+    async def _execute_cache_storage(self, prompt: str, response: Any, model: str,
+                                    params: Optional[Dict[str, Any]], ttl: Optional[int], 
+                                    tags: Optional[List[str]]) -> bool:
+        """Execute cache storage process"""
+        cache_key = self._generate_key(prompt, model, params)
+        entry = self._create_cache_entry(cache_key, response, model, prompt, ttl, tags)
+        await self._store_cache_entry(cache_key, entry)
+        await self._handle_tags_and_stats(cache_key, tags, model)
+        return True
     
     def _create_cache_entry(self, cache_key: str, response: Any, model: str, 
                            prompt: str, ttl: Optional[int], tags: Optional[List[str]]) -> CacheEntry:
         """Create cache entry with metadata"""
+        metadata = self.helpers.build_entry_metadata(model, prompt, response)
         return CacheEntry(
-            key=cache_key,
-            value=response,
-            ttl=ttl or self._calculate_ttl(prompt, response),
-            tags=tags or [],
-            metadata={
-                "model": model,
-                "prompt_length": len(prompt),
-                "response_length": len(str(response))
-            }
+            key=cache_key, value=response, ttl=ttl or self.helpers.calculate_ttl(prompt, response), 
+            tags=tags or [], metadata=metadata
         )
     
     async def _store_cache_entry(self, cache_key: str, entry: CacheEntry) -> None:
@@ -190,60 +198,6 @@ class LLMCacheManager:
             await self.invalidate_key(key)
         
         logger.info(f"Invalidated {len(keys)} entries matching pattern {pattern}")
-    
-    def _should_cache(self, prompt: str, response: Any) -> bool:
-        """Determine if response should be cached"""
-        response_str = str(response)
-        return (self._check_response_size_valid(response_str) and
-                self._check_response_not_error(response_str) and
-                self._check_response_not_too_large(response_str))
-    
-    def _check_response_size_valid(self, response_str: str) -> bool:
-        """Check if response size is valid for caching"""
-        return len(response_str) >= 10
-    
-    def _check_response_not_error(self, response_str: str) -> bool:
-        """Check if response is not an error"""
-        error_indicators = ["error", "failed", "exception", "invalid", "rate_limit"]
-        return not any(indicator in response_str.lower() for indicator in error_indicators)
-    
-    def _check_response_not_too_large(self, response_str: str) -> bool:
-        """Check if response is not too large"""
-        return len(response_str) <= 100000
-    
-    def _calculate_ttl(self, prompt: str, response: Any) -> int:
-        """Calculate adaptive TTL based on content"""
-        if self.strategy == CacheStrategy.ADAPTIVE:
-            return self._calculate_adaptive_ttl(prompt, response)
-        return self.default_ttl
-
-    def _calculate_adaptive_ttl(self, prompt: str, response: Any) -> int:
-        """Calculate adaptive TTL with strategy logic"""
-        base_ttl = self._adjust_ttl_for_prompt(prompt)
-        base_ttl = self._adjust_ttl_for_response_size(base_ttl, response)
-        return self._adjust_ttl_for_hit_rate(base_ttl)
-
-    def _adjust_ttl_for_prompt(self, prompt: str) -> int:
-        """Adjust TTL based on prompt content"""
-        base_ttl = self.default_ttl
-        if "current" in prompt.lower() or "latest" in prompt.lower():
-            base_ttl = min(base_ttl, 300)
-        return base_ttl
-
-    def _adjust_ttl_for_response_size(self, base_ttl: int, response: Any) -> int:
-        """Adjust TTL based on response size"""
-        response_length = len(str(response))
-        if response_length > 10000:
-            base_ttl = int(base_ttl * 1.5)
-        return base_ttl
-
-    def _adjust_ttl_for_hit_rate(self, base_ttl: int) -> int:
-        """Adjust TTL based on cache hit rate"""
-        if self.stats.hit_rate > 0.7:
-            return int(base_ttl * 1.2)
-        elif self.stats.hit_rate < 0.3:
-            return int(base_ttl * 0.8)
-        return base_ttl
 
     async def _update_entry(self, key: str, entry: CacheEntry) -> None:
         """Update cache entry statistics"""
@@ -260,42 +214,6 @@ class LLMCacheManager:
         """Trigger cache eviction based on strategy"""
         evictions = await self.eviction_manager.trigger_eviction(self.strategy)
         self.stats.evictions += evictions
-
-    async def _invalidation_worker(self) -> None:
-        """Background worker for cache invalidation"""
-        while True:
-            try:
-                await self._process_invalidation_queue()
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Invalidation worker error: {e}")
-
-    async def _process_invalidation_queue(self) -> None:
-        """Process one item from invalidation queue"""
-        key = await self._invalidation_queue.get()
-        await self.redis.delete(key)
-        self._update_invalidation_stats()
-
-    def _update_invalidation_stats(self) -> None:
-        """Update invalidation statistics"""
-        self.stats.invalidations += 1; self.stats.cache_size = max(0, self.stats.cache_size - 1)
-
-    async def _eviction_worker(self) -> None:
-        """Background worker for cache eviction"""
-        while True:
-            try:
-                await self._process_eviction_cycle()
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Eviction worker error: {e}")
-    
-    async def _process_eviction_cycle(self) -> None:
-        """Process one eviction cycle"""
-        await asyncio.sleep(300)
-        if self.stats.cache_size > self.max_size * 0.95:
-            await self._trigger_eviction()
 
     def get_stats(self) -> Dict[str, Any]:
         """Get cache statistics"""

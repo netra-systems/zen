@@ -169,10 +169,14 @@ class ConfigurationExtractor:
     async def _parse_env(self, content: str) -> Dict[str, Any]:
         """Parse .env file."""
         configs = {}
+        self._process_all_env_lines(configs, content)
+        return configs
+    
+    def _process_all_env_lines(self, configs: Dict[str, Any], content: str) -> None:
+        """Process all environment file lines."""
         lines = content.split('\n')
         for line in lines:
             self._update_configs_from_env_line(configs, line)
-        return configs
     
     def _update_configs_from_env_line(self, configs: Dict[str, Any], line: str) -> None:
         """Update configs from a single env line."""
@@ -218,10 +222,14 @@ class ConfigurationExtractor:
     async def _parse_yaml(self, content: str) -> Dict[str, Any]:
         """Parse YAML configuration."""
         configs = {}
+        self._process_all_yaml_lines(configs, content)
+        return configs
+    
+    def _process_all_yaml_lines(self, configs: Dict[str, Any], content: str) -> None:
+        """Process all YAML lines."""
         lines = content.split('\n')
         for line in lines:
             self._update_configs_from_yaml_line(configs, line)
-        return configs
     
     def _update_configs_from_yaml_line(self, configs: Dict[str, Any], line: str) -> None:
         """Update configs from a single YAML line."""
@@ -250,15 +258,23 @@ class ConfigurationExtractor:
     async def _parse_toml(self, content: str) -> Dict[str, Any]:
         """Parse TOML configuration."""
         configs = {}
+        self._process_all_toml_lines(configs, content)
+        return configs
+    
+    def _process_all_toml_lines(self, configs: Dict[str, Any], content: str) -> None:
+        """Process all TOML lines."""
         lines = content.split('\n')
         for line in lines:
             self._process_toml_line(configs, line)
-        return configs
     
     def _process_toml_line(self, configs: Dict[str, Any], line: str) -> None:
         """Process a single TOML line."""
         if not self._is_valid_toml_line(line):
             return
+        self._extract_toml_config(configs, line)
+    
+    def _extract_toml_config(self, configs: Dict[str, Any], line: str) -> None:
+        """Extract TOML configuration from line."""
         key, value = self._parse_toml_line_parts(line)
         if key and self._is_ai_config(key):
             configs[key] = self._mask_sensitive(key, value)
@@ -277,14 +293,22 @@ class ConfigurationExtractor:
     async def _parse_python(self, content: str) -> Dict[str, Any]:
         """Parse Python configuration."""
         configs = {}
+        self._extract_all_python_patterns(configs, content)
+        return configs
+    
+    def _extract_all_python_patterns(self, configs: Dict[str, Any], content: str) -> None:
+        """Extract all Python configuration patterns."""
         self._extract_python_assignments(configs, content)
         self._extract_python_dict_configs(configs, content)
-        return configs
     
     def _extract_python_assignments(self, configs: Dict[str, Any], content: str) -> None:
         """Extract Python assignment patterns."""
         pattern = r'(\w+)\s*=\s*["\']([^"\']+)["\']'
         matches = re.findall(pattern, content)
+        self._process_python_assignment_matches(configs, matches)
+    
+    def _process_python_assignment_matches(self, configs: Dict[str, Any], matches: list) -> None:
+        """Process Python assignment matches."""
         for key, value in matches:
             if self._is_ai_config(key):
                 configs[key] = self._mask_sensitive(key, value)
@@ -293,6 +317,10 @@ class ConfigurationExtractor:
         """Extract Python dictionary configuration patterns."""
         dict_pattern = r'["\'](\w+)["\']\s*:\s*["\']([^"\']+)["\']'
         dict_matches = re.findall(dict_pattern, content)
+        self._process_python_dict_matches(configs, dict_matches)
+    
+    def _process_python_dict_matches(self, configs: Dict[str, Any], dict_matches: list) -> None:
+        """Process Python dictionary matches."""
         for key, value in dict_matches:
             if self._is_ai_config(key):
                 configs[key] = self._mask_sensitive(key, value)
@@ -300,10 +328,14 @@ class ConfigurationExtractor:
     async def _parse_javascript(self, content: str) -> Dict[str, Any]:
         """Parse JavaScript/TypeScript configuration."""
         configs = {}
+        self._extract_all_js_patterns(configs, content)
+        return configs
+    
+    def _extract_all_js_patterns(self, configs: Dict[str, Any], content: str) -> None:
+        """Extract all JavaScript configuration patterns."""
         patterns = self._get_js_patterns()
         for pattern in patterns:
             self._extract_js_matches(configs, content, pattern)
-        return configs
     
     def _get_js_patterns(self) -> List[str]:
         """Get JavaScript parsing patterns."""
@@ -354,17 +386,28 @@ class ConfigurationExtractor:
     
     def _mask_sensitive(self, key: str, value: str) -> str:
         """Mask sensitive values."""
-        if "KEY" in key.upper() or "TOKEN" in key.upper():
-            if len(value) > 8:
-                return value[:4] + "****" + value[-4:]
-            else:
-                return "****"
+        if self._is_sensitive_key(key):
+            return self._apply_masking(value)
         return value
+    
+    def _is_sensitive_key(self, key: str) -> bool:
+        """Check if key is sensitive."""
+        return "KEY" in key.upper() or "TOKEN" in key.upper()
+    
+    def _apply_masking(self, value: str) -> str:
+        """Apply masking to sensitive value."""
+        if len(value) > 8:
+            return value[:4] + "****" + value[-4:]
+        return "****"
     
     def _merge_configs(self, main_configs: Dict[str, Any], file_configs: Dict[str, Any], file_path: str) -> None:
         """Merge file configs into main configs."""
         if not file_configs:
             return
+        self._perform_config_merge(main_configs, file_configs, file_path)
+    
+    def _perform_config_merge(self, main_configs: Dict[str, Any], file_configs: Dict[str, Any], file_path: str) -> None:
+        """Perform the actual configuration merge."""
         self._add_config_file(main_configs, file_configs, file_path)
         self._update_env_variables(main_configs, file_configs, file_path)
     

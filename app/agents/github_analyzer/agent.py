@@ -37,14 +37,18 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         tool_dispatcher: ToolDispatcher
     ) -> None:
         """Initialize with LLM manager and tool dispatcher."""
+        self._init_base_agent(llm_manager)
+        self.tool_dispatcher = tool_dispatcher
+        self._init_components()
+        self._init_reliability()
+    
+    def _init_base_agent(self, llm_manager: LLMManager) -> None:
+        """Initialize base agent configuration."""
         super().__init__(
             llm_manager=llm_manager,
             name="GitHubAnalyzerAgent",
             description="Analyzes GitHub repositories for AI/LLM usage"
         )
-        self.tool_dispatcher = tool_dispatcher
-        self._init_components()
-        self._init_reliability()
     
     def _init_components(self) -> None:
         """Initialize all analysis components."""
@@ -75,8 +79,13 @@ class GitHubAnalyzerAgent(BaseSubAgent):
             await self._validate_input(context)
             return await self._execute_analysis_phases(state, context)
         except Exception as e:
-            logger.error(f"Analysis failed: {str(e)}")
-            return self._create_error_result(str(e))
+            return await self._handle_execution_error(e)
+    
+    async def _handle_execution_error(self, error: Exception) -> TypedAgentResult:
+        """Handle execution errors with logging."""
+        error_msg = str(error)
+        logger.error(f"Analysis failed: {error_msg}")
+        return self._create_error_result(error_msg)
     
     async def _execute_analysis_phases(
         self, 
@@ -86,7 +95,14 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         """Execute all analysis phases."""
         await self._report_progress(state, "Starting analysis", 0)
         repo_url = context.get("repository_url")
-        
+        return await self._run_sequential_phases(repo_url, state)
+    
+    async def _run_sequential_phases(
+        self, 
+        repo_url: str, 
+        state: DeepAgentState
+    ) -> TypedAgentResult:
+        """Run all phases sequentially."""
         repo_path = await self._execute_phase_1(repo_url, state)
         ai_patterns = await self._execute_phase_2(repo_path, state)
         configs = await self._execute_phase_3(repo_path, state)
@@ -132,9 +148,18 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         state: DeepAgentState
     ) -> tuple[Dict[str, Any], Dict[str, Any]]:
         """Phase 4: Map LLM calls and tools."""
+        mappings = await self._generate_mappings(ai_patterns, state)
+        await self._report_progress(state, "Mapping complete", 80)
+        return mappings
+    
+    async def _generate_mappings(
+        self, 
+        ai_patterns: Dict[str, Any], 
+        state: DeepAgentState
+    ) -> tuple[Dict[str, Any], Dict[str, Any]]:
+        """Generate LLM and tool mappings."""
         llm_map = await self._map_llm_usage(ai_patterns, state)
         tool_map = await self._analyze_tools(ai_patterns, state)
-        await self._report_progress(state, "Mapping complete", 80)
         return llm_map, tool_map
     
     async def _execute_phase_5(
@@ -147,11 +172,24 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         state: DeepAgentState
     ) -> Dict[str, Any]:
         """Phase 5: Generate output map."""
-        result_map = await self._generate_map(
+        result_map = await self._generate_final_map(
             repo_url, ai_patterns, configs, llm_map, tool_map
         )
         await self._report_progress(state, "Analysis complete", 100)
         return result_map
+    
+    async def _generate_final_map(
+        self,
+        repo_url: str,
+        ai_patterns: Dict[str, Any],
+        configs: Dict[str, Any],
+        llm_map: Dict[str, Any],
+        tool_map: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Generate final AI operations map."""
+        return await self._generate_map(
+            repo_url, ai_patterns, configs, llm_map, tool_map
+        )
     
     async def _validate_input(self, context: Dict[str, Any]) -> None:
         """Validate input parameters."""
@@ -210,14 +248,28 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         tool_map: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Generate final AI operations map."""
-        return await self.formatter.format_output(
-            repo_url=repo_url,
-            patterns=patterns,
-            configurations=configs,
-            llm_mappings=llm_map,
-            tool_mappings=tool_map,
-            analyzed_at=datetime.utcnow()
+        format_params = self._build_format_params(
+            repo_url, patterns, configs, llm_map, tool_map
         )
+        return await self.formatter.format_output(**format_params)
+    
+    def _build_format_params(
+        self,
+        repo_url: str,
+        patterns: Dict[str, Any],
+        configs: Dict[str, Any],
+        llm_map: Dict[str, Any],
+        tool_map: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Build formatter parameters."""
+        return {
+            "repo_url": repo_url,
+            "patterns": patterns,
+            "configurations": configs,
+            "llm_mappings": llm_map,
+            "tool_mappings": tool_map,
+            "analyzed_at": datetime.utcnow()
+        }
     
     async def _report_progress(
         self, 
@@ -226,40 +278,55 @@ class GitHubAnalyzerAgent(BaseSubAgent):
         progress: int
     ) -> None:
         """Report progress via WebSocket."""
-        if self.websocket_manager and self.user_id:
-            await self.websocket_manager.send_agent_progress(
-                user_id=self.user_id,
-                agent_name=self.name,
-                message=message,
-                progress=progress
-            )
+        if self._should_report_progress():
+            await self._send_progress_update(message, progress)
+    
+    def _should_report_progress(self) -> bool:
+        """Check if progress should be reported."""
+        return bool(self.websocket_manager and self.user_id)
+    
+    async def _send_progress_update(
+        self, 
+        message: str, 
+        progress: int
+    ) -> None:
+        """Send progress update via WebSocket."""
+        await self.websocket_manager.send_agent_progress(
+            user_id=self.user_id,
+            agent_name=self.name,
+            message=message,
+            progress=progress
+        )
     
     def _create_success_result(
         self, 
         result_map: Dict[str, Any]
     ) -> TypedAgentResult:
         """Create success result."""
+        metadata = self._build_result_metadata()
         return TypedAgentResult(
             success=True,
             data=result_map,
             error=None,
-            metadata={
-                "agent": self.name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+            metadata=metadata
         )
     
     def _create_error_result(self, error: str) -> TypedAgentResult:
         """Create error result."""
+        metadata = self._build_result_metadata()
         return TypedAgentResult(
             success=False,
             data=None,
             error=error,
-            metadata={
-                "agent": self.name,
-                "timestamp": datetime.utcnow().isoformat()
-            }
+            metadata=metadata
         )
+    
+    def _build_result_metadata(self) -> Dict[str, str]:
+        """Build result metadata."""
+        return {
+            "agent": self.name,
+            "timestamp": datetime.utcnow().isoformat()
+        }
     
     async def handle_delegation(
         self, 
@@ -268,17 +335,24 @@ class GitHubAnalyzerAgent(BaseSubAgent):
     ) -> TypedAgentResult:
         """Handle delegated tasks from supervisor."""
         if task == "analyze_repository":
-            return await self.execute(
-                DeepAgentState(), 
-                context
-            )
+            return await self._handle_repository_analysis(context)
         elif task == "quick_scan":
-            # Lighter weight scan for quick checks
-            patterns = await self.pattern_detector.quick_scan(
-                context.get("file_paths", [])
-            )
-            return self._create_success_result(patterns)
+            return await self._handle_quick_scan(context)
         else:
-            return self._create_error_result(
-                f"Unknown task: {task}"
-            )
+            return self._create_error_result(f"Unknown task: {task}")
+    
+    async def _handle_repository_analysis(
+        self, 
+        context: Dict[str, Any]
+    ) -> TypedAgentResult:
+        """Handle repository analysis delegation."""
+        return await self.execute(DeepAgentState(), context)
+    
+    async def _handle_quick_scan(
+        self, 
+        context: Dict[str, Any]
+    ) -> TypedAgentResult:
+        """Handle quick scan delegation."""
+        file_paths = context.get("file_paths", [])
+        patterns = await self.pattern_detector.quick_scan(file_paths)
+        return self._create_success_result(patterns)

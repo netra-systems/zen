@@ -43,9 +43,7 @@ class StreamChunk:
         """Initialize StreamChunk attributes."""
         self.type = type
         self.data = data
-        self.metadata = metadata or {}
-        self.timestamp = datetime.now().isoformat()
-        self.id = str(uuid.uuid4())
+        self._set_chunk_metadata(metadata)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary format."""
@@ -53,13 +51,9 @@ class StreamChunk:
     
     def _build_dict_representation(self) -> Dict[str, Any]:
         """Build dictionary representation of chunk."""
-        return {
-            "id": self.id,
-            "type": self.type,
-            "data": self.data,
-            "metadata": self.metadata,
-            "timestamp": self.timestamp
-        }
+        base_data = {"id": self.id, "type": self.type, "data": self.data}
+        extra_data = {"metadata": self.metadata, "timestamp": self.timestamp}
+        return {**base_data, **extra_data}
     
     def to_sse(self) -> str:
         """Convert to Server-Sent Events format."""
@@ -119,11 +113,7 @@ class StreamingService:
     
     def _build_stream_info(self, protocol: StreamProtocol) -> Dict[str, Any]:
         """Build stream information dictionary."""
-        return {
-            "start_time": datetime.now(),
-            "protocol": protocol,
-            "chunk_count": 0
-        }
+        return {"start_time": datetime.now(), "protocol": protocol, "chunk_count": 0}
     
     def _create_start_chunk(
         self,
@@ -139,11 +129,9 @@ class StreamingService:
         protocol: StreamProtocol
     ) -> StreamChunk:
         """Build stream start chunk with data and metadata."""
-        return StreamChunk(
-            type="stream_start",
-            data={"stream_id": stream_id},
-            metadata={"protocol": protocol.value}
-        )
+        data = {"stream_id": stream_id}
+        metadata = {"protocol": protocol.value}
+        return StreamChunk(type="stream_start", data=data, metadata=metadata)
     
     async def _process_data_chunks(
         self,
@@ -180,11 +168,8 @@ class StreamingService:
         stream_id: str
     ) -> StreamChunk:
         """Build data chunk with result and metadata."""
-        return StreamChunk(
-            type="data",
-            data=result,
-            metadata={"stream_id": stream_id}
-        )
+        metadata = {"stream_id": stream_id}
+        return StreamChunk(type="data", data=result, metadata=metadata)
     
     def _increment_chunk_count(self, stream_id: str) -> None:
         """Increment chunk counter for stream tracking."""
@@ -203,9 +188,7 @@ class StreamingService:
     
     def _calculate_stream_duration(self, stream_info: Dict[str, Any]) -> float:
         """Calculate stream duration in milliseconds."""
-        return (
-            datetime.now() - stream_info["start_time"]
-        ).total_seconds() * 1000
+        return (datetime.now() - stream_info["start_time"]).total_seconds() * 1000
     
     def _build_completion_chunk(
         self,
@@ -214,14 +197,9 @@ class StreamingService:
         duration_ms: float
     ) -> StreamChunk:
         """Build completion chunk with metrics."""
-        return StreamChunk(
-            type="stream_end",
-            data={"stream_id": stream_id},
-            metadata={
-                "total_chunks": stream_info["chunk_count"],
-                "duration_ms": duration_ms
-            }
-        )
+        data = {"stream_id": stream_id}
+        metadata = {"total_chunks": stream_info["chunk_count"], "duration_ms": duration_ms}
+        return StreamChunk(type="stream_end", data=data, metadata=metadata)
     
     def _create_error_chunk(
         self,
@@ -237,11 +215,9 @@ class StreamingService:
         error: Exception
     ) -> StreamChunk:
         """Build error chunk with error information."""
-        return StreamChunk(
-            type="error",
-            data={"error": str(error)},
-            metadata={"stream_id": stream_id}
-        )
+        data = {"error": str(error)}
+        metadata = {"stream_id": stream_id}
+        return StreamChunk(type="error", data=data, metadata=metadata)
     
     def _cleanup_stream(self, stream_id: str) -> None:
         """Remove stream from active streams tracking."""
@@ -294,9 +270,7 @@ class StreamingService:
         self,
         stream: AsyncGenerator[StreamChunk, None]
     ) -> AsyncGenerator[list[StreamChunk], None]:
-        """
-        Buffer stream chunks for batch processing.
-        """
+        """Buffer stream chunks for batch processing."""
         buffer = []
         async for chunk in stream:
             full_buffer = await self._process_buffered_chunk(buffer, chunk)
@@ -321,22 +295,15 @@ class StreamingService:
     
     def _build_active_streams_info(self) -> Dict[str, Dict[str, Any]]:
         """Build active streams information with duration."""
-        return {
-            stream_id: self._build_stream_info_with_duration(info)
-            for stream_id, info in self.active_streams.items()
-        }
+        return {stream_id: self._build_stream_info_with_duration(info) for stream_id, info in self.active_streams.items()}
     
     def _build_stream_info_with_duration(
         self,
         info: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Build stream info including duration calculation."""
-        return {
-            **info,
-            "duration_seconds": (
-                datetime.now() - info["start_time"]
-            ).total_seconds()
-        }
+        duration_seconds = (datetime.now() - info["start_time"]).total_seconds()
+        return {**info, "duration_seconds": duration_seconds}
     
     async def terminate_stream(self, stream_id: str) -> bool:
         """Terminate an active stream."""
@@ -359,10 +326,10 @@ class TextStreamProcessor:
     ) -> AsyncGenerator[str, None]:
         """Process text into chunks."""
         words = text.split()
-        
         for i in range(0, len(words), self.chunk_size):
             chunk = words[i:i + self.chunk_size]
-            yield ' '.join(chunk) + (' ' if i + self.chunk_size < len(words) else '')
+            suffix = ' ' if i + self.chunk_size < len(words) else ''
+            yield ' '.join(chunk) + suffix
 
 
 # Singleton instance
@@ -375,3 +342,13 @@ def get_streaming_service() -> StreamingService:
     if _streaming_service is None:
         _streaming_service = StreamingService()
     return _streaming_service
+
+# Helper method to add to StreamChunk
+def _set_chunk_metadata(self, metadata: Optional[Dict[str, Any]]) -> None:
+    """Set chunk metadata and generate unique identifiers."""
+    self.metadata = metadata or {}
+    self.timestamp = datetime.now().isoformat()
+    self.id = str(uuid.uuid4())
+
+# Add method to StreamChunk class
+StreamChunk._set_chunk_metadata = _set_chunk_metadata

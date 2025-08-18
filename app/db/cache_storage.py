@@ -106,16 +106,27 @@ class CacheStorage:
             return False
         
         try:
-            cache_key, query_duration = CacheStorage._prepare_cache_data(query, params, duration, config)
-            CacheStorage.update_pattern_tracking(query, query_duration, query_patterns, query_durations)
-            ttl = AdaptiveTTLCalculator.calculate_adaptive_ttl(query, query_duration, query_patterns, config)
-            entry = CacheStorage.create_cache_entry(cache_key, result, ttl, query_duration, tags)
-            await CacheStorage._store_cache_data(redis, cache_key, entry, tags, config, ttl)
-            CacheStorage._update_metrics_and_log(metrics, ttl)
-            return True
+            return await CacheStorage._execute_cache_operation(
+                redis, query, result, params, duration, tags, config, metrics, query_patterns, query_durations
+            )
         except Exception as e:
             logger.error(f"Error caching query result: {e}")
             return False
+    
+    @staticmethod
+    async def _execute_cache_operation(
+        redis, query: str, result: Any, params: Optional[Dict], duration: Optional[float],
+        tags: Optional[Set[str]], config: QueryCacheConfig, metrics: CacheMetrics,
+        query_patterns: Dict[str, int], query_durations: Dict[str, List[float]]
+    ) -> bool:
+        """Execute the cache operation with all required steps."""
+        cache_key, query_duration = CacheStorage._prepare_cache_data(query, params, duration, config)
+        CacheStorage.update_pattern_tracking(query, query_duration, query_patterns, query_durations)
+        ttl = AdaptiveTTLCalculator.calculate_adaptive_ttl(query, query_duration, query_patterns, config)
+        entry = CacheStorage.create_cache_entry(cache_key, result, ttl, query_duration, tags)
+        await CacheStorage._store_cache_data(redis, cache_key, entry, tags, config, ttl)
+        CacheStorage._update_metrics_and_log(metrics, ttl)
+        return True
 
 
 class CacheMetricsBuilder:

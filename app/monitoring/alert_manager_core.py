@@ -113,12 +113,16 @@ class AlertManager:
     async def _monitoring_loop(self) -> None:
         """Main monitoring loop that evaluates alert rules."""
         while self._running:
-            try:
-                await self._do_monitoring_cycle()
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                await self._handle_monitoring_error(e)
+            await self._execute_monitoring_iteration()
+
+    async def _execute_monitoring_iteration(self) -> None:
+        """Execute single monitoring iteration."""
+        try:
+            await self._do_monitoring_cycle()
+        except asyncio.CancelledError:
+            return
+        except Exception as e:
+            await self._handle_monitoring_error(e)
 
     async def _handle_monitoring_error(self, error: Exception) -> None:
         """Handle monitoring loop error."""

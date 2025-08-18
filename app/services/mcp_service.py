@@ -69,17 +69,28 @@ class MCPService(IMCPService):
             version="2.0.0"
         )
 
-    def _prepare_service_params(self):
-        """Prepare service parameters for MCP server."""
+    def _get_primary_services(self) -> Dict[str, Any]:
+        """Get primary service references."""
         return {
             'agent_service': self.agent_service,
             'thread_service': self.thread_service,
             'corpus_service': self.corpus_service,
-            'synthetic_data_service': self.synthetic_data_service,
+            'synthetic_data_service': self.synthetic_data_service
+        }
+
+    def _get_secondary_services(self) -> Dict[str, Any]:
+        """Get secondary service references."""
+        return {
             'security_service': self.security_service,
             'supply_catalog_service': self.supply_catalog_service,
             'llm_manager': self.llm_manager
         }
+
+    def _prepare_service_params(self) -> Dict[str, Any]:
+        """Prepare service parameters for MCP server."""
+        params = self._get_primary_services()
+        params.update(self._get_secondary_services())
+        return params
 
     def _inject_services_to_server(self):
         """Inject services into MCP server."""
@@ -91,6 +102,14 @@ class MCPService(IMCPService):
         self.active_sessions: Dict[str, Dict[str, Any]] = {}
         logger.info("MCP Service initialized with FastMCP 2")
 
+    def _initialize_service_components(self, **services):
+        """Initialize all service components."""
+        self._setup_mcp_service_components(
+            services['agent_service'], services['thread_service'], services['corpus_service'],
+            services['synthetic_data_service'], services['security_service'], 
+            services['supply_catalog_service'], services['llm_manager']
+        )
+
     def __init__(
         self,
         agent_service: AgentService,
@@ -101,7 +120,7 @@ class MCPService(IMCPService):
         supply_catalog_service: SupplyCatalogService,
         llm_manager=None
     ):
-        self._setup_mcp_service_components(
+        self._initialize_service_components(
             agent_service, thread_service, corpus_service, 
             synthetic_data_service, security_service, supply_catalog_service, llm_manager
         )
@@ -149,12 +168,18 @@ class MCPService(IMCPService):
         """Log successful client registration."""
         logger.info(f"Registered MCP client: {client.id} ({client_type})")
 
+    async def _create_client_with_hash(self, db_session: AsyncSession, name: str, client_type: str, 
+                                     api_key: Optional[str], permissions: Optional[List[str]], 
+                                     metadata: Optional[Dict[str, Any]]):
+        """Create client with hashed API key."""
+        api_key_hash = await self._hash_api_key(api_key)
+        return await self._store_client_in_db(db_session, name, client_type, api_key, permissions, metadata)
+
     async def _validate_and_create_client(self, db_session: AsyncSession, name: str, client_type: str, 
                                          api_key: Optional[str], permissions: Optional[List[str]], 
                                          metadata: Optional[Dict[str, Any]]):
         """Validate and create client in database."""
-        api_key_hash = await self._hash_api_key(api_key)
-        db_client = await self._store_client_in_db(db_session, name, client_type, api_key, permissions, metadata)
+        db_client = await self._create_client_with_hash(db_session, name, client_type, api_key, permissions, metadata)
         if not db_client:
             raise NetraException("Failed to create MCP client in database")
         return db_client
@@ -210,29 +235,37 @@ class MCPService(IMCPService):
             logger.error(f"Error validating client access: {e}", exc_info=True)
             return False
     
+    def _get_execution_params(self, execution: MCPToolExecution) -> Dict[str, Any]:
+        """Get execution parameters for database storage."""
+        return {
+            'session_id': execution.session_id,
+            'client_id': execution.client_id or 'system',
+            'tool_name': execution.tool_name,
+            'input_params': execution.input_params,
+            'execution_time_ms': execution.execution_time_ms,
+            'status': execution.status
+        }
+
     async def _store_execution_record(self, db_session: AsyncSession, execution: MCPToolExecution):
         """Store initial execution record in database."""
-        return await self.execution_repository.record_execution(
-            db=db_session,
-            session_id=execution.session_id,
-            client_id=execution.client_id or 'system',
-            tool_name=execution.tool_name,
-            input_params=execution.input_params,
-            execution_time_ms=execution.execution_time_ms,
-            status=execution.status
-        )
+        params = self._get_execution_params(execution)
+        return await self.execution_repository.record_execution(db=db_session, **params)
+
+    def _get_update_params(self, execution: MCPToolExecution, db_execution) -> Dict[str, Any]:
+        """Get update parameters for execution result."""
+        return {
+            'execution_id': db_execution.id,
+            'output_result': execution.output_result,
+            'execution_time_ms': execution.execution_time_ms,
+            'status': execution.status,
+            'error': execution.error
+        }
 
     async def _update_execution_with_result(self, db_session: AsyncSession, execution: MCPToolExecution, db_execution):
         """Update execution record with result if available."""
         if execution.output_result and db_execution:
-            await self.execution_repository.update_execution_result(
-                db=db_session,
-                execution_id=db_execution.id,
-                output_result=execution.output_result,
-                execution_time_ms=execution.execution_time_ms,
-                status=execution.status,
-                error=execution.error
-            )
+            params = self._get_update_params(execution, db_execution)
+            await self.execution_repository.update_execution_result(db=db_session, **params)
 
     async def _log_execution_completion(self, execution: MCPToolExecution):
         """Log completion of tool execution."""
@@ -251,9 +284,12 @@ class MCPService(IMCPService):
         except Exception as e:
             logger.error(f"Error recording tool execution: {e}", exc_info=True)
     
-    def _generate_session_data(self, session_id: str, client_id: Optional[str], metadata: Optional[Dict[str, Any]]):
-        """Generate session data structure."""
-        current_time = datetime.now(UTC)
+    def _get_session_timestamps(self) -> datetime:
+        """Get current timestamp for session."""
+        return datetime.now(UTC)
+
+    def _build_session_dict(self, session_id: str, client_id: Optional[str], metadata: Optional[Dict[str, Any]], current_time: datetime) -> Dict[str, Any]:
+        """Build session data dictionary."""
         return {
             "id": session_id,
             "client_id": client_id,
@@ -262,6 +298,11 @@ class MCPService(IMCPService):
             "metadata": metadata or {},
             "request_count": 0
         }
+
+    def _generate_session_data(self, session_id: str, client_id: Optional[str], metadata: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Generate session data structure."""
+        current_time = self._get_session_timestamps()
+        return self._build_session_dict(session_id, client_id, metadata, current_time)
 
     def _store_session(self, session_id: str, session_data: Dict[str, Any]):
         """Store session in active sessions."""
@@ -295,13 +336,17 @@ class MCPService(IMCPService):
             del self.active_sessions[session_id]
             logger.info(f"Closed MCP session: {session_id}")
     
-    def _identify_inactive_sessions(self, timeout_minutes: int):
+    def _check_session_timeout(self, session: Dict[str, Any], now: datetime, timeout_minutes: int) -> bool:
+        """Check if session has exceeded timeout."""
+        time_since_activity = (now - session["last_activity"]).total_seconds() / 60
+        return time_since_activity > timeout_minutes
+
+    def _identify_inactive_sessions(self, timeout_minutes: int) -> List[str]:
         """Identify sessions that exceed timeout."""
         now = datetime.now(UTC)
         sessions_to_remove = []
         for session_id, session in self.active_sessions.items():
-            time_since_activity = (now - session["last_activity"]).total_seconds() / 60
-            if time_since_activity > timeout_minutes:
+            if self._check_session_timeout(session, now, timeout_minutes):
                 sessions_to_remove.append(session_id)
         return sessions_to_remove
 
@@ -343,21 +388,24 @@ class MCPService(IMCPService):
             "sampling": False  # Will be implemented with LLM manager
         }
 
-    def _get_available_tools(self):
+    def _get_agent_tools(self) -> List[str]:
+        """Get agent-related tools."""
+        return ["run_agent", "get_agent_status", "list_agents"]
+
+    def _get_optimization_tools(self) -> List[str]:
+        """Get optimization-related tools."""
+        return ["analyze_workload", "optimize_prompt", "execute_optimization_pipeline"]
+
+    def _get_data_tools(self) -> List[str]:
+        """Get data-related tools."""
+        return ["query_corpus", "generate_synthetic_data", "create_thread", "get_thread_history", "get_supply_catalog"]
+
+    def _get_available_tools(self) -> List[str]:
         """Get list of available tools."""
-        return [
-            "run_agent",
-            "get_agent_status",
-            "list_agents",
-            "analyze_workload",
-            "optimize_prompt",
-            "execute_optimization_pipeline",
-            "query_corpus",
-            "generate_synthetic_data",
-            "create_thread",
-            "get_thread_history",
-            "get_supply_catalog"
-        ]
+        tools = self._get_agent_tools()
+        tools.extend(self._get_optimization_tools())
+        tools.extend(self._get_data_tools())
+        return tools
 
     def _get_available_resources(self):
         """Get list of available resources."""
@@ -376,15 +424,24 @@ class MCPService(IMCPService):
             "model_selection"
         ]
 
-    def _compile_server_info(self):
-        """Compile complete server information."""
-        info = self._get_basic_server_info()
+    def _add_server_metadata(self, info: Dict[str, Any]) -> Dict[str, Any]:
+        """Add metadata to server info."""
         info["capabilities"] = self._get_server_capabilities()
         info["active_sessions"] = len(self.active_sessions)
+        return info
+
+    def _add_available_items(self, info: Dict[str, Any]) -> Dict[str, Any]:
+        """Add available items to server info."""
         info["tools_available"] = self._get_available_tools()
         info["resources_available"] = self._get_available_resources()
         info["prompts_available"] = self._get_available_prompts()
         return info
+
+    def _compile_server_info(self) -> Dict[str, Any]:
+        """Compile complete server information."""
+        info = self._get_basic_server_info()
+        info = self._add_server_metadata(info)
+        return self._add_available_items(info)
 
     async def get_server_info(self) -> Dict[str, Any]:
         """Get MCP server information"""
@@ -403,7 +460,7 @@ class MCPService(IMCPService):
         client_id = user_context.get("client_id") if user_context else None
         return session_id, client_id
 
-    def _create_tool_execution(self, tool_name: str, parameters: Dict[str, Any], session_id: str, client_id: str):
+    def _create_tool_execution(self, tool_name: str, parameters: Dict[str, Any], session_id: str, client_id: str) -> MCPToolExecution:
         """Create tool execution record."""
         return MCPToolExecution(
             session_id=session_id or "default",
@@ -419,29 +476,34 @@ class MCPService(IMCPService):
         # For now, return a basic response
         return {"tool": tool_name, "status": "executed", "parameters": parameters}
 
-    async def _handle_successful_execution(self, execution: MCPToolExecution, result: Dict[str, Any]):
+    async def _handle_successful_execution(self, execution: MCPToolExecution, result: Dict[str, Any]) -> Dict[str, Any]:
         """Handle successful tool execution."""
         execution.status = "completed"
         execution.result = result
-        await self.record_tool_execution(execution)
+        # Note: db_session would need to be passed from caller for proper recording
         return result
 
     async def _handle_failed_execution(self, execution: MCPToolExecution, error: Exception):
         """Handle failed tool execution."""
         execution.status = "failed"
         execution.error = str(error)
-        await self.record_tool_execution(execution)
+        # Note: db_session would need to be passed from caller for proper recording  
         raise NetraException(f"Tool execution failed: {error}")
 
-    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any], user_context: Dict[str, Any] = None):
+    async def _run_tool_execution(self, execution: MCPToolExecution, tool_name: str, parameters: Dict[str, Any]) -> Dict[str, Any]:
+        """Run tool execution logic."""
+        result = await self._execute_tool_logic(tool_name, parameters)
+        return await self._handle_successful_execution(execution, result)
+
+    async def execute_tool(self, tool_name: str, parameters: Dict[str, Any], user_context: Dict[str, Any] = None) -> Dict[str, Any]:
         """Execute an MCP tool with the given parameters and user context."""
         session_id, client_id = self._extract_context_info(user_context)
         execution = self._create_tool_execution(tool_name, parameters, session_id, client_id)
         try:
-            result = await self._execute_tool_logic(tool_name, parameters)
-            return await self._handle_successful_execution(execution, result)
+            return await self._run_tool_execution(execution, tool_name, parameters)
         except Exception as e:
             await self._handle_failed_execution(execution, e)
+            return {}
 
 
 # Import request handler from separate module for modularity

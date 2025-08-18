@@ -125,9 +125,24 @@ class MetricsCollector:
 
     def _collect_system_stats(self) -> Dict[str, Any]:
         """Collect raw system statistics."""
+        return self._gather_all_system_stats()
+
+    def _gather_all_system_stats(self) -> Dict[str, Any]:
+        """Gather all system statistics from psutil."""
+        cpu_data = self._get_cpu_data()
+        io_data = self._get_io_data()
+        return {**cpu_data, **io_data}
+
+    def _get_cpu_data(self) -> Dict[str, Any]:
+        """Get CPU and memory data."""
         return {
             "cpu_percent": psutil.cpu_percent(interval=1),
-            "memory": psutil.virtual_memory(),
+            "memory": psutil.virtual_memory()
+        }
+
+    def _get_io_data(self) -> Dict[str, Any]:
+        """Get I/O and network data."""
+        return {
             "disk_io": psutil.disk_io_counters(),
             "net_io": psutil.net_io_counters(),
             "connections": len(psutil.net_connections())
@@ -362,10 +377,21 @@ class MetricsCollector:
     
     def _calculate_summary_stats(self, values: List[float]) -> Dict[str, float]:
         """Calculate summary statistics for metric values."""
+        basic_stats = self._get_basic_stats(values)
+        extended_stats = self._get_extended_stats(values)
+        return {**basic_stats, **extended_stats}
+
+    def _get_basic_stats(self, values: List[float]) -> Dict[str, float]:
+        """Get basic statistical measures."""
         return {
             "count": len(values),
             "min": min(values),
-            "max": max(values),
+            "max": max(values)
+        }
+
+    def _get_extended_stats(self, values: List[float]) -> Dict[str, float]:
+        """Get extended statistical measures."""
+        return {
             "avg": sum(values) / len(values),
             "current": values[-1] if values else 0.0
         }

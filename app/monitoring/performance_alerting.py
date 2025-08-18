@@ -28,13 +28,21 @@ class PerformanceAlertManager:
     
     def _initialize_alert_rules(self) -> Dict[str, Dict[str, Any]]:
         """Initialize performance alert rules."""
-        rule_creators = {
+        rule_creators = self._get_rule_creators()
+        return self._build_rules_from_creators(rule_creators)
+
+    def _get_rule_creators(self) -> Dict[str, Callable]:
+        """Get alert rule creator functions."""
+        return {
             "high_cpu": self._create_high_cpu_rule,
             "high_memory": self._create_high_memory_rule,
             "low_memory": self._create_low_memory_rule,
             "database_pool_exhaustion": self._create_pool_exhaustion_rule,
             "low_cache_hit_ratio": self._create_cache_hit_rule
         }
+
+    def _build_rules_from_creators(self, rule_creators: Dict[str, Callable]) -> Dict[str, Dict[str, Any]]:
+        """Build alert rules from creator functions."""
         return {name: creator() for name, creator in rule_creators.items()}
     
     def _create_high_cpu_rule(self) -> Dict[str, Any]:
@@ -193,10 +201,18 @@ class PerformanceAlertManager:
     
     def _is_violation(self, value: float, threshold: float, operator: str) -> bool:
         """Check if a single value violates threshold."""
-        operator_checks = {
+        operator_checks = self._get_operator_checks()
+        return self._evaluate_operator_check(operator_checks, operator, value, threshold)
+
+    def _get_operator_checks(self) -> Dict[str, Callable]:
+        """Get operator check functions."""
+        return {
             ">": lambda v, t: v > t,
             "<": lambda v, t: v < t,
             "==": lambda v, t: v == t
         }
+
+    def _evaluate_operator_check(self, operator_checks: Dict, operator: str, value: float, threshold: float) -> bool:
+        """Evaluate operator check for value and threshold."""
         check_func = operator_checks.get(operator)
         return check_func(value, threshold) if check_func else False

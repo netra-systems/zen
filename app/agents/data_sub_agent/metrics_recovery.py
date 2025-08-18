@@ -103,10 +103,15 @@ class MetricsRecoveryManager:
         self, metric_type: str, data: List[Dict]
     ) -> Dict[str, Any]:
         """Use approximation methods for metrics calculation."""
-        sample_size = min(1000, len(data))
-        sampled_data = data[:sample_size]
+        sample_size, sampled_data = self._prepare_sample_data(data)
         result = await self._calculate_with_approximation(metric_type, sampled_data)
         return self._add_approximation_metadata(result, sample_size, len(data))
+    
+    def _prepare_sample_data(self, data: List[Dict]) -> tuple[int, List[Dict]]:
+        """Prepare sampled data for approximation calculation."""
+        sample_size = min(1000, len(data))
+        sampled_data = data[:sample_size]
+        return sample_size, sampled_data
     
     async def _calculate_performance_metrics(
         self, data: List[Dict], simplified: bool = False, approximation: bool = False
@@ -114,8 +119,12 @@ class MetricsRecoveryManager:
         """Calculate performance metrics with fallback strategies."""
         values = self._extract_numeric_values(data, 'value')
         if not values:
-            return {'average': 0, 'count': 0}
+            return self._get_empty_performance_metrics()
         return self._select_performance_calculation_method(values, simplified, approximation)
+    
+    def _get_empty_performance_metrics(self) -> Dict[str, Any]:
+        """Get empty performance metrics result."""
+        return {'average': 0, 'count': 0}
     
     async def _calculate_usage_patterns(
         self, data: List[Dict], simplified: bool = False, approximation: bool = False
@@ -167,10 +176,14 @@ class MetricsRecoveryManager:
     def _count_error_types(self, data: List[Dict]) -> Dict[str, int]:
         """Count error types from data items."""
         error_types = {}
+        self._process_error_type_counts(data, error_types)
+        return error_types
+    
+    def _process_error_type_counts(self, data: List[Dict], error_types: Dict[str, int]) -> None:
+        """Process data items to count error types."""
         for item in data:
             error_type = item.get('error_type', 'unknown')
             error_types[error_type] = error_types.get(error_type, 0) + 1
-        return error_types
     
     def _extract_hour_from_timestamp(self, timestamp: Optional[str]) -> Optional[int]:
         """Extract hour from timestamp string safely."""
