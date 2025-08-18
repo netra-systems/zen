@@ -336,14 +336,22 @@ jobs:
           # Determine overall status based on quality score
           if [ "$QUALITY_SCORE" -ge 8 ]; then
             STATUS="success"
+            echo "::notice::Code quality check passed (Score: $QUALITY_SCORE/10)"
           elif [ "$QUALITY_SCORE" -ge 6 ]; then
             STATUS="warning"
+            echo "::warning::Code quality needs improvement (Score: $QUALITY_SCORE/10)"
           else
             STATUS="failure"
+            echo "::error::Code quality check failed (Score: $QUALITY_SCORE/10)"
           fi
           
           echo "status=$STATUS" >> $GITHUB_OUTPUT
           echo "Final quality status: $STATUS (Score: $QUALITY_SCORE/10)"
+          
+          # Exit with failure if quality is too low
+          if [ "$STATUS" = "failure" ]; then
+            exit 1
+          fi
           
       - name: Update Commit Status
         if: always() && env.ACT_MODE != 'true'

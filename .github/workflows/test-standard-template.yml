@@ -1,0 +1,228 @@
+name: Standardized Test Runner Template
+# This is a template workflow demonstrating best practices for test execution
+# with proper exit code propagation and alignment with test_runner.py
+
+on:
+  workflow_call:
+    inputs:
+      test_level:
+        description: 'Test level from test_runner.py'
+        required: true
+        type: string
+        default: 'integration'
+      runner_type:
+        description: 'Runner type (must be warp-custom-default per spec)'
+        required: false
+        type: string
+        default: 'warp-custom-default'
+      python_version:
+        description: 'Python version to use'
+        required: false
+        type: string
+        default: '3.11'
+      enable_coverage:
+        description: 'Enable coverage reporting'
+        required: false
+        type: boolean
+        default: false
+      fast_fail:
+        description: 'Stop on first failure'
+        required: false
+        type: boolean
+        default: true
+      real_llm:
+        description: 'Use real LLM for testing'
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      test_status:
+        description: 'Test execution status (success/failure/cancelled)'
+        value: ${{ jobs.run-tests.outputs.test_status }}
+      exit_code:
+        description: 'Exit code from test_runner.py'
+        value: ${{ jobs.run-tests.outputs.exit_code }}
+      test_duration:
+        description: 'Test execution duration in seconds'
+        value: ${{ jobs.run-tests.outputs.test_duration }}
+
+# Permissions per github_actions.xml spec
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  statuses: write
+  checks: write
+
+env:
+  # Static defaults - ACT compatible (no self-referencing)
+  ACT: 'false'
+  IS_ACT: 'false'
+
+jobs:
+  run-tests:
+    name: Execute Tests - ${{ inputs.test_level }}
+    # MANDATORY: Always use warp-custom-default runner per spec
+    runs-on: ${{ inputs.runner_type }}
+    timeout-minutes: 30
+    outputs:
+      test_status: ${{ steps.execute-tests.outputs.test_status }}
+      exit_code: ${{ steps.execute-tests.outputs.exit_code }}
+      test_duration: ${{ steps.timer.outputs.duration }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ inputs.python_version }}
+          cache: 'pip'
+          
+      - name: Install dependencies
+        run: |
+          echo "📦 Installing dependencies..."
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          echo "✅ Dependencies installed"
+          
+      - name: Start timer
+        id: timer
+        run: |
+          echo "start_time=$(date +%s)" >> $GITHUB_OUTPUT
+          
+      - name: Execute test_runner.py
+        id: execute-tests
+        run: |
+          echo "🧪 Running tests at level: ${{ inputs.test_level }}"
+          echo "=================================="
+          
+          # Build test command based on inputs
+          TEST_CMD="python test_runner.py --level ${{ inputs.test_level }}"
+          
+          # Add optional flags based on configuration
+          if [[ "${{ inputs.enable_coverage }}" == "false" ]]; then
+            TEST_CMD="$TEST_CMD --no-coverage"
+          fi
+          
+          if [[ "${{ inputs.fast_fail }}" == "true" ]]; then
+            TEST_CMD="$TEST_CMD --fast-fail"
+          fi
+          
+          if [[ "${{ inputs.real_llm }}" == "true" ]]; then
+            TEST_CMD="$TEST_CMD --real-llm"
+          fi
+          
+          # Add CI optimization flags
+          TEST_CMD="$TEST_CMD --ci --no-warnings"
+          
+          echo "Executing: $TEST_CMD"
+          echo "=================================="
+          
+          # Execute tests and capture exit code
+          TEST_EXIT_CODE=0
+          $TEST_CMD || TEST_EXIT_CODE=$?
+          
+          # Store exit code for output
+          echo "exit_code=$TEST_EXIT_CODE" >> $GITHUB_OUTPUT
+          
+          # Determine status based on exit code
+          if [ $TEST_EXIT_CODE -eq 0 ]; then
+            echo "test_status=success" >> $GITHUB_OUTPUT
+            echo "::notice::✅ Tests passed successfully at level: ${{ inputs.test_level }}"
+          else
+            echo "test_status=failure" >> $GITHUB_OUTPUT
+            echo "::error::❌ Tests failed with exit code $TEST_EXIT_CODE at level: ${{ inputs.test_level }}"
+          fi
+          
+          # Exit with the actual test exit code to propagate failure
+          exit $TEST_EXIT_CODE
+          
+      - name: Calculate duration
+        id: timer-end
+        if: always()
+        run: |
+          start_time=${{ steps.timer.outputs.start_time }}
+          end_time=$(date +%s)
+          duration=$((end_time - start_time))
+          echo "duration=$duration" >> $GITHUB_OUTPUT
+          echo "Test execution took ${duration}s"
+          
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ inputs.test_level }}-${{ github.run_id }}
+          path: |
+            test_reports/
+            test-results/
+            coverage.xml
+            pytest.xml
+          retention-days: 7
+          
+      - name: Update commit status
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const exitCode = '${{ steps.execute-tests.outputs.exit_code }}';
+            const testStatus = '${{ steps.execute-tests.outputs.test_status }}';
+            const duration = '${{ steps.timer-end.outputs.duration }}';
+            const level = '${{ inputs.test_level }}';
+            
+            // Determine GitHub status state
+            const state = testStatus === 'success' ? 'success' : 
+                         testStatus === 'cancelled' ? 'error' : 'failure';
+            
+            // Create descriptive message
+            const description = exitCode === '0' 
+              ? `✅ ${level} tests passed (${duration}s)`
+              : `❌ ${level} tests failed - exit code: ${exitCode} (${duration}s)`;
+            
+            // Update commit status
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: state,
+              description: description,
+              context: `tests/${level}`
+            });
+            
+            // Log for debugging
+            console.log(`Commit status updated: ${state} - ${description}`);
+            
+      - name: Generate summary
+        if: always()
+        run: |
+          echo "## 📊 Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Test Level:** ${{ inputs.test_level }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Exit Code:** ${{ steps.execute-tests.outputs.exit_code }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ steps.execute-tests.outputs.test_status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Duration:** ${{ steps.timer-end.outputs.duration }}s" >> $GITHUB_STEP_SUMMARY
+          echo "**Coverage:** ${{ inputs.enable_coverage && 'Enabled' || 'Disabled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Fast Fail:** ${{ inputs.fast_fail && 'Enabled' || 'Disabled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Real LLM:** ${{ inputs.real_llm && 'Enabled' || 'Disabled' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Add status emoji based on result
+          if [ "${{ steps.execute-tests.outputs.exit_code }}" = "0" ]; then
+            echo "### ✅ All tests passed!" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ❌ Tests failed" >> $GITHUB_STEP_SUMMARY
+            echo "Please check the logs for details about failing tests." >> $GITHUB_STEP_SUMMARY
+          fi
+          
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "🧹 Cleaning up after test failure..."
+          # Kill any hanging test processes
+          pkill -f "python.*test" || true
+          # Clean up test databases or resources if needed
+          if [ -f "scripts/cleanup_test_resources.py" ]; then
+            python scripts/cleanup_test_resources.py || true
+          fi
+          echo "✅ Cleanup completed"

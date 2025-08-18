@@ -1,6 +1,45 @@
 {
   "version": "1.0",
-  "tests": {},
+  "tests": {
+    "test_health.py::test_live_endpoint": {
+      "component": "backend",
+      "first_seen": "2025-08-17T19:16:21.727698",
+      "last_failure": "2025-08-17T19:16:21.727698",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250817_191618_78892",
+          "timestamp": "2025-08-17T19:16:21.727698",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert {'status': 'healthy', 'service': 'netra-ai-platform', 'version': '1.0.0', 'timestamp': '2025-08-18T02:16:21.346927Z', 'environment': 'development'} == {'status': 'healthy', 'service': 'netra-ai-platform'}\n  \n  Common items:\n  \u001b[0m{\u001b[33m'\u001b[39;49;00m\u001b[33mservice\u001b[39;49;00m\u001b[33m'\u001b[39;49;00m: \u001b[33m'\u001b[39;49;00m\u001b[33mnetra-ai-platform\u001b[39;49;00m\u001b[33m'\u001b[39;49;00m, \u001b[33m'\u001b[39;49;00m\u001b[33mstatus\u001b[39;49;00m\u001b[33m'\u001b[39;49;00m: \u001b[33m'\u001b[39;49;00m\u001b[33mhealthy\u001b[39;49;00m\u001b[33m'\u001b[39;49;00m}\u001b["
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/services/test_quality_gate_advanced.py::TestQualityGateAdvanced::test_get_weights_for_content_types": {
+      "component": "backend",
+      "first_seen": "2025-08-17T19:17:42.263008",
+      "last_failure": "2025-08-17T19:17:42.263008",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250817_191719_39343",
+          "timestamp": "2025-08-17T19:17:42.263008",
+          "error_type": "Error",
+          "error_message": "assert 0.2 == 0.25"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    }
+  },
   "runs": [
     {
       "run_id": "run_20250817_191038_38413",
@@ -57,10 +96,34 @@
       "passed": 44,
       "failed": 3,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_191618_78892",
+      "timestamp": "2025-08-17T19:16:22.497329",
+      "total_tests": 174,
+      "passed": 173,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250817_191622_82734",
+      "timestamp": "2025-08-17T19:16:56.290723",
+      "total_tests": 47,
+      "passed": 44,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250817_191719_39343",
+      "timestamp": "2025-08-17T19:17:42.760337",
+      "total_tests": 2484,
+      "passed": 2483,
+      "failed": 1,
+      "bad_tests_count": 1
     }
   ],
   "stats": {
-    "total_runs": 7,
-    "last_updated": "2025-08-17T19:15:41.079722"
+    "total_runs": 10,
+    "last_updated": "2025-08-17T19:17:42.760337"
   }
 }

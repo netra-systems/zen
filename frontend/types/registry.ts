@@ -199,6 +199,16 @@ export interface MessageMetadata {
   costSaved?: number;
   optimizationType?: string;
   
+  // Formatting metadata for consistent rendering
+  formattingMetadata?: {
+    preserveWhitespace: boolean;
+    renderMarkdown: boolean;
+    parseLinks: boolean;
+    highlightCode: boolean;
+    contentType: 'plain_text' | 'markdown' | 'code' | 'json' | 'error' | 'system';
+    formatVersion: string;
+  };
+  
   [key: string]: unknown;
 }
 

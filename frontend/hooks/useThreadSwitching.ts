@@ -21,6 +21,7 @@ import { createThreadTimeoutManager } from '@/utils/threadTimeoutManager';
 import { executeWithRetry } from '@/lib/retry-manager';
 import { globalCleanupManager } from '@/lib/operation-cleanup';
 import type { ThreadError, createThreadError } from '@/types/thread-error-types';
+import { useURLSync, useBrowserHistorySync } from '@/services/urlSyncService';
 
 /**
  * Thread switching state
@@ -41,6 +42,8 @@ export interface ThreadSwitchingOptions {
   readonly clearMessages?: boolean;
   readonly showLoadingIndicator?: boolean;
   readonly timeoutMs?: number;
+  readonly updateUrl?: boolean;
+  readonly skipUrlUpdate?: boolean;
 }
 
 /**
@@ -59,7 +62,9 @@ export interface UseThreadSwitchingResult {
 const DEFAULT_OPTIONS: Required<ThreadSwitchingOptions> = {
   clearMessages: true,
   showLoadingIndicator: true,
-  timeoutMs: 5000
+  timeoutMs: 5000,
+  updateUrl: true,
+  skipUrlUpdate: false
 };
 
 /**
@@ -71,6 +76,9 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
   const lastFailedThreadRef = useRef<string | null>(null);
   const timeoutManagerRef = useRef(createTimeoutManager());
   const currentOperationRef = useRef<string | null>(null);
+  
+  // URL sync integration
+  const { updateUrl } = useURLSync();
   
   // Select individual actions to prevent re-renders
   const setActiveThread = useUnifiedChatStore(state => state.setActiveThread);
@@ -113,9 +121,10 @@ export const useThreadSwitching = (): UseThreadSwitchingResult => {
       storeActions,
       abortControllerRef,
       lastFailedThreadRef,
-      timeoutManagerRef.current
+      timeoutManagerRef.current,
+      updateUrl
     );
-  }, [state, storeActions]);
+  }, [state, storeActions, updateUrl]);
   
   const cancelLoading = useCallback(() => {
     performCancelLoading(abortControllerRef, setState, storeActions);
@@ -173,7 +182,8 @@ const performThreadSwitch = async (
   storeActions: any,
   abortControllerRef: React.MutableRefObject<AbortController | null>,
   lastFailedThreadRef: React.MutableRefObject<string | null>,
-  timeoutManager: any
+  timeoutManager: any,
+  updateUrl?: (threadId: string | null) => void
 ): Promise<boolean> => {
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const operationId = generateOperationId(threadId);
@@ -191,7 +201,7 @@ const performThreadSwitch = async (
       maxAttempts: 3,
       baseDelayMs: 1000
     });
-    return handleLoadingResult(result, threadId, operationId, setState, storeActions, lastFailedThreadRef, timeoutManager);
+    return handleLoadingResult(result, threadId, operationId, setState, storeActions, lastFailedThreadRef, timeoutManager, opts, updateUrl);
   } catch (error) {
     return handleLoadingError(error, threadId, operationId, setState, lastFailedThreadRef, storeActions, timeoutManager);
   }
@@ -286,7 +296,9 @@ const handleLoadingResult = (
   setState: (state: ThreadSwitchingState) => void,
   storeActions: any,
   lastFailedThreadRef: React.MutableRefObject<string | null>,
-  timeoutManager?: any
+  timeoutManager?: any,
+  options?: Required<ThreadSwitchingOptions>,
+  updateUrl?: (threadId: string | null) => void
 ): boolean => {
   if (result.success) {
     // Clear timeout and cleanup on success
@@ -301,6 +313,11 @@ const handleLoadingResult = (
     
     const loadedEvent = createThreadLoadedEvent(threadId, result.messages);
     storeActions.handleWebSocketEvent(loadedEvent);
+    
+    // Update URL if enabled and not skipped
+    if (options?.updateUrl && !options?.skipUrlUpdate && updateUrl) {
+      updateUrl(threadId);
+    }
     
     setState(prev => ({
       ...prev,

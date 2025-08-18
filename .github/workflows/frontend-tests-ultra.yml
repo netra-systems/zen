@@ -108,7 +108,8 @@ jobs:
 
     - name: Run sharded tests
       working-directory: frontend
-      run: npm run test:shard -- --silent
+      run: |
+        npm run test:shard -- --silent || exit $?
       env:
         JEST_SHARD_INDEX: ${{ matrix.shard }}
         JEST_SHARD_TOTAL: 4
@@ -209,7 +210,8 @@ jobs:
 
     - name: Run ultra-fast tests
       working-directory: frontend
-      run: npm run test:ultra -- --bail
+      run: |
+        npm run test:ultra -- --bail || exit $?
       env:
         JEST_ULTRA_SILENT: true
 
@@ -237,7 +239,8 @@ jobs:
 
     - name: Run comprehensive tests with coverage
       working-directory: frontend
-      run: npm run test:optimize:coverage
+      run: |
+        npm run test:optimize:coverage || exit $?
 
     - name: Upload comprehensive coverage
       uses: actions/upload-artifact@v4
@@ -322,10 +325,29 @@ jobs:
         echo "Result aggregation: ${{ needs.aggregate-results.result }}"
         
         # Determine overall result
+        OVERALL_FAILURE=0
+        
+        # Check each job result
+        if [[ "${{ needs.quick-feedback.result }}" == "failure" ]]; then
+          echo "::error::Quick feedback tests failed"
+          OVERALL_FAILURE=1
+        fi
+        
         if [[ "${{ needs.smart-execution.result }}" == "failure" ]]; then
+          echo "::error::Smart execution tests failed"
+          OVERALL_FAILURE=1
+        fi
+        
+        if [[ "${{ needs.aggregate-results.result }}" == "failure" ]]; then
+          echo "::error::Result aggregation failed"
+          OVERALL_FAILURE=1
+        fi
+        
+        # Final status
+        if [ $OVERALL_FAILURE -eq 1 ]; then
           echo "❌ Tests failed"
           exit 1
-        elif [[ "${{ needs.smart-execution.result }}" == "success" ]]; then
+        elif [[ "${{ needs.smart-execution.result }}" == "success" ]] || [[ "${{ needs.quick-feedback.result }}" == "success" ]]; then
           echo "✅ All tests passed"
           exit 0
         else

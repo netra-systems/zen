@@ -61,23 +61,37 @@ jobs:
       
       - name: Run Basic Tests
         id: test
-        continue-on-error: true
         run: |
           echo "=== Running Tests ==="
+          TEST_FAILED=0
           
           # Try to run test_runner.py if it exists
           if [ -f "test_runner.py" ]; then
-            python3 test_runner.py --level smoke || echo "Test runner failed"
+            python3 test_runner.py --level smoke --no-coverage --fast-fail
+            TEST_FAILED=$?
+            if [ $TEST_FAILED -ne 0 ]; then
+              echo "::error::Smoke tests failed with exit code $TEST_FAILED"
+            else
+              echo "::notice::Smoke tests passed successfully"
+            fi
           else
             # Run basic import test
-            python3 -c "import sys; print(f'Python {sys.version}'); print('Basic test passed')"
+            python3 -c "import sys; print(f'Python {sys.version}'); print('Basic test passed')" || TEST_FAILED=$?
           fi
           
           echo "===================="
+          exit $TEST_FAILED
       
       - name: Summary
+        if: always()
         run: |
           echo "=== Test Summary ==="
           echo "Environment: ${ACT:-GitHub Actions}"
-          echo "Test Status: Complete"
+          if [ "${{ steps.test.outcome }}" = "success" ]; then
+            echo "Test Status: ✅ PASSED"
+          elif [ "${{ steps.test.outcome }}" = "failure" ]; then
+            echo "Test Status: ❌ FAILED"
+          else
+            echo "Test Status: ⚠️ ${{ steps.test.outcome }}"
+          fi
           echo "===================="

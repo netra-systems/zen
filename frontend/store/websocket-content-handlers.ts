@@ -3,6 +3,7 @@
 
 import { generateUniqueId } from '@/lib/utils';
 import { mapEventPayload } from '@/utils/event-payload-mapper';
+import { MessageFormatterService } from '@/services/messageFormatter';
 import type { 
   UnifiedWebSocketEvent,
   MediumLayerData,
@@ -24,17 +25,18 @@ export const extractPartialResultData = (payload: any) => {
 };
 
 /**
- * Creates partial result message for chat
+ * Creates partial result message for chat with formatting
  */
 export const createPartialResultMessage = (resultData: any, get: () => UnifiedChatState): void => {
-  const message: ChatMessage = {
+  const baseMessage: ChatMessage = {
     id: generateUniqueId('partial'),
     role: 'assistant',
     content: resultData.content,
     timestamp: Date.now(),
     metadata: { agentName: resultData.agentId }
   };
-  get().addMessage(message);
+  const enrichedMessage = MessageFormatterService.enrich(baseMessage);
+  get().addMessage(enrichedMessage);
 };
 
 /**
@@ -97,10 +99,10 @@ export const extractFinalReportData = (payload: any) => ({
 });
 
 /**
- * Creates final report message for chat
+ * Creates final report message for chat with formatting
  */
 export const createFinalReportMessage = (reportData: any, get: () => UnifiedChatState): void => {
-  const message: ChatMessage = {
+  const baseMessage: ChatMessage = {
     id: generateUniqueId('final-report'),
     role: 'assistant',
     content: reportData.executive_summary || 
@@ -108,7 +110,8 @@ export const createFinalReportMessage = (reportData: any, get: () => UnifiedChat
     timestamp: Date.now(),
     metadata: { runId: get().currentRunId || undefined }
   };
-  get().addMessage(message);
+  const enrichedMessage = MessageFormatterService.enrich(baseMessage);
+  get().addMessage(enrichedMessage);
 };
 
 /**

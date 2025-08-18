@@ -12,6 +12,7 @@ import { useUnifiedChatStore } from '@/store/unified-chat';
 import { useWebSocket } from '@/hooks/useWebSocket';
 import { useLoadingState } from '@/hooks/useLoadingState';
 import { useEventProcessor } from '@/hooks/useEventProcessor';
+import { useThreadNavigation } from '@/hooks/useThreadNavigation';
 
 // Helper Functions (8 lines max each)
 const executeTestRun = async (
@@ -84,6 +85,9 @@ const MainChat: React.FC = () => {
     handleWebSocketEvent
   } = useUnifiedChatStore();
   
+  // Thread navigation with URL sync
+  const { currentThreadId, isNavigating } = useThreadNavigation();
+  
   const { messages: wsMessages } = useWebSocket();
   const [isCardCollapsed, setIsCardCollapsed] = useState(false);
   const [isOverflowOpen, setIsOverflowOpen] = useState(false);
@@ -122,7 +126,7 @@ const MainChat: React.FC = () => {
   // The handleWebSocketEvent function in useUnifiedChatStore will process
   // 'thread_loaded' events and automatically update the messages
   const showResponseCard = currentRunId !== null || isProcessing;
-  const isThreadSwitching = isThreadLoading && !isProcessing;
+  const isThreadSwitching = (isThreadLoading || isNavigating) && !isProcessing;
 
   // Auto-collapse card after completion
   useEffect(() => {
@@ -226,9 +230,9 @@ const MainChat: React.FC = () => {
                 <div className="flex flex-col items-center gap-3 p-6 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
                   <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
                   <div className="text-sm text-gray-600">Loading conversation...</div>
-                  {activeThreadId && (
+                  {(activeThreadId || currentThreadId) && (
                     <div className="text-xs text-gray-400">
-                      Thread: {activeThreadId.slice(0, 8)}...
+                      Thread: {(activeThreadId || currentThreadId)!.slice(0, 8)}...
                     </div>
                   )}
                 </div>

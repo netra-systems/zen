@@ -8,6 +8,7 @@ import { handleWebSocketEvent } from './websocket-event-handlers';
 import { mergeMediumLayerContent, mergeSlowLayerAgents, createUpdatedFastLayerData } from './layer-merge-utils';
 import type { UnifiedChatState, UnifiedWebSocketEvent } from '@/types/store-types';
 import type { AgentExecution } from '@/types/store-types';
+import type { OptimisticMessage } from '@/services/optimistic-updates';
 
 // ============================================
 // Initial State Configuration
@@ -36,6 +37,11 @@ const createInitialState = () => ({
   // Agent tracking
   executedAgents: new Map<string, AgentExecution>(),
   agentIterations: new Map<string, number>(),
+  
+  // Optimistic updates
+  optimisticMessages: new Map<string, OptimisticMessage>(),
+  pendingUserMessage: null as OptimisticMessage | null,
+  pendingAiMessage: null as OptimisticMessage | null,
   
   // Debug and performance
   wsEventBuffer: new WebSocketEventBuffer(1000),
@@ -109,6 +115,12 @@ export const useUnifiedChatStore = create<UnifiedChatState>()(
       updateExecutedAgent: (agentId, execution) => updateExecutedAgentAction(agentId, execution, set),
       incrementAgentIteration: (agentId) => incrementAgentIterationAction(agentId, set, get),
       resetAgentTracking: () => resetAgentTrackingAction(set),
+      
+      // Optimistic update actions
+      addOptimisticMessage: (message) => addOptimisticMessageAction(message, set),
+      updateOptimisticMessage: (localId, updates) => updateOptimisticMessageAction(localId, updates, set),
+      removeOptimisticMessage: (localId) => removeOptimisticMessageAction(localId, set),
+      clearOptimisticMessages: () => clearOptimisticMessagesAction(set),
     }),
     { name: 'unified-chat-store' }
   )
@@ -285,5 +297,56 @@ const resetAgentTrackingAction = (set: (partial: Partial<UnifiedChatState>) => v
   set({
     executedAgents: new Map<string, AgentExecution>(),
     agentIterations: new Map<string, number>()
+  });
+};
+
+// ============================================
+// Optimistic Update Action Functions (8 lines max)
+// ============================================
+
+const addOptimisticMessageAction = (
+  message: OptimisticMessage,
+  set: (partial: Partial<UnifiedChatState>) => void
+): void => {
+  set((state) => ({
+    optimisticMessages: new Map(state.optimisticMessages).set(message.localId, message),
+    pendingUserMessage: message.role === 'user' ? message : state.pendingUserMessage,
+    pendingAiMessage: message.role === 'assistant' ? message : state.pendingAiMessage
+  }));
+};
+
+const updateOptimisticMessageAction = (
+  localId: string,
+  updates: Partial<OptimisticMessage>,
+  set: (partial: Partial<UnifiedChatState>) => void
+): void => {
+  set((state) => {
+    const optimisticMessages = new Map(state.optimisticMessages);
+    const existing = optimisticMessages.get(localId);
+    if (!existing) return state;
+    const updated = { ...existing, ...updates };
+    optimisticMessages.set(localId, updated);
+    return { optimisticMessages };
+  });
+};
+
+const removeOptimisticMessageAction = (
+  localId: string,
+  set: (partial: Partial<UnifiedChatState>) => void
+): void => {
+  set((state) => {
+    const optimisticMessages = new Map(state.optimisticMessages);
+    optimisticMessages.delete(localId);
+    const pendingUserMessage = state.pendingUserMessage?.localId === localId ? null : state.pendingUserMessage;
+    const pendingAiMessage = state.pendingAiMessage?.localId === localId ? null : state.pendingAiMessage;
+    return { optimisticMessages, pendingUserMessage, pendingAiMessage };
+  });
+};
+
+const clearOptimisticMessagesAction = (set: (partial: Partial<UnifiedChatState>) => void): void => {
+  set({
+    optimisticMessages: new Map(),
+    pendingUserMessage: null,
+    pendingAiMessage: null
   });
 };
