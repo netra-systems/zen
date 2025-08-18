@@ -37,6 +37,113 @@ export type RecoveryStrategy = (
 ) => Promise<RecoveryResult>;
 
 /**
+ * Recovers from network errors
+ */
+const recoverFromNetworkError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  if (options.autoRetry && error.retryable) {
+    await waitForRetryDelay(options.retryDelay);
+    return createRetryRecoveryResult();
+  }
+  return createManualRetryResult(options.retryDelay * 2);
+};
+
+/**
+ * Recovers from timeout errors
+ */
+const recoverFromTimeoutError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  await globalCleanupManager.cleanupThread(error.threadId);
+  if (options.autoRetry) {
+    const extendedDelay = Math.min(options.retryDelay * 3, 15000);
+    await waitForRetryDelay(extendedDelay);
+    return createRetryRecoveryResult(extendedDelay);
+  }
+  return createManualRetryResult(options.retryDelay * 3);
+};
+
+/**
+ * Recovers from abort errors
+ */
+const recoverFromAbortError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  await globalCleanupManager.cleanupThread(error.threadId);
+  return {
+    success: true,
+    action: 'Operation cancelled, cleanup completed',
+    shouldRetry: false,
+    fallbackUsed: false
+  };
+};
+
+/**
+ * Recovers from permission errors
+ */
+const recoverFromPermissionError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  return {
+    success: false,
+    action: 'Authentication required - please sign in again',
+    shouldRetry: false,
+    fallbackUsed: options.fallbackAction !== undefined
+  };
+};
+
+/**
+ * Recovers from validation errors
+ */
+const recoverFromValidationError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  return {
+    success: false,
+    action: 'Invalid request - please refresh and try again',
+    shouldRetry: false,
+    fallbackUsed: options.fallbackAction !== undefined
+  };
+};
+
+/**
+ * Recovers from server errors
+ */
+const recoverFromServerError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  if (options.autoRetry && error.retryable) {
+    const backoffDelay = calculateExponentialBackoff(options.retryDelay);
+    await waitForRetryDelay(backoffDelay);
+    return createRetryRecoveryResult(backoffDelay);
+  }
+  return createManualRetryResult(options.retryDelay * 4);
+};
+
+/**
+ * Recovers from unknown errors
+ */
+const recoverFromUnknownError = async (
+  error: ThreadError,
+  options: ThreadErrorRecoveryOptions
+): Promise<RecoveryResult> => {
+  await globalCleanupManager.cleanupThread(error.threadId);
+  return {
+    success: false,
+    action: 'Unknown error occurred - please refresh the page',
+    shouldRetry: false,
+    fallbackUsed: options.fallbackAction !== undefined
+  };
+};
+
+/**
  * Recovery strategy registry
  */
 const RECOVERY_STRATEGIES: Record<ThreadErrorCategory, RecoveryStrategy> = {
@@ -57,133 +164,11 @@ export const recoverFromThreadError = async (
   options: ThreadErrorRecoveryOptions
 ): Promise<RecoveryResult> => {
   const strategy = RECOVERY_STRATEGIES[error.category];
-  
   try {
     return await strategy(error, options);
   } catch (recoveryError) {
     return createFailedRecoveryResult(error, recoveryError);
   }
-};
-
-/**
- * Recovers from network errors
- */
-const recoverFromNetworkError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  // Check if auto-retry is enabled
-  if (options.autoRetry && error.retryable) {
-    await waitForRetryDelay(options.retryDelay);
-    return createRetryRecoveryResult();
-  }
-  
-  // Suggest manual retry with longer delay
-  return createManualRetryResult(options.retryDelay * 2);
-};
-
-/**
- * Recovers from timeout errors
- */
-const recoverFromTimeoutError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  // Clean up any hanging operations first
-  await globalCleanupManager.cleanupThread(error.threadId);
-  
-  if (options.autoRetry) {
-    const extendedDelay = Math.min(options.retryDelay * 3, 15000);
-    await waitForRetryDelay(extendedDelay);
-    return createRetryRecoveryResult(extendedDelay);
-  }
-  
-  return createManualRetryResult(options.retryDelay * 3);
-};
-
-/**
- * Recovers from abort errors
- */
-const recoverFromAbortError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  // Aborted operations don't need retry, just cleanup
-  await globalCleanupManager.cleanupThread(error.threadId);
-  
-  return {
-    success: true,
-    action: 'Operation cancelled, cleanup completed',
-    shouldRetry: false,
-    fallbackUsed: false
-  };
-};
-
-/**
- * Recovers from permission errors
- */
-const recoverFromPermissionError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  // Permission errors typically require user action
-  return {
-    success: false,
-    action: 'Authentication required - please sign in again',
-    shouldRetry: false,
-    fallbackUsed: options.fallbackAction !== undefined
-  };
-};
-
-/**
- * Recovers from validation errors
- */
-const recoverFromValidationError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  // Validation errors are usually not retryable
-  return {
-    success: false,
-    action: 'Invalid request - please refresh and try again',
-    shouldRetry: false,
-    fallbackUsed: options.fallbackAction !== undefined
-  };
-};
-
-/**
- * Recovers from server errors
- */
-const recoverFromServerError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  if (options.autoRetry && error.retryable) {
-    // Use exponential backoff for server errors
-    const backoffDelay = calculateExponentialBackoff(options.retryDelay);
-    await waitForRetryDelay(backoffDelay);
-    return createRetryRecoveryResult(backoffDelay);
-  }
-  
-  return createManualRetryResult(options.retryDelay * 4);
-};
-
-/**
- * Recovers from unknown errors
- */
-const recoverFromUnknownError = async (
-  error: ThreadError,
-  options: ThreadErrorRecoveryOptions
-): Promise<RecoveryResult> => {
-  // Conservative approach for unknown errors
-  await globalCleanupManager.cleanupThread(error.threadId);
-  
-  return {
-    success: false,
-    action: 'Unknown error occurred - please refresh the page',
-    shouldRetry: false,
-    fallbackUsed: options.fallbackAction !== undefined
-  };
 };
 
 /**

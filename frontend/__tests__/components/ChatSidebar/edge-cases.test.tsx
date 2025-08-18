@@ -10,10 +10,14 @@ import { renderWithProviders, safeAsync, resetAllMocks } from '../../shared/unif
 import { safeAct, waitForCondition, flushPromises } from '../../helpers/test-timing-utilities';
 import { 
   mockThreadService,
-  sampleThreads 
+  sampleThreads,
+  renderWithProvider,
+  createTestSetup
 } from './setup';
 
 describe('ChatSidebar - Edge Cases', () => {
+  const testSetup = createTestSetup();
+
   beforeEach(() => {
     resetAllMocks();
   });

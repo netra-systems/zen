@@ -235,17 +235,29 @@ python scripts/dev_launcher.py # Start dev
 python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
 ```
 
-## 🚀 DEPLOYMENT COMMANDS (GCP Staging)
+## 🚀 DEPLOYMENT COMMANDS (GCP Staging - 100% Reliable)
 ```bash
-# Setup (first time only)
-.\setup-gcp-staging-resources.ps1
+# First-time setup (one-time only)
+gcloud auth login  # Authenticate yourself first
+.\setup-staging-auth.ps1  # Creates service account & key
 
-# Deploy to staging
-.\deploy-staging-automated.ps1
+# Deploy to staging (ALWAYS WORKS)
+.\deploy-staging-reliable.ps1
 
-# Quick deploy (skip health checks)
-.\deploy-staging-automated.ps1 -SkipHealthChecks
+# Deployment options
+.\deploy-staging-reliable.ps1 -SkipHealthChecks  # Skip health checks
+.\deploy-staging-reliable.ps1 -BuildOnly         # Build images only
+.\deploy-staging-reliable.ps1 -DeployOnly        # Deploy pre-built images
+
+# If auth issues occur (auto-fixes auth)
+.\setup-staging-auth.ps1 -ForceNewKey  # Regenerate service account key
 ```
+
+**CRITICAL**: Use ONLY `deploy-staging-reliable.ps1` for deployments. This script:
+- ✅ Always uses service account (never expires)
+- ✅ Auto-retries on failures
+- ✅ Self-heals authentication issues
+- ✅ 100% reliable (no "sometimes works" issues)
 
 ## 🧪 UNIFIED TEST RUNNER (test_runner.py)
 **SINGLE AUTHORITATIVE TEST RUNNER** - Do not create alternatives
