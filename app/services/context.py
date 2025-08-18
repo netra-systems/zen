@@ -26,4 +26,6 @@ class ToolContext:
         self.state = state
 
     def __post_init__(self):
-        self.state = DeepAgentState()
+        # Only create a new state if one wasn't provided
+        if not hasattr(self, 'state') or self.state is None:
+            self.state = DeepAgentState(user_request="tool_context_operation")

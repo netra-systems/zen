@@ -93,8 +93,11 @@ class DatabaseConfigManager:
     def _get_postgres_url(self) -> Optional[str]:
         """Get PostgreSQL URL from environment or defaults."""
         url = os.environ.get("DATABASE_URL")
-        if not url:
+        if url:
+            self._logger.info(f"Loading DATABASE_URL from environment: {url[:30]}...")
+        else:
             url = self._get_default_postgres_url()
+            self._logger.info(f"Using default database URL for {self._environment}")
         return url
     
     def _get_default_postgres_url(self) -> str:

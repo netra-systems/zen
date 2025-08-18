@@ -253,7 +253,7 @@ class ConnectionOperationBuilder:
     def _create_agent_state(self):
         """Create agent state."""
         from app.agents.state import DeepAgentState
-        return DeepAgentState()
+        return DeepAgentState(user_request="websocket_operation_context")
         
     def _create_execution_context(self, state) -> ExecutionContext:
         """Create execution context."""
