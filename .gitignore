@@ -111,3 +111,4 @@ terraform-gcp/staging.tfplan
 terraform-gcp/staging.tfplan
 ...AAA launch CLAUDE WINDOWS.BAT
 .service_discovery/auth.json
+.service_discovery/auth.json

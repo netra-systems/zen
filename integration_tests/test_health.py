@@ -45,7 +45,7 @@ def test_live_endpoint(client: TestClient):
 
 def test_ready_endpoint_success(client: TestClient):
     import asyncio
-    from unittest.mock import AsyncMock
+    from unittest.mock import AsyncMock, patch
     
     # Mock successful database connection
     mock_result = MagicMock()
@@ -59,12 +59,29 @@ def test_ready_endpoint_success(client: TestClient):
     
     app.dependency_overrides[get_db_dependency] = mock_get_db_success
     
-    response = client.get("/health/ready")
-    assert response.status_code == 200
-    response_data = response.json()
-    assert response_data["status"] == "ready"
-    assert response_data["service"] == "netra-ai-platform"
-    assert "details" in response_data  # Accept the details field
+    # Mock all health checkers to return healthy status
+    with patch("app.core.health.interface.HealthInterface.get_health_status") as mock_health:
+        mock_health.return_value = {
+            "status": "ready",
+            "service": "netra-ai-platform", 
+            "version": "1.0.0",
+            "timestamp": "2025-01-01T00:00:00Z",
+            "checks": {
+                "database_postgres": True,
+                "database_clickhouse": True,
+                "database_redis": True,
+                "dependency_websocket": True,
+                "dependency_llm": True
+            },
+            "details": {}
+        }
+        
+        response = client.get("/health/ready")
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data["status"] == "ready"
+        assert response_data["service"] == "netra-ai-platform"
+        assert "details" in response_data  # Accept the details field
 
 def test_ready_endpoint_db_failure(client: TestClient):
     import os

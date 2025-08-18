@@ -97,11 +97,7 @@ Always edit the existing file or create a new file and delete the old if it's no
 **ENFORCEMENT**: These naming conventions are MANDATORY for all new development and must be followed during refactoring.
 
 ## AI Factory Productivity
-- The system is built by Agents (LLM based) based on XML specs.
-- WHENEVER REASONABLE: Use "Tasks" system to spawn new agents as needed.
-- NEWLY SPAWNED AGENTS MUST SCOPE WORK TO RETURN SINGLE UNIT OF WORK BACK TO YOU (MASTER)
-- Assume that other agents are working along side and aim to do one atomic unit of work at a time
-- Think about managing context and AI Factory Productivity
+→ See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for detailed patterns and complex coding process
 
 
 ## Project Overview
@@ -119,115 +115,7 @@ prioritizing the conversion of free users to paid tiers.
 - Common pitfalls and solutions
 
 ## Project Directory Structure
-
-```
-root/
-├── agent_to_agent/           # Agent communication reports
-├── agent_to_agent_status_updates/ # Status update reports
-├── app/                      # Main backend application
-│   ├── agents/              # AI agent implementations (consolidated modules)
-│   ├── agent_to_agent/      # Agent-to-agent communication reports
-│   ├── auth/                # Authentication & authorization
-│   ├── auth_integration/    # SHARED AUTH SERVICE (MANDATORY USE)
-│   ├── core/                # Core utilities & exceptions
-│   │   ├── exceptions_*.py         # Categorized exception handlers
-│   │   ├── interfaces_*.py         # Interface definitions
-│   │   └── system_health_monitor.py # System monitoring
-│   ├── db/                  # Database layer
-│   │   ├── clickhouse.py           # ClickHouse connection
-│   │   ├── postgres.py             # PostgreSQL connection
-│   │   └── models_*.py             # Database models
-│   ├── llm/                 # LLM integration layer
-│   ├── middleware/          # FastAPI middleware
-│   ├── routes/              # API route definitions
-│   │   ├── admin.py               # Admin endpoints
-│   │   ├── corpus.py              # Corpus management
-│   │   ├── synthetic_data.py      # Synthetic data endpoints
-│   │   └── websockets.py          # WebSocket endpoints
-│   ├── schemas/             # Pydantic models & types
-│   │   ├── llm_*.py               # LLM-related types
-│   │   ├── admin_*.py             # Admin schemas
-│   │   └── websocket_*.py         # WebSocket message types
-│   ├── services/            # Business logic services
-│   │   ├── audit/                 # Audit service modules
-│   │   └── metrics/               # Metrics collection
-│   ├── startup_checks/      # Startup validation modules
-│   ├── tests/               # Backend test suite
-│   │   ├── auth_integration/      # Auth integration tests
-│   │   ├── config/                # Test configuration
-│   │   ├── critical/              # Critical path tests
-│   │   ├── e2e/                   # End-to-end tests
-│   │   ├── integration/           # Integration tests
-│   │   └── unit/                  # Unit tests
-│   ├── websocket/           # WebSocket management
-│   │   ├── connection.py          # Connection handling
-│   │   ├── rate_limiter.py        # Rate limiting
-│   │   └── validation.py          # Message validation
-│   ├── main.py              # FastAPI app entry point
-│   └── config.py            # Application configuration
-│
-├── frontend/                 # Next.js frontend application
-│   ├── app/                 # Next.js app directory
-│   ├── components/          # React components
-│   │   └── chat/           # Chat UI components
-│   │       └── admin/      # Admin UI components
-│   ├── hooks/               # Custom React hooks
-│   ├── services/            # Frontend services
-│   ├── store/               # State management
-│   ├── types/               # TypeScript type definitions
-│   └── utils/               # Frontend utilities
-│
-├── scripts/                  # Utility & automation scripts
-│   ├── architecture_*.py    # Architecture compliance tools
-│   ├── test_runner.py       # Test execution script
-│   ├── dev_launcher.py      # Development server launcher
-│   └── check_architecture_compliance.py # Compliance checker
-│
-├── dev_launcher/            # Development launcher module
-│   ├── launcher.py          # Main launcher logic
-│   ├── process_manager.py   # Process management
-│   └── secret_manager.py    # Secret handling
-│
-├── test_framework/          # Test framework utilities
-│   ├── runner.py            # Test runner core
-│   ├── test_discovery.py    # Test discovery logic
-│   └── comprehensive_reporter.py  # Test reporting (single source of truth)
-│
-├── SPEC/                    # Specification documents
-│   ├── learnings/           # Modular learnings by category
-│   │   ├── index.xml              # Master index of learnings
-│   │   ├── testing.xml            # Testing-related learnings
-│   │   ├── startup.xml            # Startup and initialization
-│   │   ├── critical_tests_implementation.xml # Critical test insights
-│   │   └── *.xml                  # Category-specific learnings
-│   ├── type_safety.xml      # Type safety rules
-│   ├── conventions.xml      # Coding conventions
-│   └── *.xml                # Other spec files
-│
-├── docs/                    # Documentation
-│   ├── API_DOCUMENTATION.md
-│   ├── ARCHITECTURE.md
-│   ├── TESTING_GUIDE.md
-│   └── USER_GUIDE.md        # User guide documentation
-│
-├── terraform-gcp/           # GCP infrastructure as code
-├── terraform-dev-postgres/  # PostgreSQL dev setup
-├── .github/                 # GitHub Actions workflows
-├── config/                  # Configuration files
-├── alembic/                 # Database migrations
-└── requirements.txt         # Python dependencies
-```
-
-### Key Directory Purposes
-
-- **app/**: Core backend application with FastAPI
-- **frontend/**: Next.js-based web interface
-- **agents/**: Multi-agent AI system implementations
-- **services/**: Business logic and external integrations
-- **schemas/**: Type definitions and data models
-- **scripts/**: Development and maintenance utilities
-- **SPEC/**: Living documentation and specifications
-- **test_framework/**: Custom testing infrastructure
+→ See [`SPEC/directory_structure.xml`](SPEC/directory_structure.xml) for complete project structure
 
 ## Quick Start
 ```bash
@@ -235,44 +123,18 @@ python scripts/dev_launcher.py # Start dev
 python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
 ```
 
-## 🚀 DEPLOYMENT COMMANDS (GCP Staging)
-```bash
-# First-time setup (one-time only)
-gcloud auth login  # Authenticate yourself first
-.\setup-staging-auth.ps1  # Creates service account & key
+## 🚀 DEPLOYMENT (GCP Staging)
+→ See [`SPEC/learnings/deployment_staging.xml`](SPEC/learnings/deployment_staging.xml) for detailed deployment guide
 
-# Deploy to staging
-.\deploy-staging-reliable.ps1
+**Quick Deploy**: `.\deploy-staging-reliable.ps1`  
+**Auth Issues**: `.\setup-staging-auth.ps1 -ForceNewKey`
 
-# Deployment options
-.\deploy-staging-reliable.ps1 -SkipHealthChecks  # Skip health checks
-.\deploy-staging-reliable.ps1 -BuildOnly         # Build images only
-.\deploy-staging-reliable.ps1 -DeployOnly        # Deploy pre-built images
+## 🧪 UNIFIED TEST RUNNER
+→ See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml) for complete test runner documentation
 
-# If auth issues occur
-.\setup-staging-auth.ps1 -ForceNewKey  # Regenerate service account key
-```
-
-**CRITICAL**: Use ONLY `deploy-staging-reliable.ps1` for deployments. This script:
-- ✅ Uses service account (never expires)
-- ✅ Auto-retries on failures
-- ✅ Self-heals authentication issues
-
-## 🧪 UNIFIED TEST RUNNER (test_runner.py)
-**SINGLE AUTHORITATIVE TEST RUNNER** - Do not create alternatives
-
-### Test Levels (Priority Order)
-| Level | Time | Purpose | Command | When to Use |
-|-------|------|---------|---------|-------------|
-| **integration** | 3-5min | **DEFAULT** - Feature validation | `python test_runner.py --level integration --no-coverage --fast-fail` | After any feature change |
-| **unit** | 1-2min | Component testing | `python test_runner.py --level unit` | During development |
-| **smoke** | <30s | Pre-commit validation | `python test_runner.py --level smoke` | Before every commit |
-| **agents** | 2-3min | Agent testing | `python test_runner.py --level agents` | After agent changes |
-| **critical** | 1-2min | Essential paths | `python test_runner.py --level critical` | Quick validation |
-| **real_e2e** | 15-20min | **CRITICAL** - Real LLM testing | `python test_runner.py --level real_e2e --real-llm` | Before major releases |
-| **comprehensive** | 30-45min | Full validation | `python test_runner.py --level comprehensive` | Before production deploy |
-
-- MODULAR ALWAYS. THINK DEEPLY. YOU ARE THE TOP TEAM IN THE WORLD. ACT LIKE IT.
+**DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail`  
+**AGENT CHANGES**: `python test_runner.py --level agents --real-llm`  
+**BEFORE RELEASES**: `python test_runner.py --level integration --real-llm`
 
 ### Comprehensive Test Categories (10-15min each)
 | Category | Purpose | Command |
