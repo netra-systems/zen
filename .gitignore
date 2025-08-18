@@ -37,6 +37,13 @@ out/
 .env.development.local
 .env.test.local
 .env.production.local
+.env.staging.local
+
+# GCP Service Account Keys - NEVER COMMIT
+*-sa-key.json
+gcp-*.json
+*service-account*.json
+*credentials*.json
 
 # IDE
 .vscode/
