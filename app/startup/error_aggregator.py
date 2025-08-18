@@ -214,12 +214,15 @@ class ErrorAggregator:
     async def _update_pattern_frequency(self, pattern: ErrorPattern) -> None:
         """Update or insert pattern frequency."""
         async with aiosqlite.connect(self.db_path) as db:
-            await db.execute("""
-                INSERT OR REPLACE INTO error_patterns 
-                (pattern, frequency, last_seen, suggested_fix) 
-                VALUES (?, ?, ?, ?)
-            """, (pattern.pattern, pattern.frequency, pattern.last_seen, pattern.suggested_fix))
+            sql, params = self._build_pattern_update_query(pattern)
+            await db.execute(sql, params)
             await db.commit()
+
+    def _build_pattern_update_query(self, pattern: ErrorPattern) -> tuple[str, tuple]:
+        """Build pattern update query and parameters."""
+        sql = "INSERT OR REPLACE INTO error_patterns (pattern, frequency, last_seen, suggested_fix) VALUES (?, ?, ?, ?)"
+        params = (pattern.pattern, pattern.frequency, pattern.last_seen, pattern.suggested_fix)
+        return sql, params
 
     def _analyze_error_trends(self, errors: List[StartupError], period: str) -> ErrorTrend:
         """Analyze error trends and create summary."""

@@ -65,11 +65,10 @@ class StatePersistenceService:
         """Execute save operation with comprehensive error handling."""
         try:
             snapshot_id = await self._execute_state_save_transaction(request, db_session)
-            logger.info(f"Saved state snapshot {snapshot_id} for run {request.run_id}")
+            self._log_save_success(snapshot_id, request.run_id)
             return True, snapshot_id
         except Exception as e:
-            logger.error(f"Failed to save state for run {request.run_id}: {e}")
-            return False, None
+            return self._handle_save_error(request, e)
 
     async def _execute_state_save_transaction(self, request: StatePersistenceRequest, db_session: AsyncSession) -> str:
         """Execute the complete state save transaction."""
@@ -108,8 +107,7 @@ class StatePersistenceService:
                 return state
             return await self._attempt_database_load(run_id, snapshot_id, db_session)
         except Exception as e:
-            logger.error(f"Failed to load state for run {run_id}: {e}")
-            return None
+            return self._handle_load_error(run_id, e)
 
     async def _attempt_cache_load(self, run_id: str, snapshot_id: Optional[str]) -> Optional[DeepAgentState]:
         """Try loading state from Redis cache first."""
@@ -157,8 +155,8 @@ class StatePersistenceService:
         """Execute recovery operation with comprehensive error handling."""
         try:
             success = await self._execute_recovery_operation(request, recovery_id, db_session)
-            logger.info(f"Recovery {recovery_id} {'completed' if success else 'failed'}")
-            return success, recovery_id if success else None
+            self._log_recovery_result(recovery_id, success)
+            return self._format_recovery_result(success, recovery_id)
         except Exception as e:
             return await self._handle_recovery_error(request, recovery_id, db_session, e)
 
@@ -362,10 +360,18 @@ class StatePersistenceService:
             'is_recovery_point': kwargs.get('is_recovery_point', False), 'expires_at': kwargs.get('expires_at')
         }
     
+    def _log_save_success(self, snapshot_id: str, run_id: str) -> None:
+        """Log successful save operation."""
+        logger.info(f"Saved state snapshot {snapshot_id} for run {run_id}")
+    
     def _handle_save_error(self, request: StatePersistenceRequest, error: Exception) -> Tuple[bool, None]:
         """Handle save operation error."""
         logger.error(f"Failed to save state for run {request.run_id}: {error}")
         return False, None
+    
+    def _format_recovery_result(self, success: bool, recovery_id: str) -> Tuple[bool, Optional[str]]:
+        """Format recovery operation result."""
+        return success, recovery_id if success else None
     
     def _handle_load_error(self, run_id: str, error: Exception) -> None:
         """Handle load operation error."""

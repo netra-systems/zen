@@ -68,6 +68,14 @@ Always edit the existing file or create a new file and delete the old if it's no
 - Each module must have clear interface and single purpose
 - It's okay to have many modules.
 
+## AI Factory Productivity
+- The system is built by Agents (LLM based) based on XML specs.
+- WHENEVER REASONABLE: Use "Tasks" system to spawn new agents as needed.
+- NEWLY SPAWNED AGENTS MUST SCOPE WORK TO RETURN SINGLE UNIT OF WORK BACK TO YOU (MASTER)
+- Assume that other agents are working along side and aim to do one atomic unit of work at a time
+- Think about managing context and AI Factory Productivity
+
+
 ## Project Overview
 **Netra Apex AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
 

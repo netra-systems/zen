@@ -67,13 +67,18 @@ class StartupStatusManager:
                                 errors: List[str] = None, warnings: List[str] = None) -> None:
         """Record a startup event."""
         await self._ensure_status_loaded()
-        startup_data = LastStartup(
+        startup_data = self._create_startup_data(success, duration_ms, environment, errors, warnings)
+        self.status.last_startup = startup_data
+        await self.save_status()
+
+    def _create_startup_data(self, success: bool, duration_ms: int, environment: Environment,
+                            errors: Optional[List[str]], warnings: Optional[List[str]]) -> LastStartup:
+        """Create LastStartup data object."""
+        return LastStartup(
             timestamp=datetime.now(timezone.utc), success=success,
             duration_ms=duration_ms, environment=environment,
             errors=errors or [], warnings=warnings or []
         )
-        self.status.last_startup = startup_data
-        await self.save_status()
 
     async def record_crash(self, service: ServiceType, error: str,
                           stack_trace: Optional[str] = None,
@@ -81,13 +86,18 @@ class StartupStatusManager:
                           recovery_success: bool = False) -> None:
         """Record a service crash."""
         await self._ensure_status_loaded()
-        crash = CrashEntry(
+        crash = self._create_crash_entry(service, error, stack_trace, recovery_attempted, recovery_success)
+        self.status.crash_history.append(crash)
+        await self.save_status()
+
+    def _create_crash_entry(self, service: ServiceType, error: str, stack_trace: Optional[str],
+                           recovery_attempted: bool, recovery_success: bool) -> CrashEntry:
+        """Create CrashEntry object."""
+        return CrashEntry(
             service=service, timestamp=datetime.now(timezone.utc),
             error=error, stack_trace=stack_trace,
             recovery_attempted=recovery_attempted, recovery_success=recovery_success
         )
-        self.status.crash_history.append(crash)
-        await self.save_status()
 
     async def update_migration_status(self, current_version: Optional[str] = None,
                                     pending: List[str] = None,
@@ -187,30 +197,43 @@ class StartupStatusManager:
     @asynccontextmanager
     async def _file_lock(self):
         """Cross-platform file locking context manager."""
-        max_attempts = 30
-        for attempt in range(max_attempts):
-            try:
-                self._lock_file_path.touch(exist_ok=False)
-                break
-            except FileExistsError:
-                await asyncio.sleep(0.1)
-        else:
-            raise NetraException("Could not acquire file lock")
+        await self._acquire_file_lock()
         try:
             yield
         finally:
             self._lock_file_path.unlink(missing_ok=True)
+
+    async def _acquire_file_lock(self) -> None:
+        """Acquire file lock with retry."""
+        max_attempts = 30
+        for attempt in range(max_attempts):
+            if self._try_acquire_lock():
+                return
+            await asyncio.sleep(0.1)
+        raise NetraException("Could not acquire file lock")
+
+    def _try_acquire_lock(self) -> bool:
+        """Try to acquire file lock."""
+        try:
+            self._lock_file_path.touch(exist_ok=False)
+            return True
+        except FileExistsError:
+            return False
 
     async def _atomic_write(self, data: Dict[str, Any]) -> None:
         """Write data atomically with file locking."""
         async with self._file_lock():
             temp_path = Path(f"{self.status_path}.tmp")
             try:
-                temp_path.write_text(json.dumps(data, indent=2, default=str))
+                self._write_temp_file(temp_path, data)
                 temp_path.replace(self.status_path)
             except Exception as e:
                 temp_path.unlink(missing_ok=True)
                 raise FileError(f"Failed to write status file: {e}")
+
+    def _write_temp_file(self, temp_path: Path, data: Dict[str, Any]) -> None:
+        """Write data to temporary file."""
+        temp_path.write_text(json.dumps(data, indent=2, default=str))
 
 
 # Singleton instance for application use

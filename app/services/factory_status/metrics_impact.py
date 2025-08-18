@@ -336,13 +336,24 @@ class ImpactCalculator:
     
     def _build_module_coverage_object(self, coverage_data: Dict[str, Any], metrics: Dict[str, Any]) -> ModuleCoverage:
         """Build ModuleCoverage object from data and metrics."""
-        return ModuleCoverage(
-            total_modules=len(coverage_data["all_modules"]),
-            affected_modules=len(coverage_data["affected_modules"]),
-            coverage_percentage=metrics["coverage_percentage"],
-            critical_modules_affected=metrics["critical_affected"],
-            new_modules_introduced=metrics["new_modules"], deprecated_modules=0
-        )
+        module_counts = self._extract_module_counts(coverage_data)
+        metric_values = self._extract_metric_values(metrics)
+        return ModuleCoverage(**module_counts, **metric_values, deprecated_modules=0)
+    
+    def _extract_module_counts(self, coverage_data: Dict[str, Any]) -> Dict[str, int]:
+        """Extract module counts from coverage data."""
+        return {
+            "total_modules": len(coverage_data["all_modules"]),
+            "affected_modules": len(coverage_data["affected_modules"])
+        }
+    
+    def _extract_metric_values(self, metrics: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract metric values."""
+        return {
+            "coverage_percentage": metrics["coverage_percentage"],
+            "critical_modules_affected": metrics["critical_affected"],
+            "new_modules_introduced": metrics["new_modules"]
+        }
     
     def _gather_coverage_data(self, hours: int) -> Dict[str, Any]:
         """Gather data for coverage analysis."""

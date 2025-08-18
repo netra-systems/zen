@@ -299,6 +299,10 @@ class BaseMCPAgent(BaseExecutionInterface):
     async def _process_mcp_results(self, context: ExecutionContext,
                                   results: Dict[str, Any]) -> Dict[str, Any]:
         """Process and format MCP execution results."""
+        return self._build_mcp_result_response(context, results)
+
+    def _build_mcp_result_response(self, context: ExecutionContext, results: Dict[str, Any]) -> Dict[str, Any]:
+        """Build formatted MCP result response."""
         return {
             "mcp_execution": True,
             "agent_name": context.agent_name,

@@ -115,13 +115,20 @@ class SystemPerformanceMonitor:
     
     def _log_alert_details(self, alert_name: str, severity: str, metric_summary: Dict, alert_data: Dict) -> None:
         """Log detailed alert information."""
-        log_func = logger.critical if severity == "critical" else logger.warning
-        log_func(
-            f"Performance Alert [{severity.upper()}]: {alert_name} "
-            f"- Current: {metric_summary.get('current', 'N/A')}, "
-            f"Avg: {metric_summary.get('avg', 'N/A')}, "
-            f"Threshold: {alert_data['rule']['threshold']}"
-        )
+        log_func = self._get_log_function(severity)
+        message = self._format_alert_message(alert_name, severity, metric_summary, alert_data)
+        log_func(message)
+
+    def _get_log_function(self, severity: str):
+        """Get appropriate log function based on severity."""
+        return logger.critical if severity == "critical" else logger.warning
+
+    def _format_alert_message(self, alert_name: str, severity: str, metric_summary: Dict, alert_data: Dict) -> str:
+        """Format alert message with details."""
+        return (f"Performance Alert [{severity.upper()}]: {alert_name} "
+                f"- Current: {metric_summary.get('current', 'N/A')}, "
+                f"Avg: {metric_summary.get('avg', 'N/A')}, "
+                f"Threshold: {alert_data['rule']['threshold']}")
     
     def get_performance_dashboard(self) -> Dict[str, Any]:
         """Get comprehensive performance dashboard data."""

@@ -180,6 +180,10 @@ class AsyncTransactionBatch:
         """Process operations in batches with transaction management"""
         batches = self._create_batches(operations)
         results = {"successful": 0, "failed": 0, "batches": len(batches)}
+        return await self._process_all_batches(batches, results)
+
+    async def _process_all_batches(self, batches: list, results: dict) -> dict:
+        """Process all batches and update results"""
         for batch_idx, batch in enumerate(batches):
             batch_result = await self._process_single_batch(batch, batch_idx)
             results["successful"] += batch_result["successful"]
@@ -197,11 +201,15 @@ class AsyncTransactionBatch:
         """Process single batch of operations"""
         session_id = f"batch_{batch_idx}"
         try:
-            async with self.manager.transaction_scope(session_id):
-                await self._execute_batch_operations(batch)
-                return {"successful": len(batch), "failed": 0}
+            return await self._execute_batch_in_transaction(batch, session_id)
         except Exception:
             return {"successful": 0, "failed": len(batch)}
+
+    async def _execute_batch_in_transaction(self, batch: list, session_id: str) -> Dict[str, int]:
+        """Execute batch within transaction scope"""
+        async with self.manager.transaction_scope(session_id):
+            await self._execute_batch_operations(batch)
+            return {"successful": len(batch), "failed": 0}
 
     async def _execute_batch_operations(self, batch: list) -> None:
         """Execute all operations in current batch"""

@@ -112,6 +112,15 @@ class ApiErrorHandler:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Handle custom Netra exceptions."""
+        return self._process_netra_exception(exc, trace_id, request_id)
+    
+    def _process_netra_exception(
+        self, 
+        exc: NetraException, 
+        trace_id: str, 
+        request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Process Netra exception with logging and response creation."""
         self._update_exception_trace_id(exc, trace_id)
         self._log_error(exc, exc.error_details.severity)
         return self._create_netra_error_response(exc, trace_id, request_id)
@@ -134,6 +143,18 @@ class ApiErrorHandler:
         self, exc: NetraException, error_code_value: str, trace_id: str, request_id: Optional[str]
     ) -> ErrorResponse:
         """Build ErrorResponse from Netra exception details."""
+        return self._construct_netra_error_response(
+            exc, error_code_value, trace_id, request_id
+        )
+    
+    def _construct_netra_error_response(
+        self, 
+        exc: NetraException, 
+        error_code_value: str, 
+        trace_id: str, 
+        request_id: Optional[str]
+    ) -> ErrorResponse:
+        """Construct ErrorResponse with Netra exception data."""
         return ErrorResponse(
             error_code=error_code_value,
             message=exc.error_details.message,

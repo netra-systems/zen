@@ -220,12 +220,16 @@ class MigrationTracker:
     async def _perform_rollback_execution(self, steps: int) -> bool:
         """Perform the actual rollback execution."""
         self.logger.info(f"Rolling back {steps} migration(s)")
-        loop = asyncio.get_event_loop()
         target = f"-{steps}"
-        await loop.run_in_executor(None, self._run_alembic_downgrade, target)
+        await self._execute_rollback(target)
         await self._update_rollback_state()
         self.logger.info("Rollback completed successfully")
         return True
+
+    async def _execute_rollback(self, target: str) -> None:
+        """Execute rollback with target."""
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, self._run_alembic_downgrade, target)
         
     async def _update_rollback_state(self) -> None:
         """Update state after successful rollback."""
@@ -247,21 +251,29 @@ class MigrationTracker:
         """Validate database schema integrity."""
         try:
             state = await self.check_migrations()
-            if state.pending_migrations:
-                self.logger.warning("Schema validation: pending migrations found")
-                return False
-            if state.failed_migrations:
-                self.logger.warning("Schema validation: failed migrations found")
-                return False
-            self.logger.info("Schema validation: passed")
-            return True
+            return self._validate_migration_state(state)
         except Exception as e:
             self.logger.error(f"Schema validation failed: {e}")
             return False
 
+    def _validate_migration_state(self, state: MigrationState) -> bool:
+        """Validate migration state for schema integrity."""
+        if state.pending_migrations:
+            self.logger.warning("Schema validation: pending migrations found")
+            return False
+        if state.failed_migrations:
+            self.logger.warning("Schema validation: failed migrations found")
+            return False
+        self.logger.info("Schema validation: passed")
+        return True
+
     async def get_migration_status(self) -> Dict[str, any]:
         """Get comprehensive migration status."""
         state = await self.check_migrations()
+        return self._build_status_dict(state)
+
+    def _build_status_dict(self, state: MigrationState) -> Dict[str, any]:
+        """Build migration status dictionary."""
         return {
             "current_version": state.current_version,
             "pending_count": len(state.pending_migrations),
