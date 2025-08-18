@@ -83,7 +83,9 @@ describe('MessageInput - Thread Management', () => {
       isProcessing: false,
       addMessage: mockChatStore.addMessage,
       activeThreadId: 'thread-1',
-      setActiveThread: mockChatActions.setActiveThread
+      setActiveThread: mockChatActions.setActiveThread,
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({
@@ -106,7 +108,9 @@ describe('MessageInput - Thread Management', () => {
         isProcessing: false,
         addMessage: mockChatStore.addMessage,
         activeThreadId: null,
-        setActiveThread: mockChatActions.setActiveThread
+        setActiveThread: mockChatActions.setActiveThread,
+        addOptimisticMessage: jest.fn(),
+        updateOptimisticMessage: jest.fn(),
       });
       
       (useThreadStore as jest.Mock).mockReturnValue({
@@ -161,7 +165,9 @@ describe('MessageInput - Thread Management', () => {
         isProcessing: false,
         addMessage: mockChatStore.addMessage,
         activeThreadId: null,
-        setActiveThread: mockChatActions.setActiveThread
+        setActiveThread: mockChatActions.setActiveThread,
+        addOptimisticMessage: jest.fn(),
+        updateOptimisticMessage: jest.fn(),
       });
       
       (useThreadStore as jest.Mock).mockReturnValue({
@@ -194,7 +200,9 @@ describe('MessageInput - Thread Management', () => {
         isProcessing: false,
         addMessage: mockChatStore.addMessage,
         activeThreadId: null,
-        setActiveThread: mockChatActions.setActiveThread
+        setActiveThread: mockChatActions.setActiveThread,
+        addOptimisticMessage: jest.fn(),
+        updateOptimisticMessage: jest.fn(),
       });
       
       (useThreadStore as jest.Mock).mockReturnValue({

@@ -77,6 +77,49 @@
       </solution>
     </lesson>
     
+    <lesson id="cloud-run-uvicorn-workers">
+      <problem>Cloud Run backend startup failing with uvicorn workers parameter error</problem>
+      <root_cause>
+        The cloud_run_startup.py script was passing 'workers' parameter to uvicorn.run(),
+        but uvicorn.run() doesn't accept this parameter when called programmatically.
+        The workers parameter is only available via command line.
+      </root_cause>
+      <error_trace>
+        Traceback shows failure at uvicorn.run(**config) with workers in config dict
+      </error_trace>
+      <solution>
+        Two fixes implemented:
+        1. Fixed cloud_run_startup.py - removed 'workers' from uvicorn config dict
+        2. Updated Dockerfile.backend - switched from cloud_run_startup.py to gunicorn with uvicorn workers
+      </solution>
+      <affected_files>
+        - app/cloud_run_startup.py
+        - Dockerfile.backend
+      </affected_files>
+      <key_changes>
+        # cloud_run_startup.py - removed workers parameter
+        return {
+            "app": "app.main:app", "host": "0.0.0.0", "port": get_port(),
+            "loop": "asyncio", "log_level": "info",
+            "access_log": True, "use_colors": False, "timeout_keep_alive": get_timeout()
+        }
+        
+        # Dockerfile.backend - switched to gunicorn
+        CMD exec gunicorn app.main:app \
+            --bind 0.0.0.0:$PORT \
+            --workers $WORKERS \
+            --worker-class uvicorn.workers.UvicornWorker \
+            --timeout $TIMEOUT \
+            --access-logfile - \
+            --error-logfile - \
+            --log-level info
+      </key_changes>
+      <prevention>
+        Always use gunicorn with uvicorn workers for production Cloud Run deployments.
+        Gunicorn provides better worker management and Cloud Run compatibility.
+      </prevention>
+    </lesson>
+    
     <lesson id="frontend-api-url-configuration">
       <problem>Frontend was calling localhost instead of staging API URL</problem>
       <solution>

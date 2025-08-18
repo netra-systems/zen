@@ -31,14 +31,15 @@ from app.db.models_postgres import User
 from app.db.session import get_db_session
 from app.dependencies import get_db_dependency as get_db
 from sqlalchemy.ext.asyncio import AsyncSession
-import logging
 import jwt
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 from datetime import datetime, timedelta
 import os
 
-logger = logging.getLogger(__name__)
+# Create auth-specific logger
+import logging
+logger = logging.getLogger('auth_integration.auth')
 
 security = HTTPBearer()
 

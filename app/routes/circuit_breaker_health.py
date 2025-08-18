@@ -7,7 +7,7 @@ health, metrics, and state across the Netra platform.
 from typing import Dict, Any, List
 from fastapi import APIRouter, HTTPException, Query, Depends
 from datetime import datetime, UTC
-from app.auth.auth_dependencies import get_current_user, require_admin
+from app.auth_integration import get_current_user, require_admin
 
 from app.services.circuit_breaker_monitor import (
     circuit_monitor, metrics_collector, get_circuit_health_dashboard

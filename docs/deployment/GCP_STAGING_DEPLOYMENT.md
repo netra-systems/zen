@@ -97,6 +97,19 @@ Custom domains (if configured):
 
 ## Environment Configuration
 
+## CRITICAL: Service Naming Convention
+
+### ⚠️ EXACT Service Names Required
+The following service names MUST be used exactly as shown for domain mapping to work:
+
+| Service | EXACT Name (Staging) | Domain | Notes |
+|---------|---------------------|---------|-------|
+| Backend | `netra-backend-staging` | api.staging.netrasystems.ai | DO NOT use `netra-backend` |
+| Frontend | `netra-frontend-staging` | staging.netrasystems.ai | DO NOT use `netra-frontend` |
+| Auth | `netra-auth-service` | auth.staging.netrasystems.ai | Same name across all environments |
+
+**IMPORTANT**: Using incorrect service names will break domain routing!
+
 ### Service Account Details
 - **Email**: `netra-staging-deploy@netra-staging.iam.gserviceaccount.com`
 - **Key File**: `.\gcp-staging-sa-key.json`
@@ -124,10 +137,13 @@ Custom domains (if configured):
 ### View Logs
 ```bash
 # Backend logs
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-backend" --limit 50
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-backend-staging" --limit 50
 
 # Frontend logs
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-frontend" --limit 50
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-frontend-staging" --limit 50
+
+# Auth service logs
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=netra-auth-service" --limit 50
 ```
 
 ### List Services
@@ -138,10 +154,10 @@ gcloud run services list --platform managed --region us-central1
 ### Rollback to Previous Version
 ```bash
 # Get revision list
-gcloud run revisions list --service=netra-backend --region=us-central1
+gcloud run revisions list --service=netra-backend-staging --region=us-central1
 
 # Rollback to specific revision
-gcloud run services update-traffic netra-backend --to-revisions=REVISION_NAME=100 --region=us-central1
+gcloud run services update-traffic netra-backend-staging --to-revisions=REVISION_NAME=100 --region=us-central1
 ```
 
 ## Security Notes

@@ -56,5 +56,12 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 
 EXPOSE 8080
 
-# Run with Cloud Run startup wrapper
-CMD ["python", "app/cloud_run_startup.py"]
+# Use gunicorn with uvicorn workers for better Cloud Run compatibility
+CMD exec gunicorn app.main:app \
+    --bind 0.0.0.0:$PORT \
+    --workers $WORKERS \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --timeout $TIMEOUT \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level info

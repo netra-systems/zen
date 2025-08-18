@@ -264,6 +264,16 @@
             <important_note>Module initialization and state management patterns</important_note>
         </category>
         <category>
+            <name>Naming Conflicts and Context Binding</name>
+            <file>learnings/naming_conflicts.xml</file>
+            <path>SPEC/learnings/naming_conflicts.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>property-method-naming-conflict</id>
+            </learning_ids>
+            <important_note>CRITICAL: Property-method naming conflicts cause runtime errors. Never use same name for property and method in same class.</important_note>
+        </category>
+        <category>
             <name>Frontend Comprehensive Checkup</name>
             <file>learnings/frontend_comprehensive_checkup.xml</file>
             <path>SPEC/learnings/frontend_comprehensive_checkup.xml</path>
@@ -315,14 +325,16 @@
             <name>Deployment</name>
             <file>learnings/deployment.xml</file>
             <path>SPEC/learnings/deployment.xml</path>
-            <learning_count>5</learning_count>
+            <learning_count>6</learning_count>
             <learning_ids>
                 <id>staging-setup</id>
                 <id>docker-builds</id>
                 <id>terraform-backend</id>
                 <id>cloud-armor-issues</id>
                 <id>iam-restrictions</id>
+                <id>cloud-run-uvicorn-workers</id>
             </learning_ids>
+            <important_note>CRITICAL: Use gunicorn with uvicorn workers for Cloud Run - see cloud-run-uvicorn-workers</important_note>
         </category>
         <category>
             <name>GitHub Actions</name>
@@ -371,6 +383,6 @@
     
     <statistics>
         <total_categories>21</total_categories>
-        <total_learnings>106</total_learnings>
+        <total_learnings>107</total_learnings>
     </statistics>
 </specification>

@@ -27,10 +27,10 @@ $REGION = "us-central1"
 $REGISTRY = "$REGION-docker.pkg.dev"
 $REGISTRY_PATH = "$REGISTRY/$PROJECT_ID/netra-containers"
 
-# Service names
-$BACKEND_SERVICE = "netra-backend"
-$FRONTEND_SERVICE = "netra-frontend"
-$AUTH_SERVICE = "netra-auth-service"
+# Service names - CRITICAL: These MUST match exactly for domain mapping
+$BACKEND_SERVICE = "netra-backend-staging"   # EXACT name required for staging domain
+$FRONTEND_SERVICE = "netra-frontend-staging" # EXACT name required for staging domain  
+$AUTH_SERVICE = "netra-auth-service"         # EXACT name required for auth subdomain
 
 # URLs for frontend build
 $STAGING_API_URL = "https://api.staging.netrasystems.ai"
@@ -222,7 +222,8 @@ gcloud run deploy $BACKEND_SERVICE `
     --cpu 1 `
     --min-instances 0 `
     --max-instances 10 `
-    --set-env-vars="ENVIRONMENT=staging,SERVICE_NAME=backend" `
+    --set-env-vars="ENVIRONMENT=staging,SERVICE_NAME=backend,LOAD_SECRETS=true,SECRET_MANAGER_PROJECT_ID=701982941522,GCP_PROJECT_ID_NUMERICAL_STAGING=701982941522,SKIP_MIGRATIONS=true,DISABLE_STARTUP_CHECKS=true,REDIS_URL=redis://localhost:6379,CLICKHOUSE_URL=http://localhost:8123,CLICKHOUSE_DATABASE=netra,FRONTEND_URL=https://netra-frontend-e7oy7k4boa-uc.a.run.app,BACKEND_URL=https://netra-backend-e7oy7k4boa-uc.a.run.app,CORS_ORIGINS=https://netra-frontend-701982941522.us-central1.run.app;https://staging.netrasystems.ai;https://app.staging.netrasystems.ai" `
+    --update-secrets="DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-key-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,FERNET_KEY=fernet-key-staging:latest,GOOGLE_OAUTH_CLIENT_ID_STAGING=google-client-id-staging:latest,GOOGLE_OAUTH_CLIENT_SECRET_STAGING=google-client-secret-staging:latest" `
     --quiet
 
 if ($LASTEXITCODE -ne 0) {

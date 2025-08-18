@@ -98,9 +98,7 @@ export class CoreReconciliationService {
    * Clean up expired and resolved reconciliations
    */
   public cleanup(): void {
-    this.cleanup.cleanupExpiredOptimistic(this.optimisticMessages);
-    this.cleanup.cleanupOldConfirmed(this.confirmedMessages);
-    this.updatePendingCount();
+    this.performCleanup();
   }
 
   /**
@@ -224,7 +222,13 @@ export class CoreReconciliationService {
   }
 
   private startAutoCleanup(): void {
-    this.cleanup.startAutoCleanup(() => this.cleanup());
+    this.cleanup.startAutoCleanup(() => this.performCleanup());
+  }
+  
+  private performCleanup(): void {
+    this.cleanup.cleanupExpiredOptimistic(this.optimisticMessages);
+    this.cleanup.cleanupOldConfirmed(this.confirmedMessages);
+    this.updatePendingCount();
   }
 
   private clearAllMessages(): void {

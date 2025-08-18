@@ -6,6 +6,7 @@
 // Mock dependencies BEFORE imports
 const mockSendMessage = jest.fn();
 const mockUseWebSocket = jest.fn();
+const mockHandleSend = jest.fn();
 const mockUseUnifiedChatStore = jest.fn();
 const mockUseThreadStore = jest.fn();
 const mockUseAuthStore = jest.fn();
@@ -54,10 +55,11 @@ jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
 jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
   useTextareaResize: jest.fn(() => ({ rows: 1 }))
 }));
+// Create a mock that properly calls the WebSocket send function
 jest.mock('@/components/chat/hooks/useMessageSending', () => ({
   useMessageSending: jest.fn(() => ({
     isSending: false,
-    handleSend: jest.fn()
+    handleSend: mockHandleSend
   }))
 }));
 
@@ -79,6 +81,20 @@ describe('MessageInput - Input Validation and Sanitization', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     
+    // Setup handleSend to actually call mockSendMessage
+    mockHandleSend.mockImplementation(async (params) => {
+      if (params.isAuthenticated && params.message && params.message.trim()) {
+        mockSendMessage({
+          type: 'user_message',
+          payload: {
+            content: params.message.trim(),
+            references: [],
+            thread_id: params.activeThreadId || params.currentThreadId
+          }
+        });
+      }
+    });
+    
     // Setup default mocks
     mockUseWebSocket.mockReturnValue({
       sendMessage: mockSendMessage,
@@ -89,6 +105,8 @@ describe('MessageInput - Input Validation and Sanitization', () => {
       isProcessing: false,
       setProcessing: mockChatStore.setProcessing,
       addMessage: mockChatStore.addMessage,
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
     });
     
     mockUseThreadStore.mockReturnValue({
@@ -236,6 +254,8 @@ describe('MessageInput - Input Validation and Sanitization', () => {
         isProcessing: true,
         setProcessing: mockChatStore.setProcessing,
         addMessage: mockChatStore.addMessage,
+        addOptimisticMessage: jest.fn(),
+        updateOptimisticMessage: jest.fn(),
       });
       
       render(<MessageInput />);

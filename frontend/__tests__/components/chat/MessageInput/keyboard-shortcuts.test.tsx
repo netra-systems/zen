@@ -102,6 +102,7 @@ jest.mock('@/components/chat/hooks/useMessageSending', () => ({
           }
         });
       }
+      return Promise.resolve();
     })
   }))
 }));
@@ -137,6 +138,8 @@ describe('MessageInput - Keyboard Shortcuts', () => {
       isProcessing: false,
       setProcessing: mockChatStore.setProcessing,
       addMessage: mockChatStore.addMessage,
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
     });
     
     mockUseThreadStore.mockReturnValue({
