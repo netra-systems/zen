@@ -3,8 +3,8 @@
   "last_successful_counts": {
     "backend": {
       "unit": {
-        "total": 408,
-        "timestamp": "2025-08-17T18:41:25.134604"
+        "total": 277,
+        "timestamp": "2025-08-17T18:43:38.001692"
       },
       "real_e2e": {
         "total": 1,
@@ -20,10 +20,14 @@
       },
       "smoke": {
         "total": 7,
-        "timestamp": "2025-08-17T18:34:58.236453"
+        "timestamp": "2025-08-17T18:49:31.517194"
+      },
+      "integration": {
+        "total": 51,
+        "timestamp": "2025-08-17T18:47:55.366782"
       }
     }
   },
   "category_status": {},
-  "last_update": "2025-08-17T18:41:25.134604"
+  "last_update": "2025-08-17T18:51:08.552940"
 }

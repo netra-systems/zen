@@ -1,33 +1,5 @@
 [
   {
-    "timestamp": "2025-08-17T17:57:17.916983",
-    "level": "unit",
-    "exit_code": 2,
-    "stats": {
-      "total": 402,
-      "passed": 389,
-      "failed": 3,
-      "errors": 0,
-      "skipped": 10,
-      "duration": 48.89721393585205,
-      "pass_rate": 96.76616915422885
-    }
-  },
-  {
-    "timestamp": "2025-08-17T17:57:17.945696",
-    "level": "unit",
-    "exit_code": 2,
-    "stats": {
-      "total": 402,
-      "passed": 389,
-      "failed": 3,
-      "errors": 0,
-      "skipped": 10,
-      "duration": 48.89721393585205,
-      "pass_rate": 96.76616915422885
-    }
-  },
-  {
     "timestamp": "2025-08-17T18:01:09.350932",
     "level": "real_e2e",
     "exit_code": 1,
@@ -504,31 +476,227 @@
     }
   },
   {
-    "timestamp": "2025-08-17T18:41:25.100370",
+    "timestamp": "2025-08-17T18:42:03.295225",
     "level": "unit",
     "exit_code": 2,
     "stats": {
-      "total": 408,
-      "passed": 395,
-      "failed": 3,
+      "total": 476,
+      "passed": 462,
+      "failed": 4,
       "errors": 0,
       "skipped": 10,
-      "duration": 54.10316276550293,
-      "pass_rate": 96.81372549019608
+      "duration": 65.0195324420929,
+      "pass_rate": 97.05882352941177
     }
   },
   {
-    "timestamp": "2025-08-17T18:41:25.137143",
+    "timestamp": "2025-08-17T18:42:03.323550",
     "level": "unit",
     "exit_code": 2,
     "stats": {
-      "total": 408,
-      "passed": 395,
-      "failed": 3,
+      "total": 476,
+      "passed": 462,
+      "failed": 4,
       "errors": 0,
       "skipped": 10,
-      "duration": 54.10316276550293,
-      "pass_rate": 96.81372549019608
+      "duration": 65.0195324420929,
+      "pass_rate": 97.05882352941177
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:43:37.959068",
+    "level": "unit",
+    "exit_code": 2,
+    "stats": {
+      "total": 277,
+      "passed": 265,
+      "failed": 4,
+      "errors": 0,
+      "skipped": 8,
+      "duration": 54.51744556427002,
+      "pass_rate": 95.66787003610109
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:43:38.004211",
+    "level": "unit",
+    "exit_code": 2,
+    "stats": {
+      "total": 277,
+      "passed": 265,
+      "failed": 4,
+      "errors": 0,
+      "skipped": 8,
+      "duration": 54.51744556427002,
+      "pass_rate": 95.66787003610109
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:47:12.993696",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 10.198762655258179,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:47:13.025951",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 10.198762655258179,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:47:55.334414",
+    "level": "integration",
+    "exit_code": 2,
+    "stats": {
+      "total": 51,
+      "passed": 48,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 41.281346797943115,
+      "pass_rate": 94.11764705882352
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:47:55.368298",
+    "level": "integration",
+    "exit_code": 2,
+    "stats": {
+      "total": 51,
+      "passed": 48,
+      "failed": 3,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 41.281346797943115,
+      "pass_rate": 94.11764705882352
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:49:31.479629",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 8.638772010803223,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:49:31.518898",
+    "level": "smoke",
+    "exit_code": 0,
+    "stats": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 8.638772010803223,
+      "pass_rate": 100.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:50:32.363342",
+    "level": "integration",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 10.60028624534607,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:50:32.395749",
+    "level": "integration",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 10.60028624534607,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:50:58.763022",
+    "level": "unit",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 9.0367591381073,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:50:58.792385",
+    "level": "unit",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 9.0367591381073,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:51:08.517756",
+    "level": "smoke",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 6.778837203979492,
+      "pass_rate": 0.0
+    }
+  },
+  {
+    "timestamp": "2025-08-17T18:51:08.555464",
+    "level": "smoke",
+    "exit_code": 4,
+    "stats": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0,
+      "duration": 6.778837203979492,
+      "pass_rate": 0.0
     }
   }
 ]

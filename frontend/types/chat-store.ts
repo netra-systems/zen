@@ -7,49 +7,22 @@
  * - These types are optimized for React state management and UI interactions
  */
 
-// Import consolidated types from single source of truth
-import type { MessageRole, MessageMetadata, MessageType } from '@/types/chat';
+// Import consolidated types from single source of truth (registry)
+import type { 
+  Message,
+  BaseMessage,
+  MessageRole, 
+  MessageMetadata,
+  MessageAttachment,
+  MessageReaction,
+  Thread,
+  ThreadMetadata
+} from '@/types/registry';
+import { MessageType } from '@/types/registry';
 
 // Re-export for backwards compatibility
-export type { MessageRole, MessageMetadata, MessageType };
-
-export interface BaseMessage {
-  id: string;
-  content: string;
-  role?: MessageRole;
-  type?: MessageType;
-  created_at: string;
-  displayed_to_user?: boolean;
-  error?: string;
-  thread_id?: string | null;
-}
-
-export interface Message extends BaseMessage {
-  metadata?: MessageMetadata;
-  attachments?: MessageAttachment[];
-  reactions?: MessageReaction[];
-  edited_at?: string;
-  is_edited?: boolean;
-  reply_to?: string;
-  mentions?: string[];
-}
-
-export interface MessageAttachment {
-  id: string;
-  type: 'image' | 'file' | 'link' | 'code' | 'data';
-  url?: string;
-  name: string;
-  size?: number;
-  mime_type?: string;
-  preview?: string;
-}
-
-export interface MessageReaction {
-  emoji: string;
-  count: number;
-  users: string[];
-  timestamp: string;
-}
+export type { Message, BaseMessage, MessageRole, MessageMetadata, MessageAttachment, MessageReaction, Thread, ThreadMetadata };
+export { MessageType };
 
 // Sub-agent types
 export type SubAgentStatus = 
@@ -100,28 +73,8 @@ export interface SubAgentStatusData {
   stage?: string;
 }
 
-// Thread management types
-export interface Thread {
-  id: string;
-  title: string;
-  created_at: string;
-  updated_at: string;
-  message_count: number;
-  last_message_preview?: string;
-  status: 'active' | 'archived' | 'deleted';
-  tags?: string[];
-  metadata?: ThreadMetadata;
-}
-
-export interface ThreadMetadata {
-  optimization_results_count?: number;
-  sub_agents_used?: string[];
-  total_processing_time_ms?: number;
-  user_rating?: number;
-  bookmarked?: boolean;
-  priority?: 'low' | 'medium' | 'high';
-  category?: string;
-}
+// Thread management types - Use unified types from registry
+// Import Thread and ThreadMetadata from '@/types/registry' for consistent typing
 
 // Chat state mutations
 export type ChatAction = 

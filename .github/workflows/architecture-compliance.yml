@@ -125,7 +125,7 @@ jobs:
       
       - name: Upload Compliance Report
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: architecture-compliance-report
           path: |
@@ -186,7 +186,7 @@ jobs:
           echo "- Extract reusable components" >> file-analysis.md
       
       - name: Upload File Analysis
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: file-size-analysis
           path: file-analysis.md
@@ -237,7 +237,7 @@ jobs:
           echo "- Composable, testable units" >> function-analysis.md
       
       - name: Upload Function Analysis
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: function-complexity-analysis
           path: |

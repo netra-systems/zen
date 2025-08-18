@@ -3,14 +3,12 @@ from ..db.models_postgres import User
 from ..schemas.User import UserCreate, UserUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
-import bcrypt
 from fastapi.encoders import jsonable_encoder
 from typing import List, Dict, Any, Optional, Union
-from passlib.context import CryptContext
+from argon2 import PasswordHasher
 
-# Direct bcrypt usage for better compatibility
-# Provide passlib interface for testing compatibility
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Initialize Argon2 hasher for password hashing
+ph = PasswordHasher()
 
 class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
     async def get_by_email(self, db: AsyncSession, *, email: str) -> User:

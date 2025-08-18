@@ -1,11 +1,18 @@
 /**
  * Backend Schema Auto-Generated Types
  * 
+ * ⚠️ DEPRECATED: This file is being phased out for WebSocket types.
+ * 🔄 MIGRATION: Use @/types/registry instead for all WebSocket types.
+ * 
  * This file contains TypeScript type definitions that mirror the backend
  * WebSocket message schemas, ensuring type safety across the frontend-backend boundary.
  * 
  * CRITICAL: These types must match the backend schema definitions exactly.
  * Source: app/schemas/websocket_models.py and app/schemas/core_enums.py
+ * 
+ * MIGRATION PATH:
+ * - OLD: import { WebSocketMessage } from '@/types/backend_schema_auto_generated'
+ * - NEW: import { WebSocketMessage } from '@/types/registry'
  */
 
 // ============================================================================
@@ -211,6 +218,10 @@ export interface ErrorPayload extends BaseWebSocketPayload {
 // WEBSOCKET MESSAGE STRUCTURE (mirroring backend WebSocketMessage)
 // ============================================================================
 
+/**
+ * @deprecated Use WebSocketMessage from @/types/registry instead
+ * @see {@link @/types/registry#WebSocketMessage} for the canonical type definition
+ */
 export interface WebSocketMessage {
   type: WebSocketMessageType;
   payload: 
@@ -263,6 +274,10 @@ export interface ThreadHistoryResponse {
 // WEBSOCKET ERROR TYPES
 // ============================================================================
 
+/**
+ * @deprecated Use WebSocketError from @/types/registry instead
+ * @see {@link @/types/registry#WebSocketError} for the canonical type definition
+ */
 export interface WebSocketError {
   message: string;
   error_type?: string;

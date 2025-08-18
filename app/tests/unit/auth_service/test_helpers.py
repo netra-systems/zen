@@ -25,7 +25,7 @@ from app.auth.auth_response_builders import (
     set_auth_cookies, set_pr_auth_cookies, clear_auth_cookies
 )
 from app.auth.auth_service import revoke_user_sessions, check_redis_connection
-from app.auth.environment_config import auth_env_config
+from app.clients.auth_client import Environment, EnvironmentDetector, OAuthConfigGenerator
 
 
 class TestAuthServiceHelpers:
@@ -48,30 +48,37 @@ class TestAuthServiceHelpers:
     def test_get_default_return_url_success(self):
         """Test default return URL generation."""
         mock_config = {"javascript_origins": ["http://localhost:8000"]}
-        with patch('app.auth.url_validators.auth_env_config.get_frontend_config', return_value=mock_config), \
-             patch('app.auth.url_validators.auth_env_config.is_pr_environment', False):
-            result = get_default_return_url()
-            assert result == "http://localhost:8000"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.DEVELOPMENT
+            with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
+                mock_generator.return_value.get_frontend_config.return_value = mock_config
+                result = get_default_return_url()
+                assert result == "http://localhost:8000"
             
     def test_get_default_return_url_pr_environment(self):
         """Test default return URL in PR environment."""
-        with patch('app.auth.url_validators.auth_env_config.is_pr_environment', True), \
-             patch('app.auth.url_validators.auth_env_config.pr_number', "42"):
-            result = get_default_return_url()
-            assert result == "https://pr-42.staging.netrasystems.ai"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.STAGING
+            with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
+                mock_generator.return_value.is_pr_environment.return_value = True
+                mock_generator.return_value.pr_number = "42"
+                result = get_default_return_url()
+                assert result == "https://pr-42.staging.netrasystems.ai"
             
     def test_validate_return_url_security_success(self):
         """Test return URL security validation success."""
         mock_config = MagicMock()
         mock_config.javascript_origins = ["http://localhost:8000", "https://app.netrasystems.ai"]
-        with patch('app.auth.url_validators.auth_env_config.get_oauth_config', return_value=mock_config):
+        with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
+            mock_generator.return_value.get_oauth_config.return_value = mock_config
             validate_return_url_security("http://localhost:8000/auth")  # Should not raise
             
     def test_validate_return_url_security_invalid(self):
         """Test return URL security validation failure."""
         mock_config = MagicMock()
         mock_config.javascript_origins = ["http://localhost:8000"]
-        with patch('app.auth.url_validators.auth_env_config.get_oauth_config', return_value=mock_config):
+        with patch('app.auth.url_validators.OAuthConfigGenerator') as mock_generator:
+            mock_generator.return_value.get_oauth_config.return_value = mock_config
             with pytest.raises(HTTPException):
                 validate_return_url_security("http://malicious.com")
                 
@@ -86,15 +93,15 @@ class TestAuthServiceHelpers:
             
     def test_get_oauth_redirect_uri_development(self):
         """Test OAuth redirect URI for development."""
-        with patch.object(auth_env_config, 'environment') as mock_env:
-            mock_env.value = "development"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.DEVELOPMENT
             uri = get_oauth_redirect_uri()
             assert uri == "http://localhost:8001/auth/callback"
             
     def test_get_oauth_redirect_uri_production(self):
         """Test OAuth redirect URI for production."""
-        with patch.object(auth_env_config, 'environment') as mock_env:
-            mock_env.value = "production"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.PRODUCTION
             uri = get_oauth_redirect_uri()
             assert uri == "https://auth.netrasystems.ai/auth/callback"
             
@@ -236,28 +243,28 @@ class TestAuthServiceHelpers:
             
     def test_get_auth_service_url_development(self):
         """Test auth service URL for development."""
-        with patch.object(auth_env_config, 'environment') as mock_env:
-            mock_env.value = "development"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.DEVELOPMENT
             url = get_auth_service_url()
             assert url == "http://localhost:8001"
             
     def test_get_auth_service_url_production(self):
         """Test auth service URL for production."""
-        with patch.object(auth_env_config, 'environment') as mock_env:
-            mock_env.value = "production"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.PRODUCTION
             url = get_auth_service_url()
             assert url == "https://auth.netrasystems.ai"
             
     def test_get_oauth_redirect_uri_staging(self):
         """Test OAuth redirect URI for staging environment."""
-        with patch.object(auth_env_config, 'environment') as mock_env:
-            mock_env.value = "staging"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.STAGING
             uri = get_oauth_redirect_uri()
             assert uri == "https://auth.staging.netrasystems.ai/auth/callback"
             
     def test_get_auth_service_url_staging(self):
         """Test auth service URL for staging environment."""
-        with patch.object(auth_env_config, 'environment') as mock_env:
-            mock_env.value = "staging"
+        with patch('app.auth.url_validators.EnvironmentDetector') as mock_detector:
+            mock_detector.return_value.detect_environment.return_value = Environment.STAGING
             url = get_auth_service_url()
             assert url == "https://auth.staging.netrasystems.ai"

@@ -93,7 +93,7 @@ class TestAdminVisibility:
         await admin_service.configure_alerts(alert_config)
         
         # Trigger alert condition
-        with patch.object(admin_service, 'send_alert') as mock_alert:
+        with patch.object(admin_service.coordinator, 'send_alert') as mock_alert:
             await admin_service.generate_synthetic_data(
                 db=AsyncMock(),
                 config=GenerationConfig(num_traces=10000),  # Will be slow

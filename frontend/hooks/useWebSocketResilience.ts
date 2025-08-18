@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { WebSocketError } from '@/types/backend_schema_auto_generated';
+import { WebSocketError } from '@/types/registry';
 
 export interface WebSocketOptions {
   onOpen?: () => void;

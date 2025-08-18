@@ -4,7 +4,7 @@
         <name>Learnings Index</name>
         <type>index</type>
         <version>1.0</version>
-        <last_updated>2025-08-17</last_updated>
+        <last_updated>2025-08-18</last_updated>
         <description>Index of all learning modules organized by category</description>
     </metadata>
     
@@ -238,6 +238,16 @@
                 <id>iam-restrictions</id>
             </learning_ids>
         </category>
+        <category>
+            <name>GitHub Actions</name>
+            <file>learnings/github_actions.xml</file>
+            <path>SPEC/learnings/github_actions.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>artifact-actions-v4-upgrade</id>
+                <id>cache-action-version-consistency</id>
+            </learning_ids>
+        </category>
     </categories>
     
     <usage>
@@ -248,7 +258,7 @@
     </usage>
     
     <statistics>
-        <total_categories>16</total_categories>
-        <total_learnings>64</total_learnings>
+        <total_categories>17</total_categories>
+        <total_learnings>66</total_learnings>
     </statistics>
 </specification>

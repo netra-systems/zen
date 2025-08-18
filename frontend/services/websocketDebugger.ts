@@ -3,7 +3,7 @@
  * Provides comprehensive debugging capabilities for WebSocket event flow
  */
 
-import { WebSocketMessage } from '@/types/backend_schema_auto_generated';
+import { WebSocketMessage } from '@/types/registry';
 import { UnifiedWebSocketEvent } from '@/types/unified-chat';
 import { logger } from '@/lib/logger';
 

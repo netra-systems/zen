@@ -1,11 +1,9 @@
 # Test Summary
-**Level**: unit | **Time**: 2025-08-17 18:41:25
+**Level**: smoke | **Time**: 2025-08-17 18:51:08
 
-**Status**: ❌ Failed - 3 test(s) failed
+**Status**: ⚠️ Collection or execution issues
 
-**Backend**: ❌ 395 passed, 3 failed, 10 skipped
+**Backend**: ⚫ No tests ran
 **Frontend**: ⚫ No tests ran
 **E2E**: ⚫ No tests ran
 
-## Issues
-- backend: 3 test(s) failed

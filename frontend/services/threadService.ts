@@ -1,5 +1,5 @@
 import { apiClient } from '@/services/apiClientWrapper';
-import { Thread, ThreadMetadata } from '@/types/registry';
+import { Thread, ThreadMetadata, createThreadWithTitle } from '@/types/registry';
 import type { MessageMetadata } from '@/types/chat';
 
 export interface ThreadMessage {
@@ -34,7 +34,8 @@ export class ThreadService {
 
   static async createThread(title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.post<Thread>('/api/threads', {
-      name: title, // Map title to name for registry compatibility
+      name: title,
+      title: title, // Support both patterns in unified interface
       metadata
     });
     return response.data;
@@ -42,7 +43,8 @@ export class ThreadService {
 
   static async updateThread(threadId: string, title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.put<Thread>(`/api/threads/${threadId}`, {
-      name: title, // Map title to name for registry compatibility
+      name: title,
+      title: title, // Support both patterns in unified interface
       metadata
     });
     return response.data;

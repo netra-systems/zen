@@ -5,7 +5,7 @@
  */
 
 import { WebSocketStatus } from '../services/webSocketService';
-import { WebSocketMessage } from './backend_schema_auto_generated';
+import { WebSocketMessage } from './registry';
 
 /**
  * Context type for WebSocket provider state and actions

@@ -1,14 +1,14 @@
 # Test Dashboard
-**Level**: unit | **Time**: 2025-08-17 18:41:25
+**Level**: smoke | **Time**: 2025-08-17 18:51:08
 
-## Overall Status: ❌ Failed - 3 test(s) failed
+## Overall Status: ⚠️ Collection or execution issues
 
 ## Component Summary
 
 | Component | Status | Tests | Passed | Failed | Errors | Import Errors | Duration |
 |-----------|--------|-------|--------|--------|--------|---------------|----------|
-| Backend | ❌ failed | 408 | 395 | 3 | 0 | 0 | 53.83s |
-| Frontend | ❌ failed | 0 | 0 | 0 | 0 | 0 | 0.28s |
+| Backend | ❌ failed | 0 | 0 | 0 | 0 | 2 | 6.78s |
+| Frontend | ⚠️ skipped | 0 | 0 | 0 | 0 | 0 | 0.00s |
 | E2E | ⚠️ pending | 0 | 0 | 0 | 0 | 0 | 0.00s |
 
 ## Test Categories
@@ -26,19 +26,15 @@
 | e2e | End-to-end tests | 20 | 0 | ⚪ | Never |
 | real_services | Real service tests | 15 | 0 | ⚪ | Never |
 
-## 🔴 Issues Detected
-
-- backend: 3 test(s) failed
-
 ## Statistics
 
-- **Total Tests**: 408
-- **Passed**: 395
-- **Failed**: 3
+- **Total Tests**: 0
+- **Passed**: 0
+- **Failed**: 0
 - **Errors**: 0
-- **Skipped**: 10
-- **Total Duration**: 54.10s
-- **Pass Rate**: 96.8%
+- **Skipped**: 0
+- **Total Duration**: 6.78s
+- **Pass Rate**: 0.0%
 
 ## Available Test Levels
 

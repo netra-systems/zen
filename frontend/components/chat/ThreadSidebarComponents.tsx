@@ -9,7 +9,7 @@ import {
   Check,
   Loader2
 } from 'lucide-react';
-import type { Thread } from '@/types/chat-store';
+import type { Thread, getThreadTitle } from '@/types/registry';
 
 interface ThreadSidebarHeaderProps {
   onCreateThread: () => Promise<void>;

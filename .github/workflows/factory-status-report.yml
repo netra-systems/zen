@@ -108,7 +108,7 @@ jobs:
           "
           
       - name: Upload report artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: factory-status-report-${{ steps.params.outputs.timestamp }}
           path: |

@@ -1,7 +1,8 @@
 # app/services/security_service.py
 
 from typing import Optional
-import bcrypt
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError, InvalidHashError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from jose import JWTError, jwt
@@ -15,7 +16,8 @@ from app.services.key_manager import KeyManager
 from app.config import settings
 from app.logging_config import central_logger as logger
 
-# Direct bcrypt usage for better compatibility and performance
+# Initialize Argon2 hasher for secure password hashing
+ph = PasswordHasher()
 
 class SecurityService:
     def __init__(self, key_manager: Optional[KeyManager] = None):
@@ -48,11 +50,16 @@ class SecurityService:
         return self.fernet.decrypt(encrypted_data.encode()).decode()
 
     def get_password_hash(self, password: str) -> str:
-        salt = bcrypt.gensalt()
-        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
+        """Hash a password using Argon2id."""
+        return ph.hash(password)
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        """Verify a password against its Argon2 hash."""
+        try:
+            ph.verify(hashed_password, plain_password)
+            return True
+        except (VerifyMismatchError, InvalidHashError):
+            return False
 
     def create_access_token(self, data: schemas.TokenPayload, expires_delta: Optional[timedelta] = None):
         to_encode = data.model_dump()
