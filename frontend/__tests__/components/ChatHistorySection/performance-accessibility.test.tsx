@@ -3,20 +3,88 @@
  * Tests for performance optimization and accessibility compliance
  */
 
+// Hoist all mocks to the top for proper Jest handling
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// AuthGate mock - always render children
+jest.mock('@/components/ui/auth-gate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => children
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => React.createElement('div', props, children),
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
-import { createTestSetup } from './setup';
+import { mockThreads } from './setup';
+
+const mockStore = {
+  isProcessing: false,
+  messages: [],
+  threads: mockThreads,
+  currentThreadId: 'thread-1',
+  isThreadLoading: false,
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateThreads: jest.fn(),
+  setCurrentThreadId: jest.fn(),
+};
+
+const createMockThread = (overrides: any = {}) => ({
+  id: `thread-${Math.random().toString(36).substr(2, 9)}`,
+  title: 'Test Conversation',
+  created_at: Math.floor(Date.now() / 1000),
+  updated_at: Math.floor(Date.now() / 1000),
+  user_id: 'user-1',
+  message_count: 0,
+  status: 'active' as const,
+  ...overrides,
+});
 
 describe('ChatHistorySection - Performance & Accessibility', () => {
-  const testSetup = createTestSetup();
-
   beforeEach(() => {
-    testSetup.beforeEach();
+    jest.clearAllMocks();
+    
+    // Set up default mock return values
+    mockUseUnifiedChatStore.mockReturnValue(mockStore);
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: ''
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: 'thread-1',
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+      createNewThread: jest.fn()
+    });
   });
 
   afterEach(() => {
-    testSetup.afterEach();
+    jest.clearAllMocks();
   });
 
   describe('Performance Tests', () => {
@@ -32,7 +100,10 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
         status: 'active',
       }));
 
-      testSetup.configureStoreMocks({ threads: largeThreadSet });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: largeThreadSet
+      });
 
       // Test should complete without errors or timeouts
       expect(() => render(<ChatHistorySection />)).not.toThrow();
@@ -47,14 +118,16 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
 
       // Test multiple re-renders without timing
       for (let i = 0; i < 10; i++) {
-        const currentThreads = testSetup.getCurrentMockThreads();
-        const updatedThreads = currentThreads.map(thread => ({
+        const updatedThreads = mockThreads.map(thread => ({
           ...thread,
           title: `${thread.title} - Update ${i}`,
           updated_at: Math.floor(Date.now() / 1000) + i,
         }));
         
-        testSetup.configureStoreMocks({ threads: updatedThreads });
+        mockUseUnifiedChatStore.mockReturnValue({
+          ...mockStore,
+          threads: updatedThreads
+        });
         expect(() => rerender(<ChatHistorySection />)).not.toThrow();
       }
 
@@ -74,7 +147,10 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
         status: 'active',
       }));
 
-      testSetup.configureStoreMocks({ threads: hugeThreadSet });
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: hugeThreadSet
+      });
 
       const { container } = render(<ChatHistorySection />);
 
@@ -302,9 +378,11 @@ describe('ChatHistorySection - Performance & Accessibility', () => {
       render(<ChatHistorySection />);
 
       // Add new thread to trigger update
-      const currentThreads = testSetup.getCurrentMockThreads();
-      const newThreads = [...currentThreads, testSetup.createMockThread({ title: 'New Thread' })];
-      testSetup.configureStoreMocks({ threads: newThreads });
+      const newThreads = [...mockThreads, createMockThread({ title: 'New Thread' })];
+      mockUseUnifiedChatStore.mockReturnValue({
+        ...mockStore,
+        threads: newThreads
+      });
 
       // Should provide appropriate announcements (implementation specific)
       expect(screen.getByText('Chat History')).toBeInTheDocument();

@@ -6,7 +6,6 @@
  * in the ./ChatHistorySection/ directory.
  * 
  * Test modules:
- * - setup.tsx: Shared utilities, mocks, and test setup
  * - basic.test.tsx: Basic rendering, display, and thread highlighting tests
  * - interaction.test.tsx: Search, delete, pagination, and conversation switching tests
  * - edge-cases.test.tsx: Edge cases, error handling, and comprehensive scenarios
@@ -25,6 +24,35 @@
  * - Accessibility compliance testing
  * - Comprehensive error handling
  */
+
+// Hoist all mocks to the top for proper Jest handling
+const mockUseUnifiedChatStore = jest.fn();
+const mockUseLoadingState = jest.fn();
+const mockUseThreadNavigation = jest.fn();
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+// AuthGate mock - always render children
+jest.mock('@/components/ui/auth-gate', () => ({
+  AuthGate: ({ children }: { children: React.ReactNode }) => children
+}));
+
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: ({ children, ...props }: any) => React.createElement('div', props, children),
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
 
 // Import all modular test suites
 import './ChatHistorySection/index.test';
