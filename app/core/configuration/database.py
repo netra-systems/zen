@@ -38,6 +38,13 @@ class DatabaseConfigManager:
         """Get current environment for database configuration."""
         return os.environ.get("ENVIRONMENT", "development").lower()
     
+    def refresh_environment(self) -> None:
+        """Refresh environment detection for testing scenarios."""
+        old_env = self._environment
+        self._environment = self._get_environment()
+        if old_env != self._environment:
+            self._logger.info(f"Database manager environment changed from {old_env} to {self._environment}")
+    
     def _load_validation_rules(self) -> Dict[str, dict]:
         """Load database validation rules per environment."""
         return {
@@ -97,8 +104,10 @@ class DatabaseConfigManager:
                                              self._connection_templates["postgres_dev"])
     
     def _validate_postgres_url(self, url: str) -> None:
-        """Validate PostgreSQL URL against environment rules."""
+        """Validate database URL against environment rules."""
         parsed = urlparse(url)
+        if parsed.scheme.startswith("sqlite"):
+            return  # Skip PostgreSQL-specific validation for SQLite
         rules = self._validation_rules.get(self._environment, {})
         self._check_ssl_requirement(parsed, rules)
         self._check_localhost_policy(parsed, rules)
@@ -194,12 +203,15 @@ class DatabaseConfigManager:
         return issues
     
     def _validate_postgres_consistency(self, config: AppConfig) -> List[str]:
-        """Validate PostgreSQL configuration consistency."""
+        """Validate database configuration consistency."""
         issues = []
         if not config.database_url:
-            issues.append("Missing PostgreSQL database_url")
+            issues.append("Missing database_url")
         elif not self._is_valid_postgres_url(config.database_url):
-            issues.append("Invalid PostgreSQL database_url format")
+            if config.database_url.startswith("sqlite"):
+                issues.append("Invalid SQLite URL format")
+            else:
+                issues.append("Invalid PostgreSQL URL format")
         return issues
     
     def _validate_clickhouse_consistency(self, config: AppConfig) -> List[str]:
@@ -220,10 +232,13 @@ class DatabaseConfigManager:
         return issues
     
     def _is_valid_postgres_url(self, url: str) -> bool:
-        """Check if PostgreSQL URL format is valid."""
+        """Check if database URL format is valid for environment."""
         try:
             parsed = urlparse(url)
-            return parsed.scheme in ["postgresql", "postgresql+asyncpg"] and bool(parsed.netloc)
+            valid_schemes = ["postgresql", "postgresql+asyncpg"]
+            if self._environment == "testing":
+                valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
+            return parsed.scheme in valid_schemes and (bool(parsed.netloc) or parsed.scheme.startswith("sqlite"))
         except Exception:
             return False
     

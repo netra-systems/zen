@@ -46,6 +46,13 @@ class ConfigurationValidator:
         """Get current environment for validation rules."""
         return os.environ.get("ENVIRONMENT", "development").lower()
     
+    def refresh_environment(self) -> None:
+        """Refresh environment detection for testing scenarios."""
+        old_env = self._environment
+        self._environment = self._get_environment()
+        if old_env != self._environment:
+            self._logger.info(f"Validator environment changed from {old_env} to {self._environment}")
+    
     def _load_validation_rules(self) -> Dict[str, dict]:
         """Load validation rules per environment."""
         return {
@@ -150,21 +157,33 @@ class ConfigurationValidator:
         return errors
     
     def _validate_postgres_url(self, url: str) -> List[str]:
-        """Validate PostgreSQL URL format and requirements."""
+        """Validate database URL format and requirements."""
         errors = []
         
         try:
             parsed = urlparse(url)
-            if parsed.scheme not in ["postgresql", "postgresql+asyncpg"]:
-                errors.append("Invalid PostgreSQL URL scheme")
+            valid_schemes = ["postgresql", "postgresql+asyncpg"]
             
-            if not parsed.netloc:
-                errors.append("PostgreSQL URL missing host information")
+            # Allow SQLite URLs in testing environments
+            if self._environment == "testing":
+                valid_schemes.extend(["sqlite", "sqlite+aiosqlite"])
             
-            errors.extend(self._check_database_security_requirements(parsed))
+            if parsed.scheme not in valid_schemes:
+                if parsed.scheme.startswith("sqlite") and self._environment != "testing":
+                    errors.append("SQLite URLs only allowed in testing environment")
+                else:
+                    errors.append("Invalid database URL scheme")
+            
+            # Skip host validation for SQLite URLs
+            if not parsed.scheme.startswith("sqlite") and not parsed.netloc:
+                errors.append("Database URL missing host information")
+            
+            # Skip security checks for SQLite URLs
+            if not parsed.scheme.startswith("sqlite"):
+                errors.extend(self._check_database_security_requirements(parsed))
             
         except Exception:
-            errors.append("Invalid PostgreSQL URL format")
+            errors.append("Invalid database URL format")
         
         return errors
     

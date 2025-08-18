@@ -72,7 +72,7 @@ class TeamUpdatesOrchestrator:
     def _extract_critical_issues(self, data: Dict) -> List[Dict]:
         """Extract critical issues needing immediate attention."""
         critical = []
-        if data.get("test_failures", 0) > 5:
+        if len(data.get("test_failures", [])) > 5:
             critical.append({"type": "tests", "message": "Multiple test failures"})
         if data.get("compliance_violations", 0) > 10:
             critical.append({"type": "compliance", "message": "Architecture violations"})

@@ -161,6 +161,10 @@ class UnifiedConfigManager:
         self._environment = self._detect_environment()
         if old_env != self._environment:
             self._logger.info(f"Environment changed from {old_env} to {self._environment}")
+        
+        # Also refresh all component environments
+        self._validator.refresh_environment()
+        self._database_manager.refresh_environment()
     
     def get_config_summary(self) -> Dict[str, Any]:
         """Get configuration summary for monitoring."""

@@ -16,12 +16,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from app.config import config_manager
 from app.schemas.Config import AppConfig
-from app.db.postgres import get_async_db
-from app.redis_manager import RedisManager
-from app.ws_manager import WebSocketManager
-from app.services.core.service_container import ServiceContainer
 from app.logging_config import central_logger
 
 
@@ -141,6 +136,7 @@ sqlalchemy.url = sqlite:///:memory:
             mock_redis_class.from_url.return_value = mock_redis
             
             # Initialize Redis manager
+            from app.redis_manager import RedisManager
             redis_manager = RedisManager()
             # RedisManager doesn't have initialize, it uses connect
             await redis_manager.connect()

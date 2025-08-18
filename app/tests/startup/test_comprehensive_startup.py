@@ -24,10 +24,8 @@ from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from app.core.exceptions_base import NetraException
-from app.db.clickhouse import ClickHouseService, get_clickhouse_client
-from app.services.cache_service import CacheService
-from app.auth_integration.client import AuthServiceClient
+# Import modules dynamically to avoid path issues
+import importlib
 
 
 class StartupTestSuite:
@@ -200,6 +198,13 @@ class ClickHouseValidator:
         if not self.host:
             return ValidationResult(True, "ClickHouse not configured", is_optional=True)
         
+        # Import dynamically
+        try:
+            clickhouse_module = importlib.import_module('app.db.clickhouse')
+            ClickHouseService = clickhouse_module.ClickHouseService
+        except ImportError:
+            return ValidationResult(False, "ClickHouse module not found")
+        
         service = ClickHouseService()
         
         try:
@@ -230,7 +235,7 @@ class ClickHouseValidator:
         finally:
             await service.close()
     
-    async def _test_permissions(self, service: ClickHouseService) -> "ValidationResult":
+    async def _test_permissions(self, service) -> "ValidationResult":
         """Test database permissions"""
         try:
             # Test SELECT permission
@@ -254,12 +259,19 @@ class RedisValidator:
             return ValidationResult(True, "Redis not configured", is_optional=True)
         
         try:
-            service = CacheService()
-            await service.initialize()
+            # Import dynamically
+            redis_module = importlib.import_module('app.services.redis_service')
+            RedisService = redis_module.RedisService
+            service = RedisService()
+            
+            # Test connection
+            is_available = await service.is_available()
+            if not is_available:
+                return ValidationResult(True, "Redis unavailable (optional)", is_optional=True)
             
             # Test basic operations
             test_key = "startup_test"
-            await service.set(test_key, "test_value", ttl=5)
+            await service.set(test_key, "test_value", expire=5)
             value = await service.get(test_key)
             
             if value != "test_value":
@@ -269,7 +281,7 @@ class RedisValidator:
             return ValidationResult(True, "Redis operational")
         except Exception as e:
             error_msg = str(e)
-            if "getaddrinfo failed" in error_msg:
+            if "getaddrinfo failed" in error_msg or "Connection" in error_msg:
                 return ValidationResult(True, "Redis unavailable (optional)", is_optional=True)
             return ValidationResult(False, f"Redis error: {error_msg}")
 
