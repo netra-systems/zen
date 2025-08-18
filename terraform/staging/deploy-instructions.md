@@ -1,6 +1,9 @@
-# Terraform Staging Deployment Instructions
+# Terraform CLOUD STAGING Deployment Instructions
 
-## Prerequisites
+**⚠️ This is for CLOUD STAGING on Google Cloud Platform**  
+**For LOCAL development, use `terraform-dev-postgres/` instead**
+
+## Prerequisites for CLOUD Staging
 
 1. Install Google Cloud SDK
 2. Authenticate with GCP

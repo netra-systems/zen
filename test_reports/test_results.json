@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-17T19:48:56.394149",
-    "total_runs": 52
+    "last_update": "2025-08-17T19:51:25.815750",
+    "total_runs": 53
   },
   "current_state": {
     "overall_status": "[FAILED] 86 failures",
     "last_run_level": "integration",
-    "last_run_time": "2025-08-17T19:48:56.394149",
-    "last_exit_code": 1
+    "last_run_time": "2025-08-17T19:51:25.815750",
+    "last_exit_code": 2
   },
   "known_test_counts": {
     "smoke:backend": {
@@ -33,7 +33,7 @@
       "failed": 3,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-17T19:46:49.438630"
+      "last_update": "2025-08-17T19:51:25.815750"
     },
     "smoke:frontend": {
       "total": 59,
@@ -44,12 +44,12 @@
       "last_update": "2025-08-17T19:41:22.352485"
     },
     "integration:frontend": {
-      "total": 142,
-      "passed": 56,
-      "failed": 86,
+      "total": 140,
+      "passed": 57,
+      "failed": 83,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-17T19:48:56.394149"
+      "last_update": "2025-08-17T19:51:25.815750"
     }
   },
   "category_results": {
@@ -74,10 +74,10 @@
     "integration": {
       "description": "Integration tests",
       "expected": 60,
-      "actual": 142,
-      "passed": 56,
+      "actual": 187,
+      "passed": 101,
       "failed": 86,
-      "last_run": "2025-08-17T19:48:56.394149",
+      "last_run": "2025-08-17T19:51:25.815750",
       "status": "[FAILED] 86 failures"
     },
     "critical": {
@@ -200,31 +200,34 @@
   },
   "component_results": {
     "backend": {
-      "status": "skipped",
+      "status": "failed",
       "last_counts": {
-        "total": 0,
-        "passed": 0,
-        "failed": 0,
+        "total": 47,
+        "passed": 44,
+        "failed": 3,
         "skipped": 0,
-        "errors": 0
+        "errors": 0,
+        "import_errors": 2,
+        "status": "import_error",
+        "test_files": 11
       },
-      "last_duration": 0,
-      "last_run": "2025-08-17T19:48:56.394149"
+      "last_duration": 74.10959815979004,
+      "last_run": "2025-08-17T19:51:25.816755"
     },
     "frontend": {
       "status": "failed",
       "last_counts": {
-        "total": 142,
-        "passed": 56,
-        "failed": 86,
+        "total": 140,
+        "passed": 57,
+        "failed": 83,
         "skipped": 0,
         "errors": 0,
         "import_errors": 0,
         "test_files": 76,
         "status": "failed"
       },
-      "last_duration": 75.01584601402283,
-      "last_run": "2025-08-17T19:48:56.394149"
+      "last_duration": 73.06879782676697,
+      "last_run": "2025-08-17T19:51:25.816755"
     },
     "e2e": {
       "status": "pending",
@@ -236,25 +239,42 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-17T19:48:56.394149"
+      "last_run": "2025-08-17T19:51:25.816755"
     }
   },
-  "failing_tests": [],
-  "test_history": [
+  "failing_tests": [
     {
-      "timestamp": "2025-08-17T19:26:54.227251",
-      "level": "integration",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 450,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_cache_routes.py::TestLLMCacheRoute::test_cache_health_check",
+      "timestamp": "2025-08-17T19:51:25.816755"
     },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_config_routes.py::TestConfigRoute::test_config_backup_and_restore",
+      "timestamp": "2025-08-17T19:51:25.816755"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\test_health.py::test_live_endpoint <- ..\\integration_tests\\test_health.py",
+      "timestamp": "2025-08-17T19:51:25.816755"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_cache_routes.py::\u001b[1mTestLLMCacheRoute::test_cache_health_check\u001b[0m - AttributeError: <module 'app.services.llm_cache_service' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\app\\\\services\\\\llm_cache_service.py'> does not have the attribute 'health_check'",
+      "timestamp": "2025-08-17T19:51:25.816755"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_config_routes.py::\u001b[1mTestConfigRoute::test_config_backup_and_restore\u001b[0m - ImportError: cannot import name 'backup_config' from 'app.routes.config' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes\\config.py)",
+      "timestamp": "2025-08-17T19:51:25.816755"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\test_health.py::\u001b[1mtest_live_endpoint\u001b[0m - AssertionError: assert {'status': 'healthy', 'service': 'netra-ai-platform', 'version': '1.0.0', 'timestamp': '2025-08-18T02:49:18.522035Z', 'environment': 'development'} == {'status': 'healthy', 'service': 'netra-ai-platform'}",
+      "timestamp": "2025-08-17T19:51:25.816755"
+    }
+  ],
+  "test_history": [
     {
       "timestamp": "2025-08-17T19:28:25.161230",
       "level": "unit",
@@ -520,30 +540,28 @@
         "total_skipped": 0,
         "pass_rate": 39.44
       }
+    },
+    {
+      "timestamp": "2025-08-17T19:51:25.815750",
+      "level": "integration",
+      "exit_code": 2,
+      "status": "[FAILED] 86 failures",
+      "statistics": {
+        "total_tests_known": 140,
+        "total_tests_run": 187,
+        "total_passed": 101,
+        "total_failed": 86,
+        "total_skipped": 0,
+        "pass_rate": 54.01
+      }
     }
   ],
   "statistics": {
-    "total_tests_known": 142,
-    "total_tests_run": 142,
-    "total_passed": 56,
+    "total_tests_known": 140,
+    "total_tests_run": 187,
+    "total_passed": 101,
     "total_failed": 86,
     "total_skipped": 0,
-    "pass_rate": 39.44
-  },
-  "version": "1.0",
-  "tests": {},
-  "runs": [
-    {
-      "run_id": "run_20250817_194858_38404",
-      "timestamp": "2025-08-17T19:50:12.521849",
-      "total_tests": 47,
-      "passed": 44,
-      "failed": 3,
-      "bad_tests_count": 0
-    }
-  ],
-  "stats": {
-    "total_runs": 1,
-    "last_updated": "2025-08-17T19:50:12.521849"
+    "pass_rate": 54.01
   }
 }

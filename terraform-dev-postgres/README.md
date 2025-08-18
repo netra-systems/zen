@@ -1,6 +1,8 @@
-# Development Database Infrastructure with Terraform
+# LOCAL Development Database Infrastructure with Terraform
 
-This Terraform configuration sets up a complete development database environment using Docker containers for PostgreSQL, Redis, and ClickHouse.
+**⚠️ IMPORTANT: This is for LOCAL DEVELOPMENT ONLY - NOT for staging or production!**
+
+This Terraform configuration sets up a complete LOCAL development database environment using Docker containers on your local machine for PostgreSQL, Redis, and ClickHouse.
 
 ## Prerequisites
 
