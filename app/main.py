@@ -59,14 +59,19 @@ def _load_all_env_files(root_path: Path) -> None:
 
 
 def _setup_environment_files() -> None:
-    """Load environment files in the correct order of precedence."""
+    """Load environment files ONLY if not already loaded by dev launcher."""
+    # Skip loading if running under dev launcher (it already loaded secrets)
+    if os.environ.get('DEV_LAUNCHER_ACTIVE'):
+        return
+    
+    # Only load for direct uvicorn runs
     try:
         root_path = _get_project_root()
         _load_all_env_files(root_path)
-    except ImportError: pass
+    except ImportError: 
+        pass
 
-
-# Load environment files in the correct order
+# Load environment files only if needed
 _setup_environment_files()
 
 # Import unified logging first to ensure interceptor is set up

@@ -1,18 +1,110 @@
 /**
- * Messages Domain: Comprehensive Message Types
+ * Message Domain Types - Extracted from Type Registry
  * 
- * CRITICAL ARCHITECTURAL COMPLIANCE:
- * - Single source of truth for message types
- * - Maximum file size: 300 lines
- * - Functions ≤8 lines each
+ * This module contains all message-related type definitions, interfaces, and utilities
+ * for the Netra frontend application. It serves as the single source of truth for
+ * message handling across the system.
+ * 
+ * ARCHITECTURAL COMPLIANCE:
+ * - All functions ≤8 lines (MANDATORY)
+ * - Module ≤300 lines total
+ * - Strong type safety with comprehensive interfaces
+ * - Backward compatibility maintained
+ * 
+ * Usage:
+ *   import { Message, MessageRole, createMessage } from '@/types/domains/messages';
  */
 
-import { MessageRole, MessageType } from '../shared/enums';
-import { BaseMessage, MessageMetadata, MessageAttachment, MessageReaction } from '../shared/base';
+import { MessageType } from '../shared/enums';
 
 // ============================================================================
 // UNIFIED MESSAGE HIERARCHY - Single Source of Truth
 // ============================================================================
+
+/**
+ * Comprehensive message metadata - merged from all sources
+ * Includes properties from chat-store, threadService, and all component definitions
+ */
+export interface MessageMetadata {
+  // Agent and tool information
+  sub_agent?: string;
+  tool_name?: string;
+  execution_time_ms?: number;
+  agent_name?: string;
+  
+  // Content and processing metadata
+  token_count?: number;
+  model_used?: string;
+  confidence_score?: number;
+  source?: string;
+  
+  // References and attachments
+  references?: string[];
+  attachments?: Array<{
+    id: string;
+    filename: string;
+    mimeType: string;
+    size: number;
+    url?: string;
+    thumbnailUrl?: string;
+  }>;
+  
+  // Streaming and processing state
+  is_streaming?: boolean;
+  chunk_index?: number;
+  
+  // Backend compatibility
+  model?: string;
+  tokens_used?: number;
+  processing_time?: number;
+  run_id?: string;
+  step_id?: string;
+  tool_calls?: Array<Record<string, unknown>>;
+  custom_fields?: Record<string, string | number | boolean>;
+  
+  // UI state
+  editedAt?: string;
+  
+  // Demo chat compatibility
+  processingTime?: number;
+  tokensUsed?: number;
+  costSaved?: number;
+  optimizationType?: string;
+  
+  // Formatting metadata for consistent rendering
+  formattingMetadata?: {
+    preserveWhitespace: boolean;
+    renderMarkdown: boolean;
+    parseLinks: boolean;
+    highlightCode: boolean;
+    contentType: 'plain_text' | 'markdown' | 'code' | 'json' | 'error' | 'system';
+    formatVersion: string;
+  };
+  
+  [key: string]: unknown;
+}
+
+/**
+ * Message roles - consolidated from all definitions
+ * Supports user, assistant, and system messages for complete chat functionality
+ */
+export type MessageRole = 'user' | 'assistant' | 'system';
+
+/**
+ * Base message interface with core fields
+ * Foundation for all message types across the system
+ */
+export interface BaseMessage {
+  id: string;
+  content: string;
+  role?: MessageRole;
+  type?: MessageType;
+  created_at?: string;
+  timestamp?: number | Date; // Support both number and Date for compatibility
+  displayed_to_user?: boolean;
+  error?: string;
+  thread_id?: string | null;
+}
 
 /**
  * Comprehensive Message interface - consolidated from all sources
@@ -20,10 +112,11 @@ import { BaseMessage, MessageMetadata, MessageAttachment, MessageReaction } from
  * This is the SINGLE SOURCE OF TRUTH for all message handling
  */
 export interface Message extends BaseMessage {
+  // Core message properties (ensuring all variations are covered)
   role: MessageRole; // Make role required for Message (not optional like BaseMessage)
   
   // Threading and context
-  threadId?: string;
+  threadId?: string; // Frontend camelCase version
   threadTitle?: string;
   
   // Metadata and enrichment (comprehensive from all sources)
@@ -39,13 +132,18 @@ export interface Message extends BaseMessage {
     filename?: string;
     size?: number;
     mime_type?: string;
-    mimeType?: string;
+    mimeType?: string; // Support both formats
     preview?: string;
     thumbnailUrl?: string;
   }>;
   
-  // Reactions and social features
-  reactions?: MessageReaction[];
+  // Reactions and social features (from chat-store)
+  reactions?: Array<{
+    emoji: string;
+    count: number;
+    users: string[];
+    timestamp: string;
+  }>;
   
   // Edit tracking
   edited_at?: string;
@@ -69,50 +167,33 @@ export interface Message extends BaseMessage {
  */
 export type ChatMessage = Message;
 
-// Re-export types for components that expect different names
-export { Message as ChatMessageType };
-export { BaseMessage as BaseChatMessage };
-
 // ============================================================================
-// MESSAGE DATA TRANSFER OBJECTS
+// MESSAGE CREATION UTILITIES
 // ============================================================================
 
-export interface MessageData {
-  id: string;
-  role: "user" | "assistant" | "system" | "tool";
-  content: string;
-  timestamp: string;
-  metadata?: Record<string, string | number | boolean>;
-}
-
-export interface ThreadHistoryResponse {
-  thread_id: string;
-  messages: MessageData[];
-}
-
-// ============================================================================
-// MESSAGE CREATION UTILITIES - Each function ≤8 lines
-// ============================================================================
-
+/**
+ * Create a message with the specified role, content, and optional properties
+ * Generates unique ID and timestamps automatically
+ */
 export function createMessage(
   role: MessageRole,
   content: string,
   options: Partial<Message> = {}
 ): Message {
-  const id = options.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-  const timestamp = options.timestamp || Date.now();
-  const created_at = options.created_at || new Date().toISOString();
-  
   return {
-    id,
+    id: options.id || `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     role,
     content,
-    timestamp,
-    created_at,
+    timestamp: options.timestamp || Date.now(),
+    created_at: options.created_at || new Date().toISOString(),
     ...options
   };
 }
 
+/**
+ * Create a chat message (alias for createMessage)
+ * Provides backward compatibility for components expecting this function name
+ */
 export function createChatMessage(
   role: MessageRole,
   content: string,
@@ -121,147 +202,39 @@ export function createChatMessage(
   return createMessage(role, content, options);
 }
 
-export function createUserMessage(
-  content: string,
-  options: Partial<Message> = {}
-): Message {
-  return createMessage('user', content, options);
-}
-
-export function createAssistantMessage(
-  content: string,
-  options: Partial<Message> = {}
-): Message {
-  return createMessage('assistant', content, options);
-}
-
-export function createSystemMessage(
-  content: string,
-  options: Partial<Message> = {}
-): Message {
-  return createMessage('system', content, options);
-}
-
 // ============================================================================
-// MESSAGE VALIDATION - Each function ≤8 lines
+// BACKWARDS COMPATIBILITY EXPORTS
 // ============================================================================
 
-export function isValidMessage(obj: unknown): obj is Message {
-  if (typeof obj !== 'object' || obj === null) return false;
-  const msg = obj as Message;
-  return (
-    typeof msg.id === 'string' &&
-    typeof msg.content === 'string' &&
-    typeof msg.role === 'string'
-  );
-}
-
-export function isUserMessage(message: Message): boolean {
-  return message.role === 'user';
-}
-
-export function isAssistantMessage(message: Message): boolean {
-  return message.role === 'assistant';
-}
-
-export function isSystemMessage(message: Message): boolean {
-  return message.role === 'system';
-}
-
-export function hasAttachments(message: Message): boolean {
-  return Boolean(message.attachments && message.attachments.length > 0);
-}
-
-export function hasReactions(message: Message): boolean {
-  return Boolean(message.reactions && message.reactions.length > 0);
-}
-
-export function isEdited(message: Message): boolean {
-  return Boolean(message.is_edited || message.edited_at);
-}
-
-export function hasMetadata(message: Message): boolean {
-  return Boolean(message.metadata && Object.keys(message.metadata).length > 0);
-}
+// Re-export types for components that expect different names
+export { Message as ChatMessageType };
+export { BaseMessage as BaseChatMessage };
 
 // ============================================================================
-// MESSAGE SORTING AND FILTERING - Each function ≤8 lines
+// UTILITY TYPES
 // ============================================================================
 
-export function sortMessagesByTimestamp(messages: Message[]): Message[] {
-  return [...messages].sort((a, b) => {
-    const aTime = a.timestamp || 0;
-    const bTime = b.timestamp || 0;
-    const aNum = typeof aTime === 'number' ? aTime : new Date(aTime).getTime();
-    const bNum = typeof bTime === 'number' ? bTime : new Date(bTime).getTime();
-    return aNum - bNum;
-  });
+export type MessageStatus = 'pending' | 'sent' | 'delivered' | 'read' | 'failed';
+
+export interface MessageAttachment {
+  id: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+  url?: string;
+  thumbnailUrl?: string;
+  // Chat-store compatibility
+  type?: 'image' | 'file' | 'link' | 'code' | 'data';
+  name?: string;
+  mime_type?: string; // Snake case variant
+  preview?: string;
 }
 
-export function filterMessagesByRole(
-  messages: Message[],
-  role: MessageRole
-): Message[] {
-  return messages.filter(msg => msg.role === role);
+export interface MessageReaction {
+  emoji: string;
+  count: number;
+  users: string[];
+  timestamp: string;
+  // Legacy compatibility
+  userId?: string;  
 }
-
-export function filterMessagesByThread(
-  messages: Message[],
-  threadId: string
-): Message[] {
-  return messages.filter(msg => 
-    msg.thread_id === threadId || msg.threadId === threadId
-  );
-}
-
-export function getRecentMessages(
-  messages: Message[],
-  count: number
-): Message[] {
-  const sorted = sortMessagesByTimestamp(messages);
-  return sorted.slice(-count);
-}
-
-// ============================================================================
-// MESSAGE TRANSFORMATION - Each function ≤8 lines
-// ============================================================================
-
-export function messageToData(message: Message): MessageData {
-  return {
-    id: message.id,
-    role: message.role as "user" | "assistant" | "system" | "tool",
-    content: message.content,
-    timestamp: message.created_at || new Date().toISOString(),
-    metadata: message.metadata as Record<string, string | number | boolean>
-  };
-}
-
-export function dataToMessage(data: MessageData): Message {
-  return {
-    id: data.id,
-    role: data.role as MessageRole,
-    content: data.content,
-    created_at: data.timestamp,
-    timestamp: new Date(data.timestamp).getTime(),
-    metadata: data.metadata
-  };
-}
-
-// ============================================================================
-// DEFAULT EXPORT FOR CONVENIENCE
-// ============================================================================
-
-export default {
-  createMessage,
-  createChatMessage,
-  createUserMessage,
-  createAssistantMessage,
-  createSystemMessage,
-  isValidMessage,
-  isUserMessage,
-  isAssistantMessage,
-  isSystemMessage,
-  sortMessagesByTimestamp,
-  filterMessagesByRole,
-  filterMessagesByThread
-};

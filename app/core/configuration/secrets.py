@@ -106,21 +106,11 @@ class SecretManager:
     def _load_from_environment_variables(self) -> None:
         """Load secrets from environment variables."""
         env_mapping = self._get_environment_variable_mapping()
-        # Debug environment for gemini key
-        import sys
-        print(f"[SECRET_DEBUG] Environment check:", file=sys.stderr)
-        print(f"[SECRET_DEBUG] Total env vars: {len(os.environ)}", file=sys.stderr)
-        print(f"[SECRET_DEBUG] Looking for GEMINI_API_KEY: {'YES' if 'GEMINI_API_KEY' in os.environ else 'NO'}", file=sys.stderr)
-        if 'GEMINI_API_KEY' in os.environ:
-            print(f"[SECRET_DEBUG] GEMINI_API_KEY value starts with: {os.environ['GEMINI_API_KEY'][:10]}...", file=sys.stderr)
-        
         for secret_name, env_var in env_mapping.items():
             value = os.environ.get(env_var)
             if value:
                 self._secret_cache[secret_name] = value
                 self._logger.debug(f"Loaded {secret_name} from environment")
-            elif secret_name == "gemini-api-key":
-                print(f"[SECRET_DEBUG] Failed to load {secret_name} from {env_var}", file=sys.stderr)
     
     def _load_from_gcp_secret_manager(self) -> None:
         """Load secrets from GCP Secret Manager."""

@@ -200,7 +200,7 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
         return -1, f"Tests timed out after {timeout}s"
 
 
-def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None) -> Tuple[int, str]:
+def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None, test_level: str = None) -> Tuple[int, str]:
     """Run frontend tests with specified arguments."""
     global _active_processes
     
@@ -214,10 +214,15 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
     if results:
         results["frontend"]["status"] = "running"
     
-    # Adjust timeout for smoke tests - they should be fast
-    if len(args) == 0 or ("--category" in args and "smoke" in str(args)):
+    # Determine if we should use simple frontend runner (for smoke tests or when no args)
+    use_simple_runner = (len(args) == 0 or ("--category" in args and "smoke" in str(args)))
+    
+    if use_simple_runner:
         timeout = min(timeout, 60)  # Cap smoke tests at 60 seconds
         frontend_script = PROJECT_ROOT / "scripts" / "test_frontend_simple.py"
+        # For simple runner, we need to pass the test level
+        if test_level and len(args) == 0:
+            args = ["--level", test_level]
     else:
         frontend_script = PROJECT_ROOT / RUNNERS["frontend"]
         

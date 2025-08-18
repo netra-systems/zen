@@ -59,6 +59,10 @@ def write_service_discovery(port: int, host: str = "localhost"):
     return discovery_file
 
 if __name__ == "__main__":
+    # Mark that we're running from dev launcher if backend port is set
+    if os.environ.get('BACKEND_PORT'):
+        os.environ['DEV_LAUNCHER_ACTIVE'] = 'true'
+    
     parser = argparse.ArgumentParser(description='Run the Netra AI server')
     parser.add_argument('--no-reload', action='store_true', 
                         help='Run server without auto-reload (useful for testing)')

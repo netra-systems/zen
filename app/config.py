@@ -44,13 +44,6 @@ def get_config() -> AppConfig:
     **PREFERRED METHOD**: Use this for all new code.
     Single source of truth for Enterprise reliability.
     """
-    import os
-    import sys
-    # Debug logging for Gemini API key issue
-    if 'GEMINI_API_KEY' in os.environ:
-        print(f"[CONFIG] GEMINI_API_KEY found in environment", file=sys.stderr)
-    else:
-        print(f"[CONFIG] WARNING: GEMINI_API_KEY not in environment!", file=sys.stderr)
     return get_unified_config()
 
 def reload_config():

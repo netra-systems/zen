@@ -2,15 +2,31 @@ import React, { useEffect, useRef, useLayoutEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
 import { MessageItem } from './MessageItem';
 import { ThinkingIndicator } from './ThinkingIndicator';
+import { MessageSkeleton, SkeletonPresets } from '../loading/MessageSkeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useProgressiveLoading } from '@/hooks/useProgressiveLoading';
 
 export const MessageList: React.FC = () => {
-  const { messages, isProcessing } = useUnifiedChatStore();
+  const { messages, isProcessing, isThreadLoading, currentRunId } = useUnifiedChatStore();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isUserScrolling = useRef(false);
   const lastScrollTop = useRef(0);
+  const pendingMessageRef = useRef<string | null>(null);
+  
+  // Progressive loading for pending messages
+  const {
+    shouldShowSkeleton,
+    shouldShowContent,
+    contentOpacity,
+    startLoading,
+    completeLoading
+  } = useProgressiveLoading({
+    skeletonDuration: 800,
+    revealDuration: 300,
+    fadeInDelay: 100
+  });
 
   const scrollToBottom = (smooth = true) => {
     if (messagesEndRef.current && !isUserScrolling.current) {
@@ -52,6 +68,47 @@ export const MessageList: React.FC = () => {
   useLayoutEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Handle progressive loading for new messages
+  useEffect(() => {
+    if (isProcessing && !pendingMessageRef.current) {
+      pendingMessageRef.current = currentRunId || 'pending';
+      startLoading();
+    } else if (!isProcessing && pendingMessageRef.current) {
+      completeLoading();
+      pendingMessageRef.current = null;
+    }
+  }, [isProcessing, currentRunId, startLoading, completeLoading]);
+
+  // Helper function to determine skeleton type based on processing state
+  const determineSkeletonType = () => {
+    if (isThreadLoading) return 'ai';
+    if (currentRunId) return 'agent-card';
+    return 'ai';
+  };
+
+  // Render skeleton for pending AI response
+  const renderPendingSkeleton = () => {
+    if (!shouldShowSkeleton) return null;
+    
+    return (
+      <motion.div
+        key="pending-skeleton"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+      >
+        <MessageSkeleton
+          type={determineSkeletonType()}
+          phase="content"
+          showAvatar={true}
+          showTimestamp={false}
+          className="animate-pulse"
+        />
+      </motion.div>
+    );
+  };
 
   const displayedMessages = messages.map(msg => ({
     id: msg.id,
@@ -102,22 +159,35 @@ export const MessageList: React.FC = () => {
           </motion.div>
         )}
         
-        {displayedMessages.map((msg, index) => (
-          <motion.div
-            key={msg.id || `msg-${index}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ 
-              duration: 0.3,
-              delay: index === displayedMessages.length - 1 ? 0 : 0
-            }}
-          >
-            <MessageItem message={msg} />
-          </motion.div>
-        ))}
+        {displayedMessages.map((msg, index) => {
+          const isLatestMessage = index === displayedMessages.length - 1;
+          const shouldApplyProgressive = isLatestMessage && shouldShowContent;
+          
+          return (
+            <motion.div
+              key={msg.id || `msg-${index}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ 
+                opacity: shouldApplyProgressive ? contentOpacity : 1, 
+                y: 0 
+              }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ 
+                duration: shouldApplyProgressive ? 0.6 : 0.3,
+                delay: index === displayedMessages.length - 1 ? 0 : 0,
+                ease: 'easeOut'
+              }}
+            >
+              <MessageItem message={msg} />
+            </motion.div>
+          );
+        })}
         
-        {isProcessing && (
+        {/* Render skeleton for pending messages */}
+        {isProcessing && renderPendingSkeleton()}
+        
+        {/* Fallback thinking indicator for older browsers or when skeletons are disabled */}
+        {isProcessing && !shouldShowSkeleton && (
           <motion.div
             key="thinking-indicator"
             initial={{ opacity: 0 }}

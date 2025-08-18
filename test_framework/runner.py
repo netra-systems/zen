@@ -52,9 +52,9 @@ class UnifiedTestRunner:
         self._handle_test_failures(exit_code, output, "backend")
         return exit_code, output
     
-    def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None) -> Tuple[int, str]:
+    def run_frontend_tests(self, args: List[str], timeout: int = 300, speed_opts: Optional[Dict] = None, test_level: str = None) -> Tuple[int, str]:
         """Run frontend tests and update results."""
-        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts)
+        exit_code, output = run_frontend_tests(args, timeout, self.results, speed_opts, test_level)
         self._handle_test_failures(exit_code, output, "frontend")
         return exit_code, output
     
