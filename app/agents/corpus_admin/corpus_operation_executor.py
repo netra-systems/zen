@@ -75,28 +75,41 @@ class CorpusOperationExecutor(BaseExecutionInterface):
         approval_manager, update_manager
     ) -> None:
         """Execute the complete corpus operation workflow (legacy compatibility)."""
-        # Create execution context for modern pattern
-        context = ExecutionContext(
+        context = self._create_workflow_context(state, run_id, stream_updates)
+        
+        try:
+            result = await self._execute_with_reliability(context)
+            await self._handle_workflow_result(result, context)
+        except Exception as e:
+            await self._handle_workflow_exception(e, context, state, run_id, stream_updates, start_time, approval_manager, update_manager)
+    
+    def _create_workflow_context(self, state: DeepAgentState, run_id: str, stream_updates: bool) -> ExecutionContext:
+        """Create execution context for workflow."""
+        return ExecutionContext(
             run_id=run_id, agent_name=self.agent_name, state=state,
             stream_updates=stream_updates, thread_id=getattr(state, 'chat_thread_id', run_id),
             user_id=getattr(state, 'user_id', 'default_user')
         )
-        
-        try:
-            # Execute with modern pattern using reliability manager
-            result = await self.reliability_manager.execute_with_reliability(
-                context, lambda: self.execution_engine.execute(self, context)
-            )
-            
-            # Handle result with error handler
-            if not result.success:
-                await self.error_handler.handle_execution_error(result.error, context)
-                
-        except Exception as e:
-            # Handle with error handler and fallback
-            await self.error_handler.handle_execution_error(str(e), context)
-            logger.error(f"Modern execution failed, falling back to legacy: {e}")
-            await self._execute_legacy_workflow(state, run_id, stream_updates, start_time, approval_manager, update_manager)
+    
+    async def _execute_with_reliability(self, context: ExecutionContext):
+        """Execute with modern pattern using reliability manager."""
+        return await self.reliability_manager.execute_with_reliability(
+            context, lambda: self.execution_engine.execute(self, context)
+        )
+    
+    async def _handle_workflow_result(self, result, context: ExecutionContext) -> None:
+        """Handle workflow result with error handler."""
+        if not result.success:
+            await self.error_handler.handle_execution_error(result.error, context)
+    
+    async def _handle_workflow_exception(
+        self, e: Exception, context: ExecutionContext, state: DeepAgentState, run_id: str, 
+        stream_updates: bool, start_time: float, approval_manager, update_manager
+    ) -> None:
+        """Handle workflow exception with error handler and fallback."""
+        await self.error_handler.handle_execution_error(str(e), context)
+        logger.error(f"Modern execution failed, falling back to legacy: {e}")
+        await self._execute_legacy_workflow(state, run_id, stream_updates, start_time, approval_manager, update_manager)
     
     async def _parse_operation_request(self, state: DeepAgentState):
         """Parse operation request from state."""

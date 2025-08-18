@@ -230,12 +230,31 @@ class AnomalyDetector(BaseExecutionInterface):
     ) -> Dict[str, Any]:
         """Prepare parameters for anomaly response object creation."""
         start_time, end_time = time_range
+        base_params = self._build_base_anomaly_params(data, anomaly_details, max_severity)
+        extended_params = self._build_extended_anomaly_params(
+            z_score_threshold, start_time, end_time, max_severity
+        )
+        return {**base_params, **extended_params}
+    
+    def _build_base_anomaly_params(
+        self, data: List[Dict], anomaly_details: List[AnomalyDetail],
+        max_severity: AnomalySeverity
+    ) -> Dict[str, Any]:
+        """Build base anomaly response parameters."""
         return {
             'anomalies_detected': True,
             'anomaly_count': len(data),
             'anomaly_details': anomaly_details[:50],
             'confidence_score': 0.85,
-            'severity': max_severity,
+            'severity': max_severity
+        }
+    
+    def _build_extended_anomaly_params(
+        self, z_score_threshold: float, start_time: datetime,
+        end_time: datetime, max_severity: AnomalySeverity
+    ) -> Dict[str, Any]:
+        """Build extended anomaly response parameters."""
+        return {
             'threshold_used': z_score_threshold,
             'analysis_period': {"start": start_time, "end": end_time},
             'recommended_actions': self._generate_recommendations(max_severity)
@@ -282,11 +301,27 @@ class AnomalyDetector(BaseExecutionInterface):
         """Prepare parameters for anomaly detail object creation."""
         actual_value, expected_value, z_score = values
         deviation_pct = self._calculate_deviation_percentage(actual_value, expected_value)
+        base_params = self._build_base_detail_params(row, metric_name, actual_value, expected_value)
+        extended_params = self._build_extended_detail_params(deviation_pct, z_score)
+        return {**base_params, **extended_params}
+    
+    def _build_base_detail_params(
+        self, row: Dict, metric_name: str, 
+        actual_value: float, expected_value: float
+    ) -> Dict[str, Any]:
+        """Build base anomaly detail parameters."""
         return {
             'timestamp': row.get('timestamp', datetime.utcnow()),
             'metric_name': metric_name,
             'actual_value': actual_value,
-            'expected_value': expected_value,
+            'expected_value': expected_value
+        }
+    
+    def _build_extended_detail_params(
+        self, deviation_pct: float, z_score: float
+    ) -> Dict[str, Any]:
+        """Build extended anomaly detail parameters."""
+        return {
             'deviation_percentage': deviation_pct,
             'z_score': z_score,
             'severity': self._determine_severity(z_score)

@@ -114,13 +114,25 @@ class ExecutionMonitor:
     def get_agent_performance_stats(self, agent_name: str) -> Dict[str, Any]:
         """Get comprehensive performance stats for agent."""
         stats = self._agent_stats[agent_name]
+        base_stats = self._build_base_performance_stats(agent_name, stats)
+        timing_stats = self._build_timing_performance_stats(stats)
+        base_stats.update(timing_stats)
+        return base_stats
+    
+    def _build_base_performance_stats(self, agent_name: str, stats) -> Dict[str, Any]:
+        """Build base performance statistics."""
         return {
             "agent_name": agent_name,
             "total_executions": stats.total_executions,
             "successful_executions": stats.successful_executions,
             "failed_executions": stats.failed_executions,
             "success_rate": self._calculate_success_rate(stats),
-            "error_rate": stats.error_rate,
+            "error_rate": stats.error_rate
+        }
+    
+    def _build_timing_performance_stats(self, stats) -> Dict[str, Any]:
+        """Build timing performance statistics."""
+        return {
             "average_execution_time_ms": stats.average_execution_time_ms,
             "p95_execution_time_ms": stats.p95_execution_time_ms,
             "last_execution": stats.last_execution_time
@@ -235,14 +247,19 @@ class ExecutionMonitor:
         if total_executions == 0:
             return "healthy"
         
-        # Calculate global error rate
+        global_error_rate = self._calculate_global_error_rate(total_executions)
+        return self._evaluate_health_status(global_error_rate)
+    
+    def _calculate_global_error_rate(self, total_executions: int) -> float:
+        """Calculate global error rate."""
         total_errors = sum(stats.failed_executions for stats in self._agent_stats.values())
-        global_error_rate = total_errors / total_executions
-        
+        return total_errors / total_executions
+    
+    def _evaluate_health_status(self, global_error_rate: float) -> str:
+        """Evaluate health status based on error rate."""
         threshold = self._health_indicators["error_rate_threshold"]
         if global_error_rate > threshold:
             return "degraded"
-        
         return "healthy"
     
     def _get_health_metrics(self) -> Dict[str, float]:
@@ -251,11 +268,23 @@ class ExecutionMonitor:
         if total_executions == 0:
             return {"global_error_rate": 0.0, "avg_execution_time_ms": 0.0}
         
-        total_errors = sum(stats.failed_executions for stats in self._agent_stats.values())
+        total_errors = self._calculate_total_errors()
+        all_times = self._collect_all_execution_times()
+        return self._build_health_metrics_dict(total_executions, total_errors, all_times)
+    
+    def _calculate_total_errors(self) -> int:
+        """Calculate total errors across all agents."""
+        return sum(stats.failed_executions for stats in self._agent_stats.values())
+    
+    def _collect_all_execution_times(self) -> list:
+        """Collect all execution times from agents."""
         all_times = []
         for stats in self._agent_stats.values():
             all_times.extend(stats.execution_times)
-        
+        return all_times
+    
+    def _build_health_metrics_dict(self, total_executions: int, total_errors: int, all_times: list) -> Dict[str, float]:
+        """Build health metrics dictionary."""
         return {
             "global_error_rate": total_errors / total_executions,
             "avg_execution_time_ms": sum(all_times) / len(all_times) if all_times else 0.0,
@@ -298,16 +327,17 @@ class MetricsCollector:
     def get_aggregated_metrics(self) -> Dict[str, Any]:
         """Get aggregated metrics from all monitors and core collector."""
         agent_metrics = self._get_agent_specific_metrics()
-        
-        # Get core system metrics
+        self._add_core_system_metrics(agent_metrics)
+        return agent_metrics
+    
+    def _add_core_system_metrics(self, agent_metrics: Dict[str, Any]) -> None:
+        """Add core system metrics to agent metrics."""
         try:
             core_metrics = self.core_collector.get_metric_summary("system.cpu_percent")
             agent_metrics["system_metrics"] = core_metrics
         except Exception:
             # Core collector may not be started yet
             pass
-        
-        return agent_metrics
     
     def _get_agent_specific_metrics(self) -> Dict[str, Any]:
         """Get agent-specific metrics from monitors."""
