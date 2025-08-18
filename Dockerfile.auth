@@ -27,13 +27,12 @@ COPY --from=builder /root/.local /root/.local
 ENV PATH=/root/.local/bin:$PATH
 
 # Copy application code (selective copy for auth service)
-COPY auth_service_minimal.py ./main.py
+COPY auth_service/main.py ./main.py
 
 # Copy only necessary app modules (exclude LLM-related modules)
 COPY app/__init__.py ./app/
 COPY app/config*.py ./app/
 COPY app/logging_config.py ./app/
-COPY app/auth_dependencies.py ./app/
 COPY app/clients/ ./app/clients/
 COPY app/core/ ./app/core/
 COPY app/db/ ./app/db/
