@@ -79,7 +79,6 @@ class TestMessageOrderingPreservation:
                 pytest.skip("WebSocket server not available for concurrent ordering test")
             raise
 
-
 @pytest.mark.asyncio
 class TestAtLeastOnceDeliveryGuarantee:
     @pytest.fixture
@@ -125,7 +124,6 @@ class TestAtLeastOnceDeliveryGuarantee:
             if "server not available" in str(e).lower():
                 pytest.skip("WebSocket server not available for retry test")
             raise
-
 
 @pytest.mark.asyncio
 class TestDuplicateMessageDetection:
@@ -179,7 +177,6 @@ class TestDuplicateMessageDetection:
             if "server not available" in str(e).lower():
                 pytest.skip("WebSocket server not available for prevention test")
             raise
-
 
 @pytest.mark.asyncio
 class TestReconnectionWithMessageRecovery:

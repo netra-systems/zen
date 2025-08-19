@@ -25,7 +25,7 @@ else:
     load_dotenv()
     print("Loaded environment from current directory or system")
 
-from auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -66,7 +66,7 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    from auth_core.config import AuthConfig
+    from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8081')}")
     
@@ -80,8 +80,8 @@ async def lifespan(app: FastAPI):
         return
     
     # Initialize database connections on startup
-    from auth_core.database.connection import auth_db
-    from auth_core.database.main_db_sync import main_db_sync
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.main_db_sync import main_db_sync
     
     initialization_errors = []
     
