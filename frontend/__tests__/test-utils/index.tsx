@@ -295,3 +295,8 @@ export {
 
 export { userEvent };
 export { jest };
+
+// Export new comprehensive test utilities
+export * from './real-websocket-utils';
+export * from './real-state-utils';
+export * from './render-with-providers';

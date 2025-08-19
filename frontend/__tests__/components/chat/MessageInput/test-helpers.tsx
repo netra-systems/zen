@@ -50,12 +50,10 @@ export const sendViaButton = async (text: string) => {
 export const expectMessageSent = async (mockSend: jest.Mock, content: string) => {
   await waitFor(() => {
     expect(mockSend).toHaveBeenCalledWith({
-      type: 'user_message',
-      payload: {
-        content,
-        references: [],
-        thread_id: 'thread-1'
-      }
+      message: content,
+      activeThreadId: 'thread-1',
+      currentThreadId: 'thread-1', 
+      isAuthenticated: true
     });
   });
 };

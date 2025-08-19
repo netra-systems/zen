@@ -8,6 +8,7 @@
 import {
   React,
   render,
+  act,
   setupTestEnvironment,
   cleanupTestEnvironment,
   createMockWebSocketServer,
@@ -133,8 +134,10 @@ const testUpdateBatching = async (getByText: any, getByTestId: any): Promise<voi
   const triggerButton = getByText('Trigger Concurrent Updates');
   
   // Trigger multiple batches rapidly
-  triggerButton.click();
-  triggerButton.click();
+  await act(async () => {
+    triggerButton.click();
+    triggerButton.click();
+  });
   
   // Should handle batching efficiently
   expect(getByTestId('update-count')).toHaveTextContent('6 updates');
@@ -145,9 +148,11 @@ const testStateConsistency = async (getByText: any, getByTestId: any): Promise<v
   const triggerButton = getByText('Trigger Concurrent Updates');
   
   // Multiple rapid triggers should maintain consistency
-  for (let i = 0; i < 5; i++) {
-    triggerButton.click();
-  }
+  await act(async () => {
+    for (let i = 0; i < 5; i++) {
+      triggerButton.click();
+    }
+  });
   
   // State should remain consistent
   const updateCount = parseInt(getByTestId('update-count').textContent?.split(' ')[0] || '0');
@@ -163,9 +168,11 @@ const testMixedPriorityUpdates = async (getByText: any, getByTestId: any): Promi
   const normalButton = getByText('Normal Update');
   
   // Mix critical and normal updates
-  criticalButton.click();
-  normalButton.click();
-  criticalButton.click();
+  await act(async () => {
+    criticalButton.click();
+    normalButton.click();
+    criticalButton.click();
+  });
   
   // Both types should be processed
   expect(getByTestId('critical-data')).not.toHaveTextContent('');
@@ -177,8 +184,10 @@ const testLowPriorityDeferral = async (getByText: any, getByTestId: any): Promis
   const normalButton = getByText('Normal Update');
   
   // Trigger low priority followed by high priority
-  normalButton.click();
-  criticalButton.click();
+  await act(async () => {
+    normalButton.click();
+    criticalButton.click();
+  });
   
   // Critical should be processed first/faster
   expect(getByTestId('critical-data')).not.toHaveTextContent('');
@@ -187,7 +196,9 @@ const testLowPriorityDeferral = async (getByText: any, getByTestId: any): Promis
 const testStartTransition = async (getByText: any, getByTestId: any): Promise<void> => {
   const normalButton = getByText('Normal Update');
   
-  normalButton.click();
+  await act(async () => {
+    normalButton.click();
+  });
   
   // Normal updates should use startTransition (non-blocking)
   expect(getByTestId('normal-data')).toBeInTheDocument();
@@ -197,8 +208,10 @@ const testInterruption = async (getByText: any, getByTestId: any): Promise<void>
   const triggerButton = getByText('Trigger Concurrent Updates');
   
   // Start update, then interrupt with another
-  triggerButton.click();
-  triggerButton.click();
+  await act(async () => {
+    triggerButton.click();
+    triggerButton.click();
+  });
   
   // Should handle interruption gracefully
   expect(getByTestId('update-count')).toBeDefined();
@@ -209,12 +222,14 @@ const testRenderScheduling = async (getByText: any, getByTestId: any): Promise<v
   
   // Multiple rapid updates should be scheduled optimally
   const startTime = performance.now();
-  for (let i = 0; i < 3; i++) {
-    triggerButton.click();
-  }
+  await act(async () => {
+    for (let i = 0; i < 3; i++) {
+      triggerButton.click();
+    }
+  });
   const endTime = performance.now();
   
   // Should complete efficiently
   expect(endTime - startTime).toBeLessThan(100);
   expect(getByTestId('update-count')).toBeDefined();
-};
+};;

@@ -9,6 +9,7 @@ import {
   React,
   fireEvent,
   waitFor,
+  act,
   simulateAsyncDelay,
   usePerformanceMonitor,
   TEST_TIMEOUTS
@@ -436,9 +437,11 @@ export const verifyRenderPerformance = async (getByTestId: any, renderTime: numb
 
 export const testRapidRerendering = async (getByText: any, getByTestId: any): Promise<void> => {
   // Trigger multiple rapid rerenders
-  for (let i = 0; i < 10; i++) {
-    fireEvent.click(getByText('Trigger Rerender'));
-  }
+  await act(async () => {
+    for (let i = 0; i < 10; i++) {
+      fireEvent.click(getByText('Trigger Rerender'));
+    }
+  });
   
   await waitFor(() => {
     expect(getByTestId('counter')).toHaveTextContent('10');
@@ -543,7 +546,9 @@ export const testDOMNodeManagement = async (getByText: any, getByTestId: any): P
 };
 
 export const testConcurrentUpdates = async (getByText: any, getByTestId: any): Promise<void> => {
-  fireEvent.click(getByText('Trigger Concurrent Updates'));
+  await act(async () => {
+    fireEvent.click(getByText('Trigger Concurrent Updates'));
+  });
   
   await waitFor(() => {
     expect(getByTestId('update-count')).toHaveTextContent('3 updates');
@@ -552,8 +557,10 @@ export const testConcurrentUpdates = async (getByText: any, getByTestId: any): P
 };
 
 export const testUpdatePrioritization = async (getByText: any, getByTestId: any): Promise<void> => {
-  fireEvent.click(getByText('Critical Update'));
-  fireEvent.click(getByText('Normal Update'));
+  await act(async () => {
+    fireEvent.click(getByText('Critical Update'));
+    fireEvent.click(getByText('Normal Update'));
+  });
   
   await waitFor(() => {
     expect(getByTestId('critical-data')).not.toHaveTextContent('');

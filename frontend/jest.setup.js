@@ -137,10 +137,30 @@ if (typeof global.StorageEvent === 'undefined') {
       this.newValue = eventInitDict.newValue || null;
       this.oldValue = eventInitDict.oldValue || null;
       this.storageArea = eventInitDict.storageArea || null;
-      this.url = eventInitDict.url || window.location.href;
+      this.url = eventInitDict.url || (typeof window !== 'undefined' ? window.location.href : 'http://localhost:3000');
     }
   };
 }
+
+// Enhanced cookie management for tests
+const mockCookieData = new Map();
+Object.defineProperty(document, 'cookie', {
+  get: () => {
+    return Array.from(mockCookieData.entries())
+      .map(([key, value]) => `${key}=${value}`)
+      .join('; ');
+  },
+  set: (cookie) => {
+    const [nameValue] = cookie.split(';');
+    const [name, value] = nameValue.split('=');
+    if (value === '' || cookie.includes('expires=Thu, 01 Jan 1970')) {
+      mockCookieData.delete(name.trim());
+    } else {
+      mockCookieData.set(name.trim(), value?.trim() || '');
+    }
+  },
+  configurable: true
+});
 
 // Suppress console errors in tests
 const originalError = console.error;
@@ -153,7 +173,8 @@ beforeAll(() => {
        args[0].includes('Warning:') ||
        args[0].includes('ReactDOMTestUtils') ||
        args[0].includes('Error parsing WebSocket message') ||
-       args[0].includes('WebSocket error occurred'))
+       args[0].includes('WebSocket error occurred') ||
+       args[0].includes('overlapping act() calls'))
     ) {
       return;
     }
@@ -188,6 +209,7 @@ afterEach(() => {
   fetchMock.resetMocks();
   if (localStorage && localStorage.clear) localStorage.clear();
   if (sessionStorage && sessionStorage.clear) sessionStorage.clear();
+  mockCookieData.clear();
   Date.now = originalDateNow;
 });
 

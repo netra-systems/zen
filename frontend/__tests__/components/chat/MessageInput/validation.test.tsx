@@ -6,14 +6,74 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { jest } from '@jest/globals';
+
+// Mock external dependencies before importing component
+const mockSendMessage = jest.fn();
+const mockUseWebSocket = jest.fn(() => ({
+  sendMessage: mockSendMessage,
+}));
+
+const mockChatStore = {
+  activeThreadId: 'thread-1',
+  isProcessing: false,
+  setProcessing: jest.fn(),
+  addMessage: jest.fn(),
+  addOptimisticMessage: jest.fn(),
+  updateOptimisticMessage: jest.fn(),
+};
+
+const mockThreadStore = {
+  currentThreadId: 'thread-1',
+  setCurrentThread: jest.fn(),
+  addThread: jest.fn(),
+};
+
+const mockAuthStore = {
+  isAuthenticated: true,
+};
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn(() => mockChatStore)
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: jest.fn(() => mockThreadStore)
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(() => mockAuthStore)
+}));
+
+// Mock the necessary hooks and utilities
+jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+  useMessageHistory: () => ({
+    messageHistory: [],
+    addToHistory: jest.fn(),
+    navigateHistory: jest.fn(() => '')
+  })
+}));
+
+jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+  useTextareaResize: () => ({
+    rows: 1
+  })
+}));
+
+const mockHandleSend = jest.fn();
+
+jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+  useMessageSending: () => ({
+    isSending: false,
+    handleSend: mockHandleSend
+  })
+}));
+
 import { MessageInput } from '@/components/chat/MessageInput';
-import {
-  mockSendMessage,
-  setupMinimalMocks,
-  resetMocks,
-  setProcessing,
-  setAuthenticated
-} from './minimal-test-setup';
 import {
   renderMessageInput,
   getTextarea,
@@ -23,8 +83,21 @@ import {
   expectMessageSent
 } from './test-helpers';
 
-// Setup minimal mocks before imports
-setupMinimalMocks();
+// Reset functions
+const resetMocks = () => {
+  jest.clearAllMocks();
+  mockChatStore.isProcessing = false;
+  mockAuthStore.isAuthenticated = true;
+  mockHandleSend.mockClear();
+};
+
+const setProcessing = (processing: boolean) => {
+  mockChatStore.isProcessing = processing;
+};
+
+const setAuthenticated = (auth: boolean) => {
+  mockAuthStore.isAuthenticated = auth;
+};
 
 describe('MessageInput - Input Validation and Sanitization', () => {
   beforeEach(() => {
@@ -35,13 +108,13 @@ describe('MessageInput - Input Validation and Sanitization', () => {
     it('should trim whitespace from messages before sending', async () => {
       renderMessageInput();
       await sendViaEnter('  Hello World  ');
-      await expectMessageSent(mockSendMessage, 'Hello World');
+      await expectMessageSent(mockHandleSend, 'Hello World');
     });
 
     it('should not send empty messages', async () => {
       renderMessageInput();
       await sendViaEnter('   ');
-      expect(mockSendMessage).not.toHaveBeenCalled();
+      expect(mockHandleSend).not.toHaveBeenCalled();
     });
 
     const setLongMessage = (textarea: HTMLTextAreaElement, length: number) => {
@@ -77,7 +150,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
       renderMessageInput();
       const htmlContent = '<script>alert("XSS")</script>Hello';
       await sendViaEnter(htmlContent);
-      await expectMessageSent(mockSendMessage, htmlContent);
+      await expectMessageSent(mockHandleSend, htmlContent);
     });
 
     const sendSpecialChars = async (chars: string) => {
@@ -90,14 +163,14 @@ describe('MessageInput - Input Validation and Sanitization', () => {
       renderMessageInput();
       const specialChars = '!@#$%^&*()_+-=[]{}|;\':\",./<>?`~';
       await sendSpecialChars(specialChars);
-      await expectMessageSent(mockSendMessage, specialChars);
+      await expectMessageSent(mockHandleSend, specialChars);
     });
 
     it('should handle unicode and emoji characters', async () => {
       renderMessageInput();
       const unicodeText = '你好世界 🌍 مرحبا بالعالم';
       await sendViaEnter(unicodeText);
-      await expectMessageSent(mockSendMessage, unicodeText);
+      await expectMessageSent(mockHandleSend, unicodeText);
     });
 
     it('should prevent sending when processing', async () => {
@@ -123,7 +196,7 @@ describe('MessageInput - Input Validation and Sanitization', () => {
       await sendViaEnter('Message 1');
       await sendViaEnter('Message 2');
       await waitFor(() => {
-        expect(mockSendMessage).toHaveBeenCalledTimes(2);
+        expect(mockHandleSend).toHaveBeenCalledTimes(2);
       });
     });
   });

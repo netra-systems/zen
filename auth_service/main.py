@@ -75,6 +75,7 @@ app = FastAPI(
 
 # Configure CORS
 cors_origins_env = os.getenv("CORS_ORIGINS", "")
+env = os.getenv("ENVIRONMENT", "development")
 
 # Handle wildcard CORS for development
 if cors_origins_env == "*":
@@ -84,13 +85,29 @@ elif cors_origins_env:
     # Parse comma-separated origins
     cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
 else:
-    # Default CORS origins for development
-    cors_origins = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://localhost:8080",
-        "http://localhost:8081"
-    ]
+    # Default CORS origins based on environment
+    if env == "staging":
+        cors_origins = [
+            "https://staging.netrasystems.ai",
+            "https://app.staging.netrasystems.ai",
+            "https://api.staging.netrasystems.ai",
+            "https://auth.staging.netrasystems.ai",
+            "http://localhost:3000"
+        ]
+    elif env == "production":
+        cors_origins = [
+            "https://netrasystems.ai",
+            "https://app.netrasystems.ai",
+            "https://api.netrasystems.ai",
+            "https://auth.netrasystems.ai"
+        ]
+    else:
+        cors_origins = [
+            "http://localhost:3000",
+            "http://localhost:8000",
+            "http://localhost:8080",
+            "http://localhost:8081"
+        ]
 
 # When using wildcard with credentials, we need custom handling
 if cors_origins == ["*"]:

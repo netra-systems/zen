@@ -80,11 +80,17 @@ export const setupMockAuthStore = () => {
     token: 'jwt-enterprise-token-123',
     loading: false,
     error: null,
-    login: jest.fn(),
+    login: jest.fn().mockImplementation((user, token) => {
+      mockStore.isAuthenticated = true;
+      mockStore.user = user;
+      mockStore.token = token;
+      mockStore.error = null;
+    }),
     logout: jest.fn().mockImplementation(() => {
       mockStore.isAuthenticated = false;
       mockStore.user = null;
       mockStore.token = null;
+      mockStore.error = null;
     }),
     reset: jest.fn().mockImplementation(() => {
       mockStore.isAuthenticated = false;
@@ -93,9 +99,17 @@ export const setupMockAuthStore = () => {
       mockStore.loading = false;
       mockStore.error = null;
     }),
-    setLoading: jest.fn(),
-    setError: jest.fn(),
-    updateUser: jest.fn(),
+    setLoading: jest.fn().mockImplementation((loading) => {
+      mockStore.loading = loading;
+    }),
+    setError: jest.fn().mockImplementation((error) => {
+      mockStore.error = error;
+    }),
+    updateUser: jest.fn().mockImplementation((userUpdate) => {
+      if (mockStore.user) {
+        mockStore.user = { ...mockStore.user, ...userUpdate };
+      }
+    }),
     hasPermission: jest.fn(() => true),
     hasAnyPermission: jest.fn(() => true),
     hasAllPermissions: jest.fn(() => true),
@@ -130,7 +144,6 @@ export const createStorageEvent = (key: string, newValue: string | null) => {
     newValue,
     oldValue: newValue ? null : 'old-value',
     url: 'http://localhost:3000',
-    storageArea: window.localStorage,
   });
 };
 
@@ -173,14 +186,19 @@ export const renderLogoutComponent = () => {
 
 // Storage event handler for tests (≤8 lines)
 const setupStorageEventHandler = (mockStore: any) => {
+  let isLoggingOut = false;
   const handleStorageEvent = (event: StorageEvent) => {
-    if (!event.key) return;
-    const authKeys = ['jwt_token', 'authToken', 'auth_token', 'session_token'];
+    if (!event.key || isLoggingOut) return;
+    const authKeys = ['jwt_token', 'authToken', 'auth_token', 'session_token', 'refresh_token', 'session_id'];
     const logoutValues = [null, 'logged_out', 'expired', 'unauthenticated', ''];
     const stateKeys = ['auth_state', 'session_state'];
     const shouldLogout = (authKeys.includes(event.key) && logoutValues.includes(event.newValue)) || 
                         (stateKeys.includes(event.key) && logoutValues.includes(event.newValue));
-    if (shouldLogout) mockStore.logout();
+    if (shouldLogout) {
+      isLoggingOut = true;
+      mockStore.logout();
+      setTimeout(() => { isLoggingOut = false; }, 10);
+    }
   };
   window.addEventListener('storage', handleStorageEvent);
   return () => window.removeEventListener('storage', handleStorageEvent);

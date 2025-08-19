@@ -220,28 +220,20 @@ describe('Logout Multi-Tab Sync Tests', () => {
       const startTime = performance.now();
       // Simulate rapid events
       for (let i = 0; i < 5; i++) {
-        const event = new StorageEvent('storage', {
-          key: 'jwt_token',
-          newValue: null,
-          oldValue: 'token',
-          });
+        const event = createStorageEvent('jwt_token', null);
         window.dispatchEvent(event);
       }
       await waitFor(() => {
         expect(mockStore.logout).toHaveBeenCalled();
       });
       const endTime = performance.now();
-      expect(endTime - startTime).toBeLessThan(100);
+      expect(endTime - startTime).toBeLessThan(PERFORMANCE_THRESHOLDS.RAPID_EVENTS_MAX);
     });
 
     it('should prevent logout spam across tabs', async () => {
       // Simulate multiple logout events
       for (let i = 0; i < 3; i++) {
-        const event = new StorageEvent('storage', {
-          key: 'jwt_token',
-          newValue: null,
-          oldValue: 'token',
-          });
+        const event = createStorageEvent('jwt_token', null);
         window.dispatchEvent(event);
       }
       await waitFor(() => {
@@ -252,11 +244,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
     });
 
     it('should handle storage events without UI blocking', async () => {
-      const event = new StorageEvent('storage', {
-        key: 'authToken',
-        newValue: null,
-        oldValue: 'token',
-      });
+      const event = createStorageEvent('authToken', null);
       window.dispatchEvent(event);
       await waitFor(() => {
         expect(mockStore.logout).toHaveBeenCalled();
@@ -267,21 +255,13 @@ describe('Logout Multi-Tab Sync Tests', () => {
   describe('Browser Compatibility', () => {
     const testBrowserCompatibility = async () => {
       // Test with different storage area types
-      const sessionEvent = new StorageEvent('storage', {
-        key: 'jwt_token',
-        newValue: null,
-        oldValue: 'token',
-      });
+      const sessionEvent = createStorageEvent('jwt_token', null);
       window.dispatchEvent(sessionEvent);
     };
 
     it('should handle localStorage events', async () => {
       await act(async () => {
-        const event = new StorageEvent('storage', {
-          key: 'jwt_token',
-          newValue: null,
-          oldValue: 'token',
-          });
+        const event = createStorageEvent('jwt_token', null);
         window.dispatchEvent(event);
       });
       await waitFor(() => {
@@ -300,11 +280,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
 
     it('should handle null storage area gracefully', async () => {
       await act(async () => {
-        const event = new StorageEvent('storage', {
-          key: 'jwt_token',
-          newValue: null,
-          oldValue: 'token',
-        });
+        const event = createStorageEvent('jwt_token', null);
         window.dispatchEvent(event);
       });
       // Should not crash or throw errors
@@ -317,7 +293,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
           key: null as any,
           newValue: null,
           oldValue: null,
-          });
+        });
         window.dispatchEvent(event);
       });
       // Should not crash

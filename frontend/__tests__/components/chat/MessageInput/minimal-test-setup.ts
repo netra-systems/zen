@@ -32,22 +32,24 @@ export const mockAuthStore = {
   isAuthenticated: true,
 };
 
-// Apply minimal mocks
+// Apply minimal mocks using jest.mock for proper hoisting
 export const setupMinimalMocks = () => {
-  jest.doMock('@/hooks/useWebSocket', () => ({
-    useWebSocket: mockUseWebSocket
-  }));
-  
-  jest.doMock('@/store/unified-chat', () => ({
+  // Mock the stores first
+  jest.mock('@/store/unified-chat', () => ({
     useUnifiedChatStore: jest.fn(() => mockChatStore)
   }));
   
-  jest.doMock('@/store/threadStore', () => ({
+  jest.mock('@/store/threadStore', () => ({
     useThreadStore: jest.fn(() => mockThreadStore)
   }));
   
-  jest.doMock('@/store/authStore', () => ({
+  jest.mock('@/store/authStore', () => ({
     useAuthStore: jest.fn(() => mockAuthStore)
+  }));
+
+  // Mock websocket hook
+  jest.mock('@/hooks/useWebSocket', () => ({
+    useWebSocket: mockUseWebSocket
   }));
 };
 

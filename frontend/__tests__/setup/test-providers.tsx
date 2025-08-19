@@ -1,7 +1,6 @@
 import React from 'react';
-import { AuthContext } from '@/auth/context';
 
-// Mock auth context value
+// Mock auth context value (maintain compatibility with old context-based tests)
 export const mockAuthContextValue = {
   token: 'test-token-123',
   user: {
@@ -37,23 +36,29 @@ export const MockWebSocketProvider: React.FC<{ children: React.ReactNode }> = ({
 };
 
 /**
- * Test wrapper that provides both Auth and mocked WebSocket contexts
+ * Test wrapper that provides mocked WebSocket contexts for Zustand-based tests
+ * Auth is handled via Zustand store mocks in individual tests
  */
 export const TestProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   return (
-    <AuthContext.Provider value={mockAuthContextValue}>
-      <MockWebSocketProvider>{children}</MockWebSocketProvider>
-    </AuthContext.Provider>
+    <MockWebSocketProvider>{children}</MockWebSocketProvider>
   );
 };
 
 /**
- * Test wrapper that provides only Auth context
+ * Test wrapper that provides legacy auth context (for backward compatibility)
  */
 export const AuthTestProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  return (
-    <AuthContext.Provider value={mockAuthContextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  try {
+    // Try to use AuthContext if it exists (legacy support)
+    const { AuthContext } = require('@/auth/context');
+    return (
+      <AuthContext.Provider value={mockAuthContextValue}>
+        {children}
+      </AuthContext.Provider>
+    );
+  } catch {
+    // Fallback to just children if AuthContext doesn't exist
+    return <>{children}</>;
+  }
 };

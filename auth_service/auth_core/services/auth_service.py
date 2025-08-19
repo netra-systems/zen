@@ -5,6 +5,7 @@ Single Source of Truth for authentication operations
 import os
 import hashlib
 import secrets
+import httpx
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Tuple
 import logging
@@ -146,6 +147,17 @@ class AuthService:
             
         return None
     
+    async def create_oauth_user(self, user_info: Dict) -> Dict:
+        """Create or update user from OAuth info"""
+        # In production, this would persist to database
+        return {
+            "id": user_info["id"],
+            "email": user_info["email"],
+            "name": user_info.get("name", ""),
+            "provider": "google",
+            "permissions": ["read", "write"]
+        }
+    
     async def create_service_token(self, 
                                   request: ServiceTokenRequest) -> ServiceTokenResponse:
         """Create token for service-to-service auth"""
@@ -213,9 +225,33 @@ class AuthService:
     async def _validate_oauth(self, provider: str, 
                              token: str) -> Optional[Dict]:
         """Validate OAuth token with provider"""
-        # In real implementation, validate with OAuth provider
-        # This is a placeholder
+        if provider == "google":
+            return await self._validate_google_oauth(token)
         return None
+    
+    async def _validate_google_oauth(self, token: str) -> Optional[Dict]:
+        """Validate Google OAuth token"""
+        try:
+            async with httpx.AsyncClient() as client:
+                # Verify token with Google
+                response = await client.get(
+                    "https://www.googleapis.com/oauth2/v2/userinfo",
+                    headers={"Authorization": f"Bearer {token}"}
+                )
+                
+                if response.status_code != 200:
+                    return None
+                
+                user_info = response.json()
+                return {
+                    "id": user_info["id"],
+                    "email": user_info["email"],
+                    "name": user_info.get("name", ""),
+                    "permissions": ["read", "write"]
+                }
+        except Exception as e:
+            logger.error(f"Google OAuth validation failed: {e}")
+            return None
     
     async def _validate_api_key(self, api_key: str) -> Optional[Dict]:
         """Validate API key"""
