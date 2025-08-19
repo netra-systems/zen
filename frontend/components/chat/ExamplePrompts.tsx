@@ -32,8 +32,16 @@ export const ExamplePrompts: React.FC = () => {
     };
     addMessage(userMessage);
     
-    // Send message via WebSocket
-    sendMessage({ type: 'user_message', payload: { content: prompt, references: [] } });
+    // Send start_agent message for example prompts (these start new conversations)
+    sendMessage({ 
+      type: 'start_agent', 
+      payload: { 
+        user_request: prompt,
+        thread_id: null,
+        context: { source: 'example_prompt' },
+        settings: {}
+      } 
+    });
     setProcessing(true);
     setIsOpen(false); // Collapse the panel after sending a prompt
   };

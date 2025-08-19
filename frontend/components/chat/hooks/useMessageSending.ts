@@ -64,6 +64,14 @@ export const useMessageSending = () => {
     };
   };
 
+  const checkIfFirstMessage = (threadId: string): boolean => {
+    // Check if there are any messages for this thread
+    const threadMessages = messages.filter(msg => 
+      msg.thread_id === threadId && msg.role === 'user'
+    );
+    return threadMessages.length === 0;
+  };
+
   const sendWebSocketMessage = (message: string, threadId: string): void => {
     // For the first message in a thread or new conversation, use start_agent
     // For subsequent messages, use user_message
