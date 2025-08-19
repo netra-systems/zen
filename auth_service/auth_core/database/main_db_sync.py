@@ -78,8 +78,11 @@ class MainDatabaseSync:
             finally:
                 await session.close()
     
-    async def sync_user(self, auth_user) -> bool:
-        """Sync auth user to main database"""
+    async def sync_user(self, auth_user) -> Optional[str]:
+        """
+        Sync auth user to main database
+        Returns: user_id if successful, None if failed
+        """
         try:
             async with self.get_session() as session:
                 # Import main app User model
@@ -94,13 +97,26 @@ class MainDatabaseSync:
                 
                 from app.db.models_postgres import User
                 
-                # Check if user exists
-                result = await session.execute(
+                # First check by email to avoid duplicate conflicts
+                email_result = await session.execute(
+                    select(User).filter(User.email == auth_user.email)
+                )
+                existing_by_email = email_result.scalars().first()
+                
+                if existing_by_email:
+                    # User exists, update and return existing ID
+                    existing_by_email.full_name = auth_user.full_name or existing_by_email.full_name
+                    existing_by_email.updated_at = auth_user.updated_at
+                    logger.info(f"Updated existing user {auth_user.email} with ID {existing_by_email.id}")
+                    return existing_by_email.id
+                
+                # Check if ID exists (shouldn't happen if email check passed)
+                id_result = await session.execute(
                     select(User).filter(User.id == auth_user.id)
                 )
-                existing_user = result.scalars().first()
+                existing_by_id = id_result.scalars().first()
                 
-                if not existing_user:
+                if not existing_by_id:
                     # Create new user
                     new_user = User(
                         id=auth_user.id,
@@ -112,18 +128,19 @@ class MainDatabaseSync:
                         role="user"
                     )
                     session.add(new_user)
-                    logger.info(f"Created user {auth_user.email} in main DB")
+                    logger.info(f"Created user {auth_user.email} with ID {auth_user.id}")
+                    return auth_user.id
                 else:
                     # Update existing user
-                    existing_user.email = auth_user.email
-                    existing_user.full_name = auth_user.full_name or existing_user.full_name
-                    existing_user.updated_at = auth_user.updated_at
-                    logger.info(f"Updated user {auth_user.email} in main DB")
+                    existing_by_id.email = auth_user.email
+                    existing_by_id.full_name = auth_user.full_name or existing_by_id.full_name
+                    existing_by_id.updated_at = auth_user.updated_at
+                    logger.info(f"Updated user {auth_user.email} with ID {existing_by_id.id}")
+                    return existing_by_id.id
                 
-                return True
         except Exception as e:
             logger.error(f"Failed to sync user: {e}")
-            return False
+            return None
     
     async def close(self):
         """Close the engine connection"""
