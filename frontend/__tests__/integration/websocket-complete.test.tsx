@@ -14,15 +14,17 @@ import { WebSocketTestManager, createWebSocketManager, createMultipleWebSocketMa
 import {
   WebSocketConnectionLifecycle,
   MessageMetrics,
+  generateLargeMessage,
+  measurePerformance
+} from '../helpers/websocket-test-utilities';
+import {
+  TestWebSocket,
   ConnectionStateManager,
   MessageBuffer,
-  generateLargeMessage,
-  measurePerformance,
-  TestWebSocket,
   AdvancedWebSocketTester,
   measureConnectionTime,
   measureMessageLatency
-} from '../helpers/websocket-test-utilities';
+} from '../setup/websocket-test-utils';
 
 // Test component for WebSocket lifecycle
 const WebSocketLifecycleTest: React.FC = () => {

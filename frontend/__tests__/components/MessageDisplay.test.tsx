@@ -608,11 +608,15 @@ describe('MessageDisplay - Performance', () => {
 
   it('cleans up resources properly', () => {
     const msg = createAIMessage();
-    const { unmount } = render(<TestWrapper><MessageItem message={msg} /></TestWrapper>);
+    const { unmount, container } = render(<TestWrapper><MessageItem message={msg} /></TestWrapper>);
+    
+    // Verify component is rendered
+    expect(container.firstChild).not.toBeNull();
     
     unmount();
     
-    // Should not cause memory leaks or errors
-    expect(true).toBe(true);
+    // Verify component is properly unmounted
+    expect(container.firstChild).toBeNull();
+    expect(container.innerHTML).toBe('');
   });
 });

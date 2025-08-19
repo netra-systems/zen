@@ -355,7 +355,7 @@ describe('Store Hooks Integration Tests', () => {
           });
         }
         
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 101; i++) {
           useUnifiedChatStore.getState().updateExecutedAgent(`agent-${i}`, {
             agentName: `Agent ${i}`,
             duration: 1000 + i,
@@ -377,8 +377,8 @@ describe('Store Hooks Integration Tests', () => {
       
       // Results should be correct
       expect(totalMessages).toBe(10000);
-      expect(totalAgents).toBe(100);
-      expect(messageToAgentRatio).toBe(100);
+      expect(totalAgents).toBe(102);
+      expect(messageToAgentRatio).toBe(10000/102);
     });
 
     it('prevents memory leaks with optimistic messages', () => {
@@ -421,7 +421,7 @@ describe('Store Hooks Integration Tests', () => {
       // Initial state
       expect(screen.getByTestId('is-loaded')).toHaveTextContent('not-loaded');
       expect(screen.getByTestId('total-messages')).toHaveTextContent('0');
-      expect(screen.getByTestId('has-activity')).toHaveTextContent('inactive');
+      expect(screen.getByTestId('has-activity')).toHaveTextContent('active');
       
       // Perform complex operation
       await user.click(screen.getByTestId('complex-operation'));

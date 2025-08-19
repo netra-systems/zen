@@ -235,8 +235,8 @@ export const testLandmarks = (
  */
 export const testHeadingHierarchy = (expectedLevels: number[]): void => {
   expectedLevels.forEach(level => {
-    const heading = screen.getByRole('heading', { level });
-    expect(heading).toBeInTheDocument();
+    const headings = screen.getAllByRole('heading', { level });
+    expect(headings.length).toBeGreaterThan(0);
   });
 };
 

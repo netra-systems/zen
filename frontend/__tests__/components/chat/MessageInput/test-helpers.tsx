@@ -4,6 +4,7 @@
  * BVJ: Reduces code duplication and ensures consistent test patterns
  */
 
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';

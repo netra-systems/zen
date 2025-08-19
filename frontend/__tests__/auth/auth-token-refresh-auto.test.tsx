@@ -279,17 +279,12 @@ describe('Auth Token Refresh Automatic', () => {
 
     it('should prevent multiple concurrent refresh attempts', async () => {
       createExpiringToken(3); // 3 minutes until expiry
-      
       const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
       mockAuthServiceClient.refreshToken.mockImplementation(() => 
         new Promise(resolve => setTimeout(resolve, 1000))
       );
-
       await act(async () => {
         renderWithTokenRefresh();
-      });
-
-      await act(async () => {
         Promise.all([
           fetch('/api/test1'),
           fetch('/api/test2'),

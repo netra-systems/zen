@@ -43,10 +43,8 @@ export class TestWebSocket implements WebSocketLike {
       throw new Error('WebSocket is not in OPEN state');
     }
     
-    // Simulate async send
-    setTimeout(() => {
-      this.messageQueue.push(data.toString());
-    }, 1);
+    // Immediately add to queue for testing synchronization
+    this.messageQueue.push(data.toString());
   }
   
   close(code: number = 1000, reason: string = ''): void {

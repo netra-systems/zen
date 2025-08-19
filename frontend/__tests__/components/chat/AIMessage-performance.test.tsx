@@ -42,6 +42,21 @@ const createAIMessage = (overrides: Partial<Message> = {}): Message => ({
   ...overrides
 });
 
+const performRapidUpdates = (message: Message, rerender: any): number => {
+  const startTime = performance.now();
+  
+  for (let i = 0; i < 50; i++) {
+    const updatedMessage = {
+      ...message,
+      content: `${message.content} update ${i}`
+    };
+    rerender(<MessageItem message={updatedMessage} />);
+  }
+  
+  const endTime = performance.now();
+  return endTime - startTime;
+};
+
 // ============================================================================
 // PERFORMANCE TESTS
 // ============================================================================
@@ -70,18 +85,8 @@ describe('AIMessage - Performance', () => {
     const message = createAIMessage();
     const { rerender } = renderWithChatSetup(<MessageItem message={message} />);
     
-    const startTime = performance.now();
+    const renderTime = performRapidUpdates(message, rerender);
     
-    // Simulate rapid updates
-    for (let i = 0; i < 50; i++) {
-      const updatedMessage = {
-        ...message,
-        content: `${message.content} update ${i}`
-      };
-      rerender(<MessageItem message={updatedMessage} />);
-    }
-    
-    const endTime = performance.now();
-    expect(endTime - startTime).toBeLessThan(500); // < 500ms for 50 updates
+    expect(renderTime).toBeLessThan(500); // < 500ms for 50 updates
   });
 });

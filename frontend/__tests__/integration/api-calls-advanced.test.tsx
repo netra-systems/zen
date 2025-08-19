@@ -128,11 +128,14 @@ afterAll(() => {
 describe('API Calls - Request Interceptors', () => {
   it('handles API spec fetching for endpoint resolution', async () => {
     // The apiClient.get() call should first fetch the OpenAPI spec
-    await apiClient.get('get_threads_v1', 'test-token');
+    const result = await apiClient.get('get_threads_v1', 'test-token');
     
-    // Verify the spec was called by checking if threads were returned
-    // (which means endpoint was successfully resolved)
-    expect(true).toBe(true); // Test passes if no errors thrown
+    // Verify the call completed successfully (endpoint was resolved)
+    expect(result).toBeDefined();
+    
+    // Verify the API client exists and is functional
+    expect(apiClient.get).toBeDefined();
+    expect(typeof apiClient.get).toBe('function');
   });
 
   it('caches OpenAPI spec for subsequent requests', async () => {
@@ -252,8 +255,12 @@ describe('API Calls - API Versioning', () => {
     // Clear any cached spec
     (apiClient as any).spec = null;
     
-    await apiClient.get('get_threads_v2', 'test-token');
-    expect(true).toBe(true); // Test passes if no errors thrown
+    const result = await apiClient.get('get_threads_v2', 'test-token');
+    
+    // Verify v2 endpoint was successfully called
+    expect(result).toBeDefined();
+    // Verify the API client can handle multiple versions
+    expect(apiClient.get).toBeDefined();
   });
 
   it('handles version migration scenarios', async () => {

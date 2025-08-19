@@ -141,50 +141,22 @@ describe('Auth Token Management', () => {
 
   describe('Token Operations Integration', () => {
     it('should handle rapid token operations', () => {
-      authService.removeToken();
-      testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      
-      const token1 = authService.getToken();
-      authService.removeToken();
-      
-      testEnv.localStorageMock.getItem.mockReturnValue(null);
-      const token2 = authService.getToken();
-
-      expect(token1).toBe(mockToken);
-      expect(token2).toBeNull();
-      expect(testEnv.localStorageMock.removeItem).toHaveBeenCalledTimes(2);
+      performRapidTokenOperations();
+      const { token1, token2 } = getTokensAfterOperations();
+      verifyRapidTokenResults(token1, token2);
     });
 
     it('should handle token lifecycle', () => {
-      // Initially no token
-      testEnv.localStorageMock.getItem.mockReturnValue(null);
-      expect(authService.getToken()).toBeNull();
-      expectEmptyHeaders(authService.getAuthHeaders());
-
-      // Set token
-      testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-      expect(authService.getToken()).toBe(mockToken);
-      expectAuthHeaders(authService.getAuthHeaders(), mockToken);
-
-      // Remove token
-      authService.removeToken();
-      testEnv.localStorageMock.getItem.mockReturnValue(null);
-      expect(authService.getToken()).toBeNull();
+      verifyInitialNoTokenState();
+      setTokenAndVerify();
+      removeTokenAndVerify();
     });
 
     it('should handle concurrent token access', () => {
-      testEnv.localStorageMock.getItem.mockReturnValue(mockToken);
-
-      const promises = [
-        Promise.resolve(authService.getToken()),
-        Promise.resolve(authService.getAuthHeaders()),
-        Promise.resolve(authService.getToken())
-      ];
-
+      setupTokenForConcurrentAccess();
+      const promises = createConcurrentTokenPromises();
       return Promise.all(promises).then(results => {
-        expect(results[0]).toBe(mockToken);
-        expectAuthHeaders(results[1], mockToken);
-        expect(results[2]).toBe(mockToken);
+        verifyConcurrentTokenResults(results);
       });
     });
   });
@@ -220,33 +192,15 @@ describe('Auth Token Management', () => {
     });
 
     it('should return context with all required properties', () => {
-      const mockContext = createMockAuthContext();
-      mockUseContext.mockReturnValue(mockContext);
-
+      const mockContext = setupMockAuthContext();
       const result = authService.useAuth();
-
-      expect(result).toHaveProperty('user');
-      expect(result).toHaveProperty('login');
-      expect(result).toHaveProperty('logout');
-      expect(result).toHaveProperty('loading');
-      expect(result).toHaveProperty('authConfig');
-      expect(result).toHaveProperty('token');
+      verifyContextProperties(result);
     });
 
     it('should handle context with user data', () => {
-      const mockContext = {
-        ...createMockAuthContext(),
-        user: { id: '123', email: 'test@example.com' },
-        token: mockToken,
-        loading: false
-      };
-      mockUseContext.mockReturnValue(mockContext);
-
+      const mockContext = setupMockContextWithUser();
       const result = authService.useAuth();
-
-      expect(result.user).toEqual({ id: '123', email: 'test@example.com' });
-      expect(result.token).toBe(mockToken);
-      expect(result.loading).toBe(false);
+      verifyContextWithUserData(result);
     });
 
     it('should handle loading state', () => {

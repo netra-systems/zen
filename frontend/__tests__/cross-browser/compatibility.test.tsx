@@ -165,17 +165,27 @@ describe('Cross-Browser Compatibility (Fixed)', () => {
         const mq = window.matchMedia('(max-width: 768px)');
         const handler = jest.fn();
         
+        // Verify MediaQueryList object properties
+        expect(mq).toHaveProperty('matches');
+        expect(typeof mq.matches).toBe('boolean');
+        
         if (mq.addEventListener) {
           mq.addEventListener('change', handler);
           mq.removeEventListener('change', handler);
+          // Modern event listener API available
+          expect(typeof mq.addEventListener).toBe('function');
         } else if (mq.addListener) {
           // Fallback for older browsers
           mq.addListener(handler);
           mq.removeListener(handler);
+          // Legacy listener API available
+          expect(typeof mq.addListener).toBe('function');
         }
+      } else {
+        // No matchMedia support - verify window object is available
+        expect(typeof window).toBe('object');
+        expect(window).toBeDefined();
       }
-      
-      expect(true).toBe(true); // Test passed if no errors
     });
   });
 

@@ -3,6 +3,8 @@
  * Provides reusable utility functions for test scenarios
  */
 
+import React from 'react';
+
 // Utility for finding thread elements in DOM
 export const findThreadElement = (container: HTMLElement, title: string) => {
   const threadElement = Array.from(container.querySelectorAll('[data-testid*="thread"]')).find(
@@ -78,4 +80,73 @@ export const simulateDeleteCancellation = () => {
   return () => {
     window.confirm = originalConfirm;
   };
+};
+
+// Setup helpers for common test scenarios
+export const setupStoreForEmptyState = (testSetup: any) => {
+  testSetup.configureStoreMocks({ 
+    threads: [], 
+    currentThreadId: null 
+  });
+};
+
+export const setupStoreForCurrentThread = (testSetup: any, threadId: string) => {
+  testSetup.configureStoreMocks({ 
+    currentThreadId: threadId 
+  });
+};
+
+export const setupStoreWithCustomThreads = (testSetup: any, threads: any[]) => {
+  testSetup.configureStoreMocks({ 
+    threads, 
+    currentThreadId: threads[0]?.id || null 
+  });
+};
+
+// Action helpers for common interactions
+export const renderWithTestSetup = (Component: React.ComponentType, testSetup: any) => {
+  const { render } = require('@testing-library/react');
+  return render(React.createElement(Component));
+};
+
+export const expectBasicStructure = (screen: any) => {
+  expect(screen.getByText('Chat History')).toBeInTheDocument();
+};
+
+export const expectThreadsRendered = (screen: any, threadTitles: string[]) => {
+  threadTitles.forEach(title => {
+    expect(screen.getByText(title)).toBeInTheDocument();
+  });
+};
+
+export const expectEmptyState = (screen: any) => {
+  expect(screen.getByText('No conversations yet')).toBeInTheDocument();
+};
+
+export const expectActiveThread = (screen: any, threadTitle: string) => {
+  const activeThread = screen.getByText(threadTitle).closest('div[class*="group"]');
+  expect(activeThread).toHaveClass('bg-accent');
+};
+
+export const createThreadWithTitle = (baseThread: any, title: string | null) => {
+  return { ...baseThread, title };
+};
+
+export const expectUntitledThread = (screen: any) => {
+  expect(screen.getByText('Untitled')).toBeInTheDocument();
+};
+
+export const expectSpecificThreadTitle = (screen: any, title: string) => {
+  expect(screen.getByText(title)).toBeInTheDocument();
+};
+
+export const expectMultipleThreadTitles = (screen: any, titles: string[]) => {
+  titles.forEach(title => {
+    expect(screen.getByText(title)).toBeInTheDocument();
+  });
+};
+
+export const expectThreadStructure = (screen: any) => {
+  const container = screen.getByText('Chat History').closest('.flex-col');
+  expect(container).toBeInTheDocument();
 };

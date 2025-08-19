@@ -22,14 +22,14 @@ beforeAll(() => {
 beforeEach(() => {
   resetChatMocks();
   // Setup mock implementations
-  (useWebSocket as jest.Mock).mockReturnValue(mockWebSocket);
-  (useUnifiedChatStore as jest.Mock).mockReturnValue(mockUnifiedChatStore);
-  (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+  (useWebSocket as jest.MockedFunction<typeof useWebSocket>).mockReturnValue(mockWebSocket);
+  (useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>).mockReturnValue(mockUnifiedChatStore);
+  (useAuthStore as jest.MockedFunction<typeof useAuthStore>).mockReturnValue(mockAuthStore);
 });
 
 describe('ExamplePrompts', () => {
   it('sends a message when an example prompt is clicked', () => {
-    (useAuthStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAuthStore).mockReturnValue({
       ...mockAuthStore,
       isAuthenticated: true
     });
@@ -54,7 +54,7 @@ describe('ExamplePrompts', () => {
   });
 
   it('does not send message when user is not authenticated', () => {
-    (useAuthStore as jest.Mock).mockReturnValue({
+    jest.mocked(useAuthStore).mockReturnValue({
       ...mockAuthStore,
       isAuthenticated: false
     });

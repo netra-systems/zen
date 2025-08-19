@@ -184,15 +184,11 @@ describe('Auth Session Detection', () => {
       jest.useFakeTimers();
       const futureTime = Date.now() + WARNING_THRESHOLD_MS;
       setupTokenWithExpiry(futureTime);
-      
       const mockExtendSession = jest.fn().mockResolvedValue(true);
       (authService as any).extendSession = mockExtendSession;
 
       await act(async () => {
         renderWithSession();
-      });
-
-      await act(async () => {
         advanceTimeBy(WARNING_THRESHOLD_MS - 2000);
         const appContent = screen.getByTestId('app-content');
         await userEvent.click(appContent);
@@ -207,15 +203,11 @@ describe('Auth Session Detection', () => {
       jest.useFakeTimers();
       const futureTime = Date.now() + WARNING_THRESHOLD_MS;
       setupTokenWithExpiry(futureTime);
-      
       const mockExtendSession = jest.fn().mockRejectedValue(new Error('Extension failed'));
       (authService as any).extendSession = mockExtendSession;
 
       await act(async () => {
         renderWithSession();
-      });
-
-      await act(async () => {
         advanceTimeBy(WARNING_THRESHOLD_MS + 1000);
       });
 
@@ -234,9 +226,6 @@ describe('Auth Session Detection', () => {
       
       await act(async () => {
         renderWithSession();
-      });
-
-      await act(async () => {
         advanceTimeBy(5 * 60 * 1000); // 5 minutes
       });
 
@@ -257,9 +246,6 @@ describe('Auth Session Detection', () => {
       
       await act(async () => {
         renderWithSession();
-      });
-
-      await act(async () => {
         (Date.now as jest.Mock).mockReturnValue(Date.now() - (24 * 60 * 60 * 1000));
         advanceTimeBy(1000);
       });

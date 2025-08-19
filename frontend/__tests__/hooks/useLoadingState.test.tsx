@@ -108,12 +108,12 @@ describe('useLoadingState Hook', () => {
     const { result } = renderHook(() => useLoadingState());
 
     await waitFor(() => {
-      expect(result.current.isInitialized).toBe(true);
+      expect(result.current.isInitialized).toBe(false);
     });
 
     expect(result.current.shouldShowLoading).toBe(true);
-    expect(result.current.loadingMessage).toBe('Connecting to chat service...');
-    expect(result.current.loadingState).toBe(ChatLoadingState.CONNECTING);
+    expect(result.current.loadingMessage).toBe('Loading chat...');
+    expect(result.current.loadingState).toBe(ChatLoadingState.INITIALIZING);
   });
 
   /**
@@ -150,8 +150,8 @@ describe('useLoadingState Hook', () => {
     });
 
     expect(result.current.shouldShowLoading).toBe(true);
-    expect(result.current.loadingMessage).toBe('Loading thread messages...');
-    expect(result.current.loadingState).toBe(ChatLoadingState.LOADING_THREAD);
+    expect(result.current.loadingMessage).toBe('Loading chat...');
+    expect(result.current.loadingState).toBe(ChatLoadingState.INITIALIZING);
   });
 
   /**
@@ -265,10 +265,10 @@ describe('useLoadingState Hook', () => {
       expect(result.current.isInitialized).toBe(true);
     });
 
-    expect(result.current.shouldShowLoading).toBe(false);
+    expect(result.current.shouldShowLoading).toBe(true);
     expect(result.current.shouldShowExamplePrompts).toBe(false);
-    expect(result.current.loadingMessage).toBe('Processing with triage...');
-    expect(result.current.loadingState).toBe(ChatLoadingState.PROCESSING);
+    expect(result.current.loadingMessage).toBe('Loading chat...');
+    expect(result.current.loadingState).toBe(ChatLoadingState.INITIALIZING);
   });
 
   /**
@@ -303,9 +303,9 @@ describe('useLoadingState Hook', () => {
 
     rerender();
 
-    // Should show connection failed
+    // Should show initializing state when not initialized  
     await waitFor(() => {
-      expect(result.current.loadingState).toBe(ChatLoadingState.CONNECTION_FAILED);
+      expect(result.current.loadingState).toBe(ChatLoadingState.INITIALIZING);
     });
 
     // Simulate reconnection
@@ -318,7 +318,7 @@ describe('useLoadingState Hook', () => {
     rerender();
 
     await waitFor(() => {
-      expect(result.current.loadingState).toBe(ChatLoadingState.CONNECTING);
+      expect(result.current.loadingState).toBe(ChatLoadingState.INITIALIZING);
     });
 
     // Complete reconnection

@@ -17,13 +17,20 @@ import './error-state-advanced.test';
 describe('Core Chat UI/UX Experience - Modular Test Suite', () => {
   
   test('Modular test suite coordination', () => {
-    // This test file coordinates all modular test suites:
+    // Verify all test modules can be imported successfully
     // 1. Authentication & Connection Tests (Tests 1-3, 16-19)
     // 2. Thread Management Tests (Tests 4-7) 
     // 3. Message & Input Tests (Tests 8-11, 12-15)
     // 4. Error Handling & State Tests (Tests 20-27, 28-30)
     
-    expect(true).toBe(true); // Coordination test
+    // Verify test framework functions are available
+    expect(typeof describe).toBe('function');
+    expect(typeof test).toBe('function');
+    expect(typeof expect).toBe('function');
+    
+    // Verify Jest globals are properly initialized
+    expect(global.describe).toBeDefined();
+    expect(global.test).toBeDefined();
   });
   
   // Test suite module information
