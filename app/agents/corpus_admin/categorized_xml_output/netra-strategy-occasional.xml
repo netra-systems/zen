@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<corpus domain="netra-strategy" update_frequency="occasional">
+  <prompt_response>
+    <prompt>What is the primary mission of Netra Systems?</prompt>
+    <response>The primary mission of Netra Systems is to solve the 'cost-quality-latency-throughput' quadrilemma in AI infrastructure. Netra aims to provide engineering teams with the tools and intelligence needed to strategically manage the complex trade-offs inherent in scaling AI applications, moving them from a state of reactive problem-solving to proactive, data-driven optimization.</response>
+  </prompt_response>
+</corpus>
+<?xml version="1.0" ?>
+<corpus domain="netra-strategy" update_frequency="occasional">
+  <prompt_response>
+    <prompt>Can I validate the potential return on investment (ROI) before routing my production traffic through the Netra Gateway?</prompt>
+    <response>Yes, an attractive part of the Netra onboarding process is to allow you to validate the potential ROI before routing any production traffic. By analyzing your historical logs, Netra provides a personalized savings report and forecast. This report quantifies the potential cost savings and performance improvements, serving as a data-driven validation of the platform's value for your specific use case.</response>
+  </prompt_response>
+</corpus>

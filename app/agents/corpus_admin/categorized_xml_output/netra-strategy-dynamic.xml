@@ -1,0 +1,26 @@
+<?xml version="1.0" ?>
+<corpus domain="netra-strategy" update_frequency="dynamic">
+  <prompt_response>
+    <prompt>How does Netra differentiate itself from standard MLOps tools or LLM providers?</prompt>
+    <response>Netra differentiates itself by focusing specifically on AI inference optimization as a dedicated control plane, rather than being an LLM provider or a general-purpose MLOps platform. While LLM providers create the models and MLOps tools manage the overall lifecycle, Netra acts as an intelligent layer that sits between the application and the models. Its key differentiator is its systematic, co-pilot approach to managing the cost-quality-latency trade-offs in real-time. It replaces the manual, slow, and often incomplete optimization efforts of individual teams with a unified, data-driven system that provides actionable intelligence for the entire inference stack, from third-party APIs to self-hosted models.</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Can I define custom evaluation metrics relevant to my specific use case?</prompt>
+    <response>The provided resources do not specify whether users can define custom evaluation metrics within the platform. The platform focuses on core operational metrics like cost, latency (TTFT, TPOT), throughput, and quality, and it captures the required Service Level Objectives (SLOs) for each workload.</response>
+  </prompt_response>
+</corpus>
+<?xml version="1.0" ?>
+<corpus domain="netra-strategy" update_frequency="dynamic">
+  <prompt_response>
+    <prompt>What is the expected ROI (Return on Investment) after implementing Netra?</prompt>
+    <response>The expected ROI is established and quantified on a personalized basis before any significant commitment is required. During the initial pilot phase, Netra provides an option to analyze a company's historical logs and provides a detailed savings report and forecast. This report models the potential cost savings and performance improvements from optimizations like semantic caching and data-driven model selection. This allows a company to see a concrete, data-backed ROI projection based on their own usage patterns before they decide to implement the real-time Optimization Gateway. </response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>How can Netra help accelerate the time-to-market for AI features?</prompt>
+    <response>Netra accelerates the time-to-market for AI features by abstracting away the complex and time-consuming task of inference optimization. Instead of having engineering teams spend weeks or months on manual, trial-and-error tuning to manage costs and latency, Netra provides a systematic, data-driven solution. This allows teams to ship new AI features faster, with the confidence that their performance and cost are managed by a dedicated control plane. It removes optimization as a blocker, enabling a faster development lifecycle from prototype to production.</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>What are the main benefits of using Netra for scaling AI applications from prototype to production?</prompt>
+    <response>The main benefits of using Netra for scaling AI applications are:nn1.  **Predictable Unit Economics:** Netra provides accurate performance profiles and cost breakdowns, transforming volatile AI spend into a predictable Cost of Goods Sold (COGS). This is essential for financial planning when scaling user traffic.n2.  **Systematic Optimization:** It replaces the 'chaotic, one-off' fixes common in early-stage products with a strategic, data-driven approach to managing the cost-quality-latency trade-offs, ensuring the application remains efficient as it grows.n3.  **Enhanced Reliability:** By providing deep observability and near real-time anomaly detection, Netra helps ensure that the AI application remains reliable and performs within its SLOs even under unpredictable traffic spikes.n4.  **Developer Productivity:** It automates the complex task of optimization, allowing the engineering team to focus on scaling core product functionality rather than infrastructure management.</response>
+  </prompt_response>
+</corpus>
