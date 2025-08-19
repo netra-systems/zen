@@ -304,11 +304,19 @@ async def dev_login(
                         text("DELETE FROM auth_users WHERE id = :old_id"),
                         {"old_id": dev_user.id}
                     )
-                    # Create with new ID
-                    dev_user.id = actual_user_id
-                    session.add(dev_user)
+                    # Create new record with correct ID
+                    new_user = AuthUser(
+                        id=actual_user_id,
+                        email=dev_user.email,
+                        full_name=dev_user.full_name,
+                        auth_provider=dev_user.auth_provider,
+                        is_active=dev_user.is_active,
+                        is_verified=dev_user.is_verified
+                    )
+                    session.add(new_user)
                     await session.flush()
-                    logger.info(f"Updated auth user ID to {actual_user_id}")
+                    dev_user = new_user
+                    logger.info(f"Recreated auth user with ID {actual_user_id}")
             else:
                 # Create new auth user with correct ID
                 dev_user = AuthUser(

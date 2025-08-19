@@ -34,6 +34,10 @@ class OptimizedStartupOrchestrator:
     
     def run_optimized_startup(self) -> int:
         """Run startup sequence following spec v2.0.0."""
+        # Start progress tracking
+        if hasattr(self.launcher, 'progress_tracker'):
+            self.launcher.progress_tracker.start()
+        
         # Step 1-3: Pre-checks with caching
         if not self._run_cached_pre_checks():
             return 1
@@ -43,7 +47,13 @@ class OptimizedStartupOrchestrator:
             return 1
         
         # Step 6-12: Service startup with optimization
-        return self._run_optimized_services()
+        result = self._run_optimized_services()
+        
+        # Complete progress tracking
+        if hasattr(self.launcher, 'progress_tracker'):
+            self.launcher.progress_tracker.complete()
+        
+        return result
     
     def _run_cached_pre_checks(self) -> bool:
         """Run pre-checks with intelligent caching."""
@@ -135,44 +145,77 @@ class OptimizedStartupOrchestrator:
     def _start_auth_optimized(self) -> int:
         """Start auth service with optimization."""
         start_time = time.time()
+        
+        # Track service starting
+        if hasattr(self.launcher, 'progress_tracker'):
+            self.launcher.progress_tracker.service_starting("Auth")
+        
         try:
             process, streamer = self.launcher.service_startup.start_auth_service()
             if process:
                 self.launcher.process_manager.add_process("Auth", process)
                 duration = time.time() - start_time
-                self._print("✅", "AUTH", f"Started in {duration:.1f}s")
+                
+                # Track service started
+                if hasattr(self.launcher, 'progress_tracker'):
+                    self.launcher.progress_tracker.service_started("Auth", 8081)
+                else:
+                    self._print("✅", "AUTH", f"Started in {duration:.1f}s")
                 return 0
             else:
                 # Auth service is optional if disabled in config
                 auth_config = self.launcher.config_manager.services_config.auth_service
                 if auth_config.get_config().get("enabled", True):
-                    self._print("⚠️", "WARN", "Auth service failed to start but is enabled")
+                    if hasattr(self.launcher, 'progress_tracker'):
+                        self.launcher.progress_tracker.service_failed("Auth", "Failed to start")
+                    else:
+                        self._print("⚠️", "WARN", "Auth service failed to start but is enabled")
                     return 1
                 else:
                     self._print("ℹ️", "INFO", "Auth service is disabled, skipping")
                     return 0
         except Exception as e:
             logger.error(f"Auth startup failed: {e}")
+            if hasattr(self.launcher, 'progress_tracker'):
+                self.launcher.progress_tracker.service_failed("Auth", str(e))
             return 1
     
     def _start_backend_optimized(self) -> int:
         """Start backend with optimization."""
         start_time = time.time()
+        
+        # Track service starting
+        if hasattr(self.launcher, 'progress_tracker'):
+            self.launcher.progress_tracker.service_starting("Backend")
+        
         try:
             backend_process, backend_streamer = self.launcher.service_startup.start_backend()
             if not backend_process:
-                self._print("❌", "ERROR", "Failed to start backend")
+                if hasattr(self.launcher, 'progress_tracker'):
+                    self.launcher.progress_tracker.service_failed("Backend", "Failed to start")
+                else:
+                    self._print("❌", "ERROR", "Failed to start backend")
                 return 1
             
             self.launcher.process_manager.add_process("Backend", backend_process)
             duration = time.time() - start_time
-            self._print("✅", "BACKEND", f"Started in {duration:.1f}s")
+            
+            # Get backend port from config
+            backend_port = self.launcher.config.backend_port or 8000
+            
+            # Track service started
+            if hasattr(self.launcher, 'progress_tracker'):
+                self.launcher.progress_tracker.service_started("Backend", backend_port)
+            else:
+                self._print("✅", "BACKEND", f"Started in {duration:.1f}s")
             
             # Wait for backend readiness with timeout
             return self._verify_backend_readiness_optimized()
             
         except Exception as e:
             logger.error(f"Backend startup failed: {e}")
+            if hasattr(self.launcher, 'progress_tracker'):
+                self.launcher.progress_tracker.service_failed("Backend", str(e))
             return 1
     
     def _verify_backend_readiness_optimized(self) -> int:
@@ -196,16 +239,32 @@ class OptimizedStartupOrchestrator:
     def _start_frontend_optimized(self) -> int:
         """Start frontend with optimization."""
         start_time = time.time()
+        
+        # Track service starting
+        if hasattr(self.launcher, 'progress_tracker'):
+            self.launcher.progress_tracker.service_starting("Frontend")
+        
         try:
             frontend_process, frontend_streamer = self.launcher.service_startup.start_frontend()
             if not frontend_process:
-                self._print("❌", "ERROR", "Failed to start frontend")
+                if hasattr(self.launcher, 'progress_tracker'):
+                    self.launcher.progress_tracker.service_failed("Frontend", "Failed to start")
+                else:
+                    self._print("❌", "ERROR", "Failed to start frontend")
                 self.launcher.process_manager.cleanup_all()
                 return 1
             
             self.launcher.process_manager.add_process("Frontend", frontend_process)
             duration = time.time() - start_time
-            self._print("✅", "FRONTEND", f"Started in {duration:.1f}s")
+            
+            # Get frontend port from config
+            frontend_port = self.launcher.config.frontend_port or 3000
+            
+            # Track service started
+            if hasattr(self.launcher, 'progress_tracker'):
+                self.launcher.progress_tracker.service_started("Frontend", frontend_port)
+            else:
+                self._print("✅", "FRONTEND", f"Started in {duration:.1f}s")
             
             # Wait for frontend readiness
             self._wait_for_frontend_ready_optimized()
@@ -213,6 +272,8 @@ class OptimizedStartupOrchestrator:
             
         except Exception as e:
             logger.error(f"Frontend startup failed: {e}")
+            if hasattr(self.launcher, 'progress_tracker'):
+                self.launcher.progress_tracker.service_failed("Frontend", str(e))
             return 1
     
     def _wait_for_frontend_ready_optimized(self):

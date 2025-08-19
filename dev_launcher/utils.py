@@ -309,8 +309,11 @@ def create_subprocess(
     if sys.platform == "win32":
         # Windows: create new process group
         kwargs['creationflags'] = subprocess.CREATE_NEW_PROCESS_GROUP
+    elif sys.platform == "darwin":
+        # Mac: don't use setsid as it can cause issues
+        pass
     else:
-        # Unix: create new process group
+        # Linux: create new process group
         kwargs['preexec_fn'] = os.setsid
     
     return subprocess.Popen(cmd, **kwargs)
@@ -329,7 +332,14 @@ def terminate_process(process: subprocess.Popen):
                 ["taskkill", "/F", "/T", "/PID", str(process.pid)],
                 capture_output=True
             )
+        elif sys.platform == "darwin":
+            # Mac: use kill instead of killpg
+            try:
+                os.kill(process.pid, signal.SIGTERM)
+            except (ProcessLookupError, OSError):
+                pass
         else:
+            # Linux: use killpg
             try:
                 os.killpg(os.getpgid(process.pid), signal.SIGTERM)
             except (ProcessLookupError, OSError):

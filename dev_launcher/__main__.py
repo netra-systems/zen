@@ -11,8 +11,8 @@ import os
 import argparse
 from pathlib import Path
 
-# Set UTF-8 encoding for Windows
-if sys.platform == "win32":
+# Set UTF-8 encoding for Windows and Mac
+if sys.platform in ("win32", "darwin"):
     os.environ["PYTHONIOENCODING"] = "utf-8"
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -149,6 +149,24 @@ QUICK SHORTCUTS:
         "--no-parallel",
         action="store_true",
         help="Disable parallel startup (use sequential startup)"
+    )
+    
+    # Startup mode configuration
+    ui_group.add_argument(
+        "-m", "--mode",
+        choices=["minimal", "standard", "verbose"],
+        default="minimal",
+        help="Startup output mode (default: minimal)"
+    )
+    ui_group.add_argument(
+        "--minimal",
+        action="store_true",
+        help="Use minimal output mode (cleanest)"
+    )
+    ui_group.add_argument(
+        "--standard",
+        action="store_true",
+        help="Use standard output mode (balanced)"
     )
     
     # Build configuration

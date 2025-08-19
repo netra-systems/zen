@@ -36,6 +36,9 @@ class LauncherConfig:
     # Build configuration
     use_turbopack: bool = False
     
+    # Startup mode configuration
+    startup_mode: str = "minimal"  # minimal, standard, or verbose
+    
     # Boundary monitoring configuration
     watch_boundaries: bool = False  # Real-time boundary monitoring
     boundary_check_interval: int = 30  # Check every 30 seconds
@@ -121,6 +124,17 @@ class LauncherConfig:
         # Default to loading secrets unless --no-secrets is specified
         load_secrets = not args.no_secrets if hasattr(args, 'no_secrets') else True
         
+        # Handle startup mode
+        startup_mode = "minimal"  # Default
+        if hasattr(args, 'verbose') and args.verbose:
+            startup_mode = "verbose"
+        elif hasattr(args, 'standard') and args.standard:
+            startup_mode = "standard"
+        elif hasattr(args, 'minimal') and args.minimal:
+            startup_mode = "minimal"
+        elif hasattr(args, 'mode'):
+            startup_mode = args.mode
+        
         return cls(
             backend_port=args.backend_port,
             frontend_port=args.frontend_port,
@@ -135,6 +149,7 @@ class LauncherConfig:
             non_interactive=args.non_interactive if hasattr(args, 'non_interactive') else False,
             use_turbopack=not args.no_turbopack if hasattr(args, 'no_turbopack') else False,
             parallel_startup=not args.no_parallel if hasattr(args, 'no_parallel') else True,
+            startup_mode=startup_mode,
             project_root=find_project_root()
         )
     

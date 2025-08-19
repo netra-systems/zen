@@ -104,7 +104,12 @@ class ProcessManager:
     def _terminate_unix_process(self, process: subprocess.Popen, name: str):
         """Terminate Unix process using process group."""
         try:
-            os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+            if sys.platform == "darwin":
+                # Mac: try SIGTERM first, then SIGKILL if needed
+                os.kill(process.pid, signal.SIGTERM)
+            else:
+                # Linux: use process group
+                os.killpg(os.getpgid(process.pid), signal.SIGTERM)
         except ProcessLookupError:
             logger.warning(f"Process {name} already terminated")
         except Exception as e:
@@ -139,7 +144,15 @@ class ProcessManager:
     def _force_kill_unix(self, process: subprocess.Popen):
         """Force kill Unix process."""
         try:
-            process.kill()
+            if sys.platform == "darwin":
+                # Mac: use SIGKILL directly
+                os.kill(process.pid, signal.SIGKILL)
+            else:
+                # Linux: kill process group
+                try:
+                    os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                except:
+                    process.kill()
         except ProcessLookupError:
             pass
     

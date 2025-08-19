@@ -113,6 +113,13 @@ class AuthStarter:
         """Create environment for auth service."""
         env = create_process_env()
         
+        # Add auth service directory to Python path for imports
+        auth_service_dir = str(self.config.project_root / "auth_service")
+        if "PYTHONPATH" in env:
+            env["PYTHONPATH"] = f"{auth_service_dir}{os.pathsep}{env['PYTHONPATH']}"
+        else:
+            env["PYTHONPATH"] = auth_service_dir
+        
         # Add auth service specific environment variables
         env["AUTH_SERVICE_PORT"] = str(port)
         env["AUTH_SERVICE_HOST"] = "0.0.0.0"

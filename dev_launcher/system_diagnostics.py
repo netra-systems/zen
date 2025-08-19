@@ -158,12 +158,20 @@ class SystemDiagnostics:
     async def _check_unix_memory(self) -> bool:
         """Check Unix memory usage."""
         try:
-            result = await asyncio.to_thread(
-                subprocess.run, ['free', '-m'], capture_output=True, text=True, timeout=5
-            )
-            
-            if result.returncode == 0:
-                return self._parse_unix_memory(result.stdout)
+            if sys.platform == "darwin":
+                # Mac: use vm_stat
+                result = await asyncio.to_thread(
+                    subprocess.run, ['vm_stat'], capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0:
+                    return self._parse_mac_memory(result.stdout)
+            else:
+                # Linux: use free
+                result = await asyncio.to_thread(
+                    subprocess.run, ['free', '-m'], capture_output=True, text=True, timeout=5
+                )
+                if result.returncode == 0:
+                    return self._parse_unix_memory(result.stdout)
         except Exception:
             pass
         
@@ -179,6 +187,34 @@ class SystemDiagnostics:
                     free_mem = int(mem_line[3])
                     total_mem = int(mem_line[1])
                     return (free_mem / total_mem) < 0.1  # Less than 10% free
+        except Exception:
+            pass
+        
+        return False
+    
+    def _parse_mac_memory(self, vm_stat_output: str) -> bool:
+        """Parse Mac vm_stat output to detect low memory."""
+        try:
+            # Parse vm_stat output
+            lines = vm_stat_output.split('\n')
+            stats = {}
+            for line in lines:
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    stats[key.strip()] = int(value.strip().rstrip('.'))
+            
+            # Calculate free vs used memory
+            page_size = 4096  # Default page size
+            free_pages = stats.get('Pages free', 0)
+            inactive_pages = stats.get('Pages inactive', 0)
+            active_pages = stats.get('Pages active', 0)
+            wired_pages = stats.get('Pages wired down', 0)
+            
+            total_pages = free_pages + inactive_pages + active_pages + wired_pages
+            available_pages = free_pages + inactive_pages
+            
+            if total_pages > 0:
+                return (available_pages / total_pages) < 0.1  # Less than 10% available
         except Exception:
             pass
         

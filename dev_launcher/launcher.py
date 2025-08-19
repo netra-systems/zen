@@ -33,6 +33,7 @@ from dev_launcher.cache_manager import CacheManager
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
 from dev_launcher.legacy_service_runner import LegacyServiceRunner
+from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +52,7 @@ class DevLauncher:
         self.use_emoji = check_emoji_support()
         self._shutting_down = False
         self._load_env_file()  # Load .env file first
+        self._setup_startup_mode()  # Setup startup mode and filtering
         self._setup_new_cache_system()  # Setup new cache and optimizer
         self._setup_managers()
         self._setup_components()
@@ -58,6 +60,27 @@ class DevLauncher:
         self._setup_logging()
         self._setup_signal_handlers()
         self.startup_time = time.time()
+    
+    def _setup_startup_mode(self):
+        """Setup startup mode and filtering."""
+        # Get mode from config or environment
+        mode_str = getattr(self.config, 'startup_mode', None)
+        if not mode_str:
+            mode_str = os.environ.get("NETRA_STARTUP_MODE", "minimal")
+        
+        # Set startup mode
+        try:
+            self.startup_mode = StartupMode(mode_str.lower())
+        except ValueError:
+            self.startup_mode = StartupMode.MINIMAL
+        
+        # Create log filter and progress tracker
+        self.log_filter = LogFilter(self.startup_mode)
+        self.progress_tracker = StartupProgressTracker(self.startup_mode)
+        
+        # Override verbose if in minimal mode
+        if self.startup_mode == StartupMode.MINIMAL and self.config.verbose:
+            self.config.verbose = False
     
     def _setup_managers(self):
         """Setup manager instances."""
@@ -212,7 +235,7 @@ class DevLauncher:
                 return True
     
     def _force_free_port(self, port: int):
-        """Force free a port on Windows."""
+        """Force free a port cross-platform."""
         if sys.platform == "win32":
             try:
                 import subprocess
@@ -229,6 +252,21 @@ class DevLauncher:
                             if pid.isdigit():
                                 subprocess.run(f"taskkill //F //PID {pid}", shell=True)
                                 self._print("✅", "PORT", f"Freed port {port}")
+            except Exception as e:
+                logger.error(f"Failed to free port {port}: {e}")
+        elif sys.platform == "darwin":
+            try:
+                import subprocess
+                result = subprocess.run(
+                    f"lsof -ti :{port}",
+                    shell=True, capture_output=True, text=True
+                )
+                if result.stdout:
+                    pids = result.stdout.strip().split('\n')
+                    for pid in pids:
+                        if pid.isdigit():
+                            subprocess.run(f"kill -9 {pid}", shell=True)
+                            self._print("✅", "PORT", f"Freed port {port}")
             except Exception as e:
                 logger.error(f"Failed to free port {port}: {e}")
     
