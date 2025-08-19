@@ -13,7 +13,7 @@
             <name>Authentication/OAuth</name>
             <file>learnings/auth.xml</file>
             <path>SPEC/learnings/auth.xml</path>
-            <learning_count>6</learning_count>
+            <learning_count>7</learning_count>
             <learning_ids>
                 <id>oauth-local-staging-mismatch</id>
                 <id>oauth-environment-variables</id>
@@ -21,8 +21,10 @@
                 <id>oauth-redirect-uri-mismatch</id>
                 <id>oauth-diagnostic-tool</id>
                 <id>shared-auth-integration-mandatory</id>
+                <id>auth-database-persistence</id>
             </learning_ids>
             <important_note>See also SPEC/shared_auth_integration.xml for MANDATORY shared auth service requirements</important_note>
+            <additional_file>learnings/auth_database_persistence.xml</additional_file>
         </category>
         <category>
             <name>Environment Detection</name>
@@ -401,6 +403,6 @@
     
     <statistics>
         <total_categories>21</total_categories>
-        <total_learnings>108</total_learnings>
+        <total_learnings>109</total_learnings>
     </statistics>
 </specification>

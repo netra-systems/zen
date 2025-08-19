@@ -30,6 +30,7 @@ from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
+from dev_launcher.legacy_service_runner import LegacyServiceRunner
 
 logger = logging.getLogger(__name__)
 
@@ -114,6 +115,7 @@ class DevLauncher:
         self.startup_optimizer = StartupOptimizer(self.cache_manager)
         self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
         self.optimized_startup = OptimizedStartupOrchestrator(self)
+        self.legacy_runner = LegacyServiceRunner(self)
         self._register_optimization_steps()
     
     def _register_optimization_steps(self):
@@ -200,9 +202,9 @@ class DevLauncher:
         
         # Use parallel startup if enabled
         if self.parallel_enabled:
-            return self._run_services_parallel()
+            return self.legacy_runner.run_services_parallel()
         else:
-            return self._run_services_sequential()
+            return self.legacy_runner.run_services_sequential()
     
     def _run_services_sequential(self) -> int:
         """Run services sequentially (original behavior)."""
