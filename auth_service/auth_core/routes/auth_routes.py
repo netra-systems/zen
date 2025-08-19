@@ -266,20 +266,53 @@ async def dev_login(
     
     from ..database.connection import auth_db
     from ..database.repository import AuthUserRepository
+    import uuid
     
     try:
-        # Create or get dev user in auth database
+        # Sync to main database first to get/create the user
+        from ..database.models import AuthUser
+        
+        # Create temporary auth user for sync
+        temp_user = AuthUser(
+            id=f"dev-temp-{uuid.uuid4().hex[:8]}",
+            email="dev@example.com",
+            full_name="Development User",
+            auth_provider="dev",
+            is_active=True,
+            is_verified=True
+        )
+        
+        # Sync to main database and get the actual ID
+        actual_user_id = await _sync_user_to_main_db(temp_user)
+        
+        if not actual_user_id:
+            raise HTTPException(status_code=500, detail="Failed to sync user to main database")
+        
+        # Now create or update auth user with correct ID
         async with auth_db.get_session() as session:
             repo = AuthUserRepository(session)
             
-            # Check if dev user exists
+            # Check if dev user exists in auth DB
             dev_user = await repo.get_by_email("dev@example.com")
             
-            if not dev_user:
-                # Create dev user in auth database
-                from ..database.models import AuthUser
+            if dev_user:
+                # Update existing auth user if ID changed
+                if dev_user.id != actual_user_id:
+                    from sqlalchemy import text
+                    # Delete old record
+                    await session.execute(
+                        text("DELETE FROM auth_users WHERE id = :old_id"),
+                        {"old_id": dev_user.id}
+                    )
+                    # Create with new ID
+                    dev_user.id = actual_user_id
+                    session.add(dev_user)
+                    await session.flush()
+                    logger.info(f"Updated auth user ID to {actual_user_id}")
+            else:
+                # Create new auth user with correct ID
                 dev_user = AuthUser(
-                    id="dev-user-123",
+                    id=actual_user_id,
                     email="dev@example.com",
                     full_name="Development User",
                     auth_provider="dev",
@@ -288,13 +321,10 @@ async def dev_login(
                 )
                 session.add(dev_user)
                 await session.flush()
-                logger.info(f"Created dev user in auth database")
+                logger.info(f"Created auth user with ID {actual_user_id}")
             
-            # Sync to main database
-            await _sync_user_to_main_db(dev_user)
-            
-            # Use the real user ID
-            user_id = dev_user.id
+            # Use the synced user ID
+            user_id = actual_user_id
             user_email = dev_user.email
             user_name = dev_user.full_name
         

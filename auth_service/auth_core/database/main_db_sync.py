@@ -88,6 +88,7 @@ class MainDatabaseSync:
                 # Import main app User model
                 import sys
                 from pathlib import Path
+                import uuid
                 
                 # Add main app to path
                 auth_dir = Path(__file__).resolve().parent.parent.parent
@@ -107,36 +108,35 @@ class MainDatabaseSync:
                     # User exists, update and return existing ID
                     existing_by_email.full_name = auth_user.full_name or existing_by_email.full_name
                     existing_by_email.updated_at = auth_user.updated_at
-                    logger.info(f"Updated existing user {auth_user.email} with ID {existing_by_email.id}")
+                    logger.info(f"Found existing user {auth_user.email} with ID {existing_by_email.id}")
                     return existing_by_email.id
                 
-                # Check if ID exists (shouldn't happen if email check passed)
-                id_result = await session.execute(
-                    select(User).filter(User.id == auth_user.id)
-                )
-                existing_by_id = id_result.scalars().first()
+                # No user with this email, create new one
+                # Generate a proper unique ID if the provided one might conflict
+                new_id = auth_user.id
                 
-                if not existing_by_id:
-                    # Create new user
-                    new_user = User(
-                        id=auth_user.id,
-                        email=auth_user.email,
-                        full_name=auth_user.full_name or auth_user.email,
-                        is_active=auth_user.is_active,
-                        is_superuser=False,
-                        is_developer=False,
-                        role="user"
-                    )
-                    session.add(new_user)
-                    logger.info(f"Created user {auth_user.email} with ID {auth_user.id}")
-                    return auth_user.id
-                else:
-                    # Update existing user
-                    existing_by_id.email = auth_user.email
-                    existing_by_id.full_name = auth_user.full_name or existing_by_id.full_name
-                    existing_by_id.updated_at = auth_user.updated_at
-                    logger.info(f"Updated user {auth_user.email} with ID {existing_by_id.id}")
-                    return existing_by_id.id
+                # Check if this ID already exists
+                id_result = await session.execute(
+                    select(User).filter(User.id == new_id)
+                )
+                if id_result.scalars().first():
+                    # ID conflict, generate new one
+                    new_id = f"dev-{uuid.uuid4().hex[:8]}"
+                    logger.info(f"ID conflict detected, using new ID: {new_id}")
+                
+                # Create new user
+                new_user = User(
+                    id=new_id,
+                    email=auth_user.email,
+                    full_name=auth_user.full_name or auth_user.email,
+                    is_active=auth_user.is_active,
+                    is_superuser=False,
+                    is_developer=False,
+                    role="user"
+                )
+                session.add(new_user)
+                logger.info(f"Created new user {auth_user.email} with ID {new_id}")
+                return new_id
                 
         except Exception as e:
             logger.error(f"Failed to sync user: {e}")
