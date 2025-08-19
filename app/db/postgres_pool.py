@@ -59,10 +59,13 @@ def get_pool_status() -> dict:
 async def close_async_db():
     """Close all async database connections."""
     from app.db.postgres_core import async_engine
-    global async_engine
+    from app.logging_config import central_logger
+    logger = central_logger.get_logger(__name__)
+    
     if async_engine:
         await async_engine.dispose()
-        from app.logging_config import central_logger
-        logger = central_logger.get_logger(__name__)
         logger.info("Async database connections closed")
-        async_engine = None
+        # Note: Do not set async_engine to None here as it's a global variable
+        # in another module. The engine disposal is sufficient for cleanup.
+    else:
+        logger.debug("No async engine to close")

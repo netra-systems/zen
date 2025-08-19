@@ -158,12 +158,27 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
 
 def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory."""
+    logger = central_logger.get_logger(__name__)
+    logger.info("Setting up database connections...")
     try:
+        logger.debug("Calling initialize_postgres()...")
         async_session_factory = initialize_postgres()
+        logger.debug(f"initialize_postgres() returned: {async_session_factory}")
+        
+        if async_session_factory is None:
+            raise RuntimeError("initialize_postgres() returned None - database initialization failed")
+            
         app.state.db_session_factory = async_session_factory
+        logger.info("Database session factory successfully set on app.state")
+        
+        # Verify it's accessible
+        if hasattr(app.state, 'db_session_factory') and app.state.db_session_factory is not None:
+            logger.debug("Verified: app.state.db_session_factory is accessible and not None")
+        else:
+            logger.error("ERROR: app.state.db_session_factory is None after setting!")
+            
     except Exception as e:
         # Log the error and re-raise to fail startup early
-        logger = central_logger.get_logger(__name__)
         logger.critical(f"Failed to setup database connections: {e}")
         raise RuntimeError(f"Database initialization failed: {e}") from e
 
@@ -271,10 +286,14 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
         logger.info("Skipping startup health checks (fast startup mode)")
         return
     
+    logger.info("Starting comprehensive startup health checks...")
     from app.startup_checks import run_startup_checks
     try:
-        await run_startup_checks(app)
+        logger.debug("Calling run_startup_checks...")
+        results = await run_startup_checks(app)
+        logger.info(f"Startup checks completed: {results.get('passed', 0)}/{results.get('total_checks', 0)} passed")
     except Exception as e:
+        logger.error(f"Startup health checks failed with exception: {e}")
         await _handle_startup_failure(logger, e)
 
 

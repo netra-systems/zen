@@ -32,10 +32,17 @@ class MockDependencyManager:
     @staticmethod
     def setup_core_dependencies(app):
         """Set up core application dependencies for testing."""
-        from app.dependencies import get_llm_manager
+        from app.dependencies import get_llm_manager, get_db_dependency
         from app.db.postgres import get_async_db
+        from unittest.mock import AsyncMock, MagicMock
+        from sqlalchemy.ext.asyncio import AsyncSession
         
-        # Mock database dependency
+        # Mock database session that behaves like AsyncSession
+        async def mock_get_db_dependency():
+            mock_session = MagicMock(spec=AsyncSession)
+            yield mock_session
+        
+        # Mock database dependency (for backward compatibility)
         def mock_get_async_db():
             return Mock()
         
@@ -43,6 +50,7 @@ class MockDependencyManager:
         def mock_get_llm_manager():
             return Mock()
         
+        app.dependency_overrides[get_db_dependency] = mock_get_db_dependency
         app.dependency_overrides[get_async_db] = mock_get_async_db
         app.dependency_overrides[get_llm_manager] = mock_get_llm_manager
     
@@ -50,9 +58,16 @@ class MockDependencyManager:
     def setup_agent_dependencies(app):
         """Set up agent-specific dependencies for testing."""
         from app.services.agent_service import get_agent_service
+        from app.services.agent_service_core import AgentService
         
-        def mock_get_agent_service():
-            return Mock()
+        def mock_get_agent_service(db_session=None, llm_manager=None):
+            # Return a properly mocked AgentService
+            mock_service = Mock(spec=AgentService)
+            mock_service.process_message = AsyncMock(return_value={
+                "response": "Test response",
+                "status": "success"
+            })
+            return mock_service
         
         app.dependency_overrides[get_agent_service] = mock_get_agent_service
     

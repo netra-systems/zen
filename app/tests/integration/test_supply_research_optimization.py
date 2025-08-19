@@ -21,14 +21,12 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List, Tuple
 
-from app.agents.supply_researcher.research_engine import ResearchEngine
-from app.agents.supply_researcher.data_extractor import DataExtractor
-from app.agents.supply_researcher.parsers import ModelPricingParser
+from app.agents.supply_researcher.research_engine import SupplyResearchEngine
+from app.agents.supply_researcher.data_extractor import SupplyDataExtractor
+from app.agents.supply_researcher.parsers import SupplyRequestParser
 from app.services.supply_research.schedule_manager import ScheduleManager
-from app.agents.supply_researcher.models import (
-    ResearchType, ModelProvider, PricingTier
-)
-from app.services.apex_optimizer_agent.tools.cost_impact_simulator import CostImpactSimulator
+from app.agents.supply_researcher.models import ResearchType
+# Note: CostImpactSimulator is mocked in tests and doesn't need to be imported
 from app.db.models_user import User, ToolUsageLog
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
@@ -71,17 +69,17 @@ class TestSupplyResearchOptimization:
     def _init_supply_research_components(self):
         """Initialize supply research and optimization components"""
         # Research engine with mock data sources
-        research_engine = Mock(spec=ResearchEngine)
+        research_engine = Mock(spec=SupplyResearchEngine)
         research_engine.research_model_pricing = AsyncMock(side_effect=self._mock_pricing_research)
         research_engine.research_model_capabilities = AsyncMock(side_effect=self._mock_capability_research)
         
         # Data extractor for processing research results
-        data_extractor = Mock(spec=DataExtractor)
+        data_extractor = Mock(spec=SupplyDataExtractor)
         data_extractor.extract_pricing_data = Mock(side_effect=self._mock_extract_pricing)
         data_extractor.extract_performance_metrics = Mock(side_effect=self._mock_extract_performance)
         
-        # Cost impact simulator
-        cost_simulator = Mock(spec=CostImpactSimulator)
+        # Cost impact simulator (mocked without spec)
+        cost_simulator = Mock()
         cost_simulator.simulate_cost_impact = AsyncMock(side_effect=self._mock_cost_simulation)
         
         # Schedule manager for research automation

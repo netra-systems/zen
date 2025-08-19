@@ -26,7 +26,9 @@ module.exports = {
       presets: ['next/babel'],
     }],
   },
-  transformIgnorePatterns: [],
+  transformIgnorePatterns: [
+    'node_modules/(?!(react-markdown|remark-.*|rehype-.*|micromark.*|mdast-.*|unist-.*|vfile.*|unified.*|bail|is-plain-obj|trough|zwitch)/)',
+  ],
   testMatch: [
     '<rootDir>/__tests__/**/*.test.[jt]s?(x)',
     '<rootDir>/__tests__/**/*.spec.[jt]s?(x)',

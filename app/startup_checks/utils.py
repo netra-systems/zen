@@ -35,7 +35,9 @@ def _log_critical_failures(results: Dict[str, Any]) -> None:
     logger.error("Critical startup checks failed:")
     for failure in results['failures']:
         if failure.critical:
-            logger.error(f"  - {failure.name}: {failure.message}")
+            logger.error(f"  - CRITICAL FAILURE: {failure.name}: {failure.message}")
+            if hasattr(failure, 'duration_ms') and failure.duration_ms:
+                logger.error(f"    Duration: {failure.duration_ms:.2f}ms")
 
 
 def _log_non_critical_failures(results: Dict[str, Any]) -> None:

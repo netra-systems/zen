@@ -272,7 +272,7 @@ class UnifiedBroadcastingManager:
     async def notify_job_progress(self, job_id: str, progress_data: Dict[str, Any]) -> bool:
         """Send job progress notification to job room."""
         progress_message = {
-            "type": "job_progress",
+            "type": "generation_progress",
             "payload": progress_data,
             "timestamp": time.time()
         }
@@ -281,7 +281,7 @@ class UnifiedBroadcastingManager:
     async def notify_job_completion(self, job_id: str, completion_data: Dict[str, Any]) -> bool:
         """Send job completion notification to job room."""
         completion_message = {
-            "type": "job_completion",
+            "type": "generation_complete",
             "payload": completion_data,
             "timestamp": time.time()
         }
@@ -290,7 +290,7 @@ class UnifiedBroadcastingManager:
     async def notify_job_error(self, job_id: str, error_data: Dict[str, Any]) -> bool:
         """Send job error notification to job room."""
         error_message = {
-            "type": "job_error",
+            "type": "generation_error",
             "payload": error_data,
             "timestamp": time.time()
         }
