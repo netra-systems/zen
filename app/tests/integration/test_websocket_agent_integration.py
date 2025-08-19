@@ -1,7 +1,9 @@
-"""Integration tests for WebSocket and Agent systems.
+"""Integration Test Suite: WebSocket to Agent Service Full Flow
 
-End-to-end tests ensuring WebSocket messages properly trigger agent execution
-and responses are correctly sent back to clients.
+CRITICAL: Tests the complete integration from WebSocket message receipt to agent execution.
+These tests ensure the message routing fix is working end-to-end.
+
+ROOT CAUSE ADDRESSED: Messages were being validated but never forwarded to agent service.
 """
 
 import pytest

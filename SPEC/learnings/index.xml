@@ -42,12 +42,14 @@
             <name>WebSocket</name>
             <file>learnings/websocket_message_paradox.xml</file>
             <path>SPEC/learnings/websocket_message_paradox.xml</path>
-            <learning_count>2</learning_count>
+            <learning_count>3</learning_count>
             <learning_ids>
                 <id>websocket-frontend-backend-field-mismatch</id>
                 <id>websocket-coroutine-error</id>
+                <id>websocket-coroutine-auth-fix</id>
             </learning_ids>
-            <important_note>CRITICAL: Frontend sends 'content' field, backend schema expects 'content' but handler was looking for 'text'. Also check for coroutine objects before accessing attributes.</important_note>
+            <important_note>CRITICAL: Frontend sends 'content' field, backend schema expects 'content' but handler was looking for 'text'. Also check for coroutine objects before accessing attributes. Always await async auth methods.</important_note>
+            <additional_file>learnings/websocket_coroutine_fix.xml</additional_file>
             <additional_file>learnings/websocket_coroutine_error.xml</additional_file>
         </category>
         <category>

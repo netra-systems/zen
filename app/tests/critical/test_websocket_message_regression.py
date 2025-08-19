@@ -469,3 +469,101 @@ class TestStartAgentUserMessagePayloadConsistency:
             }
         }
         assert MessageHandlerBase.extract_user_request(payload4) == "query_value"
+
+
+class TestWebSocketCoroutineAuthRegression:
+    """Regression tests for coroutine handling in WebSocket auth flow."""
+    
+    @pytest.mark.asyncio
+    async def test_decode_access_token_coroutine_await(self):
+        """Critical: Verify decode_access_token coroutine is properly awaited."""
+        from app.routes.utils.websocket_helpers import decode_token_payload
+        from app.services.security_service import SecurityService
+        
+        mock_service = AsyncMock(spec=SecurityService)
+        test_payload = {"sub": "user123", "email": "test@example.com"}
+        
+        # Setup mock to return async result
+        mock_service.decode_access_token = AsyncMock(return_value=test_payload)
+        
+        # Call should properly await
+        result = await decode_token_payload(mock_service, "test_token")
+        
+        # Verify it was awaited
+        mock_service.decode_access_token.assert_awaited_once_with("test_token")
+        
+        # Verify result is dict, not coroutine
+        assert isinstance(result, dict)
+        assert hasattr(result, 'get')
+        assert result.get("sub") == "user123"
+    
+    @pytest.mark.asyncio
+    async def test_auth_flow_no_coroutine_attribute_error(self):
+        """Verify auth flow doesn't cause 'coroutine has no attribute' error."""
+        from app.routes.utils.websocket_helpers import authenticate_websocket_user
+        from app.services.security_service import SecurityService
+        
+        mock_websocket = Mock()
+        mock_service = AsyncMock(spec=SecurityService)
+        mock_user = Mock(id="user123", email="test@example.com")
+        
+        # Setup all async operations
+        mock_service.decode_access_token = AsyncMock(
+            return_value={"sub": "user123", "email": "test@example.com"}
+        )
+        mock_service.get_user_by_id = AsyncMock(return_value=mock_user)
+        
+        with patch('app.routes.utils.websocket_helpers.get_async_db') as mock_db:
+            mock_db_session = AsyncMock()
+            mock_db.return_value.__aenter__.return_value = mock_db_session
+            
+            # Should complete without coroutine attribute errors
+            result = await authenticate_websocket_user(
+                mock_websocket, "valid_token", mock_service
+            )
+            
+            assert result == "user123"
+            
+            # Verify all async calls were properly awaited
+            assert mock_service.decode_access_token.await_count == 1
+            assert mock_service.get_user_by_id.await_count >= 1
+    
+    @pytest.mark.asyncio
+    async def test_websocket_error_handler_with_coroutine_error(self):
+        """Test error handler properly logs coroutine-related errors."""
+        from app.routes.websockets import _handle_general_exception
+        
+        mock_websocket = Mock()
+        error = RuntimeError("'coroutine' object has no attribute 'get'")
+        
+        with patch('app.routes.websockets.logger') as mock_logger:
+            await _handle_general_exception(error, "user123", mock_websocket)
+            
+            # Verify error was logged
+            mock_logger.error.assert_called()
+            assert "'coroutine' object has no attribute 'get'" in str(mock_logger.error.call_args)
+    
+    @pytest.mark.asyncio
+    async def test_security_service_validate_token_awaits_decode(self):
+        """Test EnhancedSecurityService validate_token properly awaits decode."""
+        from app.tests.services.security_service_test_mocks import EnhancedSecurityService
+        from app.services.key_manager import KeyManager
+        
+        mock_key_manager = Mock(spec=KeyManager)
+        service = EnhancedSecurityService(mock_key_manager)
+        
+        # Mock decode to verify it's awaited
+        service.decode_access_token = AsyncMock(
+            return_value={"sub": "test_user", "exp": 9999999999}
+        )
+        
+        result = await service.validate_token("test_token")
+        
+        # Verify decode was awaited
+        service.decode_access_token.assert_awaited_once_with("test_token")
+        
+        # Verify result is proper dict
+        assert isinstance(result, dict)
+        assert result["valid"] is True
+        # The validate_token method maps 'sub' to 'email'
+        assert result.get("email") == "test_user"

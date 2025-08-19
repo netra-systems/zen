@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <metadata>
+    <title>WebSocket Coroutine Authentication Fix</title>
+    <date>2025-08-18</date>
+    <severity>CRITICAL</severity>
+    <business_value>
+      Prevents WebSocket connection failures that disconnect users.
+      Protects $8K MRR from authentication-related failures.
+    </business_value>
+    <category>websockets</category>
+    <tags>async, coroutine, authentication, regression</tags>
+  </metadata>
+
+  <problem>
+    <description>
+      WebSocket authentication was failing with error:
+      "'coroutine' object has no attribute 'get'"
+      
+      The decode_access_token method was made async but not being awaited
+      in the decode_token_payload function, causing a coroutine object
+      to be returned instead of the expected dictionary.
+    </description>
+    
+    <error_message>
+      [BACKEND] ❌ 2025-08-18 22:45:58.040 | ERROR | Error in WebSocket connection: 'coroutine' object has no attribute 'get'
+      [BACKEND] ⚠️ RuntimeWarning: coroutine 'SecurityService.decode_access_token' was never awaited
+    </error_message>
+    
+    <root_cause>
+      The SecurityService.decode_access_token method was changed to async
+      (likely during auth service refactoring) but the calling code in
+      websocket_helpers.py was not updated to await the coroutine.
+    </root_cause>
+  </problem>
+
+  <solution>
+    <changes>
+      <change file="app/routes/utils/websocket_helpers.py" line="40">
+        <old>payload = security_service.decode_access_token(token)</old>
+        <new>payload = await security_service.decode_access_token(token)</new>
+        <reason>Added await to properly handle async decode_access_token</reason>
+      </change>
+      
+      <change file="tests/test_system_startup.py" line="217">
+        <old>decoded = security_service.decode_access_token(token)</old>
+        <new>decoded = await security_service.decode_access_token(token)</new>
+        <reason>Test must await async method</reason>
+      </change>
+      
+      <change file="app/tests/services/security_service_test_mocks.py" line="202">
+        <old>payload = self.decode_access_token(token)</old>
+        <new>payload = await self.decode_access_token(token)</new>
+        <reason>Mock validate_token must await decode_access_token</reason>
+      </change>
+    </changes>
+    
+    <tests_added>
+      <test file="app/tests/critical/test_websocket_message_regression.py">
+        Added TestWebSocketCoroutineAuthRegression class with:
+        - test_decode_access_token_coroutine_await: Verifies proper awaiting
+        - test_auth_flow_no_coroutine_attribute_error: Full auth flow test
+        - test_websocket_error_handler_with_coroutine_error: Error logging
+        - test_security_service_validate_token_awaits_decode: Mock validation
+      </test>
+    </tests_added>
+  </solution>
+
+  <prevention>
+    <checklist>
+      <item>When making a method async, search for ALL usages and add await</item>
+      <item>Run WebSocket integration tests after auth changes</item>
+      <item>Watch for RuntimeWarning about unawaited coroutines in logs</item>
+      <item>Test WebSocket connections after any SecurityService changes</item>
+    </checklist>
+    
+    <patterns_to_avoid>
+      <pattern>
+        <bad>result = async_method(param)  # Missing await</bad>
+        <good>result = await async_method(param)</good>
+      </pattern>
+      
+      <pattern>
+        <bad>
+          # Making method async without updating callers
+          def decode_token() -> dict  # Changed to:
+          async def decode_token() -> dict
+        </bad>
+        <good>
+          # Update all callers when making method async
+          1. Find all usages: grep -r "decode_token"
+          2. Add await to each async context
+          3. Make sync callers async if needed
+        </good>
+      </pattern>
+    </patterns_to_avoid>
+    
+    <monitoring>
+      <metric>WebSocket connection success rate</metric>
+      <metric>Authentication error rate</metric>
+      <alert>RuntimeWarning for unawaited coroutines</alert>
+      <alert>'coroutine' object has no attribute errors</alert>
+    </monitoring>
+  </prevention>
+
+  <related_files>
+    <file>app/routes/websockets.py</file>
+    <file>app/routes/utils/websocket_helpers.py</file>
+    <file>app/services/security_service.py</file>
+    <file>app/services/auth_client.py</file>
+  </related_files>
+
+  <notes>
+    This issue occurred after the auth architecture refactor on 2025-08-18
+    where SecurityService methods were made async to work with the new
+    auth_client. Always ensure comprehensive testing of WebSocket flows
+    after authentication changes.
+  </notes>
+</learning>
