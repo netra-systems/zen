@@ -73,8 +73,8 @@ describe('AIMessage - Styling and Display', () => {
     const message = createAIMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const messageCard = screen.getByRole('article');
-    expect(messageCard).toHaveClass('justify-start');
+    const messageContainer = screen.getByText('OptimizationAgent').closest('.mb-4');
+    expect(messageContainer).toHaveClass('justify-start');
     expect(screen.getByText('OptimizationAgent')).toBeInTheDocument();
   });
 
@@ -90,7 +90,7 @@ describe('AIMessage - Styling and Display', () => {
     const message = createAIMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const card = screen.getByRole('article');
+    const card = screen.getByText('OptimizationAgent').closest('.rounded-lg');
     expect(card).toHaveClass('border-gray-200');
   });
 
@@ -98,8 +98,7 @@ describe('AIMessage - Styling and Display', () => {
     const message = createAIMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const container = screen.getByTestId('message-container') || 
-                     screen.getByRole('article').parentElement;
+    const container = screen.getByText('OptimizationAgent').closest('.mb-4');
     expect(container).toHaveClass('justify-start');
   });
 
@@ -152,8 +151,8 @@ describe('AIMessage - Agent Identification', () => {
     const message = createAIMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const botIcon = screen.getByTestId('bot-icon') || 
-                   document.querySelector('[data-lucide="bot"]');
+    const botIcon = document.querySelector('svg.lucide-bot') ||
+                   screen.getByText('OptimizationAgent').parentElement?.querySelector('svg');
     expect(botIcon).toBeInTheDocument();
   });
 });
@@ -307,8 +306,8 @@ describe('AIMessage - Error Handling', () => {
     const message = createErrorMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const errorIcon = screen.getByTestId('error-icon') || 
-                     document.querySelector('[data-lucide="alert-circle"]');
+    const errorIcon = document.querySelector('svg.lucide-alert-circle') ||
+                     screen.getByText('Connection timeout occurred').parentElement?.querySelector('svg');
     expect(errorIcon).toBeInTheDocument();
   });
 
@@ -316,7 +315,7 @@ describe('AIMessage - Error Handling', () => {
     const message = createErrorMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const card = screen.getByRole('article');
+    const card = screen.getByText('Connection timeout occurred').closest('.rounded-lg');
     expect(card).toHaveClass('bg-red-50', 'border-red-200');
   });
 
@@ -326,7 +325,8 @@ describe('AIMessage - Error Handling', () => {
     
     // Error should be displayed without breaking the UI
     expect(screen.getByText('Connection timeout occurred')).toBeInTheDocument();
-    expect(screen.getByRole('article')).toBeInTheDocument();
+    const messageContainer = screen.getByText('Connection timeout occurred').closest('.mb-4');
+    expect(messageContainer).toBeInTheDocument();
   });
 });
 
@@ -341,7 +341,8 @@ describe('AIMessage - MCP Execution Indicators', () => {
         mcpExecutions: [{
           tool_name: 'file_reader',
           status: 'completed',
-          execution_time_ms: 150
+          execution_time_ms: 150,
+          args: { path: '/test/file.txt' }
         }]
       }
     });
@@ -359,7 +360,8 @@ describe('AIMessage - MCP Execution Indicators', () => {
       metadata: {
         mcpExecutions: [{
           server_status: 'CONNECTED',
-          tool_name: 'database_query'
+          tool_name: 'database_query',
+          args: { query: 'SELECT * FROM users' }
         }]
       }
     });
@@ -384,7 +386,8 @@ describe('AIMessage - Performance', () => {
       metadata: {
         mcpExecutions: Array(10).fill({
           tool_name: 'test_tool',
-          status: 'completed'
+          status: 'completed',
+          args: { test: 'value' }
         })
       }
     });

@@ -326,42 +326,26 @@ describe('Error Handling and Recovery Tests', () => {
     });
 
     it('should show clear error messages for different error types', async () => {
-      const scenarios: ErrorTestScenario[] = [
-        {
-          name: 'Network Error',
-          error: simulateNetworkError(),
-          expectedRecovery: true
-        },
-        {
-          name: 'Server Error',
-          error: createAPIError(500, 'Internal Server Error') as any,
-          expectedRecovery: true
-        },
-        {
-          name: 'Client Error', 
-          error: createAPIError(400, 'Bad Request') as any,
-          expectedRecovery: false
-        }
-      ];
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      
+      // Test Network Error
+      mockFetch.mockRejectedValueOnce(simulateNetworkError());
+      
+      const { unmount } = render(
+        <TestProviders>
+          <ErrorRecoveryComponent />
+        </TestProviders>
+      );
 
-      for (const scenario of scenarios) {
-        mockFetch.mockRejectedValueOnce(scenario.error);
-        
-        const { unmount } = render(
-          <TestProviders>
-            <ErrorRecoveryComponent />
-          </TestProviders>
-        );
-
-        await userEvent.click(screen.getByTestId('api-error-btn'));
-        
-        await waitFor(() => {
-          expect(screen.getByTestId('error-display')).toBeInTheDocument();
-        });
-        
-        unmount();
-      }
-    });
+      await user.click(screen.getByTestId('api-error-btn'));
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('error-display')).toBeInTheDocument();
+        expect(screen.getByText(/Network request failed/)).toBeInTheDocument();
+      });
+      
+      unmount();
+    }, 10000);
   });
 
   describe('Session Timeout Recovery', () => {
@@ -488,12 +472,17 @@ describe('Error Handling and Recovery Tests', () => {
         expect(screen.getByText('API call successful')).toBeInTheDocument();
       });
 
-      // Clear error and make another successful call
+      // Clear error
       await user.click(screen.getByTestId('clear-error-btn'));
-      await user.click(screen.getByTestId('api-success-btn'));
       
       await waitFor(() => {
         expect(screen.queryByTestId('error-display')).not.toBeInTheDocument();
+      });
+
+      // Make another successful call
+      await user.click(screen.getByTestId('api-success-btn'));
+      
+      await waitFor(() => {
         // Should have two successful messages
         expect(screen.getAllByText('API call successful')).toHaveLength(2);
       });

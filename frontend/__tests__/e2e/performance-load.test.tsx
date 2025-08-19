@@ -10,192 +10,76 @@
  */
 
 import { test, expect, Page, BrowserContext } from '@playwright/test';
+import {
+  authenticateUser,
+  createThread,
+  sendMessage,
+  measurePagePerformance,
+  validatePerformance,
+  cleanupTestSession
+} from './utils/e2e-test-helpers';
+import {
+  createBulkThreads,
+  populateThreadWithMessages,
+  measureThreadSwitchPerformance,
+  testScrollPerformance,
+  monitorFrameRate,
+  validateUIResponsiveness,
+  performRapidInteractions,
+  type PerformanceMetrics,
+  type LoadTestData
+} from './utils/performance-test-helpers';
 
-interface PerformanceMetrics {
-  renderTime: number;
-  threadSwitchTime: number;
-  scrollPerformance: number;
-  memoryUsage: number;
-  frameRate: number;
-}
-
-interface LoadTestData {
-  threadsCreated: number;
-  messagesCreated: number;
-  totalTime: number;
-  errors: string[];
+/**
+ * Sets up load testing environment
+ */
+async function setupLoadTestEnvironment(page: Page): Promise<void> {
+  await authenticateUser(page);
+  await page.waitForLoadState('networkidle');
 }
 
 /**
- * Sets up authenticated user for load testing
+ * Validates performance metrics against thresholds
  */
-async function setupLoadTestUser(page: Page): Promise<void> {
-  const testUser = {
-    id: 'load-test-user',
-    email: 'loadtest@netrasystems.ai',
-    name: 'Load Test User'
-  };
-  
-  await page.goto('/login');
-  await page.evaluate((user) => {
-    localStorage.setItem('auth_token', 'load-test-token');
-    localStorage.setItem('user', JSON.stringify(user));
-  }, testUser);
-  await page.goto('/chat');
+function validateLoadTestMetrics(
+  data: LoadTestData,
+  count: number,
+  timeLimit: number
+): void {
+  expect(data.threadsCreated).toBeGreaterThan(count * 0.9);
+  expect(data.totalTime).toBeLessThan(timeLimit);
+  expect(data.errors.length).toBeLessThan(count * 0.1);
 }
 
 /**
- * Creates large number of threads efficiently
+ * Tests mixed load conditions
  */
-async function createBulkThreads(
-  page: Page, 
-  count: number
-): Promise<LoadTestData> {
-  const startTime = Date.now();
-  const errors: string[] = [];
-  let threadsCreated = 0;
+async function testMixedLoadConditions(page: Page): Promise<PerformanceMetrics[]> {
+  const threads = [100, 500, 1000, 2000, 5000];
+  const performanceData: PerformanceMetrics[] = [];
   
-  for (let i = 0; i < count; i++) {
-    try {
-      await page.click('[data-testid="new-conversation"]');
-      threadsCreated++;
-      
-      // Batch creation every 50 threads to avoid timeout
-      if (i > 0 && i % 50 === 0) {
-        await page.waitForTimeout(100);
-      }
-    } catch (error) {
-      errors.push(`Thread ${i}: ${(error as Error).message}`);
-    }
+  for (let i = 0; i < threads.length; i++) {
+    await createThread(page);
+    
+    const startTime = Date.now();
+    await populateThreadWithMessages(page, threads[i]);
+    const renderTime = Date.now() - startTime;
+    
+    const switchTime = await measureThreadSwitchPerformance(page, 5);
+    const scrollTime = await testScrollPerformance(page);
+    const pageMetrics = await measurePagePerformance(page);
+    const frameRate = await monitorFrameRate(page);
+    
+    performanceData.push({
+      renderTime,
+      threadSwitchTime: switchTime,
+      scrollPerformance: scrollTime,
+      memoryUsage: pageMetrics.maxMemoryMB,
+      frameRate
+    });
   }
   
-  return {
-    threadsCreated,
-    messagesCreated: 0,
-    totalTime: Date.now() - startTime,
-    errors
-  };
-}
-
-/**
- * Populates thread with large message volume
- */
-async function populateThreadWithMessages(
-  page: Page, 
-  messageCount: number
-): Promise<number> {
-  const startTime = Date.now();
-  let messagesCreated = 0;
-  
-  for (let i = 0; i < messageCount; i++) {
-    const message = `Load test message ${i + 1}`;
-    
-    await page.fill('[data-testid="message-input"]', message);
-    await page.keyboard.press('Enter');
-    
-    // Wait for message to appear
-    await expect(page.locator('.user-message').last())
-      .toContainText(message, { timeout: 1000 });
-    
-    messagesCreated++;
-    
-    // Batch processing to maintain performance
-    if (i > 0 && i % 100 === 0) {
-      await page.waitForTimeout(50);
-    }
-  }
-  
-  return Date.now() - startTime;
-}
-
-/**
- * Measures thread switching performance
- */
-async function measureThreadSwitchPerformance(
-  page: Page, 
-  switches: number
-): Promise<number> {
-  const switchTimes: number[] = [];
-  
-  for (let i = 0; i < switches; i++) {
-    const startTime = performance.now();
-    
-    await page.click('.thread-item:nth-child(' + ((i % 10) + 1) + ')');
-    await expect(page.locator('.chat-container')).toBeVisible();
-    
-    const endTime = performance.now();
-    switchTimes.push(endTime - startTime);
-  }
-  
-  return switchTimes.reduce((sum, time) => sum + time, 0) / switchTimes.length;
-}
-
-/**
- * Tests scroll performance with large data
- */
-async function testScrollPerformance(page: Page): Promise<number> {
-  const startTime = performance.now();
-  
-  // Scroll through large message list
-  for (let i = 0; i < 50; i++) {
-    await page.keyboard.press('PageDown');
-    await page.waitForTimeout(16); // ~60 FPS
-  }
-  
-  // Scroll back to top
-  await page.keyboard.press('Home');
-  
-  return performance.now() - startTime;
-}
-
-/**
- * Measures memory usage during load test
- */
-async function measureMemoryUsage(page: Page): Promise<number> {
-  const memoryInfo = await page.evaluate(() => {
-    if ('memory' in performance) {
-      return (performance as any).memory.usedJSHeapSize;
-    }
-    return 0;
-  });
-  
-  return memoryInfo / (1024 * 1024); // Convert to MB
-}
-
-/**
- * Monitors frame rate during animations
- */
-async function monitorFrameRate(page: Page): Promise<number> {
-  const frameRate = await page.evaluate(async () => {
-    const frames: number[] = [];
-    let lastFrame = performance.now();
-    
-    for (let i = 0; i < 120; i++) { // Monitor for 2 seconds at 60 FPS
-      await new Promise(resolve => requestAnimationFrame(resolve));
-      const currentFrame = performance.now();
-      frames.push(1000 / (currentFrame - lastFrame));
-      lastFrame = currentFrame;
-    }
-    
-    return frames.reduce((sum, fps) => sum + fps, 0) / frames.length;
-  });
-  
-  return frameRate;
-}
-
-/**
- * Validates UI responsiveness under load
- */
-async function validateUIResponsiveness(page: Page): Promise<boolean> {
-  const startTime = Date.now();
-  
-  // Test various UI interactions
-  await page.click('[data-testid="new-conversation"]');
-  await page.fill('[data-testid="message-input"]', 'Responsiveness test');
-  await page.keyboard.press('Enter');
-  
-  const responseTime = Date.now() - startTime;
-  return responseTime < 500; // 500ms max for UI responsiveness
+  return performanceData;
 }
 
 test.describe('Performance Load E2E', () => {
@@ -205,179 +89,133 @@ test.describe('Performance Load E2E', () => {
   test.beforeEach(async ({ browser }) => {
     context = await browser.newContext();
     page = await context.newPage();
-    await setupLoadTestUser(page);
+    await setupLoadTestEnvironment(page);
   });
 
   test.afterEach(async () => {
+    await cleanupTestSession(page);
     await context.close();
   });
 
   test('should handle 1000+ threads without performance degradation', async () => {
     const threadCount = 1000;
     
-    // Create bulk threads
     const loadData = await createBulkThreads(page, threadCount);
+    validateLoadTestMetrics(loadData, threadCount, 300000);
     
-    expect(loadData.threadsCreated).toBeGreaterThan(threadCount * 0.9); // 90% success rate
-    expect(loadData.totalTime).toBeLessThan(300000); // 5 minutes max
-    expect(loadData.errors.length).toBeLessThan(threadCount * 0.1); // <10% errors
-    
-    // Test thread switching performance
     const avgSwitchTime = await measureThreadSwitchPerformance(page, 20);
-    expect(avgSwitchTime).toBeLessThan(500); // 500ms max per switch
+    expect(avgSwitchTime).toBeLessThan(500);
     
-    // Validate memory usage
-    const memoryUsage = await measureMemoryUsage(page);
-    expect(memoryUsage).toBeLessThan(500); // 500MB max
+    const memoryMetrics = await measurePagePerformance(page);
+    expect(memoryMetrics.maxMemoryMB).toBeLessThan(500);
   });
 
   test('should handle 10000+ messages with smooth scrolling', async () => {
     const messageCount = 10000;
     
-    // Create single thread with many messages
-    await page.click('[data-testid="new-conversation"]');
-    
+    await createThread(page);
     const populationTime = await populateThreadWithMessages(page, messageCount);
-    expect(populationTime).toBeLessThan(600000); // 10 minutes max
+    expect(populationTime).toBeLessThan(600000);
     
-    // Test scroll performance
     const scrollTime = await testScrollPerformance(page);
-    expect(scrollTime).toBeLessThan(5000); // 5 seconds for scroll test
+    expect(scrollTime).toBeLessThan(5000);
     
-    // Monitor frame rate during scrolling
     const frameRate = await monitorFrameRate(page);
-    expect(frameRate).toBeGreaterThan(55); // Close to 60 FPS
+    expect(frameRate).toBeGreaterThan(55);
     
-    // Verify UI remains responsive
     const isResponsive = await validateUIResponsiveness(page);
     expect(isResponsive).toBe(true);
   });
 
   test('should maintain performance with mixed load conditions', async () => {
-    // Create moderate number of threads with varied message counts
-    const threads = [100, 500, 1000, 2000, 5000]; // Messages per thread
-    const performanceData: PerformanceMetrics[] = [];
+    const performanceData = await testMixedLoadConditions(page);
     
-    for (let i = 0; i < threads.length; i++) {
-      await page.click('[data-testid="new-conversation"]');
-      
-      const startTime = Date.now();
-      await populateThreadWithMessages(page, threads[i]);
-      const renderTime = Date.now() - startTime;
-      
-      const switchTime = await measureThreadSwitchPerformance(page, 5);
-      const scrollTime = await testScrollPerformance(page);
-      const memoryUsage = await measureMemoryUsage(page);
-      const frameRate = await monitorFrameRate(page);
-      
-      performanceData.push({
-        renderTime,
-        threadSwitchTime: switchTime,
-        scrollPerformance: scrollTime,
-        memoryUsage,
-        frameRate
-      });
-    }
-    
-    // Validate performance doesn't degrade significantly
     const avgRenderTime = performanceData.reduce((sum, p) => sum + p.renderTime, 0) / performanceData.length;
     const avgFrameRate = performanceData.reduce((sum, p) => sum + p.frameRate, 0) / performanceData.length;
     const maxMemory = Math.max(...performanceData.map(p => p.memoryUsage));
     
-    expect(avgRenderTime).toBeLessThan(60000); // 1 minute avg render time
-    expect(avgFrameRate).toBeGreaterThan(50); // Maintain good frame rate
-    expect(maxMemory).toBeLessThan(500); // Memory under control
+    expect(avgRenderTime).toBeLessThan(60000);
+    expect(avgFrameRate).toBeGreaterThan(50);
+    expect(maxMemory).toBeLessThan(500);
   });
 
   test('should handle rapid user interactions under load', async () => {
-    // Create baseline load
     await createBulkThreads(page, 100);
     
-    // Perform rapid interactions
-    const interactions = [
-      () => page.click('[data-testid="new-conversation"]'),
-      () => page.fill('[data-testid="message-input"]', 'Quick message'),
-      () => page.keyboard.press('Enter'),
-      () => page.click('.thread-item:nth-child(1)'),
-      () => page.keyboard.press('PageDown'),
-    ];
+    const totalTime = await performRapidInteractions(page, 100);
+    expect(totalTime).toBeLessThan(30000);
     
-    const startTime = Date.now();
-    
-    // Execute 100 rapid interactions
-    for (let i = 0; i < 100; i++) {
-      const interaction = interactions[i % interactions.length];
-      await interaction();
-      
-      // Brief pause to simulate human interaction
-      await page.waitForTimeout(10);
-    }
-    
-    const totalTime = Date.now() - startTime;
-    expect(totalTime).toBeLessThan(30000); // 30 seconds for all interactions
-    
-    // Verify application remains stable
     const isResponsive = await validateUIResponsiveness(page);
     expect(isResponsive).toBe(true);
   });
 
   test('should recover gracefully from performance bottlenecks', async () => {
-    // Create heavy load condition
     await createBulkThreads(page, 500);
-    
-    // Simulate performance bottleneck with large content
-    await page.click('[data-testid="new-conversation"]');
+    await createThread(page);
     
     // Add very large message content
-    const largeContent = 'A'.repeat(100000); // 100KB message
-    await page.fill('[data-testid="message-input"]', largeContent);
-    await page.keyboard.press('Enter');
+    const largeContent = 'A'.repeat(100000);
+    await sendMessage(page, largeContent);
     
-    // Verify application doesn't freeze
     await expect(page.locator('.user-message'))
       .toContainText('AAAA', { timeout: 10000 });
     
-    // Test recovery by normal operations
-    await page.fill('[data-testid="message-input"]', 'Recovery test');
-    await page.keyboard.press('Enter');
-    
+    // Test recovery
+    await sendMessage(page, 'Recovery test');
     await expect(page.locator('.user-message').last())
       .toContainText('Recovery test', { timeout: 5000 });
     
-    // Verify performance metrics are acceptable
     const frameRate = await monitorFrameRate(page);
-    expect(frameRate).toBeGreaterThan(45); // Slightly lower but acceptable
+    expect(frameRate).toBeGreaterThan(45);
   });
 
   test('should maintain data integrity under concurrent load', async () => {
-    // Create threads with sequential numbering
     const threadCount = 100;
     const expectedThreads: string[] = [];
     
     for (let i = 0; i < threadCount; i++) {
-      await page.click('[data-testid="new-conversation"]');
+      await createThread(page);
       
       const threadName = `Load Test Thread ${i + 1}`;
       expectedThreads.push(threadName);
       
-      // Add identifier message
-      await page.fill('[data-testid="message-input"]', `Message for thread ${i + 1}`);
-      await page.keyboard.press('Enter');
+      await sendMessage(page, `Message for thread ${i + 1}`);
     }
     
-    // Verify all threads exist in sidebar
-    for (let i = 0; i < Math.min(threadCount, 20); i++) { // Check first 20
+    // Verify threads exist
+    for (let i = 0; i < Math.min(threadCount, 20); i++) {
       const threadIndex = i + 1;
       await expect(page.locator('.thread-item'))
         .toContainText(`thread ${threadIndex}`, { timeout: 1000 });
     }
     
-    // Random sampling verification for larger datasets
+    // Random sampling verification
     const sampleIndices = [0, 25, 50, 75, 99].filter(i => i < threadCount);
     for (const index of sampleIndices) {
       await page.click(`.thread-item:nth-child(${index + 1})`);
       await expect(page.locator('.user-message'))
         .toContainText(`Message for thread ${index + 1}`, { timeout: 2000 });
     }
+  });
+
+  test('should validate performance regression prevention', async () => {
+    // Baseline measurement
+    const baselineMetrics = await measurePagePerformance(page);
+    
+    // Apply load
+    await createBulkThreads(page, 200);
+    await populateThreadWithMessages(page, 1000);
+    
+    // Measure under load
+    const loadMetrics = await measurePagePerformance(page);
+    const frameRate = await monitorFrameRate(page);
+    
+    // Validate no significant degradation
+    const memoryIncrease = loadMetrics.maxMemoryMB - baselineMetrics.maxMemoryMB;
+    expect(memoryIncrease).toBeLessThan(200); // Allow reasonable increase
+    expect(frameRate).toBeGreaterThan(50); // Maintain good performance
+    
+    const responsiveness = await validateUIResponsiveness(page);
+    expect(responsiveness).toBe(true);
   });
 });
