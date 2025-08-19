@@ -70,7 +70,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
         key,
         newValue,
         oldValue: 'old-value',
-        storageArea: localStorage,
       });
       return event;
     };
@@ -118,7 +117,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
         key: tokenKey,
         newValue: null,
         oldValue: 'some-token',
-        storageArea: localStorage,
       });
       window.dispatchEvent(event);
     };
@@ -158,7 +156,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
         key,
         newValue: value,
         oldValue: 'old-value',
-        storageArea: localStorage,
       });
       window.dispatchEvent(event);
       await waitFor(() => {
@@ -243,7 +240,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
         key: 'jwt_token',
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       window.dispatchEvent(event);
       await waitFor(() => {
@@ -268,8 +264,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-        });
+          });
         window.dispatchEvent(event);
       }
       await waitFor(() => {
@@ -286,8 +281,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-        });
+          });
         window.dispatchEvent(event);
       }
       await waitFor(() => {
@@ -302,7 +296,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
         key: 'authToken',
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       window.dispatchEvent(event);
       await waitFor(() => {
@@ -318,7 +311,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
         key: 'jwt_token',
         newValue: null,
         oldValue: 'token',
-        storageArea: sessionStorage,
       });
       window.dispatchEvent(sessionEvent);
     };
@@ -329,8 +321,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-        });
+          });
         window.dispatchEvent(event);
       });
       await waitFor(() => {
@@ -353,7 +344,6 @@ describe('Logout Multi-Tab Sync Tests', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: null,
         });
         window.dispatchEvent(event);
       });
@@ -367,8 +357,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
           key: null as any,
           newValue: null,
           oldValue: null,
-          storageArea: localStorage,
-        });
+          });
         window.dispatchEvent(event);
       });
       // Should not crash

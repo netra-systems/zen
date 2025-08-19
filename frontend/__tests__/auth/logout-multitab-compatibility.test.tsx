@@ -44,7 +44,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
         key: 'jwt_token',
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       window.dispatchEvent(event);
     };
@@ -64,7 +63,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'session_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: sessionStorage,
         });
         window.dispatchEvent(event);
       });
@@ -79,7 +77,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: null,
         });
         window.dispatchEvent(event);
       });
@@ -93,7 +90,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: undefined as any,
         });
         window.dispatchEvent(event);
       });
@@ -116,7 +112,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
         key: null as any,
         newValue: null,
         oldValue: null,
-        storageArea: localStorage,
       });
       // Should not crash or throw errors
       expect(() => window.dispatchEvent).not.toThrow();
@@ -126,7 +121,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
       await testMalformedEvents({
         // Missing key property
         newValue: null,
-        storageArea: localStorage,
       });
       // Should handle gracefully
       expect(() => window.dispatchEvent).not.toThrow();
@@ -137,7 +131,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
         key: 123 as any, // Invalid type
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       // Should not crash
       expect(() => window.dispatchEvent).not.toThrow();
@@ -151,7 +144,6 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
         key: 'jwt_token',
         newValue: null,
         oldValue: circularObj,
-        storageArea: localStorage,
       });
       // Should handle without stack overflow
       expect(() => window.dispatchEvent).not.toThrow();
@@ -262,8 +254,7 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: null,
-          storageArea: localStorage,
-        });
+          });
         window.dispatchEvent(event);
       });
       await waitFor(() => {
@@ -340,8 +331,7 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-          url: 'https://different-container-origin.com',
+            url: 'https://different-container-origin.com',
         });
         window.dispatchEvent(event);
       });
@@ -374,8 +364,7 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-          url: 'https://malicious-site.com',
+            url: 'https://malicious-site.com',
         });
         window.dispatchEvent(event);
       });
@@ -399,8 +388,7 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-          url: 'invalid-url',
+            url: 'invalid-url',
         });
         window.dispatchEvent(event);
       });
@@ -415,8 +403,7 @@ describe('Logout Multi-Tab - Browser Compatibility', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'token',
-          storageArea: localStorage,
-          // No URL property
+            // No URL property
         } as any);
         window.dispatchEvent(event);
       });

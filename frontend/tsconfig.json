@@ -41,6 +41,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "__tests__/setup/global.d.ts", "types/jest.d.ts", "jest-setup.d.ts", "@types/jest.d.ts", "**/*.test.ts", "**/*.test.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "__tests__/setup/global.d.ts", "@types/**/*.d.ts", "**/*.test.ts", "**/*.test.tsx"],
   "exclude": ["node_modules"]
 }

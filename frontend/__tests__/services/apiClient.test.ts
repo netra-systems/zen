@@ -172,87 +172,156 @@ describe('ApiClient Infrastructure Tests', () => {
     });
 
     test('reconnects before failed requests', async () => {
-      // First health check fails
+      setupReconnectionMocks();
+      await executeReconnectionRequest();
+      verifyReconnectionAttempts();
+    });
+
+    function setupReconnectionMocks() {
       mockFetch
         .mockRejectedValueOnce(new Error('Connection failed'))
         .mockResolvedValueOnce(createMockResponse({ status: 'healthy' }))
         .mockResolvedValueOnce(createMockResponse({ data: 'success' }));
-      
+    }
+
+    async function executeReconnectionRequest() {
       await apiClient.get('/test');
-      
-      // Should attempt reconnection before actual request
+    }
+
+    function verifyReconnectionAttempts() {
       expect(mockFetch).toHaveBeenCalledTimes(3);
-    });
+    }
   });
 
   describe('Retry Logic with Exponential Backoff', () => {
     test('retries failed requests with exponential delay', async () => {
+      const delays = setupDelayTracking();
+      setupRetryMocks();
+      await executeRetryRequest();
+      verifyExponentialDelays(delays);
+      cleanupMocks();
+    });
+
+    function setupDelayTracking() {
       const delays: number[] = [];
       jest.spyOn(global, 'setTimeout').mockImplementation((callback, delay) => {
         delays.push(delay as number);
         (callback as Function)();
         return {} as any;
       });
-      
+      return delays;
+    }
+
+    function setupRetryMocks() {
       mockFetch
         .mockRejectedValueOnce(new Error('Network error'))
         .mockRejectedValueOnce(new Error('Network error'))
         .mockResolvedValueOnce(createMockResponse({ success: true }));
-      
+    }
+
+    async function executeRetryRequest() {
       await apiClient.get('/test');
-      
+    }
+
+    function verifyExponentialDelays(delays: number[]) {
       expectExponentialDelays(delays);
+    }
+
+    function cleanupMocks() {
       jest.restoreAllMocks();
-    });
+    }
 
     test('respects custom retry configuration', async () => {
+      setupCustomRetryMocks();
+      await executeCustomRetryRequest();
+      verifyCustomRetryBehavior();
+      cleanupMocks();
+    });
+
+    function setupCustomRetryMocks() {
       jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
         (callback as Function)();
         return {} as any;
       });
-      
-      // Clear previous fetch calls
       mockFetch.mockClear();
-      
       mockFetch
         .mockRejectedValueOnce(new Error('Error 1'))
         .mockRejectedValueOnce(new Error('Error 2'))
         .mockResolvedValueOnce(createMockResponse({ success: true }));
-      
+    }
+
+    async function executeCustomRetryRequest() {
       await apiClient.get('/test', {
         retryCount: 2,
         retryDelay: 500
       });
-      
+    }
+
+    function verifyCustomRetryBehavior() {
       expect(mockFetch).toHaveBeenCalledTimes(4); // 3 retries + 1 health check
-      jest.restoreAllMocks();
-    });
+    }
 
     test('disables retry when configured', async () => {
+      setupNoRetryMocks();
+      await expectNoRetryBehavior();
+    });
+
+    function setupNoRetryMocks() {
       mockFetch.mockClear();
       mockFetch.mockRejectedValue(new Error('Network error'));
-      
+    }
+
+    async function expectNoRetryBehavior() {
       try {
         await apiClient.get('/test', { retry: false });
       } catch (error) {
         expect(mockFetch).toHaveBeenCalledTimes(2); // 1 request + 1 health check
       }
-    });
+    }
 
     test('throws last error after all retries exhausted', async () => {
+      setupExhaustedRetryMocks();
+      await expectRetryExhaustion();
+      cleanupMocks();
+    });
+
+    function setupExhaustedRetryMocks() {
       jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
         (callback as Function)();
         return {} as any;
       });
-      
-      // Force connection as healthy to avoid connection error
       (apiClient as any).isConnected = true;
-      const finalError = new Error('Final failure');
-      mockFetch.mockRejectedValue(finalError);
-      
-      await expect(apiClient.get('/test')).rejects.toThrow(); // Any error is fine
-      jest.restoreAllMocks();
+      mockFetch.mockRejectedValue(new Error('Final failure'));
+    }
+
+    async function expectRetryExhaustion() {
+      await expect(apiClient.get('/test')).rejects.toThrow();
+    }
+
+    test('handles intermittent network failures gracefully', async () => {
+      setupIntermittentFailureMocks();
+      const result = await executeIntermittentFailureRequest();
+      verifyIntermittentFailureRecovery(result);
+      cleanupMocks();
     });
+
+    function setupIntermittentFailureMocks() {
+      jest.spyOn(global, 'setTimeout').mockImplementation((callback) => {
+        (callback as Function)();
+        return {} as any;
+      });
+      mockFetch
+        .mockRejectedValueOnce(new Error('Temporary failure'))
+        .mockResolvedValueOnce(createMockResponse({ recovered: true }));
+    }
+
+    async function executeIntermittentFailureRequest() {
+      return await apiClient.get('/test');
+    }
+
+    function verifyIntermittentFailureRecovery(result: any) {
+      expect(result.data.recovered).toBe(true);
+    }
   });
 
   describe('Error Response Handling', () => {

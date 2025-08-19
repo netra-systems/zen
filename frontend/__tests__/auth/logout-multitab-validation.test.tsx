@@ -339,7 +339,6 @@ describe('Logout Multi-Tab - Cross-Tab Validation', () => {
           key: 'jwt_token',
           newValue: '{{corrupted-json}}',
           oldValue: null,
-          storageArea: localStorage,
         });
         window.dispatchEvent(corruptedEvent);
       });
