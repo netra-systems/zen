@@ -71,7 +71,16 @@ class MultiServiceHealthValidator:
         self.health_results: Dict[str, Any] = {}
         self.alert_manager = HealthAlertManager()
         self.system_monitor = SystemHealthMonitor()
-        self.unified_interface = health_interface
+        # Create a new health interface to avoid conflicts with the existing one
+        self.unified_interface = HealthInterface("test-multi-service", "1.0.0")
+        self._setup_test_health_checkers()
+    
+    def _setup_test_health_checkers(self) -> None:
+        """Setup health checkers for testing."""
+        # Register basic database and dependency checkers
+        self.unified_interface.register_checker(DatabaseHealthChecker("postgres"))
+        self.unified_interface.register_checker(DatabaseHealthChecker("redis"))
+        self.unified_interface.register_checker(DependencyHealthChecker("websocket"))
     
     async def validate_unified_health_endpoint(self) -> Dict[str, Any]:
         """Validate unified health endpoint aggregates all services."""
@@ -80,8 +89,13 @@ class MultiServiceHealthValidator:
         try:
             # Test each health level
             basic_health = await self.unified_interface.get_health_status(HealthLevel.BASIC)
+            logger.info(f"Basic health completed: {type(basic_health)}")
+            
             standard_health = await self.unified_interface.get_health_status(HealthLevel.STANDARD)
+            logger.info(f"Standard health completed: {type(standard_health)}")
+            
             comprehensive_health = await self.unified_interface.get_health_status(HealthLevel.COMPREHENSIVE)
+            logger.info(f"Comprehensive health completed: {type(comprehensive_health)}")
             
             response_time_ms = (time.time() - start_time) * 1000
             
@@ -201,11 +215,13 @@ class MultiServiceHealthValidator:
     
     def _format_dependency_result(self, result: HealthCheckResult) -> Dict[str, Any]:
         """Format dependency health check result."""
+        # The HealthCheckResult uses details.success, not a top-level success attribute
+        success = result.details.get("success", result.status == "healthy")
         return {
-            "healthy": result.status == "healthy",
+            "healthy": success and result.status == "healthy",
             "status": result.status,
             "response_time_ms": result.response_time * 1000,
-            "health_score": result.details.get("health_score", 1.0 if result.status == "healthy" else 0.0),
+            "health_score": result.details.get("health_score", 1.0 if success else 0.0),
             "component_name": result.details.get("component_name", "unknown"),
             "error": result.details.get("error_message") if result.status != "healthy" else None
         }

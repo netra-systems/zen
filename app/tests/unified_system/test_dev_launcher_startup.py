@@ -42,8 +42,7 @@ from dev_launcher.process_manager import ProcessManager
 from dev_launcher.health_monitor import HealthMonitor
 
 # Test utilities
-from app.tests.helpers.startup_check_helpers import StartupTestHelper
-from app.tests.helpers.core_test_helpers import CoreTestHelper
+from app.tests.helpers.startup_check_helpers import StartupTestHelper, RealServiceTestValidator
 
 
 class TestDevLauncherStartup:

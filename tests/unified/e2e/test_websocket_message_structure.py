@@ -449,21 +449,14 @@ class TestWebSocketMessageStructure:
             payload = message.get("payload")
             
             # TypeScript would expect these fields
-            typescript_compatible = (
-                isinstance(msg_type, str) and
-                payload is not None and
-                isinstance(payload, dict)
-            )
+            typescript_compatible = self._check_typescript_compatibility(msg_type, payload)
+            structure_consistent = self._check_structure_consistency(message)
             
             return {
                 "frontend_parseable": typescript_compatible,
                 "has_type_field": "type" in message,
                 "has_payload_field": "payload" in message,
-                "structure_consistent": (
-                    "type" in message and 
-                    "payload" in message and
-                    not ("event" in message and "data" in message)
-                ),
+                "structure_consistent": structure_consistent,
                 "typescript_compatible": typescript_compatible
             }
         except Exception as e:
@@ -472,6 +465,18 @@ class TestWebSocketMessageStructure:
                 "error": str(e),
                 "structure_consistent": False
             }
+
+    def _check_typescript_compatibility(self, msg_type: Any, payload: Any) -> bool:
+        """Check TypeScript compatibility."""
+        return isinstance(msg_type, str) and payload is not None and isinstance(payload, dict)
+
+    def _check_structure_consistency(self, message: Dict[str, Any]) -> bool:
+        """Check message structure consistency."""
+        return (
+            "type" in message and 
+            "payload" in message and
+            not ("event" in message and "data" in message)
+        )
 
     def _validate_server_message_standard(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """Validate server message follows the standard."""

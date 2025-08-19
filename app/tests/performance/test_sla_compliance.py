@@ -458,44 +458,61 @@ class SLAComplianceTester:
         """Generate performance optimization recommendations."""
         recommendations = []
         
-        api_perf = test_results["api_performance"]
-        ws_perf = test_results["websocket_performance"]
-        memory = test_results["memory_usage"]
+        # Add specific recommendations for each SLA violation
+        recommendations.extend(self._get_api_recommendations(test_results, compliance))
+        recommendations.extend(self._get_websocket_recommendations(test_results, compliance))
+        recommendations.extend(self._get_concurrency_recommendations(compliance))
+        recommendations.extend(self._get_memory_recommendations(test_results, compliance))
+        recommendations.extend(self._get_success_rate_recommendations(test_results, compliance))
         
-        if not compliance["p95_response_time"]:
-            recommendations.append(
-                f"API P95 response time ({api_perf['p95_response_time_ms']:.1f}ms) exceeds SLA "
-                f"({self.requirements.max_p95_response_time_ms}ms). Consider caching, database optimization."
-            )
-        
-        if not compliance["websocket_latency"]:
-            recommendations.append(
-                f"WebSocket latency ({ws_perf['avg_latency_ms']:.1f}ms) exceeds SLA "
-                f"({self.requirements.max_websocket_latency_ms}ms). Check connection pooling, message batching."
-            )
-        
-        if not compliance["concurrent_users"]:
-            recommendations.append(
-                f"Concurrent user capacity below SLA requirement ({self.requirements.min_concurrent_users}). "
-                "Consider connection pooling, async optimization."
-            )
-        
-        if not compliance["memory_usage"]:
-            recommendations.append(
-                f"Peak memory usage ({memory['peak_memory_mb']:.1f}MB) exceeds limit "
-                f"({self.requirements.max_memory_mb}MB). Check for memory leaks, optimize caching."
-            )
-        
-        if not compliance["success_rate"]:
-            recommendations.append(
-                f"Success rate ({api_perf['success_rate']:.1f}%) below SLA "
-                f"({self.requirements.min_success_rate}%). Improve error handling, increase timeouts."
-            )
-        
+        # Add success message if all SLAs met
         if all(compliance.values()):
             recommendations.append("All SLA requirements met! System performing within acceptable bounds.")
         
         return recommendations
+    
+    def _get_api_recommendations(self, test_results: Dict[str, Any], 
+                               compliance: Dict[str, bool]) -> List[str]:
+        """Get API performance recommendations."""
+        if not compliance["p95_response_time"]:
+            api_perf = test_results["api_performance"]
+            return [f"API P95 response time ({api_perf['p95_response_time_ms']:.1f}ms) exceeds SLA "
+                   f"({self.requirements.max_p95_response_time_ms}ms). Consider caching, database optimization."]
+        return []
+    
+    def _get_websocket_recommendations(self, test_results: Dict[str, Any], 
+                                     compliance: Dict[str, bool]) -> List[str]:
+        """Get WebSocket performance recommendations."""
+        if not compliance["websocket_latency"]:
+            ws_perf = test_results["websocket_performance"]
+            return [f"WebSocket latency ({ws_perf['avg_latency_ms']:.1f}ms) exceeds SLA "
+                   f"({self.requirements.max_websocket_latency_ms}ms). Check connection pooling, message batching."]
+        return []
+    
+    def _get_concurrency_recommendations(self, compliance: Dict[str, bool]) -> List[str]:
+        """Get concurrent user recommendations."""
+        if not compliance["concurrent_users"]:
+            return [f"Concurrent user capacity below SLA requirement ({self.requirements.min_concurrent_users}). "
+                   "Consider connection pooling, async optimization."]
+        return []
+    
+    def _get_memory_recommendations(self, test_results: Dict[str, Any], 
+                                  compliance: Dict[str, bool]) -> List[str]:
+        """Get memory usage recommendations."""
+        if not compliance["memory_usage"]:
+            memory = test_results["memory_usage"]
+            return [f"Peak memory usage ({memory['peak_memory_mb']:.1f}MB) exceeds limit "
+                   f"({self.requirements.max_memory_mb}MB). Check for memory leaks, optimize caching."]
+        return []
+    
+    def _get_success_rate_recommendations(self, test_results: Dict[str, Any], 
+                                        compliance: Dict[str, bool]) -> List[str]:
+        """Get success rate recommendations."""
+        if not compliance["success_rate"]:
+            api_perf = test_results["api_performance"]
+            return [f"Success rate ({api_perf['success_rate']:.1f}%) below SLA "
+                   f"({self.requirements.min_success_rate}%). Improve error handling, increase timeouts."]
+        return []
 
 
 @pytest.mark.performance

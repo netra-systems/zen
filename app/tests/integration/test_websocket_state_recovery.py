@@ -250,7 +250,12 @@ class TestWebSocketStateRecovery:
         
         with patch('websockets.connect') as mock_connect:
             mock_websocket = await self._create_mock_websocket()
-            mock_connect.return_value = mock_websocket
+            
+            # Make the mock_connect coroutine awaitable
+            async def mock_connect_coroutine(*args, **kwargs):
+                return mock_websocket
+            
+            mock_connect.side_effect = mock_connect_coroutine
             
             # Create new connection
             restored_manager = await test_env["recovery_manager"].create_connection(
@@ -280,8 +285,8 @@ class TestWebSocketStateRecovery:
         # Verify message queue ordering
         if manager.message_handler.pending_messages:
             last_message = manager.message_handler.pending_messages[-1]
-            assert last_message.message.get("type") == "emergency_update"
-            assert last_message.message.get("workflow_id") == original_state["workflow_id"]
+            assert last_message.content.get("type") == "emergency_update"
+            assert last_message.content.get("workflow_id") == original_state["workflow_id"]
         
         # Send recovery verification message
         verify_message = {
@@ -321,7 +326,12 @@ class TestWebSocketStateRecovery:
         
         with patch('websockets.connect') as mock_connect:
             mock_websocket = await self._create_mock_websocket()
-            mock_connect.return_value = mock_websocket
+            
+            # Make the mock_connect coroutine awaitable
+            async def mock_connect_coroutine(*args, **kwargs):
+                return mock_websocket
+            
+            mock_connect.side_effect = mock_connect_coroutine
             
             manager = await test_env["recovery_manager"].create_connection(
                 connection_id, test_env["server_url"], config
@@ -381,7 +391,12 @@ class TestWebSocketStateRecovery:
         
         with patch('websockets.connect') as mock_connect:
             mock_websocket = await self._create_mock_websocket()
-            mock_connect.return_value = mock_websocket
+            
+            # Make the mock_connect coroutine awaitable
+            async def mock_connect_coroutine(*args, **kwargs):
+                return mock_websocket
+            
+            mock_connect.side_effect = mock_connect_coroutine
             
             manager = await test_env["recovery_manager"].create_connection(
                 connection_id, test_env["server_url"], config
@@ -437,8 +452,8 @@ class TestWebSocketStateRecovery:
         # Find the continuation message in queue
         continuation_found = False
         for pending_msg in manager.message_handler.pending_messages:
-            if pending_msg.message.get("type") == "thread_continue":
-                assert pending_msg.message.get("thread_id") == thread_state["thread_id"]
+            if pending_msg.content.get("type") == "thread_continue":
+                assert pending_msg.content.get("thread_id") == thread_state["thread_id"]
                 continuation_found = True
                 break
         

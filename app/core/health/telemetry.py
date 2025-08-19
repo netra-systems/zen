@@ -89,7 +89,7 @@ class EnterpriseHealthTelemetry:
         if not results:
             return 100.0
         
-        successful_checks = sum(1 for result in results.values() if result.success)
+        successful_checks = sum(1 for result in results.values() if result.details.get("success", result.status == "healthy"))
         return (successful_checks / len(results)) * 100.0
     
     def _record_component_metrics(
@@ -111,7 +111,7 @@ class EnterpriseHealthTelemetry:
         """Record response time metric for component."""
         self._record_metric(
             MetricType.RESPONSE_TIME, 
-            result.response_time_ms, 
+            result.response_time * 1000,  # Convert seconds to milliseconds 
             timestamp, 
             component_name
         )
@@ -123,7 +123,8 @@ class EnterpriseHealthTelemetry:
         timestamp: datetime
     ) -> None:
         """Record error rate metric for component."""
-        error_rate = 0.0 if result.success else 1.0
+        success = result.details.get("success", result.status == "healthy")
+        error_rate = 0.0 if success else 1.0
         self._record_metric(
             MetricType.ERROR_RATE, 
             error_rate, 

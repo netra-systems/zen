@@ -15,7 +15,7 @@ from ..core.session_manager import SessionManager
 from ..models.auth_models import (
     LoginRequest, LoginResponse, TokenResponse,
     ServiceTokenRequest, ServiceTokenResponse,
-    AuthProvider, AuthError, PasswordResetRequest,
+    AuthProvider, AuthError, AuthException, PasswordResetRequest,
     PasswordResetResponse, PasswordResetConfirm,
     PasswordResetConfirmResponse
 )
@@ -185,7 +185,7 @@ class AuthService:
             request.service_id, 
             request.service_secret
         ):
-            raise AuthError(
+            raise AuthException(
                 error="invalid_service",
                 error_code="AUTH003",
                 message="Invalid service credentials"
