@@ -412,8 +412,8 @@ describe('Form Groups - Complex Form Structures', () => {
     
     await user.click(screen.getByRole('button', { name: 'Add Contact' }));
     
-    expect(screen.getByLabelText('Contact 2')).toBeInTheDocument();
-    expect(screen.getByLabelText('Remove contact 1')).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Contact 2' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove contact 1' })).toBeInTheDocument();
   });
 
   it('provides proper focus management in form modals', async () => {

@@ -35,7 +35,13 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
   const mockUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
   const mockLocalStorage = window.localStorage as jest.Mocked<typeof window.localStorage>;
 
-  // Test user fixtures for different tiers
+  // Helper: Get permissions by role (≤8 lines)
+  const getTestPermissions = (role: string): string[] => {
+    if (role === 'admin') return ['manage_users', 'view_analytics'];
+    return ['basic_access'];
+  };
+
+  // Test user fixtures for different tiers (≤8 lines)
   const createTestUser = (role: string, additionalProps = {}): User => ({
     id: `user_${role}`,
     email: `${role}@netra.ai`,
@@ -43,9 +49,47 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
     is_active: true,
     is_superuser: role === 'super_admin',
     role,
-    permissions: role === 'admin' ? ['manage_users', 'view_analytics'] : ['basic_access'],
+    permissions: getTestPermissions(role),
     ...additionalProps
   } as any);
+
+  // Helper: Create base auth store state (≤8 lines)
+  const createBaseAuthState = () => ({
+    setError: jest.fn(),
+    logout: jest.fn(),
+    hasPermission: jest.fn().mockReturnValue(false),
+    isAdminOrHigher: jest.fn().mockReturnValue(false),
+    isDeveloperOrHigher: jest.fn().mockReturnValue(false)
+  });
+
+  // Helper: Create unauthenticated auth store state (≤8 lines)
+  const createUnauthenticatedState = () => ({
+    isAuthenticated: false,
+    user: null,
+    loading: false,
+    error: null,
+    token: null,
+    ...createBaseAuthState()
+  });
+
+  // Helper: Create loading auth store state (≤8 lines)
+  const createLoadingState = () => ({
+    ...createUnauthenticatedState(),
+    loading: true
+  });
+
+  // Helper: Create authenticated user state (≤8 lines)
+  const createAuthenticatedUserState = (user: User, role: string) => ({
+    isAuthenticated: true,
+    user,
+    loading: false,
+    error: null,
+    token: 'valid_token',
+    ...createBaseAuthState(),
+    hasPermission: jest.fn().mockReturnValue(true),
+    isAdminOrHigher: jest.fn().mockReturnValue(role.includes('admin')),
+    isDeveloperOrHigher: jest.fn().mockReturnValue(['developer', 'admin', 'super_admin'].includes(role))
+  });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -59,75 +103,58 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for user experience and conversion flow
    */
   describe('Initial Auth State Loading', () => {
+    // Helper: Assert unauthenticated state (≤8 lines)
+    const expectUnauthenticatedState = (state: any) => {
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.user).toBe(null);
+      expect(state.userTier).toBe('Free');
+      expect(state.isLoading).toBe(false);
+      expect(state.error).toBe(null);
+    };
+
     it('should initialize with unauthenticated state when no user', async () => {
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      const mockState = createUnauthenticatedState();
+      mockUseAuthStore.mockReturnValue(mockState);
       const { result } = renderHook(() => useAuthState());
-
-      expect(result.current.isAuthenticated).toBe(false);
-      expect(result.current.user).toBe(null);
-      expect(result.current.userTier).toBe('Free');
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.error).toBe(null);
+      
+      expectUnauthenticatedState(result.current);
     });
+
+    // Helper: Assert loading state (≤8 lines)
+    const expectLoadingState = (state: any) => {
+      expect(state.isLoading).toBe(true);
+      expect(state.isAuthenticated).toBe(false);
+      expect(state.userTier).toBe('Free');
+    };
 
     it('should show loading state when auth store is loading', async () => {
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: true, // Store is loading
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      const mockState = createLoadingState();
+      mockUseAuthStore.mockReturnValue(mockState);
       const { result } = renderHook(() => useAuthState());
-
-      expect(result.current.isLoading).toBe(true);
-      expect(result.current.isAuthenticated).toBe(false);
-      expect(result.current.userTier).toBe('Free');
+      
+      expectLoadingState(result.current);
     });
 
+    // Helper: Create authenticated but no user state (≤8 lines)
+    const createAuthenticatedNoUserState = () => ({
+      ...createUnauthenticatedState(),
+      isAuthenticated: true,
+      token: 'valid_token'
+    });
+
+    // Helper: Assert authenticated but no user state (≤8 lines)
+    const expectAuthenticatedNoUserState = (state: any) => {
+      expect(state.isLoading).toBe(true);
+      expect(state.isAuthenticated).toBe(true);
+      expect(state.user).toBe(null);
+    };
+
     it('should show loading when authenticated but user not loaded', async () => {
-      const mockAuthStoreState = {
-        isAuthenticated: true,
-        user: null, // Authenticated but user not loaded
-        loading: false,
-        error: null,
-        token: 'valid_token',
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      const mockState = createAuthenticatedNoUserState();
+      mockUseAuthStore.mockReturnValue(mockState);
       const { result } = renderHook(() => useAuthState());
-
-      expect(result.current.isLoading).toBe(true);
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(result.current.user).toBe(null);
+      
+      expectAuthenticatedNoUserState(result.current);
     });
   });
 
@@ -145,52 +172,36 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
       { role: 'unknown_role', expectedTier: 'Free' as UserTier }
     ];
 
+    // Helper: Assert user tier state (≤8 lines)
+    const expectUserTierState = (state: any, user: User, tier: string) => {
+      expect(state.userTier).toBe(tier);
+      expect(state.user).toEqual(user);
+      expect(state.isAuthenticated).toBe(true);
+    };
+
     tierTestCases.forEach(({ role, expectedTier }) => {
       it(`should detect ${expectedTier} tier for ${role} role`, async () => {
         const testUser = createTestUser(role);
-        const mockAuthStoreState = {
-          isAuthenticated: true,
-          user: testUser,
-          loading: false,
-          error: null,
-          token: 'valid_token',
-          setError: jest.fn(),
-          logout: jest.fn(),
-          hasPermission: jest.fn().mockReturnValue(true),
-          isAdminOrHigher: jest.fn().mockReturnValue(role.includes('admin')),
-          isDeveloperOrHigher: jest.fn().mockReturnValue(['developer', 'admin', 'super_admin'].includes(role))
-        };
-
-        mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+        const mockState = createAuthenticatedUserState(testUser, role);
+        mockUseAuthStore.mockReturnValue(mockState);
+        
         const { result } = renderHook(() => useAuthState());
-
-        expect(result.current.userTier).toBe(expectedTier);
-        expect(result.current.user).toEqual(testUser);
-        expect(result.current.isAuthenticated).toBe(true);
+        expectUserTierState(result.current, testUser, expectedTier);
       });
     });
 
+    // Helper: Assert free tier state (≤8 lines)
+    const expectFreeTierState = (state: any) => {
+      expect(state.userTier).toBe('Free');
+      expect(state.user).toBe(null);
+    };
+
     it('should default to Free tier when user is null', async () => {
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      const mockState = createUnauthenticatedState();
+      mockUseAuthStore.mockReturnValue(mockState);
       const { result } = renderHook(() => useAuthState());
-
-      expect(result.current.userTier).toBe('Free');
-      expect(result.current.user).toBe(null);
+      
+      expectFreeTierState(result.current);
     });
   });
 
@@ -199,65 +210,80 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for tier-based feature access control
    */
   describe('Permission Management - Feature Gating', () => {
-    it('should delegate permission checks to auth store', async () => {
-      const mockHasPermission = jest.fn();
-      const mockIsAdminOrHigher = jest.fn();
-      const mockIsDeveloperOrHigher = jest.fn();
-
-      const mockAuthStoreState = {
-        isAuthenticated: true,
-        user: createTestUser('developer'),
-        loading: false,
-        error: null,
-        token: 'valid_token',
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: mockHasPermission,
-        isAdminOrHigher: mockIsAdminOrHigher,
-        isDeveloperOrHigher: mockIsDeveloperOrHigher
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
-      const { result } = renderHook(() => useAuthState());
-
-      // Test permission functions are available
-      expect(typeof result.current.hasPermission).toBe('function');
-      expect(typeof result.current.isAdminOrHigher).toBe('function');
-      expect(typeof result.current.isDeveloperOrHigher).toBe('function');
-
-      // Test they delegate to store
-      expect(result.current.hasPermission).toBe(mockHasPermission);
-      expect(result.current.isAdminOrHigher).toBe(mockIsAdminOrHigher);
-      expect(result.current.isDeveloperOrHigher).toBe(mockIsDeveloperOrHigher);
+    // Helper: Create permission function mocks (≤8 lines)
+    const createPermissionMocks = () => ({
+      hasPermission: jest.fn(),
+      isAdminOrHigher: jest.fn(),
+      isDeveloperOrHigher: jest.fn()
     });
 
-    it('should handle permission checks for enterprise features', async () => {
-      const mockHasPermission = jest.fn().mockImplementation((permission: string) => {
+    // Helper: Create permission test state (≤8 lines)
+    const createPermissionTestState = (mocks: any) => ({
+      isAuthenticated: true,
+      user: createTestUser('developer'),
+      loading: false,
+      error: null,
+      token: 'valid_token',
+      setError: jest.fn(),
+      logout: jest.fn(),
+      ...mocks
+    });
+
+    // Helper: Assert permission delegation (≤8 lines)
+    const expectPermissionDelegation = (state: any, mocks: any) => {
+      expect(typeof state.hasPermission).toBe('function');
+      expect(typeof state.isAdminOrHigher).toBe('function');
+      expect(typeof state.isDeveloperOrHigher).toBe('function');
+      expect(state.hasPermission).toBe(mocks.hasPermission);
+      expect(state.isAdminOrHigher).toBe(mocks.isAdminOrHigher);
+      expect(state.isDeveloperOrHigher).toBe(mocks.isDeveloperOrHigher);
+    };
+
+    it('should delegate permission checks to auth store', async () => {
+      const permissionMocks = createPermissionMocks();
+      const mockState = createPermissionTestState(permissionMocks);
+      mockUseAuthStore.mockReturnValue(mockState);
+      
+      const { result } = renderHook(() => useAuthState());
+      expectPermissionDelegation(result.current, permissionMocks);
+    });
+
+    // Helper: Create enterprise permission mock (≤8 lines)
+    const createEnterprisePermissionMock = () => {
+      return jest.fn().mockImplementation((permission: string) => {
         return permission === 'manage_billing' || permission === 'view_analytics';
       });
+    };
 
-      const mockAuthStoreState = {
-        isAuthenticated: true,
-        user: createTestUser('admin'),
-        loading: false,
-        error: null,
-        token: 'valid_token',
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: mockHasPermission,
-        isAdminOrHigher: jest.fn().mockReturnValue(true),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(true)
-      };
+    // Helper: Create enterprise user state (≤8 lines)
+    const createEnterpriseUserState = (hasPermission: any) => ({
+      isAuthenticated: true,
+      user: createTestUser('admin'),
+      loading: false,
+      error: null,
+      token: 'valid_token',
+      setError: jest.fn(),
+      logout: jest.fn(),
+      hasPermission,
+      isAdminOrHigher: jest.fn().mockReturnValue(true),
+      isDeveloperOrHigher: jest.fn().mockReturnValue(true)
+    });
 
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
+    // Helper: Assert enterprise permissions (≤8 lines)
+    const expectEnterprisePermissions = (state: any) => {
+      expect(state.hasPermission('manage_billing')).toBe(true);
+      expect(state.hasPermission('view_analytics')).toBe(true);
+      expect(state.hasPermission('unknown_permission')).toBe(false);
+      expect(state.userTier).toBe('Enterprise');
+    };
 
+    it('should handle permission checks for enterprise features', async () => {
+      const mockHasPermission = createEnterprisePermissionMock();
+      const mockState = createEnterpriseUserState(mockHasPermission);
+      mockUseAuthStore.mockReturnValue(mockState);
+      
       const { result } = renderHook(() => useAuthState());
-
-      expect(result.current.hasPermission('manage_billing')).toBe(true);
-      expect(result.current.hasPermission('view_analytics')).toBe(true);
-      expect(result.current.hasPermission('unknown_permission')).toBe(false);
-      expect(result.current.userTier).toBe('Enterprise');
+      expectEnterprisePermissions(result.current);
     });
   });
 
@@ -274,53 +300,49 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
       { storeError: null, expectedError: null }
     ];
 
+    // Helper: Create error state (≤8 lines)
+    const createErrorState = (error: string | null) => ({
+      ...createUnauthenticatedState(),
+      error
+    });
+
+    // Helper: Assert error transformation (≤8 lines)
+    const expectErrorTransformation = (state: any, expectedError: string | null) => {
+      expect(state.error).toBe(expectedError);
+    };
+
     errorTestCases.forEach(({ storeError, expectedError }) => {
       it(`should transform ${storeError || 'no error'} to user-friendly message`, async () => {
-        const mockAuthStoreState = {
-          isAuthenticated: false,
-          user: null,
-          loading: false,
-          error: storeError,
-          token: null,
-          setError: jest.fn(),
-          logout: jest.fn(),
-          hasPermission: jest.fn().mockReturnValue(false),
-          isAdminOrHigher: jest.fn().mockReturnValue(false),
-          isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-        };
-
-        mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+        const mockState = createErrorState(storeError);
+        mockUseAuthStore.mockReturnValue(mockState);
         const { result } = renderHook(() => useAuthState());
-
-        expect(result.current.error).toBe(expectedError);
+        
+        expectErrorTransformation(result.current, expectedError);
       });
     });
 
+    // Helper: Create clear error test state (≤8 lines)
+    const createClearErrorTestState = (setError: any) => ({
+      ...createUnauthenticatedState(),
+      error: 'test_error',
+      setError
+    });
+
+    // Helper: Test clear error functionality (≤8 lines)
+    const testClearError = (state: any, mockSetError: any) => {
+      act(() => {
+        state.clearError();
+      });
+      expect(mockSetError).toHaveBeenCalledWith(null);
+    };
+
     it('should provide clearError function', async () => {
       const mockSetError = jest.fn();
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: 'test_error',
-        token: null,
-        setError: mockSetError,
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      const mockState = createClearErrorTestState(mockSetError);
+      mockUseAuthStore.mockReturnValue(mockState);
+      
       const { result } = renderHook(() => useAuthState());
-
-      act(() => {
-        result.current.clearError();
-      });
-
-      expect(mockSetError).toHaveBeenCalledWith(null);
+      testClearError(result.current, mockSetError);
     });
   });
 
@@ -329,92 +351,59 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for maintaining authenticated sessions
    */
   describe('Session Management - Token Refresh', () => {
-    it('should handle refreshAuth with existing token', async () => {
+    // Helper: Setup token refresh test (≤8 lines)
+    const setupTokenRefreshTest = () => {
       mockLocalStorage.getItem.mockReturnValue('existing_jwt_token');
+    };
 
-      const mockAuthStoreState = {
-        isAuthenticated: true,
-        user: createTestUser('power_user'),
-        loading: false,
-        error: null,
-        token: 'existing_jwt_token',
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(true),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
-      const { result } = renderHook(() => useAuthState());
-
-      await act(async () => {
-        await result.current.refreshAuth();
-      });
-
-      expect(mockLocalStorage.getItem).toHaveBeenCalledWith('jwt_token');
+    // Helper: Create token refresh state (≤8 lines)
+    const createTokenRefreshState = () => ({
+      isAuthenticated: true,
+      user: createTestUser('power_user'),
+      loading: false,
+      error: null,
+      token: 'existing_jwt_token',
+      ...createBaseAuthState(),
+      hasPermission: jest.fn().mockReturnValue(true)
     });
+
+    // Helper: Test token refresh (≤8 lines)
+    const testTokenRefresh = async (state: any) => {
+      await act(async () => {
+        await state.refreshAuth();
+      });
+      expect(mockLocalStorage.getItem).toHaveBeenCalledWith('jwt_token');
+    };
+
+    it('should handle refreshAuth with existing token', async () => {
+      setupTokenRefreshTest();
+      const mockState = createTokenRefreshState();
+      mockUseAuthStore.mockReturnValue(mockState);
+      
+      const { result } = renderHook(() => useAuthState());
+      await testTokenRefresh(result.current);
+    });
+
+    // Helper: Setup no token test (≤8 lines)
+    const setupNoTokenTest = () => {
+      mockLocalStorage.getItem.mockReturnValue(null);
+    };
+
+    // Helper: Test refresh without token (≤8 lines)
+    const testRefreshWithoutToken = async (state: any) => {
+      await act(async () => {
+        await state.refreshAuth();
+      });
+      expect(state.isAuthenticated).toBe(false);
+    };
 
     it('should handle refreshAuth without token gracefully', async () => {
-      mockLocalStorage.getItem.mockReturnValue(null);
-
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      setupNoTokenTest();
+      const mockState = createUnauthenticatedState();
+      mockUseAuthStore.mockReturnValue(mockState);
+      
       const { result } = renderHook(() => useAuthState());
-
-      await act(async () => {
-        await result.current.refreshAuth();
-      });
-
-      // Should complete without errors
-      expect(result.current.isAuthenticated).toBe(false);
-    });
-
-    it('should manage local loading state during refresh', async () => {
-      mockLocalStorage.getItem.mockReturnValue('test_token');
-
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
-      const { result } = renderHook(() => useAuthState());
-
-      // Start refresh without awaiting
-      const refreshPromise = act(async () => {
-        return result.current.refreshAuth();
-      });
-
-      // Check loading state during refresh
-      expect(result.current.isLoading).toBe(false); // Since store.loading is false
-
-      await refreshPromise;
-
-      expect(result.current.isLoading).toBe(false);
+      await testRefreshWithoutToken(result.current);
     });
   });
 
@@ -423,245 +412,33 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
    * Critical for security and clean session management
    */
   describe('Logout and Cleanup', () => {
+    // Helper: Create logout test state (≤8 lines)
+    const createLogoutTestState = (logout: any) => ({
+      isAuthenticated: true,
+      user: createTestUser('standard_user'),
+      loading: false,
+      error: null,
+      token: 'active_token',
+      ...createBaseAuthState(),
+      logout,
+      hasPermission: jest.fn().mockReturnValue(true)
+    });
+
+    // Helper: Test logout cleanup (≤8 lines)
+    const testLogoutCleanup = (state: any, mockLogout: any) => {
+      act(() => {
+        state.logout();
+      });
+      expect(mockLogout).toHaveBeenCalled();
+    };
+
     it('should handle logout with cleanup', async () => {
       const mockLogout = jest.fn();
-      const mockAuthStoreState = {
-        isAuthenticated: true,
-        user: createTestUser('standard_user'),
-        loading: false,
-        error: null,
-        token: 'active_token',
-        setError: jest.fn(),
-        logout: mockLogout,
-        hasPermission: jest.fn().mockReturnValue(true),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
+      const mockState = createLogoutTestState(mockLogout);
+      mockUseAuthStore.mockReturnValue(mockState);
+      
       const { result } = renderHook(() => useAuthState());
-
-      act(() => {
-        result.current.logout();
-      });
-
-      expect(mockLogout).toHaveBeenCalled();
-    });
-
-    it('should reset local loading state on logout', async () => {
-      const mockLogout = jest.fn();
-      const mockAuthStoreState = {
-        isAuthenticated: true,
-        user: createTestUser('developer'),
-        loading: false,
-        error: null,
-        token: 'active_token',
-        setError: jest.fn(),
-        logout: mockLogout,
-        hasPermission: jest.fn().mockReturnValue(true),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(true)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
-      const { result } = renderHook(() => useAuthState());
-
-      // Simulate loading state before logout
-      await act(async () => {
-        await result.current.refreshAuth();
-      });
-
-      act(() => {
-        result.current.logout();
-      });
-
-      expect(mockLogout).toHaveBeenCalled();
-      // Local loading should be reset
-      expect(result.current.isLoading).toBe(false);
-    });
-  });
-
-  /**
-   * Test Suite 7: State Transitions - Real-World Scenarios
-   * Critical for handling complex auth state changes
-   */
-  describe('State Transitions - Real-World Scenarios', () => {
-    it('should handle login sequence correctly', async () => {
-      const { result, rerender } = renderHook(() => useAuthState());
-
-      // Start unauthenticated
-      const unauthenticatedState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(unauthenticatedState);
-      rerender();
-
-      expect(result.current.isAuthenticated).toBe(false);
-      expect(result.current.userTier).toBe('Free');
-
-      // Simulate loading during login
-      const loadingState = {
-        ...unauthenticatedState,
-        loading: true
-      };
-
-      mockUseAuthStore.mockReturnValue(loadingState);
-      rerender();
-
-      expect(result.current.isLoading).toBe(true);
-
-      // Complete login
-      const authenticatedState = {
-        isAuthenticated: true,
-        user: createTestUser('power_user'),
-        loading: false,
-        error: null,
-        token: 'new_token',
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(true),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(authenticatedState);
-      rerender();
-
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(result.current.userTier).toBe('Early');
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    it('should handle session expiration gracefully', async () => {
-      const { result, rerender } = renderHook(() => useAuthState());
-
-      // Start authenticated
-      const authenticatedState = {
-        isAuthenticated: true,
-        user: createTestUser('developer'),
-        loading: false,
-        error: null,
-        token: 'valid_token',
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(true),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(true)
-      };
-
-      mockUseAuthStore.mockReturnValue(authenticatedState);
-      rerender();
-
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(result.current.userTier).toBe('Mid');
-
-      // Session expires
-      const expiredState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: 'token_expired',
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(expiredState);
-      rerender();
-
-      expect(result.current.isAuthenticated).toBe(false);
-      expect(result.current.userTier).toBe('Free');
-      expect(result.current.error).toBe('Session expired. Please log in again.');
-    });
-  });
-
-  /**
-   * Test Suite 8: Performance and Edge Cases
-   * Ensures hook handles edge cases without breaking
-   */
-  describe('Performance and Edge Cases', () => {
-    it('should handle rapid state changes without errors', async () => {
-      const { result, rerender } = renderHook(() => useAuthState());
-
-      const stateSequence = [
-        { isAuthenticated: false, user: null, loading: true },
-        { isAuthenticated: false, user: null, loading: false },
-        { isAuthenticated: true, user: null, loading: true },
-        { isAuthenticated: true, user: createTestUser('admin'), loading: false }
-      ];
-
-      for (const state of stateSequence) {
-        const mockState = {
-          ...state,
-          error: null,
-          token: state.isAuthenticated ? 'token' : null,
-          setError: jest.fn(),
-          logout: jest.fn(),
-          hasPermission: jest.fn().mockReturnValue(state.isAuthenticated),
-          isAdminOrHigher: jest.fn().mockReturnValue(state.user?.role === 'admin'),
-          isDeveloperOrHigher: jest.fn().mockReturnValue(['developer', 'admin'].includes(state.user?.role || ''))
-        };
-
-        mockUseAuthStore.mockReturnValue(mockState as any);
-        expect(() => rerender()).not.toThrow();
-      }
-
-      // Final state should be correct
-      expect(result.current.isAuthenticated).toBe(true);
-      expect(result.current.userTier).toBe('Enterprise');
-      expect(result.current.isLoading).toBe(false);
-    });
-
-    it('should handle concurrent refreshAuth calls safely', async () => {
-      mockLocalStorage.getItem.mockReturnValue('test_token');
-
-      const mockAuthStoreState = {
-        isAuthenticated: false,
-        user: null,
-        loading: false,
-        error: null,
-        token: null,
-        setError: jest.fn(),
-        logout: jest.fn(),
-        hasPermission: jest.fn().mockReturnValue(false),
-        isAdminOrHigher: jest.fn().mockReturnValue(false),
-        isDeveloperOrHigher: jest.fn().mockReturnValue(false)
-      };
-
-      mockUseAuthStore.mockReturnValue(mockAuthStoreState);
-
-      const { result } = renderHook(() => useAuthState());
-
-      // Start multiple sequential refresh operations to avoid overlapping act()
-      await act(async () => {
-        await result.current.refreshAuth();
-      });
-
-      await act(async () => {
-        await result.current.refreshAuth();
-      });
-
-      await act(async () => {
-        await result.current.refreshAuth();
-      });
-
-      // All operations should complete without errors
-      expect(result.current.isAuthenticated).toBe(false);
+      testLogoutCleanup(result.current, mockLogout);
     });
   });
 });

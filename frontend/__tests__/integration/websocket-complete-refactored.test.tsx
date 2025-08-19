@@ -575,5 +575,7 @@ const benchmarkTestPerformance = async () => {
   expect(realTime).toBeGreaterThan(0);
   expect(mockTime).toBeGreaterThan(0);
   
-  console.log(`Real WebSocket simulation: ${realTime}ms, Mock simulation: ${mockTime}ms`);
+  // Verify realistic timing relationships
+  expect(realTime).toBeGreaterThan(10); // Real WebSocket should take some time
+  expect(mockTime).toBeLessThan(realTime); // Mock should be faster than real
 };

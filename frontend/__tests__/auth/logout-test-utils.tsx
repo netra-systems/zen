@@ -129,7 +129,6 @@ export const createStorageEvent = (key: string, newValue: string | null) => {
     key,
     newValue,
     oldValue: newValue ? null : 'old-value',
-    storageArea: localStorage,
     url: 'http://localhost:3000',
   });
 };
