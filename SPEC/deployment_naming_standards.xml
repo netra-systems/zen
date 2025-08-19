@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <meta>
+    <title>Deployment Service Naming Standards</title>
+    <category>deployment</category>
+    <created>2025-08-19</created>
+    <priority>CRITICAL</priority>
+    <cross_references>
+      <ref>learnings/deployment_staging.xml</ref>
+      <ref>CLAUDE.md#gcp-staging-deployment</ref>
+    </cross_references>
+  </meta>
+
+  <critical_naming_standards>
+    <summary>
+      ALL Cloud Run services MUST use consistent naming with -staging suffix.
+      This is MANDATORY and non-negotiable.
+    </summary>
+
+    <cloud_run_service_names>
+      <backend>
+        <correct>netra-backend-staging</correct>
+        <incorrect>netra-backend</incorrect>
+        <incorrect>backend-staging</incorrect>
+        <incorrect>netra-backend-stg</incorrect>
+      </backend>
+      
+      <frontend>
+        <correct>netra-frontend-staging</correct>
+        <incorrect>netra-frontend</incorrect>
+        <incorrect>frontend-staging</incorrect>
+        <incorrect>netra-frontend-stg</incorrect>
+      </frontend>
+      
+      <auth>
+        <correct>netra-auth-service</correct>
+        <note>Auth service does not use -staging suffix</note>
+      </auth>
+    </cloud_run_service_names>
+
+    <deployment_script_variables>
+      <powershell>
+        <correct>
+          $BACKEND_SERVICE = "netra-backend-staging"
+          $FRONTEND_SERVICE = "netra-frontend-staging"
+          $AUTH_SERVICE = "netra-auth-service"
+        </correct>
+      </powershell>
+      
+      <bash>
+        <correct>
+          BACKEND_SERVICE="netra-backend-staging"
+          FRONTEND_SERVICE="netra-frontend-staging"
+          AUTH_SERVICE="netra-auth-service"
+        </correct>
+      </bash>
+    </deployment_script_variables>
+
+    <gcloud_commands>
+      <backend_deploy>
+        gcloud run deploy netra-backend-staging --image [IMAGE_URL] --region us-central1
+      </backend_deploy>
+      
+      <frontend_deploy>
+        gcloud run deploy netra-frontend-staging --image [IMAGE_URL] --region us-central1
+      </frontend_deploy>
+      
+      <auth_deploy>
+        gcloud run deploy netra-auth-service --image [IMAGE_URL] --region us-central1
+      </auth_deploy>
+    </gcloud_commands>
+
+    <verification_checklist>
+      <item>All deployment scripts use correct service names</item>
+      <item>Cloud Run console shows services with -staging suffix</item>
+      <item>Service URLs match the naming pattern</item>
+      <item>Documentation consistently uses correct names</item>
+    </verification_checklist>
+
+    <enforcement>
+      <rule>NEVER deploy without -staging suffix for backend/frontend</rule>
+      <rule>ALWAYS verify service names before deployment</rule>
+      <rule>UPDATE all scripts if service names change</rule>
+      <rule>DOCUMENT any deviations (none should exist)</rule>
+    </enforcement>
+
+    <rationale>
+      <reason>Consistency across all environments</reason>
+      <reason>Clear distinction between staging and production</reason>
+      <reason>Prevents deployment to wrong services</reason>
+      <reason>Matches actual deployed infrastructure</reason>
+    </rationale>
+  </critical_naming_standards>
+</spec>
