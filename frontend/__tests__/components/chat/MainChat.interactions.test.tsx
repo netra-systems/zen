@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 // Hoist all mocks to the top for proper Jest handling
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseLoadingState = jest.fn();
-const mockUseThreadNavigation = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseEventProcessor = jest.fn();
+var mockUseUnifiedChatStore = jest.fn();
+var mockUseLoadingState = jest.fn();
+var mockUseThreadNavigation = jest.fn();
+var mockUseWebSocket = jest.fn();
+var mockUseEventProcessor = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore

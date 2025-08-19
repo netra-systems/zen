@@ -2,8 +2,7 @@ import React from 'react';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
-import { useUnifiedChatStore } from '@/store/unified-chat';
-import { mockStore, setupMocks, cleanupMocks } from './MainChat.fixtures';
+import { mockStore, setupMocks, cleanupMocks, mockUseUnifiedChatStore, mockUseLoadingState, mockUseThreadNavigation } from './MainChat.fixtures';
 
 describe('MainChat - Agent Status Tests', () => {
   beforeEach(() => {
@@ -16,10 +15,27 @@ describe('MainChat - Agent Status Tests', () => {
 
   describe('Agent status updates', () => {
     it('should show response card when processing', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
-        currentRunId: 'run-123'
+        currentRunId: 'run-123',
+        activeThreadId: 'thread-1'
       });
       
       render(<MainChat />);
@@ -34,10 +50,27 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should display fast layer data', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
         currentRunId: 'run-123',
+        activeThreadId: 'thread-1',
         fastLayerData: {
           initialAnalysis: 'Quick analysis',
           suggestions: ['Suggestion 1', 'Suggestion 2']
@@ -50,10 +83,27 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should display medium layer data', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
         currentRunId: 'run-123',
+        activeThreadId: 'thread-1',
         mediumLayerData: {
           deeperAnalysis: 'Detailed analysis',
           recommendations: ['Rec 1', 'Rec 2']
@@ -66,10 +116,27 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should display slow layer data with final report', () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: false,
         currentRunId: 'run-123',
+        activeThreadId: 'thread-1',
         slowLayerData: {
           finalReport: 'Complete analysis report',
           metrics: { accuracy: 0.95 }
@@ -82,10 +149,27 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should auto-collapse card after completion', async () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: false,
         currentRunId: 'run-123',
+        activeThreadId: 'thread-1',
         slowLayerData: {
           finalReport: 'Complete'
         }
@@ -109,11 +193,28 @@ describe('MainChat - Agent Status Tests', () => {
     it('should reset collapse state when new processing starts', () => {
       const { rerender } = render(<MainChat />);
       
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
       // Start with completed state
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: false,
         currentRunId: 'run-123',
+        activeThreadId: 'thread-1',
         slowLayerData: { finalReport: 'Done' }
       });
       
@@ -124,10 +225,11 @@ describe('MainChat - Agent Status Tests', () => {
       });
       
       // Start new processing
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
         currentRunId: 'run-124',
+        activeThreadId: 'thread-1',
         slowLayerData: null
       });
       
@@ -138,10 +240,27 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should handle toggle collapse manually', async () => {
-      (useUnifiedChatStore as jest.Mock).mockReturnValue({
+      // Configure loading state to not show loading
+      mockUseLoadingState.mockReturnValue({
+        shouldShowLoading: false,
+        shouldShowEmptyState: false,
+        shouldShowExamplePrompts: false,
+        loadingMessage: ''
+      });
+      
+      // Configure thread navigation
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
-        currentRunId: 'run-123'
+        currentRunId: 'run-123',
+        activeThreadId: 'thread-1'
       });
       
       render(<MainChat />);

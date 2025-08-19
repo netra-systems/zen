@@ -38,14 +38,7 @@ const mockThreads = [
   },
 ];
 
-const mockThreadService = {
-  listThreads: jest.fn(),
-  getThreadMessages: jest.fn(),
-  createThread: jest.fn(),
-  updateThread: jest.fn(),
-  deleteThread: jest.fn(),
-};
-
+// Define mockThreadService inline to avoid hoisting issues
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore
 }));
@@ -59,7 +52,13 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
 }));
 
 jest.mock('@/services/threadService', () => ({
-  ThreadService: mockThreadService
+  ThreadService: {
+    listThreads: jest.fn(),
+    getThreadMessages: jest.fn(),
+    createThread: jest.fn(),
+    updateThread: jest.fn(),
+    deleteThread: jest.fn(),
+  }
 }));
 
 jest.mock('next/navigation', () => ({
@@ -83,6 +82,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { ThreadService } from '@/services/threadService';
 
 const mockStore = {
   isProcessing: false,
@@ -120,8 +120,8 @@ describe('ChatHistorySection - Interactions', () => {
     });
     
     // Configure service mocks with default behavior
-    mockThreadService.listThreads.mockResolvedValue(mockThreads);
-    mockThreadService.deleteThread.mockResolvedValue({ success: true });
+    (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
+    (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
   });
 
   describe('Search functionality', () => {
@@ -165,7 +165,7 @@ describe('ChatHistorySection - Interactions', () => {
     it('should delete thread when confirmed', async () => {
       const originalConfirm = window.confirm;
       window.confirm = jest.fn(() => true);
-      mockThreadService.deleteThread.mockResolvedValue({ success: true });
+      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -182,7 +182,7 @@ describe('ChatHistorySection - Interactions', () => {
     });
 
     it('should handle delete error gracefully', async () => {
-      mockThreadService.deleteThread.mockRejectedValue(new Error('Delete failed'));
+      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Delete failed'));
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       render(<ChatHistorySection />);

@@ -71,7 +71,9 @@ describe('MessageInput - ThreadService.getThread Fix', () => {
       isProcessing: false,
       addMessage: jest.fn(),
       activeThreadId: 'thread-1',
-      setActiveThread: jest.fn()
+      setActiveThread: jest.fn(),
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({

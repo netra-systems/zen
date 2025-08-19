@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T17:08:28.015849",
-    "total_runs": 96
+    "last_update": "2025-08-18T17:33:58.496761",
+    "total_runs": 97
   },
   "current_state": {
-    "overall_status": "[FAILED] 143 failures",
+    "overall_status": "[FAILED] 145 failures",
     "last_run_level": "integration",
-    "last_run_time": "2025-08-18T17:08:28.015849",
-    "last_exit_code": 2
+    "last_run_time": "2025-08-18T17:33:58.496761",
+    "last_exit_code": 15
   },
   "known_test_counts": {
     "unit:backend": {
@@ -36,12 +36,12 @@
       "last_update": "2025-08-18T16:58:34.369311"
     },
     "integration:backend": {
-      "total": 89,
-      "passed": 88,
-      "failed": 1,
+      "total": 104,
+      "passed": 101,
+      "failed": 3,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-18T17:08:28.015849"
+      "last_update": "2025-08-18T17:33:58.496761"
     },
     "integration:frontend": {
       "total": 204,
@@ -49,7 +49,7 @@
       "failed": 142,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-18T17:08:28.015849"
+      "last_update": "2025-08-18T17:33:58.496761"
     },
     "real_e2e:backend": {
       "total": 6357,
@@ -98,11 +98,11 @@
     "integration": {
       "description": "Integration tests",
       "expected": 60,
-      "actual": 293,
-      "passed": 150,
-      "failed": 143,
-      "last_run": "2025-08-18T17:08:28.015849",
-      "status": "[FAILED] 143 failures"
+      "actual": 308,
+      "passed": 163,
+      "failed": 145,
+      "last_run": "2025-08-18T17:33:58.496761",
+      "status": "[FAILED] 145 failures"
     },
     "critical": {
       "description": "Critical path tests",
@@ -226,17 +226,17 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 89,
-        "passed": 88,
-        "failed": 1,
+        "total": 104,
+        "passed": 101,
+        "failed": 3,
         "skipped": 0,
         "errors": 0,
         "import_errors": 0,
-        "test_files": 18,
+        "test_files": 21,
         "status": "failed"
       },
-      "last_duration": 26.962822914123535,
-      "last_run": "2025-08-18T17:08:28.015849"
+      "last_duration": 28.489147424697876,
+      "last_run": "2025-08-18T17:33:58.496761"
     },
     "frontend": {
       "status": "failed",
@@ -250,8 +250,8 @@
         "test_files": 80,
         "status": "failed"
       },
-      "last_duration": 80.03961420059204,
-      "last_run": "2025-08-18T17:08:28.015849"
+      "last_duration": 79.715341091156,
+      "last_run": "2025-08-18T17:33:58.496761"
     },
     "e2e": {
       "status": "pending",
@@ -263,36 +263,42 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T17:08:28.015849"
+      "last_run": "2025-08-18T17:33:58.496761"
     }
   },
   "failing_tests": [
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_demo.py::TestDemoRoutes::test_get_industry_templates_success",
-      "timestamp": "2025-08-18T17:08:28.015849"
+      "test": "\u001b[0m app\\tests\\routes\\test_supply_management.py::TestSupplyManagement::test_supply_optimization_recommendations",
+      "timestamp": "2025-08-18T17:33:58.496761"
     },
     {
       "component": "backend",
-      "test": "\u001b[0m app\\tests\\routes\\test_demo.py::\u001b[1mTestDemoRoutes::test_get_industry_templates_success\u001b[0m - TypeError: handle_industry_templates() takes 1 positional argument but 2 were given",
-      "timestamp": "2025-08-18T17:08:28.015849"
+      "test": "\u001b[0m app\\test_health.py::test_ready_endpoint_db_failure <- ..\\integration_tests\\test_health.py",
+      "timestamp": "2025-08-18T17:33:58.496761"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_reference_management.py::TestReferenceManagement::test_search_references Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
+      "timestamp": "2025-08-18T17:33:58.496761"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_supply_management.py::\u001b[1mTestSupplyManagement::test_supply_optimization_recommendations\u001b[0m - AttributeError: module 'app.services' has no attribute 'supply_optimization'",
+      "timestamp": "2025-08-18T17:33:58.496761"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\test_health.py::\u001b[1mtest_ready_endpoint_db_failure\u001b[0m - assert 200 == 503",
+      "timestamp": "2025-08-18T17:33:58.496761"
+    },
+    {
+      "component": "backend",
+      "test": "\u001b[0m app\\tests\\routes\\test_reference_management.py::\u001b[1mTestReferenceManagement::test_search_references\u001b[0m - AttributeError: 'NoneType' object has no attribute 'send'",
+      "timestamp": "2025-08-18T17:33:58.496761"
     }
   ],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T15:37:17.516947",
-      "level": "unit",
-      "exit_code": 2,
-      "status": "[FAILED] 3 failures",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 291,
-        "total_passed": 274,
-        "total_failed": 3,
-        "total_skipped": 14,
-        "pass_rate": 94.16
-      }
-    },
     {
       "timestamp": "2025-08-18T15:38:26.179185",
       "level": "unit",
@@ -558,15 +564,29 @@
         "total_skipped": 0,
         "pass_rate": 51.19
       }
+    },
+    {
+      "timestamp": "2025-08-18T17:33:58.496761",
+      "level": "integration",
+      "exit_code": 15,
+      "status": "[FAILED] 145 failures",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 308,
+        "total_passed": 163,
+        "total_failed": 145,
+        "total_skipped": 0,
+        "pass_rate": 52.92
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 6357,
-    "total_tests_run": 293,
-    "total_passed": 150,
-    "total_failed": 143,
+    "total_tests_run": 308,
+    "total_passed": 163,
+    "total_failed": 145,
     "total_skipped": 0,
-    "pass_rate": 51.19
+    "pass_rate": 52.92
   },
   "version": "1.0",
   "tests": {},
@@ -642,18 +662,10 @@
       "passed": 110,
       "failed": 2,
       "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_173209_29846",
-      "timestamp": "2025-08-18T17:32:38.375715",
-      "total_tests": 104,
-      "passed": 101,
-      "failed": 3,
-      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 10,
-    "last_updated": "2025-08-18T17:32:38.375715"
+    "total_runs": 9,
+    "last_updated": "2025-08-18T15:25:05.383449"
   }
 }

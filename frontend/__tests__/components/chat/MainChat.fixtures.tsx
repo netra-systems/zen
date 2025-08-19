@@ -3,11 +3,11 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../test-utils/providers';
 
 // Mock dependencies with dynamic jest.Mock functions - DEFINE FIRST
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseLoadingState = jest.fn();
-const mockUseEventProcessor = jest.fn();
-const mockUseThreadNavigation = jest.fn();
+var mockUseUnifiedChatStore = jest.fn();
+var mockUseWebSocket = jest.fn();
+var mockUseLoadingState = jest.fn();
+var mockUseEventProcessor = jest.fn();
+var mockUseThreadNavigation = jest.fn();
 
 // Mock the modules
 jest.mock('@/store/unified-chat', () => ({

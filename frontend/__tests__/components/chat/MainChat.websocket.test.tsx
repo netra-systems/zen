@@ -1,8 +1,8 @@
 // Mock all hooks before any imports
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseLoadingState = jest.fn();
-const mockUseEventProcessor = jest.fn();
+var mockUseUnifiedChatStore = jest.fn();
+var mockUseWebSocket = jest.fn();
+var mockUseLoadingState = jest.fn();
+var mockUseEventProcessor = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore

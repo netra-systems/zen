@@ -48,7 +48,9 @@ jest.mock('@/services/threadService', () => ({
       limit: 50, 
       offset: 0 
     })
-  },
+  }
+}));
+jest.mock('@/services/threadRenameService', () => ({
   ThreadRenameService: {
     autoRenameThread: jest.fn()
   }
@@ -187,7 +189,7 @@ describe('MessageInput - Thread Management', () => {
       await userEvent.type(textarea, '{enter}');
       
       await waitFor(() => {
-        expect(consoleSpy).toHaveBeenCalledWith('Failed to create thread:', expect.any(Error));
+        expect(consoleSpy).toHaveBeenCalledWith('[ERROR]', 'Failed to send message:', expect.any(Error));
         expect(mockSendMessage).not.toHaveBeenCalled();
       });
       
