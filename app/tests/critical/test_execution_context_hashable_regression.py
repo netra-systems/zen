@@ -106,10 +106,10 @@ class TestExecutionContextHashableRegression:
         assert execution_context.run_id in storage_dict
         assert storage_dict[execution_context.run_id]["value"] == "test_value"
     
-    def test_websocket_connection_executor_context_handling(self):
+    @pytest.mark.asyncio
+    async def test_websocket_connection_executor_context_handling(self):
         """Test WebSocket connection executor handles context correctly."""
         from app.websocket.connection_executor import ConnectionExecutor
-        from app.websocket.connection_info import ConnectionInfo
         
         executor = ConnectionExecutor()
         
@@ -126,7 +126,7 @@ class TestExecutionContextHashableRegression:
         )
         
         # Validate preconditions shouldn't use context as hashable
-        is_valid = executor.validate_preconditions(context)
+        is_valid = await executor.validate_preconditions(context)
         assert isinstance(is_valid, bool)
     
     def test_mcp_context_manager_storage(self):
@@ -160,8 +160,19 @@ class TestExecutionContextHashableRegression:
 class TestDataclassSerializationPatterns:
     """Test correct serialization patterns for dataclasses."""
     
-    def test_execution_context_to_dict_pattern(self, execution_context):
+    def test_execution_context_to_dict_pattern(self):
         """Test converting ExecutionContext to dict for storage."""
+        # Create test context
+        state = DeepAgentState(user_request="dict pattern test")
+        execution_context = ExecutionContext(
+            run_id="dict-test-123",
+            agent_name="test_agent",
+            state=state,
+            user_id="user-111",
+            thread_id="thread-222",
+            metadata={"test": "metadata"}
+        )
+        
         # Create a dict representation
         context_dict = {
             "run_id": execution_context.run_id,
