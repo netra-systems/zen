@@ -43,62 +43,8 @@ def _determine_urls() -> tuple[str, str]:
 
 async def _sync_user_to_main_db(auth_user):
     """Sync user from auth database to main app database"""
-    import os
-    from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-    from sqlalchemy.orm import sessionmaker
-    from sqlalchemy import select
-    
-    # Get main app database URL
-    main_db_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/apex_development")
-    
-    # Create connection to main database
-    engine = create_async_engine(main_db_url, echo=False)
-    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    
-    try:
-        async with async_session() as session:
-            # Import main app User model
-            import sys
-            import os
-            from pathlib import Path
-            
-            # Add main app to path
-            auth_dir = Path(__file__).resolve().parent.parent.parent
-            app_dir = auth_dir.parent / "app"
-            if str(app_dir) not in sys.path:
-                sys.path.insert(0, str(app_dir.parent))
-            
-            from app.db.models_postgres import User
-            
-            # Check if user exists
-            result = await session.execute(
-                select(User).filter(User.id == auth_user.id)
-            )
-            existing_user = result.scalars().first()
-            
-            if not existing_user:
-                # Create new user in main database
-                new_user = User(
-                    id=auth_user.id,
-                    email=auth_user.email,
-                    full_name=auth_user.full_name or auth_user.email,
-                    is_active=auth_user.is_active,
-                    is_superuser=False,
-                    is_developer=False,
-                    role="user"
-                )
-                session.add(new_user)
-                await session.commit()
-                logger.info(f"Created user {auth_user.email} in main database with ID {auth_user.id}")
-            else:
-                # Update existing user
-                existing_user.email = auth_user.email
-                existing_user.full_name = auth_user.full_name or existing_user.full_name
-                existing_user.updated_at = auth_user.updated_at
-                await session.commit()
-                logger.info(f"Updated user {auth_user.email} in main database")
-    finally:
-        await engine.dispose()
+    from ..database.main_db_sync import main_db_sync
+    return await main_db_sync.sync_user(auth_user)
 
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):

@@ -61,6 +61,14 @@ async def lifespan(app: FastAPI):
     
     # Cleanup
     logger.info("Shutting down Auth Service...")
+    
+    # Close database connections
+    from auth_core.database.connection import auth_db
+    from auth_core.database.main_db_sync import main_db_sync
+    
+    await auth_db.close()
+    await main_db_sync.close()
+    logger.info("Database connections closed")
 
 # Create FastAPI app
 app = FastAPI(

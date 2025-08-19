@@ -5,46 +5,68 @@ Handles syncing auth users to main application database
 import os
 import logging
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlalchemy.pool import NullPool
 from sqlalchemy import select
 from typing import Optional
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 
 class MainDatabaseSync:
-    """Singleton for main database sync operations"""
-    
-    _instance = None
-    _engine = None
-    _session_maker = None
-    
-    def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
-        return cls._instance
+    """Manages main database sync operations with Cloud Run compatibility"""
     
     def __init__(self):
-        if self._engine is None:
-            self._initialize_engine()
+        self._engine = None
+        self._session_maker = None
+        self._initialized = False
     
-    def _initialize_engine(self):
-        """Initialize single engine for main database"""
+    async def _ensure_initialized(self):
+        """Lazy initialization for Cloud Run compatibility"""
+        if not self._initialized:
+            await self._initialize_engine()
+    
+    async def _initialize_engine(self):
+        """Initialize engine with Cloud Run optimizations"""
+        if self._initialized:
+            return
+            
         main_db_url = os.getenv(
             "DATABASE_URL", 
             "postgresql+asyncpg://postgres:postgres@localhost:5432/apex_development"
         )
         
-        self._engine = create_async_engine(main_db_url, echo=False)
+        # Use NullPool for serverless environments
+        self._engine = create_async_engine(
+            main_db_url, 
+            echo=False,
+            poolclass=NullPool  # Important for Cloud Run
+        )
         self._session_maker = async_sessionmaker(
             self._engine, 
             class_=AsyncSession, 
             expire_on_commit=False
         )
+        self._initialized = True
         logger.info("Main database sync engine initialized")
+    
+    @asynccontextmanager
+    async def get_session(self):
+        """Get database session with proper cleanup"""
+        await self._ensure_initialized()
+        async with self._session_maker() as session:
+            try:
+                yield session
+                await session.commit()
+            except Exception:
+                await session.rollback()
+                raise
+            finally:
+                await session.close()
     
     async def sync_user(self, auth_user) -> bool:
         """Sync auth user to main database"""
         try:
-            async with self._session_maker() as session:
+            async with self.get_session() as session:
                 # Import main app User model
                 import sys
                 from pathlib import Path
@@ -75,14 +97,12 @@ class MainDatabaseSync:
                         role="user"
                     )
                     session.add(new_user)
-                    await session.commit()
                     logger.info(f"Created user {auth_user.email} in main DB")
                 else:
                     # Update existing user
                     existing_user.email = auth_user.email
                     existing_user.full_name = auth_user.full_name or existing_user.full_name
                     existing_user.updated_at = auth_user.updated_at
-                    await session.commit()
                     logger.info(f"Updated user {auth_user.email} in main DB")
                 
                 return True
