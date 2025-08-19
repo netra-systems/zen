@@ -8,6 +8,7 @@ import React from 'react';
 import { render, waitFor, act } from '@testing-library/react';
 import { jwtDecode } from 'jwt-decode';
 import { authService } from '@/auth/service';
+import { AuthProvider } from '@/auth/context';
 import '@testing-library/jest-dom';
 import {
   setupBasicMocks,
@@ -25,6 +26,14 @@ import {
 jest.mock('@/auth/service');
 jest.mock('jwt-decode');
 jest.mock('@/store/authStore');
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}));
 
 describe('AuthContext - Edge Cases', () => {
   let mockAuthStore: any;
@@ -52,7 +61,11 @@ describe('AuthContext - Edge Cases', () => {
 
   it('should handle missing user ID gracefully', async () => {
     setupUserWithoutId();
-    render(<div>Test</div>);
+    render(
+      <AuthProvider>
+        <div>Test</div>
+      </AuthProvider>
+    );
     await expectEmptyIdHandling();
   });
 
@@ -66,7 +79,7 @@ describe('AuthContext - Edge Cases', () => {
   const expectUndefinedNameHandling = async () => {
     await waitFor(() => {
       expect(mockAuthStore.login).toHaveBeenCalledWith(
-        expect.objectContaining({ name: undefined }),
+        expect.objectContaining({ full_name: undefined }),
         mockToken
       );
     });
@@ -74,7 +87,11 @@ describe('AuthContext - Edge Cases', () => {
 
   it('should handle missing user name gracefully', async () => {
     setupUserWithoutName();
-    render(<div>Test</div>);
+    render(
+      <AuthProvider>
+        <div>Test</div>
+      </AuthProvider>
+    );
     await expectUndefinedNameHandling();
   });
 

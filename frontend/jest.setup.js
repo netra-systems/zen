@@ -7,6 +7,8 @@ fetchMock.enableMocks();
 // Mock environment variables
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
 process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
+process.env.NEXT_PUBLIC_AUTH_SERVICE_URL = 'http://localhost:8081';
+process.env.NEXT_PUBLIC_AUTH_API_URL = 'http://localhost:8081';
 
 // Mock scrollIntoView
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
@@ -186,6 +188,9 @@ jest.mock('@/hooks/useWebSocket', () => ({
   })
 }));
 
+// Setup auth service mocks for independent service
+require('./__tests__/setup/auth-service-setup');
+
 // Mock the WebSocketProvider context with factory function
 jest.mock('@/providers/WebSocketProvider', () => {
   const React = require('react');
@@ -221,5 +226,15 @@ jest.mock('@/providers/WebSocketProvider', () => {
     WebSocketProvider: ({ children }) => React.createElement(MockWebSocketContext.Provider, { value: mockWebSocketContextValue }, children),
     WebSocketContext: MockWebSocketContext,
     useWebSocketContext: () => mockWebSocketContextValue
+  };
+});
+
+// Mock RawJsonView component for tests
+jest.mock('./components/chat/RawJsonView', () => {
+  const React = require('react');
+  return {
+    RawJsonView: ({ data }) => React.createElement('div', { 
+      'data-testid': 'raw-json-view' 
+    }, JSON.stringify(data, null, 2))
   };
 });

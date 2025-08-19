@@ -128,6 +128,7 @@ class LauncherConfig:
             no_browser=args.no_browser,
             non_interactive=args.non_interactive if hasattr(args, 'non_interactive') else False,
             use_turbopack=not args.no_turbopack if hasattr(args, 'no_turbopack') else False,
+            parallel_startup=not args.no_parallel if hasattr(args, 'no_parallel') else True,
             project_root=find_project_root()
         )
     

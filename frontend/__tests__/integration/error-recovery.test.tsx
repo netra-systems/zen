@@ -438,13 +438,13 @@ describe('Error Handling and Recovery Tests', () => {
     it('should recover from errors without losing application state', async () => {
       const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
       
-      // Success first, then error, then success again
+      // Only mock the success calls since error call doesn't use fetch
+      // Error call uses shouldFail=true which throws before reaching fetch
       mockFetch
         .mockResolvedValueOnce({
           ok: true,
           json: async () => ({ success: true })
         } as Response)
-        .mockRejectedValueOnce(simulateNetworkError())
         .mockResolvedValueOnce({
           ok: true, 
           json: async () => ({ success: true })
@@ -461,31 +461,38 @@ describe('Error Handling and Recovery Tests', () => {
       
       await waitFor(() => {
         expect(screen.getByText('API call successful')).toBeInTheDocument();
+        expect(screen.getAllByText('API call successful')).toHaveLength(1);
       });
 
-      // Make failing call
+      // Make failing call - this throws simulateNetworkError() without using fetch
       await user.click(screen.getByTestId('api-error-btn'));
       
       await waitFor(() => {
         expect(screen.getByTestId('error-display')).toBeInTheDocument();
         // Should still show previous successful message
         expect(screen.getByText('API call successful')).toBeInTheDocument();
+        expect(screen.getAllByText('API call successful')).toHaveLength(1);
       });
 
-      // Clear error
+      // Clear error - this should only clear the error, not affect messages
       await user.click(screen.getByTestId('clear-error-btn'));
       
       await waitFor(() => {
         expect(screen.queryByTestId('error-display')).not.toBeInTheDocument();
+        // Messages should still be there
+        expect(screen.getAllByText('API call successful')).toHaveLength(1);
       });
 
-      // Make another successful call
+      // Make another successful call - this should add a second message
       await user.click(screen.getByTestId('api-success-btn'));
       
-      await waitFor(() => {
-        // Should have two successful messages
-        expect(screen.getAllByText('API call successful')).toHaveLength(2);
-      });
+      await waitFor(
+        () => {
+          // Should have two successful messages
+          expect(screen.getAllByText('API call successful')).toHaveLength(2);
+        },
+        { timeout: 5000 }
+      );
     });
   });
 

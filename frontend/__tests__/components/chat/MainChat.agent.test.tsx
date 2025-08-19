@@ -299,7 +299,7 @@ describe('MainChat - Agent Status Tests', () => {
       expect(card).toHaveAttribute('data-collapsed', 'false');
     });
 
-    it('should handle toggle collapse manually', async () => {
+    it('should handle toggle collapse manually', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
@@ -322,17 +322,15 @@ describe('MainChat - Agent Status Tests', () => {
       expect(card).toHaveAttribute('data-collapsed', 'false');
       
       // First click to collapse
-      await act(async () => {
-        await userEvent.click(toggleButton);
+      act(() => {
+        toggleButton.click();
       });
-      
       expect(card).toHaveAttribute('data-collapsed', 'true');
       
       // Second click to expand
-      await act(async () => {
-        await userEvent.click(toggleButton);
+      act(() => {
+        toggleButton.click();
       });
-      
       expect(card).toHaveAttribute('data-collapsed', 'false');
     });
   });

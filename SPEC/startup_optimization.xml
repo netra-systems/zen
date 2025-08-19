@@ -75,29 +75,25 @@
   </optimizations>
 
   <usage>
-    <quick_start>
-      <command>python scripts/fast_dev.py</command>
-      <description>Fastest startup with all optimizations</description>
-      <typical_time>5-8 seconds</typical_time>
-    </quick_start>
+    <default_start>
+      <command>python scripts/dev_launcher.py</command>
+      <description>Default startup with parallel services and caching enabled</description>
+      <typical_time>10-15 seconds</typical_time>
+      <note>Parallel startup is enabled by default</note>
+    </default_start>
     
-    <fresh_start>
-      <command>python scripts/fast_dev.py --fresh</command>
-      <description>Clear cache and start fresh (when config changes)</description>
-      <typical_time>10-12 seconds</typical_time>
-    </fresh_start>
+    <sequential_start>
+      <command>python scripts/dev_launcher.py --no-parallel</command>
+      <description>Sequential startup for debugging (old behavior)</description>
+      <typical_time>20-30 seconds</typical_time>
+      <use_case>Debugging service startup issues</use_case>
+    </sequential_start>
     
-    <minimal_start>
-      <command>python scripts/fast_dev.py --minimal</command>
-      <description>Start only backend and frontend (skip auth)</description>
-      <typical_time>4-6 seconds</typical_time>
-    </minimal_start>
-    
-    <profile_startup>
-      <command>python scripts/fast_dev.py --profile</command>
-      <description>Show detailed timing breakdown</description>
-      <use_case>Debugging slow startups</use_case>
-    </profile_startup>
+    <quick_modes>
+      <command>python scripts/dev_launcher.py --no-secrets</command>
+      <description>Skip secret loading for faster local dev</description>
+      <time_saved>5-10 seconds</time_saved>
+    </quick_modes>
   </usage>
 
   <architecture_notes>

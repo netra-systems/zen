@@ -130,7 +130,8 @@ export const expectAuthStoreLogin = (mockStore: any, user = mockUser, token = mo
     expect.objectContaining({
       id: user.id || user.sub || '',
       email: user.email,
-      name: user.full_name || user.name
+      full_name: user.full_name || user.name,
+      role: user.role
     }),
     token
   );

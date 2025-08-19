@@ -145,6 +145,11 @@ QUICK SHORTCUTS:
         action="store_true",
         help="Run in non-interactive mode (no prompts, use defaults)"
     )
+    ui_group.add_argument(
+        "--no-parallel",
+        action="store_true",
+        help="Disable parallel startup (use sequential startup)"
+    )
     
     # Build configuration
     build_group = parser.add_argument_group('Build Configuration')
