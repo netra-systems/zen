@@ -8,6 +8,8 @@ from pathlib import Path
 
 # Set testing environment variables
 os.environ["TESTING"] = "1"
+os.environ["NETRA_ENV"] = "testing"
+os.environ["ENVIRONMENT"] = "testing"
 os.environ["REDIS_HOST"] = "localhost"
 os.environ["CLICKHOUSE_HOST"] = "localhost"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"

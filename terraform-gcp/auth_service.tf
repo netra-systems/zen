@@ -146,6 +146,23 @@ resource "google_secret_manager_secret_version" "DATABASE_URL" {
   secret_data = var.DATABASE_URL
 }
 
+# Staging-specific database URL secret
+resource "google_secret_manager_secret" "database_url_staging" {
+  count     = var.environment == "staging" ? 1 : 0
+  secret_id = "database-url-staging"
+  project   = var.project_id
+
+  replication {
+    auto {}
+  }
+}
+
+resource "google_secret_manager_secret_version" "database_url_staging" {
+  count       = var.environment == "staging" ? 1 : 0
+  secret      = google_secret_manager_secret.database_url_staging[0].id
+  secret_data = var.DATABASE_URL
+}
+
 resource "google_secret_manager_secret" "redis_url" {
   secret_id = "redis-url"
   project   = var.project_id
@@ -177,6 +194,15 @@ resource "google_secret_manager_secret_iam_member" "auth_service_database_url" {
 
 resource "google_secret_manager_secret_iam_member" "auth_service_redis_url" {
   secret_id = google_secret_manager_secret.redis_url.id
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${google_service_account.auth_service_sa.email}"
+  project   = var.project_id
+}
+
+# Grant access to staging database URL secret
+resource "google_secret_manager_secret_iam_member" "auth_service_database_url_staging" {
+  count     = var.environment == "staging" ? 1 : 0
+  secret_id = google_secret_manager_secret.database_url_staging[0].id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.auth_service_sa.email}"
   project   = var.project_id

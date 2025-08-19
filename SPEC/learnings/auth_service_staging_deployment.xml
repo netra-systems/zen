@@ -148,4 +148,65 @@
       Document auth service architecture and deployment process
     </task>
   </remaining_tasks>
+  
+  <terraform_management>
+    <overview>
+      Infrastructure for auth service secrets is managed via Terraform in terraform-gcp/auth_service.tf
+    </overview>
+    
+    <secrets_configuration>
+      <secret name="jwt-secret">
+        <terraform_resource>google_secret_manager_secret.jwt_secret</terraform_resource>
+        <description>JWT signing secret for authentication tokens</description>
+      </secret>
+      
+      <secret name="auth-database-url">
+        <terraform_resource>google_secret_manager_secret.DATABASE_URL</terraform_resource>
+        <description>Production database connection string</description>
+      </secret>
+      
+      <secret name="database-url-staging">
+        <terraform_resource>google_secret_manager_secret.database_url_staging</terraform_resource>
+        <description>Staging-specific database connection string</description>
+        <condition>Only created when environment == "staging"</condition>
+      </secret>
+      
+      <secret name="redis-url">
+        <terraform_resource>google_secret_manager_secret.redis_url</terraform_resource>
+        <description>Redis connection URL (disabled in staging)</description>
+      </secret>
+    </secrets_configuration>
+    
+    <service_account>
+      <name>auth-service-sa</name>
+      <terraform_resource>google_service_account.auth_service_sa</terraform_resource>
+      <permissions>
+        - roles/secretmanager.secretAccessor for all auth service secrets
+        - Automatically granted via google_secret_manager_secret_iam_member resources
+      </permissions>
+    </service_account>
+    
+    <deployment_process>
+      <step>1. Update variables in terraform.tfvars with DATABASE_URL containing correct password</step>
+      <step>2. Run terraform plan to verify changes</step>
+      <step>3. Run terraform apply to create/update secrets</step>
+      <step>4. Deploy auth service using deploy-staging-reliable.ps1</step>
+      <step>5. Service automatically pulls secrets using service account permissions</step>
+    </deployment_process>
+    
+    <important_notes>
+      <note>
+        The database-url-staging secret is conditionally created only in staging environment.
+        This prevents accidental production secret overwrites.
+      </note>
+      <note>
+        Service account permissions are automatically managed via Terraform IAM bindings.
+        No manual permission grants needed.
+      </note>
+      <note>
+        DATABASE_URL variable in terraform.tfvars must contain the full connection string
+        including the correct password for the staging PostgreSQL instance.
+      </note>
+    </important_notes>
+  </terraform_management>
 </learnings>

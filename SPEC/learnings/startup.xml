@@ -244,4 +244,72 @@
             </goals>
         </improvement>
     </performance_improvements>
+    
+    <startup_logs>
+        <learning>
+            <id>startup-logs-noise-clarification</id>
+            <category>startup</category>
+            <date>2025-08-19</date>
+            <severity>info</severity>
+            <title>Dev Launcher Startup Logs Are Informational Noise</title>
+            
+            <description>
+                The extensive startup logs from dev_launcher.py are normal informational output
+                and do not indicate issues requiring attention. These logs show successful
+                initialization of all services.
+            </description>
+            
+            <normal_log_patterns>
+                <pattern type="auth_service">
+                    <example>[AUTH] ✅ Auth database initialized successfully</example>
+                    <example>[AUTH] ✅ Main database sync initialized successfully</example>
+                    <example>[AUTH] INFO: Uvicorn running on http://0.0.0.0:8081</example>
+                    <meaning>Auth service started successfully</meaning>
+                </pattern>
+                
+                <pattern type="backend_configuration">
+                    <example>[BACKEND] INFO | Created development configuration</example>
+                    <example>[BACKEND] INFO | Configuration validation passed</example>
+                    <example>[BACKEND] INFO | Populated configuration from all sources</example>
+                    <meaning>Configuration loaded correctly</meaning>
+                </pattern>
+                
+                <pattern type="service_initialization">
+                    <example>[BACKEND] ✅ SyntheticDataService initialized successfully</example>
+                    <example>[BACKEND] INFO | UnifiedToolRegistry initialized</example>
+                    <example>[BACKEND] INFO | Quality Gate Service initialized</example>
+                    <meaning>Core services initialized properly</meaning>
+                </pattern>
+                
+                <pattern type="database_setup">
+                    <example>[BACKEND] INFO | Database is up to date</example>
+                    <example>[BACKEND] ✅ Database session factory successfully set</example>
+                    <example>[BACKEND] INFO | ClickHouse tables initialization complete</example>
+                    <meaning>Database connections established</meaning>
+                </pattern>
+                
+                <pattern type="health_checks">
+                    <example>[BACKEND] ✅ Running startup check: check_environment_variables</example>
+                    <example>[BACKEND] ✅ Running startup check: check_database_connection</example>
+                    <example>[BACKEND] ✅ Redis connected successfully</example>
+                    <meaning>All health checks passing</meaning>
+                </pattern>
+            </normal_log_patterns>
+            
+            <guidance>
+                <guideline>These logs are expected output during normal startup</guideline>
+                <guideline>The ✅ symbols indicate successful initialization steps</guideline>
+                <guideline>INFO level logs are informational and do not require action</guideline>
+                <guideline>Only ERROR or CRITICAL logs require investigation</guideline>
+                <guideline>The verbosity helps with debugging but is not indicative of problems</guideline>
+            </guidance>
+            
+            <when_to_investigate>
+                <scenario>ERROR or CRITICAL log levels appear</scenario>
+                <scenario>Services fail to start (missing ✅ confirmations)</scenario>
+                <scenario>Connection timeouts or authentication failures</scenario>
+                <scenario>Startup process hangs or crashes</scenario>
+            </when_to_investigate>
+        </learning>
+    </startup_logs>
 </specification>

@@ -1,0 +1,63 @@
+DEPLOYMENT ISSUE: Auth Service Database Connection Timeout
+Date: 2025-08-19
+Service: netra-auth-service (Cloud Run)
+
+PROBLEM:
+--------
+Auth service fails to start with database connection timeout error.
+Service returns 503 Service Unavailable on health checks.
+
+ERROR LOGS:
+-----------
+2025-08-19 23:42:00,443 - auth_service.main - WARNING - Auth database initialization failed: TimeoutError: TimeoutError()
+RuntimeError: Critical database failures: ['Auth DB: TimeoutError: TimeoutError()']
+[ERROR] Application startup failed. Exiting.
+[ERROR] Worker failed to boot.
+
+ROOT CAUSE:
+-----------
+Database connection string contains incorrect password: "test-password"
+Connection URL: postgresql+asyncpg://netra:test-password@34.68.229.240:5432/netra_staging
+
+The staging database requires the actual production password, not the test placeholder.
+
+CURRENT STATE:
+--------------
+- Auth service is deployed but continuously restarting
+- Health endpoint returns 503
+- Service is unable to initialize database connection
+- Worker process exits with code 3
+
+RESOLUTION REQUIRED:
+--------------------
+1. Update the database-url-staging secret with the correct password
+2. Retrieve the correct password from:
+   - Terraform state
+   - GCP SQL instance credentials
+   - Or reset the password if necessary
+
+COMMANDS TO FIX:
+----------------
+# Update the secret with correct password
+echo -n "postgresql://netra:[CORRECT_PASSWORD]@34.68.229.240:5432/netra_staging?sslmode=require" | \
+  gcloud secrets versions add database-url-staging --data-file=-
+
+# Redeploy the service to pick up the new secret
+gcloud run services update netra-auth-service \
+  --region us-central1 \
+  --project netra-staging
+
+VERIFICATION:
+-------------
+After updating the secret and redeploying:
+1. Check logs: gcloud run services logs read netra-auth-service
+2. Test health: curl https://netra-auth-service-701982941522.us-central1.run.app/health
+3. Should see: {"status":"healthy","redis":"disabled (staging)"}
+
+PREVENTION:
+-----------
+1. Store database passwords in secure password manager
+2. Use Terraform to manage secrets consistently
+3. Implement secret rotation policies
+4. Add database connection validation in CI/CD pipeline
+5. Consider using Cloud SQL Auth Proxy for more secure connections

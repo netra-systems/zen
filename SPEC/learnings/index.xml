@@ -47,6 +47,12 @@
             <critical-takeaway>CRITICAL: Microservices MUST be 100% independent. NO imports from the main `app/` module. Do not name internal modules 'app'.</critical-takeaway>
         </category>
 
+        <category name="Health Checks" path="SPEC/learnings/health_checks.xml" keywords="Health, Ready, Readiness, Liveness">
+            <critical-takeaway>Health check endpoints must initialize database connections lazily if not already initialized.</critical-takeaway>
+            <critical-takeaway>Auth service requires /health/ready endpoint on configured port (8080 default, not 8001).</critical-takeaway>
+            <critical-takeaway>Database health checks must handle uninitialized async_engine gracefully by calling initialize_postgres().</critical-takeaway>
+        </category>
+
         <category name="Database/AsyncIO" path="SPEC/learnings/database_asyncio.xml" keywords="AsyncSession, Database, Postgres, ClickHouse">
             <critical-takeaway>Functions marked as async must actually await something (postgres-session-async-function-paradox).</critical-takeaway>
             <critical-takeaway>ClickHouse driver: Use OperationalError instead of NetworkError (which doesn't exist) for network-related exceptions.</critical-takeaway>

@@ -85,12 +85,13 @@ class WebSocketTestClient:
         await self._websocket.send(json.dumps(message))
         logger.debug(f"Sent message: {message}")
         
-    async def send_chat(self, text: str, thread_id: Optional[str] = None) -> None:
+    async def send_chat(self, text: str, thread_id: Optional[str] = None, optimistic_id: Optional[str] = None) -> None:
         """Send a chat message.
         
         Args:
             text: Chat message text
             thread_id: Optional thread ID
+            optimistic_id: Optional optimistic update ID
         """
         message = {
             "type": "chat",
@@ -98,6 +99,8 @@ class WebSocketTestClient:
         }
         if thread_id:
             message["thread_id"] = thread_id
+        if optimistic_id:
+            message["optimistic_id"] = optimistic_id
             
         await self.send(message)
         

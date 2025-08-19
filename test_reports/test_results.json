@@ -1213,10 +1213,26 @@
       "passed": 24,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_162505_5061",
+      "timestamp": "2025-08-19T16:25:31.453958",
+      "total_tests": 122,
+      "passed": 119,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_163544_44257",
+      "timestamp": "2025-08-19T16:36:13.250553",
+      "total_tests": 123,
+      "passed": 119,
+      "failed": 3,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 71,
-    "last_updated": "2025-08-19T16:20:40.728378"
+    "total_runs": 73,
+    "last_updated": "2025-08-19T16:36:13.250553"
   }
 }

@@ -4,7 +4,7 @@ Complete Auth Integration Test - End-to-End User Journey
 BVJ (Business Value Justification):
 1. Segment: All customer segments (validates $100K+ MRR complete user journey)
 2. Business Goal: Prevent auth failures that block user conversion and retention
-3. Value Impact: Validates complete signup → chat flow worth $100K+ MRR
+3. Value Impact: Validates complete signup to chat flow worth $100K+ MRR
 4. Revenue Impact: Each test failure caught prevents customer loss and conversion drops
 
 CRITICAL E2E Test: Complete Authentication Flow
@@ -523,8 +523,8 @@ class TestCompleteAuthIntegration:
         assert "frontend_login" in flow_results["steps"], "Frontend login step missing"
         assert flow_results["steps"]["frontend_login"]["success"], "Frontend login failed"
         
-        print(f"\n✓ COMPLETE AUTH FLOW TEST PASSED - {flow_results['execution_time']:.2f}s")
-        print("✓ BUSINESS VALUE: $100K+ MRR user journey validated")
+        print(f"\nCOMPLETE AUTH FLOW TEST PASSED - {flow_results['execution_time']:.2f}s")
+        print("BUSINESS VALUE: $100K+ MRR user journey validated")
 
     async def test_auth_error_scenarios(self, error_tester):
         """Test authentication error scenarios."""
@@ -535,7 +535,7 @@ class TestCompleteAuthIntegration:
         print(f"\nInvalid Token Scenarios:")
         for scenario in token_errors["scenarios"]:
             rejected = not scenario["result"].get("valid", True)
-            print(f"  {scenario['name']}: {'✓ REJECTED' if rejected else '✗ ACCEPTED'}")
+            print(f"  {scenario['name']}: {'REJECTED' if rejected else 'ACCEPTED'}")
         
         assert token_errors["all_properly_rejected"], "Some invalid tokens were not properly rejected"
         
@@ -544,15 +544,15 @@ class TestCompleteAuthIntegration:
         print(f"\nWebSocket Auth Failure Scenarios:")
         for scenario in ws_errors["scenarios"]:
             rejected = not scenario["connected"]
-            print(f"  {scenario['name']}: {'✓ REJECTED' if rejected else '✗ ACCEPTED'}")
+            print(f"  {scenario['name']}: {'REJECTED' if rejected else 'ACCEPTED'}")
             if scenario.get("error") and "service" not in scenario["error"].lower():
                 print(f"    Error: {scenario['error']}")
         
         # Note: WebSocket rejection depends on service availability
         print(f"\nWebSocket rejection rate: {sum(1 for s in ws_errors['scenarios'] if not s['connected'])}/{len(ws_errors['scenarios'])}")
         
-        print("✓ AUTH ERROR SCENARIOS TEST COMPLETED")
-        print("✓ BUSINESS VALUE: Authentication security validated")
+        print("AUTH ERROR SCENARIOS TEST COMPLETED")
+        print("BUSINESS VALUE: Authentication security validated")
 
     async def test_auth_performance_requirements(self, auth_tester):
         """Test authentication performance requirements."""
@@ -567,7 +567,7 @@ class TestCompleteAuthIntegration:
             execution_times.append(flow_results["execution_time"])
             if flow_results["success"]:
                 success_count += 1
-            print(f"  Iteration {i+1}: {flow_results['execution_time']:.2f}s ({'✓' if flow_results['success'] else '✗'})")
+            print(f"  Iteration {i+1}: {flow_results['execution_time']:.2f}s ({'PASS' if flow_results['success'] else 'FAIL'})")
         
         avg_time = sum(execution_times) / len(execution_times)
         max_time = max(execution_times)
@@ -587,8 +587,8 @@ class TestCompleteAuthIntegration:
         assert max_time < max_threshold, f"Max time {max_time:.2f}s exceeds {max_threshold}s threshold"
         assert success_rate >= 0.5, f"Success rate {success_rate:.1%} below 50% threshold"
         
-        print("✓ AUTH PERFORMANCE REQUIREMENTS VALIDATED")
-        print(f"✓ BUSINESS VALUE: User experience optimized for {success_rate:.1%} success rate")
+        print("AUTH PERFORMANCE REQUIREMENTS VALIDATED")
+        print(f"BUSINESS VALUE: User experience optimized for {success_rate:.1%} success rate")
 
 
 # Business Impact Summary

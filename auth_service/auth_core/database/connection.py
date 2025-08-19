@@ -106,6 +106,28 @@ class AuthDatabase:
             finally:
                 await session.close()
     
+    async def is_ready(self):
+        """Check if database is ready to accept connections"""
+        if not self._initialized:
+            try:
+                await self.initialize()
+            except Exception as e:
+                logger.warning(f"Database initialization failed during readiness check: {e}")
+                return False
+        
+        if not self.engine:
+            return False
+        
+        try:
+            # Try to execute a simple query
+            from sqlalchemy import text
+            async with self.engine.begin() as conn:
+                await conn.execute(text("SELECT 1"))
+            return True
+        except Exception as e:
+            logger.warning(f"Database readiness check failed: {e}")
+            return False
+    
     async def close(self):
         """Close database connection"""
         if self.engine:

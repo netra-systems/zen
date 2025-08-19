@@ -8,6 +8,9 @@ Business Value Justification (BVJ):
 3. Value Impact: Prevents security breaches that could cost customer trust
 4. Revenue Impact: Enables conversion from Free to paid tiers
 """
+import os
+os.environ["NETRA_ENV"] = "testing"
+
 import pytest
 import json
 from fastapi.testclient import TestClient

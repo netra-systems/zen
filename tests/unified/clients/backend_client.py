@@ -163,6 +163,19 @@ class BackendTestClient:
         response.raise_for_status()
         return response.json()
         
+    async def update_profile(self, profile_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Update user profile.
+        
+        Args:
+            profile_data: Profile data to update
+            
+        Returns:
+            Updated profile
+        """
+        response = await self.client.put("/api/user/profile", json=profile_data)
+        response.raise_for_status()
+        return response.json()
+        
     async def get_websocket_info(self) -> Dict[str, Any]:
         """Get WebSocket connection information.
         

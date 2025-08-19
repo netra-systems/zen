@@ -1,0 +1,57 @@
+DEPLOYMENT ISSUE: PowerShell Script Encoding/Smart Quotes
+Date: 2025-08-19
+Script: deploy-staging-reliable.ps1
+
+PROBLEM:
+--------
+PowerShell deployment script failed to execute with syntax errors:
+- "The string is missing the terminator" error at line 581
+- Multiple "Missing closing '}'" errors cascade from this initial error
+
+ROOT CAUSE:
+-----------
+Smart quotes (Unicode characters U+201C and U+201D) were present in the PowerShell script
+instead of regular ASCII double quotes (U+0022). These appeared on lines:
+- Line 92: $env:GCP_STAGING_SA_KEY_PATH
+- Line 96: .gcp/staging-sa-key.json path
+- Line 262: Dockerfile.frontend.staging
+- Line 264: Dockerfile.frontend.optimized  
+- Line 266: Dockerfile fallback comment
+
+SYMPTOMS:
+---------
+1. PowerShell parser error: "The string is missing the terminator: "
+2. Cascading syntax errors about missing closing braces
+3. Script completely fails to execute
+
+ATTEMPTED FIXES:
+----------------
+1. Tried to identify the issue by checking hex dumps of line 581
+2. Used sed to replace smart quotes with regular quotes
+3. Created cleaned version of file with iconv
+4. Multiple attempts to fix via different methods
+
+RESOLUTION:
+-----------
+Need to systematically replace all smart quotes in the file:
+sed -i 's/[\xe2\x80\x9c\xe2\x80\x9d]/"/g' deploy-staging-reliable.ps1
+
+However, the issue persisted even after this fix, suggesting either:
+- Additional hidden Unicode characters
+- Corruption during file transfer/editing
+- Windows/Unix line ending conflicts
+
+WORKAROUND:
+-----------
+Deployed services directly using gcloud commands instead of the PowerShell script:
+1. Built Docker image: docker build -f Dockerfile.auth -t [image_tag] .
+2. Pushed to registry: docker push [image_tag]
+3. Deployed to Cloud Run: gcloud run deploy [service_name] --image [image_tag] ...
+
+PREVENTION:
+-----------
+1. Always use plain text editors that show Unicode characters
+2. Validate PowerShell scripts with: [System.Management.Automation.Language.Parser]::ParseFile()
+3. Use consistent text encoding (UTF-8 without BOM)
+4. Avoid copy-pasting from rich text sources (Word, web pages, etc.)
+5. Consider using bash scripts for cross-platform compatibility

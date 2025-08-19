@@ -269,6 +269,46 @@ async def health() -> Dict[str, Any]:
     """Basic health check with unified health system"""
     return health_interface.get_basic_health()
 
+# Readiness check endpoint
+@app.get("/health/ready")
+async def health_ready() -> Dict[str, Any]:
+    """Readiness probe to check if the service is ready to serve requests"""
+    # Check if database connections are available
+    from auth_core.database.connection import auth_db
+    
+    try:
+        # Try to check database connectivity
+        is_ready = await auth_db.is_ready() if hasattr(auth_db, 'is_ready') else True
+        
+        if is_ready:
+            return {
+                "status": "ready",
+                "service": "auth-service",
+                "version": "1.0.0",
+                "timestamp": datetime.now(UTC).isoformat()
+            }
+        else:
+            return JSONResponse(
+                status_code=503,
+                content={"status": "not_ready", "service": "auth-service", "reason": "Database not ready"}
+            )
+    except Exception as e:
+        logger.warning(f"Readiness check failed: {e}")
+        # In development, we might still be ready even if DB check fails
+        env = os.getenv("ENVIRONMENT", "development")
+        if env == "development":
+            return {
+                "status": "ready",
+                "service": "auth-service", 
+                "version": "1.0.0",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "warning": "Database check failed but continuing in development mode"
+            }
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "service": "auth-service", "reason": str(e)}
+        )
+
 if __name__ == "__main__":
     import uvicorn
     port = int(os.getenv("PORT", "8080"))

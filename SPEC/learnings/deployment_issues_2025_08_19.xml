@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>Deployment Issues and Learnings - 2025-08-19</title>
+  <date>2025-08-19</date>
+  <summary>
+    Encountered multiple issues during auth service staging deployment including PowerShell script encoding problems and database connection failures.
+  </summary>
+  
+  <deployment_attempt>
+    <timestamp>2025-08-19T23:30:00Z</timestamp>
+    <target>netra-auth-service</target>
+    <environment>staging</environment>
+    <outcome>Partial Success - Service deployed but not operational</outcome>
+  </deployment_attempt>
+  
+  <issues_encountered>
+    <issue id="1" severity="high">
+      <title>PowerShell Script Smart Quote Corruption</title>
+      <symptoms>
+        <symptom>Script fails with "The string is missing the terminator" error</symptom>
+        <symptom>Cascading "Missing closing }" errors throughout script</symptom>
+        <symptom>deploy-staging-reliable.ps1 completely unable to execute</symptom>
+      </symptoms>
+      <root_cause>
+        Smart quotes (Unicode U+201C and U+201D) present instead of ASCII quotes on multiple lines.
+        Likely introduced during copy-paste from rich text source or auto-correction by editor.
+      </root_cause>
+      <affected_lines>
+        <line number="92">$env:GCP_STAGING_SA_KEY_PATH</line>
+        <line number="96">.gcp/staging-sa-key.json path</line>
+        <line number="262">Dockerfile.frontend.staging</line>
+        <line number="264">Dockerfile.frontend.optimized</line>
+        <line number="266">Dockerfile fallback</line>
+      </affected_lines>
+      <resolution_attempts>
+        <attempt>Used sed to replace Unicode quotes: sed -i 's/[\xe2\x80\x9c\xe2\x80\x9d]/"/g'</attempt>
+        <attempt>Created cleaned version with iconv</attempt>
+        <attempt>Multiple hex dump analyses to identify problematic characters</attempt>
+      </resolution_attempts>
+      <workaround>
+        Bypassed PowerShell script entirely and used direct gcloud commands for deployment
+      </workaround>
+    </issue>
+    
+    <issue id="2" severity="critical">
+      <title>Database Connection Timeout</title>
+      <symptoms>
+        <symptom>Auth service returns 503 Service Unavailable</symptom>
+        <symptom>TimeoutError during database initialization</symptom>
+        <symptom>Worker process exits with code 3</symptom>
+        <symptom>Service continuously restarts</symptom>
+      </symptoms>
+      <root_cause>
+        Incorrect database password in database-url-staging secret.
+        Using "test-password" placeholder instead of actual staging database password.
+      </root_cause>
+      <error_details>
+        <connection_string>postgresql+asyncpg://netra:test-password@34.68.229.240:5432/netra_staging</connection_string>
+        <error_message>Auth database initialization failed: TimeoutError: TimeoutError()</error_message>
+        <critical_failure>Critical database failures: ['Auth DB: TimeoutError: TimeoutError()']</critical_failure>
+      </error_details>
+      <resolution_required>
+        Update database-url-staging secret with correct PostgreSQL password
+      </resolution_required>
+    </issue>
+  </issues_encountered>
+  
+  <successful_actions>
+    <action>Successfully built auth service Docker image</action>
+    <action>Successfully pushed image to Artifact Registry</action>
+    <action>Successfully deployed service to Cloud Run</action>
+    <action>Service is running but awaiting correct database credentials</action>
+  </successful_actions>
+  
+  <terraform_integration>
+    <enhancement>Added Terraform configuration for database-url-staging secret</enhancement>
+    <location>terraform-gcp/auth_service.tf</location>
+    <resources_added>
+      <resource>google_secret_manager_secret.database_url_staging</resource>
+      <resource>google_secret_manager_secret_version.database_url_staging</resource>
+      <resource>google_secret_manager_secret_iam_member.auth_service_database_url_staging</resource>
+    </resources_added>
+    <conditional_creation>Only creates secret when environment == "staging"</conditional_creation>
+  </terraform_integration>
+  
+  <key_learnings>
+    <learning id="1">
+      <title>Script Encoding Validation</title>
+      <description>
+        Always validate PowerShell scripts before deployment using the built-in parser.
+        Smart quotes and other Unicode characters can cause complete script failure.
+      </description>
+      <prevention>
+        Use [System.Management.Automation.Language.Parser]::ParseFile() for validation.
+        Use plain text editors that show Unicode characters.
+        Avoid copy-paste from rich text sources.
+      </prevention>
+    </learning>
+    
+    <learning id="2">
+      <title>Secret Management Critical Path</title>
+      <description>
+        Database credentials are a critical dependency for service startup.
+        Incorrect credentials cause immediate service failure and restart loops.
+      </description>
+      <prevention>
+        Maintain secure password storage with clear environment labeling.
+        Use Terraform to manage secrets consistently across environments.
+        Implement pre-deployment validation of database connectivity.
+      </prevention>
+    </learning>
+    
+    <learning id="3">
+      <title>Direct gcloud Commands as Fallback</title>
+      <description>
+        When deployment scripts fail, direct gcloud commands provide reliable fallback.
+        Understanding the underlying commands enables quick recovery from script issues.
+      </description>
+      <commands_used>
+        <command>docker build -f Dockerfile.auth -t [image] .</command>
+        <command>docker push [image]</command>
+        <command>gcloud run deploy [service] --image [image] --set-secrets [secrets]</command>
+      </commands_used>
+    </learning>
+    
+    <learning id="4">
+      <title>Service Health Monitoring</title>
+      <description>
+        Cloud Run logs provide immediate visibility into service startup issues.
+        Health endpoints should be checked immediately after deployment.
+      </description>
+      <monitoring_commands>
+        <command>gcloud run services logs read [service] --limit 50</command>
+        <command>curl https://[service-url]/health</command>
+      </monitoring_commands>
+    </learning>
+  </key_learnings>
+  
+  <next_steps>
+    <step priority="critical">
+      Obtain correct staging database password and update database-url-staging secret
+    </step>
+    <step priority="high">
+      Fix PowerShell deployment script encoding issues permanently
+    </step>
+    <step priority="medium">
+      Add automated validation to CI/CD pipeline for script syntax
+    </step>
+    <step priority="medium">
+      Document all staging environment credentials in secure vault
+    </step>
+    <step priority="low">
+      Consider migrating deployment scripts to bash for better cross-platform compatibility
+    </step>
+  </next_steps>
+  
+  <deployment_info>
+    <auth_service_url>https://netra-auth-service-701982941522.us-central1.run.app</auth_service_url>
+    <custom_domain>https://auth.staging.netrasystems.ai</custom_domain>
+    <revision>netra-auth-service-00033-pv8</revision>
+    <image>us-central1-docker.pkg.dev/netra-staging/netra-containers/auth:staging</image>
+    <digest>sha256:3d8eef35cd1a656b3e23a67616fa07f10ebc899ea1f46df098f5c4ae63e4ef0b</digest>
+  </deployment_info>
+</learnings>
