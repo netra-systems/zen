@@ -10,6 +10,7 @@ Business Value: $12K MRR - Data consistency and real-time synchronization
 import pytest
 import asyncio
 import json
+import sqlalchemy
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -19,22 +20,18 @@ from sqlalchemy import text, select
 from app.db.models_postgres import Thread, Message, User
 from app.ws_manager import WebSocketManager
 from app.schemas.websocket_message_types import ServerMessage
-from app.services.database.thread_repository import ThreadRepository
-from app.services.database.message_repository import MessageRepository
 from .fixtures import (
-    unified_services, test_user, test_database, websocket_client,
-    authenticated_user, clean_database_state
+    test_user, test_database, clean_database_state
 )
 
 
 class TestDatabaseSynchronization:
     """Test database synchronization and real-time updates"""
 
-    async def test_thread_creation_flow(self, clean_database_state, websocket_client):
+    async def test_thread_creation_flow(self, clean_database_state):
         """Test complete thread creation flow with real-time updates"""
         # Business Value: $12K MRR - Data consistency
         session = clean_database_state
-        ws_client = websocket_client
         ws_manager = WebSocketManager()
         
         # Create user first

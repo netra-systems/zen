@@ -29,7 +29,7 @@ import json
 
 from app.main import app
 from app.auth_integration.auth import get_current_user
-from app.schemas.auth_types import User
+from app.schemas.core_models import User
 from app.schemas.Config import AppConfig
 from app.config import get_config
 
@@ -55,13 +55,13 @@ class TestDevModeAuthentication:
         return User(
             id="dev-user-123",
             email="dev@netra.ai",
-            first_name="Dev",
-            last_name="User",
-            is_verified=True,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            subscription_tier="enterprise",  # Dev users get full access
-            is_active=True
+            full_name="Dev User",
+            is_active=True,
+            is_superuser=True,  # Dev users get full access
+            picture=None,
+            hashed_password=None,
+            access_token="dev-token-123",
+            token_type="Bearer"
         )
 
     @pytest.fixture

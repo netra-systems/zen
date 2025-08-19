@@ -19,6 +19,112 @@ from typing import Dict, Optional
 from .test_harness import UnifiedTestHarness
 
 
+class JWTTestHelper:
+    """Simplified JWT helper for backend testing."""
+    
+    def __init__(self):
+        self.auth_url = "http://localhost:8001"
+        self.backend_url = "http://localhost:8000"
+        self.websocket_url = "ws://localhost:8000"
+        self.test_secret = "test-jwt-secret-key-32-chars-min"
+    
+    def create_valid_payload(self) -> Dict:
+        """Create standard valid token payload."""
+        return {
+            "sub": f"test-user-{uuid.uuid4().hex[:8]}",
+            "email": "test@netra.ai",
+            "permissions": ["read", "write"],
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
+            "token_type": "access",
+            "iss": "netra-auth-service"
+        }
+    
+    def create_expired_payload(self) -> Dict:
+        """Create expired token payload."""
+        payload = self.create_valid_payload()
+        payload["exp"] = datetime.now(timezone.utc) - timedelta(minutes=1)
+        return payload
+    
+    def create_refresh_payload(self) -> Dict:
+        """Create refresh token payload."""
+        payload = self.create_valid_payload()
+        payload["token_type"] = "refresh"
+        payload["exp"] = datetime.now(timezone.utc) + timedelta(days=7)
+        if "permissions" in payload:
+            del payload["permissions"]
+        return payload
+    
+    def create_token(self, payload: Dict, secret: str = None) -> str:
+        """Create JWT token with specified payload."""
+        secret = secret or self.test_secret
+        # Convert datetime objects to timestamps for JWT
+        if isinstance(payload.get("iat"), datetime):
+            payload["iat"] = int(payload["iat"].timestamp())
+        if isinstance(payload.get("exp"), datetime):
+            payload["exp"] = int(payload["exp"].timestamp())
+        return jwt.encode(payload, secret, algorithm="HS256")
+    
+    async def create_tampered_token(self, payload: Dict) -> str:
+        """Create token with invalid signature."""
+        valid_token = self.create_token(payload)
+        parts = valid_token.split('.')
+        return f"{parts[0]}.{parts[1]}.invalid_signature_tampering_test"
+    
+    async def make_auth_request(self, endpoint: str, token: str) -> Dict:
+        """Make authenticated request to auth service."""
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            try:
+                response = await client.get(f"{self.auth_url}{endpoint}", headers=headers, timeout=5)
+                return {"status": response.status_code, "data": response.json() if response.content else {}}
+            except Exception as e:
+                return {"status": 500, "error": str(e)}
+    
+    async def make_backend_request(self, endpoint: str, token: str) -> Dict:
+        """Make authenticated request to backend service."""
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            try:
+                response = await client.get(f"{self.backend_url}{endpoint}", headers=headers, timeout=5)
+                return {"status": response.status_code, "data": response.json() if response.content else {}}
+            except Exception as e:
+                return {"status": 500, "error": str(e)}
+    
+    async def get_real_token_from_auth(self) -> Optional[str]:
+        """Get real token from auth service dev login."""
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(f"{self.auth_url}/auth/dev/login", timeout=5)
+                if response.status_code == 200:
+                    return response.json().get("access_token")
+            except Exception:
+                pass
+        return None
+    
+    async def test_websocket_connection(self, token: str, should_succeed: bool = True) -> bool:
+        """Test WebSocket connection with token."""
+        try:
+            import websockets
+            async with websockets.connect(
+                f"{self.websocket_url}/ws?token={token}",
+                timeout=5
+            ) as websocket:
+                await websocket.ping()
+                return websocket.open
+        except Exception:
+            return not should_succeed
+    
+    def validate_token_structure(self, token: str) -> bool:
+        """Validate JWT token has correct structure."""
+        try:
+            payload = jwt.decode(token, options={"verify_signature": False})
+            required_fields = ["sub", "exp", "token_type"]
+            return all(field in payload for field in required_fields)
+        except Exception:
+            return False
+
+
 class TestJWTCreationAndSigning:
     """Test JWT creation with proper claims and signing."""
     

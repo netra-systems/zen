@@ -203,6 +203,14 @@ class WebSocketLatencyTester:
         self.websocket_url = websocket_url
         self.latencies: List[float] = []
     
+    def _calculate_percentile(self, values: List[float], percentile: int) -> float:
+        """Calculate percentile from list of values."""
+        if not values:
+            return 0.0
+        sorted_values = sorted(values)
+        index = int((percentile / 100.0) * len(sorted_values))
+        return sorted_values[min(index, len(sorted_values) - 1)]
+    
     async def test_websocket_latency(self, num_messages: int = 50) -> List[float]:
         """Test WebSocket latency with ping-pong messages."""
         self.latencies = []
@@ -555,7 +563,7 @@ class TestSLACompliance:
         
         if latencies:
             avg_latency = statistics.mean(latencies)
-            p95_latency = ws_tester._calculate_percentile(latencies, 95) if hasattr(ws_tester, '_calculate_percentile') else max(latencies)
+            p95_latency = ws_tester._calculate_percentile(latencies, 95)
             
             # Allow higher tolerance for WebSocket in test environment
             assert avg_latency <= 100.0, (
