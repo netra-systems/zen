@@ -21,6 +21,7 @@ htmlcov/
 
 # Dev launcher cache
 .dev_cache/
+.dev_launcher_cache/
 
 # Node.js
 node_modules/
@@ -113,10 +114,4 @@ terraform/staging/tfplan
 terraform-gcp/staging.tfplan
 terraform-gcp/staging.tfplan
 ...AAA launch CLAUDE WINDOWS.BAT
-.service_discovery/auth.json
-.service_discovery/auth.json
-.dev_launcher_cache/dependency_cache.json
-terraform-gcp/staging.tfplan
-.dev_launcher_cache/startup_cache.json
-.dev_launcher_cache/encryption.key
 .service_discovery/auth.json

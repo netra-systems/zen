@@ -64,9 +64,9 @@ async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logge
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
     """Run database index optimization in background."""
     try:
-        logger.info("Starting background database index optimization...")
+        logger.debug("Starting background database index optimization...")
         optimization_results = await index_manager.optimize_all_databases()
-        logger.info(f"Background database optimization completed: {optimization_results}")
+        logger.debug(f"Background database optimization completed: {optimization_results}")
     except Exception as e:
         logger.error(f"Background index optimization failed: {e}")
 

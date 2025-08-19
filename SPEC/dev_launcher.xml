@@ -83,6 +83,30 @@
         </requirement>
     </logging_requirements>
     
+    <startup_visibility>
+        <requirement id="VIS-001" priority="CRITICAL">
+            <description>Background task logging control</description>
+            <implementation>
+                - Background tasks like index optimization should NOT show logs by default
+                - Only show critical errors from background tasks
+                - Provide --verbose-background flag to enable background task logging
+                - Example: _run_index_optimization_background should log at DEBUG level
+                - Keep startup output focused on main service initialization
+            </implementation>
+        </requirement>
+        
+        <requirement id="VIS-002" priority="HIGH">
+            <description>Table check lazy loading</description>
+            <implementation>
+                - Database table checks should run silently in background
+                - Only log table issues if problems detected or schema changes needed
+                - Skip logging successful table checks
+                - Provide --verbose-tables flag to show all table check details
+                - Cache table check results to avoid repeated checks
+            </implementation>
+        </requirement>
+    </startup_visibility>
+    
     <performance_optimizations>
         <requirement id="PERF-001" priority="CRITICAL">
             <description>No-reload mode for all services</description>
@@ -119,7 +143,9 @@
                   - Skip npm install if package-lock.json unchanged
                   - Skip environment validation if .env files unchanged
                 - Display startup time metrics in logs
-                - Target: Sub-10 second startup for cached runs
+                - Target: Sub-10 second startup for cached runs (GOAL ONLY - not hard limit)
+                - Startup MUST complete even if exceeding time goal
+                - Time limits are for monitoring/reporting, not enforcement
             </implementation>
         </requirement>
         
@@ -216,6 +242,21 @@
                   - Actual response or error from the service
                   - Suggested actions to resolve the issue
                 - Example: "Backend failed to start: /health/ready returned 500 after 21.4s (expected 200 within 5s). Check backend logs for startup errors."
+            </implementation>
+        </requirement>
+        
+        <requirement id="ERROR-004" priority="CRITICAL">
+            <description>Critical error handling</description>
+            <implementation>
+                - STOP entire process on critical errors (database connection, auth failure, etc)
+                - Display clear critical error message with specific failure reason
+                - Exit with appropriate error code (1 for general, specific codes for types)
+                - Critical errors include:
+                  - Database connection failures
+                  - Missing required environment variables
+                  - Authentication service failures
+                  - Port binding failures
+                - Non-critical errors should log warnings but continue
             </implementation>
         </requirement>
         

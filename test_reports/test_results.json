@@ -1,13 +1,13 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-19T08:59:15.389016",
-    "total_runs": 134
+    "last_update": "2025-08-19T09:44:04.748743",
+    "total_runs": 135
   },
   "current_state": {
     "overall_status": "[PASSED]",
     "last_run_level": "smoke",
-    "last_run_time": "2025-08-19T08:59:15.389016",
+    "last_run_time": "2025-08-19T09:44:04.748743",
     "last_exit_code": 0
   },
   "known_test_counts": {
@@ -33,7 +33,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-19T08:59:15.389016"
+      "last_update": "2025-08-19T09:44:04.748743"
     },
     "integration:backend": {
       "total": 104,
@@ -115,7 +115,7 @@
       "actual": 7,
       "passed": 7,
       "failed": 0,
-      "last_run": "2025-08-19T08:59:15.389016",
+      "last_run": "2025-08-19T09:44:04.748743",
       "status": "[PASSED] 7 tests"
     },
     "unit": {
@@ -267,8 +267,8 @@
         "test_files": 5,
         "status": "passed"
       },
-      "last_duration": 7.411129474639893,
-      "last_run": "2025-08-19T08:59:15.389016"
+      "last_duration": 9.125778913497925,
+      "last_run": "2025-08-19T09:44:04.748743"
     },
     "frontend": {
       "status": "skipped",
@@ -280,7 +280,7 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-19T08:59:15.389016"
+      "last_run": "2025-08-19T09:44:04.748743"
     },
     "e2e": {
       "status": "pending",
@@ -292,25 +292,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-19T08:59:15.389016"
+      "last_run": "2025-08-19T09:44:04.748743"
     }
   },
   "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-19T07:27:38.061541",
-      "level": "real_services",
-      "exit_code": 1,
-      "status": "[ERRORS] 1 errors",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 1,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-19T07:33:31.147289",
       "level": "unit",
@@ -565,6 +551,20 @@
     },
     {
       "timestamp": "2025-08-19T08:59:15.389016",
+      "level": "smoke",
+      "exit_code": 0,
+      "status": "[PASSED]",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 7,
+        "total_passed": 7,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 100.0
+      }
+    },
+    {
+      "timestamp": "2025-08-19T09:44:04.748743",
       "level": "smoke",
       "exit_code": 0,
       "status": "[PASSED]",

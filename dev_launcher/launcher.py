@@ -34,6 +34,7 @@ from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
 from dev_launcher.legacy_service_runner import LegacyServiceRunner
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
+from dev_launcher.critical_error_handler import critical_handler, CriticalError
 
 logger = logging.getLogger(__name__)
 
@@ -299,7 +300,21 @@ class DevLauncher:
         if not self.cache_manager.has_environment_changed():
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
-        return self.environment_checker.check_environment()
+        result = self.environment_checker.check_environment()
+        # Check for critical environment variables
+        self._check_critical_env_vars()
+        return result
+    
+    def _check_critical_env_vars(self):
+        """Check critical environment variables."""
+        critical_vars = [
+            "DATABASE_URL",
+            "JWT_SECRET_KEY"
+        ]
+        for var in critical_vars:
+            value = os.environ.get(var)
+            if not value:
+                critical_handler.check_env_var(var, value)
     
     def _check_environment_step(self) -> bool:
         """Environment check step for optimizer."""
@@ -347,12 +362,20 @@ class DevLauncher:
     
     def run(self) -> int:
         """Run the development environment with optimized startup sequence."""
-        # Check for legacy mode
-        if self.config.legacy_mode:
-            return self._run_legacy_mode()
-        
-        # Use optimized startup by default
-        return self._run_optimized_mode()
+        try:
+            # Check for legacy mode
+            if self.config.legacy_mode:
+                return self._run_legacy_mode()
+            
+            # Use optimized startup by default
+            return self._run_optimized_mode()
+        except CriticalError as e:
+            # Handle critical errors
+            critical_handler.exit_on_critical(e)
+            return e.get_exit_code()
+        except Exception as e:
+            logger.error(f"Unexpected error during startup: {e}")
+            return 1
     
     def _run_legacy_mode(self) -> int:
         """Run in legacy mode with old behavior."""

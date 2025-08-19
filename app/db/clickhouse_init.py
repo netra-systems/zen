@@ -67,20 +67,26 @@ async def _test_client_connection(client) -> bool:
         return False
     return True
 
-async def _create_single_table(client, table_name: str, schema: str) -> None:
+async def _create_single_table(client, table_name: str, schema: str, verbose: bool = False) -> None:
     """Create a single ClickHouse table."""
     try:
-        logger.info(f"Creating ClickHouse table if not exists: {table_name}")
+        if verbose:
+            logger.info(f"Creating ClickHouse table if not exists: {table_name}")
+        else:
+            logger.debug(f"Creating ClickHouse table if not exists: {table_name}")
         await client.command(schema)
-        logger.info(f"Successfully ensured table exists: {table_name}")
+        if verbose:
+            logger.info(f"Successfully ensured table exists: {table_name}")
+        else:
+            logger.debug(f"Successfully ensured table exists: {table_name}")
     except Exception as e:
         logger.error(f"Failed to create table {table_name}: {e}")
         # Continue with other tables even if one fails
 
-async def _create_all_tables(client) -> None:
+async def _create_all_tables(client, verbose: bool = False) -> None:
     """Create all required ClickHouse tables."""
     for table_name, schema in CLICKHOUSE_TABLES:
-        await _create_single_table(client, table_name, schema)
+        await _create_single_table(client, table_name, schema, verbose)
 
 async def _get_existing_tables(client) -> List[str]:
     """Get list of existing ClickHouse tables."""
@@ -91,38 +97,47 @@ async def _get_existing_tables(client) -> List[str]:
         logger.error(f"Failed to query existing tables: {e}")
         return []
 
-async def _verify_workload_events_table(existing_tables: List[str]) -> None:
+async def _verify_workload_events_table(existing_tables: List[str], verbose: bool = False) -> None:
     """Verify workload_events table exists."""
     if 'workload_events' in existing_tables:
-        logger.info("✓ workload_events table verified successfully")
+        if verbose:
+            logger.info("✓ workload_events table verified successfully")
+        else:
+            logger.debug("✓ workload_events table verified successfully")
     else:
         logger.warning("⚠ workload_events table not found after initialization")
 
-async def _verify_table_creation(client) -> None:
+async def _verify_table_creation(client, verbose: bool = False) -> None:
     """Verify all tables were created successfully."""
     try:
         existing_tables = await _get_existing_tables(client)
-        logger.info(f"ClickHouse tables after initialization: {existing_tables}")
-        await _verify_workload_events_table(existing_tables)
+        if verbose:
+            logger.info(f"ClickHouse tables after initialization: {existing_tables}")
+        else:
+            logger.debug(f"ClickHouse tables after initialization: {existing_tables}")
+        await _verify_workload_events_table(existing_tables, verbose)
     except Exception as e:
         logger.error(f"Failed to verify tables: {e}")
 
-async def _initialize_tables_with_client(client) -> None:
+async def _initialize_tables_with_client(client, verbose: bool = False) -> None:
     """Initialize tables using provided client."""
     if not await _test_client_connection(client):
         return
     
-    await _create_all_tables(client)
-    await _verify_table_creation(client)
+    await _create_all_tables(client, verbose)
+    await _verify_table_creation(client, verbose)
 
-async def initialize_clickhouse_tables() -> None:
+async def initialize_clickhouse_tables(verbose: bool = False) -> None:
     """Initialize all required ClickHouse tables."""
     if _should_skip_initialization() or _check_clickhouse_mode() or _check_development_config():
         return
     
+    import os
+    verbose = verbose or os.getenv('VERBOSE_TABLES', 'false').lower() == 'true'
+    
     try:
         async with get_clickhouse_client() as client:
-            await _initialize_tables_with_client(client)
+            await _initialize_tables_with_client(client, verbose)
     except Exception as e:
         logger.error(f"Failed to initialize ClickHouse tables: {e}")
         # Don't fail the application startup, just log the error
