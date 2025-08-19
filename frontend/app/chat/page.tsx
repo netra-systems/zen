@@ -13,6 +13,8 @@
 
 import React, { useEffect } from 'react';
 import { useUnifiedChatStore } from '@/store/unified-chat';
+import { useThreadCreation } from '@/hooks/useThreadCreation';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { MessageSquare, Plus, Clock } from 'lucide-react';
 
@@ -22,13 +24,22 @@ import { MessageSquare, Plus, Clock } from 'lucide-react';
 const ChatPage: React.FC = () => {
   const activeThreadId = useUnifiedChatStore(state => state.activeThreadId);
   const setActiveThread = useUnifiedChatStore(state => state.setActiveThread);
+  const { createAndNavigate } = useThreadCreation();
+  const router = useRouter();
   
   // Clear active thread when on home page
   useEffect(() => {
     clearActiveThreadForHome(activeThreadId, setActiveThread);
   }, [activeThreadId, setActiveThread]);
   
-  return createChatHomeView();
+  const handleNewConversation = async () => {
+    const success = await createAndNavigate();
+    if (success) {
+      router.push('/chat');
+    }
+  };
+  
+  return createChatHomeView(handleNewConversation, router);
 };
 
 /**
@@ -46,7 +57,10 @@ const clearActiveThreadForHome = (
 /**
  * Creates the chat home view
  */
-const createChatHomeView = (): JSX.Element => {
+const createChatHomeView = (
+  handleNewConversation: () => Promise<void>,
+  router: any
+): JSX.Element => {
   return (
     <div className="flex h-full bg-gradient-to-br from-gray-50 via-white to-gray-50">
       <div className="flex flex-col flex-1 max-w-full">
@@ -60,7 +74,7 @@ const createChatHomeView = (): JSX.Element => {
             >
               <div className="max-w-2xl">
                 {createWelcomeSection()}
-                {createActionButtons()}
+                {createActionButtons(handleNewConversation, router)}
                 {createFeatureGrid()}
               </div>
             </motion.div>
@@ -93,12 +107,20 @@ const createWelcomeSection = (): JSX.Element => {
 /**
  * Creates action buttons
  */
-const createActionButtons = (): JSX.Element => {
+const createActionButtons = (
+  handleNewConversation: () => Promise<void>,
+  router: any
+): JSX.Element => {
+  const handleRecentChats = () => {
+    router.push('/chat');
+  };
+  
   return (
     <div className="flex flex-col sm:flex-row gap-4 mb-12">
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        onClick={handleNewConversation}
         className="flex items-center justify-center gap-3 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors shadow-md"
       >
         <Plus className="w-5 h-5" />
@@ -107,6 +129,7 @@ const createActionButtons = (): JSX.Element => {
       <motion.button
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
+        onClick={handleRecentChats}
         className="flex items-center justify-center gap-3 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
       >
         <Clock className="w-5 h-5" />
