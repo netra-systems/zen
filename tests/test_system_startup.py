@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from app.schemas.Config import AppConfig
 from app.logging_config import central_logger
+from app.ws_manager import WebSocketManager
 
 
 class TestSystemStartup:

@@ -110,6 +110,13 @@ class SessionManager:
             
         return True
     
+    def get_user_session(self, user_id: str) -> Optional[Dict]:
+        """Get most recent active session for a user"""
+        sessions = self.get_user_sessions(user_id)
+        if not sessions:
+            return None
+        return max(sessions, key=lambda s: s.get("last_activity", ""))
+
     def get_user_sessions(self, user_id: str) -> list:
         """Get all active sessions for a user"""
         if not self.redis_client:

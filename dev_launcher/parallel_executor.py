@@ -169,8 +169,29 @@ class ParallelExecutor:
     
     def _execute_batch(self, batch: List[str]):
         """Execute batch of independent tasks."""
+        # Submit all tasks in batch
         for task_id in batch:
             self._submit_task(task_id)
+        
+        # Wait for this batch to complete before moving to next batch
+        batch_futures = {task_id: future for task_id, future in self.pending.items() if task_id in batch}
+        for task_id, future in batch_futures.items():
+            try:
+                result = future.result(timeout=30)
+                self.completed[task_id] = result
+            except Exception as e:
+                logger.error(f"Batch task {task_id} failed: {e}")
+                self.completed[task_id] = TaskResult(
+                    task_id=task_id,
+                    success=False,
+                    error=e,
+                    duration=0.0,
+                    worker_type=""
+                )
+        
+        # Remove completed tasks from pending
+        for task_id in batch:
+            self.pending.pop(task_id, None)
     
     def _submit_task(self, task_id: str):
         """Submit single task to appropriate executor."""

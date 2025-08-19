@@ -287,6 +287,11 @@ class ModernConnectionManager:
             "active_connections_count": registry_stats["total_active_connections"],
             "active_users_count": registry_stats["active_users"]
         }
+    
+    @property
+    def active_connections(self) -> Dict[str, List[ConnectionInfo]]:
+        """Get active connections from registry for backward compatibility."""
+        return self.registry.active_connections
 
 
 # Global instance for backward compatibility - lazy initialization

@@ -212,8 +212,8 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
     # Get session data if available
-    session_data = auth_service.session_manager.get_session(
-        user_id=response.user_id
+    session_data = auth_service.session_manager.get_user_session(
+        response.user_id
     ) if hasattr(auth_service, 'session_manager') else None
     
     return {
@@ -236,8 +236,8 @@ async def get_session(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
     # Get session data
-    session_data = auth_service.session_manager.get_session(
-        user_id=response.user_id
+    session_data = auth_service.session_manager.get_user_session(
+        response.user_id
     )
     
     if not session_data:
