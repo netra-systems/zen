@@ -23,8 +23,9 @@ class AuthDatabase:
         if self._initialized:
             return
         
-        # Get database URL from environment
-        database_url = os.getenv("AUTH_DATABASE_URL", os.getenv("DATABASE_URL"))
+        # Get database URL from config
+        from auth_core.config import AuthConfig
+        database_url = AuthConfig.get_database_url()
         
         if not database_url:
             logger.warning("No database URL configured, using in-memory SQLite")

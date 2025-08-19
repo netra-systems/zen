@@ -16,11 +16,27 @@ class JWTHandler:
     """Single Source of Truth for JWT operations"""
     
     def __init__(self):
-        self.secret = AuthConfig.get_jwt_secret() or "dev-secret-key"
+        self.secret = self._get_jwt_secret()
         self.algorithm = os.getenv("JWT_ALGORITHM", "HS256")
         self.access_expiry = int(os.getenv("JWT_ACCESS_EXPIRY_MINUTES", "15"))
         self.refresh_expiry = int(os.getenv("JWT_REFRESH_EXPIRY_DAYS", "7"))
         self.service_expiry = int(os.getenv("JWT_SERVICE_EXPIRY_MINUTES", "5"))
+    
+    def _get_jwt_secret(self) -> str:
+        """Get JWT secret with production safety"""
+        secret = AuthConfig.get_jwt_secret()
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        
+        if not secret:
+            if env in ["staging", "production"]:
+                raise ValueError("JWT_SECRET must be set in production/staging")
+            logger.warning("Using default JWT secret for development")
+            return "dev-secret-key-DO-NOT-USE-IN-PRODUCTION"
+        
+        if len(secret) < 32 and env in ["staging", "production"]:
+            raise ValueError("JWT_SECRET must be at least 32 characters in production")
+        
+        return secret
         
     def create_access_token(self, user_id: str, email: str, 
                            permissions: list = None) -> str:

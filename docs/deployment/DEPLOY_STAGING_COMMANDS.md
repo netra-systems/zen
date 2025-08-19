@@ -182,7 +182,7 @@ terraform workspace select staging || terraform workspace new staging
 # Set environment variables
 export TF_VAR_project_id="netra-staging"
 export TF_VAR_jwt_secret="your-secure-jwt-secret"
-export TF_VAR_auth_database_url="postgresql://user:pass@host:5432/auth_db"
+export TF_VAR_DATABASE_URL="postgresql://user:pass@host:5432/auth_db"
 
 # Plan and apply
 terraform plan -var-file="terraform.staging.tfvars" -out=staging.tfplan

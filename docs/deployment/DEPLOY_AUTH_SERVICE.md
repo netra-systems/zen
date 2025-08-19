@@ -103,7 +103,7 @@ terraform init
 # Set variables
 export TF_VAR_project_id="netra-staging"
 export TF_VAR_jwt_secret="your-secure-jwt-secret"
-export TF_VAR_auth_database_url="postgresql://user:pass@host:5432/auth_db"
+export TF_VAR_DATABASE_URL="postgresql://user:pass@host:5432/auth_db"
 export TF_VAR_redis_url="redis://redis-host:6379/0"
 
 # Apply the auth service configuration

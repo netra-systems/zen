@@ -131,7 +131,9 @@ class AuthStarter:
         
         # Add PostgreSQL configuration
         postgres_config = self.services_config.postgres.get_config()
-        env["DATABASE_URL"] = f"postgresql://{postgres_config['user']}:{postgres_config['password']}@{postgres_config['host']}:{postgres_config['port']}/{postgres_config['database']}"
+        database_url = f"postgresql://{postgres_config['user']}:{postgres_config['password']}@{postgres_config['host']}:{postgres_config['port']}/{postgres_config['database']}"
+        env["DATABASE_URL"] = database_url
+        env["DATABASE_URL"] = database_url  # Auth service specific database URL
         
         # Add service discovery path
         env["SERVICE_DISCOVERY_PATH"] = str(self.config.project_root / ".service_discovery")

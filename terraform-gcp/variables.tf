@@ -155,7 +155,7 @@ variable "jwt_secret" {
   sensitive   = true
 }
 
-variable "auth_database_url" {
+variable "DATABASE_URL" {
   description = "Database URL for auth service"
   type        = string
   sensitive   = true

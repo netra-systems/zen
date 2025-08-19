@@ -30,10 +30,21 @@ class MainDatabaseSync:
         if self._initialized:
             return
             
-        main_db_url = os.getenv(
-            "DATABASE_URL", 
+        # Check multiple environment variables for database URL
+        # Priority: MAIN_DATABASE_URL > DATABASE_URL > default
+        main_db_url = (
+            os.getenv("MAIN_DATABASE_URL") or 
+            os.getenv("DATABASE_URL") or
             "postgresql+asyncpg://postgres:postgres@localhost:5432/apex_development"
         )
+        
+        # Convert postgres:// to postgresql+asyncpg:// if needed
+        if main_db_url.startswith("postgres://"):
+            main_db_url = main_db_url.replace("postgres://", "postgresql+asyncpg://")
+        elif main_db_url.startswith("postgresql://"):
+            main_db_url = main_db_url.replace("postgresql://", "postgresql+asyncpg://")
+        
+        logger.info(f"Initializing main DB sync with URL pattern: {main_db_url.split('@')[1] if '@' in main_db_url else 'local'}")
         
         # Use NullPool for serverless environments
         self._engine = create_async_engine(
