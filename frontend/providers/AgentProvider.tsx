@@ -214,6 +214,32 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
     wsSendMessage(message);
   }, [wsSendMessage]);
 
+  const startAgent = useCallback((
+    userRequest: string,
+    threadId?: string,
+    context?: Record<string, any>,
+    settings?: Record<string, any>
+  ) => {
+    if (status !== 'OPEN' && wsContext) {
+      setError(new Error('WebSocket is not connected'));
+      return;
+    }
+
+    // Send start_agent message to backend
+    wsSendMessage({
+      type: 'start_agent',
+      payload: {
+        user_request: userRequest,
+        thread_id: threadId || null,
+        context: context || {},
+        settings: settings || {}
+      }
+    });
+
+    setIsProcessing(true);
+    setError(null);
+  }, [status, wsSendMessage, wsContext]);
+
   const value: AgentContextType = {
     isProcessing,
     sendMessage,
@@ -222,7 +248,8 @@ export const AgentProvider: React.FC<AgentProviderProps> = ({
     optimizationResults,
     messages,
     showThinking,
-    sendWsMessage
+    sendWsMessage,
+    startAgent
   };
 
   return <AgentContext.Provider value={value}>{children}</AgentContext.Provider>;
