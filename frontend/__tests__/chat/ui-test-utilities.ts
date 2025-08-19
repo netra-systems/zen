@@ -49,6 +49,8 @@ export const createThreadStoreMock = (overrides = {}) => ({
   updateThread: jest.fn(),
   loadThreads: jest.fn(),
   setError: jest.fn(),
+  setLoading: jest.fn(),
+  loading: false,
   error: null,
   ...overrides
 });
@@ -60,6 +62,19 @@ export const createWebSocketMock = (overrides = {}) => ({
   unsubscribe: jest.fn(),
   reconnect: jest.fn(),
   disconnect: jest.fn(),
+  ...overrides
+});
+
+export const createUnifiedChatStoreMock = (overrides = {}) => ({
+  isProcessing: false,
+  messages: [],
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  currentRunId: null,
+  sendMessage: jest.fn(),
+  clearMessages: jest.fn(),
+  setProcessing: jest.fn(),
   ...overrides
 });
 
@@ -87,6 +102,17 @@ export const setupClipboardMock = () => {
   
   return mockClipboard;
 };
+
+export const createThreadServiceMock = () => ({
+  listThreads: jest.fn().mockResolvedValue([]),
+  createThread: jest.fn().mockResolvedValue({ 
+    id: 'new-thread', 
+    title: 'New Conversation' 
+  }),
+  getThreadMessages: jest.fn().mockResolvedValue({ messages: [] }),
+  updateThread: jest.fn().mockResolvedValue({ id: 'thread-1', title: 'Updated' }),
+  deleteThread: jest.fn().mockResolvedValue(true)
+});
 
 export const cleanupMocks = () => {
   jest.restoreAllMocks();
@@ -160,8 +186,16 @@ export const mockModuleConfigs = {
     useThreadStore: jest.fn(() => createThreadStoreMock())
   })),
   
+  unifiedChatStore: () => jest.mock('../../store/unified-chat', () => ({
+    useUnifiedChatStore: jest.fn(() => createUnifiedChatStoreMock())
+  })),
+  
   webSocket: () => jest.mock('../../hooks/useWebSocket', () => ({
     useWebSocket: jest.fn(() => createWebSocketMock())
+  })),
+  
+  chatWebSocket: () => jest.mock('../../hooks/useChatWebSocket', () => ({
+    useChatWebSocket: jest.fn(() => createWebSocketMock())
   }))
 };
 
@@ -173,7 +207,9 @@ export const setupAllStoreMocks = () => {
   mockModuleConfigs.authStore();
   mockModuleConfigs.chatStore();
   mockModuleConfigs.threadStore();
+  mockModuleConfigs.unifiedChatStore();
   mockModuleConfigs.webSocket();
+  mockModuleConfigs.chatWebSocket();
 };
 
 // Export screen and other commonly used testing utilities
