@@ -241,6 +241,29 @@ QUICK SHORTCUTS:
         help="Disable boundary violation warning messages"
     )
     
+    # Phase 6 Integration: New optimization flags
+    perf_group = parser.add_argument_group('Performance Optimization')
+    perf_group.add_argument(
+        "--silent",
+        action="store_true",
+        help="Silent mode with minimal output (< 20 lines on success)"
+    )
+    perf_group.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Bypass all caching for testing"
+    )
+    perf_group.add_argument(
+        "--profile",
+        action="store_true",
+        help="Show detailed performance metrics and timing"
+    )
+    perf_group.add_argument(
+        "--legacy",
+        action="store_true",
+        help="Use legacy startup behavior (no optimizations)"
+    )
+    
     return parser
 
 

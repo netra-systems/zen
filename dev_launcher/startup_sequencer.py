@@ -84,12 +84,12 @@ class SmartStartupSequencer:
         """Determine if entire phase can be skipped."""
         if phase == StartupPhase.INIT:
             return False  # INIT never skipped
-        
+        return self._check_all_steps_skippable(phase)
+    
+    def _check_all_steps_skippable(self, phase: StartupPhase) -> bool:
+        """Check if all steps in phase are skippable."""
         steps = self.phases.get(phase, [])
-        for step in steps:
-            if not self._can_skip_step(step):
-                return False
-        return True
+        return all(self._can_skip_step(step) for step in steps)
     
     def _can_skip_step(self, step: PhaseStep) -> bool:
         """Check if individual step can be skipped."""
@@ -102,47 +102,49 @@ class SmartStartupSequencer:
         if self._can_skip_step(step):
             logger.debug(f"Skipping cached step: {step.name}")
             return True, 0.0
-        
+        return self._run_step_with_timing(step)
+    
+    def _run_step_with_timing(self, step: PhaseStep) -> Tuple[bool, float]:
+        """Run step and measure timing."""
         start_time = time.time()
         try:
             result = step.func()
-            duration = time.time() - start_time
-            success = result if isinstance(result, bool) else True
-            if success and step.cache_key:
-                self.cache_manager.cache_result(step.cache_key, True)
-            return success, duration
+            return self._process_step_result(step, result, time.time() - start_time)
         except Exception as e:
             duration = time.time() - start_time
             logger.error(f"Step {step.name} failed: {e}")
             return False, duration
     
+    def _process_step_result(self, step: PhaseStep, result: Any, duration: float) -> Tuple[bool, float]:
+        """Process step execution result."""
+        success = result if isinstance(result, bool) else True
+        if success and step.cache_key:
+            self.cache_manager.cache_result(step.cache_key, True)
+        return success, duration
+    
     def _execute_phase(self, phase: StartupPhase) -> PhaseResult:
         """Execute a single phase with all its steps."""
         logger.info(f"Starting phase: {phase.phase_name}")
         phase_start = time.time()
+        return self._run_phase_steps(phase, phase_start)
+    
+    def _run_phase_steps(self, phase: StartupPhase, start_time: float) -> PhaseResult:
+        """Run all steps in a phase."""
         steps = self.phases.get(phase, [])
-        
-        executed_steps = []
-        skipped_steps = []
-        
+        executed_steps, skipped_steps = [], []
         for step in steps:
-            step_success, step_duration = self._execute_step(step)
-            
-            if self._can_skip_step(step):
-                skipped_steps.append(step.name)
-            else:
-                executed_steps.append(step.name)
-            
-            if not step_success and step.required:
-                phase_duration = time.time() - phase_start
-                return PhaseResult(
-                    phase, False, phase_duration,
-                    executed_steps, skipped_steps,
-                    f"Required step {step.name} failed"
-                )
-        
-        phase_duration = time.time() - phase_start
-        return PhaseResult(phase, True, phase_duration, executed_steps, skipped_steps)
+            result = self._execute_and_categorize_step(step, executed_steps, skipped_steps)
+            if result:  # Failed required step
+                return PhaseResult(phase, False, time.time() - start_time, executed_steps, skipped_steps, result)
+        return PhaseResult(phase, True, time.time() - start_time, executed_steps, skipped_steps)
+    
+    def _execute_and_categorize_step(self, step: PhaseStep, executed: List, skipped: List) -> Optional[str]:
+        """Execute step and categorize result."""
+        step_success, _ = self._execute_step(step)
+        (skipped if self._can_skip_step(step) else executed).append(step.name)
+        if not step_success and step.required:
+            return f"Required step {step.name} failed"
+        return None
     
     def _check_timeout(self, phase: StartupPhase, elapsed: float) -> bool:
         """Check if phase has exceeded timeout."""
@@ -154,15 +156,18 @@ class SmartStartupSequencer:
     def _execute_rollback(self, failed_phase: StartupPhase):
         """Execute rollback for failed phase and predecessors."""
         phases_to_rollback = self._get_rollback_phases(failed_phase)
-        
         for phase in reversed(phases_to_rollback):
-            rollback_func = self.rollback_actions.get(phase)
-            if rollback_func:
-                try:
-                    logger.info(f"Rolling back phase: {phase.phase_name}")
-                    rollback_func()
-                except Exception as e:
-                    logger.error(f"Rollback failed for {phase.phase_name}: {e}")
+            self._rollback_single_phase(phase)
+    
+    def _rollback_single_phase(self, phase: StartupPhase):
+        """Rollback a single phase."""
+        rollback_func = self.rollback_actions.get(phase)
+        if rollback_func:
+            try:
+                logger.info(f"Rolling back phase: {phase.phase_name}")
+                rollback_func()
+            except Exception as e:
+                logger.error(f"Rollback failed for {phase.phase_name}: {e}")
     
     def _get_rollback_phases(self, failed_phase: StartupPhase) -> List[StartupPhase]:
         """Get phases that need rollback when a phase fails."""
@@ -174,58 +179,57 @@ class SmartStartupSequencer:
         """Execute the complete startup sequence."""
         self.start_time = time.time()
         self.phase_results.clear()
-        
-        sequence_phases = [
-            StartupPhase.INIT,
-            StartupPhase.VALIDATE,
-            StartupPhase.PREPARE,
-            StartupPhase.LAUNCH,
-            StartupPhase.VERIFY
-        ]
-        
+        return self._run_sequence_phases()
+    
+    def _run_sequence_phases(self) -> Dict[StartupPhase, PhaseResult]:
+        """Run all phases in sequence."""
+        sequence_phases = [StartupPhase.INIT, StartupPhase.VALIDATE, StartupPhase.PREPARE, StartupPhase.LAUNCH, StartupPhase.VERIFY]
         for phase in sequence_phases:
-            if self.can_skip_phase(phase):
-                logger.info(f"Skipping entire phase: {phase.phase_name}")
-                self.phase_results[phase] = PhaseResult(
-                    phase, True, 0.0, [], 
-                    [step.name for step in self.phases.get(phase, [])]
-                )
-                continue
-            
-            result = self._execute_phase(phase)
-            self.phase_results[phase] = result
-            
-            if self._check_timeout(phase, result.duration):
-                result.success = False
-                result.error = f"Phase timeout ({result.duration:.1f}s)"
-            
-            if not result.success:
-                logger.error(f"Phase {phase.phase_name} failed: {result.error}")
-                self._execute_rollback(phase)
-                break
-        
+            if not self._process_single_sequence_phase(phase):
+                break  # Failed phase, stop execution
         return self.phase_results
+    
+    def _process_single_sequence_phase(self, phase: StartupPhase) -> bool:
+        """Process a single phase in the sequence."""
+        if self.can_skip_phase(phase):
+            self._record_skipped_phase(phase)
+            return True
+        return self._execute_and_validate_phase(phase)
+    
+    def _record_skipped_phase(self, phase: StartupPhase):
+        """Record a skipped phase result."""
+        logger.info(f"Skipping entire phase: {phase.phase_name}")
+        self.phase_results[phase] = PhaseResult(phase, True, 0.0, [], [step.name for step in self.phases.get(phase, [])])
+    
+    def _execute_and_validate_phase(self, phase: StartupPhase) -> bool:
+        """Execute phase and validate result."""
+        result = self._execute_phase(phase)
+        self.phase_results[phase] = result
+        if self._check_timeout(phase, result.duration):
+            result.success, result.error = False, f"Phase timeout ({result.duration:.1f}s)"
+        if not result.success:
+            logger.error(f"Phase {phase.phase_name} failed: {result.error}")
+            self._execute_rollback(phase)
+            return False
+        return True
     
     def get_sequence_summary(self) -> Dict[str, Any]:
         """Get summary of sequence execution."""
         total_time = time.time() - self.start_time if self.start_time > 0 else 0
+        return self._build_summary_dict(total_time)
+    
+    def _build_summary_dict(self, total_time: float) -> Dict[str, Any]:
+        """Build summary dictionary from phase results."""
         successful_phases = [p for p, r in self.phase_results.items() if r.success]
         failed_phases = [p for p, r in self.phase_results.items() if not r.success]
-        
         total_skipped = sum(len(r.steps_skipped) for r in self.phase_results.values())
         total_executed = sum(len(r.steps_executed) for r in self.phase_results.values())
-        
         return {
-            "total_time": total_time,
-            "target_met": total_time < 10.0,
+            "total_time": total_time, "target_met": total_time < 10.0,
             "successful_phases": [p.phase_name for p in successful_phases],
             "failed_phases": [p.phase_name for p in failed_phases],
-            "total_steps_skipped": total_skipped,
-            "total_steps_executed": total_executed,
-            "phase_timings": {
-                p.phase_name: r.duration 
-                for p, r in self.phase_results.items()
-            }
+            "total_steps_skipped": total_skipped, "total_steps_executed": total_executed,
+            "phase_timings": {p.phase_name: r.duration for p, r in self.phase_results.items()}
         }
     
     def reset_sequence(self):

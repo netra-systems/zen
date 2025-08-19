@@ -1,59 +1,224 @@
 """
 Optimized startup orchestration module.
 
-Handles the new startup sequence with intelligent caching and performance optimizations.
+Phase 6 Integration: Integrates all optimization components for sub-10 second startup.
 Separated from main launcher to maintain 300-line limit.
 """
 
 import time
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Set, Tuple
 from pathlib import Path
 
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
+from dev_launcher.startup_sequencer import (
+    SmartStartupSequencer, StartupPhase, PhaseStep,
+    create_init_phase_steps, create_validate_phase_steps,
+    create_prepare_phase_steps, create_launch_phase_steps,
+    create_verify_phase_steps
+)
+from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
+from dev_launcher.log_buffer import LogBuffer, LogLevel
+from dev_launcher.progress_indicator import ProgressIndicator
+from dev_launcher.startup_profiler import StartupProfiler
+from dev_launcher.local_secrets import LocalSecretManager
+from dev_launcher.launcher_integration import LauncherIntegration
 
 logger = logging.getLogger(__name__)
 
 
 class OptimizedStartupOrchestrator:
     """
-    Orchestrates optimized startup sequence for development environment.
+    Phase 6 Integration: Complete optimized startup orchestration.
     
-    Implements the spec v2.0.0 startup sequence with intelligent caching,
-    parallel execution, and sub-10 second target for cached runs.
+    Integrates SmartStartupSequencer, ParallelExecutor, LogBuffer,
+    LocalSecretManager, and StartupProfiler for sub-10s startup.
     """
     
     def __init__(self, launcher_instance):
-        """Initialize with reference to main launcher instance."""
+        """Initialize with all optimization components."""
         self.launcher = launcher_instance
         self.config = launcher_instance.config
         self.cache_manager = launcher_instance.cache_manager
         self.startup_optimizer = launcher_instance.startup_optimizer
         self.use_emoji = launcher_instance.use_emoji
+        self._setup_optimization_components()
+    
+    def _setup_optimization_components(self):
+        """Setup all optimization components."""
+        self._setup_profiler()
+        self._setup_sequencer()
+        self._setup_parallel_executor()
+        self._setup_logging_system()
+        self._setup_local_secrets()
+    
+    def _setup_profiler(self):
+        """Setup startup profiler."""
+        self.profiler = StartupProfiler(self.config.project_root)
+    
+    def _setup_sequencer(self):
+        """Setup smart startup sequencer."""
+        self.sequencer = SmartStartupSequencer(self.cache_manager)
+        self._register_sequencer_phases()
+    
+    def _setup_parallel_executor(self):
+        """Setup parallel executor."""
+        self.parallel_executor = ParallelExecutor()
+    
+    def _setup_logging_system(self):
+        """Setup silent logging system."""
+        max_size = 100 if self.config.silent_mode else 1000
+        self.log_buffer = LogBuffer(max_size=max_size)
+        self._setup_progress_indicator()
+    
+    def _setup_progress_indicator(self):
+        """Setup progress indicator."""
+        phases = [
+            ("INIT", "Loading cache & environment", 2.0),
+            ("VALIDATE", "Validating dependencies", 3.0),
+            ("PREPARE", "Installing & migrating", 5.0),
+            ("LAUNCH", "Starting services", 5.0),
+            ("VERIFY", "Health checks", 3.0)
+        ]
+        self.progress = ProgressIndicator(phases)
+    
+    def _setup_local_secrets(self):
+        """Setup local secret manager."""
+        self.local_secrets = LocalSecretManager(
+            self.config.project_root, 
+            self.config.verbose
+        )
+        
+        # Setup integration module
+        self.integration = LauncherIntegration(self)
+    
+    def _register_sequencer_phases(self):
+        """Register all startup phases with the sequencer."""
+        # INIT phase
+        init_steps = self._create_init_steps()
+        self.sequencer.register_phase(StartupPhase.INIT, init_steps)
+        
+        # VALIDATE phase
+        validate_steps = self.integration.create_validate_steps()
+        self.sequencer.register_phase(StartupPhase.VALIDATE, validate_steps)
+        
+        # PREPARE phase  
+        prepare_steps = self.integration.create_prepare_steps()
+        self.sequencer.register_phase(StartupPhase.PREPARE, prepare_steps)
+        
+        # LAUNCH phase
+        launch_steps = self.integration.create_launch_steps()
+        self.sequencer.register_phase(StartupPhase.LAUNCH, launch_steps)
+        
+        # VERIFY phase
+        verify_steps = self.integration.create_verify_steps()
+        self.sequencer.register_phase(StartupPhase.VERIFY, verify_steps)
+    
+    def _create_init_steps(self) -> list:
+        """Create INIT phase steps."""
+        return [
+            PhaseStep("load_cache", self._load_cache_state, 0.5, True, True, "cache_state"),
+            PhaseStep("load_env", self._load_env_files, 1.0, True, True, "env_files"),
+            PhaseStep("setup_logging", self._setup_silent_logging, 0.5, True, False)
+        ]
     
     def run_optimized_startup(self) -> int:
-        """Run startup sequence following spec v2.0.0."""
-        # Start progress tracking
-        if hasattr(self.launcher, 'progress_tracker'):
-            self.launcher.progress_tracker.start()
+        """Phase 6 Integration: Run complete optimized startup sequence."""
+        # Start profiling and progress
+        self.profiler.start_profiling()
+        self.progress.start()
         
-        # Step 1-3: Pre-checks with caching
-        if not self._run_cached_pre_checks():
+        try:
+            # Execute sequence using SmartStartupSequencer
+            phase_results = self.sequencer.execute_sequence()
+            
+            # Check if any phase failed
+            failed_phases = [p for p, r in phase_results.items() if not r.success]
+            if failed_phases:
+                self._handle_startup_failure(failed_phases)
+                return 1
+            
+            # Complete startup successfully
+            return self._complete_startup_success()
+            
+        except Exception as e:
+            logger.error(f"Startup sequence failed: {e}")
+            self._handle_startup_error(e)
             return 1
+        finally:
+            self._cleanup_optimization_components()
+    
+    # Phase step implementations
+    def _load_cache_state(self) -> bool:
+        """Load cache state."""
+        return self.cache_manager.is_cache_valid()
+    
+    def _load_env_files(self) -> bool:
+        """Load environment files."""
+        return self.launcher._load_env_file() or True
+    
+    def _setup_silent_logging(self) -> bool:
+        """Setup silent logging system."""
+        return True  # Already setup in __init__
+    
+    def _complete_startup_success(self) -> int:
+        """Complete startup successfully."""
+        self.progress.complete()
+        summary = self.sequencer.get_sequence_summary()
+        self._show_startup_summary(summary)
+        return self.launcher._handle_cleanup()
+    
+    def _handle_startup_failure(self, failed_phases):
+        """Handle startup failure."""
+        self.progress.fail_current_phase()
+        for phase in failed_phases:
+            logger.error(f"Phase {phase.phase_name} failed")
+        self._show_error_logs()
+    
+    def _handle_startup_error(self, error):
+        """Handle startup error."""
+        self.log_buffer.add_message(str(error), LogLevel.ERROR)
+        self._show_error_logs()
+    
+    def _show_error_logs(self):
+        """Show error logs from buffer."""
+        error_context = self.log_buffer.get_error_context()
+        for entry in error_context:
+            print(f"[{entry.level.name}] {entry.message}")
+    
+    def _show_startup_summary(self, summary):
+        """Show startup summary."""
+        if self.config.profile_startup:
+            self._show_detailed_profile(summary)
+        elif not self.config.silent_mode:
+            if summary["target_met"]:
+                self._print("⚡", "FAST", f"Startup completed in {summary['total_time']:.1f}s")
+            else:
+                self._print("⏱️", "TIME", f"Startup took {summary['total_time']:.1f}s")
+    
+    def _show_detailed_profile(self, summary):
+        """Show detailed profiling information."""
+        print("\n" + "="*60)
+        print("🔬 STARTUP PERFORMANCE PROFILE")
+        print("="*60)
         
-        # Step 4-5: Migration check and execution
-        if not self._handle_migrations_with_cache():
-            return 1
+        print(f"⏱️  Total Time: {summary['total_time']:.2f}s")
+        print(f"🎯 Target Met: {'✅ YES' if summary['target_met'] else '❌ NO'}")
+        print(f"⚡ Steps Skipped: {summary.get('total_steps_skipped', 0)}")
+        print(f"🔧 Steps Executed: {summary.get('total_steps_executed', 0)}")
         
-        # Step 6-12: Service startup with optimization
-        result = self._run_optimized_services()
+        if summary.get('phase_timings'):
+            print("\n📊 Phase Breakdown:")
+            for phase, timing in summary['phase_timings'].items():
+                print(f"   {phase:12s}: {timing:.2f}s")
         
-        # Complete progress tracking
-        if hasattr(self.launcher, 'progress_tracker'):
-            self.launcher.progress_tracker.complete()
-        
-        return result
+        print("="*60)
+    
+    def _cleanup_optimization_components(self):
+        """Cleanup optimization components."""
+        if hasattr(self, 'parallel_executor'):
+            self.parallel_executor.cleanup()
     
     def _run_cached_pre_checks(self) -> bool:
         """Run pre-checks with intelligent caching."""

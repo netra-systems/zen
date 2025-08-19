@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-19T07:33:31.147289",
-    "total_runs": 116
+    "last_update": "2025-08-19T07:50:16.060850",
+    "total_runs": 118
   },
   "current_state": {
-    "overall_status": "[FAILED] 3 failures",
-    "last_run_level": "unit",
-    "last_run_time": "2025-08-19T07:33:31.147289",
-    "last_exit_code": 15
+    "overall_status": "[PASSED]",
+    "last_run_level": "smoke",
+    "last_run_time": "2025-08-19T07:50:16.060850",
+    "last_exit_code": 0
   },
   "known_test_counts": {
     "unit:backend": {
@@ -17,7 +17,7 @@
       "failed": 3,
       "skipped": 16,
       "errors": 1,
-      "last_update": "2025-08-19T07:33:31.147289"
+      "last_update": "2025-08-19T07:44:38.477194"
     },
     "critical:backend": {
       "total": 85,
@@ -33,7 +33,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-19T06:57:37.462048"
+      "last_update": "2025-08-19T07:50:16.060850"
     },
     "integration:backend": {
       "total": 104,
@@ -115,7 +115,7 @@
       "actual": 7,
       "passed": 7,
       "failed": 0,
-      "last_run": "2025-08-19T06:57:37.462048",
+      "last_run": "2025-08-19T07:50:16.060850",
       "status": "[PASSED] 7 tests"
     },
     "unit": {
@@ -124,7 +124,7 @@
       "actual": 455,
       "passed": 435,
       "failed": 3,
-      "last_run": "2025-08-19T07:33:31.147289",
+      "last_run": "2025-08-19T07:44:38.477194",
       "status": "[FAILED] 3 failures"
     },
     "integration": {
@@ -256,34 +256,31 @@
   },
   "component_results": {
     "backend": {
-      "status": "failed",
+      "status": "passed",
       "last_counts": {
-        "total": 455,
-        "passed": 435,
-        "failed": 3,
-        "skipped": 16,
-        "errors": 1,
+        "total": 7,
+        "passed": 7,
+        "failed": 0,
+        "skipped": 0,
+        "errors": 0,
         "import_errors": 0,
-        "test_files": 52,
-        "status": "failed"
+        "test_files": 5,
+        "status": "passed"
       },
-      "last_duration": 64.77998971939087,
-      "last_run": "2025-08-19T07:33:31.147289"
+      "last_duration": 10.852348804473877,
+      "last_run": "2025-08-19T07:50:16.060850"
     },
     "frontend": {
-      "status": "failed",
+      "status": "skipped",
       "last_counts": {
         "total": 0,
         "passed": 0,
         "failed": 0,
         "skipped": 0,
-        "errors": 0,
-        "import_errors": 0,
-        "test_files": 0,
-        "status": "unknown"
+        "errors": 0
       },
-      "last_duration": 0.9508652687072754,
-      "last_run": "2025-08-19T07:33:31.147289"
+      "last_duration": 0,
+      "last_run": "2025-08-19T07:50:16.060850"
     },
     "e2e": {
       "status": "pending",
@@ -295,70 +292,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-19T07:33:31.147289"
+      "last_run": "2025-08-19T07:50:16.060850"
     }
   },
-  "failing_tests": [
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_websocket_updates.py::TestWebSocketUpdates::test_generation_completion_notification",
-      "timestamp": "2025-08-19T07:33:31.148816"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_quality_gate_advanced.py::TestQualityGateAdvanced::test_get_weights_for_content_types",
-      "timestamp": "2025-08-19T07:33:31.148816"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::TestToolInvocations::test_generate_tool_invocations_error_scenarios Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-19T07:33:31.148816"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_websocket_updates.py::\u001b[1mTestWebSocketUpdates::test_generation_completion_notification\u001b[0m - KeyError: 'connection_info'",
-      "timestamp": "2025-08-19T07:33:31.148816"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_quality_gate_advanced.py::\u001b[1mTestQualityGateAdvanced::test_get_weights_for_content_types\u001b[0m - assert 0.2 == 0.25",
-      "timestamp": "2025-08-19T07:33:31.148816"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::\u001b[1mTestToolInvocations::test_generate_tool_invocations_error_scenarios\u001b[0m - AttributeError: 'SyntheticDataService' object has no attribute '_generate_tool_invocations'. Did you mean: 'generate_tool_invocations'?",
-      "timestamp": "2025-08-19T07:33:31.148816"
-    }
-  ],
+  "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T17:33:58.496761",
-      "level": "integration",
-      "exit_code": 15,
-      "status": "[FAILED] 145 failures",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 308,
-        "total_passed": 163,
-        "total_failed": 145,
-        "total_skipped": 0,
-        "pass_rate": 52.92
-      }
-    },
-    {
-      "timestamp": "2025-08-18T17:53:08.280598",
-      "level": "comprehensive-frontend",
-      "exit_code": 1,
-      "status": "[ERRORS] 1 errors",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 1,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-18T18:13:23.948841",
       "level": "unit",
@@ -610,15 +548,43 @@
         "total_skipped": 16,
         "pass_rate": 95.6
       }
+    },
+    {
+      "timestamp": "2025-08-19T07:44:38.477194",
+      "level": "unit",
+      "exit_code": 255,
+      "status": "[FAILED] 3 failures",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 455,
+        "total_passed": 435,
+        "total_failed": 3,
+        "total_skipped": 16,
+        "pass_rate": 95.6
+      }
+    },
+    {
+      "timestamp": "2025-08-19T07:50:16.060850",
+      "level": "smoke",
+      "exit_code": 0,
+      "status": "[PASSED]",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 7,
+        "total_passed": 7,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 100.0
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 6357,
-    "total_tests_run": 455,
-    "total_passed": 435,
-    "total_failed": 3,
-    "total_skipped": 16,
-    "pass_rate": 95.6
+    "total_tests_run": 7,
+    "total_passed": 7,
+    "total_failed": 0,
+    "total_skipped": 0,
+    "pass_rate": 100.0
   },
   "version": "1.0",
   "tests": {},
@@ -878,10 +844,18 @@
       "passed": 85,
       "failed": 3,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_074751_71681",
+      "timestamp": "2025-08-19T07:48:48.164407",
+      "total_tests": 91,
+      "passed": 88,
+      "failed": 3,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 32,
-    "last_updated": "2025-08-19T07:28:13.098962"
+    "total_runs": 33,
+    "last_updated": "2025-08-19T07:48:48.164407"
   }
 }

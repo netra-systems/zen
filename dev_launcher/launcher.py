@@ -347,8 +347,26 @@ class DevLauncher:
     
     def run(self) -> int:
         """Run the development environment with optimized startup sequence."""
+        # Check for legacy mode
+        if self.config.legacy_mode:
+            return self._run_legacy_mode()
+        
+        # Use optimized startup by default
+        return self._run_optimized_mode()
+    
+    def _run_legacy_mode(self) -> int:
+        """Run in legacy mode with old behavior."""
         self._print_startup_banner()
         self.config_manager.show_configuration()
+        
+        # Use legacy service runner
+        return self.legacy_runner.run_services_sequential()
+    
+    def _run_optimized_mode(self) -> int:
+        """Run optimized startup sequence."""
+        if not self.config.silent_mode:
+            self._print_startup_banner()
+            self.config_manager.show_configuration()
         
         # Start timing
         self.startup_optimizer.start_timing()

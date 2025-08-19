@@ -70,7 +70,7 @@ async def analyze_module_compliance(
 
 @router.get("/violations")
 async def get_compliance_violations(
-    severity: Optional[str] = Query(None, regex="^(critical|high|medium|low)$"),
+    severity: Optional[str] = Query(None, pattern="^(critical|high|medium|low)$"),
     category: Optional[str] = Query(None), current_user: Dict = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Get list of current spec violations."""

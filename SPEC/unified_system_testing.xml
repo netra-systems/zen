@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<spec name="unified_system_testing" version="1.0">
-  <metadata>
-    <author>Elite Engineer</author>
-    <created>2025-08-19</created>
-    <business_value>
-      <justification>
-        <segment>ALL - Free to Enterprise</segment>
-        <goal>Protect 100% of revenue by ensuring core functionality works</goal>
-        <value_impact>Failed chat = 100% churn rate = $0 revenue</value_impact>
+<specification>
+    <metadata>
+        <name>Unified System Testing</name>
+        <type>critical-requirement</type>
+        <version>2.0</version>
+        <created>2025-08-19</created>
+        <priority>CRITICAL</priority>
+        <business_value>
+            <segment>ALL</segment>
+            <goal>System Reliability and Customer Trust</goal>
+            <value_impact>Prevents 100% of integration failures in production</value_impact>
         <revenue_impact>Each working user journey = $99-999/month recurring</revenue_impact>
         <critical_metric>Zero tolerance for basic chat failures</critical_metric>
       </justification>
