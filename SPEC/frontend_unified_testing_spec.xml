@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Frontend Unified Testing Specification</name>
+        <type>ELITE Testing Strategy</type>
+        <category>Frontend Testing</category>
+        <version>2.0</version>
+        <last_updated>2025-01-19</last_updated>
+        <description>
+            Comprehensive elite-level frontend testing strategy for Netra Apex.
+            Business-driven, monetization-focused testing ensuring 100x better coverage.
+            Addresses all root causes: fragmentation, gaps, missing E2E, inconsistent patterns.
+        </description>
+        <business_value_justification>
+            <segment>All (Free, Early, Mid, Enterprise)</segment>
+            <goal>Prevent revenue loss from bugs, increase conversion through reliability</goal>
+            <value_impact>20% reduction in customer churn due to bugs</value_impact>
+            <revenue_impact>Estimated +$50K MRR from improved reliability and trust</revenue_impact>
+        </business_value_justification>
+    </metadata>
+    
+    <root_cause_analysis>
+        <issue id="fragmentation">
+            <problem>Multiple testing specs without unified strategy</problem>
+            <impact>Inconsistent testing, duplicated effort, gaps in coverage</impact>
+            <solution>Single source of truth for all frontend testing</solution>
+        </issue>
+        <issue id="coverage_gaps">
+            <problem>Missing tests for critical user journeys</problem>
+            <impact>Production bugs, poor user experience, lost conversions</impact>
+            <solution>Comprehensive test matrix covering all user interactions</solution>
+        </issue>
+        <issue id="missing_e2e">
+            <problem>Focus on unit tests, lacking E2E workflow tests</problem>
+            <impact>Integration issues not caught, broken user flows</impact>
+            <solution>Complete E2E test suite for all critical paths</solution>
+        </issue>
+        <issue id="ui_basics">
+            <problem>Basic UI elements not thoroughly tested</problem>
+            <impact>Broken buttons, inputs, navigation causing user frustration</impact>
+            <solution>Systematic testing of all UI components and interactions</solution>
+        </issue>
+    </root_cause_analysis>
+    
+    <testing_philosophy>
+        <principles>
+            <principle>Every test must protect revenue or enable growth</principle>
+            <principle>Test user journeys, not just code</principle>
+            <principle>Fast feedback loops (sub-second for unit, <30s for E2E)</principle>
+            <principle>Zero tolerance for flaky tests</principle>
+            <principle>Test data that mirrors production patterns</principle>
+        </principles>
+        <coverage_targets>
+            <target category="Unit Tests">95% line coverage</target>
+            <target category="Integration Tests">90% feature coverage</target>
+            <target category="E2E Tests">100% critical path coverage</target>
+            <target category="Visual Regression">100% key UI states</target>
+        </coverage_targets>
+    </testing_philosophy>
+    
+    <critical_user_journeys>
+        <journey id="onboarding" priority="P0" revenue_impact="CRITICAL">
+            <name>New User Onboarding Flow</name>
+            <description>Free user signs up and starts first conversation</description>
+            <steps>
+                <step order="1">Landing page loads</step>
+                <step order="2">User clicks "Get Started" or "Sign Up"</step>
+                <step order="3">Authentication flow (login/register)</step>
+                <step order="4">Welcome screen with "Start New Conversation" button</step>
+                <step order="5">Click button creates thread</step>
+                <step order="6">Chat interface loads with input ready</step>
+                <step order="7">User sends first message</step>
+                <step order="8">AI responds with streaming</step>
+            </steps>
+            <test_requirements>
+                <requirement>Button click responsiveness < 100ms</requirement>
+                <requirement>Thread creation success rate 100%</requirement>
+                <requirement>WebSocket connection established < 1s</requirement>
+                <requirement>First message delivery confirmed</requirement>
+                <requirement>AI response starts streaming < 2s</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="chat_interaction" priority="P0" revenue_impact="CRITICAL">
+            <name>Core Chat Interaction</name>
+            <description>User has conversation with AI agents</description>
+            <steps>
+                <step order="1">Chat page loads with sidebar</step>
+                <step order="2">User types in message input</step>
+                <step order="3">Send button enables when text present</step>
+                <step order="4">Click send or press Enter sends message</step>
+                <step order="5">Message appears in chat history</step>
+                <step order="6">Loading/thinking indicator shows</step>
+                <step order="7">AI response streams in real-time</step>
+                <step order="8">User can interrupt/stop generation</step>
+                <step order="9">Copy/retry/feedback actions work</step>
+            </steps>
+            <test_requirements>
+                <requirement>Input field accepts text, emoji, code blocks</requirement>
+                <requirement>Send button state management correct</requirement>
+                <requirement>Message delivery confirmation</requirement>
+                <requirement>Streaming updates smooth (60 FPS)</requirement>
+                <requirement>All message actions functional</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="sidebar_navigation" priority="P0" revenue_impact="HIGH">
+            <name>Sidebar Navigation and Thread Management</name>
+            <description>User manages conversations through sidebar</description>
+            <steps>
+                <step order="1">Sidebar shows thread history</step>
+                <step order="2">Click thread switches conversation</step>
+                <step order="3">New conversation button creates thread</step>
+                <step order="4">Search filters threads</step>
+                <step order="5">Delete thread with confirmation</step>
+                <step order="6">Rename thread inline</step>
+                <step order="7">Pin important threads</step>
+                <step order="8">Sidebar collapse/expand works</step>
+            </steps>
+            <test_requirements>
+                <requirement>Thread list loads < 500ms</requirement>
+                <requirement>Thread switching < 200ms</requirement>
+                <requirement>Search results update in real-time</requirement>
+                <requirement>Delete confirmation prevents accidents</requirement>
+                <requirement>State persists across page refreshes</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="error_recovery" priority="P0" revenue_impact="HIGH">
+            <name>Error Handling and Recovery</name>
+            <description>System handles errors gracefully</description>
+            <scenarios>
+                <scenario>WebSocket disconnection and reconnection</scenario>
+                <scenario>API request failures with retry</scenario>
+                <scenario>Network offline/online transitions</scenario>
+                <scenario>Session timeout and re-authentication</scenario>
+                <scenario>Rate limiting with user feedback</scenario>
+                <scenario>Server errors with fallback UI</scenario>
+            </scenarios>
+            <test_requirements>
+                <requirement>Error messages clear and actionable</requirement>
+                <requirement>Automatic retry with exponential backoff</requirement>
+                <requirement>No data loss during disconnections</requirement>
+                <requirement>Graceful degradation of features</requirement>
+                <requirement>Recovery without page refresh when possible</requirement>
+            </test_requirements>
+        </journey>
+    </critical_user_journeys>
+    
+    <component_test_matrix>
+        <component id="buttons" priority="P0">
+            <name>All Button Interactions</name>
+            <test_cases>
+                <case>Click responsiveness and visual feedback</case>
+                <case>Disabled state when action unavailable</case>
+                <case>Loading state during async operations</case>
+                <case>Keyboard navigation (Tab, Enter, Space)</case>
+                <case>Touch/mobile interactions</case>
+                <case>Tooltip on hover when applicable</case>
+                <case>Accessibility (ARIA labels, roles)</case>
+            </test_cases>
+        </component>
+        
+        <component id="inputs" priority="P0">
+            <name>All Input Fields</name>
+            <test_cases>
+                <case>Text entry and editing</case>
+                <case>Placeholder and label visibility</case>
+                <case>Validation and error messages</case>
+                <case>Auto-focus where appropriate</case>
+                <case>Copy/paste functionality</case>
+                <case>Max length enforcement</case>
+                <case>Special characters and emoji</case>
+                <case>Keyboard shortcuts (Ctrl+A, etc)</case>
+                <case>Mobile keyboard behavior</case>
+            </test_cases>
+        </component>
+        
+        <component id="message_input" priority="P0">
+            <name>Chat Message Input</name>
+            <test_cases>
+                <case>Multi-line text with auto-resize</case>
+                <case>Code block insertion and formatting</case>
+                <case>File attachment drag-and-drop</case>
+                <case>Mention/command autocomplete</case>
+                <case>Send on Enter, newline on Shift+Enter</case>
+                <case>Character/token count display</case>
+                <case>Disable during message sending</case>
+                <case>Preserve draft on navigation</case>
+            </test_cases>
+        </component>
+        
+        <component id="chat_messages" priority="P0">
+            <name>Message Display Components</name>
+            <test_cases>
+                <case>User vs AI message styling</case>
+                <case>Markdown rendering</case>
+                <case>Code syntax highlighting</case>
+                <case>Image/file preview</case>
+                <case>Timestamp display</case>
+                <case>Edit/delete actions</case>
+                <case>Copy to clipboard</case>
+                <case>Expand/collapse long messages</case>
+                <case>Loading/streaming animation</case>
+            </test_cases>
+        </component>
+        
+        <component id="sidebar" priority="P0">
+            <name>Sidebar Component</name>
+            <test_cases>
+                <case>Thread list rendering and scrolling</case>
+                <case>Active thread highlighting</case>
+                <case>Thread preview text truncation</case>
+                <case>Unread message indicators</case>
+                <case>Responsive collapse on mobile</case>
+                <case>Drag to resize width</case>
+                <case>Keyboard navigation through threads</case>
+                <case>Context menu on right-click</case>
+            </test_cases>
+        </component>
+    </component_test_matrix>
+    
+    <e2e_test_scenarios>
+        <scenario id="complete_conversation" priority="P0">
+            <name>Complete Conversation Flow</name>
+            <steps>
+                <step>Start from logged out state</step>
+                <step>Login with credentials</step>
+                <step>Create new conversation</step>
+                <step>Send multiple messages</step>
+                <step>Receive AI responses</step>
+                <step>Switch to different thread</step>
+                <step>Return to original thread</step>
+                <step>Delete a message</step>
+                <step>Edit a message</step>
+                <step>Export conversation</step>
+                <step>Logout</step>
+            </steps>
+            <validations>
+                <validation>All state transitions correct</validation>
+                <validation>Data persistence across navigation</validation>
+                <validation>No memory leaks</validation>
+                <validation>Performance metrics within targets</validation>
+            </validations>
+        </scenario>
+        
+        <scenario id="concurrent_sessions" priority="P1">
+            <name>Multi-Tab/Window Synchronization</name>
+            <steps>
+                <step>Open app in multiple tabs</step>
+                <step>Create thread in tab 1</step>
+                <step>Verify appears in tab 2 sidebar</step>
+                <step>Send message in tab 1</step>
+                <step>Verify appears in tab 2</step>
+                <step>Delete thread in tab 2</step>
+                <step>Verify removed in tab 1</step>
+            </steps>
+        </scenario>
+        
+        <scenario id="offline_resilience" priority="P1">
+            <name>Offline Mode and Recovery</name>
+            <steps>
+                <step>Load app with full connection</step>
+                <step>Disconnect network</step>
+                <step>Attempt to send message (queued)</step>
+                <step>Navigate between threads (cached)</step>
+                <step>Reconnect network</step>
+                <step>Verify queued messages sent</step>
+                <step>Verify state synchronized</step>
+            </steps>
+        </scenario>
+        
+        <scenario id="performance_under_load" priority="P1">
+            <name>Performance with Large Data</name>
+            <conditions>
+                <condition>1000+ threads in sidebar</condition>
+                <condition>10000+ messages in conversation</condition>
+                <condition>100KB+ message content</condition>
+                <condition>50+ concurrent WebSocket connections</condition>
+            </conditions>
+            <performance_targets>
+                <target>Initial render < 2s</target>
+                <target>Thread switch < 500ms</target>
+                <target>Smooth scrolling (60 FPS)</target>
+                <target>Memory usage < 500MB</target>
+            </performance_targets>
+        </scenario>
+    </e2e_test_scenarios>
+    
+    <test_implementation_patterns>
+        <pattern id="component_testing">
+            <name>React Testing Library Pattern</name>
+            <example><![CDATA[
+describe('Component Name', () => {
+  // Setup
+  const defaultProps = { /* ... */ };
+  const renderComponent = (props = {}) => {
+    return render(<Component {...defaultProps} {...props} />);
+  };
+  
+  // User interaction tests
+  it('handles user click correctly', async () => {
+    const onClick = jest.fn();
+    const { getByRole } = renderComponent({ onClick });
+    
+    const button = getByRole('button');
+    await userEvent.click(button);
+    
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
+  
+  // State tests
+  it('updates state on input change', async () => {
+    const { getByRole } = renderComponent();
+    const input = getByRole('textbox');
+    
+    await userEvent.type(input, 'test text');
+    expect(input).toHaveValue('test text');
+  });
+});
+            ]]></example>
+        </pattern>
+        
+        <pattern id="e2e_testing">
+            <name>Playwright E2E Pattern</name>
+            <example><![CDATA[
+test.describe('User Journey', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/');
+    await loginUser(page);
+  });
+  
+  test('complete conversation flow', async ({ page }) => {
+    // Create new conversation
+    await page.click('[data-testid="new-conversation"]');
+    await expect(page).toHaveURL('/chat');
+    
+    // Send message
+    await page.fill('[data-testid="message-input"]', 'Hello AI');
+    await page.keyboard.press('Enter');
+    
+    // Verify message sent
+    await expect(page.locator('.user-message')).toContainText('Hello AI');
+    
+    // Wait for AI response
+    await expect(page.locator('.ai-message')).toBeVisible({ timeout: 5000 });
+  });
+});
+            ]]></example>
+        </pattern>
+        
+        <pattern id="mock_patterns">
+            <name>Consistent Mock Strategy</name>
+            <mocks>
+                <mock type="WebSocket">Use WebSocketTestManager for unique URLs</mock>
+                <mock type="API">MSW for intercepting HTTP requests</mock>
+                <mock type="Store">Mock Zustand stores with test utilities</mock>
+                <mock type="Router">Mock Next.js navigation</mock>
+                <mock type="Time">Use jest.useFakeTimers for time-dependent tests</mock>
+            </mocks>
+        </pattern>
+    </test_implementation_patterns>
+    
+    <test_data_management>
+        <fixtures>
+            <fixture id="users">
+                <description>Test user accounts with different roles</description>
+                <data>
+                    <user role="free" email="free@test.com" threads="5" messages="50"/>
+                    <user role="early" email="early@test.com" threads="50" messages="500"/>
+                    <user role="mid" email="mid@test.com" threads="200" messages="5000"/>
+                    <user role="enterprise" email="enterprise@test.com" threads="1000" messages="50000"/>
+                </data>
+            </fixture>
+            
+            <fixture id="threads">
+                <description>Test conversation threads</description>
+                <data>
+                    <thread id="empty" messages="0" status="new"/>
+                    <thread id="simple" messages="10" status="active"/>
+                    <thread id="complex" messages="1000" status="active"/>
+                    <thread id="archived" messages="100" status="archived"/>
+                </data>
+            </fixture>
+            
+            <fixture id="messages">
+                <description>Test message content</description>
+                <data>
+                    <message type="text">Simple text message</message>
+                    <message type="code">```python\nprint("Hello")\n```</message>
+                    <message type="markdown"># Header\n- List item\n**Bold**</message>
+                    <message type="long">Lorem ipsum... (10KB text)</message>
+                    <message type="error">Error: Connection failed</message>
+                </data>
+            </fixture>
+        </fixtures>
+    </test_data_management>
+    
+    <ci_cd_integration>
+        <pipeline>
+            <stage name="pre-commit">
+                <tests>Unit tests for changed files</tests>
+                <timeout>30s</timeout>
+            </stage>
+            
+            <stage name="pull-request">
+                <tests>All unit and integration tests</tests>
+                <timeout>5m</timeout>
+                <parallel>true</parallel>
+            </stage>
+            
+            <stage name="pre-merge">
+                <tests>Full E2E suite</tests>
+                <timeout>15m</timeout>
+                <browsers>Chrome, Firefox, Safari</browsers>
+            </stage>
+            
+            <stage name="post-deploy">
+                <tests>Smoke tests in production</tests>
+                <timeout>2m</timeout>
+                <alert_on_failure>true</alert_on_failure>
+            </stage>
+        </pipeline>
+        
+        <performance_gates>
+            <gate metric="test_duration" threshold="15m" action="fail"/>
+            <gate metric="coverage_drop" threshold="1%" action="warn"/>
+            <gate metric="new_code_coverage" threshold="90%" action="fail"/>
+        </performance_gates>
+    </ci_cd_integration>
+    
+    <monitoring_and_reporting>
+        <metrics>
+            <metric name="test_execution_time">Track trends, alert on regression</metric>
+            <metric name="test_flakiness">Quarantine tests with >5% failure rate</metric>
+            <metric name="coverage_by_component">Identify gaps for targeted improvement</metric>
+            <metric name="test_maintenance_cost">Time spent fixing vs writing new tests</metric>
+        </metrics>
+        
+        <reporting>
+            <report type="daily">Email summary to team</report>
+            <report type="weekly">Coverage trends and action items</report>
+            <report type="sprint">Test debt and prioritization</report>
+            <report type="quarterly">ROI analysis of test investment</report>
+        </reporting>
+    </monitoring_and_reporting>
+    
+    <enforcement_rules>
+        <rule id="no_merge_without_tests">
+            <description>All PRs must include tests for new features</description>
+            <enforcement>GitHub Actions blocks merge</enforcement>
+        </rule>
+        
+        <rule id="coverage_regression_prevention">
+            <description>PRs cannot reduce overall coverage</description>
+            <enforcement>Codecov check fails if coverage drops</enforcement>
+        </rule>
+        
+        <rule id="test_review_required">
+            <description>Test code must be reviewed like production code</description>
+            <enforcement>PR review checklist includes test quality</enforcement>
+        </rule>
+        
+        <rule id="flaky_test_fix_sla">
+            <description>Flaky tests must be fixed within 48 hours</description>
+            <enforcement>Automatic issue creation and assignment</enforcement>
+        </rule>
+    </enforcement_rules>
+    
+    <success_metrics>
+        <metric name="bug_escape_rate">
+            <target>< 1 bug per 1000 user sessions</target>
+            <measurement>Production error tracking</measurement>
+        </metric>
+        
+        <metric name="mean_time_to_detection">
+            <target>< 5 minutes for critical issues</target>
+            <measurement>Time from deploy to alert</measurement>
+        </metric>
+        
+        <metric name="test_effectiveness">
+            <target>90% of bugs caught in testing</target>
+            <measurement>Bugs found in test vs production</measurement>
+        </metric>
+        
+        <metric name="developer_confidence">
+            <target>4.5/5 confidence score</target>
+            <measurement>Quarterly developer survey</measurement>
+        </metric>
+    </success_metrics>
+</specification>
