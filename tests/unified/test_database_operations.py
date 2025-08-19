@@ -92,6 +92,7 @@ async def db_test():
 class TestPostgreSQLOperations:
     """Test PostgreSQL operations across Auth and Backend services."""
     
+    @pytest.mark.asyncio
     async def test_postgresql_user_operations(self, db_test):
         """Test user creation and sync between Auth and Backend PostgreSQL."""
         # Generate test user data
@@ -149,6 +150,7 @@ class TestPostgreSQLOperations:
 class TestClickHouseOperations:
     """Test ClickHouse analytics operations."""
     
+    @pytest.mark.asyncio
     async def test_clickhouse_analytics_writes(self, db_test):
         """Test ClickHouse analytics event writes and queries."""
         user_id = str(uuid.uuid4())
@@ -181,6 +183,7 @@ class TestClickHouseOperations:
         db_test.test_data["analytics_user_id"] = user_id
         logger.info(f"ClickHouse analytics test passed in {query_time:.3f}s")
         
+    @pytest.mark.asyncio
     async def test_clickhouse_data_aggregation(self, db_test):
         """Test ClickHouse data aggregation capabilities."""
         if not db_test.db_connections.clickhouse_client:
@@ -210,6 +213,7 @@ class TestClickHouseOperations:
 class TestCrossDatabaseConsistency:
     """Test consistency across different database systems."""
     
+    @pytest.mark.asyncio
     async def test_cross_database_consistency(self, db_test):
         """Test data consistency between PostgreSQL, ClickHouse, and Redis."""
         user_id = str(uuid.uuid4())
@@ -272,6 +276,7 @@ class TestCrossDatabaseConsistency:
 class TestTransactionAtomicity:
     """Test transaction atomicity across database operations."""
     
+    @pytest.mark.asyncio
     async def test_transaction_atomicity(self, db_test):
         """Test atomic transactions with rollback scenarios."""
         user_id = str(uuid.uuid4())
@@ -362,6 +367,7 @@ class TestTransactionAtomicity:
 class TestConnectionPoolManagement:
     """Test database connection pool management and limits."""
     
+    @pytest.mark.asyncio
     async def test_connection_pool_management(self, db_test):
         """Test connection pool limits and reuse patterns."""
         if not db_test.db_connections.postgres_pool:
@@ -401,6 +407,7 @@ class TestConnectionPoolManagement:
             logger.error(f"Concurrent operation {operation_id} failed: {e}")
             return False
             
+    @pytest.mark.asyncio
     async def test_connection_pool_exhaustion(self, db_test):
         """Test connection pool behavior under exhaustion."""
         if not db_test.db_connections.postgres_pool:
@@ -441,6 +448,7 @@ class TestConnectionPoolManagement:
 class TestConcurrentWrites:
     """Test concurrent write operations across databases."""
     
+    @pytest.mark.asyncio
     async def test_concurrent_writes(self, db_test):
         """Test concurrent write operations for data integrity."""
         base_user_id = str(uuid.uuid4())
