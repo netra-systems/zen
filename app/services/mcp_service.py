@@ -454,6 +454,20 @@ class MCPService(IMCPService):
         await self.cleanup_inactive_sessions()
         logger.info("MCP Service initialized")
 
+    async def shutdown(self):
+        """Shutdown the MCP service."""
+        try:
+            # Clean up all active sessions
+            session_ids = list(self.active_sessions.keys())
+            for session_id in session_ids:
+                await self.close_session(session_id)
+            
+            # Clear session storage
+            self.active_sessions.clear()
+            logger.info("MCP Service shutdown completed")
+        except Exception as e:
+            logger.error(f"Error during MCP service shutdown: {e}", exc_info=True)
+
     def _extract_context_info(self, user_context: Dict[str, Any]):
         """Extract session and client info from user context."""
         session_id = user_context.get("session_id") if user_context else None

@@ -5,20 +5,17 @@ from typing import Dict, Any, List
 from app.logging_config import central_logger as logger
 
 
-async def handle_industry_templates(request_data: Dict[str, Any]) -> Dict[str, Any]:
+async def handle_industry_templates(industry: str, demo_service) -> List[Dict[str, Any]]:
     """Handle industry template requests for demo."""
     try:
-        logger.info("Processing industry templates request for demo")
+        logger.info(f"Processing industry templates request for: {industry}")
         
-        # Return basic template structure
-        return {
-            "templates": [
-                {"id": "tech", "name": "Technology", "description": "Tech industry template"},
-                {"id": "finance", "name": "Finance", "description": "Financial services template"},
-                {"id": "healthcare", "name": "Healthcare", "description": "Healthcare industry template"}
-            ],
-            "status": "success"
-        }
+        # Get templates from demo service
+        templates = await demo_service.get_industry_templates(industry)
+        return templates
+    except ValueError as e:
+        logger.error(f"Invalid industry: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Error handling industry templates: {e}")
         raise HTTPException(status_code=500, detail="Template processing failed")
