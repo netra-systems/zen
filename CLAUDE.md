@@ -11,7 +11,7 @@ Netra Apex succeeds by creating and capturing value relative to a customer's AI/
 *   **Value Capture:** Apex must capture a significant percentage of the value it creates relative to the customer's AI spend.
 *   **Customer Segments:** Free, Early, Mid, Enterprise. The primary goal of the Free tier is conversion to paid.
 *   **Prioritization:** Business goals take precedence. Engineering rigor exists to enable long-term business velocity.
-*   **Lean Development:** Avoid over-engineering. Every line of code must be evaluated for its business value. Limit the scope of new features to the critical components required.
+*   **Lean Development:** Prioritize lean, efficient solutions. Every line of code must be evaluated for its business value. Focus the scope of new features on the critical components required.
 
 ### 1.1. Revenue-Driven Development: Business Value Justification (BVJ)
 
@@ -29,34 +29,34 @@ We prioritize a globally coherent, modular architecture. Globally correct > loca
 
 ### 2.1. Architectural Tenets
 *   **Single Responsibility Principle (SRP):** Each module and function must have one clear purpose.
-*   **High Cohesion, Loose Coupling:** Keep related logic together; minimize dependencies between modules.
+*   **High Cohesion, Loose Coupling:** Keep related logic together; maximize independence between modules.
 *   **Interface-First Design:** Define clear interfaces and contracts before implementation.
 *   **Composability:** Design all components for reuse throughout the system.
 *   **Stability by Default:** Changes must be atomic. Explicitly flag any breaking changes.
 
 ### 2.2. Complexity Management
-We prioritize logical clarity over arbitrary constraints. Focus on minimizing Cyclomatic Complexity and minimizing lines of code.
-*   **Function Guidelines:** Strive for concise functions (approx. <20 lines). Functions should perform a single task.
+We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclomatic Complexity.
+*   **Function Guidelines:** Strive for concise functions (approx. <25 lines). Functions should perform a single task.
 *   **Module Guidelines:** Aim for focused modules (approx. <500 lines). Modules should be testable units.
-*   **The Standard:** If these guidelines are exceeded, it is a signal to reassess the design for SRP violations or excessive complexity. Avoid excessive fragmentation (ravioli code) that hinders readability.
+*   **The Standard:** Exceeding these guidelines is a signal to reassess the design for SRP adherence and complexity reduction. Maintain readable, cohesive structures, ensuring clarity over fragmentation (ravioli code).
 
 ### 2.3. Code Quality Standards
-*   **No Duplication:** Search for existing implementations first. Extend existing functions with options/parameters rather than duplicating logic.
-*   **Cleanliness:** Avoid duplicate files (e.g., `_enhanced`, `_fixed`, `_backup`). Edit existing files or deprecate old ones entirely.
+*   **Single Source of Truth (SSOT):** Ensure implementations are duplication-free. Extend existing functions with options/parameters instead of creating new variants.
+*   **Cleanliness:** Maintain a clean file system with unique, relevant files. Edit existing files or deprecate legacy ones entirely, ensuring finalized filenames (free of suffixes like `_enhanced`, `_fixed`, `_backup`).
 *   **Type Safety:** Adhere strictly to `SPEC/type_safety.xml`.
 *   **Compliance Check:** Run `python scripts/check_architecture_compliance.py` to check status.
 
 ### 2.4. Strategic Trade-offs
 
-While engineering standards are critical, business urgency may necessitate trade-offs. You are authorized to propose strategic trade-offs when mandates conflict (e.g., temporarily exceeding complexity guidelines to ship a critical feature). The justification must be documented within the BVJ, including the associated risks and the plan to remediate the technical debt.
+While engineering standards are critical, business urgency may necessitate trade-offs. You are authorized to propose strategic trade-offs when mandates require harmonization (e.g., temporarily accepting higher complexity to ship a critical feature). The justification must be documented within the BVJ, including the associated risks and the plan to restore technical health.
 
 ## 3. The Development Process: Structured Analysis
 
-Replace generalized planning with structured, critical analysis throughout the development lifecycle.
+Execute structured, critical analysis throughout the development lifecycle.
 
 ### 3.1. Structured Analysis Phases (Pre-Implementation)
 
-Before implementation, execute a structured analysis. Do not generate verbose plans; provide specific, critical analysis.
+Before implementation, execute a structured analysis. Prioritize concise, critical analysis over generalized plans.
 
 *   **Phase 1: Scenario Analysis:** Define the happy path, critical edge cases, security implications, performance considerations, and system impacts.
 *   **Phase 2: Interface Contract Verification (Scaffolding):** Generate the architecture, data structures, API contracts, and function signatures. Verify that this scaffolding adheres to system boundaries and satisfies the BVJ.
@@ -65,28 +65,28 @@ Before implementation, execute a structured analysis. Do not generate verbose pl
 ### 3.2. Implementation Strategy
 
 *   **Modular Implementation:** Once the scaffolding is validated, implement one module or function at a time.
-*   **Isolation (The "Firewall" Technique):** When generating Module B, provide only the interface of Module A, not its implementation. This enforces the contract and isolates the blast radius if a module fails.
+*   **Isolation (The "Firewall" Technique):** When generating Module B, provide only the interface of Module A, ensuring implementation independence. This enforces the contract and contains the impact of module updates.
 *   **Testing Focus:** Use real tests with minimal mocks. Real > Mock. E2E > Integration > Unit.
 *   **Reporting:** Be measured, accurate, and contextually precise in reporting.
 
 ### 3.3. Bug Fixing: Test-Driven Correction (TDC)
 
-When addressing bugs, understand the failure condition objectively. Shift the focus from generating plausible code to satisfying a precise, verifiable constraint.
+When addressing bugs, understand the required behavior objectively. Focus on satisfying a precise, verifiable constraint.
 
-1.  **Define the Failure:** Articulate the exact scenario where the code fails. Analyze the paradox: Why did this fail despite existing tests? What assumptions were missed? What has changed recently in the system?
-2.  **Create a Failing Test:** Write a minimal test that exposes the bug. This test MUST fail with the current implementation.
-    *   *Example Prompt:* "The `calculate_discount` function fails when a user has a loyalty card but zero previous purchases. Write a unit test that specifically asserts the correct behavior (a 10% discount) in this scenario. This test should currently fail."
-3.  **Surgical Strike:** Identify the exact code block that is failing and explicitly define the boundaries of the required changes. Changes must be scoped to either unified system-wide fixes or surgical isolated fixes.
-4.  **Discovery over Guessing:** If the solution isn't immediately apparent, use search tools (codebase, web, XMLs) to understand the context before hypothesizing a fix.
+1.  **Define the Discrepancy:** Articulate the exact scenario where the code diverges from requirements. Analyze the paradox: Why did the behavior diverge despite existing tests? What assumptions were missed? What has changed recently in the system?
+2.  **Create a Test Exposing the Discrepancy:** Write a minimal test that exposes the divergence. This test must demonstrate the current discrepancy with the existing implementation.
+    *   *Example Prompt:* "The `calculate_discount` function diverges from requirements when a user has a loyalty card but zero previous purchases. Write a unit test that specifically asserts the correct behavior (a 10% discount) in this scenario. This test should currently expose the discrepancy."
+3.  **Surgical Strike:** Identify the exact code block requiring correction and explicitly define the boundaries of the required changes. Changes must be scoped to either unified system-wide fixes or surgical isolated fixes.
+4.  **Prioritize Discovery:** When the solution requires investigation, use search tools (codebase, web, XMLs) to understand the context thoroughly before hypothesizing a fix.
 5.  **Verification:** All bug fixes require a dedicated Quality Assurance review, full regression testing, and updates to the learnings xml and spec.
 
 ## 4. Knowledge Management: The Living Source of Truth
 
 `SPEC/*.xml` files are the **Living Source of Truth** for the system architecture and learnings.
 
-*   **Iterative Discovery:** Specs are not immutable law. If implementation reveals complexities or superior solutions not anticipated in the spec, you must flag the discrepancy and propose a spec improvement.
+*   **Iterative Discovery:** Specs are adaptable and evolve with understanding. If implementation reveals complexities or superior solutions, flag the opportunity and propose a spec improvement.
 *   **Update Timing:** Specs must be *reviewed* before starting work and *finalized* immediately after code changes are validated to reflect the implemented reality.
-*   **Learnings:** Document insights in specs (using positive wording) to prevent future regressions.
+*   **Learnings:** Document insights in specs (using positive wording) to ensure continuous improvement and stability.
 *   **Navigation:** Consult and update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
 
 ## 5. Architecture and Conventions
@@ -108,10 +108,10 @@ Use precise naming to ensure clear component identification.
 4.  **Utility naming:** Descriptive names without suffixes.
 
 ### 5.3. System Boundaries and Growth Control
-*   **Healthy Growth:** Limit scope to the business need. Subdivide concepts. Use existing modules.
-*   **Composition:** Use small focused components, not monoliths.
-*   **References:** `SPEC/system_boundaries.xml` (Hard limits), `SPEC/growth_control.xml` (Good vs bad growth patterns), `SPEC/conventions.xml`.
-*   **Maintenance:** Clean, remove, or organize legacy files.
+*   **Healthy Growth:** Focus scope on the business need. Subdivide concepts. Use existing modules.
+*   **Composition:** Use small focused components; favor composition over monolithic structures.
+*   **References:** `SPEC/system_boundaries.xml` (Defined boundaries), `SPEC/growth_control.xml` (Good growth patterns), `SPEC/conventions.xml`.
+*   **Maintenance:** Clean, reorganize, or archive legacy files proactively.
 
 ### 5.4. AI Factory Productivity
 See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for detailed patterns, complex coding processes, and debugging strategies.
@@ -148,11 +148,11 @@ Ensure adherence to these core specifications throughout the development process
 | Spec | Purpose | When |
 | :--- | :--- | :--- |
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | Master index of all learnings | ALWAYS check first |
-| [`type_safety.xml`](SPEC/type_safety.xml) | Type safety, duplicate-free | BEFORE any code |
+| [`type_safety.xml`](SPEC/type_safety.xml) | Type safety, duplication-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | Change checklist | BEFORE changes |
-| [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | No test stubs in production | Always check |
-| [`anti_regression.xml`](SPEC/anti_regression.xml) | Prevent regressions | Before commits |
+| [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | Maintain stub-free production tests | Always check |
+| [`anti_regression.xml`](SPEC/anti_regression.xml) | Ensure system stability | Before commits |
 | [`independent_services.xml`](SPEC/independent_services.xml) | Microservice independence | When modifying services |
 
 ### 7.2. Domain Specs
@@ -169,7 +169,7 @@ Ensure adherence to these core specifications throughout the development process
 ## 8. Execution Checklist
 
 ### BEFORE and AFTER Any Code Change:
-1.  **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related issues/fixes FIRST.
+1.  **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related insights FIRST.
 2.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
 3.  **RUN** `python test_runner.py --level integration --no-coverage --fast-fail`.
 4.  **UPDATE** specs and documentation to reflect the implemented reality.
@@ -177,6 +177,6 @@ Ensure adherence to these core specifications throughout the development process
 ### Key Patterns
 *   Type Safety (See specs)
 *   async/await for ALL I/O
-*   Real code only (no placeholders)
+*   Ensure all code is implementation-complete (placeholder-free).
 
 **Final Reminder:** Generate monetization-focused value. Ensure every feature creates and captures value proportional to AI spend. Prioritize the unified system, global coherence, and end-to-end value.
