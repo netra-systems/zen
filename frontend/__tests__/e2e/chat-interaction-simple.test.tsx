@@ -323,8 +323,9 @@ describe('Complete Chat Flow', () => {
     fireEvent.change(input, { target: { value: 'Line 1' } });
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: true });
     
-    // Should not send message
-    expect(screen.queryByText('Line 1')).not.toBeInTheDocument();
+    // Should not send message to chat area
+    const chatArea = screen.getByTestId('chat-messages');
+    expect(chatArea).toBeEmptyDOMElement();
     expect(input).toHaveValue('Line 1');
   });
 

@@ -29,6 +29,9 @@ class LauncherConfig:
     verbose: bool = False
     non_interactive: bool = False  # Non-interactive mode for CI/automation
     
+    # Performance optimizations
+    parallel_startup: bool = True  # Enable parallel service startup by default
+    
     # Build configuration
     use_turbopack: bool = False
     

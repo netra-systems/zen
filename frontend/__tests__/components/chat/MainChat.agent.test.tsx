@@ -1,41 +1,148 @@
 import React from 'react';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
+// Hoist all mocks to the top level for proper Jest handling
+var mockUseUnifiedChatStore = jest.fn();
+var mockUseLoadingState = jest.fn();
+var mockUseThreadNavigation = jest.fn();
+var mockUseWebSocket = jest.fn();
+var mockUseEventProcessor = jest.fn();
+
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: mockUseUnifiedChatStore
+}));
+
+jest.mock('@/hooks/useLoadingState', () => ({
+  useLoadingState: mockUseLoadingState
+}));
+
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: mockUseThreadNavigation
+}));
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: mockUseWebSocket
+}));
+
+jest.mock('@/hooks/useEventProcessor', () => ({
+  useEventProcessor: mockUseEventProcessor
+}));
+
+// Mock all the components
+jest.mock('@/components/chat/ChatHeader', () => ({
+  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
+}));
+
+jest.mock('@/components/chat/MessageList', () => ({
+  MessageList: () => <div data-testid="message-list">Message List</div>
+}));
+
+jest.mock('@/components/chat/MessageInput', () => ({
+  MessageInput: () => <div data-testid="message-input">Message Input</div>
+}));
+
+jest.mock('@/components/chat/PersistentResponseCard', () => ({
+  PersistentResponseCard: ({ isCollapsed, onToggleCollapse }: any) => (
+    <div data-testid="response-card" data-collapsed={isCollapsed}>
+      <button onClick={onToggleCollapse}>Toggle</button>
+      Response Card
+    </div>
+  )
+}));
+
+jest.mock('@/components/chat/ExamplePrompts', () => ({
+  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
+}));
+
+jest.mock('@/components/chat/OverflowPanel', () => ({
+  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
+}));
+
+jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
+  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+}));
+
+// Mock framer-motion to avoid animation issues
+jest.mock('framer-motion', () => ({
+  motion: {
+    div: 'div',
+  },
+  AnimatePresence: ({ children }: any) => children,
+}));
+
 import MainChat from '@/components/chat/MainChat';
-import { mockStore, setupMocks, cleanupMocks, mockUseUnifiedChatStore, mockUseLoadingState, mockUseThreadNavigation } from './MainChat.fixtures';
+
+const mockStore = {
+  isProcessing: false,
+  messages: [],
+  fastLayerData: null,
+  mediumLayerData: null,
+  slowLayerData: null,
+  currentRunId: null,
+  activeThreadId: null,
+  isThreadLoading: false,
+  handleWebSocketEvent: jest.fn(),
+  addMessage: jest.fn(),
+  setProcessing: jest.fn(),
+  clearMessages: jest.fn(),
+  updateLayerData: jest.fn(),
+};
 
 describe('MainChat - Agent Status Tests', () => {
   beforeEach(() => {
-    setupMocks();
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    
+    // Set up default mock return values
+    mockUseUnifiedChatStore.mockReturnValue(mockStore);
+    
+    mockUseWebSocket.mockReturnValue({
+      messages: [],
+      connected: true,
+      error: null
+    });
+    
+    mockUseLoadingState.mockReturnValue({
+      shouldShowLoading: false,
+      shouldShowEmptyState: false,
+      shouldShowExamplePrompts: false,
+      loadingMessage: ''
+    });
+    
+    mockUseThreadNavigation.mockReturnValue({
+      currentThreadId: null,
+      isNavigating: false,
+      navigateToThread: jest.fn(),
+      createNewThread: jest.fn()
+    });
+    
+    mockUseEventProcessor.mockReturnValue({
+      processedEvents: [],
+      isProcessing: false,
+      stats: { processed: 0, failed: 0 }
+    });
   });
 
   afterEach(() => {
-    cleanupMocks();
+    jest.useRealTimers();
+    jest.clearAllMocks();
   });
 
   describe('Agent status updates', () => {
     it('should show response card when processing', () => {
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
-      mockUseThreadNavigation.mockReturnValue({
-        currentThreadId: 'thread-1',
-        isNavigating: false,
-        navigateToThread: jest.fn(),
-        createNewThread: jest.fn()
-      });
-      
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
         currentRunId: 'run-123',
         activeThreadId: 'thread-1'
+      });
+      
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
       });
       
       render(<MainChat />);
@@ -50,22 +157,6 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should display fast layer data', () => {
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
-      mockUseThreadNavigation.mockReturnValue({
-        currentThreadId: 'thread-1',
-        isNavigating: false,
-        navigateToThread: jest.fn(),
-        createNewThread: jest.fn()
-      });
-      
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
@@ -77,21 +168,6 @@ describe('MainChat - Agent Status Tests', () => {
         }
       });
       
-      render(<MainChat />);
-      
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
-    });
-
-    it('should display medium layer data', () => {
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
       mockUseThreadNavigation.mockReturnValue({
         currentThreadId: 'thread-1',
         isNavigating: false,
@@ -99,6 +175,12 @@ describe('MainChat - Agent Status Tests', () => {
         createNewThread: jest.fn()
       });
       
+      render(<MainChat />);
+      
+      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+    });
+
+    it('should display medium layer data', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
@@ -110,21 +192,6 @@ describe('MainChat - Agent Status Tests', () => {
         }
       });
       
-      render(<MainChat />);
-      
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
-    });
-
-    it('should display slow layer data with final report', () => {
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
       mockUseThreadNavigation.mockReturnValue({
         currentThreadId: 'thread-1',
         isNavigating: false,
@@ -132,6 +199,12 @@ describe('MainChat - Agent Status Tests', () => {
         createNewThread: jest.fn()
       });
       
+      render(<MainChat />);
+      
+      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+    });
+
+    it('should display slow layer data with final report', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: false,
@@ -143,21 +216,6 @@ describe('MainChat - Agent Status Tests', () => {
         }
       });
       
-      render(<MainChat />);
-      
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
-    });
-
-    it('should auto-collapse card after completion', async () => {
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
       mockUseThreadNavigation.mockReturnValue({
         currentThreadId: 'thread-1',
         isNavigating: false,
@@ -165,6 +223,12 @@ describe('MainChat - Agent Status Tests', () => {
         createNewThread: jest.fn()
       });
       
+      render(<MainChat />);
+      
+      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+    });
+
+    it('should auto-collapse card after completion', async () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: false,
@@ -173,6 +237,13 @@ describe('MainChat - Agent Status Tests', () => {
         slowLayerData: {
           finalReport: 'Complete'
         }
+      });
+      
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
       });
       
       render(<MainChat />);
@@ -191,24 +262,6 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should reset collapse state when new processing starts', () => {
-      const { rerender } = render(<MainChat />);
-      
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
-      mockUseThreadNavigation.mockReturnValue({
-        currentThreadId: 'thread-1',
-        isNavigating: false,
-        navigateToThread: jest.fn(),
-        createNewThread: jest.fn()
-      });
-      
       // Start with completed state
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
@@ -218,7 +271,14 @@ describe('MainChat - Agent Status Tests', () => {
         slowLayerData: { finalReport: 'Done' }
       });
       
-      rerender(<MainChat />);
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
+      });
+      
+      const { rerender } = render(<MainChat />);
       
       act(() => {
         jest.advanceTimersByTime(2000);
@@ -240,27 +300,18 @@ describe('MainChat - Agent Status Tests', () => {
     });
 
     it('should handle toggle collapse manually', async () => {
-      // Configure loading state to not show loading
-      mockUseLoadingState.mockReturnValue({
-        shouldShowLoading: false,
-        shouldShowEmptyState: false,
-        shouldShowExamplePrompts: false,
-        loadingMessage: ''
-      });
-      
-      // Configure thread navigation
-      mockUseThreadNavigation.mockReturnValue({
-        currentThreadId: 'thread-1',
-        isNavigating: false,
-        navigateToThread: jest.fn(),
-        createNewThread: jest.fn()
-      });
-      
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         isProcessing: true,
         currentRunId: 'run-123',
         activeThreadId: 'thread-1'
+      });
+      
+      mockUseThreadNavigation.mockReturnValue({
+        currentThreadId: 'thread-1',
+        isNavigating: false,
+        navigateToThread: jest.fn(),
+        createNewThread: jest.fn()
       });
       
       render(<MainChat />);
@@ -270,17 +321,19 @@ describe('MainChat - Agent Status Tests', () => {
       
       expect(card).toHaveAttribute('data-collapsed', 'false');
       
-      await userEvent.click(toggleButton);
-      
-      await waitFor(() => {
-        expect(card).toHaveAttribute('data-collapsed', 'true');
+      // First click to collapse
+      await act(async () => {
+        await userEvent.click(toggleButton);
       });
       
-      await userEvent.click(toggleButton);
+      expect(card).toHaveAttribute('data-collapsed', 'true');
       
-      await waitFor(() => {
-        expect(card).toHaveAttribute('data-collapsed', 'false');
+      // Second click to expand
+      await act(async () => {
+        await userEvent.click(toggleButton);
       });
+      
+      expect(card).toHaveAttribute('data-collapsed', 'false');
     });
   });
 });

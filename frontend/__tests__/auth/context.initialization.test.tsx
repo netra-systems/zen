@@ -8,6 +8,7 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@/auth/context';
 import { authService } from '@/auth/service';
+import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
 import {
   setupBasicMocks,
@@ -20,6 +21,49 @@ import {
 jest.mock('@/auth/service');
 jest.mock('jwt-decode');
 jest.mock('@/store/authStore');
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}));
+
+// Mock auth service client for independent service
+jest.mock('@/lib/auth-service-config', () => ({
+  authService: {
+    getConfig: jest.fn().mockResolvedValue({
+      development_mode: false,
+      google_client_id: 'mock-google-client-id',
+      oauth_enabled: true,
+      offline_mode: false
+    }),
+    getSession: jest.fn(),
+    getCurrentUser: jest.fn(),
+    validateToken: jest.fn(),
+    refreshToken: jest.fn()
+  },
+  getAuthServiceConfig: jest.fn().mockReturnValue({
+    baseUrl: 'http://localhost:8081',
+    endpoints: {
+      login: 'http://localhost:8081/auth/login',
+      logout: 'http://localhost:8081/auth/logout',
+      callback: 'http://localhost:8081/auth/callback',
+      token: 'http://localhost:8081/auth/token',
+      refresh: 'http://localhost:8081/auth/refresh',
+      validate_token: 'http://localhost:8081/auth/validate',
+      config: 'http://localhost:8081/auth/config',
+      session: 'http://localhost:8081/auth/session',
+      me: 'http://localhost:8081/auth/me'
+    },
+    oauth: {
+      googleClientId: 'mock-google-client-id',
+      redirectUri: 'http://localhost:3000/auth/callback',
+      javascriptOrigins: ['http://localhost:3000']
+    }
+  })
+}));
 
 describe('AuthContext - Initialization', () => {
   let mockAuthStore: any;
@@ -57,24 +101,25 @@ describe('AuthContext - Initialization', () => {
   });
 
   const setupConfigError = () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation();
     setupAuthConfigError();
-    return consoleError;
   };
 
-  const expectConfigErrorHandling = async (consoleError: jest.SpyInstance) => {
+  const expectConfigErrorHandling = async () => {
     await waitFor(() => {
-      expect(consoleError).toHaveBeenCalledWith(
-        'Failed to fetch auth config:',
-        expect.any(Error)
+      expect(logger.error).toHaveBeenCalledWith(
+        'Failed to fetch auth config - backend may be offline',
+        expect.any(Error),
+        {
+          component: 'AuthContext',
+          action: 'fetch_auth_config_failed'
+        }
       );
     });
-    consoleError.mockRestore();
   };
 
   it('should handle auth config fetch error gracefully', async () => {
-    const consoleError = setupConfigError();
+    setupConfigError();
     renderAuthProvider();
-    await expectConfigErrorHandling(consoleError);
+    await expectConfigErrorHandling();
   });
 });

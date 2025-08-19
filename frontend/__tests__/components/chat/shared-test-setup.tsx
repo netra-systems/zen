@@ -121,6 +121,15 @@ export const setupChatMocks = () => {
     })
   });
 
+  // Mock RawJsonView to render JSON as readable text
+  jest.mock('@/components/chat/RawJsonView', () => ({
+    RawJsonView: ({ data }: { data: any }) => (
+      <div data-testid="raw-json-view">
+        {JSON.stringify(data, null, 2)}
+      </div>
+    )
+  }));
+
   jest.clearAllMocks();
 };
 

@@ -21,16 +21,17 @@ import { setupChatMocks, resetChatMocks, renderWithChatSetup } from './shared-te
 
 beforeAll(() => {
   setupChatMocks();
+  // Mock clipboard API
+  Object.defineProperty(navigator, 'clipboard', {
+    value: {
+      writeText: jest.fn(() => Promise.resolve())
+    },
+    writable: true
+  });
 });
 
 beforeEach(() => {
   resetChatMocks();
-  // Mock clipboard API
-  Object.assign(navigator, {
-    clipboard: {
-      writeText: jest.fn(() => Promise.resolve())
-    }
-  });
 });
 
 // ============================================================================

@@ -109,7 +109,7 @@ const renderReferencesHeader = () => (
 const renderReferencesList = (references: string[], id: string | undefined) => (
   <ul className="space-y-1">
     {references.map((ref, index) => (
-      <li key={`${id}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-emerald-700 flex items-start">
+      <li key={`${id || 'msg'}-ref-${index}-${ref.substring(0, 20)}`} className="text-sm text-emerald-700 flex items-start">
         <span className="mr-2 text-blue-500">•</span>
         <span>{ref}</span>
       </li>
@@ -176,7 +176,7 @@ export const MessageItem: React.FC<MessageProps> = React.memo(({ message }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className={`mb-4 flex ${type === 'user' ? 'justify-end' : 'justify-start'}`}>
-      <Card className={`w-full max-w-3xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
+      <Card role="article" className={`w-full max-w-3xl shadow-sm hover:shadow-md transition-shadow duration-200 ${
         type === 'user' 
           ? 'bg-white/95 backdrop-blur-sm border-emerald-200' 
           : type === 'error'

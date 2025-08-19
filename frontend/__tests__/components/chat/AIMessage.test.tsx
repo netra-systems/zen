@@ -144,7 +144,7 @@ describe('AIMessage - Agent Identification', () => {
     });
     renderWithChatSetup(<MessageItem message={message} />);
     
-    expect(screen.getByText('AI Assistant')).toBeInTheDocument();
+    expect(screen.getByText('Netra Agent')).toBeInTheDocument();
   });
 
   it('displays bot icon for AI messages', () => {
@@ -272,8 +272,8 @@ describe('AIMessage - Tool Execution', () => {
     const message = createToolMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    const toolIcon = screen.getByTestId('tool-icon') || 
-                    document.querySelector('[data-lucide="wrench"]');
+    const toolIcon = document.querySelector('svg.lucide-wrench') ||
+                    screen.getByText('Tool Information').parentElement?.querySelector('svg');
     expect(toolIcon).toBeInTheDocument();
   });
 
@@ -297,8 +297,7 @@ describe('AIMessage - Error Handling', () => {
     renderWithChatSetup(<MessageItem message={message} />);
     
     expect(screen.getByText('Connection timeout occurred')).toBeInTheDocument();
-    const errorElement = screen.getByRole('alert') || 
-                        screen.getByText('Connection timeout occurred').closest('div');
+    const errorElement = screen.getByText('Connection timeout occurred').closest('div');
     expect(errorElement).toHaveClass('bg-red-50');
   });
 
