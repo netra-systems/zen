@@ -107,4 +107,33 @@
             - Enables request tracing across components
         </implementation>
     </learning>
+    
+    <learning id="loguru-format-strings">
+        <problem>
+            Logger showing raw format strings like "HTTP error: %s" instead of interpolated values.
+        </problem>
+        
+        <root_cause>
+            Loguru logger uses different string formatting than Python's standard logging.
+            Code was using %s format strings with loguru, which doesn't support them.
+        </root_cause>
+        
+        <solution>
+            Use f-strings or {} placeholders for loguru logging instead of %s format strings:
+            - OLD: self._logger.warning("HTTP error: %s", str(exc))
+            - NEW: self._logger.warning(f"HTTP error: {str(exc)}")
+        </solution>
+        
+        <prevention>
+            - Always use f-strings when logging with loguru
+            - Never use %s format strings with loguru
+            - Be aware that central_logger.get_logger() returns a loguru instance
+        </prevention>
+        
+        <impact>
+            - Proper log message formatting
+            - Correct error information in logs
+            - Better debugging capabilities
+        </impact>
+    </learning>
 </learnings>

@@ -47,8 +47,9 @@
             <critical-takeaway>CRITICAL: Microservices MUST be 100% independent. NO imports from the main `app/` module. Do not name internal modules 'app'.</critical-takeaway>
         </category>
 
-        <category name="Database/AsyncIO" path="SPEC/learnings/database_asyncio.xml" keywords="AsyncSession, Database, Postgres">
+        <category name="Database/AsyncIO" path="SPEC/learnings/database_asyncio.xml" keywords="AsyncSession, Database, Postgres, ClickHouse">
             <critical-takeaway>Functions marked as async must actually await something (postgres-session-async-function-paradox).</critical-takeaway>
+            <critical-takeaway>ClickHouse driver: Use OperationalError instead of NetworkError (which doesn't exist) for network-related exceptions.</critical-takeaway>
         </category>
 
         <category name="Dev Launcher" path="SPEC/learnings/dev_launcher.xml" keywords="Development, Startup, Local">
@@ -93,6 +94,7 @@
 
         <category name="Observability" path="SPEC/learnings/observability.xml" keywords="Logging, Monitoring, Metrics">
             <critical-takeaway>Implement modular observability architecture with correlation ID tracking.</critical-takeaway>
+            <critical-takeaway context="Loguru">Use f-strings or {} placeholders for loguru logging, not %s format strings (loguru-format-strings).</critical-takeaway>
         </category>
 
         <category name="Environment Detection" path="SPEC/learnings/environment_detection.xml" keywords="Environment, Staging, Production">
