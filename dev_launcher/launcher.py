@@ -27,6 +27,8 @@ from dev_launcher.summary_display import SummaryDisplay
 from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.startup_validator import StartupValidator
+from dev_launcher.cache_manager import CacheManager
+from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +46,7 @@ class DevLauncher:
         self.config = config
         self.use_emoji = check_emoji_support()
         self._load_env_file()  # Load .env file first
-        self._setup_cache()  # Setup caching for optimizations
-        self._setup_parallel_executor()  # Setup parallel execution
+        self._setup_new_cache_system()  # Setup new cache and optimizer
         self._setup_managers()
         self._setup_components()
         self._setup_helpers()
@@ -106,36 +107,23 @@ class DevLauncher:
         setup_logging(self.config.verbose)
         self.config_manager.log_verbose_config()
     
-    def _setup_cache(self):
-        """Setup startup cache for optimizations."""
-        self.cache_dir = self.config.project_root / ".dev_cache"
-        self.cache_dir.mkdir(exist_ok=True)
-        self.cache_file = self.cache_dir / "startup_cache.json"
-        self.cache_data = self._load_cache_data()
-    
-    def _load_cache_data(self) -> dict:
-        """Load cache data from disk."""
-        if self.cache_file.exists():
-            try:
-                with open(self.cache_file, 'r') as f:
-                    return json.load(f)
-            except:
-                return {}
-        return {}
-    
-    def _save_cache_data(self):
-        """Save cache data to disk."""
-        try:
-            with open(self.cache_file, 'w') as f:
-                json.dump(self.cache_data, f, indent=2)
-        except:
-            pass
-    
-    def _setup_parallel_executor(self):
-        """Setup thread pool for parallel execution."""
-        self.executor = ThreadPoolExecutor(max_workers=4)
-        self.service_futures = {}
+    def _setup_new_cache_system(self):
+        """Setup new cache and optimization system."""
+        self.cache_manager = CacheManager(self.config.project_root)
+        self.startup_optimizer = StartupOptimizer(self.cache_manager)
         self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
+        self._register_optimization_steps()
+    
+    def _register_optimization_steps(self):
+        """Register startup optimization steps."""
+        steps = [
+            StartupStep("environment_check", self._check_environment_step, [], True, 10, True, "env_check"),
+            StartupStep("migration_check", self._check_migrations_step, ["environment_check"], True, 15, True, "migration_check"),
+            StartupStep("backend_deps", self._check_backend_deps, [], True, 20, False, "backend_deps"),
+            StartupStep("auth_deps", self._check_auth_deps, [], True, 20, False, "auth_deps"),
+            StartupStep("frontend_deps", self._check_frontend_deps, ["backend_deps"], True, 30, False, "frontend_deps"),
+        ]
+        self.startup_optimizer.register_steps(steps)
     
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""
@@ -143,12 +131,30 @@ class DevLauncher:
     
     def check_environment(self) -> bool:
         """Check if environment is ready for launch."""
-        # Use cache to skip if unchanged
-        env_hash = self._get_environment_hash()
-        if not self._has_changed('env_hash', env_hash):
+        if not self.cache_manager.has_environment_changed():
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
         return self.environment_checker.check_environment()
+    
+    def _check_environment_step(self) -> bool:
+        """Environment check step for optimizer."""
+        return self.environment_checker.check_environment()
+    
+    def _check_migrations_step(self) -> bool:
+        """Migration check step for optimizer."""
+        return not self.cache_manager.has_migration_files_changed()
+    
+    def _check_backend_deps(self) -> bool:
+        """Backend dependencies check step."""
+        return not self.cache_manager.has_dependencies_changed("backend")
+    
+    def _check_auth_deps(self) -> bool:
+        """Auth dependencies check step."""
+        return not self.cache_manager.has_dependencies_changed("auth")
+    
+    def _check_frontend_deps(self) -> bool:
+        """Frontend dependencies check step."""
+        return not self.cache_manager.has_dependencies_changed("frontend")
     
     def _get_environment_hash(self) -> str:
         """Get hash of current environment."""
