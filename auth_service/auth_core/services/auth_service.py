@@ -17,6 +17,7 @@ from ..models.auth_models import (
     ServiceTokenRequest, ServiceTokenResponse,
     AuthProvider, AuthError
 )
+from ..database.repository import AuthUserRepository, AuthAuditRepository
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,7 @@ class AuthService:
         self.session_manager = SessionManager()
         self.max_login_attempts = int(os.getenv("MAX_LOGIN_ATTEMPTS", "5"))
         self.lockout_duration = int(os.getenv("LOCKOUT_DURATION_MINUTES", "15"))
+        self.db_session = None  # Initialize as None, set later if database available
         
     async def login(self, request: LoginRequest, 
                    client_info: Dict) -> LoginResponse:
