@@ -39,6 +39,18 @@
             <important_note>CRITICAL: Environment defaults must NEVER be "production" - always default to staging for safety</important_note>
         </category>
         <category>
+            <name>WebSocket</name>
+            <file>learnings/websocket_message_paradox.xml</file>
+            <path>SPEC/learnings/websocket_message_paradox.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>websocket-frontend-backend-field-mismatch</id>
+                <id>websocket-coroutine-error</id>
+            </learning_ids>
+            <important_note>CRITICAL: Frontend sends 'content' field, backend schema expects 'content' but handler was looking for 'text'. Also check for coroutine objects before accessing attributes.</important_note>
+            <additional_file>learnings/websocket_coroutine_error.xml</additional_file>
+        </category>
+        <category>
             <name>Configuration/Secrets</name>
             <file>learnings/configuration_secrets.xml</file>
             <path>SPEC/learnings/configuration_secrets.xml</path>

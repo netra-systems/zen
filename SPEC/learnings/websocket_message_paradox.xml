@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>WebSocket Message Field Paradox - Frontend/Backend Disconnect</title>
+  <date>2025-01-19</date>
+  <severity>HIGH</severity>
+  <category>websocket</category>
+  
+  <issue>
+    <description>
+      Silent failure where frontend sends user messages with 'content' field but backend 
+      message handler expects 'text' field, causing agents to never start.
+    </description>
+    
+    <root_cause>
+      Schema (UserMessagePayload) correctly defines 'content' field, but message handler 
+      implementation (_extract_message_data) was looking for 'text' field.
+    </root_cause>
+    
+    <symptoms>
+      - Frontend sends: { type: "user_message", payload: { content: "...", references: [] } }
+      - Backend receives message but extracts empty string for text
+      - Agent supervisor.run() never gets called with actual user request
+      - No error messages or warnings logged
+      - WebSocket connection remains active but unresponsive
+    </symptoms>
+  </issue>
+  
+  <discovery>
+    <step>Frontend inspection showed 'content' field being sent</step>
+    <step>Backend schema (UserMessagePayload) defines 'content' field</step>
+    <step>Message handler implementation was using payload.get("text", "")</step>
+    <step>This mismatch caused silent extraction failure</step>
+  </discovery>
+  
+  <fix>
+    <file>app/services/message_handlers.py</file>
+    <change>
+      Updated _extract_message_data to accept both 'content' and 'text' fields:
+      text = payload.get("content") or payload.get("text", "")
+    </change>
+    <file>app/services/agent_service_core.py</file>
+    <change>
+      Added debug logging to track message processing
+    </change>
+  </fix>
+  
+  <testing_gap>
+    <issue>Integration tests did not catch this field mismatch</issue>
+    <reason>Tests were mocking message handlers rather than testing actual field extraction</reason>
+    <recommendation>
+      Add end-to-end tests that verify actual payload field mapping between frontend and backend
+    </recommendation>
+  </testing_gap>
+  
+  <prevention>
+    <action>Ensure schema definitions are the single source of truth</action>
+    <action>Add validation that logs warnings for unexpected field names</action>
+    <action>Create integration tests that use actual frontend payloads</action>
+    <action>Add field name validation in message handlers</action>
+  </prevention>
+  
+  <lessons>
+    <lesson>Silent failures are the worst - always log when expected data is missing</lesson>
+    <lesson>Schema and implementation must be kept in sync</lesson>
+    <lesson>Field name consistency across frontend/backend is critical</lesson>
+    <lesson>Integration tests must test actual data flow, not mocked handlers</lesson>
+  </lessons>
+  
+  <related_files>
+    <file>frontend/components/chat/MessageInput.tsx</file>
+    <file>frontend/services/webSocketService.ts</file>
+    <file>app/services/message_handlers.py</file>
+    <file>app/schemas/websocket_models.py</file>
+    <file>app/services/agent_service_core.py</file>
+  </related_files>
+</learning>
