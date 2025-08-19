@@ -1,0 +1,10 @@
+{
+  "file_hashes": {
+    "key": "file_hashes",
+    "content_hash": "b326b5062b2f0e69046810717534cb09",
+    "value": true,
+    "created_at": "2025-08-19T08:47:51.685959",
+    "ttl_seconds": 86400,
+    "encrypted": false
+  }
+}

@@ -14,12 +14,10 @@ from app.schemas.shared_types import (
     DataAnalysisResponse, AnomalyDetectionResponse, PerformanceMetrics
 )
 from app.schemas.websocket_message_types import WebSocketMessage
-# Define AgentExecutionResult locally to avoid circular imports
-from typing import Union, Dict, List
-
-JsonCompatibleDict = Dict[str, Union[str, int, float, bool, None]]
-ExecutionResult = Union[JsonCompatibleDict, List[JsonCompatibleDict], str, bool, None]
-AgentExecutionResult = ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
+from app.schemas.agent_result_types import (
+    TypedAgentResult, JsonCompatibleDict, ExecutionResult, AgentExecutionResult
+)
 
 
 class StrictAgentState(Protocol):
@@ -154,17 +152,6 @@ class StrictAgentProtocol(Protocol):
         """Get execution metrics for the agent."""
         ...
 
-
-class TypedAgentResult(BaseModel):
-    """Strictly typed agent execution result."""
-    success: bool
-    agent_name: str = Field(min_length=1, max_length=100)
-    execution_time_ms: float = Field(ge=0.0)
-    result_data: Optional[Union[TriageResult, DataAnalysisResponse, 
-                              AnomalyDetectionResponse]] = None
-    error_message: Optional[str] = Field(default=None, max_length=1000)
-    warnings: List[str] = Field(default_factory=list)
-    metrics: AgentExecutionMetrics = Field(default_factory=AgentExecutionMetrics)
 
 
 class StrictStatePersistence(Protocol):

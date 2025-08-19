@@ -78,3 +78,81 @@ class DatabaseConnectionManager:
         """Cleanup ClickHouse connections."""
         if self.clickhouse_client:
             self.clickhouse_client.close()
+
+
+class DatabaseTestConnections(DatabaseConnectionManager):
+    """Test-specific database connections with additional helper methods."""
+    
+    def __init__(self):
+        super().__init__()
+        self.auth_connection = None
+        self.backend_connection = None
+        
+    async def connect_all(self):
+        """Connect to all databases for testing."""
+        await self.initialize_connections()
+        await self._create_dedicated_connections()
+        
+    async def _create_dedicated_connections(self):
+        """Create dedicated connections for auth and backend."""
+        if self.postgres_pool:
+            self.auth_connection = await self.postgres_pool.acquire()
+            self.backend_connection = await self.postgres_pool.acquire()
+            
+    async def get_auth_connection(self):
+        """Get dedicated Auth service database connection."""
+        return self.auth_connection
+        
+    async def get_backend_connection(self):
+        """Get dedicated Backend service database connection."""
+        return self.backend_connection
+        
+    async def get_clickhouse_connection(self):
+        """Get ClickHouse connection with helper methods."""
+        return ClickHouseTestHelper(self.clickhouse_client)
+        
+    async def disconnect_all(self):
+        """Disconnect all test database connections."""
+        await self._release_dedicated_connections()
+        await self.cleanup()
+        
+    async def _release_dedicated_connections(self):
+        """Release dedicated database connections."""
+        if self.postgres_pool:
+            if self.auth_connection:
+                await self.postgres_pool.release(self.auth_connection)
+            if self.backend_connection:
+                await self.postgres_pool.release(self.backend_connection)
+
+
+class ClickHouseTestHelper:
+    """Helper class for ClickHouse operations in tests."""
+    
+    def __init__(self, client):
+        self.client = client
+        
+    async def insert_user_event(self, user_id: str, event_data: dict):
+        """Insert user event into ClickHouse for testing."""
+        if not self.client:
+            return
+            
+        query = """
+            INSERT INTO user_events (user_id, event_type, event_data, timestamp)
+            VALUES (%(user_id)s, %(event_type)s, %(event_data)s, now())
+        """
+        
+        self.client.command(query, parameters={
+            'user_id': user_id,
+            'event_type': event_data.get('event_type', 'test'),
+            'event_data': str(event_data)
+        })
+        
+    async def get_user_metrics(self, user_id: str):
+        """Get user metrics from ClickHouse for testing."""
+        if not self.client:
+            return []
+            
+        query = "SELECT * FROM user_events WHERE user_id = %(user_id)s"
+        result = self.client.query(query, parameters={'user_id': user_id})
+        
+        return [{'data': {'transaction_id': row[2]}} for row in result.result_rows]

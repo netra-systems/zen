@@ -12,7 +12,8 @@ from typing import Dict, Any, Optional, Union
 
 from app.logging_config import central_logger
 from app.agents.base.errors import ExecutionErrorHandler, ErrorClassifier
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 
 # Import existing error types for backward compatibility
 from .error_types import (

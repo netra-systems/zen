@@ -89,6 +89,52 @@ def get_free_port() -> int:
     return port
 
 
+def is_port_available(port: int) -> bool:
+    """
+    Check if a specific port is available.
+    
+    Args:
+        port: Port number to check
+    
+    Returns:
+        True if port is available, False otherwise
+    """
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            result = s.connect_ex(('localhost', port))
+            return result != 0
+    except Exception:
+        return False
+
+
+def find_available_port(preferred_port: int, port_range: tuple = (8081, 8090)) -> int:
+    """
+    Find an available port, preferring the specified port.
+    
+    Args:
+        preferred_port: Preferred port to try first
+        port_range: Range of ports to try (min, max)
+    
+    Returns:
+        Available port number
+    """
+    # Try preferred port first
+    if is_port_available(preferred_port):
+        return preferred_port
+    
+    # Try ports in the specified range
+    for port in range(port_range[0], port_range[1] + 1):
+        if port != preferred_port and is_port_available(port):
+            logger.info(f"Port {preferred_port} unavailable, using {port} instead")
+            return port
+    
+    # If all ports in range are taken, get a random free port
+    free_port = get_free_port()
+    logger.warning(f"All ports in range {port_range} taken, using {free_port}")
+    return free_port
+
+
 def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bool:
     """
     Wait for a service to become available.

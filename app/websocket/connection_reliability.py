@@ -11,7 +11,8 @@ import time
 from typing import Dict, Any, Callable, Awaitable, Optional
 
 from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.circuit_breaker import CircuitBreakerConfig
 from app.schemas.shared_types import RetryConfig

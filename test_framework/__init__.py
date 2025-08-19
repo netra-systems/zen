@@ -4,7 +4,7 @@
 from .runner import UnifiedTestRunner
 from .test_config import TEST_LEVELS, RUNNERS, SHARD_MAPPINGS
 from .test_parser import parse_test_counts, parse_coverage, extract_failing_tests, extract_test_details
-from .test_orchestrator import TestOrchestrator
+# from .test_orchestrator import TestOrchestrator  # Currently not compatible
 
 # Import report generators and managers
 from .report_generators import generate_json_report, generate_text_report, generate_markdown_report
@@ -18,7 +18,7 @@ from .failing_test_runner import run_failing_tests
 
 # Import discovery and execution engines
 from .test_discovery import TestDiscovery
-from .test_execution_engine import TestExecutionEngine
+# from .test_execution_engine import TestExecutionEngine  # Uses functions not classes
 
 # Import failure analysis
 from .failure_patterns import FailurePatternAnalyzer
@@ -32,7 +32,7 @@ from .test_profile_models import (
 __all__ = [
     # Core runner classes
     'UnifiedTestRunner',
-    'TestOrchestrator',
+    # 'TestOrchestrator',
     
     # Configuration
     'TEST_LEVELS',
@@ -60,7 +60,7 @@ __all__ = [
     
     # Discovery and execution engines
     'TestDiscovery',
-    'TestExecutionEngine',
+    # 'TestExecutionEngine',
     
     # Failure analysis
     'FailurePatternAnalyzer',

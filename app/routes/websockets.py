@@ -8,6 +8,7 @@ from app.routes.utils.websocket_helpers import (
     parse_json_message, validate_and_handle_message, process_agent_message,
     check_connection_alive, cleanup_websocket_connection
 )
+from app.websocket.error_recovery_handler import get_error_recovery_handler
 import asyncio
 import time
 
@@ -108,10 +109,24 @@ def _is_websocket_connected(websocket: WebSocket) -> bool:
     return hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED
 
 async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: WebSocket):
-    """Handle WebSocket error."""
+    """Handle WebSocket error with recovery attempt."""
     logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
+    
+    # Find connection info for error recovery
+    conn_info = await manager.connection_manager.find_connection(user_id_str, websocket)
+    reconnection_token = None
+    
+    if conn_info:
+        # Attempt error recovery
+        error_handler = get_error_recovery_handler()
+        reconnection_token = await error_handler.handle_error(e, conn_info)
+        
     if _is_websocket_connected(websocket):
-        await manager.disconnect_user(user_id_str, websocket, code=1011, reason="Server error")
+        # Disconnect with potential reconnection token
+        await manager.disconnect_user(
+            user_id_str, websocket, code=1011, reason="Server error",
+            agent_state={"reconnection_token": reconnection_token} if reconnection_token else None
+        )
 
 async def _setup_websocket_auth(websocket: WebSocket):
     """Setup WebSocket authentication."""

@@ -12,7 +12,8 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock
 from datetime import datetime, timedelta
 
-from app.schemas.strict_types import TypedAgentResult, ExecutionStatus
+from app.schemas.strict_types import TypedAgentResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.state import DeepAgentState
 
 

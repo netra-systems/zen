@@ -206,12 +206,40 @@ class SmartStartupSequencer:
         result = self._execute_phase(phase)
         self.phase_results[phase] = result
         if self._check_timeout(phase, result.duration):
-            result.success, result.error = False, f"Phase timeout ({result.duration:.1f}s)"
+            # Provide detailed error message for timeout
+            service_name = self._get_phase_service_name(phase)
+            timeout_msg = self._create_timeout_message(phase, result, service_name)
+            result.success, result.error = False, timeout_msg
         if not result.success:
             logger.error(f"Phase {phase.phase_name} failed: {result.error}")
             self._execute_rollback(phase)
             return False
         return True
+    
+    def _get_phase_service_name(self, phase: StartupPhase) -> str:
+        """Get service name from phase."""
+        service_map = {
+            StartupPhase.LAUNCH: "Service startup",
+            StartupPhase.INIT: "Environment initialization", 
+            StartupPhase.VALIDATE: "Environment validation",
+            StartupPhase.PREPARE: "Dependency preparation",
+            StartupPhase.VERIFY: "Service verification"
+        }
+        return service_map.get(phase, phase.phase_name)
+    
+    def _create_timeout_message(self, phase: StartupPhase, result: PhaseResult, service: str) -> str:
+        """Create detailed timeout error message."""
+        failed_steps = [s for s in result.steps_executed if s not in result.steps_skipped]
+        if phase == StartupPhase.LAUNCH:
+            return (f"{service} failed: Services did not start within {result.duration:.1f}s "
+                   f"(expected {phase.timeout}s). Check service logs for startup errors. "
+                   f"Failed steps: {', '.join(failed_steps) if failed_steps else 'unknown'}")
+        elif phase == StartupPhase.VERIFY:
+            return (f"{service} failed: Health checks did not pass within {result.duration:.1f}s "
+                   f"(expected {phase.timeout}s). Services may still be initializing.")
+        else:
+            return (f"{service} failed: Phase exceeded timeout ({result.duration:.1f}s > {phase.timeout}s). "
+                   f"Failed steps: {', '.join(failed_steps) if failed_steps else 'none'}")
     
     def get_sequence_summary(self) -> Dict[str, Any]:
         """Get summary of sequence execution."""

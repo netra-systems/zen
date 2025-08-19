@@ -49,8 +49,8 @@ class JWTTestHelper:
         del payload["permissions"]
         return payload
     
-    async def create_jwt_token(self, payload: Dict, secret: str = None) -> str:
-        """Create JWT token with specified payload."""
+    def create_token(self, payload: Dict, secret: str = None) -> str:
+        """Create JWT token with specified payload (sync version)."""
         secret = secret or self.test_secret
         # Convert datetime objects to timestamps for JWT
         if isinstance(payload.get("iat"), datetime):
@@ -58,6 +58,10 @@ class JWTTestHelper:
         if isinstance(payload.get("exp"), datetime):
             payload["exp"] = int(payload["exp"].timestamp())
         return jwt.encode(payload, secret, algorithm="HS256")
+    
+    async def create_jwt_token(self, payload: Dict, secret: str = None) -> str:
+        """Create JWT token with specified payload."""
+        return self.create_token(payload, secret)
     
     async def create_tampered_token(self, payload: Dict) -> str:
         """Create token with invalid signature."""

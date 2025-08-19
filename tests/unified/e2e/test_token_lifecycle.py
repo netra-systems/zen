@@ -31,12 +31,12 @@ class TestTokenLifecycleE2E:
     """E2E test for JWT token refresh during active sessions."""
     
     @pytest.fixture
-    async def token_manager(self):
+    def token_manager(self):
         """Provide token lifecycle manager."""
         return TokenLifecycleManager()
     
     @pytest.fixture
-    async def websocket_manager(self):
+    def websocket_manager(self):
         """Provide WebSocket session manager."""
         return WebSocketSessionManager("ws://localhost:8000")
     

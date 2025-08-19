@@ -233,7 +233,7 @@ class ApiErrorHandler:
     
     def _log_unknown_exception(self, exc: Exception) -> None:
         """Log unknown exception with full details."""
-        self._logger.error(f"Unhandled exception: {exc}", exc_info=True)
+        self._logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
     
     def _create_unknown_error_response(
         self,

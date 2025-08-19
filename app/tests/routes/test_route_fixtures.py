@@ -104,6 +104,7 @@ class MockAppStateManager:
 def basic_test_client():
     """Basic FastAPI test client with minimal setup."""
     from app.main import app
+    MockAppStateManager.setup_app_state(app)
     return TestClient(app)
 
 

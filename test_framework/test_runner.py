@@ -279,6 +279,9 @@ Usage Examples:
   # Unit tests for development
   python test_runner.py --level unit
   
+  # Agent startup E2E tests with real services
+  python test_runner.py --level agent-startup --real-llm
+  
   # Full comprehensive testing
   python test_runner.py --level comprehensive
   
@@ -646,135 +649,18 @@ def print_test_configuration(level, config, speed_opts):
 
 def configure_real_llm_if_requested(args, level, config):
     """Configure real LLM testing if requested"""
-    if not args.real_llm:
-        return None
-    if level == "smoke":
-        print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
-        return None
-    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel)
-    print_real_llm_configuration(args, config)
-    return real_llm_config
-
-def print_real_llm_configuration(args, config):
-    """Print real LLM configuration details"""
-    print(f"[INFO] Real LLM testing enabled")
-    print(f"  - Model: {args.llm_model}")
-    print(f"  - Timeout: {args.llm_timeout}s per call")
-    print(f"  - Parallelism: {args.parallel}")
-    adjusted_timeout = config.get('timeout', 300) * 3
-    config['timeout'] = adjusted_timeout
-    print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+    from .test_execution_engine import configure_real_llm_if_requested as engine_configure
+    return engine_configure(args, level, config)
 
 def execute_test_suite(args, config, runner, real_llm_config, speed_opts, test_level):
     """Execute the test suite based on configuration"""
-    if args.backend_only:
-        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
-    elif args.frontend_only:
-        return execute_frontend_only_tests(config, runner, speed_opts, test_level)
-    else:
-        return execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level)
-
-def execute_backend_only_tests(config, runner, real_llm_config, speed_opts):
-    """Execute backend-only tests"""
-    backend_exit, _ = runner.run_backend_tests(
-        config['backend_args'], 
-        config.get('timeout', 300),
-        real_llm_config,
-        speed_opts
-    )
-    runner.results["frontend"]["status"] = "skipped"
-    return backend_exit
-
-def execute_frontend_only_tests(config, runner, speed_opts, test_level):
-    """Execute frontend-only tests"""
-    frontend_exit, _ = runner.run_frontend_tests(
-        config['frontend_args'],
-        config.get('timeout', 300),
-        speed_opts,
-        test_level
-    )
-    runner.results["backend"]["status"] = "skipped"
-    return frontend_exit
-
-def execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level):
-    """Execute full test suite (backend + frontend + E2E)"""
-    if config.get('run_both', True):
-        backend_exit, _ = runner.run_backend_tests(
-            config['backend_args'],
-            config.get('timeout', 300),
-            real_llm_config,
-            speed_opts
-        )
-        frontend_exit, _ = runner.run_frontend_tests(
-            config['frontend_args'], 
-            config.get('timeout', 300),
-            speed_opts,
-            test_level
-        )
-        exit_code = max(backend_exit, frontend_exit)
-        if config.get('run_e2e', False):
-            e2e_exit, _ = runner.run_e2e_tests([], config.get('timeout', 600))
-            exit_code = max(exit_code, e2e_exit)
-        return exit_code
-    else:
-        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
+    from .test_execution_engine import execute_test_suite as engine_execute
+    return engine_execute(args, config, runner, real_llm_config, speed_opts, test_level)
 
 def finalize_test_run(runner, level, config, output, exit_code):
     """Finalize test run with reporting and cleanup"""
-    runner.results["overall"]["end_time"] = time.time()
-    runner.results["overall"]["status"] = "passed" if exit_code == 0 else "failed"
-    generate_test_reports(runner, level, config, output, exit_code)
-    runner.print_summary()
-    return exit_code
-
-def generate_test_reports(runner, level, config, output, exit_code):
-    """Generate test reports in requested formats"""
-    if not hasattr(sys.modules[__name__], '_no_report') or not _no_report:
-        runner.save_test_report(level, config, output, exit_code)
-        save_additional_reports(runner, level, config, exit_code)
-        generate_coverage_report()
-
-def save_additional_reports(runner, level, config, exit_code):
-    """Save additional report formats if requested"""
-    args = sys.modules[__name__].__dict__.get('_current_args')
-    if not args:
-        return
-    
-    if args.output:
-        if args.report_format == "json":
-            save_json_report(runner, level, config, exit_code, args.output)
-        elif args.report_format == "text":
-            save_text_report(runner, level, config, exit_code, args.output)
-
-def save_json_report(runner, level, config, exit_code, output_file):
-    """Save JSON report to file"""
-    json_report = runner.generate_json_report(level, config, exit_code)
-    with open(output_file, "w", encoding='utf-8') as f:
-        json.dump(json_report, f, indent=2)
-    print(f"[REPORT] JSON report saved to: {output_file}")
-
-def save_text_report(runner, level, config, exit_code, output_file):
-    """Save text report to file"""
-    text_report = runner.generate_text_report(level, config, exit_code)
-    with open(output_file, "w", encoding='utf-8') as f:
-        f.write(text_report)
-    print(f"[REPORT] Text report saved to: {output_file}")
-
-def generate_coverage_report():
-    """Generate coverage report if requested"""
-    args = sys.modules[__name__].__dict__.get('_current_args')
-    if not args or not args.coverage_output:
-        return
-    
-    try:
-        coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
-        subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
-        if Path(args.coverage_output).exists():
-            print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
-        else:
-            print(f"[WARNING] Coverage report generation failed - file not created")
-    except Exception as e:
-        print(f"[WARNING] Could not generate coverage report: {e}")
+    from .test_execution_engine import finalize_test_run as engine_finalize
+    return engine_finalize(runner, level, config, output, exit_code)
 
 
 if __name__ == "__main__":

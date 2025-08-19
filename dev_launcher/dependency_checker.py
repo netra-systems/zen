@@ -406,6 +406,17 @@ class AsyncDependencyChecker:
         if hasattr(self, 'executor'):
             self.executor.cleanup()
     
+    def check_and_install_all_parallel(self, services: List[str] = None) -> bool:
+        """Check and install dependencies for all services in parallel."""
+        import asyncio
+        return asyncio.run(self._async_check_and_install_all(services))
+    
+    async def _async_check_and_install_all(self, services: List[str] = None) -> bool:
+        """Async implementation of check and install all."""
+        check_results = await self.check_all_dependencies(services)
+        install_results = await self.install_dependencies_background(check_results)
+        return all(install_results.values())
+    
     def get_cache_stats(self) -> Dict[str, Any]:
         """Get dependency cache statistics."""
         return {

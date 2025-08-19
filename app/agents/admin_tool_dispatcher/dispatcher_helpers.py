@@ -13,7 +13,8 @@ from app.db.models_postgres import User
 from app.schemas.admin_tool_types import (
     AdminToolType, AdminToolInfo, ToolStatus as AdminToolStatus
 )
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.logging_config import central_logger
 
 logger = central_logger

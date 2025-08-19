@@ -10,22 +10,10 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional, Protocol, runtime_checkable
 from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
 
 from app.agents.state import DeepAgentState
-from app.schemas.strict_types import TypedAgentResult
-
-
-class ExecutionStatus(Enum):
-    """Execution status enumeration."""
-    PENDING = "pending"
-    INITIALIZING = "initializing"
-    EXECUTING = "executing"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    RETRYING = "retrying"
-    FALLBACK = "fallback"
-    DEGRADED = "degraded"
+from app.schemas.core_enums import ExecutionStatus
+from app.schemas.agent_result_types import TypedAgentResult
 
 
 @dataclass

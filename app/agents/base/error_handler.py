@@ -7,7 +7,8 @@ import time
 from typing import Dict, Any, Optional
 
 from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from .error_classification import ErrorClassifier, ErrorClassification
 from .agent_errors import AgentExecutionError
 

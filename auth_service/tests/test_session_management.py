@@ -58,7 +58,8 @@ class TestSessionValidation:
         manager.redis_client = MagicMock()
         return manager
 
-    def test_validate_session_success(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_validate_session_success(self, session_manager):
         """Test validation of valid session"""
         session_data = {
             "user_id": "user123",
@@ -67,11 +68,12 @@ class TestSessionValidation:
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         session_manager.redis_client.setex.return_value = True
         
-        is_valid = session_manager.validate_session("session123")
+        is_valid = await session_manager.validate_session("session123")
         
         assert is_valid is True
 
-    def test_validate_session_expired(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_validate_session_expired(self, session_manager):
         """Test validation of expired session"""
         old_time = datetime.utcnow() - timedelta(hours=25)
         session_data = {
@@ -81,7 +83,7 @@ class TestSessionValidation:
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         session_manager.redis_client.delete.return_value = 1
         
-        is_valid = session_manager.validate_session("session123")
+        is_valid = await session_manager.validate_session("session123")
         
         assert is_valid is False
 
@@ -97,7 +99,8 @@ class TestSessionExpiry:
         manager.session_ttl = 24  # 24 hours
         return manager
 
-    def test_session_auto_expiry(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_session_auto_expiry(self, session_manager):
         """Test automatic session expiry via validate_session"""
         expired_time = datetime.utcnow() - timedelta(hours=25)
         session_data = {
@@ -108,7 +111,7 @@ class TestSessionExpiry:
         session_manager.redis_client.delete.return_value = 1
         
         # validate_session should detect expiry and return False
-        is_valid = session_manager.validate_session("expired_session")
+        is_valid = await session_manager.validate_session("expired_session")
         
         assert is_valid is False
 
@@ -135,7 +138,8 @@ class TestSessionRefresh:
         manager.redis_client = MagicMock()
         return manager
 
-    def test_refresh_active_session(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_refresh_active_session(self, session_manager):
         """Test refreshing active session before expiry"""
         session_data = {
             "user_id": "user123",
@@ -144,15 +148,16 @@ class TestSessionRefresh:
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         session_manager.redis_client.setex.return_value = True
         
-        result = session_manager.update_session("session123", {"refreshed": True})
+        result = await session_manager.update_session("session123", {"refreshed": True})
         
         assert result is True
 
-    def test_refresh_expired_session(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_refresh_expired_session(self, session_manager):
         """Test refresh attempt on expired session"""
         session_manager.redis_client.get.return_value = None
         
-        result = session_manager.update_session("expired_session", {"data": "new"})
+        result = await session_manager.update_session("expired_session", {"data": "new"})
         
         assert result is False
 
@@ -167,7 +172,8 @@ class TestMultiDeviceSessionManagement:
         manager.redis_client = MagicMock()
         return manager
 
-    def test_multiple_sessions_per_user(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_multiple_sessions_per_user(self, session_manager):
         """Test handling multiple sessions for same user"""
         sessions_data = [
             {"session_id": "session1", "user_id": "user123", "device": "mobile"},
@@ -186,11 +192,12 @@ class TestMultiDeviceSessionManagement:
         
         session_manager.redis_client.get.side_effect = get_side_effect
         
-        user_sessions = session_manager.get_user_sessions("user123")
+        user_sessions = await session_manager.get_user_sessions("user123")
         
         assert len(user_sessions) == 2
 
-    def test_session_isolation(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_session_isolation(self, session_manager):
         """Test sessions are isolated between users"""
         mock_keys = ["session:session1", "session:session2"]
         session_manager.redis_client.scan_iter.return_value = mock_keys
@@ -204,7 +211,7 @@ class TestMultiDeviceSessionManagement:
         
         session_manager.redis_client.get.side_effect = get_side_effect
         
-        sessions = session_manager.get_user_sessions("user123")
+        sessions = await session_manager.get_user_sessions("user123")
         
         assert len(sessions) == 1
         assert sessions[0]["user_id"] == "user123"
@@ -229,7 +236,8 @@ class TestSessionRevocation:
         assert result is True
         session_manager.redis_client.delete.assert_called_with("session:session123")
 
-    def test_all_sessions_logout(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_all_sessions_logout(self, session_manager):
         """Test logout of all user sessions"""
         sessions_data = [
             {"session_id": "session1", "user_id": "user123"},
@@ -243,7 +251,7 @@ class TestSessionRevocation:
         ]
         session_manager.redis_client.delete.return_value = 1
         
-        count = session_manager.invalidate_user_sessions("user123")
+        count = await session_manager.invalidate_user_sessions("user123")
         
         assert count == 2
 
@@ -326,7 +334,8 @@ class TestSessionSecurityAndHijackingPrevention:
         assert len(session_id1) == 36  # UUID length
         assert "-" in session_id1  # UUID format
 
-    def test_session_data_isolation(self, session_manager):
+    @pytest.mark.asyncio
+    async def test_session_data_isolation(self, session_manager):
         """Test session data is isolated per session"""
         session_data1 = {"user_id": "user1", "sensitive": "data1"}
         session_data2 = {"user_id": "user2", "sensitive": "data2"}
@@ -340,8 +349,8 @@ class TestSessionSecurityAndHijackingPrevention:
         
         session_manager.redis_client.get.side_effect = get_side_effect
         
-        data1 = session_manager.get_session("session1")
-        data2 = session_manager.get_session("session2")
+        data1 = await session_manager.get_session("session1")
+        data2 = await session_manager.get_session("session2")
         
         assert data1["sensitive"] != data2["sensitive"]
         assert data1["user_id"] != data2["user_id"]

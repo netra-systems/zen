@@ -14,7 +14,7 @@ project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.database_test_connections import DatabaseTestManager
+from tests.unified.database_test_connections import DatabaseConnectionManager
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class E2EServiceOrchestrator:
         """Initialize service orchestrator."""
         self.project_root = project_root or self._detect_project_root()
         self.services_manager = RealServicesManager(self.project_root)
-        self.db_manager = DatabaseTestManager()
+        self.db_manager = DatabaseConnectionManager()
         self.ready = False
     
     def _detect_project_root(self) -> Path:
@@ -51,8 +51,7 @@ class E2EServiceOrchestrator:
     
     async def _setup_test_database(self, db_name: str) -> None:
         """Setup isolated test database."""
-        await self.db_manager.create_test_database(db_name)
-        await self.db_manager.run_migrations(db_name)
+        await self.db_manager.initialize_connections()
     
     async def _start_all_services(self) -> None:
         """Start all services in correct order."""
@@ -67,8 +66,9 @@ class E2EServiceOrchestrator:
         """Validate all services are healthy."""
         if not self.services_manager.is_all_ready():
             raise RuntimeError("Services not ready")
-        if not self.db_manager.is_connected():
-            raise RuntimeError("Database not ready")
+        # Check database connections are available
+        if not (self.db_manager.postgres_pool or self.db_manager.redis_client):
+            raise RuntimeError("Database connections not ready")
     
     def get_service_url(self, service_name: str) -> str:
         """Get URL for specific service."""
@@ -86,14 +86,14 @@ class E2EServiceOrchestrator:
         """Check if environment is ready."""
         return (self.ready and 
                 self.services_manager.is_all_ready() and
-                self.db_manager.is_connected())
+                (self.db_manager.postgres_pool is not None))
     
     async def get_environment_status(self) -> Dict[str, Any]:
         """Get complete environment status."""
         return {
             "orchestrator_ready": self.ready,
             "services": await self.services_manager.health_status(),
-            "database": await self.db_manager.get_connection_status()
+            "database": {"postgres_ready": self.db_manager.postgres_pool is not None}
         }
     
     async def stop_test_environment(self, db_name: str) -> None:
@@ -108,7 +108,7 @@ class E2EServiceOrchestrator:
     
     async def _cleanup_database(self, db_name: str) -> None:
         """Cleanup test database."""
-        await self.db_manager.drop_test_database(db_name)
+        await self.db_manager.cleanup()
     
     async def _stop_services(self) -> None:
         """Stop all orchestrated services."""

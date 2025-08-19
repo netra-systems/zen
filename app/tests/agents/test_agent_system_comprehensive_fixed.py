@@ -35,7 +35,7 @@ from app.agents.triage_sub_agent.agent import TriageSubAgent
 from app.llm.llm_manager import LLMManager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.schemas.strict_types import TypedAgentResult
-from app.agents.base.interface import ExecutionStatus
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.state import DeepAgentState
 
 # Import test helpers

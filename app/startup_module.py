@@ -255,6 +255,13 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     """Run application startup checks."""
+    disable_checks = os.getenv("DISABLE_STARTUP_CHECKS", "false").lower() == "true"
+    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
+    
+    if disable_checks or fast_startup:
+        logger.info("Skipping startup health checks (fast startup mode)")
+        return
+    
     from app.startup_checks import run_startup_checks
     try:
         await run_startup_checks(app)

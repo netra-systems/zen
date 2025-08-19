@@ -110,7 +110,7 @@ class AuthService:
                 self.session_manager.delete_session(session_id)
             elif user_id:
                 # Invalidate all user sessions
-                self.session_manager.invalidate_user_sessions(user_id)
+                await self.session_manager.invalidate_user_sessions(user_id)
             
             # Log logout
             await self._audit_log(

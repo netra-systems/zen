@@ -5,6 +5,7 @@ Main cache manager that coordinates cache operations, storage, and warming.
 """
 
 import json
+import hashlib
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -246,6 +247,33 @@ class CacheManager:
                 # If no timestamp, consider valid if it exists
                 return True
         return False
+
+    def cache_result(self, key: str, value: Any) -> None:
+        """Cache a result with automatic timestamp."""
+        # Determine the appropriate cache type based on key
+        cache_type = 'state'  # Default to state
+        if 'hash' in key.lower():
+            cache_type = 'hashes'
+        elif 'service' in key.lower():
+            cache_type = 'services'
+        elif 'secret' in key.lower():
+            cache_type = 'secrets'
+        
+        # Create content hash for the value
+        value_str = json.dumps(value) if not isinstance(value, str) else value
+        content_hash = hashlib.md5(value_str.encode()).hexdigest()
+        
+        # Create a CacheEntry with proper fields
+        entry = CacheEntry(
+            key=key,
+            content_hash=content_hash,
+            value=value,
+            created_at=datetime.now(),
+            ttl_seconds=24 * 3600,  # 24 hours in seconds
+            encrypted=False
+        )
+        # Set the cache entry
+        self.set_cache_entry(cache_type, entry)
 
     def clear_cache(self, cache_type: Optional[str] = None) -> bool:
         """Clear cache data with optional type filter."""

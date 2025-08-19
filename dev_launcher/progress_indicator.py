@@ -120,11 +120,11 @@ class ProgressIndicator:
     def _default_phases(self) -> List[Tuple[str, str, float]]:
         """Get default startup phases."""
         return [
-            ("INIT", "Initializing environment", 2.0),
-            ("CACHE", "Checking cache", 1.0),
-            ("DEPS", "Validating dependencies", 3.0),
-            ("SERVICES", "Starting services", 8.0),
-            ("HEALTH", "Health checks", 2.0)
+            ("INIT", "Checking environment and dependencies", 2.0),
+            ("CACHE", "Loading cached configurations", 1.0),
+            ("DEPS", "Installing/validating dependencies", 3.0),
+            ("SERVICES", "Starting backend, auth and frontend", 8.0),
+            ("HEALTH", "Waiting for services to be ready", 2.0)
         ]
     
     def _update_display(self, message: Optional[str] = None) -> None:

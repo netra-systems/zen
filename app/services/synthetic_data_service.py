@@ -16,6 +16,13 @@ from .synthetic_data.job_manager import JobManager
 from .synthetic_data.generation_engine import GenerationEngine
 from .synthetic_data.ingestion_manager import IngestionManager
 from .synthetic_data.error_handler import ErrorHandler
+from .synthetic_data.synthetic_data_service_main import SyntheticDataService as MainSyntheticDataService
+
+# Function exports for backward compatibility
+async def get_job_status(job_id: str):
+    """Get job status - compatibility function"""
+    service = MainSyntheticDataService()
+    return await service.get_job_status(job_id)
 
 # Re-export everything for backward compatibility
 __all__ = [
@@ -28,5 +35,6 @@ __all__ = [
     'JobManager',
     'GenerationEngine',
     'IngestionManager',
-    'ErrorHandler'
+    'ErrorHandler',
+    'get_job_status'
 ]

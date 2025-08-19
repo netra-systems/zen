@@ -7,7 +7,7 @@ Business Value: Reduces connection failures by 40% with better monitoring.
 """
 
 import asyncio
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Any
 import time
 
 from fastapi import WebSocket
@@ -23,6 +23,7 @@ from app.websocket.ghost_connection_manager import (
 from app.websocket.connection_registry import (
     ConnectionRegistry, ConnectionInfoProvider, ConnectionCleanupManager
 )
+from app.websocket.reconnection_handler import get_reconnection_handler
 
 logger = central_logger.get_logger(__name__)
 
@@ -44,6 +45,7 @@ class ModernConnectionManager:
         self.state_monitor = ConnectionStateMonitor(self.ghost_manager)
         self.info_provider = ConnectionInfoProvider(self.registry)
         self.cleanup_manager = ConnectionCleanupManager(self.registry)
+        self.reconnection_handler = get_reconnection_handler()
         
     async def connect(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish and register a new WebSocket connection."""
@@ -113,13 +115,22 @@ class ModernConnectionManager:
         self._stats["total_connections"] += 1
         
     async def disconnect(self, user_id: str, websocket: WebSocket,
-                        code: int = 1000, reason: str = "Normal closure"):
-        """Properly disconnect and clean up a WebSocket connection."""
+                        code: int = 1000, reason: str = "Normal closure",
+                        agent_state: Optional[Dict[str, Any]] = None) -> Optional[str]:
+        """Properly disconnect and clean up a WebSocket connection with reconnection support."""
         if not self.cleanup_manager.validate_user_for_disconnect(user_id):
-            return
+            return None
             
         conn_info = self.registry.find_connection_info(user_id, websocket)
+        reconnection_token = None
+        
+        if conn_info and self._should_prepare_reconnection(code, reason):
+            reconnection_token = await self.reconnection_handler.prepare_for_reconnection(
+                conn_info, agent_state
+            )
+            
         await self._process_disconnection_if_found(user_id, conn_info, code, reason)
+        return reconnection_token
         
     async def _process_disconnection_if_found(self, user_id: str, conn_info, code: int, reason: str):
         """Process disconnection if connection info found."""
@@ -278,6 +289,17 @@ class ModernConnectionManager:
         """Clear all connection tracking structures."""
         await self.registry.clear_all_connections()
         
+    def _should_prepare_reconnection(self, code: int, reason: str) -> bool:
+        """Determine if reconnection should be prepared based on disconnect reason."""
+        # Prepare reconnection for unexpected disconnections, network issues, etc.
+        unexpected_codes = [1006, 1011, 1012, 1013, 1014]  # Abnormal closure, server errors
+        expected_codes = [1000, 1001, 1005]  # Normal closure, going away, no status
+        
+        return (code in unexpected_codes or 
+                "network" in reason.lower() or 
+                "timeout" in reason.lower() or
+                "connection" in reason.lower())
+        
     def get_health_status(self) -> Dict[str, any]:
         """Get comprehensive health status."""
         orchestrator_health = self.orchestrator.get_health_status()
@@ -292,6 +314,30 @@ class ModernConnectionManager:
             "active_connections_count": registry_stats["total_active_connections"],
             "active_users_count": registry_stats["active_users"]
         }
+        
+    async def attempt_reconnection(self, reconnection_token: str,
+                                 new_websocket: WebSocket) -> Optional[ConnectionInfo]:
+        """Attempt to reconnect a WebSocket with preserved state."""
+        logger.info(f"Attempting reconnection with token: {reconnection_token}")
+        
+        conn_info = await self.reconnection_handler.attempt_reconnection(
+            reconnection_token, new_websocket
+        )
+        
+        if conn_info:
+            # Register the reconnected connection
+            await self._register_new_connection(conn_info.user_id, conn_info)
+            logger.info(f"Successfully reconnected user {conn_info.user_id}")
+            
+        return conn_info
+        
+    def get_preserved_agent_state(self, reconnection_token: str) -> Optional[Dict[str, Any]]:
+        """Get preserved agent state for reconnection."""
+        return self.reconnection_handler.get_preserved_agent_state(reconnection_token)
+        
+    async def cleanup_expired_reconnections(self) -> int:
+        """Clean up expired reconnection contexts."""
+        return await self.reconnection_handler.cleanup_expired_contexts()
     
     @property
     def active_connections(self) -> Dict[str, List[ConnectionInfo]]:

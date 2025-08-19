@@ -69,6 +69,28 @@ class StartupValidator:
             self._print("🌐", "BROWSER", f"Opening browser at {frontend_url}")
             open_browser(frontend_url)
     
+    def verify_all_services_ready(self, services: Dict[str, Any] = None) -> bool:
+        """Verify that all services (auth, backend, frontend) are ready."""
+        return self._verify_auth_ready() and self._verify_backend_ready() and self._verify_frontend_ready()
+    
+    def _verify_auth_ready(self) -> bool:
+        """Verify auth service is ready."""
+        from dev_launcher.utils import wait_for_service
+        auth_url = "http://localhost:8081/health"
+        return wait_for_service(auth_url, timeout=10)
+    
+    def _verify_backend_ready(self) -> bool:
+        """Verify backend service is ready."""
+        from dev_launcher.utils import wait_for_service
+        backend_url = "http://localhost:8000/health/ready" 
+        return wait_for_service(backend_url, timeout=10)
+    
+    def _verify_frontend_ready(self) -> bool:
+        """Verify frontend service is ready."""
+        from dev_launcher.utils import wait_for_service
+        frontend_url = "http://localhost:3000"
+        return wait_for_service(frontend_url, timeout=30)
+    
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""
         print_with_emoji(emoji, text, message, self.use_emoji)

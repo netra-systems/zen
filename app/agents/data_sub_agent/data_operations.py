@@ -15,7 +15,8 @@ from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
 from app.logging_config import central_logger as logger
-from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.circuit_breaker import CircuitBreakerConfig

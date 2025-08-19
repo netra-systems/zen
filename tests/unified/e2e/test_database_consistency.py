@@ -23,6 +23,7 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from tests.unified.database_sync_fixtures import create_test_user_data
 from .database_consistency_fixtures import (
@@ -33,7 +34,7 @@ from .database_consistency_fixtures import (
 )
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def database_consistency_tester():
     """Create database consistency tester fixture."""
     tester = DatabaseConsistencyTester()

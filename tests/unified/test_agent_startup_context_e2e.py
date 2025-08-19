@@ -200,3 +200,29 @@ async def test_concurrent_multi_agent_initialization():
     
     results = await asyncio.gather(*tasks, return_exceptions=True)
     await _validate_concurrent_results(results)
+
+
+async def _run_concurrent_multi_agent_test(manager: MultiAgentTestManager, validator: AgentInitializationValidator, test_id: int) -> Dict[str, Any]:
+    """Run single concurrent multi-agent test."""
+    try:
+        async with TestHarnessContext(f"concurrent_multi_agent_{test_id}") as harness:
+            manager.harness = harness
+            await manager.setup_http_client()
+            validator.start_timer()
+            
+            token = await manager.authenticate_and_connect()
+            multi_response = await manager.send_multi_agent_message()
+            
+            validator.validate_multi_agent_initialization(multi_response)
+            validator.validate_context_loading_performance(max_seconds=8.0)
+            return {"status": "success", "test_id": test_id}
+    finally:
+        await _cleanup_multi_agent_test(manager)
+
+
+async def _validate_concurrent_results(results: list) -> None:
+    """Validate all concurrent tests passed."""
+    for i, result in enumerate(results):
+        assert not isinstance(result, Exception), f"Concurrent test {i} failed: {result}"
+        if isinstance(result, dict):
+            assert result.get("status") == "success", f"Test {i} did not complete successfully"

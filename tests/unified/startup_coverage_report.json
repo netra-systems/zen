@@ -1,0 +1,38 @@
+{
+  "generated_at": "2025-08-19T16:01:53.145146+00:00",
+  "summary": {
+    "total_tests": 8,
+    "critical_coverage": "8/10",
+    "coverage_percentage": 30.0,
+    "status": "INCOMPLETE"
+  },
+  "test_analysis": {
+    "implemented_files": 8,
+    "total_test_functions": 59,
+    "files_by_area": {
+      "cold_start": 45,
+      "performance": 10,
+      "resilience": 4
+    }
+  },
+  "missing_coverage": [
+    "multi_tier",
+    "reconnection",
+    "context_preservation",
+    "concurrent_users",
+    "edge_cases",
+    "load_testing",
+    "service_integration"
+  ],
+  "performance_coverage": {
+    "performance_files": 5,
+    "metrics_tracked": {
+      "tracks_memory": 4,
+      "tracks_response_time": 4,
+      "tracks_cpu": 3
+    }
+  },
+  "recommendations": [
+    "Implement missing test areas for complete coverage"
+  ]
+}

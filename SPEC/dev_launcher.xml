@@ -182,6 +182,66 @@
         <step order="13">ONLY NOW start health monitoring</step>
     </service_startup_sequence>
     
+    <port_management>
+        <requirement id="PORT-001" priority="CRITICAL">
+            <description>Dynamic port allocation for auth service</description>
+            <implementation>
+                - Check if port 8081 is available before starting auth service
+                - If port 8081 is in use, dynamically allocate next available port (8082, 8083, etc)
+                - Update backend configuration to use the dynamically allocated auth port
+                - Log the actual port being used for auth service
+                - Store allocated port in startup state cache for consistency
+            </implementation>
+        </requirement>
+        
+        <requirement id="PORT-002" priority="HIGH">
+            <description>Port availability checking</description>
+            <implementation>
+                - Use socket library to check port availability before service startup
+                - Implement retry logic with configurable port range (default: 8081-8090)
+                - Provide --auth-port flag to override default port
+                - Display clear message when using non-default port
+            </implementation>
+        </requirement>
+    </port_management>
+    
+    <error_messaging>
+        <requirement id="ERROR-001" priority="CRITICAL">
+            <description>Clear and actionable error messages</description>
+            <implementation>
+                - Phase timeout errors should show what was expected vs what happened
+                - Instead of generic "Phase timeout", show:
+                  - Which service failed to start
+                  - What readiness check failed
+                  - Actual response or error from the service
+                  - Suggested actions to resolve the issue
+                - Example: "Backend failed to start: /health/ready returned 500 after 21.4s (expected 200 within 5s). Check backend logs for startup errors."
+            </implementation>
+        </requirement>
+        
+        <requirement id="ERROR-002" priority="HIGH">
+            <description>Progress indicators with meaningful context</description>
+            <implementation>
+                - Show what phase is currently executing
+                - Display what specific check is being performed
+                - Include service-specific details in progress messages
+                - Example: "Starting backend service on port 8000..." instead of generic "INIT: Loading"
+                - Show actual progress percentage based on completed vs total steps
+            </implementation>
+        </requirement>
+        
+        <requirement id="ERROR-003" priority="HIGH">
+            <description>Startup phase descriptions</description>
+            <implementation>
+                - INIT phase: "Checking environment and dependencies"
+                - LAUNCH phase: "Starting {service_name} service"
+                - READY phase: "Waiting for {service_name} to become ready"
+                - SUCCESS phase: "All services started successfully"
+                - Include service name and port in phase messages
+            </implementation>
+        </requirement>
+    </error_messaging>
+    
     <graceful_shutdown>
         <requirement id="SHUTDOWN-001" priority="CRITICAL">
             <description>Proper signal handling for graceful shutdown</description>
@@ -195,11 +255,12 @@
         <requirement id="SHUTDOWN-002" priority="CRITICAL">
             <description>Port cleanup on shutdown</description>
             <implementation>
-                - Auth service port 8081 MUST be freed on shutdown
+                - Auth service port (dynamic or 8081) MUST be freed on shutdown
                 - Backend service ports MUST be freed on shutdown
                 - Frontend service ports MUST be freed on shutdown
                 - Use taskkill with /F /T flags on Windows to ensure child processes are terminated
                 - Verify ports are free after shutdown
+                - Clean up dynamically allocated ports from cache
             </implementation>
         </requirement>
         

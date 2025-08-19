@@ -15,7 +15,8 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 from tests.unified.config import UnifiedTestConfig, TestTier, get_test_user
 from app.agents.state import DeepAgentState, AgentMetadata
-from app.agents.base.interface import ExecutionContext, ExecutionStatus
+from app.agents.base.interface import ExecutionContext
+from app.schemas.core_enums import ExecutionStatus
 from app.schemas.agent_models import AgentMetadata
 
 
