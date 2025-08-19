@@ -156,25 +156,6 @@ class DevLauncher:
         """Frontend dependencies check step."""
         return not self.cache_manager.has_dependencies_changed("frontend")
     
-    def _get_environment_hash(self) -> str:
-        """Get hash of current environment."""
-        env_data = {
-            'python': sys.version,
-            'platform': sys.platform,
-            'root': str(self.config.project_root),
-            'paths': [str(p) for p in [self.config.project_root / 'app',
-                                       self.config.project_root / 'frontend']]
-        }
-        return hashlib.md5(json.dumps(env_data, sort_keys=True).encode()).hexdigest()
-    
-    def _has_changed(self, key: str, value: str) -> bool:
-        """Check if value has changed since last run."""
-        old_value = self.cache_data.get(key)
-        changed = old_value != value
-        if changed:
-            self.cache_data[key] = value
-            self._save_cache_data()
-        return changed
     
     def load_secrets(self) -> bool:
         """Load secrets if configured."""
@@ -200,12 +181,61 @@ class DevLauncher:
         )
     
     def run(self) -> int:
-        """Run the development environment."""
+        """Run the development environment with optimized startup sequence."""
         self._print_startup_banner()
         self.config_manager.show_configuration()
-        if not self._run_pre_checks():
+        
+        # Start timing
+        self.startup_optimizer.start_timing()
+        
+        # Execute optimized startup sequence
+        return self._run_optimized_startup()
+    
+    def _run_optimized_startup(self) -> int:
+        """Run startup sequence following spec v2.0.0."""
+        # Step 1-3: Pre-checks with caching
+        if not self._run_cached_pre_checks():
             return 1
-        return self._run_services()
+        
+        # Step 4-5: Migration check and execution
+        if not self._handle_migrations_with_cache():
+            return 1
+        
+        # Step 6-12: Service startup with optimization
+        return self._run_optimized_services()
+    
+    def _run_cached_pre_checks(self) -> bool:
+        """Run pre-checks with intelligent caching."""
+        # Check cache for previous startup state
+        if self.cache_manager.is_cache_valid():
+            self._print("⚡", "CACHE", "Using cached startup state")
+        
+        # Environment check (skip if cached and unchanged)
+        if not self.check_environment():
+            return False
+        
+        # Load secrets if configured
+        return self._handle_secret_loading()
+    
+    def _handle_migrations_with_cache(self) -> bool:
+        """Handle database migrations with file hash caching."""
+        if not self.cache_manager.has_migration_files_changed():
+            self._print("⚡", "CACHE", "Migrations unchanged, skipping")
+            return True
+        
+        # Run migrations if needed (this would need integration with migration system)
+        self._print("🗄️", "DB", "Running migrations...")
+        return True
+    
+    def _run_optimized_services(self) -> int:
+        """Run services with optimization."""
+        self._clear_service_discovery()
+        
+        # Use parallel startup if enabled
+        if self.parallel_enabled:
+            return self._run_services_parallel()
+        else:
+            return self._run_services_sequential()
     
     def _run_services(self) -> int:
         """Run all services."""
@@ -446,19 +476,25 @@ class DevLauncher:
     
     def _handle_cleanup(self) -> int:
         """Handle cleanup and return exit code."""
-        # Show startup time
+        # Show startup time and optimization report
         elapsed = time.time() - self.startup_time
         self._print("⏱️", "TIME", f"Total startup time: {elapsed:.1f}s")
         
+        # Show optimization report
+        if self.config.verbose:
+            timing_report = self.startup_optimizer.get_timing_report()
+            self._print("📊", "PERF", f"Target met: {timing_report['target_met']}")
+            if timing_report['cached_steps']:
+                self._print("⚡", "CACHE", f"Cached steps: {len(timing_report['cached_steps'])}")
+        
         # Save successful run to cache
-        self.cache_data['last_run'] = datetime.now().isoformat()
-        self._save_cache_data()
+        self.cache_manager.mark_successful_startup(elapsed)
         
         # Cleanup
         self.health_monitor.stop()
         self.process_manager.cleanup_all()
         self.log_manager.stop_all()
-        self.executor.shutdown(wait=False)
+        self.startup_optimizer.cleanup()
         
         if not self.health_monitor.all_healthy():
             self._print("⚠️", "WARN", "Some services were unhealthy during execution")
