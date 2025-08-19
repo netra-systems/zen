@@ -16,22 +16,17 @@ The product is Netra Apex.
 - Every added line of code, every file, every module, every system: you ALWAYS think and ask: What is the business value? Which customer segment is it for? How much value does this add relative to their AI spend?
 
 ## IMPORTANT: Revenue-Driven Development: Business Value Justification (BVJ)
-To enforce the mandate that business goals are superior to engineering goals, every engineering task (Ticket/Issue) must include a Business Value Justification (BVJ).
-
-Example:
-**BVJ:**
-1. **Segment**: Growth & Enterprise
-2. **Business Goal**: Increase Value Creation (Savings Delta).
-3. **Value Impact**: Estimated to increase average customer savings by 10-15%.
-4. **Revenue Impact**: Increases the 20% performance fee capture. Estimated +$10K MRR 
+To enforce the mandate that business goals are superior to engineering goals, every engineering task (Ticket/Issue) must include a Business Value Justification (BVJ). Example:
+**BVJ:** 1. **Segment**: 2. **Business Goal**:3. **Value Impact**:4. **Revenue Impact**:
 
 ## 🔴 Engineering CRITICAL: MODULE-BASED ARCHITECTURE
 **MANDATORY**:
-- ALL functions MUST be ≤8 lines. Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
+- ALL files MUST be ≤300 lines. Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
 - ALL functions MUST be ≤8 lines. Functions exceeding 8 lines MUST be split into smaller functions.
-- Plan module boundaries BEFORE coding - don't code first then split
+- THINK DEEPLY ABOUT integration with UNIFIED system at all stages. Globally correct > locally correct.
+- Plan for modular code and healthy boundaries BEFORE coding.
 - Each module = single responsibility, clear interface, testable unit
-- Each function = single task
+- Each function = single task.
 - Composable - All concepts are designed for composable reuse throughout the system.
 - STABLE BY DEFAULT. MUST FLAG ANY BREAKING CHANGES. MAKE CODE CHANGES IN ATOMIC WAY.
 - Always review existing specs and upate specs whenever relevant.
@@ -191,13 +186,13 @@ Always reflect on the UNIFIED SYSTEM. Global coherence. End to end value. Real >
 ## Testing
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml)
 
-## 📝 MODULE PLANNING
+## 📝 PLANNING
 
 ### BEFORE Writing Any Code:
 1. **ULTRA THINK** - Deep analysis first
 2. **PLAN MODULES** - Design boundaries for 300-line limit
 3. **CHECK TYPES** - Read [`type_safety.xml`](SPEC/type_safety.xml)
-4. **NO DUPLICATES** - Search for existing implementations
+4. **DUPLICATE-FREE** - Search for existing implementations
 
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 Generate a monetization-focused product and engineering value for Netra Apex.
