@@ -9,6 +9,7 @@ from sqlalchemy import select, func
 from app.db.postgres import get_async_db
 from app.logging_config import central_logger
 from app.routes.utils.validators import validate_token_payload, validate_user_id_in_payload, validate_user_active
+from app.clients.auth_client import auth_client
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,12 +34,17 @@ async def accept_websocket_connection(websocket: WebSocket) -> str:
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="No token provided")
     
-    # Pre-validate token signature before accepting connection
-    security_service, _ = extract_app_services(websocket)
+    # Pre-validate token signature before accepting connection using auth client
     try:
-        # This will raise an exception if token is invalid/tampered
-        await security_service.decode_access_token(token)
-        logger.info("[WS AUTH] Token signature validated, accepting connection")
+        # Validate token with auth service (same as REST endpoints)
+        validation_result = await auth_client.validate_token(token)
+        
+        if not validation_result or not validation_result.get("valid"):
+            logger.error("[WS AUTH] Token validation failed: invalid token from auth service")
+            from fastapi import HTTPException
+            raise HTTPException(status_code=403, detail="Invalid or expired token")
+        
+        logger.info("[WS AUTH] Token validated with auth service, accepting connection")
     except Exception as e:
         logger.error(f"[WS AUTH] Token validation failed: {e}")
         # Reject at HTTP level before WebSocket upgrade
@@ -57,8 +63,20 @@ def extract_app_services(websocket: WebSocket) -> Tuple[Any, Any]:
 
 
 async def decode_token_payload(security_service, token: str) -> Dict:
-    """Decode and validate token payload."""
-    payload = await security_service.decode_access_token(token)
+    """Decode and validate token payload using auth service."""
+    # Use auth service for token validation (same as REST endpoints)
+    validation_result = await auth_client.validate_token(token)
+    
+    if not validation_result or not validation_result.get("valid"):
+        raise ValueError("Invalid or expired token")
+    
+    # Convert auth service response to expected payload format
+    payload = {
+        "sub": validation_result.get("user_id"),
+        "email": validation_result.get("email"),
+        "permissions": validation_result.get("permissions", [])
+    }
+    
     return validate_token_payload(payload)
 
 

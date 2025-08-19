@@ -173,23 +173,37 @@ class TestAgentRoute:
             assert result["context"]["thread_id"] == "thread123"
     
     def test_agent_rate_limiting(self, agent_test_client):
-        """Test agent endpoint rate limiting.""" 
-        # Send multiple rapid requests to test rate limiting
-        responses = []
-        for i in range(10):
-            response = agent_test_client.post(
-                "/api/agent/message",
-                json={"message": f"Rate limit test {i}"}
-            )
-            responses.append(response.status_code)
+        """Test agent endpoint rate limiting."""
+        from app.main import app
+        from app.services.agent_service import get_agent_service
         
-        # Should have at least some successful responses or rate limit errors
-        success_codes = [200, 201]
-        rate_limit_codes = [429, 503]
-        error_codes = [500, 404]  # If not implemented
+        # Create and configure mock agent service
+        mock_agent_service = MockServiceFactory.create_mock_agent_service()
         
-        for status_code in responses:
-            assert status_code in success_codes + rate_limit_codes + error_codes
+        # Override the dependency for this specific test
+        app.dependency_overrides[get_agent_service] = lambda: mock_agent_service
+        
+        try:
+            # Send multiple rapid requests to test rate limiting
+            responses = []
+            for i in range(10):
+                response = agent_test_client.post(
+                    "/api/agent/message",
+                    json={"message": f"Rate limit test {i}"}
+                )
+                responses.append(response.status_code)
+            
+            # Should have at least some successful responses or rate limit errors
+            success_codes = [200, 201]
+            rate_limit_codes = [429, 503]
+            error_codes = [500, 404]  # If not implemented
+            
+            for status_code in responses:
+                assert status_code in success_codes + rate_limit_codes + error_codes
+        finally:
+            # Clean up this specific override
+            if get_agent_service in app.dependency_overrides:
+                del app.dependency_overrides[get_agent_service]
     
     async def test_agent_multi_modal_input(self):
         """Test agent handling of multi-modal input."""

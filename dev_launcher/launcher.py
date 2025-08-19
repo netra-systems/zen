@@ -35,6 +35,7 @@ from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
 from dev_launcher.legacy_service_runner import LegacyServiceRunner
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 from dev_launcher.critical_error_handler import critical_handler, CriticalError
+from dev_launcher.migration_runner import MigrationRunner
 
 logger = logging.getLogger(__name__)
 
@@ -102,6 +103,7 @@ class DevLauncher:
         """Setup helper instances."""
         self.health_helper = HealthRegistrationHelper(self.health_monitor, self.use_emoji)
         self.startup_validator = StartupValidator(self.use_emoji)
+        self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
     
     def _create_secret_loader(self) -> SecretLoader:
         """Create secret loader instance."""
@@ -330,6 +332,10 @@ class DevLauncher:
     def _check_migrations_step(self) -> bool:
         """Migration check step for optimizer."""
         return not self.cache_manager.has_migration_files_changed()
+    
+    def run_migrations(self, env: Optional[Dict] = None) -> bool:
+        """Run database migrations if needed."""
+        return self.migration_runner.check_and_run_migrations(env)
     
     def _check_backend_deps(self) -> bool:
         """Backend dependencies check step."""

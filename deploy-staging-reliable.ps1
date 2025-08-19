@@ -17,7 +17,10 @@ param(
     [switch]$DeployOnly,
     
     [Parameter(Mandatory=$false)]
-    [switch]$SkipErrorMonitoring
+    [switch]$SkipErrorMonitoring,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipMigrations
 )
 
 # Enforce strict coding standards and stop on PowerShell errors
@@ -326,6 +329,32 @@ if ($BuildOnly) {
     Write-Host ""
     Write-Host "Build completed. Skipping deployment." -ForegroundColor Yellow
     exit 0
+}
+
+# Step 3.5: Run Database Migrations
+if (-not $SkipMigrations) {
+    Write-Host "[3.5/5] Running database migrations..." -ForegroundColor Green
+
+    # Check if migration script exists
+    $migrationScriptPath = Join-Path $PSScriptRoot "run-staging-migrations.ps1"
+    if (Test-Path $migrationScriptPath) {
+        Write-Host "  Checking and running migrations if needed..." -ForegroundColor Cyan
+        
+        # Run the migration script
+        & $migrationScriptPath
+        
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host "  Warning: Migration check returned non-zero exit code" -ForegroundColor Yellow
+            Write-Host "  Continuing with deployment (migrations may have already been applied)" -ForegroundColor Yellow
+        } else {
+            Write-Host "  Migrations completed successfully" -ForegroundColor Green
+        }
+    } else {
+        Write-Host "  Migration script not found, skipping migrations" -ForegroundColor Yellow
+        Write-Host "  Expected at: $migrationScriptPath" -ForegroundColor Gray
+    }
+} else {
+    Write-Host "[3.5/5] Skipping database migrations (--SkipMigrations flag)" -ForegroundColor Yellow
 }
 
 # Step 4: Deploy to Cloud Run

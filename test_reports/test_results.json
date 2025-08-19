@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-19T14:32:46.228718",
-    "total_runs": 157
+    "last_update": "2025-08-19T15:26:26.918098",
+    "total_runs": 158
   },
   "current_state": {
-    "overall_status": "[FAILED] 3 failures",
-    "last_run_level": "unit",
-    "last_run_time": "2025-08-19T14:32:46.228718",
-    "last_exit_code": 255
+    "overall_status": "[ERRORS] 1 errors",
+    "last_run_level": "all",
+    "last_run_time": "2025-08-19T15:26:26.918098",
+    "last_exit_code": 2
   },
   "known_test_counts": {
     "unit:backend": {
@@ -113,7 +113,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 1,
-      "last_update": "2025-08-19T14:28:36.605716"
+      "last_update": "2025-08-19T15:26:26.918098"
     },
     "comprehensive:backend": {
       "total": 1,
@@ -274,17 +274,17 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 455,
-        "passed": 435,
-        "failed": 3,
-        "skipped": 16,
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
         "errors": 1,
-        "import_errors": 0,
-        "test_files": 52,
-        "status": "failed"
+        "import_errors": 2,
+        "status": "import_error",
+        "test_files": 0
       },
-      "last_duration": 70.56344985961914,
-      "last_run": "2025-08-19T14:32:46.228718"
+      "last_duration": 32.94814920425415,
+      "last_run": "2025-08-19T15:26:26.918098"
     },
     "frontend": {
       "status": "failed",
@@ -298,11 +298,11 @@
         "test_files": 0,
         "status": "unknown"
       },
-      "last_duration": 0.28194522857666016,
-      "last_run": "2025-08-19T14:32:46.228718"
+      "last_duration": 3.5421762466430664,
+      "last_run": "2025-08-19T15:26:26.918098"
     },
     "e2e": {
-      "status": "pending",
+      "status": "failed",
       "last_counts": {
         "total": 0,
         "passed": 0,
@@ -311,56 +311,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-19T14:32:46.228718"
+      "last_run": "2025-08-19T15:26:26.918098"
     }
   },
-  "failing_tests": [
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_websocket_updates.py::TestWebSocketUpdates::test_generation_completion_notification",
-      "timestamp": "2025-08-19T14:32:46.230273"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_quality_gate_advanced.py::TestQualityGateAdvanced::test_get_weights_for_content_types",
-      "timestamp": "2025-08-19T14:32:46.230273"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::TestToolInvocations::test_generate_tool_invocations_error_scenarios Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-19T14:32:46.230273"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_websocket_updates.py::\u001b[1mTestWebSocketUpdates::test_generation_completion_notification\u001b[0m - AssertionError: generation_complete message was not sent",
-      "timestamp": "2025-08-19T14:32:46.230273"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_quality_gate_advanced.py::\u001b[1mTestQualityGateAdvanced::test_get_weights_for_content_types\u001b[0m - assert 0.2 == 0.25",
-      "timestamp": "2025-08-19T14:32:46.230273"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::\u001b[1mTestToolInvocations::test_generate_tool_invocations_error_scenarios\u001b[0m - AttributeError: 'SyntheticDataService' object has no attribute '_generate_tool_invocations'. Did you mean: 'generate_tool_invocations'?",
-      "timestamp": "2025-08-19T14:32:46.230273"
-    }
-  ],
+  "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-19T10:12:44.999815",
-      "level": "smoke",
-      "exit_code": 0,
-      "status": "[PASSED]",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 7,
-        "total_passed": 7,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 100.0
-      }
-    },
     {
       "timestamp": "2025-08-19T11:13:23.003230",
       "level": "real_services",
@@ -626,15 +581,29 @@
         "total_skipped": 16,
         "pass_rate": 95.6
       }
+    },
+    {
+      "timestamp": "2025-08-19T15:26:26.918098",
+      "level": "all",
+      "exit_code": 2,
+      "status": "[ERRORS] 1 errors",
+      "statistics": {
+        "total_tests_known": 666,
+        "total_tests_run": 1,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 666,
-    "total_tests_run": 455,
-    "total_passed": 435,
-    "total_failed": 3,
-    "total_skipped": 16,
-    "pass_rate": 95.6
+    "total_tests_run": 1,
+    "total_passed": 0,
+    "total_failed": 0,
+    "total_skipped": 0,
+    "pass_rate": 0.0
   },
   "version": "1.0",
   "tests": {},
@@ -1142,10 +1111,26 @@
       "passed": 93,
       "failed": 3,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_153107_67513",
+      "timestamp": "2025-08-19T15:32:56.746083",
+      "total_tests": 24,
+      "passed": 24,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_153411_51800",
+      "timestamp": "2025-08-19T15:34:39.865035",
+      "total_tests": 112,
+      "passed": 109,
+      "failed": 3,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 63,
-    "last_updated": "2025-08-19T14:55:42.096455"
+    "total_runs": 65,
+    "last_updated": "2025-08-19T15:34:39.866041"
   }
 }

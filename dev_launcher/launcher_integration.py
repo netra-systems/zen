@@ -242,13 +242,24 @@ class LauncherIntegration:
     
     def _run_migrations_if_needed(self) -> bool:
         """Run migrations if needed."""
+        # Check if migrations should be skipped
         if not self.config.no_cache and not self.cache_manager.has_migration_files_changed():
-            self._log_step("Migrations", "No changes detected")
+            self._log_step("Migrations", "No changes detected, using cache")
             return True
-            
-        self._log_step("Migrations", "Running database migrations")
-        # Actual migration logic would go here
-        return True
+        
+        # Run migrations through the launcher's migration runner
+        self._log_step("Migrations", "Checking database schema...")
+        success = self.launcher.run_migrations()
+        
+        if success:
+            self._log_step("Migrations", "Database ready")
+            # Update cache to avoid re-running on next startup
+            if not self.config.no_cache:
+                self.cache_manager.cache_result("migrations", True)
+        else:
+            self._log_step("Migrations", "Migration issues detected", LogLevel.WARNING)
+        
+        return success
     
     def _warm_caches(self) -> bool:
         """Warm caches for next startup."""

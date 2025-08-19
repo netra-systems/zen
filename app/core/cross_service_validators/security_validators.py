@@ -33,8 +33,30 @@ class TokenValidationValidator(BaseValidator):
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__("token_validation_validator", config)
-        self.jwt_secret = config.get("jwt_secret", "test-secret-key") if config else "test-secret-key"
+        # Use the same secret source as the services for consistency
+        self.jwt_secret = self._get_jwt_secret_for_testing(config)
         self.jwt_algorithm = config.get("jwt_algorithm", "HS256") if config else "HS256"
+    
+    def _get_jwt_secret_for_testing(self, config: Optional[Dict[str, Any]] = None) -> str:
+        """Get JWT secret for testing, consistent with service configuration."""
+        import os
+        
+        # If explicitly provided in config, use it
+        if config and "jwt_secret" in config:
+            return config["jwt_secret"]
+        
+        # Use same environment variable as the services
+        secret = os.getenv("JWT_SECRET_KEY")
+        if secret:
+            return secret
+        
+        # Fallback to legacy JWT_SECRET
+        secret = os.getenv("JWT_SECRET")
+        if secret:
+            return secret
+        
+        # Test environment fallback
+        return "test-secret-key-for-validation-testing-32-chars"
     
     async def validate(self, context: Dict[str, Any]) -> List[ValidationResult]:
         """Validate token validation consistency."""

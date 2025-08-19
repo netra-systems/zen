@@ -17,11 +17,14 @@ class AuthSecretLoader:
     def get_jwt_secret() -> str:
         """
         Get JWT secret with proper fallback chain.
+        CRITICAL: Must match backend service secret loading for token validation consistency.
+        
         Priority order:
         1. Environment-specific Google Secret Manager (staging/production)
         2. Environment-specific env vars (JWT_SECRET_STAGING, JWT_SECRET_PRODUCTION)
-        3. Generic env vars (JWT_SECRET, JWT_SECRET_KEY)
-        4. Development fallback (only in development)
+        3. Primary: JWT_SECRET_KEY (shared with backend service)
+        4. Fallback: JWT_SECRET (auth service legacy)
+        5. Development fallback (only in development)
         """
         env = os.getenv("ENVIRONMENT", "development").lower()
         
@@ -53,16 +56,16 @@ class AuthSecretLoader:
                 return secret
         
         # Fall back to generic variables (for all environments)
-        # Check JWT_SECRET first (auth service convention)
-        secret = os.getenv("JWT_SECRET")
-        if secret:
-            logger.info("Using JWT_SECRET from environment")
-            return secret
-            
-        # Then check JWT_SECRET_KEY (backend convention)
+        # CRITICAL: Check JWT_SECRET_KEY first to match backend service behavior
         secret = os.getenv("JWT_SECRET_KEY")
         if secret:
-            logger.info("Using JWT_SECRET_KEY from environment")
+            logger.info("Using JWT_SECRET_KEY from environment (shared with backend)")
+            return secret
+            
+        # Legacy fallback for JWT_SECRET (auth service specific)
+        secret = os.getenv("JWT_SECRET")
+        if secret:
+            logger.warning("Using JWT_SECRET from environment (legacy - should use JWT_SECRET_KEY)")
             return secret
         
         # Development fallback only

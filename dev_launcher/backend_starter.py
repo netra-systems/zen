@@ -196,8 +196,24 @@ class BackendStarter:
         if process.poll() is not None:
             self._handle_backend_startup_failure(process)
             return None, None
+        
+        # Verify backend is actually responding on the expected port
+        if not self._verify_backend_health(port):
+            logger.error(f"Backend process started but not responding on port {port}")
+            self._print("❌", "ERROR", f"Backend not responding on port {port}")
+            return None, None
+            
         self._finalize_backend_startup(port, process)
         return process, log_streamer
+    
+    def _verify_backend_health(self, port: int) -> bool:
+        """Verify backend is responding on the expected port."""
+        from dev_launcher.utils import wait_for_service_with_details
+        backend_url = f"http://localhost:{port}/health"
+        success, details = wait_for_service_with_details(backend_url, timeout=30)
+        if not success:
+            logger.debug(f"Backend health check failed on port {port}: {details}")
+        return success
     
     def _handle_backend_startup_exception(self, e: Exception):
         """Handle backend startup exception."""
