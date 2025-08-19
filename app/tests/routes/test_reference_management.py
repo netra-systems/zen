@@ -37,8 +37,8 @@ class TestReferenceManagement:
         mock_session.commit = AsyncMock()
         mock_session.refresh = AsyncMock(side_effect=lambda ref: setattr(ref, 'id', 'ref-new'))
         
-        # Create async generator for session
-        async def mock_get_db_session():
+        # Create generator for session (not async since TestClient is sync)
+        def mock_get_db_session():
             yield mock_session
         
         # Override dependency
@@ -130,8 +130,8 @@ class TestReferenceManagement:
         mock_result.scalars.return_value.all.return_value = mock_references
         mock_session.execute = AsyncMock(return_value=mock_result)
         
-        # Create async generator for session
-        async def mock_get_db_session():
+        # Create generator for session (not async since TestClient is sync)
+        def mock_get_db_session():
             yield mock_session
         
         # Override dependency
@@ -164,8 +164,8 @@ class TestReferenceManagement:
         mock_session.commit = AsyncMock()
         mock_session.refresh = AsyncMock()
         
-        # Create async generator for session
-        async def mock_get_db_session():
+        # Create generator for session (not async since TestClient is sync)
+        def mock_get_db_session():
             yield mock_session
         
         # Override dependency

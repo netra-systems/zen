@@ -18,6 +18,7 @@ NOISE_PATTERNS = [
     r"npm WARN",
     r"npm notice",
     r"deprecated.*package",
+    r"DeprecationWarning",
     
     # File watching
     r"Watching for file changes",
@@ -39,13 +40,25 @@ NOISE_PATTERNS = [
     r"Will assume transactional DDL",
     r"REAL connection (established|closed)",
     r"connection (open|closed)",
+    r"\[ClickHouse\] Connecting to instance",
+    r"\[ClickHouse\] REAL connection",
+    r"PostgreSQL async engine created",
+    r"Current revision:",
+    r"Database is up to date",
     
     # Service initialization
     r"UnifiedToolRegistry initialized",
     r"Response Generator initialized",
     r"Quality Gate Service initialized",
+    r"Quality Monitoring Service initialized",
     r"Multiprocessing configured",
     r"Registered telemetry for service",
+    r"SyntheticDataService initialized",
+    r"Registered agent:",
+    r"Performance.*initialized",
+    r"Performance.*started",
+    r"Background task.*added",
+    r"Task Task-\d+ added",
     
     # HTTP request noise
     r"HTTP Request:",
@@ -60,12 +73,30 @@ NOISE_PATTERNS = [
     r"Using dev user:",
     r"Application startup complete",
     r"Uvicorn running on",
+    r"pytest detected in sys.modules",
+    r"Checking database migrations",
+    r"Loading key manager",
+    r"Key manager loaded",
+    r"Initializing ClickHouse tables",
+    r"ClickHouse tables initialization complete",
+    r"Starting database optimization",
+    r"Database optimization completed",
+    r"Database index optimization scheduled",
+    r"Comprehensive monitoring started",
+    r"Database connection monitoring",
     
     # Environment/validation
     r"Database environment validation",
     r"Environment variables loaded",
-    r"Loading key manager",
-    r"Key manager loaded",
+    r"Configuration validation passed",
+    r"Schema validation.*successfully",
+    r"Extra tables in database",
+    
+    # Development environment specific
+    r"Created development configuration",
+    r"Loading DATABASE_URL",
+    r"Populated.*config for development",
+    r"Populated.*secrets for development",
 ]
 
 # Patterns to condense in standard mode

@@ -64,6 +64,8 @@ async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logge
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
     """Run database index optimization in background."""
     try:
+        # Delay optimization to avoid startup bottleneck
+        await asyncio.sleep(30)  # Wait 30 seconds after startup
         logger.debug("Starting background database index optimization...")
         optimization_results = await index_manager.optimize_all_databases()
         logger.debug(f"Background database optimization completed: {optimization_results}")

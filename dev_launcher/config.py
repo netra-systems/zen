@@ -102,8 +102,12 @@ class LauncherConfig:
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":
         """Create configuration from command-line arguments."""
-        # Handle port configuration
-        dynamic_ports = not args.static if hasattr(args, 'static') else True
+        # Handle port configuration - default to dynamic ports unless explicitly disabled
+        dynamic_ports = True  # Default to dynamic
+        if hasattr(args, 'static') and args.static:
+            dynamic_ports = False
+        elif hasattr(args, 'dynamic'):
+            dynamic_ports = args.dynamic
         
         # Handle reload flags
         if hasattr(args, 'dev') and args.dev:

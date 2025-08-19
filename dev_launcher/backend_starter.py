@@ -85,7 +85,10 @@ class BackendStarter:
     
     def _allocate_dynamic_backend_port(self) -> int:
         """Allocate dynamic backend port."""
-        port = get_free_port()
+        # Try to get a port in a preferred range first
+        from dev_launcher.utils import find_available_port
+        preferred_port = 8000
+        port = find_available_port(preferred_port, (8000, 8010))
         logger.info(f"Allocated backend port: {port}")
         return port
     

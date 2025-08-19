@@ -35,8 +35,8 @@ We prioritize a globally coherent, modular architecture. Globally correct > loca
 *   **Stability by Default:** Changes must be atomic. Explicitly flag any breaking changes.
 
 ### 2.2. Complexity Management
-We prioritize logical clarity over arbitrary constraints. Focus on minimizing Cyclomatic Complexity rather than simply minimizing lines of code.
-*   **Function Guidelines:** Strive for concise functions (approx. <25 lines). Functions should perform a single task.
+We prioritize logical clarity over arbitrary constraints. Focus on minimizing Cyclomatic Complexity and minimizing lines of code.
+*   **Function Guidelines:** Strive for concise functions (approx. <20 lines). Functions should perform a single task.
 *   **Module Guidelines:** Aim for focused modules (approx. <500 lines). Modules should be testable units.
 *   **The Standard:** If these guidelines are exceeded, it is a signal to reassess the design for SRP violations or excessive complexity. Avoid excessive fragmentation (ravioli code) that hinders readability.
 

@@ -174,6 +174,8 @@ class OptimizedStartupOrchestrator:
         self.progress.complete()
         summary = self.sequencer.get_sequence_summary()
         self._show_startup_summary(summary)
+        # Run the main loop to keep services running
+        self.launcher._run_main_loop()
         return self.launcher._handle_cleanup()
     
     def _handle_startup_failure(self, failed_phases):

@@ -167,11 +167,16 @@ class DevLauncher:
     def _ensure_cleanup(self):
         """Ensure cleanup is performed on exit."""
         if not self._shutting_down:
+            self._shutting_down = True
             self._graceful_shutdown()
     
     def _graceful_shutdown(self):
         """Perform graceful shutdown of all services."""
-        self._print("🔄", "CLEANUP", "Starting graceful shutdown...")
+        # Only print if we're actually shutting down services
+        if hasattr(self, 'process_manager') and self.process_manager.processes:
+            self._print("🔄", "CLEANUP", "Starting graceful shutdown...")
+        else:
+            return  # Nothing to shutdown
         
         # Stop health monitoring first
         if hasattr(self, 'health_monitor'):
@@ -195,7 +200,9 @@ class DevLauncher:
         # Verify ports are freed
         self._verify_ports_freed()
         
-        self._print("✅", "SHUTDOWN", "Graceful shutdown complete")
+        # Only print completion if we actually shut down services
+        if hasattr(self, 'process_manager') and self.process_manager.processes:
+            self._print("✅", "SHUTDOWN", "Graceful shutdown complete")
     
     def _terminate_all_services(self):
         """Terminate all services in proper order."""
@@ -465,6 +472,9 @@ class DevLauncher:
         if self._shutting_down:
             return 0  # Already handled by graceful shutdown
         
+        # Prevent duplicate cleanup from atexit handler
+        self._shutting_down = True
+        
         # Show startup time and optimization report
         elapsed = time.time() - self.startup_time
         self._print("⏱️", "TIME", f"Total startup time: {elapsed:.1f}s")
@@ -479,11 +489,9 @@ class DevLauncher:
         # Save successful run to cache
         self.cache_manager.mark_successful_startup(elapsed)
         
-        # Mark as shutting down to prevent duplicate cleanup
-        self._shutting_down = True
-        
-        # Perform graceful shutdown
-        self._graceful_shutdown()
+        # Perform graceful shutdown if needed
+        if hasattr(self, 'process_manager') and self.process_manager.processes:
+            self._graceful_shutdown()
         
         if not self.health_monitor.all_healthy():
             self._print("⚠️", "WARN", "Some services were unhealthy during execution")

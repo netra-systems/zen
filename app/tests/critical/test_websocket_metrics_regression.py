@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 from app.monitoring.metrics_collector import MetricsCollector
-from app.schemas.monitoring import WebSocketMetrics
+from app.monitoring import WebSocketMetrics
 from app.agents.base.interface import ExecutionResult
 from app.schemas.core_enums import ExecutionStatus
 
