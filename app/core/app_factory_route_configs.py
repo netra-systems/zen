@@ -18,7 +18,8 @@ def _get_auth_route_configs(modules: dict) -> dict:
 def _get_api_route_configs(modules: dict) -> dict:
     """Get API route configurations."""
     return {"threads": (modules["threads_router"], "", ["threads"]),
-        "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"])}
+        "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
+        "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"])}
 
 
 def _get_service_route_configs(modules: dict) -> dict:

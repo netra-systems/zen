@@ -67,7 +67,8 @@ def _import_core_routers() -> dict:
     """Import core functionality routers"""
     from app.routes.llm_cache import router as llm_cache_router
     from app.routes.threads_route import router as threads_router
-    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router}
+    from app.routes.mcp import router as mcp_router
+    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
 
 
 def _import_extended_routers() -> dict:

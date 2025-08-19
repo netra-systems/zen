@@ -197,8 +197,8 @@ sqlalchemy.url = sqlite:///:memory:
         
         # Test statistics initialization
         stats = await ws_manager.get_statistics()
-        assert stats["total_connections"] == 0
-        assert stats["active_connections"] == 0
+        assert stats["connection_summary"]["active"] == 0
+        assert stats["connection_summary"]["total_messages"] == 0
     
     @pytest.mark.asyncio
     async def test_authentication_system_startup(self, startup_env):
