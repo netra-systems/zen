@@ -329,7 +329,7 @@ Write-Success "Auth Service deployed"
 # Deploy Backend
 Write-Status "Deploying Backend to Cloud Run..."
 $backendDeployCmd = @(
-    "run", "deploy", "netra-backend",
+    "run", "deploy", "netra-backend-staging",
     "--image", "$REGISTRY/backend:latest",
     "--region", $Region,
     "--platform", "managed",
@@ -361,7 +361,7 @@ Write-Success "Backend deployed"
 # Deploy Frontend
 Write-Status "Deploying Frontend to Cloud Run..."
 $frontendDeployCmd = @(
-    "run", "deploy", "netra-frontend",
+    "run", "deploy", "netra-frontend-staging",
     "--image", "$REGISTRY/frontend:latest",
     "--region", $Region,
     "--platform", "managed",

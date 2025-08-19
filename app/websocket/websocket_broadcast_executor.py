@@ -70,9 +70,9 @@ class WebSocketBroadcastExecutor(BaseExecutionInterface):
         """Initialize modern architecture components."""
         self.reliability_manager = self._init_reliability_manager(reliability_config)
         self.monitor = ExecutionMonitor()
-        # Delayed import to avoid circular dependency
-        from app.agents.base.executor import BaseExecutionEngine
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+        # Removed BaseExecutionEngine import to fix circular dependency
+        # Broadcast executor manages its own execution pattern
+        self.execution_engine = None
         self.error_handler = ExecutionErrorHandler()
     
     def _init_reliability_manager(self, config: Optional[Dict[str, Any]]) -> ReliabilityManager:

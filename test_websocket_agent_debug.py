@@ -14,7 +14,7 @@ from app.llm.llm_manager import LLMManager
 from app.agents.tool_dispatcher import ToolDispatcher
 from app.ws_manager import manager as websocket_manager
 from app.services.agent_service_core import AgentService
-from app.config_setup_core import config
+# config import not needed for this test
 
 logger = central_logger.get_logger(__name__)
 
@@ -23,7 +23,9 @@ async def test_agent_registration():
     print("\n=== Testing Agent Registration ===")
     
     # Create supervisor with components
-    llm_manager = LLMManager()
+    from app.schemas import AppConfig
+    config = AppConfig()
+    llm_manager = LLMManager(config)
     tool_dispatcher = ToolDispatcher({})
     
     supervisor = SupervisorAgent(
@@ -55,7 +57,9 @@ async def test_message_flow():
     print("\n=== Testing Message Flow ===")
     
     # Create components
-    llm_manager = LLMManager()
+    from app.schemas import AppConfig
+    config = AppConfig()
+    llm_manager = LLMManager(config)
     tool_dispatcher = ToolDispatcher({})
     supervisor = SupervisorAgent(
         llm_manager=llm_manager,
@@ -97,7 +101,9 @@ async def test_supervisor_run():
     print("\n=== Testing Direct Supervisor Run ===")
     
     # Create components
-    llm_manager = LLMManager()
+    from app.schemas import AppConfig
+    config = AppConfig()
+    llm_manager = LLMManager(config)
     tool_dispatcher = ToolDispatcher({})
     supervisor = SupervisorAgent(
         llm_manager=llm_manager,

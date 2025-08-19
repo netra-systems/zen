@@ -14,6 +14,16 @@
   <deployment_learnings>
     <date>2025-08-18</date>
     
+    <critical_requirement>
+      <title>MANDATORY SERVICE NAMING CONVENTION</title>
+      <rule>Cloud Run service names MUST ALWAYS be:</rule>
+      <service>netra-backend-staging (NOT netra-backend)</service>
+      <service>netra-frontend-staging (NOT netra-frontend)</service>
+      <service>netra-auth-service (unchanged)</service>
+      <reason>These names must match exactly what is deployed in Cloud Run</reason>
+      <enforcement>All deployment scripts have been updated to use these names</enforcement>
+    </critical_requirement>
+    
     <what_works>
       <service_account_auth>
         <key_file>gcp-staging-sa-key.json</key_file>
@@ -29,10 +39,13 @@
         <auth>docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest -f Dockerfile.auth .</auth>
       </docker_build_commands>
 
-      <service_names exact="true">
+      <service_names exact="true" critical="true">
+        <!-- CRITICAL: Service names MUST always use -staging suffix -->
         <backend>netra-backend-staging</backend>
         <frontend>netra-frontend-staging</frontend>
         <auth>netra-auth-service</auth>
+        <note>ALWAYS use -staging suffix for backend and frontend services</note>
+        <note>These names MUST match exactly in Cloud Run</note>
       </service_names>
     </what_works>
 

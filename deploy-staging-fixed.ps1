@@ -27,9 +27,9 @@ $REGION = "us-central1"
 $REGISTRY = "$REGION-docker.pkg.dev"
 $REGISTRY_PATH = "$REGISTRY/$PROJECT_ID/netra-containers"
 
-# Service names
-$BACKEND_SERVICE = "netra-backend"
-$FRONTEND_SERVICE = "netra-frontend"
+# Service names (MUST match Cloud Run service names exactly)
+$BACKEND_SERVICE = "netra-backend-staging"
+$FRONTEND_SERVICE = "netra-frontend-staging"
 $AUTH_SERVICE = "netra-auth-service"
 
 # URLs for frontend build

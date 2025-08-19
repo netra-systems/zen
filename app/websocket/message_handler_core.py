@@ -25,7 +25,7 @@ from .error_handler import WebSocketErrorHandler, default_error_handler
 from app.agents.base.interface import (
     BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus
 )
-from app.agents.base.executor import BaseExecutionEngine
+# Removed BaseExecutionEngine import to fix circular dependency
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.errors import ExecutionErrorHandler
@@ -86,7 +86,8 @@ class ModernReliableMessageHandler(BaseExecutionInterface):
         retry_config = self._create_retry_config()
         self.reliability_manager = ReliabilityManager(circuit_config, retry_config)
         self.monitor = ExecutionMonitor()
-        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+        # Use local execution pattern instead of BaseExecutionEngine to avoid circular import
+        self.execution_engine = None  # WebSocket handler manages its own execution
         
     def _create_circuit_config(self) -> CircuitBreakerConfig:
         """Create circuit breaker configuration."""
