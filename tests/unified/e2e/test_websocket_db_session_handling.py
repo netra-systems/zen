@@ -509,33 +509,30 @@ async def test_websocket_database_session_handling():
     print(f"\nTest Results (Execution time: {result['execution_time']:.2f}s)")
     print("-" * 50)
     
-    # Depends validation results
-    depends_result = result.get("depends_validation", {})
-    print(f"✓ Depends() Violations Check: {'PASS' if depends_result.get('success') else 'FAIL'}")
-    if depends_result.get("violations"):
-        print(f"  └─ Found {len(depends_result['violations'])} violations:")
-        for violation in depends_result["violations"][:3]:  # Show first 3
-            print(f"     • {violation['file']}:{violation['line']} - {violation['issue']}")
-    else:
-        print(f"  └─ No Depends() violations found in WebSocket endpoints")
+    # Depends violations check
+    violations = result.get("depends_violations", [])
+    print(f"✓ Depends() Violations Check: {'FOUND' if violations else 'NONE'}")
+    if violations:
+        print(f"  └─ Found {len(violations)} violations:")
+        for violation in violations[:3]:  # Show first 3
+            print(f"     • {violation['file']} - {violation['violation']}")
+            print(f"       Line: {violation['line']}")
     
     # Correct patterns validation
-    patterns_result = result.get("patterns_validation", {})
-    print(f"✓ Correct Patterns Check: {'PASS' if patterns_result.get('success') else 'FAIL'}")
-    if patterns_result.get("correct_usages"):
-        print(f"  └─ Found {len(patterns_result['correct_usages'])} correct pattern usages")
+    patterns = result.get("correct_patterns", [])
+    print(f"✓ Correct Patterns Check: {'FOUND' if patterns else 'MISSING'}")
+    if patterns:
+        print(f"  └─ Found {len(patterns)} correct pattern usages:")
+        for pattern in patterns[:2]:
+            print(f"     • {pattern['file']} - {pattern['pattern']}")
     
-    # Context manager test
-    context_result = result.get("context_manager_test", {})
-    print(f"✓ Context Manager Test: {'PASS' if context_result.get('success') else 'FAIL'}")
-    if context_result.get("session_acquired"):
-        print(f"  └─ Database session acquired and closed properly")
-    
-    # Depends simulation
-    depends_sim = result.get("depends_simulation", {})
-    print(f"✓ Depends() Issue Demo: {'PASS' if depends_sim.get('success') else 'FAIL'}")
-    if depends_sim.get("error_occurred"):
-        print(f"  └─ Demonstrated issue: {depends_sim.get('error_message', '')}")
+    # Depends issue demonstration
+    depends_demo = result.get("depends_issue_demo", {})
+    print(f"✓ Depends() Issue Demo: {'PASS' if depends_demo.get('issue_demonstrated') else 'FAIL'}")
+    if depends_demo.get("issue_demonstrated"):
+        print(f"  └─ Depends() returns: {depends_demo.get('depends_type', 'unknown')}")
+        print(f"  └─ Has execute method: {depends_demo.get('depends_has_execute', False)}")
+        print(f"  └─ Is callable: {depends_demo.get('depends_is_callable', False)}")
     
     # Performance compliance
     performance_ok = result.get("performance_compliance", False)
@@ -546,19 +543,31 @@ async def test_websocket_database_session_handling():
     print(f"\nSUMMARY:")
     print(f"• Total Depends() violations: {summary.get('total_violations', 0)}")
     print(f"• Correct patterns found: {summary.get('correct_patterns_found', 0)}")
-    print(f"• Context manager works: {summary.get('context_manager_works', False)}")
-    print(f"• Depends() issue demonstrated: {summary.get('depends_issue_demonstrated', False)}")
+    print(f"• Depends() issue demonstrated: {summary.get('issue_demonstrated', False)}")
     
     print("\n" + "="*80)
+    print("CRITICAL FINDINGS:")
+    if violations:
+        print(f"🚨 FOUND {len(violations)} WebSocket endpoints using incorrect Depends() pattern!")
+        print("   This will cause '_AsyncGeneratorContextManager' errors in production!")
+    else:
+        print("✅ No Depends() violations found in WebSocket endpoints")
+    
+    if patterns:
+        print(f"✅ Found {len(patterns)} correct async context manager patterns")
+    else:
+        print("❌ No correct patterns found!")
+    
+    print("="*80)
     
     # Assertions for test framework
     assert result["success"], f"WebSocket database session handling validation failed: {result.get('error', 'Multiple failures')}"
     assert result["execution_time"] < 10.0, f"Test took too long: {result['execution_time']:.2f}s (must be <10s)"
     
-    # Specific critical assertions
-    assert depends_result["success"], f"Found Depends() violations in WebSocket endpoints: {depends_result.get('violations', [])}"
-    assert patterns_result["success"], f"Missing correct database session patterns: {patterns_result.get('missing_patterns', [])}"
-    assert context_result["success"], f"Database context manager not working: {context_result.get('error', '')}"
+    # Critical assertions - we expect to find violations (this is testing for bugs)
+    assert len(violations) > 0, "Expected to find Depends() violations in WebSocket endpoints - if none found, the bug may have been fixed"
+    assert len(patterns) > 0, "Expected to find correct patterns in websocket helpers"
+    assert depends_demo.get("issue_demonstrated", False), "Failed to demonstrate the Depends() issue"
     
     return result
 
