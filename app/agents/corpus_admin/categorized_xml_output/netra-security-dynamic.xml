@@ -1,0 +1,14 @@
+<?xml version="1.0" ?>
+<corpus domain="netra-security" update_frequency="dynamic">
+  <prompt_response>
+    <prompt>How does Netra ensure the security of my data and models?</prompt>
+    <response>Netra ensures the security of your data through a 'Security First' architecture designed by industry veterans. Key security measures include:nn*   **No Raw Data Access:** The platform operates on sanitized logs and never requires access to raw, sensitive PII data.n*   **PII Redaction:** Robust methods are provided for PII redaction before data ingestion, including native SQL views and Python scripts.n*   **Read-Only Access:** By default, Netra connects to your data sources with read-only permissions, preventing any modification to your data.n*   **Secure Connection:** The initial connection is made via a dedicated, secure ClickHouse user.n*   **Data Deletion Guarantee:** Data deletion is contractually guaranteed.n*   **Flexible Deployment:** For maximum security, enterprise clients have the option to host the platform in their own private cloud (VPC) and ensure 100% data residency within their networks.</response>
+  </prompt_response>
+</corpus>
+<?xml version="1.0" ?>
+<corpus domain="netra-security" update_frequency="dynamic">
+  <prompt_response>
+    <prompt>How does Netra ensure the security of my data and models?</prompt>
+    <response>Netra ensures the security of your data through a 'Security First' architecture designed by industry veterans. Key security measures include:nn*   **No Raw Data Access:** The platform operates on sanitized logs and never requires access to raw, sensitive PII data.n*   **PII Redaction:** Robust methods are provided for PII redaction before data ingestion, including native SQL views and Python scripts.n*   **Read-Only Access:** By default, Netra connects to your data sources with read-only permissions, preventing any modification to your data.n*   **Secure Connection:** The initial connection is made via a dedicated, secure ClickHouse user.n*   **Data Deletion Guarantee:** Data deletion is contractually guaranteed.n*   **Flexible Deployment:** For maximum security, enterprise clients have the option to host the platform in their own private cloud (VPC) and ensure 100% data residency within their networks.</response>
+  </prompt_response>
+</corpus>

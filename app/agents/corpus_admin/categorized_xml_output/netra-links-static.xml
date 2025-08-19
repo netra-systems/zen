@@ -1,0 +1,119 @@
+<?xml version="1.0" ?>
+<corpus domain="netra-links" update_frequency="static">
+  <prompt_response>
+    <prompt>How much does the Netra platform cost?</prompt>
+    <response>Netra offers several pricing plans. There is a Free plan, a Professional plan at $300/month, a Premium plan at $2,500/month plus a percentage of managed spend, and a custom-priced Enterprise plan. You can find more details on the pricing page: https://netrasystems.ai/pricing</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where can I find a detailed comparison of your different subscription tiers?</prompt>
+    <response>A detailed comparison table of the features included in the Free, Professional, Premium, and Enterprise plans is available on our pricing page: https://netrasystems.ai/pricing#features</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Do you offer a free plan, a trial, or discounts for startups?</prompt>
+    <response>Yes, we offer a free-forever plan with basic features. We also offer a risk-free pilot program that functions as a trial, providing a free cost analysis. You can find details about all our plans, which are designed to be startup-friendly, on our pricing page: https://netrasystems.ai/pricing</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>I need details on your pricing model and performance-based fees. Can you provide a link?</prompt>
+    <response>Certainly. All details regarding our pricing model, including the performance-based fees for the Premium plan, are outlined on our official pricing page: https://netrasystems.ai/pricing</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>What features are included in the Growth plan versus the Enterprise plan?</prompt>
+    <response>You can find a comprehensive feature comparison between all our plans, including Premium (our primary offering for production teams) and Enterprise, on our pricing page: https://netrasystems.ai/pricing#features</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where is the pricing page located?</prompt>
+    <response>The pricing page is located at the following URL: https://netrasystems.ai/pricing</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>How do I sign up for Netra?</prompt>
+    <response>You can start the process of signing up for Netra by applying for our AI Inference Optimization Pilot program. Please visit the following page to get started: https://netrasystems.ai/pilot</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>I'm interested in starting a pilot program or a Proof of Concept (PoC). What are the next steps?</prompt>
+    <response>The next step is to fill out the application form for our pilot program. This will help us understand your needs and determine eligibility. You can find the form here: https://netrasystems.ai/pilot</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where do I go to create a new account or register for access?</prompt>
+    <response>To register for access and begin the onboarding process, please apply for our pilot program at this link: https://netrasystems.ai/pilot</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>How can I get a demo of the platform?</prompt>
+    <response>To get a demo of the platform, we recommend starting with our pilot program, which includes a personalized savings report based on your own data. You can apply for the pilot here: https://netrasystems.ai/pilot</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Send me the link to get started with Netra today.</prompt>
+    <response>You can get started with Netra by applying for our pilot program at the following link: https://netrasystems.ai/pilot</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where is the official technical documentation for Netra located?</prompt>
+    <response>The official technical documentation for Netra can be found here: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>I just signed up and need the 'Getting Started' guide.</prompt>
+    <response>You can find the 'Getting Started' guide, which outlines the initial steps for connecting your data to the platform, at this link: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>How do I integrate the Netra SDK into my application?</prompt>
+    <response>General integration instructions and technical guides are available in our documentation. Please start with the 'Getting Started' guide here: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Are there tutorials, examples, or Quickstart guides available for new users?</prompt>
+    <response>Yes, our technical documentation serves as the primary resource for new users. The best place to start is the 'Getting Started' guide: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where are the instructions for setting up the platform for the first time?</prompt>
+    <response>The initial setup instructions, which cover connecting your logs securely to Netra, are detailed in our 'Getting Started' guide: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>How do I begin the technical implementation?</prompt>
+    <response>The technical implementation begins with ingesting your data. Please follow the steps outlined in our 'Getting Started' documentation: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>What is the Netra Model Context Protocol (MCP)?</prompt>
+    <response>The Netra MCP is designed to integrate with your existing development lifecycle and act as an intelligent partner. You can read more about Netra MCP here: https://docs.netrasystems.ai/docs/Netra-MCP</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where can I find a technical overview or whitepaper on Netra's architecture?</prompt>
+    <response>The provided documentation link that covers the Netra MCP and its architecture was inaccessible. For available technical information, please refer to the main documentation page: https://docs.netrasystems.ai/docs/Getting-Started</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Is there documentation explaining the different implementation workflows?</prompt>
+    <response>Yes! Start with our comprehensive 'Getting Started' guide: https://docs.netrasystems.ai/docs/Getting-Started </response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>I need more details on how the Optimization Gateway operates. Where is that documented?</prompt>
+    <response>Read the doumentation on Netra MCP which handles the optimization operations: https://docs.netrasystems.ai/docs/Netra-MCP</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where can I read about the architecture of the Netra MCP?</prompt>
+    <response>Here: https://docs.netrasystems.ai/docs/Netra-MCP</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where is the complete API reference documentation?</prompt>
+    <response>Here: https://docs.netrasystems.ai/docs/Netra-MCP</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>I need the specific endpoint details and technical reference for authentication.</prompt>
+    <response>The Netra MCP endpoint is: https://mcp.netrasystems.ai/v1. Find all the relevant information to setup at: https://docs.netrasystems.ai/docs/Netra-MCP</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>What are the required parameters and format for the /auth/token POST request?</prompt>
+    <response>Visit the page: https://docs.netrasystems.ai/reference/token_api_auth_token_post</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Who is the team behind the Netra AI Platform?</prompt>
+    <response>The Netra AI Platform is built by Netra Apex. The founding team consists of CEO Anthony Chaudhary, Aishwarya Kotharu (Product, AI/ML, GTM), and Poonam Nain (Customer Success). They are supported by a board of expert advisors with experience from companies like Tiktok/Bytedance, AWS, Apple, and SAP. You can learn more about them here: https://netrasystems.ai/team</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Where can I learn more about the company, its mission, and its founders?</prompt>
+    <response>You can learn more about the Netra Apex team, including its founders and advisors, and their mission to solve the 'cost-quality-latency-throughput' quadrilemma on the team page: https://netrasystems.ai/team</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>Do you have a page detailing the expertise and background of your leadership team?</prompt>
+    <response>Yes, we do. The background and expertise of our founding team and advisors are detailed on our team page: https://netrasystems.ai/team</response>
+  </prompt_response>
+  <prompt_response>
+    <prompt>I'd like to see the 'About Us' or 'Team' page.</prompt>
+    <response>Certainly. You can find our team page at the following link: https://netrasystems.ai/team</response>
+  </prompt_response>
+</corpus>
