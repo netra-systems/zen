@@ -27,8 +27,10 @@ export interface TestUser {
   id: string;
   email: string;
   full_name: string;
-  role: 'admin' | 'user' | 'developer';
+  role: 'standard_user' | 'power_user' | 'developer' | 'admin' | 'super_admin';
   permissions: string[];
+  is_developer?: boolean;
+  is_superuser?: boolean;
 }
 
 // Test user factory (≤8 lines)
@@ -38,6 +40,8 @@ export const createTestUser = (): TestUser => ({
   full_name: 'Enterprise User',
   role: 'admin',
   permissions: ['read', 'write', 'admin', 'enterprise'],
+  is_developer: true,
+  is_superuser: false,
 });
 
 // Mock WebSocket factory (≤8 lines)
@@ -75,9 +79,9 @@ export const createBrowserMocks = () => ({
 // Auth store mock setup (≤8 lines)
 export const setupMockAuthStore = () => {
   const mockStore = {
-    isAuthenticated: true,
-    user: createTestUser(),
-    token: 'jwt-enterprise-token-123',
+    isAuthenticated: false,
+    user: null,
+    token: null,
     loading: false,
     error: null,
     login: jest.fn().mockImplementation((user, token) => {
@@ -85,12 +89,20 @@ export const setupMockAuthStore = () => {
       mockStore.user = user;
       mockStore.token = token;
       mockStore.error = null;
+      // Simulate localStorage storage like real store
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('jwt_token', token);
+      }
     }),
     logout: jest.fn().mockImplementation(() => {
       mockStore.isAuthenticated = false;
       mockStore.user = null;
       mockStore.token = null;
       mockStore.error = null;
+      // Simulate localStorage removal like real store
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('jwt_token');
+      }
     }),
     reset: jest.fn().mockImplementation(() => {
       mockStore.isAuthenticated = false;
@@ -98,6 +110,10 @@ export const setupMockAuthStore = () => {
       mockStore.token = null;
       mockStore.loading = false;
       mockStore.error = null;
+      // Simulate localStorage removal like real store
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('jwt_token');
+      }
     }),
     setLoading: jest.fn().mockImplementation((loading) => {
       mockStore.loading = loading;
@@ -110,11 +126,27 @@ export const setupMockAuthStore = () => {
         mockStore.user = { ...mockStore.user, ...userUpdate };
       }
     }),
-    hasPermission: jest.fn(() => true),
-    hasAnyPermission: jest.fn(() => true),
-    hasAllPermissions: jest.fn(() => true),
-    isAdminOrHigher: jest.fn(() => true),
-    isDeveloperOrHigher: jest.fn(() => true),
+    hasPermission: jest.fn().mockImplementation((permission) => {
+      if (!mockStore.user) return false;
+      return mockStore.user.permissions?.includes(permission) || false;
+    }),
+    hasAnyPermission: jest.fn().mockImplementation((permissions) => {
+      if (!mockStore.user) return false;
+      return permissions.some(p => mockStore.user?.permissions?.includes(p)) || false;
+    }),
+    hasAllPermissions: jest.fn().mockImplementation((permissions) => {
+      if (!mockStore.user) return false;
+      return permissions.every(p => mockStore.user?.permissions?.includes(p)) || false;
+    }),
+    isAdminOrHigher: jest.fn().mockImplementation(() => {
+      if (!mockStore.user) return false;
+      return ['admin', 'super_admin'].includes(mockStore.user.role || '') || mockStore.user.is_superuser || false;
+    }),
+    isDeveloperOrHigher: jest.fn().mockImplementation(() => {
+      if (!mockStore.user) return false;
+      return ['developer', 'admin', 'super_admin'].includes(mockStore.user.role || '') || 
+             mockStore.user.is_developer || mockStore.user.is_superuser || false;
+    }),
   };
   (useAuthStore as jest.Mock).mockReturnValue(mockStore);
   return mockStore;
@@ -139,12 +171,13 @@ export const setupWebSocketEnvironment = () => {
 
 // Storage event factory (≤8 lines)
 export const createStorageEvent = (key: string, newValue: string | null) => {
-  return new StorageEvent('storage', {
-    key,
-    newValue,
-    oldValue: newValue ? null : 'old-value',
-    url: 'http://localhost:3000',
-  });
+  const event = new Event('storage') as StorageEvent;
+  Object.defineProperty(event, 'key', { value: key, writable: false });
+  Object.defineProperty(event, 'newValue', { value: newValue, writable: false });
+  Object.defineProperty(event, 'oldValue', { value: newValue ? null : 'old-value', writable: false });
+  Object.defineProperty(event, 'url', { value: 'http://localhost:3000', writable: false });
+  Object.defineProperty(event, 'storageArea', { value: localStorage, writable: false });
+  return event;
 };
 
 // Test cookies setup (≤8 lines)

@@ -29,6 +29,7 @@ from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
+from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
 
 logger = logging.getLogger(__name__)
 
@@ -112,6 +113,7 @@ class DevLauncher:
         self.cache_manager = CacheManager(self.config.project_root)
         self.startup_optimizer = StartupOptimizer(self.cache_manager)
         self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
+        self.optimized_startup = OptimizedStartupOrchestrator(self)
         self._register_optimization_steps()
     
     def _register_optimization_steps(self):
@@ -189,53 +191,8 @@ class DevLauncher:
         self.startup_optimizer.start_timing()
         
         # Execute optimized startup sequence
-        return self._run_optimized_startup()
+        return self.optimized_startup.run_optimized_startup()
     
-    def _run_optimized_startup(self) -> int:
-        """Run startup sequence following spec v2.0.0."""
-        # Step 1-3: Pre-checks with caching
-        if not self._run_cached_pre_checks():
-            return 1
-        
-        # Step 4-5: Migration check and execution
-        if not self._handle_migrations_with_cache():
-            return 1
-        
-        # Step 6-12: Service startup with optimization
-        return self._run_optimized_services()
-    
-    def _run_cached_pre_checks(self) -> bool:
-        """Run pre-checks with intelligent caching."""
-        # Check cache for previous startup state
-        if self.cache_manager.is_cache_valid():
-            self._print("⚡", "CACHE", "Using cached startup state")
-        
-        # Environment check (skip if cached and unchanged)
-        if not self.check_environment():
-            return False
-        
-        # Load secrets if configured
-        return self._handle_secret_loading()
-    
-    def _handle_migrations_with_cache(self) -> bool:
-        """Handle database migrations with file hash caching."""
-        if not self.cache_manager.has_migration_files_changed():
-            self._print("⚡", "CACHE", "Migrations unchanged, skipping")
-            return True
-        
-        # Run migrations if needed (this would need integration with migration system)
-        self._print("🗄️", "DB", "Running migrations...")
-        return True
-    
-    def _run_optimized_services(self) -> int:
-        """Run services with optimization."""
-        self._clear_service_discovery()
-        
-        # Use parallel startup if enabled
-        if self.parallel_enabled:
-            return self._run_services_parallel()
-        else:
-            return self._run_services_sequential()
     
     def _run_services(self) -> int:
         """Run all services."""
