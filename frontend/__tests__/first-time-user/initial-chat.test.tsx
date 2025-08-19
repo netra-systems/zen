@@ -12,74 +12,51 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
-// Test utilities - using REAL components and providers
-import { 
-  createMockUser,
-  renderWithProviders,
-  createMockMessage,
-  createMockThread,
-  expectNoErrors
-} from '../test-utils';
+// Test utilities and helpers
+import { renderWithProviders, createMockMessage, expectNoErrors } from '../test-utils';
+import {
+  createMockStates,
+  setupCleanTestState,
+  resetTestMocks,
+  getMessageInput,
+  getFirstExamplePrompt,
+  sendFirstMessage,
+  clickExamplePrompt,
+  verifyMessageSent,
+  verifyProcessingState,
+  verifyExamplePromptSent,
+  verifyWelcomeDisplay,
+  verifyExamplePromptsVisible,
+  verifyQuickLoad,
+  verifyAccessibilityFeatures,
+  verifyUnauthenticatedState,
+  verifyMarkdownRendering,
+  verifyCodeBlockRendering
+} from './initial-chat-helpers';
 
 // Real components under test
 import { ExamplePrompts } from '@/components/chat/ExamplePrompts';
 import { MessageInput } from '@/components/chat/MessageInput';
 import MainChat from '@/components/chat/MainChat';
 
-// Mock store states for different test scenarios
-const mockWebSocket = {
-  sendMessage: jest.fn(),
-  connected: true,
-  isConnected: true,
-  connectionState: 'connected' as const,
-  messages: []
-};
-
-const mockAuthenticatedUser = createMockUser({
-  email: 'firsttime@company.com',
-  name: 'First Time User',
-  role: 'free'
-});
-
-const mockChatStore = {
-  isProcessing: false,
-  messages: [],
-  addMessage: jest.fn(),
-  setProcessing: jest.fn(),
-  clearMessages: jest.fn(),
-  activeThreadId: 'thread-new-user',
-  setActiveThread: jest.fn(),
-  fastLayerData: null,
-  mediumLayerData: null,
-  slowLayerData: null,
-  currentRunId: null,
-  isThreadLoading: false
-};
-
-const mockAuthStore = {
-  isAuthenticated: true,
-  user: mockAuthenticatedUser,
-  token: 'test-token-123',
-  login: jest.fn(),
-  logout: jest.fn(),
-  loading: false
-};
+// Initialize mock states
+const mocks = createMockStates();
 
 // Mock hooks with proper return types
 jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: jest.fn(() => mockWebSocket)
+  useWebSocket: jest.fn(() => mocks.webSocket)
 }));
 
 jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: jest.fn(() => mockChatStore)
+  useUnifiedChatStore: jest.fn(() => mocks.chatStore)
 }));
 
 jest.mock('@/store/authStore', () => ({
-  useAuthStore: jest.fn(() => mockAuthStore)
+  useAuthStore: jest.fn(() => mocks.authStore)
 }));
 
 jest.mock('@/store/threadStore', () => ({
@@ -89,7 +66,6 @@ jest.mock('@/store/threadStore', () => ({
   }))
 }));
 
-// Mock loading state hook for clean testing
 jest.mock('@/hooks/useLoadingState', () => ({
   useLoadingState: jest.fn(() => ({
     shouldShowLoading: false,

@@ -19,6 +19,7 @@ class LauncherConfig:
     # Reload configuration (uses native reload)
     backend_reload: bool = False  # Default to no reload for performance
     frontend_reload: bool = True  # Next.js always has reload
+    auth_reload: bool = False  # Auth service reload for performance
     
     # Secret management
     load_secrets: bool = True
@@ -100,18 +101,22 @@ class LauncherConfig:
             # Development mode: enable all hot reload
             backend_reload = True
             frontend_reload = True
+            auth_reload = True
         elif hasattr(args, 'backend_reload') and args.backend_reload:
             # Explicit backend reload
             backend_reload = True
             frontend_reload = True
-        elif args.no_reload:
-            # No reload at all
+            auth_reload = False
+        elif hasattr(args, 'no_reload') and args.no_reload:
+            # No reload at all - disable for all services
             backend_reload = False
-            frontend_reload = True  # Next.js always has reload
+            frontend_reload = False  # Disable frontend reload for maximum performance
+            auth_reload = False
         else:
             # Default: no backend reload for performance
             backend_reload = False
             frontend_reload = True
+            auth_reload = False
         
         # Default to loading secrets unless --no-secrets is specified
         load_secrets = not args.no_secrets if hasattr(args, 'no_secrets') else True
@@ -123,6 +128,7 @@ class LauncherConfig:
             verbose=args.verbose,
             backend_reload=backend_reload,
             frontend_reload=frontend_reload,
+            auth_reload=auth_reload,
             load_secrets=load_secrets,
             project_id=args.project_id if hasattr(args, 'project_id') else None,
             no_browser=args.no_browser,
@@ -140,6 +146,7 @@ class LauncherConfig:
             "dynamic_ports": self.dynamic_ports,
             "backend_reload": self.backend_reload,
             "frontend_reload": self.frontend_reload,
+            "auth_reload": self.auth_reload,
             "load_secrets": self.load_secrets,
             "project_id": self.project_id,
             "no_browser": self.no_browser,
