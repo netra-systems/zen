@@ -31,6 +31,10 @@ class LegacyServiceRunner:
     
     def run_services_sequential(self) -> int:
         """Run services sequentially (original behavior)."""
+        # Run migrations before starting services
+        if not self._run_migrations_if_needed():
+            self._print("⚠️", "WARN", "Migration issues detected, continuing anyway")
+        
         auth_result = self._start_and_verify_auth()
         if auth_result != 0:
             return auth_result
@@ -42,6 +46,10 @@ class LegacyServiceRunner:
     def run_services_parallel(self) -> int:
         """Run services in parallel for faster startup."""
         self._print("⚡", "FAST", "Starting services in parallel...")
+        
+        # Run migrations before starting services
+        if not self._run_migrations_if_needed():
+            self._print("⚠️", "WARN", "Migration issues detected, continuing anyway")
         
         # Start auth and backend in parallel
         auth_future = self.executor.submit(self._start_auth_parallel)
@@ -205,6 +213,18 @@ class LegacyServiceRunner:
             self.config.frontend_port,
             self.config.no_browser
         )
+    
+    def _run_migrations_if_needed(self) -> bool:
+        """Run migrations if needed."""
+        self._print("🔄", "MIGRATIONS", "Checking database schema...")
+        success = self.launcher.run_migrations()
+        
+        if success:
+            self._print("✅", "MIGRATIONS", "Database ready")
+        else:
+            self._print("⚠️", "MIGRATIONS", "Migration issues detected")
+        
+        return success
     
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""

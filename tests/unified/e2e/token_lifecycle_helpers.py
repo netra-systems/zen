@@ -17,7 +17,7 @@ class TokenLifecycleManager:
     """Manages token lifecycle operations for E2E testing."""
     
     def __init__(self):
-        self.auth_url = "http://localhost:8001"
+        self.auth_url = "http://localhost:8081"  # Updated to match services
         self.backend_url = "http://localhost:8000"
         self.websocket_url = "ws://localhost:8000"
         self.jwt_helper = JWTTestHelper()

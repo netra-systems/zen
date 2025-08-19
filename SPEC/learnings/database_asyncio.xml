@@ -126,5 +126,45 @@
             <test-case>app/tests/unit/test_state_checkpoint_session_fix.py</test-case>
         </learning>
 
+        <learning id="postgres-session-async-function-paradox">
+            <title>PostgreSQL Session Factory Async Function Paradox</title>
+            <date>2025-08-19</date>
+            <category>Database/AsyncIO</category>
+            <description>
+                Health check endpoints were failing with 503 errors despite valid database credentials and running
+                PostgreSQL container. The issue was _setup_session_for_transaction() being marked as async but not
+                actually awaiting anything, causing type mismatch when get_async_db() tried to await it.
+            </description>
+            <symptoms>
+                <symptom>Error: Database readiness check failed: 503: Service Unavailable</symptom>
+                <symptom>Direct database connection tests succeed with same credentials</symptom>
+                <symptom>PostgreSQL container running and accessible on port 5433</symptom>
+                <symptom>Health check endpoints failing despite valid .env configuration</symptom>
+            </symptoms>
+            <root-causes>
+                <cause>_setup_session_for_transaction() marked as async but returns sync object directly</cause>
+                <cause>Function returns async_session_factory() without awaiting (not a coroutine)</cause>
+                <cause>get_async_db() tries to await the result, expecting coroutine but gets session factory</cause>
+                <cause>Type mismatch between async function declaration and sync return value</cause>
+            </root-causes>
+            <solution>
+                <step>Remove async keyword from _setup_session_for_transaction() function</step>
+                <step>Remove await when calling _setup_session_for_transaction() in get_async_db()</step>
+                <step>Function now correctly returns session factory synchronously</step>
+                <step>Verified health endpoints return successful status after fix</step>
+            </solution>
+            <files-modified>
+                <file>app/db/postgres_session.py:104 - Removed async from _setup_session_for_transaction</file>
+                <file>app/db/postgres_session.py:128 - Removed await when calling _setup_session_for_transaction</file>
+            </files-modified>
+            <prevention>
+                <item>Only mark functions as async if they actually await something</item>
+                <item>Validate that async functions return coroutines, not sync objects</item>
+                <item>Test database connectivity separately from application startup</item>
+                <item>Add explicit type hints for session factory returns</item>
+            </prevention>
+            <test-case>Verified with curl http://localhost:8000/health/ready</test-case>
+        </learning>
+
     </learnings>
 </specification>

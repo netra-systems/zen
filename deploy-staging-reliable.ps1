@@ -354,7 +354,7 @@ if (-not $SkipMigrations) {
         Write-Host "  Expected at: $migrationScriptPath" -ForegroundColor Gray
     }
 } else {
-    Write-Host "[3.5/5] Skipping database migrations (--SkipMigrations flag)" -ForegroundColor Yellow
+    Write-Host "[3.5/5] Skipping database migrations (SkipMigrations flag)" -ForegroundColor Yellow
 }
 
 # Step 4: Deploy to Cloud Run
@@ -420,13 +420,13 @@ if ($AuthServiceExists) {
         "--region", $REGION,
         "--project", $PROJECT_ID,
         "--allow-unauthenticated",
-        "--port", "8080",
-        "--memory", "512Mi",
+        "--port", "8001",
+        "--memory", "1Gi",
         "--cpu", "1",
-        "--min-instances", "0",
-        "--max-instances", "10",
+        "--min-instances", "1",
+        "--max-instances", "2",
         "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=auth",
-        "--set-secrets=DATABASE_URL=database-url-staging:latest",
+        "--set-secrets=DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest",
         "--quiet"
     )
     gcloud @authDeployArgs
@@ -578,5 +578,5 @@ try {
     $deploymentInfo | ConvertTo-Json | Out-File -FilePath $jsonPath -Encoding utf8
     Write-Host "Deployment info saved to deployment-info.json" -ForegroundColor Yellow
 } catch {
-    Write-Host "Warning: Failed to save deployment-info.json: $_" -ForegroundColor Yellow
+    Write-Host "Warning: Failed to save deployment-info.json" -ForegroundColor Yellow
 }

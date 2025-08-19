@@ -17,13 +17,13 @@ from typing import Dict, Optional, Set
 
 # Support both root and auth_service directory execution
 try:
-    # When running from root directory
-    from auth_service.auth_core.core.jwt_handler import JWTHandler
-    from auth_service.auth_core.config import AuthConfig
-except ImportError:
-    # When running from within auth_service directory
+    # Primary import path - auth_core at root level
     from auth_core.core.jwt_handler import JWTHandler
     from auth_core.config import AuthConfig
+except ImportError:
+    # Fallback for auth_service directory execution
+    from auth_service.auth_core.core.jwt_handler import JWTHandler
+    from auth_service.auth_core.config import AuthConfig
 
 
 class TestJWTSignatureValidation:

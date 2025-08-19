@@ -485,10 +485,14 @@ async def oauth_callback(
 async def health_check():
     """Health check endpoint"""
     redis_ok = auth_service.session_manager.health_check()
+    redis_enabled = auth_service.session_manager.redis_enabled
+    
+    # If Redis is disabled by design, the service is still healthy
+    service_status = "healthy" if (redis_ok or not redis_enabled) else "degraded"
     
     return HealthResponse(
-        status="healthy" if redis_ok else "degraded",
-        redis_connected=redis_ok,
+        status=service_status,
+        redis_connected=redis_ok if redis_enabled else None,  # None when Redis is disabled
         database_connected=True  # Placeholder
     )
 

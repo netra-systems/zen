@@ -139,10 +139,14 @@
             <name>Database/AsyncIO</name>
             <file>learnings/database_asyncio.xml</file>
             <path>SPEC/learnings/database_asyncio.xml</path>
-            <learning_count>1</learning_count>
+            <learning_count>4</learning_count>
             <learning_ids>
                 <id>async-context-manager-dependency-injection</id>
+                <id>trial-period-type-mismatch</id>
+                <id>state-checkpoint-manager-session-factory</id>
+                <id>postgres-session-async-function-paradox</id>
             </learning_ids>
+            <important_note>CRITICAL: Functions marked as async must actually await something - see postgres-session-async-function-paradox</important_note>
         </category>
         <category>
             <name>Demo Readiness</name>

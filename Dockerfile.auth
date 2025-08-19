@@ -33,6 +33,8 @@ RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
 # Copy application code - proper directory structure
 COPY auth_service/ ./auth_service/
+# Copy auth_core to root level for proper imports
+COPY auth_service/auth_core/ ./auth_core/
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \

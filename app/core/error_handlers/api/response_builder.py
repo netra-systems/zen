@@ -41,7 +41,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for validation errors."""
-        self._logger.error(f"Validation error: {exc}")
+        self._logger.error("Validation error: %s", str(exc))
         
         return ErrorResponse(
             error_code=ErrorCode.VALIDATION_ERROR.value,
@@ -60,7 +60,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for database errors."""
-        self._logger.error(f"Database error: {exc}", exc_info=True)
+        self._logger.error("Database error: %s", str(exc), exc_info=True)
         
         return ErrorResponse(
             error_code=ErrorCode.DATABASE_ERROR.value,
@@ -79,7 +79,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for HTTP exceptions."""
-        self._logger.warning(f"HTTP error: {exc}")
+        self._logger.warning("HTTP error: %s", str(exc))
         
         # Map specific HTTP status codes to appropriate error codes
         error_code = self._map_http_status_to_error_code(exc)
@@ -127,7 +127,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for unknown exceptions."""
-        self._logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+        self._logger.error("Unhandled exception: %s", str(exc), exc_info=True)
         
         return ErrorResponse(
             error_code=ErrorCode.INTERNAL_ERROR.value,

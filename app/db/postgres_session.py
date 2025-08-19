@@ -101,7 +101,7 @@ async def _commit_session_transaction(session: AsyncSession):
     await session.commit()
 
 
-async def _setup_session_for_transaction():
+def _setup_session_for_transaction():
     """Setup and validate session for transaction."""
     from app.db.postgres_core import async_session_factory
     _validate_async_session_factory()
@@ -125,7 +125,7 @@ async def _execute_session_transaction(session: AsyncSession):
 @asynccontextmanager
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
     """Dependency to get async database session with proper transaction handling."""
-    session_factory = await _setup_session_for_transaction()
+    session_factory = _setup_session_for_transaction()
     async with session_factory as session:
         async for result in _execute_session_transaction(session):
             yield result

@@ -18,7 +18,7 @@ class JWTTestHelper:
     """Helper class for JWT token operations in tests."""
     
     def __init__(self):
-        self.auth_url = "http://localhost:8001"
+        self.auth_url = "http://localhost:8081"  # Updated to match services
         self.backend_url = "http://localhost:8000"
         self.websocket_url = "ws://localhost:8000"
         self.test_secret = "test-jwt-secret-key-32-chars-min"
