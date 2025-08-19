@@ -41,12 +41,9 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _initialize_execution_engine(self):
         """Initialize execution engine."""
-        # Delayed import to avoid circular dependency
-        from app.agents.base.executor import BaseExecutionEngine
-        self.execution_engine = BaseExecutionEngine(
-            reliability_manager=None,  # Using our custom reliability manager
-            monitor=self.monitor
-        )
+        # Removed BaseExecutionEngine import to fix circular dependency
+        # Connection executor uses its own execution pattern
+        self.execution_engine = None  # Not needed for connection management
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute connection operation core logic."""
