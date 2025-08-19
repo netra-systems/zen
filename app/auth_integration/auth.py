@@ -77,19 +77,12 @@ async def get_current_user(
         if not user:
             # In development mode, create and persist a dev user
             if os.getenv("ENVIRONMENT", "development") == "development":
-                # Create and persist a development user
-                user = User(
-                    id=user_id,
-                    email=validation_result.get("email", "dev@example.com"),
-                    is_superuser=validation_result.get("is_admin", True),
-                    is_developer=True,
-                    full_name="Development User",
-                    role="admin"
-                )
-                session.add(user)
-                await session.commit()
-                await session.refresh(user)
-                logger.warning(f"Created and persisted dev user: {user.email}")
+                from app.services.user_service import user_service
+                
+                # Use centralized dev user creation
+                email = validation_result.get("email", "dev@example.com")
+                user = await user_service.get_or_create_dev_user(session, email=email, user_id=user_id)
+                logger.warning(f"Using dev user: {user.email}")
             else:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,

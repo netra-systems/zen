@@ -58,6 +58,42 @@ class CRUDUser(EnhancedCRUDService[User, UserCreate, UserUpdate]):
             return existing_user
         return await self.create(db, obj_in=obj_in)
     
+    async def get_or_create_dev_user(self, db: AsyncSession, email: str = "dev@example.com", user_id: Optional[str] = None) -> User:
+        """Get or create development user. SINGLE SOURCE OF TRUTH for dev user creation."""
+        from sqlalchemy.exc import IntegrityError
+        import uuid
+        
+        # First try to find by email
+        user = await self.get_by_email(db, email=email)
+        if user:
+            return user
+        
+        # Create new dev user with proper ID
+        try:
+            if not user_id:
+                user_id = str(uuid.uuid4())
+            
+            user = User(
+                id=user_id,
+                email=email,
+                full_name="Development User",
+                is_active=True,
+                is_superuser=True,
+                is_developer=True,
+                role="admin"
+            )
+            db.add(user)
+            await db.commit()
+            await db.refresh(user)
+            return user
+        except IntegrityError:
+            # Handle race condition
+            await db.rollback()
+            user = await self.get_by_email(db, email=email)
+            if user:
+                return user
+            raise
+    
     async def create(self, db: AsyncSession, *, obj_in: UserCreate) -> User:
         # Check if user already exists with this email
         existing_user = await self.get_by_email(db, email=obj_in.email)

@@ -64,10 +64,8 @@ def build_oauth_user_data(user_info: dict) -> UserCreateOAuth:
 
 async def get_or_create_user(db: AsyncSession, user_info: dict):
     """Get existing user or create new user from OAuth info."""
-    user = await user_service.get_by_email(db, email=user_info['email'])
-    if not user:
-        user_in = build_oauth_user_data(user_info)
-        user = await user_service.create(db, obj_in=user_in)
+    user_in = build_oauth_user_data(user_info)
+    user = await user_service.get_or_create(db, obj_in=user_in)
     return user
 
 

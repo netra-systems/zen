@@ -21,10 +21,7 @@ def validate_dev_login_allowed(oauth_config) -> None:
 
 async def get_or_create_dev_user(db: AsyncSession, email: str):
     """Get existing dev user or create new one."""
-    user = await user_service.get_by_email(db, email=email)
-    if not user:
-        user_in = UserCreate(email=email, full_name="Dev User", picture=None, password="")
-        user = await user_service.create(db, obj_in=user_in)
+    user = await user_service.get_or_create_dev_user(db, email=email)
     return user
 
 

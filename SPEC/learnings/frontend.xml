@@ -775,5 +775,88 @@ export default {
                 <tag>typescript</tag>
             </tags>
         </learning>
+
+        <learning>
+            <id>mixed-content-https-enforcement</id>
+            <date>2025-08-19</date>
+            <category>Security/Configuration</category>
+            <severity>critical</severity>
+            <title>HTTPS Enforcement for Production/Staging Environments</title>
+            
+            <problem>
+                <description>Frontend served over HTTPS making requests to HTTP API endpoints causes mixed content errors</description>
+                <error_message>Mixed Content: The page at 'https://app.staging.netrasystems.ai/login' was loaded over HTTPS, but requested an insecure resource 'http://api.staging.netrasystems.ai/api/threads/?limit=20&offset=0'. This request has been blocked</error_message>
+                <symptoms>
+                    <symptom>API calls fail silently in production/staging</symptom>
+                    <symptom>Browser blocks HTTP requests from HTTPS pages</symptom>
+                    <symptom>Features work locally but fail in staging/production</symptom>
+                </symptoms>
+                <root_cause>Hardcoded HTTP URLs and direct environment variable usage without HTTPS enforcement</root_cause>
+                <impact>Complete API communication failure in HTTPS environments</impact>
+            </problem>
+            
+            <solution>
+                <description>Centralized secure API configuration that automatically enforces HTTPS/WSS in production environments</description>
+                <implementation>
+                    <step>Created lib/secure-api-config.ts as single source of truth for API URLs</step>
+                    <step>Updated all config files to use getSecureApiConfig() function</step>
+                    <step>Replaced all hardcoded HTTP URLs with config imports</step>
+                    <step>Automatic protocol upgrade: HTTP->HTTPS and WS->WSS when served over HTTPS</step>
+                </implementation>
+                <code_example>
+// WRONG - Direct env var usage without HTTPS enforcement
+export const config = {
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+  wsUrl: process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8000/ws",
+};
+
+// WRONG - Hardcoded HTTP URL
+const response = await fetch("http://localhost:8000/api/data", {...});
+
+// CORRECT - Use secure configuration
+import { getSecureApiConfig } from './lib/secure-api-config';
+const secureConfig = getSecureApiConfig();
+export const config = {
+  apiUrl: secureConfig.apiUrl,
+  wsUrl: secureConfig.wsUrl,
+};
+
+// CORRECT - Use config for all API calls
+import { config } from '@/config';
+const response = await fetch(`${config.apiUrl}/api/data`, {...});
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <action>Always use centralized secure-api-config.ts for API URLs</action>
+                <action>Never hardcode HTTP/WS URLs in components</action>
+                <action>Test with HTTPS locally using: HTTPS=true npm run dev</action>
+                <action>Verify staging deployment uses HTTPS for all API calls</action>
+                <action>Add lint rule to detect hardcoded localhost URLs</action>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/config.ts</file>
+                <file>frontend/services/apiConfig.ts</file>
+                <file>frontend/config/api.ts</file>
+                <file>frontend/components/synthetic-data-generator.tsx</file>
+                <file>frontend/lib/secure-api-config.ts</file>
+            </affected_files>
+            
+            <references>
+                <reference>MDN: Mixed Content</reference>
+                <reference>OWASP: Protocol Downgrade Attacks</reference>
+                <reference>Next.js: Environment Variables</reference>
+            </references>
+            
+            <tags>
+                <tag>security</tag>
+                <tag>https</tag>
+                <tag>mixed-content</tag>
+                <tag>staging</tag>
+                <tag>production</tag>
+                <tag>configuration</tag>
+            </tags>
+        </learning>
     </learnings>
 </specification>
