@@ -227,5 +227,21 @@
         <reference>app/db/clickhouse.py</reference>
         <reference>.env.development.local</reference>
         <reference>scripts/dev_launcher.py</reference>
+        <reference>SPEC/dev_launcher_performance.xml</reference>
+        <reference>SPEC/dev_launcher.xml</reference>
     </references>
+    
+    <performance_improvements>
+        <improvement date="2025-08-19">
+            <description>Created dedicated performance optimization spec</description>
+            <reference>SPEC/dev_launcher_performance.xml</reference>
+            <goals>
+                <goal>Sub-10 second startup for cached runs</goal>
+                <goal>Silent repetitive logs</goal>
+                <goal>Local-first secrets (no GSM by default)</goal>
+                <goal>Aggressive caching of one-time operations</goal>
+                <goal>Multiprocessing for parallel operations</goal>
+            </goals>
+        </improvement>
+    </performance_improvements>
 </specification>

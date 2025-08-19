@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Dev Launcher Performance Optimization</name>
+        <type>performance</type>
+        <version>1.0.0</version>
+        <created>2025-08-19</created>
+        <description>
+            Performance optimization specification for achieving sub-10 second dev launcher startup.
+            Addresses startup speed, log noise, local-first secrets, aggressive caching, and parallelization.
+        </description>
+        <business_value>
+            <segment>All (Free, Early, Mid, Enterprise)</segment>
+            <goal>Increase developer productivity by 20% through faster iteration cycles</goal>
+            <impact>Saves 5+ minutes per developer per day = $50K+ annual value for mid-size team</impact>
+        </business_value>
+    </metadata>
+    
+    <critical_requirements>
+        <requirement id="PERF-CRITICAL-001" priority="MANDATORY">
+            <title>Sub-10 Second Startup Target</title>
+            <description>The entire dev launch process MUST complete in under 10 seconds for cached runs</description>
+            <implementation>
+                - Aggressive caching of all initialization steps
+                - Parallel execution of independent tasks
+                - Skip all unnecessary checks on cached runs
+                - Lazy loading of non-critical components
+            </implementation>
+            <metrics>
+                <metric name="cold_startup_time" target="30s" max="45s"/>
+                <metric name="cached_startup_time" target="8s" max="10s"/>
+                <metric name="service_ready_time" target="5s" max="7s"/>
+            </metrics>
+        </requirement>
+        
+        <requirement id="PERF-CRITICAL-002" priority="MANDATORY">
+            <title>Silent Repetitive Logs</title>
+            <description>All repetitive logs MUST be silent by default</description>
+            <implementation>
+                - Suppress all dependency installation logs
+                - Hide compilation progress unless errors occur
+                - Silence health check success logs
+                - Show only critical state changes
+                - Buffer logs and show only on error
+            </implementation>
+            <log_levels>
+                <level name="SILENT" description="No output except errors"/>
+                <level name="MINIMAL" description="Critical state changes only"/>
+                <level name="STANDARD" description="Important events"/>
+                <level name="VERBOSE" description="Debug information"/>
+            </log_levels>
+        </requirement>
+        
+        <requirement id="PERF-CRITICAL-003" priority="MANDATORY">
+            <title>Local-First Secrets</title>
+            <description>Google Secret Manager is OPTIONAL - default to local env only</description>
+            <implementation>
+                - Check .env and .env.local files FIRST
+                - SKIP Google Secret Manager by default
+                - Only use GSM with explicit --load-secrets flag
+                - Cache successful secret loads for 24 hours
+                - Validate secrets asynchronously
+            </implementation>
+            <fallback_chain>
+                <step order="1">Process environment variables</step>
+                <step order="2">.env.local file</step>
+                <step order="3">.env file</step>
+                <step order="4">Google Secret Manager (if --load-secrets)</step>
+            </fallback_chain>
+        </requirement>
+        
+        <requirement id="PERF-CRITICAL-004" priority="MANDATORY">
+            <title>Aggressive One-Time Caching</title>
+            <description>ALL one-time operations MUST be properly cached</description>
+            <cache_items>
+                <item name="migrations" cache_key="migration_files_hash" ttl="permanent"/>
+                <item name="dependency_install" cache_key="requirements_hash" ttl="7_days"/>
+                <item name="npm_install" cache_key="package_lock_hash" ttl="7_days"/>
+                <item name="performance_checks" cache_key="system_config_hash" ttl="24_hours"/>
+                <item name="port_availability" cache_key="port_config" ttl="1_hour"/>
+                <item name="environment_validation" cache_key="env_files_hash" ttl="24_hours"/>
+                <item name="database_init" cache_key="schema_hash" ttl="permanent"/>
+            </cache_items>
+            <implementation>
+                - Use file content hashing for cache keys
+                - Store cache in .dev_launcher_cache/
+                - Implement cache warming on first run
+                - Provide --clear-cache flag for troubleshooting
+            </implementation>
+        </requirement>
+        
+        <requirement id="PERF-CRITICAL-005" priority="MANDATORY">
+            <title>Multiprocessing and Parallelization</title>
+            <description>Use multiprocessing for ALL independent operations</description>
+            <implementation>
+                - Parallel service startup (auth, backend, frontend)
+                - Concurrent dependency checks
+                - Parallel health checks
+                - Async secret loading
+                - Parallel log processing
+                - Use ProcessPoolExecutor for CPU-bound tasks
+                - Use ThreadPoolExecutor for I/O-bound tasks
+            </implementation>
+            <parallel_groups>
+                <group name="initialization">
+                    <task>Environment validation</task>
+                    <task>Secret loading</task>
+                    <task>Port checking</task>
+                </group>
+                <group name="dependency_check">
+                    <task>Python dependencies</task>
+                    <task>Node dependencies</task>
+                    <task>System dependencies</task>
+                </group>
+                <group name="service_startup">
+                    <task>Auth service</task>
+                    <task>Backend service</task>
+                    <task>Database connections</task>
+                </group>
+            </parallel_groups>
+        </requirement>
+    </critical_requirements>
+    
+    <optimization_strategies>
+        <strategy id="OPT-001">
+            <name>Lazy Service Discovery</name>
+            <description>Don't validate services until actually needed</description>
+            <implementation>
+                - Skip service discovery on startup
+                - Validate services on first access
+                - Cache discovery results for session
+            </implementation>
+        </strategy>
+        
+        <strategy id="OPT-002">
+            <name>Smart Dependency Detection</name>
+            <description>Only check dependencies that have changed</description>
+            <implementation>
+                - Hash requirements.txt and package.json
+                - Skip install if hash matches cache
+                - Run install in background if needed
+                - Use --no-deps flag for pip when possible
+            </implementation>
+        </strategy>
+        
+        <strategy id="OPT-003">
+            <name>Progressive Service Startup</name>
+            <description>Start services as they become ready</description>
+            <implementation>
+                - Don't wait for all services before proceeding
+                - Start frontend as soon as backend is ready
+                - Use health checks asynchronously
+                - Allow partial startup for development
+            </implementation>
+        </strategy>
+        
+        <strategy id="OPT-004">
+            <name>Log Buffering and Filtering</name>
+            <description>Reduce log noise through intelligent filtering</description>
+            <implementation>
+                - Buffer logs in memory
+                - Only flush on error or completion
+                - Filter out known noisy patterns
+                - Collapse repetitive messages
+            </implementation>
+            <filters>
+                <filter pattern="webpack.Progress"/>
+                <filter pattern="npm WARN"/>
+                <filter pattern="Watching for file changes"/>
+                <filter pattern="Health check passed"/>
+                <filter pattern="Compiling..."/>
+            </filters>
+        </strategy>
+    </optimization_strategies>
+    
+    <startup_sequence>
+        <phase name="INIT" parallel="true" timeout="2s">
+            <step>Load cached state</step>
+            <step>Check cache validity</step>
+            <step>Load local env files</step>
+        </phase>
+        
+        <phase name="VALIDATE" parallel="true" timeout="3s" skip_if_cached="true">
+            <step>Check file hashes</step>
+            <step>Validate environment</step>
+            <step>Check port availability</step>
+        </phase>
+        
+        <phase name="PREPARE" parallel="true" timeout="5s" skip_if_cached="true">
+            <step>Install dependencies (if needed)</step>
+            <step>Run migrations (if needed)</step>
+            <step>Warm caches</step>
+        </phase>
+        
+        <phase name="LAUNCH" parallel="true" timeout="5s">
+            <step>Start auth service</step>
+            <step>Start backend service</step>
+            <step>Start frontend service</step>
+        </phase>
+        
+        <phase name="VERIFY" parallel="false" timeout="3s">
+            <step>Quick health check</step>
+            <step>Update cache</step>
+            <step>Show summary</step>
+        </phase>
+    </startup_sequence>
+    
+    <cache_structure>
+        <directory>.dev_launcher_cache</directory>
+        <files>
+            <file name="state.json" description="Overall launcher state"/>
+            <file name="hashes.json" description="File content hashes"/>
+            <file name="services.json" description="Service configuration cache"/>
+            <file name="secrets.json" description="Secret validation cache (encrypted)"/>
+            <file name="performance.json" description="Performance metrics"/>
+        </files>
+        <invalidation>
+            <trigger>File content change</trigger>
+            <trigger>Manual --clear-cache flag</trigger>
+            <trigger>Cache TTL expiration</trigger>
+            <trigger>System configuration change</trigger>
+        </invalidation>
+    </cache_structure>
+    
+    <error_handling>
+        <strategy>Fail fast with clear messages</strategy>
+        <implementation>
+            - Show only relevant error context
+            - Hide stack traces unless --verbose
+            - Provide actionable fix suggestions
+            - Log full details to file for debugging
+        </implementation>
+    </error_handling>
+    
+    <testing_requirements>
+        <test id="TEST-001">
+            <name>Cold startup under 30 seconds</name>
+            <command>time python scripts/dev_launcher.py --clear-cache</command>
+        </test>
+        <test id="TEST-002">
+            <name>Cached startup under 10 seconds</name>
+            <command>time python scripts/dev_launcher.py</command>
+        </test>
+        <test id="TEST-003">
+            <name>Silent log output</name>
+            <command>python scripts/dev_launcher.py 2>&1 | wc -l</command>
+            <expected>Less than 20 lines for successful startup</expected>
+        </test>
+        <test id="TEST-004">
+            <name>Local-only secrets</name>
+            <command>python scripts/dev_launcher.py --no-secrets</command>
+            <expected>No Google Secret Manager calls</expected>
+        </test>
+    </testing_requirements>
+    
+    <implementation_checklist>
+        <task>Implement aggressive cache manager</task>
+        <task>Add multiprocessing to startup phases</task>
+        <task>Create log filter and buffer system</task>
+        <task>Optimize secret loading to be local-first</task>
+        <task>Add performance metrics collection</task>
+        <task>Implement progressive service startup</task>
+        <task>Add cache warming on first run</task>
+        <task>Create startup profiler for debugging</task>
+    </implementation_checklist>
+    
+    <references>
+        <reference>SPEC/dev_launcher.xml</reference>
+        <reference>SPEC/learnings/startup.xml</reference>
+        <reference>dev_launcher/launcher.py</reference>
+        <reference>dev_launcher/cache_manager.py</reference>
+        <reference>dev_launcher/startup_optimizer.py</reference>
+    </references>
+</specification>

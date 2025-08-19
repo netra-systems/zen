@@ -174,6 +174,17 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "timeout": 300,
         "run_coverage": True,
         "run_both": False
+    },
+    "performance": {
+        "description": "Performance validation suite for SLA compliance (3-5 minutes)",
+        "purpose": "Validate response times meet business SLA requirements",
+        "backend_args": ["-m", "performance", "tests/test_unified_performance.py", "-v", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 300,
+        "run_coverage": False,
+        "run_both": False,
+        "highlight": True,
+        "business_critical": True
     }
 }
 

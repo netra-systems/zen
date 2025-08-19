@@ -1,0 +1,128 @@
+{
+  "meta": {
+    "agent": "Agent 1 - Unified Testing Implementation Team",
+    "task": "Scan all test files for import errors and document them",
+    "timestamp": "2025-08-19T07:00:00Z",
+    "success_criteria_met": true
+  },
+  "executive_summary": {
+    "total_test_files_scanned": 683,
+    "files_with_imports": 681,
+    "total_import_statements": 5376,
+    "potentially_problematic_modules": 479,
+    "relative_imports_detected": 179,
+    "critical_finding": "Many 'missing' modules actually exist but have incorrect import paths"
+  },
+  "critical_import_errors": [
+    {
+      "module": "app.agents.state",
+      "files_affected": 79,
+      "status": "EXISTS_BUT_WRONG_PATH",
+      "actual_location": "app/agents/state.py",
+      "common_import_pattern": "from app.agents.state import AgentState",
+      "priority": "HIGH"
+    },
+    {
+      "module": "app.llm.llm_manager", 
+      "files_affected": 59,
+      "status": "EXISTS_BUT_WRONG_PATH",
+      "actual_location": "app/llm/llm_manager.py",
+      "common_import_pattern": "from app.llm.llm_manager import LLMManager",
+      "priority": "HIGH"
+    },
+    {
+      "module": "app.core.exceptions_base",
+      "files_affected": 46,
+      "status": "EXISTS_BUT_WRONG_PATH", 
+      "actual_location": "app/core/exceptions_base.py",
+      "common_import_pattern": "from app.core.exceptions_base import NetraException",
+      "priority": "HIGH"
+    },
+    {
+      "module": "app.agents.supervisor_consolidated",
+      "files_affected": 44,
+      "status": "NEEDS_VERIFICATION",
+      "common_import_pattern": "from app.agents.supervisor_consolidated import SupervisorAgent",
+      "priority": "HIGH"
+    },
+    {
+      "module": "app.agents.tool_dispatcher",
+      "files_affected": 43,
+      "status": "EXISTS_BUT_WRONG_PATH",
+      "actual_location": "app/agents/tool_dispatcher.py",
+      "common_import_pattern": "from app.agents.tool_dispatcher import ToolDispatcher", 
+      "priority": "HIGH"
+    }
+  ],
+  "relative_import_issues": [
+    {
+      "file": "test_startup_checks_modular.py",
+      "relative_imports_count": 11,
+      "sample_problematic_imports": [
+        "from ..helpers import startup_check_helpers",
+        "from .startup_check_helpers import create_mock_config"
+      ],
+      "recommended_fix": "Convert to absolute imports: from app.tests.helpers.startup_check_helpers import..."
+    },
+    {
+      "file": "test_realistic_clickhouse_operations.py", 
+      "relative_imports_count": 6,
+      "sample_problematic_imports": [
+        "from .fixtures import clickhouse_test_fixtures",
+        "from ..conftest import get_test_config"
+      ],
+      "recommended_fix": "Convert to absolute imports"
+    }
+  ],
+  "module_existence_analysis": {
+    "confirmed_existing": [
+      "app/agents/state.py",
+      "app/core/exceptions_base.py", 
+      "app/llm/llm_manager.py",
+      "app/agents/tool_dispatcher.py"
+    ],
+    "need_verification": [
+      "app.agents.supervisor_consolidated",
+      "app.schemas.registry",
+      "app.db.models_postgres",
+      "app.services.quality_gate_service",
+      "app.services.agent_service"
+    ]
+  },
+  "recommendations": {
+    "immediate_actions": [
+      {
+        "action": "Create import path validation script",
+        "priority": "CRITICAL",
+        "effort": "2-4 hours",
+        "impact": "Prevents future import errors"
+      },
+      {
+        "action": "Fix top 10 most common import errors", 
+        "priority": "HIGH",
+        "effort": "4-8 hours",
+        "impact": "Fixes imports for 400+ test files"
+      },
+      {
+        "action": "Convert relative imports to absolute",
+        "priority": "MEDIUM",
+        "effort": "2-3 hours", 
+        "impact": "Fixes 179 relative import issues"
+      }
+    ],
+    "systematic_approach": [
+      "1. Verify existence of top 20 'missing' modules",
+      "2. Create mapping of correct import paths", 
+      "3. Build automated import fix script",
+      "4. Test fixes on subset of files",
+      "5. Apply fixes systematically",
+      "6. Add import validation to CI/CD"
+    ]
+  },
+  "success_metrics": {
+    "target_import_success_rate": "95%",
+    "critical_modules_fixed": "Top 10 missing modules",
+    "relative_imports_converted": "All 179 files",
+    "test_discoverability": "All 683 test files discoverable by pytest"
+  }
+}

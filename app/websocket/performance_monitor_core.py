@@ -5,15 +5,15 @@ Main performance monitoring with micro-functions and threshold checking.
 
 import asyncio
 import time
-import statistics
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from typing import Dict, List, Any, Optional
-from collections import deque, defaultdict
 
 from app.logging_config import central_logger
 from .performance_monitor_types import PerformanceThresholds, AlertSeverity
 from .performance_monitor_collector import MetricCollector
 from .performance_monitor_alerts import PerformanceAlertManager
+from .performance_monitor_coverage import MonitoringCoverageTracker
+from .performance_monitor_metrics import PerformanceMetricsProcessor
 
 logger = central_logger.get_logger(__name__)
 
@@ -25,20 +25,15 @@ class PerformanceMonitor:
         self.thresholds = thresholds or PerformanceThresholds()
         self.metric_collector = MetricCollector()
         self.alert_manager = PerformanceAlertManager()
+        self.coverage_tracker = MonitoringCoverageTracker()
+        self.metrics_processor = PerformanceMetricsProcessor(self.metric_collector)
         self._init_monitoring_state()
-        self._init_performance_tracking()
     
     def _init_monitoring_state(self) -> None:
         """Initialize monitoring state variables."""
         self.monitoring_active = False
         self._monitor_task: Optional[asyncio.Task] = None
     
-    def _init_performance_tracking(self) -> None:
-        """Initialize performance tracking structures."""
-        self.connection_stats = defaultdict(dict)
-        self.message_response_times: deque = deque(maxlen=1000)
-        self.error_counts = defaultdict(int)
-        self.throughput_tracker = deque(maxlen=60)
     
     async def start_monitoring(self) -> None:
         """Start performance monitoring."""
@@ -75,16 +70,16 @@ class PerformanceMonitor:
         """Record a connection-related event."""
         self.metric_collector.record_counter(f"connection.{event}", value, {"connection_id": connection_id})
         if event == "error":
-            self.error_counts[connection_id] += 1
+            self.metrics_processor.error_counts[connection_id] += 1
     
     def record_message_response_time(self, connection_id: str, response_time_ms: float) -> None:
         """Record message response time."""
         self.metric_collector.record_timer("message.response_time", response_time_ms, {"connection_id": connection_id})
-        self.message_response_times.append(response_time_ms)
+        self.metrics_processor.message_response_times.append(response_time_ms)
     
     def record_message_throughput(self, messages_count: int) -> None:
         """Record message throughput per second."""
-        self.throughput_tracker.append((time.time(), messages_count))
+        self.metrics_processor.throughput_tracker.append((time.time(), messages_count))
         self.metric_collector.record_gauge("message.throughput", messages_count)
     
     def record_memory_usage(self, memory_mb: float) -> None:
@@ -121,12 +116,16 @@ class PerformanceMonitor:
         await asyncio.sleep(5)
     
     async def _check_performance_thresholds(self) -> None:
-        """Check performance metrics against thresholds."""
-        await self._check_response_time_threshold()
-        await self._check_memory_threshold()
-        await self._check_error_rate_threshold()
-        await self._check_throughput_threshold()
-        await self._check_cpu_threshold()
+        """Check performance metrics against thresholds with parallel execution."""
+        checks = [
+            self._check_response_time_threshold(),
+            self._check_memory_threshold(),
+            self._check_error_rate_threshold(),
+            self._check_throughput_threshold(),
+            self._check_cpu_threshold()
+        ]
+        results = await asyncio.gather(*checks, return_exceptions=True)
+        await self._process_monitoring_results(results)
     
     async def _check_response_time_threshold(self) -> None:
         """Check response time threshold."""
@@ -210,6 +209,16 @@ class PerformanceMonitor:
             cpu_usage
         )
     
+    async def _process_monitoring_results(self, results: List[Any]) -> None:
+        """Process parallel monitoring check results."""
+        check_names = self._get_check_names()
+        self.coverage_tracker.update_coverage_metrics(len(results))
+        await self.coverage_tracker.handle_check_results(check_names, results)
+    
+    def _get_check_names(self) -> List[str]:
+        """Get list of monitoring check names."""
+        return ["response_time", "memory", "error_rate", "throughput", "cpu"]
+    
     def resolve_alert(self, metric_name: str) -> bool:
         """Resolve alerts for a specific metric."""
         return self.alert_manager.resolve_alert(metric_name)
@@ -220,86 +229,21 @@ class PerformanceMonitor:
     
     def _build_performance_summary_dict(self) -> Dict[str, Any]:
         """Build performance summary dictionary."""
-        core_metrics = self._get_core_performance_metrics()
-        supplemental_metrics = self._get_supplemental_performance_metrics()
+        core_metrics = self.metrics_processor.get_core_performance_metrics()
+        supplemental_metrics = self.metrics_processor.get_supplemental_performance_metrics(
+            self.alert_manager.get_alert_summary(),
+            self.monitoring_active,
+            self.coverage_tracker.get_coverage_summary()
+        )
         return {**core_metrics, **supplemental_metrics}
     
-    def _get_core_performance_metrics(self) -> Dict[str, Any]:
-        """Get core performance metrics."""
-        return {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "response_time": self._get_response_time_stats(),
-            "throughput_messages_per_second": self._calculate_current_throughput(),
-            "total_connections": len(self.connection_stats)
-        }
-    
-    def _get_supplemental_performance_metrics(self) -> Dict[str, Any]:
-        """Get supplemental performance metrics."""
-        return {
-            "active_alerts": self.alert_manager.get_alert_summary(),
-            "system_metrics": self._get_system_metrics(),
-            "error_counts": dict(self.error_counts),
-            "monitoring_active": self.monitoring_active
-        }
-    
-    def _get_response_time_stats(self) -> Dict[str, float]:
-        """Get response time statistics."""
-        if not self.message_response_times:
-            return {}
-        times = list(self.message_response_times)
-        return self._calculate_response_time_metrics(times)
-    
-    def _calculate_response_time_metrics(self, times: List[float]) -> Dict[str, float]:
-        """Calculate response time metrics from times list."""
-        return {
-            "average_ms": statistics.mean(times),
-            "median_ms": statistics.median(times),
-            "p95_ms": sorted(times)[int(len(times) * 0.95)],
-            "max_ms": max(times)
-        }
-    
-    def _calculate_current_throughput(self) -> float:
-        """Calculate current message throughput."""
-        if not self.throughput_tracker:
-            return 0.0
-        recent_throughput = self._get_recent_throughput()
-        return sum(recent_throughput) / 60.0 if recent_throughput else 0.0
-    
-    def _get_recent_throughput(self) -> List[int]:
-        """Get throughput data from last minute."""
-        return [count for timestamp, count in self.throughput_tracker 
-                if timestamp > time.time() - 60]
-    
-    def _get_system_metrics(self) -> Dict[str, Any]:
-        """Get system metrics summary."""
-        return {
-            "memory_usage_mb": self.metric_collector.get_metric_stats("system.memory_usage", 1),
-            "cpu_usage_percent": self.metric_collector.get_metric_stats("system.cpu_usage", 1)
-        }
     
     def get_detailed_metrics(self, duration_minutes: int = 60) -> Dict[str, Any]:
         """Get detailed metrics for a specific time period."""
         return {
             "duration_minutes": duration_minutes,
-            "metrics": self._collect_metrics_summary(duration_minutes),
+            "metrics": self.metrics_processor.collect_metrics_summary(duration_minutes),
             "alerts": self.alert_manager.get_recent_alerts(duration_minutes)
-        }
-    
-    def _collect_metrics_summary(self, duration_minutes: int) -> Dict[str, Any]:
-        """Collect summary of all metrics."""
-        metrics_summary = {}
-        for metric_name in self.metric_collector.metrics.keys():
-            stats = self.metric_collector.get_metric_stats(metric_name, duration_minutes)
-            if stats:
-                metrics_summary[metric_name] = self._format_metric_data(metric_name, stats, duration_minutes)
-        return metrics_summary
-    
-    def _format_metric_data(self, metric_name: str, stats: Dict[str, float], duration_minutes: int) -> Dict[str, Any]:
-        """Format metric data for export."""
-        return {
-            "type": self.metric_collector.metric_types.get(metric_name, "unknown").value,
-            "stats": stats,
-            "values": self.metric_collector.get_metric_values(metric_name, duration_minutes)[-100:]
         }
     
     def export_metrics(self, format_type: str = "json") -> Dict[str, Any]:
@@ -315,23 +259,13 @@ class PerformanceMonitor:
             "thresholds": self.thresholds.__dict__,
             "current_summary": self.get_current_performance_summary(),
             "detailed_metrics": self.get_detailed_metrics(60),
-            "total_metrics_collected": self._count_total_metrics()
+            "total_metrics_collected": self.metrics_processor.count_total_metrics()
         }
-    
-    def _count_total_metrics(self) -> int:
-        """Count total metrics collected."""
-        return sum(len(points) for points in self.metric_collector.metrics.values())
     
     def reset_metrics(self) -> None:
         """Reset all metrics and alerts."""
         self.metric_collector = MetricCollector()
         self.alert_manager = PerformanceAlertManager()
-        self._reset_tracking_structures()
+        self.coverage_tracker.reset_coverage()
+        self.metrics_processor.reset_metrics_tracking()
         logger.info("Performance metrics reset")
-    
-    def _reset_tracking_structures(self) -> None:
-        """Reset performance tracking structures."""
-        self.connection_stats.clear()
-        self.message_response_times.clear()
-        self.error_counts.clear()
-        self.throughput_tracker.clear()

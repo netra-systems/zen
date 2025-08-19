@@ -32,6 +32,20 @@ class DisconnectReason(str, Enum):
     UNKNOWN = "unknown"
 
 
+class CallbackCriticality(str, Enum):
+    """Callback criticality levels."""
+    CRITICAL = "critical"
+    IMPORTANT = "important"
+    NON_CRITICAL = "non_critical"
+
+
+class CallbackType(str, Enum):
+    """Callback type identifiers."""
+    STATE_CHANGE = "state_change"
+    CONNECT = "connect"
+    DISCONNECT = "disconnect"
+
+
 @dataclass
 class ReconnectionConfig:
     """Reconnection configuration."""
@@ -61,6 +75,26 @@ class ReconnectionAttempt:
 
 
 @dataclass
+class CallbackFailure:
+    """Callback failure record."""
+    callback_type: CallbackType
+    timestamp: datetime
+    error_message: str
+    criticality: CallbackCriticality
+
+
+@dataclass
+class CallbackCircuitBreaker:
+    """Circuit breaker for callback failures."""
+    failure_threshold: int = 3
+    reset_timeout_ms: int = 60000  # 1 minute
+    is_open: bool = False
+    failure_count: int = 0
+    last_failure_time: Optional[datetime] = None
+    recent_failures: List[CallbackFailure] = field(default_factory=list)
+
+
+@dataclass
 class ReconnectionMetrics:
     """Reconnection metrics and statistics."""
     total_disconnects: int = 0
@@ -72,3 +106,5 @@ class ReconnectionMetrics:
     disconnect_reasons: Dict[str, int] = field(default_factory=dict)
     last_disconnect_time: Optional[datetime] = None
     last_successful_reconnect_time: Optional[datetime] = None
+    callback_failures: Dict[str, int] = field(default_factory=dict)
+    critical_callback_failures: int = 0

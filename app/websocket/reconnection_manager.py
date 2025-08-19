@@ -11,12 +11,15 @@ from typing import Optional, Callable, Any, Dict, List
 from app.logging_config import central_logger
 from .reconnection_types import (
     ReconnectionState, DisconnectReason, ReconnectionConfig,
-    ReconnectionAttempt, ReconnectionMetrics
+    ReconnectionAttempt, ReconnectionMetrics, CallbackType
 )
 from .reconnection_status import ReconnectionStatusReporter
 from .reconnection_helpers import (
     ReconnectionDelayCalculator, ReconnectionAttemptHelper, ReconnectionMetricsHelper
 )
+from .callback_failure_manager import CallbackFailureManager
+from .callback_executor import CallbackExecutor
+from .reconnection_exceptions import StateNotificationFailure, CriticalCallbackFailure
 
 logger = central_logger.get_logger(__name__)
 
@@ -41,23 +44,11 @@ class WebSocketReconnectionManager:
 
     def _initialize_tracking_state(self) -> None:
         """Initialize reconnection tracking state."""
-        self._setup_attempt_tracking()
-        self._setup_time_tracking()
-        self._setup_metrics_and_flags()
-
-    def _setup_attempt_tracking(self) -> None:
-        """Setup attempt tracking state."""
         self.current_attempt = 0
         self.current_delay_ms = self.config.initial_delay_ms
-
-    def _setup_time_tracking(self) -> None:
-        """Setup time tracking state."""
         self.last_disconnect_time: Optional[datetime] = None
         self.last_successful_connect_time: Optional[datetime] = None
         self.attempt_history: List[ReconnectionAttempt] = []
-
-    def _setup_metrics_and_flags(self) -> None:
-        """Setup metrics and control flags."""
         self.metrics = ReconnectionMetrics()
         self._stop_reconnecting = False
         self._permanent_failure = False
@@ -67,10 +58,13 @@ class WebSocketReconnectionManager:
         self.delay_calculator = ReconnectionDelayCalculator(self.config)
         self.attempt_helper = ReconnectionAttemptHelper(self.connection_id, self.config)
         self.status_reporter = ReconnectionStatusReporter(self)
+        self.callback_failure_manager = CallbackFailureManager(self.connection_id)
+        self.callback_executor = CallbackExecutor(self.connection_id, self.callback_failure_manager)
 
     async def handle_disconnect(self, reason: DisconnectReason, error_message: Optional[str] = None) -> None:
         """Handle disconnection and start reconnection process."""
         self._record_disconnect(reason)
+        await self.callback_executor.execute_disconnect(self.disconnect_callback, reason)
         if self._is_permanent_failure(reason):
             await self._handle_permanent_failure(reason)
             return
@@ -216,9 +210,8 @@ class WebSocketReconnectionManager:
         await self._notify_state_change()
 
     async def _execute_connection_callback(self) -> None:
-        """Execute connection callback if available."""
-        if self.connect_callback:
-            await self.connect_callback(self.connection_id)
+        """Execute connection callback with failure handling."""
+        await self.callback_executor.execute_connect(self.connect_callback)
 
     async def _handle_connection_success(self, attempt: ReconnectionAttempt, start_time: float) -> None:
         """Handle successful connection attempt."""
@@ -247,21 +240,11 @@ class WebSocketReconnectionManager:
     async def _finalize_reconnection_loop(self) -> None:
         """Finalize reconnection loop after all attempts."""
         if self.current_attempt >= self.config.max_attempts:
-            await self._handle_max_attempts_reached()
+            self.state = ReconnectionState.FAILED
+            self._permanent_failure = True
+            logger.error(f"Reconnection failed for {self.connection_id} after {self.config.max_attempts} attempts")
         else:
-            await self._handle_loop_stopped()
-
-    async def _handle_max_attempts_reached(self) -> None:
-        """Handle case when max attempts reached."""
-        self.state = ReconnectionState.FAILED
-        self._permanent_failure = True
-        logger.error(f"Reconnection failed for {self.connection_id} after "
-                    f"{self.config.max_attempts} attempts")
-        await self._notify_state_change()
-
-    async def _handle_loop_stopped(self) -> None:
-        """Handle case when loop stopped before max attempts."""
-        self.state = ReconnectionState.DISCONNECTED
+            self.state = ReconnectionState.DISCONNECTED
         await self._notify_state_change()
 
     async def _schedule_delay_reset(self) -> None:
@@ -273,28 +256,23 @@ class WebSocketReconnectionManager:
 
     def _update_average_reconnection_time(self, duration_ms: float) -> None:
         """Update average reconnection time."""
-        successful_count = self.metrics.successful_reconnections
-        current_avg = self.metrics.average_reconnection_time_ms
-        self.metrics.average_reconnection_time_ms = ReconnectionMetricsHelper.update_average_reconnection_time(
-            current_avg, successful_count, duration_ms
-        )
-        self._update_longest_downtime()
-
-    def _update_longest_downtime(self) -> None:
-        """Update longest downtime metric."""
-        downtime_ms = ReconnectionMetricsHelper.calculate_downtime_ms(self.last_disconnect_time)
-        self.metrics.longest_downtime_ms = max(self.metrics.longest_downtime_ms, downtime_ms)
+        ReconnectionMetricsHelper.update_metrics_on_success(self.metrics, duration_ms, self.last_disconnect_time)
 
     async def _notify_state_change(self) -> None:
-        """Notify about state changes."""
-        if self.state_change_callback:
-            try:
-                if asyncio.iscoroutinefunction(self.state_change_callback):
-                    await self.state_change_callback(self.connection_id, self.state)
-                else:
-                    self.state_change_callback(self.connection_id, self.state)
-            except Exception as e:
-                logger.error(f"State change callback error for {self.connection_id}: {e}")
+        """Notify about state changes with failure propagation."""
+        try:
+            await self.callback_executor.execute_state_change(self.state_change_callback, self.state)
+        except (StateNotificationFailure, CriticalCallbackFailure):
+            await self._handle_critical_state_failure()
+            raise
+
+    async def _handle_critical_state_failure(self) -> None:
+        """Handle critical state callback failure."""
+        self.state = ReconnectionState.FAILED
+        self._permanent_failure = True
+        self._stop_reconnecting = True
+        self.metrics.critical_callback_failures += 1
+        logger.critical(f"Critical state failure for {self.connection_id} - entering error state")
 
     # Status and metrics methods - delegated to status reporter
     def get_status(self) -> Dict[str, Any]:
@@ -303,17 +281,21 @@ class WebSocketReconnectionManager:
 
     def get_metrics(self) -> Dict[str, Any]:
         """Get comprehensive reconnection metrics."""
-        return self.status_reporter.get_metrics()
+        base_metrics = self.status_reporter.get_metrics()
+        callback_metrics = self.callback_failure_manager.get_failure_metrics()
+        return {**base_metrics, 'callback_metrics': callback_metrics}
 
     def clear_history(self) -> None:
         """Clear attempt history and reset metrics."""
         self.attempt_history.clear()
         self.metrics = ReconnectionMetrics()
-        logger.info(f"Cleared reconnection history for {self.connection_id}")
 
     def update_config(self, new_config: ReconnectionConfig) -> None:
         """Update reconnection configuration."""
         self.config = new_config
         self.delay_calculator = ReconnectionDelayCalculator(new_config)
         self.attempt_helper = ReconnectionAttemptHelper(self.connection_id, new_config)
-        logger.info(f"Updated reconnection configuration for {self.connection_id}: {new_config}")
+
+    def set_callback_criticality(self, callback_type: CallbackType, criticality) -> None:
+        """Set callback criticality level for failure handling."""
+        self.callback_failure_manager.set_callback_criticality(callback_type, criticality)

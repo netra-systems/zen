@@ -18,6 +18,7 @@
         <coherence>Validate Coherence with SPEC:chat_ui_ux</coherence>
         <coherence>Validate Coherence with SPEC:netra_user_auth</coherence>
         <coherence>Validate Coherence with SPEC:conventions</coherence>
+        <coherence>Validate Coherence with SPEC:websocket_reliability - CRITICAL for preventing silent failures</coherence>
         <coherence>Agent to Frontend communications using NETRA_WEBSOCKETS</coherence>
         <coherence>Frontend to Agent communications using NETRA_WEBSOCKETS</coherence>
         <coherence>Frontend loading into Chat UI/UX concepts using NETRA_WEBSOCKETS</coherence>

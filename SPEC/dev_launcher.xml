@@ -8,6 +8,18 @@
         and multi-service orchestration. Target: Sub-10 second cached startup.
     </description>
     
+    <performance_optimization_reference>
+        <spec>SPEC/dev_launcher_performance.xml</spec>
+        <description>
+            See dev_launcher_performance.xml for aggressive performance optimizations including:
+            - Sub-10 second startup requirements
+            - Silent logging implementation
+            - Local-first secrets loading
+            - Aggressive caching strategies
+            - Multiprocessing requirements
+        </description>
+    </performance_optimization_reference>
+    
     <architecture>
         <components>
             <component name="DevLauncher" file="dev_launcher/launcher.py">

@@ -9,6 +9,7 @@ Business Value: Enables better connection tracking and monitoring.
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
+from enum import Enum
 import time
 
 from fastapi import WebSocket
@@ -17,6 +18,14 @@ from starlette.websockets import WebSocketState
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+
+class ConnectionState(Enum):
+    """Connection state enumeration for atomic state management."""
+    ACTIVE = "active"
+    CLOSING = "closing"
+    FAILED = "failed"
+    CLOSED = "closed"
 
 
 @dataclass
@@ -34,6 +43,52 @@ class ConnectionInfo:
     rate_limit_count: int = 0
     rate_limit_window_start: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     is_closing: bool = False
+    state: ConnectionState = ConnectionState.ACTIVE
+    failure_count: int = 0
+    last_failure_time: Optional[datetime] = None
+    
+    def transition_to_closing(self) -> bool:
+        """Atomically transition to closing state."""
+        if self.state == ConnectionState.ACTIVE:
+            self.state = ConnectionState.CLOSING
+            self.is_closing = True
+            return True
+        return False
+        
+    def transition_to_failed(self) -> None:
+        """Atomically transition to failed state."""
+        self.state = ConnectionState.FAILED
+        self.failure_count += 1
+        self.last_failure_time = datetime.now(timezone.utc)
+        
+    def transition_to_closed(self) -> None:
+        """Atomically transition to closed state."""
+        self.state = ConnectionState.CLOSED
+        self.is_closing = False
+        
+    def is_ghost_connection(self) -> bool:
+        """Check if this is a ghost connection."""
+        return (self.state == ConnectionState.FAILED or 
+                (self.state == ConnectionState.CLOSING and 
+                 self._is_stale_closing_connection()))
+                 
+    def _is_stale_closing_connection(self) -> bool:
+        """Check if connection has been closing for too long."""
+        if not self.last_failure_time:
+            return False
+        time_diff = (datetime.now(timezone.utc) - 
+                    self.last_failure_time).total_seconds()
+        return time_diff > 60  # 60 seconds timeout
+        
+    def should_retry_closure(self) -> bool:
+        """Check if connection closure should be retried."""
+        return (self.state == ConnectionState.FAILED and 
+                self.failure_count < 3)
+                
+    def can_be_cleaned_up(self) -> bool:
+        """Check if connection can be safely cleaned up."""
+        return (self.state in [ConnectionState.FAILED, ConnectionState.CLOSED] or
+                self.is_ghost_connection())
 
 
 @dataclass

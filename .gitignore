@@ -118,3 +118,5 @@ terraform-gcp/staging.tfplan
 .dev_launcher_cache/dependency_cache.json
 terraform-gcp/staging.tfplan
 .dev_launcher_cache/startup_cache.json
+.dev_launcher_cache/encryption.key
+.service_discovery/auth.json
