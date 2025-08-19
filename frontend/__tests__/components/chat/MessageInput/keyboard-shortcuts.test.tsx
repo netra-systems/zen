@@ -4,12 +4,12 @@
  */
 
 // Mock dependencies BEFORE imports
-const mockSendMessage = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseThreadStore = jest.fn();
-const mockUseAuthStore = jest.fn();
-const mockGenerateUniqueId = jest.fn();
+var mockSendMessage = jest.fn();
+var mockUseWebSocket = jest.fn();
+var mockUseUnifiedChatStore = jest.fn();
+var mockUseThreadStore = jest.fn();
+var mockUseAuthStore = jest.fn();
+var mockGenerateUniqueId = jest.fn();
 
 jest.mock('@/hooks/useWebSocket', () => ({
   useWebSocket: mockUseWebSocket
@@ -48,12 +48,12 @@ jest.mock('@/components/chat/utils/messageInputUtils', () => ({
 let mockMessageHistory: string[] = [];
 let mockHistoryIndex = -1;
 
-const mockAddToHistory = jest.fn((message: string) => {
+var mockAddToHistory = jest.fn((message: string) => {
   mockMessageHistory.push(message);
   mockHistoryIndex = mockMessageHistory.length;
 });
 
-const mockNavigateHistory = jest.fn((direction: 'up' | 'down') => {
+var mockNavigateHistory = jest.fn((direction: 'up' | 'down') => {
   if (direction === 'up') {
     if (mockHistoryIndex === -1 || mockHistoryIndex === mockMessageHistory.length) {
       // Start from the most recent message

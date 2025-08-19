@@ -5,8 +5,11 @@
 
 // Hoist all mocks to the top for proper Jest handling
 const mockUseUnifiedChatStore = jest.fn();
+const mockUseThreadStore = jest.fn();
+const mockUseChatStore = jest.fn();
 const mockUseLoadingState = jest.fn();
 const mockUseThreadNavigation = jest.fn();
+const mockUseAuthStore = jest.fn();
 const mockRouter = { push: jest.fn() };
 const mockThreads = [
   {
@@ -49,6 +52,18 @@ jest.mock('@/hooks/useLoadingState', () => ({
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: mockUseThreadNavigation
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: mockUseThreadStore
+}));
+
+jest.mock('@/store/chat', () => ({
+  useChatStore: mockUseChatStore
 }));
 
 jest.mock('@/services/threadService', () => ({
@@ -117,6 +132,32 @@ describe('ChatHistorySection - Interactions', () => {
       isNavigating: false,
       navigateToThread: jest.fn(),
       createNewThread: jest.fn()
+    });
+    
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: 'user-1', email: 'test@example.com' },
+      login: jest.fn(),
+      logout: jest.fn(),
+      checkAuth: jest.fn()
+    });
+    
+    mockUseThreadStore.mockReturnValue({
+      threads: mockThreads,
+      currentThreadId: 'thread-1',
+      setThreads: jest.fn(),
+      setCurrentThread: jest.fn(),
+      addThread: jest.fn(),
+      updateThread: jest.fn(),
+      deleteThread: jest.fn(),
+      setLoading: jest.fn(),
+      setError: jest.fn()
+    });
+    
+    mockUseChatStore.mockReturnValue({
+      clearMessages: jest.fn(),
+      loadMessages: jest.fn(),
+      messages: []
     });
     
     // Configure service mocks with default behavior

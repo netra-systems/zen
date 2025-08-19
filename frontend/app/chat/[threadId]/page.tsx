@@ -23,9 +23,9 @@ import { Loader2, AlertCircle } from 'lucide-react';
  * Thread page props from Next.js dynamic routing
  */
 interface ThreadPageProps {
-  params: {
+  params: Promise<{
     threadId: string;
-  };
+  }>;
 }
 
 /**
@@ -37,7 +37,7 @@ type LoadingState = 'validating' | 'loading' | 'loaded' | 'error';
  * Dynamic thread chat page component
  */
 const ThreadPage: React.FC<ThreadPageProps> = ({ params }) => {
-  const { threadId } = params;
+  const { threadId } = React.use(params);
   const [loadingState, setLoadingState] = useState<LoadingState>('validating');
   const [errorMessage, setErrorMessage] = useState<string>('');
   

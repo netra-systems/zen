@@ -225,6 +225,21 @@ describe('Authentication Flow Integration', () => {
     await verifyStateRestoration();
   });
 
+  it('should support onboarding flow authentication', async () => {
+    await performOnboardingLogin();
+    await verifyOnboardingAuthState();
+    await simulateFirstThreadCreation();
+    expectOnboardingFlowComplete();
+  });
+
+  it('should handle session timeout during onboarding', async () => {
+    setupAuthenticatedState();
+    await simulateSessionTimeout();
+    await verifySessionTimeoutHandling();
+    await performReauthentication();
+    expectContinuedOnboarding();
+  });
+
   // Component factories
   function createLoginComponent() {
     return () => {
@@ -344,5 +359,67 @@ describe('Authentication Flow Integration', () => {
     await waitFor(() => {
       expectAuthenticatedState();
     });
+  }
+
+  // Onboarding-specific helper functions
+  async function performOnboardingLogin() {
+    const onboardingUser = {
+      id: 'onboarding-user-123',
+      email: 'newuser@netra.ai',
+      name: 'New User',
+      tier: 'free'
+    };
+    
+    const authStore = useAuthStore();
+    await authStore.login(onboardingUser, 'onboarding-token-123');
+  }
+
+  async function verifyOnboardingAuthState() {
+    const authStore = useAuthStore();
+    expect(authStore.isAuthenticated).toBe(true);
+    expect(authStore.user?.tier).toBe('free');
+    expect(localStorage.getItem('auth-token')).toBeTruthy();
+  }
+
+  async function simulateFirstThreadCreation() {
+    // Mock thread creation during onboarding
+    mockUseUnifiedChatStore.mockReturnValue({
+      ...mockUseUnifiedChatStore(),
+      createThread: jest.fn().mockResolvedValue({
+        id: 'first-thread-123',
+        title: 'Welcome Conversation'
+      })
+    });
+  }
+
+  function expectOnboardingFlowComplete() {
+    const authStore = useAuthStore();
+    expect(authStore.isAuthenticated).toBe(true);
+    expect(authStore.user?.email).toBe('newuser@netra.ai');
+  }
+
+  async function simulateSessionTimeout() {
+    // Simulate token expiration
+    localStorage.removeItem('auth-token');
+    useAuthStore.setState({
+      isAuthenticated: false,
+      token: null
+    });
+  }
+
+  async function verifySessionTimeoutHandling() {
+    await waitFor(() => {
+      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+    });
+  }
+
+  async function performReauthentication() {
+    const authStore = useAuthStore();
+    await authStore.login(mockUser, 'new-token-456');
+  }
+
+  function expectContinuedOnboarding() {
+    expect(useAuthStore.getState().isAuthenticated).toBe(true);
+    expect(localStorage.getItem('auth-token')).toBe('new-token-456');
   }
 });
