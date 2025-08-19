@@ -1,10 +1,11 @@
 /**
- * WebSocket Test Manager - Centralized WebSocket mock server management
- * Solves URL conflicts and improper cleanup issues
- * Ensures test isolation with unique URLs per test
+ * WebSocket Test Manager - Real WebSocket behavior simulation
+ * Replaces jest-websocket-mock with realistic WebSocket testing
+ * Provides comprehensive WebSocket lifecycle and state management
  */
 
 import WS from 'jest-websocket-mock';
+import { TestWebSocket, ConnectionStateManager, MessageBuffer } from '../setup/websocket-test-utils';
 
 /**
  * Generates unique WebSocket URL for each test
@@ -38,40 +39,90 @@ function createMockServer(url?: string): WS {
 }
 
 /**
- * WebSocket Test Manager for centralized mock server management
+ * Enhanced WebSocket Test Manager with real behavior simulation
  */
 export class WebSocketTestManager {
   private server?: WS;
+  private testWebSocket?: TestWebSocket;
+  private stateManager: ConnectionStateManager;
+  private messageBuffer: MessageBuffer;
   private readonly url: string;
+  private connectionHistory: { event: string; timestamp: number }[] = [];
+  private isUsingRealSimulation: boolean = true;
 
-  constructor(customUrl?: string) {
+  constructor(customUrl?: string, useRealSimulation: boolean = true) {
     this.url = customUrl || generateUniqueUrl();
+    this.isUsingRealSimulation = useRealSimulation;
+    this.stateManager = new ConnectionStateManager();
+    this.messageBuffer = new MessageBuffer();
   }
 
   /**
-   * Sets up WebSocket mock server
+   * Sets up WebSocket with real behavior simulation or mock server
    */
-  setup(): WS {
+  setup(): WS | TestWebSocket {
     this.cleanup(); // Ensure clean state
-    this.server = createMockServer(this.url);
-    return this.server;
+    
+    if (this.isUsingRealSimulation) {
+      this.testWebSocket = new TestWebSocket(this.url);
+      this.setupRealSimulation();
+      return this.testWebSocket as any;
+    } else {
+      this.server = createMockServer(this.url);
+      return this.server;
+    }
   }
 
   /**
-   * Cleans up WebSocket mock server
+   * Sets up real WebSocket simulation with state tracking
+   */
+  private setupRealSimulation(): void {
+    if (!this.testWebSocket) return;
+
+    this.testWebSocket.addEventListener('open', () => {
+      this.stateManager.setState('connected');
+      this.logEvent('open');
+    });
+
+    this.testWebSocket.addEventListener('close', () => {
+      this.stateManager.setState('disconnected');
+      this.logEvent('close');
+    });
+
+    this.testWebSocket.addEventListener('error', () => {
+      this.stateManager.setState('error');
+      this.logEvent('error');
+    });
+
+    this.testWebSocket.addEventListener('message', (event: Event) => {
+      const messageEvent = event as MessageEvent;
+      this.messageBuffer.add(messageEvent.data);
+      this.logEvent('message');
+    });
+  }
+
+  /**
+   * Cleans up WebSocket resources
    */
   cleanup(): void {
+    if (this.testWebSocket) {
+      this.testWebSocket.close();
+      this.testWebSocket = undefined;
+    }
     if (this.server) {
       this.server = undefined;
     }
+    this.stateManager.clearHistory();
+    this.messageBuffer.flush();
+    this.connectionHistory = [];
     safeCleanup();
   }
 
   /**
-   * Gets current server instance
+   * Gets current server instance (real or mock)
    */
-  getServer(): WS | undefined {
-    return this.server;
+  getServer(): WS | TestWebSocket | undefined {
+    return this.testWebSocket || this.server;
   }
 
   /**
@@ -82,37 +133,211 @@ export class WebSocketTestManager {
   }
 
   /**
-   * Waits for WebSocket connection
+   * Gets connection state manager
    */
-  async waitForConnection(): Promise<void> {
-    // Mock implementation - immediately resolve
-    return Promise.resolve();
+  getStateManager(): ConnectionStateManager {
+    return this.stateManager;
   }
 
   /**
-   * Sends message through WebSocket
+   * Gets message buffer
+   */
+  getMessageBuffer(): MessageBuffer {
+    return this.messageBuffer;
+  }
+
+  /**
+   * Waits for WebSocket connection with real timing
+   */
+  async waitForConnection(timeoutMs: number = 1000): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const startTime = Date.now();
+      
+      const checkConnection = () => {
+        if (this.stateManager.getState() === 'connected') {
+          resolve();
+        } else if (Date.now() - startTime > timeoutMs) {
+          reject(new Error('Connection timeout'));
+        } else {
+          setTimeout(checkConnection, 10);
+        }
+      };
+      
+      checkConnection();
+    });
+  }
+
+  /**
+   * Sends message through WebSocket with real behavior
    */
   sendMessage(message: any): void {
-    if (this.server) {
-      this.server.send(JSON.stringify(message));
+    const messageData = typeof message === 'string' ? message : JSON.stringify(message);
+    
+    if (this.testWebSocket) {
+      try {
+        this.testWebSocket.send(messageData);
+        this.logEvent('send');
+      } catch (error) {
+        this.logEvent('send_error');
+        throw error;
+      }
+    } else if (this.server) {
+      this.server.send(messageData);
     }
   }
 
   /**
-   * Closes WebSocket connection
+   * Closes WebSocket connection with real behavior
    */
-  close(): void {
-    if (this.server) {
+  close(code?: number, reason?: string): void {
+    if (this.testWebSocket) {
+      this.testWebSocket.close(code, reason);
+    } else if (this.server) {
       this.server.close();
     }
+  }
+
+  /**
+   * Simulates incoming message
+   */
+  simulateIncomingMessage(data: any): void {
+    if (this.testWebSocket) {
+      this.testWebSocket.simulateMessage(data);
+    }
+  }
+
+  /**
+   * Simulates connection error
+   */
+  simulateError(error?: any): void {
+    if (this.testWebSocket) {
+      this.testWebSocket.simulateError(error);
+    }
+  }
+
+  /**
+   * Simulates reconnection
+   */
+  simulateReconnect(): void {
+    if (this.testWebSocket) {
+      this.stateManager.setState('reconnecting');
+      this.testWebSocket.simulateReconnect();
+    }
+  }
+
+  /**
+   * Gets connection event history
+   */
+  getConnectionHistory(): { event: string; timestamp: number }[] {
+    return [...this.connectionHistory];
+  }
+
+  /**
+   * Gets current connection state
+   */
+  getConnectionState(): string {
+    return this.stateManager.getState();
+  }
+
+  /**
+   * Checks if WebSocket is ready for communication
+   */
+  isReady(): boolean {
+    if (this.testWebSocket) {
+      return this.testWebSocket.readyState === 1; // OPEN
+    }
+    return false;
+  }
+
+  /**
+   * Gets sent messages queue
+   */
+  getSentMessages(): string[] {
+    if (this.testWebSocket) {
+      return this.testWebSocket.getSentMessages();
+    }
+    return [];
+  }
+
+  /**
+   * Gets received messages buffer
+   */
+  getReceivedMessages(): string[] {
+    return this.messageBuffer.flush();
+  }
+
+  /**
+   * Logs connection events for testing
+   */
+  private logEvent(event: string): void {
+    this.connectionHistory.push({
+      event,
+      timestamp: Date.now()
+    });
+  }
+
+  /**
+   * Enables/disables real simulation mode
+   */
+  setRealSimulationMode(enabled: boolean): void {
+    this.isUsingRealSimulation = enabled;
+  }
+
+  /**
+   * Tests WebSocket performance
+   */
+  async measureConnectionTime(): Promise<number> {
+    const start = performance.now();
+    await this.waitForConnection();
+    return performance.now() - start;
+  }
+
+  /**
+   * Tests message round-trip time
+   */
+  async measureMessageRoundTrip(message: any): Promise<number> {
+    const start = performance.now();
+    this.sendMessage(message);
+    // Simulate echo response
+    setTimeout(() => {
+      this.simulateIncomingMessage(message);
+    }, 1);
+    
+    return new Promise((resolve) => {
+      const checkMessage = () => {
+        const received = this.getReceivedMessages();
+        if (received.length > 0) {
+          resolve(performance.now() - start);
+        } else {
+          setTimeout(checkMessage, 1);
+        }
+      };
+      checkMessage();
+    });
   }
 }
 
 /**
- * Creates WebSocket manager for tests
+ * Creates WebSocket manager for tests with realistic behavior
  */
-export function createWebSocketManager(customUrl?: string): WebSocketTestManager {
-  return new WebSocketTestManager(customUrl);
+export function createWebSocketManager(customUrl?: string, useRealSimulation: boolean = true): WebSocketTestManager {
+  return new WebSocketTestManager(customUrl, useRealSimulation);
+}
+
+/**
+ * Creates WebSocket manager specifically for legacy mock testing
+ */
+export function createLegacyWebSocketManager(customUrl?: string): WebSocketTestManager {
+  return new WebSocketTestManager(customUrl, false);
+}
+
+/**
+ * Creates multiple WebSocket managers for concurrent testing
+ */
+export function createMultipleWebSocketManagers(count: number, useRealSimulation: boolean = true): WebSocketTestManager[] {
+  return Array(count).fill(0).map(() => 
+    new WebSocketTestManager(generateUniqueUrl(), useRealSimulation)
+  );
 }
 
 /**

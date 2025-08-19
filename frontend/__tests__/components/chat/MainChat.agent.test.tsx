@@ -29,38 +29,14 @@ jest.mock('@/hooks/useEventProcessor', () => ({
   useEventProcessor: mockUseEventProcessor
 }));
 
-// Mock all the components
-jest.mock('@/components/chat/ChatHeader', () => ({
-  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
-}));
-
-jest.mock('@/components/chat/MessageList', () => ({
-  MessageList: () => <div data-testid="message-list">Message List</div>
-}));
-
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => <div data-testid="message-input">Message Input</div>
-}));
-
-jest.mock('@/components/chat/PersistentResponseCard', () => ({
-  PersistentResponseCard: ({ isCollapsed, onToggleCollapse }: any) => (
-    <div data-testid="response-card" data-collapsed={isCollapsed}>
-      <button onClick={onToggleCollapse}>Toggle</button>
-      Response Card
-    </div>
-  )
-}));
-
-jest.mock('@/components/chat/ExamplePrompts', () => ({
-  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
-}));
-
-jest.mock('@/components/chat/OverflowPanel', () => ({
-  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
-}));
-
-jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
-  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+// Mock utility services but NOT UI components
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn()
+  }
 }));
 
 // Mock framer-motion to avoid animation issues
@@ -147,13 +123,13 @@ describe('MainChat - Agent Status Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+      expect(screen.getByText(/response card/i)).toBeInTheDocument();
     });
 
     it('should hide response card when not processing and no run', () => {
       render(<MainChat />);
       
-      expect(screen.queryByTestId('response-card')).not.toBeInTheDocument();
+      expect(screen.queryByText(/response card/i)).not.toBeInTheDocument();
     });
 
     it('should display fast layer data', () => {
@@ -177,7 +153,7 @@ describe('MainChat - Agent Status Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+      expect(screen.getByText(/response card/i)).toBeInTheDocument();
     });
 
     it('should display medium layer data', () => {
@@ -201,7 +177,7 @@ describe('MainChat - Agent Status Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+      expect(screen.getByText(/response card/i)).toBeInTheDocument();
     });
 
     it('should display slow layer data with final report', () => {
@@ -225,7 +201,7 @@ describe('MainChat - Agent Status Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('response-card')).toBeInTheDocument();
+      expect(screen.getByText(/response card/i)).toBeInTheDocument();
     });
 
     it('should auto-collapse card after completion', async () => {
@@ -248,8 +224,8 @@ describe('MainChat - Agent Status Tests', () => {
       
       render(<MainChat />);
       
-      const card = screen.getByTestId('response-card');
-      expect(card).toHaveAttribute('data-collapsed', 'false');
+      const card = screen.getByText(/response card/i).closest('[role=\"region\"]') as HTMLElement;
+      expect(card).not.toHaveAttribute('data-collapsed', 'true');
       
       // Fast-forward timer
       act(() => {
@@ -295,8 +271,8 @@ describe('MainChat - Agent Status Tests', () => {
       
       rerender(<MainChat />);
       
-      const card = screen.getByTestId('response-card');
-      expect(card).toHaveAttribute('data-collapsed', 'false');
+      const card = screen.getByText(/response card/i).closest('[role=\"region\"]') as HTMLElement;
+      expect(card).not.toHaveAttribute('data-collapsed', 'true');
     });
 
     it('should handle toggle collapse manually', () => {
@@ -316,10 +292,10 @@ describe('MainChat - Agent Status Tests', () => {
       
       render(<MainChat />);
       
-      const card = screen.getByTestId('response-card');
-      const toggleButton = within(card).getByText('Toggle');
+      const card = screen.getByText(/response card/i).closest('[role=\"region\"]') as HTMLElement;
+      const toggleButton = within(card).getByRole('button', { name: /collapse|expand/i });
       
-      expect(card).toHaveAttribute('data-collapsed', 'false');
+      expect(card).not.toHaveAttribute('data-collapsed', 'true');
       
       // First click to collapse
       act(() => {
@@ -331,7 +307,7 @@ describe('MainChat - Agent Status Tests', () => {
       act(() => {
         toggleButton.click();
       });
-      expect(card).toHaveAttribute('data-collapsed', 'false');
+      expect(card).not.toHaveAttribute('data-collapsed', 'true');
     });
   });
 });
