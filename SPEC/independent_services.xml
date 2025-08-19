@@ -1,342 +1,103 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<spec>
-  <title>Independent Microservices Best Practices</title>
-  <version>1.0.0</version>
-  <created>2025-01-18</created>
-  <priority>CRITICAL</priority>
-  
-  <summary>
-    MANDATORY guidelines for creating and maintaining truly independent microservices 
-    that have NO dependencies on the main application.
-  </summary>
-
-  <critical_principle>
-    <name>Complete Independence</name>
+<specification>
+  <metadata>
+    <name>Microservice.IndependenceProtocol</name>
+    <version>2.0.0</version>
+    <priority>CRITICAL</priority>
     <description>
-      Each microservice MUST be 100% self-contained with ZERO dependencies on the main app.
-      This ensures services can be deployed, scaled, and maintained independently.
+      MANDATORY protocol for designing and validating independent microservices. 
+      Ensures zero coupling with the main application monolith.
     </description>
-  </critical_principle>
+  </metadata>
+  
+  <critical-principle id="MS-P1">
+    <title>Absolute Independence</title>
+    <instruction>Ensure each microservice is 100% self-contained. ZERO direct code dependencies (imports) on the main application (`app/`) or other services.</instruction>
+  </critical-principle>
 
-  <directory_structure>
-    <rule>
-      <title>Unique Module Names</title>
-      <requirement>NEVER use 'app' as a module name in services</requirement>
-      <good_example>
-        auth_service/
-        ├── auth_core/        # UNIQUE name, not 'app'
-        │   ├── models/
-        │   ├── services/
-        │   └── routes/
-        └── main.py
-      </good_example>
-      <bad_example>
-        auth_service/
-        ├── app/              # WRONG - confusing with main app
-        │   ├── models/
-        │   └── services/
-        └── main.py
-      </bad_example>
-      <reason>
-        Using 'app' creates confusion and potential import conflicts with the main application.
-        Each service needs its own unique namespace.
-      </reason>
-    </rule>
-  </directory_structure>
+  <section title="Architectural Constraints">
+    <constraint id="MS-ARC-001" priority="CRITICAL">
+      <title>Unique Module Namespace (NO 'app')</title>
+      <instruction>Do not use 'app' as the root module name within a microservice. Use `{service_name}_core/`.</instruction>
+      <code-example language="directory-structure">
+        <before description="VIOLATION: Namespace collision">
+auth_service/
+├── app/
+└── main.py
+        </before>
+        <after description="CORRECT: Unique namespace">
+auth_service/
+├── auth_core/
+└── main.py
+        </after>
+      </code-example>
+    </constraint>
 
-  <import_rules>
-    <rule>
-      <title>No Cross-Service Imports</title>
-      <requirement>Services MUST NOT import from the main app or other services directly</requirement>
-      <good_example>
-        # In auth_service/auth_core/routes/auth_routes.py
-        from ..services.auth_service import AuthService  # Internal imports only
-        from ..models.auth_models import LoginRequest
-      </good_example>
-      <bad_example>
-        # In auth_service files
-        from app.models.user import User  # WRONG - importing from main app
-        from app.core.config import settings  # WRONG - dependency on main app
-      </bad_example>
-    </rule>
+    <constraint id="MS-ARC-002" priority="CRITICAL">
+      <title>Forbidden Cross-Service Imports</title>
+      <instruction>Services must not import code from the main `app/` directory.</instruction>
+      <forbidden-import-pattern>from app\.</forbidden-import-pattern>
+    </constraint>
+  </section>
 
-    <rule>
-      <title>Service Communication via APIs</title>
-      <requirement>Services communicate through well-defined HTTP/gRPC APIs only</requirement>
-      <implementation>
-        # Main app communicates with auth service via client
-        # app/clients/auth_client.py (in main app, not auth service)
-        async def validate_token(token: str):
-            response = await httpx.post(f"{AUTH_SERVICE_URL}/auth/validate", ...)
-            return response.json()
-      </implementation>
-    </rule>
-  </import_rules>
+  <section title="Dockerfile Standardization">
+    <guideline id="MS-DOCKER-001">
+      <title>Optimized Multi-Stage Build Template</title>
+      <instruction>Use the following multi-stage build pattern optimized for Cloud Run deployment.</instruction>
+      <code-block language="dockerfile">
+<![CDATA[
+# Stage 1: Builder
+FROM python:3.11-slim AS builder
+WORKDIR /app
+# Install build dependencies (gcc, g++, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends gcc g++ && rm -rf /var/lib/apt/lists/*
+# Build wheels
+COPY service_name/requirements.txt .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
-  <dockerfile_best_practices>
-    <rule>
-      <title>Optimized Multi-Stage Build</title>
-      <template>
-        # Build stage
-        FROM python:3.11-slim AS builder
-        WORKDIR /app
-        
-        # Install build dependencies
-        RUN apt-get update && apt-get install -y --no-install-recommends \
-            gcc g++ && rm -rf /var/lib/apt/lists/*
-        
-        # Build wheels for faster installation
-        COPY service_name/requirements.txt .
-        RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
-        
-        # Runtime stage
-        FROM python:3.11-slim
-        WORKDIR /app
-        
-        # Install runtime dependencies only
-        RUN apt-get update && apt-get install -y --no-install-recommends \
-            curl && apt-get clean && rm -rf /var/lib/apt/lists/*
-        
-        # Install from wheels
-        COPY --from=builder /app/wheels /wheels
-        RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
-        
-        # Copy entire service directory
-        COPY service_name/ ./
-        
-        # Security: Run as non-root user
-        RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-        USER appuser
-        
-        # Cloud Run optimized settings
-        ENV PYTHONUNBUFFERED=1 \
-            PYTHONDONTWRITEBYTECODE=1 \
-            PORT=8080 \
-            WORKERS=1
-        
-        # Use gunicorn with uvicorn workers
-        CMD exec gunicorn main:app \
-            --bind 0.0.0.0:$PORT \
-            --workers $WORKERS \
-            --worker-class uvicorn.workers.UvicornWorker
-      </template>
-    </rule>
+# Stage 2: Runtime
+FROM python:3.11-slim
+WORKDIR /app
+# Install from wheels
+COPY --from=builder /app/wheels /wheels
+RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
-    <rule>
-      <title>Include gunicorn in requirements</title>
-      <requirement>Services using gunicorn MUST include it in requirements.txt</requirement>
-      <example>
-        fastapi==0.104.1
-        uvicorn[standard]==0.24.0
-        gunicorn==21.2.0  # Required for production deployment
-      </example>
-    </rule>
-  </dockerfile_best_practices>
+# Copy service code - CRITICAL STEP
+COPY service_name/ ./
 
-  <service_structure>
-    <template>
-      service_name/
-      ├── main.py                    # Service entry point
-      ├── requirements.txt           # Service-specific dependencies
-      ├── README.md                  # Service documentation
-      ├── {service_name}_core/       # Unique module name (NOT 'app')
-      │   ├── __init__.py
-      │   ├── models/               # Service-specific models
-      │   │   └── service_models.py
-      │   ├── services/             # Business logic
-      │   │   └── service_logic.py
-      │   ├── routes/               # API endpoints
-      │   │   └── service_routes.py
-      │   └── core/                 # Core utilities
-      │       ├── config.py         # Service-specific config
-      │       └── dependencies.py   # Service dependencies
-      └── tests/                    # Service tests
-          └── test_service.py
-    </template>
-  </service_structure>
+# Security: Non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
 
-  <documentation_requirements>
-    <rule>
-      <title>Clear Independence Statement</title>
-      <requirement>README must explicitly state service independence</requirement>
-      <example>
-        # Service Name
-        
-        **IMPORTANT**: This is a completely independent standalone microservice.
-        It has NO dependencies on the main application and must remain fully self-contained.
-        
-        ## Architecture
-        
-        ### Independence Principle
-        This service is designed to be 100% independent from the main application:
-        - All code is contained within the `service_name/` directory
-        - Uses its own `service_core/` module (NOT the main app's `app/` module)
-        - Has its own models, services, and routes
-        - No imports from the main app are allowed
-      </example>
-    </rule>
-  </documentation_requirements>
+# Cloud Run Optimization
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PORT=8080 WORKERS=1
 
-  <testing_independence>
-    <rule>
-      <title>Isolated Testing</title>
-      <requirement>Services must be testable in complete isolation</requirement>
-      <test_command>
-        # Test service independently
-        cd service_name
-        python -c "from main import app; print('Service loads independently')"
-        
-        # Run service tests
-        pytest tests/ --no-cov
-      </test_command>
-    </rule>
-  </testing_independence>
+# Execution Command
+CMD exec gunicorn main:app --bind 0.0.0.0:$PORT --workers $WORKERS --worker-class uvicorn.workers.UvicornWorker
+]]>
+      </code-block>
+    </guideline>
+  </section>
 
-  <common_pitfalls>
-    <pitfall>
-      <issue>Shared configuration files</issue>
-      <solution>Each service has its own config and .env files</solution>
-    </pitfall>
-    
-    <pitfall>
-      <issue>Shared database models</issue>
-      <solution>Services define their own models; use API contracts for data exchange</solution>
-    </pitfall>
-    
-    <pitfall>
-      <issue>Direct database access across services</issue>
-      <solution>Each service owns its data; expose via APIs only</solution>
-    </pitfall>
-    
-    <pitfall>
-      <issue>Shared utility functions</issue>
-      <solution>Duplicate small utilities; create shared library package for complex ones</solution>
-    </pitfall>
-  </common_pitfalls>
+  <section title="Validation and Regression Prevention">
+    <protocol id="MS-VAL-001">
+      <title>Automated Independence Validation (AI Workflow)</title>
+      <instruction>AI Agents must execute this validation protocol when creating or modifying a microservice before finalizing the task.</instruction>
+      <validation-steps language="bash">
+<![CDATA[
+SERVICE_DIR=$1
+cd $SERVICE_DIR
 
-  <migration_checklist>
-    <step number="1">
-      <action>Identify all imports from main app</action>
-      <command>grep -r "from app\." service_name/</command>
-    </step>
-    
-    <step number="2">
-      <action>Rename 'app' directory to unique name</action>
-      <command>mv service_name/app service_name/service_core</command>
-    </step>
-    
-    <step number="3">
-      <action>Update all internal imports</action>
-      <example>
-        # Change: from app.models import X
-        # To: from service_core.models import X
-      </example>
-    </step>
-    
-    <step number="4">
-      <action>Update Dockerfile to copy entire service</action>
-      <example>COPY service_name/ ./</example>
-    </step>
-    
-    <step number="5">
-      <action>Test independence</action>
-      <command>
-        cd service_name
-        python -c "from main import app"
-      </command>
-    </step>
-    
-    <step number="6">
-      <action>Update documentation</action>
-      <requirement>Add independence statement to README</requirement>
-    </step>
-  </migration_checklist>
+# 1. Check for forbidden 'app' directory (MS-ARC-001)
+if [ -d "app" ]; then echo "ERROR: 'app' directory found."; exit 1; fi
 
-  <business_value>
-    <benefit>Independent Scaling</benefit>
-    <benefit>Isolated Deployments</benefit>
-    <benefit>Team Autonomy</benefit>
-    <benefit>Reduced Coupling</benefit>
-    <benefit>Easier Testing</benefit>
-    <benefit>Clear Service Boundaries</benefit>
-  </business_value>
+# 2. Check for imports from main app (MS-ARC-002)
+if grep -r "from app\." . --exclude-dir=venv; then echo "ERROR: Imports from main app found."; exit 1; fi
 
-  <enforcement>
-    <rule>Code reviews MUST verify service independence</rule>
-    <rule>CI/CD pipelines should test services in isolation</rule>
-    <rule>Import linting rules to prevent cross-service imports</rule>
-  </enforcement>
-
-  <regression_prevention>
-    <critical_checks>
-      <check>NEVER create an 'app' directory in any service - use unique names</check>
-      <check>ALWAYS grep for "from app." imports before deployment</check>
-      <check>Test service startup in isolation: cd service_name && python main.py</check>
-      <check>Dockerfile must copy entire service directory, not selective files</check>
-      <check>Requirements.txt must include ALL dependencies (e.g., gunicorn)</check>
-    </critical_checks>
-    
-    <automated_validation>
-      <script>
-        # Add to CI/CD pipeline
-        SERVICE_NAME=$1
-        cd $SERVICE_NAME
-        
-        # Check for forbidden imports
-        if grep -r "from app\." . --exclude-dir=venv; then
-          echo "ERROR: Found imports from main app!"
-          exit 1
-        fi
-        
-        # Check for 'app' directory
-        if [ -d "app" ]; then
-          echo "ERROR: Service has 'app' directory - use unique name!"
-          exit 1
-        fi
-        
-        # Test import independence
-        python -c "from main import app" || exit 1
-      </script>
-    </automated_validation>
-  </regression_prevention>
-
-  <cross_references>
-    <reference>
-      <spec>SPEC/conventions.xml</spec>
-      <section>Naming Conventions</section>
-      <note>Service modules must follow unique naming to avoid conflicts</note>
-    </reference>
-    
-    <reference>
-      <spec>SPEC/system_boundaries.xml</spec>
-      <section>Service Boundaries</section>
-      <note>Each service is a complete boundary - no cross-boundary imports</note>
-    </reference>
-    
-    <reference>
-      <spec>SPEC/type_safety.xml</spec>
-      <section>Service Types</section>
-      <note>Each service defines its own types - no shared type imports</note>
-    </reference>
-    
-    <reference>
-      <spec>SPEC/shared_auth_integration.xml</spec>
-      <section>Auth Service Integration</section>
-      <note>Auth service is the canonical example of an independent service</note>
-    </reference>
-    
-    <reference>
-      <spec>SPEC/docker_best_practices.xml</spec>
-      <section>Multi-Stage Builds</section>
-      <note>All services use optimized multi-stage Docker builds</note>
-    </reference>
-  </cross_references>
-
-  <historical_context>
-    <issue date="2025-01-18">
-      <problem>Auth service had 'app' directory causing import confusion</problem>
-      <solution>Renamed to 'auth_core' for unique namespace</solution>
-      <impact>Eliminated import ambiguity and established independence pattern</impact>
-    </issue>
-  </historical_context>
-</spec>
+# 3. Test isolation import
+python -c "from main import app" || (echo "ERROR: Isolated startup failed."; exit 1)
+]]>
+      </validation-steps>
+    </protocol>
+  </section>
+</specification>

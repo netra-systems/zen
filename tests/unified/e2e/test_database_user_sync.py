@@ -32,11 +32,18 @@ import httpx
 import uuid
 import time
 import logging
+import sys
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
+from pathlib import Path
 
-from tests.unified.real_services_manager import create_real_services_manager
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
 
 logger = logging.getLogger(__name__)
 

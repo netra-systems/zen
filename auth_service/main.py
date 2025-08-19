@@ -96,8 +96,9 @@ async def lifespan(app: FastAPI):
         await auth_db.initialize()
         logger.info("Auth database initialized successfully")
     except Exception as e:
-        logger.warning(f"Auth database initialization failed: {e}")
-        initialization_errors.append(f"Auth DB: {e}")
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
+        logger.warning(f"Auth database initialization failed: {error_msg}")
+        initialization_errors.append(f"Auth DB: {error_msg}")
     
     # Try to initialize main database sync (non-critical for basic auth)
     try:

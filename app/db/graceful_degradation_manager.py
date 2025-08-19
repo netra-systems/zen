@@ -31,6 +31,7 @@ T = TypeVar('T')
 
 class ServiceLevel(Enum):
     """Service degradation levels."""
+    UNKNOWN = "unknown"
     FULL_SERVICE = "full_service"
     DEGRADED_SERVICE = "degraded_service" 
     LIMITED_SERVICE = "limited_service"

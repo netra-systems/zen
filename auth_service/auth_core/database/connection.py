@@ -56,12 +56,18 @@ class AuthDatabase:
             # SQLite optimizations for testing
             connect_args = {"check_same_thread": False}
         
-        self.engine = create_async_engine(
-            database_url,
-            poolclass=NullPool,  # Disable pooling for serverless
-            echo=os.getenv("SQL_ECHO", "false").lower() == "true",
-            connect_args=connect_args
-        )
+        logger.info(f"Creating async engine with URL pattern: {database_url.split('@')[0]}@...")
+        
+        try:
+            self.engine = create_async_engine(
+                database_url,
+                poolclass=NullPool,  # Disable pooling for serverless
+                echo=os.getenv("SQL_ECHO", "false").lower() == "true",
+                connect_args=connect_args
+            )
+        except Exception as e:
+            logger.error(f"Failed to create async engine: {e}")
+            raise
         
         # Create session factory
         self.async_session_maker = async_sessionmaker(

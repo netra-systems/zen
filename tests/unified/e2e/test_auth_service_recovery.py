@@ -31,11 +31,18 @@ import time
 import logging
 import pytest
 import httpx
+import sys
 from typing import Dict, Any, Optional
 from unittest.mock import patch
+from pathlib import Path
 
-from .service_orchestrator import create_service_orchestrator
-from .service_failure_recovery_helpers import (
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.e2e.service_orchestrator import create_service_orchestrator
+from tests.unified.e2e.service_failure_recovery_helpers import (
     create_auth_failure_simulator,
     create_degradation_tester,
     create_state_preservation_validator,

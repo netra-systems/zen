@@ -36,16 +36,23 @@ import httpx
 import json
 import os
 import websockets
+import sys
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, Optional, Tuple
 from unittest.mock import patch, AsyncMock
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 # Set test environment
 os.environ["TESTING"] = "1" 
 os.environ["USE_REAL_SERVICES"] = "true"
 
-from tests.unified.real_services_manager import create_real_services_manager
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
 from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
 from app.logging_config import central_logger
 

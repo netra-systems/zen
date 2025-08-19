@@ -27,25 +27,23 @@ import uuid
 import json
 import jwt
 import websockets
+import sys
+import os
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional, List
 from unittest.mock import patch, AsyncMock
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-try:
-    from ..oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-    from ..real_services_manager import create_real_services_manager
-    from ..real_http_client import RealHTTPClient
-    from ..real_client_types import create_auth_config, create_backend_config
-except ImportError:
-    # Standalone execution - add parent directories to path
-    import sys
-    from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    from oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-    from real_services_manager import create_real_services_manager
-    from real_http_client import RealHTTPClient
-    from real_client_types import create_auth_config, create_backend_config
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
+from tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
+from tests.unified.real_http_client import RealHTTPClient
+from tests.unified.real_client_types import create_auth_config, create_backend_config
 
 from app.logging_config import central_logger
 

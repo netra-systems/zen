@@ -29,12 +29,19 @@ import httpx
 import websockets
 import json
 import redis.asyncio as redis
+import sys
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timezone
+from pathlib import Path
 
-from ..service_manager import ServiceManager
-from ..test_harness import UnifiedTestHarness
-from .rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
 
 
 class UnifiedRateLimitTester:

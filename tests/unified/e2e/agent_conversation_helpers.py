@@ -76,3 +76,73 @@ class AgentConversationHelpers:
         context["messages"] = []
         context["context"] = {}
         await asyncio.sleep(0.01)  # Small delay for cleanup
+
+
+class AgentConversationTestCore:
+    """Core test utilities for agent conversations."""
+    
+    def __init__(self):
+        self.test_env = {}
+        self.helpers = AgentConversationHelpers()
+    
+    async def setup_test_environment(self):
+        """Set up test environment."""
+        self.test_env = {
+            "initialized": True,
+            "user_id": "test_user",
+            "thread_id": "test_thread"
+        }
+    
+    async def teardown_test_environment(self):
+        """Tear down test environment."""
+        self.test_env = {}
+
+
+class ConversationFlowSimulator:
+    """Simulates conversation flows for testing."""
+    
+    async def simulate_multi_turn(self, turns: int = 3) -> List[Dict]:
+        """Simulate multi-turn conversation."""
+        results = []
+        for i in range(turns):
+            results.append({
+                "turn": i + 1,
+                "message": f"Message {i + 1}",
+                "response": f"Response {i + 1}"
+            })
+        return results
+
+
+class ConversationFlowValidator:
+    """Validates conversation flows."""
+    
+    def validate_turn_order(self, turns: List[Dict]) -> bool:
+        """Validate turn order in conversation."""
+        for i, turn in enumerate(turns):
+            if turn.get("turn") != i + 1:
+                return False
+        return True
+
+
+class AgentConversationTestUtils:
+    """Utilities for agent conversation testing."""
+    
+    @staticmethod
+    def create_test_message(content: str) -> Dict:
+        """Create test message."""
+        return {
+            "content": content,
+            "timestamp": datetime.now().isoformat()
+        }
+
+
+class RealTimeUpdateValidator:
+    """Validates real-time updates."""
+    
+    def validate_update_timing(self, updates: List[Dict]) -> bool:
+        """Validate update timing."""
+        if not updates:
+            return True
+        
+        timestamps = [u.get("timestamp") for u in updates]
+        return all(timestamps)

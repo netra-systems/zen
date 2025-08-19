@@ -14,6 +14,27 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+async def check_service_health(url: str, timeout: float = 5.0) -> bool:
+    """
+    Simple health check for a service endpoint.
+    
+    Args:
+        url: Health check URL
+        timeout: Request timeout in seconds
+    
+    Returns:
+        True if service is healthy, False otherwise
+    """
+    try:
+        import httpx
+        async with httpx.AsyncClient(timeout=timeout) as client:
+            response = await client.get(url)
+            return response.status_code == 200
+    except Exception as e:
+        logger.debug(f"Health check failed for {url}: {e}")
+        return False
+
+
 class ServiceHealthMonitor:
     """Monitor service health during tests."""
     

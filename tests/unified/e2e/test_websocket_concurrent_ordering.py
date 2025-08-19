@@ -30,14 +30,21 @@ import time
 import uuid
 import psutil
 import pytest
+import sys
 from typing import Dict, List, Any, Optional, Set
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from pathlib import Path
 
-from ..real_services_manager import create_real_services_manager
-from ..jwt_token_helpers import JWTTestHelper
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig, ConnectionState
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig, ConnectionState
 
 
 @dataclass

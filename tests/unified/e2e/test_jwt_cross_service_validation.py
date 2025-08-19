@@ -22,8 +22,16 @@ import websockets
 import jwt
 import time
 import uuid
+import sys
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any, List
+from pathlib import Path
+
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
 
 from tests.unified.real_services_manager import RealServicesManager
 from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester

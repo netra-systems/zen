@@ -1,567 +1,143 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <specification>
     <metadata>
-        <name>Coding Conventions</name>
-        <type>conventions</type>
-        <version>2.2</version>
-        <last_updated>2025-08-18</last_updated>
+        <name>NetraPlatform.CodingConventions</name>
+        <type>InstructionSet</type>
+        <version>3.0</version>
+        <last_updated>2025-08-19</last_updated>
         <description>
-            MANDATORY coding standards for the Netra AI platform.
-            These conventions ensure consistency, maintainability, and prevent regressions.
-            Includes agent naming conventions to distinguish between LLM-based agents, infrastructure components, and utility modules.
-            Updated to reflect current architectural compliance status: 37.7% (6,433 violations).
+            MANDATORY instruction set for all AI agents contributing code to the Netra AI platform.
         </description>
     </metadata>
     
-    <critical-rules>
-        <rule id="file-size-limit" priority="CRITICAL">
-            <title>300 Line File Limit</title>
-            <description>Every file MUST be 300 lines or less</description>
-            <enforcement>Split large files into focused modules</enforcement>
-        </rule>
+    <section title="Architectural Constraints (The 300/8 Rule)">
+        <ai-directive>AI agents must proactively enforce these constraints during code generation, initiating refactoring protocols if limits are approached (e.g., 250 lines for files, 6 lines for functions).</ai-directive>
+
+        <constraint id="ARC-001" priority="CRITICAL">
+            <title>File Line Limit (300 Lines)</title>
+            <instruction>Ensure every source file is 300 lines or less (LOC).</instruction>
+            <action-on-violation>Execute 'Extract Module Protocol'. Split the file based on functional boundaries.</action-on-violation>
+        </constraint>
         
-        <rule id="function-line-limit" priority="CRITICAL">
-            <title>8 Line Function Limit</title>
-            <description>Every function MUST be 8 lines or less (MANDATORY)</description>
-            <enforcement>Split complex functions into smaller, focused functions</enforcement>
-            <rationale>Forces single responsibility and improves readability</rationale>
-        </rule>
+        <constraint id="ARC-002" priority="CRITICAL">
+            <title>Function/Method Line Limit (8 Lines)</title>
+            <instruction>Ensure every function or method body is 8 lines or less (LOC).</instruction>
+            <action-on-violation>Execute 'Extract Function Protocol'. Decompose logic into smaller, named helper functions.</action-on-violation>
+        </constraint>
         
-        <rule id="no-duplication" priority="CRITICAL">
-            <title>Prevent Function Duplication</title>
-            <description>NEVER create "enhanced", "v2", or duplicate versions</description>
-            <actions>
-                <action>Search for existing implementations before creating new</action>
-                <action>Extend existing functions with options/parameters</action>
-                <action>Use composition over duplication</action>
-            </actions>
-        </rule>
+        <constraint id="ARC-003" priority="CRITICAL">
+            <title>Prohibition of Duplication</title>
+            <instruction>Do not create duplicate functionality or types. Extend existing implementations.</instruction>
+            <ai-directive>Before generating new code or types, search the codebase for existing implementations. If found, IMPORT and USE it. Do not redefine.</ai-directive>
+        </constraint>
         
-        <rule id="no-test-stubs" priority="CRITICAL">
-            <title>No Test Implementations in Production</title>
-            <description>NEVER add test code in production services</description>
+        <constraint id="ARC-004" priority="CRITICAL">
+            <title>Test Code Segregation</title>
+            <instruction>Do not introduce test stubs or mocks into production service code.</instruction>
             <reference>SPEC/no_test_stubs.xml</reference>
-        </rule>
-    </critical-rules>
+        </constraint>
+    </section>
 
-    <frontend-state-management>
-        <convention id="zustand-selectors" priority="CRITICAL">
-            <title>Zustand Store Selector Pattern</title>
-            <description>ALWAYS use individual selectors to prevent infinite loops</description>
-            <problem>Object-returning selectors create new references on every render causing infinite loops</problem>
-            <solution>Select each state property individually with separate useStore calls</solution>
-            <example>
-                // WRONG - Will cause infinite loop
-                const selector = (state) => ({ a: state.a, b: state.b });
-                const data = useStore(selector, shallow);
-                
-                // CORRECT - Stable references
-                const a = useStore(state => state.a);
-                const b = useStore(state => state.b);
-            </example>
-            <reference>SPEC/learnings/frontend.xml#zustand-individual-selectors-pattern</reference>
-        </convention>
-    </frontend-state-management>
+    <section title="Frontend Specific Conventions">
+        <guideline id="FE-001" context="State Management (Zustand)" priority="CRITICAL">
+            <title>Zustand Individual Selector Pattern</title>
+            <instruction>Always use individual selectors for accessing Zustand store state. Object-returning selectors are FORBIDDEN as they cause infinite loops.</instruction>
+            <code-example language="typescript">
+                <before description="VIOLATION: Creates unstable references">
+<![CDATA[
+const selector = (state) => ({ a: state.a, b: state.b });
+const data = useStore(selector, shallow);
+]]>
+                </before>
+                <after description="CORRECT: Ensures stable references">
+<![CDATA[
+const a = useStore(state => state.a);
+const b = useStore(state => state.b);
+]]>
+                </after>
+            </code-example>
+        </guideline>
 
-    <type-safety>
-        <convention id="backend-types">
-            <location>app/schemas/</location>
-            <pattern>Pydantic models for all API contracts</pattern>
-            <enforcement>Type hints on ALL functions</enforcement>
-        </convention>
+        <guideline id="FE-003" context="React Keys">
+            <instruction>Ensure unique and stable keys for all list renderings.</instruction>
+            <pattern>Use `generateUniqueId()` from `@/lib/utils` if no stable ID exists.</pattern>
+            <forbidden-pattern>Do NOT use `Date.now()` or array indices as keys.</forbidden-pattern>
+        </guideline>
+    </section>
+
+    <section title="Backend Specific Conventions">
+        <guideline id="BE-002" context="Dependency Injection (FastAPI)" priority="CRITICAL">
+            <title>Explicit Typing for DB Sessions</title>
+            <instruction>Explicitly type hint database session dependencies to prevent runtime auth failures.</instruction>
+            <code-example language="python">
+                <before description="VIOLATION: Missing type hint causes errors">
+<![CDATA[
+db_session = Depends(get_db_session)
+]]>
+                </before>
+                <after description="CORRECT: Explicit type hint">
+<![CDATA[
+db_session: AsyncSession = Depends(get_db_session)
+]]>
+                </after>
+            </code-example>
+        </guideline>
+
+        <guideline id="BE-003" context="Dependency Injection (Singletons)" priority="CRITICAL">
+            <title>Singleton Injection via Provider Functions</title>
+            <instruction>Inject singleton services using provider functions, not the class directly, to ensure configuration (e.g., secrets) is applied.</instruction>
+            <code-example language="python">
+                <before description="VIOLATION: Bypasses configuration">
+<![CDATA[
+Depends(LLMManager)
+]]>
+                </before>
+                <after description="CORRECT: Uses provider function">
+<![CDATA[
+Depends(get_llm_manager)
+]]>
+                </after>
+            </code-example>
+        </guideline>
+    </section>
+
+    <section title="Agent Architecture Naming Conventions" priority="CRITICAL">
+        <instruction>Apply the correct suffix based on the component's role.</instruction>
         
-        <convention id="frontend-types">
-            <location>frontend/types/</location>
-            <pattern>TypeScript types matching backend schemas</pattern>
-            <enforcement>Strict mode enabled, no any types</enforcement>
-        </convention>
+        <classification suffix="SubAgent" or="Agent">
+            <role>LLM-powered components extending `BaseSubAgent`.</role>
+            <requirement>Must utilize LLM capabilities.</requirement>
+        </classification>
         
-        <convention id="single-source-truth">
-            <description>Each concept defined ONCE, referenced everywhere</description>
-            <examples>
-                <example>One WebSocket provider, not multiple</example>
-                <example>One auth context, not duplicates</example>
-                <example>One chat store, not enhanced versions</example>
-            </examples>
-        </convention>
-    </type-safety>
-
-    <async-patterns>
-        <convention id="async-first">
-            <description>Use async/await for ALL I/O operations</description>
-            <backend>
-                <pattern>async def for all database/API operations</pattern>
-                <pattern>AsyncSession for database access</pattern>
-                <pattern>await for all external calls</pattern>
-            </backend>
-            <frontend>
-                <pattern>async functions for API calls</pattern>
-                <pattern>Proper error handling with try/catch</pattern>
-            </frontend>
-        </convention>
-    </async-patterns>
-
-    <error-handling>
-        <convention id="backend-exceptions">
-            <pattern>Use NetraException with proper context</pattern>
-            <example>
-                raise NetraException(
-                    message="Operation failed",
-                    error_code="OP_001",
-                    context={"user_id": user_id}
-                )
-            </example>
-        </convention>
+        <classification suffix="Executor" or="Manager">
+            <role>Infrastructure orchestration and system coordination (Non-LLM).</role>
+        </classification>
         
-        <convention id="frontend-errors">
-            <pattern>Centralized error handling with toast notifications</pattern>
-            <pattern>Log errors to console with context</pattern>
-        </convention>
-    </error-handling>
-
-    <imports>
-        <convention id="backend-imports">
-            <rules>
-                <rule>Import at module level, not inside functions</rule>
-                <rule>Group imports: stdlib, third-party, local</rule>
-                <rule>Use absolute imports from app root</rule>
-            </rules>
-        </convention>
+        <classification suffix="Service">
+            <role>Domain-specific business logic processing units.</role>
+        </classification>
         
-        <convention id="frontend-imports">
-            <rules>
-                <rule>Use @/ alias for all internal imports</rule>
-                <rule>Named exports only: export const</rule>
-                <rule>Import with braces: {Component}</rule>
-                <rule>NO default exports</rule>
-            </rules>
-        </convention>
-    </imports>
+        <forbidden>Do NOT use the "Agent" suffix for utility or infrastructure modules.</forbidden>
+    </section>
 
-    <database-patterns>
-        <convention id="repository-pattern">
-            <description>ALL database access through repositories</description>
-            <location>app/services/database/</location>
-            <pattern>One repository per entity/domain</pattern>
-        </convention>
-        
-        <convention id="database-sessions">
-            <description>Explicit type hints for sessions</description>
-            <pattern>db_session: AsyncSession = Depends(get_db_session)</pattern>
-            <critical>Missing type hints cause auth failures</critical>
-        </convention>
-    </database-patterns>
+    <section title="Testing Protocol">
+        <guideline id="TEST-003" context="TDD Workflow (Feature Flags)" priority="HIGH">
+            <title>Feature Flag Driven TDD</title>
+            <instruction>Utilize the feature flag system for TDD to maintain a 100% CI/CD pass rate during development.</instruction>
+            <workflow>
+                <step>1. Define feature in `test_feature_flags.json` with status "in_development".</step>
+                <step>2. Write test using `@tdd_test("feature_name")` decorator. (Test will be skipped in CI).</step>
+                <step>3. Implement functionality.</step>
+                <step>4. Update status to "enabled" when implementation is complete and tests pass.</step>
+            </workflow>
+        </guideline>
+    </section>
 
-    <testing>
-        <convention id="test-coverage">
-            <minimum>Backend: 70%, Frontend: 60%</minimum>
-            <target>97% overall coverage</target>
-            <enforcement>Tests required for all new code</enforcement>
-        </convention>
-        
-        <convention id="test-organization">
-            <pattern>Mirror source structure in tests</pattern>
-            <pattern>One test file per source file</pattern>
-            <pattern>Use descriptive test names</pattern>
-        </convention>
-    </testing>
-
-    <ui-design>
-        <convention id="glassmorphic">
-            <description>Glassmorphic design throughout</description>
-            <rules>
-                <rule>NO blue gradient bars</rule>
-                <rule>Use glass-panel classes</rule>
-                <rule>Consistent blur and transparency</rule>
-            </rules>
-        </convention>
-        
-        <convention id="unique-ids">
-            <description>Prevent React key warnings</description>
-            <pattern>Use generateUniqueId() from @/lib/utils</pattern>
-            <critical>NEVER use Date.now() alone</critical>
-        </convention>
-    </ui-design>
-
-    <authentication>
-        <convention id="auth-checks">
-            <description>Check auth before API calls</description>
-            <pattern>
-                if (!isAuthenticated) {
-                    console.error('User must be authenticated');
-                    return;
-                }
-            </pattern>
-        </convention>
-        
-        <convention id="auth-ui">
-            <description>Provide feedback for unauthenticated state</description>
-            <examples>
-                <example>Disable inputs when not authenticated</example>
-                <example>Show "Please sign in" messages</example>
-            </examples>
-        </convention>
-    </authentication>
-
-    <websockets>
-        <convention id="websocket-provider">
-            <description>Single WebSocketProvider for entire app</description>
-            <location>frontend/providers/WebSocketProvider.tsx</location>
-            <critical>NO duplicate WebSocket implementations</critical>
-        </convention>
-        
-        <convention id="message-types">
-            <description>Typed WebSocket messages</description>
-            <backend>app/schemas/websocket_types.py</backend>
-            <frontend>frontend/types/websocket.ts</frontend>
-        </convention>
-    </websockets>
-
-    <naming>
-        <convention id="python-naming">
-            <classes>PascalCase: UserService, NetraException</classes>
-            <functions>snake_case: get_user_by_id</functions>
-            <constants>UPPER_SNAKE: MAX_RETRIES</constants>
-            <files>snake_case: user_service.py</files>
-        </convention>
-        
-        <convention id="typescript-naming">
-            <components>PascalCase: ChatMessage.tsx</components>
-            <functions>camelCase: getUserById</functions>
-            <constants>UPPER_SNAKE: MAX_RETRIES</constants>
-            <types>PascalCase with I/T prefix: IUser, TResponse</types>
-        </convention>
-    </naming>
-
-    <agent-naming-conventions>
-        <convention id="agent-classification" priority="CRITICAL">
-            <title>Agent Component Classification</title>
-            <description>Clear naming patterns to distinguish between different component types in the Netra platform</description>
-            
-            <agent-suffix>
-                <description>Reserved ONLY for LLM-based SubAgents that extend BaseSubAgent</description>
-                <pattern>*SubAgent or *Agent</pattern>
-                <examples>
-                    <example>TriageSubAgent: LLM-powered triage operations</example>
-                    <example>DataSubAgent: LLM-powered data analysis</example>
-                    <example>ReportingSubAgent: LLM-powered report generation</example>
-                </examples>
-                <requirement>Must extend BaseSubAgent and use LLM capabilities</requirement>
-            </agent-suffix>
-            
-            <executor-suffix>
-                <description>Infrastructure pattern implementations for orchestration and management</description>
-                <pattern>*Executor or *Manager</pattern>
-                <examples>
-                    <example>BroadcastExecutor: Message broadcasting infrastructure</example>
-                    <example>MCPManager: MCP protocol management</example>
-                    <example>ExecutionManager: Task execution coordination</example>
-                </examples>
-                <responsibility>Handles infrastructure patterns, orchestration, and system coordination</responsibility>
-            </executor-suffix>
-            
-            <service-suffix>
-                <description>Specialized processing units for domain-specific operations</description>
-                <pattern>*Service</pattern>
-                <examples>
-                    <example>GitHubAnalyzerService: Specialized GitHub analysis</example>
-                    <example>DemoService: Demo functionality processing</example>
-                    <example>ValidationService: Data validation operations</example>
-                </examples>
-                <responsibility>Focused processing units for specific business domains</responsibility>
-            </service-suffix>
-            
-            <utility-naming>
-                <description>Descriptive names for utility and support modules</description>
-                <patterns>
-                    <pattern>*Dispatcher: Request routing and dispatching</pattern>
-                    <pattern>*Handler: Event and error handling</pattern>
-                    <pattern>*Validator: Data validation operations</pattern>
-                    <pattern>*Processor: Data processing operations</pattern>
-                </patterns>
-                <examples>
-                    <example>ToolDispatcher: Routes tool requests to appropriate handlers</example>
-                    <example>StateManager: Manages application state</example>
-                    <example>ErrorHandler: Centralized error processing</example>
-                    <example>MessageValidator: Validates incoming messages</example>
-                </examples>
-                <avoid>Using "Agent" suffix for utility modules</avoid>
-            </utility-naming>
-        </convention>
-        
-        <convention id="naming-enforcement" priority="HIGH">
-            <title>Naming Convention Enforcement</title>
-            <description>Guidelines for consistent application of naming patterns</description>
-            <rules>
-                <rule>Use descriptive, intention-revealing names</rule>
-                <rule>Match suffix to actual component responsibility</rule>
-                <rule>Avoid generic names like "Handler" or "Manager" without context</rule>
-                <rule>Maintain consistency within related component groups</rule>
-            </rules>
-            <verification>
-                <check>Component functionality matches naming suffix</check>
-                <check>LLM usage justifies "Agent" suffix</check>
-                <check>Infrastructure components use appropriate "Executor/Manager" suffixes</check>
-                <check>Business logic components use "Service" suffix</check>
-            </verification>
-        </convention>
-    </agent-naming-conventions>
-
-    <logging>
-        <convention id="backend-logging">
-            <pattern>Use CentralLogger for all logging</pattern>
-            <levels>
-                <level>DEBUG: Detailed diagnostic info</level>
-                <level>INFO: General informational messages</level>
-                <level>WARNING: Warning messages</level>
-                <level>ERROR: Error messages with context</level>
-            </levels>
-        </convention>
-        
-        <convention id="frontend-logging">
-            <pattern>Use lib/logger for structured logging</pattern>
-            <production>Minimal console output in production</production>
-        </convention>
-    </logging>
-
-    <dependency-injection>
-        <convention id="singleton-services">
-            <description>Use provider functions for singletons</description>
-            <correct>Depends(get_llm_manager)</correct>
-            <incorrect>Depends(LLMManager)</incorrect>
-            <critical>Direct injection loses configuration</critical>
-        </convention>
-    </dependency-injection>
-
-    <file-organization>
-        <convention id="keep-root-clean">
-            <description>NEVER create files in project root</description>
-            <rule>Place files in appropriate subdirectories</rule>
-        </convention>
-        
-        <convention id="logical-grouping">
-            <description>Group related functionality</description>
-            <examples>
-                <example>app/agents/ for all agent code</example>
-                <example>app/services/ for business logic</example>
-                <example>frontend/components/ for UI components</example>
-            </examples>
-        </convention>
-    </file-organization>
-
-    <boundary-enforcement>
-        <enforcement id="automated-compliance">
-            <description>Automated enforcement of 300/8 limits with enhanced reporting</description>
-            <tool>scripts/check_architecture_compliance.py</tool>
-            <frequency>Every commit, every PR</frequency>
-            <threshold>0 violations allowed</threshold>
-            <features>
-                <feature>Smart violation limits (adaptive display)</feature>
-                <feature>Severity-based prioritization</feature>
-                <feature>Accurate violation statistics</feature>
-                <feature>Visual severity markers</feature>
-            </features>
-            <cli-options>
-                <option>--violation-limit N: Set display limit</option>
-                <option>--show-all: Show all violations</option>
-                <option>--no-smart-limits: Disable adaptive limits</option>
-                <option>--no-emoji: Use text markers for compatibility</option>
-            </cli-options>
-            <integration>
-                <pre-commit>Run compliance check before commit</pre-commit>
-                <ci-cd>Block merges on violations</ci-cd>
-                <monitoring>Weekly compliance reports with statistics</monitoring>
-            </integration>
-        </enforcement>
-
-        <enforcement id="growth-pattern-reviews">
-            <description>Review growth patterns to maintain boundaries</description>
-            <triggers>
-                <trigger>File approaches 250 lines</trigger>
-                <trigger>Function approaches 6 lines</trigger>
-                <trigger>New module creation</trigger>
-                <trigger>Major refactoring</trigger>
-            </triggers>
-            <checklist>
-                <item>Does growth follow good patterns from SPEC/growth_control.xml?</item>
-                <item>Are boundaries maintained?</item>
-                <item>Is subdivision needed?</item>
-                <item>Are responsibilities clear?</item>
-            </checklist>
-        </enforcement>
-
-        <enforcement id="boundary-violation-response">
-            <description>Immediate response to boundary violations</description>
-            <response-levels>
-                <level-1>
-                    <condition>Single violation, first occurrence</condition>
-                    <action>Developer self-remediation within same day</action>
-                </level-1>
-                <level-2>
-                    <condition>Multiple violations or repeated patterns</condition>
-                    <action>Team review and pair programming within 2 days</action>
-                </level-2>
-                <level-3>
-                    <condition>Systemic violations or architectural resistance</condition>
-                    <action>Architecture review and training within 1 week</action>
-                </level-3>
-            </response-levels>
-        </enforcement>
-
-        <enforcement id="proactive-monitoring">
-            <description>Monitor system health to prevent boundary decay</description>
-            <metrics>
-                <metric>File size distribution (target: 95% under 200 lines)</metric>
-                <metric>Function complexity distribution (target: 95% under 6 lines)</metric>
-                <metric>Module cohesion metrics</metric>
-                <metric>Dependency depth tracking</metric>
-                <metric>Type duplication detection</metric>
-            </metrics>
-            <alerts>
-                <alert>File reaches 250 lines - subdivision planning required</alert>
-                <alert>Function reaches 6 lines - extraction planning required</alert>
-                <alert>Duplicate type detected - consolidation required</alert>
-            </alerts>
-        </enforcement>
-    </boundary-enforcement>
-
-    <architectural-health>
-        <health-indicator id="compliance-score">
-            <description>Overall system compliance with 300/8 limits</description>
-            <calculation>Percentage of files/functions within limits</calculation>
-            <target>100% compliance</target>
-            <monitoring>Daily automated checks</monitoring>
-        </health-indicator>
-
-        <health-indicator id="modular-cohesion">
-            <description>Measure of how well modules maintain single responsibilities</description>
-            <metrics>
-                <metric>Functions per module (target: focused, not excessive)</metric>
-                <metric>Cross-module dependencies (target: minimal)</metric>
-                <metric>Public interface size (target: minimal surface area)</metric>
-            </metrics>
-        </health-indicator>
-
-        <health-indicator id="growth-sustainability">
-            <description>Whether system growth maintains architectural quality</description>
-            <patterns>
-                <good-pattern>New modules created instead of expanding existing</good-pattern>
-                <good-pattern>Consistent subdivision when approaching limits</good-pattern>
-                <good-pattern>Type consolidation over duplication</good-pattern>
-            </patterns>
-            <reference>SPEC/growth_control.xml</reference>
-        </health-indicator>
-    </architectural-health>
-    
-    <testing-conventions>
-        <convention id="bad-test-detection" priority="HIGH">
-            <title>Automatic Bad Test Detection</title>
-            <description>All test runs automatically track and report consistently failing tests</description>
-            <enabled-by-default>true</enabled-by-default>
-            <disable-flag>--no-bad-test-detection</disable-flag>
-            
-            <tracking>
-                <description>Track test failures with {test}:{failure_count} pattern</description>
-                <storage>test_reports/bad_tests.json</storage>
-                <persistence>Maintains history across test runs</persistence>
-            </tracking>
-            
-            <detection-thresholds>
-                <threshold type="consecutive_failures" value="5">
-                    <action>Mark for immediate fix</action>
-                    <priority>HIGH</priority>
-                </threshold>
-                <threshold type="failure_rate" value="70%" runs="10+">
-                    <action>Consider refactoring</action>
-                    <priority>MEDIUM</priority>
-                </threshold>
-                <threshold type="failure_rate" value="90%">
-                    <action>Recommend deletion/rewrite</action>
-                    <priority>CRITICAL</priority>
-                </threshold>
-            </detection-thresholds>
-            
-            <reporting>
-                <command>python -m test_framework.bad_test_reporter</command>
-                <options>
-                    <option>--summary: View statistics only</option>
-                    <option>--details: Include test histories</option>
-                    <option>--test NAME: View specific test history</option>
-                    <option>--reset: Clear bad test data</option>
-                    <option>--export FILE: Export report to file</option>
-                </options>
-            </reporting>
-            
-            <best-practices>
-                <practice>Review bad test report weekly</practice>
-                <practice>Fix consistently failing tests immediately</practice>
-                <practice>Delete tests with 90%+ failure rate after review</practice>
-                <practice>Refactor tests with high failure rates (70-90%)</practice>
-                <practice>Use test history to identify flaky test patterns</practice>
-            </best-practices>
-        </convention>
-        
-        <convention id="test-maintenance" priority="HIGH">
-            <title>Test Health Maintenance</title>
-            <description>Regular maintenance of test suite health</description>
-            <actions>
-                <action>Fix tests that test non-existent SUT (System Under Test)</action>
-                <action>Update tests when code changes</action>
-                <action>Remove obsolete tests promptly</action>
-                <action>Maintain test coverage above 97% for revenue paths</action>
-            </actions>
-        </convention>
-        
-        <convention id="feature-flag-tdd" priority="HIGH">
-            <title>Feature Flag Driven TDD Workflow</title>
-            <description>Use feature flags to enable TDD while maintaining 100% CI/CD pass rate</description>
-            
-            <tdd-workflow>
-                <step order="1">Write test for new feature with @tdd_test decorator</step>
-                <step order="2">Mark feature as "in_development" in test_feature_flags.json</step>
-                <step order="3">Test is skipped in CI/CD, maintaining 100% pass rate</step>
-                <step order="4">Implement feature functionality</step>
-                <step order="5">Change feature status to "enabled" when ready</step>
-                <step order="6">Test runs normally and must pass</step>
-            </tdd-workflow>
-            
-            <feature-status-usage>
-                <status name="enabled">Production-ready features with passing tests</status>
-                <status name="in_development">TDD features being developed</status>
-                <status name="disabled">Features temporarily disabled</status>
-                <status name="experimental">Research features, opt-in only</status>
-            </feature-status-usage>
-            
-            <decorator-patterns>
-                <pattern>@feature_flag("feature_name") - Basic feature gating</pattern>
-                <pattern>@tdd_test("feature_name") - TDD workflow with expected failures</pattern>
-                <pattern>@requires_feature("feat_a", "feat_b") - Multi-feature dependencies</pattern>
-                <pattern>@experimental_test() - Research and experimental features</pattern>
-            </decorator-patterns>
-            
-            <environment-overrides>
-                <format>TEST_FEATURE_&lt;NAME&gt;=&lt;status&gt;</format>
-                <example>TEST_FEATURE_ROI_CALCULATOR=enabled</example>
-                <use-case>Enable features for specific test runs</use-case>
-            </environment-overrides>
-            
-            <business-benefits>
-                <benefit>50% faster feature development through early test writing</benefit>
-                <benefit>100% CI/CD pass rate maintained during development</benefit>
-                <benefit>Clear feature readiness tracking for product teams</benefit>
-                <benefit>Environment-based testing flexibility</benefit>
-            </business-benefits>
-            
-            <mandatory-practices>
-                <practice>ALWAYS use feature flags for new feature tests</practice>
-                <practice>Configure features in test_feature_flags.json with ownership</practice>
-                <practice>Use @tdd_test decorator for tests written before implementation</practice>
-                <practice>Update feature status to "enabled" only when tests pass</practice>
-                <practice>Document feature dependencies and target releases</practice>
-            </mandatory-practices>
-            
-            <reference>SPEC/testing.xml#feature_flag_testing</reference>
-            <reference>SPEC/learnings/testing.xml#feature-flags-tdd-workflow</reference>
-        </convention>
-    </testing-conventions>
+    <section title="Compliance and Enforcement">
+        <tool id="COMP-001">
+            <name>Architecture Compliance Check</name>
+            <command>python scripts/check_architecture_compliance.py</command>
+            <ai-directive>AI Agent MUST execute this tool before finalizing any code contribution. If violations are detected, initiate the appropriate refactoring protocol (ARC-001 or ARC-002).</ai-directive>
+        </tool>
+    </section>
 </specification>

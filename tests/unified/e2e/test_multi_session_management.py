@@ -23,13 +23,20 @@ Compliance: <300 lines, <8 lines per function, real connections only
 import asyncio
 import time
 import uuid
+import sys
 from typing import Dict, List, Any, Optional, Tuple
+from pathlib import Path
 import pytest
 
-from ..real_services_manager import RealServicesManager
-from ..jwt_token_helpers import JWTTestHelper
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig, ConnectionState
+# Add parent directories to sys.path for imports
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent))
+
+from tests.unified.real_services_manager import RealServicesManager
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig, ConnectionState
 
 
 class MultiSessionManager:

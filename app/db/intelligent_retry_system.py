@@ -418,7 +418,7 @@ def create_clickhouse_retry_policy() -> RetryPolicy:
         
         policy.error_classifications.update({
             ch_exc.DatabaseError: ErrorSeverity.DEGRADED,
-            ch_exc.NetworkError: ErrorSeverity.TRANSIENT,
+            ch_exc.OperationalError: ErrorSeverity.TRANSIENT,
             ConnectionError: ErrorSeverity.TRANSIENT
         })
     except ImportError:
