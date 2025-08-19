@@ -182,7 +182,7 @@ class StateManagementMixin:
     async def _execute_save_with_reliability(self, state_manager, context):
         """Execute save operation with reliability patterns."""
         return await state_manager.reliability_manager.execute_with_reliability(
-            context, lambda: self._execute_save_operation()
+            context, self._execute_save_operation
         )
         
     async def _handle_save_result(self, result) -> None:
@@ -286,7 +286,7 @@ class StateManagementMixin:
     async def _execute_load_with_reliability(self, state_manager, context):
         """Execute load operation with reliability patterns."""
         return await state_manager.reliability_manager.execute_with_reliability(
-            context, lambda: self._execute_load_operation()
+            context, self._execute_load_operation
         )
         
     async def _handle_load_result(self, result) -> None:
@@ -384,7 +384,7 @@ class StateManagementMixin:
     async def _execute_recovery_with_reliability(self, state_manager, context):
         """Execute recovery operation with reliability patterns."""
         return await state_manager.reliability_manager.execute_with_reliability(
-            context, lambda: self._execute_recovery_operation()
+            context, self._execute_recovery_operation
         )
         
     def _handle_recovery_result(self, result) -> None:

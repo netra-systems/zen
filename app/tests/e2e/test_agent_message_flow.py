@@ -163,11 +163,17 @@ async def real_agent_service(real_supervisor_agent):
 @pytest.fixture
 async def mock_db_session():
     """Fixture providing mock database session."""
-    from unittest.mock import AsyncMock
+    from unittest.mock import AsyncMock, MagicMock
     from sqlalchemy.ext.asyncio import AsyncSession
     
     session = AsyncMock(spec=AsyncSession)
-    session.begin = AsyncMock()
+    
+    # Create proper async context manager mock for db_session.begin()
+    mock_transaction = AsyncMock()
+    mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
+    mock_transaction.__aexit__ = AsyncMock(return_value=None)
+    session.begin = MagicMock(return_value=mock_transaction)
+    
     session.commit = AsyncMock()
     session.rollback = AsyncMock()
     session.flush = AsyncMock()

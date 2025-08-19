@@ -79,7 +79,9 @@ class TestWebSocketStateManagement:
     async def connection_manager(self):
         """Get connection manager instance."""
         manager = get_connection_manager()
-        await manager.cleanup_dead_connections()
+        # Clear any existing connections without using the problematic cleanup method
+        if hasattr(manager, 'registry') and hasattr(manager.registry, 'active_connections'):
+            manager.registry.active_connections.clear()
         return manager
 
     @pytest.fixture

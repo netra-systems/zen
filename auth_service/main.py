@@ -68,7 +68,7 @@ async def lifespan(app: FastAPI):
     # Log configuration
     from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
-    logger.info(f"Port: {os.getenv('PORT', '8081')}")
+    logger.info(f"Port: {os.getenv('PORT', '8080')}")
     
     # Check if we're in fast test mode
     fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
@@ -264,5 +264,5 @@ async def health() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", "8081"))
+    port = int(os.getenv("PORT", "8080"))
     uvicorn.run(app, host="0.0.0.0", port=port)

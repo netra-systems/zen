@@ -85,7 +85,7 @@ class WebSocketSessionManager:
     async def start_chat_session(self, token: str) -> bool:
         """Start WebSocket chat session with token."""
         config = ClientConfig(timeout=5.0, max_retries=1)
-        self.client = RealWebSocketClient(f"{self.ws_url}/ws?token={token}", config)
+        self.client = RealWebSocketClient(f"{self.ws_url}?token={token}", config)
         return await self.client.connect()
     
     async def send_chat_message(self, message: str, thread_id: str) -> bool:

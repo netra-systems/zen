@@ -129,21 +129,11 @@ class TestJWTCreationAndSigning:
     """Test JWT creation with proper claims and signing."""
     
     @pytest.fixture
-    async def test_harness(self):
-        """Setup test harness with all services."""
-        harness = UnifiedTestHarness()
-        await harness.start_all_services()
-        await harness.wait_for_health_checks()
-        yield harness
-        await harness.stop_all_services()
-    
-    @pytest.fixture
     def jwt_helper(self):
         """JWT test helper instance."""
         return JWTTestHelper()
     
-    @pytest.mark.asyncio
-    async def test_jwt_creation_and_signing(self, test_harness, jwt_helper):
+    def test_jwt_creation_and_signing(self, jwt_helper):
         """Test JWT creation with proper claims.
         Business Value: $15K MRR - Security integrity
         """
@@ -175,8 +165,7 @@ class TestJWTCreationAndSigning:
         assert decoded["token_type"] == "access"
         assert decoded["iss"] == "netra-auth-service"
     
-    @pytest.mark.asyncio
-    async def test_jwt_with_service_claims(self, test_harness, jwt_helper):
+    def test_jwt_with_service_claims(self, jwt_helper):
         """Test JWT creation for service-to-service authentication."""
         service_id = "backend-service"
         

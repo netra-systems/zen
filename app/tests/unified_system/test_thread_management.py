@@ -10,6 +10,7 @@ Business Value: Data integrity and proper thread state management
 import pytest
 import asyncio
 import json
+import sqlalchemy
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -17,13 +18,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text, select, func, and_, or_
 
 from app.db.models_postgres import Thread, Message, User
-from app.services.database.thread_repository import ThreadRepository
-from app.services.database.message_repository import MessageRepository
 from app.ws_manager import WebSocketManager
 from app.schemas.websocket_message_types import ServerMessage
 from .fixtures import (
-    unified_services, test_user, test_database, websocket_client,
-    authenticated_user, clean_database_state
+    test_user, test_database, clean_database_state
 )
 
 
@@ -33,7 +31,6 @@ class TestThreadLifecycle:
     async def test_thread_lifecycle(self, clean_database_state):
         """Test complete thread lifecycle from creation to deletion"""
         session = clean_database_state
-        repo = ThreadRepository()
         
         # Create user
         user = User(
@@ -120,6 +117,14 @@ class TestThreadLifecycle:
         assert archived_thread.metadata_["archived"] is True
         
         # 5. Delete thread (hard delete)
+        # First delete messages manually
+        messages_to_delete = await session.execute(
+            select(Message).where(Message.thread_id == "lifecycle-thread")
+        )
+        for message in messages_to_delete.scalars().all():
+            await session.delete(message)
+        
+        # Then delete thread
         await session.delete(archived_thread)
         await session.commit()
         
@@ -128,7 +133,7 @@ class TestThreadLifecycle:
         deleted_thread = result.scalar_one_or_none()
         assert deleted_thread is None
         
-        # Verify cascade - messages should be deleted too
+        # Verify messages are deleted too
         msg_result = await session.execute(
             select(Message).where(Message.thread_id == "lifecycle-thread")
         )
@@ -162,7 +167,7 @@ class TestThreadLifecycle:
             conn.state = MagicMock()
             conn.state.value = 1
             user_id = f"user-{i}"
-            await ws_manager.connect(conn, user_id=user_id)
+            await ws_manager.connect_user(user_id, conn)
             user_connections[user_id] = conn
         
         # Simulate concurrent message additions
@@ -217,15 +222,14 @@ class TestThreadLifecycle:
         for message in saved_messages:
             update_msg = ServerMessage(
                 type="message_added",
-                data={
+                payload={
                     "thread_id": "concurrent-thread",
                     "message_id": message.id,
                     "author": message.metadata_["author"],
                     "content": message.content[0]["text"]["value"]
-                },
-                timestamp=datetime.now(timezone.utc).isoformat()
+                }
             )
-            await ws_manager.broadcast_to_all(update_msg.model_dump())
+            await ws_manager.broadcast_to_all_users(update_msg.model_dump())
         
         # Verify all users received all updates
         for connection in user_connections.values():

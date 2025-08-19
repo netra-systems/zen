@@ -20,6 +20,7 @@ from sqlalchemy import text, select
 from app.db.models_postgres import Thread, Message, User
 from app.ws_manager import WebSocketManager
 from app.schemas.websocket_message_types import ServerMessage
+from app.schemas.core_enums import WebSocketMessageType
 from .fixtures import (
     test_user, test_database, clean_database_state
 )
@@ -49,7 +50,7 @@ class TestDatabaseSynchronization:
         mock_connection.state.value = 1  # CONNECTED state
         
         # Register connection with user
-        await ws_manager.connect(mock_connection, user_id="user-123")
+        await ws_manager.connect_user("user-123", mock_connection)
         
         # Create thread data
         thread_data = {
@@ -73,23 +74,22 @@ class TestDatabaseSynchronization:
         
         # Simulate WebSocket notification
         message = ServerMessage(
-            type="thread_created",
-            data={
+            type=WebSocketMessageType.THREAD_CREATED,
+            payload={
                 "thread_id": "thread-123",
                 "title": "Test Thread",
                 "created_at": thread_data["created_at"]
-            },
-            timestamp=datetime.now(timezone.utc).isoformat()
+            }
         )
         
         # Send notification to user
-        await ws_manager.send_to_user("user-123", message.model_dump())
+        await ws_manager.send_message_to_user("user-123", message.model_dump())
         
         # Verify WebSocket call was made
         mock_connection.send_text.assert_called_once()
         sent_data = json.loads(mock_connection.send_text.call_args[0][0])
         assert sent_data["type"] == "thread_created"
-        assert sent_data["data"]["thread_id"] == "thread-123"
+        assert sent_data["payload"]["thread_id"] == "thread-123"
 
     async def test_postgres_persistence(self, clean_database_state):
         """Test data persistence in PostgreSQL across service restarts"""
@@ -167,8 +167,8 @@ class TestDatabaseSynchronization:
         user2_connection.state.value = 1
         
         # Register connections
-        await ws_manager.connect(user1_connection, user_id="user-1")
-        await ws_manager.connect(user2_connection, user_id="user-2")
+        await ws_manager.connect_user("user-1", user1_connection)
+        await ws_manager.connect_user("user-2", user2_connection)
         
         # Simulate database change
         thread = Thread(
@@ -182,17 +182,16 @@ class TestDatabaseSynchronization:
         
         # Trigger WebSocket event for database change
         update_message = ServerMessage(
-            type="thread_updated",
-            data={
+            type=WebSocketMessageType.THREAD_UPDATED,
+            payload={
                 "thread_id": "ui-update-thread",
                 "title": "UI Update Test",
                 "action": "created"
-            },
-            timestamp=datetime.now(timezone.utc).isoformat()
+            }
         )
         
         # Broadcast to all users
-        await ws_manager.broadcast_to_all(update_message.model_dump())
+        await ws_manager.broadcast_to_all_users(update_message.model_dump())
         
         # Verify all users received update
         user1_connection.send_text.assert_called_once()
@@ -203,9 +202,9 @@ class TestDatabaseSynchronization:
         sent_message_2 = json.loads(user2_connection.send_text.call_args[0][0])
         
         assert sent_message_1["type"] == "thread_updated"
-        assert sent_message_1["data"]["thread_id"] == "ui-update-thread"
+        assert sent_message_1["payload"]["thread_id"] == "ui-update-thread"
         assert sent_message_2["type"] == "thread_updated"
-        assert sent_message_2["data"]["thread_id"] == "ui-update-thread"
+        assert sent_message_2["payload"]["thread_id"] == "ui-update-thread"
 
     async def test_frontend_state_sync(self, clean_database_state):
         """Test frontend state synchronization across multiple tabs"""
@@ -235,9 +234,9 @@ class TestDatabaseSynchronization:
         tab3_connection.state.value = 1
         
         # Register all tabs for same user
-        await ws_manager.connect(tab1_connection, user_id="sync-user")
-        await ws_manager.connect(tab2_connection, user_id="sync-user")
-        await ws_manager.connect(tab3_connection, user_id="sync-user")
+        await ws_manager.connect_user("sync-user", tab1_connection)
+        await ws_manager.connect_user("sync-user", tab2_connection)
+        await ws_manager.connect_user("sync-user", tab3_connection)
         
         # Update in one tab (simulate user action)
         thread = Thread(
@@ -256,19 +255,18 @@ class TestDatabaseSynchronization:
         # Broadcast state change to all tabs
         sync_message = ServerMessage(
             type="state_sync",
-            data={
+            payload={
                 "entity_type": "thread",
                 "entity_id": "sync-thread",
                 "changes": {
                     "title": "Updated Title"
                 },
                 "timestamp": datetime.now(timezone.utc).isoformat()
-            },
-            timestamp=datetime.now(timezone.utc).isoformat()
+            }
         )
         
         # Send to all user's connections
-        await ws_manager.send_to_user("sync-user", sync_message.model_dump())
+        await ws_manager.send_message_to_user("sync-user", sync_message.model_dump())
         
         # Verify all tabs received sync message
         tab1_connection.send_text.assert_called_once()
@@ -284,7 +282,7 @@ class TestDatabaseSynchronization:
         for connection in [tab1_connection, tab2_connection, tab3_connection]:
             sent_data = json.loads(connection.send_text.call_args[0][0])
             assert sent_data["type"] == "state_sync"
-            assert sent_data["data"]["changes"]["title"] == "Updated Title"
+            assert sent_data["payload"]["changes"]["title"] == "Updated Title"
 
     async def test_concurrent_database_operations(self, clean_database_state):
         """Test concurrent database operations with proper synchronization"""
@@ -307,7 +305,7 @@ class TestDatabaseSynchronization:
             conn = AsyncMock()
             conn.state = MagicMock()
             conn.state.value = 1
-            await ws_manager.connect(conn, user_id=f"user-{i}")
+            await ws_manager.connect_user(f"user-{i}", conn)
             connections.append(conn)
         
         # Simulate concurrent message additions
@@ -341,14 +339,13 @@ class TestDatabaseSynchronization:
         for i in range(5):
             update_msg = ServerMessage(
                 type="message_added",
-                data={
+                payload={
                     "thread_id": "concurrent-thread",
                     "message_id": f"concurrent-msg-{i}",
                     "content": f"Message {i}"
-                },
-                timestamp=datetime.now(timezone.utc).isoformat()
+                }
             )
-            await ws_manager.broadcast_to_all(update_msg.model_dump())
+            await ws_manager.broadcast_to_all_users(update_msg.model_dump())
         
         # Verify all connections received all updates
         for connection in connections:
@@ -430,11 +427,11 @@ class TestDatabaseSynchronization:
         connection.state.value = 1
         
         # Connect user
-        await ws_manager.connect(connection, user_id="recovery-user")
+        await ws_manager.connect_user("recovery-user", connection)
         
         # Simulate connection drop
         connection.state.value = 3  # DISCONNECTED
-        await ws_manager.disconnect(connection)
+        await ws_manager.disconnect_user("recovery-user", connection)
         
         # Create new connection (recovery)
         new_connection = AsyncMock()
@@ -442,12 +439,12 @@ class TestDatabaseSynchronization:
         new_connection.state.value = 1
         
         # Reconnect user
-        await ws_manager.connect(new_connection, user_id="recovery-user")
+        await ws_manager.connect_user("recovery-user", new_connection)
         
         # Send state restoration message
         restore_message = ServerMessage(
             type="state_restore",
-            data={
+            payload={
                 "threads": [
                     {
                         "id": "recovery-thread",
@@ -455,15 +452,14 @@ class TestDatabaseSynchronization:
                         "created_at": thread.created_at
                     }
                 ]
-            },
-            timestamp=datetime.now(timezone.utc).isoformat()
+            }
         )
         
-        await ws_manager.send_to_user("recovery-user", restore_message.model_dump())
+        await ws_manager.send_message_to_user("recovery-user", restore_message.model_dump())
         
         # Verify new connection received state restoration
         new_connection.send_text.assert_called_once()
         sent_data = json.loads(new_connection.send_text.call_args[0][0])
         assert sent_data["type"] == "state_restore"
-        assert len(sent_data["data"]["threads"]) == 1
-        assert sent_data["data"]["threads"][0]["id"] == "recovery-thread"
+        assert len(sent_data["payload"]["threads"]) == 1
+        assert sent_data["payload"]["threads"][0]["id"] == "recovery-thread"

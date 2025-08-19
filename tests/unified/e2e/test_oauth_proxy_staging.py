@@ -355,7 +355,7 @@ class OAuthProxyStagingTester:
 
 
 # Test execution
-@pytest_asyncio.async_test
+@pytest.mark.asyncio
 async def test_oauth_proxy_pr_environment_complete_flow():
     """
     CRITICAL Test #8: OAuth Proxy PR Environment Validation
@@ -394,7 +394,7 @@ async def test_oauth_proxy_pr_environment_complete_flow():
         await tester.cleanup()
 
 
-@pytest_asyncio.async_test  
+@pytest.mark.asyncio
 async def test_oauth_proxy_error_scenarios():
     """Test OAuth proxy error handling scenarios"""
     tester = OAuthProxyStagingTester()

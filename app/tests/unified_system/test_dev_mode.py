@@ -82,11 +82,11 @@ class TestDevModeAuthentication:
                 # Setup: Dev mode auto-creates and validates dev user
                 mock_validate.return_value = {
                     "valid": True,
+                    "user_id": "dev-user-123",
                     "user": {
                         "id": "dev-user-123",
                         "email": "dev@netra.ai",
-                        "first_name": "Dev",
-                        "last_name": "User",
+                        "full_name": "Dev User",
                         "subscription_tier": "enterprise"
                     },
                     "permissions": ["read", "write", "admin"]
@@ -96,8 +96,29 @@ class TestDevModeAuthentication:
                 from app.auth_integration.auth import get_current_user
                 from fastapi.security import HTTPAuthorizationCredentials
                 from sqlalchemy.ext.asyncio import AsyncSession
+                from app.db.models_postgres import User as DBUser
+                
+                # Mock database user
+                mock_db_user = DBUser(
+                    id="dev-user-123",
+                    email="dev@netra.ai",
+                    full_name="Dev User",
+                    is_active=True
+                )
+                
+                # Mock database session and query
+                mock_result = MagicMock()
+                mock_result.scalar_one_or_none.return_value = mock_db_user
+                
+                mock_session = AsyncMock()
+                mock_session.execute.return_value = mock_result
+                mock_session.__aenter__.return_value = mock_session
+                mock_session.__aexit__.return_value = None
                 
                 mock_db = AsyncMock(spec=AsyncSession)
+                mock_db.__aenter__.return_value = mock_session
+                mock_db.__aexit__.return_value = None
+                
                 mock_creds = HTTPAuthorizationCredentials(
                     scheme="Bearer",
                     credentials="dev-token-auto-generated"
@@ -109,7 +130,8 @@ class TestDevModeAuthentication:
                 # Verify: Dev user authenticated instantly
                 assert user is not None
                 assert user.email == "dev@netra.ai"
-                assert user.subscription_tier == "enterprise"
+                assert user.full_name == "Dev User"
+                assert user.is_active is True
                 
                 # Verify: Auth client called with dev token
                 mock_validate.assert_called_once_with("dev-token-auto-generated")

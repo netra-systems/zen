@@ -117,3 +117,16 @@ def _create_service_params(agent_service, thread_service, corpus_service, securi
         agent_service, thread_service, corpus_service, 
         synthetic_data_service, security_service, supply_catalog_service
     )
+
+
+async def create_mcp_service_for_websocket() -> MCPService:
+    """Create MCP service instance for WebSocket endpoints without FastAPI Depends."""
+    from app.dependencies import get_agent_service, get_thread_service, get_corpus_service, get_security_service
+    
+    # Manually create service dependencies for WebSocket
+    agent_service = get_agent_service()
+    thread_service = get_thread_service()
+    corpus_service = get_corpus_service()
+    security_service = get_security_service()
+    
+    return await _get_or_create_service(agent_service, thread_service, corpus_service, security_service)

@@ -1020,10 +1020,26 @@
       "passed": 113,
       "failed": 4,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_133158_18483",
+      "timestamp": "2025-08-19T13:33:45.421068",
+      "total_tests": 5,
+      "passed": 1,
+      "failed": 4,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_133412_52033",
+      "timestamp": "2025-08-19T13:35:39.770947",
+      "total_tests": 115,
+      "passed": 110,
+      "failed": 4,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 52,
-    "last_updated": "2025-08-19T13:17:49.373992"
+    "total_runs": 54,
+    "last_updated": "2025-08-19T13:35:39.770947"
   }
 }

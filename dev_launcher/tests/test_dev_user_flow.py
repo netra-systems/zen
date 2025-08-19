@@ -30,7 +30,7 @@ import subprocess
 import time
 
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.config import DevConfig
+from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor
 from dev_launcher.process_manager import ProcessManager
 
@@ -41,13 +41,14 @@ class TestDevUserCreation:
     @pytest.fixture
     def mock_dev_config(self):
         """Mock dev launcher configuration"""
-        config = MagicMock(spec=DevConfig)
-        config.dev_mode = True
-        config.auto_create_dev_user = True
-        config.dev_user_email = "dev@netra.ai"
-        config.dev_user_permissions = ["read", "write", "admin"]
-        config.reset_on_startup = True
-        config.seed_dev_data = True
+        config = MagicMock(spec=LauncherConfig)
+        config.startup_mode = "minimal"
+        config.verbose = True
+        config.no_browser = True
+        config.parallel_startup = True
+        config.dynamic_ports = True
+        config.backend_port = 8000
+        config.frontend_port = 3000
         return config
 
     @pytest.fixture

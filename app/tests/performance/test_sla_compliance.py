@@ -532,6 +532,12 @@ class TestSLACompliance:
         self.sla_tester = SLAComplianceTester()
     
     @pytest.mark.asyncio
+    async def test_p95_response_time(self):
+        """Test P95 response time meets SLA requirements."""
+        # Alias for the API response time test for backward compatibility
+        await self.test_api_response_time_sla()
+    
+    @pytest.mark.asyncio
     async def test_api_response_time_sla(self):
         """Test API response time meets P95 < 200ms SLA."""
         api_tester = APILoadTester()

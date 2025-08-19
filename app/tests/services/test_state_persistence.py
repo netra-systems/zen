@@ -11,6 +11,12 @@ class TestStatePersistence:
         mock_db.add = MagicMock()
         mock_db.commit = AsyncMock()
         
+        # Create proper async context manager mock for db_session.begin()
+        mock_transaction = AsyncMock()
+        mock_transaction.__aenter__ = AsyncMock(return_value=mock_transaction)
+        mock_transaction.__aexit__ = AsyncMock(return_value=None)
+        mock_db.begin = MagicMock(return_value=mock_transaction)
+        
         # Mock the async session's execute method for Run lookup  
         mock_run = MagicMock()
         mock_run.metadata_ = {}
@@ -42,7 +48,9 @@ class TestStatePersistence:
             db_session=mock_db
         )
         
-        assert result == True
+        # Result is a tuple (success, snapshot_id)
+        assert result[0] == True
+        assert result[1] is not None  # snapshot_id should be generated
     
     async def test_restore_agent_state(self):
         """Test restoring agent state from database"""

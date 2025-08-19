@@ -158,10 +158,13 @@ async def get_mcp_config(
 @router.websocket("/ws")
 async def websocket_endpoint(
     websocket: WebSocket,
-    api_key: Optional[str] = None,
-    mcp_service = Depends(get_mcp_service)
+    api_key: Optional[str] = None
 ):
     """WebSocket endpoint for MCP"""
+    # Manually create MCP service for WebSocket endpoint
+    # FastAPI Depends() doesn't work properly with WebSocket endpoints
+    from .service_factory import create_mcp_service_for_websocket
+    mcp_service = await create_mcp_service_for_websocket()
     handler = MCPWebSocketHandler(mcp_service)
     await handler.handle_websocket(websocket, api_key)
 
