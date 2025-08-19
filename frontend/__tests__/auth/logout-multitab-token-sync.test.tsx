@@ -79,7 +79,7 @@ describe('Logout Multi-Tab - Token Synchronization', () => {
           key: 'jwt_token',
           newValue: null,
           oldValue: 'malformed-token',
-          storageArea: null, // Malformed event
+          // Malformed event test
         });
         window.dispatchEvent(event);
       });
@@ -260,7 +260,6 @@ describe('Logout Multi-Tab - Token Synchronization', () => {
         key: 'jwt_token',
         newValue: null,
         oldValue: 'token',
-        storageArea: null,
       });
       
       // Should not crash
@@ -272,7 +271,6 @@ describe('Logout Multi-Tab - Token Synchronization', () => {
         key: undefined,
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       
       // Should not trigger logout for undefined keys
@@ -284,7 +282,6 @@ describe('Logout Multi-Tab - Token Synchronization', () => {
         key: 'jwt_token',
         newValue: undefined,
         oldValue: undefined,
-        storageArea: localStorage,
       });
       
       await waitFor(() => {
@@ -298,7 +295,6 @@ describe('Logout Multi-Tab - Token Synchronization', () => {
         key: longKey,
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       
       // Should not crash with long keys

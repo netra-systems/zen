@@ -163,36 +163,53 @@ describe('Connection Management Core Tests', () => {
     qualityMonitor = new ConnectionQualityMonitor();
     heartbeatManager = new HeartbeatManager();
     wsManager.setup();
-    jest.useFakeTimers();
   });
 
   afterEach(() => {
     wsManager.cleanup();
     heartbeatManager.stop();
     jest.clearAllMocks();
-    jest.useRealTimers();
   });
 
   describe('Connection State Management', () => {
     it('should track connection status changes', async () => {
-      render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      await act(async () => {
+        render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      });
 
       expect(screen.getByTestId('connection-status')).toHaveTextContent('disconnected');
-      await userEvent.click(screen.getByTestId('btn-connecting'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-connecting'));
+      });
       expect(screen.getByTestId('connection-status')).toHaveTextContent('connecting');
-      await userEvent.click(screen.getByTestId('btn-connected'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-connected'));
+      });
       expect(screen.getByTestId('connection-status')).toHaveTextContent('connected');
-      await userEvent.click(screen.getByTestId('btn-error'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-error'));
+      });
       expect(screen.getByTestId('connection-status')).toHaveTextContent('error');
     });
 
     it('should track reconnection attempts', async () => {
-      render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      await act(async () => {
+        render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      });
 
       expect(screen.getByTestId('reconnect-attempts')).toHaveTextContent('0');
-      await userEvent.click(screen.getByTestId('btn-reconnect'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-reconnect'));
+      });
       expect(screen.getByTestId('reconnect-attempts')).toHaveTextContent('1');
-      await userEvent.click(screen.getByTestId('btn-reconnect'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-reconnect'));
+      });
       expect(screen.getByTestId('reconnect-attempts')).toHaveTextContent('2');
     });
   });
@@ -216,26 +233,40 @@ describe('Connection Management Core Tests', () => {
 
   describe('Heartbeat Management', () => {
     it('should track heartbeat metrics', async () => {
-      render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      await act(async () => {
+        render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      });
 
       expect(screen.getByTestId('heartbeat-sent')).toHaveTextContent('0');
-      await userEvent.click(screen.getByTestId('btn-heartbeat'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-heartbeat'));
+      });
       expect(screen.getByTestId('heartbeat-sent')).toHaveTextContent('1');
       expect(screen.getByTestId('heartbeat-received')).toHaveTextContent('1');
     });
 
     it('should track missed heartbeats', async () => {
-      render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      await act(async () => {
+        render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      });
 
-      await userEvent.click(screen.getByTestId('btn-miss'));
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-miss'));
+      });
       expect(screen.getByTestId('heartbeat-missed')).toHaveTextContent('1');
     });
 
     it('should toggle heartbeat enabled state', async () => {
-      render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      await act(async () => {
+        render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      });
 
       expect(screen.getByTestId('heartbeat-enabled')).toHaveTextContent('false');
-      await userEvent.click(screen.getByTestId('btn-toggle'));
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-toggle'));
+      });
       expect(screen.getByTestId('heartbeat-enabled')).toHaveTextContent('true');
     });
 
@@ -250,14 +281,22 @@ describe('Connection Management Core Tests', () => {
 
   describe('Connection Quality Monitoring', () => {
     it('should calculate quality based on latency', () => {
-      qualityMonitor.recordLatency(30);
-      expect(qualityMonitor.getQuality()).toBe('excellent');
-      qualityMonitor.recordLatency(100);
-      expect(qualityMonitor.getQuality()).toBe('good');
-      qualityMonitor.recordLatency(300);
-      expect(qualityMonitor.getQuality()).toBe('poor');
-      qualityMonitor.recordLatency(600);
-      expect(qualityMonitor.getQuality()).toBe('critical');
+      // Test individual ranges with fresh monitor instances
+      const excellentMonitor = new ConnectionQualityMonitor();
+      excellentMonitor.recordLatency(30);
+      expect(excellentMonitor.getQuality()).toBe('excellent');
+      
+      const goodMonitor = new ConnectionQualityMonitor();
+      goodMonitor.recordLatency(100);
+      expect(goodMonitor.getQuality()).toBe('good');
+      
+      const poorMonitor = new ConnectionQualityMonitor();
+      poorMonitor.recordLatency(300);
+      expect(poorMonitor.getQuality()).toBe('poor');
+      
+      const criticalMonitor = new ConnectionQualityMonitor();
+      criticalMonitor.recordLatency(600);
+      expect(criticalMonitor.getQuality()).toBe('critical');
     });
 
     it('should track average latency', () => {
@@ -277,8 +316,12 @@ describe('Connection Management Core Tests', () => {
 
   describe('Resource Cleanup', () => {
     it('should clean up connection resources', async () => {
-      const { unmount } = render(<TestProviders><ConnectionTestComponent /></TestProviders>);
-      unmount();
+      const { unmount } = await act(async () => {
+        return render(<TestProviders><ConnectionTestComponent /></TestProviders>);
+      });
+      await act(async () => {
+        unmount();
+      });
       expect(true).toBe(true);
     });
 

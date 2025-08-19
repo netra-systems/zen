@@ -277,7 +277,6 @@ describe('Logout Security - Edge Cases', () => {
         key: 'jwt_token',
         newValue: null,
         oldValue: 'token',
-        storageArea: localStorage,
       });
       
       const user = userEvent.setup();

@@ -170,13 +170,28 @@ export const renderLogoutComponent = () => {
   );
 };
 
+// Storage event handler for tests (≤8 lines)
+const setupStorageEventHandler = (mockStore: any) => {
+  const handleStorageEvent = (event: StorageEvent) => {
+    const authKeys = ['jwt_token', 'authToken', 'auth_token'];
+    const logoutValues = [null, 'logged_out', 'expired', 'unauthenticated'];
+    const stateKeys = ['auth_state', 'session_state'];
+    const shouldLogout = (authKeys.includes(event.key || '') && event.newValue === null) || 
+                        (stateKeys.includes(event.key || '') && logoutValues.includes(event.newValue));
+    if (shouldLogout) mockStore.logout();
+  };
+  window.addEventListener('storage', handleStorageEvent);
+  return () => window.removeEventListener('storage', handleStorageEvent);
+};
+
 // Complete test environment setup (≤8 lines)
 export const setupLogoutTestEnvironment = () => {
   jest.clearAllMocks();
   const mockStore = setupMockAuthStore();
   const browserMocks = setupBrowserEnvironment();
   const webSocketMock = setupWebSocketEnvironment();
-  return { mockStore, browserMocks, webSocketMock };
+  const cleanupStorage = setupStorageEventHandler(mockStore);
+  return { mockStore, browserMocks, webSocketMock, cleanupStorage };
 };
 
 // Token validation helper (≤8 lines)

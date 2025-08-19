@@ -50,14 +50,7 @@ jest.mock('@/utils/debug-logger', () => ({
   }
 }));
 
-// Use real child components - only mock complex diagnostics components
-jest.mock('@/components/chat/OverflowPanel', () => ({
-  OverflowPanel: () => null
-}));
-
-jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
-  EventDiagnosticsPanel: () => null
-}));
+// Use real UI components - these are part of the tested functionality
 
 // Mock framer-motion
 jest.mock('framer-motion', () => ({

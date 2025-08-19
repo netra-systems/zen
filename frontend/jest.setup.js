@@ -172,8 +172,8 @@ beforeEach(() => {
 afterEach(() => {
   jest.clearAllMocks();
   fetchMock.resetMocks();
-  localStorage.clear();
-  sessionStorage.clear();
+  if (localStorage && localStorage.clear) localStorage.clear();
+  if (sessionStorage && sessionStorage.clear) sessionStorage.clear();
   Date.now = originalDateNow;
 });
 

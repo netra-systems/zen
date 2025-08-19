@@ -373,7 +373,7 @@ describe('ARIA Landmarks - Structure and Navigation', () => {
         
         <main role="main">
           <article>
-            <header>
+            <header role="group">
               <h1>Article Title</h1>
               <p>Article metadata</p>
             </header>
