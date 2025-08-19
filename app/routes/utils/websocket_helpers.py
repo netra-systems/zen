@@ -37,7 +37,7 @@ def extract_app_services(websocket: WebSocket) -> Tuple[Any, Any]:
 
 async def decode_token_payload(security_service, token: str) -> Dict:
     """Decode and validate token payload."""
-    payload = security_service.decode_access_token(token)
+    payload = await security_service.decode_access_token(token)
     return validate_token_payload(payload)
 
 

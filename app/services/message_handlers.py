@@ -163,6 +163,13 @@ class MessageHandlerService(IMessageHandlerService):
         """Handle user_message type"""
         text, references, thread_id = self._extract_message_data(payload)
         logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
+        
+        # Don't process empty messages - prevents wasted agent resources
+        if not text or not text.strip():
+            logger.warning(f"Empty message from {user_id}, not starting agent")
+            await manager.send_error(user_id, "Please enter a message")
+            return
+        
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
         # Join user to thread room for WebSocket broadcasts
         if thread and thread_id:

@@ -174,7 +174,47 @@ class MessageProcessor:
         if self.handler.is_ping_message(message):
             await self.handler.handle_ping_message(conn_info.websocket)
             return True
-        return await self._validate_message_and_update_stats(message)
+        
+        # First validate the message
+        if not await self._validate_message_and_update_stats(message):
+            return False
+        
+        # CRITICAL: Actually process the message through agent service
+        return await self._forward_to_agent_service(conn_info, message)
+    
+    async def _forward_to_agent_service(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
+        """Forward validated message to agent service for processing."""
+        try:
+            # Get user_id from connection metadata
+            user_id = conn_info.metadata.get("user_id")
+            if not user_id:
+                logger.error(f"No user_id found for connection {conn_info.connection_id}")
+                return False
+            
+            # Get agent service from app state
+            app = conn_info.websocket.app
+            if not hasattr(app.state, 'agent_service'):
+                logger.error("Agent service not found in app state")
+                return False
+            
+            agent_service = app.state.agent_service
+            
+            # Forward message to agent service as JSON string
+            import json
+            message_str = json.dumps(message)
+            
+            logger.info(f"Forwarding message to agent service for user {user_id}: {message.get('type')}")
+            
+            # Process through agent service (this will handle the message routing)
+            from app.db.postgres import get_async_db
+            async with get_async_db() as db_session:
+                await agent_service.handle_websocket_message(user_id, message_str, db_session)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error forwarding message to agent service: {e}", exc_info=True)
+            return False
     
     async def _validate_message_and_update_stats(self, message: Dict[str, Any]) -> bool:
         """Validate message and update statistics."""

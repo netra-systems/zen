@@ -38,9 +38,13 @@
       Updated _extract_message_data to accept both 'content' and 'text' fields:
       text = payload.get("content") or payload.get("text", "")
     </change>
+    <change>
+      Added empty message validation to prevent wasted agent resources:
+      if not text or not text.strip(): send error and return
+    </change>
     <file>app/services/agent_service_core.py</file>
     <change>
-      Added debug logging to track message processing
+      Added debug logging to track message processing and payload keys
     </change>
   </fix>
   
@@ -64,7 +68,27 @@
     <lesson>Schema and implementation must be kept in sync</lesson>
     <lesson>Field name consistency across frontend/backend is critical</lesson>
     <lesson>Integration tests must test actual data flow, not mocked handlers</lesson>
+    <lesson>Empty messages should be rejected early to prevent wasted agent resources</lesson>
+    <lesson>First message without thread context DOES create thread and start agent properly</lesson>
+    <lesson>Error messages to users should be clear and actionable</lesson>
   </lessons>
+  
+  <agent_startup_verification>
+    <confirmed>Agent DOES start on first message without prior context</confirmed>
+    <flow>
+      <step>User sends message without thread_id</step>
+      <step>System calls get_or_create_thread to create new thread</step>
+      <step>Message is saved to thread</step>
+      <step>Run is created for the thread</step>
+      <step>Supervisor context is set (thread_id, user_id, db_session)</step>
+      <step>supervisor.run() is called with message text</step>
+    </flow>
+    <requirements>
+      <requirement>Database session must exist</requirement>
+      <requirement>Message content must not be empty</requirement>
+      <requirement>Thread creation must succeed</requirement>
+    </requirements>
+  </agent_startup_verification>
   
   <related_files>
     <file>frontend/components/chat/MessageInput.tsx</file>

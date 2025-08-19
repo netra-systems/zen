@@ -199,7 +199,7 @@ class EnhancedSecurityService(SecurityService):
     
     async def validate_token(self, token: str) -> Dict[str, Any]:
         """Validate token and return user data"""
-        payload = self.decode_access_token(token)
+        payload = await self.decode_access_token(token)
         if not payload:
             return {'valid': False, 'error': 'Invalid token'}
         

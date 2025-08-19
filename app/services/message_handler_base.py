@@ -14,7 +14,16 @@ class MessageHandlerBase:
     
     @staticmethod
     def extract_user_request(payload: Dict[str, Any]) -> str:
-        """Extract user request from payload"""
+        """Extract user request from payload - supports multiple field names for consistency"""
+        # First check for direct content/text fields (same as user_message)
+        if "content" in payload:
+            return payload["content"]
+        if "text" in payload:
+            return payload["text"]
+        # Then check for user_request directly
+        if "user_request" in payload:
+            return payload["user_request"]
+        # Finally check nested request structure (legacy)
         request_data = payload.get("request", {})
         return request_data.get("query", "") or request_data.get("user_request", "")
     
