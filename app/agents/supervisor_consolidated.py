@@ -105,6 +105,7 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
         """Initialize modern execution infrastructure."""
         self.monitor = ExecutionMonitor()
         self.reliability_manager = SupervisorInitializationHelpers.create_reliability_manager()
+        # BaseExecutionEngine: Core reliability and monitoring infrastructure
         self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
         self.error_handler = ExecutionErrorHandler()
     
@@ -123,7 +124,9 @@ class SupervisorAgent(BaseExecutionInterface, BaseSubAgent):
 
     def _init_execution_components(self, websocket_manager: 'WebSocketManager') -> None:
         """Initialize execution components."""
+        # ExecutionEngine: Handles agent execution with WebSocket notifications
         self.engine = ExecutionEngine(self.registry, websocket_manager)
+        # PipelineExecutor: Orchestrates multi-agent pipeline execution
         self.pipeline_executor = PipelineExecutor(
             self.engine, websocket_manager, self.db_session
         )

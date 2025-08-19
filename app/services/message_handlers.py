@@ -23,7 +23,7 @@ from app.services.message_handler_utils import handle_thread_history as _handle_
 from app.services.message_handler_utils import handle_stop_agent as _handle_stop_agent
 from app.services.message_handler_base import MessageHandlerBase
 from app.services.message_processing import (
-    process_user_message as _process_user_message,
+    process_user_message_with_notifications as _process_user_message,
     execute_and_persist as _execute_and_persist,
     persist_response as _persist_response,
     save_assistant_message as _save_assistant_message,
@@ -179,7 +179,8 @@ class MessageHandlerService(IMessageHandlerService):
     def _extract_message_data(self, payload: UserMessagePayload) -> tuple:
         """Extract message data from payload - supports both 'content' and 'text' fields"""
         # Support both 'content' (from frontend) and 'text' (legacy) field names
-        text = payload.get("content") or payload.get("text", "")
+        # Ensure text is never None
+        text = payload.get("content") or payload.get("text") or ""
         references = payload.get("references", [])
         thread_id = payload.get("thread_id", None)
         return text, references, thread_id

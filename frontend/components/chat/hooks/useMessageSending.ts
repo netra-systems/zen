@@ -64,6 +64,8 @@ export const useMessageSending = () => {
   };
 
   const sendWebSocketMessage = (message: string, threadId: string): void => {
+    // Send user_message type - backend will automatically start agent processing
+    // Backend flow: user_message -> agent_started notification -> agent processing -> agent_completed
     sendMessage({ 
       type: 'user_message', 
       payload: { 

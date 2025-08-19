@@ -53,6 +53,12 @@
   </message_flow>
   
   <fix>
+    <file>app/routes/websockets.py</file>
+    <change>
+      CRITICAL: Fixed inverted logic in _handle_validated_message:
+      OLD: if not await validate_and_handle_message(): return True (EXIT!)
+      NEW: Always call process_valid_message for non-system messages
+    </change>
     <file>app/websocket/unified/message_handlers.py</file>
     <change>
       Added _forward_to_agent_service method that:
@@ -66,6 +72,13 @@
     </change>
     <change>
       Added comprehensive logging to track message flow
+    </change>
+    <file>app/services/message_handlers.py</file>
+    <change>
+      Fixed field extraction to accept both 'content' and 'text' fields
+    </change>
+    <change>
+      Added empty message validation to prevent wasted resources
     </change>
   </fix>
   
@@ -103,13 +116,36 @@
     <test_suite>test_websocket_field_alignment.py - Field alignment tests</test_suite>
   </test_coverage>
   
+  <inverted_logic_pattern>
+    <pattern>
+      if not await some_handler():
+          return True  # EXIT
+      return await actual_processing()
+    </pattern>
+    <problem>
+      This pattern causes silent failures when handler returns False.
+      The actual processing is skipped when it should be executed.
+    </problem>
+    <correct_pattern>
+      # Handle system messages separately
+      if message_type in system_messages:
+          return await system_handler()
+      
+      # Always process business messages
+      return await actual_processing()
+    </correct_pattern>
+  </inverted_logic_pattern>
+  
   <lessons_learned>
+    <lesson>INVERTED LOGIC: "if not handler(): return" pattern is extremely dangerous</lesson>
     <lesson>Silent success is worse than loud failure - always log actual work being done</lesson>
     <lesson>Message validation alone is not message processing</lesson>
     <lesson>Every layer of abstraction needs explicit forwarding logic</lesson>
     <lesson>Integration tests must verify actual agent execution, not just message receipt</lesson>
     <lesson>When no logs appear, the code path is likely not being executed at all</lesson>
     <lesson>Always trace message flow end-to-end with logging during debugging</lesson>
+    <lesson>System messages (ping/pong/auth) should be handled separately from business messages</lesson>
+    <lesson>When debugging "no logs", check for early returns in the call chain</lesson>
   </lessons_learned>
   
   <prevention>

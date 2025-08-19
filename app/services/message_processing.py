@@ -9,12 +9,25 @@ from app.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 
-async def process_user_message(
+async def send_agent_started_notification(
+    user_id: str, thread: Optional[Thread], run: Optional[Run]
+) -> None:
+    """Send agent_started notification to frontend"""
+    thread_id = thread.id if thread else None
+    run_id = run.id if run else None
+    await manager.send_message(user_id, {
+        "type": "agent_started",
+        "payload": {"thread_id": thread_id, "run_id": run_id}
+    })
+
+async def process_user_message_with_notifications(
     supervisor, user_id: str, text: str, thread: Optional[Thread],
     run: Optional[Run], db_session: Optional[AsyncSession], thread_service
 ) -> None:
     """Process user message and send response"""
     try:
+        # Send agent_started notification
+        await send_agent_started_notification(user_id, thread, run)
         response = await execute_and_persist(
             supervisor, user_id, text, thread, run, db_session, thread_service
         )
