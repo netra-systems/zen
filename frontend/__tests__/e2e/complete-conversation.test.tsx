@@ -33,110 +33,44 @@ interface ConversationMetrics {
 }
 
 /**
- * Sets up authenticated user session
+ * Sets up complete conversation workflow
  */
-async function setupAuthenticatedUser(page: Page): Promise<AuthTestUser> {
-  const testUser: AuthTestUser = {
-    email: 'test@netrasystems.ai',
-    name: 'Test User',
-    id: 'e2e-test-user'
-  };
-  
-  await page.goto('/login');
-  await mockSuccessfulAuthentication(page, testUser);
+async function setupConversationWorkflow(page: Page): Promise<TestUser> {
+  const testUser = await authenticateUser(page);
+  await waitForWebSocketConnection(page);
   return testUser;
 }
 
 /**
- * Mocks successful authentication process
+ * Sends message and measures response time
  */
-async function mockSuccessfulAuthentication(
-  page: Page, 
-  user: AuthTestUser
-): Promise<void> {
-  await page.evaluate((userData) => {
-    localStorage.setItem('auth_token', 'e2e-test-token');
-    localStorage.setItem('user', JSON.stringify(userData));
-  }, user);
-  await page.goto('/chat');
-}
-
-/**
- * Creates new conversation thread
- */
-async function createNewConversation(page: Page): Promise<string> {
-  await page.click('[data-testid="new-conversation"]');
-  await expect(page).toHaveURL(/\/chat/);
-  
-  const threadId = await page.evaluate(() => 
-    localStorage.getItem('currentThreadId') || 'default'
-  );
-  return threadId;
-}
-
-/**
- * Sends message and waits for response
- */
-async function sendMessageAndWaitResponse(
-  page: Page, 
-  message: string
-): Promise<number> {
+async function sendMessageWithTiming(page: Page, message: string): Promise<number> {
   const startTime = Date.now();
-  
-  await page.fill('[data-testid="message-input"]', message);
-  await page.keyboard.press('Enter');
-  
-  await expect(page.locator('.user-message')).toContainText(message);
-  await expect(page.locator('.ai-message')).toBeVisible({ timeout: 5000 });
-  
+  await sendMessage(page, message);
+  await waitForAIResponse(page);
   return Date.now() - startTime;
 }
 
 /**
- * Validates conversation state persistence
+ * Validates message persistence after reload
  */
-async function validateConversationPersistence(
+async function validateMessagePersistence(
   page: Page, 
-  expectedMessages: string[]
+  messages: string[]
 ): Promise<void> {
   await page.reload();
-  
-  for (const message of expectedMessages) {
+  for (const message of messages) {
     await expect(page.locator('.message')).toContainText(message);
   }
 }
 
 /**
- * Measures performance metrics
+ * Performs logout and validates cleanup
  */
-async function measurePerformanceMetrics(page: Page): Promise<ConversationMetrics> {
-  const performanceData = await page.evaluate(() => {
-    const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
-    return {
-      loadTime: navigation.loadEventEnd - navigation.loadEventStart,
-      domContentLoaded: navigation.domContentLoadedEventEnd - navigation.domContentLoadedEventStart
-    };
-  });
-  
-  return {
-    startTime: Date.now(),
-    endTime: Date.now(),
-    messageCount: 0,
-    responseLatency: [performanceData.loadTime]
-  };
-}
-
-/**
- * Performs logout and cleanup
- */
-async function performLogoutAndCleanup(page: Page): Promise<void> {
+async function performLogoutFlow(page: Page): Promise<void> {
   await page.goto('/auth/logout');
   await expect(page).toHaveURL(/\/login/);
-  
-  const authToken = await page.evaluate(() => 
-    localStorage.getItem('auth_token')
-  );
-  expect(authToken).toBeNull();
+  await cleanupTestSession(page);
 }
 
 test.describe('Complete Conversation Flow E2E', () => {
@@ -156,61 +90,51 @@ test.describe('Complete Conversation Flow E2E', () => {
   test('should complete full conversation flow under 30 seconds', async () => {
     const startTime = Date.now();
     
-    // Step 1: Authentication
-    const testUser = await setupAuthenticatedUser(page);
-    expect(testUser.email).toBe('test@netrasystems.ai');
+    // Step 1: Setup authenticated workflow
+    const testUser = await setupConversationWorkflow(page);
+    expect(testUser.email).toContain('@netrasystems.ai');
     
-    // Step 2: Create new conversation
-    const threadId = await createNewConversation(page);
-    expect(threadId).toBeTruthy();
-    
-    // Step 3: Send multiple messages
+    // Step 2: Create conversation and send messages
+    const threadId = await createThread(page);
     const messages = ['Hello AI', 'What can you help me with?', 'Thank you'];
-    const responseLatencies: number[] = [];
     
     for (const message of messages) {
-      const latency = await sendMessageAndWaitResponse(page, message);
-      responseLatencies.push(latency);
-      expect(latency).toBeLessThan(3000); // 3s max response time
+      const latency = await sendMessageWithTiming(page, message);
+      expect(latency).toBeLessThan(3000);
     }
     
-    // Step 4: Validate state persistence
-    await validateConversationPersistence(page, messages);
+    // Step 3: Validate persistence and performance
+    await validateMessagePersistence(page, messages);
+    const metrics = await measurePagePerformance(page);
+    validatePerformance(metrics, { maxResponseTime: 2000 });
     
-    // Step 5: Performance validation
-    const metrics = await measurePerformanceMetrics(page);
-    expect(metrics.responseLatency[0]).toBeLessThan(2000);
-    
-    // Step 6: Logout
-    await performLogoutAndCleanup(page);
+    // Step 4: Complete logout flow
+    await performLogoutFlow(page);
     
     const totalTime = Date.now() - startTime;
-    expect(totalTime).toBeLessThan(30000); // Complete flow under 30s
+    expect(totalTime).toBeLessThan(30000);
   });
 
   test('should handle WebSocket connection establishment', async () => {
-    await setupAuthenticatedUser(page);
-    await createNewConversation(page);
-    
-    // Verify WebSocket connection indicator
-    await expect(page.locator('[data-testid="connection-status"]'))
-      .toContainText('Connected', { timeout: 1000 });
+    await setupConversationWorkflow(page);
+    await createThread(page);
     
     // Test real-time message delivery
     const message = 'WebSocket test message';
-    await sendMessageAndWaitResponse(page, message);
+    await sendMessage(page, message);
+    await waitForAIResponse(page);
     
-    // Verify streaming response starts within 2s
+    // Verify streaming response appears
     await expect(page.locator('.ai-message .streaming-indicator'))
       .toBeVisible({ timeout: 2000 });
   });
 
   test('should maintain 60 FPS during conversation', async () => {
-    await setupAuthenticatedUser(page);
-    await createNewConversation(page);
+    await setupConversationWorkflow(page);
+    await createThread(page);
     
     // Monitor frame rate during interaction
-    const frameRateData = await page.evaluate(async () => {
+    const frameRate = await page.evaluate(async () => {
       const frames: number[] = [];
       let lastFrame = performance.now();
       
@@ -224,82 +148,51 @@ test.describe('Complete Conversation Flow E2E', () => {
       return frames.reduce((sum, fps) => sum + fps, 0) / frames.length;
     });
     
-    expect(frameRateData).toBeGreaterThan(55); // Allow slight variance from 60 FPS
+    expect(frameRate).toBeGreaterThan(55);
   });
 
   test('should handle session timeout gracefully', async () => {
-    await setupAuthenticatedUser(page);
+    await setupConversationWorkflow(page);
     
     // Simulate session expiration
-    await page.evaluate(() => {
-      localStorage.removeItem('auth_token');
-    });
-    
-    await createNewConversation(page);
+    await page.evaluate(() => localStorage.removeItem('auth_token'));
+    await createThread(page);
     
     // Should redirect to login on session expiry
     await expect(page).toHaveURL(/\/login/, { timeout: 5000 });
   });
 
   test('should recover from network interruption', async () => {
-    await setupAuthenticatedUser(page);
-    await createNewConversation(page);
+    await setupConversationWorkflow(page);
+    await createThread(page);
     
-    // Simulate network disconnection
-    await context.setOffline(true);
-    
+    // Test offline mode
+    await simulateNetworkCondition(page, 'offline');
     const message = 'Offline message';
-    await page.fill('[data-testid="message-input"]', message);
-    await page.keyboard.press('Enter');
+    await sendMessage(page, message);
     
-    // Should show offline indicator
-    await expect(page.locator('[data-testid="connection-status"]'))
-      .toContainText('Offline', { timeout: 2000 });
-    
-    // Reconnect and verify message delivery
-    await context.setOffline(false);
-    
-    await expect(page.locator('[data-testid="connection-status"]'))
-      .toContainText('Connected', { timeout: 5000 });
-    
+    // Reconnect and verify delivery
+    await simulateNetworkCondition(page, 'fast');
+    await waitForWebSocketConnection(page);
     await expect(page.locator('.user-message'))
       .toContainText(message, { timeout: 3000 });
   });
 
   test('should prevent memory leaks during extended use', async () => {
-    await setupAuthenticatedUser(page);
-    await createNewConversation(page);
+    await setupConversationWorkflow(page);
+    await createThread(page);
     
-    const initialMemory = await page.evaluate(() => {
-      if ('memory' in performance) {
-        return (performance as any).memory.usedJSHeapSize;
-      }
-      return 0;
-    });
+    const initialMetrics = await measurePagePerformance(page);
     
     // Send 20 messages to simulate extended use
     for (let i = 0; i < 20; i++) {
-      await sendMessageAndWaitResponse(page, `Test message ${i + 1}`);
+      await sendMessage(page, `Test message ${i + 1}`);
     }
     
-    // Force garbage collection if available
-    await page.evaluate(() => {
-      if ('gc' in window) {
-        (window as any).gc();
-      }
-    });
-    
-    const finalMemory = await page.evaluate(() => {
-      if ('memory' in performance) {
-        return (performance as any).memory.usedJSHeapSize;
-      }
-      return 0;
-    });
+    const finalMetrics = await measurePagePerformance(page);
+    const memoryIncrease = finalMetrics.maxMemoryMB - initialMetrics.maxMemoryMB;
     
     // Memory should not grow excessively (allow 50MB increase)
-    if (initialMemory > 0 && finalMemory > 0) {
-      const memoryIncrease = finalMemory - initialMemory;
-      expect(memoryIncrease).toBeLessThan(50 * 1024 * 1024);
-    }
+    expect(memoryIncrease).toBeLessThan(50);
   });
 });

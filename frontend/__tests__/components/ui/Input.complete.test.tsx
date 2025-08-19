@@ -209,7 +209,8 @@ describe('Input Component - Comprehensive Tests', () => {
       renderInput({ maxLength: 5, defaultValue: 'Hello' });
       const input = screen.getByTestId('test-input');
       
-      await user.keyboard('{Backspace}');
+      await user.click(input);
+      await user.keyboard('{End}{Backspace}');
       expect(input).toHaveValue('Hell');
     });
   });
@@ -385,10 +386,11 @@ describe('Input Component - Comprehensive Tests', () => {
       expect(input).toHaveAttribute('aria-labelledby', 'label-id');
     });
 
-    it('has proper role attribute', () => {
+    it('has proper input type for screen readers', () => {
       renderInput();
       const input = screen.getByTestId('test-input');
-      expect(input).toHaveAttribute('role', 'textbox');
+      expect(input).toBeInstanceOf(HTMLInputElement);
+      expect(input.tagName.toLowerCase()).toBe('input');
     });
 
     it('supports screen reader descriptions', () => {

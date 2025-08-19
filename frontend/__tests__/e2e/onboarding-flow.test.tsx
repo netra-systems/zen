@@ -22,12 +22,10 @@ import { TestProviders } from '../test-utils/providers';
 import { WebSocketTestManager } from '../helpers/websocket-test-manager';
 import {
   setupTestEnvironment,
-  mockAuthenticatedUser,
-  createMockWebSocketServer,
-  expectSuccessfulNavigation,
-  verifyThreadCreation,
-  verifyWebSocketConnection,
-  performTestCleanup
+  mockUser as mockAuthenticatedUser,
+  createWebSocketServer,
+  resetTestState,
+  performFullCleanup
 } from '../test-utils/integration-test-setup';
 
 // Mock Next.js router
@@ -140,7 +138,7 @@ describe('Onboarding Flow E2E Tests', () => {
   beforeEach(() => {
     setupE2ETestEnvironment();
     wsManager = new WebSocketTestManager('ws://localhost:8080/ws');
-    mockServer = createMockWebSocketServer();
+    mockServer = createWebSocketServer();
     resetOnboardingState();
   });
   
@@ -205,7 +203,7 @@ describe('Onboarding Flow E2E Tests', () => {
   // Helper functions (8 lines max each)
   function setupE2ETestEnvironment(): void {
     setupTestEnvironment();
-    jest.clearAllMocks();
+    resetTestState();
     mockPush.mockClear();
     mockReplace.mockClear();
   }
@@ -222,7 +220,7 @@ describe('Onboarding Flow E2E Tests', () => {
   function performE2ECleanup(): void {
     wsManager?.cleanup();
     mockServer?.close();
-    performTestCleanup();
+    performFullCleanup(mockServer);
   }
   
   async function renderChatPageWithAuth(): Promise<void> {
@@ -295,13 +293,13 @@ describe('Onboarding Flow E2E Tests', () => {
   
   async function verifyThreadCreatedSuccessfully(): Promise<void> {
     await waitFor(() => {
-      verifyThreadCreation(mockChatStore.createThread);
+      expect(mockChatStore.createThread).toHaveBeenCalledTimes(1);
     });
   }
   
   async function verifyNavigationToNewThread(): Promise<void> {
     await waitFor(() => {
-      expectSuccessfulNavigation(mockPush, `/chat/${onboardingData.expectedThreadId}`);
+      expect(mockPush).toHaveBeenCalledWith(`/chat/${onboardingData.expectedThreadId}`);
     });
   }
   
@@ -320,7 +318,7 @@ describe('Onboarding Flow E2E Tests', () => {
   
   async function verifyConnectionEstablished(): Promise<void> {
     await waitFor(() => {
-      verifyWebSocketConnection(mockWebSocket.isConnected);
+      expect(mockWebSocket.isConnected).toBe(true);
     });
   }
   

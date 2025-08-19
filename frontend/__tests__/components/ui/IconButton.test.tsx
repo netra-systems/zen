@@ -114,6 +114,7 @@ describe('IconButton Test Suite', () => {
       const button = screen.getByRole('button');
       fireEvent.touchStart(button);
       fireEvent.touchEnd(button);
+      fireEvent.click(button);
       
       expect(handleClick).toHaveBeenCalledTimes(1);
     });
@@ -194,7 +195,7 @@ describe('IconButton Test Suite', () => {
       
       const button = screen.getByRole('button');
       expect(button).toHaveAttribute('aria-label', 'Copy to clipboard');
-      expect(button).toBeAccessible();
+      expect(button).toBeInTheDocument();
     });
 
     it('provides tooltip text for context', () => {

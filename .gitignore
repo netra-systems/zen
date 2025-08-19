@@ -19,6 +19,9 @@ htmlcov/
 .ruff_cache/
 .coverage*
 
+# Dev launcher cache
+.dev_cache/
+
 # Node.js
 node_modules/
 npm-debug.log*
