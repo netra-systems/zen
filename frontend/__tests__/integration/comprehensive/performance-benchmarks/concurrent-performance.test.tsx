@@ -9,6 +9,7 @@ import {
   React,
   render,
   act,
+  waitFor,
   setupTestEnvironment,
   cleanupTestEnvironment,
   createMockWebSocketServer,
@@ -156,13 +157,15 @@ const testStateConsistency = async (getByText: any, getByTestId: any): Promise<v
     }
   });
   
-  // State should remain consistent
-  const updateCount = parseInt(getByTestId('update-count').textContent?.split(' ')[0] || '0');
-  const highPriorityCount = parseInt(getByTestId('high-priority-updates').textContent?.split(' ')[0] || '0');
-  
-  expect(updateCount).toBeGreaterThan(0);
-  expect(highPriorityCount).toBeGreaterThan(0);
-  expect(highPriorityCount).toBeLessThanOrEqual(updateCount);
+  // State should remain consistent with waitFor to ensure DOM updates
+  await waitFor(() => {
+    const updateCount = parseInt(getByTestId('update-count').textContent?.split(' ')[0] || '0');
+    const highPriorityCount = parseInt(getByTestId('high-priority-updates').textContent?.split(' ')[0] || '0');
+    
+    expect(updateCount).toBeGreaterThan(0);
+    expect(highPriorityCount).toBeGreaterThan(0);
+    expect(highPriorityCount).toBeLessThanOrEqual(updateCount);
+  }, { timeout: 2000 });
 };
 
 const testMixedPriorityUpdates = async (getByText: any, getByTestId: any): Promise<void> => {
@@ -176,9 +179,11 @@ const testMixedPriorityUpdates = async (getByText: any, getByTestId: any): Promi
     criticalButton.click();
   });
   
-  // Both types should be processed
-  expect(getByTestId('critical-data')).not.toHaveTextContent('');
-  expect(getByTestId('normal-data')).not.toHaveTextContent('');
+  // Both types should be processed with waitFor to ensure DOM updates
+  await waitFor(() => {
+    expect(getByTestId('critical-data')).not.toHaveTextContent('');
+    expect(getByTestId('normal-data')).not.toHaveTextContent('');
+  }, { timeout: 2000 });
 };
 
 const testLowPriorityDeferral = async (getByText: any, getByTestId: any): Promise<void> => {
@@ -191,8 +196,10 @@ const testLowPriorityDeferral = async (getByText: any, getByTestId: any): Promis
     criticalButton.click();
   });
   
-  // Critical should be processed first/faster
-  expect(getByTestId('critical-data')).not.toHaveTextContent('');
+  // Critical should be processed first/faster with waitFor
+  await waitFor(() => {
+    expect(getByTestId('critical-data')).not.toHaveTextContent('');
+  }, { timeout: 2000 });
 };
 
 const testStartTransition = async (getByText: any, getByTestId: any): Promise<void> => {
@@ -202,8 +209,10 @@ const testStartTransition = async (getByText: any, getByTestId: any): Promise<vo
     normalButton.click();
   });
   
-  // Normal updates should use startTransition (non-blocking)
-  expect(getByTestId('normal-data')).toBeInTheDocument();
+  // Normal updates should use startTransition (non-blocking) with waitFor
+  await waitFor(() => {
+    expect(getByTestId('normal-data')).toBeInTheDocument();
+  }, { timeout: 2000 });
 };
 
 const testInterruption = async (getByText: any, getByTestId: any): Promise<void> => {
@@ -215,8 +224,10 @@ const testInterruption = async (getByText: any, getByTestId: any): Promise<void>
     triggerButton.click();
   });
   
-  // Should handle interruption gracefully
-  expect(getByTestId('update-count')).toBeDefined();
+  // Should handle interruption gracefully with waitFor
+  await waitFor(() => {
+    expect(getByTestId('update-count')).toBeDefined();
+  }, { timeout: 2000 });
 };
 
 const testRenderScheduling = async (getByText: any, getByTestId: any): Promise<void> => {
@@ -231,7 +242,10 @@ const testRenderScheduling = async (getByText: any, getByTestId: any): Promise<v
   });
   const endTime = performance.now();
   
-  // Should complete efficiently
+  // Should complete efficiently with waitFor to ensure DOM updates
+  await waitFor(() => {
+    expect(getByTestId('update-count')).toBeDefined();
+  }, { timeout: 2000 });
+  
   expect(endTime - startTime).toBeLessThan(100);
-  expect(getByTestId('update-count')).toBeDefined();
 };;

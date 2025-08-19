@@ -32,6 +32,7 @@ const mockThreadStore = {
   updateThread: jest.fn(),
   deleteThread: jest.fn(),
   setCurrentThread: jest.fn(),
+  setThreads: jest.fn(),
   loading: false,
   error: null
 };
@@ -56,6 +57,48 @@ jest.mock('../../hooks/useThreadSwitching', () => ({
 
 jest.mock('../../hooks/useThreadCreation', () => ({
   useThreadCreation: jest.fn(() => ({ state: { isCreating: false } }))
+}));
+
+jest.mock('../../components/chat/ThreadSidebarActions', () => ({
+  useThreadSidebarActions: jest.fn(() => ({
+    loadThreads: jest.fn(),
+    handleCreateThread: jest.fn(),
+    handleSelectThread: jest.fn(),
+    handleUpdateTitle: jest.fn(),
+    handleDeleteThread: jest.fn(),
+    formatDate: jest.fn(() => 'Jan 19'),
+    handleErrorBoundaryError: jest.fn(),
+    handleErrorBoundaryRetry: jest.fn()
+  }))
+}));
+
+jest.mock('framer-motion', () => ({
+  AnimatePresence: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+}));
+
+jest.mock('../../components/chat/ThreadErrorBoundary', () => ({
+  ThreadErrorBoundary: ({ children }: { children: React.ReactNode }) => <div>{children}</div>
+}));
+
+jest.mock('../../components/chat/ThreadLoadingIndicator', () => ({
+  ThreadLoadingIndicator: () => <div data-testid="thread-loading">Loading...</div>
+}));
+
+jest.mock('../../components/chat/ThreadSidebarComponents', () => ({
+  ThreadSidebarHeader: ({ onCreateThread }: { onCreateThread: () => void }) => (
+    <div>
+      <button onClick={onCreateThread}>New Thread</button>
+    </div>
+  ),
+  ThreadItem: ({ thread, onSelect, onEdit, onDelete }: any) => (
+    <div data-testid={`thread-${thread.id}`} onClick={onSelect}>
+      <span>{thread.title}</span>
+      <button data-testid={`edit-thread-${thread.id}`} onClick={onEdit}>Edit</button>
+      <button data-testid={`delete-thread-${thread.id}`} onClick={onDelete}>Delete</button>
+    </div>
+  ),
+  ThreadEmptyState: () => <div>No threads available</div>,
+  ThreadAuthRequiredState: () => <div>Authentication required</div>
 }));
 
 describe('Comprehensive Thread Management Tests', () => {
