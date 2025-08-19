@@ -55,10 +55,19 @@ const setupAuthStore = () => {
     isAuthenticated: true,
     user: createUserData(),
     token: 'test-token-123',
+    loading: false,
+    error: null,
+    login: jest.fn(),
     logout: jest.fn(),
-    reset: jest.fn(),
     setLoading: jest.fn(),
     setError: jest.fn(),
+    updateUser: jest.fn(),
+    reset: jest.fn(),
+    hasPermission: jest.fn(() => false),
+    hasAnyPermission: jest.fn(() => false),
+    hasAllPermissions: jest.fn(() => false),
+    isAdminOrHigher: jest.fn(() => false),
+    isDeveloperOrHigher: jest.fn(() => false)
   };
   (useAuthStore as jest.Mock).mockReturnValue(mockStore);
   return mockStore;
@@ -92,22 +101,30 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should remove JWT token from localStorage', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('jwt_token');
     });
 
     it('should remove auth token from localStorage', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('authToken');
     });
 
     it('should remove refresh token from localStorage', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('refresh_token');
     });
 
     it('should remove session ID from localStorage', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('session_id');
     });
   });
@@ -121,22 +138,30 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should remove user preferences from localStorage', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('user_preferences');
     });
 
     it('should remove cached user data from localStorage', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('cached_user_data');
     });
 
     it('should remove remember me flag from localStorage', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('remember_me');
     });
 
     it('should not affect non-auth localStorage items', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       expect(mockLocalStorage.removeItem).not.toHaveBeenCalledWith('theme_preference');
     });
   });
@@ -150,23 +175,31 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should remove auth cookies', async () => {
-      await verifyCookieCleanup();
+      await act(async () => {
+        await verifyCookieCleanup();
+      });
       expect(document.cookie).not.toContain('auth_token');
     });
 
     it('should remove session cookies', async () => {
-      await verifyCookieCleanup();
+      await act(async () => {
+        await verifyCookieCleanup();
+      });
       expect(document.cookie).not.toContain('session_id');
     });
 
     it('should remove remember me cookies', async () => {
-      await verifyCookieCleanup();
+      await act(async () => {
+        await verifyCookieCleanup();
+      });
       expect(document.cookie).not.toContain('remember_me');
     });
 
     it('should preserve non-auth cookies', async () => {
       document.cookie = 'theme=dark';
-      await verifyCookieCleanup();
+      await act(async () => {
+        await verifyCookieCleanup();
+      });
       expect(document.cookie).toContain('theme=dark');
     });
   });
@@ -191,22 +224,30 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should replace history state after logout', async () => {
-      const mockHistory = await verifyBackPrevention();
+      const mockHistory = await act(async () => {
+        return await verifyBackPrevention();
+      });
       expect(mockHistory.replaceState).toHaveBeenCalled();
     });
 
     it('should prevent navigation to authenticated pages', async () => {
-      await verifyBackPrevention();
+      await act(async () => {
+        await verifyBackPrevention();
+      });
       expect(mockStore.isAuthenticated).toBe(false);
     });
 
     it('should clear browser navigation state', async () => {
-      const mockHistory = await verifyBackPrevention();
+      const mockHistory = await act(async () => {
+        return await verifyBackPrevention();
+      });
       expect(mockHistory.replaceState).toHaveBeenCalled();
     });
 
     it('should ensure no cached authenticated state', async () => {
-      await verifyBackPrevention();
+      await act(async () => {
+        await verifyBackPrevention();
+      });
       expect(mockStore.user).toBeNull();
       expect(mockStore.token).toBeNull();
     });
@@ -222,25 +263,33 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should not leave sensitive data in memory', async () => {
-      await verifySecurityCleanup();
+      await act(async () => {
+        await verifySecurityCleanup();
+      });
       expect(mockStore.user?.email).toBeUndefined();
       expect(mockStore.token).toBeNull();
     });
 
     it('should clear all authentication artifacts', async () => {
-      await verifySecurityCleanup();
+      await act(async () => {
+        await verifySecurityCleanup();
+      });
       expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('jwt_token');
     });
 
     it('should ensure complete session termination', async () => {
-      await verifySecurityCleanup();
+      await act(async () => {
+        await verifySecurityCleanup();
+      });
       expect(mockStore.isAuthenticated).toBe(false);
       expect(mockStore.user).toBeNull();
       expect(mockStore.token).toBeNull();
     });
 
     it('should clear permissions and role data', async () => {
-      await verifySecurityCleanup();
+      await act(async () => {
+        await verifySecurityCleanup();
+      });
       expect(mockStore.user?.permissions).toBeUndefined();
     });
   });
@@ -254,22 +303,30 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should reset all error states', async () => {
-      await verifyCleanSlate();
+      await act(async () => {
+        await verifyCleanSlate();
+      });
       expect(mockStore.setError).toHaveBeenCalledWith(null);
     });
 
     it('should reset loading states', async () => {
-      await verifyCleanSlate();
+      await act(async () => {
+        await verifyCleanSlate();
+      });
       expect(mockStore.setLoading).toHaveBeenCalledWith(false);
     });
 
     it('should clear any cached authentication state', async () => {
-      await verifyCleanSlate();
+      await act(async () => {
+        await verifyCleanSlate();
+      });
       expect(mockStore.token).toBeNull();
     });
 
     it('should ensure fresh authentication flow on next login', async () => {
-      await verifyCleanSlate();
+      await act(async () => {
+        await verifyCleanSlate();
+      });
       expect(mockStore.isAuthenticated).toBe(false);
       expect(mockStore.user).toBeNull();
     });
@@ -284,22 +341,30 @@ describe('Logout Security and Multi-Tab Tests', () => {
     };
 
     it('should set authenticated status to false', async () => {
-      await verifyContentCleanup();
+      await act(async () => {
+        await verifyContentCleanup();
+      });
       expect(mockStore.isAuthenticated).toBe(false);
     });
 
     it('should clear user identity information', async () => {
-      await verifyContentCleanup();
+      await act(async () => {
+        await verifyContentCleanup();
+      });
       expect(mockStore.user).toBeNull();
     });
 
     it('should clear role and permissions', async () => {
-      await verifyContentCleanup();
+      await act(async () => {
+        await verifyContentCleanup();
+      });
       expect(mockStore.user?.role).toBeUndefined();
     });
 
     it('should ensure no sensitive data remains in DOM', async () => {
-      await verifyContentCleanup();
+      await act(async () => {
+        await verifyContentCleanup();
+      });
       expect(mockStore.user?.email).toBeUndefined();
     });
   });

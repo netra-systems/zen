@@ -31,10 +31,19 @@ const setupAuthStore = () => {
     isAuthenticated: true,
     user: createUserData(),
     token: 'test-token-123',
+    loading: false,
+    error: null,
+    login: jest.fn(),
     logout: jest.fn(),
-    reset: jest.fn(),
     setLoading: jest.fn(),
     setError: jest.fn(),
+    updateUser: jest.fn(),
+    reset: jest.fn(),
+    hasPermission: jest.fn(() => false),
+    hasAnyPermission: jest.fn(() => false),
+    hasAllPermissions: jest.fn(() => false),
+    isAdminOrHigher: jest.fn(() => false),
+    isDeveloperOrHigher: jest.fn(() => false)
   };
   (useAuthStore as jest.Mock).mockReturnValue(mockStore);
   return mockStore;
@@ -53,7 +62,7 @@ const setupLocalStorageMocks = () => {
 
 // Simple logout button component for testing
 const LogoutButton: React.FC = () => {
-  const { logout } = React.useContext(require('@/auth/context').AuthContext);
+  const { logout } = useAuthStore();
   return (
     <button onClick={logout} data-testid="logout-btn">
       Logout
@@ -88,14 +97,18 @@ describe('Logout State Cleanup Tests', () => {
     };
 
     it('should remove JWT token from localStorage', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
       });
     });
 
     it('should clear auth token from memory', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
         expect(mockAuthStore.token).toBeNull();
@@ -103,7 +116,9 @@ describe('Logout State Cleanup Tests', () => {
     });
 
     it('should remove all auth-related localStorage items', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('authToken');
@@ -111,7 +126,9 @@ describe('Logout State Cleanup Tests', () => {
     });
 
     it('should clear refresh tokens completely', async () => {
-      await verifyTokenRemoval();
+      await act(async () => {
+        await verifyTokenRemoval();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('refresh_token');
       });
@@ -127,14 +144,18 @@ describe('Logout State Cleanup Tests', () => {
     };
 
     it('should clear user state from auth store', async () => {
-      await verifyStateCleanup();
+      await act(async () => {
+        await verifyStateCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
       });
     });
 
     it('should reset authentication status', async () => {
-      await verifyStateCleanup();
+      await act(async () => {
+        await verifyStateCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
         expect(mockAuthStore.isAuthenticated).toBe(false);
@@ -142,7 +163,9 @@ describe('Logout State Cleanup Tests', () => {
     });
 
     it('should clear all user data from memory', async () => {
-      await verifyStateCleanup();
+      await act(async () => {
+        await verifyStateCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.user).toBeNull();
         expect(mockAuthStore.token).toBeNull();
@@ -150,7 +173,9 @@ describe('Logout State Cleanup Tests', () => {
     });
 
     it('should reset store completely', async () => {
-      await verifyStateCleanup();
+      await act(async () => {
+        await verifyStateCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.reset).toHaveBeenCalled();
       });
@@ -166,28 +191,36 @@ describe('Logout State Cleanup Tests', () => {
     };
 
     it('should reset auth store completely', async () => {
-      await verifyMemoryCleanup();
+      await act(async () => {
+        await verifyMemoryCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.reset).toHaveBeenCalled();
       });
     });
 
     it('should clear user object from memory', async () => {
-      await verifyMemoryCleanup();
+      await act(async () => {
+        await verifyMemoryCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.user).toBeNull();
       });
     });
 
     it('should clear permissions from memory', async () => {
-      await verifyMemoryCleanup();
+      await act(async () => {
+        await verifyMemoryCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.user?.permissions).toBeUndefined();
       });
     });
 
     it('should clear any cached API responses', async () => {
-      await verifyMemoryCleanup();
+      await act(async () => {
+        await verifyMemoryCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.reset).toHaveBeenCalled();
       });
@@ -203,28 +236,36 @@ describe('Logout State Cleanup Tests', () => {
     };
 
     it('should remove user preferences from localStorage', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('user_preferences');
       });
     });
 
     it('should remove cached user data from localStorage', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('cached_user_data');
       });
     });
 
     it('should remove remember me flag from localStorage', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('remember_me');
       });
     });
 
     it('should not affect non-auth localStorage items', async () => {
-      await verifyLocalStorageCleanup();
+      await act(async () => {
+        await verifyLocalStorageCleanup();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).not.toHaveBeenCalledWith('theme_preference');
       });
@@ -240,14 +281,18 @@ describe('Logout State Cleanup Tests', () => {
     };
 
     it('should clear session IDs from storage', async () => {
-      await verifySessionCleanup();
+      await act(async () => {
+        await verifySessionCleanup();
+      });
       await waitFor(() => {
         expect(localStorageMock.removeItem).toHaveBeenCalledWith('session_id');
       });
     });
 
     it('should clear all user-specific cached data', async () => {
-      await verifySessionCleanup();
+      await act(async () => {
+        await verifySessionCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
         expect(mockAuthStore.user).toBeNull();
@@ -255,14 +300,18 @@ describe('Logout State Cleanup Tests', () => {
     });
 
     it('should ensure complete session cleanup', async () => {
-      await verifySessionCleanup();
+      await act(async () => {
+        await verifySessionCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.reset).toHaveBeenCalled();
       });
     });
 
     it('should clear permissions and role data', async () => {
-      await verifySessionCleanup();
+      await act(async () => {
+        await verifySessionCleanup();
+      });
       await waitFor(() => {
         expect(mockAuthStore.user?.role).toBeUndefined();
       });
@@ -284,38 +333,46 @@ describe('Logout State Cleanup Tests', () => {
     };
 
     it('should complete cleanup within 100ms', async () => {
-      const cleanupTime = await measureCleanupTime();
+      const cleanupTime = await act(async () => {
+        return await measureCleanupTime();
+      });
       expect(cleanupTime).toBeLessThan(100);
     });
 
     it('should not block UI during cleanup', async () => {
-      const cleanupTime = await measureCleanupTime();
+      const cleanupTime = await act(async () => {
+        return await measureCleanupTime();
+      });
       expect(cleanupTime).toBeLessThan(50);
     });
 
     it('should clear localStorage efficiently', async () => {
-      const user = userEvent.setup();
-      renderLogoutComponent();
-      const logoutBtn = await screen.findByTestId('logout-btn');
-      const startTime = performance.now();
-      await user.click(logoutBtn);
-      await waitFor(() => {
-        expect(localStorageMock.removeItem).toHaveBeenCalled();
-        const endTime = performance.now();
-        expect(endTime - startTime).toBeLessThan(25);
+      await act(async () => {
+        const user = userEvent.setup();
+        renderLogoutComponent();
+        const logoutBtn = await screen.findByTestId('logout-btn');
+        const startTime = performance.now();
+        await user.click(logoutBtn);
+        await waitFor(() => {
+          expect(localStorageMock.removeItem).toHaveBeenCalled();
+          const endTime = performance.now();
+          expect(endTime - startTime).toBeLessThan(25);
+        });
       });
     });
 
     it('should complete memory cleanup quickly', async () => {
-      const user = userEvent.setup();
-      renderLogoutComponent();
-      const logoutBtn = await screen.findByTestId('logout-btn');
-      const startTime = performance.now();
-      await user.click(logoutBtn);
-      await waitFor(() => {
-        expect(mockAuthStore.reset).toHaveBeenCalled();
-        const endTime = performance.now();
-        expect(endTime - startTime).toBeLessThan(30);
+      await act(async () => {
+        const user = userEvent.setup();
+        renderLogoutComponent();
+        const logoutBtn = await screen.findByTestId('logout-btn');
+        const startTime = performance.now();
+        await user.click(logoutBtn);
+        await waitFor(() => {
+          expect(mockAuthStore.reset).toHaveBeenCalled();
+          const endTime = performance.now();
+          expect(endTime - startTime).toBeLessThan(30);
+        });
       });
     });
   });

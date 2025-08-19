@@ -29,10 +29,19 @@ const setupAuthStore = () => {
     isAuthenticated: true,
     user: createUserData(),
     token: 'test-token-123',
+    loading: false,
+    error: null,
+    login: jest.fn(),
     logout: jest.fn(),
-    reset: jest.fn(),
     setLoading: jest.fn(),
     setError: jest.fn(),
+    updateUser: jest.fn(),
+    reset: jest.fn(),
+    hasPermission: jest.fn(() => false),
+    hasAnyPermission: jest.fn(() => false),
+    hasAllPermissions: jest.fn(() => false),
+    isAdminOrHigher: jest.fn(() => false),
+    isDeveloperOrHigher: jest.fn(() => false)
   };
   (useAuthStore as jest.Mock).mockReturnValue(mockStore);
   return mockStore;
@@ -75,22 +84,30 @@ describe('Logout Multi-Tab Sync Tests', () => {
     };
 
     it('should detect token removal in other tabs', async () => {
-      await simulateStorageEvent('jwt_token', null);
+      await act(async () => {
+        await simulateStorageEvent('jwt_token', null);
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
 
     it('should sync logout state across tabs', async () => {
-      await simulateStorageEvent('auth_state', 'logged_out');
+      await act(async () => {
+        await simulateStorageEvent('auth_state', 'logged_out');
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
 
     it('should handle storage events for auth tokens', async () => {
-      await simulateStorageEvent('authToken', null);
+      await act(async () => {
+        await simulateStorageEvent('authToken', null);
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
 
     it('should ignore non-auth storage events', async () => {
-      await simulateStorageEvent('theme', 'dark');
+      await act(async () => {
+        await simulateStorageEvent('theme', 'dark');
+      });
       expect(mockStore.logout).not.toHaveBeenCalled();
     });
   });
@@ -107,22 +124,30 @@ describe('Logout Multi-Tab Sync Tests', () => {
     };
 
     it('should sync JWT token removal across tabs', async () => {
-      await testTokenSync('jwt_token');
+      await act(async () => {
+        await testTokenSync('jwt_token');
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
 
     it('should sync auth token removal across tabs', async () => {
-      await testTokenSync('authToken');
+      await act(async () => {
+        await testTokenSync('authToken');
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
 
     it('should sync refresh token removal across tabs', async () => {
-      await testTokenSync('refresh_token');
+      await act(async () => {
+        await testTokenSync('refresh_token');
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
 
     it('should sync session ID removal across tabs', async () => {
-      await testTokenSync('session_id');
+      await act(async () => {
+        await testTokenSync('session_id');
+      });
       expect(mockStore.logout).toHaveBeenCalled();
     });
   });
@@ -142,22 +167,30 @@ describe('Logout Multi-Tab Sync Tests', () => {
     };
 
     it('should ignore theme preference changes', async () => {
-      await testNonAuthEvent('theme', 'dark');
+      await act(async () => {
+        await testNonAuthEvent('theme', 'dark');
+      });
       expect(mockStore.logout).not.toHaveBeenCalled();
     });
 
     it('should ignore language preference changes', async () => {
-      await testNonAuthEvent('language', 'en');
+      await act(async () => {
+        await testNonAuthEvent('language', 'en');
+      });
       expect(mockStore.logout).not.toHaveBeenCalled();
     });
 
     it('should ignore application settings changes', async () => {
-      await testNonAuthEvent('app_settings', '{}');
+      await act(async () => {
+        await testNonAuthEvent('app_settings', '{}');
+      });
       expect(mockStore.logout).not.toHaveBeenCalled();
     });
 
     it('should ignore cache data changes', async () => {
-      await testNonAuthEvent('cache_data', 'some_cache');
+      await act(async () => {
+        await testNonAuthEvent('cache_data', 'some_cache');
+      });
       expect(mockStore.logout).not.toHaveBeenCalled();
     });
   });
@@ -171,24 +204,32 @@ describe('Logout Multi-Tab Sync Tests', () => {
     };
 
     it('should ensure logout state is consistent across tabs', async () => {
-      await verifyMultiTabSecurity();
+      await act(async () => {
+        await verifyMultiTabSecurity();
+      });
       expect(mockStore.isAuthenticated).toBe(false);
       expect(mockStore.user).toBeNull();
       expect(mockStore.token).toBeNull();
     });
 
     it('should prevent authenticated access in any tab after logout', async () => {
-      await verifyMultiTabSecurity();
+      await act(async () => {
+        await verifyMultiTabSecurity();
+      });
       expect(mockStore.isAuthenticated).toBe(false);
     });
 
     it('should clear all session data across tabs', async () => {
-      await verifyMultiTabSecurity();
+      await act(async () => {
+        await verifyMultiTabSecurity();
+      });
       expect(mockStore.reset).toHaveBeenCalled();
     });
 
     it('should ensure clean slate across all tabs', async () => {
-      await verifyMultiTabSecurity();
+      await act(async () => {
+        await verifyMultiTabSecurity();
+      });
       expect(mockStore.user).toBeNull();
       expect(mockStore.token).toBeNull();
       expect(mockStore.isAuthenticated).toBe(false);
@@ -213,7 +254,9 @@ describe('Logout Multi-Tab Sync Tests', () => {
     };
 
     it('should respond to storage events within 50ms', async () => {
-      const responseTime = await measureStorageEventResponse();
+      const responseTime = await act(async () => {
+        return await measureStorageEventResponse();
+      });
       expect(responseTime).toBeLessThan(50);
     });
 
@@ -281,45 +324,53 @@ describe('Logout Multi-Tab Sync Tests', () => {
     };
 
     it('should handle localStorage events', async () => {
-      const event = new StorageEvent('storage', {
-        key: 'jwt_token',
-        newValue: null,
-        oldValue: 'token',
-        storageArea: localStorage,
+      await act(async () => {
+        const event = new StorageEvent('storage', {
+          key: 'jwt_token',
+          newValue: null,
+          oldValue: 'token',
+          storageArea: localStorage,
+        });
+        window.dispatchEvent(event);
       });
-      window.dispatchEvent(event);
       await waitFor(() => {
         expect(mockStore.logout).toHaveBeenCalled();
       });
     });
 
     it('should handle sessionStorage events', async () => {
-      await testBrowserCompatibility();
+      await act(async () => {
+        await testBrowserCompatibility();
+      });
       await waitFor(() => {
         expect(mockStore.logout).toHaveBeenCalled();
       });
     });
 
     it('should handle null storage area gracefully', async () => {
-      const event = new StorageEvent('storage', {
-        key: 'jwt_token',
-        newValue: null,
-        oldValue: 'token',
-        storageArea: null,
+      await act(async () => {
+        const event = new StorageEvent('storage', {
+          key: 'jwt_token',
+          newValue: null,
+          oldValue: 'token',
+          storageArea: null,
+        });
+        window.dispatchEvent(event);
       });
-      window.dispatchEvent(event);
       // Should not crash or throw errors
       expect(mockStore.logout).not.toThrow();
     });
 
     it('should handle malformed storage events', async () => {
-      const event = new StorageEvent('storage', {
-        key: null as any,
-        newValue: null,
-        oldValue: null,
-        storageArea: localStorage,
+      await act(async () => {
+        const event = new StorageEvent('storage', {
+          key: null as any,
+          newValue: null,
+          oldValue: null,
+          storageArea: localStorage,
+        });
+        window.dispatchEvent(event);
       });
-      window.dispatchEvent(event);
       // Should not crash
       expect(mockStore.logout).not.toThrow();
     });

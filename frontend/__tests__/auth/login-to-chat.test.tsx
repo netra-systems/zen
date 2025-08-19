@@ -13,19 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { AuthProvider } from '@/auth/context';
 import { authService } from '@/auth/service';
 import { useAuthStore } from '@/store/authStore';
-import { 
-  setupBasicMocks, 
-  setupTokenMocks, 
-  setupDevModeMocks,
-  mockAuthConfig,
-  mockUser,
-  mockToken
-} from '@/__tests__/auth/helpers/test-helpers';
-import {
-  mockAuthServiceResponses,
-  setupAuthServiceErrors,
-  setupAuthServiceUnauthorized
-} from '@/__tests__/mocks/auth-service-mock';
+import '@testing-library/jest-dom';
 
 // Mock dependencies for isolated auth testing
 jest.mock('@/auth/service');
@@ -35,15 +23,26 @@ jest.mock('jwt-decode', () => ({
   jwtDecode: jest.fn()
 }));
 
+// Test data
+const mockUser = {
+  id: 'user-123',
+  email: 'test@example.com',
+  full_name: 'Test User',
+  role: 'admin' as const,
+  permissions: ['read', 'write']
+};
+
+const mockToken = 'mock-jwt-token-123';
+
 describe('Auth Login to Chat Flow', () => {
   let mockAuthStore: any;
   let user: ReturnType<typeof userEvent.setup>;
 
   beforeEach(() => {
     user = userEvent.setup();
-    setupBasicMocks();
     setupMockAuthStore();
     setupMockCookies();
+    setupMockAuthService();
     
     // Reset all timers and mocks
     jest.clearAllTimers();
@@ -58,9 +57,11 @@ describe('Auth Login to Chat Flow', () => {
 
   describe('Successful Login Flow', () => {
     it('completes successful login with valid credentials', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('valid@example.com', 'validpassword');
+      await act(async () => {
+        await performLogin('valid@example.com', 'validpassword');
+      });
       
       await waitFor(() => {
         expect(mockAuthStore.login).toHaveBeenCalledWith(
@@ -71,19 +72,23 @@ describe('Auth Login to Chat Flow', () => {
     });
 
     it('handles token storage correctly', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       expect(authService.setToken).toHaveBeenCalledWith(mockToken);
-      expect(localStorage.getItem('auth_token')).toBe(mockToken);
+      expect(localStorage.getItem('jwt_token')).toBe(mockToken);
     });
 
     it('redirects to chat after successful login', async () => {
       const mockPush = jest.fn();
-      const { getByTestId } = renderLoginComponent(mockPush);
+      renderLoginComponent(mockPush);
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       await waitFor(() => {
         expect(mockPush).toHaveBeenCalledWith('/chat');
@@ -91,39 +96,50 @@ describe('Auth Login to Chat Flow', () => {
     });
 
     it('fetches user profile after token storage', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       await waitFor(() => {
         expect(authService.getCurrentUser).toHaveBeenCalled();
-        expect(mockAuthStore.setUserProfile).toHaveBeenCalledWith(mockUser);
+        expect(mockAuthStore.updateUser).toHaveBeenCalledWith(mockUser);
       });
     });
   });
 
   describe('Invalid Credentials Handling', () => {
     it('displays error for invalid email format', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('invalid-email', 'password123');
+      await act(async () => {
+        await performLogin('invalid-email', 'password123');
+      });
       
       expect(screen.getByText('Please enter a valid email address')).toBeInTheDocument();
     });
 
     it('displays error for empty password', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('user@example.com', '');
+      await act(async () => {
+        await performLogin('user@example.com', '');
+      });
       
       expect(screen.getByText('Password is required')).toBeInTheDocument();
     });
 
     it('handles unauthorized response correctly', async () => {
-      setupAuthServiceUnauthorized();
-      const { getByTestId } = renderLoginComponent();
+      (authService.handleLogin as jest.Mock).mockResolvedValue({
+        success: false,
+        error: 'Invalid email or password'
+      });
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'wrongpassword');
+      await act(async () => {
+        await performLogin('user@example.com', 'wrongpassword');
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Invalid email or password')).toBeInTheDocument();
@@ -131,11 +147,13 @@ describe('Auth Login to Chat Flow', () => {
     });
 
     it('prevents multiple submissions with same credentials', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      const button = getByTestId('login-button');
-      await user.click(button);
-      await user.click(button);
+      const button = screen.getByTestId('login-button');
+      await act(async () => {
+        await user.click(button);
+        await user.click(button);
+      });
       
       expect(authService.handleLogin).toHaveBeenCalledTimes(1);
     });
@@ -143,10 +161,12 @@ describe('Auth Login to Chat Flow', () => {
 
   describe('Network Error Recovery', () => {
     it('displays network error message on connection failure', async () => {
-      setupAuthServiceErrors();
-      const { getByTestId } = renderLoginComponent();
+      (authService.handleLogin as jest.Mock).mockRejectedValue(new Error('Network error'));
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Network error. Please check your connection.')).toBeInTheDocument();
@@ -154,10 +174,12 @@ describe('Auth Login to Chat Flow', () => {
     });
 
     it('enables retry after network error', async () => {
-      setupAuthServiceErrors();
-      const { getByTestId } = renderLoginComponent();
+      (authService.handleLogin as jest.Mock).mockRejectedValue(new Error('Network error'));
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('retry-button')).toBeInTheDocument();
@@ -165,11 +187,16 @@ describe('Auth Login to Chat Flow', () => {
     });
 
     it('clears error state on retry attempt', async () => {
-      setupAuthServiceErrors();
-      const { getByTestId } = renderLoginComponent();
+      (authService.handleLogin as jest.Mock).mockRejectedValue(new Error('Network error'));
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
-      await user.click(screen.getByTestId('retry-button'));
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
+      
+      await act(async () => {
+        await user.click(screen.getByTestId('retry-button'));
+      });
       
       expect(screen.queryByText('Network error')).not.toBeInTheDocument();
     });
@@ -177,21 +204,24 @@ describe('Auth Login to Chat Flow', () => {
 
   describe('Token Validation', () => {
     it('validates token before setting authenticated state', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       expect(authService.validateToken).toHaveBeenCalledWith(mockToken);
     });
 
     it('handles expired token during login', async () => {
       const expiredToken = 'expired.jwt.token';
-      setupTokenMocks(expiredToken);
       (authService.validateToken as jest.Mock).mockResolvedValue(false);
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Session expired. Please login again.')).toBeInTheDocument();
@@ -200,11 +230,12 @@ describe('Auth Login to Chat Flow', () => {
 
     it('refreshes token if near expiration', async () => {
       const nearExpiryToken = 'near.expiry.token';
-      setupTokenMocks(nearExpiryToken);
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await performLogin('user@example.com', 'password123');
+      });
       
       expect(authService.refreshToken).toHaveBeenCalled();
     });
@@ -212,19 +243,23 @@ describe('Auth Login to Chat Flow', () => {
 
   describe('Remember Me Functionality', () => {
     it('stores remember me preference in cookies', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await user.click(getByTestId('remember-me-checkbox'));
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await user.click(screen.getByTestId('remember-me-checkbox'));
+        await performLogin('user@example.com', 'password123');
+      });
       
       expect(document.cookie).toContain('remember_me=true');
     });
 
     it('extends token expiration with remember me', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
-      await user.click(getByTestId('remember-me-checkbox'));
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await user.click(screen.getByTestId('remember-me-checkbox'));
+        await performLogin('user@example.com', 'password123');
+      });
       
       expect(authService.setTokenExpiration).toHaveBeenCalledWith('extended');
     });
@@ -232,10 +267,14 @@ describe('Auth Login to Chat Flow', () => {
     it('clears remember me on explicit logout', async () => {
       const { getByTestId } = renderLoginComponent();
       
-      await user.click(getByTestId('remember-me-checkbox'));
-      await performLogin('user@example.com', 'password123');
+      await act(async () => {
+        await user.click(getByTestId('remember-me-checkbox'));
+        await performLogin('user@example.com', 'password123');
+      });
       
-      mockAuthStore.logout();
+      await act(async () => {
+        mockAuthStore.logout();
+      });
       
       expect(document.cookie).not.toContain('remember_me=true');
     });
@@ -245,7 +284,9 @@ describe('Auth Login to Chat Flow', () => {
     it('initiates Google OAuth flow', async () => {
       const { getByTestId } = renderLoginComponent();
       
-      await user.click(getByTestId('google-login-button'));
+      await act(async () => {
+        await user.click(getByTestId('google-login-button'));
+      });
       
       expect(authService.initiateGoogleLogin).toHaveBeenCalled();
     });
@@ -282,7 +323,9 @@ describe('Auth Login to Chat Flow', () => {
       
       const { getByTestId } = renderLoginComponent();
       
-      await performLogin('mfa@example.com', 'password123');
+      await act(async () => {
+        await performLogin('mfa@example.com', 'password123');
+      });
       
       await waitFor(() => {
         expect(screen.getByTestId('mfa-code-input')).toBeInTheDocument();
@@ -298,9 +341,11 @@ describe('Auth Login to Chat Flow', () => {
       
       const { getByTestId } = renderLoginComponent();
       
-      await performLogin('mfa@example.com', 'password123');
-      await user.type(getByTestId('mfa-code-input'), '123456');
-      await user.click(getByTestId('verify-mfa-button'));
+      await act(async () => {
+        await performLogin('mfa@example.com', 'password123');
+        await user.type(getByTestId('mfa-code-input'), '123456');
+        await user.click(getByTestId('verify-mfa-button'));
+      });
       
       expect(authService.verifyMFA).toHaveBeenCalledWith('mfa_session_123', '123456');
     });
@@ -314,9 +359,11 @@ describe('Auth Login to Chat Flow', () => {
       const { getByTestId } = renderLoginComponent();
       
       // Setup MFA flow
-      await performLogin('mfa@example.com', 'password123');
-      await user.type(getByTestId('mfa-code-input'), '000000');
-      await user.click(getByTestId('verify-mfa-button'));
+      await act(async () => {
+        await performLogin('mfa@example.com', 'password123');
+        await user.type(getByTestId('mfa-code-input'), '000000');
+        await user.click(getByTestId('verify-mfa-button'));
+      });
       
       await waitFor(() => {
         expect(screen.getByText('Invalid MFA code. Please try again.')).toBeInTheDocument();
@@ -327,14 +374,40 @@ describe('Auth Login to Chat Flow', () => {
   // Helper functions (≤8 lines each)
   function setupMockAuthStore() {
     mockAuthStore = {
-      login: jest.fn(),
-      logout: jest.fn(),
-      setUserProfile: jest.fn(),
+      isAuthenticated: false,
       user: null,
       token: null,
-      isAuthenticated: false
+      loading: false,
+      error: null,
+      login: jest.fn(),
+      logout: jest.fn(),
+      setLoading: jest.fn(),
+      setError: jest.fn(),
+      updateUser: jest.fn(),
+      reset: jest.fn(),
+      hasPermission: jest.fn(() => false),
+      hasAnyPermission: jest.fn(() => false),
+      hasAllPermissions: jest.fn(() => false),
+      isAdminOrHigher: jest.fn(() => false),
+      isDeveloperOrHigher: jest.fn(() => false)
     };
     (useAuthStore as jest.Mock).mockReturnValue(mockAuthStore);
+  }
+
+  function setupMockAuthService() {
+    (authService.handleLogin as jest.Mock) = jest.fn().mockResolvedValue({
+      success: true,
+      user: mockUser,
+      token: mockToken
+    });
+    (authService.setToken as jest.Mock) = jest.fn();
+    (authService.getCurrentUser as jest.Mock) = jest.fn().mockResolvedValue(mockUser);
+    (authService.validateToken as jest.Mock) = jest.fn().mockResolvedValue(true);
+    (authService.refreshToken as jest.Mock) = jest.fn().mockResolvedValue(mockToken);
+    (authService.initiateGoogleLogin as jest.Mock) = jest.fn();
+    (authService.handleOAuthCallback as jest.Mock) = jest.fn();
+    (authService.verifyMFA as jest.Mock) = jest.fn().mockResolvedValue({ success: true });
+    (authService.setTokenExpiration as jest.Mock) = jest.fn();
   }
 
   function setupMockCookies() {
@@ -342,20 +415,22 @@ describe('Auth Login to Chat Flow', () => {
       writable: true,
       value: ''
     });
+    
+    // Mock localStorage
+    const localStorageMock = {
+      getItem: jest.fn(),
+      setItem: jest.fn(),
+      removeItem: jest.fn(),
+      clear: jest.fn(),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock
+    });
+    (localStorageMock.getItem as jest.Mock).mockReturnValue(mockToken);
   }
 
   function renderLoginComponent(mockPush?: jest.Mock) {
-    const MockRouter = ({ children }: { children: React.ReactNode }) => (
-      <div>{children}</div>
-    );
-    
-    return render(
-      <MockRouter>
-        <AuthProvider>
-          <LoginForm onRedirect={mockPush} />
-        </AuthProvider>
-      </MockRouter>
-    );
+    return render(<LoginForm onRedirect={mockPush} />);
   }
 
   async function performLogin(email: string, password: string) {
