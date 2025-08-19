@@ -234,7 +234,7 @@
             <name>Testing</name>
             <file>learnings/testing.xml</file>
             <path>SPEC/learnings/testing.xml</path>
-            <learning_count>12</learning_count>
+            <learning_count>13</learning_count>
             <learning_ids>
                 <id>clickhouse-regex-deep-nested-fields</id>
                 <id>clickhouse-function-wrapper-preservation</id>
@@ -248,8 +248,9 @@
                 <id>test-modularization-300-line-compliance</id>
                 <id>feature-flags-tdd-workflow</id>
                 <id>frontend-test-paradox-report</id>
+                <id>test-compliance-validation-comprehensive</id>
             </learning_ids>
-            <important_note>CRITICAL: Tests must test REAL functionality not mocks - see frontend-test-paradox-report</important_note>
+            <important_note>CRITICAL: Tests must test REAL functionality not mocks - see frontend-test-paradox-report and test-compliance-validation-comprehensive</important_note>
             <additional_file>learnings/frontend_test_paradox_report.xml</additional_file>
         </category>
         <category>
@@ -400,6 +401,6 @@
     
     <statistics>
         <total_categories>21</total_categories>
-        <total_learnings>107</total_learnings>
+        <total_learnings>108</total_learnings>
     </statistics>
 </specification>

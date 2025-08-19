@@ -134,7 +134,7 @@ export const waitForCondition = async (
   }
 };
 
-export const retryAsync = async <T>(
+export const retryAsync = async <T extends unknown>(
   operation: () => Promise<T>,
   maxAttempts: number = 3,
   delayMs: number = 100

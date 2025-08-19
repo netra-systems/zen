@@ -327,7 +327,6 @@ describe('Logout Multi-Tab - Auth State Synchronization', () => {
         key: 'auth_state',
         newValue: null,
         oldValue: 'logged_in',
-        storageArea: localStorage,
       });
       
       await waitFor(() => {
@@ -340,7 +339,6 @@ describe('Logout Multi-Tab - Auth State Synchronization', () => {
         key: 'auth_state',
         newValue: '',
         oldValue: 'logged_in',
-        storageArea: localStorage,
       });
       
       await waitFor(() => {
@@ -353,7 +351,7 @@ describe('Logout Multi-Tab - Auth State Synchronization', () => {
         key: 'auth_state',
         newValue: 'logged_out',
         oldValue: null,
-        storageArea: null, // Malformed
+        // Malformed event test
       });
       
       // Should not crash
@@ -366,7 +364,6 @@ describe('Logout Multi-Tab - Auth State Synchronization', () => {
         key: 'auth_state',
         newValue: longValue,
         oldValue: 'logged_in',
-        storageArea: localStorage,
       });
       
       // Should handle without crashing
