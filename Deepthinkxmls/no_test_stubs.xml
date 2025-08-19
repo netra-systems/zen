@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>No Test Stubs in Production Code</title>
+    <description>Strict guidelines to prevent test stubs and mock implementations in production services</description>
+    <priority>CRITICAL</priority>
+    <created>2025-08-12</created>
+    <category>code-quality</category>
+  </metadata>
+
+  <problem_statement>
+    Test stubs, mock implementations, and fake services keep appearing in production code,
+    causing confusion, test failures, and reduced code quality. These must be prevented.
+  </problem_statement>
+
+  <forbidden_patterns>
+    <pattern id="test-stub-functions">
+      <description>Standalone test stub functions at module level</description>
+      <examples>
+        <!-- FORBIDDEN -->
+        <forbidden>
+def get_metrics() -> Dict[str, Any]:
+    """Get metrics for testing."""
+    return {"fake": "data"}
+
+async def process_message(*args, **kwargs):
+    """Test stub implementation."""
+    return {"status": "ok"}
+        </forbidden>
+      </examples>
+      <rule>NEVER add standalone test functions in service modules</rule>
+    </pattern>
+
+    <pattern id="mock-implementations">
+      <description>Mock implementations returning hardcoded data</description>
+      <examples>
+        <!-- FORBIDDEN -->
+        <forbidden>
+async def get_all_users(self, db: Optional[AsyncSession] = None):
+    """Get all users - test implementation."""
+    # Mock implementation for testing
+    return [
+        {"id": "1", "email": "user1@test.com"},
+        {"id": "2", "email": "user2@test.com"}
+    ]
+        </forbidden>
+      </examples>
+      <rule>NEVER return hardcoded test data from service methods</rule>
+    </pattern>
+
+    <pattern id="fake-service-files">
+      <description>Entire service files that are just test stubs</description>
+      <examples>
+        <!-- FORBIDDEN -->
+        <forbidden>
+# config_service.py
+"""Configuration service for testing."""
+def get_config():
+    return {"test": "data"}
+        </forbidden>
+      </examples>
+      <rule>NEVER create service files that only contain test stubs</rule>
+    </pattern>
+
+    <pattern id="args-kwargs-stubs">
+      <description>Functions that accept *args, **kwargs and return static data</description>
+      <examples>
+        <!-- FORBIDDEN -->
+        <forbidden>
+async def bulk_index(*args, **kwargs):
+    """Test stub implementation."""
+    return {"status": "ok"}
+        </forbidden>
+      </examples>
+      <rule>NEVER use *args, **kwargs for test stubs in production code</rule>
+    </pattern>
+  </forbidden_patterns>
+
+  <correct_patterns>
+    <pattern id="real-implementations">
+      <description>Real implementations that interact with actual systems</description>
+      <examples>
+        <!-- CORRECT -->
+        <correct>
+async def get_all_users(self, db: AsyncSession) -> List[User]:
+    """Get all users from the database."""
+    result = await db.execute(select(User))
+    return result.scalars().all()
+        </correct>
+      </examples>
+    </pattern>
+
+    <pattern id="proper-test-location">
+      <description>Test helpers belong in test directories</description>
+      <examples>
+        <!-- CORRECT -->
+        <correct>
+# app/tests/fixtures/user_fixtures.py
+def create_test_user():
+    return {"id": "test", "email": "test@example.com"}
+        </correct>
+      </examples>
+    </pattern>
+
+    <pattern id="service-with-dependencies">
+      <description>Services that properly use dependencies</description>
+      <examples>
+        <!-- CORRECT -->
+        <correct>
+class UserService:
+    def __init__(self, db: AsyncSession, cache: Redis):
+        self.db = db
+        self.cache = cache
+        
+    async def get_user(self, user_id: str) -> User:
+        # Real implementation using actual database
+        return await self.db.get(User, user_id)
+        </correct>
+      </examples>
+    </pattern>
+  </correct_patterns>
+
+  <detection_rules>
+    <rule id="test-keyword-detection">
+      <description>Detect "test", "mock", "fake", "stub" in docstrings or comments</description>
+      <patterns>
+        <pattern>""".*test implementation.*"""</pattern>
+        <pattern># Mock implementation</pattern>
+        <pattern># Test stub</pattern>
+        <pattern>""".*for testing.*"""</pattern>
+      </patterns>
+      <action>REJECT and require real implementation</action>
+    </rule>
+
+    <rule id="hardcoded-data-detection">
+      <description>Detect hardcoded test data patterns</description>
+      <patterns>
+        <pattern>return [{"id": "1",</pattern>
+        <pattern>return {"test": "data"}</pattern>
+        <pattern>return {"status": "ok"}</pattern>
+        <pattern>["Part 1", "Part 2", "Part 3"]</pattern>
+      </patterns>
+      <action>REJECT if in service layer</action>
+    </rule>
+
+    <rule id="args-kwargs-detection">
+      <description>Detect *args, **kwargs with static returns</description>
+      <patterns>
+        <pattern>async def \w+\(\*args, \*\*kwargs\).*return {"</pattern>
+        <pattern>def \w+\(\*args, \*\*kwargs\).*return {"</pattern>
+      </patterns>
+      <action>REJECT in production code</action>
+    </rule>
+  </detection_rules>
+
+  <prevention_strategies>
+    <strategy id="code-review">
+      <description>Automated checks during code review</description>
+      <steps>
+        <step>Run detection rules on all service files</step>
+        <step>Flag any forbidden patterns</step>
+        <step>Require replacement with real implementations</step>
+      </steps>
+    </strategy>
+
+    <strategy id="test-separation">
+      <description>Strict separation of test and production code</description>
+      <steps>
+        <step>Test fixtures ONLY in app/tests/</step>
+        <step>Mock factories ONLY in test directories</step>
+        <step>Service files MUST contain real implementations</step>
+      </steps>
+    </strategy>
+
+    <strategy id="import-validation">
+      <description>Validate that services don't import test utilities</description>
+      <steps>
+        <step>Check imports in service files</step>
+        <step>Reject imports from test directories</step>
+        <step>Reject imports of mock/fake libraries in production</step>
+      </steps>
+    </strategy>
+  </prevention_strategies>
+
+  <cleanup_checklist>
+    <item>Search for "test implementation" in all service files</item>
+    <item>Search for "Mock implementation" in comments</item>
+    <item>Search for functions accepting (*args, **kwargs) with static returns</item>
+    <item>Search for hardcoded test data arrays/objects</item>
+    <item>Remove or replace all findings with real implementations</item>
+    <item>Move any legitimate test helpers to app/tests/</item>
+    <item>Update imports in test files if helpers were moved</item>
+  </cleanup_checklist>
+
+  <examples>
+    <example type="violation">
+      <file>app/services/user_service.py</file>
+      <issue>Mock implementation returning hardcoded users</issue>
+      <fix>Replace with actual database query using AsyncSession</fix>
+    </example>
+    
+    <example type="violation">
+      <file>app/services/config_service.py</file>
+      <issue>Entire file is test stubs</issue>
+      <fix>Delete file or implement real configuration management</fix>
+    </example>
+    
+    <example type="violation">
+      <file>app/services/agent_service.py</file>
+      <issue>Standalone test functions at module level</issue>
+      <fix>Remove test functions, use class methods only</fix>
+    </example>
+  </examples>
+
+  <enforcement>
+    <rule>This specification is MANDATORY for all code changes</rule>
+    <rule>Test stubs in production code must be rejected immediately</rule>
+    <rule>Real implementations are required even for "simple" services</rule>
+    <rule>If unsure whether something is needed, ASK rather than adding stubs</rule>
+  </enforcement>
+</specification>

@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>System Boundaries and Hard Limits</name>
+        <type>enforcement</type>
+        <version>1.0</version>
+        <priority>CRITICAL</priority>
+        <description>
+            MANDATORY system boundaries that prevent architectural decay and enforce 
+            the 300/8 limits. These are NON-NEGOTIABLE constraints that maintain 
+            system integrity and prevent runaway complexity.
+        </description>
+    </metadata>
+
+    <hard-limits>
+        <limit id="file-size-absolute" priority="CRITICAL">
+            <title>300 Line File Maximum</title>
+            <value>300</value>
+            <unit>lines</unit>
+            <enforcement>MANDATORY - No exceptions</enforcement>
+            <rationale>
+                Forces modular thinking, prevents monolithic files, improves maintainability,
+                enables focused testing, and ensures cognitive load remains manageable.
+            </rationale>
+            <violation-action>IMMEDIATE refactoring required</violation-action>
+            <measurement>
+                <tool>scripts/check_architecture_compliance.py</tool>
+                <frequency>Every commit</frequency>
+                <threshold>0 violations allowed</threshold>
+            </measurement>
+        </limit>
+
+        <limit id="function-complexity-absolute" priority="CRITICAL">
+            <title>8 Line Function Maximum</title>
+            <value>8</value>
+            <unit>lines</unit>
+            <enforcement>MANDATORY - No exceptions for production code</enforcement>
+            <rationale>
+                Forces single responsibility principle, improves readability, enables 
+                comprehensive testing, reduces cognitive complexity, and promotes reusability.
+            </rationale>
+            <violation-action>IMMEDIATE function splitting required</violation-action>
+            <measurement>
+                <tool>scripts/check_architecture_compliance.py</tool>
+                <frequency>Every commit</frequency>
+                <threshold>0 violations in production code</threshold>
+            </measurement>
+            <exceptions>
+                <exception>Example/demo files (severity: low warning)</exception>
+                <exception>Test files (but still discouraged)</exception>
+            </exceptions>
+        </limit>
+
+        <limit id="module-responsibility" priority="HIGH">
+            <title>Single Responsibility Per Module</title>
+            <description>Each module must have exactly one clear responsibility</description>
+            <enforcement>Design review required</enforcement>
+            <indicators>
+                <indicator>Module name clearly describes single purpose</indicator>
+                <indicator>All functions relate to core responsibility</indicator>
+                <indicator>Minimal coupling with other modules</indicator>
+                <indicator>High cohesion within module</indicator>
+            </indicators>
+        </limit>
+
+        <limit id="dependency-depth" priority="HIGH">
+            <title>Maximum Import Depth</title>
+            <value>5</value>
+            <unit>levels</unit>
+            <description>No more than 5 levels of import dependencies to prevent circular imports</description>
+            <measurement>
+                <tool>Import analysis in check_architecture_compliance.py</tool>
+                <frequency>Weekly</frequency>
+            </measurement>
+        </limit>
+
+        <limit id="type-duplication" priority="CRITICAL">
+            <title>Zero Type Duplication</title>
+            <value>1</value>
+            <unit>definition per type</unit>
+            <enforcement>MANDATORY - Single source of truth</enforcement>
+            <rationale>
+                Prevents inconsistencies, reduces maintenance burden, improves type safety,
+                and ensures API contract consistency.
+            </rationale>
+            <measurement>
+                <tool>scripts/check_architecture_compliance.py</tool>
+                <frequency>Every commit</frequency>
+                <threshold>0 duplicate types allowed</threshold>
+            </measurement>
+        </limit>
+    </hard-limits>
+
+    <boundary-definitions>
+        <boundary id="module-interface">
+            <title>Module Interface Boundaries</title>
+            <description>Clear contracts between modules</description>
+            <requirements>
+                <requirement>Public API explicitly defined</requirement>
+                <requirement>Private implementation hidden</requirement>
+                <requirement>Type-safe interfaces</requirement>
+                <requirement>Minimal surface area</requirement>
+            </requirements>
+            <patterns>
+                <pattern type="backend">Export only what's needed from __init__.py</pattern>
+                <pattern type="frontend">Named exports only, no default exports</pattern>
+                <pattern type="both">Use TypeScript/Python type annotations</pattern>
+            </patterns>
+        </boundary>
+
+        <boundary id="layer-separation">
+            <title>Architectural Layer Boundaries</title>
+            <description>Strict separation between architectural layers</description>
+            <layers>
+                <layer name="presentation">
+                    <location>app/routes, frontend/components</location>
+                    <responsibilities>HTTP/UI concerns only</responsibilities>
+                    <forbidden>Direct database access, business logic</forbidden>
+                </layer>
+                <layer name="business">
+                    <location>app/services</location>
+                    <responsibilities>Business logic, orchestration</responsibilities>
+                    <forbidden>HTTP concerns, direct DB models</forbidden>
+                </layer>
+                <layer name="data">
+                    <location>app/services/database, app/db</location>
+                    <responsibilities>Data access, persistence</responsibilities>
+                    <forbidden>Business logic, HTTP concerns</forbidden>
+                </layer>
+            </layers>
+        </boundary>
+
+        <boundary id="test-production">
+            <title>Test/Production Code Boundaries</title>
+            <description>Absolute separation between test and production code</description>
+            <rules>
+                <rule>NO test code in production modules</rule>
+                <rule>NO mock implementations in production services</rule>
+                <rule>NO test data in production configuration</rule>
+                <rule>NO development stubs in production endpoints</rule>
+            </rules>
+            <enforcement>
+                <tool>scripts/check_architecture_compliance.py</tool>
+                <patterns>Test stub detection patterns</patterns>
+                <action>IMMEDIATE removal required</action>
+            </enforcement>
+        </boundary>
+
+        <boundary id="dependency-direction">
+            <title>Dependency Direction Boundaries</title>
+            <description>Enforce proper dependency flow</description>
+            <rules>
+                <rule>Higher layers depend on lower layers only</rule>
+                <rule>Core domain depends on nothing</rule>
+                <rule>Infrastructure depends on abstractions</rule>
+                <rule>NO circular dependencies allowed</rule>
+            </rules>
+            <flow>
+                Routes → Services → Repositories → Database
+            </flow>
+        </boundary>
+    </boundary-definitions>
+
+    <constraint-enforcement>
+        <automated-checks>
+            <check id="pre-commit">
+                <frequency>Every commit</frequency>
+                <command>python scripts/check_architecture_compliance.py --fail-on-violation</command>
+                <threshold>0 violations</threshold>
+            </check>
+            
+            <check id="ci-pipeline">
+                <frequency>Every PR</frequency>
+                <command>python scripts/check_architecture_compliance.py --json-output compliance.json</command>
+                <threshold>100% compliance score</threshold>
+            </check>
+            
+            <check id="function-complexity">
+                <frequency>Every commit</frequency>
+                <target>8 lines maximum</target>
+                <exceptions>Example files (warnings only)</exceptions>
+            </check>
+            
+            <check id="type-safety">
+                <frequency>Every commit</frequency>
+                <backend>mypy app/ --ignore-missing-imports</backend>
+                <frontend>npx tsc --noEmit</frontend>
+                <threshold>0 type errors</threshold>
+            </check>
+        </automated-checks>
+
+        <manual-reviews>
+            <review id="architecture-review">
+                <trigger>New modules, major refactoring</trigger>
+                <checklist>
+                    <item>Module fits within 300-line limit</item>
+                    <item>Single responsibility clearly defined</item>
+                    <item>Dependencies flow in correct direction</item>
+                    <item>Public interface minimal and clear</item>
+                    <item>No boundary violations</item>
+                </checklist>
+            </review>
+            
+            <review id="growth-review">
+                <trigger>System size increases by 10%</trigger>
+                <focus>Ensure growth follows good patterns</focus>
+                <reference>SPEC/growth_control.xml</reference>
+            </review>
+        </manual-reviews>
+    </constraint-enforcement>
+
+    <violation-remediation>
+        <immediate-actions>
+            <action type="file-size">
+                <step>Identify module boundaries within file</step>
+                <step>Extract related functions into new modules</step>
+                <step>Update imports and dependencies</step>
+                <step>Verify tests still pass</step>
+                <step>Update documentation</step>
+            </action>
+            
+            <action type="function-complexity">
+                <step>Identify single responsibilities within function</step>
+                <step>Extract helper functions</step>
+                <step>Use composition to combine small functions</step>
+                <step>Maintain original function behavior</step>
+                <step>Add unit tests for new functions</step>
+            </action>
+            
+            <action type="type-duplication">
+                <step>Identify canonical location for type</step>
+                <step>Move type to appropriate module</step>
+                <step>Update all imports</step>
+                <step>Verify type consistency</step>
+                <step>Remove duplicate definitions</step>
+            </action>
+        </immediate-actions>
+
+        <escalation-paths>
+            <path level="1">
+                <condition>Single violation</condition>
+                <action>Developer self-remediation</action>
+                <timeline>Same day</timeline>
+            </path>
+            
+            <path level="2">
+                <condition>Multiple violations or repeated violations</condition>
+                <action>Team review and pair programming</action>
+                <timeline>Within 2 days</timeline>
+            </path>
+            
+            <path level="3">
+                <condition>Systemic violations or resistance to limits</condition>
+                <action>Architecture review and training</action>
+                <timeline>Within 1 week</timeline>
+            </path>
+        </escalation-paths>
+    </violation-remediation>
+
+    <boundary-benefits>
+        <cognitive-load>
+            <benefit>300-line limit keeps entire file in working memory</benefit>
+            <benefit>8-line functions reduce cognitive complexity</benefit>
+            <benefit>Clear module boundaries reduce mental context switching</benefit>
+        </cognitive-load>
+        
+        <maintainability>
+            <benefit>Small modules easier to understand and modify</benefit>
+            <benefit>Small functions easier to test and debug</benefit>
+            <benefit>Clear boundaries reduce unintended coupling</benefit>
+        </maintainability>
+        
+        <scalability>
+            <benefit>Modular architecture supports team scaling</benefit>
+            <benefit>Clear interfaces enable parallel development</benefit>
+            <benefit>Boundary enforcement prevents technical debt accumulation</benefit>
+        </scalability>
+        
+        <quality>
+            <benefit>Constraints force better design decisions</benefit>
+            <benefit>Small units enable comprehensive testing</benefit>
+            <benefit>Type safety prevents runtime errors</benefit>
+        </quality>
+    </boundary-benefits>
+
+    <references>
+        <reference>SPEC/conventions.xml - Implementation patterns</reference>
+        <reference>SPEC/growth_control.xml - Growth management</reference>
+        <reference>SPEC/type_safety.xml - Type boundary enforcement</reference>
+        <reference>scripts/check_architecture_compliance.py - Enforcement tool</reference>
+        <reference>CLAUDE.md - Overall architectural philosophy</reference>
+    </references>
+</specification>

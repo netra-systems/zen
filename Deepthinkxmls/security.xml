@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Netra Security</name>
+        <type>NETRA_SECURITY</type>
+        <version>1.0</version>
+    </metadata>
+    
+    <security-requirements>
+        <requirement id="1">
+            <title>OAuth and JWT Token Management</title>
+            <description>Uses OAuth, JWT. SecurityService (e.g JWT) Keep all structural security concepts as is</description>
+            <details>
+                <detail>Frontend JWT Storage:
+                    - Use single localStorage key: 'jwt_token' (not 'auth_token')
+                    - Token is stored on successful login (OAuth or dev)
+                    - Token is removed on logout
+                    - Token is included in all API calls via Authorization header</detail>
+                <detail>WebSocket Authentication:
+                    - Token passed as query parameter on initial connection
+                    - Connection validates token on backend
+                    - Automatic reconnection with fresh token if available</detail>
+                <detail>Token Validation:
+                    - Frontend validates token expiration using jwt-decode
+                    - Invalid/expired tokens are automatically removed
+                    - User redirected to login on invalid token</detail>
+                <detail>Session Management:
+                    - Pure token-based authentication (no server sessions)
+                    - Token contains user info (id, email, etc.)
+                    - Token refresh not implemented (user re-authenticates on expiry)</detail>
+            </details>
+        </requirement>
+        
+        <requirement id="2">The UI/UX base layout and header are persistent in all auth states</requirement>
+        
+        <requirement id="3">Only use official OAuth libraries or similar</requirement>
+        
+        <requirement id="4">Validate that OAuth Login, OAuth Logout, and development user context all works. Production ready</requirement>
+        
+        <requirement id="5">
+            <title>Development Context Auto-Login</title>
+            <description>In development context: Defaults to auto login on first init, including JWT token etc. to simulate OAuth</description>
+            <details>
+                <detail>Auto-login ONLY happens on first page load when no token exists</detail>
+                <detail>If user explicitly logs out, the logout state MUST persist (no auto-login)</detail>
+                <detail>Store a 'dev_logout_flag' in localStorage to track explicit logout in dev mode</detail>
+                <detail>User can still manually login with OAuth to test OAuth flow</detail>
+                <detail>Clear the logout flag when user manually logs in</detail>
+            </details>
+        </requirement>
+        
+        <requirement id="6">Consider context of frontend and backend env hot reloading</requirement>
+        
+        <requirement id="7" priority="high">
+            <title>Keep Existing</title>
+            <description>KEEP EXISTING STUFF. Keep existing stuff as much as possible. The point is to have the core wiring work. Focus on adding mixing things and break fix. Use Schemas.py and app/types/index.ts whenever possible for any static values, paths, config values, etc. etc.</description>
+        </requirement>
+        
+        <requirement id="8">
+            <title>OAuth Schema</title>
+            <schema>
+                <web>
+                    <authorized_javascript_origins>
+                        <origin>https://app.netrasystems.ai</origin>
+                        <origin>https://127.0.0.1</origin>
+                        <origin>http://localhost</origin>
+                    </authorized_javascript_origins>
+                    <authorized_redirect_uris>
+                        <uri>https://app.netrasystems.ai/oauth2callback</uri>
+                        <uri>http://localhost:3000/auth/callback</uri>
+                    </authorized_redirect_uris>
+                </web>
+            </schema>
+        </requirement>
+        
+        <requirement id="9">
+            <title>Login Button UI</title>
+            <description>The login button for OAuth on the front end looks good and is large. In dev mode, it shows the dev user and option to OAuth Login "Override" the dev mode login</description>
+        </requirement>
+        
+        <requirement id="10">
+            <title>Service Discovery</title>
+            <description>The backend provides discovery of OAUTH endpoints to frontend, e.g. the complete path including base url etc. a dict with login, logout, auth, etc. This can lean on existing OpenAPI / Fast API spec if possible</description>
+        </requirement>
+        
+        <requirement id="11">
+            <title>Development Environment Authentication Flow</title>
+            <description>Keep the development env. When front and backend in development mode: Conditional auto-authentication based on logout state</description>
+            <flow>
+                <step>On page load, check for existing JWT token</step>
+                <step>If token exists and is valid, use it (maintain session)</step>
+                <step>If no token exists:
+                    - Check for 'dev_logout_flag' in localStorage
+                    - If flag exists, DO NOT auto-login (user explicitly logged out)
+                    - If no flag, auto-login with dev user (first time or cleared state)</step>
+                <step>On manual login (OAuth or dev), clear the logout flag</step>
+                <step>On logout, set the logout flag and remove token</step>
+            </flow>
+        </requirement>
+    </security-requirements>
+    
+    <implementation-notes>
+        <note id="1">
+            <title>Token Storage Consistency</title>
+            <description>All components must use the same localStorage key 'jwt_token' for token storage. The authStore and authService should be synchronized.</description>
+        </note>
+        <note id="2">
+            <title>Frontend State Management</title>
+            <description>Auth state should be managed through AuthContext/Provider, with authStore as optional Zustand store for global state if needed. Avoid duplication.</description>
+        </note>
+        <note id="3">
+            <title>Error Handling</title>
+            <description>All auth operations should have proper error handling with user-friendly messages. Failed operations should clean up state appropriately.</description>
+        </note>
+    </implementation-notes>
+    
+    <security-review-findings>
+        <review-checklist>
+            <item status="complete">Modern OAuth implementation with Google OAuth using OIDC</item>
+            <item status="complete">JWT compliant with proper signing</item>
+            <item status="complete">Consistent authentication across HTTP (Bearer) and WebSocket (query param)</item>
+            <item status="complete">Proper user storage in database with bcrypt hashing</item>
+            <item status="resolved">Token storage consistency - standardized on 'jwt_token' key</item>
+            <item status="resolved">Dev mode logout persistence - implemented with dev_logout_flag</item>
+        </review-checklist>
+        
+        <resolved-issues>
+            <issue priority="high" status="resolved">
+                <title>Token Storage Inconsistency</title>
+                <description>authStore was using 'auth_token' while authService used 'jwt_token' as localStorage key</description>
+                <resolution>Standardized on 'jwt_token' across all components</resolution>
+            </issue>
+            <issue priority="high" status="resolved">
+                <title>Dev Logout Not Persistent</title>
+                <description>Dev mode auto-logins even after explicit logout</description>
+                <resolution>Implemented dev_logout_flag to track explicit logouts</resolution>
+            </issue>
+            <issue priority="medium" status="resolved">
+                <title>Duplicate Auth State Management</title>
+                <description>Both AuthContext and authStore managed auth state</description>
+                <resolution>AuthContext is primary, authStore as optional global state</resolution>
+            </issue>
+        </resolved-issues>
+    </security-review-findings>
+</specification>

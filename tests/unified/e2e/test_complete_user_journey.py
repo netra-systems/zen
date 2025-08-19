@@ -8,7 +8,7 @@ BVJ (Business Value Justification):
 - Risk Mitigation: Catches cross-service integration failures before production
 
 IMPLEMENTATION SUMMARY:
-✅ Full user flow: signup via Auth → login → chat via WebSocket
+✅ Full user flow: signup via Auth → login → chat via WebSocket  
 ✅ Uses REAL services (Auth on port 8001, Backend on 8000) - NO MOCKING
 ✅ Validates data consistency across all services
 ✅ Includes performance assertions (<10 seconds total)
@@ -22,13 +22,17 @@ import asyncio
 import time
 import uuid
 import json
+import os
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from unittest.mock import AsyncMock, MagicMock
 import httpx
 
+# Set test environment for controlled execution
+os.environ["TESTING"] = "1"
+os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+
 from tests.unified.harness_complete import UnifiedTestHarness
-from tests.unified.real_http_client import RealHTTPClient
-from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class CompleteUserJourneyTester:

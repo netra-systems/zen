@@ -28,6 +28,7 @@ import pytest
 import time
 import uuid
 import json
+import jwt
 import httpx
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timezone, timedelta
@@ -170,11 +171,22 @@ class CrossServiceSessionSyncTester:
         # Fallback to JWT token creation for testing
         try:
             user_id = f"test-session-user-{uuid.uuid4().hex[:8]}"
-            access_token = self.jwt_helper.create_access_token(
-                user_id=user_id,
-                email=self.test_email,
-                permissions=["read", "write"]
-            )
+            
+            # Use the same JWT secret as the backend
+            backend_jwt_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"
+            
+            # Create token payload matching backend expectations
+            payload = {
+                "sub": user_id,
+                "email": self.test_email,
+                "permissions": ["read", "write"],
+                "iat": int(time.time()),
+                "exp": int(time.time()) + 900,  # 15 minutes
+                "token_type": "access",
+                "iss": "netra-auth-service"
+            }
+            
+            access_token = jwt.encode(payload, backend_jwt_secret, algorithm="HS256")
             
             # Store for later use
             result._dev_token = access_token
