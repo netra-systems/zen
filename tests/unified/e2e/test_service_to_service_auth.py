@@ -161,18 +161,12 @@ class ServiceAuthTestValidator:
         # Create an expired service token for testing
         expired_token = helper.create_expired_service_token("test-service")
         
-        async with httpx.AsyncClient(timeout=self.test_timeout) as client:
-            response = await client.post(
-                f"{self.auth_service_url}/auth/validate",
-                json={"token": expired_token}
-            )
-            
-            # Should either reject (401) or return valid=false
-            if response.status_code == 200:
-                data = response.json()
-                assert data.get("valid") is False, "Expired service token should be invalid"
-            else:
-                assert response.status_code == 401, "Should reject expired service token"
+        # Validate using auth client
+        validation_result = await self.auth_client.validate_token(expired_token)
+        
+        # Should return None or valid=false for expired token
+        if validation_result is not None:
+            assert validation_result.get("valid") is False, "Expired service token should be invalid"
 
 
 @pytest.mark.asyncio

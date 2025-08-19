@@ -88,7 +88,7 @@ class TestRealLLMWorkflow:
                 context={'agent': 'triage', 'stage': 'classification'}
             )
             setup['performance_tracker']['quality_checks'].append(('triage', quality_result))
-            assert quality_result.acceptance_level in [AcceptanceLevel.EXCELLENT, AcceptanceLevel.GOOD]
+            assert quality_result.metrics.quality_level in [QualityLevel.EXCELLENT, QualityLevel.GOOD]
 
 
     async def _execute_data_analysis_with_real_llm(self, setup: Dict, state: DeepAgentState):
@@ -113,7 +113,7 @@ class TestRealLLMWorkflow:
                 context={'agent': 'data', 'stage': 'analysis'}
             )
             setup['performance_tracker']['quality_checks'].append(('data', quality_result))
-            assert quality_result.acceptance_level in [AcceptanceLevel.EXCELLENT, AcceptanceLevel.GOOD]
+            assert quality_result.metrics.quality_level in [QualityLevel.EXCELLENT, QualityLevel.GOOD]
 
 
     async def _execute_optimization_with_real_llm(self, setup: Dict, state: DeepAgentState):
@@ -138,7 +138,7 @@ class TestRealLLMWorkflow:
                 context={'agent': 'optimization', 'stage': 'recommendations'}
             )
             setup['performance_tracker']['quality_checks'].append(('optimization', quality_result))
-            assert quality_result.acceptance_level in [AcceptanceLevel.EXCELLENT, AcceptanceLevel.GOOD]
+            assert quality_result.metrics.quality_level in [QualityLevel.EXCELLENT, QualityLevel.GOOD]
 
 
     async def _validate_multi_agent_coordination(self, setup: Dict, state: DeepAgentState):
@@ -160,8 +160,8 @@ class TestRealLLMWorkflow:
         
         # Quality validation
         assert len(tracker['quality_checks']) >= 3, "All agents must pass quality gates"
-        quality_levels = [check[1].acceptance_level for check in tracker['quality_checks']]
-        assert all(level in [AcceptanceLevel.EXCELLENT, AcceptanceLevel.GOOD] for level in quality_levels)
+        quality_levels = [check[1].metrics.quality_level for check in tracker['quality_checks']]
+        assert all(level in [QualityLevel.EXCELLENT, QualityLevel.GOOD] for level in quality_levels)
 
 
 @pytest.mark.real_llm
@@ -311,5 +311,5 @@ class TestRealLLMQualityGates:
         
         # Validate all quality checks passed minimum thresholds
         for agent_name, quality_result in tracker['quality_checks']:
-            assert quality_result.acceptance_level != AcceptanceLevel.POOR, f"{agent_name} quality too low"
+            assert quality_result.metrics.quality_level != QualityLevel.POOR, f"{agent_name} quality too low"
             assert quality_result.specificity_score > 0.5, f"{agent_name} not specific enough"
