@@ -158,8 +158,14 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
 
 def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory."""
-    async_session_factory = initialize_postgres()
-    app.state.db_session_factory = async_session_factory
+    try:
+        async_session_factory = initialize_postgres()
+        app.state.db_session_factory = async_session_factory
+    except Exception as e:
+        # Log the error and re-raise to fail startup early
+        logger = central_logger.get_logger(__name__)
+        logger.critical(f"Failed to setup database connections: {e}")
+        raise RuntimeError(f"Database initialization failed: {e}") from e
 
 
 def initialize_core_services(app: FastAPI, logger: logging.Logger) -> KeyManager:

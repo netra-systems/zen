@@ -284,4 +284,6 @@ def initialize_postgres():
     global async_engine, async_session_factory
     if async_session_factory is None:
         _initialize_async_engine()
+        if async_session_factory is None:
+            raise RuntimeError("Failed to initialize PostgreSQL: Session factory is None. Check database configuration and connectivity.")
     return async_session_factory

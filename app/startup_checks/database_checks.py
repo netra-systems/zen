@@ -102,6 +102,8 @@ class DatabaseChecker:
     
     async def _execute_database_tests(self) -> None:
         """Execute database connectivity and schema tests"""
+        if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
+            raise RuntimeError("Database session factory not initialized. Check database setup.")
         async with self.app.state.db_session_factory() as db:
             await self._test_basic_connectivity(db)
             await self._check_critical_tables(db)
@@ -122,6 +124,8 @@ class DatabaseChecker:
     
     async def _handle_assistant_check(self) -> StartupCheckResult:
         """Handle assistant existence check and creation"""
+        if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
+            raise RuntimeError("Database session factory not initialized. Check database setup.")
         async with self.app.state.db_session_factory() as db:
             assistant = await self._find_assistant(db)
             if not assistant:

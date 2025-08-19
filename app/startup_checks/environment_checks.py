@@ -48,7 +48,10 @@ class EnvironmentChecker:
     
     def _get_required_vars(self) -> List[str]:
         """Get required environment variables"""
-        # Always require these critical variables
+        # In development mode, these can use defaults from settings
+        if self.environment == "development":
+            return []  # Allow defaults in development
+        # In production/staging, require explicit configuration
         return ["DATABASE_URL", "SECRET_KEY"]
     
     def _get_optional_vars(self) -> List[str]:
@@ -79,11 +82,17 @@ class EnvironmentChecker:
     
     def _validate_database_config(self) -> None:
         """Validate database configuration"""
+        # In development, allow default database URL
+        if self.environment == "development":
+            return  # Skip validation, allow defaults
         if not self.is_staging and not settings.database_url:
             raise ValueError("DATABASE_URL is not configured")
     
     def _validate_secret_key(self) -> None:
         """Validate secret key configuration"""
+        # In development, allow default secret key
+        if self.environment == "development":
+            return  # Skip validation, allow defaults
         if not settings.secret_key or len(settings.secret_key) < 32:
             raise ValueError("SECRET_KEY must be at least 32 characters")
     
