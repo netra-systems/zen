@@ -76,73 +76,6 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": True,
         "run_both": True
     },
-    "comprehensive-backend": {
-        "description": "Comprehensive backend tests only (15-20 minutes)",
-        "purpose": "Full backend validation without frontend",
-        "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 1200,
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-frontend": {
-        "description": "Comprehensive frontend tests only (10-15 minutes)",
-        "purpose": "Full frontend validation without backend",
-        "backend_args": [],
-        "frontend_args": ["--coverage"],
-        "timeout": 900,
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-core": {
-        "description": "Core functionality comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of core components only",
-        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "core or config or dependencies", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-agents": {
-        "description": "Agent system comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of multi-agent system",
-        "backend_args": [
-            "app/tests/agents", "tests/test_actions_sub_agent.py",
-            "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast",
-            "--markers", "not real_services"
-        ],
-        "frontend_args": [],
-        "timeout": 900,
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-websocket": {
-        "description": "WebSocket comprehensive tests (5-10 minutes)",
-        "purpose": "Deep validation of WebSocket functionality",
-        "backend_args": ["--coverage", f"--parallel={min(2, OPTIMAL_WORKERS)}", "-k", "websocket or ws_manager", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 600,
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-database": {
-        "description": "Database comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of all database operations",
-        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "database or repository or clickhouse or postgres", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,
-        "run_coverage": True,
-        "run_both": False
-    },
-    "comprehensive-api": {
-        "description": "API comprehensive tests (10-15 minutes)",
-        "purpose": "Deep validation of all API endpoints",
-        "backend_args": ["--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "-k", "routes or api", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 900,
-        "run_coverage": True,
-        "run_both": False
-    },
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",
         "purpose": "Essential functionality verification",
@@ -162,17 +95,6 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_both": True,
         "run_e2e": True
     },
-    "real_e2e": {
-        "description": "[REAL E2E] Tests with actual LLM calls and services (15-20 minutes)",
-        "purpose": "End-to-end validation with real LLM and service integrations",
-        "backend_args": ["-k", "real_ or _real", "-v", "--fail-fast"],
-        "frontend_args": [],
-        "timeout": 1200,  # 20 minutes for real e2e tests
-        "run_coverage": False,
-        "run_both": False,
-        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"],
-        "highlight": True  # Flag to highlight in output
-    },
     "real_services": {
         "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
         "purpose": "Validation with actual service dependencies",
@@ -182,15 +104,6 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": False,
         "run_both": False,
         "requires_env": ["ENABLE_REAL_LLM_TESTING=true"]
-    },
-    "mock_only": {
-        "description": "Tests using only mocks, no external dependencies",
-        "purpose": "Fast CI/CD validation without external dependencies",
-        "backend_args": ["-m", "mock_only", "-v", "--coverage", f"--parallel={OPTIMAL_WORKERS}"],
-        "frontend_args": [],
-        "timeout": 300,
-        "run_coverage": True,
-        "run_both": False
     },
     "performance": {
         "description": "Performance validation suite for SLA compliance (3-5 minutes)",
@@ -205,21 +118,29 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     }
 }
 
-# Test runner configurations
+# Test runner configurations - DEPRECATED (kept for backward compatibility)
+# Use test_runner.py as the single entry point
 RUNNERS = {
-    "simple": "test_scripts/simple_test_runner.py",
     "backend": "scripts/test_backend.py", 
     "frontend": "scripts/test_frontend.py"
 }
 
-# Shard mappings for parallel execution in CI/CD
-SHARD_MAPPINGS = {
+# Component mappings for focused testing
+COMPONENT_MAPPINGS = {
     "core": ["app/core", "app/config", "app/dependencies"],
     "agents": ["app/agents", "app/services/agent"],
     "websocket": ["app/ws_manager", "app/services/websocket", "test_websocket"],
     "database": ["app/db", "app/services/database", "test_database"],
     "api": ["app/routes", "test_api", "test_auth"],
     "frontend": ["frontend"]
+}
+
+# Shard mappings for CI/CD parallel execution (numeric sharding)
+SHARD_MAPPINGS = {
+    "1/4": ["app/core", "app/config", "app/dependencies"],
+    "2/4": ["app/agents", "app/services/agent"],
+    "3/4": ["app/ws_manager", "app/services/websocket", "app/db", "app/services/database"],
+    "4/4": ["app/routes", "test_api", "test_auth", "frontend"]
 }
 
 def configure_staging_environment(staging_url: str, staging_api_url: str):
@@ -234,10 +155,18 @@ def configure_staging_environment(staging_url: str, staging_api_url: str):
 
 def configure_real_llm(model: str, timeout: int, parallel: str):
     """Configure environment for real LLM testing."""
+    # Handle special parallel values
+    if parallel == "max":
+        parallel_value = str(OPTIMAL_WORKERS)
+    elif parallel == "auto":
+        parallel_value = "auto"
+    else:
+        parallel_value = str(parallel)
+    
     config = {
         "model": model,
         "timeout": timeout,
-        "parallel": parallel
+        "parallel": parallel_value
     }
     
     # Set environment variables
@@ -245,7 +174,7 @@ def configure_real_llm(model: str, timeout: int, parallel: str):
     os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
     os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
     
-    if parallel != "auto":
-        os.environ["TEST_PARALLEL"] = str(parallel)
+    if parallel_value != "auto":
+        os.environ["TEST_PARALLEL"] = parallel_value
     
     return config

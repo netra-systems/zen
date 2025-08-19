@@ -153,16 +153,33 @@ def save_text_report(runner, level: str, config: Dict, exit_code: int, output_fi
 def generate_coverage_report():
     """Generate coverage report if requested."""
     args = sys.modules.get('test_framework.test_runner').__dict__.get('_current_args')
-    if not args or not args.coverage_output:
+    if not args:
         return
     
-    try:
-        PROJECT_ROOT = Path(__file__).parent.parent
-        coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
-        subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
-        if Path(args.coverage_output).exists():
-            print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
-        else:
-            print(f"[WARNING] Coverage report generation failed - file not created")
-    except Exception as e:
-        print(f"[WARNING] Could not generate coverage report: {e}")
+    PROJECT_ROOT = Path(__file__).parent.parent
+    
+    # Generate XML coverage if requested
+    if hasattr(args, 'coverage_output') and args.coverage_output:
+        try:
+            coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
+            subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+            if Path(args.coverage_output).exists():
+                print(f"[COVERAGE] XML report saved to: {args.coverage_output}")
+            else:
+                print(f"[WARNING] Coverage XML generation failed")
+        except Exception as e:
+            print(f"[WARNING] Could not generate XML coverage: {e}")
+    
+    # Generate HTML coverage if requested
+    if hasattr(args, 'coverage_html') and args.coverage_html:
+        try:
+            html_dir = PROJECT_ROOT / "htmlcov"
+            coverage_cmd = [sys.executable, "-m", "coverage", "html", "-d", str(html_dir)]
+            subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+            if html_dir.exists():
+                print(f"[COVERAGE] HTML report saved to: {html_dir}")
+                print(f"  Open {html_dir / 'index.html'} in a browser to view")
+            else:
+                print(f"[WARNING] Coverage HTML generation failed")
+        except Exception as e:
+            print(f"[WARNING] Could not generate HTML coverage: {e}")

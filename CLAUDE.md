@@ -186,6 +186,7 @@ Always reflect on the UNIFIED SYSTEM. Global coherence. End to end value. Real >
 - [`SPEC/system_boundaries.xml`](SPEC/system_boundaries.xml) - Hard limits & enforcement
 - [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
+- Clean, remove, or organize legacy files
 
 ## Testing
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml)

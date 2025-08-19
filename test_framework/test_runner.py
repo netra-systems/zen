@@ -47,7 +47,7 @@ load_dotenv()
 
 # Import test framework modules
 from .runner import UnifiedTestRunner
-from .test_config import TEST_LEVELS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
+from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
 from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
 
@@ -265,32 +265,40 @@ def create_argument_parser():
 def get_parser_epilog():
     """Get parser epilog with test levels and examples"""
     level_descriptions = chr(10).join([
-        f"  {level:<24} - {config['description']}" 
+        f"  {level:<20} - {config['description']}" 
         for level, config in TEST_LEVELS.items()
     ])
     return f"""
-Test Levels:
+Test Levels (fastest to slowest):
 {level_descriptions}
 
-Usage Examples:
-  # Quick smoke tests (recommended for pre-commit)
+Common Workflows:
+  # DEFAULT - Quick integration tests
+  python test_runner.py
+  
+  # Development workflow
+  python test_runner.py --level unit --fast-fail
+  python test_runner.py --level integration --no-coverage
+  
+  # Pre-commit check
   python test_runner.py --level smoke
   
-  # Unit tests for development
-  python test_runner.py --level unit
+  # Component-specific testing
+  python test_runner.py --level comprehensive --component agents
+  python test_runner.py --level comprehensive --backend-only
   
-  # Agent startup E2E tests with real services
-  python test_runner.py --level agent-startup --real-llm
+  # Real LLM testing (for releases)
+  python test_runner.py --level integration --real-llm
+  python test_runner.py --level agents --real-llm
   
-  # Full comprehensive testing
-  python test_runner.py --level comprehensive
+  # Parallel vs Serial execution
+  python test_runner.py --parallel 1       # Serial (for debugging)
+  python test_runner.py --parallel auto    # Auto-detect (default)
+  python test_runner.py --parallel max     # Maximum parallelism
   
-  # Backend only testing
-  python test_runner.py --level unit --backend-only
-  
-  # Real LLM testing examples:
-  python test_runner.py --level unit --real-llm
-  python test_runner.py --level integration --real-llm --llm-model gemini-2.5-pro
+  # CI/CD shard execution
+  python test_runner.py --shard 1/4        # Run first quarter of tests
+  python test_runner.py --shard 2/4        # Run second quarter
         """
 
 def add_all_arguments(parser):
@@ -307,12 +315,12 @@ def add_all_arguments(parser):
 def add_main_test_arguments(parser):
     """Add main test level selection arguments"""
     parser.add_argument(
-        "--level", "-l", choices=list(TEST_LEVELS.keys()), default="smoke",
-        help="Test level to run (default: smoke)"
+        "--level", "-l", choices=list(TEST_LEVELS.keys()), default="integration",
+        help="Test level to run (default: integration)"
     )
     parser.add_argument(
-        "--simple", action="store_true", 
-        help="Use simple test runner (overrides --level)"
+        "--exclusive", action="store_true",
+        help="Run ONLY tests at specified level (no superset inclusion)"
     )
 
 def add_component_arguments(parser):
@@ -324,6 +332,11 @@ def add_component_arguments(parser):
     parser.add_argument(
         "--frontend-only", action="store_true",
         help="Run only frontend tests"
+    )
+    parser.add_argument(
+        "--component", type=str,
+        choices=["core", "agents", "websocket", "database", "api"],
+        help="Run tests for specific component"
     )
 
 def add_output_arguments(parser):
@@ -355,7 +368,7 @@ def add_llm_arguments(parser):
     )
     parser.add_argument(
         "--parallel", type=str, default="auto",
-        help="Parallelism for tests: auto, 1 (sequential), or number of workers"
+        help="Parallelism: auto, 1 (serial), max, or number of workers"
     )
     parser.add_argument(
         "--speed", action="store_true",
@@ -405,8 +418,8 @@ def add_discovery_arguments(parser):
     """Add test discovery arguments"""
     parser.add_argument(
         "--shard", type=str,
-        choices=["core", "agents", "websocket", "database", "api", "frontend"],
-        help="Run a specific shard of tests for parallel execution"
+        choices=["1/4", "2/4", "3/4", "4/4"],
+        help="Run specific test shard for CI/CD parallelization"
     )
     parser.add_argument(
         "--json-output", type=str,
@@ -414,6 +427,14 @@ def add_discovery_arguments(parser):
     )
     parser.add_argument(
         "--coverage-output", type=str, help="Path to save coverage XML report"
+    )
+    parser.add_argument(
+        "--coverage-html", action="store_true",
+        help="Generate HTML coverage report"
+    )
+    parser.add_argument(
+        "--format", type=str, choices=["text", "json", "html"],
+        default="text", help="Output format for test results"
     )
     add_discovery_listing_arguments(parser)
 
@@ -445,14 +466,6 @@ def add_failing_test_arguments(parser):
     parser.add_argument(
         "--run-failing", action="store_true",
         help="Run only the currently failing tests"
-    )
-    parser.add_argument(
-        "--fix-failing", action="store_true",
-        help="Attempt to automatically fix failing tests (experimental)"
-    )
-    parser.add_argument(
-        "--max-fixes", type=int, default=None,
-        help="Maximum number of tests to attempt fixing (default: all)"
     )
     parser.add_argument(
         "--clear-failing", action="store_true",
@@ -572,8 +585,6 @@ def handle_failing_test_commands(args, runner):
     elif args.run_failing:
         exit_code = execute_failing_tests(args, runner)
         sys.exit(exit_code)
-    elif args.fix_failing:
-        handle_fix_failing_command()
 
 def execute_failing_tests(args, runner):
     """Execute failing tests run"""
@@ -581,7 +592,7 @@ def execute_failing_tests(args, runner):
     print("RUNNING FAILING TESTS")
     print("=" * 80)
     exit_code = runner.run_failing_tests(
-        max_fixes=args.max_fixes,
+        max_fixes=None,
         backend_only=args.backend_only,
         frontend_only=args.frontend_only
     )
@@ -599,23 +610,15 @@ def run_tests_with_configuration(args, runner, speed_opts):
     if args.staging:
         runner.staging_mode = True
     
-    if args.simple:
-        return run_simple_tests(runner)
-    else:
-        return run_level_based_tests(args, runner, speed_opts)
-
-def run_simple_tests(runner):
-    """Run simple test validation"""
-    print(f"Running simple test validation...")
-    exit_code, output = runner.run_simple_tests()
-    config = {"description": "Simple test validation", "purpose": "Basic functionality check"}
-    level = "simple"
-    return finalize_test_run(runner, level, config, "", exit_code)
+    return run_level_based_tests(args, runner, speed_opts)
 
 def run_level_based_tests(args, runner, speed_opts):
     """Run tests based on specified level"""
-    config = TEST_LEVELS[args.level]
+    config = TEST_LEVELS[args.level].copy()  # Copy to avoid modifying original
     level = args.level
+    # Handle exclusive mode (no superset inclusion)
+    if hasattr(args, 'exclusive') and args.exclusive:
+        print(f"[EXCLUSIVE] Running ONLY {level} level tests (no superset)")
     apply_shard_filtering(args, config)
     print_test_configuration(level, config, speed_opts)
     real_llm_config = configure_real_llm_if_requested(args, level, config)
@@ -623,19 +626,27 @@ def run_level_based_tests(args, runner, speed_opts):
     return finalize_test_run(runner, level, config, "", exit_code)
 
 def apply_shard_filtering(args, config):
-    """Apply shard filtering if specified"""
-    if args.shard:
-        print(f"[SHARD] Running only {args.shard} shard for {args.level} tests")
-        if args.shard in SHARD_MAPPINGS and args.shard != "frontend":
+    """Apply shard or component filtering if specified"""
+    # Handle component filtering
+    if hasattr(args, 'component') and args.component:
+        print(f"[COMPONENT] Running only {args.component} component tests")
+        if args.component in COMPONENT_MAPPINGS:
+            component_patterns = COMPONENT_MAPPINGS[args.component]
+            pattern_args = []
+            for pattern in component_patterns:
+                pattern_args.extend(["-k", pattern])
+            config['backend_args'] = config.get('backend_args', []) + pattern_args
+            print(f"[COMPONENT] Test patterns: {', '.join(component_patterns)}")
+    # Handle shard filtering for CI/CD
+    elif args.shard:
+        print(f"[SHARD] Running shard {args.shard} for parallel CI/CD execution")
+        if args.shard in SHARD_MAPPINGS:
             shard_patterns = SHARD_MAPPINGS[args.shard]
             pattern_args = []
             for pattern in shard_patterns:
                 pattern_args.extend(["-k", pattern])
             config['backend_args'] = config.get('backend_args', []) + pattern_args
             print(f"[SHARD] Test patterns: {', '.join(shard_patterns)}")
-        elif args.shard == "frontend":
-            args.frontend_only = True
-            args.backend_only = False
 
 def print_test_configuration(level, config, speed_opts):
     """Print test configuration details"""

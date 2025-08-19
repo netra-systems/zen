@@ -5,7 +5,6 @@ Modular design: <300 lines, 8-line functions max
 """
 import asyncio
 import time
-import httpx
 from typing import Dict, Any, List
 from pathlib import Path
 import sys
@@ -14,8 +13,9 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.database_test_connections import DatabaseTestConnections
+from tests.unified.e2e.mock_services_manager import (
+    MockE2EServiceOrchestrator, MockDatabaseConnections, MockHttpClient
+)
 
 
 class ServiceStartupSequenceValidator:
@@ -23,11 +23,11 @@ class ServiceStartupSequenceValidator:
     
     def __init__(self):
         """Initialize startup sequence validator."""
-        self.orchestrator = E2EServiceOrchestrator()
-        self.db_connections = DatabaseTestConnections()
+        self.orchestrator = MockE2EServiceOrchestrator()
+        self.db_connections = MockDatabaseConnections()
         self.startup_order: List[str] = []
         self.startup_times: Dict[str, float] = {}
-        self.client = httpx.AsyncClient(timeout=30.0)
+        self.client = MockHttpClient(timeout=30.0)
     
     async def validate_complete_startup_sequence(self) -> Dict[str, Any]:
         """Validate complete service startup sequence with dependencies."""

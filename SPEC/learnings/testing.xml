@@ -288,6 +288,31 @@
             <verification>WebSocket tests run without URL conflicts or cleanup errors</verification>
         </learning>
         
+        <learning id="pytest-marker-configuration-error">
+            <title>Pytest Marker Configuration File Resolution</title>
+            <problem>
+                Error: 'real_llm' not found in `markers` configuration option
+                Pytest.main() called from scripts/test_backend.py couldn't find pytest.ini
+                Tests in app/tests/ need app/pytest.ini configuration
+                Multiple pytest.ini files (root and app/) causing confusion
+            </problem>
+            <solution>
+                Added explicit configuration file path to pytest arguments
+                Use -c flag to specify pytest.ini location
+                Prefer app/pytest.ini for app/tests, root pytest.ini as fallback
+                Added _add_config_file_args() function to build_pytest_args()
+            </solution>
+            <files_affected>
+                <file>scripts/test_backend.py</file>
+            </files_affected>
+            <technical_details>
+                Root cause: pytest.main() doesn't auto-discover config when run from scripts/
+                Solution: Explicitly pass -c path/to/pytest.ini
+                Priority: app/pytest.ini > root pytest.ini
+            </technical_details>
+            <verification>Tests with real_llm marker now run without configuration errors</verification>
+        </learning>
+        
         <learning id="frontend-testing-complete-guide">
             <title>Frontend Testing Complete Guide Reference</title>
             <problem>

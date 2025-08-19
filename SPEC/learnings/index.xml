@@ -99,6 +99,19 @@
             </learning_ids>
         </category>
         <category>
+            <name>Test Runner Enhancements</name>
+            <file>SPEC/test_runner_guide.xml</file>
+            <path>SPEC/test_runner_guide.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>comprehensive-test-levels-added</id>
+                <id>test-pattern-matching-improved</id>
+                <id>claude-testing-prompt-spec-updated</id>
+            </learning_ids>
+            <important_note>Updated 2025-08-19: Added all 20 test levels from test runner usage, organized prompt patterns by category, improved Claude's test execution workflow</important_note>
+            <additional_file>SPEC/claude_testing_prompt_spec.xml</additional_file>
+        </category>
+        <category>
             <name>GitHub Actions</name>
             <file>learnings/github_actions.xml</file>
             <path>SPEC/learnings/github_actions.xml</path>

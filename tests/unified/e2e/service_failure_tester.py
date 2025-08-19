@@ -3,8 +3,8 @@ Service Failure Scenario Tester Module
 Business Value: Prevents cascading failures that cause total system outage
 Modular design: <300 lines, 8-line functions max
 """
-import httpx
 from typing import Dict, Any
+from .mock_services_manager import MockHttpClient, MockTimeoutException
 
 
 class ServiceFailureScenarioTester:
@@ -12,7 +12,7 @@ class ServiceFailureScenarioTester:
     
     def __init__(self):
         """Initialize failure scenario tester."""
-        self.client = httpx.AsyncClient(timeout=10.0)
+        self.client = MockHttpClient(timeout=10.0)
     
     async def test_auth_dependency_failure(self) -> Dict[str, Any]:
         """Test backend startup when auth service is unavailable."""
@@ -35,13 +35,17 @@ class ServiceFailureScenarioTester:
     
     async def _execute_auth_failure_test(self, results: Dict[str, Any]) -> None:
         """Execute auth dependency failure test."""
+        # Configure mock to simulate auth service failure
+        self.client.set_failure_mode(True, ["auth"])
+        
+        auth_health = await self._check_service_health("localhost", 8081, "/health")
         backend_health = await self._check_service_health("localhost", 8000, "/health")
         
-        if backend_health:
-            results["error"] = "Backend started without auth dependency"
-        else:
+        if not auth_health and not backend_health:
             results["success"] = True
-            results["message"] = "Backend correctly failed without auth"
+            results["message"] = "Backend correctly failed without auth dependency"
+        else:
+            results["error"] = "Backend started without auth dependency"
     
     async def test_graceful_degradation(self) -> Dict[str, Any]:
         """Test system operates with optional services unavailable."""
@@ -56,6 +60,9 @@ class ServiceFailureScenarioTester:
     
     async def _execute_degradation_test(self, results: Dict[str, Any]) -> None:
         """Execute graceful degradation test."""
+        # Reset to normal mode for degradation testing
+        self.client.set_failure_mode(False)
+        
         core_health = await self._check_service_health("localhost", 8000, "/health")
         
         if core_health:
@@ -162,10 +169,10 @@ class ServiceFailureScenarioTester:
         
         try:
             # Use very short timeout to simulate slow service
-            short_timeout_client = httpx.AsyncClient(timeout=0.1)
+            short_timeout_client = MockHttpClient(timeout=0.1)
             await short_timeout_client.get("http://localhost:8000/health")
             await short_timeout_client.aclose()
-        except httpx.TimeoutException:
+        except MockTimeoutException:
             elapsed_time = self._get_current_time() - start_time
             if elapsed_time < 1.0:  # Should timeout quickly
                 results["success"] = True

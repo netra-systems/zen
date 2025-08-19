@@ -327,7 +327,12 @@ class LauncherIntegration:
         return True
     
     def _show_final_summary(self) -> bool:
-        """Show final startup summary."""
+        """Show final startup summary and start health monitoring."""
+        # Start health monitoring AFTER services are verified ready (per HEALTH-001)
+        self.launcher.register_health_monitoring()
+        self.launcher.health_monitor.start()
+        
+        # Show success summary
         self.launcher.summary_display.show_success_summary()
         return True
     

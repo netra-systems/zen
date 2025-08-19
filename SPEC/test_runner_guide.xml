@@ -4,6 +4,7 @@
     <title>Unified Test Runner Specification</title>
     <category>testing</category>
     <created>2025-08-18</created>
+    <updated>2025-08-19</updated>
     <cross_references>
       <ref>CLAUDE.md#unified-test-runner</ref>
       <ref>testing.xml</ref>
@@ -15,94 +16,209 @@
     <overview>
       SINGLE AUTHORITATIVE TEST RUNNER - Do not create alternatives.
       The test_runner.py is the only approved method for running tests.
+      
+      DESIGN PRINCIPLES:
+      - Clear linear progression from fastest to slowest tests
+      - Explicit parallel vs serial execution control
+      - Logical superset relationships between test levels
+      - No confusing or redundant options
     </overview>
 
+    <!-- Linear test levels from fastest to slowest -->
     <test_levels>
-      <level name="integration" time="3-5min" default="true">
-        <purpose>DEFAULT - Feature validation</purpose>
-        <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
-        <when>After any feature change</when>
-      </level>
-      
-      <level name="unit" time="1-2min">
-        <purpose>Component testing</purpose>
-        <command>python test_runner.py --level unit</command>
-        <when>During development</when>
-      </level>
-      
-      <level name="smoke" time="&lt;30s">
+      <level name="smoke" time="&lt;30s" order="1">
         <purpose>Pre-commit validation</purpose>
         <command>python test_runner.py --level smoke</command>
         <when>Before every commit</when>
+        <includes>Basic health checks, critical paths only</includes>
       </level>
       
-      <level name="agents" time="2-3min">
-        <purpose>Agent testing</purpose>
+      <level name="unit" time="1-2min" order="2">
+        <purpose>Component testing</purpose>
+        <command>python test_runner.py --level unit</command>
+        <when>During development</when>
+        <includes>All isolated component tests</includes>
+      </level>
+      
+      <level name="critical" time="1-2min" order="3">
+        <purpose>Essential paths validation</purpose>
+        <command>python test_runner.py --level critical</command>
+        <when>Quick validation, hotfixes</when>
+        <includes>Business-critical functionality only</includes>
+      </level>
+      
+      <level name="agents" time="2-3min" order="4">
+        <purpose>Agent system testing</purpose>
         <command>python test_runner.py --level agents</command>
         <when>After agent changes</when>
+        <includes>All agent-related tests</includes>
       </level>
       
-      <level name="critical" time="1-2min">
-        <purpose>Essential paths</purpose>
-        <command>python test_runner.py --level critical</command>
-        <when>Quick validation</when>
+      <level name="agent-startup" time="1-2min" order="5">
+        <purpose>Agent startup sequence validation</purpose>
+        <command>python test_runner.py --level agent-startup</command>
+        <when>After startup sequence changes</when>
+        <includes>Agent initialization and startup tests</includes>
       </level>
       
-      <level name="real_e2e" time="15-20min" critical="true">
-        <purpose>CRITICAL - Real LLM testing</purpose>
+      <level name="integration" time="3-5min" order="6" default="true">
+        <purpose>DEFAULT - Feature validation</purpose>
+        <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
+        <when>After any feature change</when>
+        <includes>Component interaction tests</includes>
+      </level>
+      
+      <level name="mock_only" time="2-3min" order="7">
+        <purpose>Fast testing with all mocks</purpose>
+        <command>python test_runner.py --level mock_only</command>
+        <when>Quick validation without external dependencies</when>
+        <includes>Tests with all external services mocked</includes>
+      </level>
+      
+      <level name="performance" time="3-5min" order="8">
+        <purpose>SLA compliance validation</purpose>
+        <command>python test_runner.py --level performance</command>
+        <when>Before releases, after performance changes</when>
+        <includes>Response time and throughput tests</includes>
+      </level>
+      
+      <level name="real_e2e" time="20-30min" order="9">
+        <purpose>Full end-to-end testing with real services</purpose>
         <command>python test_runner.py --level real_e2e --real-llm</command>
-        <when>Before major releases</when>
+        <when>Pre-production validation</when>
+        <includes>Complete user flows with real services</includes>
+        <requires>ENABLE_REAL_LLM_TESTING=true</requires>
       </level>
       
-      <level name="comprehensive" time="30-45min">
-        <purpose>Full validation</purpose>
+      <level name="real_services" time="15-20min" order="10">
+        <purpose>Tests with actual external services</purpose>
+        <command>python test_runner.py --level real_services --real-llm</command>
+        <when>Before releases requiring service validation</when>
+        <includes>Real LLM, database, and service integrations</includes>
+        <requires>ENABLE_REAL_LLM_TESTING=true</requires>
+      </level>
+      
+      <level name="comprehensive" time="30-45min" order="11">
+        <purpose>Full validation suite</purpose>
         <command>python test_runner.py --level comprehensive</command>
         <when>Before production deploy</when>
+        <includes>ALL tests including unit, integration, agents, performance</includes>
+      </level>
+      
+      <level name="comprehensive-backend" time="15-20min" order="12">
+        <purpose>Comprehensive backend validation</purpose>
+        <command>python test_runner.py --level comprehensive-backend</command>
+        <when>Backend deep testing</when>
+        <includes>All backend component tests</includes>
+      </level>
+      
+      <level name="comprehensive-frontend" time="15-20min" order="13">
+        <purpose>Comprehensive frontend validation</purpose>
+        <command>python test_runner.py --level comprehensive-frontend</command>
+        <when>Frontend deep testing</when>
+        <includes>All frontend component tests</includes>
+      </level>
+      
+      <level name="comprehensive-core" time="15-20min" order="14">
+        <purpose>Comprehensive core system validation</purpose>
+        <command>python test_runner.py --level comprehensive-core</command>
+        <when>Core system deep testing</when>
+        <includes>Core functionality tests</includes>
+      </level>
+      
+      <level name="comprehensive-agents" time="15-20min" order="15">
+        <purpose>Comprehensive agent system validation</purpose>
+        <command>python test_runner.py --level comprehensive-agents</command>
+        <when>Multi-agent system deep testing</when>
+        <includes>All agent interaction tests</includes>
+      </level>
+      
+      <level name="comprehensive-websocket" time="10-15min" order="16">
+        <purpose>Comprehensive WebSocket validation</purpose>
+        <command>python test_runner.py --level comprehensive-websocket</command>
+        <when>WebSocket deep testing</when>
+        <includes>All WebSocket communication tests</includes>
+      </level>
+      
+      <level name="comprehensive-database" time="15-20min" order="17">
+        <purpose>Comprehensive database validation</purpose>
+        <command>python test_runner.py --level comprehensive-database</command>
+        <when>Database operations deep testing</when>
+        <includes>All database interaction tests</includes>
+      </level>
+      
+      <level name="comprehensive-api" time="15-20min" order="18">
+        <purpose>Comprehensive API validation</purpose>
+        <command>python test_runner.py --level comprehensive-api</command>
+        <when>API endpoints deep testing</when>
+        <includes>All API endpoint tests</includes>
+      </level>
+      
+      <level name="all" time="45-60min" order="19">
+        <purpose>Complete system validation</purpose>
+        <command>python test_runner.py --level all</command>
+        <when>Major releases, full regression testing</when>
+        <includes>Everything including E2E and frontend tests</includes>
       </level>
     </test_levels>
 
-    <comprehensive_categories>
-      <category name="comprehensive-backend" time="10-15min">
-        <purpose>Full backend validation</purpose>
-        <command>python test_runner.py --level comprehensive-backend</command>
+    <!-- Test level categories and relationships -->
+    <test_categories>
+      <category name="quick-validation">
+        <levels>smoke, unit, critical, mock_only</levels>
+        <purpose>Fast feedback during development</purpose>
       </category>
       
-      <category name="comprehensive-frontend" time="10-15min">
-        <purpose>Full frontend validation</purpose>
-        <command>python test_runner.py --level comprehensive-frontend</command>
+      <category name="feature-validation">
+        <levels>agents, agent-startup, integration</levels>
+        <purpose>Feature and component testing</purpose>
       </category>
       
-      <category name="comprehensive-core" time="10-15min">
-        <purpose>Core components deep test</purpose>
-        <command>python test_runner.py --level comprehensive-core</command>
+      <category name="deep-validation">
+        <levels>performance, real_e2e, real_services</levels>
+        <purpose>Thorough testing with real services</purpose>
       </category>
       
-      <category name="comprehensive-agents" time="10-15min">
-        <purpose>Multi-agent system validation</purpose>
-        <command>python test_runner.py --level comprehensive-agents</command>
+      <category name="comprehensive-suites">
+        <levels>comprehensive, comprehensive-backend, comprehensive-frontend, comprehensive-core, comprehensive-agents, comprehensive-websocket, comprehensive-database, comprehensive-api</levels>
+        <purpose>Complete component-specific validation</purpose>
       </category>
       
-      <category name="comprehensive-websocket" time="10-15min">
-        <purpose>WebSocket deep validation</purpose>
-        <command>python test_runner.py --level comprehensive-websocket</command>
+      <category name="full-system">
+        <levels>all</levels>
+        <purpose>Complete system validation including all tests</purpose>
       </category>
-      
-      <category name="comprehensive-database" time="10-15min">
-        <purpose>Database operations validation</purpose>
-        <command>python test_runner.py --level comprehensive-database</command>
-      </category>
-      
-      <category name="comprehensive-api" time="10-15min">
-        <purpose>API endpoints validation</purpose>
-        <command>python test_runner.py --level comprehensive-api</command>
-      </category>
-    </comprehensive_categories>
+    </test_categories>
 
+    <!-- Parallel vs Serial execution control -->
+    <execution_modes>
+      <mode name="serial">
+        <command>python test_runner.py --level unit --parallel 1</command>
+        <purpose>Sequential execution for debugging</purpose>
+      </mode>
+      
+      <mode name="parallel-auto">
+        <command>python test_runner.py --level unit --parallel auto</command>
+        <purpose>Auto-detect optimal parallelism (default)</purpose>
+      </mode>
+      
+      <mode name="parallel-fixed">
+        <command>python test_runner.py --level unit --parallel 4</command>
+        <purpose>Fixed number of parallel workers</purpose>
+      </mode>
+      
+      <mode name="parallel-max">
+        <command>python test_runner.py --level unit --parallel max</command>
+        <purpose>Maximum parallelism (CPU count - 1)</purpose>
+      </mode>
+    </execution_modes>
+
+    <!-- Real LLM testing configuration -->
     <real_llm_testing>
-      <critical>Always test with real LLMs before releases to catch integration issues</critical>
+      <critical>Test with real LLMs before releases to catch integration issues</critical>
       
       <commands>
-        <command purpose="Integration tests with real LLM (DEFAULT for releases)">
+        <command purpose="Integration with real LLM (DEFAULT for releases)">
           python test_runner.py --level integration --real-llm
         </command>
         
@@ -110,8 +226,8 @@
           python test_runner.py --level integration --real-llm --llm-model gemini-2.5-flash
         </command>
         
-        <command purpose="Full E2E with real services">
-          python test_runner.py --level real_e2e --real-llm --llm-timeout 60
+        <command purpose="Real services with timeout control">
+          python test_runner.py --level real_services --real-llm --llm-timeout 60
         </command>
         
         <command purpose="Agent tests with real LLM (MANDATORY for agent changes)">
@@ -120,62 +236,130 @@
       </commands>
     </real_llm_testing>
 
+    <!-- Speed optimization flags -->
     <speed_optimizations>
-      <option name="CI Mode" safe="true">
-        <command>python test_runner.py --level unit --ci</command>
-      </option>
+      <flag name="--fast-fail">
+        <purpose>Stop on first failure</purpose>
+        <safe>true</safe>
+      </flag>
       
-      <option name="No Warnings">
-        <command>python test_runner.py --level unit --no-warnings</command>
-      </option>
+      <flag name="--no-coverage">
+        <purpose>Skip coverage collection</purpose>
+        <safe>true</safe>
+      </flag>
       
-      <option name="No Coverage">
-        <command>python test_runner.py --level unit --no-coverage</command>
-      </option>
+      <flag name="--no-warnings">
+        <purpose>Suppress warning output</purpose>
+        <safe>true</safe>
+      </flag>
       
-      <option name="Fast Fail">
-        <command>python test_runner.py --level unit --fast-fail</command>
-      </option>
+      <flag name="--ci">
+        <purpose>CI mode with safe optimizations</purpose>
+        <safe>true</safe>
+        <enables>--fast-fail --no-warnings --parallel auto</enables>
+      </flag>
       
-      <option name="Speed Mode" warning="May skip slow tests">
-        <command>python test_runner.py --level unit --speed</command>
-      </option>
+      <flag name="--speed">
+        <purpose>Aggressive speed mode</purpose>
+        <safe>false</safe>
+        <warning>May skip slower tests</warning>
+      </flag>
     </speed_optimizations>
 
-    <component_selection>
-      <command purpose="Backend only">python test_runner.py --level unit --backend-only</command>
-      <command purpose="Frontend only">python test_runner.py --level unit --frontend-only</command>
-    </component_selection>
+    <!-- Test selection and filtering -->
+    <test_selection>
+      <flag name="--exclusive">
+        <purpose>Run ONLY tests at specified level (no superset)</purpose>
+        <example>python test_runner.py --level integration --exclusive</example>
+      </flag>
+      
+      <flag name="--backend-only">
+        <purpose>Run backend tests only</purpose>
+      </flag>
+      
+      <flag name="--frontend-only">
+        <purpose>Run frontend tests only</purpose>
+      </flag>
+      
+      <flag name="--component">
+        <purpose>Run tests for specific component</purpose>
+        <values>core, agents, websocket, database, api</values>
+      </flag>
+      
+      <flag name="--shard">
+        <purpose>Run specific test shard for CI/CD parallelization</purpose>
+        <values>1/4, 2/4, 3/4, 4/4</values>
+      </flag>
+    </test_selection>
 
-    <test_discovery>
-      <command purpose="List all tests">python test_runner.py --list</command>
-      <command purpose="List with JSON format">python test_runner.py --list --list-format json</command>
-      <command purpose="List with Markdown format">python test_runner.py --list --list-format markdown</command>
-      <command purpose="List specific category">python test_runner.py --list --list-category unit</command>
-      <command purpose="Show failing tests">python test_runner.py --show-failing</command>
-      <command purpose="Run only failing tests">python test_runner.py --run-failing</command>
-      <command purpose="Clear failing tests log">python test_runner.py --clear-failing</command>
-    </test_discovery>
+    <!-- Test discovery and reporting -->
+    <discovery_reporting>
+      <command purpose="List all available tests">
+        python test_runner.py --list
+      </command>
+      
+      <command purpose="List tests at specific level">
+        python test_runner.py --list --level unit
+      </command>
+      
+      <command purpose="Show failing tests from last run">
+        python test_runner.py --show-failing
+      </command>
+      
+      <command purpose="Re-run only failing tests">
+        python test_runner.py --run-failing
+      </command>
+      
+      <command purpose="Clear failing tests cache">
+        python test_runner.py --clear-failing
+      </command>
+      
+      <command purpose="Generate JSON report">
+        python test_runner.py --level unit --output results.json --format json
+      </command>
+      
+      <command purpose="Generate HTML coverage report">
+        python test_runner.py --level unit --coverage-html
+      </command>
+    </discovery_reporting>
 
+    <!-- Staging environment testing -->
     <staging_testing>
-      <command purpose="Test against staging">python test_runner.py --level integration --staging</command>
-      <command purpose="Override staging URLs">
-        python test_runner.py --staging --staging-url https://staging.example.com --staging-api-url https://api.staging.example.com
+      <command purpose="Test against staging">
+        python test_runner.py --level integration --staging
+      </command>
+      
+      <command purpose="Custom staging URLs">
+        python test_runner.py --staging --staging-url https://staging.example.com
       </command>
     </staging_testing>
 
-    <cicd_integration>
-      <command purpose="CI mode with JSON output">
-        python test_runner.py --level unit --ci --output results.json --report-format json
-      </command>
-      <command purpose="Generate coverage report">
-        python test_runner.py --level comprehensive --coverage-output coverage.xml
-      </command>
-    </cicd_integration>
-
-    <parallelism>
-      <command purpose="Sequential execution">python test_runner.py --level unit --real-llm --parallel 1</command>
-      <command purpose="Auto-detect parallelism">python test_runner.py --level unit --real-llm --parallel auto</command>
-    </parallelism>
+    <!-- Common workflows -->
+    <workflows>
+      <workflow name="development">
+        <step>1. python test_runner.py --level unit --fast-fail</step>
+        <step>2. python test_runner.py --level integration --no-coverage</step>
+        <step>3. python test_runner.py --level smoke (before commit)</step>
+      </workflow>
+      
+      <workflow name="agent-development">
+        <step>1. python test_runner.py --level agents --fast-fail</step>
+        <step>2. python test_runner.py --level agents --real-llm</step>
+        <step>3. python test_runner.py --level integration</step>
+      </workflow>
+      
+      <workflow name="pre-release">
+        <step>1. python test_runner.py --level comprehensive</step>
+        <step>2. python test_runner.py --level real_services --real-llm</step>
+        <step>3. python test_runner.py --level performance</step>
+        <step>4. python test_runner.py --level all --staging</step>
+      </workflow>
+      
+      <workflow name="hotfix">
+        <step>1. python test_runner.py --level critical --fast-fail</step>
+        <step>2. python test_runner.py --level smoke</step>
+        <step>3. python test_runner.py --level integration --component affected</step>
+      </workflow>
+    </workflows>
   </test_runner>
 </spec>

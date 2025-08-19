@@ -440,9 +440,8 @@ class DevLauncher:
     
     def _run_main_loop(self):
         """Run main service loop."""
-        self.summary_display.show_success_summary()
-        self.register_health_monitoring()
-        self.health_monitor.start()
+        # Note: Health monitoring is now started in launcher_integration._show_final_summary
+        # after services are verified ready (per HEALTH-001)
         self._execute_process_loop()
     
     def _execute_process_loop(self):

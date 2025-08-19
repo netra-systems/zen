@@ -9,7 +9,7 @@ and rollback capability on failure.
 import time
 import logging
 import asyncio
-from typing import Dict, List, Optional, Callable, Any, Tuple
+from typing import Dict, List, Optional, Callable, Any, Tuple, Union
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -97,30 +97,33 @@ class SmartStartupSequencer:
             return False
         return self.cache_manager.is_cached_and_valid(step.cache_key)
     
-    def _execute_step(self, step: PhaseStep) -> Tuple[bool, float]:
+    def _execute_step(self, step: PhaseStep) -> Tuple[bool, Optional[str]]:
         """Execute a single step with timeout and error handling."""
         if self._can_skip_step(step):
             logger.debug(f"Skipping cached step: {step.name}")
-            return True, 0.0
+            return True, None
         return self._run_step_with_timing(step)
     
-    def _run_step_with_timing(self, step: PhaseStep) -> Tuple[bool, float]:
+    def _run_step_with_timing(self, step: PhaseStep) -> Tuple[bool, Optional[str]]:
         """Run step and measure timing."""
         start_time = time.time()
         try:
             result = step.func()
-            return self._process_step_result(step, result, time.time() - start_time)
+            duration = time.time() - start_time
+            success = self._process_step_result(step, result, duration)
+            return success, None
         except Exception as e:
             duration = time.time() - start_time
             logger.error(f"Step {step.name} failed: {e}")
-            return False, duration
+            return False, str(e)
     
-    def _process_step_result(self, step: PhaseStep, result: Any, duration: float) -> Tuple[bool, float]:
+    def _process_step_result(self, step: PhaseStep, result: Any, duration: float) -> bool:
         """Process step execution result."""
         success = result if isinstance(result, bool) else True
         if success and step.cache_key:
             self.cache_manager.cache_result(step.cache_key, True)
-        return success, duration
+        logger.debug(f"Step {step.name}: {'success' if success else 'failed'} in {duration:.2f}s")
+        return success
     
     def _execute_phase(self, phase: StartupPhase) -> PhaseResult:
         """Execute a single phase with all its steps."""
@@ -140,16 +143,23 @@ class SmartStartupSequencer:
     
     def _execute_and_categorize_step(self, step: PhaseStep, executed: List, skipped: List) -> Optional[str]:
         """Execute step and categorize result."""
-        step_success, _ = self._execute_step(step)
+        step_success, error_msg = self._execute_step(step)
         (skipped if self._can_skip_step(step) else executed).append(step.name)
         if not step_success and step.required:
-            return f"Required step {step.name} failed"
+            # Per ERROR-001: Provide specific error details
+            if step.name == "verify_readiness":
+                return "Service readiness verification failed. Check logs above for specific service failures."
+            elif error_msg:
+                return f"Required step {step.name} failed: {error_msg}"
+            else:
+                return f"Required step {step.name} failed"
         return None
     
     def _check_timeout(self, phase: StartupPhase, elapsed: float) -> bool:
-        """Check if phase has exceeded timeout."""
+        """Check if phase has exceeded timeout goal (not a failure)."""
         if elapsed > phase.timeout:
-            logger.error(f"Phase {phase.phase_name} timeout ({elapsed:.1f}s > {phase.timeout}s)")
+            # Per PERF-003: Timeout is a goal, not a hard limit
+            logger.warning(f"Phase {phase.phase_name} exceeded goal time ({elapsed:.1f}s > {phase.timeout}s goal)")
             return True
         return False
     
@@ -206,10 +216,10 @@ class SmartStartupSequencer:
         result = self._execute_phase(phase)
         self.phase_results[phase] = result
         if self._check_timeout(phase, result.duration):
-            # Log timeout as warning but don't fail
+            # Per PERF-003: Log timeout as warning but don't fail
             service_name = self._get_phase_service_name(phase)
             timeout_msg = self._create_timeout_warning(phase, result, service_name)
-            logger.warning(timeout_msg)
+            logger.info(timeout_msg)  # Use info level for goal status
             # Don't fail on timeout - it's just a goal
         if not result.success:
             logger.error(f"Phase {phase.phase_name} failed: {result.error}")
