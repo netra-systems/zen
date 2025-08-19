@@ -130,7 +130,7 @@ class SupplyResearchResult(BaseModel):
 
 class DeepAgentState(BaseModel):
     """Strongly typed state for the deep agent system."""
-    user_request: str
+    user_request: str = "default_request"  # Default for backward compatibility
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     

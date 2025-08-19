@@ -23,6 +23,9 @@ import secrets
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+# Initialize auth service singleton
+auth_service = AuthService()
+
 def get_client_info(request: Request) -> dict:
     """Extract client information from request"""
     return {

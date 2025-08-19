@@ -349,4 +349,36 @@
             - Simplified compliance and auditing
         </impact>
     </learning>
+    
+    <learning id="auth-service-singleton-initialization" date="2025-08-18" severity="CRITICAL">
+        <title>Auth Service Singleton Not Initialized in Routes</title>
+        <problem>
+            auth_routes.py uses auth_service variable throughout (lines 119, 135, 143, etc.)
+            but never creates an instance of AuthService class.
+            Error: "name 'auth_service' is not defined" when accessing /auth/dev/login endpoint.
+        </problem>
+        <root_cause>
+            The file imports AuthService class but doesn't create a singleton instance.
+            All route handlers expect auth_service to be a module-level singleton.
+            Missing initialization code that creates and configures the AuthService instance.
+        </root_cause>
+        <solution>
+            Add singleton initialization after imports in auth_routes.py:
+            auth_service = AuthService()
+            This creates single shared instance for all route handlers.
+        </solution>
+        <files_modified>
+            <file>auth_service/auth_core/routes/auth_routes.py - Added auth_service initialization</file>
+        </files_modified>
+        <prevention>
+            ALWAYS initialize service instances when importing service classes.
+            Use singleton pattern for stateful services like auth.
+            Test all endpoints after adding new route files.
+        </prevention>
+        <business_impact>
+            Critical: Auth service failures block all user access.
+            Revenue: Users cannot login means zero platform usage.
+            Enterprise: Auth failures are immediate escalation issues.
+        </business_impact>
+    </learning>
 </specification>

@@ -13,8 +13,15 @@ from app.logging_config import central_logger
 from app.websocket.connection_info import ConnectionInfo
 from app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
 
-# Initialize connection_manager using lazy initialization
-connection_manager = get_connection_manager()
+# Connection manager will be initialized lazily when first accessed
+connection_manager = None
+
+def get_connection_manager_instance():
+    """Get connection manager instance with lazy initialization."""
+    global connection_manager
+    if connection_manager is None:
+        connection_manager = get_connection_manager()
+    return connection_manager
 
 # Import legacy components for backward compatibility
 from app.websocket.connection_info import (
@@ -102,6 +109,7 @@ __all__ = [
     'ConnectionInfo',
     'ConnectionManager', 
     'connection_manager',
+    'get_connection_manager_instance',
     'ConnectionStats',
     'ConnectionInfoBuilder',
     'ConnectionValidator',

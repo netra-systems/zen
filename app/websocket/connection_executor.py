@@ -250,7 +250,10 @@ class ConnectionOperationBuilder:
     def _create_agent_state(self):
         """Create agent state."""
         from app.agents.state import DeepAgentState
-        return DeepAgentState(user_request="websocket_operation_context")
+        # Extract user_request from operation_data or use operation-specific default
+        user_request = self._operation_data.get('user_request', 
+                                                f"websocket_{self._operation_type or 'operation'}")
+        return DeepAgentState(user_request=user_request)
         
     def _create_execution_context(self, state) -> ExecutionContext:
         """Create execution context."""
