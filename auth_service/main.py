@@ -57,15 +57,30 @@ async def lifespan(app: FastAPI):
     AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8081')}")
     
+    # Initialize database connections on startup
+    from auth_core.database.connection import auth_db
+    from auth_core.database.main_db_sync import main_db_sync
+    
+    try:
+        await auth_db.initialize()
+        logger.info("Auth database initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize auth database: {e}")
+        raise
+    
+    try:
+        await main_db_sync.initialize()
+        logger.info("Main database sync initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize main database sync: {e}")
+        raise
+    
     yield
     
     # Cleanup
     logger.info("Shutting down Auth Service...")
     
     # Close database connections
-    from auth_core.database.connection import auth_db
-    from auth_core.database.main_db_sync import main_db_sync
-    
     await auth_db.close()
     await main_db_sync.close()
     logger.info("Database connections closed")

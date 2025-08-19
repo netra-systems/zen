@@ -20,6 +20,10 @@ class MainDatabaseSync:
         self._session_maker = None
         self._initialized = False
     
+    async def initialize(self):
+        """Initialize database connection (public method)"""
+        await self._initialize_engine()
+    
     async def _ensure_initialized(self):
         """Lazy initialization for Cloud Run compatibility"""
         if not self._initialized:

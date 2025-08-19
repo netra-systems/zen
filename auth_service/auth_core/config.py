@@ -99,8 +99,8 @@ class AuthConfig:
     @staticmethod
     def get_database_url() -> str:
         """Get database URL for auth service"""
-        # Check for auth-specific database URL first
-        database_url = os.getenv("DATABASE_URL", os.getenv("DATABASE_URL", ""))
+        # Use the same DATABASE_URL as the main application
+        database_url = os.getenv("DATABASE_URL", "")
         
         if not database_url:
             logger.warning("No database URL configured, will use in-memory SQLite")
