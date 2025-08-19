@@ -12,8 +12,9 @@ class TestWebSocketAdvanced:
         client = TestClient(app)
         
         with patch('app.routes.websockets.manager') as mock_manager, \
-             patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth, \
-             patch('app.routes.utils.websocket_helpers.extract_app_services') as mock_get_services:
+             patch('app.routes.websockets.authenticate_websocket_user') as mock_auth, \
+             patch('app.routes.websockets.extract_app_services') as mock_get_services, \
+             patch('app.routes.websockets.accept_websocket_connection') as mock_accept:
             
             # Setup mocks
             mock_manager.connect_user = AsyncMock(return_value=MagicMock())
@@ -26,6 +27,9 @@ class TestWebSocketAdvanced:
             mock_agent_service = MagicMock()
             mock_get_services.return_value = (mock_security_service, mock_agent_service)
             
+            # Mock accept websocket to return token
+            mock_accept.return_value = "test-token"
+            
             with client.websocket_connect("/ws?token=valid_token") as websocket:
                 # If we get here, authentication succeeded
                 assert True  # Connection established successfully
@@ -35,7 +39,8 @@ class TestWebSocketAdvanced:
         client = TestClient(app)
         
         with patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth, \
-             patch('app.routes.utils.websocket_helpers.extract_app_services') as mock_get_services:
+             patch('app.routes.websockets.extract_app_services') as mock_get_services, \
+             patch('app.routes.websockets.accept_websocket_connection') as mock_accept:
             
             # Mock authentication failure
             mock_auth.side_effect = ValueError("Invalid token")
@@ -45,6 +50,9 @@ class TestWebSocketAdvanced:
             mock_security_service.decode_access_token = AsyncMock(return_value={"user_id": "test-user-123"})
             mock_agent_service = MagicMock()
             mock_get_services.return_value = (mock_security_service, mock_agent_service)
+            
+            # Mock accept websocket to return token
+            mock_accept.return_value = "test-token"
             
             # The ValueError is caught by WebSocket exception handler and connection is closed gracefully
             # So we don't expect an exception to be raised to the test client
@@ -57,8 +65,9 @@ class TestWebSocketAdvanced:
         client = TestClient(app)
         
         with patch('app.routes.websockets.manager') as mock_manager, \
-             patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth, \
-             patch('app.routes.utils.websocket_helpers.extract_app_services') as mock_get_services:
+             patch('app.routes.websockets.authenticate_websocket_user') as mock_auth, \
+             patch('app.routes.websockets.extract_app_services') as mock_get_services, \
+             patch('app.routes.websockets.accept_websocket_connection') as mock_accept:
             
             # Setup mocks
             mock_manager.connect_user = AsyncMock(return_value=MagicMock())

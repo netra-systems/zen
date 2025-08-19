@@ -82,22 +82,45 @@ def test_user() -> TestUser:
 async def test_database() -> AsyncGenerator[AsyncSession, None]:
     """Provide isolated test database session."""
     engine = create_async_engine(settings.database_url, echo=False)
+    session = None
     
-    # Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
-    # Create session
-    async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
-    
-    async with async_session() as session:
+    try:
+        # Create tables
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        
+        # Create session factory
+        async_session = sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
+        
+        # Create and yield session
+        session = async_session()
         yield session
-    
-    # Clean up
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
-    
-    await engine.dispose()
+        
+    finally:
+        # Ensure session is closed before engine disposal
+        if session is not None:
+            try:
+                await session.close()
+            except Exception as e:
+                # Log but don't fail on session close error
+                print(f"Warning: Session close error: {e}")
+        
+        # Clean up database tables
+        try:
+            async with engine.begin() as conn:
+                await conn.run_sync(Base.metadata.drop_all)
+        except Exception as e:
+            # Log but don't fail on table cleanup error
+            print(f"Warning: Table cleanup error: {e}")
+        
+        # Use asyncio.shield to protect engine disposal from event loop closure
+        try:
+            # Create a task for engine disposal to prevent event loop closure issues
+            disposal_task = asyncio.create_task(engine.dispose())
+            await asyncio.shield(disposal_task)
+        except Exception as e:
+            # Log but don't fail on engine disposal error
+            print(f"Warning: Engine disposal error: {e}")
 
 
 @pytest.fixture(scope="function")
@@ -224,17 +247,27 @@ def service_timeouts() -> Dict[str, int]:
 @pytest.fixture(scope="function") 
 async def clean_database_state(test_database):
     """Ensure clean database state before and after tests."""
-    # Clean before test
-    await _clean_all_tables(test_database)
-    
-    yield test_database
-    
-    # Clean after test
-    await _clean_all_tables(test_database)
+    try:
+        # Clean before test
+        await _clean_all_tables(test_database)
+        
+        yield test_database
+        
+    finally:
+        # Clean after test - with error handling
+        try:
+            await _clean_all_tables(test_database)
+        except Exception as e:
+            # Log but don't fail on cleanup error
+            print(f"Warning: Database cleanup error: {e}")
 
 
 async def _clean_all_tables(session: AsyncSession) -> None:
     """Clean all tables in the test database."""
+    # Check if session is still valid
+    if session is None or session.is_active is False:
+        return
+    
     table_names = [
         "users", "threads", "messages", "workload_events",
         "llm_metrics", "corpus_content", "supply_data"
@@ -246,12 +279,20 @@ async def _clean_all_tables(session: AsyncSession) -> None:
 
 async def _truncate_table(session: AsyncSession, table_name: str) -> None:
     """Truncate a specific table."""
+    # Check if session is still valid before operations
+    if session is None or session.is_active is False:
+        return
+        
     try:
         await session.execute(f"TRUNCATE TABLE {table_name} CASCADE")
         await session.commit()
-    except Exception:
-        # Table might not exist, continue
-        await session.rollback()
+    except Exception as e:
+        # Table might not exist or session might be closed
+        try:
+            await session.rollback()
+        except Exception:
+            # Session might already be closed, ignore rollback error
+            pass
 
 
 @pytest.fixture(scope="function")
