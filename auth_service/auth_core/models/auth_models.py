@@ -153,3 +153,23 @@ class AuthConfigResponse(BaseModel):
     pr_number: Optional[str] = None
     use_proxy: Optional[bool] = False
     proxy_url: Optional[str] = None
+
+class PasswordResetRequest(BaseModel):
+    """Password reset request model"""
+    email: EmailStr
+
+class PasswordResetResponse(BaseModel):
+    """Password reset response model"""
+    success: bool
+    message: str
+    reset_token: Optional[str] = None  # For testing only
+
+class PasswordResetConfirm(BaseModel):
+    """Password reset confirmation model"""
+    reset_token: str
+    new_password: str = Field(min_length=8, max_length=128)
+    
+class PasswordResetConfirmResponse(BaseModel):
+    """Password reset confirmation response"""
+    success: bool
+    message: str
