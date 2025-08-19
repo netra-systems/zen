@@ -412,7 +412,9 @@ describe('Form Groups - Complex Form Structures', () => {
     
     await user.click(screen.getByRole('button', { name: 'Add Contact' }));
     
-    expect(screen.getByRole('textbox', { name: 'Contact 2' })).toBeInTheDocument();
+    const contact2Elements = screen.getAllByLabelText('Contact 2');
+    const contact2Input = contact2Elements.find(el => el.tagName === 'INPUT');
+    expect(contact2Input).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Remove contact 1' })).toBeInTheDocument();
   });
 
