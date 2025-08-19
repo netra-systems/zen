@@ -48,6 +48,50 @@
         </business_impact>
     </learning>
     
+    <learning id="dev-user-creation-duplication" priority="CRITICAL">
+        <title>🔴 CRITICAL: Dev User Creation Must Use Single Source</title>
+        <problem>
+            Multiple duplicate get_or_create_dev_user implementations causing:
+            - UniqueViolationError: duplicate key value violates unique constraint "ix_userbase_email"
+            - Multiple functions trying to create same dev@example.com user
+            - Race conditions between different creation points
+            - Inconsistent dev user attributes across creation points
+        </problem>
+        <root_cause>
+            Historical implementations created separate dev user creation logic in:
+            - app/routes/auth_routes/dev_login.py
+            - app/services/apex_optimizer_agent/dev_utils.py
+            - app/auth_integration/auth.py (inline logic)
+            Each trying to create users independently without proper duplicate checking.
+        </root_cause>
+        <solution>
+            <step>Created SINGLE get_or_create_dev_user in user_service</step>
+            <step>All dev user creation now uses user_service.get_or_create_dev_user()</step>
+            <step>Function properly handles existing users and race conditions</step>
+            <step>Uses IntegrityError catching for concurrent request handling</step>
+        </solution>
+        <files_modified>
+            <file>app/services/user_service.py - Added centralized get_or_create_dev_user</file>
+            <file>app/routes/auth_routes/dev_login.py - Updated to use centralized function</file>
+            <file>app/services/apex_optimizer_agent/dev_utils.py - Updated to use centralized function</file>
+            <file>app/auth_integration/auth.py - Simplified to use centralized function</file>
+            <file>app/routes/auth_routes/callback_processor.py - Uses get_or_create for OAuth</file>
+        </files_modified>
+        <prevention>
+            NEVER create User models directly for dev/test users.
+            ALWAYS use user_service.get_or_create_dev_user() for dev users.
+            ALWAYS use user_service.get_or_create() for regular users.
+            Run: grep -r "User(" --include="*.py" | grep -v "test_" | grep email
+            Expected: No direct User model creation outside user_service.
+        </prevention>
+        <business_impact>
+            Stability: Prevents startup failures in development/staging.
+            Developer Experience: No duplicate key errors blocking development.
+            Revenue: Prevents auth service downtime from impacting customers.
+            Testing: Consistent dev user creation for reliable testing.
+        </business_impact>
+    </learning>
+    
     <learning id="oauth-local-staging-mismatch">
         <title>OAuth Configuration Mismatch for Local Development</title>
         <problem>
