@@ -133,24 +133,33 @@ class ParallelExecutor:
         """Resolve task dependencies into execution batches."""
         batches = []
         remaining = set(self.tasks.keys())
+        completed_in_this_run = set()
         
         while remaining:
-            ready_tasks = self._find_ready_tasks(remaining)
+            ready_tasks = self._find_ready_tasks(remaining, completed_in_this_run)
             if not ready_tasks:
-                logger.error("Circular dependency detected")
+                logger.error(f"Circular dependency detected, remaining: {remaining}")
+                # Add remaining tasks to avoid infinite loop
+                batches.append(list(remaining))
                 break
             
             batches.append(sorted(ready_tasks, key=self._get_task_priority))
+            completed_in_this_run.update(ready_tasks)
             remaining.difference_update(ready_tasks)
         
         return batches
     
-    def _find_ready_tasks(self, remaining: set) -> List[str]:
+    def _find_ready_tasks(self, remaining: set, completed_in_this_run: set = None) -> List[str]:
         """Find tasks ready for execution."""
+        if completed_in_this_run is None:
+            completed_in_this_run = set()
+        
         ready = []
+        all_completed = self.completed.keys() | completed_in_this_run
+        
         for task_id in remaining:
             deps = self.dependency_graph.get(task_id, [])
-            if all(dep in self.completed for dep in deps):
+            if all(dep in all_completed for dep in deps):
                 ready.append(task_id)
         return ready
     
