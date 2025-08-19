@@ -11,7 +11,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { WebSocketTestManager } from '@/helpers/websocket-test-manager';
+import { WebSocketTestManager } from '../helpers/websocket-test-manager';
 import { MessageInput } from '@/components/chat/MessageInput';
 import { MessageItem } from '@/components/chat/MessageItem';
 import { MainChat } from '@/components/chat/MainChat';

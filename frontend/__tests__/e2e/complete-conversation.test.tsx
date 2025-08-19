@@ -10,12 +10,20 @@
  */
 
 import { test, expect, Page, BrowserContext } from '@playwright/test';
-
-interface AuthTestUser {
-  email: string;
-  name: string;
-  id: string;
-}
+import {
+  authenticateUser,
+  createThread,
+  sendMessage,
+  waitForAIResponse,
+  waitForWebSocketConnection,
+  measurePagePerformance,
+  validatePerformance,
+  cleanupTestSession,
+  simulateNetworkCondition,
+  createTestUser,
+  type TestUser,
+  type PerformanceThresholds
+} from './utils/e2e-test-helpers';
 
 interface ConversationMetrics {
   startTime: number;

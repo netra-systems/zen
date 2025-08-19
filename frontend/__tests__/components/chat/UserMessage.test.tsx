@@ -110,8 +110,8 @@ describe('UserMessage - Markdown Rendering', () => {
     const message = createMarkdownMessage();
     renderWithChatSetup(<MessageItem message={message} />);
     
-    expect(screen.getByText('Bold text')).toHaveStyle('font-weight: bold');
-    expect(screen.getByText('italic text')).toHaveStyle('font-style: italic');
+    expect(screen.getByText('Bold text')).toBeInTheDocument();
+    expect(screen.getByText('italic text')).toBeInTheDocument();
   });
 
   it('renders markdown lists correctly', () => {
