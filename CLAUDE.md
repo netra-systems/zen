@@ -18,7 +18,6 @@ The product is Netra Apex.
 ## IMPORTANT: Revenue-Driven Development: Business Value Justification (BVJ)
 To enforce the mandate that business goals are superior to engineering goals, every engineering task (Ticket/Issue) must include a Business Value Justification (BVJ).
 
-# Example Task: Implement Intelligent Model Routing
 Example:
 **BVJ:**
 1. **Segment**: Growth & Enterprise
@@ -26,18 +25,19 @@ Example:
 3. **Value Impact**: Estimated to increase average customer savings by 10-15%.
 4. **Revenue Impact**: Increases the 20% performance fee capture. Estimated +$10K MRR 
 
-
-## 🔴 Engineering CRITICAL: MODULE-BASED ARCHITECTURE (300 LINES MAX, 8 LINES PER FUNCTION)
-**MANDATORY**: Every file MUST be ≤300 lines. ALL functions MUST be ≤8 lines.
-- Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
-- Functions exceeding 8 lines MUST be split into smaller functions IMMEDIATELY.
+## 🔴 Engineering CRITICAL: MODULE-BASED ARCHITECTURE
+**MANDATORY**:
+- ALL functions MUST be ≤8 lines. Files exceeding 300 lines MUST be split into focused modules BEFORE implementation
+- ALL functions MUST be ≤8 lines. Functions exceeding 8 lines MUST be split into smaller functions.
 - Plan module boundaries BEFORE coding - don't code first then split
 - Each module = single responsibility, clear interface, testable unit
-- Each function = single task, 8 lines maximum (no exceptions)
+- Each function = single task
 - Composable - All concepts are designed for composable reuse throughout the system.
-- COMPLIANCE STATUS Run: `python scripts/check_architecture_compliance.py` to check current status
 - STABLE BY DEFAULT. MUST FLAG ANY BREAKING CHANGES. MAKE CODE CHANGES IN ATOMIC WAY.
+- Always review existing specs and upate specs whenever relevant.
 - Always update relevant docs and xmls after completing work.
+- Always reflect on the UNIFIED SYSTEM. Global coherence. End to end value. Real > Mock. E2E > Integration > Unit.
+- COMPLIANCE STATUS Run: `python scripts/check_architecture_compliance.py` to check current status
 
 ## Core Principles
 
@@ -45,6 +45,7 @@ Example:
 - **FIRST**: Ultra deep think BEFORE any implementation
 - **SECOND**: Think deeply about edge cases, performance, system impacts  
 - **THIRD**: Ultra thinking required for complex problems - this is your masterpiece. Think deeply while working on code and while testing.
+- Reporting - Be measured, accurate, and contextually precise in reporting.
 
 ### 2. Specs are Law
 - `SPEC/*.xml` = Source of truth.
@@ -53,104 +54,72 @@ Example:
 
 ### 3. ARCHITECTURE  
 
-MANAGE SCOPE
+LIMIT SCOPE
 - Changes must stay within the overall scope and bounds of the existing system architecture unless expressly requested.
 - Keep architecture limited in complexity.
 - Spend extra thinking energy to find elegant and "simple" solutions
 - Modular code ALWAYS.
+- LIMIT SCOPE OF NEW FEATURES TO MOST CRITICAL PARTS
 - Avoid creating duplicate files with suffixes like `_enhanced, _fixed, _backup` or similar. 
 Always edit the existing file or create a new file and delete the old if it's now legacy.
-
-300-LINE MODULE 
-**CRITICAL**: No file exceeds 300 lines - enforce through modular design:
-- Split by responsibility
-- Plan modules during design phase
 - Each module must have clear interface and single purpose
 - It's okay to have many modules.
+- Complete changes always. Search for similar patterns of issues, search for all references across project when updating names.
 
-## 🔴 MICROSERVICE INDEPENDENCE (MANDATORY)
+## 4 🔴 MICROSERVICE INDEPENDENCE
 **CRITICAL**: All microservices MUST be 100% independent.
 → See [`SPEC/independent_services.xml`](SPEC/independent_services.xml) for MANDATORY independence guidelines
 
-### Key Rules:
-1. **ALWAYS USE UNIQUE MODULE NAMES** (like 'auth_core' for auth service)
-2. **ALWAYS KEEP IMPORTS 100% INDEPENDENT** communicate via APIs only
-3. **COPY** entire service directory in Dockerfile
-4. **TEST** independence: `cd service_name && python main.py`
-
-## 🔴 AGENT NAMING CONVENTIONS (MANDATORY)
+## 5 🔴 NAMING CONVENTIONS
 **CRITICAL**: Use precise naming to prevent confusion and ensure clear component identification
 
 ### Component Naming Rules:
-**MANDATORY**: Follow these naming patterns to distinguish between component types
-
 1. **"Agent" suffix**: ONLY for LLM-based SubAgents extending BaseSubAgent
-   - ✅ TriageSubAgent, DataSubAgent, ReportingSubAgent
-   - ❌ Never use for utilities or services
-   - **Business Value**: Clear distinction ensures proper agent scaling and billing
-
 2. **"Executor/Manager" suffix**: For infrastructure patterns
-   - ✅ BroadcastExecutor, ExecutionManager, MCPManager
-   - Focus: Reliability, monitoring, infrastructure
-   - **Business Value**: Separates core business logic from infrastructure
-
 3. **"Service" suffix**: For specialized processors
-   - ✅ GitHubAnalyzerService, DemoService
-   - Focus: Task-specific operations
-   - **Business Value**: Modular services enable targeted feature monetization
-
 4. **Utility naming**: Descriptive names without "Agent"
-   - ✅ ToolDispatcher, StateManager, ErrorHandler
-   - ❌ Never append "Agent" to utilities
-   - **Business Value**: Clear separation prevents architectural confusion
 
-**ENFORCEMENT**: These naming conventions are MANDATORY for all new development and must be followed during refactoring.
-
-## AI Factory Productivity
+## 6 AI Factory Productivity
 → See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for detailed patterns and complex coding process
 
-
-## Project Overview
+## 7 Project Overview
 **Netra Apex AI Optimization Platform** - Enterprise AI workload optimization with multi-agent architecture.
-
 Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend,
 prioritizing the conversion of free users to paid tiers.
 
-## 🗺️ NAVIGATION: LLM Master Index
+## 8 🗺️ NAVIGATION: LLM Index
 **CRITICAL**: Before searching for files or functionality, consult [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md)
-- Resolves common file confusion (config.py vs config_setup_core.py, multiple auth.py files, etc.)
-- Quick reference for locating functionality
-- Organized by business domains and technical areas
-- Common pitfalls and solutions
+Update this index as needed.
 
-## Project Directory Structure
+## 9 Project Directory Structure
 → See [`SPEC/directory_structure.xml`](SPEC/directory_structure.xml) for complete project structure
 
-## Quick Start
+## 10 Quick Start
 ```bash
-python scripts/dev_launcher.py # Start dev
-python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT tests (fast feedback)
+python scripts/dev_launcher.py
+python test_runner.py
 ```
+Always reflect on the UNIFIED SYSTEM. Global coherence. End to end value. Real > Mock. E2E > Integration > Unit.
 
-## 🚀 DEPLOYMENT (GCP Staging)
+## 11 🚀 DEPLOYMENT (GCP Staging)
 → See [`SPEC/learnings/deployment_staging.xml`](SPEC/learnings/deployment_staging.xml) for detailed deployment guide
 
 **Quick Deploy**: `.\deploy-staging-reliable.ps1`  
 **Auth Issues**: `.\setup-staging-auth.ps1 -ForceNewKey`
 
-## 🧪 UNIFIED TEST RUNNER
+## 12 🧪 UNIFIED TEST RUNNER
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml) for complete test runner documentation
 
 **DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail`  
 **AGENT CHANGES**: `python test_runner.py --level agents --real-llm`  
 **BEFORE RELEASES**: `python test_runner.py --level integration --real-llm`
 
-## 🔴 MANDATORY SPECS (Read 3x Before Coding)
+## 🔴 MANDATORY SPECS (Read 3x Before Planning or Coding)
 Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend.
 
-### Critical Specs - ALWAYS CONSULT FIRST
+### Critical Specs
 | Spec | Purpose | When |
 |------|---------|------|
 | [`learnings/index.xml`](SPEC/learnings/index.xml) | **#0 PRIORITY** - Master index of all learnings | ALWAYS check first |
@@ -188,43 +157,32 @@ Ensures every feature directly creates and captures value proportional to a cust
 3. **FIX** all identified issues before proceeding
 - **ALWAYS** double check you are updating, creating, editing: SINGLE SOURCES OF TRUTH
 - **ALWAYS** extend existing functions with options/parameters
+Always reflect on the UNIFIED SYSTEM. Global coherence. End to end value. Real > Mock. E2E > Integration > Unit.
 
-### 300-LINE MODULES & 8-LINE FUNCTIONS (Repeat: This is MANDATORY)
+### 300-LINE MODULES & 8-LINE FUNCTIONS (Repeat: MANDATORY)
 - **PLAN** module boundaries BEFORE coding
 - **SPLIT** at 300 lines MAX
 - **SPLIT** functions at 8 lines MAX
 - **DESIGN** for modularity from the start
 
-### REAL CODE ALWAYS
+### REAL CODE & TESTS ALWAYS
 - **REAL** code only - placeholders-are-bad
 - **CHECK** [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) always
+- **Use real tests with minimal mocks**
 
 ## Key Patterns
-
-### Type Safety (REPEAT: TOP PRIORITY)
-- Pydantic models (backend)
-- TypeScript types (frontend)  
-- See [`type_safety.xml`](SPEC/type_safety.xml) FIRST
-
-### Async/Repository Pattern
+- Type Safety [`type_safety.xml`](SPEC/type_safety.xml)
 - async/await for ALL I/O
-- Database via repositories only
-- NetraException for errors
-
 
 ### Complex Coding & Debugging
 → See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for MULTI STEP PLAN process and debugging patterns
 
-## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
+## 🚧 SYSTEM BOUNDARIES
 
 ### Growth Control Patterns
-- **SUBDIVISION**: Split files approaching 250 lines BEFORE they hit 300
-- **EXTRACTION**: Extract functions approaching 6 lines BEFORE they hit 8
-- **Healthy GROWTH ONLY**: Subdivide concepts. Use existing modules.
+- CRITICAL **Healthy GROWTH ONLY**: Limit scope to business need. Subdivide concepts. Use existing modules.
 - **COMPOSITION**: Use small focused components, not monoliths
 - **KEEP SCOPE REASONABLE**: ONLY BUILD WHAT IS REQUIRED FOR BUSINESS GOALS.
-
-### Critical References
 - [`SPEC/system_boundaries.xml`](SPEC/system_boundaries.xml) - Hard limits & enforcement
 - [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
@@ -232,11 +190,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 ## Testing
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml)
 
-- **DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail`
-- **AGENT CHANGES**: `python test_runner.py --level agents --real-llm` (MANDATORY)
-- **BEFORE RELEASES**: `python test_runner.py --level integration --real-llm`
-
-## 📝 MODULE PLANNING (3rd Reminder: 300 Lines MAX)
+## 📝 MODULE PLANNING
 
 ### BEFORE Writing Any Code:
 1. **ULTRA THINK** - Deep analysis first
@@ -244,26 +198,13 @@ Ensures every feature directly creates and captures value proportional to a cust
 3. **CHECK TYPES** - Read [`type_safety.xml`](SPEC/type_safety.xml)
 4. **NO DUPLICATES** - Search for existing implementations
 
-### Module Design Checklist:
-- [ ] Each file ≤300 lines
-- [ ] Each function ≤8 lines (MANDATORY)
-- [ ] Strong types - all new params must have strong types.
-- [ ] Single responsibility per module
-- [ ] Clear interfaces between modules
-- [ ] Single source of truth - update existing items.
-- [ ] Test coverage maintained
-- [ ] Tests pass
-
-
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend.
+Always reflect on the UNIFIED SYSTEM. Global coherence. End to end value.
 
-1. **300-LINE MODULES** - Plan before coding, split at boundaries
-2. **8-LINE FUNCTIONS** - Every function ≤8 lines (MANDATORY)
-3. **TYPE SAFETY FIRST** - Read [`type_safety.xml`](SPEC/type_safety.xml) 
-4. **EXTEND and UPDATE SINGLE SOURCES OF TRUTH.**
-5. **UNIT TESTS** - Run before and after all changes.
-6. **ULTRA DEEP THINK** - This is your masterpiece
+**EXTEND and UPDATE SINGLE SOURCES OF TRUTH.**
+**TESTS** - Run after any changes.
+**ULTRA DEEP THINK** - This is your masterpiece
 
 **Specs = Law. 300 lines = Maximum. 8 lines per function = Maximum. Modular elite quality code. Ultra think = Always.**
