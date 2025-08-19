@@ -59,7 +59,7 @@ class FrontendLogger {
   private maxBufferSize = 1000;
 
   constructor() {
-    this.isDevelopment = process.env.NODE_ENV === 'development';
+    this.isDevelopment = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
     this.isProduction = process.env.NODE_ENV === 'production';
     
     // Set log level based on environment
@@ -155,10 +155,10 @@ class FrontendLogger {
     // Remove sensitive patterns from messages
     const sensitivePatterns = [
       /password[\s:=]+[^\s]+/gi,
-      /token[\s:=]+[^\s]+/gi,
+      /token[\s:=]+(?:Bearer\s+)?[^\s]+/gi,
       /key[\s:=]+[^\s]+/gi,
       /secret[\s:=]+[^\s]+/gi,
-      /bearer[\s:=]+[^\s]+/gi,
+      /bearer\s+[^\s]+/gi,
       /authorization[\s:=]+[^\s]+/gi
     ];
 
@@ -297,6 +297,19 @@ class FrontendLogger {
   // Check if logging is enabled for a level
   isEnabled(level: LogLevel): boolean {
     return this.shouldLog(level);
+  }
+
+  // Console group methods for development debugging
+  group(label: string): void {
+    if ((this.isDevelopment || process.env.NODE_ENV === 'test') && this.shouldLog(LogLevel.DEBUG)) {
+      console.group(label);
+    }
+  }
+
+  groupEnd(): void {
+    if ((this.isDevelopment || process.env.NODE_ENV === 'test') && this.shouldLog(LogLevel.DEBUG)) {
+      console.groupEnd();
+    }
   }
 }
 

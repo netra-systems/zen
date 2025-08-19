@@ -1,6 +1,7 @@
 /**
  * Real WebSocket Test Utilities - Simulates actual WebSocket behavior
  * Replaces excessive jest.fn() mocking with realistic WebSocket simulation
+ * FIXED: Act() wrapping for React synchronization and timing issue resolution
  */
 
 export interface WebSocketLike {
@@ -34,8 +35,8 @@ export class TestWebSocket implements WebSocketLike {
   
   constructor(url: string, protocols?: string | string[]) {
     this.url = url;
-    // Simulate async connection
-    setTimeout(() => this.simulateOpen(), this.connectionDelay);
+    // Simulate async connection with proper React synchronization
+    this.scheduleOpenEvent();
   }
   
   send(data: string | ArrayBuffer | Blob): void {
@@ -53,10 +54,7 @@ export class TestWebSocket implements WebSocketLike {
     this.isClosing = true;
     this.readyState = 2; // CLOSING
     
-    setTimeout(() => {
-      this.readyState = 3; // CLOSED
-      this.triggerClose(code, reason);
-    }, 5);
+    this.scheduleCloseEvent(code, reason);
   }
   
   addEventListener(type: string, listener: EventListener): void {
@@ -101,7 +99,7 @@ export class TestWebSocket implements WebSocketLike {
   
   simulateReconnect(): void {
     this.readyState = 0; // CONNECTING
-    setTimeout(() => this.simulateOpen(), this.connectionDelay);
+    this.scheduleOpenEvent();
   }
   
   private simulateOpen(): void {
@@ -130,6 +128,22 @@ export class TestWebSocket implements WebSocketLike {
     if (listeners) {
       listeners.forEach(listener => listener(event));
     }
+  }
+  
+  private scheduleOpenEvent(): void {
+    // Use proper timing for React synchronization
+    setTimeout(() => {
+      if (!this.isClosing) {
+        this.simulateOpen();
+      }
+    }, this.connectionDelay);
+  }
+  
+  private scheduleCloseEvent(code: number, reason: string): void {
+    setTimeout(() => {
+      this.readyState = 3; // CLOSED
+      this.triggerClose(code, reason);
+    }, 5);
   }
   
   // Test utilities

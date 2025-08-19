@@ -76,7 +76,8 @@ class AuthService:
                 event_type="login",
                 user_id=user["id"],
                 success=True,
-                metadata={"provider": request.provider}
+                metadata={"provider": request.provider},
+                client_info=client_info
             )
             
             return LoginResponse(
@@ -149,13 +150,27 @@ class AuthService:
     
     async def create_oauth_user(self, user_info: Dict) -> Dict:
         """Create or update user from OAuth info"""
-        # In production, this would persist to database
+        if not self.db_session:
+            # Fallback for when no database is available
+            return {
+                "id": user_info.get("id", user_info.get("sub")),
+                "email": user_info["email"],
+                "name": user_info.get("name", ""),
+                "provider": user_info.get("provider", "google"),
+                "permissions": ["read", "write"]
+            }
+        
+        # Use database repository to persist user
+        user_repo = AuthUserRepository(self.db_session)
+        auth_user = await user_repo.create_oauth_user(user_info)
+        
         return {
-            "id": user_info["id"],
-            "email": user_info["email"],
-            "name": user_info.get("name", ""),
-            "provider": "google",
-            "permissions": ["read", "write"]
+            "id": auth_user.id,
+            "email": auth_user.email,
+            "name": auth_user.full_name,
+            "provider": auth_user.auth_provider,
+            "permissions": ["read", "write"],
+            "is_verified": auth_user.is_verified
         }
     
     async def create_service_token(self, 
@@ -207,20 +222,47 @@ class AuthService:
     async def _validate_local_auth(self, email: str, 
                                   password: str) -> Optional[Dict]:
         """Validate local username/password"""
-        # In real implementation, fetch from database
-        # This is a placeholder
-        hashed = hashlib.sha256(password.encode()).hexdigest()
+        if not self.db_session:
+            # Fallback for testing
+            hashed = hashlib.sha256(password.encode()).hexdigest()
+            if email == "test@example.com":
+                return {
+                    "id": "user-123",
+                    "email": email,
+                    "name": "Test User",
+                    "permissions": ["read", "write"]
+                }
+            return None
         
-        # Mock user data
-        if email == "test@example.com":
-            return {
-                "id": "user-123",
-                "email": email,
-                "name": "Test User",
-                "permissions": ["read", "write"]
-            }
+        # Use database repository
+        user_repo = AuthUserRepository(self.db_session)
         
-        return None
+        # Check if account is locked
+        if await user_repo.check_account_locked(email):
+            return None
+        
+        # Get user from database
+        user = await user_repo.get_by_email(email)
+        if not user or not user.hashed_password:
+            await user_repo.increment_failed_attempts(email)
+            return None
+        
+        # Verify password (would use proper hashing in production)
+        # For now, simple comparison
+        if user.hashed_password != hashlib.sha256(password.encode()).hexdigest():
+            await user_repo.increment_failed_attempts(email)
+            return None
+        
+        # Reset failed attempts on successful login
+        await user_repo.reset_failed_attempts(user.id)
+        await user_repo.update_login_time(user.id)
+        
+        return {
+            "id": user.id,
+            "email": user.email,
+            "name": user.full_name,
+            "permissions": ["read", "write"]
+        }
     
     async def _validate_oauth(self, provider: str, 
                              token: str) -> Optional[Dict]:
@@ -279,15 +321,32 @@ class AuthService:
     
     async def _check_account_status(self, user_id: str) -> bool:
         """Check if account is active and not locked"""
-        # In real implementation, check database
-        # This is a placeholder
-        return True
+        if not self.db_session:
+            return True  # Fallback
+        
+        user_repo = AuthUserRepository(self.db_session)
+        user = await user_repo.get_by_id(user_id)
+        
+        if not user:
+            return False
+        
+        return user.is_active and not user.locked_until
     
     async def _audit_log(self, event_type: str, 
                         user_id: Optional[str] = None,
                         success: bool = True, 
-                        metadata: Dict = None):
+                        metadata: Dict = None,
+                        client_info: Optional[Dict] = None):
         """Log authentication events for audit"""
-        # In real implementation, store in database
-        logger.info(f"Audit: {event_type} for user {user_id} - Success: {success}")
-        pass
+        if self.db_session:
+            audit_repo = AuthAuditRepository(self.db_session)
+            await audit_repo.log_event(
+                event_type=event_type,
+                user_id=user_id,
+                success=success,
+                metadata=metadata,
+                client_info=client_info
+            )
+        else:
+            # Fallback to logger when no database
+            logger.info(f"Audit: {event_type} for user {user_id} - Success: {success}")

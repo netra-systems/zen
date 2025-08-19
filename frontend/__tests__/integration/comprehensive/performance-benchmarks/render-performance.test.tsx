@@ -115,7 +115,9 @@ describe('Render Performance Tests', () => {
 // Test helper functions (≤8 lines each)
 const verifyComponentMemoization = async (getByTestId: any, initialRenderCount: string | null): Promise<void> => {
   // Component should not re-render unnecessarily
-  expect(getByTestId('render-count')).toHaveTextContent(initialRenderCount || '');
+  await act(async () => {
+    expect(getByTestId('render-count')).toHaveTextContent(initialRenderCount || '');
+  });
   
   // Verify memoization is working
   const renderCountNumber = parseInt(initialRenderCount?.split(': ')[1] || '0');
@@ -125,10 +127,12 @@ const verifyComponentMemoization = async (getByTestId: any, initialRenderCount: 
 const testStateBatching = async (getByText: any, getByTestId: any): Promise<void> => {
   const triggerButton = getByText('Trigger Rerender');
   
-  // Trigger multiple updates in quick succession
-  triggerButton.click();
-  triggerButton.click();
-  triggerButton.click();
+  // Trigger multiple updates in quick succession with act wrapping
+  await act(async () => {
+    triggerButton.click();
+    triggerButton.click();
+    triggerButton.click();
+  });
   
   // Updates should be batched, not individual
   const counter = parseInt(getByTestId('counter').textContent || '0');
@@ -139,10 +143,12 @@ const testLargeDatasetHandling = async (getByTestId: any): Promise<void> => {
   const scrollContainer = getByTestId('scroll-performance').closest('div');
   const scrollDownButton = scrollContainer?.querySelector('button:first-child');
   
-  // Simulate scrolling through large dataset
-  for (let i = 0; i < 5; i++) {
-    if (scrollDownButton) scrollDownButton.click();
-  }
+  // Simulate scrolling through large dataset with act wrapping
+  await act(async () => {
+    for (let i = 0; i < 5; i++) {
+      if (scrollDownButton) scrollDownButton.click();
+    }
+  });
   
   expect(getByTestId('visible-items')).toHaveTextContent('120 visible');
 };

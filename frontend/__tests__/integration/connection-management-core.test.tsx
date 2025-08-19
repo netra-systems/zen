@@ -128,24 +128,50 @@ class ConnectionQualityMonitor {
   }
 }
 
-// Heartbeat manager
+// Heartbeat manager with React synchronization
 class HeartbeatManager {
   private interval: number;
   private timer: NodeJS.Timeout | null = null;
   private enabled: boolean = false;
+  private isReactSyncEnabled: boolean = true;
 
-  constructor(interval: number = 30000) { this.interval = interval; }
+  constructor(interval: number = 30000, enableReactSync: boolean = true) { 
+    this.interval = interval;
+    this.isReactSyncEnabled = enableReactSync;
+  }
+  
   isEnabled(): boolean { return this.enabled; }
 
   start(onHeartbeat: () => void): void {
     this.enabled = true;
-    this.timer = setInterval(onHeartbeat, this.interval);
+    
+    if (this.isReactSyncEnabled) {
+      this.startWithReactSync(onHeartbeat);
+    } else {
+      this.timer = setInterval(onHeartbeat, this.interval);
+    }
+  }
+  
+  private startWithReactSync(onHeartbeat: () => void): void {
+    const heartbeatLoop = () => {
+      if (!this.enabled) return;
+      
+      // Use queueMicrotask for React synchronization
+      queueMicrotask(() => {
+        if (this.enabled) {
+          onHeartbeat();
+          this.timer = setTimeout(heartbeatLoop, this.interval);
+        }
+      });
+    };
+    
+    this.timer = setTimeout(heartbeatLoop, this.interval);
   }
 
   stop(): void {
     this.enabled = false;
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
     }
   }
@@ -270,11 +296,19 @@ describe('Connection Management Core Tests', () => {
       expect(screen.getByTestId('heartbeat-enabled')).toHaveTextContent('true');
     });
 
-    it('should manage heartbeat lifecycle', () => {
+    it('should manage heartbeat lifecycle with React sync', async () => {
       let count = 0;
-      heartbeatManager.start(() => count++);
+      
+      await act(async () => {
+        heartbeatManager.start(() => count++);
+      });
+      
       expect(heartbeatManager.isEnabled()).toBe(true);
-      heartbeatManager.stop();
+      
+      await act(async () => {
+        heartbeatManager.stop();
+      });
+      
       expect(heartbeatManager.isEnabled()).toBe(false);
     });
   });

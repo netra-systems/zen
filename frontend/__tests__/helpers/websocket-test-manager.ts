@@ -2,6 +2,7 @@
  * WebSocket Test Manager - Real WebSocket behavior simulation
  * Replaces jest-websocket-mock with realistic WebSocket testing
  * Provides comprehensive WebSocket lifecycle and state management
+ * FIXED: React synchronization and timing issues resolved
  */
 
 import WS from 'jest-websocket-mock';
@@ -74,30 +75,38 @@ export class WebSocketTestManager {
   }
 
   /**
-   * Sets up real WebSocket simulation with state tracking
+   * Sets up real WebSocket simulation with state tracking and React synchronization
    */
   private setupRealSimulation(): void {
     if (!this.testWebSocket) return;
 
     this.testWebSocket.addEventListener('open', () => {
-      this.stateManager.setState('connected');
-      this.logEvent('open');
+      this.synchronizeStateChange(() => {
+        this.stateManager.setState('connected');
+        this.logEvent('open');
+      });
     });
 
     this.testWebSocket.addEventListener('close', () => {
-      this.stateManager.setState('disconnected');
-      this.logEvent('close');
+      this.synchronizeStateChange(() => {
+        this.stateManager.setState('disconnected');
+        this.logEvent('close');
+      });
     });
 
     this.testWebSocket.addEventListener('error', () => {
-      this.stateManager.setState('error');
-      this.logEvent('error');
+      this.synchronizeStateChange(() => {
+        this.stateManager.setState('error');
+        this.logEvent('error');
+      });
     });
 
     this.testWebSocket.addEventListener('message', (event: Event) => {
-      const messageEvent = event as MessageEvent;
-      this.messageBuffer.add(messageEvent.data);
-      this.logEvent('message');
+      this.synchronizeStateChange(() => {
+        const messageEvent = event as MessageEvent;
+        this.messageBuffer.add(messageEvent.data);
+        this.logEvent('message');
+      });
     });
   }
 
@@ -147,7 +156,7 @@ export class WebSocketTestManager {
   }
 
   /**
-   * Waits for WebSocket connection with real timing
+   * Waits for WebSocket connection with React-synchronized timing
    */
   async waitForConnection(timeoutMs: number = 1000): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -159,7 +168,8 @@ export class WebSocketTestManager {
         } else if (Date.now() - startTime > timeoutMs) {
           reject(new Error('Connection timeout'));
         } else {
-          setTimeout(checkConnection, 10);
+          // Use queueMicrotask for better React synchronization
+          queueMicrotask(checkConnection);
         }
       };
       
@@ -216,12 +226,14 @@ export class WebSocketTestManager {
   }
 
   /**
-   * Simulates reconnection
+   * Simulates reconnection with proper state synchronization
    */
   simulateReconnect(): void {
     if (this.testWebSocket) {
-      this.stateManager.setState('reconnecting');
-      this.testWebSocket.simulateReconnect();
+      this.synchronizeStateChange(() => {
+        this.stateManager.setState('reconnecting');
+        this.testWebSocket?.simulateReconnect();
+      });
     }
   }
 
@@ -282,6 +294,19 @@ export class WebSocketTestManager {
   setRealSimulationMode(enabled: boolean): void {
     this.isUsingRealSimulation = enabled;
   }
+  
+  /**
+   * Synchronizes state changes with React updates to prevent race conditions
+   */
+  private synchronizeStateChange(stateChangeFn: () => void): void {
+    if (this.isUsingRealSimulation) {
+      // Use queueMicrotask for better React synchronization
+      queueMicrotask(stateChangeFn);
+    } else {
+      // For mock mode, execute immediately
+      stateChangeFn();
+    }
+  }
 
   /**
    * Tests WebSocket performance
@@ -293,15 +318,15 @@ export class WebSocketTestManager {
   }
 
   /**
-   * Tests message round-trip time
+   * Tests message round-trip time with React synchronization
    */
   async measureMessageRoundTrip(message: any): Promise<number> {
     const start = performance.now();
     this.sendMessage(message);
-    // Simulate echo response
-    setTimeout(() => {
+    // Simulate echo response with proper timing
+    queueMicrotask(() => {
       this.simulateIncomingMessage(message);
-    }, 1);
+    });
     
     return new Promise((resolve) => {
       const checkMessage = () => {
@@ -309,7 +334,7 @@ export class WebSocketTestManager {
         if (received.length > 0) {
           resolve(performance.now() - start);
         } else {
-          setTimeout(checkMessage, 1);
+          queueMicrotask(checkMessage);
         }
       };
       checkMessage();

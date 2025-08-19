@@ -48,54 +48,30 @@ export interface TestRenderOptions extends Omit<RenderOptions, 'wrapper'> {
   wsValue?: Partial<any>;
 }
 
-// Component Rendering Utilities
-export const renderWithProviders = (
-  ui: ReactElement,
-  options: TestRenderOptions = {}
-): RenderResult => {
+// Legacy rendering utilities (use new real-* utilities instead)
+export const renderWithProviders = (ui: ReactElement, options: TestRenderOptions = {}): RenderResult => {
   const { TestProviders } = require('./providers');
-  const { withAuth = true, withWebSocket = true, ...renderOptions } = options;
-  
-  return render(ui, { wrapper: TestProviders, ...renderOptions });
+  return render(ui, { wrapper: TestProviders, ...options });
 };
 
-export const renderWithAuth = (
-  ui: ReactElement,
-  authValue?: Partial<any>
-): RenderResult => {
+export const renderWithAuth = (ui: ReactElement, authValue?: Partial<any>): RenderResult => {
   const { AuthTestProvider } = require('./providers');
-  
-  return render(ui, { 
-    wrapper: ({ children }) => <AuthTestProvider value={authValue}>{children}</AuthTestProvider>
-  });
+  return render(ui, { wrapper: ({ children }) => <AuthTestProvider value={authValue}>{children}</AuthTestProvider> });
 };
 
-export const renderWithWebSocket = (
-  ui: ReactElement,
-  wsValue?: Partial<any>
-): RenderResult => {
+export const renderWithWebSocket = (ui: ReactElement, wsValue?: Partial<any>): RenderResult => {
   const { WebSocketTestProvider } = require('./providers');
-  
-  return render(ui, {
-    wrapper: ({ children }) => <WebSocketTestProvider value={wsValue}>{children}</WebSocketTestProvider>
-  });
+  return render(ui, { wrapper: ({ children }) => <WebSocketTestProvider value={wsValue}>{children}</WebSocketTestProvider> });
 };
 
-export const renderIsolated = (
-  ui: ReactElement,
-  options?: RenderOptions
-): RenderResult => {
+export const renderIsolated = (ui: ReactElement, options?: RenderOptions): RenderResult => {
   return render(ui, options);
 };
 
-// User Interaction Helpers
-export const fillForm = async (
-  fields: Record<string, string>,
-  options?: { delay?: number }
-): Promise<void> => {
+// User Interaction Helpers (Legacy - use real-* utilities instead)
+export const fillForm = async (fields: Record<string, string>, options?: { delay?: number }): Promise<void> => {
   const user = userEvent.setup();
   const delay = options?.delay || 10;
-  
   for (const [fieldName, value] of Object.entries(fields)) {
     const field = screen.getByLabelText(new RegExp(fieldName, 'i'));
     await user.clear(field);
@@ -103,19 +79,11 @@ export const fillForm = async (
   }
 };
 
-export const clickAndWait = async (
-  elementOrSelector: HTMLElement | string,
-  waitForSelector?: string
-): Promise<void> => {
+export const clickAndWait = async (elementOrSelector: HTMLElement | string, waitForSelector?: string): Promise<void> => {
   const user = userEvent.setup();
-  const element = typeof elementOrSelector === 'string' 
-    ? screen.getByRole('button', { name: new RegExp(elementOrSelector, 'i') })
-    : elementOrSelector;
-    
+  const element = typeof elementOrSelector === 'string' ? screen.getByRole('button', { name: new RegExp(elementOrSelector, 'i') }) : elementOrSelector;
   await user.click(element);
-  if (waitForSelector) {
-    await waitFor(() => screen.getByText(new RegExp(waitForSelector, 'i')));
-  }
+  if (waitForSelector) await waitFor(() => screen.getByText(new RegExp(waitForSelector, 'i')));
 };
 
 // Async Operation Utilities
@@ -298,5 +266,13 @@ export { jest };
 
 // Export new comprehensive test utilities
 export * from './real-websocket-utils';
+export * from './real-websocket-assertions';
 export * from './real-state-utils';
+export * from './real-state-assertions';
 export * from './render-with-providers';
+export * from './real-provider-testing';
+
+// Export timing and synchronization utilities
+export * from './react-act-utils';
+export * from './mock-service-alignment';
+export * from './state-timing-utils';

@@ -8,6 +8,7 @@ from typing import Optional
 import logging
 import os
 
+from ..config import AuthConfig
 from ..services.auth_service import AuthService
 from ..models.auth_models import (
     LoginRequest, LoginResponse,
@@ -22,9 +23,6 @@ import secrets
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-# Initialize service
-auth_service = AuthService()
-
 def get_client_info(request: Request) -> dict:
     """Extract client information from request"""
     return {
@@ -34,19 +32,11 @@ def get_client_info(request: Request) -> dict:
 
 def _detect_environment() -> str:
     """Detect the current environment"""
-    env = os.getenv("ENVIRONMENT", "development").lower()
-    if env in ["staging", "production", "development"]:
-        return env
-    return "development"
+    return AuthConfig.get_environment()
 
 def _determine_urls() -> tuple[str, str]:
     """Determine auth service and frontend URLs based on environment"""
-    env = _detect_environment()
-    if env == 'staging':
-        return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
-    elif env == 'production':
-        return 'https://auth.netrasystems.ai', 'https://netrasystems.ai'
-    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081'), 'http://localhost:3000'
+    return AuthConfig.get_auth_service_url(), AuthConfig.get_frontend_url()
 
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):
@@ -71,7 +61,7 @@ async def get_auth_config(request: Request):
         
         # Build response
         return AuthConfigResponse(
-            google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+            google_client_id=AuthConfig.get_google_client_id(),
             endpoints=endpoints,
             development_mode=dev_mode,
             authorized_javascript_origins=[frontend_url],
@@ -93,8 +83,9 @@ async def initiate_oauth_login(
     from fastapi.responses import RedirectResponse
     try:
         # Get OAuth configuration
-        google_client_id = os.getenv('GOOGLE_CLIENT_ID')
+        google_client_id = AuthConfig.get_google_client_id()
         if not google_client_id:
+            logger.error("OAuth not configured - GOOGLE_CLIENT_ID is not set")
             raise HTTPException(status_code=500, detail="OAuth not configured")
         
         # Build OAuth URL
@@ -324,8 +315,8 @@ async def oauth_callback(
     from fastapi.responses import RedirectResponse
     try:
         # Exchange code for tokens
-        google_client_id = os.getenv('GOOGLE_CLIENT_ID')
-        google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+        google_client_id = AuthConfig.get_google_client_id()
+        google_client_secret = AuthConfig.get_google_client_secret()
         redirect_uri = _determine_urls()[1] + "/auth/callback"
         
         async with httpx.AsyncClient() as client:

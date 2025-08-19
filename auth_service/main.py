@@ -53,8 +53,8 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
-    logger.info(f"Service: auth-service")
+    from auth_core.config import AuthConfig
+    AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8081')}")
     
     yield

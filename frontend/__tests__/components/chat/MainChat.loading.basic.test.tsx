@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import MainChat from '@/components/chat/MainChat';
 import { useUnifiedChatStore } from '@/store/unified-chat';
@@ -48,6 +48,34 @@ jest.mock('@/utils/debug-logger', () => ({
   }
 }));
 
+// Mock additional required hooks
+jest.mock('@/hooks/useMCPTools', () => ({
+  useMCPTools: jest.fn(() => ({
+    tools: [],
+    servers: [],
+    executions: [],
+    isLoading: false,
+    error: null,
+    refreshTools: jest.fn()
+  }))
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(() => ({
+    isAuthenticated: true,
+    user: { id: 'test', name: 'Test User' },
+    token: 'test-token'
+  }))
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: jest.fn(() => ({
+    currentThreadId: 'test-thread',
+    threads: [],
+    isLoading: false
+  }))
+}));
+
 describe('MainChat Basic Loading States', () => {
   const mockUseUnifiedChatStore = useUnifiedChatStore as jest.MockedFunction<typeof useUnifiedChatStore>;
   const mockUseWebSocket = useWebSocket as jest.MockedFunction<typeof useWebSocket>;
@@ -85,15 +113,18 @@ describe('MainChat Basic Loading States', () => {
    * Test Case 2: Should show example prompts for new thread (no messages)
    * This is the state that should appear after the fix when thread is ready
    */
-  it('should show example prompts when thread is ready with no messages', () => {
+  it('should show example prompts when thread is ready with no messages', async () => {
     mockUseLoadingState.mockReturnValue(createThreadReadyState());
     mockUseUnifiedChatStore.mockReturnValue(createMockChatStore({
       activeThreadId: 'thread_123'
     }));
 
-    render(<MainChat />);
+    await act(async () => {
+      render(<MainChat />);
+    });
 
-    expect(screen.getByRole('banner')).toBeInTheDocument();
+    // Check for the ExamplePrompts component heading instead of generic banner
+    expect(screen.getByText('Quick Start Examples')).toBeInTheDocument();
     expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
@@ -102,14 +133,17 @@ describe('MainChat Basic Loading States', () => {
   /**
    * Test Case 3: Should show empty state when no thread selected
    */
-  it('should show empty state when connected but no thread selected', () => {
+  it('should show empty state when connected but no thread selected', async () => {
     mockUseLoadingState.mockReturnValue(createEmptyState());
 
-    render(<MainChat />);
+    await act(async () => {
+      render(<MainChat />);
+    });
 
     expect(screen.getByText('Welcome to Netra AI')).toBeInTheDocument();
     expect(screen.getByText(/Create a new conversation/)).toBeInTheDocument();
-    expect(screen.getByRole('banner')).toBeInTheDocument();
+    // Check for the main chat header instead of generic banner
+    expect(screen.getByText('Netra AI Agent')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
     expect(screen.queryByText(/explore these examples/i)).not.toBeInTheDocument();
@@ -118,7 +152,7 @@ describe('MainChat Basic Loading States', () => {
   /**
    * Test Case 4: Should show message list when thread has messages
    */
-  it('should show message list when thread has messages', () => {
+  it('should show message list when thread has messages', async () => {
     mockUseUnifiedChatStore.mockReturnValue(createMockChatStore({
       messages: [
         { id: '1', content: 'Hello', role: 'user' },
@@ -129,7 +163,9 @@ describe('MainChat Basic Loading States', () => {
 
     mockUseLoadingState.mockReturnValue(createThreadReadyState());
 
-    render(<MainChat />);
+    await act(async () => {
+      render(<MainChat />);
+    });
 
     expect(screen.getByRole('list')).toBeInTheDocument();
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
@@ -140,18 +176,21 @@ describe('MainChat Basic Loading States', () => {
    * Test Case 5: Should handle hot-reload scenario correctly
    * This specifically tests the scenario that caused the original bug
    */
-  it('should handle hot-reload with pre-connected WebSocket correctly', () => {
+  it('should handle hot-reload with pre-connected WebSocket correctly', async () => {
     mockUseUnifiedChatStore.mockReturnValue(createMockChatStore({
       activeThreadId: 'thread_hot_reload'
     }));
 
     mockUseLoadingState.mockReturnValue(createThreadReadyState());
 
-    render(<MainChat />);
+    await act(async () => {
+      render(<MainChat />);
+    });
 
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
     expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
-    expect(screen.getByRole('banner')).toBeInTheDocument();
+    // Check for the chat header text instead of generic banner
+    expect(screen.getByText('Netra AI Agent')).toBeInTheDocument();
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 });

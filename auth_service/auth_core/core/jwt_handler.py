@@ -8,13 +8,15 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any
 import logging
 
+from ..config import AuthConfig
+
 logger = logging.getLogger(__name__)
 
 class JWTHandler:
     """Single Source of Truth for JWT operations"""
     
     def __init__(self):
-        self.secret = os.getenv("JWT_SECRET", "dev-secret-key")
+        self.secret = AuthConfig.get_jwt_secret() or "dev-secret-key"
         self.algorithm = os.getenv("JWT_ALGORITHM", "HS256")
         self.access_expiry = int(os.getenv("JWT_ACCESS_EXPIRY_MINUTES", "15"))
         self.refresh_expiry = int(os.getenv("JWT_REFRESH_EXPIRY_DAYS", "7"))

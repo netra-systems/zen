@@ -278,36 +278,6 @@ export const filterRealMessagesByType = (
   return messages.filter(msg => msg.type === messageType);
 };
 
-// Real Performance Testing Utilities
-export const measureRealLatency = async (
-  testManager: RealWebSocketTestManager,
-  message: WebSocketMessage
-): Promise<number> => {
-  const startTime = performance.now();
-  
-  return new Promise((resolve) => {
-    testManager.onMessage(() => {
-      const endTime = performance.now();
-      resolve(endTime - startTime);
-    });
-    
-    testManager.sendMessage(message);
-  });
-};
-
-export const measureRealThroughput = async (
-  testManager: RealWebSocketTestManager,
-  messageCount: number
-): Promise<number> => {
-  const messages = Array(messageCount).fill(null).map(() => createRealTestMessage());
-  const startTime = performance.now();
-  
-  await testRealMessageFlow(testManager, messages);
-  
-  const endTime = performance.now();
-  return messageCount / ((endTime - startTime) / 1000);
-};
-
 // Helper Functions (≤8 lines each)
 const createOptimisticSender = (testManager: RealWebSocketTestManager) => {
   return (content: string, type: 'user' | 'assistant' = 'user'): OptimisticMessage => {
@@ -325,29 +295,6 @@ const createMockReconciliationStats = (): ReconciliationStats => {
     pendingMessages: 0,
     reconciliationTime: 0
   };
-};
-
-// Real Test Assertion Helpers
-export const expectRealWebSocketConnection = (testManager: RealWebSocketTestManager): void => {
-  expect(testManager.getConnectionState()).toBe(WebSocket.OPEN);
-};
-
-export const expectRealMessageReceived = (
-  messages: WebSocketMessage[],
-  messageType: string
-): void => {
-  expect(messages.some(msg => msg.type === messageType)).toBe(true);
-};
-
-export const expectRealMessageCount = (messages: WebSocketMessage[], count: number): void => {
-  expect(messages).toHaveLength(count);
-};
-
-export const expectRealMessageContent = (
-  message: WebSocketMessage,
-  expectedContent: string
-): void => {
-  expect(message.payload?.content).toBe(expectedContent);
 };
 
 // Export the test manager for direct use

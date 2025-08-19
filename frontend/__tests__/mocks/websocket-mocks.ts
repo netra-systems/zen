@@ -7,12 +7,14 @@
  * - Connection state management
  * - Reconnection scenarios
  * 
+ * FIXED: Aligned with real WebSocket behavior and React synchronization
+ * 
  * ARCHITECTURAL COMPLIANCE:
  * - Maximum file size: 300 lines
  * - Functions ≤8 lines each
  * - Full TypeScript type safety
  * - Support for error scenarios
- * - Delay simulation for timing tests
+ * - React-synchronized timing
  */
 
 import { EventEmitter } from 'events';
@@ -93,12 +95,23 @@ export class EnhancedMockWebSocket extends EventEmitter {
   // ============================================================================
 
   private simulateConnection(delay: number = 50) {
-    this.connectionTimer = setTimeout(() => {
-      this.readyState = EnhancedMockWebSocket.OPEN;
-      this.isConnected = true;
-      this.emitOpenEvent();
-      this.processQueuedMessages();
-    }, delay);
+    if (delay === 0) {
+      queueMicrotask(() => {
+        this.readyState = EnhancedMockWebSocket.OPEN;
+        this.isConnected = true;
+        this.emitOpenEvent();
+        this.processQueuedMessages();
+      });
+    } else {
+      this.connectionTimer = setTimeout(() => {
+        queueMicrotask(() => {
+          this.readyState = EnhancedMockWebSocket.OPEN;
+          this.isConnected = true;
+          this.emitOpenEvent();
+          this.processQueuedMessages();
+        });
+      }, delay);
+    }
   }
 
   private emitOpenEvent() {
@@ -123,10 +136,10 @@ export class EnhancedMockWebSocket extends EventEmitter {
       throw new Error('WebSocket is not open');
     }
     
-    // Echo back for testing (simulate server response)
-    setTimeout(() => {
+    // Echo back for testing with React synchronization
+    queueMicrotask(() => {
       this.simulateEchoResponse(data);
-    }, 20);
+    });
   }
 
   private simulateEchoResponse(data: string | ArrayBuffer | Blob) {
@@ -163,10 +176,10 @@ export class EnhancedMockWebSocket extends EventEmitter {
     this.readyState = EnhancedMockWebSocket.CLOSING;
     this.isConnected = false;
     
-    setTimeout(() => {
+    queueMicrotask(() => {
       this.readyState = EnhancedMockWebSocket.CLOSED;
       this.emitCloseEvent(code, reason);
-    }, 30);
+    });
   }
 
   private cleanupTimers() {
@@ -204,9 +217,13 @@ export class EnhancedMockWebSocket extends EventEmitter {
   simulateStreamingMessage(content: string, chunkSize: number = 50) {
     const chunks = this.createMessageChunks(content, chunkSize);
     chunks.forEach((chunk, index) => {
-      setTimeout(() => {
-        this.simulateMessage(chunk, 'message');
-      }, index * 100);
+      if (index === 0) {
+        queueMicrotask(() => this.simulateMessage(chunk, 'message'));
+      } else {
+        setTimeout(() => {
+          queueMicrotask(() => this.simulateMessage(chunk, 'message'));
+        }, index * 100);
+      }
     });
   }
 
@@ -241,10 +258,10 @@ export class EnhancedMockWebSocket extends EventEmitter {
     this.reconnectAttempts++;
     
     if (this.reconnectAttempts <= this.maxReconnectAttempts) {
-      setTimeout(() => {
+      queueMicrotask(() => {
         this.readyState = EnhancedMockWebSocket.CONNECTING;
-        this.simulateConnection(200);
-      }, 1000);
+        this.simulateConnection(0); // Use immediate connection for tests
+      });
     }
   }
 
@@ -360,7 +377,7 @@ export function createWebSocketTestManager(): WebSocketTestManager {
 export function waitForWebSocketOpen(ws: EnhancedMockWebSocket, timeout: number = 1000): Promise<void> {
   return new Promise((resolve, reject) => {
     if (ws.isOpen()) {
-      resolve();
+      queueMicrotask(resolve);
       return;
     }
 
@@ -370,7 +387,7 @@ export function waitForWebSocketOpen(ws: EnhancedMockWebSocket, timeout: number 
 
     ws.addEventListener('open', () => {
       clearTimeout(timer);
-      resolve();
+      queueMicrotask(resolve);
     });
   });
 }
@@ -383,7 +400,7 @@ export function waitForMessage(ws: EnhancedMockWebSocket, timeout: number = 1000
 
     ws.addEventListener('message', (event) => {
       clearTimeout(timer);
-      resolve(event);
+      queueMicrotask(() => resolve(event));
     });
   });
 }

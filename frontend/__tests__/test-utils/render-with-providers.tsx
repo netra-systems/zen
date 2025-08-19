@@ -47,9 +47,7 @@ export interface RouterConfig {
 }
 
 // Real Auth Provider for Testing
-export const createRealAuthProvider = (
-  authValue: Partial<AuthContextType> = {}
-): React.FC<{ children: ReactNode }> => {
+export const createRealAuthProvider = (authValue: Partial<AuthContextType> = {}): React.FC<{ children: ReactNode }> => {
   const defaultAuthValue: AuthContextType = {
     user: createRealTestUser(),
     token: 'test-token-real',
@@ -59,24 +57,13 @@ export const createRealAuthProvider = (
     authConfig: {
       development_mode: true,
       google_client_id: 'test-client-id',
-      endpoints: {
-        login: '/auth/login',
-        logout: '/auth/logout',
-        callback: '/auth/callback',
-        token: '/auth/token',
-        user: '/auth/me'
-      },
+      endpoints: { login: '/auth/login', logout: '/auth/logout', callback: '/auth/callback', token: '/auth/token', user: '/auth/me' },
       authorized_javascript_origins: ['http://localhost:3000'],
       authorized_redirect_uris: ['http://localhost:3000/auth/callback']
     },
     ...authValue
   };
-
-  return ({ children }) => (
-    <AuthContext.Provider value={defaultAuthValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return ({ children }) => <AuthContext.Provider value={defaultAuthValue}>{children}</AuthContext.Provider>;
 };
 
 // Real WebSocket Provider for Testing  
@@ -288,85 +275,24 @@ export const renderWithRealTheme = (
 // Real Integration Testing Utilities
 export const createRealTestEnvironment = (options: RealProviderOptions = {}) => {
   const history = createMemoryHistory();
-  
-  const renderComponent = (ui: ReactElement) => {
-    return renderWithRealProviders(ui, {
-      ...options,
-      routerConfig: { history, useMemoryRouter: false }
-    });
-  };
-
-  const navigate = (path: string) => {
-    history.push(path);
-  };
-
-  const getCurrentPath = () => {
-    return history.location.pathname;
-  };
-
+  const renderComponent = (ui: ReactElement) => renderWithRealProviders(ui, { ...options, routerConfig: { history, useMemoryRouter: false } });
+  const navigate = (path: string) => history.push(path);
+  const getCurrentPath = () => history.location.pathname;
   return { renderComponent, navigate, getCurrentPath, history };
 };
 
 // Real Provider State Verification
-export const verifyRealProviderState = (
-  component: RenderResult,
-  expectedStates: {
-    auth?: boolean;
-    websocket?: boolean;
-    theme?: string;
-    route?: string;
-  }
-): boolean => {
+export const verifyRealProviderState = (component: RenderResult, expectedStates: { auth?: boolean; websocket?: boolean; theme?: string; route?: string; }): boolean => {
   const { container } = component;
-  
-  // Check for provider-specific elements or attributes
   if (expectedStates.auth !== undefined) {
     const authElement = container.querySelector('[data-testid="auth-status"]');
     if (!authElement) return false;
   }
-
   if (expectedStates.websocket !== undefined) {
     const wsElement = container.querySelector('[data-testid="ws-status"]');
     if (!wsElement) return false;
   }
-
   return true;
-};
-
-// Real Provider Performance Testing
-export const measureRealProviderPerformance = async (
-  ui: ReactElement,
-  options: RealProviderOptions = {}
-): Promise<number> => {
-  const startTime = performance.now();
-  
-  const result = renderWithRealProviders(ui, options);
-  
-  const endTime = performance.now();
-  
-  // Cleanup
-  result.unmount();
-  
-  return endTime - startTime;
-};
-
-// Real Provider Error Boundary Testing
-export const testRealProviderErrorBoundary = (
-  ui: ReactElement,
-  options: RealProviderOptions = {}
-): RenderResult => {
-  const ErrorBoundary: React.FC<{ children: ReactNode }> = ({ children }) => {
-    try {
-      return <>{children}</>;
-    } catch (error) {
-      return <div data-testid="error-boundary">Error caught</div>;
-    }
-  };
-
-  return renderWithRealProviders(
-    <ErrorBoundary>{ui}</ErrorBoundary>,
-    options
-  );
 };
 
 // Export types and utilities

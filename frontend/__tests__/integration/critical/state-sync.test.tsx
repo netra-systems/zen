@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { render, waitFor, screen, fireEvent } from '@testing-library/react';
+import { render, waitFor, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Import stores
@@ -15,12 +15,14 @@ import { useThreadStore } from '@/store/threadStore';
 import { TestProviders } from '../../test-utils/providers';
 
 describe('State Synchronization', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     jest.clearAllMocks();
     
-    // Reset stores
-    useChatStore.setState({ messages: [], currentThread: null });
-    useThreadStore.setState({ threads: [], currentThreadId: null, currentThread: null });
+    // Reset stores with proper async handling
+    await act(async () => {
+      useChatStore.setState({ messages: [], currentThread: null });
+      useThreadStore.setState({ threads: [], currentThreadId: null, currentThread: null });
+    });
   });
 
   afterEach(() => {
@@ -44,13 +46,15 @@ describe('State Synchronization', () => {
         json: async () => serverState
       });
       
-      // Sync state
+      // Sync state with proper async handling
       const response = await fetch('/api/state/sync');
       const data = await response.json();
       
-      // Update stores
-      useThreadStore.setState({ threads: data.threads });
-      useChatStore.setState({ messages: data.messages });
+      // Update stores with act wrapping
+      await act(async () => {
+        useThreadStore.setState({ threads: data.threads });
+        useChatStore.setState({ messages: data.messages });
+      });
       
       expect(useThreadStore.getState().threads).toEqual(serverState.threads);
       expect(useChatStore.getState().messages).toEqual(serverState.messages);
@@ -66,29 +70,52 @@ describe('State Synchronization', () => {
       const TestComponent = () => {
         const threads = useThreadStore((state) => state.threads);
         const messages = useChatStore((state) => state.messages);
+        const [isProcessing, setIsProcessing] = React.useState(false);
         
         React.useEffect(() => {
-          // Process updates concurrently
-          updates.forEach(update => {
-            if (update.type === 'thread_created') {
-              useThreadStore.getState().addThread(update.data);
-            } else if (update.type === 'message_sent') {
-              useChatStore.getState().addMessage(update.data);
-            } else if (update.type === 'thread_updated') {
-              useThreadStore.getState().updateThread(update.data.id, update.data);
+          const processUpdates = async () => {
+            setIsProcessing(true);
+            
+            // Process updates with proper async handling
+            for (const update of updates) {
+              await new Promise(resolve => {
+                queueMicrotask(() => {
+                  if (update.type === 'thread_created') {
+                    useThreadStore.getState().addThread(update.data);
+                  } else if (update.type === 'message_sent') {
+                    useChatStore.getState().addMessage(update.data);
+                  } else if (update.type === 'thread_updated') {
+                    useThreadStore.getState().updateThread(update.data.id, update.data);
+                  }
+                  resolve(undefined);
+                });
+              });
             }
-          });
+            
+            setIsProcessing(false);
+          };
+          
+          processUpdates();
         }, []);
         
         return (
           <div>
             <div data-testid="threads">Threads: {threads.length}</div>
             <div data-testid="messages">Messages: {messages.length}</div>
+            <div data-testid="processing">{isProcessing ? 'processing' : 'idle'}</div>
           </div>
         );
       };
       
-      const { getByTestId } = render(<TestComponent />);
+      let getByTestId: any;
+      await act(async () => {
+        const result = render(<TestComponent />);
+        getByTestId = result.getByTestId;
+      });
+      
+      await waitFor(() => {
+        expect(getByTestId('processing')).toHaveTextContent('idle');
+      });
       
       expect(getByTestId('threads')).toHaveTextContent('Threads: 1');
       expect(getByTestId('messages')).toHaveTextContent('Messages: 1');

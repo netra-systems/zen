@@ -237,21 +237,14 @@ export const testRealAuthStoreFlow = async (
   return snapshots;
 };
 
-export const testRealChatStoreFlow = async (
-  actions: Array<() => void>
-): Promise<any[]> => {
+export const testRealChatStoreFlow = async (actions: Array<() => void>): Promise<any[]> => {
   const { result } = renderChatStoreHook();
   const snapshots: any[] = [];
-  
   snapshots.push({ ...result.current });
-  
   for (const action of actions) {
-    await act(async () => {
-      action();
-    });
+    await act(async () => { action(); });
     snapshots.push({ ...result.current });
   }
-  
   return snapshots;
 };
 

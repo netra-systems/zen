@@ -11,13 +11,18 @@ import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
 import { WebSocketTestManager } from '../helpers/websocket-test-manager';
 
-// Reconnection manager
+// Reconnection manager with React synchronization
 class ReconnectionManager {
   private maxAttempts: number;
   private currentAttempt: number = 0;
   private timer: NodeJS.Timeout | null = null;
+  private useReactSync: boolean = true;
 
-  constructor(maxAttempts: number = 5) { this.maxAttempts = maxAttempts; }
+  constructor(maxAttempts: number = 5, enableReactSync: boolean = true) { 
+    this.maxAttempts = maxAttempts;
+    this.useReactSync = enableReactSync;
+  }
+  
   getAttemptCount(): number { return this.currentAttempt; }
   shouldReconnect(): boolean { return this.currentAttempt < this.maxAttempts; }
 
@@ -25,7 +30,15 @@ class ReconnectionManager {
     if (!this.shouldReconnect()) return -1;
     this.currentAttempt++;
     const delay = 1000 * Math.pow(2, this.currentAttempt - 1);
-    this.timer = setTimeout(callback, delay);
+    
+    if (this.useReactSync) {
+      this.timer = setTimeout(() => {
+        queueMicrotask(callback);
+      }, delay);
+    } else {
+      this.timer = setTimeout(callback, delay);
+    }
+    
     return delay;
   }
 
@@ -80,7 +93,13 @@ class NetworkSimulator {
   setBandwidth(mbps: number): void { this.bandwidth = mbps; }
 
   simulateLatency(): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, this.latency));
+    return new Promise(resolve => {
+      if (this.latency === 0) {
+        queueMicrotask(resolve);
+      } else {
+        setTimeout(() => queueMicrotask(resolve), this.latency);
+      }
+    });
   }
 
   shouldDropPacket(): boolean {

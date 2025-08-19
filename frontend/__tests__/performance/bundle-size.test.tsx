@@ -242,11 +242,13 @@ describe('Bundle Size Tests', () => {
     it('should validate route-based code splitting', async () => {
       const LazyComponent = createLazyComponent(50);
       
-      render(
-        <TestProviders>
-          <LazyComponent />
-        </TestProviders>
-      );
+      await act(async () => {
+        render(
+          <TestProviders>
+            <LazyComponent />
+          </TestProviders>
+        );
+      });
       
       expect(screen.getByTestId('loading')).toBeInTheDocument();
       
@@ -304,11 +306,15 @@ describe('Bundle Size Tests', () => {
     it('should validate component lazy loading', async () => {
       const LazyComponent = createLazyComponent(100);
       
-      const { container } = render(
-        <TestProviders>
-          <LazyComponent />
-        </TestProviders>
-      );
+      let container: any;
+      await act(async () => {
+        const result = render(
+          <TestProviders>
+            <LazyComponent />
+          </TestProviders>
+        );
+        container = result.container;
+      });
       
       // Should show loading state first
       expect(container.querySelector('[data-testid="loading"]')).toBeInTheDocument();
@@ -318,7 +324,7 @@ describe('Bundle Size Tests', () => {
       });
     });
 
-    it('should test intersection observer for lazy loading', () => {
+    it('should test intersection observer for lazy loading', async () => {
       const mockIntersectionObserver = jest.fn();
       mockIntersectionObserver.mockReturnValue({
         observe: jest.fn(),
@@ -328,11 +334,13 @@ describe('Bundle Size Tests', () => {
       
       window.IntersectionObserver = mockIntersectionObserver;
       
-      render(
-        <TestProviders>
-          <div data-testid="observed-element">Content</div>
-        </TestProviders>
-      );
+      await act(async () => {
+        render(
+          <TestProviders>
+            <div data-testid="observed-element">Content</div>
+          </TestProviders>
+        );
+      });
       
       expect(mockIntersectionObserver).toBeDefined();
     });
@@ -340,13 +348,17 @@ describe('Bundle Size Tests', () => {
 
   describe('Network Payload Optimization', () => {
     it('should monitor network resource loading', async () => {
-      networkMonitor.start();
+      await act(async () => {
+        networkMonitor.start();
+      });
       
-      render(
-        <TestProviders>
-          <div>Network test component</div>
-        </TestProviders>
-      );
+      await act(async () => {
+        render(
+          <TestProviders>
+            <div>Network test component</div>
+          </TestProviders>
+        );
+      });
       
       await act(async () => {
         await new Promise(resolve => setTimeout(resolve, 100));

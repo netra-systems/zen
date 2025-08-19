@@ -49,8 +49,8 @@ jest.mock('@/store/authStore', () => ({
   useAuthStore: jest.fn(() => mockAuthStore)
 }));
 
-// Mock the necessary hooks and utilities
-jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
+// Mock the necessary hooks and utilities - using correct relative paths
+jest.mock('../../../../components/chat/hooks/useMessageHistory', () => ({
   useMessageHistory: () => ({
     messageHistory: [],
     addToHistory: jest.fn(),
@@ -58,7 +58,7 @@ jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
   })
 }));
 
-jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
+jest.mock('../../../../components/chat/hooks/useTextareaResize', () => ({
   useTextareaResize: () => ({
     rows: 1
   })
@@ -66,7 +66,7 @@ jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
 
 const mockHandleSend = jest.fn();
 
-jest.mock('@/components/chat/hooks/useMessageSending', () => ({
+jest.mock('../../../../components/chat/hooks/useMessageSending', () => ({
   useMessageSending: () => ({
     isSending: false,
     handleSend: mockHandleSend
