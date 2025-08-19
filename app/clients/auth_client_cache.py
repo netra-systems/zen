@@ -101,7 +101,12 @@ class AuthServiceSettings:
     """Manages auth service configuration settings."""
     
     def __init__(self):
-        self.base_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
+        # Use 127.0.0.1 instead of localhost for Windows compatibility
+        default_url = "http://127.0.0.1:8081"
+        self.base_url = os.getenv("AUTH_SERVICE_URL", default_url)
+        # If localhost is in the URL, replace with 127.0.0.1 for Windows
+        if "localhost" in self.base_url:
+            self.base_url = self.base_url.replace("localhost", "127.0.0.1")
         self.enabled = os.getenv("AUTH_SERVICE_ENABLED", "true").lower() == "true"
         self.cache_ttl = int(os.getenv("AUTH_CACHE_TTL_SECONDS", "300"))  # 5 min
         self.service_id = os.getenv("SERVICE_ID", "backend")
