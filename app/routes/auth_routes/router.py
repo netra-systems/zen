@@ -37,7 +37,7 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     """Authenticate user and return access token."""
     user = await security_service.authenticate_user(db, form_data.username, form_data.password)
     validate_user_auth(user)
-    return create_token_response(security_service, user)
+    return await create_token_response(security_service, user)
 
 
 def _handle_auth_config_error(e: Exception) -> None:
