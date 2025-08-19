@@ -16,6 +16,7 @@ from dev_launcher.backend_starter import BackendStarter
 from dev_launcher.frontend_starter import FrontendStarter
 from dev_launcher.auth_starter import AuthStarter
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
+from dev_launcher.critical_error_handler import critical_handler, CriticalErrorType
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,15 @@ class ServiceStartupCoordinator:
     
     def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the backend server."""
-        return self.backend_starter.start_backend()
+        result = self.backend_starter.start_backend()
+        # Check for critical backend failures
+        if result[0] is None:
+            critical_handler.handle_critical_error(
+                CriticalErrorType.DATABASE_CONNECTION,
+                "Backend failed to start - database connection or configuration error",
+                {"suggestion": "Check DATABASE_URL and ensure PostgreSQL is running"}
+            )
+        return result
     
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the frontend server."""
@@ -89,7 +98,16 @@ class ServiceStartupCoordinator:
     
     def start_auth_service(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the auth service."""
-        return self.auth_starter.start_auth_service()
+        result = self.auth_starter.start_auth_service()
+        # Check for critical auth failures
+        if result[0] is None:
+            port = getattr(self.auth_starter, 'auth_port', 8081)
+            critical_handler.handle_critical_error(
+                CriticalErrorType.AUTH_SERVICE,
+                f"Auth service failed to start on port {port}",
+                {"suggestion": f"Check if port {port} is available and auth service configuration"}
+            )
+        return result
     
     def start_services_parallel(self) -> Dict[str, Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]]:
         """Start all services in parallel with progressive readiness."""
