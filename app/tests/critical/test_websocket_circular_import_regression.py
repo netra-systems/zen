@@ -33,8 +33,8 @@ class TestCircularImportRegression:
         ]
         
         for module_name in websocket_modules:
-            # Get the file path
-            module_path = module_name.replace('.', os.sep) + '.py'
+            # Get the file path - go up from tests directory
+            module_path = os.path.join('..', '..', module_name.replace('.', os.sep) + '.py')
             
             # Read the file content
             with open(module_path, 'r') as f:
