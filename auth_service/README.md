@@ -1,10 +1,19 @@
 # Netra Auth Service
 
-Standalone authentication microservice for the Netra platform.
+**IMPORTANT**: This is a completely independent standalone authentication microservice for the Netra platform.
+It has NO dependencies on the main Netra app and must remain fully self-contained.
 
 ## Architecture
 
-The auth service is a completely standalone microservice that handles:
+### Independence Principle
+The auth service is designed to be 100% independent from the main Netra application:
+- All code is contained within the `auth_service/` directory
+- Uses its own `auth_core/` module (NOT the main app's `app/` module)
+- Has its own models, services, and routes
+- No imports from the main Netra app are allowed
+
+### Core Responsibilities
+The auth service handles:
 - User authentication (login/logout)
 - Token management (JWT creation/validation)
 - Session management (Redis-backed)
@@ -131,9 +140,10 @@ terraform apply -target=google_cloud_run_service.auth_service
 
 ### Backend Integration
 
-The backend uses the auth service client located at `app/clients/auth_client.py`:
+The main Netra backend service integrates with this auth service using the auth client located in the main app at `app/clients/auth_client.py`:
 
 ```python
+# In the main Netra app (not in auth service)
 from app.clients.auth_client import auth_client
 
 # Validate token

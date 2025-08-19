@@ -59,13 +59,14 @@ def test_ready_endpoint_success(client: TestClient):
     
     app.dependency_overrides[get_db_dependency] = mock_get_db_success
     
-    # Mock all health checkers to return healthy status
-    with patch("app.core.health.interface.HealthInterface.get_health_status") as mock_health:
+    # Mock the health interface instance in the health route module
+    with patch("app.routes.health.health_interface.get_health_status") as mock_health:
         mock_health.return_value = {
-            "status": "ready",
+            "status": "healthy",
             "service": "netra-ai-platform", 
             "version": "1.0.0",
             "timestamp": "2025-01-01T00:00:00Z",
+            "uptime_seconds": 100,
             "checks": {
                 "database_postgres": True,
                 "database_clickhouse": True,
@@ -73,7 +74,7 @@ def test_ready_endpoint_success(client: TestClient):
                 "dependency_websocket": True,
                 "dependency_llm": True
             },
-            "details": {}
+            "metrics": {}
         }
         
         response = client.get("/health/ready")

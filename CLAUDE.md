@@ -136,107 +136,6 @@ python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT te
 **AGENT CHANGES**: `python test_runner.py --level agents --real-llm`  
 **BEFORE RELEASES**: `python test_runner.py --level integration --real-llm`
 
-### Comprehensive Test Categories (10-15min each)
-| Category | Purpose | Command |
-|----------|---------|---------|
-| **comprehensive-backend** | Full backend validation | `python test_runner.py --level comprehensive-backend` |
-| **comprehensive-frontend** | Full frontend validation | `python test_runner.py --level comprehensive-frontend` |
-| **comprehensive-core** | Core components deep test | `python test_runner.py --level comprehensive-core` |
-| **comprehensive-agents** | Multi-agent system validation | `python test_runner.py --level comprehensive-agents` |
-| **comprehensive-websocket** | WebSocket deep validation | `python test_runner.py --level comprehensive-websocket` |
-| **comprehensive-database** | Database operations validation | `python test_runner.py --level comprehensive-database` |
-| **comprehensive-api** | API endpoints validation | `python test_runner.py --level comprehensive-api` |
-
-### 🔴 CRITICAL: Real LLM Testing
-**IMPORTANT**: Always test with real LLMs before releases to catch integration issues
-
-```bash
-# Integration tests with real LLM (DEFAULT for releases)
-python test_runner.py --level integration --real-llm
-
-# Specific model testing
-python test_runner.py --level integration --real-llm --llm-model gemini-2.5-flash
-
-# Full E2E with real services
-python test_runner.py --level real_e2e --real-llm --llm-timeout 60
-
-# Agent tests with real LLM (MANDATORY for agent changes)
-python test_runner.py --level agents --real-llm
-```
-
-### Speed Optimizations (SAFE)
-```bash
-# CI Mode - Safe speed optimizations
-python test_runner.py --level unit --ci
-
-# Individual optimizations
-python test_runner.py --level unit --no-warnings  # Suppress warnings
-python test_runner.py --level unit --no-coverage  # Skip coverage
-python test_runner.py --level unit --fast-fail    # Stop on first failure
-
-# Aggressive speed mode (WARNING: May skip slow tests)
-python test_runner.py --level unit --speed
-```
-
-### Component Selection
-```bash
-python test_runner.py --level unit --backend-only  # Backend only
-python test_runner.py --level unit --frontend-only # Frontend only
-```
-
-### Real LLM Testing
-```bash
-# Unit tests with real LLM
-python test_runner.py --level unit --real-llm
-
-# Specify model and timeout
-python test_runner.py --level integration --real-llm --llm-model gemini-2.5-flash --llm-timeout 60
-
-# Control parallelism
-python test_runner.py --level unit --real-llm --parallel 1  # Sequential
-python test_runner.py --level unit --real-llm --parallel auto  # Auto-detect
-```
-
-### Staging Environment Testing
-```bash
-# Test against staging
-python test_runner.py --level integration --staging
-
-# Override staging URLs
-python test_runner.py --staging --staging-url https://staging.example.com --staging-api-url https://api.staging.example.com
-```
-
-### Test Discovery & Management
-```bash
-# List all tests
-python test_runner.py --list
-
-# List with different formats
-python test_runner.py --list --list-format json
-python test_runner.py --list --list-format markdown
-
-# List specific category
-python test_runner.py --list --list-category unit
-
-# Show failing tests
-python test_runner.py --show-failing
-
-# Run only failing tests
-python test_runner.py --run-failing
-
-# Clear failing tests log
-python test_runner.py --clear-failing
-```
-
-### CI/CD Integration
-```bash
-# CI mode with JSON output
-python test_runner.py --level unit --ci --output results.json --report-format json
-
-# Generate coverage report
-python test_runner.py --level comprehensive --coverage-output coverage.xml
-```
-
 ## 🔴 MANDATORY SPECS (Read 3x Before Coding)
 Generate a monetization-focused product and engineering value for Netra Apex.
 Ensures every feature directly creates and captures value proportional to a customer's AI spend.
@@ -302,26 +201,8 @@ Ensures every feature directly creates and captures value proportional to a cust
 - NetraException for errors
 
 
-### Complex Debugging:
-- Use Root Cause Analysis (5 Whys)
-
-### COMPLEX CODING: MULTI STEP PLAN Process
-MUST FOLLOW THIS:
-
-TASK 1: Spawn an Isolated ULTRA THINK ELITE ENGINEER agent
-to **write** the code. Return the result to you.
-
-TASK 2: Spawn an Isolated ULTRA THINK ELITE REVIEWER agent
-to **review** the code. Return the review result (CRITICAL: Critic's comments only without code).
-
-TASK 3: Spawn an Isolated ULTRA THINK ELITE ENGINEER agent
-pass a: original goal, b: output from Task 1, c: output from Task 2.
-Instruct Agent 3 to Address all critique points and rewrite higher quality code.
-
-TASK 4: Spawn an Isolated ULTRA THINK TESTING agent
-Takes the code from agent 3 and runs tests.
-
-EVERY AGENT MUST HAVE A FRESH CONTEXT WINDOW TO MAINTAIN INTEGRITY OF PROCESS.
+### Complex Coding & Debugging
+→ See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for MULTI STEP PLAN process and debugging patterns
 
 ## 🚧 SYSTEM BOUNDARIES (ENFORCE 300/8 LIMITS)
 
@@ -337,15 +218,12 @@ EVERY AGENT MUST HAVE A FRESH CONTEXT WINDOW TO MAINTAIN INTEGRITY OF PROCESS.
 - [`SPEC/growth_control.xml`](SPEC/growth_control.xml) - Good vs bad growth patterns
 - [`SPEC/conventions.xml`](SPEC/conventions.xml) - Boundary enforcement integration
 
-## Testing (Use UNIFIED TEST RUNNER)
+## Testing
+→ See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml)
+
 - **DEFAULT**: `python test_runner.py --level integration --no-coverage --fast-fail`
-- **AGENT CHANGES**: `python test_runner.py --level agents --real-llm` (MANDATORY for agent changes)
-- **REAL LLM TESTING**: `python test_runner.py --level integration --real-llm` (before releases)
-- **FULL VALIDATION**: `python test_runner.py --level comprehensive` (before production)
-- Choose a category using test discovery: `python test_runner.py --list`
-- ALWAYS run integration tests for feature changes
-- ALWAYS run real LLM tests for agent changes (catches integration issues)
-- Think about DATA, data flow, data types, critical paths
+- **AGENT CHANGES**: `python test_runner.py --level agents --real-llm` (MANDATORY)
+- **BEFORE RELEASES**: `python test_runner.py --level integration --real-llm`
 
 ## 📝 MODULE PLANNING (3rd Reminder: 300 Lines MAX)
 
@@ -365,53 +243,6 @@ EVERY AGENT MUST HAVE A FRESH CONTEXT WINDOW TO MAINTAIN INTEGRITY OF PROCESS.
 - [ ] Test coverage maintained
 - [ ] Tests pass
 
-# Tools notes
-- Use tools like read file, replace_all, etc.
-
-## 🚀 GCP STAGING DEPLOYMENT LEARNINGS (8/18/25)
-
-### WHAT WORKS:
-1. **Service Account Authentication**:
-   - Key file: `gcp-staging-sa-key.json` (NOT staging-deploy-key.json)
-   - Project: `netra-staging` (NOT netra-systems)
-   - Activate: `gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json`
-
-2. **Docker Build Commands**:
-   - Backend: `docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest -f Dockerfile.backend .`
-   - Frontend: `docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest -f Dockerfile.frontend.staging .`
-   - Auth: `docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest -f Dockerfile.auth .`
-
-3. **Correct Service Names** (EXACT):
-   - `netra-backend-staging`
-   - `netra-frontend-staging`
-   - `netra-auth-service`
-
-### WHAT DOESN'T WORK:
-1. **PowerShell Script Issues**:
-   - `deploy-staging-reliable.ps1` has syntax errors (unclosed quotes/brackets)
-   - Manual deployment commands work better than the script
-
-2. **Common Mistakes**:
-   - Wrong Dockerfile names (e.g., Dockerfile.frontend vs Dockerfile.frontend.staging)
-   - Wrong project ID (netra-systems vs netra-staging)
-   - Wrong key file name (staging-deploy-key.json doesn't exist)
-
-### DEPLOYMENT SEQUENCE:
-```bash
-# 1. Authenticate
-gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json
-gcloud config set project netra-staging
-
-# 2. Configure Docker
-gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
-
-# 3. Build & Push Images (parallel)
-docker build -t [IMAGE_URL] -f [DOCKERFILE] .
-docker push [IMAGE_URL]
-
-# 4. Deploy to Cloud Run
-gcloud run deploy [SERVICE_NAME] --image [IMAGE_URL] --region us-central1
-```
 
 ## 🎯 FINAL REMINDERS (Ultra Think 3x)
 Generate a monetization-focused product and engineering value for Netra Apex.

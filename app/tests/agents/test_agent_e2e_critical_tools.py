@@ -89,12 +89,23 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         # Mock state persistence
         saved_states = {}
         
-        async def mock_save_state(run_id, thread_id, user_id, state, db_session):
+        async def mock_save_state(*args, **kwargs):
+            # Handle both positional and keyword arguments
+            if len(args) >= 5:
+                run_id, thread_id, user_id, state, db_session = args[0], args[1], args[2], args[3], args[4]
+            else:
+                run_id = kwargs.get('run_id')
+                thread_id = kwargs.get('thread_id') 
+                user_id = kwargs.get('user_id')
+                state = kwargs.get('state')
+                db_session = kwargs.get('db_session')
+            
             saved_states[run_id] = {
                 "thread_id": thread_id,
                 "user_id": user_id,
-                "state": state.model_dump()
+                "state": state.model_dump() if hasattr(state, 'model_dump') else state
             }
+            return True, "mock_snapshot_id"
             
         async def mock_load_state(run_id, db_session):
             if run_id in saved_states:

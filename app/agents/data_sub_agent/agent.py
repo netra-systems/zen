@@ -479,11 +479,11 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     async def process_with_retry(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with retry logic."""
         max_retries = getattr(self, 'config', {}).get('max_retries', 3)
-        for attempt in range(max_retries + 1):
+        for attempt in range(max_retries):
             try:
                 return await self._process_internal(data)
             except Exception as e:
-                if attempt == max_retries:
+                if attempt == max_retries - 1:
                     raise e
                 await asyncio.sleep(0.1 * (2 ** attempt))
         

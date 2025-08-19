@@ -1,63 +1,69 @@
-# Auth Service Dockerfile
-# Standalone microservice for authentication
+# Dockerfile.auth - Optimized for Google Cloud Run
+# Standalone authentication microservice - COMPLETELY INDEPENDENT
 
-# Build stage
-FROM python:3.11-slim as builder
+# Build stage for dependencies
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install build dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    g++ \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements first for better caching
+# Copy and build Python wheels
 COPY auth_service/requirements.txt .
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
-# Production stage
+# Runtime stage
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy Python dependencies from builder
-COPY --from=builder /root/.local /root/.local
+# Install only runtime dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Make sure scripts in .local are usable
-ENV PATH=/root/.local/bin:$PATH
+# Install Python packages from wheels
+COPY --from=builder /app/wheels /wheels
+RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
-# Copy application code (selective copy for auth service)
-COPY auth_service/main.py ./main.py
+# Copy the entire auth service
+# IMPORTANT: auth_core is the renamed 'app' directory - completely independent from main app
+COPY auth_service/ ./
 
-# Copy only necessary app modules (exclude LLM-related modules)
-COPY app/__init__.py ./app/
-COPY app/config*.py ./app/
-COPY app/logging_config.py ./app/
-COPY app/auth_dependencies.py ./app/
-COPY app/configuration/ ./app/configuration/
-COPY app/clients/ ./app/clients/
-COPY app/core/ ./app/core/
-COPY app/db/ ./app/db/
-COPY app/routes/auth_routes/ ./app/routes/auth_routes/
-COPY app/routes/__init__.py ./app/routes/
-COPY app/schemas/ ./app/schemas/
-COPY app/services/security_service.py ./app/services/
-COPY app/services/user_service.py ./app/services/
-COPY app/services/key_manager.py ./app/services/
-COPY app/services/base.py ./app/services/
-COPY auth_service/services_init.py ./app/services/__init__.py
+# Create non-root user
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app && \
+    mkdir -p /app/logs && \
+    chown -R appuser:appuser /app/logs
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV SERVICE_NAME=auth-service
-ENV PORT=8080
+USER appuser
+
+# Environment variables for Cloud Run
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONIOENCODING=utf-8 \
+    SERVICE_NAME=auth-service \
+    PORT=8080 \
+    WORKERS=1 \
+    TIMEOUT=120
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD python -c "import requests; exit(0 if requests.get('http://localhost:8080/health').status_code == 200 else 1)"
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
 
-# Expose port
 EXPOSE 8080
 
-# Run the auth service
-CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "2"]
+# Use gunicorn with uvicorn workers for better Cloud Run compatibility
+CMD exec gunicorn main:app \
+    --bind 0.0.0.0:$PORT \
+    --workers $WORKERS \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --timeout $TIMEOUT \
+    --access-logfile - \
+    --error-logfile - \
+    --log-level info

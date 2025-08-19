@@ -12,7 +12,7 @@ import logging
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from app.routes.auth_routes import router as auth_router
+from auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(

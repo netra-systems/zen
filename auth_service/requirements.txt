@@ -1,6 +1,7 @@
 # Auth Service Requirements
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+gunicorn==21.2.0
 pydantic==2.5.0
 pydantic[email]==2.5.0
 redis==5.0.1

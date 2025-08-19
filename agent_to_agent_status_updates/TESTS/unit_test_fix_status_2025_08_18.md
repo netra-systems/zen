@@ -19,8 +19,12 @@ Failing tests:
    - Status: FIXED - Updated to use service.advanced._select_workload_type()
    - Root cause: Method exists in AdvancedGenerators module due to modular architecture
 
-### Integration Tests (144 failures)
-**Status**: PENDING
+### Integration Tests (2 backend failures)
+**Status**: FIXED ✅
+
+Fixed tests:
+1. `test_api_config_includes_ws_url` - Fixed dependency injection to use proper FastAPI pattern
+2. `test_ready_endpoint_success` - Fixed mock patching to target correct health interface instance
 
 ### Agent Tests (3 failures)
 **Status**: PENDING
@@ -30,6 +34,8 @@ Failing tests:
 - [2025-08-18 16:48] Starting unit test fixes
 - [2025-08-18 16:49] Fixed test_select_workload_type - updated to use service.advanced module path
 - [2025-08-18 16:49] Fixed test_websocket_heartbeat - simplified to test backward compatibility
+- [2025-08-18 16:53] Fixed test_api_config_includes_ws_url - proper dependency injection
+- [2025-08-18 16:53] Fixed test_ready_endpoint_success - correct mock patching
 
 ## Next Steps
 1. Fix unit test failures
