@@ -88,22 +88,43 @@ async def get_and_validate_user(
 
 
 async def authenticate_websocket_user(websocket: WebSocket, token: str, security_service) -> str:
-    """Authenticate WebSocket user and return user ID string."""
+    """Authenticate WebSocket user and return user ID string with enhanced error handling."""
     logger.info(f"[WS AUTH] Starting authentication with token: {token[:20] if token else 'None'}...")
-    try:
-        payload = await decode_token_payload(security_service, token)
-        logger.info(f"[WS AUTH] Token decoded successfully, payload: {payload}")
-        user_id = validate_user_id_in_payload(payload)
-        logger.info(f"[WS AUTH] User ID validated: {user_id}")
-        async with get_async_db() as db_session:
-            logger.info(f"[WS AUTH] Database session acquired, fetching user {user_id}")
-            result = await get_and_validate_user(security_service, db_session, user_id, payload)
-            logger.info(f"[WS AUTH] User validated successfully: {result}")
-            return result
-    except Exception as e:
-        logger.error(f"[WS AUTH ERROR] Authentication failed: {e}", exc_info=True)
-        await websocket.close(code=1008, reason=f"Authentication failed: {str(e)}")
-        raise
+    
+    # Retry counter for transient failures
+    max_retries = 2
+    retry_delay = 0.5
+    
+    for attempt in range(max_retries + 1):
+        try:
+            payload = await decode_token_payload(security_service, token)
+            logger.info(f"[WS AUTH] Token decoded successfully, payload keys: {list(payload.keys())}")
+            
+            user_id = validate_user_id_in_payload(payload)
+            logger.info(f"[WS AUTH] User ID validated: {user_id}")
+            
+            async with get_async_db() as db_session:
+                logger.info(f"[WS AUTH] Database session acquired, fetching user {user_id} (attempt {attempt + 1})")
+                result = await get_and_validate_user(security_service, db_session, user_id, payload)
+                logger.info(f"[WS AUTH] User validated successfully: {result}")
+                return result
+                
+        except ValueError as e:
+            # Authentication errors - don't retry
+            logger.error(f"[WS AUTH ERROR] Authentication validation failed: {e}")
+            await _close_websocket_with_auth_error(websocket, str(e))
+            raise
+            
+        except Exception as e:
+            # Transient errors - retry if not last attempt
+            if attempt < max_retries and _is_retryable_error(e):
+                logger.warning(f"[WS AUTH] Retryable error on attempt {attempt + 1}: {e}")
+                await asyncio.sleep(retry_delay * (attempt + 1))
+                continue
+            else:
+                logger.error(f"[WS AUTH ERROR] Authentication failed after {attempt + 1} attempts: {e}", exc_info=True)
+                await _close_websocket_with_auth_error(websocket, f"Authentication failed: {str(e)}")
+                raise
 
 
 async def receive_message_with_timeout(websocket: WebSocket) -> str:
@@ -186,3 +207,21 @@ async def cleanup_websocket_connection(user_id_str: str, websocket: WebSocket, m
         connections = manager.connection_manager.active_connections.get(user_id_str, [])
         if any(conn.websocket == websocket for conn in connections):
             await manager.disconnect_user(user_id_str, websocket)
+
+
+async def _close_websocket_with_auth_error(websocket: WebSocket, error_message: str) -> None:
+    """Close WebSocket connection with authentication error."""
+    try:
+        await websocket.close(code=1008, reason=f"Authentication failed: {error_message}")
+    except Exception as close_error:
+        logger.debug(f"Error closing WebSocket after auth failure: {close_error}")
+
+
+def _is_retryable_error(error: Exception) -> bool:
+    """Check if an error is retryable (transient network/database issues)."""
+    error_str = str(error).lower()
+    retryable_indicators = [
+        'connection', 'timeout', 'network', 'database unavailable',
+        'connection reset', 'connection lost', 'temporary failure'
+    ]
+    return any(indicator in error_str for indicator in retryable_indicators)

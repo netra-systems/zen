@@ -121,8 +121,13 @@ class MCPService(IMCPService):
         llm_manager=None
     ):
         self._initialize_service_components(
-            agent_service, thread_service, corpus_service, 
-            synthetic_data_service, security_service, supply_catalog_service, llm_manager
+            agent_service=agent_service,
+            thread_service=thread_service,
+            corpus_service=corpus_service,
+            synthetic_data_service=synthetic_data_service,
+            security_service=security_service,
+            supply_catalog_service=supply_catalog_service,
+            llm_manager=llm_manager
         )
     
     def _setup_mcp_service_components(

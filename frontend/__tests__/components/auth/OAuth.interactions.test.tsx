@@ -23,10 +23,14 @@ const mockLocation = {
   replace: jest.fn()
 };
 
-Object.defineProperty(window, 'location', {
-  value: mockLocation,
-  writable: true
-});
+// Only mock if not already mocked
+if (!window.location.hasOwnProperty('mockClear')) {
+  Object.defineProperty(window, 'location', {
+    value: mockLocation,
+    writable: true,
+    configurable: true
+  });
+}
 
 describe('OAuth Button Interaction Tests', () => {
   const mockLogin = jest.fn();

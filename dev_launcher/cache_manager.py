@@ -229,6 +229,24 @@ class CacheManager:
         except (ValueError, TypeError, AttributeError):
             return False
 
+    def is_cached_and_valid(self, key: str, max_age_hours: int = 24) -> bool:
+        """Check if a specific cache key exists and is valid."""
+        # Try to find the key in different cache types
+        for cache_type in ['state', 'hashes', 'services', 'secrets']:
+            entry = self.get_cache_entry(cache_type, key)
+            if entry:
+                # Check if entry is recent enough
+                if hasattr(entry, 'timestamp'):
+                    try:
+                        entry_time = datetime.fromisoformat(entry.timestamp)
+                        age = datetime.now() - entry_time
+                        return age < timedelta(hours=max_age_hours)
+                    except (ValueError, TypeError, AttributeError):
+                        pass
+                # If no timestamp, consider valid if it exists
+                return True
+        return False
+
     def clear_cache(self, cache_type: Optional[str] = None) -> bool:
         """Clear cache data with optional type filter."""
         try:

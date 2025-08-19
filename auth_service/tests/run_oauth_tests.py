@@ -59,15 +59,15 @@ def run_tests():
             results.append((cmd, result.returncode))
             
             if result.returncode != 0:
-                print(f"❌ Test suite {i} failed with exit code {result.returncode}")
+                print(f"[FAIL] Test suite {i} failed with exit code {result.returncode}")
             else:
                 print(f"✅ Test suite {i} passed")
                 
         except subprocess.TimeoutExpired:
-            print(f"❌ Test suite {i} timed out after 5 minutes")
+            print(f"[FAIL] Test suite {i} timed out after 5 minutes")
             results.append((cmd, -1))
         except Exception as e:
-            print(f"❌ Test suite {i} failed with error: {e}")
+            print(f"[FAIL] Test suite {i} failed with error: {e}")
             results.append((cmd, -1))
     
     # Print summary
@@ -77,7 +77,7 @@ def run_tests():
     
     all_passed = True
     for i, (cmd, returncode) in enumerate(results, 1):
-        status = "✅ PASSED" if returncode == 0 else "❌ FAILED"
+        status = "✅ PASSED" if returncode == 0 else "[FAIL] FAILED"
         print(f"Suite {i}: {status} - {' '.join(cmd[3:])}")
         if returncode != 0:
             all_passed = False
@@ -98,13 +98,13 @@ def check_dependencies():
         print("✅ Test dependencies available")
         return True
     except ImportError as e:
-        print(f"❌ Missing test dependency: {e}")
+        print(f"[FAIL] Missing test dependency: {e}")
         print("Install with: pip install -r tests/requirements-test.txt")
         return False
 
 def main():
     """Main test runner"""
-    print("🧪 Auth Service OAuth Tests Runner")
+    print("Auth Service OAuth Tests Runner")
     print("=" * 50)
     
     # Check dependencies

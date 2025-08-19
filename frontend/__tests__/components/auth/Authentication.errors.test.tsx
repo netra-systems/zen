@@ -18,14 +18,12 @@ import '@testing-library/jest-dom';
 jest.mock('@/auth/service');
 
 // Mock logger to capture error messages
-const mockLogger = {
-  error: jest.fn(),
-  warn: jest.fn(),
-  info: jest.fn()
-};
-
 jest.mock('@/lib/logger', () => ({
-  logger: mockLogger
+  logger: {
+    error: jest.fn(),
+    warn: jest.fn(),
+    info: jest.fn()
+  }
 }));
 
 describe('Authentication Error Message Tests', () => {
@@ -50,9 +48,6 @@ describe('Authentication Error Message Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mockLogger.error.mockClear();
-    mockLogger.warn.mockClear();
-    mockLogger.info.mockClear();
     (authService.useAuth as jest.Mock).mockReturnValue(baseAuthContext);
   });
 

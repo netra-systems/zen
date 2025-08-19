@@ -41,6 +41,23 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": False,
         "run_both": False
     },
+    "agent-startup": {
+        "description": "Agent startup E2E tests with real services (2-3 minutes)",
+        "purpose": "Comprehensive agent initialization and startup validation",
+        "backend_args": [
+            "tests/unified/test_agent_cold_start.py",
+            "tests/unified/test_concurrent_agents.py",
+            "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}",
+            "--markers", "real_services"
+        ],
+        "frontend_args": [],
+        "timeout": 300,
+        "run_coverage": True,
+        "run_both": False,
+        "supports_real_llm": True,
+        "business_critical": True,
+        "highlight": True
+    },
     "integration": {
         "description": "Integration tests for component interaction (3-5 minutes)",
         "purpose": "Feature validation, API testing",

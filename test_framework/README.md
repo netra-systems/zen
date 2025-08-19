@@ -48,6 +48,7 @@ test_framework/
 ├── test_parser.py               # Output parsing utilities
 ├── test_orchestrator.py         # Test orchestration logic
 ├── test_suite_orchestrator.py   # Advanced orchestration engine
+├── unified_orchestrator.py      # ⭐ UNIFIED SERVICE ORCHESTRATOR
 ├── failure_pattern_analyzer.py  # Pattern recognition & analysis
 ├── report_generators.py         # Multi-format report generation
 ├── report_manager.py            # Report management
@@ -79,6 +80,10 @@ python test_runner.py --level unit --real-llm
 
 # Run only failing tests
 python test_runner.py --run-failing
+
+# ⭐ UNIFIED SERVICE ORCHESTRATOR - Run all tests with service startup
+python run_unified_tests.py              # Run all tests with services
+python run_unified_tests.py --sequential # Sequential execution
 ```
 
 ### Test Levels

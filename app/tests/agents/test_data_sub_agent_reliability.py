@@ -96,7 +96,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         async def mock_process_data(data):
             if not data.get("valid", True):
                 raise Exception("Invalid data")
-            return {"status": "processed", "data": data}
+            return {"status": "success", "data": data}
         
         agent.process_data = mock_process_data
         

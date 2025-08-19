@@ -104,8 +104,13 @@ def _perform_database_validation(logger: logging.Logger) -> None:
 
 def run_database_migrations(logger: logging.Logger) -> None:
     """Run database migrations if not in test mode."""
-    if 'pytest' not in sys.modules:
+    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
+    skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
+    
+    if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
+    elif fast_startup or skip_migrations:
+        logger.info("Skipping database migrations (fast startup mode)")
 
 
 def _execute_migrations(logger: logging.Logger) -> None:

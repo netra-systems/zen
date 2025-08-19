@@ -45,7 +45,7 @@ class LauncherIntegration:
         self.health_checker = QuickHealthChecker()
         self.dep_checker = AsyncDependencyChecker(
             self.config.project_root,
-            self.cache_manager
+            self.cache_manager.cache_dir
         )
     
     def create_validate_steps(self) -> List[PhaseStep]:

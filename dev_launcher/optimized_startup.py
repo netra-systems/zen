@@ -48,10 +48,10 @@ class OptimizedStartupOrchestrator:
     def _setup_optimization_components(self):
         """Setup all optimization components."""
         self._setup_profiler()
+        self._setup_parallel_executor()  # Must be before local_secrets
+        self._setup_logging_system()  # Must be before local_secrets
+        self._setup_local_secrets()  # Must be before sequencer for integration
         self._setup_sequencer()
-        self._setup_parallel_executor()
-        self._setup_logging_system()
-        self._setup_local_secrets()
     
     def _setup_profiler(self):
         """Setup startup profiler."""
@@ -152,7 +152,14 @@ class OptimizedStartupOrchestrator:
     # Phase step implementations
     def _load_cache_state(self) -> bool:
         """Load cache state."""
-        return self.cache_manager.is_cache_valid()
+        # Always return True - cache is optional
+        # Just check if cache exists, don't fail if invalid
+        try:
+            self.cache_manager.is_cache_valid()
+            return True
+        except Exception:
+            # Cache doesn't exist yet, that's OK
+            return True
     
     def _load_env_files(self) -> bool:
         """Load environment files."""

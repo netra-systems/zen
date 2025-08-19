@@ -1,21 +1,7 @@
 """Phase 4: LLM Integration Tester - Cost-Critical LLM Operations Testing
 
-Business Value Justification (BVJ):
-- Segment: Growth & Enterprise (customers with significant AI spend)
-- Business Goal: Ensure reliable LLM operations directly impact customer value creation
-- Value Impact: LLM reliability = 95%+ uptime for revenue-generating AI workflows
-- Revenue Impact: LLM costs represent 60-80% of customer AI spend - reliability = revenue protection
-
-This module tests critical LLM integration points that directly affect customer billing:
-1. Fallback chains (GPT → Gemini → Claude) for 99.9% availability
-2. Rate limit handling with cost-aware exponential backoff
-3. Timeout recovery across distributed LLM services
-4. Accurate cost tracking for margin protection
-
-Architecture compliance:
-- 300-line file limit through focused test modules
-- 8-line function limit for all test functions
-- Independent LLM integration testing
+BVJ: Growth & Enterprise segment, LLM reliability = revenue protection
+Tests fallback chains, rate limits, timeouts, and cost tracking for 99.9% availability
 """
 
 import asyncio
@@ -40,7 +26,7 @@ class MockLLMProvider:
     async def ainvoke(self, prompt: str) -> Dict[str, Any]:
         """Mock LLM invocation with controlled failure"""
         self.call_count += 1
-        await asyncio.sleep(0.1)  # Simulate network delay
+        await asyncio.sleep(0.1)
         if self.should_fail:
             raise Exception(f"{self.provider_name} rate limit exceeded")
         return {"content": f"Response from {self.provider_name}"}
@@ -58,8 +44,7 @@ class MockRetryStrategy:
         """Calculate exponential backoff delay with jitter"""
         import random
         base = self.base_delay * (2.0 ** (attempt - 1))
-        jitter = random.uniform(0.8, 1.2)
-        return min(base * jitter, self.max_delay)
+        return min(base * random.uniform(0.8, 1.2), self.max_delay)
 
 
 class MockCostCalculator:
@@ -94,7 +79,7 @@ class MockTokenUsage:
     @property
     def cost_estimate(self) -> Optional[float]:
         """Mock cost estimate"""
-        return 0.003  # $0.003 estimate
+        return 0.003
 
 
 class LLMIntegrationTester:
@@ -122,12 +107,10 @@ def llm_tester():
     """Fixture providing LLM integration tester"""
     return LLMIntegrationTester()
 
-
 @pytest.fixture  
 def sample_token_usage():
     """Fixture providing sample token usage for cost testing"""
     return MockTokenUsage(prompt_tokens=1000, completion_tokens=500, total_tokens=1500)
-
 
 class MockNetraException(Exception):
     """Mock Netra exception for testing"""
@@ -174,11 +157,7 @@ class TestLLMFallbackChain:
     
     def _create_all_failing_providers(self, tester) -> Dict[str, MockLLMProvider]:
         """Create all failing providers for edge case testing"""
-        return {
-            "gpt": MockLLMProvider("gpt", should_fail=True),
-            "gemini": MockLLMProvider("gemini", should_fail=True),
-            "claude": MockLLMProvider("claude", should_fail=True)
-        }
+        return {p: MockLLMProvider(p, should_fail=True) for p in ["gpt", "gemini", "claude"]}
     
     async def _execute_fallback_sequence(self, providers: List[MockLLMProvider]) -> Dict[str, Any]:
         """Execute fallback sequence through provider list"""
@@ -200,20 +179,13 @@ class TestLLMRateLimitHandling:
     """Test LLM rate limit handling with exponential backoff"""
     
     async def test_llm_rate_limit_handling_exponential_backoff(self, llm_tester):
-        """Test rate limit handling with exponential backoff"""
-        retry_delays = []
+        """Test rate limit handling with exponential backoff and jitter"""
         strategy = llm_tester.retry_strategy
-        for attempt in range(1, 4):
-            delay = strategy.calculate_delay(attempt)
-            retry_delays.append(delay)
+        retry_delays = [strategy.calculate_delay(i) for i in range(1, 4)]
         assert retry_delays[1] > retry_delays[0]  # Exponential increase
-    
-    async def test_llm_rate_limit_handling_jitter_variance(self, llm_tester):
-        """Test jitter introduces variance in retry delays"""
-        strategy = llm_tester.retry_strategy
+        # Test jitter variance
         delays = [strategy.calculate_delay(2) for _ in range(10)]
-        unique_delays = set(delays)
-        assert len(unique_delays) > 1  # Jitter creates variance
+        assert len(set(delays)) > 1  # Jitter creates variance
     
     async def test_llm_rate_limit_handling_max_delay_cap(self, llm_tester):
         """Test maximum delay cap prevents excessive waits"""
@@ -235,7 +207,7 @@ class TestLLMRateLimitHandling:
         """Process queue with simulated rate limit delays"""
         results = []
         for prompt in queue:
-            await asyncio.sleep(0.1)  # Simulate rate limit delay
+            await asyncio.sleep(0.1)
             result = await provider.ainvoke(prompt)
             results.append(result)
         return results
@@ -254,11 +226,7 @@ class TestLLMTimeoutRecovery:
     
     async def test_llm_timeout_recovery_service_chain(self, llm_tester):
         """Test timeout recovery across service chain"""
-        providers = [
-            MockLLMProvider("service1"), 
-            MockLLMProvider("service2"), 
-            MockLLMProvider("service3")
-        ]
+        providers = [MockLLMProvider(f"service{i}") for i in range(1, 4)]
         results = await self._execute_service_chain(providers, timeout=0.5)
         assert len(results) == 3
     
@@ -289,11 +257,7 @@ class TestLLMTimeoutRecovery:
     
     async def _execute_service_chain(self, providers: List[MockLLMProvider], timeout: float) -> List[Dict[str, Any]]:
         """Execute chain of services with timeout handling"""
-        results = []
-        for provider in providers:
-            result = await self._execute_with_timeout(provider, timeout)
-            results.append(result)
-        return results
+        return [await self._execute_with_timeout(p, timeout) for p in providers]
     
     async def _execute_with_graceful_degradation(self, provider: MockLLMProvider) -> Dict[str, Any]:
         """Execute with graceful degradation fallback"""
@@ -314,14 +278,12 @@ class TestLLMCostTracking:
         assert isinstance(cost, Decimal)
         assert cost > 0
     
-    def test_llm_cost_tracking_provider_variance(self, llm_tester, sample_token_usage):
-        """Test cost variance across different providers"""
+    def test_llm_cost_tracking_provider_and_tier_variance(self, llm_tester, sample_token_usage):
+        """Test cost variance across providers and model tiers"""
         openai_cost = self._calculate_provider_cost(llm_tester, "openai", sample_token_usage)
         anthropic_cost = self._calculate_provider_cost(llm_tester, "anthropic", sample_token_usage)
         assert openai_cost != anthropic_cost  # Different provider pricing
-    
-    def test_llm_cost_tracking_model_tier_impact(self, llm_tester, sample_token_usage):
-        """Test cost impact of different model tiers"""
+        # Test model tier impact
         economy_model = llm_tester.cost_calculator.get_cost_optimal_model("openai", "economy")
         premium_model = llm_tester.cost_calculator.get_cost_optimal_model("openai", "premium")
         assert economy_model != premium_model
@@ -336,20 +298,13 @@ class TestLLMCostTracking:
     
     def test_llm_cost_tracking_cached_token_discount(self, llm_tester):
         """Test cost calculation includes cached token discounts"""
-        cached_usage = TokenUsage(
-            prompt_tokens=1000, completion_tokens=500, 
-            total_tokens=1500, cached_tokens=200
-        )
-        cost_estimate = cached_usage.cost_estimate
-        assert cost_estimate is not None
+        cached_usage = MockTokenUsage(1000, 500, 1500, cached_tokens=200)
+        assert cached_usage.cost_estimate is not None
     
-    def _calculate_provider_cost(self, tester: LLMIntegrationTester, provider: LLMProvider, usage: TokenUsage) -> Decimal:
+    def _calculate_provider_cost(self, tester: LLMIntegrationTester, provider: str, usage: MockTokenUsage) -> Decimal:
         """Calculate cost for specific provider"""
-        model_map = {
-            LLMProvider.OPENAI: "gpt-3.5-turbo",
-            LLMProvider.ANTHROPIC: "claude-3-haiku"
-        }
-        return tester.cost_calculator.calculate_cost(usage, provider, model_map[provider])
+        models = {"openai": "gpt-3.5-turbo", "anthropic": "claude-3-haiku"}
+        return tester.cost_calculator.calculate_cost(usage, provider, models[provider])
 
 
 # Integration test execution marker

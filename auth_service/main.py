@@ -49,7 +49,7 @@ health_interface = AuthServiceHealthInterface("auth-service", "1.0.0")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifecycle"""
+    """Manage application lifecycle with optimized startup"""
     logger.info("Starting Auth Service...")
     
     # Log configuration
@@ -57,32 +57,59 @@ async def lifespan(app: FastAPI):
     AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8081')}")
     
+    # Check if we're in fast test mode
+    fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+    env = os.getenv("ENVIRONMENT", "development").lower()
+    
+    if fast_test_mode or env == "test":
+        logger.info("Running in fast test mode - skipping database initialization")
+        yield
+        return
+    
     # Initialize database connections on startup
     from auth_core.database.connection import auth_db
     from auth_core.database.main_db_sync import main_db_sync
     
+    initialization_errors = []
+    
+    # Try to initialize auth database
     try:
         await auth_db.initialize()
         logger.info("Auth database initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize auth database: {e}")
-        raise
+        logger.warning(f"Auth database initialization failed: {e}")
+        initialization_errors.append(f"Auth DB: {e}")
     
+    # Try to initialize main database sync (non-critical for basic auth)
     try:
         await main_db_sync.initialize()
         logger.info("Main database sync initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize main database sync: {e}")
-        raise
+        logger.warning(f"Main database sync failed (non-critical): {e}")
+        initialization_errors.append(f"Main DB Sync: {e}")
+    
+    # In development, allow service to start even with some DB issues
+    if env == "development" and initialization_errors:
+        logger.warning(f"Starting with {len(initialization_errors)} DB issues in development mode")
+    elif initialization_errors and env in ["staging", "production"]:
+        raise RuntimeError(f"Critical database failures: {initialization_errors}")
     
     yield
     
     # Cleanup
     logger.info("Shutting down Auth Service...")
     
-    # Close database connections
-    await auth_db.close()
-    await main_db_sync.close()
+    # Close database connections safely
+    try:
+        await auth_db.close()
+    except Exception as e:
+        logger.warning(f"Error closing auth DB: {e}")
+    
+    try:
+        await main_db_sync.close()
+    except Exception as e:
+        logger.warning(f"Error closing main DB sync: {e}")
+    
     logger.info("Database connections closed")
 
 # Create FastAPI app

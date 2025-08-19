@@ -68,7 +68,12 @@ class ModernConnectionManager:
             
     async def _handle_successful_connection(self, result, user_id: str) -> ConnectionInfo:
         """Handle successful connection establishment."""
-        conn_info = result.result["connection_info"]
+        # Extract connection info from nested result structure
+        if "data" in result.result:
+            execution_result = result.result["data"]
+            conn_info = execution_result.result.get("connection_info")
+        else:
+            conn_info = result.result.get("connection_info")
         await self._register_new_connection(user_id, conn_info)
         return conn_info
         

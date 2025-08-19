@@ -19,6 +19,7 @@ pylint>=2.17.0
 
 # Testing utilities
 httpx>=0.23.0  # For API testing
+websockets>=11.0.0  # For real WebSocket testing
 faker>=18.0.0  # For test data generation
 freezegun>=1.2.0  # For mocking datetime
 responses>=0.23.0  # For mocking HTTP requests

@@ -184,6 +184,16 @@ class MCPClientRepository(BaseRepository[MCPClientModel]):
             return await self._update_client_timestamp(db, client)
         except Exception as e:
             return await self._handle_update_error(db, e)
+    
+    async def find_by_user(self, db: AsyncSession, user_id: str) -> List[MCPClientModel]:
+        """Find MCP clients by user ID"""
+        try:
+            # For now, return all clients as MCP clients aren't user-specific yet
+            # In the future, could filter by user permissions or associations
+            return list(self._clients_cache.values())
+        except Exception as e:
+            logger.error(f"Error finding MCP clients by user {user_id}: {e}")
+            return []
 
 
 class MCPToolExecutionRepository(BaseRepository[MCPToolExecutionModel]):
@@ -306,4 +316,14 @@ class MCPToolExecutionRepository(BaseRepository[MCPToolExecutionModel]):
             
         except Exception as e:
             logger.error(f"Error getting client executions: {e}")
+            return []
+    
+    async def find_by_user(self, db: AsyncSession, user_id: str) -> List[MCPToolExecutionModel]:
+        """Find MCP tool executions by user ID"""
+        try:
+            # For now, return empty list as tool executions aren't user-specific yet
+            # In the future, could filter by user through client associations
+            return []
+        except Exception as e:
+            logger.error(f"Error finding MCP executions by user {user_id}: {e}")
             return []

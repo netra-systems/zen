@@ -220,7 +220,9 @@ class ConnectionEstablishmentReliability:
         operation = lambda: self._execute_connection_setup(user_id, websocket, max_connections)
         
         result = await self.reliability_manager.execute_with_reliability(connection_id, operation)
-        return result.result.get("connection_info") if result.success else None
+        if result.success and "data" in result.result:
+            return result.result["data"].get("connection_info")
+        return None
         
     async def _execute_connection_setup(self, user_id: str, websocket,
                                       max_connections: int) -> Dict[str, ConnectionInfo]:

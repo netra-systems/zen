@@ -229,9 +229,13 @@ class ModernReliableMessageHandler(BaseExecutionInterface):
     async def _execute_message_processor(self, sanitized_message: Dict[str, Any],
                                        handling_context: MessageHandlingContext) -> bool:
         """Execute message processor and update statistics."""
-        await handling_context.message_processor(sanitized_message, handling_context.conn_info)
-        self._update_success_stats(handling_context)
-        return True
+        try:
+            result = await handling_context.message_processor(sanitized_message, handling_context.conn_info)
+            self._update_success_stats(handling_context)
+            return True
+        except Exception as e:
+            logger.error(f"Message processor failed: {e}")
+            return False
         
     def _update_success_stats(self, handling_context: MessageHandlingContext) -> None:
         """Update statistics for successful message processing."""

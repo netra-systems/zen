@@ -390,18 +390,21 @@ jobs:
   # ==========================================
 
   run-tests:
-    name: Execute Test Suite
+    name: Execute Unified Test Suite
     needs: determine-strategy
     if: |
       needs.determine-strategy.outputs.should_run == 'true' &&
       needs.determine-strategy.outputs.skip_tests != 'true' &&
       contains(fromJSON('["test", "pr-validation", "main-deploy", "branch-test", "health-check", "act-local"]'), needs.determine-strategy.outputs.execution_path)
-    uses: ./.github/workflows/test-runner.yml
+    uses: ./.github/workflows/unified-test-runner.yml
     with:
       test_level: ${{ needs.determine-strategy.outputs.test_scope }}
       changed_areas: ${{ needs.determine-strategy.outputs.changed_areas }}
       act_mode: ${{ needs.determine-strategy.outputs.act_mode }}
       runner_type: ${{ needs.determine-strategy.outputs.runner_type }}
+      strategy: ${{ needs.determine-strategy.outputs.test_scope == 'comprehensive' && 'matrix' || 'parallel' }}
+      enable_real_services: ${{ needs.determine-strategy.outputs.test_scope != 'smoke' }}
+      total_shards: ${{ needs.determine-strategy.outputs.test_scope == 'comprehensive' && 6 || 3 }}
     secrets: inherit
 
   # ==========================================

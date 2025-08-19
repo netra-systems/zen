@@ -8,9 +8,55 @@ import asyncio
 import uuid
 import time
 import json
+import subprocess
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
+from pathlib import Path
+
+
+class ServiceConfig:
+    """Configuration for a test service."""
+    
+    def __init__(self, name: str, host: str = "localhost", port: int = 8000, 
+                 health_endpoint: str = "/health", startup_timeout: int = 30):
+        self.name = name
+        self.host = host
+        self.port = port
+        self.health_endpoint = health_endpoint
+        self.startup_timeout = startup_timeout
+        self.ready = False
+        self.process: Optional[subprocess.Popen] = None
+
+
+class DatabaseManager:
+    """Manages database connections and setup for testing."""
+    
+    def __init__(self, harness):
+        self.harness = harness
+        self.initialized = False
+    
+    async def setup_databases(self) -> None:
+        """Setup test databases."""
+        self.initialized = True
+    
+    async def cleanup_databases(self) -> None:
+        """Cleanup test databases."""
+        self.initialized = False
+
+
+class TestState:
+    """State management for test harness."""
+    
+    def __init__(self):
+        self.services: Dict[str, ServiceConfig] = {
+            "auth_service": ServiceConfig("auth_service", port=8001),
+            "backend": ServiceConfig("backend", port=8000)
+        }
+        self.databases = DatabaseManager(None)
+        self.ready = False
+        self.cleanup_tasks: List[callable] = []
+        self.project_root = Path.cwd()
 
 
 class UnifiedTestHarness:
@@ -23,6 +69,9 @@ class UnifiedTestHarness:
         self.test_session_id = str(uuid.uuid4())
         self.mock_services = {}
         self.test_data = {}
+        self.state = TestState()
+        self.state.databases.harness = self
+        self.project_root = Path.cwd()
     
     # Authentication Testing Support
     def create_test_user(self, user_id: str = None) -> Dict[str, str]:

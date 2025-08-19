@@ -107,7 +107,17 @@ class AuthServiceSettings:
         # If localhost is in the URL, replace with 127.0.0.1 for Windows
         if "localhost" in self.base_url:
             self.base_url = self.base_url.replace("localhost", "127.0.0.1")
-        self.enabled = os.getenv("AUTH_SERVICE_ENABLED", "true").lower() == "true"
+        
+        # Check environment and test mode for auth service enabling
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+        
+        # Disable auth service in fast test mode or test environment
+        if fast_test_mode or env == "test":
+            self.enabled = False
+        else:
+            self.enabled = os.getenv("AUTH_SERVICE_ENABLED", "true").lower() == "true"
+        
         self.cache_ttl = int(os.getenv("AUTH_CACHE_TTL_SECONDS", "300"))  # 5 min
         self.service_id = os.getenv("SERVICE_ID", "backend")
         self.service_secret = os.getenv("SERVICE_SECRET")

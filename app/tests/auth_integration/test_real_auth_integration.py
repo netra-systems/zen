@@ -69,26 +69,31 @@ class AuthServiceManager:
             return False
     
     async def _launch_service(self) -> bool:
-        """Launch auth service process"""
+        """Launch auth service process with optimized test configuration"""
         import subprocess
         import sys
         
         try:
-            # Set environment for auth service
+            # Set environment for fast auth service startup
             env = os.environ.copy()
             env.update({
                 "PORT": "8081",
-                "ENVIRONMENT": "development",
-                "AUTH_SERVICE_ENABLED": "true"
+                "ENVIRONMENT": "test",
+                "AUTH_SERVICE_ENABLED": "true",
+                "AUTH_FAST_TEST_MODE": "true",  # Enable fast test mode
+                "SQL_ECHO": "false",  # Disable SQL logging for speed
+                "JWT_SECRET": "test-secret-key-for-testing-only"
             })
             
-            # Start auth service
+            # Start auth service with optimized settings
             self.auth_process = subprocess.Popen([
                 sys.executable, "-m", "auth_service.main"
-            ], env=env, cwd=os.getcwd())
+            ], env=env, cwd=os.getcwd(), 
+               stdout=subprocess.DEVNULL,  # Suppress output for speed
+               stderr=subprocess.PIPE)     # Capture errors only
             
-            # Wait for service to be ready
-            return await self._wait_for_service()
+            # Wait for service to be ready with shorter timeout
+            return await self._wait_for_service(timeout=10)  # Reduced from 30s
         except Exception as e:
             print(f"Failed to start auth service: {e}")
             return False

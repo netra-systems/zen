@@ -1,0 +1,237 @@
+{
+  "generated_at": 1755615828.7847593,
+  "description": "Performance baselines for agent startup and initialization tests",
+  "business_justification": {
+    "segment": "ALL customer segments (Free, Early, Mid, Enterprise)",
+    "business_goal": "Ensure optimal agent startup performance for user retention",
+    "value_impact": "Fast startup directly affects user experience and conversion rates",
+    "revenue_impact": "Slow startup causes 20-30% user abandonment - $75K+ ARR protection"
+  },
+  "total_metrics": 12,
+  "categories": {
+    "cold_start": {
+      "count": 4,
+      "metrics": [
+        "agent_cold_start_time",
+        "supervisor_initialization_time",
+        "llm_model_load_time",
+        "database_connection_time"
+      ]
+    },
+    "response_time": {
+      "count": 4,
+      "metrics": [
+        "first_response_p50",
+        "first_response_p95", 
+        "first_response_p99",
+        "warm_response_time"
+      ]
+    },
+    "resource_usage": {
+      "count": 2,
+      "metrics": [
+        "startup_cpu_usage",
+        "startup_memory_usage"
+      ]
+    },
+    "concurrent_limits": {
+      "count": 2,
+      "metrics": [
+        "concurrent_startup_limit",
+        "websocket_latency_limit"
+      ]
+    }
+  },
+  "metrics": {
+    "agent_cold_start_time": {
+      "category": "cold_start",
+      "description": "Total time for agent cold start from zero state",
+      "unit": "seconds",
+      "baseline_value": 2.0,
+      "warning_threshold": 3.0,
+      "critical_threshold": 5.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 2.0s for enterprise SLA"
+    },
+    "supervisor_initialization_time": {
+      "category": "cold_start",
+      "description": "Time for SupervisorAgent to initialize and become ready",
+      "unit": "seconds",
+      "baseline_value": 0.8,
+      "warning_threshold": 1.2,
+      "critical_threshold": 2.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 1.0s for responsive UI"
+    },
+    "llm_model_load_time": {
+      "category": "cold_start",
+      "description": "Time to load and initialize LLM model connections",
+      "unit": "seconds",
+      "baseline_value": 1.0,
+      "warning_threshold": 1.5,
+      "critical_threshold": 3.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 1.5s for production readiness"
+    },
+    "database_connection_time": {
+      "category": "cold_start",
+      "description": "Time to establish database connections and validate schemas",
+      "unit": "seconds",
+      "baseline_value": 0.3,
+      "warning_threshold": 0.5,
+      "critical_threshold": 1.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 0.5s for system responsiveness"
+    },
+    "first_response_p50": {
+      "category": "response_time",
+      "description": "50th percentile (median) first response time",
+      "unit": "seconds",
+      "baseline_value": 0.8,
+      "warning_threshold": 1.2,
+      "critical_threshold": 2.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 1.0s for good UX"
+    },
+    "first_response_p95": {
+      "category": "response_time",
+      "description": "95th percentile first response time",
+      "unit": "seconds",
+      "baseline_value": 1.5,
+      "warning_threshold": 2.5,
+      "critical_threshold": 4.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 2.0s for enterprise SLA"
+    },
+    "first_response_p99": {
+      "category": "response_time",
+      "description": "99th percentile first response time (tail latency)",
+      "unit": "seconds",
+      "baseline_value": 3.0,
+      "warning_threshold": 4.5,
+      "critical_threshold": 6.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 5.0s for production SLA"
+    },
+    "warm_response_time": {
+      "category": "response_time",
+      "description": "Response time for warm (already initialized) agent",
+      "unit": "seconds",
+      "baseline_value": 0.5,
+      "warning_threshold": 0.8,
+      "critical_threshold": 1.2,
+      "higher_is_better": false,
+      "sla_requirement": "< 0.8s for optimal performance"
+    },
+    "startup_cpu_usage": {
+      "category": "resource_usage",
+      "description": "CPU usage percentage during agent startup",
+      "unit": "percentage",
+      "baseline_value": 60.0,
+      "warning_threshold": 80.0,
+      "critical_threshold": 95.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 80% to maintain system stability"
+    },
+    "startup_memory_usage": {
+      "category": "resource_usage",
+      "description": "Memory usage in MB during agent startup",
+      "unit": "MB",
+      "baseline_value": 256.0,
+      "warning_threshold": 512.0,
+      "critical_threshold": 1024.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 512MB for resource efficiency"
+    },
+    "concurrent_startup_limit": {
+      "category": "concurrent_limits",
+      "description": "Maximum number of agents that can start concurrently",
+      "unit": "agents",
+      "baseline_value": 10.0,
+      "warning_threshold": 7.0,
+      "critical_threshold": 5.0,
+      "higher_is_better": true,
+      "sla_requirement": ">= 8 concurrent startups for scalability"
+    },
+    "websocket_latency_limit": {
+      "category": "concurrent_limits",
+      "description": "WebSocket connection establishment latency limit",
+      "unit": "seconds",
+      "baseline_value": 0.2,
+      "warning_threshold": 0.5,
+      "critical_threshold": 1.0,
+      "higher_is_better": false,
+      "sla_requirement": "< 0.3s for real-time communication"
+    }
+  },
+  "performance_tiers": {
+    "free": {
+      "description": "Performance expectations for free tier users",
+      "cold_start_sla": 5.0,
+      "response_time_sla": 3.0,
+      "concurrent_limit": 3
+    },
+    "early": {
+      "description": "Performance expectations for early tier users",
+      "cold_start_sla": 3.0,
+      "response_time_sla": 2.0,
+      "concurrent_limit": 5
+    },
+    "mid": {
+      "description": "Performance expectations for mid tier users",
+      "cold_start_sla": 2.5,
+      "response_time_sla": 1.5,
+      "concurrent_limit": 8
+    },
+    "enterprise": {
+      "description": "Performance expectations for enterprise tier users",
+      "cold_start_sla": 2.0,
+      "response_time_sla": 1.0,
+      "concurrent_limit": 15
+    }
+  },
+  "database_query_limits": {
+    "connection_pool_startup": {
+      "baseline_ms": 200,
+      "warning_ms": 500,
+      "critical_ms": 1000
+    },
+    "schema_validation": {
+      "baseline_ms": 100,
+      "warning_ms": 300,
+      "critical_ms": 500
+    },
+    "initial_data_load": {
+      "baseline_ms": 150,
+      "warning_ms": 400,
+      "critical_ms": 800
+    },
+    "auth_token_validation": {
+      "baseline_ms": 50,
+      "warning_ms": 150,
+      "critical_ms": 300
+    }
+  },
+  "websocket_latency_targets": {
+    "connection_establishment": {
+      "baseline_ms": 100,
+      "warning_ms": 300,
+      "critical_ms": 500
+    },
+    "first_message_roundtrip": {
+      "baseline_ms": 200,
+      "warning_ms": 500,
+      "critical_ms": 1000
+    },
+    "auth_handshake": {
+      "baseline_ms": 150,
+      "warning_ms": 400,
+      "critical_ms": 800
+    },
+    "broadcast_latency": {
+      "baseline_ms": 50,
+      "warning_ms": 150,
+      "critical_ms": 300
+    }
+  }
+}

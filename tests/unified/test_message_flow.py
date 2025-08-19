@@ -17,6 +17,7 @@ Architecture:
 """
 
 import pytest
+import pytest_asyncio
 import asyncio
 from typing import Dict, Any, List, Optional
 
@@ -36,26 +37,26 @@ from tests.unified.message_flow_helpers import (
 )
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def message_flow_config():
     """Setup message flow test configuration"""
     config = TEST_CONFIG
     return config
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def flow_validator():
     """Setup message flow validator"""
     return MessageFlowValidator()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def persistence_validator():
     """Setup persistence validator"""
     return MessagePersistenceValidator()
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def interruption_handler():
     """Setup stream interruption handler"""
     return StreamInterruptionHandler()
