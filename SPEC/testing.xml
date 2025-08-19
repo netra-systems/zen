@@ -49,6 +49,61 @@
         </goals>
     </overview>
     
+    <real_test_requirements>
+        <description>
+            CRITICAL: Tests must test REAL functionality, not mocks of their own creation.
+            Based on frontend test paradox analysis (2025-08-19).
+        </description>
+        
+        <mandatory_rules>
+            <rule id="no-mock-components">
+                Tests MUST NOT include their own mock component implementations.
+                Test the real component or don't test at all.
+            </rule>
+            
+            <rule id="real-child-components">
+                Integration tests MUST use real child components, not mock divs.
+                Mocking all children defeats the purpose of integration testing.
+            </rule>
+            
+            <rule id="test-size-limits">
+                Test files MUST follow same 300-line limit as production code.
+                Test functions MUST follow same 8-line limit as production code.
+            </rule>
+            
+            <rule id="minimal-mocking">
+                Mock ONLY external APIs and truly unavailable resources.
+                WebSocket, state management, and UI components should be real.
+            </rule>
+            
+            <rule id="fix-sut-not-tests">
+                When tests fail, fix the System Under Test first.
+                Only modify tests if the requirements genuinely changed.
+            </rule>
+        </mandatory_rules>
+        
+        <test_pyramid>
+            <level name="unit" percentage="20">
+                Test individual functions with minimal mocking
+            </level>
+            <level name="integration" percentage="60">
+                Test real component interactions with real child components
+            </level>
+            <level name="e2e" percentage="20">
+                Test complete user flows with real backend
+            </level>
+        </test_pyramid>
+        
+        <anti_patterns>
+            <anti_pattern>Creating mock components inside test files</anti_pattern>
+            <anti_pattern>Mocking all child components in integration tests</anti_pattern>
+            <anti_pattern>Using jest.fn() for everything</anti_pattern>
+            <anti_pattern>Modifying tests to pass instead of fixing bugs</anti_pattern>
+            <anti_pattern>Tests longer than 300 lines</anti_pattern>
+            <anti_pattern>Test functions longer than 8 lines</anti_pattern>
+        </anti_patterns>
+    </real_test_requirements>
+    
     <test_categories>
         <category name="unit">
             <description>Fast, isolated tests for individual components</description>

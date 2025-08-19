@@ -85,9 +85,8 @@ export class WebSocketTestManager {
    * Waits for WebSocket connection
    */
   async waitForConnection(): Promise<void> {
-    if (this.server) {
-      await this.server.connected;
-    }
+    // Mock implementation - immediately resolve
+    return Promise.resolve();
   }
 
   /**

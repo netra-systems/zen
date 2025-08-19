@@ -5,6 +5,7 @@
  * BVJ: Reduces test maintenance overhead and ensures consistent test patterns.
  */
 
+import React from 'react';
 import { jest } from '@jest/globals';
 
 // Mock utility modules
@@ -64,27 +65,30 @@ jest.mock('@/components/chat/hooks/useMessageSending', () => ({
 
 // Component mocks
 jest.mock('@/components/chat/components/MessageActionButtons', () => ({
-  MessageActionButtons: ({ isDisabled, canSend, isSending, onSend }: any) => (
-    <div>
-      <button 
-        data-testid="send-button"
-        disabled={isDisabled || !canSend || isSending}
-        onClick={onSend}
-      >
-        {isSending ? 'Sending...' : 'Send'}
-      </button>
-      <button data-testid="emoji-button">😀</button>
-      <button data-testid="file-button">📎</button>
-    </div>
-  )
+  MessageActionButtons: ({ isDisabled, canSend, isSending, onSend }: any) => 
+    React.createElement('div', {}, [
+      React.createElement('button', {
+        key: 'send',
+        'data-testid': 'send-button',
+        disabled: isDisabled || !canSend || isSending,
+        onClick: onSend
+      }, isSending ? 'Sending...' : 'Send'),
+      React.createElement('button', {
+        key: 'emoji',
+        'data-testid': 'emoji-button'
+      }, '😀'),
+      React.createElement('button', {
+        key: 'file',
+        'data-testid': 'file-button'
+      }, '📎')
+    ])
 }));
 
 jest.mock('@/components/chat/components/KeyboardShortcutsHint', () => ({
-  KeyboardShortcutsHint: ({ isAuthenticated, hasMessage }: any) => (
-    <div data-testid="keyboard-hint">
-      {isAuthenticated && hasMessage ? 'Enter to send, Shift+Enter for new line' : 'Sign in to send'}
-    </div>
-  )
+  KeyboardShortcutsHint: ({ isAuthenticated, hasMessage }: any) => 
+    React.createElement('div', {
+      'data-testid': 'keyboard-hint'
+    }, isAuthenticated && hasMessage ? 'Enter to send, Shift+Enter for new line' : 'Sign in to send')
 }));
 
 // Default mock setup

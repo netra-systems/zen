@@ -171,6 +171,18 @@ describe('ChatHistorySection - Basic Functionality', () => {
         ...mockStore,
         threads: []
       });
+      
+      mockUseThreadStore.mockReturnValue({
+        threads: [],
+        currentThreadId: null,
+        setThreads: jest.fn(),
+        setCurrentThread: jest.fn(),
+        addThread: jest.fn(),
+        updateThread: jest.fn(),
+        deleteThread: jest.fn(),
+        setLoading: jest.fn(),
+        setError: jest.fn()
+      });
 
       render(<ChatHistorySection />);
       
@@ -193,6 +205,18 @@ describe('ChatHistorySection - Basic Functionality', () => {
         ...mockStore,
         threads: threadsWithNullTitle
       });
+      
+      mockUseThreadStore.mockReturnValue({
+        threads: threadsWithNullTitle,
+        currentThreadId: 'thread-1',
+        setThreads: jest.fn(),
+        setCurrentThread: jest.fn(),
+        addThread: jest.fn(),
+        updateThread: jest.fn(),
+        deleteThread: jest.fn(),
+        setLoading: jest.fn(),
+        setError: jest.fn()
+      });
 
       render(<ChatHistorySection />);
       
@@ -207,6 +231,18 @@ describe('ChatHistorySection - Basic Functionality', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         threads: threadsWithEmptyTitle
+      });
+      
+      mockUseThreadStore.mockReturnValue({
+        threads: threadsWithEmptyTitle,
+        currentThreadId: 'thread-1',
+        setThreads: jest.fn(),
+        setCurrentThread: jest.fn(),
+        addThread: jest.fn(),
+        updateThread: jest.fn(),
+        deleteThread: jest.fn(),
+        setLoading: jest.fn(),
+        setError: jest.fn()
       });
 
       render(<ChatHistorySection />);
@@ -235,6 +271,18 @@ describe('ChatHistorySection - Basic Functionality', () => {
         ...mockStore,
         threads: threadsWithLongTitle
       });
+      
+      mockUseThreadStore.mockReturnValue({
+        threads: threadsWithLongTitle,
+        currentThreadId: 'thread-1',
+        setThreads: jest.fn(),
+        setCurrentThread: jest.fn(),
+        addThread: jest.fn(),
+        updateThread: jest.fn(),
+        deleteThread: jest.fn(),
+        setLoading: jest.fn(),
+        setError: jest.fn()
+      });
 
       render(<ChatHistorySection />);
       
@@ -255,6 +303,18 @@ describe('ChatHistorySection - Basic Functionality', () => {
         threads: orderedThreads
       });
       
+      mockUseThreadStore.mockReturnValue({
+        threads: orderedThreads,
+        currentThreadId: 'thread-1',
+        setThreads: jest.fn(),
+        setCurrentThread: jest.fn(),
+        addThread: jest.fn(),
+        updateThread: jest.fn(),
+        deleteThread: jest.fn(),
+        setLoading: jest.fn(),
+        setError: jest.fn()
+      });
+      
       render(<ChatHistorySection />);
       
       // Verify all threads are rendered
@@ -271,6 +331,18 @@ describe('ChatHistorySection - Basic Functionality', () => {
       mockUseUnifiedChatStore.mockReturnValue({
         ...mockStore,
         threads: threadsWithMissingTimestamp
+      });
+      
+      mockUseThreadStore.mockReturnValue({
+        threads: threadsWithMissingTimestamp,
+        currentThreadId: 'thread-1',
+        setThreads: jest.fn(),
+        setCurrentThread: jest.fn(),
+        addThread: jest.fn(),
+        updateThread: jest.fn(),
+        deleteThread: jest.fn(),
+        setLoading: jest.fn(),
+        setError: jest.fn()
       });
 
       render(<ChatHistorySection />);

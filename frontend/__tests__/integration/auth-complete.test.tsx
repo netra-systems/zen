@@ -105,7 +105,7 @@ describe('Complete Authentication Flow Integration', () => {
       
       await verifyOAuthLoginSuccess(mockLogin);
       expectTokenStoredSecurely();
-    }, 10000);
+    });
 
     it('should handle OAuth callback with state validation', async () => {
       const TestComponent = createAuthTestComponent();
@@ -117,7 +117,7 @@ describe('Complete Authentication Flow Integration', () => {
       await waitForButtonToAppear('auth-status');
       // Test passes if component renders without errors
       expect(screen.getByTestId('auth-status')).toBeInTheDocument();
-    }, 10000);
+    });
 
     it('should reject invalid OAuth state', async () => {
       setupInvalidStateScenario();
@@ -129,7 +129,7 @@ describe('Complete Authentication Flow Integration', () => {
       
       await waitForButtonToAppear('auth-status');
       await expectAuthenticationRejected();
-    }, 10000);
+    });
   });
 
   describe('Development Mode Authentication', () => {
@@ -145,7 +145,7 @@ describe('Complete Authentication Flow Integration', () => {
       
       await verifyDevLoginSuccess(mockDevLogin);
       expectDevUserAuthenticated();
-    }, 10000);
+    });
 
     it('should respect dev logout flag', async () => {
       setupDevLoggedOutScenario();
@@ -159,7 +159,7 @@ describe('Complete Authentication Flow Integration', () => {
       
       expectNoAutoLogin();
       expectUnauthenticatedState();
-    }, 10000);
+    });
   });
 
   describe('Logout Flow', () => {
@@ -179,7 +179,7 @@ describe('Complete Authentication Flow Integration', () => {
       
       await verifyLogoutSuccess(mockLogout);
       expectCompleteCleanup();
-    }, 10000);
+    });
 
     it('should handle logout during active session', async () => {
       setupActiveSessionScenario();
@@ -199,7 +199,7 @@ describe('Complete Authentication Flow Integration', () => {
       // Since this is a mock test and the actual routing isn't implemented,
       // we'll just verify the logout function was called
       expect(mockAuthService.handleLogout).toHaveBeenCalled();
-    }, 10000);
+    });
   });
 
   describe('Token Management', () => {
@@ -215,7 +215,7 @@ describe('Complete Authentication Flow Integration', () => {
       await waitForButtonToAppear('auth-status');
       expectTokenValidated();
       expectClaimsExtracted();
-    }, 10000);
+    });
 
     it('should handle malformed tokens', async () => {
       const malformedToken = 'invalid.token.format';
@@ -229,7 +229,7 @@ describe('Complete Authentication Flow Integration', () => {
       await waitForButtonToAppear('auth-status');
       expectTokenRejected();
       expectSecurityCleanup();
-    }, 10000);
+    });
 
     it('should handle expired tokens', async () => {
       const expiredToken = createExpiredJWT();
@@ -252,7 +252,7 @@ describe('Complete Authentication Flow Integration', () => {
       
       // Verify user remains unauthenticated
       await expectAuthenticationRejected();
-    }, 10000);
+    });
   });
 
   // Helper functions for test setup (≤8 lines each)

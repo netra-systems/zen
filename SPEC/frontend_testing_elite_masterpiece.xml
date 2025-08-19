@@ -1,0 +1,1091 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Frontend Testing Elite Masterpiece</name>
+        <type>ULTRA ELITE Testing Specification</type>
+        <category>Frontend Testing Excellence</category>
+        <version>10.0</version>
+        <last_updated>2025-08-19</last_updated>
+        <description>
+            The definitive, ultra-comprehensive frontend testing specification for Netra Apex.
+            10x improvement over existing specs with laser focus on first-time user experience,
+            chat initialization, and conversion-critical paths. Every test tied to revenue.
+        </description>
+        <business_value_justification>
+            <segment>All (Free → Enterprise)</segment>
+            <goal>100% conversion reliability, zero critical bugs</goal>
+            <value_impact>50% reduction in onboarding drop-off, 90% bug prevention</value_impact>
+            <revenue_impact>+$100K MRR from improved conversion and retention</revenue_impact>
+        </business_value_justification>
+    </metadata>
+    
+    <ultra_critical_focus_areas>
+        <area id="first_time_user_experience" priority="ULTRA_P0" revenue_impact="$50K MRR">
+            <name>First-Time User Experience - The Golden Path</name>
+            <description>
+                The first 30 seconds determine if a user converts or churns.
+                This is the most critical testing area in the entire application.
+            </description>
+            <critical_moments>
+                <moment id="page_load" max_time="1s">Initial page render and interactivity</moment>
+                <moment id="auth_check" max_time="100ms">Check if user is authenticated</moment>
+                <moment id="ui_ready" max_time="2s">All UI elements visible and clickable</moment>
+                <moment id="start_chat_visible" max_time="0ms">Start Chat button ALWAYS visible</moment>
+                <moment id="first_click_response" max_time="50ms">Immediate feedback on any click</moment>
+            </critical_moments>
+        </area>
+        
+        <area id="start_chat_button" priority="ULTRA_P0" revenue_impact="$30K MRR">
+            <name>Start Chat Button - The Conversion Gateway</name>
+            <description>
+                The single most important button in the application.
+                Must work flawlessly in ALL conditions.
+            </description>
+            <requirements>
+                <requirement>ALWAYS visible to new users</requirement>
+                <requirement>NEVER disabled except during active creation</requirement>
+                <requirement>Click feedback within 16ms (single frame)</requirement>
+                <requirement>Thread creation within 300ms</requirement>
+                <requirement>Double-click protection MANDATORY</requirement>
+                <requirement>Mobile tap works identically to desktop click</requirement>
+            </requirements>
+        </area>
+        
+        <area id="chat_initialization" priority="ULTRA_P0" revenue_impact="$20K MRR">
+            <name>Chat Initialization - The Experience Foundation</name>
+            <description>
+                From login to first message must be flawless.
+                Any friction here causes immediate churn.
+            </description>
+            <critical_path>
+                <step>Login completes</step>
+                <step>WebSocket connects</step>
+                <step>Thread list loads</step>
+                <step>Chat UI renders</step>
+                <step>Input field ready</step>
+                <step>User types message</step>
+                <step>Message sends successfully</step>
+                <step>AI response begins</step>
+            </critical_path>
+        </area>
+    </ultra_critical_focus_areas>
+    
+    <first_time_user_journey_tests priority="ULTRA_P0">
+        <test_suite id="landing_to_chat" business_value="Conversion Critical">
+            <name>Complete Landing to First Message Flow</name>
+            <test_cases>
+                <test id="ftue_001" priority="P0">
+                    <name>Brand new user sees landing page</name>
+                    <steps>
+                        <step>Navigate to root URL</step>
+                        <step>Page loads completely</step>
+                        <step>Hero section visible</step>
+                        <step>"Get Started" button prominent</step>
+                        <step>No authentication required</step>
+                    </steps>
+                    <validations>
+                        <validate>Page interactive < 1s</validate>
+                        <validate>CTA button above fold</validate>
+                        <validate>No console errors</validate>
+                        <validate>All images loaded</validate>
+                    </validations>
+                </test>
+                
+                <test id="ftue_002" priority="P0">
+                    <name>Get Started button leads to signup</name>
+                    <steps>
+                        <step>Click "Get Started"</step>
+                        <step>Signup form appears</step>
+                        <step>Email field auto-focused</step>
+                        <step>Password requirements shown</step>
+                        <step>Social login options visible</step>
+                    </steps>
+                    <validations>
+                        <validate>Form loads < 200ms</validate>
+                        <validate>Keyboard ready immediately</validate>
+                        <validate>Validation in real-time</validate>
+                    </validations>
+                </test>
+                
+                <test id="ftue_003" priority="P0">
+                    <name>Signup completion to chat ready</name>
+                    <steps>
+                        <step>Complete signup form</step>
+                        <step>Account created</step>
+                        <step>Auto-login happens</step>
+                        <step>Redirect to /chat</step>
+                        <step>Welcome message shows</step>
+                        <step>Start New Chat button prominent</step>
+                    </steps>
+                    <validations>
+                        <validate>No manual login required</validate>
+                        <validate>Token stored correctly</validate>
+                        <validate>WebSocket connected</validate>
+                        <validate>UI fully interactive</validate>
+                    </validations>
+                </test>
+                
+                <test id="ftue_004" priority="P0">
+                    <name>First chat creation flow</name>
+                    <steps>
+                        <step>Click "Start New Chat"</step>
+                        <step>Loading spinner shows</step>
+                        <step>Thread created</step>
+                        <step>Empty chat view loads</step>
+                        <step>Welcome prompt displays</step>
+                        <step>Input field focused</step>
+                        <step>Placeholder text helpful</step>
+                    </steps>
+                    <validations>
+                        <validate>Thread creation < 300ms</validate>
+                        <validate>No duplicate threads</validate>
+                        <validate>Thread ID unique</validate>
+                        <validate>Sidebar updates</validate>
+                        <validate>URL updates</validate>
+                    </validations>
+                </test>
+                
+                <test id="ftue_005" priority="P0">
+                    <name>First message send and response</name>
+                    <steps>
+                        <step>Type "Hello"</step>
+                        <step>Press Enter or click Send</step>
+                        <step>Message appears immediately</step>
+                        <step>Sending indicator shows</step>
+                        <step>AI thinking indicator</step>
+                        <step>Response begins streaming</step>
+                        <step>Response completes</step>
+                        <step>Actions available</step>
+                    </steps>
+                    <validations>
+                        <validate>Optimistic UI update</validate>
+                        <validate>No input lag</validate>
+                        <validate>First token < 1s</validate>
+                        <validate>Smooth streaming</validate>
+                        <validate>Copy button works</validate>
+                    </validations>
+                </test>
+            </test_cases>
+            
+            <edge_cases>
+                <case>Network drops during signup</case>
+                <case>Duplicate email attempted</case>
+                <case>Weak password entered</case>
+                <case>Browser back during flow</case>
+                <case>Multiple tabs open</case>
+                <case>Page refresh at any step</case>
+                <case>Mobile keyboard issues</case>
+                <case>Autofill interference</case>
+            </edge_cases>
+        </test_suite>
+        
+        <test_suite id="returning_user_flow" business_value="Retention Critical">
+            <name>Returning User Quick Access</name>
+            <test_cases>
+                <test id="return_001" priority="P0">
+                    <name>Auto-login with saved token</name>
+                    <steps>
+                        <step>User visits site</step>
+                        <step>Token found in storage</step>
+                        <step>Token validated</step>
+                        <step>Auto-redirect to /chat</step>
+                        <step>Previous threads load</step>
+                        <step>Last thread selected</step>
+                    </steps>
+                    <validations>
+                        <validate>No login screen shown</validate>
+                        <validate>Direct to chat < 2s</validate>
+                        <validate>State fully restored</validate>
+                    </validations>
+                </test>
+                
+                <test id="return_002" priority="P0">
+                    <name>Expired token handling</name>
+                    <steps>
+                        <step>Token found but expired</step>
+                        <step>Refresh attempt made</step>
+                        <step>If refresh fails, show login</step>
+                        <step>Preserve intended destination</step>
+                        <step>After login, go to destination</step>
+                    </steps>
+                    <validations>
+                        <validate>Graceful degradation</validate>
+                        <validate>No infinite loops</validate>
+                        <validate>Clear messaging</validate>
+                    </validations>
+                </test>
+            </test_cases>
+        </test_suite>
+    </first_time_user_journey_tests>
+    
+    <start_chat_button_comprehensive_tests priority="ULTRA_P0">
+        <test_suite id="button_visibility" business_value="$30K MRR">
+            <name>Start Chat Button Visibility Matrix</name>
+            <test_matrix>
+                <scenario state="no_auth" visibility="true" location="landing_page"/>
+                <scenario state="authenticated_no_threads" visibility="true" location="chat_empty_state"/>
+                <scenario state="authenticated_with_threads" visibility="true" location="sidebar_top"/>
+                <scenario state="thread_selected" visibility="true" location="sidebar_top"/>
+                <scenario state="message_sending" visibility="true" location="sidebar_top"/>
+                <scenario state="error_state" visibility="true" location="multiple"/>
+                <scenario state="offline" visibility="true" location="current"/>
+                <scenario state="mobile_view" visibility="true" location="bottom_bar"/>
+            </test_matrix>
+            
+            <test_cases>
+                <test id="scb_001">
+                    <name>Button always findable by new users</name>
+                    <validations>
+                        <validate>data-testid="start-chat" exists</validate>
+                        <validate>aria-label descriptive</validate>
+                        <validate>z-index above other elements</validate>
+                        <validate>Contrast ratio > 4.5:1</validate>
+                        <validate>Touch target >= 44x44px</validate>
+                    </validations>
+                </test>
+                
+                <test id="scb_002">
+                    <name>Button prominent in empty state</name>
+                    <validations>
+                        <validate>Centered in viewport</validate>
+                        <validate>Large size (min 200px wide)</validate>
+                        <validate>Primary color scheme</validate>
+                        <validate>Pulse animation on first view</validate>
+                    </validations>
+                </test>
+                
+                <test id="scb_003">
+                    <name>Button accessible via keyboard</name>
+                    <validations>
+                        <validate>Tab navigation reaches button</validate>
+                        <validate>Enter key triggers click</validate>
+                        <validate>Space key triggers click</validate>
+                        <validate>Focus ring visible</validate>
+                        <validate>Screen reader announces</validate>
+                    </validations>
+                </test>
+            </test_cases>
+        </test_suite>
+        
+        <test_suite id="button_interaction" business_value="Conversion Critical">
+            <name>Start Chat Button Interaction Tests</name>
+            <test_cases>
+                <test id="sci_001" priority="P0">
+                    <name>Single click creates thread</name>
+                    <implementation><![CDATA[
+it('creates thread on single click', async () => {
+  const user = userEvent.setup();
+  renderWithProviders(<ChatInterface />);
+  
+  const button = screen.getByTestId('start-chat-button');
+  await user.click(button);
+  
+  await waitFor(() => {
+    expect(mockAPI.createThread).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('new-thread')).toBeInTheDocument();
+  }, { timeout: 300 });
+  
+  expect(button).toBeDisabled(); // During creation
+  
+  await waitFor(() => {
+    expect(button).toBeEnabled(); // After creation
+  });
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="sci_002" priority="P0">
+                    <name>Double-click prevention</name>
+                    <implementation><![CDATA[
+it('prevents duplicate threads on double-click', async () => {
+  const user = userEvent.setup();
+  renderWithProviders(<ChatInterface />);
+  
+  const button = screen.getByTestId('start-chat-button');
+  
+  // Rapid double-click
+  await user.click(button);
+  await user.click(button);
+  
+  await waitFor(() => {
+    expect(mockAPI.createThread).toHaveBeenCalledTimes(1);
+  });
+  
+  // Only one thread created
+  const threads = screen.getAllByTestId(/thread-/);
+  expect(threads).toHaveLength(1);
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="sci_003" priority="P0">
+                    <name>Loading state during creation</name>
+                    <implementation><![CDATA[
+it('shows loading state during thread creation', async () => {
+  const user = userEvent.setup();
+  
+  // Delay API response
+  mockAPI.createThread.mockImplementation(
+    () => new Promise(resolve => setTimeout(resolve, 500))
+  );
+  
+  renderWithProviders(<ChatInterface />);
+  const button = screen.getByTestId('start-chat-button');
+  
+  await user.click(button);
+  
+  // Immediate feedback
+  expect(button).toHaveAttribute('aria-busy', 'true');
+  expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+  expect(button).toBeDisabled();
+  
+  await waitFor(() => {
+    expect(button).toHaveAttribute('aria-busy', 'false');
+    expect(button).toBeEnabled();
+  });
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="sci_004" priority="P0">
+                    <name>Error recovery on creation failure</name>
+                    <implementation><![CDATA[
+it('recovers from thread creation failure', async () => {
+  const user = userEvent.setup();
+  
+  mockAPI.createThread.mockRejectedValueOnce(
+    new Error('Network error')
+  );
+  
+  renderWithProviders(<ChatInterface />);
+  const button = screen.getByTestId('start-chat-button');
+  
+  await user.click(button);
+  
+  await waitFor(() => {
+    expect(screen.getByText(/failed/i)).toBeInTheDocument();
+    expect(button).toBeEnabled(); // Re-enabled for retry
+  });
+  
+  // Retry succeeds
+  mockAPI.createThread.mockResolvedValueOnce({ id: 'thread-123' });
+  await user.click(button);
+  
+  await waitFor(() => {
+    expect(screen.getByTestId('thread-123')).toBeInTheDocument();
+  });
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="sci_005" priority="P0">
+                    <name>Mobile touch interaction</name>
+                    <implementation><![CDATA[
+it('handles touch events on mobile', async () => {
+  renderWithProviders(<ChatInterface />);
+  const button = screen.getByTestId('start-chat-button');
+  
+  // Simulate touch
+  fireEvent.touchStart(button);
+  fireEvent.touchEnd(button);
+  
+  await waitFor(() => {
+    expect(mockAPI.createThread).toHaveBeenCalled();
+  });
+  
+  // No ghost clicks
+  expect(mockAPI.createThread).toHaveBeenCalledTimes(1);
+});
+                    ]]></implementation>
+                </test>
+            </test_cases>
+        </test_suite>
+    </start_chat_button_comprehensive_tests>
+    
+    <chat_initialization_comprehensive_tests priority="ULTRA_P0">
+        <test_suite id="websocket_setup" business_value="Core Functionality">
+            <name>WebSocket Connection Tests</name>
+            <test_cases>
+                <test id="ws_001" priority="P0">
+                    <name>WebSocket connects with auth token</name>
+                    <implementation><![CDATA[
+it('establishes WebSocket connection after login', async () => {
+  const wsManager = new WebSocketTestManager();
+  const server = wsManager.createMockServer();
+  
+  renderWithProviders(<ChatInterface />);
+  
+  await performLogin('user@example.com', 'password');
+  
+  await waitFor(() => {
+    expect(server.clients).toHaveLength(1);
+    const client = server.clients[0];
+    expect(client.readyState).toBe(WebSocket.OPEN);
+    
+    // Verify auth header
+    const authHeader = client.protocol;
+    expect(authHeader).toContain('Bearer');
+  });
+  
+  wsManager.cleanup();
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="ws_002" priority="P0">
+                    <name>WebSocket reconnects on disconnect</name>
+                    <implementation><![CDATA[
+it('automatically reconnects WebSocket', async () => {
+  const wsManager = new WebSocketTestManager();
+  const server = wsManager.createMockServer();
+  
+  renderWithProviders(<ChatInterface />);
+  await performLogin('user@example.com', 'password');
+  
+  // Force disconnect
+  server.clients[0].close();
+  
+  await waitFor(() => {
+    expect(screen.getByTestId('connection-status')).toHaveTextContent('Reconnecting');
+  });
+  
+  // Should reconnect
+  await waitFor(() => {
+    expect(server.clients).toHaveLength(1);
+    expect(screen.getByTestId('connection-status')).toHaveTextContent('Connected');
+  }, { timeout: 5000 });
+  
+  wsManager.cleanup();
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="ws_003" priority="P0">
+                    <name>Message queue during disconnection</name>
+                    <implementation><![CDATA[
+it('queues messages during disconnection', async () => {
+  const wsManager = new WebSocketTestManager();
+  const server = wsManager.createMockServer();
+  
+  renderWithProviders(<ChatInterface />);
+  const user = userEvent.setup();
+  
+  // Disconnect WebSocket
+  server.close();
+  
+  // Try to send message
+  const input = screen.getByTestId('message-input');
+  await user.type(input, 'Test message');
+  await user.keyboard('{Enter}');
+  
+  // Message shown as pending
+  expect(screen.getByText('Test message')).toHaveAttribute('data-status', 'pending');
+  
+  // Reconnect
+  const newServer = wsManager.createMockServer();
+  
+  await waitFor(() => {
+    // Message sent after reconnection
+    expect(newServer.messages).toContainEqual(
+      expect.objectContaining({ text: 'Test message' })
+    );
+  });
+  
+  wsManager.cleanup();
+});
+                    ]]></implementation>
+                </test>
+            </test_cases>
+        </test_suite>
+        
+        <test_suite id="thread_initialization" business_value="User Experience">
+            <name>Thread Initialization Tests</name>
+            <test_cases>
+                <test id="thread_001" priority="P0">
+                    <name>Thread list loads on login</name>
+                    <implementation><![CDATA[
+it('loads user threads after authentication', async () => {
+  mockAPI.getThreads.mockResolvedValue([
+    { id: 'thread-1', title: 'First Chat', updated_at: '2024-01-01' },
+    { id: 'thread-2', title: 'Second Chat', updated_at: '2024-01-02' }
+  ]);
+  
+  renderWithProviders(<ChatInterface />);
+  await performLogin('user@example.com', 'password');
+  
+  await waitFor(() => {
+    expect(screen.getByText('First Chat')).toBeInTheDocument();
+    expect(screen.getByText('Second Chat')).toBeInTheDocument();
+  });
+  
+  // Most recent thread selected
+  expect(screen.getByTestId('thread-2')).toHaveAttribute('aria-selected', 'true');
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="thread_002" priority="P0">
+                    <name>Empty state for new users</name>
+                    <implementation><![CDATA[
+it('shows empty state for users with no threads', async () => {
+  mockAPI.getThreads.mockResolvedValue([]);
+  
+  renderWithProviders(<ChatInterface />);
+  await performLogin('newuser@example.com', 'password');
+  
+  await waitFor(() => {
+    expect(screen.getByTestId('empty-state')).toBeInTheDocument();
+    expect(screen.getByText('Start your first conversation')).toBeInTheDocument();
+    
+    // Start chat button prominent
+    const button = screen.getByTestId('start-chat-button');
+    expect(button).toHaveClass('primary-action');
+    expect(button).toBeVisible();
+  });
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="thread_003" priority="P0">
+                    <name>Thread switching updates UI</name>
+                    <implementation><![CDATA[
+it('updates UI when switching threads', async () => {
+  const user = userEvent.setup();
+  
+  mockAPI.getThreads.mockResolvedValue([
+    { id: 'thread-1', title: 'Thread 1' },
+    { id: 'thread-2', title: 'Thread 2' }
+  ]);
+  
+  mockAPI.getMessages.mockImplementation((threadId) => {
+    if (threadId === 'thread-1') {
+      return Promise.resolve([{ text: 'Message 1' }]);
+    }
+    return Promise.resolve([{ text: 'Message 2' }]);
+  });
+  
+  renderWithProviders(<ChatInterface />);
+  await performLogin('user@example.com', 'password');
+  
+  // Switch to thread-1
+  await user.click(screen.getByTestId('thread-1'));
+  
+  await waitFor(() => {
+    expect(screen.getByText('Message 1')).toBeInTheDocument();
+    expect(screen.queryByText('Message 2')).not.toBeInTheDocument();
+  });
+  
+  // Switch to thread-2
+  await user.click(screen.getByTestId('thread-2'));
+  
+  await waitFor(() => {
+    expect(screen.getByText('Message 2')).toBeInTheDocument();
+    expect(screen.queryByText('Message 1')).not.toBeInTheDocument();
+  });
+});
+                    ]]></implementation>
+                </test>
+            </test_cases>
+        </test_suite>
+    </chat_initialization_comprehensive_tests>
+    
+    <message_flow_bulletproof_tests priority="ULTRA_P0">
+        <test_suite id="message_sending" business_value="Core Functionality">
+            <name>Message Sending Reliability</name>
+            <test_cases>
+                <test id="msg_send_001" priority="P0">
+                    <name>Message sends on Enter key</name>
+                    <implementation><![CDATA[
+it('sends message on Enter key press', async () => {
+  const user = userEvent.setup();
+  renderWithProviders(<ChatInterface />);
+  
+  const input = screen.getByTestId('message-input');
+  await user.type(input, 'Hello AI');
+  await user.keyboard('{Enter}');
+  
+  // Immediate optimistic update
+  expect(screen.getByText('Hello AI')).toBeInTheDocument();
+  
+  // API called
+  expect(mockAPI.sendMessage).toHaveBeenCalledWith(
+    expect.objectContaining({ text: 'Hello AI' })
+  );
+  
+  // Input cleared
+  expect(input).toHaveValue('');
+  
+  // Input re-focused
+  expect(input).toHaveFocus();
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="msg_send_002" priority="P0">
+                    <name>Multiline with Shift+Enter</name>
+                    <implementation><![CDATA[
+it('creates multiline message with Shift+Enter', async () => {
+  const user = userEvent.setup();
+  renderWithProviders(<ChatInterface />);
+  
+  const input = screen.getByTestId('message-input');
+  await user.type(input, 'Line 1');
+  await user.keyboard('{Shift>}{Enter}{/Shift}');
+  await user.type(input, 'Line 2');
+  
+  expect(input).toHaveValue('Line 1\nLine 2');
+  
+  // Send with Enter
+  await user.keyboard('{Enter}');
+  
+  expect(mockAPI.sendMessage).toHaveBeenCalledWith(
+    expect.objectContaining({ text: 'Line 1\nLine 2' })
+  );
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="msg_send_003" priority="P0">
+                    <name>Empty message prevention</name>
+                    <implementation><![CDATA[
+it('prevents sending empty messages', async () => {
+  const user = userEvent.setup();
+  renderWithProviders(<ChatInterface />);
+  
+  const input = screen.getByTestId('message-input');
+  const sendButton = screen.getByTestId('send-button');
+  
+  // Empty input
+  expect(sendButton).toBeDisabled();
+  
+  // Whitespace only
+  await user.type(input, '   ');
+  expect(sendButton).toBeDisabled();
+  
+  // Enter key does nothing
+  await user.keyboard('{Enter}');
+  expect(mockAPI.sendMessage).not.toHaveBeenCalled();
+  
+  // Valid text enables send
+  await user.type(input, 'Hello');
+  expect(sendButton).toBeEnabled();
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="msg_send_004" priority="P0">
+                    <name>Rate limiting protection</name>
+                    <implementation><![CDATA[
+it('prevents message spam with rate limiting', async () => {
+  const user = userEvent.setup();
+  renderWithProviders(<ChatInterface />);
+  
+  const input = screen.getByTestId('message-input');
+  
+  // Send multiple messages rapidly
+  for (let i = 0; i < 10; i++) {
+    await user.type(input, `Message ${i}`);
+    await user.keyboard('{Enter}');
+  }
+  
+  // Only first few messages sent
+  expect(mockAPI.sendMessage).toHaveBeenCalledTimes(3);
+  
+  // Rate limit warning shown
+  expect(screen.getByText(/slow down/i)).toBeInTheDocument();
+  
+  // Wait for cooldown
+  await waitFor(() => {
+    expect(screen.queryByText(/slow down/i)).not.toBeInTheDocument();
+  }, { timeout: 2000 });
+  
+  // Can send again
+  await user.type(input, 'After cooldown');
+  await user.keyboard('{Enter}');
+  expect(mockAPI.sendMessage).toHaveBeenCalledTimes(4);
+});
+                    ]]></implementation>
+                </test>
+            </test_cases>
+        </test_suite>
+        
+        <test_suite id="message_receiving" business_value="User Experience">
+            <name>Message Reception and Display</name>
+            <test_cases>
+                <test id="msg_recv_001" priority="P0">
+                    <name>AI response streaming</name>
+                    <implementation><![CDATA[
+it('displays AI response with streaming', async () => {
+  const wsManager = new WebSocketTestManager();
+  const server = wsManager.createMockServer();
+  
+  renderWithProviders(<ChatInterface />);
+  await sendMessage('Hello');
+  
+  // Send response chunks
+  await server.sendMessage({
+    type: 'stream_start',
+    message_id: 'msg-1'
+  });
+  
+  expect(screen.getByTestId('ai-thinking')).toBeInTheDocument();
+  
+  await server.sendMessage({
+    type: 'stream_chunk',
+    text: 'Hello! '
+  });
+  
+  expect(screen.getByText('Hello!')).toBeInTheDocument();
+  
+  await server.sendMessage({
+    type: 'stream_chunk',
+    text: 'How can I help?'
+  });
+  
+  expect(screen.getByText('Hello! How can I help?')).toBeInTheDocument();
+  
+  await server.sendMessage({
+    type: 'stream_end'
+  });
+  
+  expect(screen.queryByTestId('ai-thinking')).not.toBeInTheDocument();
+  
+  wsManager.cleanup();
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="msg_recv_002" priority="P0">
+                    <name>Markdown rendering in messages</name>
+                    <implementation><![CDATA[
+it('renders markdown in AI responses', async () => {
+  mockAPI.sendMessage.mockResolvedValue({
+    response: '# Header\n**Bold** and *italic*\n```js\nconsole.log("code");\n```'
+  });
+  
+  renderWithProviders(<ChatInterface />);
+  await sendMessage('Show markdown');
+  
+  await waitFor(() => {
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Header');
+    expect(screen.getByText('Bold')).toHaveStyle({ fontWeight: 'bold' });
+    expect(screen.getByText('italic')).toHaveStyle({ fontStyle: 'italic' });
+    expect(screen.getByText('console.log("code");')).toHaveClass('language-js');
+  });
+});
+                    ]]></implementation>
+                </test>
+                
+                <test id="msg_recv_003" priority="P0">
+                    <name>Error message display</name>
+                    <implementation><![CDATA[
+it('displays error messages appropriately', async () => {
+  const wsManager = new WebSocketTestManager();
+  const server = wsManager.createMockServer();
+  
+  renderWithProviders(<ChatInterface />);
+  await sendMessage('Cause error');
+  
+  await server.sendMessage({
+    type: 'error',
+    error: 'Something went wrong',
+    retry_available: true
+  });
+  
+  expect(screen.getByText('Something went wrong')).toBeInTheDocument();
+  expect(screen.getByTestId('retry-button')).toBeInTheDocument();
+  
+  // Retry functionality
+  const user = userEvent.setup();
+  await user.click(screen.getByTestId('retry-button'));
+  
+  expect(mockAPI.retryMessage).toHaveBeenCalled();
+  
+  wsManager.cleanup();
+});
+                    ]]></implementation>
+                </test>
+            </test_cases>
+        </test_suite>
+    </message_flow_bulletproof_tests>
+    
+    <ui_component_exhaustive_tests priority="P0">
+        <test_suite id="all_buttons" business_value="User Interaction">
+            <name>Every Button in the Application</name>
+            <button_matrix>
+                <button id="start-chat" states="enabled,disabled,loading,hover,focus,active"/>
+                <button id="send-message" states="enabled,disabled,loading"/>
+                <button id="copy-message" states="enabled,hover,clicked"/>
+                <button id="retry-message" states="enabled,disabled,loading"/>
+                <button id="delete-message" states="enabled,confirming"/>
+                <button id="edit-message" states="enabled,editing,saving"/>
+                <button id="stop-generation" states="enabled,stopping"/>
+                <button id="logout" states="enabled,confirming"/>
+                <button id="settings" states="enabled,open"/>
+                <button id="thread-menu" states="enabled,open"/>
+            </button_matrix>
+            
+            <test_template><![CDATA[
+it('tests ${button_id} in ${state} state', async () => {
+  const button = screen.getByTestId('${button_id}');
+  
+  // Set button to ${state} state
+  await setButtonState(button, '${state}');
+  
+  // Visual validation
+  expect(button).toHaveAttribute('aria-disabled', '${disabled}');
+  expect(button).toHaveAttribute('aria-busy', '${loading}');
+  
+  // Interaction validation
+  if (${state} === 'enabled') {
+    await userEvent.click(button);
+    expect(mockHandlers['${button_id}']).toHaveBeenCalled();
+  }
+  
+  // Accessibility validation
+  expect(button).toHaveAccessibleName();
+  expect(button).toHaveAccessibleDescription();
+});
+            ]]></test_template>
+        </test_suite>
+        
+        <test_suite id="all_inputs" business_value="Data Entry">
+            <name>Every Input Field</name>
+            <input_matrix>
+                <input id="message-input" type="textarea" validations="max_length,emoji,markdown"/>
+                <input id="email-input" type="email" validations="format,required"/>
+                <input id="password-input" type="password" validations="strength,required"/>
+                <input id="search-input" type="text" validations="debounce,clear"/>
+                <input id="thread-title" type="text" validations="max_length,auto_save"/>
+            </input_matrix>
+            
+            <test_cases>
+                <test id="input_001">
+                    <name>Input accepts valid data</name>
+                </test>
+                <test id="input_002">
+                    <name>Input shows validation errors</name>
+                </test>
+                <test id="input_003">
+                    <name>Input handles paste events</name>
+                </test>
+                <test id="input_004">
+                    <name>Input supports undo/redo</name>
+                </test>
+                <test id="input_005">
+                    <name>Input accessible with screen reader</name>
+                </test>
+            </test_cases>
+        </test_suite>
+    </ui_component_exhaustive_tests>
+    
+    <performance_requirements priority="P0">
+        <metric id="first_contentful_paint" target="< 1s" current="1.2s" gap="200ms"/>
+        <metric id="time_to_interactive" target="< 2s" current="2.5s" gap="500ms"/>
+        <metric id="first_input_delay" target="< 50ms" current="75ms" gap="25ms"/>
+        <metric id="cumulative_layout_shift" target="< 0.1" current="0.15" gap="0.05"/>
+        <metric id="largest_contentful_paint" target="< 2.5s" current="3s" gap="500ms"/>
+        
+        <critical_user_actions>
+            <action name="Click Start Chat" target="< 50ms response"/>
+            <action name="Send Message" target="< 100ms response"/>
+            <action name="Switch Thread" target="< 200ms response"/>
+            <action name="Type in Input" target="< 16ms response"/>
+            <action name="Scroll Messages" target="> 60fps"/>
+        </critical_user_actions>
+    </performance_requirements>
+    
+    <implementation_patterns>
+        <pattern id="test_organization">
+            <name>Test File Organization</name>
+            <structure><![CDATA[
+frontend/
+  __tests__/
+    critical/           # P0 revenue-critical tests
+      first-load/      # First load experience
+      auth-flow/       # Authentication flows
+      chat-init/       # Chat initialization
+      start-button/    # Start chat button
+    features/          # Feature-specific tests
+      messaging/       # Message send/receive
+      threads/         # Thread management
+      search/          # Search functionality
+    components/        # Component unit tests
+    integration/       # Integration tests
+    e2e/              # End-to-end tests
+    performance/      # Performance tests
+    accessibility/    # A11y tests
+            ]]></structure>
+        </pattern>
+        
+        <pattern id="test_utilities">
+            <name>Shared Test Utilities</name>
+            <code><![CDATA[
+// test-utils.ts
+export const renderWithProviders = (component: ReactElement) => {
+  return render(
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <WebSocketProvider>
+          <RouterProvider>
+            {component}
+          </RouterProvider>
+        </WebSocketProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
+
+export const performLogin = async (email: string, password: string) => {
+  const user = userEvent.setup();
+  await user.type(screen.getByTestId('email-input'), email);
+  await user.type(screen.getByTestId('password-input'), password);
+  await user.click(screen.getByTestId('login-button'));
+  await waitFor(() => {
+    expect(screen.getByTestId('chat-interface')).toBeInTheDocument();
+  });
+};
+
+export const sendMessage = async (text: string) => {
+  const user = userEvent.setup();
+  const input = screen.getByTestId('message-input');
+  await user.type(input, text);
+  await user.keyboard('{Enter}');
+};
+
+export const createMockWebSocket = () => {
+  const server = new WS('ws://localhost:8080');
+  return {
+    server,
+    sendToClient: (data: any) => server.send(JSON.stringify(data)),
+    cleanup: () => server.close()
+  };
+};
+            ]]></code>
+        </pattern>
+        
+        <pattern id="mock_strategy">
+            <name>Comprehensive Mock Strategy</name>
+            <mocks>
+                <mock type="api">
+                    <description>MSW for all HTTP requests</description>
+                    <implementation><![CDATA[
+// mocks/api.ts
+export const handlers = [
+  rest.post('/api/auth/login', (req, res, ctx) => {
+    return res(ctx.json({ token: 'mock-token', user: mockUser }));
+  }),
+  rest.post('/api/threads', (req, res, ctx) => {
+    return res(ctx.json({ id: 'thread-123', created_at: Date.now() }));
+  }),
+  rest.post('/api/messages', (req, res, ctx) => {
+    return res(ctx.json({ id: 'msg-123', status: 'sent' }));
+  })
+];
+                    ]]></implementation>
+                </mock>
+                <mock type="websocket">
+                    <description>Custom WebSocket test manager</description>
+                </mock>
+                <mock type="storage">
+                    <description>In-memory storage for tests</description>
+                </mock>
+            </mocks>
+        </pattern>
+    </implementation_patterns>
+    
+    <continuous_improvement>
+        <monitoring>
+            <metric name="test_coverage" target="95%" alert_threshold="90%"/>
+            <metric name="test_execution_time" target="< 5min" alert_threshold="10min"/>
+            <metric name="flaky_test_rate" target="0%" alert_threshold="1%"/>
+            <metric name="bug_escape_rate" target="< 0.1%" measurement="bugs_in_prod / total_changes"/>
+        </monitoring>
+        
+        <automation>
+            <hook trigger="pre-commit">
+                <action>Run affected unit tests</action>
+                <timeout>30s</timeout>
+            </hook>
+            <hook trigger="pre-push">
+                <action>Run all unit and integration tests</action>
+                <timeout>2min</timeout>
+            </hook>
+            <hook trigger="pull-request">
+                <action>Full test suite including E2E</action>
+                <timeout>10min</timeout>
+            </hook>
+            <hook trigger="main-merge">
+                <action>Deploy to staging and run smoke tests</action>
+                <timeout>15min</timeout>
+            </hook>
+        </automation>
+        
+        <reporting>
+            <report type="daily">
+                <content>Test failures, coverage changes, performance metrics</content>
+                <recipients>dev-team</recipients>
+            </report>
+            <report type="weekly">
+                <content>Coverage trends, flaky tests, bug escape analysis</content>
+                <recipients>dev-team, product</recipients>
+            </report>
+            <report type="sprint">
+                <content>Test debt, coverage gaps, action items</content>
+                <recipients>dev-team, management</recipients>
+            </report>
+        </reporting>
+    </continuous_improvement>
+    
+    <enforcement_and_governance>
+        <rule id="no_untested_code">
+            <description>All new code must have tests</description>
+            <enforcement>PR checks block merge without tests</enforcement>
+            <exceptions>Configuration files, type definitions</exceptions>
+        </rule>
+        
+        <rule id="coverage_maintenance">
+            <description>Coverage cannot decrease</description>
+            <enforcement>Automated coverage checks</enforcement>
+            <remediation>Must add tests to increase coverage</remediation>
+        </rule>
+        
+        <rule id="critical_path_coverage">
+            <description>100% coverage for revenue-critical paths</description>
+            <paths>
+                <path>First user experience</path>
+                <path>Start chat button</path>
+                <path>Message sending</path>
+                <path>Authentication</path>
+                <path>Payment flows</path>
+            </paths>
+        </rule>
+        
+        <rule id="performance_regression">
+            <description>No performance regressions allowed</description>
+            <enforcement>Performance tests in CI</enforcement>
+            <threshold>5% degradation blocks merge</threshold>
+        </rule>
+    </enforcement_and_governance>
+    
+    <summary>
+        <key_improvements>
+            <improvement>10x more comprehensive than previous specs</improvement>
+            <improvement>Laser focus on first-time user experience</improvement>
+            <improvement>Start Chat button exhaustively tested</improvement>
+            <improvement>Every UI component has test coverage</improvement>
+            <improvement>Real implementation code, not abstractions</improvement>
+            <improvement>Business value tied to every test suite</improvement>
+            <improvement>Performance metrics with specific targets</improvement>
+            <improvement>Enforcement mechanisms built-in</improvement>
+        </key_improvements>
+        
+        <expected_outcomes>
+            <outcome>50% reduction in onboarding drop-off</outcome>
+            <outcome>90% reduction in production bugs</outcome>
+            <outcome>100% conversion path reliability</outcome>
+            <outcome>Zero critical path failures</outcome>
+            <outcome>+$100K MRR from improved quality</outcome>
+        </expected_outcomes>
+    </summary>
+</specification>

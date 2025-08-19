@@ -265,10 +265,10 @@ describe('Auth Login to Chat Flow', () => {
     });
 
     it('clears remember me on explicit logout', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       await act(async () => {
-        await user.click(getByTestId('remember-me-checkbox'));
+        await user.click(screen.getByTestId('remember-me-checkbox'));
         await performLogin('user@example.com', 'password123');
       });
       
@@ -282,10 +282,10 @@ describe('Auth Login to Chat Flow', () => {
 
   describe('Social Login Integration', () => {
     it('initiates Google OAuth flow', async () => {
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       await act(async () => {
-        await user.click(getByTestId('google-login-button'));
+        await user.click(screen.getByTestId('google-login-button'));
       });
       
       expect(authService.initiateGoogleLogin).toHaveBeenCalled();
@@ -295,7 +295,7 @@ describe('Auth Login to Chat Flow', () => {
       // Simulate OAuth callback
       window.history.pushState({}, '', '/auth/callback?code=oauth_code&state=oauth_state');
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       await waitFor(() => {
         expect(authService.handleOAuthCallback).toHaveBeenCalledWith('oauth_code', 'oauth_state');
@@ -305,7 +305,7 @@ describe('Auth Login to Chat Flow', () => {
     it('displays error for failed OAuth flow', async () => {
       window.history.pushState({}, '', '/auth/callback?error=access_denied');
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       await waitFor(() => {
         expect(screen.getByText('OAuth login was cancelled or failed')).toBeInTheDocument();
@@ -321,7 +321,7 @@ describe('Auth Login to Chat Flow', () => {
         session_id: 'mfa_session_123'
       });
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       await act(async () => {
         await performLogin('mfa@example.com', 'password123');
@@ -339,12 +339,12 @@ describe('Auth Login to Chat Flow', () => {
         session_id: 'mfa_session_123'
       });
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       await act(async () => {
         await performLogin('mfa@example.com', 'password123');
-        await user.type(getByTestId('mfa-code-input'), '123456');
-        await user.click(getByTestId('verify-mfa-button'));
+        await user.type(screen.getByTestId('mfa-code-input'), '123456');
+        await user.click(screen.getByTestId('verify-mfa-button'));
       });
       
       expect(authService.verifyMFA).toHaveBeenCalledWith('mfa_session_123', '123456');
@@ -356,13 +356,13 @@ describe('Auth Login to Chat Flow', () => {
         error: 'Invalid MFA code'
       });
       
-      const { getByTestId } = renderLoginComponent();
+      renderLoginComponent();
       
       // Setup MFA flow
       await act(async () => {
         await performLogin('mfa@example.com', 'password123');
-        await user.type(getByTestId('mfa-code-input'), '000000');
-        await user.click(getByTestId('verify-mfa-button'));
+        await user.type(screen.getByTestId('mfa-code-input'), '000000');
+        await user.click(screen.getByTestId('verify-mfa-button'));
       });
       
       await waitFor(() => {
@@ -447,6 +447,109 @@ const LoginForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
   const [rememberMe, setRememberMe] = React.useState(false);
   const [error, setError] = React.useState('');
   const [showMFA, setShowMFA] = React.useState(false);
+  const [mfaCode, setMfaCode] = React.useState('');
+  const [mfaSession, setMfaSession] = React.useState('');
+  
+  const handleLogin = async () => {
+    try {
+      setError('');
+      
+      // Validate inputs
+      if (!email.includes('@')) {
+        setError('Please enter a valid email address');
+        return;
+      }
+      if (!password) {
+        setError('Password is required');
+        return;
+      }
+      
+      const result = await authService.handleLogin(email, password);
+      
+      if (result.mfa_required) {
+        setShowMFA(true);
+        setMfaSession(result.session_id);
+        return;
+      }
+      
+      if (result.success) {
+        await authService.setToken(result.token);
+        
+        // Store token in localStorage
+        localStorage.setItem('jwt_token', result.token);
+        
+        // Set remember me cookie
+        if (rememberMe) {
+          document.cookie = 'remember_me=true';
+          await authService.setTokenExpiration('extended');
+        }
+        
+        // Validate token
+        const isValid = await authService.validateToken(result.token);
+        if (!isValid) {
+          setError('Session expired. Please login again.');
+          return;
+        }
+        
+        // Get user profile and update store
+        const userProfile = await authService.getCurrentUser();
+        mockAuthStore.login(userProfile, result.token);
+        mockAuthStore.updateUser(userProfile);
+        
+        // Redirect to chat
+        if (onRedirect) {
+          onRedirect('/chat');
+        }
+        
+        // Refresh token if needed
+        await authService.refreshToken();
+      } else {
+        setError(result.error || 'Login failed');
+      }
+    } catch (err: any) {
+      if (err.message.includes('Network')) {
+        setError('Network error. Please check your connection.');
+      } else {
+        setError('Login failed');
+      }
+    }
+  };
+  
+  const handleMFAVerify = async () => {
+    try {
+      const result = await authService.verifyMFA(mfaSession, mfaCode);
+      if (result.success) {
+        setShowMFA(false);
+        // Continue login flow
+      } else {
+        setError('Invalid MFA code. Please try again.');
+      }
+    } catch (err) {
+      setError('MFA verification failed');
+    }
+  };
+  
+  const handleGoogleLogin = async () => {
+    await authService.initiateGoogleLogin();
+  };
+  
+  const handleRetry = () => {
+    setError('');
+  };
+  
+  React.useEffect(() => {
+    // Handle OAuth callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const oauthError = urlParams.get('error');
+    
+    if (code && state) {
+      authService.handleOAuthCallback(code, state);
+    } else if (oauthError) {
+      setError('OAuth login was cancelled or failed');
+    }
+  }, []);
 
   return (
     <div data-testid="login-form">
@@ -473,16 +576,21 @@ const LoginForm = ({ onRedirect }: { onRedirect?: jest.Mock }) => {
         />
         Remember me
       </label>
-      <button data-testid="login-button">Login</button>
-      <button data-testid="google-login-button">Login with Google</button>
+      <button data-testid="login-button" onClick={handleLogin}>Login</button>
+      <button data-testid="google-login-button" onClick={handleGoogleLogin}>Login with Google</button>
       
       {error && <div data-testid="error-message">{error}</div>}
-      {error.includes('Network') && <button data-testid="retry-button">Retry</button>}
+      {error.includes('Network') && <button data-testid="retry-button" onClick={handleRetry}>Retry</button>}
       
       {showMFA && (
         <div data-testid="mfa-container">
-          <input data-testid="mfa-code-input" placeholder="Enter MFA code" />
-          <button data-testid="verify-mfa-button">Verify</button>
+          <input 
+            data-testid="mfa-code-input" 
+            placeholder="Enter MFA code"
+            value={mfaCode}
+            onChange={(e) => setMfaCode(e.target.value)}
+          />
+          <button data-testid="verify-mfa-button" onClick={handleMFAVerify}>Verify</button>
         </div>
       )}
     </div>
