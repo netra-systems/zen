@@ -68,6 +68,16 @@ Always edit the existing file or create a new file and delete the old if it's no
 - Each module must have clear interface and single purpose
 - It's okay to have many modules.
 
+## 🔴 MICROSERVICE INDEPENDENCE (MANDATORY)
+**CRITICAL**: All microservices MUST be 100% independent.
+→ See [`SPEC/independent_services.xml`](SPEC/independent_services.xml) for MANDATORY independence guidelines
+
+### Key Rules:
+1. **ALWAYS USE UNIQUE MODULE NAMES** (like 'auth_core' for auth service)
+2. **ALWAYS KEEP IMPORTS 100% INDEPENDENT** communicate via APIs only
+3. **COPY** entire service directory in Dockerfile
+4. **TEST** independence: `cd service_name && python main.py`
+
 ## 🔴 AGENT NAMING CONVENTIONS (MANDATORY)
 **CRITICAL**: Use precise naming to prevent confusion and ensure clear component identification
 
@@ -149,6 +159,7 @@ Ensures every feature directly creates and captures value proportional to a cust
 | [`code_changes.xml`](SPEC/code_changes.xml) | **#3 PRIORITY** - Change checklist | BEFORE changes |
 | [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | **CRITICAL** - No test stubs in production | Always check |
 | [`anti_regression.xml`](SPEC/anti_regression.xml) | Prevent regressions | Before commits |
+| [`independent_services.xml`](SPEC/independent_services.xml) | **CRITICAL** - Microservice independence | When creating/modifying services |
 
 ### Domain Specs
 | Domain | Key Specs |

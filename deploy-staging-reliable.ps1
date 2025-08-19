@@ -366,7 +366,7 @@ if (-not $SkipErrorMonitoring) {
             Write-Host "  ⚠ Error monitoring script not found at $errorMonitorPath" -ForegroundColor Yellow
         }
     } catch {
-        Write-Host "  ⚠ Error monitoring check failed: $($_.Exception.Message)" -ForegroundColor Yellow
+        Write-Host "  ⚠ Error monitoring check failed: $_" -ForegroundColor Yellow
     }
 } else {
     Write-Host ""

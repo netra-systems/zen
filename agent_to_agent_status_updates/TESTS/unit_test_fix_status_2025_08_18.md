@@ -26,8 +26,19 @@ Fixed tests:
 1. `test_api_config_includes_ws_url` - Fixed dependency injection to use proper FastAPI pattern
 2. `test_ready_endpoint_success` - Fixed mock patching to target correct health interface instance
 
-### Agent Tests (3 failures)
-**Status**: PENDING
+### Agent Tests (4 failures)
+**Status**: FIXED ✅
+
+Fixed tests:
+1. `test_retry_on_failure` - Fixed retry logic to use exactly max_retries attempts
+2. `test_process_with_retry_all_failures` (2 tests) - Same retry logic fix
+3. `test_5_state_persistence_and_recovery` - Fixed mock function signature
+
+### Smoke Tests
+**Status**: PASSED ✅ (All 7 tests passing)
+
+### Critical Tests
+**Status**: PASSED ✅ (All 85 tests passing)
 
 ## Actions Taken
 - [2025-08-18 16:48] Identified failing unit tests
@@ -36,9 +47,11 @@ Fixed tests:
 - [2025-08-18 16:49] Fixed test_websocket_heartbeat - simplified to test backward compatibility
 - [2025-08-18 16:53] Fixed test_api_config_includes_ws_url - proper dependency injection
 - [2025-08-18 16:53] Fixed test_ready_endpoint_success - correct mock patching
+- [2025-08-18 17:01] Fixed agent retry tests - corrected retry count logic
+- [2025-08-18 17:01] Fixed state persistence test - updated mock signature
 
 ## Next Steps
-1. Fix unit test failures
-2. Run integration tests and fix failures
-3. Run agent tests and fix failures
-4. Run comprehensive validation
+1. ✅ Fix unit test failures - COMPLETED
+2. ✅ Run integration tests and fix failures - COMPLETED
+3. ✅ Run agent tests and fix failures - COMPLETED
+4. Run final comprehensive validation

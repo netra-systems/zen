@@ -372,6 +372,20 @@
             </learning_ids>
             <important_note>CRITICAL: Startup errors often cascade - fix configuration first, then secrets, then connections</important_note>
         </category>
+        <category>
+            <name>Microservice Independence</name>
+            <file>../independent_services.xml</file>
+            <path>SPEC/independent_services.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>auth-service-independence-refactor</id>
+            </learning_ids>
+            <important_note>CRITICAL: All microservices MUST be 100% independent - NO imports from main app allowed</important_note>
+            <description>
+                Complete guide for creating and maintaining truly independent microservices.
+                Covers directory structure, import rules, Dockerfile best practices, and migration checklist.
+            </description>
+        </category>
     </categories>
     
     <usage>

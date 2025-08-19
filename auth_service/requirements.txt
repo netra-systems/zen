@@ -2,8 +2,8 @@
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 gunicorn==21.2.0
-pydantic==2.5.0
-pydantic[email]==2.5.0
+pydantic>=2.7.4
+pydantic[email]>=2.7.4
 redis==5.0.1
 PyJWT==2.8.0
 python-multipart==0.0.6
