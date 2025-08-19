@@ -10,10 +10,10 @@ import {
   fireEvent,
   waitFor,
   simulateAsyncDelay,
-  PERFORMANCE_THRESHOLDS,
   usePerformanceMonitor,
   TEST_TIMEOUTS
 } from '../test-utils';
+import { PERFORMANCE_THRESHOLDS } from '../utils/performance-test-utils';
 
 // Performance monitoring utilities (≤8 lines each)
 export const measureRenderTime = (renderFn: () => void): number => {

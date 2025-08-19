@@ -128,6 +128,20 @@ const sessionStorageMock = {
 };
 global.sessionStorage = sessionStorageMock;
 
+// Add StorageEvent polyfill for Node.js test environment
+if (typeof global.StorageEvent === 'undefined') {
+  global.StorageEvent = class StorageEvent extends Event {
+    constructor(type, eventInitDict = {}) {
+      super(type, eventInitDict);
+      this.key = eventInitDict.key || null;
+      this.newValue = eventInitDict.newValue || null;
+      this.oldValue = eventInitDict.oldValue || null;
+      this.storageArea = eventInitDict.storageArea || null;
+      this.url = eventInitDict.url || window.location.href;
+    }
+  };
+}
+
 // Suppress console errors in tests
 const originalError = console.error;
 const originalWarn = console.warn;

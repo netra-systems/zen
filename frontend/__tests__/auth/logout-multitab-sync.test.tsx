@@ -9,46 +9,19 @@ import React from 'react';
 import { act, waitFor } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { useAuthStore } from '@/store/authStore';
+import { 
+  setupLogoutTestEnvironment,
+  createStorageEvent,
+  PERFORMANCE_THRESHOLDS
+} from './logout-test-utils';
 import '@testing-library/jest-dom';
 
 // Mock dependencies
 jest.mock('@/store/authStore');
 jest.mock('@/lib/logger');
 
-// Test data following 8-line limit
-const createUserData = () => ({
-  id: 'user-123',
-  email: 'test@example.com',
-  full_name: 'Test User',
-  role: 'admin',
-  permissions: ['read', 'write'],
-});
-
-const setupAuthStore = () => {
-  const mockStore = {
-    isAuthenticated: true,
-    user: createUserData(),
-    token: 'test-token-123',
-    loading: false,
-    error: null,
-    login: jest.fn(),
-    logout: jest.fn(),
-    setLoading: jest.fn(),
-    setError: jest.fn(),
-    updateUser: jest.fn(),
-    reset: jest.fn(),
-    hasPermission: jest.fn(() => false),
-    hasAnyPermission: jest.fn(() => false),
-    hasAllPermissions: jest.fn(() => false),
-    isAdminOrHigher: jest.fn(() => false),
-    isDeveloperOrHigher: jest.fn(() => false)
-  };
-  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
-  return mockStore;
-};
-
-const performLogoutCleanup = async () => {
-  const mockStore = setupAuthStore();
+// Simplified test helpers (≤8 lines each)
+const performLogoutCleanup = async (mockStore: any) => {
   await act(async () => {
     mockStore.logout();
     mockStore.reset();
@@ -58,24 +31,23 @@ const performLogoutCleanup = async () => {
 
 describe('Logout Multi-Tab Sync Tests', () => {
   let mockStore: any;
+  let cleanupStorage: () => void;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    mockStore = setupAuthStore();
+    const testEnv = setupLogoutTestEnvironment();
+    mockStore = testEnv.mockStore;
+    cleanupStorage = testEnv.cleanupStorage;
+  });
+
+  afterEach(() => {
+    if (cleanupStorage) {
+      cleanupStorage();
+    }
   });
 
   describe('Multi-Tab Logout Sync', () => {
-    const mockStorageEvent = (key: string, newValue: string | null) => {
-      const event = new StorageEvent('storage', {
-        key,
-        newValue,
-        oldValue: 'old-value',
-      });
-      return event;
-    };
-
     const simulateStorageEvent = async (key: string, value: string | null) => {
-      const event = mockStorageEvent(key, value);
+      const event = createStorageEvent(key, value);
       window.dispatchEvent(event);
       await waitFor(() => {
         expect(event.key).toBe(key);
@@ -113,11 +85,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
 
   describe('Cross-Tab Token Synchronization', () => {
     const testTokenSync = async (tokenKey: string) => {
-      const event = new StorageEvent('storage', {
-        key: tokenKey,
-        newValue: null,
-        oldValue: 'some-token',
-      });
+      const event = createStorageEvent(tokenKey, null);
       window.dispatchEvent(event);
     };
 
@@ -152,11 +120,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
 
   describe('Storage Event Filtering', () => {
     const testNonAuthEvent = async (key: string, value: string) => {
-      const event = new StorageEvent('storage', {
-        key,
-        newValue: value,
-        oldValue: 'old-value',
-      });
+      const event = createStorageEvent(key, value);
       window.dispatchEvent(event);
       await waitFor(() => {
         expect(event.key).toBe(key);
@@ -194,7 +158,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
 
   describe('Multi-Tab Security Validation', () => {
     const verifyMultiTabSecurity = async () => {
-      await performLogoutCleanup();
+      await performLogoutCleanup(mockStore);
       await waitFor(() => {
         expect(mockStore.logout).toHaveBeenCalled();
       });
@@ -236,11 +200,7 @@ describe('Logout Multi-Tab Sync Tests', () => {
   describe('Storage Event Timing', () => {
     const measureStorageEventResponse = async () => {
       const startTime = performance.now();
-      const event = new StorageEvent('storage', {
-        key: 'jwt_token',
-        newValue: null,
-        oldValue: 'token',
-      });
+      const event = createStorageEvent('jwt_token', null);
       window.dispatchEvent(event);
       await waitFor(() => {
         expect(mockStore.logout).toHaveBeenCalled();
@@ -249,11 +209,11 @@ describe('Logout Multi-Tab Sync Tests', () => {
       return endTime - startTime;
     };
 
-    it('should respond to storage events within 50ms', async () => {
+    it('should respond to storage events within threshold', async () => {
       const responseTime = await act(async () => {
         return await measureStorageEventResponse();
       });
-      expect(responseTime).toBeLessThan(50);
+      expect(responseTime).toBeLessThan(PERFORMANCE_THRESHOLDS.STORAGE_EVENT_MAX);
     });
 
     it('should handle rapid storage events efficiently', async () => {

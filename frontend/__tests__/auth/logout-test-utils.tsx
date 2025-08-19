@@ -130,6 +130,7 @@ export const createStorageEvent = (key: string, newValue: string | null) => {
     newValue,
     oldValue: newValue ? null : 'old-value',
     url: 'http://localhost:3000',
+    storageArea: window.localStorage,
   });
 };
 
@@ -173,11 +174,12 @@ export const renderLogoutComponent = () => {
 // Storage event handler for tests (≤8 lines)
 const setupStorageEventHandler = (mockStore: any) => {
   const handleStorageEvent = (event: StorageEvent) => {
-    const authKeys = ['jwt_token', 'authToken', 'auth_token'];
-    const logoutValues = [null, 'logged_out', 'expired', 'unauthenticated'];
+    if (!event.key) return;
+    const authKeys = ['jwt_token', 'authToken', 'auth_token', 'session_token'];
+    const logoutValues = [null, 'logged_out', 'expired', 'unauthenticated', ''];
     const stateKeys = ['auth_state', 'session_state'];
-    const shouldLogout = (authKeys.includes(event.key || '') && event.newValue === null) || 
-                        (stateKeys.includes(event.key || '') && logoutValues.includes(event.newValue));
+    const shouldLogout = (authKeys.includes(event.key) && logoutValues.includes(event.newValue)) || 
+                        (stateKeys.includes(event.key) && logoutValues.includes(event.newValue));
     if (shouldLogout) mockStore.logout();
   };
   window.addEventListener('storage', handleStorageEvent);
