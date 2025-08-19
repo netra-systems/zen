@@ -83,6 +83,11 @@ Always edit the existing file or create a new file and delete the old if it's no
 **CRITICAL**: All microservices MUST be 100% independent.
 → See [`SPEC/independent_services.xml`](SPEC/independent_services.xml) for MANDATORY independence guidelines
 
+### List of Microservices
+1: Main Backend /app  (main application, 80% of code)
+2: Auth Service /auth_service
+3: Frontend (/frontend)
+
 ## 5 🔴 NAMING CONVENTIONS
 **CRITICAL**: Use precise naming to prevent confusion and ensure clear component identification
 

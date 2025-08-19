@@ -45,8 +45,12 @@ class MainDatabaseSync:
         # Convert postgres:// to postgresql+asyncpg:// if needed
         if main_db_url.startswith("postgres://"):
             main_db_url = main_db_url.replace("postgres://", "postgresql+asyncpg://")
+            # Convert sslmode to ssl for asyncpg
+            main_db_url = main_db_url.replace("sslmode=", "ssl=")
         elif main_db_url.startswith("postgresql://"):
             main_db_url = main_db_url.replace("postgresql://", "postgresql+asyncpg://")
+            # Convert sslmode to ssl for asyncpg
+            main_db_url = main_db_url.replace("sslmode=", "ssl=")
         
         logger.info(f"Initializing main DB sync with URL pattern: {main_db_url.split('@')[1] if '@' in main_db_url else 'local'}")
         

@@ -31,8 +31,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
-# Copy application code (selective copy for auth service)
-COPY auth_service_fixed.py ./main.py
+# Copy application code - proper directory structure
+COPY auth_service/ ./auth_service/
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \
@@ -46,10 +46,16 @@ USER appuser
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONIOENCODING=utf-8 \
+    PYTHONHASHSEED=random \
+    PYTHONOPTIMIZE=1 \
     SERVICE_NAME=auth-service \
     PORT=8080 \
     WORKERS=1 \
-    TIMEOUT=120
+    WORKER_CONNECTIONS=1000 \
+    MAX_WORKERS=4 \
+    TIMEOUT=120 \
+    GRACEFUL_TIMEOUT=30 \
+    KEEP_ALIVE=5
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
@@ -57,12 +63,19 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 
 EXPOSE 8080
 
-# Use gunicorn with uvicorn workers for better Cloud Run compatibility
-CMD exec gunicorn main:app \
-    --bind 0.0.0.0:$PORT \
-    --workers $WORKERS \
+# Use exec form to ensure proper signal handling for Cloud Run
+# Cloud Run sends SIGTERM for graceful shutdown
+CMD ["sh", "-c", "exec gunicorn auth_service.main:app \
+    --bind 0.0.0.0:${PORT} \
+    --workers ${WORKERS} \
     --worker-class uvicorn.workers.UvicornWorker \
-    --timeout $TIMEOUT \
+    --worker-connections ${WORKER_CONNECTIONS} \
+    --max-requests 1000 \
+    --max-requests-jitter 50 \
+    --timeout ${TIMEOUT} \
+    --graceful-timeout ${GRACEFUL_TIMEOUT} \
+    --keep-alive ${KEEP_ALIVE} \
     --access-logfile - \
     --error-logfile - \
-    --log-level info
+    --log-level info \
+    --preload"]

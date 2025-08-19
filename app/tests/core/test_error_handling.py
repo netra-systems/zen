@@ -26,7 +26,6 @@ from app.core.exceptions import (
 )
 from app.core.error_handlers import (
     ApiErrorHandler,
-    ErrorResponse,
     handle_exception,
     get_http_status_code,
     netra_exception_handler,
@@ -34,6 +33,7 @@ from app.core.error_handlers import (
     http_exception_handler,
     general_exception_handler,
 )
+from app.core.error_response import ErrorResponse
 from app.core.error_context import ErrorContext, AsyncErrorContextManager as ErrorContextManager, get_enriched_error_context
 
 

@@ -319,7 +319,7 @@ class LauncherIntegration:
     
     def _quick_health_check(self) -> bool:
         """Quick health check of all services."""
-        return self.health_checker.quick_health_check()
+        return self.health_checker.run_quick_checks()
     
     def _update_success_cache(self) -> bool:
         """Update cache with successful startup."""

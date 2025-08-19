@@ -159,6 +159,19 @@
                 <id>mac-utf8-encoding</id>
             </learning_ids>
             <important_note>Mac requires different process handling, port freeing, and memory monitoring than Linux</important_note>
+            <additional_file>learnings/dev_launcher_health_checks.xml</additional_file>
+        </category>
+        <category>
+            <name>Dev Launcher/Health Checks</name>
+            <file>learnings/dev_launcher_health_checks.xml</file>
+            <path>SPEC/learnings/dev_launcher_health_checks.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>health-check-timeout-1</id>
+                <id>dynamic-port-health-check</id>
+                <id>quick-health-check-attribute</id>
+            </learning_ids>
+            <important_note>Health checks must use dynamic ports and have adequate timeouts for database optimization</important_note>
         </category>
         <category>
             <name>Development/Git</name>

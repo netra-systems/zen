@@ -158,9 +158,13 @@ class FastStartupConnectionManager:
     def _get_async_db_url(self, db_url: str) -> str:
         """Convert sync database URL to async format."""
         if db_url.startswith("postgresql://"):
-            return db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+            # Convert sslmode to ssl for asyncpg
+            return url.replace("sslmode=", "ssl=")
         elif db_url.startswith("postgres://"):
-            return db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+            # Convert sslmode to ssl for asyncpg
+            return url.replace("sslmode=", "ssl=")
         elif db_url.startswith("sqlite://"):
             return db_url.replace("sqlite://", "sqlite+aiosqlite://", 1)
         return db_url

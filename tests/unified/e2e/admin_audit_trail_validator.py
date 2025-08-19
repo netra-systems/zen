@@ -56,17 +56,11 @@ class AdminAuditTrailValidator:
     async def _setup_audit_validation(self) -> None:
         """Setup audit validation environment."""
         # Initialize audit service connection
-        await self._initialize_audit_service()
-    
-    async def _initialize_audit_service(self) -> None:
-        """Initialize connection to audit service."""
-        # Mock audit service initialization
         pass
     
     def _extract_expected_audit_entries(self, admin_results: Dict[str, Any]) -> None:
         """Extract expected audit entries from admin operation results."""
         operations_performed = admin_results.get("operations_performed", 0)
-        audit_entries_generated = admin_results.get("audit_entries_generated", 0)
         
         # Create expected audit entries based on operations
         self.expected_audit_entries = self._build_expected_audit_entries(operations_performed)
@@ -74,8 +68,6 @@ class AdminAuditTrailValidator:
     def _build_expected_audit_entries(self, operations_count: int) -> List[Dict[str, Any]]:
         """Build list of expected audit entries."""
         expected_entries = []
-        
-        # Expected audit entry types for admin operations
         audit_types = ["users_viewed", "user_suspended", "user_reactivated"]
         
         for i, audit_type in enumerate(audit_types):
