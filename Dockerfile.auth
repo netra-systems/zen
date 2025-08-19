@@ -31,9 +31,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
-# Copy the entire auth service
-# IMPORTANT: auth_core is the renamed 'app' directory - completely independent from main app
-COPY auth_service/ ./
+# Copy application code (selective copy for auth service)
+COPY auth_service_fixed.py ./main.py
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \

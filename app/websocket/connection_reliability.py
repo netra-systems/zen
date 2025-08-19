@@ -223,12 +223,12 @@ class ConnectionEstablishmentReliability:
         return result.result.get("connection_info") if result.success else None
         
     async def _execute_connection_setup(self, user_id: str, websocket,
-                                      max_connections: int) -> ConnectionInfo:
+                                      max_connections: int) -> Dict[str, ConnectionInfo]:
         """Execute connection setup with validation."""
         self._validate_connection_request(user_id, websocket)
         conn_info = self._create_connection_info(user_id, websocket)
         logger.info(f"Connection established safely for user {user_id} (ID: {conn_info.connection_id})")
-        return conn_info
+        return {"connection_info": conn_info}
         
     def _validate_connection_request(self, user_id: str, websocket) -> None:
         """Validate connection request parameters."""
