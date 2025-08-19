@@ -1,0 +1,197 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`Admin Page Visual Layout renders admin page layout correctly: admin-page-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Admin Page Visual Layout renders admin page with dashboard view: admin-page-dashboard 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Admin Page Visual Layout renders admin page with settings panel: admin-page-settings 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Admin Page Visual Layout renders admin page with user management: admin-page-users 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Chat Page Visual Layout renders chat page basic layout correctly: chat-page-basic-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Chat Page Visual Layout renders chat page with loading state: chat-page-loading-state 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Chat Page Visual Layout renders chat page with mobile viewport: chat-page-mobile-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Chat Page Visual Layout renders chat page with sidebar collapsed: chat-page-sidebar-collapsed 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Corpus Page Visual Layout renders corpus page empty state: corpus-page-empty 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Corpus Page Visual Layout renders corpus page layout correctly: corpus-page-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Corpus Page Visual Layout renders corpus page with data grid: corpus-page-data-grid 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Corpus Page Visual Layout renders corpus page with search active: corpus-page-search 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Dark Theme Page Layout Tests renders admin page in dark theme correctly: admin-page-dark-theme 1`] = `
+<div
+  class="dark"
+>
+  <div>
+    Loading...
+  </div>
+</div>
+`;
+
+exports[`Dark Theme Page Layout Tests renders chat page in dark theme correctly: chat-page-dark-theme 1`] = `
+<div
+  class="dark"
+>
+  <div>
+    Loading...
+  </div>
+</div>
+`;
+
+exports[`Dark Theme Page Layout Tests renders demo page in dark theme correctly: demo-page-dark-theme 1`] = `
+<div
+  class="dark"
+>
+  <div>
+    Loading...
+  </div>
+</div>
+`;
+
+exports[`Dark Theme Page Layout Tests renders login page in dark theme correctly: login-page-dark-theme 1`] = `
+<div
+  class="dark"
+>
+  <div>
+    Loading...
+  </div>
+</div>
+`;
+
+exports[`Demo Page Visual Layout renders demo page layout correctly: demo-page-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Demo Page Visual Layout renders demo page tablet layout: demo-page-tablet 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Demo Page Visual Layout renders demo page with analytics sections: demo-page-analytics 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Demo Page Visual Layout renders demo page with performance metrics: demo-page-metrics 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Grid Layout Visual Tests renders content list layout correctly: content-list-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Grid Layout Visual Tests renders dashboard grid layout correctly: dashboard-grid-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Layout Component Visual Tests renders footer layout correctly: footer-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Layout Component Visual Tests renders header layout correctly: header-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Layout Component Visual Tests renders main content area layout correctly: main-content-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Layout Component Visual Tests renders sidebar navigation layout correctly: sidebar-navigation 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Login Page Visual Layout renders login page layout correctly: login-page-layout 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Login Page Visual Layout renders login page mobile layout: login-page-mobile 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Login Page Visual Layout renders login page with center alignment: login-page-centered 1`] = `
+<div>
+  Loading...
+</div>
+`;
+
+exports[`Login Page Visual Layout renders login page with error state: login-page-error-state 1`] = `
+<div>
+  Loading...
+</div>
+`;

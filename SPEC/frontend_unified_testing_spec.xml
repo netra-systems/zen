@@ -4,8 +4,8 @@
         <name>Frontend Unified Testing Specification</name>
         <type>ELITE Testing Strategy</type>
         <category>Frontend Testing</category>
-        <version>2.0</version>
-        <last_updated>2025-01-19</last_updated>
+        <version>3.0</version>
+        <last_updated>2025-08-19</last_updated>
         <description>
             Comprehensive elite-level frontend testing strategy for Netra Apex.
             Business-driven, monetization-focused testing ensuring 100x better coverage.
@@ -59,6 +59,200 @@
     </testing_philosophy>
     
     <critical_user_journeys>
+        <journey id="first_load" priority="P0" revenue_impact="CRITICAL">
+            <name>Application First Load Experience</name>
+            <description>User visits app for the very first time</description>
+            <steps>
+                <step order="1">Initial page request and bundle loading</step>
+                <step order="2">Authentication state check (no token exists)</step>
+                <step order="3">Redirect to login/signup page</step>
+                <step order="4">Login form renders with all elements</step>
+                <step order="5">WebSocket attempts connection (should fail gracefully)</step>
+                <step order="6">Error boundaries catch any initialization errors</step>
+                <step order="7">UI shows appropriate unauthenticated state</step>
+            </steps>
+            <test_requirements>
+                <requirement>Page interactive time < 3s</requirement>
+                <requirement>No console errors during load</requirement>
+                <requirement>All UI elements visible and functional</requirement>
+                <requirement>Graceful handling of missing auth token</requirement>
+                <requirement>Loading states show appropriately</requirement>
+                <requirement>No flashing of authenticated content</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="login_flow_complete" priority="P0" revenue_impact="CRITICAL">
+            <name>Complete Login to Chat Ready Flow</name>
+            <description>User logs in and reaches functional chat state</description>
+            <steps>
+                <step order="1">Enter credentials in login form</step>
+                <step order="2">Submit triggers authentication API call</step>
+                <step order="3">Loading spinner shows during auth</step>
+                <step order="4">Token received and stored in localStorage/cookies</step>
+                <step order="5">WebSocket connection initiated with auth token</step>
+                <step order="6">User data fetched (profile, settings, threads)</step>
+                <step order="7">Thread list populates in sidebar</step>
+                <step order="8">Most recent thread auto-selected or empty state shown</step>
+                <step order="9">Message history loads for selected thread</step>
+                <step order="10">Chat input becomes active and ready</step>
+                <step order="11">All UI buttons and controls enabled</step>
+            </steps>
+            <test_requirements>
+                <requirement>Auth response < 500ms</requirement>
+                <requirement>Token securely stored and accessible</requirement>
+                <requirement>WebSocket authenticated connection < 1s</requirement>
+                <requirement>Thread list loads < 500ms after auth</requirement>
+                <requirement>Message history renders correctly</requirement>
+                <requirement>No race conditions between data fetches</requirement>
+                <requirement>Input field auto-focuses when ready</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="start_chat_button" priority="P0" revenue_impact="CRITICAL">
+            <name>Start New Chat Button Functionality</name>
+            <description>User initiates new conversation via Start Chat button</description>
+            <steps>
+                <step order="1">User sees "Start New Chat" or "New Conversation" button</step>
+                <step order="2">Button has proper hover state and cursor</step>
+                <step order="3">Click triggers immediate visual feedback</step>
+                <step order="4">API call to create new thread</step>
+                <step order="5">Loading state while thread creates</step>
+                <step order="6">New thread appears in sidebar</step>
+                <step order="7">View switches to new empty thread</step>
+                <step order="8">Welcome/starter message displays</step>
+                <step order="9">Input field focused and ready</step>
+                <step order="10">User types and sends first message</step>
+                <step order="11">Message sends successfully</step>
+                <step order="12">AI response begins streaming</step>
+            </steps>
+            <test_requirements>
+                <requirement>Button always visible and accessible</requirement>
+                <requirement>Click feedback < 50ms</requirement>
+                <requirement>Thread creation < 300ms</requirement>
+                <requirement>No duplicate threads on double-click</requirement>
+                <requirement>Thread ID properly generated and unique</requirement>
+                <requirement>Sidebar updates immediately</requirement>
+                <requirement>Route updates to new thread URL</requirement>
+                <requirement>Input ready for typing without click</requirement>
+                <requirement>First message delivery confirmed</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="thread_switching" priority="P0" revenue_impact="CRITICAL">
+            <name>Thread Clicking and Switching</name>
+            <description>User navigates between conversation threads</description>
+            <steps>
+                <step order="1">User sees list of threads in sidebar</step>
+                <step order="2">Hover shows visual feedback on threads</step>
+                <step order="3">Click on different thread</step>
+                <step order="4">Current message input saved as draft</step>
+                <step order="5">Loading indicator during switch</step>
+                <step order="6">Previous thread messages cleared from view</step>
+                <step order="7">New thread messages load</step>
+                <step order="8">Scroll position restored if previously viewed</step>
+                <step order="9">URL updates to reflect new thread</step>
+                <step order="10">Input field cleared or draft restored</step>
+                <step order="11">Thread marked as active in sidebar</step>
+                <step order="12">Unread indicators cleared</step>
+            </steps>
+            <test_requirements>
+                <requirement>Thread switch < 200ms for cached threads</requirement>
+                <requirement>No message mixing between threads</requirement>
+                <requirement>Draft preservation works correctly</requirement>
+                <requirement>Browser back/forward navigation works</requirement>
+                <requirement>Active thread clearly indicated</requirement>
+                <requirement>Rapid thread switching doesn't break state</requirement>
+                <requirement>WebSocket subscriptions update correctly</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="message_receiving" priority="P0" revenue_impact="CRITICAL">
+            <name>Message Reception and Display</name>
+            <description>Handling incoming messages from AI</description>
+            <steps>
+                <step order="1">User sends message to AI</step>
+                <step order="2">Message appears in chat with sending state</step>
+                <step order="3">Thinking/processing indicator shows</step>
+                <step order="4">WebSocket receives first chunk</step>
+                <step order="5">AI message container appears</step>
+                <step order="6">Text streams in character by character</step>
+                <step order="7">Markdown renders in real-time</step>
+                <step order="8">Code blocks format with syntax highlighting</step>
+                <step order="9">Auto-scroll maintains during streaming</step>
+                <step order="10">Stream completion detected</step>
+                <step order="11">Message actions become available</step>
+                <step order="12">Input re-enables for next message</step>
+            </steps>
+            <test_requirements>
+                <requirement>First token appears < 1s after send</requirement>
+                <requirement>Streaming smooth without flicker</requirement>
+                <requirement>Markdown renders correctly during stream</requirement>
+                <requirement>Code blocks preserve formatting</requirement>
+                <requirement>No message duplication</requirement>
+                <requirement>Scroll behavior follows user preference</requirement>
+                <requirement>Copy/retry buttons work immediately</requirement>
+                <requirement>Network interruption handled gracefully</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="logout_cleanup" priority="P0" revenue_impact="HIGH">
+            <name>Logout and State Cleanup</name>
+            <description>User logs out and all state properly clears</description>
+            <steps>
+                <step order="1">User clicks logout button</step>
+                <step order="2">Confirmation dialog if unsaved changes</step>
+                <step order="3">Logout API call initiated</step>
+                <step order="4">Auth tokens cleared from storage</step>
+                <step order="5">WebSocket connection closed</step>
+                <step order="6">All user data cleared from memory</step>
+                <step order="7">Thread list cleared</step>
+                <step order="8">Message history cleared</step>
+                <step order="9">Redirect to login page</step>
+                <step order="10">No authenticated content visible</step>
+                <step order="11">Browser back doesn't show private data</step>
+                <step order="12">New login works correctly</step>
+            </steps>
+            <test_requirements>
+                <requirement>Logout completes < 500ms</requirement>
+                <requirement>All tokens properly removed</requirement>
+                <requirement>No memory leaks from cleared data</requirement>
+                <requirement>WebSocket cleanly disconnected</requirement>
+                <requirement>No errors during cleanup</requirement>
+                <requirement>Cannot access protected routes</requirement>
+                <requirement>Clean slate for next login</requirement>
+            </test_requirements>
+        </journey>
+        
+        <journey id="input_interaction" priority="P0" revenue_impact="CRITICAL">
+            <name>Message Input Complete Interaction</name>
+            <description>All input field functionality and edge cases</description>
+            <steps>
+                <step order="1">Click or tab to focus input</step>
+                <step order="2">Type regular text</step>
+                <step order="3">Paste formatted text</step>
+                <step order="4">Insert emoji via picker or paste</step>
+                <step order="5">Add code blocks with backticks</step>
+                <step order="6">Multi-line with Shift+Enter</step>
+                <step order="7">Send with Enter or button click</step>
+                <step order="8">Character count updates live</step>
+                <step order="9">Max length enforcement</step>
+                <step order="10">Disabled during sending</step>
+                <step order="11">Re-enabled after send</step>
+                <step order="12">History navigation with up/down arrows</step>
+            </steps>
+            <test_requirements>
+                <requirement>Input responsive to all keystrokes</requirement>
+                <requirement>No input lag even with long text</requirement>
+                <requirement>Paste handles all formats correctly</requirement>
+                <requirement>Emoji render properly</requirement>
+                <requirement>Code block detection works</requirement>
+                <requirement>Send button enables/disables correctly</requirement>
+                <requirement>Keyboard shortcuts all functional</requirement>
+                <requirement>Mobile keyboard behavior correct</requirement>
+                <requirement>Draft saved on navigation</requirement>
+            </test_requirements>
+        </journey>
+        
         <journey id="onboarding" priority="P0" revenue_impact="CRITICAL">
             <name>New User Onboarding Flow</name>
             <description>Free user signs up and starts first conversation</description>
@@ -147,7 +341,135 @@
         </journey>
     </critical_user_journeys>
     
+    <message_flow_testing priority="CRITICAL">
+        <test_category id="message_lifecycle">
+            <name>Complete Message Lifecycle Testing</name>
+            <phases>
+                <phase id="pre_send">
+                    <name>Pre-Send Validation</name>
+                    <tests>
+                        <test>Empty message cannot be sent</test>
+                        <test>Whitespace-only message blocked</test>
+                        <test>Max length validation (32K chars)</test>
+                        <test>Input trimming on send</test>
+                        <test>Rate limiting prevents spam</test>
+                        <test>Network status check before send</test>
+                    </tests>
+                </phase>
+                <phase id="sending">
+                    <name>Message Sending Process</name>
+                    <tests>
+                        <test>Optimistic UI update shows immediately</test>
+                        <test>Sending indicator displays</test>
+                        <test>Input disabled during send</test>
+                        <test>Send button disabled</test>
+                        <test>Message ID generated client-side</test>
+                        <test>Timestamp accurate to second</test>
+                        <test>Retry mechanism on failure</test>
+                        <test>Duplicate prevention on retry</test>
+                    </tests>
+                </phase>
+                <phase id="receiving">
+                    <name>Message Reception</name>
+                    <tests>
+                        <test>WebSocket message parsing correct</test>
+                        <test>Message ordering maintained</test>
+                        <test>Chunked messages assembled properly</test>
+                        <test>Streaming text appears smoothly</test>
+                        <test>Progress indicators accurate</test>
+                        <test>Completion detection reliable</test>
+                        <test>Error messages display clearly</test>
+                    </tests>
+                </phase>
+                <phase id="post_receive">
+                    <name>Post-Reception Actions</name>
+                    <tests>
+                        <test>Copy button copies full text</test>
+                        <test>Retry regenerates response</test>
+                        <test>Edit allows message modification</test>
+                        <test>Delete removes with confirmation</test>
+                        <test>Feedback buttons functional</test>
+                        <test>Share creates shareable link</test>
+                        <test>Code execution if enabled</test>
+                    </tests>
+                </phase>
+            </phases>
+        </test_category>
+        
+        <test_category id="edge_cases">
+            <name>Message Edge Cases</name>
+            <scenarios>
+                <scenario>Rapid message sending (10 messages in 1 second)</scenario>
+                <scenario>Very long message (30K characters)</scenario>
+                <scenario>Message with 100+ emoji</scenario>
+                <scenario>Code block with 1000+ lines</scenario>
+                <scenario>Mixed content (text + code + markdown + links)</scenario>
+                <scenario>RTL and special Unicode characters</scenario>
+                <scenario>Message during network interruption</scenario>
+                <scenario>Message during WebSocket reconnection</scenario>
+                <scenario>Message when thread is deleted</scenario>
+                <scenario>Message when session expires</scenario>
+                <scenario>Concurrent messages from multiple tabs</scenario>
+                <scenario>Message with malicious content (XSS attempts)</scenario>
+            </scenarios>
+        </test_category>
+        
+        <test_category id="performance">
+            <name>Message Performance Tests</name>
+            <metrics>
+                <metric name="input_latency" target="< 16ms">Keystroke to character display</metric>
+                <metric name="send_latency" target="< 100ms">Click to UI update</metric>
+                <metric name="first_token" target="< 1000ms">Send to first AI token</metric>
+                <metric name="render_fps" target="> 60">Streaming render frame rate</metric>
+                <metric name="scroll_performance" target="> 60fps">With 1000+ messages</metric>
+                <metric name="memory_usage" target="< 200MB">After 100 messages</metric>
+                <metric name="cpu_usage" target="< 30%">During streaming</metric>
+            </metrics>
+        </test_category>
+    </message_flow_testing>
+    
     <component_test_matrix>
+        <component id="start_chat_button" priority="P0">
+            <name>Start Chat Button - All States</name>
+            <test_cases>
+                <case>Button visible on first load</case>
+                <case>Button visible when no threads exist</case>
+                <case>Button visible in sidebar</case>
+                <case>Button visible in empty state</case>
+                <case>Click creates thread immediately</case>
+                <case>Double-click prevention works</case>
+                <case>Disabled during thread creation</case>
+                <case>Re-enabled after creation</case>
+                <case>Keyboard accessible (Enter/Space)</case>
+                <case>Mobile tap works correctly</case>
+                <case>Loading spinner during creation</case>
+                <case>Error handling on creation failure</case>
+                <case>Analytics event fires on click</case>
+            </test_cases>
+        </component>
+        
+        <component id="thread_list" priority="P0">
+            <name>Thread List in Sidebar</name>
+            <test_cases>
+                <case>All threads load on mount</case>
+                <case>Real-time updates via WebSocket</case>
+                <case>Active thread highlighted</case>
+                <case>Unread count badges accurate</case>
+                <case>Thread preview text truncated</case>
+                <case>Timestamp formatting correct</case>
+                <case>Search filters threads instantly</case>
+                <case>Sort by recent/name/custom</case>
+                <case>Pagination for 100+ threads</case>
+                <case>Virtual scrolling performance</case>
+                <case>Drag to reorder threads</case>
+                <case>Right-click context menu</case>
+                <case>Keyboard navigation (arrows)</case>
+                <case>Delete with confirmation</case>
+                <case>Archive/unarchive toggle</case>
+                <case>Pin/unpin to top</case>
+            </test_cases>
+        </component>
+        
         <component id="buttons" priority="P0">
             <name>All Button Interactions</name>
             <test_cases>

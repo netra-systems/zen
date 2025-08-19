@@ -41,6 +41,7 @@ const getRetryConfig = (): number => {
 
 export default defineConfig({
   testDir: './__tests__/e2e',
+  testMatch: '**/*.playwright.test.tsx',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: getRetryConfig(),

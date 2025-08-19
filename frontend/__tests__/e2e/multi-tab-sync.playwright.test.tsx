@@ -7,6 +7,9 @@
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines
  * @compliance type_safety.xml - Full TypeScript typing
  * @spec frontend_unified_testing_spec.xml - E2E concurrent sessions P1 priority
+ * 
+ * NOTE: This is a Playwright test - run with `npm run e2e:test`
+ * DO NOT run with Jest - will cause import errors
  */
 
 import { test, expect } from '@playwright/test';

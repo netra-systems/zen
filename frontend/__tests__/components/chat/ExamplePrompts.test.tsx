@@ -76,7 +76,7 @@ describe('ExamplePrompts', () => {
     const firstPrompt = screen.getByText(/I need to reduce costs but keep quality the same/i);
     fireEvent.click(firstPrompt);
     
-    expect(consoleErrorSpy).toHaveBeenCalledWith('User must be authenticated to send messages');
+    expect(consoleErrorSpy).toHaveBeenCalledWith('[ERROR]', 'User must be authenticated to send messages');
     expect(mockAddMessage).not.toHaveBeenCalled();
     expect(mockSendMessage).not.toHaveBeenCalled();
     expect(mockSetProcessing).not.toHaveBeenCalled();

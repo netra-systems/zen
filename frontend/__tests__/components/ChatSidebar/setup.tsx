@@ -446,7 +446,7 @@ export class ChatSidebarTestSetup {
   // Helper to create test threads
   createThread(overrides: Partial<typeof sampleThreads[0]> = {}) {
     const now = Math.floor(Date.now() / 1000); // Unix timestamp
-    return {
+    const baseThread = {
       id: `thread-${Math.random().toString(36).substr(2, 9)}`,
       title: 'Test Thread',
       created_at: now,
@@ -464,9 +464,21 @@ export class ChatSidebarTestSetup {
       messageCount: 1,
       isActive: false,
       participants: ['user1', 'assistant'],
-      tags: ['test'],
-      ...overrides
+      tags: ['test']
     };
+    
+    // Apply overrides and ensure timestamps are properly handled
+    const result = { ...baseThread, ...overrides };
+    
+    // Handle timestamp conversions for overrides
+    if (overrides.created_at && typeof overrides.created_at === 'string') {
+      result.created_at = Math.floor(new Date(overrides.created_at).getTime() / 1000);
+    }
+    if (overrides.updated_at && typeof overrides.updated_at === 'string') {
+      result.updated_at = Math.floor(new Date(overrides.updated_at).getTime() / 1000);
+    }
+    
+    return result;
   }
 
   // Mock loading state

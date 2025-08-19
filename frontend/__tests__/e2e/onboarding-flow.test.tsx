@@ -95,6 +95,21 @@ jest.mock('@/hooks/useLoadingState', () => ({
   })
 }));
 
+// Mock window.scrollTo to prevent "not implemented" errors in tests
+Object.defineProperty(window, 'scrollTo', {
+  value: jest.fn(),
+  writable: true,
+});
+
+// Mock window.scroll for additional coverage
+Object.defineProperty(window, 'scroll', {
+  value: jest.fn(),
+  writable: true,
+});
+
+// Mock scrollIntoView for elements
+Element.prototype.scrollIntoView = jest.fn();
+
 // Components under test
 import ChatPage from '@/app/chat/page';
 import MainChat from '@/components/chat/MainChat';

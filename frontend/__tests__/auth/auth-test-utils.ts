@@ -84,7 +84,7 @@ export const setupFetchMock = () => {
 
 // Test data factories
 export const createMockAuthConfig = () => ({
-  google_client_id: 'test-client-id',
+  google_client_id: 'mock-google-client-id',
   development_mode: false,
   endpoints: {
     login: 'http://localhost:8081/auth/login',

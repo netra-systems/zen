@@ -30,9 +30,16 @@ export const clearTestStorage = () => {
 };
 
 export const resetTestStores = () => {
-  useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-  useChatStore.setState({ messages: [], currentRunId: null });
-  useThreadStore.setState({ threads: [], currentThread: null, currentThreadId: null });
+  // Use proper reset methods instead of setState for zustand stores
+  if (typeof useAuthStore.getState === 'function') {
+    useAuthStore.getState().reset();
+  }
+  if (typeof useChatStore.getState === 'function') {
+    useChatStore.getState().reset();
+  }
+  if (typeof useThreadStore.getState === 'function') {
+    useThreadStore.getState().reset();
+  }
 };
 
 export const setupMockServer = () => {
@@ -72,7 +79,10 @@ export const createMockToken = () => 'test-jwt-token';
 export const setAuthenticatedState = () => {
   const user = createTestUser();
   const token = createMockToken();
-  useAuthStore.setState({ user, token, isAuthenticated: true });
+  // Use proper login method instead of setState
+  if (typeof useAuthStore.getState === 'function') {
+    useAuthStore.getState().login(user, token);
+  }
   return { user, token };
 };
 export const setupMockFetchForConfig = () => {

@@ -33,7 +33,7 @@ const FileAttachmentButton: React.FC<{ isDisabled: boolean }> = ({ isDisabled })
     aria-label="Attach file"
     title="Attach file (coming soon)"
   >
-    <Paperclip className="w-5 h-5" />
+    <Paperclip className="w-5 h-5" data-testid="paperclip-icon" />
   </AnimatedButton>
 );
 
@@ -44,7 +44,7 @@ const VoiceInputButton: React.FC<{ isDisabled: boolean }> = ({ isDisabled }) => 
     aria-label="Voice input"
     title="Voice input (coming soon)"
   >
-    <Mic className="w-5 h-5" />
+    <Mic className="w-5 h-5" data-testid="mic-icon" />
   </AnimatedButton>
 );
 
@@ -58,7 +58,7 @@ const SendButtonIcon: React.FC<{ isSending: boolean }> = ({ isSending }) => (
         exit={{ opacity: 0 }}
         transition={{ duration: 0.3, rotate: { duration: 1, repeat: Infinity, ease: "linear" } }}
       >
-        <Loader2 className="w-5 h-5" />
+        <Loader2 className="w-5 h-5" data-testid="loading-icon" />
       </motion.div>
     ) : (
       <motion.div
@@ -82,7 +82,7 @@ const SendButton: React.FC<{
   <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
     <Button
       onClick={onSend}
-      disabled={!canSend}
+      disabled={!canSend || isSending}
       className={cn(
         "rounded-full w-12 h-12 flex items-center justify-center transition-all duration-200",
         "bg-emerald-500 hover:bg-emerald-600",

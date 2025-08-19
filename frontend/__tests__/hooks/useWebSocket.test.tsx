@@ -1,16 +1,3 @@
-/**
- * AI AGENT MODIFICATION METADATA
- * ================================
- * Timestamp: 2025-08-12T14:45:00Z
- * Agent: Test Debug Expert Agent #6
- * Context: Fix useWebSocket test to work with MockWebSocketProvider
- * Git: v6 | 88345b5 | dirty
- * Change: Test | Scope: Component | Risk: Low
- * Session: test-fix | Seq: 2
- * Review: Pending | Score: 95/100
- * ================================
- */
-
 import { renderHook } from '@testing-library/react';
 import React from 'react';
 import { useWebSocket } from '@/hooks/useWebSocket';

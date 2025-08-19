@@ -1,6 +1,6 @@
 /**
- * API Calls Integration Tests
- * Tests REST API communication patterns using MSW for mocking
+ * API Calls Integration Tests - Basic Operations
+ * Tests REST API communication patterns (GET, POST, PUT, DELETE)
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)
@@ -20,7 +20,7 @@ import { getApiUrl } from '@/services/api';
 
 const mockApiUrl = 'http://localhost:8000';
 
-const createMockHandlers = () => [
+const createBasicHandlers = () => [
   // GET endpoints
   http.get(`${mockApiUrl}/api/threads`, () => {
     return HttpResponse.json({
@@ -101,7 +101,7 @@ const createMockHandlers = () => [
   })
 ];
 
-const server = setupServer(...createMockHandlers());
+const server = setupServer(...createBasicHandlers());
 
 // ============================================================================
 // TEST SETUP
@@ -315,147 +315,5 @@ describe('API Calls - DELETE Requests', () => {
     });
     
     expect(capturedHeaders['authorization']).toBe('Bearer delete-token');
-  });
-});
-
-// ============================================================================
-// REQUEST INTERCEPTOR TESTS
-// ============================================================================
-
-describe('API Calls - Request Interceptors', () => {
-  it('handles API spec fetching for endpoint resolution', async () => {
-    // The apiClient.get() call should first fetch the OpenAPI spec
-    await apiClient.get('get_threads', 'test-token');
-    
-    // Verify the spec was called by checking if threads were returned
-    // (which means endpoint was successfully resolved)
-    expect(true).toBe(true); // Test passes if no errors thrown
-  });
-
-  it('caches OpenAPI spec for subsequent requests', async () => {
-    let specCallCount = 0;
-    
-    server.use(
-      http.get(`${mockApiUrl}/openapi.json`, () => {
-        specCallCount++;
-        return HttpResponse.json({
-          paths: {
-            '/api/threads': {
-              get: { summary: 'get_threads' }
-            }
-          }
-        });
-      })
-    );
-
-    // Make multiple requests
-    await apiClient.get('get_threads', 'test-token');
-    await apiClient.get('get_threads', 'test-token');
-    
-    // Spec should only be fetched once due to caching
-    expect(specCallCount).toBe(1);
-  });
-
-  it('handles endpoint resolution failure gracefully', async () => {
-    server.use(
-      http.get(`${mockApiUrl}/openapi.json`, () => {
-        return HttpResponse.json({
-          paths: {} // Empty paths
-        });
-      })
-    );
-
-    await expect(
-      apiClient.get('nonexistent_endpoint', 'test-token')
-    ).rejects.toThrow('Endpoint nonexistent_endpoint not found');
-  });
-});
-
-// ============================================================================
-// API VERSIONING TESTS
-// ============================================================================
-
-describe('API Calls - API Versioning', () => {
-  it('supports versioned API endpoints', async () => {
-    server.use(
-      http.get(`${mockApiUrl}/api/v2/threads`, () => {
-        return HttpResponse.json({
-          version: '2.0',
-          threads: []
-        });
-      })
-    );
-
-    const url = getApiUrl('/api/v2/threads');
-    const response = await fetch(url);
-    const data = await response.json();
-    
-    expect(data.version).toBe('2.0');
-  });
-
-  it('handles version-specific endpoints in OpenAPI spec', async () => {
-    server.use(
-      http.get(`${mockApiUrl}/openapi.json`, () => {
-        return HttpResponse.json({
-          paths: {
-            '/api/v1/threads': {
-              get: { summary: 'get_threads_v1' }
-            },
-            '/api/v2/threads': {
-              get: { summary: 'get_threads_v2' }
-            }
-          }
-        });
-      })
-    );
-
-    // Clear any cached spec
-    (apiClient as any).spec = null;
-    
-    await apiClient.get('get_threads_v2', 'test-token');
-    expect(true).toBe(true); // Test passes if no errors thrown
-  });
-});
-
-// ============================================================================
-// RESPONSE INTERCEPTOR TESTS
-// ============================================================================
-
-describe('API Calls - Response Interceptors', () => {
-  it('parses JSON responses correctly', async () => {
-    const response = await apiClient.get('get_threads', 'test-token');
-    
-    expect(typeof response).toBe('object');
-    expect(response.threads).toBeInstanceOf(Array);
-  });
-
-  it('handles empty response bodies', async () => {
-    server.use(
-      http.delete(`${mockApiUrl}/api/threads/thread-1`, () => {
-        return new HttpResponse(null, { status: 204 });
-      })
-    );
-
-    const response = await apiClient.request('delete_thread', 'delete', {
-      method: 'DELETE'
-    });
-    
-    // Should handle empty response gracefully
-    expect(response).toBeDefined();
-  });
-
-  it('preserves response status information', async () => {
-    server.use(
-      http.post(`${mockApiUrl}/api/threads`, () => {
-        return HttpResponse.json(
-          { id: 'created-thread' },
-          { status: 201 }
-        );
-      })
-    );
-
-    // Note: apiClient.request doesn't expose status, but it should not throw
-    const response = await apiClient.post('create_thread', {}, 'test-token');
-    expect(response.id).toBe('created-thread');
   });
 });

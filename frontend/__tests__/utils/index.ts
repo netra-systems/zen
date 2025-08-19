@@ -34,6 +34,19 @@ export * from './thread-test-helpers';
 export * from './auth-test-helpers';
 
 // ============================================================================
+// NEW TEST UTILITIES - Enhanced testing capabilities
+// ============================================================================
+
+// Enhanced render functions and utilities
+export * from './test-helpers';
+
+// Mock data factories for consistent testing
+export * from './mock-factories';
+
+// Custom Jest matchers for better assertions
+export * from './custom-matchers';
+
+// ============================================================================
 // CONVENIENCE RE-EXPORTS - Common patterns
 // ============================================================================
 
@@ -73,3 +86,14 @@ export type {
   AuthEndpoints,
   AuthConfigResponse
 } from './auth-test-helpers';
+
+// New utility types
+export type {
+  MockUser,
+  MockThread,
+  MockMessage,
+  MockWebSocketMessage,
+  MockStoreState,
+  TestRenderOptions,
+  PerformanceMetrics
+} from './test-helpers';

@@ -194,7 +194,7 @@ export const createTestSetup = () => new ChatHistoryTestSetup();
 
 // Export commonly used items
 export { ThreadService };
-export { mockRouter, mockPathname, createMockThread };
+export { mockRouter, mockPathname, createMockThread, mockThreads };
 export { mockUseUnifiedChatStore, mockUseLoadingState, mockUseThreadNavigation };
 
 // Initialize mocks at module level

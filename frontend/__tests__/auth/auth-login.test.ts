@@ -69,16 +69,17 @@ describe('Auth Login Flow', () => {
       expect(mockAuthServiceClient.getConfig).toHaveBeenCalled();
       expect(result).toEqual({
         development_mode: false,
-        google_client_id: 'test-client-id',
+        google_client_id: 'mock-google-client-id',
         endpoints: {
           login: 'http://localhost:8081/auth/login',
           logout: 'http://localhost:8081/auth/logout',
           callback: 'http://localhost:8081/auth/callback',
           token: 'http://localhost:8081/auth/token',
-          user: 'http://localhost:8081/auth/me'
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
         },
         authorized_javascript_origins: ['http://localhost:3000'],
-        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+        authorized_redirect_uris: ['http://localhost:3000/callback']
       });
     });
 

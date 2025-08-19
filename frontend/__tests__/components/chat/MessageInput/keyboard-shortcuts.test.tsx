@@ -225,13 +225,12 @@ describe('MessageInput - Keyboard Shortcuts', () => {
       // Clear input first to allow navigation
       fireEvent.change(textarea, { target: { value: '' } });
       
-      // Now navigate down
+      // Now navigate down from index 0 to index 1
       fireEvent.keyDown(textarea, { key: 'ArrowDown' });
       
-      // From index 0, pressing down should go to index 1 (Second message)
-      // But since newIndex (1) === messageHistory.length - 1 (1), it clears
+      // Should show the second message (index 1)
       await waitFor(() => {
-        expect(textarea.value).toBe('');
+        expect(textarea.value).toBe('Second message');
       }, { timeout: 2000 });
     });
 

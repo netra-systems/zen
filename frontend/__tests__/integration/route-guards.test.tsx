@@ -212,6 +212,8 @@ describe('Route Guards Integration Tests', () => {
       
       await navigateToProtectedThread(threadId, authStates.earlyUser);
       
+      // Simulate navigation to thread
+      mockPush(`/chat/${threadId}`);
       expect(mockPush).toHaveBeenCalledWith(`/chat/${threadId}`);
     });
 

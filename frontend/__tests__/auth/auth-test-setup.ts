@@ -39,7 +39,7 @@ jest.mock('@/lib/auth-service-config', () => ({
       me: 'http://localhost:8081/auth/me'
     },
     oauth: {
-      googleClientId: 'test-client-id',
+      googleClientId: 'mock-google-client-id',
       redirectUri: 'http://localhost:3000/auth/callback',
       javascriptOrigins: ['http://localhost:3000']
     }

@@ -126,8 +126,8 @@ describe('Authentication Flow Integration', () => {
             token,
             isAuthenticated: true
           };
-          // Store in localStorage like real implementation
-          localStorage.setItem('auth-token', token);
+          // Store in localStorage using same key as real implementation
+          localStorage.setItem('jwt_token', token);
           localStorage.setItem('auth-user', JSON.stringify(user));
         }),
         logout: jest.fn().mockImplementation(() => {
@@ -137,11 +137,11 @@ describe('Authentication Flow Integration', () => {
             token: null,
             isAuthenticated: false
           };
-          localStorage.removeItem('auth-token');
+          localStorage.removeItem('jwt_token');
           localStorage.removeItem('auth-user');
         }),
         initializeFromStorage: jest.fn().mockImplementation(() => {
-          const token = localStorage.getItem('auth-token');
+          const token = localStorage.getItem('jwt_token');
           const userStr = localStorage.getItem('auth-user');
           if (token && userStr) {
             const user = JSON.parse(userStr);
@@ -321,7 +321,7 @@ describe('Authentication Flow Integration', () => {
   }
 
   function setupAuthenticatedState() {
-    useAuthStore.setState({
+    (mockUseAuthStore as any).setState({
       user: mockUser,
       token: mockAuthToken,
       isAuthenticated: true
@@ -330,7 +330,7 @@ describe('Authentication Flow Integration', () => {
 
   function performLoginFlow() {
     // Simulate the login process that sets localStorage and updates state
-    localStorage.setItem('auth-token', mockAuthToken);
+    localStorage.setItem('jwt_token', mockAuthToken);
     localStorage.setItem('auth-user', JSON.stringify(mockUser));
     
     // Update the mock state directly 
@@ -345,19 +345,26 @@ describe('Authentication Flow Integration', () => {
   }
 
   function verifyStatePersistence() {
-    expect(localStorage.getItem('auth-token')).toBe(mockAuthToken);
+    expect(localStorage.getItem('jwt_token')).toBe(mockAuthToken);
     expect(JSON.parse(localStorage.getItem('auth-user') || '{}')).toEqual(mockUser);
   }
 
   function performPageRefresh() {
     // Simulate page refresh by resetting store and calling initialization
-    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-    useAuthStore.getState().initializeFromStorage();
+    (mockUseAuthStore as any).setState({ user: null, token: null, isAuthenticated: false });
+    
+    // Call initializeFromStorage to restore state from localStorage
+    const mockStoreInstance = mockUseAuthStore();
+    mockStoreInstance.initializeFromStorage();
   }
 
   async function verifyStateRestoration() {
     await waitFor(() => {
-      expectAuthenticatedState();
+      // Verify the mock store has restored the authenticated state
+      const authState = (mockUseAuthStore as any).getState();
+      expect(authState.isAuthenticated).toBe(true);
+      expect(authState.user).toEqual(mockUser);
+      expect(authState.token).toBe(mockAuthToken);
     });
   }
 
@@ -378,7 +385,7 @@ describe('Authentication Flow Integration', () => {
     const authStore = useAuthStore();
     expect(authStore.isAuthenticated).toBe(true);
     expect(authStore.user?.tier).toBe('free');
-    expect(localStorage.getItem('auth-token')).toBeTruthy();
+    expect(localStorage.getItem('jwt_token')).toBeTruthy();
   }
 
   async function simulateFirstThreadCreation() {
@@ -400,8 +407,8 @@ describe('Authentication Flow Integration', () => {
 
   async function simulateSessionTimeout() {
     // Simulate token expiration
-    localStorage.removeItem('auth-token');
-    useAuthStore.setState({
+    localStorage.removeItem('jwt_token');
+    (mockUseAuthStore as any).setState({
       isAuthenticated: false,
       token: null
     });
@@ -409,7 +416,7 @@ describe('Authentication Flow Integration', () => {
 
   async function verifySessionTimeoutHandling() {
     await waitFor(() => {
-      expect(useAuthStore.getState().isAuthenticated).toBe(false);
+      expect((mockUseAuthStore as any).getState().isAuthenticated).toBe(false);
     });
   }
 
@@ -419,7 +426,7 @@ describe('Authentication Flow Integration', () => {
   }
 
   function expectContinuedOnboarding() {
-    expect(useAuthStore.getState().isAuthenticated).toBe(true);
-    expect(localStorage.getItem('auth-token')).toBe('new-token-456');
+    expect((mockUseAuthStore as any).getState().isAuthenticated).toBe(true);
+    expect(localStorage.getItem('jwt_token')).toBe('new-token-456');
   }
 });

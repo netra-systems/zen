@@ -2,7 +2,45 @@ require('whatwg-fetch');
 require('@testing-library/jest-dom');
 const fetchMock = require('jest-fetch-mock');
 
+// Mock Web APIs that MSW needs in Node.js environment
+global.BroadcastChannel = class BroadcastChannel {
+  constructor(name) {
+    this.name = name;
+  }
+  postMessage() {}
+  close() {}
+  addEventListener() {}
+  removeEventListener() {}
+};
+
+global.TransformStream = class TransformStream {
+  constructor() {
+    this.readable = new ReadableStream();
+    this.writable = new WritableStream();
+  }
+};
+
 fetchMock.enableMocks();
+
+// Add TextEncoder/TextDecoder polyfills for MSW
+if (typeof global.TextEncoder === 'undefined') {
+  const { TextEncoder, TextDecoder } = require('util');
+  global.TextEncoder = TextEncoder;
+  global.TextDecoder = TextDecoder;
+}
+
+// Add BroadcastChannel polyfill for MSW
+if (typeof global.BroadcastChannel === 'undefined') {
+  global.BroadcastChannel = class BroadcastChannel {
+    constructor(name) {
+      this.name = name;
+    }
+    postMessage() {}
+    addEventListener() {}
+    removeEventListener() {}
+    close() {}
+  };
+}
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
@@ -39,58 +77,29 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
-// Enhanced WebSocket Mock with proper timing and state management
-class MockWebSocket {
-  constructor(url) {
-    this.url = url;
-    this.readyState = MockWebSocket.CONNECTING;
-    this.onopen = null;
-    this.onclose = null;
-    this.onerror = null;
-    this.onmessage = null;
-    this.send = jest.fn();
-    this.close = jest.fn((code, reason) => {
-      this.readyState = MockWebSocket.CLOSING;
-      setTimeout(() => {
-        this.readyState = MockWebSocket.CLOSED;
-        if (this.onclose) {
-          this.onclose(new CloseEvent('close', { code, reason }));
-        }
-      }, 0);
-    });
-    this.addEventListener = jest.fn((event, handler) => {
-      if (event === 'open') this.onopen = handler;
-      if (event === 'close') this.onclose = handler;
-      if (event === 'error') this.onerror = handler;
-      if (event === 'message') this.onmessage = handler;
-    });
-    this.removeEventListener = jest.fn();
-    
-    // Simulate async connection with proper state transition
-    process.nextTick(() => {
-      this.readyState = MockWebSocket.OPEN;
-      if (this.onopen) {
-        this.onopen(new Event('open'));
-      }
-    });
-  }
-
-  // Helper method for tests to simulate messages
-  simulateMessage(data) {
-    if (this.onmessage && this.readyState === MockWebSocket.OPEN) {
-      const messageData = typeof data === 'string' ? data : JSON.stringify(data);
-      this.onmessage(new MessageEvent('message', { data: messageData }));
+// Enhanced WebSocket Mock - Use the comprehensive version from mocks (conditional)
+try {
+  const { installWebSocketMock } = require('./__tests__/mocks/websocket-mocks');
+  // Install the enhanced WebSocket mock globally
+  installWebSocketMock();
+} catch (error) {
+  // Fallback to simple WebSocket mock if enhanced version fails
+  class SimpleWebSocket {
+    constructor(url) {
+      this.url = url;
+      this.readyState = 1; // OPEN
+      this.send = jest.fn();
+      this.close = jest.fn();
+      this.addEventListener = jest.fn();
+      this.removeEventListener = jest.fn();
     }
   }
+  SimpleWebSocket.CONNECTING = 0;
+  SimpleWebSocket.OPEN = 1;
+  SimpleWebSocket.CLOSING = 2;
+  SimpleWebSocket.CLOSED = 3;
+  global.WebSocket = SimpleWebSocket;
 }
-
-// Add static properties after class definition
-MockWebSocket.CONNECTING = 0;
-MockWebSocket.OPEN = 1;
-MockWebSocket.CLOSING = 2;
-MockWebSocket.CLOSED = 3;
-
-global.WebSocket = MockWebSocket;
 
 // Mock localStorage with quota handling
 const localStorageData = new Map();
@@ -190,6 +199,30 @@ jest.mock('@/hooks/useWebSocket', () => ({
 
 // Setup auth service mocks for independent service
 require('./__tests__/setup/auth-service-setup');
+
+// Optional MSW setup - only load if explicitly enabled via environment variable
+if (process.env.ENABLE_MSW_MOCKS === 'true') {
+  try {
+    const { startMockServer, resetMockHandlers, stopMockServer } = require('./__tests__/mocks/api-mocks');
+
+    // Start MSW server before all tests
+    beforeAll(() => {
+      startMockServer();
+    });
+
+    // Reset handlers after each test to ensure test isolation
+    afterEach(() => {
+      resetMockHandlers();
+    });
+
+    // Stop MSW server after all tests
+    afterAll(() => {
+      stopMockServer();
+    });
+  } catch (error) {
+    console.warn('MSW mocks not available:', error.message);
+  }
+}
 
 // Mock the WebSocketProvider context with factory function
 jest.mock('@/providers/WebSocketProvider', () => {
