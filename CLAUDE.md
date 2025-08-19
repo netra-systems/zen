@@ -50,6 +50,13 @@ We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclom
 
 While engineering standards are critical, business urgency may necessitate trade-offs. You are authorized to propose strategic trade-offs when mandates require harmonization (e.g., temporarily accepting higher complexity to ship a critical feature). The justification must be documented within the BVJ, including the associated risks and the plan to restore technical health.
 
+### 2.5. Observability and Data-Driven Operations
+We cannot optimize what we do not measure. The system must be observable by design.
+*   **The Three Pillars:** Implement comprehensive, structured logging, metrics (Prometheus/Grafana), and distributed tracing (OpenTelemetry) across all services.
+*   **SLIs/SLOs/SLAs:** Define Service Level Indicators (SLIs) and Objectives (SLOs) for all critical services, mapping directly to customer-facing SLAs.
+*   **Error Budgets:** Utilize error budgets to balance innovation velocity with stability. If an SLO is breached, development focus MUST shift to restoring stability before shipping new features.
+*   **Actionable Alerting:** Alerts must be directly linked to SLO breaches, minimize noise, and have a corresponding runbook.
+
 ## 3. The Development Process: Structured Analysis
 
 Execute structured, critical analysis throughout the development lifecycle.
