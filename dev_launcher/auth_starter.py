@@ -99,9 +99,12 @@ class AuthStarter:
             "--port", str(port)
         ]
         
-        # Add reload in development mode
-        if not self.config.production:
+        # Add reload based on configuration
+        if self.config.auth_reload:
             cmd.append("--reload")
+            logger.info("Auth service hot reload: ENABLED")
+        else:
+            logger.info("Auth service hot reload: DISABLED")
         
         logger.debug(f"Auth service command: {' '.join(cmd)}")
         return cmd
