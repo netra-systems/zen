@@ -353,17 +353,89 @@ async def use_connection_manager():
                 <impact>Prevents revenue loss from undetected connection failures</impact>
             </business_impact>
         </learning>
+        
+        <learning>
+            <id>websocket-connection-circular-import</id>
+            <date>2025-08-18</date>
+            <category>WebSocket/Import</category>
+            <severity>critical</severity>
+            <title>Circular Import Between Connection Modules</title>
+            
+            <problem>
+                <description>Circular import dependency between connection.py, connection_executor.py, and connection_manager.py</description>
+                <error_message>ImportError: cannot import name 'get_connection_manager' from partially initialized module</error_message>
+                <symptoms>
+                    <symptom>Module fails to import at startup</symptom>
+                    <symptom>WebSocket connections cannot be established</symptom>
+                    <symptom>Service fails to start completely</symptom>
+                </symptoms>
+                <root_cause>connection.py was initializing connection_manager at module level, creating circular dependency</root_cause>
+                <impact>100% WebSocket connection failure, service completely non-functional</impact>
+            </problem>
+            
+            <solution>
+                <description>Implement lazy initialization for connection_manager</description>
+                <implementation>
+                    <step>Changed connection_manager from immediate initialization to None</step>
+                    <step>Created get_connection_manager_instance() function for lazy loading</step>
+                    <step>Updated exports to include the lazy getter function</step>
+                </implementation>
+                <code_changes>
+                    <file>app/websocket/connection.py</file>
+                    <change>Line 17: Changed from immediate get_connection_manager() to None</change>
+                    <change>Lines 19-24: Added get_connection_manager_instance() lazy getter</change>
+                    <change>Line 112: Added get_connection_manager_instance to __all__ exports</change>
+                </code_changes>
+            </solution>
+            
+            <prevention>
+                <recommendation>Never initialize shared resources at module import time</recommendation>
+                <recommendation>Always use lazy initialization for singleton patterns</recommendation>
+                <recommendation>Test import order independence in critical tests</recommendation>
+                <pattern>
+                    <name>Lazy Singleton Pattern</name>
+                    <code><![CDATA[
+# Module level - lazy initialization
+connection_manager = None
+
+def get_connection_manager_instance():
+    """Get connection manager with lazy initialization."""
+    global connection_manager
+    if connection_manager is None:
+        connection_manager = get_connection_manager()
+    return connection_manager
+                    ]]></code>
+                </pattern>
+            </prevention>
+            
+            <testing>
+                <test_file>app/tests/critical/test_websocket_circular_import_regression.py</test_file>
+                <test_class>TestConnectionModuleCircularImportPrevention</test_class>
+                <tests>
+                    <test>test_connection_manager_lazy_initialization - Verifies lazy init behavior</test>
+                    <test>test_connection_modules_import_independently - Tests isolated imports</test>
+                    <test>test_connection_backward_compatibility - Ensures all exports available</test>
+                </tests>
+            </testing>
+            
+            <business_impact>
+                <metric>Prevents 100% WebSocket connection failures</metric>
+                <metric>Protects $50K+ MRR from service disruption</metric>
+                <metric>Ensures zero downtime from import errors</metric>
+            </business_impact>
+        </learning>
     </learnings>
     
     <summary>
-        <total_learnings>5</total_learnings>
+        <total_learnings>6</total_learnings>
         <categories>
             <category>WebSocket/Error Handling</category>
             <category>WebSocket/Implementation Details</category>
             <category>WebSocket/Race Conditions</category>
             <category>WebSocket/Metrics Collection</category>
             <category>WebSocket/Initialization</category>
+            <category>WebSocket/Import</category>
         </categories>
-        <key_takeaway>Always validate WebSocket connection state before operations, handle race conditions with proper state flags, ensure async methods are properly awaited in monitoring systems, and use proper singleton initialization patterns for connection managers</key_takeaway>
+        <key_takeaway>Always validate WebSocket connection state before operations, handle race conditions with proper state flags, ensure async methods are properly awaited in monitoring systems, use proper singleton initialization patterns for connection managers, and implement lazy initialization to prevent circular import dependencies</key_takeaway>
     </summary>
 </specification>

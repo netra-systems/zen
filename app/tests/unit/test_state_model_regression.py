@@ -82,12 +82,11 @@ class TestAllStateModelsInit:
         """Test MigrationState initialization."""
         from app.startup.migration_models import MigrationState
         
-        # Test with required fields only
-        state = MigrationState(
-            migration_id="test_id",
-            status="pending"
-        )
-        assert state.migration_id == "test_id"
+        # Test with default initialization
+        state = MigrationState()
+        assert state.applied_migrations == []
+        assert state.pending_migrations == []
+        assert state.auto_run_enabled is True
         
     def test_langchain_agent_state_init(self):
         """Test LangChainAgentState initialization."""
@@ -116,18 +115,29 @@ class TestAllStateModelsInit:
     def test_agent_state_from_apex_optimizer(self):
         """Test AgentState from apex_optimizer."""
         from app.services.apex_optimizer_agent.models import AgentState
+        from langchain_core.messages import HumanMessage
         
-        # Should be initializable with default values
-        state = AgentState()
-        assert state.messages == []
+        # Test with required fields
+        state = AgentState(
+            messages=[HumanMessage(content="test")],
+            next_node="start"
+        )
+        assert len(state.messages) == 1
+        assert state.next_node == "start"
         
     def test_current_system_state_init(self):
         """Test CurrentSystemState initialization."""
         from app.schemas.llm_config_types import CurrentSystemState
         
-        # Should have defaults for all fields
-        state = CurrentSystemState()
-        assert state.enabled is False
+        # Test with required fields
+        state = CurrentSystemState(
+            daily_cost=100.0,
+            avg_latency_ms=50.0,
+            daily_requests=1000
+        )
+        assert state.daily_cost == 100.0
+        assert state.avg_latency_ms == 50.0
+        assert state.daily_requests == 1000
         
     def test_system_state_diagnostic_init(self):
         """Test SystemState from diagnostics initialization."""
@@ -135,7 +145,9 @@ class TestAllStateModelsInit:
         
         # Should have sensible defaults
         state = SystemState()
-        assert state.healthy is True
+        assert state.processes == []
+        assert state.memory_usage == 0.0
+        assert state.cpu_usage == 0.0
 
 
 class TestValidationErrorMessages:

@@ -9,6 +9,11 @@ REGRESSION HISTORY:
 - Issue: Circular import between app.websocket.connection_executor and app.agents.base.executor
 - Impact: Agents couldn't be imported, WebSocket messages sent but no responses
 - Fix: Removed BaseExecutionEngine imports from WebSocket modules
+
+- Date: 2025-08-18
+- Issue: Circular import between connection.py, connection_executor.py, and connection_manager.py
+- Impact: Module-level initialization of connection_manager caused import loops
+- Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
 """
 
 import pytest
@@ -175,3 +180,111 @@ class TestCircularImportRegression:
         # Verify supervisor was called
         assert mock_supervisor.run.called, \
             "Message should trigger supervisor execution after circular fix"
+
+
+class TestConnectionModuleCircularImportPrevention:
+    """Prevent regression of connection module circular import fixes."""
+    
+    def test_connection_manager_lazy_initialization(self):
+        """Test that connection.py uses lazy initialization.
+        
+        Business Value: Prevents import-time initialization causing circular deps.
+        Protects $50K+ MRR from WebSocket connection failures.
+        """
+        # Clear module cache
+        modules_to_clear = [
+            'app.websocket.connection',
+            'app.websocket.connection_manager',
+            'app.websocket.connection_executor'
+        ]
+        for module in modules_to_clear:
+            if module in sys.modules:
+                del sys.modules[module]
+        
+        # Import connection module
+        from app.websocket.connection import connection_manager, get_connection_manager_instance
+        
+        # Verify lazy initialization
+        assert connection_manager is None, \
+            "connection_manager MUST be None at import time (lazy init required)"
+        
+        # Verify getter exists and works
+        assert callable(get_connection_manager_instance), \
+            "get_connection_manager_instance must be callable"
+        
+        # Test lazy getter returns instance
+        manager = get_connection_manager_instance()
+        assert manager is not None, "Lazy getter must return manager instance"
+        
+        # Verify singleton behavior
+        second_manager = get_connection_manager_instance()
+        assert second_manager is manager, "Should return same instance (singleton)"
+    
+    def test_connection_modules_import_independently(self):
+        """Test each connection module imports independently.
+        
+        Business Value: Ensures microservice independence per SPEC requirements.
+        """
+        test_cases = [
+            ('app.websocket.connection_info', ['ConnectionInfo']),
+            ('app.websocket.connection_reliability', ['ConnectionReliabilityManager']),
+            ('app.websocket.connection_executor', ['ConnectionExecutor']),
+            ('app.websocket.connection_manager', ['ModernConnectionManager', 'get_connection_manager']),
+            ('app.websocket.connection', ['ConnectionManager', 'get_connection_manager_instance'])
+        ]
+        
+        for module_name, expected_attrs in test_cases:
+            # Clear module cache
+            if module_name in sys.modules:
+                del sys.modules[module_name]
+            
+            try:
+                # Import module in isolation
+                module = importlib.import_module(module_name)
+                
+                # Verify expected attributes exist
+                for attr in expected_attrs:
+                    assert hasattr(module, attr), \
+                        f"{module_name} missing expected attribute: {attr}"
+                        
+            except ImportError as e:
+                pytest.fail(f"{module_name} failed isolated import: {e}")
+            finally:
+                # Clean up
+                if module_name in sys.modules:
+                    del sys.modules[module_name]
+    
+    def test_connection_backward_compatibility(self):
+        """Test all legacy exports remain available.
+        
+        Business Value: Prevents breaking changes in dependent services.
+        """
+        from app.websocket import connection
+        
+        # All expected exports for backward compatibility
+        required_exports = [
+            'ConnectionInfo',
+            'ConnectionManager',  # Legacy wrapper class
+            'connection_manager',  # Legacy variable (now None/lazy)
+            'get_connection_manager_instance',  # New lazy getter
+            'ConnectionStats',
+            'ConnectionInfoBuilder',
+            'ConnectionValidator',
+            'ConnectionMetrics',
+            'ConnectionDurationCalculator',
+            'ConnectionExecutor',
+            'ConnectionOperationBuilder',
+            'ConnectionExecutionOrchestrator',
+            'ConnectionReliabilityManager',
+            'ConnectionCloseReliability',
+            'ConnectionEstablishmentReliability',
+            'ModernConnectionManager'
+        ]
+        
+        for export in required_exports:
+            assert hasattr(connection, export), \
+                f"Missing backward compatibility export: {export}"
+        
+        # Verify __all__ matches
+        assert set(connection.__all__) == set(required_exports), \
+            "__all__ exports don't match required exports"
