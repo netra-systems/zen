@@ -52,16 +52,16 @@ class AgentBillingTestCore:
         user_data = self._get_test_user_for_tier(tier)
         
         # Establish WebSocket connection
-        client = await self.websocket_core.establish_authenticated_connection(user_data["id"])
+        client = await self.websocket_core.establish_authenticated_connection(user_data.id)
         
         return {
             "client": client,
-            "user_data": user_data,
+            "user_data": {"id": user_data.id, "email": user_data.email, "full_name": user_data.full_name},
             "tier": tier,
             "session_start": time.time()
         }
     
-    def _get_test_user_for_tier(self, tier: PlanTier) -> Dict[str, Any]:
+    def _get_test_user_for_tier(self, tier: PlanTier):
         """Get test user configuration for plan tier."""
         tier_user_map = {
             PlanTier.FREE: TEST_USERS["free"],

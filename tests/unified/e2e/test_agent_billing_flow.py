@@ -29,6 +29,7 @@ import time
 from typing import Dict, Any
 from unittest.mock import patch
 import pytest
+import pytest_asyncio
 
 from .agent_billing_test_helpers import (
     AgentBillingTestCore,
@@ -43,7 +44,7 @@ from app.schemas.UserPlan import PlanTier
 class TestAgentBillingFlow:
     """Test #2: Agent Request → Processing → Response → Billing Record Flow."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def test_core(self):
         """Initialize billing test core."""
         core = AgentBillingTestCore()
@@ -64,6 +65,7 @@ class TestAgentBillingFlow:
         billing_helper = ClickHouseBillingHelper()
         return BillingFlowValidator(billing_helper)
     
+    @pytest.mark.asyncio
     async def test_complete_agent_billing_flow_triage(self, test_core, request_simulator, 
                                                     billing_validator):
         """Test complete billing flow for triage agent."""
@@ -88,6 +90,7 @@ class TestAgentBillingFlow:
         finally:
             await session["client"].close()
     
+    @pytest.mark.asyncio
     async def test_multiple_agent_types_billing_accuracy(self, test_core, request_simulator,
                                                        billing_validator):
         """Test billing accuracy across different agent types."""
@@ -115,6 +118,7 @@ class TestAgentBillingFlow:
         finally:
             await session["client"].close()
     
+    @pytest.mark.asyncio
     async def test_billing_performance_requirements(self, test_core, request_simulator,
                                                   billing_validator):
         """Test that billing operations meet performance requirements."""
@@ -141,6 +145,7 @@ class TestAgentBillingFlow:
         finally:
             await session["client"].close()
     
+    @pytest.mark.asyncio
     async def test_billing_error_handling(self, test_core, request_simulator):
         """Test billing flow error handling and recovery."""
         session = await test_core.establish_authenticated_user_session(PlanTier.PRO)
@@ -161,6 +166,7 @@ class TestAgentBillingFlow:
         finally:
             await session["client"].close()
     
+    @pytest.mark.asyncio
     async def test_tier_specific_billing_validation(self, test_core, request_simulator,
                                                   billing_validator):
         """Test billing validation for different user tiers."""
@@ -216,7 +222,7 @@ class TestAgentBillingFlow:
 class TestAgentBillingPerformance:
     """Performance validation for agent billing operations."""
     
-    @pytest.fixture
+    @pytest_asyncio.fixture
     async def test_core(self):
         """Initialize performance test core."""
         core = AgentBillingTestCore()
@@ -224,6 +230,7 @@ class TestAgentBillingPerformance:
         yield core
         await core.teardown_test_environment()
     
+    @pytest.mark.asyncio
     async def test_billing_record_creation_performance(self, test_core):
         """Test that billing record creation meets performance requirements."""
         session = await test_core.establish_authenticated_user_session(PlanTier.PRO)
@@ -249,6 +256,7 @@ class TestAgentBillingPerformance:
         finally:
             await session["client"].close()
     
+    @pytest.mark.asyncio
     async def test_concurrent_billing_operations(self, test_core):
         """Test billing system under concurrent load."""
         sessions = []

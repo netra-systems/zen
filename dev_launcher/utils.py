@@ -11,7 +11,7 @@ import webbrowser
 import urllib.request
 import urllib.error
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -147,8 +147,25 @@ def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bo
     Returns:
         True if service became available
     """
+    success, _ = wait_for_service_with_details(url, timeout, check_interval)
+    return success
+
+
+def wait_for_service_with_details(url: str, timeout: int = 30, check_interval: int = 2) -> Tuple[bool, Optional[str]]:
+    """
+    Wait for a service to become available with detailed error info.
+    
+    Args:
+        url: URL to check
+        timeout: Maximum time to wait in seconds
+        check_interval: Time between checks in seconds
+    
+    Returns:
+        Tuple of (success, error_details)
+    """
     start_time = time.time()
     attempt = 0
+    last_error = None
     
     while time.time() - start_time < timeout:
         attempt += 1
@@ -156,15 +173,24 @@ def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bo
             with urllib.request.urlopen(url, timeout=3) as response:
                 if response.status == 200:
                     logger.info(f"Service ready at {url} after {attempt} attempts")
-                    return True
-        except (urllib.error.URLError, ConnectionError, TimeoutError, OSError):
-            if attempt == 1:
-                logger.debug(f"Waiting for service at {url}...")
-            elif attempt % 10 == 0:
-                logger.debug(f"Still waiting for {url}... ({attempt} attempts)")
-            time.sleep(check_interval)
+                    return True, None
+                else:
+                    last_error = f"Status {response.status}"
+        except urllib.error.HTTPError as e:
+            last_error = f"HTTP {e.code}: {e.reason}"
+        except urllib.error.URLError as e:
+            last_error = f"Connection error: {e.reason}"
+        except (ConnectionError, TimeoutError, OSError) as e:
+            last_error = f"Network error: {str(e)}"
+        
+        if attempt == 1:
+            logger.debug(f"Waiting for service at {url}...")
+        elif attempt % 10 == 0:
+            logger.debug(f"Still waiting for {url}... ({attempt} attempts)")
+        time.sleep(check_interval)
     
-    return False
+    elapsed = time.time() - start_time
+    return False, f"{last_error} after {elapsed:.1f}s"
 
 
 def open_browser(url: str, delay: float = 1.0) -> bool:

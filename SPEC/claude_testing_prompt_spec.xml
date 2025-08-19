@@ -32,39 +32,189 @@
   </overview>
 
   <prompt_patterns>
-    <pattern match="run all tests|run tests|test everything">
-      <action>Use all test level</action>
-      <command>python test_runner.py --level all</command>
+    <!-- Core Test Levels -->
+    <pattern match="run smoke tests|quick test|quick validation">
+      <action>Run minimal smoke tests for quick validation</action>
+      <command>python test_runner.py --level smoke</command>
+      <description>Fastest test suite - basic functionality check</description>
     </pattern>
     
-    <pattern match="run all unified tests|run unified tests">
-      <action>Use integration test level (unified testing)</action>
+    <pattern match="run unit tests|test units|unit test">
+      <action>Run unit tests for isolated component testing</action>
+      <command>python test_runner.py --level unit</command>
+      <description>Tests individual functions and classes in isolation</description>
+    </pattern>
+    
+    <pattern match="run agent tests|test agents|agent testing">
+      <action>Run agent tests with real LLM interactions</action>
+      <command>python test_runner.py --level agents --real-llm</command>
+      <description>Tests multi-agent system with actual LLM calls</description>
+    </pattern>
+    
+    <pattern match="run agent startup|test agent startup|agent-startup">
+      <action>Run agent startup sequence tests</action>
+      <command>python test_runner.py --level agent-startup</command>
+      <description>Validates agent initialization and startup sequences</description>
+    </pattern>
+    
+    <pattern match="run integration tests|run unified tests|test integration">
+      <action>Run integration tests (DEFAULT for development)</action>
       <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
+      <description>Tests component interactions - recommended default</description>
     </pattern>
     
-    <pattern match="run backend tests">
+    <!-- Comprehensive Test Suites -->
+    <pattern match="run comprehensive tests|comprehensive testing|full test suite">
+      <action>Run comprehensive test suite</action>
+      <command>python test_runner.py --level comprehensive</command>
+      <description>Complete test coverage across all components</description>
+    </pattern>
+    
+    <pattern match="comprehensive backend|backend comprehensive">
+      <action>Run comprehensive backend tests</action>
+      <command>python test_runner.py --level comprehensive-backend</command>
+      <description>Full backend component testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive frontend|frontend comprehensive">
+      <action>Run comprehensive frontend tests</action>
+      <command>python test_runner.py --level comprehensive-frontend</command>
+      <description>Full frontend component testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive core|core comprehensive">
+      <action>Run comprehensive core system tests</action>
+      <command>python test_runner.py --level comprehensive-core</command>
+      <description>Core system functionality testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive agents|agents comprehensive">
+      <action>Run comprehensive agent tests</action>
+      <command>python test_runner.py --level comprehensive-agents</command>
+      <description>Complete multi-agent system testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive websocket|websocket comprehensive">
+      <action>Run comprehensive WebSocket tests</action>
+      <command>python test_runner.py --level comprehensive-websocket</command>
+      <description>Full WebSocket communication testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive database|database comprehensive">
+      <action>Run comprehensive database tests</action>
+      <command>python test_runner.py --level comprehensive-database</command>
+      <description>Complete database operations testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive api|api comprehensive">
+      <action>Run comprehensive API tests</action>
+      <command>python test_runner.py --level comprehensive-api</command>
+      <description>Full API endpoint testing</description>
+    </pattern>
+    
+    <!-- Critical and Special Test Patterns -->
+    <pattern match="run critical tests|critical testing|business critical">
+      <action>Run business-critical tests only</action>
+      <command>python test_runner.py --level critical</command>
+      <description>Tests for revenue-impacting functionality</description>
+    </pattern>
+    
+    <pattern match="run all tests|test everything|complete test">
+      <action>Run ALL test levels - complete validation</action>
+      <command>python test_runner.py --level all</command>
+      <description>Runs every single test in the system</description>
+    </pattern>
+    
+    <pattern match="run real e2e|real end to end|e2e tests">
+      <action>Run real end-to-end tests with actual services</action>
+      <command>python test_runner.py --level real_e2e --real-llm</command>
+      <description>Full system testing with real services</description>
+    </pattern>
+    
+    <pattern match="run real services|test real services|services test">
+      <action>Run tests with real service integrations</action>
+      <command>python test_runner.py --level real_services --real-llm</command>
+      <description>Tests with actual external service calls</description>
+    </pattern>
+    
+    <pattern match="run mock only|mock tests|mocked testing">
+      <action>Run tests with mocked dependencies only</action>
+      <command>python test_runner.py --level mock_only</command>
+      <description>Fast testing with all external deps mocked</description>
+    </pattern>
+    
+    <pattern match="run performance tests|performance testing|perf test">
+      <action>Run performance and load tests</action>
+      <command>python test_runner.py --level performance</command>
+      <description>Tests system performance and scalability</description>
+    </pattern>
+    
+    <!-- Specialized Test Patterns -->
+    <pattern match="run backend tests|backend only|test backend">
       <action>Run backend-only tests</action>
       <command>python test_runner.py --level unit --backend-only</command>
+      <description>Backend components isolation testing</description>
     </pattern>
     
-    <pattern match="run frontend tests">
+    <pattern match="run frontend tests|frontend only|test frontend">
       <action>Run frontend-only tests</action>
       <command>python test_runner.py --level unit --frontend-only</command>
+      <description>Frontend components isolation testing</description>
     </pattern>
     
-    <pattern match="run agent tests">
-      <action>Run agent tests with real LLM</action>
-      <command>python test_runner.py --level agents --real-llm</command>
-    </pattern>
-    
-    <pattern match="run e2e tests|run end to end tests">
-      <action>Run real E2E tests</action>
-      <command>python test_runner.py --level real_e2e --real-llm</command>
-    </pattern>
-    
-    <pattern match="run failing tests|fix failing tests">
+    <pattern match="run failing tests|fix failing tests|test failures">
       <action>Run only currently failing tests</action>
       <command>python test_runner.py --run-failing</command>
+      <description>Re-run tests that failed in last run</description>
+    </pattern>
+    
+    <pattern match="fix all failing|auto fix tests|fix tests">
+      <action>Automatically fix failing tests</action>
+      <command>python test_runner.py --fix-failing</command>
+      <description>AI-powered test failure fixing</description>
+    </pattern>
+    
+    <pattern match="clear failing|reset failures|clear test cache">
+      <action>Clear failing tests cache</action>
+      <command>python test_runner.py --clear-failing</command>
+      <description>Reset the failing tests tracking</description>
+    </pattern>
+    
+    <!-- Test with Options -->
+    <pattern match="test with coverage|coverage test|test coverage">
+      <action>Run tests with coverage reporting</action>
+      <command>python test_runner.py --level integration</command>
+      <description>Default includes coverage unless --no-coverage</description>
+    </pattern>
+    
+    <pattern match="fast test|quick feedback|fast fail">
+      <action>Run tests with fast-fail for quick feedback</action>
+      <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
+      <description>Stop at first failure for rapid iteration</description>
+    </pattern>
+    
+    <pattern match="parallel test|test parallel|speed test">
+      <action>Run tests in parallel for speed</action>
+      <command>python test_runner.py --level integration --parallel 4 --speed</command>
+      <description>Maximize test execution speed</description>
+    </pattern>
+    
+    <pattern match="staging test|test staging|staging validation">
+      <action>Run tests against staging environment</action>
+      <command>python test_runner.py --level integration --staging</command>
+      <description>Validate staging deployment</description>
+    </pattern>
+    
+    <pattern match="list tests|show tests|what tests">
+      <action>List available tests without running</action>
+      <command>python test_runner.py --list --list-level integration</command>
+      <description>Show which tests would run</description>
+    </pattern>
+    
+    <pattern match="show failing|list failures|what's failing">
+      <action>Show currently failing tests</action>
+      <command>python test_runner.py --show-failing</command>
+      <description>Display failing tests from last run</description>
     </pattern>
   </prompt_patterns>
 

@@ -71,25 +71,49 @@ class StartupValidator:
     
     def verify_all_services_ready(self, services: Dict[str, Any] = None) -> bool:
         """Verify that all services (auth, backend, frontend) are ready."""
-        return self._verify_auth_ready() and self._verify_backend_ready() and self._verify_frontend_ready()
+        auth_ready = self._verify_auth_ready()
+        if not auth_ready:
+            logger.error("Auth service failed to start: /health endpoint not responding (expected 200 within 10s)")
+            return False
+        
+        backend_ready = self._verify_backend_ready()
+        if not backend_ready:
+            logger.error("Backend failed to start: /health/ready returned no response after 10s (expected 200). Check backend logs for startup errors.")
+            return False
+        
+        frontend_ready = self._verify_frontend_ready()
+        if not frontend_ready:
+            logger.error("Frontend failed to start: localhost:3000 not responding after 30s. Check frontend compilation errors.")
+            return False
+        
+        return True
     
     def _verify_auth_ready(self) -> bool:
         """Verify auth service is ready."""
-        from dev_launcher.utils import wait_for_service
+        from dev_launcher.utils import wait_for_service_with_details
         auth_url = "http://localhost:8081/health"
-        return wait_for_service(auth_url, timeout=10)
+        success, details = wait_for_service_with_details(auth_url, timeout=10)
+        if not success and details:
+            logger.debug(f"Auth service check failed: {details}")
+        return success
     
     def _verify_backend_ready(self) -> bool:
         """Verify backend service is ready."""
-        from dev_launcher.utils import wait_for_service
+        from dev_launcher.utils import wait_for_service_with_details
         backend_url = "http://localhost:8000/health/ready" 
-        return wait_for_service(backend_url, timeout=10)
+        success, details = wait_for_service_with_details(backend_url, timeout=10)
+        if not success and details:
+            logger.debug(f"Backend service check failed: {details}")
+        return success
     
     def _verify_frontend_ready(self) -> bool:
         """Verify frontend service is ready."""
-        from dev_launcher.utils import wait_for_service
+        from dev_launcher.utils import wait_for_service_with_details
         frontend_url = "http://localhost:3000"
-        return wait_for_service(frontend_url, timeout=30)
+        success, details = wait_for_service_with_details(frontend_url, timeout=30)
+        if not success and details:
+            logger.debug(f"Frontend service check failed: {details}")
+        return success
     
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""
