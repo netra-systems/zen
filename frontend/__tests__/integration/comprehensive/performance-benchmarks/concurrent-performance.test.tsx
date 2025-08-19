@@ -139,9 +139,11 @@ const testUpdateBatching = async (getByText: any, getByTestId: any): Promise<voi
     triggerButton.click();
   });
   
-  // Should handle batching efficiently
-  expect(getByTestId('update-count')).toHaveTextContent('6 updates');
-  expect(getByTestId('high-priority-updates')).toHaveTextContent('2 high priority');
+  // Should handle batching efficiently with waitFor to ensure DOM updates
+  await waitFor(() => {
+    expect(getByTestId('update-count')).toHaveTextContent('6 updates');
+    expect(getByTestId('high-priority-updates')).toHaveTextContent('2 high priority');
+  }, { timeout: 2000 });
 };
 
 const testStateConsistency = async (getByText: any, getByTestId: any): Promise<void> => {
