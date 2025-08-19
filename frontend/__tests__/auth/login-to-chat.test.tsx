@@ -51,6 +51,23 @@ jest.mock('@/services/api', () => ({
   }
 }));
 
+// Mock auth service for OAuth testing
+jest.mock('@/auth', () => ({
+  authService: {
+    useAuth: jest.fn(() => ({
+      user: null,
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false
+    }))
+  }
+}));
+
+// Mock WebSocket provider
+jest.mock('@/providers/WebSocketProvider', () => ({
+  WebSocketProvider: ({ children }: { children: React.ReactNode }) => children
+}));
+
 // Mock auth service to prevent loading state
 jest.mock('@/auth/service', () => ({
   authService: {

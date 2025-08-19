@@ -101,48 +101,27 @@ describe('MessageInput - Input Validation and Sanitization', () => {
     });
 
     it('should prevent sending when processing', async () => {
-      mockUseUnifiedChatStore.mockReturnValue({
-        activeThreadId: 'thread-1',
-        isProcessing: true,
-        setProcessing: mockChatStore.setProcessing,
-        addMessage: mockChatStore.addMessage,
-        addOptimisticMessage: jest.fn(),
-        updateOptimisticMessage: jest.fn(),
-      });
-      
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Agent is thinking/i);
-      const sendButton = screen.getByLabelText('Send message');
-      
+      setProcessing(true);
+      renderMessageInput();
+      const textarea = getTextarea();
+      const sendButton = getSendButton();
       expect(textarea).toBeDisabled();
       expect(sendButton).toBeDisabled();
     });
 
     it('should prevent sending when not authenticated', async () => {
-      mockUseAuthStore.mockReturnValue({
-        isAuthenticated: false,
-      });
-      
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Please sign in/i);
-      const sendButton = screen.getByLabelText('Send message');
-      
+      setAuthenticated(false);
+      renderMessageInput();
+      const textarea = getTextarea();
+      const sendButton = getSendButton();
       expect(textarea).toBeDisabled();
       expect(sendButton).toBeDisabled();
     });
 
     it('should handle rapid successive sends correctly', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message\.\.\./i);
-      
-      // First message
-      await userEvent.type(textarea, 'Message 1');
-      await userEvent.type(textarea, '{enter}');
-      
-      // Second message immediately
-      await userEvent.type(textarea, 'Message 2');
-      await userEvent.type(textarea, '{enter}');
-      
+      renderMessageInput();
+      await sendViaEnter('Message 1');
+      await sendViaEnter('Message 2');
       await waitFor(() => {
         expect(mockSendMessage).toHaveBeenCalledTimes(2);
       });

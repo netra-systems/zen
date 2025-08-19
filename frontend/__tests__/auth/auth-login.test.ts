@@ -62,25 +62,10 @@ describe('Auth Login Flow', () => {
     });
 
     it('should fetch auth config successfully', async () => {
-      mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
-
+      setupSuccessfulAuthConfig();
       const result = await authService.getAuthConfig();
-
-      expect(mockAuthServiceClient.getConfig).toHaveBeenCalled();
-      expect(result).toEqual({
-        development_mode: false,
-        google_client_id: 'mock-google-client-id',
-        endpoints: {
-          login: 'http://localhost:8081/auth/login',
-          logout: 'http://localhost:8081/auth/logout',
-          callback: 'http://localhost:8081/auth/callback',
-          token: 'http://localhost:8081/auth/token',
-          user: 'http://localhost:8081/auth/me',
-          dev_login: 'http://localhost:8081/auth/dev/login'
-        },
-        authorized_javascript_origins: ['http://localhost:3000'],
-        authorized_redirect_uris: ['http://localhost:3000/callback']
-      });
+      verifyAuthConfigCall();
+      verifyAuthConfigResult(result);
     });
 
     it('should throw error when fetch fails', async () => {
@@ -123,63 +108,28 @@ describe('Auth Login Flow', () => {
 
   describe('handleDevLogin', () => {
     it('should perform dev login successfully', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createSuccessResponse(mockDevLoginResponse)
-      );
-
+      setupSuccessfulDevLogin();
       const result = await authService.handleDevLogin(mockAuthConfig);
-
-      validateDevLoginCall(testEnv.fetchMock, mockAuthConfig);
-      validateSecureTokenStorage(testEnv.localStorageMock, mockToken);
-      expect(result).toEqual(mockDevLoginResponse);
-      expect(mockLogger.info).toHaveBeenCalled();
+      verifySuccessfulDevLogin(result);
     });
 
     it('should handle dev login failure with non-ok response', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createErrorResponse(401)
-      );
-
+      setupFailedDevLogin();
       const result = await authService.handleDevLogin(mockAuthConfig);
-
-      expect(mockLogger.error).toHaveBeenCalled();
-      expect(mockLogger.error.mock.calls[0][0])
-        .toContain('Dev login failed');
-      expect(testEnv.localStorageMock.setItem).not.toHaveBeenCalled();
-      expect(result).toBeNull();
+      verifyFailedDevLogin(result);
     });
 
     it('should handle dev login network error', async () => {
-      testEnv.fetchMock.mockRejectedValue(
-        createNetworkError('Network error')
-      );
-
+      setupNetworkErrorDevLogin();
       const result = await authService.handleDevLogin(mockAuthConfig);
-
-      expect(mockLogger.error).toHaveBeenCalled();
-      expect(mockLogger.error.mock.calls[0][0])
-        .toContain('Error during dev login');
-      expect(testEnv.localStorageMock.setItem).not.toHaveBeenCalled();
-      expect(result).toBeNull();
+      verifyNetworkErrorDevLogin(result);
     });
 
     it('should handle localStorage quota exceeded', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createSuccessResponse(mockDevLoginResponse)
-      );
-      
-      testEnv.localStorageMock.setItem.mockImplementation(() => {
-        throw new Error('QuotaExceededError');
-      });
-
+      setupQuotaExceededScenario();
       const result = await authService.handleDevLogin(mockAuthConfig);
-      
-      expect(result).toBeNull();
-      expect(mockLogger.error).toHaveBeenCalled();
-      expect(mockLogger.error.mock.calls[0][0])
-        .toContain('Error during dev login');
-      
-      testEnv.localStorageMock.setItem.mockClear();
+      verifyQuotaExceededHandling(result);
+      cleanupQuotaExceededTest();
     });
 
     it('should sanitize email input in dev login', async () => {
@@ -234,51 +184,173 @@ describe('Auth Login Flow', () => {
 
   describe('Login Flow Integration', () => {
     it('should handle complete login flow', async () => {
-      // Step 1: Get config
-      mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
-      
+      setupCompleteLoginFlow();
       const config = await authService.getAuthConfig();
-      expect(config).toHaveProperty('development_mode');
-      expect(config).toHaveProperty('endpoints');
-
-      // Step 2: Handle login
-      authService.handleLogin(config);
-      expect(mockAuthServiceClient.initiateLogin).toHaveBeenCalledWith('google');
+      verifyConfigProperties(config);
+      performAndVerifyLogin(config);
     });
 
     it('should handle dev login flow', async () => {
-      // Step 1: Get dev config
-      const devConfig = createMockDevConfig();
-      mockAuthServiceClient.getConfig.mockResolvedValue(devConfig);
-      
+      const devConfig = setupDevLoginFlow();
       const config = await authService.getAuthConfig();
-      expect(config).toHaveProperty('development_mode');
-
-      // Step 2: Dev login
-      testEnv.fetchMock.mockResolvedValue(
-        createSuccessResponse(mockDevLoginResponse)
-      );
-      
-      const result = await authService.handleDevLogin(config);
-      expect(result).toEqual(mockDevLoginResponse);
+      verifyDevConfigProperties(config);
+      const result = await performDevLogin(config);
+      verifyDevLoginResult(result);
     });
 
     it('should handle concurrent config requests', async () => {
-      mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
-
-      const promises = [
-        authService.getAuthConfig(),
-        authService.getAuthConfig(),
-        authService.getAuthConfig()
-      ];
-
+      setupConcurrentRequests();
+      const promises = createConcurrentConfigRequests();
       const results = await Promise.all(promises);
-      
-      results.forEach(result => {
-        expect(result).toHaveProperty('development_mode');
-        expect(result).toHaveProperty('endpoints');
-      });
-      expect(mockAuthServiceClient.getConfig).toHaveBeenCalledTimes(3);
+      verifyConcurrentResults(results);
+      verifyConcurrentCallCount();
     });
   });
+
+  // Helper functions for test setup (≤8 lines each)
+  function setupSuccessfulAuthConfig() {
+    mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
+  }
+
+  function verifyAuthConfigCall() {
+    expect(mockAuthServiceClient.getConfig).toHaveBeenCalled();
+  }
+
+  function verifyAuthConfigResult(result: any) {
+    expect(result).toEqual({
+      development_mode: false,
+      google_client_id: 'mock-google-client-id',
+      endpoints: getExpectedEndpoints(),
+      authorized_javascript_origins: ['http://localhost:3000'],
+      authorized_redirect_uris: ['http://localhost:3000/callback']
+    });
+  }
+
+  function getExpectedEndpoints() {
+    return {
+      login: 'http://localhost:8081/auth/login',
+      logout: 'http://localhost:8081/auth/logout',
+      callback: 'http://localhost:8081/auth/callback',
+      token: 'http://localhost:8081/auth/token',
+      user: 'http://localhost:8081/auth/me',
+      dev_login: 'http://localhost:8081/auth/dev/login'
+    };
+  }
+
+  function setupSuccessfulDevLogin() {
+    testEnv.fetchMock.mockResolvedValue(
+      createSuccessResponse(mockDevLoginResponse)
+    );
+  }
+
+  function verifySuccessfulDevLogin(result: any) {
+    validateDevLoginCall(testEnv.fetchMock, mockAuthConfig);
+    validateSecureTokenStorage(testEnv.localStorageMock, mockToken);
+    expect(result).toEqual(mockDevLoginResponse);
+    expect(mockLogger.info).toHaveBeenCalled();
+  }
+
+  function setupFailedDevLogin() {
+    testEnv.fetchMock.mockResolvedValue(createErrorResponse(401));
+  }
+
+  function verifyFailedDevLogin(result: any) {
+    expect(mockLogger.error).toHaveBeenCalled();
+    expect(mockLogger.error.mock.calls[0][0])
+      .toContain('Dev login failed');
+    expect(testEnv.localStorageMock.setItem).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+  }
+
+  function setupNetworkErrorDevLogin() {
+    testEnv.fetchMock.mockRejectedValue(
+      createNetworkError('Network error')
+    );
+  }
+
+  function verifyNetworkErrorDevLogin(result: any) {
+    expect(mockLogger.error).toHaveBeenCalled();
+    expect(mockLogger.error.mock.calls[0][0])
+      .toContain('Error during dev login');
+    expect(testEnv.localStorageMock.setItem).not.toHaveBeenCalled();
+    expect(result).toBeNull();
+  }
+
+  function setupQuotaExceededScenario() {
+    testEnv.fetchMock.mockResolvedValue(
+      createSuccessResponse(mockDevLoginResponse)
+    );
+    testEnv.localStorageMock.setItem.mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+  }
+
+  function verifyQuotaExceededHandling(result: any) {
+    expect(result).toBeNull();
+    expect(mockLogger.error).toHaveBeenCalled();
+    expect(mockLogger.error.mock.calls[0][0])
+      .toContain('Error during dev login');
+  }
+
+  function cleanupQuotaExceededTest() {
+    testEnv.localStorageMock.setItem.mockClear();
+  }
+
+  function setupCompleteLoginFlow() {
+    mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
+  }
+
+  function verifyConfigProperties(config: any) {
+    expect(config).toHaveProperty('development_mode');
+    expect(config).toHaveProperty('endpoints');
+  }
+
+  function performAndVerifyLogin(config: any) {
+    authService.handleLogin(config);
+    expect(mockAuthServiceClient.initiateLogin).toHaveBeenCalledWith('google');
+  }
+
+  function setupDevLoginFlow() {
+    const devConfig = createMockDevConfig();
+    mockAuthServiceClient.getConfig.mockResolvedValue(devConfig);
+    testEnv.fetchMock.mockResolvedValue(
+      createSuccessResponse(mockDevLoginResponse)
+    );
+    return devConfig;
+  }
+
+  function verifyDevConfigProperties(config: any) {
+    expect(config).toHaveProperty('development_mode');
+  }
+
+  function performDevLogin(config: any) {
+    return authService.handleDevLogin(config);
+  }
+
+  function verifyDevLoginResult(result: any) {
+    expect(result).toEqual(mockDevLoginResponse);
+  }
+
+  function setupConcurrentRequests() {
+    mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
+  }
+
+  function createConcurrentConfigRequests() {
+    return [
+      authService.getAuthConfig(),
+      authService.getAuthConfig(),
+      authService.getAuthConfig()
+    ];
+  }
+
+  function verifyConcurrentResults(results: any[]) {
+    results.forEach(result => {
+      expect(result).toHaveProperty('development_mode');
+      expect(result).toHaveProperty('endpoints');
+    });
+  }
+
+  function verifyConcurrentCallCount() {
+    expect(mockAuthServiceClient.getConfig).toHaveBeenCalledTimes(3);
+  }
 });

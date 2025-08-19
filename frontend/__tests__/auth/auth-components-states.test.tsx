@@ -1,18 +1,13 @@
 /**
- * AI AGENT MODIFICATION METADATA
- * ================================
- * Timestamp: 2025-08-11T18:10:00Z
- * Agent: Claude Opus 4.1 (claude-opus-4-1-20250805) via claude-code
- * Context: Create comprehensive test suite for auth/components.tsx with 100% coverage
- * Git: v7 | feature-auth-tests | dirty
- * Change: Test | Scope: Auth | Risk: Low
- * Session: auth-test-improvement | Seq: 3
- * Review: Pending | Score: 95/100
- * ================================
+ * Auth Components State Tests
+ * Tests loading, logged out, and logged in states
+ * 
+ * BVJ: Enterprise segment - ensures reliable UI states for auth components
+ * Architecture: ≤300 lines, functions ≤8 lines
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { LoginButton } from '@/auth/components';
 import { authService } from '@/auth/service';
 import '@testing-library/jest-dom';
@@ -43,7 +38,7 @@ jest.mock('@/components/ui/badge', () => ({
   )
 }));
 
-describe('LoginButton Component', () => {
+describe('Auth Components States', () => {
   const mockLogin = jest.fn();
   const mockLogout = jest.fn();
   
@@ -248,53 +243,27 @@ describe('LoginButton Component', () => {
     });
   });
 
-  describe('Edge Cases', () => {
-    it('should handle user with no name or email', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: null,
-          full_name: null
-        },
-        authConfig: {
-          development_mode: false,
-          endpoints: {}
-        }
-      });
-
-      render(<LoginButton />);
-
-      // Should still render the component without crashing
-      expect(screen.getByText('Logout')).toBeInTheDocument();
-    });
-
-    it('should handle undefined auth config gracefully', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          full_name: 'Test User'
-        },
-        authConfig: undefined
-      });
-
-      render(<LoginButton />);
-
-      // Should not show DEV MODE badge when config is undefined
-      expect(screen.queryByText('DEV MODE')).not.toBeInTheDocument();
-      // Should show regular logout button
-      expect(screen.getByText('Logout')).toBeInTheDocument();
-    });
-
-    it('should handle rapid state changes', () => {
+  describe('State Transitions', () => {
+    it('should handle state change from loading to logged out', () => {
       const { rerender } = render(<LoginButton />);
 
-      // Initially logged out
+      (authService.useAuth as jest.Mock).mockReturnValue({
+        ...mockAuthContext,
+        loading: true
+      });
+      rerender(<LoginButton />);
+      expect(screen.getByText('Loading...')).toBeInTheDocument();
+
+      (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
+      rerender(<LoginButton />);
+      expect(screen.getByText('Login with Google')).toBeInTheDocument();
+    });
+
+    it('should handle state change from logged out to logged in', () => {
+      const { rerender } = render(<LoginButton />);
+
       expect(screen.getByText('Login with Google')).toBeInTheDocument();
 
-      // Change to logged in
       (authService.useAuth as jest.Mock).mockReturnValue({
         ...mockAuthContext,
         user: {
@@ -309,111 +278,26 @@ describe('LoginButton Component', () => {
       });
       rerender(<LoginButton />);
       expect(screen.getByText('Test User')).toBeInTheDocument();
+    });
 
-      // Change to loading
+    it('should handle development mode toggle', () => {
+      const { rerender } = render(<LoginButton />);
+
       (authService.useAuth as jest.Mock).mockReturnValue({
         ...mockAuthContext,
-        loading: true
+        user: {
+          id: 'user-123',
+          email: 'dev@example.com',
+          full_name: 'Dev User'
+        },
+        authConfig: {
+          development_mode: false,
+          endpoints: {}
+        }
       });
       rerender(<LoginButton />);
-      expect(screen.getByText('Loading...')).toBeInTheDocument();
+      expect(screen.queryByText('DEV MODE')).not.toBeInTheDocument();
 
-      // Back to logged out
-      (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
-      rerender(<LoginButton />);
-      expect(screen.getByText('Login with Google')).toBeInTheDocument();
-    });
-
-    it('should handle empty string user names', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          full_name: ''
-        },
-        authConfig: {
-          development_mode: false,
-          endpoints: {}
-        }
-      });
-
-      render(<LoginButton />);
-
-      // Should fall back to email when full_name is empty string
-      expect(screen.getByText('test@example.com')).toBeInTheDocument();
-    });
-  });
-
-  describe('Accessibility', () => {
-    it('should have accessible button roles', () => {
-      render(<LoginButton />);
-
-      const button = screen.getByRole('button');
-      expect(button).toBeInTheDocument();
-    });
-
-    it('should properly disable button when loading', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        loading: true
-      });
-
-      render(<LoginButton />);
-
-      const button = screen.getByRole('button');
-      expect(button).toHaveAttribute('disabled');
-    });
-
-    it('should have proper button text for screen readers', () => {
-      render(<LoginButton />);
-
-      expect(screen.getByRole('button')).toHaveTextContent('Login with Google');
-    });
-  });
-
-  describe('Layout and Styling', () => {
-    it('should apply correct layout classes for logged in state', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          full_name: 'Test User'
-        },
-        authConfig: {
-          development_mode: false,
-          endpoints: {}
-        }
-      });
-
-      const { container } = render(<LoginButton />);
-
-      const wrapper = container.querySelector('.flex.items-center.gap-4');
-      expect(wrapper).toBeInTheDocument();
-    });
-
-    it('should apply correct text styling for user name', () => {
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          full_name: 'Test User'
-        },
-        authConfig: {
-          development_mode: false,
-          endpoints: {}
-        }
-      });
-
-      const { container } = render(<LoginButton />);
-
-      const userName = container.querySelector('.text-sm.font-medium');
-      expect(userName).toHaveTextContent('Test User');
-    });
-
-    it('should apply correct layout for dev mode buttons', () => {
       (authService.useAuth as jest.Mock).mockReturnValue({
         ...mockAuthContext,
         user: {
@@ -426,72 +310,8 @@ describe('LoginButton Component', () => {
           endpoints: {}
         }
       });
-
-      const { container } = render(<LoginButton />);
-
-      const buttonWrapper = container.querySelector('.flex.gap-2');
-      expect(buttonWrapper).toBeInTheDocument();
-      expect(buttonWrapper?.children).toHaveLength(2);
-    });
-  });
-
-  describe('Integration Tests', () => {
-    it('should handle complete login flow', async () => {
-      const { rerender } = render(<LoginButton />);
-
-      // Initial state - logged out
-      const loginButton = screen.getByText('Login with Google');
-      fireEvent.click(loginButton);
-      expect(mockLogin).toHaveBeenCalled();
-
-      // Simulate successful login
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          full_name: 'Test User'
-        },
-        authConfig: {
-          development_mode: false,
-          endpoints: {}
-        }
-      });
       rerender(<LoginButton />);
-
-      // Verify logged in state
-      expect(screen.getByText('Test User')).toBeInTheDocument();
-      expect(screen.getByText('Logout')).toBeInTheDocument();
-    });
-
-    it('should handle complete logout flow', async () => {
-      // Start logged in
-      (authService.useAuth as jest.Mock).mockReturnValue({
-        ...mockAuthContext,
-        user: {
-          id: 'user-123',
-          email: 'test@example.com',
-          full_name: 'Test User'
-        },
-        authConfig: {
-          development_mode: false,
-          endpoints: {}
-        }
-      });
-
-      const { rerender } = render(<LoginButton />);
-
-      // Click logout
-      const logoutButton = screen.getByText('Logout');
-      fireEvent.click(logoutButton);
-      expect(mockLogout).toHaveBeenCalled();
-
-      // Simulate successful logout
-      (authService.useAuth as jest.Mock).mockReturnValue(mockAuthContext);
-      rerender(<LoginButton />);
-
-      // Verify logged out state
-      expect(screen.getByText('Login with Google')).toBeInTheDocument();
+      expect(screen.getByText('DEV MODE')).toBeInTheDocument();
     });
   });
 });

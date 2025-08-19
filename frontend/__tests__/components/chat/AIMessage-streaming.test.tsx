@@ -49,6 +49,36 @@ const createStreamingMessage = (): Message => createAIMessage({
   }
 });
 
+const createUpdatedStreamingMessage = (baseMessage: Message): Message => ({
+  ...baseMessage,
+  content: baseMessage.content + ' additional text',
+  metadata: {
+    ...baseMessage.metadata,
+    chunk_index: 2
+  }
+});
+
+const simulateRapidStreamingUpdates = (message: Message, rerender: any) => {
+  let frameCount = 0;
+  const startTime = performance.now();
+  
+  for (let i = 0; i < 10; i++) {
+    const updatedMessage = {
+      ...message,
+      content: `${message.content} chunk ${i}`,
+      metadata: { ...message.metadata, chunk_index: i }
+    };
+    rerender(React.createElement(MessageItem, { message: updatedMessage }));
+    frameCount++;
+  }
+  
+  const endTime = performance.now();
+  const duration = endTime - startTime;
+  const fps = (frameCount / duration) * 1000;
+  
+  return { frameCount, fps };
+};
+
 // ============================================================================
 // STREAMING ANIMATION TESTS
 // ============================================================================
@@ -71,16 +101,7 @@ describe('AIMessage - Streaming Animations', () => {
     const message = createStreamingMessage();
     const { rerender } = renderWithChatSetup(<MessageItem message={message} />);
     
-    // Simulate streaming update
-    const updatedMessage = {
-      ...message,
-      content: message.content + ' additional text',
-      metadata: {
-        ...message.metadata,
-        chunk_index: 2
-      }
-    };
-    
+    const updatedMessage = createUpdatedStreamingMessage(message);
     rerender(<MessageItem message={updatedMessage} />);
     
     await waitFor(() => {
@@ -90,28 +111,12 @@ describe('AIMessage - Streaming Animations', () => {
 
   it('maintains smooth FPS updates during streaming', async () => {
     const message = createStreamingMessage();
-    let frameCount = 0;
-    const startTime = performance.now();
-    
     const { rerender } = renderWithChatSetup(<MessageItem message={message} />);
     
-    // Simulate rapid streaming updates
-    for (let i = 0; i < 10; i++) {
-      const updatedMessage = {
-        ...message,
-        content: `${message.content} chunk ${i}`,
-        metadata: { ...message.metadata, chunk_index: i }
-      };
-      
-      rerender(<MessageItem message={updatedMessage} />);
-      frameCount++;
-    }
-    
-    const endTime = performance.now();
-    const duration = endTime - startTime;
-    const fps = (frameCount / duration) * 1000;
+    const { frameCount, fps } = simulateRapidStreamingUpdates(message, rerender);
     
     expect(fps).toBeGreaterThan(30); // At least 30 FPS
+    expect(frameCount).toBe(10);
   });
 
   it('completes streaming animation properly', async () => {
