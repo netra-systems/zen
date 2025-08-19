@@ -1,13 +1,19 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ThreadService } from '@/services/threadService';
 import { Thread } from '@/types/registry';
+import { useAuthStore } from '@/store/authStore';
 
 export function useThreads() {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuthStore();
 
   const fetchThreads = useCallback(async () => {
+    if (!isAuthenticated) {
+      setThreads([]);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -18,7 +24,7 @@ export function useThreads() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAuthenticated]);
 
   const createThread = useCallback(async (title: string) => {
     setError(null);
@@ -56,8 +62,12 @@ export function useThreads() {
   }, []);
 
   useEffect(() => {
-    fetchThreads();
-  }, [fetchThreads]);
+    if (isAuthenticated) {
+      fetchThreads();
+    } else {
+      setThreads([]);
+    }
+  }, [fetchThreads, isAuthenticated]);
 
   return {
     threads,

@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { Thread, ThreadService } from '@/services/threadService';
 import { ChatSidebarState, FilterType } from './ChatSidebarTypes';
 import { logger } from '@/utils/debug-logger';
+import { useAuthStore } from '@/store/authStore';
 
 export const useChatSidebarState = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -37,6 +38,7 @@ export const useThreadLoader = (
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isLoadingThreads, setIsLoadingThreads] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const { isAuthenticated } = useAuthStore();
 
   const clearError = () => {
     setLoadError(null);
@@ -61,6 +63,10 @@ export const useThreadLoader = (
   };
 
   const loadThreads = async () => {
+    if (!isAuthenticated) {
+      setThreads([]);
+      return;
+    }
     setLoading(true);
     clearError();
     try {
@@ -74,8 +80,12 @@ export const useThreadLoader = (
   };
 
   useEffect(() => {
-    loadThreads();
-  }, [showAllThreads, filterType]);
+    if (isAuthenticated) {
+      loadThreads();
+    } else {
+      setThreads([]);
+    }
+  }, [showAllThreads, filterType, isAuthenticated]);
 
   return {
     threads,

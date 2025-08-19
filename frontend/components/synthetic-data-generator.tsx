@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { config } from '@/config';
 
 const workloadPatterns = [
   { value: "default", label: "Default Workload" },
@@ -39,7 +40,7 @@ export function SyntheticDataGenerator({ onGenerationComplete }: { onGenerationC
     const fetchTables = async () => {
       try {
         const token = localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token');
-        const response = await fetch("http://localhost:8000/api/generation/clickhouse_tables", {
+        const response = await fetch(`${config.apiUrl}/api/generation/clickhouse_tables`, {
           headers: {
             ...(token && { 'Authorization': `Bearer ${token}` })
           }
@@ -74,7 +75,7 @@ export function SyntheticDataGenerator({ onGenerationComplete }: { onGenerationC
     setError(null);
     try {
       const token = localStorage.getItem('jwt_token') || sessionStorage.getItem('jwt_token');
-      const response = await fetch("http://localhost:8000/api/generation/synthetic_data", {
+      const response = await fetch(`${config.apiUrl}/api/generation/synthetic_data`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
