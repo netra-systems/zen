@@ -252,7 +252,6 @@ class MessageBroadcastValidator:
 
 
 @pytest.mark.asyncio
-@pytest.mark.integration
 class TestMultiTabSessionReal:
     """E2E Test: Multi-Tab WebSocket Session Management with Real Scenarios."""
     
@@ -443,7 +442,7 @@ class TestMultiTabSessionReal:
     
     async def test_tab_crash_recovery(self, session_manager, state_validator):
         """Test system resilience when tabs crash or close unexpectedly."""
-        session_manager.user_token = await session_manager.create_user_token()
+        session_manager.user_token = session_manager.create_user_token()
         
         try:
             # Open multiple tabs
@@ -458,8 +457,7 @@ class TestMultiTabSessionReal:
             # Verify other tabs continue working
             remaining_tabs = [t for t in tabs if t != crashed_tab]
             for tab_id in remaining_tabs:
-                client = session_manager.connections[tab_id]
-                assert client.state == ConnectionState.CONNECTED, f"{tab_id} failed after crash"
+                assert session_manager.is_tab_connected(tab_id), f"{tab_id} failed after crash"
             
             # User reopens crashed tab
             recovery_success = await session_manager.open_tab("recovered_tab")
