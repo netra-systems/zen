@@ -42,6 +42,24 @@ To enforce the mandate that business goals are superior to engineering goals, ev
 - **THIRD**: Ultra thinking required for complex problems - this is your masterpiece. Think deeply while working on code and while testing.
 - Reporting - Be measured, accurate, and contextually precise in reporting.
 
+####  Scaffolding and Decomposition
+Interface-First Design (Scaffolding): Before generating implementations, generate the architecture, data structures, API contracts, and function signatures (the "scaffolding")
+Modular Implementation: Once the scaffolding is validated, have the AI implement one module or function at a time.
+When possible assign different agents to different modules. (Isolation and the "Firewall" Technique: When generating Module B, provide only the interface of Module A, not its implementation. This forces the AI to respect the contract and isolates the blast radius if a module fails, making it easier to identify and fix the issue without causing unrelated parts of the system to drift.)
+
+#### Bug fixing
+Any time you are asked to fix something: Implement Test-Driven Correction (TDC)
+When a bug arises, understand the failure condition objectively. 
+Shift the focus from generating plausible code to satisfying a precise, verifiable constraint.
+1: Define the Failure: Articulate the exact scenario where the code fails. Think about the Paradox. Why does this fail despite large volume of tests or good quality code? What assumptions is it missing? What has changed recently in the system?
+2: Use a fresh agent task context to create a Failing Test: Write a test that exposes the bug. This test must fail with the current implementation.
+2:a: Example Prompt: "The calculate_discount` function fails when a user has a loyalty card but zero previous purchases. Write a unit test that specifically asserts the correct behavior (a 10% discount) in this scenario. This test should currently fail."
+3: Surgical Strike": When passing tasks to agents, provide the exact function or code block that is failing and explicitly define the boundaries of what the sub agent is allowed to change.
+4: Whenever fixing bugs: Current state > random new changes. Changes must be scoped to either unified system wide fixes or surgical isolated fixes.
+5: If something doesn't feel right, use search tools, search XMLs for learnings, serach existing codebase, websearch etc. Search and discovery > guessing.
+6: ALL bug fixees MUST have a dedicated Quality Assurance agent spawned to review.
+7: Bug fixes always require rerunning tests, updating learnings xml, updating spec.
+
 ### 2. Specs are Law
 - `SPEC/*.xml` = Source of truth.
 - Update specs BEFORE AND AFTER code changes
