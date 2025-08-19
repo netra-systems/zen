@@ -73,11 +73,9 @@ class TestCircuitBreakerCascade:
         }
 
     @pytest.fixture
-    async def fallback_coordinator(self) -> FallbackCoordinator:
+    def fallback_coordinator(self) -> FallbackCoordinator:
         """Create fallback coordinator for cascade testing"""
-        coordinator = FallbackCoordinator()
-        yield coordinator
-        await coordinator.reset_system_status()
+        return FallbackCoordinator()
 
     @pytest.mark.asyncio
     async def test_service_failure_isolation(self, circuit_breakers):
