@@ -51,7 +51,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.config = {"max_retries": 3}  # Initialize config dict
         
-        with patch.object(agent, 'process_data', new_callable=AsyncMock) as mock_process:
+        with patch.object(agent, '_process_internal', new_callable=AsyncMock) as mock_process:
             # Fail twice, then succeed
             mock_process.side_effect = [
                 Exception("Error 1"),
@@ -71,7 +71,7 @@ class TestErrorHandling(SharedTestErrorHandling):
         agent = DataSubAgent(mock_llm_manager, mock_tool_dispatcher)
         agent.config = {"max_retries": 2}  # Initialize config dict
         
-        with patch.object(agent, 'process_data', new_callable=AsyncMock) as mock_process:
+        with patch.object(agent, '_process_internal', new_callable=AsyncMock) as mock_process:
             mock_process.side_effect = Exception("Persistent error")
             
             with pytest.raises(Exception) as exc_info:
