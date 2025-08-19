@@ -311,3 +311,23 @@ def generate_jwt_token(user_data: TestUserData) -> str:
     """Quick generate JWT token for test user"""
     factory = TestDataFactory()
     return factory.generate_jwt_token(user_data)
+
+
+def create_test_service_credentials(service_id: str) -> Dict[str, str]:
+    """Create test service credentials for service-to-service auth"""
+    import os
+    service_secrets = {
+        "backend": "test-backend-secret-12345",
+        "worker": "test-worker-secret-67890", 
+        "scheduler": "test-scheduler-secret-abcde"
+    }
+    
+    service_secret = service_secrets.get(service_id, f"test-{service_id}-secret-{uuid.uuid4().hex[:8]}")
+    
+    # Set environment variable for validation
+    os.environ[f"SERVICE_SECRET_{service_id}"] = service_secret
+    
+    return {
+        "service_id": service_id,
+        "service_secret": service_secret
+    }

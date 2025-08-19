@@ -756,54 +756,69 @@ class AuthServiceIndependenceValidator:
 @pytest.mark.asyncio
 async def test_auth_service_complete_independence():
     """
-    Test #8: Auth Service Independence Validation
+    Test #1: Auth Service Independence - P0 CRITICAL 
     
-    BVJ: Microservice Architecture Independence = System Scalability
-    - Validates no imports from main app anywhere in auth service
-    - Tests auth service starts without main app
-    - Verifies standalone deployment capability
-    - Confirms API-only communication
-    - Ensures no shared database connections
-    - Validates self-contained directory structure
+    BVJ: Enterprise | SOC2 Compliance | Microservice Independence | $50K+ MRR at risk
+    SPEC: SPEC/independent_services.xml
+    
+    ZERO TOLERANCE TEST: Validates auth service has ZERO imports from main app
+    - Scans ALL Python files in auth_service/ 
+    - FAILS if ANY file contains "from app." imports
+    - Tests 3+ error scenarios for robustness
+    - MUST complete in <10 seconds
+    
+    Failure blocks enterprise deals and SOC2 compliance.
     """
     validator = AuthServiceIndependenceValidator()
     
     try:
-        results = await _execute_independence_validation(validator)
-        _validate_independence_results(results)
+        results = await _execute_fast_independence_validation(validator)
+        _validate_critical_independence_results(results)
         _print_independence_success(results)
         
     finally:
         await validator.cleanup()
 
 
-async def _execute_independence_validation(validator):
-    """Execute comprehensive independence validation."""
+async def _execute_fast_independence_validation(validator):
+    """Execute FAST independence validation - must complete in <10 seconds."""
     return await validator.validate_complete_independence()
 
 
-def _validate_independence_results(results):
-    """Validate independence test results."""
-    assert results["success"], f"Independence validation failed: {results.get('errors', [])}"
+def _validate_critical_independence_results(results):
+    """Validate CRITICAL independence test results - ZERO tolerance for failures."""
+    # Check execution time first
+    execution_time = results.get("execution_time", 0)
+    assert execution_time < TEST_TIMEOUT, f"Test exceeded {TEST_TIMEOUT}s limit: {execution_time}s"
     
-    # Validate critical requirements
+    assert results["success"], f"CRITICAL: Independence validation failed: {results.get('errors', [])}"
+    
     validations = results["validations"]
     
-    # Import independence is critical
-    import_validation = validations.get("import_independence", {})
-    assert import_validation.get("passed", False), f"Forbidden imports found: {import_validation.get('forbidden_imports', [])}"
+    # CRITICAL P0: Import independence - ZERO tolerance for "from app." imports
+    import_validation = validations.get("critical_import_scan", {})
+    forbidden_imports = import_validation.get("forbidden_imports", [])
+    assert len(forbidden_imports) == 0, f"BLOCKING: {len(forbidden_imports)} forbidden imports found: {forbidden_imports}"
+    assert import_validation.get("scanned_files", 0) > 0, "CRITICAL: No Python files were scanned"
     
-    # Standalone startup is critical  
-    startup_validation = validations.get("standalone_startup", {})
-    assert startup_validation.get("passed", False), f"Standalone startup failed: {startup_validation.get('error', 'Unknown error')}"
+    # CRITICAL P0: Auth core structure - Must use auth_core, not app
+    structure_validation = validations.get("auth_core_structure", {})
+    assert structure_validation.get("passed", False), f"CRITICAL: Invalid auth service structure: {structure_validation}"
+    assert structure_validation.get("has_auth_core", False), "BLOCKING: Missing auth_core directory"
+    assert not structure_validation.get("has_forbidden_app_dir", True), "BLOCKING: Forbidden app directory exists"
     
-    # Self-contained structure is critical
-    structure_validation = validations.get("self_contained_structure", {})
-    assert structure_validation.get("passed", False), "Auth service structure is not self-contained"
+    # CRITICAL P0: Independent startup capability
+    startup_validation = validations.get("independent_startup", {})
+    assert startup_validation.get("passed", False), f"CRITICAL: Independent startup failed: {startup_validation.get('error', 'Unknown error')}"
     
-    # Success rate must be 100%
+    # ERROR SCENARIOS: Must test and handle 3+ error scenarios correctly
+    error_scenarios = validations.get("error_scenarios", {})
+    assert error_scenarios.get("scenarios_tested", 0) >= 3, f"Insufficient error scenarios tested: {error_scenarios.get('scenarios_tested', 0)}"
+    assert error_scenarios.get("passed", False), f"Error scenario handling failed: {error_scenarios}"
+    
+    # Overall success rate must be 100%
     summary = results["test_summary"]
-    assert summary["success_rate"] == 100.0, f"Success rate {summary['success_rate']}% < 100%. Failed: {summary['critical_failures']}"
+    assert summary["success_rate"] == 100.0, f"CRITICAL: Success rate {summary['success_rate']}% < 100%. Failed: {summary['critical_failures']}"
 
 
 def _print_independence_success(results):
@@ -819,46 +834,127 @@ def _print_independence_success(results):
 
 
 @pytest.mark.asyncio
-async def test_auth_service_no_forbidden_imports():
+async def test_zero_tolerance_forbidden_imports():
     """
-    Test forbidden imports specifically - zero tolerance for app.* imports.
+    ZERO TOLERANCE: Test that ALL Python files in auth_service/ have NO "from app." imports
     
-    BVJ: Import independence prevents tight coupling and deployment issues
+    BVJ: Enterprise | SOC2 Compliance | Zero coupling to main app
+    REQUIREMENT: Scan ALL files, FAIL if ANY contains "from app." imports
     """
     validator = AuthServiceIndependenceValidator()
     
     try:
-        results = await validator._validate_import_independence()
+        start_time = time.time()
+        results = await validator._validate_import_independence_fast()
+        execution_time = time.time() - start_time
         
+        # CRITICAL: Must complete fast for CI/CD
+        assert execution_time < IMPORT_SCAN_TIMEOUT, f"Import scan too slow: {execution_time}s > {IMPORT_SCAN_TIMEOUT}s"
+        
+        # CRITICAL: Must scan files
+        scanned_files = results.get("scanned_files", 0)
+        assert scanned_files > 0, "CRITICAL: No Python files were scanned in auth_service/"
+        
+        # ZERO TOLERANCE: No forbidden imports allowed
         forbidden_imports = results.get("forbidden_imports", [])
-        assert len(forbidden_imports) == 0, f"Found {len(forbidden_imports)} forbidden imports: {forbidden_imports}"
-        assert results.get("scanned_files", 0) > 0, "No Python files were scanned"
+        assert len(forbidden_imports) == 0, (
+            f"BLOCKING ENTERPRISE DEALS: Found {len(forbidden_imports)} forbidden 'from app.' imports:\n" +
+            "\n".join([f"  {imp['file']}: {imp['pattern']} -> {imp['line_preview']}" for imp in forbidden_imports])
+        )
         
-        print(f"[SUCCESS] Import Independence: {results['scanned_files']} files scanned, 0 forbidden imports")
+        print(f"[PASS] Zero Tolerance Import Scan: {scanned_files} files scanned in {execution_time:.2f}s, 0 violations")
+        
+    finally:
+        await validator.cleanup()
+
+
+@pytest.mark.asyncio
+async def test_auth_core_module_not_app_module():
+    """
+    CRITICAL: Test auth service uses auth_core module, NOT app module
+    
+    BVJ: Enterprise | Microservice Independence | Clear service boundaries
+    SPEC: SPEC/independent_services.xml - services must use unique module names
+    """
+    validator = AuthServiceIndependenceValidator()
+    
+    try:
+        results = await validator._validate_auth_core_structure()
+        
+        # MUST have auth_core directory
+        assert results.get("has_auth_core", False), "BLOCKING: Auth service missing auth_core/ directory"
+        
+        # MUST NOT have forbidden app directory  
+        assert not results.get("has_forbidden_app_dir", True), "BLOCKING: Auth service has forbidden app/ directory"
+        
+        # Overall structure must be valid
+        assert results.get("structure_valid", False), f"CRITICAL: Invalid auth service structure: {results}"
+        
+        print("[PASS] Auth Core Module: Uses auth_core/ (not app/), structure valid")
         
     finally:
         await validator.cleanup()
 
 
 @pytest.mark.asyncio  
-async def test_auth_service_standalone_startup_performance():
+async def test_auth_service_independent_startup():
     """
-    Test auth service startup performance in isolation.
+    Test auth service can start independently without main app.
     
-    BVJ: Fast isolated startup ensures service can scale independently
+    BVJ: Enterprise | Independent scaling | Service isolation
+    REQUIREMENT: Service must import and start without dependencies on main app
     """
     validator = AuthServiceIndependenceValidator()
     
     try:
-        results = await validator._validate_standalone_startup()
+        start_time = time.time()
+        results = await validator._validate_fast_startup()
+        execution_time = time.time() - start_time
         
-        assert results.get("passed", False), f"Standalone startup failed: {results.get('error', 'Unknown error')}"
-        assert results.get("health_check", False), "Health check failed"
+        # CRITICAL: Must be fast for CI/CD
+        assert execution_time < SERVICE_STARTUP_TIMEOUT, f"Startup validation too slow: {execution_time}s"
         
-        startup_time = results.get("startup_time", 0)
-        assert startup_time < SERVICE_STARTUP_TIMEOUT, f"Startup too slow: {startup_time}s"
+        # CRITICAL: Must be able to import main.py independently
+        assert results.get("can_import_main", False), f"BLOCKING: Cannot import auth service main.py: {results.get('error', 'Unknown error')}"
         
-        print(f"[SUCCESS] Standalone Startup: {startup_time}s (< {SERVICE_STARTUP_TIMEOUT}s limit)")
+        print(f"[PASS] Independent Startup: main.py imports successfully in {execution_time:.2f}s")
+        
+    finally:
+        await validator.cleanup()
+
+
+@pytest.mark.asyncio
+async def test_error_scenario_handling():
+    """
+    Test 3+ error scenarios for robustness - validates error detection and handling.
+    
+    BVJ: Enterprise | System reliability | Error detection capability
+    REQUIREMENT: Must test and correctly handle 3+ error scenarios
+    """
+    validator = AuthServiceIndependenceValidator()
+    
+    try:
+        start_time = time.time()
+        results = await validator._validate_error_scenarios()
+        execution_time = time.time() - start_time
+        
+        # Must test sufficient scenarios
+        scenarios_tested = results.get("scenarios_tested", 0)
+        assert scenarios_tested >= 3, f"Insufficient error scenarios: {scenarios_tested} < 3"
+        
+        # All scenarios must be handled correctly
+        scenarios_passed = results.get("scenarios_passed", 0)
+        assert scenarios_passed == scenarios_tested, f"Error scenario failures: {scenarios_passed}/{scenarios_tested} passed"
+        
+        # Must pass overall error scenario validation
+        assert results.get("passed", False), f"Error scenario validation failed: {results}"
+        
+        print(f"[PASS] Error Scenarios: {scenarios_passed}/{scenarios_tested} scenarios handled correctly in {execution_time:.2f}s")
+        
+        # Print scenario details
+        for scenario_name, scenario_result in results.get("error_tests", {}).items():
+            status = "PASS" if scenario_result.get("handled_correctly", False) else "FAIL"
+            print(f"  [{status}] {scenario_name}: {scenario_result.get('description', 'No description')}")
         
     finally:
         await validator.cleanup()

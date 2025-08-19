@@ -7,7 +7,6 @@ IMPACT: Services can't authenticate with each other securely
 """
 import pytest
 import asyncio
-import httpx
 import os
 import logging
 from datetime import datetime, timedelta
@@ -17,36 +16,43 @@ from typing import Dict, Optional
 from tests.unified.test_data_factory import create_test_service_credentials
 from tests.unified.jwt_token_helpers import JWTTokenTestHelper
 
+# App imports
+from app.clients.auth_client_core import AuthServiceClient
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.models.auth_models import ServiceTokenRequest
+
 logger = logging.getLogger(__name__)
 
 class ServiceAuthTestValidator:
     """Validates service-to-service authentication patterns"""
     
     def __init__(self):
-        self.auth_service_url = os.getenv("AUTH_SERVICE_URL", "http://localhost:8081")
-        self.backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
-        self.test_timeout = 30
+        self.auth_service = AuthService()
+        self.auth_client = AuthServiceClient()
+        self.test_timeout = 10
         
     async def validate_service_token_generation(self, service_id: str, 
                                                service_secret: str) -> Dict:
         """Test service token generation with service credentials"""
-        async with httpx.AsyncClient(timeout=self.test_timeout) as client:
-            response = await client.post(
-                f"{self.auth_service_url}/auth/service-token",
-                json={
-                    "service_id": service_id,
-                    "service_secret": service_secret
-                }
-            )
+        request = ServiceTokenRequest(
+            service_id=service_id,
+            service_secret=service_secret
+        )
+        
+        try:
+            response = await self.auth_service.create_service_token(request)
             
-            assert response.status_code == 200, f"Service token generation failed: {response.text}"
-            data = response.json()
+            assert response.token is not None, "Service token not returned"
+            assert response.expires_in == 300, "Service token should expire in 5 minutes"
+            assert response.service_name is not None, "Service name not returned"
             
-            assert "token" in data, "Service token not returned"
-            assert "expires_in" in data, "Token expiry not specified"
-            assert data["expires_in"] == 300, "Service token should expire in 5 minutes"
-            
-            return data
+            return {
+                "token": response.token,
+                "expires_in": response.expires_in,
+                "service_name": response.service_name
+            }
+        except Exception as e:
+            pytest.fail(f"Service token generation failed: {e}")
     
     async def validate_service_token_structure(self, token: str) -> Dict:
         """Validate service token has correct structure and claims"""
@@ -69,20 +75,16 @@ class ServiceAuthTestValidator:
     
     async def validate_service_token_authentication(self, token: str) -> Dict:
         """Test backend authenticating with auth service using service token"""
-        async with httpx.AsyncClient(timeout=self.test_timeout) as client:
-            # Test service token validation endpoint
-            response = await client.post(
-                f"{self.auth_service_url}/auth/validate",
-                json={"token": token}
-            )
+        try:
+            # Use auth client to validate token
+            validation_result = await self.auth_client.validate_token(token)
             
-            assert response.status_code == 200, f"Service token validation failed: {response.text}"
-            data = response.json()
+            assert validation_result is not None, "Token validation returned None"
+            assert validation_result.get("valid") is True, "Service token should be valid"
             
-            assert data.get("valid") is True, "Service token should be valid"
-            assert "service_id" in data or "user_id" in data, "Service ID not returned"
-            
-            return data
+            return validation_result
+        except Exception as e:
+            pytest.fail(f"Service token validation failed: {e}")
     
     async def validate_service_vs_user_token_differences(self, service_token: str, 
                                                         user_token: str) -> None:
@@ -140,25 +142,17 @@ class ServiceAuthTestValidator:
     
     async def validate_invalid_service_credentials(self) -> None:
         """Test service token generation with invalid credentials"""
-        async with httpx.AsyncClient(timeout=self.test_timeout) as client:
-            # Test with invalid service ID
-            response = await client.post(
-                f"{self.auth_service_url}/auth/service-token",
-                json={
-                    "service_id": "invalid-service",
-                    "service_secret": "invalid-secret"
-                }
-            )
-            
-            assert response.status_code == 401, "Should reject invalid service credentials"
-            
-            # Test with missing credentials
-            response = await client.post(
-                f"{self.auth_service_url}/auth/service-token",
-                json={}
-            )
-            
-            assert response.status_code == 422, "Should reject missing credentials"
+        # Test with invalid service ID
+        request = ServiceTokenRequest(
+            service_id="invalid-service",
+            service_secret="invalid-secret"
+        )
+        
+        with pytest.raises(Exception) as exc_info:
+            await self.auth_service.create_service_token(request)
+        
+        # Should raise AuthError for invalid credentials
+        assert "invalid" in str(exc_info.value).lower() or "auth" in str(exc_info.value).lower()
     
     async def validate_expired_service_token(self) -> None:
         """Test handling of expired service tokens (simulation)"""

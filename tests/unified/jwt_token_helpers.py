@@ -224,5 +224,44 @@ class JWTSecurityTester:
         return True  # No services available to test
 
 
+class JWTTokenTestHelper:
+    """Additional JWT token test helper for service-to-service auth testing."""
+    
+    def __init__(self):
+        self.test_secret = "test-jwt-secret-key-32-chars-min"
+    
+    def decode_token_unsafe(self, token: str) -> Optional[Dict]:
+        """Decode JWT token without verification (for testing only)."""
+        try:
+            return jwt.decode(token, options={"verify_signature": False})
+        except Exception:
+            return None
+    
+    def create_expired_service_token(self, service_id: str) -> str:
+        """Create an expired service token for testing."""
+        payload = {
+            "sub": service_id,
+            "service": f"netra-{service_id}",
+            "token_type": "service",
+            "iat": int((datetime.now(timezone.utc) - timedelta(minutes=10)).timestamp()),
+            "exp": int((datetime.now(timezone.utc) - timedelta(minutes=5)).timestamp()),
+            "iss": "netra-auth-service"
+        }
+        return jwt.encode(payload, self.test_secret, algorithm="HS256")
+    
+    def create_test_user_token(self, user_id: str, email: str) -> str:
+        """Create a test user token for comparison."""
+        payload = {
+            "sub": user_id,
+            "email": email,
+            "permissions": ["read", "write"],
+            "token_type": "access",
+            "iat": int(datetime.now(timezone.utc).timestamp()),
+            "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+            "iss": "netra-auth-service"
+        }
+        return jwt.encode(payload, self.test_secret, algorithm="HS256")
+
+
 # Export commonly used classes
-__all__ = ['JWTTestHelper', 'JWTTestFixtures', 'JWTSecurityTester']
+__all__ = ['JWTTestHelper', 'JWTTestFixtures', 'JWTSecurityTester', 'JWTTokenTestHelper']
