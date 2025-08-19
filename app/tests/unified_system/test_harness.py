@@ -12,6 +12,8 @@ import asyncio
 import subprocess
 import time
 import httpx
+import shutil
+import platform
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
 import logging
@@ -119,12 +121,38 @@ class UnifiedTestHarness:
     
     async def _create_service_process(self, config: ServiceConfig) -> subprocess.Popen:
         """Create subprocess for service."""
+        # Resolve executable paths for cross-platform compatibility
+        resolved_command = self._resolve_command_path(config.startup_command)
+        
+        # On Windows, we need shell=True for proper executable resolution
+        use_shell = platform.system() == "Windows"
+        
         return subprocess.Popen(
-            config.startup_command,
+            resolved_command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=self._get_service_env(config.name)
+            env=self._get_service_env(config.name),
+            shell=use_shell
         )
+    
+    def _resolve_command_path(self, command: List[str]) -> List[str]:
+        """Resolve executable path for cross-platform compatibility."""
+        if not command:
+            return command
+        
+        # Get the executable (first element of command)
+        executable = command[0]
+        
+        # Try to find the full path to the executable
+        resolved_path = shutil.which(executable)
+        if resolved_path:
+            # Return command with resolved executable path
+            return [resolved_path] + command[1:]
+        else:
+            # If we can't resolve it, return original command
+            # This allows subprocess to handle the error appropriately
+            logger.warning(f"Could not resolve executable path for: {executable}")
+            return command
     
     def _get_service_env(self, service_name: str) -> Dict[str, str]:
         """Get environment variables for service."""

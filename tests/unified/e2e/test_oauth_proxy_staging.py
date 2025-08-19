@@ -28,7 +28,6 @@ OAuth Proxy PR Environment Test - P1 STAGING BROKEN
 
 import asyncio
 import pytest
-import pytest_asyncio
 import time
 import uuid
 import json

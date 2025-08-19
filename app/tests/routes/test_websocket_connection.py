@@ -10,14 +10,19 @@ class TestWebSocketConnection:
         client = TestClient(app)
         
         with patch('app.routes.websockets.manager') as mock_manager, \
-             patch('app.routes.websockets._authenticate_websocket_user') as mock_auth, \
-             patch('app.routes.websockets._get_app_services') as mock_get_services:
+             patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth, \
+             patch('app.routes.utils.websocket_helpers.extract_app_services') as mock_get_services:
             
             # Setup mocks
             mock_manager.connect_user = AsyncMock(return_value=MagicMock())
             mock_manager.disconnect_user = AsyncMock()
             mock_auth.return_value = "test-user-123"
-            mock_get_services.return_value = (MagicMock(), MagicMock())
+            
+            # Mock security service with async methods
+            mock_security_service = MagicMock()
+            mock_security_service.decode_access_token = AsyncMock(return_value={"user_id": "test-user-123"})
+            mock_agent_service = MagicMock()
+            mock_get_services.return_value = (mock_security_service, mock_agent_service)
             
             with client.websocket_connect("/ws?token=test-token") as websocket:
                 # If we get here, authentication succeeded
@@ -28,8 +33,8 @@ class TestWebSocketConnection:
         client = TestClient(app)
         
         with patch('app.routes.websockets.manager') as mock_manager, \
-             patch('app.routes.websockets._authenticate_websocket_user') as mock_auth, \
-             patch('app.routes.websockets._get_app_services') as mock_get_services:
+             patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth, \
+             patch('app.routes.utils.websocket_helpers.extract_app_services') as mock_get_services:
             
             # Setup mocks
             mock_manager.connect_user = AsyncMock(return_value=MagicMock())
@@ -38,9 +43,11 @@ class TestWebSocketConnection:
             mock_auth.return_value = "test-user-123"
             
             # Mock services
+            mock_security_service = MagicMock()
+            mock_security_service.decode_access_token = AsyncMock(return_value={"user_id": "test-user-123"})
             mock_agent_service = MagicMock()
             mock_agent_service.handle_websocket_message = AsyncMock()
-            mock_get_services.return_value = (MagicMock(), mock_agent_service)
+            mock_get_services.return_value = (mock_security_service, mock_agent_service)
             
             with client.websocket_connect("/ws?token=test-token") as websocket:
                 test_message = {
@@ -58,8 +65,8 @@ class TestWebSocketConnection:
         client = TestClient(app)
         
         with patch('app.routes.websockets.manager') as mock_manager, \
-             patch('app.routes.websockets._authenticate_websocket_user') as mock_auth, \
-             patch('app.routes.websockets._get_app_services') as mock_get_services:
+             patch('app.routes.utils.websocket_helpers.authenticate_websocket_user') as mock_auth, \
+             patch('app.routes.utils.websocket_helpers.extract_app_services') as mock_get_services:
             
             # Setup mocks
             mock_conn_info = MagicMock()
@@ -70,7 +77,12 @@ class TestWebSocketConnection:
             mock_manager.connection_manager.active_connections = {"test-user-123": [mock_conn_info]}
             mock_manager.connection_manager.is_connection_alive = MagicMock(return_value=True)
             mock_auth.return_value = "test-user-123"
-            mock_get_services.return_value = (MagicMock(), MagicMock())
+            
+            # Mock security service with async methods
+            mock_security_service = MagicMock()
+            mock_security_service.decode_access_token = AsyncMock(return_value={"user_id": "test-user-123"})
+            mock_agent_service = MagicMock()
+            mock_get_services.return_value = (mock_security_service, mock_agent_service)
             
             # Connect and disconnect
             try:
