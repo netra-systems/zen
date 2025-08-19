@@ -13,7 +13,12 @@ from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
 from auth_core.models.auth_models import AuthProvider
-from auth_service.main import app
+import sys
+from pathlib import Path
+# Add auth service to path
+auth_service_dir = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(auth_service_dir))
+from main import app
 
 # Test client
 client = TestClient(app)

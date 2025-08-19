@@ -37,8 +37,8 @@ import { MessageList } from '@/components/chat/MessageList';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
 // Test utilities and mocks
-import { TestProviders } from '@/test-utils';
-import { mockWebSocketProvider, mockUnifiedChatStore } from '../shared-test-setup';
+import { TestProviders } from '../../../test-utils';
+import { mockWebSocketProvider, mockUnifiedChatStore } from './shared-test-setup';
 
 // Types
 import { Message, Thread, WebSocketEvent } from '@/types';

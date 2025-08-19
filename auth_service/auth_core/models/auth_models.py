@@ -2,9 +2,9 @@
 Auth Service Pydantic Models - Type safety and validation
 Single Source of Truth for auth data structures
 """
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, model_validator
 from typing import Optional, List, Dict, Any
-from datetime import datetime
+from datetime import datetime, UTC
 from enum import Enum
 
 class TokenType(str, Enum):
@@ -27,11 +27,11 @@ class LoginRequest(BaseModel):
     provider: AuthProvider = AuthProvider.LOCAL
     oauth_token: Optional[str] = None
     
-    @validator('password')
-    def validate_password(cls, v, values):
-        if values.get('provider') == AuthProvider.LOCAL and not v:
+    @model_validator(mode='after')
+    def validate_password_for_local(self):
+        if self.provider == AuthProvider.LOCAL and not self.password:
             raise ValueError('Password required for local auth')
-        return v
+        return self
 
 class LoginResponse(BaseModel):
     """Login response with tokens"""
@@ -106,14 +106,14 @@ class AuthError(BaseModel):
     error_code: str
     message: str
     details: Optional[Dict[str, Any]] = None
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 class HealthResponse(BaseModel):
     """Health check response"""
     status: str
     service: str = "auth-service"
     version: str = "1.0.0"
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
     redis_connected: bool
     database_connected: bool
 
@@ -128,7 +128,7 @@ class AuditLog(BaseModel):
     success: bool
     error_message: Optional[str] = None
     metadata: Dict[str, Any] = {}
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
 class AuthEndpoints(BaseModel):
     """Auth service endpoint configuration"""

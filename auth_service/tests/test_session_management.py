@@ -98,7 +98,7 @@ class TestSessionExpiry:
         return manager
 
     def test_session_auto_expiry(self, session_manager):
-        """Test automatic session expiry"""
+        """Test automatic session expiry via validate_session"""
         expired_time = datetime.utcnow() - timedelta(hours=25)
         session_data = {
             "user_id": "user123",
@@ -107,9 +107,10 @@ class TestSessionExpiry:
         session_manager.redis_client.get.return_value = json.dumps(session_data)
         session_manager.redis_client.delete.return_value = 1
         
-        session = session_manager.get_session("expired_session")
+        # validate_session should detect expiry and return False
+        is_valid = session_manager.validate_session("expired_session")
         
-        assert session is None
+        assert is_valid is False
 
     def test_session_ttl_refresh(self, session_manager):
         """Test session TTL refresh on activity"""
@@ -256,7 +257,8 @@ class TestSessionPersistence:
             id="session123",
             user_id="user123",
             ip_address="192.168.1.1",
-            expires_at=datetime.now(timezone.utc) + timedelta(hours=24)
+            expires_at=datetime.now(timezone.utc) + timedelta(hours=24),
+            is_active=True
         )
         
         # Verify model structure

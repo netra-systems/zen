@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 # Import components
-from .test_harness import UnifiedTestHarness, DatabaseManager
+from .test_harness import UnifiedTestHarness
 from .service_manager import ServiceManager, TestDataSeeder, HealthMonitor
 
 logger = logging.getLogger(__name__)
