@@ -329,8 +329,14 @@ class MockHTTPService:
     
     async def start(self) -> None:
         """Start the mock HTTP service."""
-        self.server = TestServer(self.app, host=self.host, port=self.port)
+        from aiohttp import ClientSession
+        
+        # Use aiohttp test server which handles ports automatically
+        self.server = TestServer(self.app, host=self.host)
         await self.server.start_server()
+        
+        # Update the port to the actual assigned port
+        self.port = self.server.port
         logger.info(f"Mock HTTP service '{self.service_name}' started on {self.host}:{self.port}")
     
     async def stop(self) -> None:
@@ -342,6 +348,8 @@ class MockHTTPService:
     @property
     def url(self) -> str:
         """Get the service URL."""
+        if self.server and hasattr(self.server, 'port'):
+            return f"http://{self.host}:{self.server.port}"
         return f"http://{self.host}:{self.port}"
 
 
@@ -432,8 +440,11 @@ class MockWebSocketService:
     
     async def start(self) -> None:
         """Start WebSocket service."""
-        self.server = TestServer(self.app, host=self.host, port=self.port)
+        self.server = TestServer(self.app, host=self.host)
         await self.server.start_server()
+        
+        # Update port to actual assigned port
+        self.port = self.server.port
         logger.info(f"Mock WebSocket service started on {self.host}:{self.port}")
     
     async def stop(self) -> None:
@@ -441,6 +452,13 @@ class MockWebSocketService:
         if self.server:
             await self.server.close()
         logger.info("Mock WebSocket service stopped")
+    
+    @property
+    def url(self) -> str:
+        """Get the WebSocket service URL."""
+        if self.server and hasattr(self.server, 'port'):
+            return f"http://{self.host}:{self.server.port}"
+        return f"http://{self.host}:{self.port}"
 
 
 class ServiceRegistry:
@@ -497,23 +515,23 @@ class ServiceRegistry:
 
 
 # Convenience functions for creating mock services
-def create_mock_auth_service(port: int = 8001) -> MockHTTPService:
-    """Create mock auth service."""
+def create_mock_auth_service(port: int = 0) -> MockHTTPService:
+    """Create mock auth service with dynamic port allocation."""
     return MockHTTPService("auth-service", port)
 
 
-def create_mock_backend_service(port: int = 8000) -> MockHTTPService:
-    """Create mock backend service."""
+def create_mock_backend_service(port: int = 0) -> MockHTTPService:
+    """Create mock backend service with dynamic port allocation."""
     return MockHTTPService("backend-service", port)
 
 
-def create_mock_frontend_service(port: int = 3000) -> MockHTTPService:
-    """Create mock frontend service."""
+def create_mock_frontend_service(port: int = 0) -> MockHTTPService:
+    """Create mock frontend service with dynamic port allocation."""
     return MockHTTPService("frontend-service", port)
 
 
-def create_mock_websocket_service(port: int = 8765) -> MockWebSocketService:
-    """Create mock WebSocket service."""
+def create_mock_websocket_service(port: int = 0) -> MockWebSocketService:
+    """Create mock WebSocket service with dynamic port allocation."""
     return MockWebSocketService(port=port)
 
 
@@ -521,17 +539,17 @@ async def setup_unified_mock_services() -> ServiceRegistry:
     """Setup complete mock service environment for unified testing."""
     registry = ServiceRegistry()
     
-    # Register HTTP services
-    auth_service = create_mock_auth_service(8001)
-    backend_service = create_mock_backend_service(8000)
-    frontend_service = create_mock_frontend_service(3000)
+    # Register HTTP services with dynamic port allocation
+    auth_service = create_mock_auth_service()
+    backend_service = create_mock_backend_service()
+    frontend_service = create_mock_frontend_service()
     
     registry.register_http_service("auth", auth_service)
     registry.register_http_service("backend", backend_service)
     registry.register_http_service("frontend", frontend_service)
     
-    # Register WebSocket service
-    ws_service = create_mock_websocket_service(8765)
+    # Register WebSocket service with dynamic port allocation
+    ws_service = create_mock_websocket_service()
     registry.register_websocket_service("main", ws_service)
     
     # Register other mock services

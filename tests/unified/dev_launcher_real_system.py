@@ -43,18 +43,17 @@ class DevLauncherRealSystem:
         self.start_time = time.time()
         
         # Create launcher config for testing
-        self.config = LauncherConfig(
-            backend_port=8000,
-            frontend_port=3000 if not self.skip_frontend else None,
-            dynamic_ports=False,  # Use fixed ports for testing
-            no_backend_reload=True,  # No hot reload for tests
-            no_browser=True,  # Don't open browser
-            verbose=False,  # Less output for tests
-            non_interactive=True,  # No prompts
-            startup_mode="minimal",  # Fast startup
-            no_secrets=True,  # Don't load secrets for tests
-            parallel_startup=True  # Parallel startup for speed
-        )
+        self.config = LauncherConfig()
+        self.config.backend_port = 8000
+        self.config.frontend_port = 3000 if not self.skip_frontend else None
+        self.config.dynamic_ports = False  # Use fixed ports for testing
+        self.config.no_backend_reload = True  # No hot reload for tests
+        self.config.no_browser = True  # Don't open browser
+        self.config.verbose = False  # Less output for tests
+        self.config.non_interactive = True  # No prompts
+        self.config.startup_mode = "minimal"  # Fast startup
+        self.config.no_secrets = True  # Don't load secrets for tests
+        self.config.parallel_startup = True  # Parallel startup for speed
         
         # Create launcher instance
         self.launcher = DevLauncher(self.config)
