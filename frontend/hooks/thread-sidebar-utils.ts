@@ -9,8 +9,8 @@
  */
 
 import { logger } from '@/utils/debug-logger';
-
 import { ThreadService } from '@/services/threadService';
+import { useAuthStore } from '@/store/authStore';
 
 // ============================================
 // Error Handling Functions (8 lines max each)
@@ -65,8 +65,13 @@ export const handleDeleteThreadError = (
 export const executeThreadLoad = async (
   setLoading: (loading: boolean) => void,
   setThreads: (threads: any[]) => void,
-  setError: (error: string) => void
+  setError: (error: string) => void,
+  isAuthenticated: boolean
 ): Promise<void> => {
+  if (!isAuthenticated) {
+    setThreads([]);
+    return;
+  }
   try {
     setLoading(true);
     const fetchedThreads = await ThreadService.listThreads();
