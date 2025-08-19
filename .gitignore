@@ -115,3 +115,4 @@ terraform-gcp/staging.tfplan
 ...AAA launch CLAUDE WINDOWS.BAT
 .service_discovery/auth.json
 .service_discovery/auth.json
+.dev_launcher_cache/dependency_cache.json

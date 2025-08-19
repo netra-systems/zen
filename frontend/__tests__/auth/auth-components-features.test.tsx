@@ -15,28 +15,9 @@ import '@testing-library/jest-dom';
 // Mock auth service
 jest.mock('@/auth/service');
 
-// Mock UI components
-jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, onClick, disabled, variant, size, ...props }: any) => (
-    <button 
-      onClick={onClick} 
-      disabled={disabled}
-      data-variant={variant}
-      data-size={size}
-      {...props}
-    >
-      {children}
-    </button>
-  )
-}));
-
-jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, variant, className }: any) => (
-    <span data-variant={variant} className={className}>
-      {children}
-    </span>
-  )
-}));
+// Import real UI components
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 describe('Auth Components Features', () => {
   const mockLogin = jest.fn();

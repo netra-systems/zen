@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
@@ -85,10 +85,22 @@ describe('Message Streaming Core Tests', () => {
       render(<TestProviders><StreamingCoreTest /></TestProviders>);
 
       expect(screen.getByTestId('chunk-count')).toHaveTextContent('0');
-      await userEvent.click(screen.getByTestId('btn-add'));
-      expect(screen.getByTestId('chunk-count')).toHaveTextContent('1');
-      await userEvent.click(screen.getByTestId('btn-add'));
-      expect(screen.getByTestId('chunk-count')).toHaveTextContent('2');
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-add'));
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('chunk-count')).toHaveTextContent('1');
+      }, { timeout: 1000 });
+      
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-add'));
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('chunk-count')).toHaveTextContent('2');
+      }, { timeout: 1000 });
     });
   });
 
@@ -96,22 +108,37 @@ describe('Message Streaming Core Tests', () => {
     it('should track messages per second', async () => {
       render(<TestProviders><StreamingCoreTest /></TestProviders>);
 
-      await userEvent.click(screen.getByTestId('btn-mps'));
-      expect(screen.getByTestId('metrics-mps')).toHaveTextContent('60');
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-mps'));
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('metrics-mps')).toHaveTextContent('60');
+      }, { timeout: 1000 });
     });
 
     it('should achieve 60 FPS target', async () => {
       render(<TestProviders><StreamingCoreTest /></TestProviders>);
 
-      await userEvent.click(screen.getByTestId('btn-fps'));
-      expect(screen.getByTestId('metrics-fps')).toHaveTextContent('60');
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-fps'));
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('metrics-fps')).toHaveTextContent('60');
+      }, { timeout: 1000 });
     });
 
     it('should track dropped frames', async () => {
       render(<TestProviders><StreamingCoreTest /></TestProviders>);
 
-      await userEvent.click(screen.getByTestId('btn-drop'));
-      expect(screen.getByTestId('metrics-dropped')).toHaveTextContent('1');
+      await act(async () => {
+        await userEvent.click(screen.getByTestId('btn-drop'));
+      });
+      
+      await waitFor(() => {
+        expect(screen.getByTestId('metrics-dropped')).toHaveTextContent('1');
+      }, { timeout: 1000 });
     });
 
     it('should monitor performance', () => {

@@ -89,7 +89,7 @@ class OptimizedStartupOrchestrator:
         if self.launcher.parallel_enabled:
             return self._run_services_with_optimization()
         else:
-            return self.launcher._run_services_sequential()
+            return self.launcher.legacy_runner.run_services_sequential()
     
     def _run_services_with_optimization(self) -> int:
         """Run services with advanced optimization."""

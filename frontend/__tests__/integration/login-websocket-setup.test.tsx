@@ -95,7 +95,7 @@ const mockUseWebSocket = jest.fn();
 
 // Mock implementations
 jest.mock('@/store/authStore', () => ({ useAuthStore: mockUseAuthStore }));
-jest.mock('@/services/websocket', () => ({ 
+jest.mock('@/services/webSocketService', () => ({ 
   useWebSocket: mockUseWebSocket,
   webSocketService: mockWebSocketService
 }));

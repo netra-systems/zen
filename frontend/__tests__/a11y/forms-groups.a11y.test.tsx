@@ -6,6 +6,7 @@
  * 
  * - forms-groups-basic.a11y.test.tsx - Basic form structures, radio groups, validation
  * - forms-groups-dynamic.a11y.test.tsx - Dynamic sections, conditional forms, progressive disclosure
+ * - forms-groups-validation.a11y.test.tsx - Validation features, collapsible sections, error handling
  * 
  * Each module maintains focused responsibility and complies with the
  * MANDATORY 300-line limit for Elite Engineering standards.
@@ -20,6 +21,7 @@
 // Import all modular accessibility test suites
 import './forms-groups-basic.a11y.test';
 import './forms-groups-dynamic.a11y.test';
+import './forms-groups-validation.a11y.test';
 
 // Re-export shared helpers for convenience
 export { 

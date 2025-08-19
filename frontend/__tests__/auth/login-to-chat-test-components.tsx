@@ -28,7 +28,7 @@ export const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.real.token';
 
 // Mock LoginButton component for testing (≤8 lines)
 const MockLoginButton = () => (
-  <button data-testid="login-button">Login</button>
+  <button data-testid="login-button">Login with Google</button>
 );
 
 // Test component wrapper for testing (≤8 lines)
@@ -50,10 +50,12 @@ export function renderRealLoginToChatFlow() {
       <div data-testid="test-app">
         <MockLoginButton />
         <div data-testid="chat-window">
-          <div data-testid="message-input">
-            <input disabled={false} />
+          <div>
+            <input data-testid="message-input" disabled={false} />
+            <button data-testid="send-button">Send</button>
           </div>
           <div data-testid="thread-list">Threads</div>
+          <div data-testid="threads-loading" style={{display: 'none'}}>Loading threads...</div>
           <div data-testid="connection-status">Connected</div>
         </div>
       </div>

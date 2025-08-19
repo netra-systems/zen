@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-18T21:26:30.867148",
-    "total_runs": 102
+    "last_update": "2025-08-18T21:44:56.065884",
+    "total_runs": 103
   },
   "current_state": {
     "overall_status": "[UNKNOWN]",
-    "last_run_level": "integration",
-    "last_run_time": "2025-08-18T21:26:30.867148",
-    "last_exit_code": 143
+    "last_run_level": "unit",
+    "last_run_time": "2025-08-18T21:44:56.065884",
+    "last_exit_code": 255
   },
   "known_test_counts": {
     "unit:backend": {
@@ -100,7 +100,7 @@
       "actual": 0,
       "passed": 0,
       "failed": 0,
-      "last_run": "2025-08-18T18:13:33.829179",
+      "last_run": "2025-08-18T21:44:56.065884",
       "status": "[NO TESTS]"
     },
     "integration": {
@@ -241,7 +241,7 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T21:26:30.867148"
+      "last_run": "2025-08-18T21:44:56.065884"
     },
     "frontend": {
       "status": "failed",
@@ -252,11 +252,11 @@
         "skipped": 0,
         "errors": 0,
         "import_errors": 0,
-        "test_files": 1,
+        "test_files": 0,
         "status": "unknown"
       },
-      "last_duration": 29.95187783241272,
-      "last_run": "2025-08-18T21:26:30.867148"
+      "last_duration": 0.25179290771484375,
+      "last_run": "2025-08-18T21:44:56.065884"
     },
     "e2e": {
       "status": "pending",
@@ -268,25 +268,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-18T21:26:30.867148"
+      "last_run": "2025-08-18T21:44:56.065884"
     }
   },
   "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-18T16:27:00.939678",
-      "level": "smoke",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 6357,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-18T16:29:09.694656",
       "level": "smoke",
@@ -543,6 +529,20 @@
       "timestamp": "2025-08-18T21:26:30.867148",
       "level": "integration",
       "exit_code": 143,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 6357,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-18T21:44:56.065884",
+      "level": "unit",
+      "exit_code": 255,
       "status": "[UNKNOWN]",
       "statistics": {
         "total_tests_known": 6357,
