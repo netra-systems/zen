@@ -121,7 +121,7 @@ class ServiceStartupCoordinator:
                 args=("auth", self.auth_starter.start_auth_service),
                 task_type=TaskType.IO_BOUND,
                 priority=1,  # Start auth first (highest priority)
-                timeout=15
+                timeout=30
             ),
             ParallelTask(
                 task_id="backend_startup", 
@@ -130,7 +130,7 @@ class ServiceStartupCoordinator:
                 task_type=TaskType.IO_BOUND,
                 dependencies=["auth_startup"],  # Backend depends on auth
                 priority=2,
-                timeout=20
+                timeout=40
             ),
             ParallelTask(
                 task_id="frontend_startup",
@@ -139,7 +139,7 @@ class ServiceStartupCoordinator:
                 task_type=TaskType.IO_BOUND,
                 dependencies=["backend_startup"],  # Frontend depends on backend
                 priority=3,
-                timeout=25
+                timeout=50
             )
         ]
         

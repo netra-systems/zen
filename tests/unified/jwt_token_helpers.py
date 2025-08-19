@@ -59,6 +59,19 @@ class JWTTestHelper:
             payload["exp"] = int(payload["exp"].timestamp())
         return jwt.encode(payload, secret, algorithm="HS256")
     
+    def create_access_token(self, user_id: str, email: str, permissions: list = None) -> str:
+        """Create access token for user."""
+        payload = {
+            "sub": user_id,
+            "email": email,
+            "permissions": permissions or ["read", "write"],
+            "iat": datetime.now(timezone.utc),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
+            "token_type": "access",
+            "iss": "netra-auth-service"
+        }
+        return self.create_token(payload)
+    
     async def create_jwt_token(self, payload: Dict, secret: str = None) -> str:
         """Create JWT token with specified payload."""
         return self.create_token(payload, secret)

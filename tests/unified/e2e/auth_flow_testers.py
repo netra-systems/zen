@@ -57,3 +57,63 @@ class AuthFlowE2ETester:
         """Cleanup all test services."""
         self.mock_services.clear()
         self.test_tokens.clear()
+    
+    async def create_test_user(self, user_data: Dict) -> None:
+        """Create test user with specified data."""
+        await self.mock_services["db"].create_user(user_data)
+    
+    async def login_user(self, email: str) -> Dict:
+        """Simulate user login and return tokens."""
+        # Mock successful login
+        user_id = f"user-{email.split('@')[0]}"
+        access_token = self.jwt_helper.create_access_token(user_id, email)
+        
+        return {
+            "access_token": access_token,
+            "user_id": user_id,
+            "email": email
+        }
+    
+    @property
+    def api_client(self):
+        """Get API client for making requests."""
+        if not hasattr(self, '_api_client'):
+            self._api_client = MockAPIClient()
+        return self._api_client
+
+
+class MockAPIClient:
+    """Mock API client for testing admin operations."""
+    
+    async def call_api(self, method: str, endpoint: str, data: Dict = None, headers: Dict = None) -> Dict:
+        """Mock API call with basic admin operation simulation."""
+        if endpoint == "/admin/users" and method == "GET":
+            return self._mock_get_all_users()
+        elif endpoint == "/admin/users/suspend" and method == "POST":
+            return self._mock_suspend_user(data)
+        elif endpoint == "/admin/users/reactivate" and method == "POST":
+            return self._mock_reactivate_user(data)
+        elif endpoint == "/admin/users/bulk" and method == "POST":
+            return self._mock_bulk_operation(data)
+        else:
+            return {"success": True, "mock": True}
+    
+    def _mock_get_all_users(self) -> list:
+        """Mock get all users response."""
+        return [
+            {"id": "admin-123", "email": "admin@example.com", "role": "admin", "is_active": True},
+            {"id": "user-456", "email": "testuser@example.com", "role": "user", "is_active": True}
+        ]
+    
+    def _mock_suspend_user(self, data: Dict) -> Dict:
+        """Mock suspend user response."""
+        return {"success": True, "user_id": data.get("user_id"), "action": "suspended"}
+    
+    def _mock_reactivate_user(self, data: Dict) -> Dict:
+        """Mock reactivate user response."""
+        return {"success": True, "user_id": data.get("user_id"), "action": "reactivated"}
+    
+    def _mock_bulk_operation(self, data: Dict) -> Dict:
+        """Mock bulk operation response."""
+        user_ids = data.get("user_ids", [])
+        return {"success": True, "processed": len(user_ids), "action": data.get("action")}
