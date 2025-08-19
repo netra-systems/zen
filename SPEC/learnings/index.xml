@@ -392,6 +392,20 @@
                 Covers directory structure, import rules, Dockerfile best practices, and migration checklist.
             </description>
         </category>
+        <category>
+            <name>State Management/Validation</name>
+            <file>learnings/state_validation.xml</file>
+            <path>SPEC/learnings/state_validation.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>deep-agent-state-validation-errors</id>
+            </learning_ids>
+            <important_note>Always provide defaults for Pydantic model fields unless absolutely critical</important_note>
+            <description>
+                Lessons learned from WebSocket validation errors with DeepAgentState.
+                Covers required fields, default values, backward compatibility, and testing strategies.
+            </description>
+        </category>
     </categories>
     
     <usage>

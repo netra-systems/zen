@@ -692,10 +692,18 @@
       "passed": 66,
       "failed": 1,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250818_221615_75445",
+      "timestamp": "2025-08-18T22:16:37.970186",
+      "total_tests": 89,
+      "passed": 87,
+      "failed": 2,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 15,
-    "last_updated": "2025-08-18T22:01:32.470562"
+    "total_runs": 16,
+    "last_updated": "2025-08-18T22:16:37.970186"
   }
 }
