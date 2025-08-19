@@ -8,33 +8,14 @@ import asyncio
 import time
 from datetime import datetime, timezone
 from typing import Dict, Set, Optional, Callable, Any
-from dataclasses import dataclass, field
-from enum import Enum
 
 from app.logging_config import central_logger
 from .connection import ConnectionInfo, ConnectionManager
 from .error_types import ErrorSeverity
+from .sync_types import SyncState, StateCheckpoint
+from .callback_handler import CallbackHandler
 
 logger = central_logger.get_logger(__name__)
-
-
-class SyncState(str, Enum):
-    """Connection synchronization states."""
-    SYNCED = "synced"
-    DESYNCED = "desynced"
-    SYNCING = "syncing"
-    FAILED = "failed"
-
-
-@dataclass
-class StateCheckpoint:
-    """Connection state checkpoint."""
-    connection_id: str
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    websocket_state: str = ""
-    internal_state: str = ""
-    last_activity: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    sync_status: SyncState = SyncState.SYNCED
 
 
 class ConnectionStateSynchronizer:
@@ -50,6 +31,7 @@ class ConnectionStateSynchronizer:
         self._running = False
         self._sync_interval = 5  # Check every 5 seconds instead of 10
         self._max_concurrent_checks = 10  # Limit concurrent checks
+        self._callback_handler = CallbackHandler()
     
     async def start_monitoring(self) -> None:
         """Start state synchronization monitoring."""
@@ -207,14 +189,10 @@ class ConnectionStateSynchronizer:
         await self.check_connection_sync(conn_info)
     
     async def _notify_sync_callbacks(self, connection_id: str, event_type: str) -> None:
-        """Notify registered callbacks about sync events with timeout."""
+        """Notify registered callbacks about sync events."""
         callbacks = self.sync_callbacks.get(connection_id, set())
-        if not callbacks:
-            return
-        
-        callback_tasks = await self._create_callback_tasks(callbacks, connection_id, event_type)
-        if callback_tasks:
-            await self._execute_callback_tasks(callback_tasks, connection_id)
+        if callbacks:
+            await self._callback_handler.execute_callbacks(callbacks, connection_id, event_type)
     
     async def _handle_sync_error(self, error: Exception, retry_count: int) -> int:
         """Handle sync loop error with retry logic."""
@@ -237,47 +215,6 @@ class ConnectionStateSynchronizer:
             return 0
         return retry_count
     
-    async def _create_callback_tasks(self, callbacks: Set[Callable], connection_id: str, event_type: str) -> list:
-        """Create tasks for all callbacks."""
-        callback_tasks = []
-        for callback in callbacks:
-            task = await self._process_single_callback(callback, connection_id, event_type)
-            if task:
-                callback_tasks.append(task)
-        return callback_tasks
-    
-    async def _process_single_callback(self, callback: Callable, connection_id: str, event_type: str) -> Optional[asyncio.Task]:
-        """Process single callback with error handling."""
-        try:
-            return await self._create_single_callback_task(callback, connection_id, event_type)
-        except Exception as e:
-            logger.error(f"Error creating callback task for {connection_id}: {e}")
-            return None
-    
-    async def _create_single_callback_task(self, callback: Callable, connection_id: str, event_type: str) -> Optional[asyncio.Task]:
-        """Create task for a single callback."""
-        if asyncio.iscoroutinefunction(callback):
-            return asyncio.create_task(callback(connection_id, event_type))
-        else:
-            loop = asyncio.get_event_loop()
-            return loop.run_in_executor(None, callback, connection_id, event_type)
-    
-    async def _execute_callback_tasks(self, callback_tasks: list, connection_id: str) -> None:
-        """Execute callback tasks with timeout."""
-        try:
-            await asyncio.wait_for(
-                asyncio.gather(*callback_tasks, return_exceptions=True), 
-                timeout=5.0
-            )
-        except (asyncio.TimeoutError, Exception) as e:
-            await self._handle_callback_error(e, connection_id)
-    
-    async def _handle_callback_error(self, error: Exception, connection_id: str) -> None:
-        """Handle callback execution errors."""
-        if isinstance(error, asyncio.TimeoutError):
-            logger.warning(f"Callback timeout for connection {connection_id}")
-        else:
-            logger.error(f"Callback execution error for {connection_id}: {error}")
     
     def get_sync_stats(self) -> Dict[str, Any]:
         """Get synchronization statistics."""
@@ -301,4 +238,9 @@ class ConnectionStateSynchronizer:
         desynced_count = total_connections - synced_count
         sync_rate = synced_count / total_connections if total_connections > 0 else 1.0
         
-        return {"total": total_connections, "synced": synced_count, "desynced": desynced_count, "rate": sync_rate}
+        return {
+            "total": total_connections, 
+            "synced": synced_count, 
+            "desynced": desynced_count, 
+            "rate": sync_rate
+        }

@@ -27,7 +27,9 @@ class ApiClientWrapper {
   
   constructor() {
     // Use secure API configuration to prevent mixed content errors
-    this.baseURL = secureApiConfig.apiUrl;
+    // In browser, use empty string to make relative requests (goes through Next.js proxy)
+    // In server-side contexts, use the full backend URL
+    this.baseURL = typeof window !== 'undefined' ? '' : secureApiConfig.apiUrl;
     this.checkConnection();
   }
 
@@ -44,7 +46,9 @@ class ApiClientWrapper {
 
   private async performConnectionCheck(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseURL}/health`, {
+      // Use the proxied health endpoint instead of direct backend URL
+      const healthUrl = typeof window !== 'undefined' ? '/health/ready' : `${this.baseURL}/health/ready`;
+      const response = await fetch(healthUrl, {
         method: 'GET',
         mode: 'cors',
       }).catch(() => null);

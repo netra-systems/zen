@@ -172,6 +172,7 @@ def check_dependencies() -> dict:
 def build_pytest_args(args) -> List[str]:
     """Build pytest command arguments"""
     pytest_args = []
+    _add_config_file_args(pytest_args)
     _add_test_paths(args, pytest_args)
     _add_verbosity_args(args, pytest_args)
     _add_parallel_args(args, pytest_args)
@@ -181,6 +182,18 @@ def build_pytest_args(args) -> List[str]:
     _add_output_args(args, pytest_args)
     _add_bad_test_detection_args(args, pytest_args)
     return [arg for arg in pytest_args if arg]
+
+def _add_config_file_args(pytest_args):
+    """Add pytest configuration file path"""
+    # Check if we're testing app/ directory tests
+    app_pytest_ini = PROJECT_ROOT / "app" / "pytest.ini"
+    root_pytest_ini = PROJECT_ROOT / "pytest.ini"
+    
+    # Use app/pytest.ini if it exists, otherwise use root pytest.ini
+    if app_pytest_ini.exists():
+        pytest_args.extend(["-c", str(app_pytest_ini)])
+    elif root_pytest_ini.exists():
+        pytest_args.extend(["-c", str(root_pytest_ini)])
 
 def _add_test_paths(args, pytest_args):
     """Add test paths based on category or specific paths"""

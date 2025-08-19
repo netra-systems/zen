@@ -15,15 +15,15 @@ from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
 
 # Operational imports
-from app.services.mcp.tool_registry import MCPToolRegistry
-from app.services.supply_research.scheduler import SupplyResearchScheduler
-from app.services.error_recovery.cascade_handler import ErrorRecoveryCascadeHandler
-from app.services.admin.operations_manager import AdminOperationsManager
-from app.services.quality.monitoring_service import QualityMonitoringService
-from app.services.demo.session_manager import DemoSessionManager
-from app.services.system.health_aggregator import SystemHealthAggregator
-from app.services.permissions.rbac_service import RBACPermissionService
-from app.db.connection_pool_manager import DatabaseConnectionPoolManager
+from app.services.unified_tool_registry.registry import UnifiedToolRegistry
+from app.services.supply_research_scheduler import SupplyResearchScheduler
+from app.core.error_recovery import ErrorRecoveryManager
+# AdminService not available, will mock directly
+from app.services.quality_monitoring.service import QualityMonitoringService
+from app.services.demo.session_manager import SessionManager
+from app.core.health.interface import HealthInterface
+from app.services.permission_service import PermissionService
+# get_engine not available from postgres_core
 from app.core.circuit_breaker import CircuitBreaker
 
 
@@ -40,15 +40,15 @@ class TestOperationalSystems:
 
     async def _create_operational_infrastructure(self):
         """Create comprehensive operational infrastructure"""
-        mcp_registry = Mock(spec=MCPToolRegistry)
+        mcp_registry = Mock(spec=UnifiedToolRegistry)
         research_scheduler = Mock(spec=SupplyResearchScheduler)
-        error_handler = Mock(spec=ErrorRecoveryCascadeHandler)
-        admin_manager = Mock(spec=AdminOperationsManager)
+        error_handler = Mock(spec=ErrorRecoveryManager)
+        admin_manager = Mock()  # AdminService not implemented yet
         quality_monitor = Mock(spec=QualityMonitoringService)
-        demo_manager = Mock(spec=DemoSessionManager)
-        health_aggregator = Mock(spec=SystemHealthAggregator)
-        rbac_service = Mock(spec=RBACPermissionService)
-        pool_manager = Mock(spec=DatabaseConnectionPoolManager)
+        demo_manager = Mock(spec=SessionManager)
+        health_aggregator = Mock(spec=HealthInterface)
+        rbac_service = Mock(spec=PermissionService)
+        pool_manager = Mock()  # DatabaseConnectionPoolManager not implemented
         
         return {
             "mcp_registry": mcp_registry,

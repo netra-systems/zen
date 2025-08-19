@@ -20,9 +20,10 @@ from app.websocket.error_handler_cleanup import ErrorHandlerCleanup
 
 # Modern agent architecture imports
 from app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
+    BaseExecutionInterface, ExecutionContext, ExecutionResult,
     WebSocketManagerProtocol
 )
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.errors import ExecutionErrorHandler
@@ -81,7 +82,6 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
         context = self._create_error_context(error, conn_info)
         # Execute without BaseExecutionEngine to avoid circular dependency
         result = await self.execute_core_logic(context)
-        from app.agents.base.interface import ExecutionResult, ExecutionStatus
         return ExecutionResult(
             status=ExecutionStatus.SUCCESS if result.get('recovery_success') else ExecutionStatus.FAILED,
             result=result,

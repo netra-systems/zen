@@ -34,6 +34,7 @@ from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
 from dev_launcher.legacy_service_runner import LegacyServiceRunner
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
+from dev_launcher.critical_error_handler import critical_handler, CriticalError
 
 logger = logging.getLogger(__name__)
 
@@ -166,11 +167,16 @@ class DevLauncher:
     def _ensure_cleanup(self):
         """Ensure cleanup is performed on exit."""
         if not self._shutting_down:
+            self._shutting_down = True
             self._graceful_shutdown()
     
     def _graceful_shutdown(self):
         """Perform graceful shutdown of all services."""
-        self._print("🔄", "CLEANUP", "Starting graceful shutdown...")
+        # Only print if we're actually shutting down services
+        if hasattr(self, 'process_manager') and self.process_manager.processes:
+            self._print("🔄", "CLEANUP", "Starting graceful shutdown...")
+        else:
+            return  # Nothing to shutdown
         
         # Stop health monitoring first
         if hasattr(self, 'health_monitor'):
@@ -194,7 +200,9 @@ class DevLauncher:
         # Verify ports are freed
         self._verify_ports_freed()
         
-        self._print("✅", "SHUTDOWN", "Graceful shutdown complete")
+        # Only print completion if we actually shut down services
+        if hasattr(self, 'process_manager') and self.process_manager.processes:
+            self._print("✅", "SHUTDOWN", "Graceful shutdown complete")
     
     def _terminate_all_services(self):
         """Terminate all services in proper order."""
@@ -299,7 +307,21 @@ class DevLauncher:
         if not self.cache_manager.has_environment_changed():
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
-        return self.environment_checker.check_environment()
+        result = self.environment_checker.check_environment()
+        # Check for critical environment variables
+        self._check_critical_env_vars()
+        return result
+    
+    def _check_critical_env_vars(self):
+        """Check critical environment variables."""
+        critical_vars = [
+            "DATABASE_URL",
+            "JWT_SECRET_KEY"
+        ]
+        for var in critical_vars:
+            value = os.environ.get(var)
+            if not value:
+                critical_handler.check_env_var(var, value)
     
     def _check_environment_step(self) -> bool:
         """Environment check step for optimizer."""
@@ -347,8 +369,34 @@ class DevLauncher:
     
     def run(self) -> int:
         """Run the development environment with optimized startup sequence."""
+        try:
+            # Check for legacy mode
+            if self.config.legacy_mode:
+                return self._run_legacy_mode()
+            
+            # Use optimized startup by default
+            return self._run_optimized_mode()
+        except CriticalError as e:
+            # Handle critical errors
+            critical_handler.exit_on_critical(e)
+            return e.get_exit_code()
+        except Exception as e:
+            logger.error(f"Unexpected error during startup: {e}")
+            return 1
+    
+    def _run_legacy_mode(self) -> int:
+        """Run in legacy mode with old behavior."""
         self._print_startup_banner()
         self.config_manager.show_configuration()
+        
+        # Use legacy service runner
+        return self.legacy_runner.run_services_sequential()
+    
+    def _run_optimized_mode(self) -> int:
+        """Run optimized startup sequence."""
+        if not self.config.silent_mode:
+            self._print_startup_banner()
+            self.config_manager.show_configuration()
         
         # Start timing
         self.startup_optimizer.start_timing()
@@ -399,9 +447,8 @@ class DevLauncher:
     
     def _run_main_loop(self):
         """Run main service loop."""
-        self.summary_display.show_success_summary()
-        self.register_health_monitoring()
-        self.health_monitor.start()
+        # Note: Health monitoring is now started in launcher_integration._show_final_summary
+        # after services are verified ready (per HEALTH-001)
         self._execute_process_loop()
     
     def _execute_process_loop(self):
@@ -425,6 +472,9 @@ class DevLauncher:
         if self._shutting_down:
             return 0  # Already handled by graceful shutdown
         
+        # Prevent duplicate cleanup from atexit handler
+        self._shutting_down = True
+        
         # Show startup time and optimization report
         elapsed = time.time() - self.startup_time
         self._print("⏱️", "TIME", f"Total startup time: {elapsed:.1f}s")
@@ -439,11 +489,9 @@ class DevLauncher:
         # Save successful run to cache
         self.cache_manager.mark_successful_startup(elapsed)
         
-        # Mark as shutting down to prevent duplicate cleanup
-        self._shutting_down = True
-        
-        # Perform graceful shutdown
-        self._graceful_shutdown()
+        # Perform graceful shutdown if needed
+        if hasattr(self, 'process_manager') and self.process_manager.processes:
+            self._graceful_shutdown()
         
         if not self.health_monitor.all_healthy():
             self._print("⚠️", "WARN", "Some services were unhealthy during execution")

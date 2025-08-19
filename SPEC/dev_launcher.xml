@@ -8,6 +8,18 @@
         and multi-service orchestration. Target: Sub-10 second cached startup.
     </description>
     
+    <performance_optimization_reference>
+        <spec>SPEC/dev_launcher_performance.xml</spec>
+        <description>
+            See dev_launcher_performance.xml for aggressive performance optimizations including:
+            - Sub-10 second startup requirements
+            - Silent logging implementation
+            - Local-first secrets loading
+            - Aggressive caching strategies
+            - Multiprocessing requirements
+        </description>
+    </performance_optimization_reference>
+    
     <architecture>
         <components>
             <component name="DevLauncher" file="dev_launcher/launcher.py">
@@ -71,6 +83,30 @@
         </requirement>
     </logging_requirements>
     
+    <startup_visibility>
+        <requirement id="VIS-001" priority="CRITICAL">
+            <description>Background task logging control</description>
+            <implementation>
+                - Background tasks like index optimization should NOT show logs by default
+                - Only show critical errors from background tasks
+                - Provide --verbose-background flag to enable background task logging
+                - Example: _run_index_optimization_background should log at DEBUG level
+                - Keep startup output focused on main service initialization
+            </implementation>
+        </requirement>
+        
+        <requirement id="VIS-002" priority="HIGH">
+            <description>Table check lazy loading</description>
+            <implementation>
+                - Database table checks should run silently in background
+                - Only log table issues if problems detected or schema changes needed
+                - Skip logging successful table checks
+                - Provide --verbose-tables flag to show all table check details
+                - Cache table check results to avoid repeated checks
+            </implementation>
+        </requirement>
+    </startup_visibility>
+    
     <performance_optimizations>
         <requirement id="PERF-001" priority="CRITICAL">
             <description>No-reload mode for all services</description>
@@ -107,7 +143,9 @@
                   - Skip npm install if package-lock.json unchanged
                   - Skip environment validation if .env files unchanged
                 - Display startup time metrics in logs
-                - Target: Sub-10 second startup for cached runs
+                - Target: Sub-10 second startup for cached runs (GOAL ONLY - not hard limit)
+                - Startup MUST complete even if exceeding time goal
+                - Time limits are for monitoring/reporting, not enforcement
             </implementation>
         </requirement>
         
@@ -170,6 +208,81 @@
         <step order="13">ONLY NOW start health monitoring</step>
     </service_startup_sequence>
     
+    <port_management>
+        <requirement id="PORT-001" priority="CRITICAL">
+            <description>Dynamic port allocation for auth service</description>
+            <implementation>
+                - Check if port 8081 is available before starting auth service
+                - If port 8081 is in use, dynamically allocate next available port (8082, 8083, etc)
+                - Update backend configuration to use the dynamically allocated auth port
+                - Log the actual port being used for auth service
+                - Store allocated port in startup state cache for consistency
+            </implementation>
+        </requirement>
+        
+        <requirement id="PORT-002" priority="HIGH">
+            <description>Port availability checking</description>
+            <implementation>
+                - Use socket library to check port availability before service startup
+                - Implement retry logic with configurable port range (default: 8081-8090)
+                - Provide --auth-port flag to override default port
+                - Display clear message when using non-default port
+            </implementation>
+        </requirement>
+    </port_management>
+    
+    <error_messaging>
+        <requirement id="ERROR-001" priority="CRITICAL">
+            <description>Clear and actionable error messages</description>
+            <implementation>
+                - Phase timeout errors should show what was expected vs what happened
+                - Instead of generic "Phase timeout", show:
+                  - Which service failed to start
+                  - What readiness check failed
+                  - Actual response or error from the service
+                  - Suggested actions to resolve the issue
+                - Example: "Backend failed to start: /health/ready returned 500 after 21.4s (expected 200 within 5s). Check backend logs for startup errors."
+            </implementation>
+        </requirement>
+        
+        <requirement id="ERROR-004" priority="CRITICAL">
+            <description>Critical error handling</description>
+            <implementation>
+                - STOP entire process on critical errors (database connection, auth failure, etc)
+                - Display clear critical error message with specific failure reason
+                - Exit with appropriate error code (1 for general, specific codes for types)
+                - Critical errors include:
+                  - Database connection failures
+                  - Missing required environment variables
+                  - Authentication service failures
+                  - Port binding failures
+                - Non-critical errors should log warnings but continue
+            </implementation>
+        </requirement>
+        
+        <requirement id="ERROR-002" priority="HIGH">
+            <description>Progress indicators with meaningful context</description>
+            <implementation>
+                - Show what phase is currently executing
+                - Display what specific check is being performed
+                - Include service-specific details in progress messages
+                - Example: "Starting backend service on port 8000..." instead of generic "INIT: Loading"
+                - Show actual progress percentage based on completed vs total steps
+            </implementation>
+        </requirement>
+        
+        <requirement id="ERROR-003" priority="HIGH">
+            <description>Startup phase descriptions</description>
+            <implementation>
+                - INIT phase: "Checking environment and dependencies"
+                - LAUNCH phase: "Starting {service_name} service"
+                - READY phase: "Waiting for {service_name} to become ready"
+                - SUCCESS phase: "All services started successfully"
+                - Include service name and port in phase messages
+            </implementation>
+        </requirement>
+    </error_messaging>
+    
     <graceful_shutdown>
         <requirement id="SHUTDOWN-001" priority="CRITICAL">
             <description>Proper signal handling for graceful shutdown</description>
@@ -183,11 +296,12 @@
         <requirement id="SHUTDOWN-002" priority="CRITICAL">
             <description>Port cleanup on shutdown</description>
             <implementation>
-                - Auth service port 8081 MUST be freed on shutdown
+                - Auth service port (dynamic or 8081) MUST be freed on shutdown
                 - Backend service ports MUST be freed on shutdown
                 - Frontend service ports MUST be freed on shutdown
                 - Use taskkill with /F /T flags on Windows to ensure child processes are terminated
                 - Verify ports are free after shutdown
+                - Clean up dynamically allocated ports from cache
             </implementation>
         </requirement>
         

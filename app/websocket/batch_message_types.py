@@ -20,6 +20,14 @@ class BatchingStrategy(Enum):
     PRIORITY = "priority"          # Batch by message priority
 
 
+class MessageState(Enum):
+    """Message processing states for transactional reliability."""
+    PENDING = "pending"    # Message queued, ready to send
+    SENDING = "sending"    # Message being sent, don't remove from queue
+    SENT = "sent"          # Message successfully sent, can be removed
+    FAILED = "failed"      # Message failed to send, available for retry
+
+
 @dataclass
 class BatchConfig:
     """Configuration for message batching."""
@@ -40,6 +48,10 @@ class PendingMessage:
     priority: int = 1
     timestamp: float = field(default_factory=time.time)
     size_bytes: int = 0
+    state: MessageState = MessageState.PENDING
+    retry_count: int = 0
+    last_retry_time: float = 0.0
+    max_retries: int = 3
     
     def __post_init__(self):
         if self.size_bytes == 0:

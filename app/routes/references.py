@@ -29,10 +29,9 @@ async def get_references(
     offset: int = Query(0, ge=0), limit: int = Query(100, ge=1, le=1000), db: AsyncSession = Depends(get_db_session)
 ) -> ReferenceGetResponse:
     """Returns a paginated list of available @reference items."""
-    async with db as session:
-        total = await _get_total_references_count(session)
-        references = await _get_paginated_references(session, offset, limit)
-        return _build_references_response(references, total, offset, limit)
+    total = await _get_total_references_count(db)
+    references = await _get_paginated_references(db, offset, limit)
+    return _build_references_response(references, total, offset, limit)
 
 def _build_search_filter(query: str):
     """Build search filter for references."""
@@ -48,10 +47,9 @@ def _build_search_query(query: Optional[str]):
 @router.get("/references/search")
 async def search_references(query: Optional[str] = Query(None), db: AsyncSession = Depends(get_db_session)):
     """Search references by name or description."""
-    async with db as session:
-        search_query = _build_search_query(query)
-        result = await session.execute(search_query)
-        return result.scalars().all()
+    search_query = _build_search_query(query)
+    result = await db.execute(search_query)
+    return result.scalars().all()
 
 async def _get_reference_safe(reference_id: str, session: AsyncSession) -> ReferenceItem:
     """Get reference with validation."""
@@ -64,8 +62,7 @@ async def _get_reference_safe(reference_id: str, session: AsyncSession) -> Refer
 @router.get("/references/{reference_id}", response_model=ReferenceItem)
 async def get_reference(reference_id: str, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Returns a specific @reference item."""
-    async with db as session:
-        return await _get_reference_safe(reference_id, session)
+    return await _get_reference_safe(reference_id, db)
 
 async def _create_reference_in_db(reference: ReferenceCreateRequest, session: AsyncSession) -> ReferenceItem:
     """Create reference in database."""
@@ -78,8 +75,7 @@ async def _create_reference_in_db(reference: ReferenceCreateRequest, session: As
 @router.post("/references", response_model=ReferenceItem, status_code=201)
 async def create_reference(reference: ReferenceCreateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Creates a new @reference item."""
-    async with db as session:
-        return await _create_reference_in_db(reference, session)
+    return await _create_reference_in_db(reference, db)
 
 async def _get_reference_by_id(session: AsyncSession, reference_id: str) -> Reference:
     """Get reference by ID or raise 404."""
@@ -105,8 +101,7 @@ async def _update_reference_in_db(reference_id: str, reference: ReferenceUpdateR
 @router.put("/references/{reference_id}", response_model=ReferenceItem)
 async def update_reference(reference_id: str, reference: ReferenceUpdateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Updates a specific @reference item."""
-    async with db as session:
-        return await _update_reference_in_db(reference_id, reference, session)
+    return await _update_reference_in_db(reference_id, reference, db)
 
 async def _get_reference_or_404(session: AsyncSession, reference_id: str) -> Reference:
     """Get reference or raise 404 error."""
@@ -127,8 +122,7 @@ async def _patch_reference_in_db(reference_id: str, reference: ReferenceUpdateRe
 @router.patch("/references/{reference_id}", response_model=ReferenceItem)
 async def patch_reference(reference_id: str, reference: ReferenceUpdateRequest, db: AsyncSession = Depends(get_db_session)) -> ReferenceItem:
     """Partially update a reference."""
-    async with db as session:
-        return await _patch_reference_in_db(reference_id, reference, session)
+    return await _patch_reference_in_db(reference_id, reference, db)
 
 async def _delete_reference_from_db(session: AsyncSession, db_reference: Reference) -> dict:
     """Delete reference from database."""
@@ -139,6 +133,5 @@ async def _delete_reference_from_db(session: AsyncSession, db_reference: Referen
 @router.delete("/references/{reference_id}", status_code=204)
 async def delete_reference(reference_id: str, db: AsyncSession = Depends(get_db_session)):
     """Delete a reference."""
-    async with db as session:
-        db_reference = await _get_reference_or_404(session, reference_id)
-        return await _delete_reference_from_db(session, db_reference)
+    db_reference = await _get_reference_or_404(db, reference_id)
+    return await _delete_reference_from_db(db, db_reference)

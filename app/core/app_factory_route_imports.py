@@ -9,9 +9,9 @@ def import_basic_route_modules() -> dict:
 def _import_core_routes() -> tuple:
     """Import core route modules as tuple."""
     from app.routes import (supply, generation, admin, references, health, 
-        corpus, synthetic_data, config, demo, unified_tools, quality)
+        corpus, synthetic_data, config, demo, unified_tools, quality, users)
     return (supply, generation, admin, references, health, corpus,
-            synthetic_data, config, demo, unified_tools, quality)
+            synthetic_data, config, demo, unified_tools, quality, users)
 
 
 def _create_basic_modules_dict_from_imports(imports: tuple) -> dict:
@@ -25,11 +25,11 @@ def _unpack_route_imports(imports: tuple) -> tuple:
     return imports
 
 
-def _create_basic_modules_dict(supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools, quality) -> dict:
+def _create_basic_modules_dict(supply, generation, admin, references, health, corpus, synthetic_data, config, demo, unified_tools, quality, users) -> dict:
     """Create basic modules dictionary mapping"""
     core_modules = _create_core_modules_dict(supply, generation, admin, references)
     extended_modules = _create_extended_modules_dict(health, corpus, synthetic_data, config)
-    utility_modules = _create_utility_modules_dict(demo, unified_tools, quality)
+    utility_modules = _create_utility_modules_dict(demo, unified_tools, quality, users)
     return {**core_modules, **extended_modules, **utility_modules}
 
 
@@ -43,9 +43,9 @@ def _create_extended_modules_dict(health, corpus, synthetic_data, config) -> dic
     return {"health": health, "corpus": corpus, "synthetic_data": synthetic_data, "config": config}
 
 
-def _create_utility_modules_dict(demo, unified_tools, quality) -> dict:
+def _create_utility_modules_dict(demo, unified_tools, quality, users) -> dict:
     """Create utility modules dictionary mapping."""
-    return {"demo": demo, "unified_tools": unified_tools, "quality": quality}
+    return {"demo": demo, "unified_tools": unified_tools, "quality": quality, "users": users}
 
 
 def import_named_routers() -> dict:
@@ -67,7 +67,8 @@ def _import_core_routers() -> dict:
     """Import core functionality routers"""
     from app.routes.llm_cache import router as llm_cache_router
     from app.routes.threads_route import router as threads_router
-    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router}
+    from app.routes.mcp import router as mcp_router
+    return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
 
 
 def _import_extended_routers() -> dict:

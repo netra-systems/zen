@@ -76,18 +76,33 @@ async def _handle_clickhouse_error(error: Exception) -> None:
     else:
         raise
 
-async def _check_readiness_status() -> Dict[str, Any]:
-    """Check application readiness."""
-    health_status = await health_interface.get_health_status(HealthLevel.STANDARD)
-    if health_status["status"] in ["healthy", "degraded"]:
-        return {"status": "ready", "service": "netra-ai-platform", "details": health_status}
-    raise HTTPException(status_code=503, detail="Service Unavailable")
+async def _check_database_connection(db: AsyncSession) -> None:
+    """Check database connection using dependency injection."""
+    await _check_postgres_connection(db)
+    await _check_clickhouse_connection()
+
+async def _check_readiness_status(db: AsyncSession) -> Dict[str, Any]:
+    """Check application readiness including database connectivity."""
+    try:
+        # First check database connectivity using dependency injection
+        await _check_database_connection(db)
+        
+        # Then get overall health status
+        health_status = await health_interface.get_health_status(HealthLevel.STANDARD)
+        if health_status["status"] in ["healthy", "degraded"]:
+            return {"status": "ready", "service": "netra-ai-platform", "details": health_status}
+        raise HTTPException(status_code=503, detail="Service Unavailable")
+    except Exception as e:
+        logger.error(f"Database readiness check failed: {e}")
+        raise HTTPException(status_code=503, detail="Service Unavailable")
 
 @router.get("/ready")
 async def ready(db: AsyncSession = Depends(get_db_dependency)) -> Dict[str, Any]:
     """Readiness probe to check if the application is ready to serve requests."""
     try:
-        return await _check_readiness_status()
+        return await _check_readiness_status(db)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Readiness probe failed: {e}")
         raise HTTPException(status_code=503, detail="Service Unavailable")

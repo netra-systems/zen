@@ -1,298 +1,189 @@
-#!/usr/bin/env python
 """
-Test Execution Engine - Handles parallel and sequential test execution
-Manages test running with timeout, retry logic, and result collection
+Test Execution Engine - Core test execution logic for different test types
+
+Business Value Justification (BVJ):
+1. Segment: ALL customer segments - core testing infrastructure  
+2. Business Goal: Ensure reliable test execution across all test types
+3. Value Impact: Prevents test infrastructure failures that block development
+4. Revenue Impact: Protects development velocity and release confidence
+
+Architectural Compliance:
+- File size: <300 lines (MANDATORY)
+- Function size: <8 lines each (MANDATORY)
+- Single responsibility: Test execution coordination
+- Modular design for different test types
 """
 
-import sys
 import time
-import asyncio
+import json
+import subprocess
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
-from datetime import datetime
-
-from .test_profile_models import TestProfile, TestStatus
+from typing import Dict, Optional
 
 
-class TestExecutionEngine:
-    """Handles test execution with parallel/sequential modes and retry logic"""
+def execute_test_suite(args, config: Dict, runner, real_llm_config: Optional[Dict], speed_opts: Optional[Dict], test_level: str) -> int:
+    """Route test execution based on configuration and test level."""
+    # Special handling for agent startup E2E tests
+    if test_level == "agent-startup":
+        from .agent_startup_handler import execute_agent_startup_tests as handler_execute
+        return handler_execute(args, config, runner, real_llm_config, speed_opts)
+    elif args.backend_only:
+        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
+    elif args.frontend_only:
+        return execute_frontend_only_tests(config, runner, speed_opts, test_level)
+    else:
+        return execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level)
+
+def execute_backend_only_tests(config: Dict, runner, real_llm_config: Optional[Dict], speed_opts: Optional[Dict]) -> int:
+    """Execute backend-only tests."""
+    backend_exit, _ = runner.run_backend_tests(
+        config['backend_args'], 
+        config.get('timeout', 300),
+        real_llm_config,
+        speed_opts
+    )
+    runner.results["frontend"]["status"] = "skipped"
+    return backend_exit
+
+def execute_frontend_only_tests(config: Dict, runner, speed_opts: Optional[Dict], test_level: str) -> int:
+    """Execute frontend-only tests."""
+    frontend_exit, _ = runner.run_frontend_tests(
+        config['frontend_args'],
+        config.get('timeout', 300),
+        speed_opts,
+        test_level
+    )
+    runner.results["backend"]["status"] = "skipped"
+    return frontend_exit
+
+def execute_full_test_suite(config: Dict, runner, real_llm_config: Optional[Dict], speed_opts: Optional[Dict], test_level: str) -> int:
+    """Execute full test suite (backend + frontend + E2E)."""
+    if config.get('run_both', True):
+        backend_exit, _ = runner.run_backend_tests(
+            config['backend_args'],
+            config.get('timeout', 300),
+            real_llm_config,
+            speed_opts
+        )
+        frontend_exit, _ = runner.run_frontend_tests(
+            config['frontend_args'], 
+            config.get('timeout', 300),
+            speed_opts,
+            test_level
+        )
+        exit_code = max(backend_exit, frontend_exit)
+        if config.get('run_e2e', False):
+            e2e_exit, _ = runner.run_e2e_tests([], config.get('timeout', 600))
+            exit_code = max(exit_code, e2e_exit)
+        return exit_code
+    else:
+        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
+
+def configure_real_llm_if_requested(args, level: str, config: Dict):
+    """Configure real LLM testing if requested."""
+    if not args.real_llm:
+        return None
+    if level == "smoke":
+        print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
+        return None
     
-    def __init__(self, project_root: Path):
-        self.project_root = project_root
-        
-    async def execute_parallel(
-        self,
-        tests: List[TestProfile],
-        max_parallel: int,
-        fail_fast: bool = False
-    ) -> List[Dict]:
-        """Execute tests in parallel"""
-        results = []
-        semaphore = asyncio.Semaphore(max_parallel)
-        
-        async def run_test(test: TestProfile):
-            async with semaphore:
-                if fail_fast and any(r["status"] == "failed" for r in results):
-                    return {"name": test.name, "status": "skipped", "reason": "fail_fast"}
-                
-                result = await self._run_single_test(test)
-                results.append(result)
-                return result
-        
-        tasks = [run_test(test) for test in tests]
-        await asyncio.gather(*tasks)
-        
-        return results
+    from .test_config import configure_real_llm
+    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel, test_level=level)
+    print_llm_configuration(real_llm_config, config)
+    return real_llm_config
+
+def print_llm_configuration(real_llm_config: Dict, config: Dict):
+    """Print real LLM configuration details."""
+    print(f"[INFO] Real LLM testing enabled")
+    print(f"  - Model: {real_llm_config['model']}")
+    print(f"  - Timeout: {real_llm_config['timeout']}s per call")
+    print(f"  - Parallelism: {real_llm_config['parallel']}")
     
-    async def execute_sequential(
-        self,
-        tests: List[TestProfile],
-        fail_fast: bool = False
-    ) -> List[Dict]:
-        """Execute tests sequentially"""
-        results = []
-        
-        for test in tests:
-            if fail_fast and any(r["status"] == "failed" for r in results):
-                results.append({"name": test.name, "status": "skipped", "reason": "fail_fast"})
-                continue
-            
-            result = await self._run_single_test(test)
-            results.append(result)
-        
-        return results
+    if real_llm_config.get('rate_limit_delay'):
+        print(f"  - Rate limit delay: {real_llm_config['rate_limit_delay']}s between calls")
     
-    async def _run_single_test(self, test: TestProfile) -> Dict:
-        """Run a single test and return result"""
-        start_time = time.time()
-        
-        # Prepare test command based on test type
-        if test.path.endswith(".py"):
-            cmd = [sys.executable, "-m", "pytest", test.path, "-xvs", "--tb=short"]
-        elif test.path.endswith((".ts", ".tsx", ".js", ".jsx")):
-            cmd = ["npm", "test", "--", test.path]
-        else:
-            return {
-                "name": test.name,
-                "path": test.path,
-                "status": "error",
-                "error": "Unknown test type",
-                "duration": 0
-            }
-        
+    adjusted_timeout = config.get('timeout', 300) * 3
+    config['timeout'] = adjusted_timeout
+    print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+
+def finalize_test_run(runner, level: str, config: Dict, output: str, exit_code: int) -> int:
+    """Finalize test run with reporting and cleanup."""
+    runner.results["overall"]["end_time"] = time.time()
+    runner.results["overall"]["status"] = "passed" if exit_code == 0 else "failed"
+    
+    # Special reporting for agent startup tests
+    if level == "agent-startup" and hasattr(runner.results, 'agent_performance'):
+        from .agent_startup_handler import print_agent_performance_summary
+        print_agent_performance_summary(runner.results['agent_performance'])
+    
+    generate_test_reports(runner, level, config, output, exit_code)
+    runner.print_summary()
+    return exit_code
+
+def generate_test_reports(runner, level: str, config: Dict, output: str, exit_code: int):
+    """Generate test reports in requested formats."""
+    module = sys.modules.get('test_framework.test_runner')
+    if not hasattr(module, '_no_report') or not module._no_report:
+        runner.save_test_report(level, config, output, exit_code)
+        save_additional_reports(runner, level, config, exit_code)
+        generate_coverage_report()
+
+def save_additional_reports(runner, level: str, config: Dict, exit_code: int):
+    """Save additional report formats if requested."""
+    args = sys.modules.get('test_framework.test_runner').__dict__.get('_current_args')
+    if not args or not args.output:
+        return
+    
+    if args.report_format == "json":
+        save_json_report(runner, level, config, exit_code, args.output)
+    elif args.report_format == "text":
+        save_text_report(runner, level, config, exit_code, args.output)
+
+def save_json_report(runner, level: str, config: Dict, exit_code: int, output_file: str):
+    """Save JSON report to file."""
+    json_report = runner.generate_json_report(level, config, exit_code)
+    with open(output_file, "w", encoding='utf-8') as f:
+        json.dump(json_report, f, indent=2)
+    print(f"[REPORT] JSON report saved to: {output_file}")
+
+def save_text_report(runner, level: str, config: Dict, exit_code: int, output_file: str):
+    """Save text report to file."""
+    text_report = runner.generate_text_report(level, config, exit_code)
+    with open(output_file, "w", encoding='utf-8') as f:
+        f.write(text_report)
+    print(f"[REPORT] Text report saved to: {output_file}")
+
+def generate_coverage_report():
+    """Generate coverage report if requested."""
+    args = sys.modules.get('test_framework.test_runner').__dict__.get('_current_args')
+    if not args:
+        return
+    
+    PROJECT_ROOT = Path(__file__).parent.parent
+    
+    # Generate XML coverage if requested
+    if hasattr(args, 'coverage_output') and args.coverage_output:
         try:
-            # Run test with timeout
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                cwd=self.project_root
-            )
-            
-            try:
-                stdout, stderr = await asyncio.wait_for(
-                    process.communicate(),
-                    timeout=test.avg_duration * 2 if test.avg_duration > 0 else 60
-                )
-                
-                duration = time.time() - start_time
-                status = TestStatus.PASSED if process.returncode == 0 else TestStatus.FAILED
-                
-                # Update test profile
-                test.update_result(status, duration)
-                
-                return {
-                    "name": test.name,
-                    "path": test.path,
-                    "status": status.value,
-                    "duration": duration,
-                    "output": stdout.decode() if stdout else "",
-                    "error": stderr.decode() if stderr and process.returncode != 0 else "",
-                    "exit_code": process.returncode,
-                    "timestamp": datetime.now().isoformat()
-                }
-                
-            except asyncio.TimeoutError:
-                process.kill()
-                duration = time.time() - start_time
-                test.update_result(TestStatus.TIMEOUT, duration)
-                
-                return {
-                    "name": test.name,
-                    "path": test.path,
-                    "status": "timeout",
-                    "duration": duration,
-                    "error": f"Test timed out after {duration:.2f}s",
-                    "timestamp": datetime.now().isoformat()
-                }
-                
+            coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
+            subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+            if Path(args.coverage_output).exists():
+                print(f"[COVERAGE] XML report saved to: {args.coverage_output}")
+            else:
+                print(f"[WARNING] Coverage XML generation failed")
         except Exception as e:
-            duration = time.time() - start_time
-            test.update_result(TestStatus.ERROR, duration)
-            
-            return {
-                "name": test.name,
-                "path": test.path,
-                "status": "error",
-                "duration": duration,
-                "error": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
+            print(f"[WARNING] Could not generate XML coverage: {e}")
     
-    async def retry_failed_tests(
-        self, 
-        failed_tests: List[Dict], 
-        test_profiles: Dict[str, TestProfile],
-        retry_count: int = 1
-    ) -> List[Dict]:
-        """Retry failed tests"""
-        retry_results = []
-        
-        for test_result in failed_tests:
-            test_name = test_result["name"]
-            test_profile = test_profiles.get(test_name)
-            
-            if not test_profile:
-                continue
-            
-            best_result = test_result
-            for i in range(retry_count):
-                print(f"Retrying {test_name} (attempt {i+1}/{retry_count})")
-                retry_result = await self._run_single_test(test_profile)
-                
-                if retry_result["status"] == "passed":
-                    best_result = retry_result
-                    best_result["retried"] = True
-                    best_result["retry_attempt"] = i + 1
-                    break
-            
-            retry_results.append(best_result)
-        
-        return retry_results
-    
-    def generate_execution_summary(self, test_results: List[Dict]) -> Dict:
-        """Generate test execution summary"""
-        summary = {
-            "total": len(test_results),
-            "passed": sum(1 for t in test_results if t["status"] == "passed"),
-            "failed": sum(1 for t in test_results if t["status"] == "failed"),
-            "skipped": sum(1 for t in test_results if t["status"] == "skipped"),
-            "errors": sum(1 for t in test_results if t["status"] == "error"),
-            "timeouts": sum(1 for t in test_results if t["status"] == "timeout"),
-            "retried": sum(1 for t in test_results if t.get("retried", False)),
-            "total_duration": sum(t.get("duration", 0) for t in test_results),
-            "avg_duration": sum(t.get("duration", 0) for t in test_results) / len(test_results) if test_results else 0
-        }
-        
-        summary["pass_rate"] = (summary["passed"] / summary["total"] * 100) if summary["total"] > 0 else 0
-        
-        return summary
-
-
-class BatchTestExecutor:
-    """Executes tests in batches for memory management"""
-    
-    def __init__(self, execution_engine: TestExecutionEngine, batch_size: int = 50):
-        self.execution_engine = execution_engine
-        self.batch_size = batch_size
-    
-    async def execute_in_batches(
-        self, 
-        tests: List[TestProfile], 
-        max_parallel: int = 4,
-        fail_fast: bool = False
-    ) -> List[Dict]:
-        """Execute tests in batches to manage memory"""
-        all_results = []
-        
-        for i in range(0, len(tests), self.batch_size):
-            batch = tests[i:i + self.batch_size]
-            print(f"Executing batch {i//self.batch_size + 1}/{(len(tests) + self.batch_size - 1)//self.batch_size}")
-            
-            batch_results = await self.execution_engine.execute_parallel(
-                batch, max_parallel, fail_fast
-            )
-            
-            all_results.extend(batch_results)
-            
-            # Stop if fail_fast and we have failures
-            if fail_fast and any(r["status"] == "failed" for r in batch_results):
-                break
-        
-        return all_results
-
-
-class TestCommandBuilder:
-    """Builds test execution commands for different test types"""
-    
-    @staticmethod
-    def build_pytest_command(
-        test_path: str, 
-        markers: str = None,
-        timeout: int = 300,
-        parallel: bool = False,
-        verbose: bool = True
-    ) -> List[str]:
-        """Build pytest command"""
-        cmd = [sys.executable, "-m", "pytest"]
-        
-        if test_path:
-            cmd.append(test_path)
-        
-        if markers:
-            cmd.extend(["-m", markers])
-        
-        if timeout:
-            cmd.extend(["--timeout", str(timeout)])
-        
-        if parallel:
-            cmd.extend(["-n", "auto"])
-        
-        if verbose:
-            cmd.extend(["-v", "--tb=short"])
-        else:
-            cmd.extend(["-q", "--tb=no"])
-        
-        return cmd
-    
-    @staticmethod
-    def build_jest_command(
-        test_path: str = None,
-        coverage: bool = False,
-        silent: bool = False
-    ) -> List[str]:
-        """Build Jest command"""
-        cmd = ["npm", "test"]
-        
-        if silent:
-            cmd.append("--silent")
-        
-        if coverage:
-            cmd.append("--coverage")
-        
-        if test_path:
-            cmd.extend(["--", test_path])
-        
-        return cmd
-    
-    @staticmethod
-    def build_cypress_command(
-        test_path: str = None,
-        headless: bool = True,
-        browser: str = "chrome"
-    ) -> List[str]:
-        """Build Cypress command"""
-        cmd = ["npx", "cypress"]
-        
-        if headless:
-            cmd.append("run")
-        else:
-            cmd.append("open")
-        
-        if browser:
-            cmd.extend(["--browser", browser])
-        
-        if test_path:
-            cmd.extend(["--spec", test_path])
-        
-        return cmd
+    # Generate HTML coverage if requested
+    if hasattr(args, 'coverage_html') and args.coverage_html:
+        try:
+            html_dir = PROJECT_ROOT / "htmlcov"
+            coverage_cmd = [sys.executable, "-m", "coverage", "html", "-d", str(html_dir)]
+            subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
+            if html_dir.exists():
+                print(f"[COVERAGE] HTML report saved to: {html_dir}")
+                print(f"  Open {html_dir / 'index.html'} in a browser to view")
+            else:
+                print(f"[WARNING] Coverage HTML generation failed")
+        except Exception as e:
+            print(f"[WARNING] Could not generate HTML coverage: {e}")

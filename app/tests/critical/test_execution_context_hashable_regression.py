@@ -12,7 +12,8 @@ from typing import Dict, Any
 from datetime import datetime
 from unittest.mock import Mock, MagicMock
 
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.error_handler import ExecutionErrorHandler
 from app.agents.base.monitoring import ExecutionMonitor
 from app.schemas.agent_models import DeepAgentState

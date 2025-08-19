@@ -259,6 +259,18 @@ class MCPToolExecutionStatus(str, Enum):
     TIMEOUT = "timeout"
 
 
+class ExecutionStatus(str, Enum):
+    """Agent execution status enumeration - moved from base.interface to break circular imports."""
+    PENDING = "pending"
+    INITIALIZING = "initializing"
+    EXECUTING = "executing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    RETRYING = "retrying"
+    FALLBACK = "fallback"
+    DEGRADED = "degraded"
+
+
 # Export all enums
 __all__ = [
     "MessageType",
@@ -273,5 +285,6 @@ __all__ = [
     "MCPServerStatus",
     "MCPAuthType",
     "MCPToolExecutionStatus",
+    "ExecutionStatus",
     "MessageTypeLiteral"
 ]

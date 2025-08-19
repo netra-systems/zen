@@ -3,6 +3,8 @@ Auth Service Main Application
 Standalone microservice for authentication
 """
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +14,18 @@ import logging
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from auth_core.routes.auth_routes import router as auth_router
+# Load environment variables from .env file
+# Try parent directory first (where main .env is located)
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+    print(f"Loaded environment from: {env_path}")
+else:
+    # Fallback to current directory
+    load_dotenv()
+    print("Loaded environment from current directory or system")
+
+from auth_service.auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -49,40 +62,67 @@ health_interface = AuthServiceHealthInterface("auth-service", "1.0.0")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Manage application lifecycle"""
+    """Manage application lifecycle with optimized startup"""
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    from auth_core.config import AuthConfig
+    from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8081')}")
     
-    # Initialize database connections on startup
-    from auth_core.database.connection import auth_db
-    from auth_core.database.main_db_sync import main_db_sync
+    # Check if we're in fast test mode
+    fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+    env = os.getenv("ENVIRONMENT", "development").lower()
     
+    if fast_test_mode or env == "test":
+        logger.info("Running in fast test mode - skipping database initialization")
+        yield
+        return
+    
+    # Initialize database connections on startup
+    from auth_service.auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.main_db_sync import main_db_sync
+    
+    initialization_errors = []
+    
+    # Try to initialize auth database
     try:
         await auth_db.initialize()
         logger.info("Auth database initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize auth database: {e}")
-        raise
+        logger.warning(f"Auth database initialization failed: {e}")
+        initialization_errors.append(f"Auth DB: {e}")
     
+    # Try to initialize main database sync (non-critical for basic auth)
     try:
         await main_db_sync.initialize()
         logger.info("Main database sync initialized successfully")
     except Exception as e:
-        logger.error(f"Failed to initialize main database sync: {e}")
-        raise
+        logger.warning(f"Main database sync failed (non-critical): {e}")
+        initialization_errors.append(f"Main DB Sync: {e}")
+    
+    # In development, allow service to start even with some DB issues
+    if env == "development" and initialization_errors:
+        logger.warning(f"Starting with {len(initialization_errors)} DB issues in development mode")
+    elif initialization_errors and env in ["staging", "production"]:
+        raise RuntimeError(f"Critical database failures: {initialization_errors}")
     
     yield
     
     # Cleanup
     logger.info("Shutting down Auth Service...")
     
-    # Close database connections
-    await auth_db.close()
-    await main_db_sync.close()
+    # Close database connections safely
+    try:
+        await auth_db.close()
+    except Exception as e:
+        logger.warning(f"Error closing auth DB: {e}")
+    
+    try:
+        await main_db_sync.close()
+    except Exception as e:
+        logger.warning(f"Error closing main DB sync: {e}")
+    
     logger.info("Database connections closed")
 
 # Create FastAPI app

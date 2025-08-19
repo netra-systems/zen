@@ -84,3 +84,21 @@ class AuthAuditLog(Base):
     created_at = Column(DateTime(timezone=True), 
                        default=lambda: datetime.now(timezone.utc), 
                        index=True)
+
+class PasswordResetToken(Base):
+    """Password reset token tracking"""
+    __tablename__ = "password_reset_tokens"
+    
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id = Column(String, nullable=False, index=True)
+    token_hash = Column(String, nullable=False, unique=True)
+    email = Column(String, nullable=False, index=True)
+    
+    # Token status
+    is_used = Column(Boolean, default=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), 
+                       default=lambda: datetime.now(timezone.utc))
+    used_at = Column(DateTime(timezone=True), nullable=True)

@@ -126,11 +126,15 @@ async_session_factory: Optional[async_sessionmaker] = None
 
 def _convert_postgresql_url(db_url: str) -> str:
     """Convert postgresql:// URL to async format."""
-    return db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # Convert sslmode to ssl for asyncpg
+    return url.replace("sslmode=", "ssl=")
 
 def _convert_postgres_url(db_url: str) -> str:
     """Convert postgres:// URL to async format."""
-    return db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    # Convert sslmode to ssl for asyncpg
+    return url.replace("sslmode=", "ssl=")
 
 def _convert_sqlite_url(db_url: str) -> str:
     """Convert sqlite:// URL to async format."""

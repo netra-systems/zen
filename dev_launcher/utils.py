@@ -11,7 +11,7 @@ import webbrowser
 import urllib.request
 import urllib.error
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 import logging
 
 logger = logging.getLogger(__name__)
@@ -89,6 +89,52 @@ def get_free_port() -> int:
     return port
 
 
+def is_port_available(port: int) -> bool:
+    """
+    Check if a specific port is available.
+    
+    Args:
+        port: Port number to check
+    
+    Returns:
+        True if port is available, False otherwise
+    """
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(0.1)
+            result = s.connect_ex(('localhost', port))
+            return result != 0
+    except Exception:
+        return False
+
+
+def find_available_port(preferred_port: int, port_range: tuple = (8081, 8090)) -> int:
+    """
+    Find an available port, preferring the specified port.
+    
+    Args:
+        preferred_port: Preferred port to try first
+        port_range: Range of ports to try (min, max)
+    
+    Returns:
+        Available port number
+    """
+    # Try preferred port first
+    if is_port_available(preferred_port):
+        return preferred_port
+    
+    # Try ports in the specified range
+    for port in range(port_range[0], port_range[1] + 1):
+        if port != preferred_port and is_port_available(port):
+            logger.info(f"Port {preferred_port} unavailable, using {port} instead")
+            return port
+    
+    # If all ports in range are taken, get a random free port
+    free_port = get_free_port()
+    logger.warning(f"All ports in range {port_range} taken, using {free_port}")
+    return free_port
+
+
 def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bool:
     """
     Wait for a service to become available.
@@ -101,8 +147,25 @@ def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bo
     Returns:
         True if service became available
     """
+    success, _ = wait_for_service_with_details(url, timeout, check_interval)
+    return success
+
+
+def wait_for_service_with_details(url: str, timeout: int = 30, check_interval: int = 2) -> Tuple[bool, Optional[str]]:
+    """
+    Wait for a service to become available with detailed error info.
+    
+    Args:
+        url: URL to check
+        timeout: Maximum time to wait in seconds
+        check_interval: Time between checks in seconds
+    
+    Returns:
+        Tuple of (success, error_details)
+    """
     start_time = time.time()
     attempt = 0
+    last_error = None
     
     while time.time() - start_time < timeout:
         attempt += 1
@@ -110,15 +173,24 @@ def wait_for_service(url: str, timeout: int = 30, check_interval: int = 2) -> bo
             with urllib.request.urlopen(url, timeout=3) as response:
                 if response.status == 200:
                     logger.info(f"Service ready at {url} after {attempt} attempts")
-                    return True
-        except (urllib.error.URLError, ConnectionError, TimeoutError, OSError):
-            if attempt == 1:
-                logger.debug(f"Waiting for service at {url}...")
-            elif attempt % 10 == 0:
-                logger.debug(f"Still waiting for {url}... ({attempt} attempts)")
-            time.sleep(check_interval)
+                    return True, None
+                else:
+                    last_error = f"Status {response.status}"
+        except urllib.error.HTTPError as e:
+            last_error = f"HTTP {e.code}: {e.reason}"
+        except urllib.error.URLError as e:
+            last_error = f"Connection error: {e.reason}"
+        except (ConnectionError, TimeoutError, OSError) as e:
+            last_error = f"Network error: {str(e)}"
+        
+        if attempt == 1:
+            logger.debug(f"Waiting for service at {url}...")
+        elif attempt % 10 == 0:
+            logger.debug(f"Still waiting for {url}... ({attempt} attempts)")
+        time.sleep(check_interval)
     
-    return False
+    elapsed = time.time() - start_time
+    return False, f"{last_error} after {elapsed:.1f}s"
 
 
 def open_browser(url: str, delay: float = 1.0) -> bool:

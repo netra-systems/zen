@@ -18,7 +18,8 @@ def _get_auth_route_configs(modules: dict) -> dict:
 def _get_api_route_configs(modules: dict) -> dict:
     """Get API route configurations."""
     return {"threads": (modules["threads_router"], "", ["threads"]),
-        "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"])}
+        "llm_cache": (modules["llm_cache_router"], "/api/llm-cache", ["llm-cache"]),
+        "mcp": (modules["mcp_router"], "/api/mcp", ["mcp"])}
 
 
 def _get_service_route_configs(modules: dict) -> dict:
@@ -96,7 +97,8 @@ def _get_data_utility_configs(modules: dict) -> dict:
 def _get_tool_utility_configs(modules: dict) -> dict:
     """Get tool utility route configurations."""
     return {"demo": (modules["demo"].router, "", ["demo"]),
-            "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"])}
+            "unified_tools": (modules["unified_tools"].router, "/api/tools", ["unified-tools"]),
+            "users": (modules["users"].router, "", ["users"])}
 
 
 def _get_factory_configs(modules: dict) -> dict:

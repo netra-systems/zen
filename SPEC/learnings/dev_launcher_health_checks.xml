@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>Dev Launcher Health Checks and Timeouts</title>
+  <date>2025-08-19</date>
+  
+  <issue id="health-check-timeout-1">
+    <description>Backend health checks timing out with dynamic ports</description>
+    <symptoms>
+      <symptom>Backend failed to start: /health/ready returned no response after 10s</symptom>
+      <symptom>Service is actually running but health check fails</symptom>
+      <symptom>Database optimization takes 10-15 seconds on startup</symptom>
+    </symptoms>
+    <root_cause>
+      Health check timeouts were too short (10s) for services that need database optimization
+      and initialization on startup.
+    </root_cause>
+    <solution>
+      Extended all service health check timeouts:
+      - Auth: 10s → 30s
+      - Backend: 10s → 30s  
+      - Frontend: 30s → 60s
+      - Service startup timeouts: 15-25s → 30-50s
+      - Overall timeout: 60s → 120s
+    </solution>
+    <files_modified>
+      <file>dev_launcher/startup_validator.py</file>
+      <file>dev_launcher/service_startup.py</file>
+    </files_modified>
+  </issue>
+  
+  <issue id="dynamic-port-health-check">
+    <description>Health checks using hardcoded ports instead of dynamic ports</description>
+    <symptoms>
+      <symptom>Health check tries localhost:8000 but backend running on port 62832</symptom>
+      <symptom>Services start successfully but health checks fail</symptom>
+    </symptoms>
+    <root_cause>
+      The verify_all_services_ready method was using hardcoded ports (8081, 8000, 3000)
+      instead of reading actual allocated ports from service discovery files.
+    </root_cause>
+    <solution>
+      Modified verify_all_services_ready to:
+      1. Read port information from .service_discovery/*.json files
+      2. Use dynamic ports for health checks
+      3. Fall back to default ports if discovery files don't exist
+      4. Handle malformed JSON gracefully
+    </solution>
+    <files_modified>
+      <file>dev_launcher/startup_validator.py</file>
+    </files_modified>
+  </issue>
+  
+  <issue id="quick-health-check-attribute">
+    <description>QuickHealthChecker missing quick_health_check method</description>
+    <symptoms>
+      <symptom>'QuickHealthChecker' object has no attribute 'quick_health_check'</symptom>
+      <symptom>Phase VERIFY fails immediately</symptom>
+    </symptoms>
+    <root_cause>
+      The QuickHealthChecker class has a method named run_quick_checks() but code was
+      calling non-existent quick_health_check() method.
+    </root_cause>
+    <solution>
+      Updated all references from quick_health_check() to run_quick_checks():
+      - startup_sequencer.py: PhaseStep health check
+      - launcher_integration.py: _quick_health_check method
+    </solution>
+    <files_modified>
+      <file>dev_launcher/startup_sequencer.py</file>
+      <file>dev_launcher/launcher_integration.py</file>
+    </files_modified>
+  </issue>
+  
+  <best_practices>
+    <practice>
+      <title>Dynamic Port Health Checks</title>
+      <description>
+        Always read actual port allocations from service discovery files when performing
+        health checks in environments with dynamic port allocation.
+      </description>
+    </practice>
+    <practice>
+      <title>Timeout Configuration</title>
+      <description>
+        Set health check timeouts based on worst-case startup times including:
+        - Database migrations and optimization
+        - Secret loading from cloud services
+        - Frontend compilation (Next.js can take 30-60s)
+        - Add buffer for slow systems
+      </description>
+    </practice>
+    <practice>
+      <title>Graceful Fallbacks</title>
+      <description>
+        Always provide fallback to default values when reading configuration files
+        to handle missing or malformed data gracefully.
+      </description>
+    </practice>
+  </best_practices>
+  
+  <testing>
+    <test_file>dev_launcher/tests/test_dynamic_port_health.py</test_file>
+    <coverage>
+      <test>Test health checks with dynamic ports</test>
+      <test>Test fallback to default ports</test>
+      <test>Test handling of malformed discovery files</test>
+      <test>Test extended timeout values</test>
+    </coverage>
+  </testing>
+  
+  <prevention>
+    <measure>
+      Always test dev launcher with dynamic port allocation enabled to catch port-related issues
+    </measure>
+    <measure>
+      Monitor actual service startup times in logs to adjust timeouts appropriately
+    </measure>
+    <measure>
+      Ensure method names are consistent across interfaces (use IDE refactoring tools)
+    </measure>
+  </prevention>
+</learnings>

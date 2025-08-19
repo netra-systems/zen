@@ -47,7 +47,7 @@ load_dotenv()
 
 # Import test framework modules
 from .runner import UnifiedTestRunner
-from .test_config import TEST_LEVELS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
+from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
 from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
 
@@ -265,29 +265,40 @@ def create_argument_parser():
 def get_parser_epilog():
     """Get parser epilog with test levels and examples"""
     level_descriptions = chr(10).join([
-        f"  {level:<24} - {config['description']}" 
+        f"  {level:<20} - {config['description']}" 
         for level, config in TEST_LEVELS.items()
     ])
     return f"""
-Test Levels:
+Test Levels (fastest to slowest):
 {level_descriptions}
 
-Usage Examples:
-  # Quick smoke tests (recommended for pre-commit)
+Common Workflows:
+  # DEFAULT - Quick integration tests
+  python test_runner.py
+  
+  # Development workflow
+  python test_runner.py --level unit --fast-fail
+  python test_runner.py --level integration --no-coverage
+  
+  # Pre-commit check
   python test_runner.py --level smoke
   
-  # Unit tests for development
-  python test_runner.py --level unit
+  # Component-specific testing
+  python test_runner.py --level comprehensive --component agents
+  python test_runner.py --level comprehensive --backend-only
   
-  # Full comprehensive testing
-  python test_runner.py --level comprehensive
+  # Real LLM testing (for releases)
+  python test_runner.py --level integration --real-llm
+  python test_runner.py --level agents --real-llm
   
-  # Backend only testing
-  python test_runner.py --level unit --backend-only
+  # Parallel vs Serial execution
+  python test_runner.py --parallel 1       # Serial (for debugging)
+  python test_runner.py --parallel auto    # Auto-detect (default)
+  python test_runner.py --parallel max     # Maximum parallelism
   
-  # Real LLM testing examples:
-  python test_runner.py --level unit --real-llm
-  python test_runner.py --level integration --real-llm --llm-model gemini-2.5-pro
+  # CI/CD shard execution
+  python test_runner.py --shard 1/4        # Run first quarter of tests
+  python test_runner.py --shard 2/4        # Run second quarter
         """
 
 def add_all_arguments(parser):
@@ -304,12 +315,12 @@ def add_all_arguments(parser):
 def add_main_test_arguments(parser):
     """Add main test level selection arguments"""
     parser.add_argument(
-        "--level", "-l", choices=list(TEST_LEVELS.keys()), default="smoke",
-        help="Test level to run (default: smoke)"
+        "--level", "-l", choices=list(TEST_LEVELS.keys()), default="integration",
+        help="Test level to run (default: integration)"
     )
     parser.add_argument(
-        "--simple", action="store_true", 
-        help="Use simple test runner (overrides --level)"
+        "--exclusive", action="store_true",
+        help="Run ONLY tests at specified level (no superset inclusion)"
     )
 
 def add_component_arguments(parser):
@@ -321,6 +332,11 @@ def add_component_arguments(parser):
     parser.add_argument(
         "--frontend-only", action="store_true",
         help="Run only frontend tests"
+    )
+    parser.add_argument(
+        "--component", type=str,
+        choices=["core", "agents", "websocket", "database", "api"],
+        help="Run tests for specific component"
     )
 
 def add_output_arguments(parser):
@@ -348,11 +364,11 @@ def add_llm_arguments(parser):
     )
     parser.add_argument(
         "--llm-timeout", type=int, default=30,
-        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 30-120)"
+        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 60-120 for real services)"
     )
     parser.add_argument(
         "--parallel", type=str, default="auto",
-        help="Parallelism for tests: auto, 1 (sequential), or number of workers"
+        help="Parallelism: auto, 1 (serial), max, or number of workers"
     )
     parser.add_argument(
         "--speed", action="store_true",
@@ -402,8 +418,8 @@ def add_discovery_arguments(parser):
     """Add test discovery arguments"""
     parser.add_argument(
         "--shard", type=str,
-        choices=["core", "agents", "websocket", "database", "api", "frontend"],
-        help="Run a specific shard of tests for parallel execution"
+        choices=["1/4", "2/4", "3/4", "4/4"],
+        help="Run specific test shard for CI/CD parallelization"
     )
     parser.add_argument(
         "--json-output", type=str,
@@ -411,6 +427,14 @@ def add_discovery_arguments(parser):
     )
     parser.add_argument(
         "--coverage-output", type=str, help="Path to save coverage XML report"
+    )
+    parser.add_argument(
+        "--coverage-html", action="store_true",
+        help="Generate HTML coverage report"
+    )
+    parser.add_argument(
+        "--format", type=str, choices=["text", "json", "html"],
+        default="text", help="Output format for test results"
     )
     add_discovery_listing_arguments(parser)
 
@@ -442,14 +466,6 @@ def add_failing_test_arguments(parser):
     parser.add_argument(
         "--run-failing", action="store_true",
         help="Run only the currently failing tests"
-    )
-    parser.add_argument(
-        "--fix-failing", action="store_true",
-        help="Attempt to automatically fix failing tests (experimental)"
-    )
-    parser.add_argument(
-        "--max-fixes", type=int, default=None,
-        help="Maximum number of tests to attempt fixing (default: all)"
     )
     parser.add_argument(
         "--clear-failing", action="store_true",
@@ -569,8 +585,6 @@ def handle_failing_test_commands(args, runner):
     elif args.run_failing:
         exit_code = execute_failing_tests(args, runner)
         sys.exit(exit_code)
-    elif args.fix_failing:
-        handle_fix_failing_command()
 
 def execute_failing_tests(args, runner):
     """Execute failing tests run"""
@@ -578,7 +592,7 @@ def execute_failing_tests(args, runner):
     print("RUNNING FAILING TESTS")
     print("=" * 80)
     exit_code = runner.run_failing_tests(
-        max_fixes=args.max_fixes,
+        max_fixes=None,
         backend_only=args.backend_only,
         frontend_only=args.frontend_only
     )
@@ -596,23 +610,15 @@ def run_tests_with_configuration(args, runner, speed_opts):
     if args.staging:
         runner.staging_mode = True
     
-    if args.simple:
-        return run_simple_tests(runner)
-    else:
-        return run_level_based_tests(args, runner, speed_opts)
-
-def run_simple_tests(runner):
-    """Run simple test validation"""
-    print(f"Running simple test validation...")
-    exit_code, output = runner.run_simple_tests()
-    config = {"description": "Simple test validation", "purpose": "Basic functionality check"}
-    level = "simple"
-    return finalize_test_run(runner, level, config, "", exit_code)
+    return run_level_based_tests(args, runner, speed_opts)
 
 def run_level_based_tests(args, runner, speed_opts):
     """Run tests based on specified level"""
-    config = TEST_LEVELS[args.level]
+    config = TEST_LEVELS[args.level].copy()  # Copy to avoid modifying original
     level = args.level
+    # Handle exclusive mode (no superset inclusion)
+    if hasattr(args, 'exclusive') and args.exclusive:
+        print(f"[EXCLUSIVE] Running ONLY {level} level tests (no superset)")
     apply_shard_filtering(args, config)
     print_test_configuration(level, config, speed_opts)
     real_llm_config = configure_real_llm_if_requested(args, level, config)
@@ -620,19 +626,27 @@ def run_level_based_tests(args, runner, speed_opts):
     return finalize_test_run(runner, level, config, "", exit_code)
 
 def apply_shard_filtering(args, config):
-    """Apply shard filtering if specified"""
-    if args.shard:
-        print(f"[SHARD] Running only {args.shard} shard for {args.level} tests")
-        if args.shard in SHARD_MAPPINGS and args.shard != "frontend":
+    """Apply shard or component filtering if specified"""
+    # Handle component filtering
+    if hasattr(args, 'component') and args.component:
+        print(f"[COMPONENT] Running only {args.component} component tests")
+        if args.component in COMPONENT_MAPPINGS:
+            component_patterns = COMPONENT_MAPPINGS[args.component]
+            pattern_args = []
+            for pattern in component_patterns:
+                pattern_args.extend(["-k", pattern])
+            config['backend_args'] = config.get('backend_args', []) + pattern_args
+            print(f"[COMPONENT] Test patterns: {', '.join(component_patterns)}")
+    # Handle shard filtering for CI/CD
+    elif args.shard:
+        print(f"[SHARD] Running shard {args.shard} for parallel CI/CD execution")
+        if args.shard in SHARD_MAPPINGS:
             shard_patterns = SHARD_MAPPINGS[args.shard]
             pattern_args = []
             for pattern in shard_patterns:
                 pattern_args.extend(["-k", pattern])
             config['backend_args'] = config.get('backend_args', []) + pattern_args
             print(f"[SHARD] Test patterns: {', '.join(shard_patterns)}")
-        elif args.shard == "frontend":
-            args.frontend_only = True
-            args.backend_only = False
 
 def print_test_configuration(level, config, speed_opts):
     """Print test configuration details"""
@@ -646,135 +660,18 @@ def print_test_configuration(level, config, speed_opts):
 
 def configure_real_llm_if_requested(args, level, config):
     """Configure real LLM testing if requested"""
-    if not args.real_llm:
-        return None
-    if level == "smoke":
-        print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
-        return None
-    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel)
-    print_real_llm_configuration(args, config)
-    return real_llm_config
-
-def print_real_llm_configuration(args, config):
-    """Print real LLM configuration details"""
-    print(f"[INFO] Real LLM testing enabled")
-    print(f"  - Model: {args.llm_model}")
-    print(f"  - Timeout: {args.llm_timeout}s per call")
-    print(f"  - Parallelism: {args.parallel}")
-    adjusted_timeout = config.get('timeout', 300) * 3
-    config['timeout'] = adjusted_timeout
-    print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+    from .test_execution_engine import configure_real_llm_if_requested as engine_configure
+    return engine_configure(args, level, config)
 
 def execute_test_suite(args, config, runner, real_llm_config, speed_opts, test_level):
     """Execute the test suite based on configuration"""
-    if args.backend_only:
-        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
-    elif args.frontend_only:
-        return execute_frontend_only_tests(config, runner, speed_opts, test_level)
-    else:
-        return execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level)
-
-def execute_backend_only_tests(config, runner, real_llm_config, speed_opts):
-    """Execute backend-only tests"""
-    backend_exit, _ = runner.run_backend_tests(
-        config['backend_args'], 
-        config.get('timeout', 300),
-        real_llm_config,
-        speed_opts
-    )
-    runner.results["frontend"]["status"] = "skipped"
-    return backend_exit
-
-def execute_frontend_only_tests(config, runner, speed_opts, test_level):
-    """Execute frontend-only tests"""
-    frontend_exit, _ = runner.run_frontend_tests(
-        config['frontend_args'],
-        config.get('timeout', 300),
-        speed_opts,
-        test_level
-    )
-    runner.results["backend"]["status"] = "skipped"
-    return frontend_exit
-
-def execute_full_test_suite(config, runner, real_llm_config, speed_opts, test_level):
-    """Execute full test suite (backend + frontend + E2E)"""
-    if config.get('run_both', True):
-        backend_exit, _ = runner.run_backend_tests(
-            config['backend_args'],
-            config.get('timeout', 300),
-            real_llm_config,
-            speed_opts
-        )
-        frontend_exit, _ = runner.run_frontend_tests(
-            config['frontend_args'], 
-            config.get('timeout', 300),
-            speed_opts,
-            test_level
-        )
-        exit_code = max(backend_exit, frontend_exit)
-        if config.get('run_e2e', False):
-            e2e_exit, _ = runner.run_e2e_tests([], config.get('timeout', 600))
-            exit_code = max(exit_code, e2e_exit)
-        return exit_code
-    else:
-        return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
+    from .test_execution_engine import execute_test_suite as engine_execute
+    return engine_execute(args, config, runner, real_llm_config, speed_opts, test_level)
 
 def finalize_test_run(runner, level, config, output, exit_code):
     """Finalize test run with reporting and cleanup"""
-    runner.results["overall"]["end_time"] = time.time()
-    runner.results["overall"]["status"] = "passed" if exit_code == 0 else "failed"
-    generate_test_reports(runner, level, config, output, exit_code)
-    runner.print_summary()
-    return exit_code
-
-def generate_test_reports(runner, level, config, output, exit_code):
-    """Generate test reports in requested formats"""
-    if not hasattr(sys.modules[__name__], '_no_report') or not _no_report:
-        runner.save_test_report(level, config, output, exit_code)
-        save_additional_reports(runner, level, config, exit_code)
-        generate_coverage_report()
-
-def save_additional_reports(runner, level, config, exit_code):
-    """Save additional report formats if requested"""
-    args = sys.modules[__name__].__dict__.get('_current_args')
-    if not args:
-        return
-    
-    if args.output:
-        if args.report_format == "json":
-            save_json_report(runner, level, config, exit_code, args.output)
-        elif args.report_format == "text":
-            save_text_report(runner, level, config, exit_code, args.output)
-
-def save_json_report(runner, level, config, exit_code, output_file):
-    """Save JSON report to file"""
-    json_report = runner.generate_json_report(level, config, exit_code)
-    with open(output_file, "w", encoding='utf-8') as f:
-        json.dump(json_report, f, indent=2)
-    print(f"[REPORT] JSON report saved to: {output_file}")
-
-def save_text_report(runner, level, config, exit_code, output_file):
-    """Save text report to file"""
-    text_report = runner.generate_text_report(level, config, exit_code)
-    with open(output_file, "w", encoding='utf-8') as f:
-        f.write(text_report)
-    print(f"[REPORT] Text report saved to: {output_file}")
-
-def generate_coverage_report():
-    """Generate coverage report if requested"""
-    args = sys.modules[__name__].__dict__.get('_current_args')
-    if not args or not args.coverage_output:
-        return
-    
-    try:
-        coverage_cmd = [sys.executable, "-m", "coverage", "xml", "-o", args.coverage_output]
-        subprocess.run(coverage_cmd, cwd=PROJECT_ROOT, capture_output=True, text=True)
-        if Path(args.coverage_output).exists():
-            print(f"[COVERAGE] Coverage report saved to: {args.coverage_output}")
-        else:
-            print(f"[WARNING] Coverage report generation failed - file not created")
-    except Exception as e:
-        print(f"[WARNING] Could not generate coverage report: {e}")
+    from .test_execution_engine import finalize_test_run as engine_finalize
+    return engine_finalize(runner, level, config, output, exit_code)
 
 
 if __name__ == "__main__":

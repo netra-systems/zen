@@ -149,6 +149,10 @@ class WebSocketManager:
         """CONSOLIDATED: Get unified WebSocket statistics."""
         return self._unified_manager.get_unified_stats()
 
+    async def get_statistics(self) -> Dict[str, Any]:
+        """CONSOLIDATED: Get unified WebSocket statistics (async wrapper for compatibility)."""
+        return self.get_stats()
+
     def _build_stats_from_components(self) -> Dict[str, Any]:
         """DEPRECATED: Use unified stats instead."""
         return self.get_stats()

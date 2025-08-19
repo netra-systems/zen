@@ -11,11 +11,14 @@ from app.logging_config import central_logger
 from app.schemas.websocket_message_types import ServerMessage
 from app.websocket.connection import ConnectionInfo, ConnectionManager
 
-from .batch_message_types import BatchConfig, PendingMessage, BatchMetrics
+from .batch_message_types import BatchConfig, PendingMessage, BatchMetrics, MessageState
 from .batch_message_strategies import BatchingStrategyManager
 from .batch_load_monitor import LoadMonitor
 from .batch_message_operations import (
     send_batch_to_connection, BatchTimerManager, create_batched_message
+)
+from .batch_message_transactional import (
+    TransactionalBatchProcessor, RetryManager, MessageStateManager
 )
 
 logger = central_logger.get_logger(__name__)
@@ -39,9 +42,12 @@ class MessageBatcher:
         self._shutdown = False
     
     def _init_strategy_manager(self) -> None:
-        """Initialize strategy manager and load monitor."""
+        """Initialize strategy manager and transactional components."""
         self._load_monitor = LoadMonitor()
         self._strategy_manager = BatchingStrategyManager(self.config, self._load_monitor)
+        self._transactional_processor = TransactionalBatchProcessor(self.config)
+        self._retry_manager = RetryManager()
+        self._state_manager = MessageStateManager()
     
     async def queue_message(self, user_id: str, message: Union[Dict[str, Any], ServerMessage],
                            priority: int = 1, connection_id: Optional[str] = None) -> bool:
@@ -143,51 +149,59 @@ class MessageBatcher:
     
     
     async def _flush_batch(self, connection_id: str) -> None:
-        """Flush pending messages for a connection."""
+        """Flush pending messages using transactional pattern."""
         async with self._lock:
-            batch = self._extract_pending_batch(connection_id)
+            batch = self._mark_batch_sending(connection_id)
             if not batch:
                 return
         
-        await self._send_batch(connection_id, batch)
+        await self._send_batch_transactionally(connection_id, batch)
     
-    def _extract_pending_batch(self, connection_id: str) -> List[PendingMessage]:
-        """Extract pending batch and clear queue."""
+    def _mark_batch_sending(self, connection_id: str) -> List[PendingMessage]:
+        """Mark batch as SENDING without removing from queue (transactional)."""
         if not self._has_pending_messages(connection_id):
             return []
         
-        return self._extract_and_cleanup_batch(connection_id)
+        return self._mark_pending_as_sending(connection_id)
     
     def _has_pending_messages(self, connection_id: str) -> bool:
         """Check if connection has pending messages."""
         return (connection_id in self._pending_messages and 
                 bool(self._pending_messages[connection_id]))
     
-    def _extract_and_cleanup_batch(self, connection_id: str) -> List[PendingMessage]:
-        """Extract batch and perform cleanup."""
-        batch = self._pending_messages[connection_id].copy()
-        self._pending_messages[connection_id].clear()
-        self._cleanup_timer(connection_id)
-        return batch
+    def _mark_pending_as_sending(self, connection_id: str) -> List[PendingMessage]:
+        """Mark PENDING messages as SENDING and return batch."""
+        all_messages = self._pending_messages[connection_id]
+        pending_messages = self._state_manager.get_pending_messages(all_messages)
+        
+        if pending_messages:
+            self._cleanup_timer(connection_id)
+            return self._transactional_processor.mark_batch_sending(pending_messages)
+        return []
     
     def _cleanup_timer(self, connection_id: str) -> None:
         """Clean up batch timer for connection."""
         self._timer_manager.cleanup_timer(connection_id)
     
-    async def _send_batch(self, connection_id: str, batch: List[PendingMessage]) -> None:
-        """Send a batch of messages to a connection."""
+    async def _send_batch_transactionally(self, connection_id: str, batch: List[PendingMessage]) -> None:
+        """Send batch with transactional guarantees."""
         if not batch:
             return
-        await self._execute_batch_send(connection_id, batch)
+        
+        try:
+            await self._attempt_send_with_retry(connection_id, batch)
+            await self._handle_successful_send(connection_id, batch)
+        except Exception as e:
+            await self._handle_send_failure(connection_id, batch, e)
 
 
-    async def _execute_batch_send(self, connection_id: str, batch: List[PendingMessage]) -> None:
-        """Execute batch send to connection."""
+    async def _attempt_send_with_retry(self, connection_id: str, batch: List[PendingMessage]) -> None:
+        """Attempt to send batch with connection validation."""
         connection_info = self.connection_manager.get_connection_by_id(connection_id)
         if not self._validate_connection_exists(connection_id, connection_info):
-            return
+            raise ConnectionError(f"Connection {connection_id} no longer exists")
         
-        await self._send_and_update_metrics(connection_info, batch, connection_id)
+        await send_batch_to_connection(connection_info, batch, connection_id, self.config)
     
     def _validate_connection_exists(self, connection_id: str, connection_info) -> bool:
         """Validate connection exists for batch send."""
@@ -196,16 +210,46 @@ class MessageBatcher:
             return False
         return True
     
-    async def _send_and_update_metrics(self, connection_info, batch: List[PendingMessage], connection_id: str) -> None:
-        """Send batch and update metrics."""
-        await send_batch_to_connection(connection_info, batch, connection_id, self.config)
-        self._update_send_metrics(batch)
-    
     def _log_connection_not_found(self, connection_id: str) -> None:
         """Log when connection is not found."""
         logger.debug(f"Connection {connection_id} no longer exists")
     
+    async def _handle_successful_send(self, connection_id: str, batch: List[PendingMessage]) -> None:
+        """Handle successful batch send (mark as SENT and remove)."""
+        async with self._lock:
+            self._transactional_processor.mark_batch_sent(batch)
+            self._remove_sent_messages(connection_id)
+            self._update_send_metrics(batch)
     
+    async def _handle_send_failure(self, connection_id: str, batch: List[PendingMessage], error: Exception) -> None:
+        """Handle send failure (revert to PENDING or mark FAILED)."""
+        logger.error(f"Failed to send batch to {connection_id}: {error}")
+        async with self._lock:
+            self._transactional_processor.revert_batch_to_pending(batch)
+            self._schedule_retry_if_applicable(connection_id)
+    
+    
+    
+    def _remove_sent_messages(self, connection_id: str) -> None:
+        """Remove SENT messages from queue."""
+        if connection_id in self._pending_messages:
+            self._pending_messages[connection_id] = self._state_manager.remove_sent_messages(
+                self._pending_messages[connection_id]
+            )
+    
+    def _schedule_retry_if_applicable(self, connection_id: str) -> None:
+        """Schedule retry for failed messages if applicable."""
+        if connection_id in self._pending_messages:
+            failed_messages = self._state_manager.get_failed_messages(
+                self._pending_messages[connection_id]
+            )
+            retryable = self._retry_manager.filter_retryable_messages(failed_messages)
+            if retryable:
+                self._timer_manager.set_flush_timer(
+                    connection_id, 
+                    self.config.max_wait_time,
+                    self._flush_batch
+                )
     
     def _update_send_metrics(self, batch: List[PendingMessage]) -> None:
         """Update metrics after successful send."""
@@ -221,10 +265,11 @@ class MessageBatcher:
         """Re-queue messages that failed to send."""
         async with self._lock:
             for msg in messages:
-                self._requeue_single_message(msg)
+                self._requeue_single_message_with_state(msg)
     
-    def _requeue_single_message(self, msg: PendingMessage) -> None:
-        """Re-queue single message at front of queue."""
+    def _requeue_single_message_with_state(self, msg: PendingMessage) -> None:
+        """Re-queue single message with proper state management."""
+        msg.state = MessageState.PENDING
         if msg.connection_id not in self._pending_messages:
             self._pending_messages[msg.connection_id] = []
         self._pending_messages[msg.connection_id].insert(0, msg)
@@ -295,10 +340,16 @@ class MessageBatcher:
 
 
     def _get_queue_metrics(self) -> Dict[str, Any]:
-        """Get queue and timer metrics."""
+        """Get queue and timer metrics with state information."""
+        all_messages = [msg for msgs in self._pending_messages.values() for msg in msgs]
+        state_counts = self._state_manager.count_by_state(all_messages)
+        
         return {
             "pending_queues": len(self._pending_messages),
-            "pending_messages": sum(len(msgs) for msgs in self._pending_messages.values()),
+            "total_messages": len(all_messages),
+            "pending_messages": state_counts[MessageState.PENDING],
+            "sending_messages": state_counts[MessageState.SENDING], 
+            "failed_messages": state_counts[MessageState.FAILED],
             "active_timers": self._timer_manager.get_active_timer_count()
         }
     

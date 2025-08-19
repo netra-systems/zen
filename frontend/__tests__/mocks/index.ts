@@ -69,6 +69,15 @@ export const {
 // WEBSOCKET MOCKING EXPORTS
 // ============================================================================
 
+// Import for default export usage
+import { 
+  EnhancedMockWebSocket as _EnhancedMockWebSocket, 
+  createWebSocketTestManager as _createWebSocketTestManager,
+  installWebSocketMock,
+  waitForWebSocketOpen,
+  waitForMessage
+} from './websocket-mocks';
+
 export {
   // WebSocket classes
   EnhancedMockWebSocket,
@@ -312,6 +321,6 @@ export default {
   createMockMessage,
   createMockUser,
   mockServer,
-  EnhancedMockWebSocket,
-  createWebSocketTestManager
+  EnhancedMockWebSocket: _EnhancedMockWebSocket,
+  createWebSocketTestManager: _createWebSocketTestManager
 };

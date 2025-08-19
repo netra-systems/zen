@@ -138,7 +138,15 @@ class UnifiedWebSocketManager:
         if not self.circuit_breaker.can_execute():
             self._record_circuit_break()
             raise ConnectionError("Circuit breaker is open")
-        return await self._execute_protected_connect(user_id, websocket)
+        
+        conn_info = await self._execute_protected_connect(user_id, websocket)
+        
+        # Handle state synchronization for new connection
+        await self.messaging.message_handler.handle_new_connection_state_sync(
+            user_id, conn_info.connection_id, websocket
+        )
+        
+        return conn_info
 
     def _record_circuit_break(self) -> None:
         """Record circuit breaker activation."""
@@ -158,9 +166,40 @@ class UnifiedWebSocketManager:
 
     async def disconnect_user(self, user_id: str, websocket: WebSocket, 
                        code: int = 1000, reason: str = "Normal closure") -> None:
-        """Safely disconnect user with cleanup."""
-        await self.connection_manager.disconnect(user_id, websocket, code, reason)
-        self.telemetry["connections_closed"] += 1
+        """Safely disconnect user with comprehensive cleanup."""
+        try:
+            # Find connection info before disconnecting
+            conn_info = await self.connection_manager.find_connection(user_id, websocket)
+            if conn_info:
+                await self.messaging.message_handler.handle_disconnection_state_sync(
+                    user_id, conn_info.connection_id
+                )
+            
+            await self.connection_manager.disconnect(user_id, websocket, code, reason)
+            self.telemetry["connections_closed"] += 1
+            
+            # Additional cleanup for abnormal disconnects
+            if code != 1000:
+                await self._handle_abnormal_disconnect_telemetry(user_id, code, reason)
+                
+        except Exception as e:
+            logger.error(f"Error during user disconnect: {e}")
+            self.telemetry["errors_handled"] += 1
+            # Ensure telemetry is updated even on error
+            self.telemetry["connections_closed"] += 1
+    
+    async def _handle_abnormal_disconnect_telemetry(self, user_id: str, code: int, reason: str) -> None:
+        """Handle telemetry for abnormal disconnects."""
+        logger.warning(f"Abnormal disconnect for user {user_id}, code: {code}, reason: {reason}")
+        
+        # Track abnormal disconnects in telemetry
+        if "abnormal_disconnects" not in self.telemetry:
+            self.telemetry["abnormal_disconnects"] = 0
+        self.telemetry["abnormal_disconnects"] += 1
+        
+        # Clean up any room associations
+        if hasattr(self, 'room_manager'):
+            self.room_manager.leave_all_rooms(user_id)
 
     async def send_message_to_user(self, user_id: str, 
                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 

@@ -9,7 +9,8 @@ Business Value: Standardizes admin tool execution patterns across all tools.
 from typing import Optional, Dict, Any, Union
 from datetime import datetime, UTC
 from app.schemas.admin_tool_types import ToolResponse, ToolSuccessResponse, ToolFailureResponse
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.errors import ExecutionErrorHandler
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.state import DeepAgentState

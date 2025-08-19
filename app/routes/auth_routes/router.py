@@ -15,8 +15,21 @@ from .login_flow import handle_login_request
 from .callback_processor import handle_callback_request
 from .dev_login import handle_dev_login
 from .token_management import validate_user_auth, create_token_response
+from app.auth_integration.auth import get_current_user
 
 router = APIRouter()
+
+
+@router.get("/me")
+async def get_current_user_profile(current_user: dict = Depends(get_current_user)):
+    """Get current authenticated user profile."""
+    return {
+        "id": current_user.get("id", ""),
+        "email": current_user.get("email", ""),
+        "name": current_user.get("name", ""),
+        "profile": current_user.get("profile", {}),
+        "authenticated": True
+    }
 
 
 @router.post("/token")

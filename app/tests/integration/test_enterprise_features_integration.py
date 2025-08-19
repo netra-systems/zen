@@ -17,8 +17,9 @@ import jwt
 # Enterprise imports - using existing services and mocking others
 from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.triage_sub_agent.agent import TriageSubAgent
+from app.agents.supply_researcher.agent import SupplyResearcherAgent
 from app.services.agent_service import AgentService
-from app.services.audit.corpus_audit import CorpusAuditService
+from app.services.audit.corpus_audit import CorpusAuditLogger
 from app.services.permission_service import PermissionService
 from app.schemas.registry import WebSocketMessage
 
@@ -37,7 +38,7 @@ class TestEnterpriseFeatures:
     async def _create_enterprise_infrastructure(self):
         """Create comprehensive enterprise infrastructure"""
         # Use existing services where available, mock others
-        audit_service = Mock(spec=CorpusAuditService)
+        audit_service = Mock(spec=CorpusAuditLogger)
         permission_service = Mock(spec=PermissionService)
         agent_service = Mock(spec=AgentService)
         

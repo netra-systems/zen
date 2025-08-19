@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Unified System Testing</name>
+        <type>critical-requirement</type>
+        <version>2.0</version>
+        <created>2025-08-19</created>
+        <priority>CRITICAL</priority>
+        <business_value>
+            <segment>ALL</segment>
+            <goal>System Reliability and Customer Trust</goal>
+            <value_impact>Prevents 100% of integration failures in production</value_impact>
+        <revenue_impact>Each working user journey = $99-999/month recurring</revenue_impact>
+        <critical_metric>Zero tolerance for basic chat failures</critical_metric>
+      </justification>
+    </business_value>
+  </metadata>
+
+  <problem_statement>
+    <paradox>
+      Tests exist everywhere but basic functionality fails because tests mock everything,
+      never test real system integration, and have import errors preventing execution.
+      We have 800+ test files but 0% confidence in actual system behavior.
+    </paradox>
+    <root_causes>
+      <cause id="1">Excessive mocking - tests don't test real code</cause>
+      <cause id="2">Isolated testing - services never tested together</cause>
+      <cause id="3">Import errors - tests can't even run</cause>
+      <cause id="4">Missing E2E flows - no user journey validation</cause>
+      <cause id="5">Silent failures - tests pass but functionality broken</cause>
+    </root_causes>
+  </problem_statement>
+
+  <unified_testing_architecture>
+    <principle id="1">
+      <name>REAL OVER MOCKED</name>
+      <rule>Only mock external services (payment gateways, email providers)</rule>
+      <rule>NEVER mock internal services or database</rule>
+      <rule>Use real Auth service, real Backend, real Frontend together</rule>
+    </principle>
+    
+    <principle id="2">
+      <name>UNIFIED SYSTEM TESTS</name>
+      <rule>Every critical flow must test Auth + Backend + Frontend together</rule>
+      <rule>Communication between services must be real WebSocket/HTTP</rule>
+      <rule>Data must flow through all three services</rule>
+    </principle>
+    
+    <principle id="3">
+      <name>LOUD FAILURES</name>
+      <rule>Failures must be immediately visible and actionable</rule>
+      <rule>No silent failures or false positives</rule>
+      <rule>Clear error messages with exact failure points</rule>
+    </principle>
+  </unified_testing_architecture>
+
+  <critical_user_journeys>
+    <journey id="first_time_user">
+      <name>First Time User Complete Flow</name>
+      <revenue_impact>100% of new revenue</revenue_impact>
+      <steps>
+        <step>User visits landing page</step>
+        <step>User clicks sign up</step>
+        <step>User enters email and password</step>
+        <step>Auth service creates user</step>
+        <step>Backend creates user profile</step>
+        <step>Frontend redirects to dashboard</step>
+        <step>User sends first chat message</step>
+        <step>Backend processes via WebSocket</step>
+        <step>Agent responds with meaningful answer</step>
+        <step>Response displayed in Frontend</step>
+      </steps>
+      <validation>
+        <check>User exists in Auth database</check>
+        <check>User exists in Backend database</check>
+        <check>WebSocket connection established</check>
+        <check>Message received and processed</check>
+        <check>Response generated and delivered</check>
+      </validation>
+    </journey>
+
+    <journey id="returning_user_login">
+      <name>Returning User Login Flow</name>
+      <revenue_impact>Retention of existing revenue</revenue_impact>
+      <steps>
+        <step>User visits login page</step>
+        <step>User enters credentials</step>
+        <step>Auth service validates</step>
+        <step>JWT token generated</step>
+        <step>Backend accepts token</step>
+        <step>Frontend stores token</step>
+        <step>Dashboard loads with user data</step>
+        <step>Previous conversations visible</step>
+      </steps>
+      <validation>
+        <check>Token valid across all services</check>
+        <check>User data consistent</check>
+        <check>Session persistence works</check>
+      </validation>
+    </journey>
+
+    <journey id="oauth_login">
+      <name>OAuth Login Flow</name>
+      <revenue_impact>Enterprise customer acquisition</revenue_impact>
+      <steps>
+        <step>User clicks "Login with Google"</step>
+        <step>OAuth redirect initiated</step>
+        <step>Google authentication completes</step>
+        <step>Callback processed</step>
+        <step>User created/updated in Auth</step>
+        <step>Profile synced to Backend</step>
+        <step>Dashboard loads</step>
+      </steps>
+      <validation>
+        <check>OAuth token exchange successful</check>
+        <check>User profile correctly mapped</check>
+        <check>Permissions properly set</check>
+      </validation>
+    </journey>
+
+    <journey id="basic_chat">
+      <name>Basic Chat Interaction</name>
+      <revenue_impact>Core value delivery</revenue_impact>
+      <steps>
+        <step>User types message</step>
+        <step>Frontend sends via WebSocket</step>
+        <step>Backend authenticates user</step>
+        <step>Message routed to agent</step>
+        <step>Agent processes request</step>
+        <step>Response generated</step>
+        <step>Response sent via WebSocket</step>
+        <step>Frontend displays response</step>
+      </steps>
+      <validation>
+        <check>Message delivery confirmed</check>
+        <check>Processing time under 5 seconds</check>
+        <check>Response meaningful and relevant</check>
+        <check>UI updates correctly</check>
+      </validation>
+    </journey>
+  </critical_user_journeys>
+
+  <test_infrastructure>
+    <unified_test_environment>
+      <component name="auth_service">
+        <type>Real service instance</type>
+        <database>Test PostgreSQL instance</database>
+        <port>8001</port>
+      </component>
+      <component name="backend_service">
+        <type>Real FastAPI application</type>
+        <database>Test PostgreSQL + ClickHouse</database>
+        <port>8000</port>
+      </component>
+      <component name="frontend_service">
+        <type>Real Next.js application</type>
+        <port>3000</port>
+      </component>
+      <communication>
+        <websocket>Real WebSocket connections</websocket>
+        <http>Real HTTP requests</http>
+        <auth>Real JWT tokens</auth>
+      </communication>
+    </unified_test_environment>
+
+    <test_data_management>
+      <strategy>Isolated test databases per test suite</strategy>
+      <seed_data>Realistic user profiles and conversations</seed_data>
+      <cleanup>Automatic cleanup after each test</cleanup>
+    </test_data_management>
+
+    <test_categories>
+      <category name="unified_critical">
+        <description>Tests that validate entire system working together</description>
+        <minimum_tests>50</minimum_tests>
+        <coverage_target>100% of critical paths</coverage_target>
+      </category>
+      <category name="service_integration">
+        <description>Tests between two services</description>
+        <minimum_tests>100</minimum_tests>
+        <coverage_target>All service boundaries</coverage_target>
+      </category>
+      <category name="component_isolation">
+        <description>Traditional unit tests (minimal mocking)</description>
+        <minimum_tests>500</minimum_tests>
+        <coverage_target>Business logic only</coverage_target>
+      </category>
+    </test_categories>
+  </test_infrastructure>
+
+  <implementation_requirements>
+    <requirement id="1">
+      <name>Test Discovery Fix</name>
+      <action>Fix all import errors preventing test execution</action>
+      <validation>All test files can be imported without errors</validation>
+    </requirement>
+    
+    <requirement id="2">
+      <name>Unified Test Harness</name>
+      <action>Create test harness that starts all three services</action>
+      <validation>Single command starts entire test environment</validation>
+    </requirement>
+    
+    <requirement id="3">
+      <name>Real Service Tests</name>
+      <action>Replace mocked tests with real service interactions</action>
+      <validation>Tests use actual HTTP/WebSocket calls</validation>
+    </requirement>
+    
+    <requirement id="4">
+      <name>Journey Test Suite</name>
+      <action>Implement all critical user journey tests</action>
+      <validation>Each journey has minimum 10 test variations</validation>
+    </requirement>
+    
+    <requirement id="5">
+      <name>Continuous Validation</name>
+      <action>Run unified tests on every commit</action>
+      <validation>CI/CD pipeline includes unified tests</validation>
+    </requirement>
+  </implementation_requirements>
+
+  <success_metrics>
+    <metric level="CRITICAL" name="test_execution_rate">
+      <current>10% (due to import errors)</current>
+      <target>100%</target>
+    </metric>
+    <metric level="CRITICAL" name="real_vs_mocked_ratio">
+      <current>5% real / 95% mocked</current>
+      <target>80% real / 20% mocked</target>
+    </metric>
+    <metric name="unified_test_coverage">
+      <current>0%</current>
+      <target>100% of critical journeys</target>
+    </metric>
+    <metric name="confidence_in_deployment">
+      <current>20%</current>
+      <target>95%</target>
+    </metric>
+  </success_metrics>
+
+  <anti_patterns_to_eliminate>
+    <pattern>Mock everything approach</pattern>
+    <pattern>Testing services in complete isolation</pattern>
+    <pattern>Ignoring import errors</pattern>
+    <pattern>Tests that don't test real functionality</pattern>
+    <pattern>Silent failures and false positives</pattern>
+  </anti_patterns_to_eliminate>
+
+  <enforcement>
+    <rule>No PR merged without unified test coverage</rule>
+    <rule>Mock usage requires explicit justification</rule>
+    <rule>Import errors block deployment</rule>
+    <rule>Every feature requires journey test</rule>
+    <rule>Test failures must include clear diagnostics</rule>
+  </enforcement>
+</spec>

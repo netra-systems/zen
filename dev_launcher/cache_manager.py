@@ -1,11 +1,9 @@
 """
-Startup state and file hash caching component.
+Simplified enhanced cache manager with modular architecture.
 
-Provides intelligent caching to skip unnecessary steps during development
-launcher startup when files haven't changed.
+Main cache manager that coordinates cache operations, storage, and warming.
 """
 
-import os
 import json
 import hashlib
 import logging
@@ -13,219 +11,317 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 
+try:
+    from .cache_entry import (
+        CacheEntry, CacheEncryption, ContentHasher, 
+        CacheValidator, TTL_PRESETS
+    )
+    from .cache_warmer import CacheWarmer
+    from .cache_operations import CacheOperations
+except ImportError:
+    # Support standalone execution
+    from cache_entry import (
+        CacheEntry, CacheEncryption, ContentHasher, 
+        CacheValidator, TTL_PRESETS
+    )
+    from cache_warmer import CacheWarmer
+    from cache_operations import CacheOperations
+
 logger = logging.getLogger(__name__)
 
 
 class CacheManager:
     """
-    Manages startup state and file hash caching for development environment.
+    Enhanced cache manager with TTL, encryption, and warming support.
     
-    Tracks file changes, dependency states, and startup status to optimize
-    subsequent launcher runs by skipping unchanged components.
+    Provides comprehensive caching for startup optimization with content-based
+    hashing, time-to-live management, and cache warming capabilities.
     """
     
     def __init__(self, project_root: Path, cache_dir_name: str = ".dev_launcher_cache"):
-        """Initialize cache manager."""
+        """Initialize enhanced cache manager."""
         self.project_root = project_root
         self.cache_dir = project_root / cache_dir_name
         self.cache_dir.mkdir(exist_ok=True)
-        self.cache_file = self.cache_dir / "startup_cache.json"
-        self.migration_cache_file = self.cache_dir / "migration_cache.json"
-        self.dependency_cache_file = self.cache_dir / "dependency_cache.json"
-        self.cache_data = self._load_cache_file(self.cache_file)
-        self.migration_cache = self._load_cache_file(self.migration_cache_file)
-        self.dependency_cache = self._load_cache_file(self.dependency_cache_file)
+        self._setup_cache_files()
+        self._setup_encryption()
+        self.operations = CacheOperations(project_root)
+        self.warmer = CacheWarmer(project_root, self)
+
+    def _setup_cache_files(self) -> None:
+        """Setup cache file structure."""
+        self.cache_files = {
+            'state': self.cache_dir / 'state.json',
+            'hashes': self.cache_dir / 'hashes.json', 
+            'services': self.cache_dir / 'services.json',
+            'secrets': self.cache_dir / 'secrets.json',
+            'performance': self.cache_dir / 'performance.json'
+        }
+        self.cache_data = {}
+        for name, file_path in self.cache_files.items():
+            self.cache_data[name] = self._load_cache_file(file_path)
     
-    def _load_cache_file(self, cache_file: Path) -> Dict[str, Any]:
-        """Load cache data from specific file."""
-        if cache_file.exists():
-            try:
-                with open(cache_file, 'r') as f:
-                    return json.load(f)
-            except (json.JSONDecodeError, IOError):
-                logger.warning(f"Invalid cache file {cache_file}, resetting")
-        return {}
+    def _setup_encryption(self) -> None:
+        """Setup encryption for sensitive data."""
+        key_file = self.cache_dir / 'encryption.key'
+        if key_file.exists():
+            with open(key_file, 'r') as f:
+                key_string = f.read().strip()
+            self.encryption = CacheEncryption.from_key_string(key_string)
+        else:
+            self.encryption = CacheEncryption()
+            with open(key_file, 'w') as f:
+                f.write(self.encryption.get_key_string())
     
-    def _save_cache_file(self, cache_file: Path, data: Dict[str, Any]):
-        """Save cache data to specific file."""
+    def _load_cache_file(self, cache_file: Path) -> Dict[str, CacheEntry]:
+        """Load cache entries from file."""
+        if not cache_file.exists():
+            return {}
         try:
+            with open(cache_file, 'r') as f:
+                data = json.load(f)
+            return {k: CacheEntry.from_dict(v) for k, v in data.items()}
+        except (json.JSONDecodeError, IOError, TypeError, ValueError):
+            logger.warning(f"Invalid cache file {cache_file}, resetting")
+            return {}
+    
+    def _save_cache_file(self, cache_file: Path, entries: Dict[str, CacheEntry]):
+        """Save cache entries to file."""
+        try:
+            data = {k: v.to_dict() for k, v in entries.items()}
             with open(cache_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except IOError as e:
             logger.warning(f"Failed to save cache {cache_file}: {e}")
+
+    def get_cache_entry(self, cache_type: str, key: str) -> Optional[CacheEntry]:
+        """Get cache entry by type and key."""
+        if cache_type not in self.cache_data:
+            return None
+        entry = self.cache_data[cache_type].get(key)
+        if entry and CacheValidator.validate_ttl(entry):
+            return entry
+        return None
     
-    def get_file_hash(self, file_path: Path) -> str:
-        """Calculate MD5 hash of file contents."""
-        if not file_path.exists():
-            return ""
+    def set_cache_entry(
+        self, cache_type: str, entry: CacheEntry, encrypt: bool = False
+    ) -> bool:
+        """Set cache entry with optional encryption."""
         try:
-            hasher = hashlib.md5()
-            with open(file_path, 'rb') as f:
-                for chunk in iter(lambda: f.read(4096), b""):
-                    hasher.update(chunk)
-            return hasher.hexdigest()
-        except IOError:
-            return ""
-    
-    def get_directory_hash(self, directory: Path, patterns: List[str]) -> str:
-        """Calculate combined hash of files in directory matching patterns."""
-        if not directory.exists():
-            return ""
+            if encrypt and not entry.encrypted:
+                entry.value = self.encryption.encrypt_value(entry.value)
+                entry.encrypted = True
+            
+            if cache_type not in self.cache_data:
+                self.cache_data[cache_type] = {}
+            
+            self.cache_data[cache_type][entry.key] = entry
+            
+            if cache_type in self.cache_files:
+                self._save_cache_file(
+                    self.cache_files[cache_type], 
+                    self.cache_data[cache_type]
+                )
+            return True
+        except Exception as e:
+            logger.error(f"Failed to set cache entry: {e}")
+            return False
+
+    def get_cached_value(
+        self, cache_type: str, key: str, decrypt: bool = False
+    ) -> Optional[Any]:
+        """Get cached value with optional decryption."""
+        entry = self.get_cache_entry(cache_type, key)
+        if not entry:
+            return None
         
-        file_hashes = []
-        for pattern in patterns:
-            for file_path in directory.glob(pattern):
-                if file_path.is_file():
-                    file_hashes.append(f"{file_path.name}:{self.get_file_hash(file_path)}")
+        value = entry.value
+        if decrypt and entry.encrypted:
+            try:
+                value = self.encryption.decrypt_value(value)
+            except Exception as e:
+                logger.error(f"Decryption failed for {key}: {e}")
+                return None
         
-        # Sort for consistent ordering
-        file_hashes.sort()
-        combined = "\n".join(file_hashes)
-        return hashlib.md5(combined.encode()).hexdigest()
+        return value
     
+    def invalidate_cache_entry(self, cache_type: str, key: str) -> bool:
+        """Invalidate specific cache entry."""
+        if cache_type not in self.cache_data:
+            return False
+        
+        if key in self.cache_data[cache_type]:
+            del self.cache_data[cache_type][key]
+            if cache_type in self.cache_files:
+                self._save_cache_file(
+                    self.cache_files[cache_type],
+                    self.cache_data[cache_type]
+                )
+            return True
+        return False
+
+    # Delegate change detection operations
+    def has_content_changed(
+        self, cache_type: str, key: str, current_content: Any
+    ) -> bool:
+        """Check if content has changed based on hash."""
+        return self.operations.has_content_changed(
+            self.cache_data, cache_type, key, current_content
+        )
+
     def has_migration_files_changed(self) -> bool:
-        """Check if database migration files have changed."""
-        migration_paths = [
-            self.project_root / "alembic" / "versions",
-            self.project_root / "app" / "models.py",
-            self.project_root / "app" / "database.py",
-            self.project_root / "alembic.ini"
-        ]
-        
-        current_hash = self._calculate_migration_hash(migration_paths)
-        cached_hash = self.migration_cache.get("migration_files_hash", "")
-        
-        if current_hash != cached_hash:
-            self.migration_cache["migration_files_hash"] = current_hash
-            self.migration_cache["last_checked"] = datetime.now().isoformat()
-            self._save_cache_file(self.migration_cache_file, self.migration_cache)
-            return True
-        
-        return False
-    
-    def _calculate_migration_hash(self, paths: List[Path]) -> str:
-        """Calculate combined hash of migration-related files."""
-        hashes = []
-        for path in paths:
-            if path.is_file():
-                hashes.append(self.get_file_hash(path))
-            elif path.is_dir():
-                hashes.append(self.get_directory_hash(path, ["*.py", "*.ini"]))
-        
-        combined = "|".join(hashes)
-        return hashlib.md5(combined.encode()).hexdigest()
-    
+        """Check if migration files have changed."""
+        return self.operations.has_migration_files_changed(self.cache_data)
+
     def has_dependencies_changed(self, service_name: str) -> bool:
-        """Check if dependencies have changed for a service."""
-        dependency_files = self._get_dependency_files(service_name)
-        current_hash = self._calculate_dependency_hash(dependency_files)
-        cache_key = f"{service_name}_dependencies_hash"
-        cached_hash = self.dependency_cache.get(cache_key, "")
-        
-        if current_hash != cached_hash:
-            self.dependency_cache[cache_key] = current_hash
-            self.dependency_cache[f"{service_name}_last_checked"] = datetime.now().isoformat()
-            self._save_cache_file(self.dependency_cache_file, self.dependency_cache)
-            return True
-        
-        return False
-    
-    def _get_dependency_files(self, service_name: str) -> List[Path]:
-        """Get dependency files for a service."""
-        if service_name == "backend":
-            return [
-                self.project_root / "requirements.txt",
-                self.project_root / "pyproject.toml",
-                self.project_root / "Pipfile"
-            ]
-        elif service_name == "frontend":
-            return [
-                self.project_root / "frontend" / "package.json",
-                self.project_root / "frontend" / "package-lock.json",
-                self.project_root / "frontend" / "yarn.lock"
-            ]
-        elif service_name == "auth":
-            return [
-                self.project_root / "auth_service" / "requirements.txt",
-                self.project_root / "auth_service" / "pyproject.toml"
-            ]
-        return []
-    
-    def _calculate_dependency_hash(self, files: List[Path]) -> str:
-        """Calculate combined hash of dependency files."""
-        hashes = []
-        for file_path in files:
-            if file_path.exists():
-                hashes.append(self.get_file_hash(file_path))
-        
-        combined = "|".join(hashes)
-        return hashlib.md5(combined.encode()).hexdigest()
-    
+        """Check if service dependencies have changed."""
+        return self.operations.has_dependencies_changed(
+            self.cache_data, service_name
+        )
+
     def has_environment_changed(self) -> bool:
-        """Check if environment configuration has changed."""
-        env_files = [
-            self.project_root / ".env",
-            self.project_root / ".env.local",
-            self.project_root / ".env.development"
-        ]
-        
-        current_hash = self._calculate_dependency_hash(env_files)
-        cached_hash = self.cache_data.get("environment_hash", "")
-        
-        if current_hash != cached_hash:
-            self.cache_data["environment_hash"] = current_hash
-            self.cache_data["env_last_checked"] = datetime.now().isoformat()
-            self._save_cache_file(self.cache_file, self.cache_data)
-            return True
-        
-        return False
-    
+        """Check if environment files have changed."""
+        return self.operations.has_environment_changed(self.cache_data)
+
+    async def warm_caches(self) -> Dict[str, bool]:
+        """Warm all caches for faster startup."""
+        return await self.warmer.warm_all_caches()
+
+    def cache_startup_metrics(self, startup_time: float, phase_times: Dict[str, float]):
+        """Cache startup performance metrics."""
+        entry = self.operations.create_startup_metrics_entry(
+            startup_time, phase_times
+        )
+        self.set_cache_entry('performance', entry)
+
+    def get_startup_metrics(self) -> Optional[Dict[str, Any]]:
+        """Get cached startup metrics."""
+        return self.get_cached_value('performance', 'startup_metrics')
+
     def mark_successful_startup(self, startup_time: float):
-        """Mark a successful startup with timing information."""
-        self.cache_data.update({
-            "last_successful_startup": datetime.now().isoformat(),
-            "last_startup_time": startup_time,
-            "successful_runs": self.cache_data.get("successful_runs", 0) + 1
-        })
-        self._save_cache_file(self.cache_file, self.cache_data)
+        """Mark successful startup with metrics."""
+        successful_runs = self._get_successful_runs() + 1
+        entry = self.operations.create_startup_state_entry(
+            startup_time, successful_runs
+        )
+        self.set_cache_entry('state', entry)
     
+    def _get_successful_runs(self) -> int:
+        """Get number of successful runs."""
+        last_startup = self.get_cached_value('state', 'last_startup')
+        return last_startup.get('successful_runs', 0) if last_startup else 0
+
     def get_last_startup_time(self) -> Optional[float]:
-        """Get the last recorded startup time."""
-        return self.cache_data.get("last_startup_time")
-    
+        """Get last startup time from cache."""
+        last_startup = self.get_cached_value('state', 'last_startup')
+        return last_startup.get('startup_time') if last_startup else None
+
     def is_cache_valid(self, max_age_hours: int = 24) -> bool:
-        """Check if the cache is still valid based on age."""
-        last_startup = self.cache_data.get("last_successful_startup")
+        """Check cache validity based on age."""
+        last_startup = self.get_cached_value('state', 'last_startup')
         if not last_startup:
             return False
         
         try:
-            last_time = datetime.fromisoformat(last_startup)
+            timestamp = last_startup.get('timestamp')
+            last_time = datetime.fromisoformat(timestamp)
             age = datetime.now() - last_time
             return age < timedelta(hours=max_age_hours)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, AttributeError):
             return False
-    
-    def clear_cache(self):
-        """Clear all cache data."""
-        self.cache_data.clear()
-        self.migration_cache.clear()
-        self.dependency_cache.clear()
-        self._save_cache_file(self.cache_file, self.cache_data)
-        self._save_cache_file(self.migration_cache_file, self.migration_cache)
-        self._save_cache_file(self.dependency_cache_file, self.dependency_cache)
-        logger.info("Cache cleared successfully")
-    
+
+    def is_cached_and_valid(self, key: str, max_age_hours: int = 24) -> bool:
+        """Check if a specific cache key exists and is valid."""
+        # Try to find the key in different cache types
+        for cache_type in ['state', 'hashes', 'services', 'secrets']:
+            entry = self.get_cache_entry(cache_type, key)
+            if entry:
+                # Check if entry is recent enough
+                if hasattr(entry, 'timestamp'):
+                    try:
+                        entry_time = datetime.fromisoformat(entry.timestamp)
+                        age = datetime.now() - entry_time
+                        return age < timedelta(hours=max_age_hours)
+                    except (ValueError, TypeError, AttributeError):
+                        pass
+                # If no timestamp, consider valid if it exists
+                return True
+        return False
+
+    def cache_result(self, key: str, value: Any) -> None:
+        """Cache a result with automatic timestamp."""
+        # Determine the appropriate cache type based on key
+        cache_type = 'state'  # Default to state
+        if 'hash' in key.lower():
+            cache_type = 'hashes'
+        elif 'service' in key.lower():
+            cache_type = 'services'
+        elif 'secret' in key.lower():
+            cache_type = 'secrets'
+        
+        # Create content hash for the value
+        value_str = json.dumps(value) if not isinstance(value, str) else value
+        content_hash = hashlib.md5(value_str.encode()).hexdigest()
+        
+        # Create a CacheEntry with proper fields
+        entry = CacheEntry(
+            key=key,
+            content_hash=content_hash,
+            value=value,
+            created_at=datetime.now(),
+            ttl_seconds=24 * 3600,  # 24 hours in seconds
+            encrypted=False
+        )
+        # Set the cache entry
+        self.set_cache_entry(cache_type, entry)
+
+    def clear_cache(self, cache_type: Optional[str] = None) -> bool:
+        """Clear cache data with optional type filter."""
+        try:
+            if cache_type:
+                if cache_type in self.cache_data:
+                    self.cache_data[cache_type].clear()
+                    if cache_type in self.cache_files:
+                        self._save_cache_file(
+                            self.cache_files[cache_type],
+                            self.cache_data[cache_type]
+                        )
+                    logger.info(f"Cache cleared for {cache_type}")
+            else:
+                for cache_name, entries in self.cache_data.items():
+                    entries.clear()
+                    if cache_name in self.cache_files:
+                        self._save_cache_file(
+                            self.cache_files[cache_name], entries
+                        )
+                logger.info("All caches cleared successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Cache clear failed: {e}")
+            return False
+
     def get_cache_stats(self) -> Dict[str, Any]:
-        """Get cache statistics for debugging."""
-        return {
-            "cache_dir": str(self.cache_dir),
-            "cache_files_exist": {
-                "startup": self.cache_file.exists(),
-                "migration": self.migration_cache_file.exists(),
-                "dependency": self.dependency_cache_file.exists()
-            },
-            "last_successful_startup": self.cache_data.get("last_successful_startup"),
-            "successful_runs": self.cache_data.get("successful_runs", 0),
-            "cache_valid": self.is_cache_valid()
-        }
+        """Get comprehensive cache statistics."""
+        base_stats = self.operations.get_cache_statistics(
+            self.cache_data, self.cache_files, self.cache_dir
+        )
+        
+        # Add cache-specific stats
+        base_stats.update({
+            'cache_valid': self.is_cache_valid(),
+            'last_startup_time': self.get_last_startup_time(),
+            'successful_runs': self._get_successful_runs()
+        })
+        
+        return base_stats
+
+    def cleanup_expired_entries(self) -> int:
+        """Remove expired cache entries and return count removed."""
+        removed_count = self.operations.cleanup_expired_entries(self.cache_data)
+        
+        # Save updated cache files
+        for cache_type, entries in self.cache_data.items():
+            if cache_type in self.cache_files:
+                self._save_cache_file(self.cache_files[cache_type], entries)
+        
+        return removed_count

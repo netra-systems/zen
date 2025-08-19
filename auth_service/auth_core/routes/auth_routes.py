@@ -15,7 +15,9 @@ from ..models.auth_models import (
     TokenRequest, TokenResponse,
     RefreshRequest, ServiceTokenRequest,
     ServiceTokenResponse, HealthResponse,
-    AuthEndpoints, AuthConfigResponse
+    AuthEndpoints, AuthConfigResponse,
+    PasswordResetRequest, PasswordResetResponse,
+    PasswordResetConfirm, PasswordResetConfirmResponse
 )
 import httpx
 import secrets
@@ -212,8 +214,8 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
     # Get session data if available
-    session_data = auth_service.session_manager.get_session(
-        user_id=response.user_id
+    session_data = await auth_service.session_manager.get_user_session(
+        response.user_id
     ) if hasattr(auth_service, 'session_manager') else None
     
     return {
@@ -236,8 +238,8 @@ async def get_session(authorization: Optional[str] = Header(None)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
     # Get session data
-    session_data = auth_service.session_manager.get_session(
-        user_id=response.user_id
+    session_data = await auth_service.session_manager.get_user_session(
+        response.user_id
     )
     
     if not session_data:
@@ -489,3 +491,23 @@ async def health_check():
         redis_connected=redis_ok,
         database_connected=True  # Placeholder
     )
+
+@router.post("/password-reset/request", response_model=PasswordResetResponse)
+async def request_password_reset(request: PasswordResetRequest):
+    """Request password reset for user"""
+    try:
+        response = await auth_service.request_password_reset(request)
+        return response
+    except Exception as e:
+        logger.error(f"Password reset request error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.post("/password-reset/confirm", response_model=PasswordResetConfirmResponse)
+async def confirm_password_reset(request: PasswordResetConfirm):
+    """Confirm password reset with token and new password"""
+    try:
+        response = await auth_service.confirm_password_reset(request)
+        return response
+    except Exception as e:
+        logger.error(f"Password reset confirmation error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))

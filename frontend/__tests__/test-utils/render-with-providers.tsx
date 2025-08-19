@@ -15,8 +15,7 @@
 
 import React, { ReactElement, ReactNode } from 'react';
 import { render, RenderOptions, RenderResult } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter, Router } from 'react-router-dom';
-import { createMemoryHistory, MemoryHistory } from 'history';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from 'next-themes';
 import { AuthContext, AuthContextType } from '@/auth/context';
 import { WebSocketProvider } from '@/providers/WebSocketProvider';
@@ -42,7 +41,6 @@ export interface RealProviderOptions {
 export interface RouterConfig {
   initialEntries?: string[];
   initialIndex?: number;
-  history?: MemoryHistory;
   useMemoryRouter?: boolean;
 }
 
@@ -107,27 +105,14 @@ export const createRealRouterProvider = (
   const {
     initialEntries = ['/'],
     initialIndex = 0,
-    history,
     useMemoryRouter = true
   } = routerConfig;
 
-  if (useMemoryRouter) {
-    return ({ children }) => (
-      <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
-        {children}
-      </MemoryRouter>
-    );
-  }
-
-  const routerHistory = history || createMemoryHistory({ 
-    initialEntries, 
-    initialIndex 
-  });
-
+  // For Next.js testing, we primarily use MemoryRouter
   return ({ children }) => (
-    <Router history={routerHistory}>
+    <MemoryRouter initialEntries={initialEntries} initialIndex={initialIndex}>
       {children}
-    </Router>
+    </MemoryRouter>
   );
 };
 
@@ -297,4 +282,4 @@ export const verifyRealProviderState = (component: RenderResult, expectedStates:
 
 // Export types and utilities
 export type { RealProviderOptions, RouterConfig };
-export { createMemoryHistory };
+// History functionality is handled by MemoryRouter

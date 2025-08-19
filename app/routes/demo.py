@@ -80,7 +80,8 @@ async def get_synthetic_metrics(
     demo_service: DemoService = Depends(get_demo_service)
 ) -> DemoMetrics:
     """Generate synthetic performance metrics."""
-    return await handle_synthetic_metrics(scenario, duration_hours, demo_service)
+    metrics_data = await handle_synthetic_metrics(scenario, duration_hours, demo_service)
+    return DemoMetrics(**metrics_data)
 
 
 @router.post("/export/report")

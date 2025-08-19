@@ -13,7 +13,7 @@
             <name>Authentication/OAuth</name>
             <file>learnings/auth.xml</file>
             <path>SPEC/learnings/auth.xml</path>
-            <learning_count>8</learning_count>
+            <learning_count>13</learning_count>
             <learning_ids>
                 <id>oauth-local-staging-mismatch</id>
                 <id>oauth-environment-variables</id>
@@ -23,10 +23,16 @@
                 <id>shared-auth-integration-mandatory</id>
                 <id>auth-database-persistence</id>
                 <id>interservice-auth-sync</id>
+                <id>jwt-secret-mismatch</id>
+                <id>secret-manager-integration</id>
+                <id>environment-variable-naming</id>
+                <id>dev-login-token-validation</id>
+                <id>path-traversal-csp-blocking</id>
             </learning_ids>
             <important_note>See also SPEC/shared_auth_integration.xml for MANDATORY shared auth service requirements</important_note>
             <additional_file>learnings/auth_database_persistence.xml</additional_file>
             <additional_file>learnings/interservice_auth_sync.xml</additional_file>
+            <additional_file>learnings/jwt_secret_configuration.xml</additional_file>
         </category>
         <category>
             <name>Environment Detection</name>
@@ -99,6 +105,19 @@
             </learning_ids>
         </category>
         <category>
+            <name>Test Runner Enhancements</name>
+            <file>SPEC/test_runner_guide.xml</file>
+            <path>SPEC/test_runner_guide.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>comprehensive-test-levels-added</id>
+                <id>test-pattern-matching-improved</id>
+                <id>claude-testing-prompt-spec-updated</id>
+            </learning_ids>
+            <important_note>Updated 2025-08-19: Added all 20 test levels from test runner usage, organized prompt patterns by category, improved Claude's test execution workflow</important_note>
+            <additional_file>SPEC/claude_testing_prompt_spec.xml</additional_file>
+        </category>
+        <category>
             <name>GitHub Actions</name>
             <file>learnings/github_actions.xml</file>
             <path>SPEC/learnings/github_actions.xml</path>
@@ -146,6 +165,19 @@
                 <id>mac-utf8-encoding</id>
             </learning_ids>
             <important_note>Mac requires different process handling, port freeing, and memory monitoring than Linux</important_note>
+            <additional_file>learnings/dev_launcher_health_checks.xml</additional_file>
+        </category>
+        <category>
+            <name>Dev Launcher/Health Checks</name>
+            <file>learnings/dev_launcher_health_checks.xml</file>
+            <path>SPEC/learnings/dev_launcher_health_checks.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>health-check-timeout-1</id>
+                <id>dynamic-port-health-check</id>
+                <id>quick-health-check-attribute</id>
+            </learning_ids>
+            <important_note>Health checks must use dynamic ports and have adequate timeouts for database optimization</important_note>
         </category>
         <category>
             <name>Development/Git</name>

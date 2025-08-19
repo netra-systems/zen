@@ -1,0 +1,33 @@
+
+TRANSACTION BOUNDARY VALIDATION REPORT
+=====================================
+Total Tests: 8
+Passed: 5
+Failed: 3
+Success Rate: 62.5%
+
+DETAILED RESULTS:
+
+[PASS] User Creation Commit Boundary
+  - User bddc4bcf-6750-4b0c-a92d-e79156778ab7 created and persisted successfully
+
+[FAIL] User Creation Rollback Boundary
+  - Failed with error: Can't operate on closed transaction inside context manager.  Please complete the context manager before emitting further commands.
+
+[FAIL] Message Transaction Isolation
+  - Failed with error: DB_QUERY_FAILED: Unexpected error creating Thread
+
+[PASS] Concurrent Transaction Safety
+  - 3 concurrent user creations completed without interference
+
+[FAIL] Distributed Transaction Coordination
+  - Failed with error: object _AsyncGeneratorContextManager can't be used in 'await' expression
+
+[PASS] Bulk Operation Atomicity
+  - 3 users created atomically in bulk transaction
+
+[PASS] Payment Transaction Simulation
+  - Payment processing transaction completed for user f080edc6-df7f-4c4c-83eb-2adb92fbd69f
+
+[PASS] Transaction Isolation Levels
+  - READ_COMMITTED isolation level worked correctly

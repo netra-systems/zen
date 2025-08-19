@@ -5,20 +5,17 @@ from typing import Dict, Any, List
 from app.logging_config import central_logger as logger
 
 
-async def handle_industry_templates(request_data: Dict[str, Any]) -> Dict[str, Any]:
+async def handle_industry_templates(industry: str, demo_service) -> List[Dict[str, Any]]:
     """Handle industry template requests for demo."""
     try:
-        logger.info("Processing industry templates request for demo")
+        logger.info(f"Processing industry templates request for: {industry}")
         
-        # Return basic template structure
-        return {
-            "templates": [
-                {"id": "tech", "name": "Technology", "description": "Tech industry template"},
-                {"id": "finance", "name": "Finance", "description": "Financial services template"},
-                {"id": "healthcare", "name": "Healthcare", "description": "Healthcare industry template"}
-            ],
-            "status": "success"
-        }
+        # Get templates from demo service
+        templates = await demo_service.get_industry_templates(industry)
+        return templates
+    except ValueError as e:
+        logger.error(f"Invalid industry: {e}")
+        raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         logger.error(f"Error handling industry templates: {e}")
         raise HTTPException(status_code=500, detail="Template processing failed")
@@ -44,21 +41,30 @@ async def generate_metrics_from_service(template_id: str, config: Dict[str, Any]
         raise HTTPException(status_code=500, detail="Metrics generation failed")
 
 
-async def handle_synthetic_metrics(request_data: Dict[str, Any]) -> Dict[str, Any]:
+async def handle_synthetic_metrics(scenario: str, duration_hours: int, demo_service):
     """Handle synthetic metrics generation."""
     try:
-        logger.info("Processing synthetic metrics request")
+        logger.info(f"Processing synthetic metrics request - scenario: {scenario}, duration: {duration_hours}h")
         
-        # Return synthetic metrics
+        # Generate metrics using demo service if available
+        metrics = await demo_service.generate_synthetic_metrics(scenario=scenario, duration_hours=duration_hours)
+        
+        # Return the raw metrics data - the route handler will convert to DemoMetrics
+        return metrics
+    except AttributeError:
+        # Fallback if demo_service doesn't have generate_synthetic_metrics
+        logger.info("Using default synthetic metrics")
+        from datetime import datetime, UTC
         return {
-            "synthetic_metrics": {
-                "ai_efficiency": 78.5,
-                "cost_savings": 15.2,
-                "performance_boost": 88.0,
-                "error_reduction": 67.3
-            },
-            "generated_at": "2025-08-18T16:45:00Z",
-            "status": "success"
+            "latency_reduction": 60.0 + (duration_hours * 0.5),
+            "throughput_increase": 200.0 + (duration_hours * 1.0),
+            "cost_reduction": 45.0 + (duration_hours * 0.3),
+            "accuracy_improvement": 8.5,
+            "timestamps": [datetime.now(UTC)],
+            "values": {
+                "baseline_latency": [250.0],
+                "optimized_latency": [100.0]
+            }
         }
     except Exception as e:
         logger.error(f"Error handling synthetic metrics: {e}")

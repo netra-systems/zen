@@ -48,7 +48,7 @@ class SessionManager:
             return session_id
         return None
     
-    def get_session(self, session_id: str) -> Optional[Dict]:
+    async def get_session(self, session_id: str) -> Optional[Dict]:
         """Retrieve session data"""
         if not self.redis_client:
             return None
@@ -60,7 +60,7 @@ class SessionManager:
             if data:
                 session = json.loads(data)
                 # Update last activity
-                self._update_activity(session_id)
+                await self._update_activity_async(session_id)
                 return session
                 
         except Exception as e:
@@ -68,10 +68,10 @@ class SessionManager:
             
         return None
     
-    def update_session(self, session_id: str, 
+    async def update_session(self, session_id: str, 
                       updates: Dict) -> bool:
         """Update existing session data"""
-        session = self.get_session(session_id)
+        session = await self.get_session(session_id)
         if not session:
             return False
             
@@ -94,9 +94,9 @@ class SessionManager:
             logger.error(f"Session deletion failed: {e}")
             return False
     
-    def validate_session(self, session_id: str) -> bool:
+    async def validate_session(self, session_id: str) -> bool:
         """Check if session is valid and active"""
-        session = self.get_session(session_id)
+        session = await self.get_session(session_id)
         if not session:
             return False
             
@@ -110,7 +110,14 @@ class SessionManager:
             
         return True
     
-    def get_user_sessions(self, user_id: str) -> list:
+    async def get_user_session(self, user_id: str) -> Optional[Dict]:
+        """Get most recent active session for a user"""
+        sessions = await self.get_user_sessions(user_id)
+        if not sessions:
+            return None
+        return max(sessions, key=lambda s: s.get("last_activity", ""))
+
+    async def get_user_sessions(self, user_id: str) -> list:
         """Get all active sessions for a user"""
         if not self.redis_client:
             return []
@@ -136,9 +143,9 @@ class SessionManager:
             logger.error(f"Failed to get user sessions: {e}")
             return []
     
-    def invalidate_user_sessions(self, user_id: str) -> int:
+    async def invalidate_user_sessions(self, user_id: str) -> int:
         """Invalidate all sessions for a user"""
-        sessions = self.get_user_sessions(user_id)
+        sessions = await self.get_user_sessions(user_id)
         count = 0
         
         for session in sessions:
@@ -169,6 +176,18 @@ class SessionManager:
     
     def _update_activity(self, session_id: str):
         """Update session last activity timestamp"""
+        try:
+            key = self._get_session_key(session_id)
+            # Reset TTL
+            self.redis_client.expire(
+                key, 
+                timedelta(hours=self.session_ttl)
+            )
+        except Exception:
+            pass
+    
+    async def _update_activity_async(self, session_id: str):
+        """Update session last activity timestamp (async version)"""
         try:
             key = self._get_session_key(session_id)
             # Reset TTL

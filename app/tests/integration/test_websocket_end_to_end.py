@@ -55,7 +55,7 @@ class TestWebSocketConnectionLifecycle:
         
         # Establish and then disconnect
         conn_info = await conn_manager.connect("user_456", websocket)
-        await conn_manager.disconnect(conn_info)
+        await conn_manager.disconnect("user_456", websocket)
         
         # Verify connection is removed
         if "user_456" in conn_manager.active_connections:
@@ -98,7 +98,7 @@ class TestWebSocketMessageProcessing:
         # Create connection info
         websocket = Mock(spec=WebSocket)
         websocket.send_json = AsyncMock()
-        conn_info = ConnectionInfo("conn_123", "user_123", websocket)
+        conn_info = ConnectionInfo(websocket, "user_123")
         
         # Process message through pipeline
         raw_message = json.dumps({"type": "chat", "content": "Hello"})
@@ -125,7 +125,7 @@ class TestWebSocketMessageProcessing:
         ]
         
         for raw_message, expected_valid in test_cases:
-            conn_info = ConnectionInfo("conn_test", "user_test", Mock())
+            conn_info = ConnectionInfo(Mock(), "user_test")
             processor = AsyncMock()
             
             result = await handler.handle_message(raw_message, conn_info, processor)
@@ -150,7 +150,7 @@ class TestWebSocketMessageProcessing:
         fallback_handler = AsyncMock(return_value={"handled": "fallback"})
         router.register_fallback_handler(fallback_handler)
         
-        conn_info = ConnectionInfo("conn_fb", "user_fb", Mock())
+        conn_info = ConnectionInfo(Mock(), "user_fb")
         
         # Test specific handler
         result = await router.route_message({"type": "specific"}, conn_info)
@@ -263,7 +263,7 @@ class TestWebSocketResilience:
         handler = ModernReliableMessageHandler()
         
         # Simulate multiple failures
-        conn_info = ConnectionInfo("conn_cb", "user_cb", Mock())
+        conn_info = ConnectionInfo(Mock(), "user_cb")
         
         # Create a processor that always fails
         failing_processor = AsyncMock(side_effect=Exception("Processing failed"))
@@ -300,7 +300,7 @@ class TestWebSocketResilience:
         router.register_handler("flaky", flaky_handler)
         
         # Process message - should retry and succeed
-        conn_info = ConnectionInfo("conn_retry", "user_retry", Mock())
+        conn_info = ConnectionInfo(Mock(), "user_retry")
         
         # The retry logic is handled by execution engine
         # This test verifies the setup exists
@@ -314,9 +314,9 @@ class TestWebSocketResilience:
         
         # Test with various failure scenarios
         scenarios = [
-            (None, ConnectionInfo("c1", "u1", Mock())),  # None message
+            (None, ConnectionInfo(Mock(), "u1")),  # None message
             ('{"type": "test"}', None),  # None connection
-            ('', ConnectionInfo("c2", "u2", Mock())),  # Empty message
+            ('', ConnectionInfo(Mock(), "u2")),  # Empty message
         ]
         
         for raw_message, conn_info in scenarios:
@@ -343,7 +343,7 @@ class TestWebSocketPerformance:
         # Fast processor to test baseline latency
         fast_processor = AsyncMock(return_value={"processed": True})
         
-        conn_info = ConnectionInfo("conn_perf", "user_perf", Mock())
+        conn_info = ConnectionInfo(Mock(), "user_perf")
         
         # Measure processing time
         import time
@@ -367,7 +367,7 @@ class TestWebSocketPerformance:
         
         # Create multiple connection infos
         connections = [
-            ConnectionInfo(f"conn_{i}", f"user_{i}", Mock())
+            ConnectionInfo(Mock(), f"user_{i}")
             for i in range(10)
         ]
         

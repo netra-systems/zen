@@ -11,11 +11,11 @@ import asyncio
 
 from app.mcp_client import MCPTool, MCPConnection
 from app.services.mcp_client_service import MCPClientService
-from app.schemas.core_enums import MCPServerStatus, MCPToolExecutionStatus
+from app.schemas.core_enums import MCPServerStatus, MCPToolExecutionStatus, ExecutionStatus
 from app.core.exceptions_service import ServiceError
 from app.logging_config import central_logger
 from app.agents.base import BaseExecutionInterface, ExecutionMonitor, ExecutionErrorHandler
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
 
 logger = central_logger.get_logger(__name__)
 

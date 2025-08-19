@@ -12,6 +12,7 @@ module.exports = {
     '^@/auth/(.*)$': '<rootDir>/auth/$1',
     '^@/services/(.*)$': '<rootDir>/services/$1',
     '^@/providers/(.*)$': '<rootDir>/providers/$1',
+    '^@/styles/(.*)$': '<rootDir>/__mocks__/styleMock.js',
     '^@/(.*)$': '<rootDir>/$1',
     '\\.(css|less|scss|sass)$': '<rootDir>/__mocks__/styleMock.js',
     'react-syntax-highlighter/dist/esm/styles/prism': '<rootDir>/__mocks__/prismStyleMock.js',
@@ -19,11 +20,7 @@ module.exports = {
   },
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
-      tsconfig: {
-        jsx: 'react-jsx',
-        esModuleInterop: true,
-        allowSyntheticDefaultImports: true,
-      },
+      tsconfig: 'tsconfig.test.json',
     }],
     '^.+\\.(js|jsx|mjs)$': ['babel-jest', {
       presets: ['next/babel'],

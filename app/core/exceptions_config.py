@@ -33,3 +33,15 @@ class ValidationError(NetraException):
         if validation_errors:
             details['validation_errors'] = validation_errors
         return details
+
+
+class DatabaseError(NetraException):
+    """Raised when database operations fail."""
+    
+    def __init__(self, message: str = None, **kwargs):
+        super().__init__(
+            message=message or "Database operation failed",
+            code=ErrorCode.DATABASE_ERROR,
+            severity=ErrorSeverity.HIGH,
+            **kwargs
+        )

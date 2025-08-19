@@ -9,7 +9,8 @@ Business Value: Enables modern agent architecture compliance.
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from app.agents.base.interface import ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.logging_config import central_logger
 
 logger = central_logger

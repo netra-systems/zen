@@ -14,7 +14,7 @@ from dev_launcher.config import LauncherConfig, resolve_path
 from dev_launcher.log_streamer import LogStreamer, LogManager, Colors
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.utils import (
-    get_free_port, create_process_env, create_subprocess, print_with_emoji
+    get_free_port, find_available_port, create_process_env, create_subprocess, print_with_emoji
 )
 
 logger = logging.getLogger(__name__)
@@ -70,8 +70,12 @@ class AuthStarter:
         
         self._print("🔐", "AUTH", f"Starting auth service ({mode_desc})...")
         
-        # Get auth service configuration
-        port = auth_config.get_config().get("port", 8081)
+        # Get auth service configuration with dynamic port allocation
+        preferred_port = auth_config.get_config().get("port", 8081)
+        port = find_available_port(preferred_port, (8081, 8090))
+        
+        if port != preferred_port:
+            self._print("⚠️", "AUTH", f"Port {preferred_port} unavailable, using port {port} instead")
         
         # Build command to start auth service
         cmd = self._build_auth_command(port)
@@ -193,6 +197,11 @@ class AuthStarter:
             
             # Write service discovery info
             self._write_auth_discovery(port)
+            
+            # Update backend environment to use correct auth port
+            import os
+            os.environ["AUTH_SERVICE_PORT"] = str(port)
+            os.environ["AUTH_SERVICE_URL"] = f"http://localhost:{port}"
             
             self._print("✅", "AUTH", f"Auth service started on port {port}")
             return process, streamer

@@ -1,0 +1,399 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <meta>
+    <title>Claude Testing Prompt Specification</title>
+    <category>testing</category>
+    <created>2025-08-19</created>
+    <version>1.0.0</version>
+    <purpose>
+    Define how Claude should handle testing prompts like
+     "run all tests" or "run all unified tests"</purpose>
+    <cross_references>
+      <ref>test_runner_guide.xml</ref>
+      <ref>failing_test_management.xml</ref>
+      <ref>testing.xml</ref>
+      <ref>learnings/testing.xml</ref>
+      <ref>CLAUDE.md#unified-test-runner</ref>
+    </cross_references>
+  </meta>
+
+  <overview>
+    <description>
+      CRITICAL: This specification defines the MANDATORY workflow for Claude when receiving testing prompts.
+      When users ask to "run tests", "run all tests", "run unified tests", etc., Claude MUST follow this specification.
+    </description>
+    <goals>
+      <goal>Standardize Claude's response to testing requests</goal>
+      <goal>Ensure proper use of unified test runner</goal>
+      <goal>Automate test failure investigation and fixing</goal>
+      <goal>Document learnings from test failures</goal>
+      <goal>Generate reports for test runs</goal>
+    </goals>
+  </overview>
+
+  <prompt_patterns>
+    <!-- Core Test Levels -->
+    <pattern match="run smoke tests|quick test|quick validation">
+      <action>Run minimal smoke tests for quick validation</action>
+      <command>python test_runner.py --level smoke</command>
+      <description>Fastest test suite - basic functionality check</description>
+    </pattern>
+    
+    <pattern match="run unit tests|test units|unit test">
+      <action>Run unit tests for isolated component testing</action>
+      <command>python test_runner.py --level unit</command>
+      <description>Tests individual functions and classes in isolation</description>
+    </pattern>
+    
+    <pattern match="run agent tests|test agents|agent testing">
+      <action>Run agent tests with real LLM interactions</action>
+      <command>python test_runner.py --level agents --real-llm</command>
+      <description>Tests multi-agent system with actual LLM calls</description>
+    </pattern>
+    
+    <pattern match="run agent startup|test agent startup|agent-startup">
+      <action>Run agent startup sequence tests</action>
+      <command>python test_runner.py --level agent-startup</command>
+      <description>Validates agent initialization and startup sequences</description>
+    </pattern>
+    
+    <pattern match="run integration tests|run unified tests|test integration">
+      <action>Run integration tests (DEFAULT for development)</action>
+      <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
+      <description>Tests component interactions - recommended default</description>
+    </pattern>
+    
+    <!-- Comprehensive Test Suites -->
+    <pattern match="run comprehensive tests|comprehensive testing|full test suite">
+      <action>Run comprehensive test suite</action>
+      <command>python test_runner.py --level comprehensive</command>
+      <description>Complete test coverage across all components</description>
+    </pattern>
+    
+    <pattern match="comprehensive backend|backend comprehensive">
+      <action>Run comprehensive backend tests</action>
+      <command>python test_runner.py --level comprehensive-backend</command>
+      <description>Full backend component testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive frontend|frontend comprehensive">
+      <action>Run comprehensive frontend tests</action>
+      <command>python test_runner.py --level comprehensive-frontend</command>
+      <description>Full frontend component testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive core|core comprehensive">
+      <action>Run comprehensive core system tests</action>
+      <command>python test_runner.py --level comprehensive-core</command>
+      <description>Core system functionality testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive agents|agents comprehensive">
+      <action>Run comprehensive agent tests</action>
+      <command>python test_runner.py --level comprehensive-agents</command>
+      <description>Complete multi-agent system testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive websocket|websocket comprehensive">
+      <action>Run comprehensive WebSocket tests</action>
+      <command>python test_runner.py --level comprehensive-websocket</command>
+      <description>Full WebSocket communication testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive database|database comprehensive">
+      <action>Run comprehensive database tests</action>
+      <command>python test_runner.py --level comprehensive-database</command>
+      <description>Complete database operations testing</description>
+    </pattern>
+    
+    <pattern match="comprehensive api|api comprehensive">
+      <action>Run comprehensive API tests</action>
+      <command>python test_runner.py --level comprehensive-api</command>
+      <description>Full API endpoint testing</description>
+    </pattern>
+    
+    <!-- Critical and Special Test Patterns -->
+    <pattern match="run critical tests|critical testing|business critical">
+      <action>Run business-critical tests only</action>
+      <command>python test_runner.py --level critical</command>
+      <description>Tests for revenue-impacting functionality</description>
+    </pattern>
+    
+    <pattern match="run all tests|test everything|complete test">
+      <action>Run ALL test levels - complete validation</action>
+      <command>python test_runner.py --level all</command>
+      <description>Runs every single test in the system</description>
+    </pattern>
+    
+    <pattern match="run real e2e|real end to end|e2e tests">
+      <action>Run real end-to-end tests with actual services</action>
+      <command>python test_runner.py --level real_e2e --real-llm</command>
+      <description>Full system testing with real services</description>
+    </pattern>
+    
+    <pattern match="run real services|test real services|services test">
+      <action>Run tests with real service integrations</action>
+      <command>python test_runner.py --level real_services --real-llm</command>
+      <description>Tests with actual external service calls</description>
+    </pattern>
+    
+    <pattern match="run mock only|mock tests|mocked testing">
+      <action>Run tests with mocked dependencies only</action>
+      <command>python test_runner.py --level mock_only</command>
+      <description>Fast testing with all external deps mocked</description>
+    </pattern>
+    
+    <pattern match="run performance tests|performance testing|perf test">
+      <action>Run performance and load tests</action>
+      <command>python test_runner.py --level performance</command>
+      <description>Tests system performance and scalability</description>
+    </pattern>
+    
+    <!-- Specialized Test Patterns -->
+    <pattern match="run backend tests|backend only|test backend">
+      <action>Run backend-only tests</action>
+      <command>python test_runner.py --level unit --backend-only</command>
+      <description>Backend components isolation testing</description>
+    </pattern>
+    
+    <pattern match="run frontend tests|frontend only|test frontend">
+      <action>Run frontend-only tests</action>
+      <command>python test_runner.py --level unit --frontend-only</command>
+      <description>Frontend components isolation testing</description>
+    </pattern>
+    
+    <pattern match="run failing tests|fix failing tests|test failures">
+      <action>Run only currently failing tests</action>
+      <command>python test_runner.py --run-failing</command>
+      <description>Re-run tests that failed in last run</description>
+    </pattern>
+    
+    <pattern match="fix all failing|auto fix tests|fix tests">
+      <action>Automatically fix failing tests</action>
+      <command>python test_runner.py --fix-failing</command>
+      <description>AI-powered test failure fixing</description>
+    </pattern>
+    
+    <pattern match="clear failing|reset failures|clear test cache">
+      <action>Clear failing tests cache</action>
+      <command>python test_runner.py --clear-failing</command>
+      <description>Reset the failing tests tracking</description>
+    </pattern>
+    
+    <!-- Test with Options -->
+    <pattern match="test with coverage|coverage test|test coverage">
+      <action>Run tests with coverage reporting</action>
+      <command>python test_runner.py --level integration</command>
+      <description>Default includes coverage unless --no-coverage</description>
+    </pattern>
+    
+    <pattern match="fast test|quick feedback|fast fail">
+      <action>Run tests with fast-fail for quick feedback</action>
+      <command>python test_runner.py --level integration --no-coverage --fast-fail</command>
+      <description>Stop at first failure for rapid iteration</description>
+    </pattern>
+    
+    <pattern match="parallel test|test parallel|speed test">
+      <action>Run tests in parallel for speed</action>
+      <command>python test_runner.py --level integration --parallel 4 --speed</command>
+      <description>Maximize test execution speed</description>
+    </pattern>
+    
+    <pattern match="staging test|test staging|staging validation">
+      <action>Run tests against staging environment</action>
+      <command>python test_runner.py --level integration --staging</command>
+      <description>Validate staging deployment</description>
+    </pattern>
+    
+    <pattern match="list tests|show tests|what tests">
+      <action>List available tests without running</action>
+      <command>python test_runner.py --list --list-level integration</command>
+      <description>Show which tests would run</description>
+    </pattern>
+    
+    <pattern match="show failing|list failures|what's failing">
+      <action>Show currently failing tests</action>
+      <command>python test_runner.py --show-failing</command>
+      <description>Display failing tests from last run</description>
+    </pattern>
+  </prompt_patterns>
+
+  <workflow>
+    <step number="1" name="Read Existing Documentation">
+      <description>MANDATORY: Before running any tests, read relevant XML specs</description>
+      <actions>
+        <action priority="1">Read SPEC/test_runner_guide.xml for test runner commands</action>
+        <action priority="2">Read SPEC/testing.xml for testing standards</action>
+        <action priority="3">Check SPEC/learnings/testing.xml for known issues</action>
+        <action priority="4">Review test_reports/failing_tests.json if exists</action>
+      </actions>
+    </step>
+
+    <step number="2" name="Use Unified Test Runner">
+      <description>MANDATORY: Always use the unified test runner</description>
+      <critical>NEVER run pytest directly. NEVER create alternative test runners.</critical>
+      <default_command>python test_runner.py --level integration --no-coverage --fast-fail</default_command>
+      <options>
+        <option name="Quick validation">--level smoke</option>
+        <option name="Fast feedback">--no-coverage --fast-fail</option>
+        <option name="Real LLM testing">--real-llm</option>
+        <option name="Specific category">--level {category}</option>
+      </options>
+    </step>
+
+    <step number="3" name="Handle Test Failures">
+      <description>When tests fail, spawn specialized agents for investigation</description>
+      <actions>
+        <action priority="1">Parse test output to identify failures</action>
+        <action priority="2">Group failures by type (import, assertion, mock, async, etc.)</action>
+        <action priority="3">For each failure group, spawn a Task agent</action>
+      </actions>
+      
+      <agent_spawning>
+        <trigger>Test failures detected</trigger>
+        <strategy>One agent per failure category or per 5 related failures</strategy>
+        <agent_prompt_template>
+          Investigate and fix the following test failure(s):
+          - Test file: {test_path}
+          - Test name: {test_name}
+          - Error type: {error_type}
+          - Error message: {error_message}
+          - Traceback: {traceback}
+          
+          Instructions:
+          1. Read the test file and understand what it's testing
+          2. Identify the root cause (not just symptoms)
+          3. Fix the System Under Test (SUT) first, only modify test if requirements changed
+          4. Verify fix by running: python -m pytest {test_path}::{test_name} -xvs
+          5. Return a summary of the fix and what was learned
+        </agent_prompt_template>
+      </agent_spawning>
+    </step>
+
+    <step number="4" name="Report Generation">
+      <description>Generate comprehensive reports after test runs</description>
+      <report_location>agent_to_agent/test_run_report_{timestamp}.md</report_location>
+      <report_sections>
+        <section name="Summary">
+          - Total tests run
+          - Passed/Failed/Skipped counts
+          - Test duration
+          - Coverage percentage (if applicable)
+        </section>
+        <section name="Failure Analysis">
+          - Categorized failures by type
+          - Root cause analysis
+          - Fixes applied
+          - Tests that remain broken
+        </section>
+        <section name="Performance Metrics">
+          - Slowest tests
+          - Memory usage
+          - Parallel execution efficiency
+        </section>
+        <section name="Recommendations">
+          - Tests needing refactoring
+          - Flaky test identification
+          - Missing test coverage areas
+        </section>
+      </report_sections>
+    </step>
+
+    <step number="5" name="Document Learnings">
+      <description>Update XML specs with new learnings</description>
+      <actions>
+        <action>For new failure patterns, update SPEC/learnings/testing.xml</action>
+        <action>For test runner issues, update SPEC/test_runner_guide.xml</action>
+        <action>For architectural issues discovered, update relevant domain specs</action>
+      </actions>
+      <learning_template>
+        <learning id="{unique_id}">
+          <title>{Brief description}</title>
+          <problem>{What went wrong}</problem>
+          <solution>{How it was fixed}</solution>
+          <files_affected>{List of files}</files_affected>
+          <verification>{How to verify fix}</verification>
+          <business_value>{Impact on MRR if applicable}</business_value>
+        </learning>
+      </learning_template>
+    </step>
+  </workflow>
+
+  <agent_coordination>
+    <parallel_execution>
+      <description>Spawn multiple agents in parallel for different test categories</description>
+      <max_concurrent_agents>5</max_concurrent_agents>
+      <categories>
+        <category name="import_errors">Fix import and dependency issues</category>
+        <category name="assertion_failures">Fix business logic test failures</category>
+        <category name="mock_issues">Fix mocking and fixture problems</category>
+        <category name="async_timing">Fix async and timing issues</category>
+        <category name="integration_failures">Fix cross-component issues</category>
+      </categories>
+    </parallel_execution>
+
+    <agent_communication>
+      <description>Agents should communicate discoveries to prevent duplicate work</description>
+      <shared_context>agent_to_agent/test_fix_context.json</shared_context>
+      <update_frequency>After each successful fix</update_frequency>
+    </agent_communication>
+  </agent_coordination>
+
+  <best_practices>
+    <practice priority="1">ALWAYS use unified test runner, NEVER pytest directly</practice>
+    <practice priority="2">Read existing specs BEFORE running tests</practice>
+    <practice priority="3">Fix root causes, not symptoms</practice>
+    <practice priority="4">Test fixes in isolation before full suite</practice>
+    <practice priority="5">Document all learnings in XML specs</practice>
+    <practice priority="6">Generate reports in agent_to_agent folder</practice>
+    <practice priority="7">Spawn agents for parallel investigation</practice>
+    <practice priority="8">Update failing_tests.json after fixes</practice>
+  </best_practices>
+
+  <error_handling>
+    <scenario name="Test runner not found">
+      <action>Check if in correct directory: netra-core-generation-1</action>
+      <action>Verify test_runner.py exists in root</action>
+      <fallback>Alert user that test runner is missing</fallback>
+    </scenario>
+    
+    <scenario name="Import errors in test runner">
+      <action>Run: pip install -r requirements.txt</action>
+      <action>Check Python version compatibility</action>
+    </scenario>
+    
+    <scenario name="Database connection failures">
+      <action>Check if dev_launcher.py is running</action>
+      <action>Verify database services are up</action>
+      <action>Check .env configuration</action>
+    </scenario>
+  </error_handling>
+
+  <mandatory_rules>
+    <rule id="1">MUST use unified test runner (test_runner.py)</rule>
+    <rule id="2">MUST read existing XML specs before testing</rule>
+    <rule id="3">MUST spawn agents for test failure investigation</rule>
+    <rule id="4">MUST generate reports in agent_to_agent folder</rule>
+    <rule id="5">MUST document learnings in XML specs</rule>
+    <rule id="6">MUST update failing_tests.json</rule>
+    <rule id="7">NEVER run pytest directly</rule>
+    <rule id="8">NEVER create alternative test runners</rule>
+    <rule id="9">NEVER skip documentation of learnings</rule>
+    <rule id="10">ALWAYS verify fixes before marking as complete</rule>
+  </mandatory_rules>
+
+  <test_runner_usage>
+usage: test_runner.py [-h]
+                      [--level {smoke,unit,agents,agent-startup,integration,comprehensive,comprehensive-backend,comprehensive-frontend,comprehensive-core,comprehensive-agents,comprehensive-websocket,comprehensive-database,comprehensive-api,critical,all,real_e2e,real_services,mock_only,performance}]
+                      [--simple] [--backend-only] [--frontend-only] [--quiet] [--verbose] [--no-report] [--real-llm]
+                      [--llm-model {gemini-2.5-flash,gemini-2.5-pro,gpt-4,gpt-3.5-turbo,claude-3-sonnet}]
+                      [--llm-timeout LLM_TIMEOUT] [--parallel PARALLEL] [--speed] [--no-warnings] [--no-coverage]
+                      [--fast-fail] [--staging] [--staging-url STAGING_URL] [--staging-api-url STAGING_API_URL]
+                      [--report-format {text,json,markdown}] [--output OUTPUT] [--ci]
+                      [--shard {core,agents,websocket,database,api,frontend}] [--json-output JSON_OUTPUT]
+                      [--coverage-output COVERAGE_OUTPUT] [--list] [--list-format {text,json,markdown}]
+                      [--list-level {smoke,unit,agents,agent-startup,integration,comprehensive,comprehensive-backend,comprehensive-frontend,comprehensive-core,comprehensive-agents,comprehensive-websocket,comprehensive-database,comprehensive-api,critical,all,real_e2e,real_services,mock_only,performance}]
+                      [--list-category LIST_CATEGORY] [--show-failing] [--run-failing] [--fix-failing]
+                      [--max-fixes MAX_FIXES] [--clear-failing]
+  </test_runner_usage>
+</spec>

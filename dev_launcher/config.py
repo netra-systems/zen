@@ -39,6 +39,12 @@ class LauncherConfig:
     # Startup mode configuration
     startup_mode: str = "minimal"  # minimal, standard, or verbose
     
+    # Phase 6 Integration: New optimization flags
+    silent_mode: bool = False  # Silent logging with minimal output
+    no_cache: bool = False  # Bypass all caching
+    profile_startup: bool = False  # Show detailed performance metrics
+    legacy_mode: bool = False  # Use old behavior for compatibility
+    
     # Boundary monitoring configuration
     watch_boundaries: bool = False  # Real-time boundary monitoring
     boundary_check_interval: int = 30  # Check every 30 seconds
@@ -96,8 +102,12 @@ class LauncherConfig:
     @classmethod
     def from_args(cls, args) -> "LauncherConfig":
         """Create configuration from command-line arguments."""
-        # Handle port configuration
-        dynamic_ports = not args.static if hasattr(args, 'static') else True
+        # Handle port configuration - default to dynamic ports unless explicitly disabled
+        dynamic_ports = True  # Default to dynamic
+        if hasattr(args, 'static') and args.static:
+            dynamic_ports = False
+        elif hasattr(args, 'dynamic'):
+            dynamic_ports = args.dynamic
         
         # Handle reload flags
         if hasattr(args, 'dev') and args.dev:
@@ -135,6 +145,18 @@ class LauncherConfig:
         elif hasattr(args, 'mode'):
             startup_mode = args.mode
         
+        # Handle new optimization flags
+        silent_mode = hasattr(args, 'silent') and args.silent
+        no_cache = hasattr(args, 'no_cache') and args.no_cache
+        profile_startup = hasattr(args, 'profile') and args.profile
+        legacy_mode = hasattr(args, 'legacy') and args.legacy
+        
+        # Legacy mode overrides optimizations
+        if legacy_mode:
+            silent_mode = False
+            no_cache = True
+            profile_startup = False
+        
         return cls(
             backend_port=args.backend_port,
             frontend_port=args.frontend_port,
@@ -150,6 +172,10 @@ class LauncherConfig:
             use_turbopack=not args.no_turbopack if hasattr(args, 'no_turbopack') else False,
             parallel_startup=not args.no_parallel if hasattr(args, 'no_parallel') else True,
             startup_mode=startup_mode,
+            silent_mode=silent_mode,
+            no_cache=no_cache,
+            profile_startup=profile_startup,
+            legacy_mode=legacy_mode,
             project_root=find_project_root()
         )
     

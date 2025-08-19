@@ -79,7 +79,10 @@ class FrontendStarter:
     
     def _allocate_dynamic_frontend_port(self) -> int:
         """Allocate dynamic frontend port."""
-        port = get_free_port()
+        # Try to get a port in a preferred range first
+        from dev_launcher.utils import find_available_port
+        preferred_port = self.config.frontend_port or 3000
+        port = find_available_port(preferred_port, (3000, 3010))
         logger.info(f"Allocated frontend port: {port}")
         self.config.frontend_port = port
         return port

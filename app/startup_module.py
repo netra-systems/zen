@@ -64,9 +64,11 @@ async def _schedule_background_optimizations(app: FastAPI, logger: logging.Logge
 async def _run_index_optimization_background(logger: logging.Logger) -> None:
     """Run database index optimization in background."""
     try:
-        logger.info("Starting background database index optimization...")
+        # Delay optimization to avoid startup bottleneck
+        await asyncio.sleep(30)  # Wait 30 seconds after startup
+        logger.debug("Starting background database index optimization...")
         optimization_results = await index_manager.optimize_all_databases()
-        logger.info(f"Background database optimization completed: {optimization_results}")
+        logger.debug(f"Background database optimization completed: {optimization_results}")
     except Exception as e:
         logger.error(f"Background index optimization failed: {e}")
 
@@ -104,8 +106,13 @@ def _perform_database_validation(logger: logging.Logger) -> None:
 
 def run_database_migrations(logger: logging.Logger) -> None:
     """Run database migrations if not in test mode."""
-    if 'pytest' not in sys.modules:
+    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
+    skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
+    
+    if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
+    elif fast_startup or skip_migrations:
+        logger.info("Skipping database migrations (fast startup mode)")
 
 
 def _execute_migrations(logger: logging.Logger) -> None:
@@ -250,6 +257,13 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     """Run application startup checks."""
+    disable_checks = os.getenv("DISABLE_STARTUP_CHECKS", "false").lower() == "true"
+    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
+    
+    if disable_checks or fast_startup:
+        logger.info("Skipping startup health checks (fast startup mode)")
+        return
+    
     from app.startup_checks import run_startup_checks
     try:
         await run_startup_checks(app)

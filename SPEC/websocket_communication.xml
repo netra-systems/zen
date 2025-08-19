@@ -16,6 +16,9 @@
     <architecture>
       Agent System → Supervisor → WebSocket Manager → Frontend → UI Layers
     </architecture>
+    <critical_reference>
+      MUST comply with SPEC:websocket_reliability for silent failure prevention
+    </critical_reference>
   </overview>
 
   <current_issues>

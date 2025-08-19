@@ -7,13 +7,17 @@ from app.db.base import Base
 def _convert_postgresql_url(db_url: str) -> str:
     """Convert postgresql:// to postgresql+asyncpg://"""
     if db_url.startswith("postgresql://"):
-        return db_url.replace("postgresql://", "postgresql+asyncpg://")
+        url = db_url.replace("postgresql://", "postgresql+asyncpg://")
+        # Convert sslmode to ssl for asyncpg
+        return url.replace("sslmode=", "ssl=")
     return db_url
 
 def _convert_postgres_url(db_url: str) -> str:
     """Convert postgres:// to postgresql+asyncpg://"""
     if db_url.startswith("postgres://"):
-        return db_url.replace("postgres://", "postgresql+asyncpg://")
+        url = db_url.replace("postgres://", "postgresql+asyncpg://")
+        # Convert sslmode to ssl for asyncpg
+        return url.replace("sslmode=", "ssl=")
     return db_url
 
 def get_async_database_url() -> str:

@@ -19,29 +19,48 @@ class AuthDatabase:
         self._initialized = False
     
     async def initialize(self):
-        """Initialize database connection"""
+        """Initialize database connection with fast test mode support"""
         if self._initialized:
             return
         
-        # Get database URL from config
-        from auth_core.config import AuthConfig
-        database_url = AuthConfig.get_database_url()
+        # Check for fast test mode
+        fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+        env = os.getenv("ENVIRONMENT", "development").lower()
         
-        if not database_url:
-            logger.warning("No database URL configured, using in-memory SQLite")
+        if fast_test_mode or env == "test":
+            # Use in-memory SQLite for fast testing
+            logger.info("Using in-memory SQLite for fast test mode")
             database_url = "sqlite+aiosqlite:///:memory:"
-        elif database_url.startswith("postgresql://"):
-            # Convert to async PostgreSQL URL
-            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
-        elif database_url.startswith("postgres://"):
-            # Handle Heroku-style URLs
-            database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
+        else:
+            # Get database URL from config
+            from auth_core.config import AuthConfig
+            database_url = AuthConfig.get_database_url()
+            
+            if not database_url:
+                logger.warning("No database URL configured, using in-memory SQLite")
+                database_url = "sqlite+aiosqlite:///:memory:"
+            elif database_url.startswith("postgresql://"):
+                # Convert to async PostgreSQL URL
+                database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+                # Convert sslmode to ssl for asyncpg
+                database_url = database_url.replace("sslmode=", "ssl=")
+            elif database_url.startswith("postgres://"):
+                # Handle Heroku-style URLs
+                database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
+                # Convert sslmode to ssl for asyncpg
+                database_url = database_url.replace("sslmode=", "ssl=")
         
-        # Create async engine
+        # Create async engine with optimizations
+        connect_args = {}
+        if database_url.startswith("sqlite"):
+            # SQLite optimizations for testing
+            connect_args = {"check_same_thread": False}
+        
         self.engine = create_async_engine(
             database_url,
             poolclass=NullPool,  # Disable pooling for serverless
-            echo=os.getenv("SQL_ECHO", "false").lower() == "true"
+            echo=os.getenv("SQL_ECHO", "false").lower() == "true",
+            connect_args=connect_args
         )
         
         # Create session factory
@@ -51,11 +70,12 @@ class AuthDatabase:
             expire_on_commit=False
         )
         
-        # Create tables if needed
-        await self.create_tables()
+        # Create tables if needed (skip for in-memory in some cases)
+        if not (fast_test_mode and database_url == "sqlite+aiosqlite:///:memory:"):
+            await self.create_tables()
         
         self._initialized = True
-        logger.info("Auth database initialized successfully")
+        logger.info(f"Auth database initialized successfully ({'fast test' if fast_test_mode else 'normal'} mode)")
     
     async def create_tables(self):
         """Create database tables if they don't exist"""

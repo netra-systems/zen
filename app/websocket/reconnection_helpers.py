@@ -81,3 +81,14 @@ class ReconnectionMetricsHelper:
     def calculate_attempt_duration_ms(start_time: float) -> float:
         """Calculate attempt duration in milliseconds."""
         return (time.time() - start_time) * 1000
+
+    @staticmethod 
+    def update_metrics_on_success(metrics, duration_ms: float, disconnect_time: Optional[datetime]) -> None:
+        """Update metrics on successful reconnection."""
+        successful_count = metrics.successful_reconnections
+        current_avg = metrics.average_reconnection_time_ms
+        metrics.average_reconnection_time_ms = ReconnectionMetricsHelper.update_average_reconnection_time(
+            current_avg, successful_count, duration_ms
+        )
+        downtime_ms = ReconnectionMetricsHelper.calculate_downtime_ms(disconnect_time)
+        metrics.longest_downtime_ms = max(metrics.longest_downtime_ms, downtime_ms)

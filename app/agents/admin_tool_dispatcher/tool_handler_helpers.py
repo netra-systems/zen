@@ -11,7 +11,8 @@ Target Segments: Growth & Enterprise (enhanced admin operations).
 from typing import Dict, Any, Optional, Tuple
 from sqlalchemy.orm import Session
 from app.db.models_postgres import User
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.monitoring import ExecutionMonitor
 from app.logging_config import central_logger
 

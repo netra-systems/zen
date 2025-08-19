@@ -10,7 +10,8 @@ import re
 import time
 
 from app.logging_config import central_logger
-from app.agents.base.interface import AgentExecutionMixin, ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import AgentExecutionMixin, ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.monitoring import ExecutionMonitor
 from app.agents.base.error_handler import ExecutionErrorHandler
 

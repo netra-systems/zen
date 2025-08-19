@@ -172,5 +172,19 @@ async def handle_mcp_message(
 ):
     """Handle MCP JSON-RPC message"""
     from app.services.mcp_request_handler import handle_request
-    return await handle_request(request)
+    from fastapi import HTTPException
+    
+    result = await handle_request(request)
+    
+    # If response contains error, return appropriate HTTP status
+    if "error" in result:
+        error_code = result["error"].get("code", -32603)
+        if error_code == -32600:  # Invalid Request
+            raise HTTPException(status_code=400, detail=result["error"]["message"])
+        elif error_code == -32601:  # Method not found
+            raise HTTPException(status_code=404, detail=result["error"]["message"])
+        else:
+            raise HTTPException(status_code=422, detail=result["error"]["message"])
+    
+    return result
 

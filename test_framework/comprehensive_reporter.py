@@ -97,6 +97,11 @@ class ComprehensiveTestReporter:
         # Add to history
         self.updater.add_to_history(self.test_results, level, exit_code, timestamp)
         
+        # Handle agent performance data for agent-startup tests
+        if level == "agent-startup" and hasattr(results, 'agent_performance'):
+            from .agent_performance_reporter import update_agent_performance_data
+            update_agent_performance_data(self.test_results, results['agent_performance'], timestamp)
+        
         # Save the single file
         self._save_results()
     

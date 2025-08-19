@@ -11,7 +11,7 @@ from typing import Dict, List, Any, Optional
 
 from .test_profile_models import TestProfile, TestSuite, TestProfileManager, TestPriority
 from .test_discovery import TestDiscovery
-from .test_execution_engine import TestExecutionEngine
+from .test_execution_engine import execute_test_suite
 from .failure_patterns import FailurePatternAnalyzer
 from .test_insights import TestInsightGenerator
 
@@ -27,7 +27,7 @@ class TestOrchestrator:
         
         # Initialize components
         self.discovery = TestDiscovery(project_root)
-        self.execution_engine = TestExecutionEngine(project_root)
+        self.execute_test_suite = execute_test_suite
         self.failure_analyzer = FailurePatternAnalyzer()
         self.insight_generator = TestInsightGenerator()
         

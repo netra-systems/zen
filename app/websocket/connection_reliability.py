@@ -11,7 +11,8 @@ import time
 from typing import Dict, Any, Callable, Awaitable, Optional
 
 from app.logging_config import central_logger
-from app.agents.base.interface import ExecutionContext, ExecutionResult, ExecutionStatus
+from app.agents.base.interface import ExecutionContext, ExecutionResult
+from app.schemas.core_enums import ExecutionStatus
 from app.agents.base.reliability_manager import ReliabilityManager
 from app.agents.base.circuit_breaker import CircuitBreakerConfig
 from app.schemas.shared_types import RetryConfig
@@ -199,12 +200,14 @@ class ConnectionCloseReliability:
         return ConnectionValidator.should_attempt_close(conn_info.websocket)
         
     async def _perform_websocket_close(self, websocket, code: int, reason: str) -> None:
-        """Perform the websocket close operation."""
+        """Perform the websocket close operation with resource cleanup."""
         try:
             await websocket.close(code=code, reason=reason)
+            logger.debug(f"WebSocket closed successfully with code {code}: {reason}")
         except Exception as e:
             logger.debug(f"Error closing WebSocket: {e}")
-            raise
+            # Even if close fails, we should continue with cleanup
+            pass
 
 
 class ConnectionEstablishmentReliability:
@@ -220,15 +223,17 @@ class ConnectionEstablishmentReliability:
         operation = lambda: self._execute_connection_setup(user_id, websocket, max_connections)
         
         result = await self.reliability_manager.execute_with_reliability(connection_id, operation)
-        return result.result.get("connection_info") if result.success else None
+        if result.success and "data" in result.result:
+            return result.result["data"].get("connection_info")
+        return None
         
     async def _execute_connection_setup(self, user_id: str, websocket,
-                                      max_connections: int) -> ConnectionInfo:
+                                      max_connections: int) -> Dict[str, ConnectionInfo]:
         """Execute connection setup with validation."""
         self._validate_connection_request(user_id, websocket)
         conn_info = self._create_connection_info(user_id, websocket)
         logger.info(f"Connection established safely for user {user_id} (ID: {conn_info.connection_id})")
-        return conn_info
+        return {"connection_info": conn_info}
         
     def _validate_connection_request(self, user_id: str, websocket) -> None:
         """Validate connection request parameters."""

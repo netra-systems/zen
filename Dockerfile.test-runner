@@ -1,0 +1,76 @@
+# Dockerfile.test-runner - Unified Test Execution Container
+# Purpose: Run comprehensive integration tests against all services
+# Business Value: Ensures 100% confidence in deployments = $0 churn risk
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies for testing
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    wget \
+    postgresql-client \
+    redis-tools \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Node.js for frontend testing
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
+    apt-get install -y nodejs
+
+# Copy and install Python dependencies
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+
+# Install additional testing dependencies
+RUN pip install --no-cache-dir \
+    pytest-xdist \
+    pytest-html \
+    pytest-json-report \
+    pytest-cov \
+    requests \
+    websocket-client \
+    selenium \
+    playwright \
+    aiohttp \
+    asyncpg \
+    httpx \
+    tenacity
+
+# Install Playwright browsers
+RUN playwright install chromium --with-deps
+
+# Copy test framework and configuration
+COPY test_framework/ ./test_framework/
+COPY tests/ ./tests/
+COPY integration_tests/ ./integration_tests/
+COPY test_runner.py ./
+COPY conftest.py ./
+
+# Copy application code (needed for imports in tests)
+COPY app/ ./app/
+COPY shared/ ./shared/
+
+# Create directories for test results
+RUN mkdir -p /app/test_results /app/logs /app/screenshots
+
+# Create non-root user for security
+RUN useradd -m -u 1000 testuser && \
+    chown -R testuser:testuser /app
+
+USER testuser
+
+# Environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app \
+    TEST_ENVIRONMENT=docker \
+    PYTEST_TIMEOUT=300
+
+# Health check - verify test runner can start
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=2 \
+    CMD python -c "import pytest; import requests; print('Test runner ready')" || exit 1
+
+# Default command runs comprehensive test suite
+CMD ["python", "test_runner.py", "--level", "unified", "--real-services", "--docker-network", "--generate-reports"]
