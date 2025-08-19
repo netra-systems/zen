@@ -227,6 +227,222 @@ class MockWebSocketServer:
         self._connections -= disconnected
 
 
+class MockHTTPService:
+    """Mock HTTP service with health endpoints."""
+    
+    def __init__(self, service_name: str, port: int, host: str = "localhost"):
+        self.service_name = service_name
+        self.host = host
+        self.port = port
+        self.app = None
+        self.server = None
+        self._setup_routes()
+    
+    def _setup_routes(self) -> None:
+        """Setup mock HTTP routes."""
+        self.app = web.Application()
+        self.app.router.add_get('/health', self._health_handler)
+        self.app.router.add_get('/status', self._status_handler)
+        
+        # Service-specific routes
+        if self.service_name == "auth-service":
+            self.app.router.add_post('/auth/login', self._auth_login_handler)
+            self.app.router.add_post('/auth/logout', self._auth_logout_handler)
+            self.app.router.add_get('/auth/verify', self._auth_verify_handler)
+        elif self.service_name == "backend-service":
+            self.app.router.add_get('/api/users', self._api_users_handler)
+            self.app.router.add_get('/api/systems', self._api_systems_handler)
+        elif self.service_name == "frontend-service":
+            self.app.router.add_get('/', self._frontend_handler)
+    
+    async def _health_handler(self, request) -> web.Response:
+        """Mock health check endpoint."""
+        health_data = {
+            "status": "healthy",
+            "service": self.service_name,
+            "timestamp": time.time(),
+            "version": "1.0.0-mock",
+            "checks": {
+                "database": "healthy",
+                "memory": "healthy",
+                "disk": "healthy"
+            },
+            "metrics": {
+                "uptime_seconds": 3600,
+                "memory_usage_mb": 128,
+                "cpu_usage_percent": 15
+            }
+        }
+        return web.json_response(health_data)
+    
+    async def _status_handler(self, request) -> web.Response:
+        """Mock status endpoint."""
+        status_data = {
+            "service": self.service_name,
+            "status": "running",
+            "environment": "test"
+        }
+        return web.json_response(status_data)
+    
+    async def _auth_login_handler(self, request) -> web.Response:
+        """Mock auth login endpoint."""
+        return web.json_response({
+            "access_token": "mock_token_123",
+            "token_type": "Bearer",
+            "expires_in": 3600
+        })
+    
+    async def _auth_logout_handler(self, request) -> web.Response:
+        """Mock auth logout endpoint."""
+        return web.json_response({"message": "Logged out successfully"})
+    
+    async def _auth_verify_handler(self, request) -> web.Response:
+        """Mock auth verification endpoint."""
+        return web.json_response({
+            "valid": True,
+            "user_id": "test_user_123"
+        })
+    
+    async def _api_users_handler(self, request) -> web.Response:
+        """Mock API users endpoint."""
+        return web.json_response({
+            "users": [{
+                "id": 1,
+                "username": "test_user",
+                "email": "test@example.com"
+            }]
+        })
+    
+    async def _api_systems_handler(self, request) -> web.Response:
+        """Mock API systems endpoint."""
+        return web.json_response({
+            "systems": [{
+                "id": 1,
+                "name": "test_system",
+                "status": "active"
+            }]
+        })
+    
+    async def _frontend_handler(self, request) -> web.Response:
+        """Mock frontend handler."""
+        return web.Response(text="Mock Frontend Service", content_type="text/html")
+    
+    async def start(self) -> None:
+        """Start the mock HTTP service."""
+        self.server = TestServer(self.app, host=self.host, port=self.port)
+        await self.server.start_server()
+        logger.info(f"Mock HTTP service '{self.service_name}' started on {self.host}:{self.port}")
+    
+    async def stop(self) -> None:
+        """Stop the mock HTTP service."""
+        if self.server:
+            await self.server.close()
+        logger.info(f"Mock HTTP service '{self.service_name}' stopped")
+    
+    @property
+    def url(self) -> str:
+        """Get the service URL."""
+        return f"http://{self.host}:{self.port}"
+
+
+class MockWebSocketService:
+    """Enhanced mock WebSocket service."""
+    
+    def __init__(self, host: str = "localhost", port: int = 8765):
+        self.host = host
+        self.port = port
+        self.app = None
+        self.server = None
+        self._connections: set = set()
+        self._message_handlers: Dict[str, callable] = {}
+        self._setup_websocket_app()
+    
+    def _setup_websocket_app(self) -> None:
+        """Setup WebSocket application."""
+        self.app = web.Application()
+        self.app.router.add_get('/ws', self._websocket_handler)
+        self.app.router.add_get('/health', self._ws_health_handler)
+    
+    async def _websocket_handler(self, request) -> web.WebSocketResponse:
+        """Handle WebSocket connections."""
+        ws = web.WebSocketResponse()
+        await ws.prepare(request)
+        
+        self._connections.add(ws)
+        
+        try:
+            async for msg in ws:
+                if msg.type == WSMsgType.TEXT:
+                    try:
+                        data = json.loads(msg.data)
+                        response = await self._process_message(data)
+                        if response:
+                            await ws.send_str(json.dumps(response))
+                    except json.JSONDecodeError:
+                        await ws.send_str(json.dumps({"error": "Invalid JSON"}))
+                elif msg.type == WSMsgType.ERROR:
+                    logger.error(f"WebSocket error: {ws.exception()}")
+        finally:
+            self._connections.discard(ws)
+        
+        return ws
+    
+    async def _ws_health_handler(self, request) -> web.Response:
+        """WebSocket health endpoint."""
+        return web.json_response({
+            "status": "healthy",
+            "service": "websocket-service",
+            "active_connections": len(self._connections)
+        })
+    
+    async def _process_message(self, message: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Process WebSocket message."""
+        message_type = message.get("type", "unknown")
+        handler = self._message_handlers.get(message_type)
+        
+        if handler:
+            return await handler(message)
+        
+        # Default echo response
+        return {
+            "type": "echo",
+            "data": message,
+            "timestamp": time.time()
+        }
+    
+    def register_handler(self, message_type: str, handler: callable) -> None:
+        """Register message handler."""
+        self._message_handlers[message_type] = handler
+    
+    async def broadcast_message(self, message: Dict[str, Any]) -> None:
+        """Broadcast message to all connections."""
+        if not self._connections:
+            return
+        
+        message_str = json.dumps(message)
+        disconnected = set()
+        
+        for ws in self._connections:
+            try:
+                await ws.send_str(message_str)
+            except Exception:
+                disconnected.add(ws)
+        
+        self._connections -= disconnected
+    
+    async def start(self) -> None:
+        """Start WebSocket service."""
+        self.server = TestServer(self.app, host=self.host, port=self.port)
+        await self.server.start_server()
+        logger.info(f"Mock WebSocket service started on {self.host}:{self.port}")
+    
+    async def stop(self) -> None:
+        """Stop WebSocket service."""
+        if self.server:
+            await self.server.close()
+        logger.info("Mock WebSocket service stopped")
+
+
 class ServiceRegistry:
     """Registry for managing mock services."""
     
