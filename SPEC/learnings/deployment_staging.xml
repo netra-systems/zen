@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <meta>
+    <title>GCP Staging Deployment Learnings</title>
+    <category>deployment</category>
+    <created>2025-08-18</created>
+    <cross_references>
+      <ref>CLAUDE.md#gcp-staging-deployment</ref>
+      <ref>deployment.xml</ref>
+      <ref>learnings/gcp_deployment.xml</ref>
+    </cross_references>
+  </meta>
+
+  <deployment_learnings>
+    <date>2025-08-18</date>
+    
+    <critical_requirement>
+      <title>MANDATORY SERVICE NAMING CONVENTION</title>
+      <rule>Cloud Run service names MUST ALWAYS be:</rule>
+      <service>netra-backend-staging (NOT netra-backend)</service>
+      <service>netra-frontend-staging (NOT netra-frontend)</service>
+      <service>netra-auth-service (unchanged)</service>
+      <reason>These names must match exactly what is deployed in Cloud Run</reason>
+      <enforcement>All deployment scripts have been updated to use these names</enforcement>
+    </critical_requirement>
+    
+    <what_works>
+      <service_account_auth>
+        <key_file>gcp-staging-sa-key.json</key_file>
+        <not_this>staging-deploy-key.json</not_this>
+        <project>netra-staging</project>
+        <not_this_project>netra-systems</not_this_project>
+        <activate_command>gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json</activate_command>
+      </service_account_auth>
+
+      <docker_build_commands>
+        <backend>docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest -f Dockerfile.backend .</backend>
+        <frontend>docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest -f Dockerfile.frontend.staging .</frontend>
+        <auth>docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest -f Dockerfile.auth .</auth>
+      </docker_build_commands>
+
+      <service_names exact="true" critical="true">
+        <!-- CRITICAL: Service names MUST always use -staging suffix -->
+        <backend>netra-backend-staging</backend>
+        <frontend>netra-frontend-staging</frontend>
+        <auth>netra-auth-service</auth>
+        <note>ALWAYS use -staging suffix for backend and frontend services</note>
+        <note>These names MUST match exactly in Cloud Run</note>
+      </service_names>
+    </what_works>
+
+    <what_doesnt_work>
+      <powershell_issues>
+        <script>deploy-staging-reliable.ps1</script>
+        <problem>Has syntax errors (unclosed quotes/brackets)</problem>
+        <solution>Manual deployment commands work better than the script</solution>
+      </powershell_issues>
+
+      <common_mistakes>
+        <mistake>Wrong Dockerfile names (e.g., Dockerfile.frontend vs Dockerfile.frontend.staging)</mistake>
+        <mistake>Wrong project ID (netra-systems vs netra-staging)</mistake>
+        <mistake>Wrong key file name (staging-deploy-key.json doesn't exist)</mistake>
+      </common_mistakes>
+    </what_doesnt_work>
+
+    <deployment_sequence>
+      <step number="1" name="Authenticate">
+        <command>gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json</command>
+        <command>gcloud config set project netra-staging</command>
+      </step>
+
+      <step number="2" name="Configure Docker">
+        <command>gcloud auth configure-docker us-central1-docker.pkg.dev --quiet</command>
+      </step>
+
+      <step number="3" name="Build and Push Images">
+        <note>Can be done in parallel</note>
+        <command>docker build -t [IMAGE_URL] -f [DOCKERFILE] .</command>
+        <command>docker push [IMAGE_URL]</command>
+      </step>
+
+      <step number="4" name="Deploy to Cloud Run">
+        <command>gcloud run deploy [SERVICE_NAME] --image [IMAGE_URL] --region us-central1</command>
+      </step>
+    </deployment_sequence>
+
+    <primary_deployment_commands>
+      <setup_one_time>
+        <command>gcloud auth login</command>
+        <command>.\setup-staging-auth.ps1</command>
+      </setup_one_time>
+
+      <deploy>
+        <command>.\deploy-staging-reliable.ps1</command>
+      </deploy>
+
+      <deployment_options>
+        <command purpose="Skip health checks">.\deploy-staging-reliable.ps1 -SkipHealthChecks</command>
+        <command purpose="Build only">.\deploy-staging-reliable.ps1 -BuildOnly</command>
+        <command purpose="Deploy pre-built images">.\deploy-staging-reliable.ps1 -DeployOnly</command>
+      </deployment_options>
+
+      <auth_issues>
+        <command purpose="Regenerate service account key">.\setup-staging-auth.ps1 -ForceNewKey</command>
+      </auth_issues>
+    </primary_deployment_commands>
+
+    <critical_notes>
+      <note>Use ONLY deploy-staging-reliable.ps1 for deployments</note>
+      <note>Uses service account (never expires)</note>
+      <note>Auto-retries on failures</note>
+      <note>Self-heals authentication issues</note>
+    </critical_notes>
+  </deployment_learnings>
+</spec>

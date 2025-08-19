@@ -31,9 +31,20 @@ class SummaryDisplay:
         print("\n" + "=" * 60)
         self._print("✨", "SUCCESS", "Development environment is running!")
         print("=" * 60)
+        self._show_auth_summary()
         self._show_backend_summary()
         self._show_frontend_summary()
         self._show_commands_info()
+    
+    def _show_auth_summary(self):
+        """Show auth service summary."""
+        auth_info = self.service_discovery.read_auth_info()
+        if auth_info:
+            self._print("🔐", "AUTH", "")
+            print(f"  URL: {auth_info['url']}")
+            print(f"  Health: {auth_info['health']}")
+            print(f"  Docs: {auth_info.get('docs', auth_info['url'] + '/docs')}")
+            print(f"  Logs: Real-time streaming (cyan)")
     
     def _show_backend_summary(self):
         """Show backend summary."""

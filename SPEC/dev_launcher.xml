@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <specification>
     <name>Dev Launcher</name>
-    <version>1.0.0</version>
+    <version>2.0.0</version>
     <description>
-        Development environment launcher with real-time logging, health monitoring,
-        and multi-service orchestration.
+        High-performance development environment launcher with intelligent caching,
+        optimized startup sequences, real-time logging, health monitoring,
+        and multi-service orchestration. Target: Sub-10 second cached startup.
     </description>
     
     <architecture>
@@ -23,6 +24,14 @@
             </component>
             <component name="ProcessManager" file="dev_launcher/process_manager.py">
                 <responsibility>Subprocess lifecycle management</responsibility>
+                <max_lines>300</max_lines>
+            </component>
+            <component name="CacheManager" file="dev_launcher/cache_manager.py">
+                <responsibility>Startup state and file hash caching</responsibility>
+                <max_lines>300</max_lines>
+            </component>
+            <component name="StartupOptimizer" file="dev_launcher/startup_optimizer.py">
+                <responsibility>Optimize startup sequence and skip unnecessary steps</responsibility>
                 <max_lines>300</max_lines>
             </component>
         </components>
@@ -62,6 +71,57 @@
         </requirement>
     </logging_requirements>
     
+    <performance_optimizations>
+        <requirement id="PERF-001" priority="CRITICAL">
+            <description>No-reload mode for all services</description>
+            <implementation>
+                - Backend service: Use --reload=false or equivalent to disable auto-reload
+                - Auth service: Disable auto-reload mechanism
+                - Frontend: Configure Next.js for optimized dev mode without unnecessary rebuilds
+                - Provide flag --no-reload to disable all auto-reload features across services
+                - Manual restart required for code changes when no-reload is active
+            </implementation>
+        </requirement>
+        
+        <requirement id="PERF-002" priority="CRITICAL">
+            <description>Smart caching for database initialization</description>
+            <implementation>
+                - Cache database migration state using file checksums
+                - Skip migrations if no changes detected in:
+                  - Migration files (alembic/versions/*)
+                  - Database schema files (*.sql, models.py)
+                  - Database configuration files
+                - Store cache in .dev_launcher_cache/ directory
+                - Cache key: hash of all relevant DB files
+                - Provide --force-migrations flag to bypass cache
+            </implementation>
+        </requirement>
+        
+        <requirement id="PERF-003" priority="HIGH">
+            <description>Incremental startup optimization</description>
+            <implementation>
+                - Track startup time for each service
+                - Parallelize non-dependent service startups
+                - Skip unnecessary initialization steps when possible:
+                  - Skip pip install if requirements.txt unchanged
+                  - Skip npm install if package-lock.json unchanged
+                  - Skip environment validation if .env files unchanged
+                - Display startup time metrics in logs
+                - Target: Sub-10 second startup for cached runs
+            </implementation>
+        </requirement>
+        
+        <requirement id="PERF-004">
+            <description>Service dependency optimization</description>
+            <implementation>
+                - Lazy load optional dependencies
+                - Start services in optimal order based on dependencies
+                - Allow partial startup (e.g., backend without auth for testing)
+                - Cache service readiness state to optimize subsequent checks
+            </implementation>
+        </requirement>
+    </performance_optimizations>
+    
     <health_monitoring>
         <requirement id="HEALTH-001" priority="CRITICAL">
             <description>Health checks wait for startup completion</description>
@@ -95,15 +155,64 @@
     </health_monitoring>
     
     <service_startup_sequence>
-        <step order="1">Environment check</step>
-        <step order="2">Load secrets if configured</step>
-        <step order="3">Start backend process</step>
-        <step order="4">Wait for backend readiness (/health/ready)</step>
-        <step order="5">Verify auth system (/api/auth/config)</step>
-        <step order="6">Start frontend process</step>
-        <step order="7">Wait for frontend readiness</step>
-        <step order="8">ONLY NOW start health monitoring</step>
+        <step order="1">Check cache for previous startup state</step>
+        <step order="2">Environment check (skip if cached and unchanged)</step>
+        <step order="3">Load secrets if configured</step>
+        <step order="4">Check if migrations needed (use file hash cache)</step>
+        <step order="5">Run migrations only if needed</step>
+        <step order="6">Start backend process (with --no-reload if flag set)</step>
+        <step order="7">Start auth service (with --no-reload if flag set)</step>
+        <step order="8">Wait for backend readiness (/health/ready)</step>
+        <step order="9">Verify auth system (/api/auth/config)</step>
+        <step order="10">Start frontend process (optimized mode)</step>
+        <step order="11">Wait for frontend readiness</step>
+        <step order="12">Cache successful startup state</step>
+        <step order="13">ONLY NOW start health monitoring</step>
     </service_startup_sequence>
+    
+    <graceful_shutdown>
+        <requirement id="SHUTDOWN-001" priority="CRITICAL">
+            <description>Proper signal handling for graceful shutdown</description>
+            <implementation>
+                - Install signal handlers for SIGINT (Ctrl+C) and SIGTERM
+                - On Windows, handle keyboard interrupt and console close events
+                - Ensure all cleanup functions are called on any exit path
+            </implementation>
+        </requirement>
+        
+        <requirement id="SHUTDOWN-002" priority="CRITICAL">
+            <description>Port cleanup on shutdown</description>
+            <implementation>
+                - Auth service port 8081 MUST be freed on shutdown
+                - Backend service ports MUST be freed on shutdown
+                - Frontend service ports MUST be freed on shutdown
+                - Use taskkill with /F /T flags on Windows to ensure child processes are terminated
+                - Verify ports are free after shutdown
+            </implementation>
+        </requirement>
+        
+        <requirement id="SHUTDOWN-003" priority="HIGH">
+            <description>Service termination order</description>
+            <implementation>
+                - Stop health monitoring first
+                - Terminate frontend process
+                - Terminate backend process
+                - Terminate auth service process
+                - Stop all log streamers
+                - Cleanup cache and temporary files
+            </implementation>
+        </requirement>
+        
+        <requirement id="SHUTDOWN-004" priority="HIGH">
+            <description>Timeout handling for shutdown</description>
+            <implementation>
+                - Give each service 5 seconds to gracefully terminate
+                - Force kill if graceful termination fails
+                - Log any services that required force termination
+                - Total shutdown should complete within 15 seconds
+            </implementation>
+        </requirement>
+    </graceful_shutdown>
     
     <color_codes>
         <service name="BACKEND" color="\033[96m" description="Bright Cyan"/>

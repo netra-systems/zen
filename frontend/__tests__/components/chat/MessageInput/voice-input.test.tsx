@@ -49,6 +49,8 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
       addMessage: mockChatStore.addMessage,
       activeThreadId: 'thread-1',
       setActiveThread: jest.fn(),
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
     });
     
     (useThreadStore as jest.Mock).mockReturnValue({
@@ -79,6 +81,8 @@ describe('MessageInput - Voice Input and Emoji Features', () => {
         addMessage: mockChatStore.addMessage,
         activeThreadId: 'thread-1',
         setActiveThread: jest.fn(),
+        addOptimisticMessage: jest.fn(),
+        updateOptimisticMessage: jest.fn(),
       });
       
       render(<MessageInput />);

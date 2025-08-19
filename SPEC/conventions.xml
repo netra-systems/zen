@@ -511,5 +511,57 @@
                 <action>Maintain test coverage above 97% for revenue paths</action>
             </actions>
         </convention>
+        
+        <convention id="feature-flag-tdd" priority="HIGH">
+            <title>Feature Flag Driven TDD Workflow</title>
+            <description>Use feature flags to enable TDD while maintaining 100% CI/CD pass rate</description>
+            
+            <tdd-workflow>
+                <step order="1">Write test for new feature with @tdd_test decorator</step>
+                <step order="2">Mark feature as "in_development" in test_feature_flags.json</step>
+                <step order="3">Test is skipped in CI/CD, maintaining 100% pass rate</step>
+                <step order="4">Implement feature functionality</step>
+                <step order="5">Change feature status to "enabled" when ready</step>
+                <step order="6">Test runs normally and must pass</step>
+            </tdd-workflow>
+            
+            <feature-status-usage>
+                <status name="enabled">Production-ready features with passing tests</status>
+                <status name="in_development">TDD features being developed</status>
+                <status name="disabled">Features temporarily disabled</status>
+                <status name="experimental">Research features, opt-in only</status>
+            </feature-status-usage>
+            
+            <decorator-patterns>
+                <pattern>@feature_flag("feature_name") - Basic feature gating</pattern>
+                <pattern>@tdd_test("feature_name") - TDD workflow with expected failures</pattern>
+                <pattern>@requires_feature("feat_a", "feat_b") - Multi-feature dependencies</pattern>
+                <pattern>@experimental_test() - Research and experimental features</pattern>
+            </decorator-patterns>
+            
+            <environment-overrides>
+                <format>TEST_FEATURE_&lt;NAME&gt;=&lt;status&gt;</format>
+                <example>TEST_FEATURE_ROI_CALCULATOR=enabled</example>
+                <use-case>Enable features for specific test runs</use-case>
+            </environment-overrides>
+            
+            <business-benefits>
+                <benefit>50% faster feature development through early test writing</benefit>
+                <benefit>100% CI/CD pass rate maintained during development</benefit>
+                <benefit>Clear feature readiness tracking for product teams</benefit>
+                <benefit>Environment-based testing flexibility</benefit>
+            </business-benefits>
+            
+            <mandatory-practices>
+                <practice>ALWAYS use feature flags for new feature tests</practice>
+                <practice>Configure features in test_feature_flags.json with ownership</practice>
+                <practice>Use @tdd_test decorator for tests written before implementation</practice>
+                <practice>Update feature status to "enabled" only when tests pass</practice>
+                <practice>Document feature dependencies and target releases</practice>
+            </mandatory-practices>
+            
+            <reference>SPEC/testing.xml#feature_flag_testing</reference>
+            <reference>SPEC/learnings/testing.xml#feature-flags-tdd-workflow</reference>
+        </convention>
     </testing-conventions>
 </specification>

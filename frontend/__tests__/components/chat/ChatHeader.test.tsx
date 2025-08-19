@@ -4,15 +4,9 @@ import { render, screen } from '@testing-library/react';
 import { ChatHeader } from '@/components/chat/ChatHeader';
 import { setupChatMocks, resetChatMocks, renderWithChatSetup, overrideChatMocks, mockUnifiedChatStore, mockMCPTools } from './shared-test-setup';
 
-// Mock all dependencies at the top level
+// Mock only necessary dependencies - use real components
 jest.mock('@/store/unified-chat');
 jest.mock('@/hooks/useMCPTools');
-jest.mock('@/components/chat/ConnectionStatusIndicator', () => ({
-  ConnectionStatusIndicator: () => <div data-testid="connection-status">Connected</div>
-}));
-jest.mock('@/components/chat/MCPServerStatus', () => ({
-  MCPServerStatus: () => <div data-testid="mcp-server-status">MCP Status</div>
-}));
 
 // Import the mocked hooks
 import { useUnifiedChatStore } from '@/store/unified-chat';

@@ -157,9 +157,15 @@ class MessageProcessor:
     
     async def process_with_rate_limiting(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
         """Process message with rate limiting checks."""
+        logger.info(f"[CRITICAL ENTRY] process_with_rate_limiting called with message type: {message.get('type')}")
+        logger.info(f"[CRITICAL ENTRY] Connection info: {conn_info.connection_id}, metadata: {conn_info.metadata}")
+        
         if self.manager.rate_limiter.is_rate_limited(conn_info):
+            logger.warning(f"[CRITICAL] Rate limited for connection {conn_info.connection_id}")
             await self._handle_rate_limit_exceeded(conn_info)
             return False
+        
+        logger.info(f"[CRITICAL] Not rate limited, proceeding to validate and process")
         return await self._validate_and_process_message(conn_info, message)
     
     async def _handle_rate_limit_exceeded(self, conn_info: ConnectionInfo) -> None:
@@ -174,7 +180,63 @@ class MessageProcessor:
         if self.handler.is_ping_message(message):
             await self.handler.handle_ping_message(conn_info.websocket)
             return True
-        return await self._validate_message_and_update_stats(message)
+        
+        # First validate the message
+        if not await self._validate_message_and_update_stats(message):
+            return False
+        
+        # CRITICAL: Actually process the message through agent service
+        return await self._forward_to_agent_service(conn_info, message)
+    
+    async def _forward_to_agent_service(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
+        """Forward validated message to agent service for processing."""
+        import json
+        
+        logger.info(f"[CRITICAL DEBUG] Attempting to forward message type: {message.get('type')}")
+        logger.info(f"[CRITICAL DEBUG] Connection metadata: {conn_info.metadata}")
+        
+        try:
+            # Get user_id from connection metadata
+            user_id = conn_info.metadata.get("user_id")
+            if not user_id:
+                logger.error(f"[CRITICAL] No user_id found in metadata for connection {conn_info.connection_id}")
+                logger.error(f"[CRITICAL] Available metadata keys: {list(conn_info.metadata.keys())}")
+                return False
+            
+            logger.info(f"[CRITICAL DEBUG] Found user_id: {user_id}")
+            
+            # Get agent service from app state
+            app = conn_info.websocket.app
+            if not hasattr(app, 'state'):
+                logger.error("[CRITICAL] WebSocket app has no state attribute!")
+                return False
+                
+            if not hasattr(app.state, 'agent_service'):
+                logger.error("[CRITICAL] Agent service not found in app.state!")
+                logger.error(f"[CRITICAL] Available app.state attributes: {dir(app.state)}")
+                return False
+            
+            agent_service = app.state.agent_service
+            logger.info(f"[CRITICAL DEBUG] Found agent service: {agent_service}")
+            
+            # Forward message to agent service as JSON string
+            message_str = json.dumps(message)
+            
+            logger.info(f"[CRITICAL] Forwarding message to agent service for user {user_id}: {message.get('type')}")
+            logger.info(f"[CRITICAL] Message payload: {message.get('payload')}")
+            
+            # Process through agent service (this will handle the message routing)
+            from app.db.postgres import get_async_db
+            async with get_async_db() as db_session:
+                logger.info(f"[CRITICAL] Calling agent_service.handle_websocket_message")
+                await agent_service.handle_websocket_message(user_id, message_str, db_session)
+                logger.info(f"[CRITICAL] Successfully called agent_service.handle_websocket_message")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"[CRITICAL ERROR] Failed to forward message to agent service: {e}", exc_info=True)
+            return False
     
     async def _validate_message_and_update_stats(self, message: Dict[str, Any]) -> bool:
         """Validate message and update statistics."""

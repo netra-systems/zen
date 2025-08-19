@@ -3,204 +3,131 @@
  * Tests for textarea auto-resize behavior
  */
 
-// Mock dependencies BEFORE imports
-const mockSendMessage = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseThreadStore = jest.fn();
-const mockUseAuthStore = jest.fn();
-const mockGenerateUniqueId = jest.fn();
-
-jest.mock('@/hooks/useWebSocket', () => ({
-  useWebSocket: mockUseWebSocket
-}));
-jest.mock('@/store/unified-chat', () => ({
-  useUnifiedChatStore: mockUseUnifiedChatStore
-}));
-jest.mock('@/store/threadStore', () => ({
-  useThreadStore: mockUseThreadStore
-}));
-jest.mock('@/store/authStore', () => ({
-  useAuthStore: mockUseAuthStore
-}));
-jest.mock('@/lib/utils', () => ({
-  generateUniqueId: mockGenerateUniqueId,
-  cn: jest.fn((...classes) => classes.filter(Boolean).join(' '))
-}));
-jest.mock('@/components/chat/utils/messageInputUtils', () => ({
-  getPlaceholder: jest.fn((isAuthenticated, isProcessing, messageLength) => {
-    if (!isAuthenticated) return 'Please sign in to send messages';
-    if (isProcessing) return 'Agent is thinking...';
-    if (messageLength > 9000) return `${10000 - messageLength} characters remaining`;
-    return 'Type a message...';
-  }),
-  getTextareaClassName: jest.fn(() => 'mocked-textarea-class'),
-  getCharCountClassName: jest.fn(() => 'mocked-char-count-class'),
-  shouldShowCharCount: jest.fn((messageLength) => messageLength > 8000),
-  isMessageDisabled: jest.fn((isProcessing, isAuthenticated, isSending) => {
-    return isProcessing || !isAuthenticated || isSending;
-  }),
-  canSendMessage: jest.fn((isDisabled, message, messageLength) => {
-    return !isDisabled && !!message.trim() && messageLength <= 10000;
-  })
-}));
-jest.mock('@/components/chat/hooks/useMessageHistory', () => ({
-  useMessageHistory: jest.fn(() => ({
-    messageHistory: [],
-    addToHistory: jest.fn(),
-    navigateHistory: jest.fn(() => '')
-  }))
-}));
-jest.mock('@/components/chat/hooks/useTextareaResize', () => ({
-  useTextareaResize: jest.fn(() => ({ rows: 1 }))
-}));
-jest.mock('@/components/chat/hooks/useMessageSending', () => ({
-  useMessageSending: jest.fn(() => ({
-    isSending: false,
-    handleSend: jest.fn()
-  }))
-}));
-
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MessageInput } from '@/components/chat/MessageInput';
+import {
+  mockSendMessage,
+  setupMinimalMocks,
+  resetMocks
+} from './minimal-test-setup';
+import {
+  renderMessageInput,
+  getTextarea,
+  typeMessage,
+  sendViaEnter
+} from './test-helpers';
+
+// Setup minimal mocks before imports
+setupMinimalMocks();
 
 describe('MessageInput - Auto-resize Textarea Behavior', () => {
-  const mockChatStore = {
-    setProcessing: jest.fn(),
-    addMessage: jest.fn()
-  };
-  const mockThreadStore = {
-    setCurrentThread: jest.fn(),
-    addThread: jest.fn()
-  };
-
   beforeEach(() => {
-    jest.clearAllMocks();
-    
-    // Setup default mocks
-    mockUseWebSocket.mockReturnValue({
-      sendMessage: mockSendMessage,
-    });
-    
-    mockUseUnifiedChatStore.mockReturnValue({
-      activeThreadId: 'thread-1',
-      isProcessing: false,
-      setProcessing: mockChatStore.setProcessing,
-      addMessage: mockChatStore.addMessage,
-    });
-    
-    mockUseThreadStore.mockReturnValue({
-      currentThreadId: 'thread-1',
-      setCurrentThread: mockThreadStore.setCurrentThread,
-      addThread: mockThreadStore.addThread,
-    });
-    
-    mockUseAuthStore.mockReturnValue({
-      isAuthenticated: true,
-    });
-    
-    mockGenerateUniqueId.mockImplementation((prefix) => `${prefix}-${Date.now()}`);
+    resetMocks();
   });
 
   describe('Auto-resize textarea behavior', () => {
-    it('should start with single row', () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      // The component sets rows dynamically based on content height
-      // Empty textarea should have minimal rows (1 or 2 depending on styling)
+    const verifyTextareaStartsMinimal = () => {
+      const textarea = getTextarea();
       expect(textarea.rows).toBeLessThanOrEqual(2);
+    };
+
+    it('should start with single row', () => {
+      renderMessageInput();
+      verifyTextareaStartsMinimal();
     });
 
-    it('should expand textarea as content grows', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      const initialRows = textarea.rows;
-      
-      // Type multiline content using actual newlines
-      const multilineText = 'Line 1\nLine 2\nLine 3';
-      fireEvent.change(textarea, { target: { value: multilineText } });
-      
-      // Should expand from initial rows
-      await waitFor(() => {
-        expect(textarea.rows).toBeGreaterThanOrEqual(initialRows);
-        // Component calculates rows based on scrollHeight
-        expect(textarea.value).toContain('Line 1');
-        expect(textarea.value).toContain('Line 2');
-        expect(textarea.value).toContain('Line 3');
-      });
-    });
+    const setMultilineContent = (textarea: HTMLTextAreaElement, text: string) => {
+      fireEvent.change(textarea, { target: { value: text } });
+    };
 
-    it('should respect maximum rows limit', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      // Set multiline content directly to avoid timeout
-      const manyLines = Array.from({ length: 10 }, (_, i) => `Line ${i}`).join('\n');
-      fireEvent.change(textarea, { target: { value: manyLines } });
-      
-      // Wait for component to update rows
+    const verifyTextareaExpanded = async (textarea: HTMLTextAreaElement, content: string) => {
       await waitFor(() => {
-        // Should not exceed MAX_ROWS (5)
-        expect(textarea.rows).toBeLessThanOrEqual(5);
-      });
-    });
-
-    it('should reset to single row after sending', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      // Type multiline content
-      await userEvent.type(textarea, 'Line 1');
-      await userEvent.type(textarea, '{shift}{enter}');
-      await userEvent.type(textarea, 'Line 2');
-      
-      await waitFor(() => {
+        expect(textarea.value).toBe(content);
         expect(textarea.rows).toBeGreaterThan(1);
       });
-      
-      // Send message
-      await userEvent.type(textarea, '{enter}');
-      
+    };
+
+    it('should expand textarea as content grows', async () => {
+      renderMessageInput();
+      const textarea = getTextarea();
+      const multilineText = 'Line 1\nLine 2\nLine 3';
+      setMultilineContent(textarea, multilineText);
+      await verifyTextareaExpanded(textarea, multilineText);
+    });
+
+    const createManyLinesText = (count: number) => {
+      return Array.from({ length: count }, (_, i) => `Line ${i}`).join('\n');
+    };
+
+    const verifyMaxRowsRespected = async (textarea: HTMLTextAreaElement) => {
+      await waitFor(() => {
+        expect(textarea.rows).toBeLessThanOrEqual(5);
+      });
+    };
+
+    it('should respect maximum rows limit', async () => {
+      renderMessageInput();
+      const textarea = getTextarea();
+      const manyLines = createManyLinesText(10);
+      setMultilineContent(textarea, manyLines);
+      await verifyMaxRowsRespected(textarea);
+    });
+
+    const verifyTextareaReset = async (textarea: HTMLTextAreaElement) => {
       await waitFor(() => {
         expect(textarea.rows).toBe(1);
         expect(textarea.value).toBe('');
       });
+    };
+
+    it('should reset to single row after sending', async () => {
+      renderMessageInput();
+      const textarea = getTextarea();
+      const multilineText = 'Line 1\nLine 2';
+      setMultilineContent(textarea, multilineText);
+      await verifyTextareaExpanded(textarea, multilineText);
+      fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+      await verifyTextareaReset(textarea);
     });
+
+    const pasteMultilineContent = async (textarea: HTMLTextAreaElement, text: string) => {
+      await userEvent.click(textarea);
+      await userEvent.paste(text);
+    };
+
+    const verifyPastedContent = async (textarea: HTMLTextAreaElement, text: string) => {
+      await waitFor(() => {
+        expect(textarea.value).toBe(text);
+        expect(textarea.rows).toBeGreaterThan(1);
+        expect(textarea.rows).toBeLessThanOrEqual(5);
+      });
+    };
 
     it('should handle paste of multiline content', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
+      renderMessageInput();
+      const textarea = getTextarea();
       const multilineText = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5';
-      
-      // Simulate paste
-      await userEvent.click(textarea);
-      await userEvent.paste(multilineText);
-      
-      await waitFor(() => {
-        expect(textarea.value).toBe(multilineText);
-        expect(textarea.rows).toBeGreaterThan(1);
-        expect(textarea.rows).toBeLessThanOrEqual(5); // MAX_ROWS
-      });
+      await pasteMultilineContent(textarea, multilineText);
+      await verifyPastedContent(textarea, multilineText);
     });
 
-    it('should maintain scroll position during resize', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      // Type content
+    const typeInitialContent = async (textarea: HTMLTextAreaElement) => {
       await userEvent.type(textarea, 'First line');
-      const initialScrollTop = textarea.scrollTop;
-      
-      // Add more content
+      return textarea.scrollTop;
+    };
+
+    const addMoreContent = async (textarea: HTMLTextAreaElement) => {
       await userEvent.type(textarea, '{shift>}{enter}{/shift}');
       await userEvent.type(textarea, 'Second line');
-      
-      // Scroll position should be maintained
+    };
+
+    it('should maintain scroll position during resize', async () => {
+      renderMessageInput();
+      const textarea = getTextarea();
+      const initialScrollTop = await typeInitialContent(textarea);
+      await addMoreContent(textarea);
       expect(textarea.scrollTop).toBeGreaterThanOrEqual(initialScrollTop);
     });
   });

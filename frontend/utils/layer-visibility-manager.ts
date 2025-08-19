@@ -6,6 +6,7 @@ import type {
   MediumLayerData, 
   SlowLayerData 
 } from '@/types/layer-types';
+import { logger } from '@/lib/logger';
 
 // ============================================
 // Enhanced Visibility Manager
@@ -244,7 +245,7 @@ const hasAgentName = (data: FastLayerData | null): boolean => {
 export const debugLayerVisibility = (
   config: LayerVisibilityConfig
 ): void => {
-  if (process.env.NODE_ENV !== 'development') return;
+  if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') return;
   
   const result = calculateEnhancedLayerVisibility(config);
   

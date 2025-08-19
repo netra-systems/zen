@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Error Handling Principles</name>
+        <version>1.0</version>
+        <created>2025-08-19</created>
+        <priority>CRITICAL</priority>
+        <description>MANDATORY error handling patterns - ALL FAILURES MUST RAISE BY DEFAULT</description>
+    </metadata>
+    
+    <core_principle>
+        <title>ALL FAILURES MUST RAISE BY DEFAULT</title>
+        <description>
+            Silent failures are the enemy of reliability. Every error condition MUST be:
+            1. Logged with full context
+            2. Raised/thrown as an exception
+            3. Handled explicitly at appropriate boundaries
+            4. Communicated clearly to clients/users
+        </description>
+    </core_principle>
+    
+    <mandatory_patterns>
+        <pattern priority="CRITICAL">
+            <name>Authentication Failures Must Be Loud</name>
+            <rule>All authentication failures MUST log, raise, and close connections</rule>
+            <implementation>
+                try:
+                    user = await authenticate_user(token)
+                except Exception as e:
+                    logger.error(f"[AUTH ERROR] Failed for token {token[:20]}...: {e}", exc_info=True)
+                    await connection.close(code=1008, reason=f"Authentication failed: {str(e)}")
+                    raise  # ALWAYS RAISE
+            </implementation>
+        </pattern>
+        
+        <pattern priority="CRITICAL">
+            <name>Database Errors Must Propagate</name>
+            <rule>Database connection/query failures MUST be logged and raised</rule>
+            <implementation>
+                try:
+                    async with get_db() as session:
+                        result = await session.execute(query)
+                except Exception as e:
+                    logger.error(f"[DB ERROR] Query failed: {e}", exc_info=True)
+                    raise  # Let caller handle appropriately
+            </implementation>
+        </pattern>
+        
+        <pattern priority="HIGH">
+            <name>WebSocket Failures Must Close Connection</name>
+            <rule>Any WebSocket error MUST close the connection with proper code</rule>
+            <implementation>
+                try:
+                    await process_message(websocket, message)
+                except Exception as e:
+                    logger.error(f"[WS ERROR] Message processing failed: {e}", exc_info=True)
+                    await websocket.close(code=1011, reason="Server error")
+                    raise
+            </implementation>
+        </pattern>
+        
+        <pattern priority="HIGH">
+            <name>API Errors Must Return Status Codes</name>
+            <rule>API endpoints MUST return appropriate HTTP status codes</rule>
+            <implementation>
+                @app.post("/api/endpoint")
+                async def endpoint(request: Request):
+                    try:
+                        return await process_request(request)
+                    except ValueError as e:
+                        logger.error(f"[API ERROR] Invalid request: {e}")
+                        raise HTTPException(status_code=400, detail=str(e))
+                    except Exception as e:
+                        logger.error(f"[API ERROR] Internal error: {e}", exc_info=True)
+                        raise HTTPException(status_code=500, detail="Internal server error")
+            </implementation>
+        </pattern>
+    </mandatory_patterns>
+    
+    <forbidden_patterns>
+        <pattern severity="CRITICAL">
+            <name>Silent Exception Swallowing</name>
+            <forbidden>
+                try:
+                    result = await operation()
+                except:
+                    pass  # NEVER DO THIS
+            </forbidden>
+            <reason>Hides failures, makes debugging impossible</reason>
+        </pattern>
+        
+        <pattern severity="CRITICAL">
+            <name>Return None on Error</name>
+            <forbidden>
+                try:
+                    user = await get_user(id)
+                except:
+                    return None  # WRONG - caller can't distinguish error from not found
+            </forbidden>
+            <correct>
+                try:
+                    user = await get_user(id)
+                except NotFoundException:
+                    return None  # OK - specific exception for not found
+                except Exception as e:
+                    logger.error(f"Failed to get user {id}: {e}", exc_info=True)
+                    raise  # Other errors must propagate
+            </correct>
+        </pattern>
+        
+        <pattern severity="HIGH">
+            <name>Generic Error Messages</name>
+            <forbidden>
+                logger.error("Error occurred")  # No context
+            </forbidden>
+            <correct>
+                logger.error(f"[SERVICE] Operation failed for user {user_id}: {error}", exc_info=True)
+            </correct>
+        </pattern>
+    </forbidden_patterns>
+    
+    <error_boundaries>
+        <boundary>
+            <name>WebSocket Handler</name>
+            <location>Routes layer</location>
+            <responsibility>Log, close connection, clean up resources</responsibility>
+        </boundary>
+        
+        <boundary>
+            <name>API Endpoints</name>
+            <location>Routes layer</location>
+            <responsibility>Convert exceptions to HTTP status codes</responsibility>
+        </boundary>
+        
+        <boundary>
+            <name>Background Tasks</name>
+            <location>Task layer</location>
+            <responsibility>Log, retry with backoff, alert on repeated failures</responsibility>
+        </boundary>
+        
+        <boundary>
+            <name>Service Layer</name>
+            <location>Business logic</location>
+            <responsibility>Validate inputs, raise domain exceptions</responsibility>
+        </boundary>
+    </error_boundaries>
+    
+    <logging_requirements>
+        <requirement priority="CRITICAL">
+            <name>Context in Every Log</name>
+            <fields>
+                - Component/Service name
+                - Operation being performed
+                - User/Request ID if available
+                - Full exception with traceback for errors
+            </fields>
+        </requirement>
+        
+        <requirement priority="HIGH">
+            <name>Structured Logging</name>
+            <format>
+                logger.error(
+                    "[COMPONENT] Operation failed",
+                    extra={
+                        "user_id": user_id,
+                        "operation": "authenticate",
+                        "error_type": type(e).__name__
+                    },
+                    exc_info=True
+                )
+            </format>
+        </requirement>
+    </logging_requirements>
+    
+    <testing_requirements>
+        <requirement>Test that errors are raised, not swallowed</requirement>
+        <requirement>Test that connections close on error</requirement>
+        <requirement>Test that appropriate status codes are returned</requirement>
+        <requirement>Test that errors are logged with context</requirement>
+        <requirement>Test error recovery and retry logic</requirement>
+    </testing_requirements>
+    
+    <enforcement>
+        <rule>Code review MUST check for silent failures</rule>
+        <rule>Tests MUST verify error propagation</rule>
+        <rule>Monitoring MUST alert on error rate increases</rule>
+        <rule>Regular audits of try/except blocks</rule>
+    </enforcement>
+</specification>

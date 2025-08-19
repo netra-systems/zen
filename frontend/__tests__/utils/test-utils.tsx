@@ -130,3 +130,16 @@ export function withRouter(component: ReactElement) {
   
   return <MockRouter>{component}</MockRouter>;
 }
+
+// ============================================================================
+// RE-EXPORT NEW TEST UTILITIES - Centralized access point
+// ============================================================================
+
+// Message test helpers
+export * from './message-test-helpers';
+
+// Thread test helpers  
+export * from './thread-test-helpers';
+
+// Auth test helpers
+export * from './auth-test-helpers';

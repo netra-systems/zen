@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.user_service import user_service
 from app.services.security_service import SecurityService
 from app.schemas.registry import UserCreate
-from app.schemas.Auth import DevLoginRequest
+from app.schemas.auth_types import DevLoginRequest
 from .token_management import create_token_response
 
 
@@ -21,10 +21,7 @@ def validate_dev_login_allowed(oauth_config) -> None:
 
 async def get_or_create_dev_user(db: AsyncSession, email: str):
     """Get existing dev user or create new one."""
-    user = await user_service.get_by_email(db, email=email)
-    if not user:
-        user_in = UserCreate(email=email, full_name="Dev User", picture=None, password="")
-        user = await user_service.create(db, obj_in=user_in)
+    user = await user_service.get_or_create_dev_user(db, email=email)
     return user
 
 

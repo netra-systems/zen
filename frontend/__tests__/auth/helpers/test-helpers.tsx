@@ -1,6 +1,7 @@
 /**
  * Shared test helpers for auth context tests
  * Each helper function ≤8 lines per architecture requirements
+ * Updated for auth service independence
  */
 
 import React from 'react';
@@ -9,16 +10,23 @@ import { AuthProvider, AuthContext } from '@/auth/context';
 import { authService } from '@/auth/service';
 import { jwtDecode } from 'jwt-decode';
 import { useAuthStore } from '@/store/authStore';
+import { logger } from '@/lib/logger';
+import { mockAuthServiceResponses } from '@/__tests__/mocks/auth-service-mock';
 
-// Mock data
+// Mock data - uses independent auth service endpoints
 export const mockAuthConfig = {
   development_mode: false,
+  google_client_id: 'mock-google-client-id',
   endpoints: {
-    login: 'http://localhost:8000/auth/login',
-    logout: 'http://localhost:8000/auth/logout',
-    callback: 'http://localhost:8000/auth/callback',
-    dev_login: 'http://localhost:8000/auth/dev-login'
-  }
+    login: 'http://localhost:8081/auth/login',
+    logout: 'http://localhost:8081/auth/logout',
+    callback: 'http://localhost:8081/auth/callback',
+    token: 'http://localhost:8081/auth/token',
+    user: 'http://localhost:8081/auth/me',
+    dev_login: 'http://localhost:8081/auth/dev/login'
+  },
+  authorized_javascript_origins: ['http://localhost:3000'],
+  authorized_redirect_uris: ['http://localhost:3000/auth/callback']
 };
 
 export const mockUser = {
@@ -39,6 +47,7 @@ export const setupBasicMocks = () => {
   (authService.getToken as jest.Mock).mockReturnValue(null);
   (authService.getDevLogoutFlag as jest.Mock).mockReturnValue(false);
   setupAuthServiceMethods();
+  setupAuthServiceClientMocks();
   (jwtDecode as jest.Mock).mockReturnValue(mockUser);
 };
 
@@ -48,7 +57,18 @@ export const setupAuthServiceMethods = () => {
   (authService.setDevLogoutFlag as jest.Mock).mockImplementation(() => {});
   (authService.clearDevLogoutFlag as jest.Mock).mockImplementation(() => {});
   (authService.removeToken as jest.Mock).mockImplementation(() => {});
-  (authService.handleDevLogin as jest.Mock).mockResolvedValue(null);
+  (authService.handleDevLogin as jest.Mock).mockResolvedValue(mockAuthServiceResponses.devLogin);
+  (authService.getAuthHeaders as jest.Mock).mockReturnValue({});
+};
+
+export const setupAuthServiceClientMocks = () => {
+  // Mock auth service client for independent service communication
+  const authServiceClient = require('@/lib/auth-service-config').authService;
+  if (authServiceClient) {
+    authServiceClient.getConfig = jest.fn().mockResolvedValue(mockAuthServiceResponses.config);
+    authServiceClient.getSession = jest.fn().mockResolvedValue(mockAuthServiceResponses.session);
+    authServiceClient.getCurrentUser = jest.fn().mockResolvedValue(mockAuthServiceResponses.user);
+  }
 };
 
 export const setupAuthStore = () => {
@@ -110,7 +130,8 @@ export const expectAuthStoreLogin = (mockStore: any, user = mockUser, token = mo
     expect.objectContaining({
       id: user.id || user.sub || '',
       email: user.email,
-      name: user.full_name || user.name
+      full_name: user.full_name || user.name,
+      role: user.role
     }),
     token
   );

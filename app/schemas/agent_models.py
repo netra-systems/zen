@@ -111,7 +111,7 @@ class AgentResult(BaseModel):
 
 class DeepAgentState(BaseModel):
     """Unified Deep Agent State - single source of truth (replaces old AgentState)."""
-    user_request: str
+    user_request: str = "default_request"  # Default for backward compatibility
     chat_thread_id: Optional[str] = None
     user_id: Optional[str] = None
     

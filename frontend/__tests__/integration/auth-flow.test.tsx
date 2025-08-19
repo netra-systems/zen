@@ -126,8 +126,8 @@ describe('Authentication Flow Integration', () => {
             token,
             isAuthenticated: true
           };
-          // Store in localStorage like real implementation
-          localStorage.setItem('auth-token', token);
+          // Store in localStorage using same key as real implementation
+          localStorage.setItem('jwt_token', token);
           localStorage.setItem('auth-user', JSON.stringify(user));
         }),
         logout: jest.fn().mockImplementation(() => {
@@ -137,11 +137,11 @@ describe('Authentication Flow Integration', () => {
             token: null,
             isAuthenticated: false
           };
-          localStorage.removeItem('auth-token');
+          localStorage.removeItem('jwt_token');
           localStorage.removeItem('auth-user');
         }),
         initializeFromStorage: jest.fn().mockImplementation(() => {
-          const token = localStorage.getItem('auth-token');
+          const token = localStorage.getItem('jwt_token');
           const userStr = localStorage.getItem('auth-user');
           if (token && userStr) {
             const user = JSON.parse(userStr);
@@ -225,6 +225,21 @@ describe('Authentication Flow Integration', () => {
     await verifyStateRestoration();
   });
 
+  it('should support onboarding flow authentication', async () => {
+    await performOnboardingLogin();
+    await verifyOnboardingAuthState();
+    await simulateFirstThreadCreation();
+    expectOnboardingFlowComplete();
+  });
+
+  it('should handle session timeout during onboarding', async () => {
+    setupAuthenticatedState();
+    await simulateSessionTimeout();
+    await verifySessionTimeoutHandling();
+    await performReauthentication();
+    expectContinuedOnboarding();
+  });
+
   // Component factories
   function createLoginComponent() {
     return () => {
@@ -306,7 +321,7 @@ describe('Authentication Flow Integration', () => {
   }
 
   function setupAuthenticatedState() {
-    useAuthStore.setState({
+    (mockUseAuthStore as any).setState({
       user: mockUser,
       token: mockAuthToken,
       isAuthenticated: true
@@ -315,7 +330,7 @@ describe('Authentication Flow Integration', () => {
 
   function performLoginFlow() {
     // Simulate the login process that sets localStorage and updates state
-    localStorage.setItem('auth-token', mockAuthToken);
+    localStorage.setItem('jwt_token', mockAuthToken);
     localStorage.setItem('auth-user', JSON.stringify(mockUser));
     
     // Update the mock state directly 
@@ -330,19 +345,88 @@ describe('Authentication Flow Integration', () => {
   }
 
   function verifyStatePersistence() {
-    expect(localStorage.getItem('auth-token')).toBe(mockAuthToken);
+    expect(localStorage.getItem('jwt_token')).toBe(mockAuthToken);
     expect(JSON.parse(localStorage.getItem('auth-user') || '{}')).toEqual(mockUser);
   }
 
   function performPageRefresh() {
     // Simulate page refresh by resetting store and calling initialization
-    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-    useAuthStore.getState().initializeFromStorage();
+    (mockUseAuthStore as any).setState({ user: null, token: null, isAuthenticated: false });
+    
+    // Call initializeFromStorage to restore state from localStorage
+    const mockStoreInstance = mockUseAuthStore();
+    mockStoreInstance.initializeFromStorage();
   }
 
   async function verifyStateRestoration() {
     await waitFor(() => {
-      expectAuthenticatedState();
+      // Verify the mock store has restored the authenticated state
+      const authState = (mockUseAuthStore as any).getState();
+      expect(authState.isAuthenticated).toBe(true);
+      expect(authState.user).toEqual(mockUser);
+      expect(authState.token).toBe(mockAuthToken);
     });
+  }
+
+  // Onboarding-specific helper functions
+  async function performOnboardingLogin() {
+    const onboardingUser = {
+      id: 'onboarding-user-123',
+      email: 'newuser@netra.ai',
+      name: 'New User',
+      tier: 'free'
+    };
+    
+    const authStore = useAuthStore();
+    await authStore.login(onboardingUser, 'onboarding-token-123');
+  }
+
+  async function verifyOnboardingAuthState() {
+    const authStore = useAuthStore();
+    expect(authStore.isAuthenticated).toBe(true);
+    expect(authStore.user?.tier).toBe('free');
+    expect(localStorage.getItem('jwt_token')).toBeTruthy();
+  }
+
+  async function simulateFirstThreadCreation() {
+    // Mock thread creation during onboarding
+    mockUseUnifiedChatStore.mockReturnValue({
+      ...mockUseUnifiedChatStore(),
+      createThread: jest.fn().mockResolvedValue({
+        id: 'first-thread-123',
+        title: 'Welcome Conversation'
+      })
+    });
+  }
+
+  function expectOnboardingFlowComplete() {
+    const authStore = useAuthStore();
+    expect(authStore.isAuthenticated).toBe(true);
+    expect(authStore.user?.email).toBe('newuser@netra.ai');
+  }
+
+  async function simulateSessionTimeout() {
+    // Simulate token expiration
+    localStorage.removeItem('jwt_token');
+    (mockUseAuthStore as any).setState({
+      isAuthenticated: false,
+      token: null
+    });
+  }
+
+  async function verifySessionTimeoutHandling() {
+    await waitFor(() => {
+      expect((mockUseAuthStore as any).getState().isAuthenticated).toBe(false);
+    });
+  }
+
+  async function performReauthentication() {
+    const authStore = useAuthStore();
+    await authStore.login(mockUser, 'new-token-456');
+  }
+
+  function expectContinuedOnboarding() {
+    expect((mockUseAuthStore as any).getState().isAuthenticated).toBe(true);
+    expect(localStorage.getItem('jwt_token')).toBe('new-token-456');
   }
 });

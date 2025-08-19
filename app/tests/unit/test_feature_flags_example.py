@@ -194,7 +194,9 @@ def test_enterprise_sso_flow():
     
     Currently disabled as enterprise_sso depends on features not yet launched.
     """
-    from app.auth.enterprise_sso import SSOProvider
+    # from app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
+    pytest.skip("enterprise_sso module not available - use auth_integration")
+    return
     
     provider = SSOProvider("okta")
     auth_url = provider.get_auth_url("client_123")

@@ -86,6 +86,12 @@ class AgentService(IAgentService):
         """Process parsed websocket message."""
         data = self._parse_message(message)
         message_type = data.get("type")
+        
+        # Validate message type is present
+        if not message_type:
+            await manager.send_error(user_id, "Message type is required")
+            return
+            
         payload = data.get("payload", {})
         await self._route_message_by_type(user_id, message_type, payload, db_session)
     
@@ -102,8 +108,10 @@ class AgentService(IAgentService):
     ) -> bool:
         """Handle standard message types, return True if handled."""
         if message_type == "start_agent":
+            logger.info(f"Processing start_agent for user {user_id}")
             await self.message_handler.handle_start_agent(user_id, payload, db_session)
         elif message_type == "user_message":
+            logger.info(f"Processing user_message for user {user_id}, payload keys: {list(payload.keys())}")
             await self.message_handler.handle_user_message(user_id, payload, db_session)
         elif message_type == "get_thread_history":
             await self.message_handler.handle_thread_history(user_id, db_session)
@@ -119,6 +127,8 @@ class AgentService(IAgentService):
         if await self._handle_thread_message_types(user_id, message_type, payload, db_session):
             return
         logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
+        # Send error to user for unknown message type
+        await manager.send_error(user_id, f"Unknown message type: {message_type}")
     
     async def _handle_thread_message_types(
         self, user_id: str, message_type: str, payload: Dict[str, Any], 
@@ -141,7 +151,7 @@ class AgentService(IAgentService):
         """Handle JSON decode error with user notification."""
         logger.error(f"Invalid JSON in websocket message from user {user_id}: {e}")
         try:
-            await manager.send_error(user_id, "Invalid message format")
+            await manager.send_error(user_id, "Invalid JSON message format")
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
     
@@ -152,8 +162,18 @@ class AgentService(IAgentService):
     async def _handle_general_exception(self, user_id: str, e: Exception) -> None:
         """Handle general exception with error reporting."""
         logger.error(f"Error in handle_websocket_message for user_id: {user_id}: {e}", exc_info=True)
+        
+        # Provide more specific error messages based on exception type
+        error_message = "Internal server error"
+        if isinstance(e, (TypeError, AttributeError)):
+            error_message = "Invalid message format or structure"
+        elif isinstance(e, KeyError):
+            error_message = f"Missing required field: {str(e)}"
+        elif isinstance(e, ValueError):
+            error_message = f"Invalid value: {str(e)}"
+            
         try:
-            await manager.send_error(user_id, "Internal server error")
+            await manager.send_error(user_id, error_message)
         except (WebSocketDisconnect, Exception):
             logger.warning(f"Could not send error to disconnected user {user_id}")
     

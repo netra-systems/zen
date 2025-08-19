@@ -272,12 +272,16 @@ class DevelopmentConfig(AppConfig):
     
     def __init__(self, **data):
         import os
+        # Load configuration from environment BEFORE parent init
+        if not data:  # If called with no arguments (from UnifiedConfigManager)
+            data = {}
         self._load_database_url(data, os)
         self._load_clickhouse_config(data, os)
         self._load_redis_config(data, os)
         service_modes = self._get_service_modes(os)
         self._configure_service_flags(data, service_modes)
         self._log_service_configuration(service_modes)
+        # Call parent init with updated data
         super().__init__(**data)
     
     def _load_database_url(self, data: dict, os_module) -> None:
@@ -306,25 +310,23 @@ class DevelopmentConfig(AppConfig):
         ch_password = os_module.environ.get('CLICKHOUSE_PASSWORD', '')
         ch_db = os_module.environ.get('CLICKHOUSE_DB', 'default')
         
-        # Override ClickHouse native config
-        if 'clickhouse_native' not in data:
-            data['clickhouse_native'] = ClickHouseNativeConfig(
-                host=ch_host,
-                port=ch_native_port,
-                user=ch_user,
-                password=ch_password,
-                database=ch_db
-            )
+        # ALWAYS override ClickHouse configs with env values
+        # Do NOT check if already exists - parent class sets placeholders
+        data['clickhouse_native'] = ClickHouseNativeConfig(
+            host=ch_host,
+            port=ch_native_port,
+            user=ch_user,
+            password=ch_password,
+            database=ch_db
+        )
         
-        # Override ClickHouse HTTPS config
-        if 'clickhouse_https' not in data:
-            data['clickhouse_https'] = ClickHouseHTTPSConfig(
-                host=ch_host,
-                port=ch_http_port,
-                user=ch_user,
-                password=ch_password,
-                database=ch_db
-            )
+        data['clickhouse_https'] = ClickHouseHTTPSConfig(
+            host=ch_host,
+            port=ch_http_port,
+            user=ch_user,
+            password=ch_password,
+            database=ch_db
+        )
     
     def _load_redis_config(self, data: dict, os_module) -> None:
         """Load Redis configuration from environment variables."""
@@ -342,16 +344,21 @@ class DevelopmentConfig(AppConfig):
             redis_port = int(os_module.environ.get('REDIS_PORT', '6379'))
             redis_password = os_module.environ.get('REDIS_PASSWORD')
         
-        # Override Redis config
-        if 'redis' not in data:
-            data['redis'] = RedisConfig(
-                host=redis_host,
-                port=redis_port,
-                password=redis_password
-            )
+        # ALWAYS override Redis config with env values
+        # Do NOT check if already exists - parent class sets placeholders
+        data['redis'] = RedisConfig(
+            host=redis_host,
+            port=redis_port,
+            password=redis_password
+        )
     
     def _configure_service_flags(self, data: dict, service_modes: dict) -> None:
         """Configure service enabled flags based on modes."""
+        # Set the actual mode fields
+        data["redis_mode"] = service_modes['redis']
+        data["clickhouse_mode"] = service_modes['clickhouse']
+        data["llm_mode"] = service_modes['llm']
+        # Set enabled flags
         data["dev_mode_redis_enabled"] = service_modes['redis'] != "disabled"
         data["dev_mode_clickhouse_enabled"] = service_modes['clickhouse'] != "disabled"
         data["dev_mode_llm_enabled"] = service_modes['llm'] != "disabled"

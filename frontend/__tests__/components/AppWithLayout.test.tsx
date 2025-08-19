@@ -1,21 +1,49 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AppWithLayout } from '@/components/AppWithLayout';
+import { Header } from '@/components/Header';
+import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
 // Mock the store
 jest.mock('@/store', () => ({
   useAppStore: jest.fn(),
 }));
 
-// Mock the ChatSidebar and Header components
-jest.mock('@/components/chat/ChatSidebar', () => ({
-  ChatSidebar: () => <div data-testid="sidebar">ChatSidebar</div>,
+// Mock external dependencies that ChatSidebar needs
+jest.mock('@/store/unified-chat', () => ({
+  useUnifiedChatStore: jest.fn(() => ({
+    isProcessing: false,
+    activeThreadId: null,
+  })),
 }));
-jest.mock('@/components/Header', () => ({
-  Header: ({ toggleSidebar }: { toggleSidebar: () => void }) => (
-    <button onClick={toggleSidebar} data-testid="header">
-      Header
-    </button>
-  ),
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn(() => ({
+    isDeveloperOrHigher: () => false,
+  })),
+}));
+
+jest.mock('@/hooks/useAuthState', () => ({
+  useAuthState: jest.fn(() => ({
+    isAuthenticated: false,
+    userTier: 'Free',
+  })),
+}));
+
+jest.mock('@/hooks/useWebSocket', () => ({
+  useWebSocket: jest.fn(() => ({
+    sendMessage: jest.fn(),
+  })),
+}));
+
+jest.mock('@/components/Icons', () => ({
+  Icons: {
+    logo: () => <div data-testid="logo">Logo</div>,
+  },
+}));
+
+jest.mock('@/components/LoginButton', () => ({
+  __esModule: true,
+  default: () => <div data-testid="login-button">Login</div>,
 }));
 
 describe('AppWithLayout', () => {
@@ -31,9 +59,9 @@ describe('AppWithLayout', () => {
     // Act
     render(<AppWithLayout><div>Child</div></AppWithLayout>);
 
-    // Assert
-    expect(screen.getByTestId('header')).toBeInTheDocument();
-    expect(screen.getByTestId('sidebar')).toBeInTheDocument();
+    // Assert - Look for actual header element and sidebar content
+    expect(screen.getByRole('banner')).toBeInTheDocument(); // Header has header role
+    expect(screen.getByTestId('chat-sidebar')).toBeInTheDocument(); // ChatSidebar has this testid
   });
 
   it('does not render the Sidebar when it is collapsed', () => {
@@ -49,8 +77,8 @@ describe('AppWithLayout', () => {
     render(<AppWithLayout><div>Child</div></AppWithLayout>);
 
     // Assert
-    expect(screen.getByTestId('header')).toBeInTheDocument();
-    expect(screen.queryByTestId('sidebar')).not.toBeInTheDocument();
+    expect(screen.getByRole('banner')).toBeInTheDocument(); // Header still present
+    expect(screen.queryByTestId('chat-sidebar')).not.toBeInTheDocument(); // Sidebar hidden
   });
 
   it('calls toggleSidebar when header button is clicked', () => {
@@ -64,7 +92,10 @@ describe('AppWithLayout', () => {
 
     // Act
     render(<AppWithLayout><div>Child</div></AppWithLayout>);
-    fireEvent.click(screen.getByTestId('header'));
+    
+    // Find the toggle button in the Header component (outline variant with icon)
+    const toggleButton = screen.getByRole('button', { name: /toggle navigation menu/i });
+    fireEvent.click(toggleButton);
 
     // Assert
     expect(toggleSidebar).toHaveBeenCalled();

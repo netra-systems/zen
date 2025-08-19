@@ -6,14 +6,31 @@ global.fetch = jest.fn();
 
 describe('MessageService', () => {
   beforeEach(() => {
+    setupTestEnvironment();
+  });
+
+  function setupTestEnvironment() {
     jest.clearAllMocks();
+    setupLocalStorage();
+    resetServiceState();
+  }
+
+  function setupLocalStorage() {
     localStorage.clear();
-    // Set up default auth token for all tests
     localStorage.setItem('jwt_token', 'test-token');
-    // Reset the messageService singleton state by clearing queued messages and thread states
+  }
+
+  function resetServiceState() {
     (messageService as any).queuedMessages = [];
     (messageService as any).threadStates = new Map();
-  });
+  }
+
+  function createMockResponse(data: any, ok = true) {
+    return {
+      ok,
+      json: async () => data
+    };
+  }
 
   describe('Thread Management', () => {
     it('should create a new thread', async () => {
@@ -142,36 +159,48 @@ describe('MessageService', () => {
     });
 
     it('should handle pagination for large message lists', async () => {
-      const mockMessages = Array(100).fill(0).map((_, i) => ({
+      const mockMessages = createLargeMessageList();
+      setupPaginationMock(mockMessages);
+      const result = await executePaginatedRequest();
+      verifyPaginationCall();
+      verifyPaginationResult(result);
+    });
+
+    function createLargeMessageList() {
+      return Array(100).fill(0).map((_, i) => ({
         id: `msg-${i}`,
         role: i % 2 === 0 ? 'user' : 'assistant',
         content: `Message ${i}`,
         timestamp: new Date(Date.now() + i * 1000).toISOString(),
-        displayed_to_user: true,
+        displayed_to_user: true
       }));
+    }
 
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({
-          messages: mockMessages.slice(0, 50),
-          has_more: true,
-          next_cursor: 'cursor-50',
-        }),
-      });
+    function setupPaginationMock(mockMessages: any[]) {
+      const paginatedResponse = {
+        messages: mockMessages.slice(0, 50),
+        has_more: true,
+        next_cursor: 'cursor-50'
+      };
+      (fetch as jest.Mock).mockResolvedValueOnce(createMockResponse(paginatedResponse));
+    }
 
-      const result = await messageService.getThreadMessages('thread-123', {
-        limit: 50,
-      });
+    async function executePaginatedRequest() {
+      return await messageService.getThreadMessages('thread-123', { limit: 50 });
+    }
 
+    function verifyPaginationCall() {
       expect(fetch).toHaveBeenCalledWith(
         '/api/threads/thread-123/messages?limit=50',
         expect.any(Object)
       );
+    }
 
+    function verifyPaginationResult(result: any) {
       expect(result.messages).toHaveLength(50);
       expect(result.has_more).toBe(true);
       expect(result.next_cursor).toBe('cursor-50');
-    });
+    }
   });
 
   describe('Local Cache Management', () => {
@@ -258,52 +287,61 @@ describe('MessageService', () => {
     });
 
     it('should retry failed message sends', async () => {
-      // Ensure the service is reset before this test
+      resetServiceForRetryTest();
+      const message = createRetryTestMessage();
+      await queueMessageOffline(message);
+      await verifyMessageQueued();
+      await setupRetryMocks(message);
+      const retryResults = await executeRetry();
+      verifyRetryResults(retryResults);
+    });
+
+    function resetServiceForRetryTest() {
       (messageService as any)._reset();
-      
-      const message: Message = {
+    }
+
+    function createRetryTestMessage() {
+      return {
         id: 'msg-retry',
         role: 'user',
         content: 'Retry message',
         timestamp: new Date().toISOString(),
-        displayed_to_user: true,
+        displayed_to_user: true
       };
+    }
 
-      // Save with offline flag - this should queue the message
+    async function queueMessageOffline(message: Message) {
       const saveResult = await messageService.saveMessage('thread-123', message, {
-        offline: true,
+        offline: true
       });
-
-      // Verify message was queued
       expect(saveResult.queued).toBe(true);
-      
-      // Verify the message is in the queue
-      let queuedMessages = await messageService.getQueuedMessages();
+    }
+
+    async function verifyMessageQueued() {
+      const queuedMessages = await messageService.getQueuedMessages();
       expect(queuedMessages).toHaveLength(1);
       expect(queuedMessages[0].message.id).toBe('msg-retry');
-      
-      // Clear the mock to reset call count
+    }
+
+    async function setupRetryMocks(message: Message) {
       (fetch as jest.Mock).mockClear();
-      
-      // Now simulate coming back online - need to mock the POST to messages endpoint
-      // Mock implementation that returns a proper response
       (fetch as jest.Mock).mockImplementationOnce(async () => ({
         ok: true,
-        json: async () => ({ ...message, persisted: true }),
+        json: async () => ({ ...message, persisted: true })
       }));
-
-      // Double-check queue before retry
       const queueBeforeRetry = await messageService.getQueuedMessages();
       expect(queueBeforeRetry).toHaveLength(1);
+    }
 
-      // Test that retryQueuedMessages is callable
-      const retryResults = await messageService.retryQueuedMessages();
-      
-      // Just verify the function returns a result
+    async function executeRetry() {
+      return await messageService.retryQueuedMessages();
+    }
+
+    function verifyRetryResults(retryResults: any) {
       expect(retryResults).toBeDefined();
       expect(retryResults).toHaveProperty('successful');
       expect(retryResults).toHaveProperty('failed');
-    });
+    }
   });
 
   describe('Thread State Management', () => {
@@ -322,26 +360,33 @@ describe('MessageService', () => {
     });
 
     it('should update thread metadata', async () => {
-      (fetch as jest.Mock).mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true }),
-      });
+      setupMetadataUpdateMock();
+      await executeMetadataUpdate();
+      verifyMetadataUpdateCall();
+    });
 
+    function setupMetadataUpdateMock() {
+      (fetch as jest.Mock).mockResolvedValueOnce(createMockResponse({ success: true }));
+    }
+
+    async function executeMetadataUpdate() {
       await messageService.updateThreadMetadata('thread-123', {
         title: 'Updated thread title',
-        tags: ['important', 'work'],
+        tags: ['important', 'work']
       });
+    }
 
+    function verifyMetadataUpdateCall() {
       expect(fetch).toHaveBeenCalledWith(
         '/api/threads/thread-123/metadata',
         expect.objectContaining({
           method: 'PATCH',
           body: JSON.stringify({
             title: 'Updated thread title',
-            tags: ['important', 'work'],
-          }),
+            tags: ['important', 'work']
+          })
         })
       );
-    });
+    }
   });
 });

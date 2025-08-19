@@ -1,183 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <deployment_learnings>
-  <title>Deployment Learnings</title>
-  <description>Lessons learned from GCP deployments and infrastructure management</description>
-  
-  <staging_deployment>
-    <lesson id="staging-setup">
-      <problem>Staging deployment process was unclear and mixed with production configs</problem>
-      <solution>
-        Created dedicated staging configuration:
-        - terraform.staging.tfvars with cost-optimized resources
-        - deploy-staging.sh automated script
-        - Separate workspace and state bucket
-      </solution>
-      <key_files>
-        - terraform-gcp/terraform.staging.tfvars
-        - terraform-gcp/deploy-staging.sh
-        - docs/STAGING_DEPLOYMENT.md
-      </key_files>
-    </lesson>
-    
-    <lesson id="docker-builds">
-      <problem>Frontend Dockerfile naming inconsistency</problem>
-      <solution>
-        Use Dockerfile.frontend.staging for staging builds
-        Use Dockerfile.frontend.optimized for production
-      </solution>
+  <metadata>
+    <created>2025-08-18</created>
+    <purpose>Document deployment process learnings to prevent regression</purpose>
+    <category>deployment</category>
+  </metadata>
+
+  <critical_info>
+    <project_id>netra-staging</project_id>
+    <region>us-central1</region>
+    <registry>us-central1-docker.pkg.dev</registry>
+    <repository>netra-staging/netra-staging</repository>
+  </critical_info>
+
+  <service_names>
+    <service name="backend" exact="netra-backend-staging"/>
+    <service name="frontend" exact="netra-frontend-staging"/>
+    <service name="auth" exact="netra-auth-service"/>
+  </service_names>
+
+  <authentication>
+    <correct>
+      <key_file>gcp-staging-sa-key.json</key_file>
+      <service_account>netra-staging-deploy@netra-staging.iam.gserviceaccount.com</service_account>
+      <command>gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json</command>
+    </correct>
+    <incorrect>
+      <key_file>staging-deploy-key.json</key_file>
+      <note>This file does not exist</note>
+    </incorrect>
+  </authentication>
+
+  <docker_files>
+    <backend>Dockerfile.backend</backend>
+    <frontend>Dockerfile.frontend.staging</frontend>
+    <auth>Dockerfile.auth</auth>
+    <note>Frontend uses .staging suffix, others don't</note>
+  </docker_files>
+
+  <build_commands>
+    <backend>
+      docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest -f Dockerfile.backend .
+    </backend>
+    <frontend>
+      docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest -f Dockerfile.frontend.staging .
+    </frontend>
+    <auth>
+      docker build -t us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest -f Dockerfile.auth .
+    </auth>
+  </build_commands>
+
+  <deployment_steps>
+    <step order="1">
+      <action>Authenticate service account</action>
       <commands>
-        docker build -f Dockerfile.frontend.staging .
+        <command>gcloud auth activate-service-account --key-file=gcp-staging-sa-key.json</command>
+        <command>gcloud config set project netra-staging</command>
       </commands>
-    </lesson>
-    
-    <lesson id="terraform-backend">
-      <problem>Terraform backend not configured in main.tf</problem>
-      <solution>
-        Added GCS backend configuration to main.tf:
-        backend "gcs" {
-          # Bucket and prefix set via backend-config
-        }
-      </solution>
-    </lesson>
-    
-    <lesson id="oauth-https-redirect">
-      <problem>OAuth callback URLs using HTTP instead of HTTPS in staging environment</problem>
-      <root_cause>
-        When Cloud Run receives requests behind a proxy/load balancer, request.base_url
-        returns HTTP instead of HTTPS, causing OAuth redirect_uri mismatch
-      </root_cause>
-      <solution>
-        Force HTTPS for staging and production environments in auth routes:
-        - Updated app/routes/auth/auth.py login endpoint
-        - Updated app/routes/auth/auth.py config endpoint
-        - Check environment and replace http:// with https:// for non-dev environments
-      </solution>
-      <affected_files>
-        - app/routes/auth/auth.py
-      </affected_files>
-      <key_changes>
-        if auth_env_config.environment.value in ["staging", "production"]:
-            base_url = base_url.replace("http://", "https://")
-      </key_changes>
-    </lesson>
-    
-    <lesson id="cloud-armor-issues">
-      <problem>cloud-armor-ip-blocking.tf references non-existent service</problem>
-      <solution>
-        Temporarily disabled file by renaming to .disabled
-        Fix: Change google_cloud_run_service.app to google_cloud_run_service.backend
-      </solution>
-    </lesson>
-    
-    <lesson id="iam-restrictions">
-      <problem>Organization policy prevents setting allUsers IAM binding</problem>
-      <solution>
-        Deploy services first, then manually add IAM bindings if needed:
-        gcloud beta run services add-iam-policy-binding
-      </solution>
-    </lesson>
-    
-    <lesson id="frontend-api-url-configuration">
-      <problem>Frontend was calling localhost instead of staging API URL</problem>
-      <solution>
-        Build frontend with staging API URL using build args:
-        docker build -f Dockerfile.frontend.staging \
-          --build-arg NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai \
-          --build-arg NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws \
-          -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest .
-      </solution>
-      <details>
-        The frontend uses environment variables at build time for API configuration.
-        These must be set during Docker build, not at runtime.
-        Default staging API URL: https://api.staging.netrasystems.ai
-      </details>
-    </lesson>
-    
-    <lesson id="oauth-credential-env-var-mismatch">
-      <problem>OAuth authentication failing with invalid_client and CSRF state mismatch errors in staging</problem>
-      <root_cause>
-        Multiple configuration mismatches:
-        1. OAuth client initialized with wrong credentials - used settings.oauth_config instead of environment-specific config
-        2. Terraform set GOOGLE_CLIENT_ID but code expected GOOGLE_OAUTH_CLIENT_ID_STAGING
-        3. Session middleware https_only flag not set for staging (only production)
-        4. Frontend URL hardcoded to localhost:3010 instead of staging URL
-      </root_cause>
-      <solution>
-        Fixed all configuration mismatches:
-        1. Updated app/auth/auth.py to use auth_env_config.get_oauth_config() instead of settings.oauth_config
-        2. Updated terraform-gcp/main.tf to set correct env var names:
-           - GOOGLE_OAUTH_CLIENT_ID_STAGING (was GOOGLE_CLIENT_ID)
-           - GOOGLE_OAUTH_CLIENT_SECRET_STAGING (was GOOGLE_CLIENT_SECRET)
-        3. Updated middleware_setup.py to set https_only for both staging and production
-        4. Added _get_frontend_url_for_environment() helper to dynamically determine frontend URL
-        5. Added ENVIRONMENT=staging env var in Terraform for proper environment detection
-      </solution>
-      <affected_files>
-        - app/auth/auth.py
-        - app/routes/auth/auth.py
-        - app/core/middleware_setup.py
-        - terraform-gcp/main.tf
-      </affected_files>
-      <key_changes>
-        # OAuth client initialization
-        oauth_config = auth_env_config.get_oauth_config()
-        self.google = self.oauth.register(
-            client_id=oauth_config.client_id,
-            client_secret=oauth_config.client_secret
-        )
-        
-        # Terraform env vars
-        env {
-          name  = "GOOGLE_OAUTH_CLIENT_ID_STAGING"
-          value_from { secret_key_ref { name = "google-client-id-staging" } }
-        }
-        
-        # Session middleware
-        https_only=(settings.environment in ["production", "staging"])
-      </key_changes>
-      <prevention>
-        Always verify environment variable names match between infrastructure and application code.
-        Use single source of truth for OAuth configuration - prefer environment-specific config over static settings.
-      </prevention>
-    </lesson>
-  </staging_deployment>
-  
-  <quick_commands>
-    <deploy_staging>
-      # Complete staging deployment
-      cd terraform-gcp
-      ./deploy-staging.sh
-    </deploy_staging>
-    
-    <build_and_push>
-      # Build and push images
-      docker build -t us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest -f Dockerfile.backend .
-      docker push us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest
-      
-      # Frontend with staging API URL
-      docker build -f Dockerfile.frontend.staging \
-        --build-arg NEXT_PUBLIC_API_URL=https://api.staging.netrasystems.ai \
-        --build-arg NEXT_PUBLIC_WS_URL=wss://api.staging.netrasystems.ai/ws \
-        -t us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest .
-      docker push us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest
-    </build_and_push>
-    
-    <deploy_services>
-      # Deploy to Cloud Run
-      gcloud run deploy netra-backend --image us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:latest --region us-central1 --platform managed --allow-unauthenticated --quiet
-      gcloud run deploy netra-frontend --image us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:latest --region us-central1 --platform managed --allow-unauthenticated --quiet
-    </deploy_services>
-  </quick_commands>
-  
-  <staging_urls>
-    <frontend>https://netra-frontend-701982941522.us-central1.run.app/</frontend>
-    <backend>https://netra-backend-701982941522.us-central1.run.app/</backend>
-  </staging_urls>
-  
-  <cost_optimization>
-    <note>Staging uses minimal resources and scales to zero when idle</note>
-    <db_tier>db-f1-micro</db_tier>
-    <backend_resources>0.5 vCPU, 1GB RAM</backend_resources>
-    <frontend_resources>0.25 vCPU, 512MB RAM</frontend_resources>
-  </cost_optimization>
+    </step>
+    <step order="2">
+      <action>Configure Docker for Artifact Registry</action>
+      <command>gcloud auth configure-docker us-central1-docker.pkg.dev --quiet</command>
+    </step>
+    <step order="3">
+      <action>Build Docker images</action>
+      <note>Can be done in parallel</note>
+    </step>
+    <step order="4">
+      <action>Push images to Artifact Registry</action>
+      <commands>
+        <command>docker push us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest</command>
+        <command>docker push us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest</command>
+        <command>docker push us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest</command>
+      </commands>
+    </step>
+    <step order="5">
+      <action>Deploy to Cloud Run</action>
+      <commands>
+        <command>gcloud run deploy netra-backend-staging --image us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest --region us-central1</command>
+        <command>gcloud run deploy netra-frontend-staging --image us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest --region us-central1</command>
+        <command>gcloud run deploy netra-auth-service --image us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest --region us-central1</command>
+      </commands>
+    </step>
+  </deployment_steps>
+
+  <known_issues>
+    <issue>
+      <problem>deploy-staging-reliable.ps1 has syntax errors</problem>
+      <solution>Use manual commands instead of the script</solution>
+    </issue>
+    <issue>
+      <problem>Wrong project ID used (netra-systems)</problem>
+      <solution>Always use netra-staging</solution>
+    </issue>
+    <issue>
+      <problem>Wrong Dockerfile names</problem>
+      <solution>Check actual file names with ls/dir command first</solution>
+    </issue>
+    <issue>
+      <problem>Service account lacks iam.serviceAccounts.actAs permission</problem>
+      <error>PERMISSION_DENIED: Permission 'iam.serviceaccounts.actAs' denied on service account</error>
+      <solution>Need owner or admin to grant roles/iam.serviceAccountUser to netra-staging-deploy@netra-staging.iam.gserviceaccount.com</solution>
+      <workaround>Images are successfully pushed to Artifact Registry. Can be deployed by someone with proper permissions</workaround>
+    </issue>
+  </known_issues>
+
+  <environment_variables>
+    <note>Set these before deployment if needed</note>
+    <var name="GOOGLE_APPLICATION_CREDENTIALS">gcp-staging-sa-key.json</var>
+    <var name="PROJECT_ID">netra-staging</var>
+    <var name="REGION">us-central1</var>
+  </environment_variables>
+
+  <deployment_status date="2025-08-18">
+    <success>
+      <item>All three Docker images built successfully</item>
+      <item>Images pushed to Artifact Registry at us-central1-docker.pkg.dev/netra-staging/netra-staging/</item>
+      <item>Services already exist in Cloud Run</item>
+    </success>
+    <images_available>
+      <backend>us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-backend-staging:latest</backend>
+      <frontend>us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-frontend-staging:latest</frontend>
+      <auth>us-central1-docker.pkg.dev/netra-staging/netra-staging/netra-auth-service:latest</auth>
+    </images_available>
+    <pending>
+      <item>Cloud Run deployment requires admin to grant iam.serviceAccountUser role</item>
+      <command_to_fix>gcloud projects add-iam-policy-binding netra-staging --member="serviceAccount:netra-staging-deploy@netra-staging.iam.gserviceaccount.com" --role="roles/iam.serviceAccountUser"</command_to_fix>
+    </pending>
+  </deployment_status>
 </deployment_learnings>

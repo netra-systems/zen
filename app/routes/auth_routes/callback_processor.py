@@ -64,18 +64,24 @@ def build_oauth_user_data(user_info: dict) -> UserCreateOAuth:
 
 async def get_or_create_user(db: AsyncSession, user_info: dict):
     """Get existing user or create new user from OAuth info."""
-    user = await user_service.get_by_email(db, email=user_info['email'])
-    if not user:
-        user_in = build_oauth_user_data(user_info)
-        user = await user_service.create(db, obj_in=user_in)
+    user_in = build_oauth_user_data(user_info)
+    user = await user_service.get_or_create(db, obj_in=user_in)
     return user
 
 
-def _create_user_access_token(security_service: SecurityService, user) -> str:
-    """Create access token for user."""
-    return security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
+async def _create_user_access_token(user) -> str:
+    """Create access token for user through auth service."""
+    from app.clients.auth_client import auth_client
+    token_data = {"user_id": str(user.id)}
+    result = await auth_client.create_token(token_data)
+    if not result or "access_token" not in result:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create access token"
+        )
+    return result["access_token"]
 
-async def _execute_oauth_flow(request: Request, db: AsyncSession) -> tuple:
+async def _execute_oauth_flow(request: Request, db: AsyncSession) -> object:
     """Execute OAuth token exchange and user creation flow."""
     log_callback_initiation(request)
     validate_callback_params(request)
@@ -88,7 +94,7 @@ async def process_oauth_callback(
 ) -> RedirectResponse:
     """Process OAuth callback and create user session."""
     user = await _execute_oauth_flow(request, db)
-    access_token = _create_user_access_token(security_service, user)
+    access_token = await _create_user_access_token(user)
     return build_callback_redirect(access_token)
 
 

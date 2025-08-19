@@ -266,35 +266,132 @@ describe('ThreadService Revenue-Critical Tests', () => {
 
   describe('Concurrent Operations - System Resilience', () => {
     test('handles multiple thread operations simultaneously', async () => {
+      const mockThreads = setupConcurrentOperationMocks();
+      const results = await executeConcurrentOperations();
+      verifyConcurrentResults(results, mockThreads);
+    });
+
+    function setupConcurrentOperationMocks() {
       const mockThreads = createMockThreads(3);
       mockApiClient.get.mockResolvedValue({ data: mockThreads });
       mockApiClient.post.mockResolvedValue({ data: mockThreads[0] });
       mockApiClient.put.mockResolvedValue({ data: mockThreads[1] });
+      return mockThreads;
+    }
 
-      const [listResult, createResult, updateResult] = await Promise.all([
+    async function executeConcurrentOperations() {
+      return await Promise.all([
         ThreadService.listThreads(),
         ThreadService.createThread('New Thread'),
         ThreadService.updateThread('thread-1', 'Updated')
       ]);
+    }
 
+    function verifyConcurrentResults(results: any[], mockThreads: any[]) {
+      const [listResult, createResult, updateResult] = results;
       expect(listResult).toEqual(mockThreads);
       expect(createResult).toEqual(mockThreads[0]);
       expect(updateResult).toEqual(mockThreads[1]);
-    });
+    }
 
     test('isolates failures in concurrent operations', async () => {
+      setupMixedConcurrentMocks();
+      const results = await executeMixedConcurrentOperations();
+      expectMixedConcurrentResults(results);
+    });
+
+    function setupMixedConcurrentMocks() {
       mockApiClient.get.mockResolvedValue({ data: createMockThreads(1) });
       mockApiClient.post.mockRejectedValue(createApiError(400, 'Create failed'));
       mockApiClient.put.mockResolvedValue({ data: createMockThread('1', 'Updated') });
+    }
 
-      const results = await Promise.allSettled([
+    async function executeMixedConcurrentOperations() {
+      return await Promise.allSettled([
         ThreadService.listThreads(),
         ThreadService.createThread('Bad Thread'),
         ThreadService.updateThread('thread-1', 'Good Update')
       ]);
+    }
 
-      expectMixedConcurrentResults(results);
+    test('handles network timeout during concurrent operations', async () => {
+      setupTimeoutMocks();
+      const results = await executeTimeoutOperations();
+      verifyTimeoutHandling(results);
     });
+
+    function setupTimeoutMocks() {
+      mockApiClient.get.mockRejectedValue(createApiError(408, 'Request timeout'));
+      mockApiClient.post.mockResolvedValue({ data: createMockThread('new', 'New') });
+    }
+
+    async function executeTimeoutOperations() {
+      return await Promise.allSettled([
+        ThreadService.listThreads(),
+        ThreadService.createThread('Timeout Test')
+      ]);
+    }
+
+    function verifyTimeoutHandling(results: PromiseSettledResult<any>[]) {
+      expect(results[0].status).toBe('rejected');
+      expect(results[1].status).toBe('fulfilled');
+    }
+  });
+
+  describe('Edge Cases and Error Resilience', () => {
+    test('handles malformed API responses', async () => {
+      setupMalformedResponseMock();
+      await expectMalformedResponseError();
+    });
+
+    function setupMalformedResponseMock() {
+      mockApiClient.get.mockResolvedValue({ data: null });
+    }
+
+    async function expectMalformedResponseError() {
+      await expect(ThreadService.listThreads()).rejects.toThrow();
+    }
+
+    test('handles invalid thread ID formats', async () => {
+      setupInvalidIdMock();
+      await expectInvalidIdError();
+    });
+
+    function setupInvalidIdMock() {
+      mockApiClient.get.mockRejectedValue(createApiError(400, 'Invalid thread ID format'));
+    }
+
+    async function expectInvalidIdError() {
+      await expect(ThreadService.getThread('<script>')).rejects.toThrow('Invalid thread ID format');
+    }
+
+    test('handles extremely large pagination values', async () => {
+      setupLargePaginationMock();
+      const result = await ThreadService.listThreads(999999, 999999);
+      expectEmptyResult(result);
+    });
+
+    function setupLargePaginationMock() {
+      mockApiClient.get.mockResolvedValue({ data: [] });
+    }
+
+    function expectEmptyResult(result: any[]) {
+      expect(result).toEqual([]);
+      expectListCall(mockApiClient, 999999, 999999);
+    }
+
+    test('handles rate limiting on operations', async () => {
+      setupRateLimitMock();
+      await expectRateLimitError();
+    });
+
+    function setupRateLimitMock() {
+      mockApiClient.post.mockRejectedValue(createApiError(429, 'Rate limit exceeded'));
+    }
+
+    async function expectRateLimitError() {
+      await expect(ThreadService.createThread('Rate Limited')).rejects.toThrow('Rate limit exceeded');
+    }
   });
 });
 

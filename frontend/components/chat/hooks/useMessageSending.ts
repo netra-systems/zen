@@ -19,7 +19,8 @@ export const useMessageSending = () => {
     setActiveThread, 
     setProcessing, 
     addOptimisticMessage,
-    updateOptimisticMessage 
+    updateOptimisticMessage,
+    messages 
   } = useUnifiedChatStore();
   const { setCurrentThread, addThread } = useThreadStore();
 
@@ -63,15 +64,44 @@ export const useMessageSending = () => {
     };
   };
 
+  const checkIfFirstMessage = (threadId: string): boolean => {
+    // Check if there are any messages for this thread
+    const threadMessages = messages.filter(msg => 
+      msg.thread_id === threadId && msg.role === 'user'
+    );
+    return threadMessages.length === 0;
+  };
+
   const sendWebSocketMessage = (message: string, threadId: string): void => {
-    sendMessage({ 
-      type: 'user_message', 
-      payload: { 
-        content: message, 
-        references: [],
-        thread_id: threadId 
-      } 
-    });
+    // For the first message in a thread or new conversation, use start_agent
+    // For subsequent messages, use user_message
+    // This ensures proper agent initialization and context setup
+    
+    // Check if this is the first message (new thread or no messages in current thread)
+    const isFirstMessage = !threadId || checkIfFirstMessage(threadId);
+    
+    if (isFirstMessage) {
+      // Use start_agent for initial message - properly initializes agent context
+      sendMessage({ 
+        type: 'start_agent', 
+        payload: { 
+          user_request: message,
+          thread_id: threadId || null,
+          context: {},
+          settings: {}
+        } 
+      });
+    } else {
+      // Use user_message for subsequent messages in an existing conversation
+      sendMessage({ 
+        type: 'user_message', 
+        payload: { 
+          content: message, 
+          references: [],
+          thread_id: threadId 
+        } 
+      });
+    }
   };
 
   const handleThreadRename = async (threadId: string, message: string): Promise<void> => {

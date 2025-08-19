@@ -2,11 +2,11 @@ import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 
 // Hoist all mocks to the top for proper Jest handling
-const mockUseUnifiedChatStore = jest.fn();
-const mockUseLoadingState = jest.fn();
-const mockUseThreadNavigation = jest.fn();
-const mockUseWebSocket = jest.fn();
-const mockUseEventProcessor = jest.fn();
+var mockUseUnifiedChatStore = jest.fn();
+var mockUseLoadingState = jest.fn();
+var mockUseThreadNavigation = jest.fn();
+var mockUseWebSocket = jest.fn();
+var mockUseEventProcessor = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore
@@ -28,30 +28,14 @@ jest.mock('@/hooks/useEventProcessor', () => ({
   useEventProcessor: mockUseEventProcessor
 }));
 
-// Mock all the components
-jest.mock('@/components/chat/ChatHeader', () => ({
-  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
-}));
-
-jest.mock('@/components/chat/MessageList', () => ({
-  MessageList: () => <div data-testid="message-list">Message List</div>
-}));
-
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => <div data-testid="message-input">Message Input</div>
-}));
-
-jest.mock('@/components/chat/ExamplePrompts', () => ({
-  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
-}));
-
-jest.mock('@/components/chat/PersistentResponseCard', () => ({
-  PersistentResponseCard: ({ isCollapsed, onToggleCollapse }: any) => (
-    <div data-testid="response-card" data-collapsed={isCollapsed}>
-      <button onClick={onToggleCollapse}>Toggle</button>
-      Response Card
-    </div>
-  )
+// Mock utility services but NOT UI components
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn()
+  }
 }));
 
 jest.mock('framer-motion', () => ({
@@ -147,7 +131,7 @@ describe('MainChat - Message Interactions Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should show example prompts when no messages', () => {
@@ -174,7 +158,7 @@ describe('MainChat - Message Interactions Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+      expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
     });
 
     it('should hide example prompts when messages exist', () => {
@@ -246,7 +230,7 @@ describe('MainChat - Message Interactions Tests', () => {
       rerender(<MainChat />);
       
       // Message list should be present
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should maintain message order', () => {
@@ -280,7 +264,7 @@ describe('MainChat - Message Interactions Tests', () => {
       render(<MainChat />);
       
       // Messages should be displayed in order
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should handle empty message content gracefully', () => {
@@ -313,7 +297,7 @@ describe('MainChat - Message Interactions Tests', () => {
       render(<MainChat />);
       
       // Should not crash
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
   });
 
@@ -347,7 +331,7 @@ describe('MainChat - Message Interactions Tests', () => {
       
       render(<MainChat />);
       
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should handle pagination of message history', () => {
@@ -381,7 +365,7 @@ describe('MainChat - Message Interactions Tests', () => {
       render(<MainChat />);
       
       // Should handle large message lists
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should preserve scroll position when loading history', async () => {
@@ -432,7 +416,7 @@ describe('MainChat - Message Interactions Tests', () => {
       rerender(<MainChat />);
       
       // Scroll position should be maintained
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should handle empty message history', () => {
@@ -461,8 +445,8 @@ describe('MainChat - Message Interactions Tests', () => {
       render(<MainChat />);
       
       // Should show example prompts instead
-      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
-      expect(screen.queryByTestId('response-card')).not.toBeInTheDocument();
+      expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
+      expect(screen.queryByText(/fast layer/i)).not.toBeInTheDocument();
     });
 
     it('should update history when new messages arrive', async () => {
@@ -508,7 +492,7 @@ describe('MainChat - Message Interactions Tests', () => {
       
       // Example prompts should disappear when there are messages
       await waitFor(() => {
-        expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+        expect(screen.queryByText(/explore these examples/i)).not.toBeInTheDocument();
       });
     });
 
@@ -560,7 +544,7 @@ describe('MainChat - Message Interactions Tests', () => {
       rerender(<MainChat />);
       
       // Should still render
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
   });
 });

@@ -43,7 +43,8 @@ const formatDuration = (ms: number | undefined): string => {
   return ms < 1000 ? `${ms}ms` : `${(ms / 1000).toFixed(1)}s`;
 };
 
-const formatArgs = (args: Record<string, any>): string => {
+const formatArgs = (args: Record<string, any> | undefined | null): string => {
+  if (!args) return 'No arguments';
   const entries = Object.entries(args);
   if (entries.length === 0) return 'No arguments';
   return entries.slice(0, 2).map(([k, v]) => `${k}: ${String(v).slice(0, 20)}`).join(', ');

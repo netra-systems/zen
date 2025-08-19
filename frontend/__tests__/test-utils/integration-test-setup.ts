@@ -7,8 +7,6 @@
 
 import WS from 'jest-websocket-mock';
 import { safeWebSocketCleanup } from '../helpers/websocket-test-manager';
-import { useAuthStore } from '@/store/authStore';
-import { useUnifiedChatStore } from '@/store/unified-chat';
 
 // Mock Next.js router
 export const mockNextRouter = () => {
@@ -45,21 +43,8 @@ export const resetTestState = () => {
   localStorage.clear();
   sessionStorage.clear();
   
-  // Reset stores - check if setState exists (for non-mocked environments)
-  if (typeof useAuthStore.setState === 'function') {
-    useAuthStore.setState({ user: null, token: null, isAuthenticated: false });
-  }
-  
-  if (typeof useUnifiedChatStore.setState === 'function') {
-    useUnifiedChatStore.setState({ 
-      messages: [], 
-      threads: [], 
-      fastLayerData: null,
-      currentMessage: '',
-      isLoading: false,
-      error: null 
-    });
-  }
+  // Store reset is handled by individual test mocks
+  // to avoid import issues with mock declarations
 };
 
 // Common test data

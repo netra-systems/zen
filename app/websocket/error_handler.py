@@ -51,8 +51,8 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
         """Lazy load execution engine to avoid circular dependency."""
         if self._execution_engine is None:
             try:
-                from app.agents.base.executor import BaseExecutionEngine
-                self._execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
+                # Removed BaseExecutionEngine import to fix circular dependency
+                self._execution_engine = None  # Use fallback handler
             except ImportError:
                 # Fallback to a basic error handler if BaseExecutionEngine is not available
                 self._execution_engine = self.error_handler
@@ -79,7 +79,14 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
     async def handle_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo] = None) -> bool:
         """Handle WebSocket error using modern architecture patterns."""
         context = self._create_error_context(error, conn_info)
-        result = await self.execution_engine.execute(self, context)
+        # Execute without BaseExecutionEngine to avoid circular dependency
+        result = await self.execute_core_logic(context)
+        from app.agents.base.interface import ExecutionResult, ExecutionStatus
+        return ExecutionResult(
+            status=ExecutionStatus.SUCCESS if result.get('recovery_success') else ExecutionStatus.FAILED,
+            result=result,
+            run_id=context.run_id
+        )
         return self._extract_recovery_success(result)
         
     def _create_error_context(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> ExecutionContext:

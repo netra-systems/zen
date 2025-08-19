@@ -13,7 +13,10 @@ param(
     [switch]$BuildOnly = $false,
     
     [Parameter(Mandatory=$false)]
-    [switch]$DeployOnly = $false
+    [switch]$DeployOnly = $false,
+    
+    [Parameter(Mandatory=$false)]
+    [switch]$SkipErrorMonitoring = $false
 )
 
 Write-Host "================================================" -ForegroundColor Blue
@@ -27,9 +30,9 @@ $REGION = "us-central1"
 $REGISTRY = "$REGION-docker.pkg.dev"
 $REGISTRY_PATH = "$REGISTRY/$PROJECT_ID/netra-containers"
 
-# Service names
-$BACKEND_SERVICE = "netra-backend"
-$FRONTEND_SERVICE = "netra-frontend"
+# Service names (MUST match Cloud Run service names exactly)
+$BACKEND_SERVICE = "netra-backend-staging"
+$FRONTEND_SERVICE = "netra-frontend-staging"
 $AUTH_SERVICE = "netra-auth-service"
 
 # URLs for frontend build
@@ -223,6 +226,7 @@ gcloud run deploy $BACKEND_SERVICE `
     --min-instances 0 `
     --max-instances 10 `
     --set-env-vars="ENVIRONMENT=staging,SERVICE_NAME=backend" `
+    --set-secrets="DATABASE_URL=database-url-staging:latest" `
     --quiet
 
 if ($LASTEXITCODE -ne 0) {
@@ -266,6 +270,7 @@ if (Test-Path "Dockerfile.auth") {
         --min-instances 0 `
         --max-instances 10 `
         --set-env-vars="ENVIRONMENT=staging,SERVICE_NAME=auth" `
+        --set-secrets="DATABASE_URL=database-url-staging:latest" `
         --quiet
     
     if ($LASTEXITCODE -ne 0) {
@@ -319,6 +324,53 @@ if (-not $SkipHealthChecks) {
     } catch {
         Write-Host "  ⚠ Frontend check failed (service may still be starting)" -ForegroundColor Yellow
     }
+}
+
+# Error monitoring check
+if (-not $SkipErrorMonitoring) {
+    Write-Host ""
+    Write-Host "Running post-deployment error monitoring..." -ForegroundColor Yellow
+
+    # Record deployment time for error analysis
+    $deploymentTime = Get-Date -Format "yyyy-MM-ddTHH:mm:ss.fffZ"
+
+    # Wait a moment for any immediate errors to appear in GCP Error Reporting
+    Start-Sleep -Seconds 15
+
+    try {
+        # Run the error monitoring script
+        $errorMonitorPath = "$PSScriptRoot\scripts\staging_error_monitor.py"
+        
+        if (Test-Path $errorMonitorPath) {
+            Write-Host "  Checking for deployment-related errors..." -ForegroundColor Cyan
+            
+            # Run error monitor with deployment time
+            python $errorMonitorPath --deployment-time $deploymentTime --project-id $PROJECT_ID --service netra-backend
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "  ✓ No critical deployment errors detected" -ForegroundColor Green
+            } elseif ($LASTEXITCODE -eq 1) {
+                Write-Host "  ❌ Critical deployment errors detected!" -ForegroundColor Red
+                Write-Host "  Consider rolling back the deployment." -ForegroundColor Yellow
+                
+                # Ask user if they want to continue despite errors
+                $continue = Read-Host "Continue despite errors? (y/N)"
+                if ($continue -ne "y" -and $continue -ne "Y") {
+                    Write-Host "Deployment marked as failed due to critical errors." -ForegroundColor Red
+                    exit 1
+                }
+            } else {
+                Write-Host "  ⚠ Error monitoring script failed to run" -ForegroundColor Yellow
+            }
+        } else {
+            Write-Host "  ⚠ Error monitoring script not found at $errorMonitorPath" -ForegroundColor Yellow
+        }
+    } catch {
+        Write-Host "  ⚠ Error monitoring check failed: $_" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host ""
+    Write-Host "Skipping error monitoring check..." -ForegroundColor Yellow
 }
 
 # Summary

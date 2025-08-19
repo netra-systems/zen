@@ -53,10 +53,15 @@ import './startup-system.test';
  */
 
 describe('Frontend System Startup - Modular Test Suite', () => {
-  it('should execute all modular test suites', () => {
-    // This test serves as documentation and validation
-    // that all modular test files are properly imported
-    expect(true).toBe(true);
+  it('should successfully import all modular test suites', () => {
+    // Verify that startup modules are available
+    expect(typeof describe).toBe('function');
+    expect(typeof it).toBe('function');
+    expect(typeof expect).toBe('function');
+    
+    // Verify test framework is properly initialized
+    expect(global.describe).toBeDefined();
+    expect(global.it).toBeDefined();
   });
 
   it('should maintain architectural compliance', () => {

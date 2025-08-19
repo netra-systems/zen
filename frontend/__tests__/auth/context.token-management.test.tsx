@@ -9,6 +9,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@/auth/context';
 import { authService } from '@/auth/service';
 import { jwtDecode } from 'jwt-decode';
+import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
 import {
   setupBasicMocks,
@@ -24,6 +25,14 @@ import {
 jest.mock('@/auth/service');
 jest.mock('jwt-decode');
 jest.mock('@/store/authStore');
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}));
 
 describe('AuthContext - Token Management', () => {
   let mockAuthStore: any;
@@ -55,27 +64,31 @@ describe('AuthContext - Token Management', () => {
   });
 
   const setupInvalidToken = () => {
-    const consoleError = jest.spyOn(console, 'error').mockImplementation();
     setupTokenMocks();
     (jwtDecode as jest.Mock).mockImplementation(() => {
       throw new Error('Invalid token');
     });
-    return consoleError;
   };
 
-  const expectInvalidTokenHandling = async (consoleError: jest.SpyInstance) => {
+  const expectInvalidTokenHandling = async () => {
     await waitFor(() => {
-      expect(consoleError).toHaveBeenCalledWith('Invalid token:', expect.any(Error));
+      expect(logger.error).toHaveBeenCalledWith(
+        'Invalid token detected', 
+        expect.any(Error),
+        {
+          component: 'AuthContext',
+          action: 'token_validation_failed'
+        }
+      );
       expect(authService.removeToken).toHaveBeenCalled();
       expect(mockAuthStore.logout).toHaveBeenCalled();
     });
-    consoleError.mockRestore();
   };
 
   it('should handle invalid token gracefully', async () => {
-    const consoleError = setupInvalidToken();
+    setupInvalidToken();
     render(<AuthProvider><div>Test Content</div></AuthProvider>);
-    await expectInvalidTokenHandling(consoleError);
+    await expectInvalidTokenHandling();
   });
 
   const renderWithoutToken = () => {

@@ -34,5 +34,10 @@ module.exports = {
     '<rootDir>/__tests__/**/*.test.[jt]s?(x)',
     '<rootDir>/__tests__/**/*.spec.[jt]s?(x)',
   ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/__tests__/setup/',
+    '.*\\.playwright\\.test\\.[jt]sx?$',  // Exclude Playwright test files
+  ],
   coverageProvider: 'v8',
 };

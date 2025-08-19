@@ -49,6 +49,61 @@
         </goals>
     </overview>
     
+    <real_test_requirements>
+        <description>
+            CRITICAL: Tests must test REAL functionality, not mocks of their own creation.
+            Based on frontend test paradox analysis (2025-08-19).
+        </description>
+        
+        <mandatory_rules>
+            <rule id="no-mock-components">
+                Tests MUST NOT include their own mock component implementations.
+                Test the real component or don't test at all.
+            </rule>
+            
+            <rule id="real-child-components">
+                Integration tests MUST use real child components, not mock divs.
+                Mocking all children defeats the purpose of integration testing.
+            </rule>
+            
+            <rule id="test-size-limits">
+                Test files MUST follow same 300-line limit as production code.
+                Test functions MUST follow same 8-line limit as production code.
+            </rule>
+            
+            <rule id="minimal-mocking">
+                Mock ONLY external APIs and truly unavailable resources.
+                WebSocket, state management, and UI components should be real.
+            </rule>
+            
+            <rule id="fix-sut-not-tests">
+                When tests fail, fix the System Under Test first.
+                Only modify tests if the requirements genuinely changed.
+            </rule>
+        </mandatory_rules>
+        
+        <test_pyramid>
+            <level name="unit" percentage="20">
+                Test individual functions with minimal mocking
+            </level>
+            <level name="integration" percentage="60">
+                Test real component interactions with real child components
+            </level>
+            <level name="e2e" percentage="20">
+                Test complete user flows with real backend
+            </level>
+        </test_pyramid>
+        
+        <anti_patterns>
+            <anti_pattern>Creating mock components inside test files</anti_pattern>
+            <anti_pattern>Mocking all child components in integration tests</anti_pattern>
+            <anti_pattern>Using jest.fn() for everything</anti_pattern>
+            <anti_pattern>Modifying tests to pass instead of fixing bugs</anti_pattern>
+            <anti_pattern>Tests longer than 300 lines</anti_pattern>
+            <anti_pattern>Test functions longer than 8 lines</anti_pattern>
+        </anti_patterns>
+    </real_test_requirements>
+    
     <test_categories>
         <category name="unit">
             <description>Fast, isolated tests for individual components</description>
@@ -930,6 +985,239 @@
             </issue>
         </troubleshooting>
     </real_llm_testing>
+    
+    <feature_flag_testing>
+        <description>
+            Comprehensive feature flag system enabling TDD workflow while maintaining 100% CI/CD pass rate.
+            Tests can be written before implementation and flagged appropriately based on feature development status.
+        </description>
+        
+        <feature_status_types>
+            <status name="enabled">
+                <description>Feature is complete and tests should pass reliably</description>
+                <test_behavior>Tests run normally and must pass</test_behavior>
+                <usage>Production-ready features</usage>
+            </status>
+            
+            <status name="in_development">
+                <description>Feature in progress, tests may fail during development</description>
+                <test_behavior>Tests are skipped or marked as expected to fail</test_behavior>
+                <usage>TDD workflow - tests written before implementation</usage>
+            </status>
+            
+            <status name="disabled">
+                <description>Feature disabled, tests should be skipped</description>
+                <test_behavior>Tests are skipped with clear reason</test_behavior>
+                <usage>Features temporarily disabled or future development</usage>
+            </status>
+            
+            <status name="experimental">
+                <description>Feature is experimental, tests are optional</description>
+                <test_behavior>Tests only run when explicitly enabled</test_behavior>
+                <usage>Research features or proof of concepts</usage>
+            </status>
+        </feature_status_types>
+        
+        <configuration>
+            <config_file>test_feature_flags.json</config_file>
+            <structure>
+                {
+                    "features": {
+                        "feature_name": {
+                            "status": "enabled|in_development|disabled|experimental",
+                            "description": "Feature description",
+                            "owner": "team-name",
+                            "target_release": "v1.x.x",
+                            "dependencies": ["other_feature"],
+                            "metadata": { "jira_ticket": "TICKET-123" }
+                        }
+                    }
+                }
+            </structure>
+        </configuration>
+        
+        <environment_overrides>
+            <description>Environment variables can override feature flag configuration</description>
+            <format>TEST_FEATURE_&lt;FEATURE_NAME&gt;=&lt;status&gt;</format>
+            <examples>
+                <example>TEST_FEATURE_ROI_CALCULATOR=enabled</example>
+                <example>TEST_FEATURE_GITHUB_INTEGRATION=disabled</example>
+                <example>ENABLE_EXPERIMENTAL_TESTS=true</example>
+            </examples>
+            <use_cases>
+                <use_case>Enable feature for specific test runs</use_case>
+                <use_case>Disable problematic features temporarily</use_case>
+                <use_case>Test different feature combinations</use_case>
+            </use_cases>
+        </environment_overrides>
+        
+        <backend_decorators>
+            <decorator name="@feature_flag">
+                <usage>@feature_flag("feature_name")</usage>
+                <behavior>Skip test if feature not enabled</behavior>
+                <example>Used for basic feature gating</example>
+            </decorator>
+            
+            <decorator name="@tdd_test">
+                <usage>@tdd_test("feature_name", expected_to_fail=True)</usage>
+                <behavior>Mark test as expected to fail during development</behavior>
+                <example>TDD workflow for features in development</example>
+            </decorator>
+            
+            <decorator name="@requires_feature">
+                <usage>@requires_feature("feat_a", "feat_b")</usage>
+                <behavior>Require all specified features to be enabled</behavior>
+                <example>Integration tests requiring multiple features</example>
+            </decorator>
+            
+            <decorator name="@experimental_test">
+                <usage>@experimental_test("Testing new ML algorithm")</usage>
+                <behavior>Only run when ENABLE_EXPERIMENTAL_TESTS=true</behavior>
+                <example>Research and experimental features</example>
+            </decorator>
+            
+            <decorator name="@performance_test">
+                <usage>@performance_test(threshold_ms=100)</usage>
+                <behavior>Performance tests with automatic threshold checking</behavior>
+                <example>API response time validation</example>
+            </decorator>
+            
+            <decorator name="@integration_only">
+                <usage>@integration_only()</usage>
+                <behavior>Only run during integration test levels</behavior>
+                <example>Database integration tests</example>
+            </decorator>
+            
+            <decorator name="@requires_env">
+                <usage>@requires_env("API_KEY", "DATABASE_URL")</usage>
+                <behavior>Skip if required environment variables not set</behavior>
+                <example>Tests requiring external services</example>
+            </decorator>
+            
+            <decorator name="@flaky_test">
+                <usage>@flaky_test(max_retries=3, reason="Network dependency")</usage>
+                <behavior>Retry tests up to max_retries on failure</behavior>
+                <example>Tests with external API dependencies</example>
+            </decorator>
+        </backend_decorators>
+        
+        <frontend_utilities>
+            <utility name="describeFeature">
+                <usage>describeFeature("feature_name", "Test Suite", testFn)</usage>
+                <behavior>Feature-flagged test suite</behavior>
+                <framework>Jest/TypeScript</framework>
+            </utility>
+            
+            <utility name="testFeature">
+                <usage>testFeature("feature_name", "Test Name", testFn)</usage>
+                <behavior>Feature-flagged individual test</behavior>
+                <framework>Jest/TypeScript</framework>
+            </utility>
+            
+            <utility name="testTDD">
+                <usage>testTDD("feature_name", "Test Name", testFn)</usage>
+                <behavior>TDD test marked as todo during development</behavior>
+                <framework>Jest/TypeScript</framework>
+            </utility>
+            
+            <utility name="testRequiresFeatures">
+                <usage>testRequiresFeatures(["feat_a", "feat_b"], "Test", testFn)</usage>
+                <behavior>Test requiring multiple features</behavior>
+                <framework>Jest/TypeScript</framework>
+            </utility>
+            
+            <utility name="testExperimental">
+                <usage>testExperimental("Test Name", testFn)</usage>
+                <behavior>Experimental test only when opted in</behavior>
+                <framework>Jest/TypeScript</framework>
+            </utility>
+        </frontend_utilities>
+        
+        <test_runner_integration>
+            <feature_summary>
+                <description>Test runner displays feature flag summary</description>
+                <includes>
+                    <item>Enabled features count</item>
+                    <item>In development features count</item>
+                    <item>Disabled features count</item>
+                    <item>Experimental features count</item>
+                    <item>Environment overrides active</item>
+                </includes>
+            </feature_summary>
+            
+            <visibility>
+                <description>Clear visibility of feature status in test output</description>
+                <benefits>
+                    <benefit>Product managers can track feature readiness</benefit>
+                    <benefit>Developers understand which features are testable</benefit>
+                    <benefit>CI/CD reports show feature development progress</benefit>
+                </benefits>
+            </visibility>
+        </test_runner_integration>
+        
+        <business_benefits>
+            <benefit name="tdd_enablement">
+                <description>Enables true TDD workflow without breaking CI/CD</description>
+                <impact>50% faster feature development through early test writing</impact>
+            </benefit>
+            
+            <benefit name="ci_cd_reliability">
+                <description>Maintains 100% test pass rate while features in development</description>
+                <impact>Eliminates build failures from incomplete features</impact>
+            </benefit>
+            
+            <benefit name="feature_visibility">
+                <description>Clear tracking of feature readiness and dependencies</description>
+                <impact>Improved product planning and release coordination</impact>
+            </benefit>
+            
+            <benefit name="environment_flexibility">
+                <description>Environment-based testing for different deployment stages</description>
+                <impact>Consistent testing across dev, staging, and production</impact>
+            </benefit>
+        </business_benefits>
+        
+        <implementation_files>
+            <file>test_framework/feature_flags.py</file>
+            <file>test_framework/decorators.py</file>
+            <file>frontend/test-utils/feature-flags.ts</file>
+            <file>test_feature_flags.json</file>
+            <file>app/tests/unit/test_feature_flags_example.py</file>
+        </implementation_files>
+        
+        <usage_examples>
+            <example name="basic_feature_flag">
+                @feature_flag("roi_calculator")
+                def test_roi_calculation():
+                    # Test skipped if roi_calculator not enabled
+                    assert calculate_roi(1000, 0.2) == 200
+            </example>
+            
+            <example name="tdd_workflow">
+                @tdd_test("new_auth_system", expected_to_fail=True)
+                def test_oauth_flow():
+                    # Written before implementation, expected to fail
+                    user = oauth_login("user@example.com")
+                    assert user.is_authenticated
+            </example>
+            
+            <example name="multiple_requirements">
+                @requires_feature("auth_integration", "websocket_streaming")
+                @integration_only()
+                def test_authenticated_websocket():
+                    # Requires multiple features and integration testing
+                    pass
+            </example>
+            
+            <example name="frontend_tdd">
+                testTDD("roi_calculator", "should calculate ROI correctly", () => {
+                    // Jest test marked as todo during development
+                    const result = calculateROI(1000, 0.2);
+                    expect(result).toBe(200);
+                });
+            </example>
+        </usage_examples>
+    </feature_flag_testing>
     
     <unified_commands>
         <command name="pre_commit" description="Quick pre-commit validation">

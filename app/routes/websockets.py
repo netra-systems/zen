@@ -27,8 +27,19 @@ async def _handle_validated_message(
     user_id_str: str, websocket: WebSocket, message, data: str, agent_service
 ) -> bool:
     """Handle message after validation."""
-    if not await validate_and_handle_message(user_id_str, websocket, message, manager):
+    # CRITICAL FIX: Always process through agent service regardless of manager result
+    # The manager handles WebSocket-level concerns (ping/pong, routing, etc)
+    # But messages still need to go to the agent service for actual processing
+    
+    # Let manager handle WebSocket-specific messages (ping/pong, etc)
+    manager_handled = await validate_and_handle_message(user_id_str, websocket, message, manager)
+    
+    # If it's a ping or other system message, manager handles it completely
+    if message.get("type") in ["ping", "pong", "auth"]:
         return True
+    
+    # For user messages, ALWAYS forward to agent service
+    logger.info(f"[CRITICAL FIX] Processing message through agent service: {message.get('type')}")
     return await _process_valid_message(user_id_str, data, agent_service)
 
 async def _handle_parsed_message(
@@ -41,10 +52,15 @@ async def _handle_parsed_message(
 
 async def _process_single_message(user_id_str: str, websocket: WebSocket, agent_service):
     """Process a single WebSocket message."""
+    logger.info(f"[WS MESSAGE] Waiting for message from user {user_id_str}")
     data = await receive_message_with_timeout(websocket)
+    logger.info(f"[WS MESSAGE] Received raw data from {user_id_str}: {data[:100] if data else 'None'}")
     message = await parse_json_message(data, user_id_str, manager)
+    logger.info(f"[WS MESSAGE] Parsed message from {user_id_str}: {message}")
     if await handle_pong_message(data, user_id_str, websocket, manager):
+        logger.info(f"[WS MESSAGE] Handled pong from {user_id_str}")
         return True
+    logger.info(f"[WS MESSAGE] Processing message type: {message.get('type') if message else 'None'}")
     return await _handle_parsed_message(user_id_str, websocket, message, data, agent_service)
 
 async def _handle_message_timeout(conn_info, user_id_str: str) -> bool:
@@ -69,11 +85,16 @@ async def _process_message_with_timeout_handling(
 
 async def _handle_message_loop(user_id_str: str, websocket: WebSocket, conn_info, agent_service):
     """Handle the main message processing loop."""
+    logger.info(f"[MESSAGE LOOP] Starting message loop for user {user_id_str}")
+    message_count = 0
     while True:
+        message_count += 1
+        logger.info(f"[MESSAGE LOOP] Waiting for message #{message_count} from {user_id_str}")
         continue_loop = await _process_message_with_timeout_handling(
             user_id_str, websocket, conn_info, agent_service
         )
         if not continue_loop:
+            logger.info(f"[MESSAGE LOOP] Exiting loop for {user_id_str} after {message_count} messages")
             break
 
 async def _handle_websocket_disconnect(e: WebSocketDisconnect, user_id_str: str, websocket: WebSocket):
@@ -94,9 +115,13 @@ async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: Web
 
 async def _setup_websocket_auth(websocket: WebSocket):
     """Setup WebSocket authentication."""
+    logger.info("[WEBSOCKET AUTH] Starting authentication")
     token = await accept_websocket_connection(websocket)
+    logger.info(f"[WEBSOCKET AUTH] Token: {token[:20] if token else 'None'}...")
     security_service, agent_service = extract_app_services(websocket)
+    logger.info(f"[WEBSOCKET AUTH] Services found: security={security_service is not None}, agent={agent_service is not None}")
     user_id_str = await authenticate_websocket_user(websocket, token, security_service)
+    logger.info(f"[WEBSOCKET AUTH] Authenticated user: {user_id_str}")
     return user_id_str, agent_service
 
 async def _finalize_websocket_connection(user_id_str: str, websocket: WebSocket):
@@ -149,6 +174,8 @@ async def _execute_websocket_session(websocket: WebSocket):
 @router.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """Main WebSocket endpoint handler."""
+    logger.info("[WEBSOCKET CONNECTED] New WebSocket connection received at /ws endpoint")
     user_id_str = await _execute_websocket_session(websocket)
     if user_id_str:
+        logger.info(f"[WEBSOCKET CLEANUP] Cleaning up connection for user {user_id_str}")
         await cleanup_websocket_connection(user_id_str, websocket, manager)

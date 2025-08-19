@@ -5,8 +5,11 @@
 
 // Hoist all mocks to the top for proper Jest handling
 const mockUseUnifiedChatStore = jest.fn();
+const mockUseThreadStore = jest.fn();
+const mockUseChatStore = jest.fn();
 const mockUseLoadingState = jest.fn();
 const mockUseThreadNavigation = jest.fn();
+const mockUseAuthStore = jest.fn();
 const mockRouter = { push: jest.fn() };
 const mockThreads = [
   {
@@ -38,14 +41,7 @@ const mockThreads = [
   },
 ];
 
-const mockThreadService = {
-  listThreads: jest.fn(),
-  getThreadMessages: jest.fn(),
-  createThread: jest.fn(),
-  updateThread: jest.fn(),
-  deleteThread: jest.fn(),
-};
-
+// Define mockThreadService inline to avoid hoisting issues
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore
 }));
@@ -58,8 +54,26 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: mockUseThreadNavigation
 }));
 
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: mockUseThreadStore
+}));
+
+jest.mock('@/store/chat', () => ({
+  useChatStore: mockUseChatStore
+}));
+
 jest.mock('@/services/threadService', () => ({
-  ThreadService: mockThreadService
+  ThreadService: {
+    listThreads: jest.fn(),
+    getThreadMessages: jest.fn(),
+    createThread: jest.fn(),
+    updateThread: jest.fn(),
+    deleteThread: jest.fn(),
+  }
 }));
 
 jest.mock('next/navigation', () => ({
@@ -83,6 +97,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
+import { ThreadService } from '@/services/threadService';
 
 const mockStore = {
   isProcessing: false,
@@ -119,9 +134,35 @@ describe('ChatHistorySection - Interactions', () => {
       createNewThread: jest.fn()
     });
     
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: 'user-1', email: 'test@example.com' },
+      login: jest.fn(),
+      logout: jest.fn(),
+      checkAuth: jest.fn()
+    });
+    
+    mockUseThreadStore.mockReturnValue({
+      threads: mockThreads,
+      currentThreadId: 'thread-1',
+      setThreads: jest.fn(),
+      setCurrentThread: jest.fn(),
+      addThread: jest.fn(),
+      updateThread: jest.fn(),
+      deleteThread: jest.fn(),
+      setLoading: jest.fn(),
+      setError: jest.fn()
+    });
+    
+    mockUseChatStore.mockReturnValue({
+      clearMessages: jest.fn(),
+      loadMessages: jest.fn(),
+      messages: []
+    });
+    
     // Configure service mocks with default behavior
-    mockThreadService.listThreads.mockResolvedValue(mockThreads);
-    mockThreadService.deleteThread.mockResolvedValue({ success: true });
+    (ThreadService.listThreads as jest.Mock).mockResolvedValue(mockThreads);
+    (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
   });
 
   describe('Search functionality', () => {
@@ -165,7 +206,7 @@ describe('ChatHistorySection - Interactions', () => {
     it('should delete thread when confirmed', async () => {
       const originalConfirm = window.confirm;
       window.confirm = jest.fn(() => true);
-      mockThreadService.deleteThread.mockResolvedValue({ success: true });
+      (ThreadService.deleteThread as jest.Mock).mockResolvedValue({ success: true });
       
       render(<ChatHistorySection />);
       
@@ -182,7 +223,7 @@ describe('ChatHistorySection - Interactions', () => {
     });
 
     it('should handle delete error gracefully', async () => {
-      mockThreadService.deleteThread.mockRejectedValue(new Error('Delete failed'));
+      (ThreadService.deleteThread as jest.Mock).mockRejectedValue(new Error('Delete failed'));
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
       
       render(<ChatHistorySection />);

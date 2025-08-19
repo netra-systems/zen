@@ -9,6 +9,7 @@ import { render, waitFor } from '@testing-library/react';
 import { AuthProvider } from '@/auth/context';
 import { authService } from '@/auth/service';
 import { jwtDecode } from 'jwt-decode';
+import { logger } from '@/lib/logger';
 import '@testing-library/jest-dom';
 import {
   setupBasicMocks,
@@ -23,6 +24,14 @@ import {
 jest.mock('@/auth/service');
 jest.mock('jwt-decode');
 jest.mock('@/store/authStore');
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}));
 
 describe('AuthContext - Development Mode', () => {
   let mockAuthStore: any;
@@ -76,10 +85,14 @@ describe('AuthContext - Development Mode', () => {
     return devConfig;
   };
 
-  const expectSkipMessage = async (consoleSpy: jest.SpyInstance) => {
+  const expectSkipMessage = async () => {
     await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Skipping auto dev login - user has logged out'
+      expect(logger.info).toHaveBeenCalledWith(
+        'Skipping auto dev login - user has logged out',
+        {
+          component: 'AuthContext',
+          action: 'auto_dev_login_skipped'
+        }
       );
       expect(authService.handleDevLogin).not.toHaveBeenCalled();
     });
@@ -87,10 +100,8 @@ describe('AuthContext - Development Mode', () => {
 
   it('should skip auto-login if user has logged out in dev mode', async () => {
     setupSkipAutoLogin();
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
     renderDevProvider();
-    await expectSkipMessage(consoleSpy);
-    consoleSpy.mockRestore();
+    await expectSkipMessage();
   });
 
   const setupDevLoginFailure = () => {

@@ -94,43 +94,46 @@ class TestClickHouseConnection:
         result = await client.fetch("SELECT 1 as test")
         assert len(result) == 1
         assert result[0]['test'] == 1
-    async def test_list_corpus_tables(self, real_clickhouse_client):
-        """Test listing corpus tables with real ClickHouse."""
-        # First create a test corpus table
+    @patch('app.services.clickhouse_service.get_clickhouse_client')
+    async def test_list_corpus_tables(self, mock_get_client):
+        """Test listing corpus tables with mocked ClickHouse."""
+        # Create mock client
+        mock_client = AsyncMock()
+        mock_client_context = AsyncMock()
+        mock_client_context.__aenter__.return_value = mock_client
+        mock_client_context.__aexit__.return_value = None
+        mock_get_client.return_value = mock_client_context
+        
+        # Mock the response for listing corpus tables
         test_corpus_id = str(uuid.uuid4()).replace('-', '_')[:8]
         test_table_name = f"netra_content_corpus_test_{test_corpus_id}"
         
-        create_query = f"""
-        CREATE TABLE IF NOT EXISTS {test_table_name} (
-            record_id UUID DEFAULT generateUUIDv4(),
-            workload_type String,
-            prompt String,
-            response String,
-            metadata String,
-            created_at DateTime64(3) DEFAULT now()
-        ) ENGINE = MergeTree()
-        ORDER BY (workload_type, created_at)
-        """
+        mock_tables_response = [
+            {'name': 'netra_content_corpus_analytics'},
+            {'name': test_table_name},
+            {'name': 'netra_content_corpus_production'}
+        ]
+        mock_client.fetch.return_value = mock_tables_response
         
-        await real_clickhouse_client.execute_query(create_query)
+        # Test the service function
+        from app.services.clickhouse_service import list_corpus_tables
+        tables = await list_corpus_tables()
         
-        try:
-            # Now list tables using the real client directly
-            tables_result = await real_clickhouse_client.execute_query("SHOW TABLES LIKE 'netra_content_corpus_%'")
-            tables = [table['name'] for table in tables_result]
-            assert isinstance(tables, list)
-            
-            # Check if our test table is in the list
-            corpus_tables = [t for t in tables if 'corpus' in t]
-            logger.info(f"Found {len(corpus_tables)} corpus tables")
-            
-            # Verify corpus table format
-            for table in corpus_tables:
-                assert 'corpus' in table.lower()
+        # Verify results
+        assert isinstance(tables, list)
+        assert len(tables) == 3
+        assert 'netra_content_corpus_analytics' in tables
+        assert test_table_name in tables
+        assert 'netra_content_corpus_production' in tables
         
-        finally:
-            # Clean up test table
-            await real_clickhouse_client.execute_query(f"DROP TABLE IF EXISTS {test_table_name}")
+        # Verify corpus table format
+        for table in tables:
+            assert 'corpus' in table.lower()
+            assert table.startswith('netra_content_corpus_')
+        
+        # Verify mock was called correctly
+        mock_get_client.assert_called_once()
+        mock_client.fetch.assert_called_once_with("SHOW TABLES LIKE 'netra_content_corpus_%'")
 
     # @pytest.mark.asyncio
     # async def test_basic_query_execution(self, clickhouse_client):

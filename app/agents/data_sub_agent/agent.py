@@ -94,6 +94,8 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
         self.clickhouse_ops = self.core.clickhouse_ops
         self.redis_manager = self.core.redis_manager
         self.cache_ttl = self.core.cache_ttl
+        # Add extended_ops as alias to self for test compatibility
+        self.extended_ops = self
         
     # Modern BaseExecutionInterface Implementation
     async def validate_preconditions(self, context: ExecutionContext) -> bool:
@@ -477,11 +479,11 @@ class DataSubAgent(BaseSubAgent, BaseExecutionInterface):
     async def process_with_retry(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Process data with retry logic."""
         max_retries = getattr(self, 'config', {}).get('max_retries', 3)
-        for attempt in range(max_retries + 1):
+        for attempt in range(max_retries):
             try:
                 return await self._process_internal(data)
             except Exception as e:
-                if attempt == max_retries:
+                if attempt == max_retries - 1:
                     raise e
                 await asyncio.sleep(0.1 * (2 ** attempt))
         

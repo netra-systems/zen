@@ -109,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           callback: '/auth/callback',
           token: '/auth/token',
           user: '/auth/me',
-          ...(process.env.NODE_ENV === 'development' && { dev_login: '/auth/dev_login' })
+          ...(process.env.NODE_ENV === 'development' && { dev_login: '/auth/dev/login' })
         },
         authorized_javascript_origins: ['http://localhost:3000'],
         authorized_redirect_uris: ['http://localhost:3000/auth/callback']

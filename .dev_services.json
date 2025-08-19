@@ -1,14 +1,18 @@
 {
   "redis": {
-    "mode": "shared"
+    "mode": "local",
+    "config": {}
   },
   "clickhouse": {
-    "mode": "shared"
+    "mode": "local",
+    "config": {}
   },
   "postgres": {
-    "mode": "local"
+    "mode": "local",
+    "config": {}
   },
   "llm": {
-    "mode": "shared"
+    "mode": "shared",
+    "config": {}
   }
 }

@@ -8,8 +8,11 @@
 
 // Hoist all mocks to the top for proper Jest handling
 const mockUseUnifiedChatStore = jest.fn();
+const mockUseThreadStore = jest.fn();
+const mockUseChatStore = jest.fn();
 const mockUseLoadingState = jest.fn();
 const mockUseThreadNavigation = jest.fn();
+const mockUseAuthStore = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore
@@ -21,6 +24,18 @@ jest.mock('@/hooks/useLoadingState', () => ({
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: mockUseThreadNavigation
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: mockUseThreadStore
+}));
+
+jest.mock('@/store/chat', () => ({
+  useChatStore: mockUseChatStore
 }));
 
 // AuthGate mock - always render children

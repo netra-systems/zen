@@ -4,7 +4,7 @@ import time
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from app.auth.pr_router import (
+from app.auth_integration.auth import (
     _build_pr_state_data,
     _encode_state_to_base64,
     _decode_state_from_base64,

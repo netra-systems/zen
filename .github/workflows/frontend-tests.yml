@@ -1,0 +1,527 @@
+name: Frontend Tests - Production Grade
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: [ 'frontend/**' ]
+  pull_request:
+    branches: [ main, develop ]
+    paths: [ 'frontend/**' ]
+  workflow_dispatch:
+    inputs:
+      test_level:
+        description: 'Test execution level'
+        required: false
+        default: 'integration'
+        type: choice
+        options:
+        - smoke
+        - unit
+        - integration
+        - e2e
+        - comprehensive
+        - performance
+      browser_matrix:
+        description: 'Cross-browser testing'
+        required: false
+        default: 'chrome'
+        type: choice
+        options:
+        - chrome
+        - firefox
+        - safari
+        - all
+
+env:
+  NODE_VERSION: '20'
+  CACHE_VERSION: v2
+  TEST_TIMEOUT: 30
+  CI: true
+
+jobs:
+  # Job 1: Smoke Tests - Critical path validation (2-3 min)
+  smoke-tests:
+    name: 🔥 Smoke Tests (Critical Paths)
+    runs-on: warp-custom-default
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request' || inputs.test_level == 'smoke'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+
+    - name: Setup Node.js with cache
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies (minimal)
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run smoke tests
+      working-directory: frontend
+      run: |
+        npm run test:smoke --if-present || npm run test:ultra
+      env:
+        JEST_TIMEOUT: 10000
+
+    - name: Upload smoke test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: smoke-test-results
+        path: frontend/test-results/
+        retention-days: 3
+
+  # Job 2: Unit Tests - Component and hook testing (5-8 min)
+  unit-tests:
+    name: 🧪 Unit Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 10
+    if: |
+      github.event_name == 'push' || 
+      inputs.test_level == 'unit' || 
+      inputs.test_level == 'integration' ||
+      inputs.test_level == 'comprehensive'
+    
+    strategy:
+      matrix:
+        test-suite: [components, hooks, services, utils]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js with cache
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Cache Jest cache
+      uses: actions/cache@v3
+      with:
+        path: frontend/.jest-cache*
+        key: jest-unit-${{ env.CACHE_VERSION }}-${{ matrix.test-suite }}-${{ hashFiles('frontend/package-lock.json') }}
+        restore-keys: |
+          jest-unit-${{ env.CACHE_VERSION }}-${{ matrix.test-suite }}-
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run unit tests for ${{ matrix.test-suite }}
+      working-directory: frontend
+      run: |
+        npm run test:suites:${{ matrix.test-suite }} || exit $?
+      env:
+        JEST_TIMEOUT: ${{ env.TEST_TIMEOUT }}000
+
+    - name: Generate coverage report
+      if: matrix.test-suite == 'components'
+      working-directory: frontend
+      run: |
+        npm run test:suites:coverage
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-test-results-${{ matrix.test-suite }}
+        path: frontend/test-results/
+        retention-days: 7
+
+    - name: Upload coverage
+      if: matrix.test-suite == 'components'
+      uses: actions/upload-artifact@v4
+      with:
+        name: unit-coverage-${{ matrix.test-suite }}
+        path: frontend/coverage/
+        retention-days: 7
+
+  # Job 3: Integration Tests - Feature integration testing (8-12 min)
+  integration-tests:
+    name: 🔗 Integration Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 15
+    if: |
+      inputs.test_level == 'integration' || 
+      inputs.test_level == 'comprehensive' ||
+      github.ref == 'refs/heads/main'
+    
+    strategy:
+      matrix:
+        integration-suite: [auth-flow, websocket, store-sync, api-calls]
+      fail-fast: false
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js with cache
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run integration tests for ${{ matrix.integration-suite }}
+      working-directory: frontend
+      run: |
+        npm run test:integration:${{ matrix.integration-suite }} --if-present || npm run test:suites:integration
+      env:
+        JEST_TIMEOUT: 60000
+
+    - name: Upload integration test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: integration-test-results-${{ matrix.integration-suite }}
+        path: frontend/test-results/
+        retention-days: 7
+
+  # Job 4: E2E Tests - End-to-end user journey testing (10-20 min)
+  e2e-tests:
+    name: 🎭 E2E Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 25
+    if: |
+      inputs.test_level == 'e2e' || 
+      inputs.test_level == 'comprehensive' ||
+      github.ref == 'refs/heads/main'
+    
+    strategy:
+      matrix:
+        browser: ${{ inputs.browser_matrix == 'all' && fromJson('["chromium", "firefox", "webkit"]') || fromJson('["chromium"]') }}
+      fail-fast: false
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Install Playwright browsers
+      working-directory: frontend
+      run: |
+        npx playwright install ${{ matrix.browser }} --with-deps
+
+    - name: Run E2E tests on ${{ matrix.browser }}
+      working-directory: frontend
+      run: |
+        npm run e2e:test -- --project=${{ matrix.browser }}
+      env:
+        PLAYWRIGHT_TIMEOUT: 60000
+
+    - name: Upload E2E test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: e2e-test-results-${{ matrix.browser }}
+        path: |
+          frontend/test-results/
+          frontend/playwright-report/
+        retention-days: 7
+
+    - name: Upload E2E screenshots
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: e2e-screenshots-${{ matrix.browser }}
+        path: frontend/test-results/
+        retention-days: 3
+
+  # Job 5: Visual Regression Tests (5-10 min)
+  visual-regression-tests:
+    name: 👁️ Visual Regression Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 12
+    if: |
+      inputs.test_level == 'comprehensive' ||
+      github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Install Playwright for visual tests
+      working-directory: frontend
+      run: |
+        npx playwright install chromium --with-deps
+
+    - name: Run visual regression tests
+      working-directory: frontend
+      run: |
+        npm run test:visual --if-present || npm run e2e:test -- --grep="visual"
+      env:
+        UPDATE_SNAPSHOTS: false
+
+    - name: Upload visual test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: visual-test-results
+        path: |
+          frontend/test-results/
+          frontend/visual-snapshots/
+        retention-days: 7
+
+  # Job 6: Accessibility Tests (3-5 min)
+  accessibility-tests:
+    name: ♿ Accessibility Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 8
+    if: |
+      inputs.test_level == 'comprehensive' ||
+      github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run accessibility tests
+      working-directory: frontend
+      run: |
+        npm run test:a11y --if-present || npm run test:suites -- --selectProjects=a11y
+      env:
+        JEST_TIMEOUT: 30000
+
+    - name: Upload accessibility test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: a11y-test-results
+        path: frontend/test-results/
+        retention-days: 7
+
+  # Job 7: Performance Tests (5-8 min)
+  performance-tests:
+    name: ⚡ Performance Tests
+    runs-on: warp-custom-default
+    timeout-minutes: 10
+    if: |
+      inputs.test_level == 'performance' || 
+      inputs.test_level == 'comprehensive' ||
+      github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Run performance tests
+      working-directory: frontend
+      run: |
+        npm run test:performance --if-present || npm run test:fast
+      env:
+        PERFORMANCE_BUDGET: true
+
+    - name: Upload performance test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-test-results
+        path: frontend/test-results/
+        retention-days: 7
+
+  # Job 8: Test Coverage Aggregation and Reporting
+  coverage-aggregation:
+    name: 📊 Coverage Aggregation
+    runs-on: warp-custom-default
+    needs: [unit-tests, integration-tests]
+    if: always() && !cancelled()
+    timeout-minutes: 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies (minimal)
+      working-directory: frontend
+      run: |
+        npm ci --prefer-offline --no-audit --progress=false
+
+    - name: Download all coverage reports
+      uses: actions/download-artifact@v4
+      with:
+        pattern: "*coverage*"
+        path: frontend/coverage/
+        merge-multiple: true
+
+    - name: Merge coverage reports
+      working-directory: frontend
+      run: |
+        npm run coverage:merge --if-present || echo "Coverage merge not configured"
+
+    - name: Upload to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        directory: frontend/coverage/
+        flags: frontend
+        fail_ci_if_error: false
+
+    - name: Comment coverage on PR
+      if: github.event_name == 'pull_request'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: frontend-coverage
+        path: frontend/coverage/coverage-summary.md
+
+  # Job 9: Test Results Summary and Status Check
+  test-summary:
+    name: 📋 Test Summary
+    runs-on: warp-custom-default
+    needs: [smoke-tests, unit-tests, integration-tests, e2e-tests, accessibility-tests]
+    if: always()
+    timeout-minutes: 3
+    
+    steps:
+    - name: Download all test results
+      uses: actions/download-artifact@v4
+      with:
+        pattern: "*test-results*"
+        path: test-results/
+        merge-multiple: true
+
+    - name: Generate test summary
+      run: |
+        echo "# Frontend Test Summary" > test-summary.md
+        echo "## Test Execution Results" >> test-summary.md
+        echo "- Smoke Tests: ${{ needs.smoke-tests.result }}" >> test-summary.md
+        echo "- Unit Tests: ${{ needs.unit-tests.result }}" >> test-summary.md
+        echo "- Integration Tests: ${{ needs.integration-tests.result }}" >> test-summary.md
+        echo "- E2E Tests: ${{ needs.e2e-tests.result }}" >> test-summary.md
+        echo "- Accessibility Tests: ${{ needs.accessibility-tests.result }}" >> test-summary.md
+        
+        # Determine overall status
+        FAILED_JOBS=0
+        
+        if [[ "${{ needs.smoke-tests.result }}" == "failure" ]]; then
+          echo "::error::Smoke tests failed - critical paths broken"
+          FAILED_JOBS=$((FAILED_JOBS + 1))
+        fi
+        
+        if [[ "${{ needs.unit-tests.result }}" == "failure" ]]; then
+          echo "::error::Unit tests failed"
+          FAILED_JOBS=$((FAILED_JOBS + 1))
+        fi
+        
+        if [[ "${{ needs.integration-tests.result }}" == "failure" ]]; then
+          echo "::error::Integration tests failed"
+          FAILED_JOBS=$((FAILED_JOBS + 1))
+        fi
+        
+        if [[ "${{ needs.e2e-tests.result }}" == "failure" ]]; then
+          echo "::error::E2E tests failed"
+          FAILED_JOBS=$((FAILED_JOBS + 1))
+        fi
+        
+        echo "Failed jobs: $FAILED_JOBS" >> test-summary.md
+        
+        if [ $FAILED_JOBS -gt 0 ]; then
+          echo "❌ Frontend tests failed ($FAILED_JOBS job(s))"
+          exit 1
+        else
+          echo "✅ All frontend tests passed"
+          exit 0
+        fi
+
+    - name: Comment test summary on PR
+      if: github.event_name == 'pull_request'
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        header: frontend-test-summary
+        path: test-summary.md
+
+    - name: Upload test summary
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-summary
+        path: test-summary.md
+        retention-days: 30
+
+  # Job 10: Notification and Cleanup
+  notification:
+    name: 📢 Notification
+    runs-on: warp-custom-default
+    needs: [test-summary]
+    if: always() && github.ref == 'refs/heads/main'
+    timeout-minutes: 2
+    
+    steps:
+    - name: Notify on failure
+      if: needs.test-summary.result == 'failure'
+      run: |
+        echo "::error::Frontend tests failed on main branch"
+        # Add Slack/Discord notification here if configured
+        
+    - name: Cleanup old artifacts
+      run: |
+        echo "Cleanup would run here for artifacts older than retention period"

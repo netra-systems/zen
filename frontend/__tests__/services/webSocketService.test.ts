@@ -1,44 +1,38 @@
 import { webSocketService } from '@/services/webSocketService';
 
 describe('webSocketService', () => {
-  let mockWebSocket: jest.Mocked<WebSocket>;
+  let mockWebSocket: Partial<WebSocket>;
 
   beforeEach(() => {
+    setupMocks();
+  });
+
+  function setupMocks() {
     jest.clearAllMocks();
     jest.useFakeTimers();
+    createWebSocketMock();
+    setupStorage();
+  }
 
-    // Mock WebSocket
+  function createWebSocketMock() {
     mockWebSocket = {
       readyState: WebSocket.CONNECTING,
       close: jest.fn(),
       send: jest.fn(),
-      addEventListener: jest.fn(),
-      removeEventListener: jest.fn(),
-      dispatchEvent: jest.fn(),
-      url: 'ws://localhost:8000/ws',
-      protocol: '',
-      extensions: '',
-      bufferedAmount: 0,
-      binaryType: 'blob' as BinaryType,
       onopen: null,
       onclose: null,
       onerror: null,
-      onmessage: null,
-      CONNECTING: WebSocket.CONNECTING,
-      OPEN: WebSocket.OPEN,
-      CLOSING: WebSocket.CLOSING,
-      CLOSED: WebSocket.CLOSED
-    } as jest.Mocked<WebSocket>;
-
-    // Mock global WebSocket constructor
+      onmessage: null
+    };
     global.WebSocket = jest.fn().mockImplementation(() => mockWebSocket) as any;
-    
-    // Mock localStorage
+  }
+
+  function setupStorage() {
     Storage.prototype.getItem = jest.fn((key) => {
       if (key === 'authToken') return 'test-token-123';
       return null;
     });
-  });
+  }
 
   afterEach(() => {
     jest.useRealTimers();
@@ -50,46 +44,82 @@ describe('webSocketService', () => {
       const onStatusChange = jest.fn();
       webSocketService.onStatusChange = onStatusChange;
       
-      webSocketService.connect('ws://localhost:8000/ws');
-
-      expect(global.WebSocket).toHaveBeenCalledWith('ws://localhost:8000/ws');
-      expect(onStatusChange).toHaveBeenCalledWith('CONNECTING');
+      connectToWebSocket();
+      expectConnectionEstablished(onStatusChange);
     });
 
+    function connectToWebSocket() {
+      webSocketService.connect('ws://localhost:8000/ws');
+    }
+
+    function expectConnectionEstablished(statusHandler: jest.Mock) {
+      expect(global.WebSocket).toHaveBeenCalledWith('ws://localhost:8000/ws');
+      expect(statusHandler).toHaveBeenCalledWith('CONNECTING');
+    }
+
     it('should handle connection success', () => {
+      const { onStatusChange, onOpen } = setupConnectionHandlers();
+      connectWithHandlers(onOpen);
+      simulateConnectionOpen();
+      expectSuccessfulConnection(onStatusChange, onOpen);
+    });
+
+    function setupConnectionHandlers() {
       const onStatusChange = jest.fn();
       const onOpen = jest.fn();
       webSocketService.onStatusChange = onStatusChange;
-      
+      return { onStatusChange, onOpen };
+    }
+
+    function connectWithHandlers(onOpen: jest.Mock) {
       webSocketService.connect('ws://localhost:8000/ws', { onOpen });
-      
-      // Simulate connection open
+    }
+
+    function simulateConnectionOpen() {
       mockWebSocket.readyState = WebSocket.OPEN;
       mockWebSocket.onopen?.();
+    }
 
-      expect(onStatusChange).toHaveBeenCalledWith('OPEN');
-      expect(onOpen).toHaveBeenCalled();
-      
-      // Should send auth token
+    function expectSuccessfulConnection(statusHandler: jest.Mock, openHandler: jest.Mock) {
+      expect(statusHandler).toHaveBeenCalledWith('OPEN');
+      expect(openHandler).toHaveBeenCalled();
+      expectAuthTokenSent();
+    }
+
+    function expectAuthTokenSent() {
       expect(mockWebSocket.send).toHaveBeenCalledWith(
         JSON.stringify({ type: 'auth', token: 'test-token-123' })
       );
-    });
+    }
 
     it('should handle connection errors', () => {
+      const { onStatusChange, onError } = setupErrorHandlers();
+      connectWithErrorHandler(onError);
+      const error = simulateConnectionError();
+      expectErrorHandling(onStatusChange, onError, error);
+    });
+
+    function setupErrorHandlers() {
       const onStatusChange = jest.fn();
       const onError = jest.fn();
       webSocketService.onStatusChange = onStatusChange;
-      
+      return { onStatusChange, onError };
+    }
+
+    function connectWithErrorHandler(onError: jest.Mock) {
       webSocketService.connect('ws://localhost:8000/ws', { onError });
-      
-      // Simulate error
+    }
+
+    function simulateConnectionError() {
       const error = new Error('Connection failed');
       mockWebSocket.onerror?.(error as any);
+      return error;
+    }
 
-      expect(onStatusChange).toHaveBeenCalledWith('CLOSED');
-      expect(onError).toHaveBeenCalledWith(error);
-    });
+    function expectErrorHandling(statusHandler: jest.Mock, errorHandler: jest.Mock, error: Error) {
+      expect(statusHandler).toHaveBeenCalledWith('CLOSED');
+      expect(errorHandler).toHaveBeenCalledWith(error);
+    }
 
     it('should disconnect WebSocket properly', () => {
       webSocketService.connect('ws://localhost:8000/ws');
@@ -109,22 +139,34 @@ describe('webSocketService', () => {
     });
 
     it('should handle connection state transitions', () => {
+      const onStatusChange = setupStateTransitionTest();
+      verifyConnectingState();
+      simulateOpenAndVerify();
+      simulateCloseAndVerify();
+    });
+
+    function setupStateTransitionTest() {
       const onStatusChange = jest.fn();
       webSocketService.onStatusChange = onStatusChange;
-      
       webSocketService.connect('ws://localhost:8000/ws');
+      return onStatusChange;
+    }
+
+    function verifyConnectingState() {
       expect(webSocketService.getState()).toBe('connecting');
-      
-      // Open connection
+    }
+
+    function simulateOpenAndVerify() {
       mockWebSocket.readyState = WebSocket.OPEN;
       mockWebSocket.onopen?.();
       expect(webSocketService.getState()).toBe('connected');
-      
-      // Close connection
+    }
+
+    function simulateCloseAndVerify() {
       mockWebSocket.readyState = WebSocket.CLOSED;
       mockWebSocket.onclose?.();
       expect(webSocketService.getState()).toBe('disconnected');
-    });
+    }
   });
 
   describe('Message Sending and Receiving', () => {
@@ -135,25 +177,46 @@ describe('webSocketService', () => {
     });
 
     it('should send messages when connected', () => {
-      const message = { type: 'test', payload: { data: 'test data' } };
-
-      webSocketService.sendMessage(message);
-
-      expect(mockWebSocket.send).toHaveBeenCalledWith(JSON.stringify(message));
+      const message = createTestMessage();
+      sendTestMessage(message);
+      expectMessageSent(message);
     });
+
+    function createTestMessage() {
+      return { type: 'test', payload: { data: 'test data' } };
+    }
+
+    function sendTestMessage(message: any) {
+      webSocketService.sendMessage(message);
+    }
+
+    function expectMessageSent(message: any) {
+      expect(mockWebSocket.send).toHaveBeenCalledWith(JSON.stringify(message));
+    }
 
     it('should queue messages when disconnected', () => {
+      setDisconnectedState();
+      const message = createQueuedMessage();
+      sendMessageWhenDisconnected(message);
+      expectMessageQueued();
+    });
+
+    function setDisconnectedState() {
       mockWebSocket.readyState = WebSocket.CLOSED;
-      
-      const message = { type: 'test', payload: { data: 'queued message' } };
+    }
 
+    function createQueuedMessage() {
+      return { type: 'test', payload: { data: 'queued message' } };
+    }
+
+    function sendMessageWhenDisconnected(message: any) {
       webSocketService.sendMessage(message);
+    }
 
-      // Message should be queued, not sent immediately
-      // Auth token is sent on open, so check the send count
+    function expectMessageQueued() {
       const authCallCount = 1;
       expect(mockWebSocket.send).toHaveBeenCalledTimes(authCallCount);
-    });
+    }
 
     it('should send queued messages after reconnection', () => {
       // Queue messages while disconnected
@@ -195,21 +258,33 @@ describe('webSocketService', () => {
     });
 
     it('should handle malformed message data gracefully', () => {
+      const { onMessage, onError } = setupMessageHandlers();
+      establishConnection(onError);
+      sendMalformedMessage();
+      expectMalformedMessageHandled(onMessage);
+    });
+
+    function setupMessageHandlers() {
       const onMessage = jest.fn();
       const onError = jest.fn();
       webSocketService.onMessage = onMessage;
-      
-      // Connect with error handler
+      return { onMessage, onError };
+    }
+
+    function establishConnection(onError: jest.Mock) {
       webSocketService.connect('ws://localhost:8000/ws', { onError });
       mockWebSocket.readyState = WebSocket.OPEN;
       mockWebSocket.onopen?.();
+    }
 
-      // Send malformed JSON
+    function sendMalformedMessage() {
       const messageEvent = new MessageEvent('message', { data: 'invalid json' });
       mockWebSocket.onmessage?.(messageEvent);
+    }
 
+    function expectMalformedMessageHandled(onMessage: jest.Mock) {
       expect(onMessage).not.toHaveBeenCalled();
-    });
+    }
 
     it('should handle binary message data', () => {
       const onBinaryMessage = jest.fn();

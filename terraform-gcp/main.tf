@@ -157,7 +157,7 @@ resource "google_project_iam_member" "cloudrun_secrets" {
 
 # Cloud Run Service - Backend
 resource "google_cloud_run_service" "backend" {
-  name     = "netra-backend"
+  name     = "netra-backend-staging"  # CRITICAL: Exact name for domain mapping
   location = var.region
 
   template {
@@ -333,7 +333,7 @@ resource "google_cloud_run_service" "backend" {
 
 # Cloud Run Service - Frontend
 resource "google_cloud_run_service" "frontend" {
-  name     = "netra-frontend"
+  name     = "netra-frontend-staging"  # CRITICAL: Exact name for domain mapping
   location = var.region
 
   template {

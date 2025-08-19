@@ -82,9 +82,11 @@ class ExecutionErrorHandler:
     def _build_failed_execution_result(self, error: Exception, metadata: Dict[str, Any]) -> ExecutionResult:
         """Build failed execution result."""
         return ExecutionResult(
+            success=False,
             status=ExecutionStatus.FAILED,
             error=str(error),
-            metadata=metadata
+            execution_time_ms=0.0,
+            metrics=metadata
         )
     
     def _build_error_metadata(self, classification: ErrorClassification) -> Dict[str, Any]:
@@ -102,7 +104,7 @@ class ExecutionErrorHandler:
         self._fallback_data_cache[cache_key] = {
             "data": data,
             "timestamp": time.time(),
-            "context": context.model_dump() if hasattr(context, 'model_dump') else str(context)
+            "context": context
         }
     
     def get_health_status(self) -> Dict[str, Any]:

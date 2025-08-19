@@ -103,6 +103,8 @@ describe('MessageInput - Send Button States', () => {
       setProcessing: mockChatStore.setProcessing,
       addMessage: mockChatStore.addMessage,
       setActiveThread: jest.fn(),
+      addOptimisticMessage: jest.fn(),
+      updateOptimisticMessage: jest.fn(),
     });
     
     mockUseThreadStore.mockReturnValue({

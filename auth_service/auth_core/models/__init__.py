@@ -1,0 +1,3 @@
+"""
+Auth service models module.
+"""

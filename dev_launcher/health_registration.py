@@ -55,10 +55,30 @@ class HealthRegistrationHelper:
             max_failures=5
         )
     
+    def register_auth(self, auth_info: Optional[Dict[str, Any]]):
+        """Register auth service health monitoring."""
+        if not auth_info:
+            return
+        auth_url = f"{auth_info['url']}{auth_info.get('health_endpoint', '/health')}"
+        self._register_auth_service(auth_url)
+        logger.info("Auth service health monitoring registered")
+    
+    def _register_auth_service(self, auth_url: str):
+        """Register auth service with health monitor."""
+        self.health_monitor.register_service(
+            "Auth",
+            health_check=create_url_health_check(auth_url),
+            recovery_action=lambda: logger.error("Auth service needs restart - please restart the launcher"),
+            max_failures=5
+        )
+    
     def register_all_services(self, backend_info: Optional[Dict[str, Any]], 
-                            frontend_info: Optional[Dict[str, Any]]):
+                            frontend_info: Optional[Dict[str, Any]],
+                            auth_info: Optional[Dict[str, Any]] = None):
         """Register all services for health monitoring."""
         self._print("💚", "HEALTH", "Registering health monitoring...")
+        if auth_info:
+            self.register_auth(auth_info)
         self.register_backend(backend_info)
         self.register_frontend(frontend_info)
     

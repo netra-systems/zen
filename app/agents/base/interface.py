@@ -47,6 +47,17 @@ class ExecutionContext:
         """Initialize metadata if not provided."""
         if self.metadata is None:
             self.metadata = {}
+    
+    def __hash__(self):
+        """Make ExecutionContext hashable using run_id and agent_name."""
+        # Include both run_id and agent_name for unique hash
+        return hash((self.run_id, self.agent_name))
+    
+    def __eq__(self, other):
+        """Compare ExecutionContext objects by run_id and agent_name."""
+        if not isinstance(other, ExecutionContext):
+            return False
+        return self.run_id == other.run_id and self.agent_name == other.agent_name
 
 
 @dataclass

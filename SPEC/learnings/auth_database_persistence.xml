@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning_document>
+    <metadata>
+        <title>Auth Service Database Persistence</title>
+        <category>Authentication</category>
+        <tags>auth, database, oauth, persistence, regression</tags>
+        <created>2025-01-19</created>
+        <priority>CRITICAL</priority>
+    </metadata>
+
+    <problem_statement>
+        Auth service had placeholder comments saying "In production, this would persist to database" 
+        but wasn't actually persisting OAuth users or authentication data to any database.
+        This caused multiple regressions and confusion about where user data should be stored.
+    </problem_statement>
+
+    <regression_history>
+        <regression version="1">
+            <issue>Auth service was created without database persistence</issue>
+            <symptom>OAuth users were only stored in memory/temporary dictionaries</symptom>
+            <impact>User data lost on service restart</impact>
+        </regression>
+        
+        <regression version="2">
+            <issue>Attempted to use main backend's database from auth service</issue>
+            <symptom>Import errors and circular dependencies</symptom>
+            <impact>Violated microservice independence principle</impact>
+        </regression>
+        
+        <regression version="3">
+            <issue>Config refactoring broke auth service routes</issue>
+            <symptom>Missing auth_service global variable references</symptom>
+            <impact>Routes couldn't instantiate AuthService properly</impact>
+        </regression>
+    </regression_history>
+
+    <correct_architecture>
+        <principle>Auth service MUST have its own database persistence layer</principle>
+        <principle>Auth service is INDEPENDENT from main backend database</principle>
+        <principle>OAuth users MUST be persisted to database on first login</principle>
+        
+        <structure>
+            <component path="auth_service/auth_core/database/">
+                <file name="models.py">SQLAlchemy models for auth data</file>
+                <file name="connection.py">Database connection management</file>
+                <file name="repository.py">Repository pattern for data access</file>
+                <file name="__init__.py">Module exports</file>
+            </component>
+        </structure>
+    </correct_architecture>
+
+    <implementation_details>
+        <database_models>
+            <model name="AuthUser">
+                <purpose>Store user authentication data</purpose>
+                <fields>
+                    - id, email, full_name
+                    - hashed_password (null for OAuth users)
+                    - auth_provider (google, local, etc.)
+                    - provider_user_id (OAuth provider's user ID)
+                    - provider_data (JSON for additional OAuth data)
+                    - is_active, is_verified
+                    - failed_login_attempts, locked_until
+                </fields>
+            </model>
+            
+            <model name="AuthSession">
+                <purpose>Track active user sessions</purpose>
+                <fields>
+                    - session_id, user_id
+                    - refresh_token_hash
+                    - ip_address, user_agent
+                    - created_at, expires_at
+                    - is_active, revoked_at
+                </fields>
+            </model>
+            
+            <model name="AuthAuditLog">
+                <purpose>Audit trail for all auth events</purpose>
+                <fields>
+                    - event_type, user_id
+                    - success, error_message
+                    - event_metadata (NOT "metadata" - reserved word!)
+                    - ip_address, user_agent
+                    - created_at
+                </fields>
+            </model>
+        </database_models>
+
+        <repository_pattern>
+            <repository name="AuthUserRepository">
+                <methods>
+                    - create_oauth_user(user_info) - Creates or updates OAuth user
+                    - create_local_user(email, password_hash) - Creates local user
+                    - get_by_email(email) - Find user by email
+                    - increment_failed_attempts(email) - Track failed logins
+                    - check_account_locked(email) - Check lockout status
+                </methods>
+            </repository>
+        </repository_pattern>
+
+        <auth_service_integration>
+            <change>
+                <before>
+                    ```python
+                    class AuthService:
+                        def __init__(self):
+                            self.jwt_handler = JWTHandler()
+                    ```
+                </before>
+                <after>
+                    ```python
+                    class AuthService:
+                        def __init__(self, db_session: Optional[AsyncSession] = None):
+                            self.jwt_handler = JWTHandler()
+                            self.db_session = db_session
+                    ```
+                </after>
+            </change>
+            
+            <change>
+                <before>
+                    ```python
+                    async def create_oauth_user(self, user_info: Dict) -> Dict:
+                        # In production, this would persist to database
+                        return {"id": user_info["id"], ...}
+                    ```
+                </before>
+                <after>
+                    ```python
+                    async def create_oauth_user(self, user_info: Dict) -> Dict:
+                        if not self.db_session:
+                            # Fallback for testing
+                            return {...}
+                        
+                        user_repo = AuthUserRepository(self.db_session)
+                        auth_user = await user_repo.create_oauth_user(user_info)
+                        return {
+                            "id": auth_user.id,
+                            "email": auth_user.email,
+                            ...
+                        }
+                    ```
+                </after>
+            </change>
+        </auth_service_integration>
+
+        <route_dependency_injection>
+            <pattern>
+                Every route handler must:
+                1. Accept db session as dependency
+                2. Create AuthService instance with db session
+                3. Use that instance for the request
+            </pattern>
+            
+            <example>
+                ```python
+                @router.post("/login")
+                async def login(
+                    request: LoginRequest,
+                    client_info: dict = Depends(get_client_info),
+                    db: AsyncSession = Depends(get_db_session)  # Added
+                ):
+                    auth_service = AuthService(db)  # Create with DB
+                    response = await auth_service.login(request, client_info)
+                    return response
+                ```
+            </example>
+        </route_dependency_injection>
+    </implementation_details>
+
+    <common_pitfalls>
+        <pitfall>
+            <mistake>Using "metadata" as a column name in SQLAlchemy models</mistake>
+            <solution>Use "event_metadata" or similar - "metadata" is reserved</solution>
+        </pitfall>
+        
+        <pitfall>
+            <mistake>Trying to import main backend's models in auth service</mistake>
+            <solution>Auth service has its own models - maintain independence</solution>
+        </pitfall>
+        
+        <pitfall>
+            <mistake>Creating global AuthService instance in routes</mistake>
+            <solution>Create per-request instance with database session</solution>
+        </pitfall>
+        
+        <pitfall>
+            <mistake>Not persisting OAuth user data on first login</mistake>
+            <solution>Always call create_oauth_user to persist/update user</solution>
+        </pitfall>
+    </common_pitfalls>
+
+    <testing_requirements>
+        <requirement>
+            Auth service database tests must use separate test database
+        </requirement>
+        <requirement>
+            Test OAuth user persistence across service restarts
+        </requirement>
+        <requirement>
+            Verify failed login tracking and account lockout
+        </requirement>
+        <requirement>
+            Ensure audit logs are created for all auth events
+        </requirement>
+    </testing_requirements>
+
+    <checklist>
+        <item>✅ Auth service has own database models</item>
+        <item>✅ Repository pattern for data access</item>
+        <item>✅ OAuth users persisted on first login</item>
+        <item>✅ Failed login tracking implemented</item>
+        <item>✅ Session management with database</item>
+        <item>✅ Audit logging to database</item>
+        <item>✅ No dependencies on main backend database</item>
+        <item>✅ Database session injected per request</item>
+    </checklist>
+
+    <business_value>
+        <value>User data persistence enables reliable authentication</value>
+        <value>Audit logs provide security compliance</value>
+        <value>Failed login tracking prevents brute force attacks</value>
+        <value>Session management enables proper logout and multi-device support</value>
+    </business_value>
+</learning_document>

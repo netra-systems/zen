@@ -253,8 +253,74 @@ class AuthServiceClient:
             return None
         return await self._attempt_service_token_creation()
     
+    async def hash_password(self, password: str) -> Optional[Dict]:
+        """Hash password through auth service."""
+        if not self.settings.enabled:
+            # Fallback for development
+            logger.warning("Auth service disabled, using fallback hash")
+            return {"hashed_password": f"dev_hash_{password}"}
+        
+        try:
+            client = await self._get_client()
+            response = await client.post("/auth/hash-password", json={"password": password})
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except Exception as e:
+            logger.error(f"Password hashing failed: {e}")
+            return None
+    
+    async def verify_password(self, plain_password: str, hashed_password: str) -> Optional[Dict]:
+        """Verify password through auth service."""
+        if not self.settings.enabled:
+            # Fallback for development
+            logger.warning("Auth service disabled, using fallback verification")
+            return {"valid": plain_password in hashed_password}
+        
+        try:
+            client = await self._get_client()
+            response = await client.post("/auth/verify-password", json={
+                "plain_password": plain_password,
+                "hashed_password": hashed_password
+            })
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except Exception as e:
+            logger.error(f"Password verification failed: {e}")
+            return None
+    
+    async def create_token(self, token_data: Dict) -> Optional[Dict]:
+        """Create access token through auth service."""
+        if not self.settings.enabled:
+            # Fallback for development
+            logger.warning("Auth service disabled, using fallback token")
+            return {"access_token": f"dev_token_{token_data.get('user_id')}"}
+        
+        try:
+            client = await self._get_client()
+            response = await client.post("/auth/create-token", json=token_data)
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except Exception as e:
+            logger.error(f"Token creation failed: {e}")
+            return None
+    
     async def _local_validate(self, token: str) -> Optional[Dict]:
         """Local token validation fallback."""
+        import os
+        # Development mode bypass when auth service is unavailable
+        if os.getenv("ENVIRONMENT", "development") == "development":
+            logger.warning("Auth service unavailable, using development bypass")
+            # Accept any token in development mode for testing
+            return {
+                "valid": True,
+                "user_id": "dev-user-1",  # Use string ID as the User table expects varchar
+                "email": "dev@example.com",
+                "permissions": ["admin", "developer"],
+                "is_admin": True
+            }
         # In production, this should always fail if auth service is down
         logger.warning("Auth service unavailable, rejecting token")
         return {"valid": False}

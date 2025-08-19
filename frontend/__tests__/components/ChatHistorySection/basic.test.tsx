@@ -5,8 +5,11 @@
 
 // Hoist all mocks to the top for proper Jest handling
 const mockUseUnifiedChatStore = jest.fn();
+const mockUseThreadStore = jest.fn();
+const mockUseChatStore = jest.fn();
 const mockUseLoadingState = jest.fn();
 const mockUseThreadNavigation = jest.fn();
+const mockUseAuthStore = jest.fn();
 
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: mockUseUnifiedChatStore
@@ -18,6 +21,18 @@ jest.mock('@/hooks/useLoadingState', () => ({
 
 jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: mockUseThreadNavigation
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: mockUseAuthStore
+}));
+
+jest.mock('@/store/threadStore', () => ({
+  useThreadStore: mockUseThreadStore
+}));
+
+jest.mock('@/store/chat', () => ({
+  useChatStore: mockUseChatStore
 }));
 
 // AuthGate mock - always render children
@@ -35,7 +50,22 @@ jest.mock('framer-motion', () => ({
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHistorySection } from '@/components/ChatHistorySection';
-import { createTestSetup, mockThreads } from './setup';
+import { createTestSetup } from './setup';
+import { mockThreads } from './mockData';
+import { 
+  setupStoreForEmptyState, 
+  setupStoreForCurrentThread, 
+  setupStoreWithCustomThreads,
+  expectBasicStructure, 
+  expectThreadsRendered, 
+  expectEmptyState, 
+  expectActiveThread,
+  createThreadWithTitle,
+  expectUntitledThread,
+  expectSpecificThreadTitle,
+  expectMultipleThreadTitles,
+  expectThreadStructure
+} from './testUtils';
 
 const mockStore = {
   isProcessing: false,
@@ -70,6 +100,32 @@ describe('ChatHistorySection - Basic Functionality', () => {
       navigateToThread: jest.fn(),
       createNewThread: jest.fn()
     });
+    
+    mockUseAuthStore.mockReturnValue({
+      isAuthenticated: true,
+      user: { id: 'user-1', email: 'test@example.com' },
+      login: jest.fn(),
+      logout: jest.fn(),
+      checkAuth: jest.fn()
+    });
+    
+    mockUseThreadStore.mockReturnValue({
+      threads: mockThreads,
+      currentThreadId: 'thread-1',
+      setThreads: jest.fn(),
+      setCurrentThread: jest.fn(),
+      addThread: jest.fn(),
+      updateThread: jest.fn(),
+      deleteThread: jest.fn(),
+      setLoading: jest.fn(),
+      setError: jest.fn()
+    });
+    
+    mockUseChatStore.mockReturnValue({
+      clearMessages: jest.fn(),
+      loadMessages: jest.fn(),
+      messages: []
+    });
   });
 
   afterEach(() => {
@@ -96,23 +152,12 @@ describe('ChatHistorySection - Basic Functionality', () => {
     });
 
     it('should highlight the current active thread', () => {
-      // Configure store to have currentThreadId set
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        currentThreadId: 'thread-1'
-      });
-      
-      mockUseThreadNavigation.mockReturnValue({
-        currentThreadId: 'thread-1',
-        isNavigating: false,
-        navigateToThread: jest.fn(),
-        createNewThread: jest.fn()
-      });
+      const testSetup = createTestSetup();
+      setupStoreForCurrentThread(testSetup, 'thread-1');
       
       render(<ChatHistorySection />);
       
-      const firstThread = screen.getByText('First Conversation').closest('div[class*="group"]');
-      expect(firstThread).toHaveClass('bg-accent');
+      expectActiveThread(screen, 'First Conversation');
     });
 
     it('should show message icons for each thread', () => {
@@ -125,14 +170,12 @@ describe('ChatHistorySection - Basic Functionality', () => {
     });
 
     it('should render empty state when no threads exist', () => {
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        threads: []
-      });
+      const testSetup = createTestSetup();
+      setupStoreForEmptyState(testSetup);
 
       render(<ChatHistorySection />);
       
-      expect(screen.getByText('No conversations yet')).toBeInTheDocument();
+      expectEmptyState(screen);
     });
 
     it('should show hover effects on non-active threads', () => {
@@ -143,97 +186,64 @@ describe('ChatHistorySection - Basic Functionality', () => {
     });
 
     it('should render thread with null title as Untitled', () => {
-      const threadsWithNullTitle = [
-        { ...mockThreads[0], title: null },
-      ];
-      
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        threads: threadsWithNullTitle
-      });
+      const testSetup = createTestSetup();
+      const threadsWithNullTitle = [createThreadWithTitle(mockThreads[0], null)];
+      setupStoreWithCustomThreads(testSetup, threadsWithNullTitle);
 
       render(<ChatHistorySection />);
       
-      expect(screen.getByText('Untitled')).toBeInTheDocument();
+      expectUntitledThread(screen);
     });
 
     it('should render thread with empty title as Untitled', () => {
-      const threadsWithEmptyTitle = [
-        { ...mockThreads[0], title: '' },
-      ];
-      
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        threads: threadsWithEmptyTitle
-      });
+      const testSetup = createTestSetup();
+      const threadsWithEmptyTitle = [createThreadWithTitle(mockThreads[0], '')];
+      setupStoreWithCustomThreads(testSetup, threadsWithEmptyTitle);
 
       render(<ChatHistorySection />);
       
-      expect(screen.getByText('Untitled')).toBeInTheDocument();
+      expectUntitledThread(screen);
     });
 
     it('should display message count for each thread', () => {
       render(<ChatHistorySection />);
       
       // Check if message counts are displayed (this depends on the actual component implementation)
-      // Looking for any indication of message counts
-      const historyContainer = screen.getByText('Chat History').closest('.flex-col');
-      expect(historyContainer).toBeInTheDocument();
-      
-      // The specific implementation may vary, but we expect some way to show message counts
-      // This test validates the basic structure is in place
+      expectThreadStructure(screen);
     });
 
     it('should handle threads with very long titles', () => {
-      const threadsWithLongTitle = [
-        { ...mockThreads[0], title: 'This is a very long conversation title that should be handled properly by the component without breaking the layout or causing any display issues' },
-      ];
-      
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        threads: threadsWithLongTitle
-      });
+      const testSetup = createTestSetup();
+      const longTitle = 'This is a very long conversation title that should be handled properly by the component without breaking the layout or causing any display issues';
+      const threadsWithLongTitle = [createThreadWithTitle(mockThreads[0], longTitle)];
+      setupStoreWithCustomThreads(testSetup, threadsWithLongTitle);
 
       render(<ChatHistorySection />);
       
-      const longTitleElement = screen.getByText(/This is a very long conversation title/);
-      expect(longTitleElement).toBeInTheDocument();
+      expectSpecificThreadTitle(screen, longTitle);
     });
 
     it('should render threads in chronological order', () => {
-      // Create threads with specific order
+      const testSetup = createTestSetup();
       const orderedThreads = [
         { ...mockThreads[0], title: 'Newest Thread', created_at: Math.floor(Date.now() / 1000) },
         { ...mockThreads[1], title: 'Middle Thread', created_at: Math.floor(Date.now() / 1000) - 3600 },
         { ...mockThreads[2], title: 'Oldest Thread', created_at: Math.floor(Date.now() / 1000) - 7200 },
       ];
-      
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        threads: orderedThreads
-      });
+      setupStoreWithCustomThreads(testSetup, orderedThreads);
       
       render(<ChatHistorySection />);
       
-      // Verify all threads are rendered
-      expect(screen.getByText('Newest Thread')).toBeInTheDocument();
-      expect(screen.getByText('Middle Thread')).toBeInTheDocument();
-      expect(screen.getByText('Oldest Thread')).toBeInTheDocument();
+      expectMultipleThreadTitles(screen, ['Newest Thread', 'Middle Thread', 'Oldest Thread']);
     });
 
     it('should handle missing timestamps gracefully', () => {
-      const threadsWithMissingTimestamp = [
-        { ...mockThreads[0], created_at: null, updated_at: null },
-      ];
-      
-      mockUseUnifiedChatStore.mockReturnValue({
-        ...mockStore,
-        threads: threadsWithMissingTimestamp
-      });
+      const testSetup = createTestSetup();
+      const threadsWithMissingTimestamp = [{ ...mockThreads[0], created_at: null, updated_at: null }];
+      setupStoreWithCustomThreads(testSetup, threadsWithMissingTimestamp);
 
       render(<ChatHistorySection />);
       
-      // Should still render the thread even without timestamps
       expect(screen.getByText('First Conversation')).toBeInTheDocument();
       expect(screen.getByText('Unknown date')).toBeInTheDocument();
     });

@@ -647,6 +647,21 @@ interface WebSocketMessage {
 
 ## 🧪 Testing
 
+### Feature Flags & TDD (NEW)
+
+Write tests before implementation without breaking CI/CD:
+
+```bash
+# Configure feature in test_feature_flags.json as "in_development"
+# Write test with @tdd_test decorator
+# Test locally with override:
+TEST_FEATURE_NEW_FEATURE=enabled python test_runner.py --level unit
+
+# When feature is ready, change status to "enabled" in config
+```
+
+See [Feature Flags Documentation](docs/TESTING_WITH_FEATURE_FLAGS.md) for complete guide.
+
 ### Unified Test Runner (RECOMMENDED)
 
 ```bash

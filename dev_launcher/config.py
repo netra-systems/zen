@@ -19,6 +19,7 @@ class LauncherConfig:
     # Reload configuration (uses native reload)
     backend_reload: bool = False  # Default to no reload for performance
     frontend_reload: bool = True  # Next.js always has reload
+    auth_reload: bool = False  # Auth service reload for performance
     
     # Secret management
     load_secrets: bool = True
@@ -29,14 +30,23 @@ class LauncherConfig:
     verbose: bool = False
     non_interactive: bool = False  # Non-interactive mode for CI/automation
     
+    # Performance optimizations
+    parallel_startup: bool = True  # Enable parallel service startup by default
+    
     # Build configuration
     use_turbopack: bool = False
+    
+    # Startup mode configuration
+    startup_mode: str = "minimal"  # minimal, standard, or verbose
     
     # Boundary monitoring configuration
     watch_boundaries: bool = False  # Real-time boundary monitoring
     boundary_check_interval: int = 30  # Check every 30 seconds
     fail_on_boundary_violations: bool = False  # Stop dev server on violations
     show_boundary_warnings: bool = True  # Show boundary warning messages
+    
+    # Environment configuration
+    production: bool = False  # Default to development mode
     
     # Paths
     project_root: Path = field(default_factory=lambda: Path.cwd())
@@ -94,21 +104,36 @@ class LauncherConfig:
             # Development mode: enable all hot reload
             backend_reload = True
             frontend_reload = True
+            auth_reload = True
         elif hasattr(args, 'backend_reload') and args.backend_reload:
             # Explicit backend reload
             backend_reload = True
             frontend_reload = True
-        elif args.no_reload:
-            # No reload at all
+            auth_reload = False
+        elif hasattr(args, 'no_reload') and args.no_reload:
+            # No reload at all - disable for all services
             backend_reload = False
-            frontend_reload = True  # Next.js always has reload
+            frontend_reload = False  # Disable frontend reload for maximum performance
+            auth_reload = False
         else:
             # Default: no backend reload for performance
             backend_reload = False
             frontend_reload = True
+            auth_reload = False
         
         # Default to loading secrets unless --no-secrets is specified
         load_secrets = not args.no_secrets if hasattr(args, 'no_secrets') else True
+        
+        # Handle startup mode
+        startup_mode = "minimal"  # Default
+        if hasattr(args, 'verbose') and args.verbose:
+            startup_mode = "verbose"
+        elif hasattr(args, 'standard') and args.standard:
+            startup_mode = "standard"
+        elif hasattr(args, 'minimal') and args.minimal:
+            startup_mode = "minimal"
+        elif hasattr(args, 'mode'):
+            startup_mode = args.mode
         
         return cls(
             backend_port=args.backend_port,
@@ -117,11 +142,14 @@ class LauncherConfig:
             verbose=args.verbose,
             backend_reload=backend_reload,
             frontend_reload=frontend_reload,
+            auth_reload=auth_reload,
             load_secrets=load_secrets,
             project_id=args.project_id if hasattr(args, 'project_id') else None,
             no_browser=args.no_browser,
             non_interactive=args.non_interactive if hasattr(args, 'non_interactive') else False,
             use_turbopack=not args.no_turbopack if hasattr(args, 'no_turbopack') else False,
+            parallel_startup=not args.no_parallel if hasattr(args, 'no_parallel') else True,
+            startup_mode=startup_mode,
             project_root=find_project_root()
         )
     
@@ -133,6 +161,7 @@ class LauncherConfig:
             "dynamic_ports": self.dynamic_ports,
             "backend_reload": self.backend_reload,
             "frontend_reload": self.frontend_reload,
+            "auth_reload": self.auth_reload,
             "load_secrets": self.load_secrets,
             "project_id": self.project_id,
             "no_browser": self.no_browser,

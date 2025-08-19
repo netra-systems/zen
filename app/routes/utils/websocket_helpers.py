@@ -37,7 +37,7 @@ def extract_app_services(websocket: WebSocket) -> Tuple[Any, Any]:
 
 async def decode_token_payload(security_service, token: str) -> Dict:
     """Decode and validate token payload."""
-    payload = security_service.decode_access_token(token)
+    payload = await security_service.decode_access_token(token)
     return validate_token_payload(payload)
 
 
@@ -89,10 +89,21 @@ async def get_and_validate_user(
 
 async def authenticate_websocket_user(websocket: WebSocket, token: str, security_service) -> str:
     """Authenticate WebSocket user and return user ID string."""
-    payload = await decode_token_payload(security_service, token)
-    user_id = validate_user_id_in_payload(payload)
-    async with get_async_db() as db_session:
-        return await get_and_validate_user(security_service, db_session, user_id, payload)
+    logger.info(f"[WS AUTH] Starting authentication with token: {token[:20] if token else 'None'}...")
+    try:
+        payload = await decode_token_payload(security_service, token)
+        logger.info(f"[WS AUTH] Token decoded successfully, payload: {payload}")
+        user_id = validate_user_id_in_payload(payload)
+        logger.info(f"[WS AUTH] User ID validated: {user_id}")
+        async with get_async_db() as db_session:
+            logger.info(f"[WS AUTH] Database session acquired, fetching user {user_id}")
+            result = await get_and_validate_user(security_service, db_session, user_id, payload)
+            logger.info(f"[WS AUTH] User validated successfully: {result}")
+            return result
+    except Exception as e:
+        logger.error(f"[WS AUTH ERROR] Authentication failed: {e}", exc_info=True)
+        await websocket.close(code=1008, reason=f"Authentication failed: {str(e)}")
+        raise
 
 
 async def receive_message_with_timeout(websocket: WebSocket) -> str:
@@ -114,6 +125,10 @@ async def handle_pong_message(data: str, user_id_str: str, websocket: WebSocket,
 async def parse_json_message(data: str, user_id_str: str, manager):
     """Parse JSON message and handle errors."""
     try:
+        # Ensure data is not a coroutine before processing
+        if asyncio.iscoroutine(data):
+            logger.error(f"Received coroutine instead of data for user {user_id_str}")
+            return None
         return json.loads(data) if isinstance(data, str) else data
     except json.JSONDecodeError:
         logger.warning(f"Invalid JSON received from user {user_id_str}: {data[:100]}")
@@ -123,6 +138,10 @@ async def parse_json_message(data: str, user_id_str: str, manager):
 
 async def _handle_ping_message(message, websocket: WebSocket) -> bool:
     """Handle ping message and return True if handled."""
+    # Ensure message is not a coroutine
+    if asyncio.iscoroutine(message):
+        logger.error("Received coroutine instead of message in ping handler")
+        return False
     if isinstance(message, dict) and message.get("type") == "ping":
         await _send_pong_response(websocket)
         return True

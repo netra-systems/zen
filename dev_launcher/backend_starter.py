@@ -45,7 +45,29 @@ class BackendStarter:
     
     def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
         """Start the backend server."""
-        self._print("🚀", "BACKEND", "Starting backend server...")
+        # Build service mode description
+        from dev_launcher.service_config import ResourceMode
+        service_modes = []
+        
+        # Check each service mode
+        services = [
+            ("Redis", self.services_config.redis),
+            ("ClickHouse", self.services_config.clickhouse),
+            ("PostgreSQL", self.services_config.postgres),
+            ("LLM", self.services_config.llm)
+        ]
+        
+        for name, service in services:
+            if service.mode == ResourceMode.LOCAL:
+                service_modes.append(f"{name}:local")
+            elif service.mode == ResourceMode.SHARED:
+                service_modes.append(f"{name}:cloud")
+            elif service.mode == ResourceMode.MOCK:
+                service_modes.append(f"{name}:mock")
+        
+        mode_str = ", ".join(service_modes) if service_modes else "default configuration"
+        self._print("🚀", "BACKEND", f"Starting backend server ({mode_str})...")
+        
         port = self._determine_backend_port()
         server_script = self._find_server_script()
         cmd = self._build_backend_command(port, server_script)

@@ -295,16 +295,30 @@ class MetricsCollector:
     
     async def _gather_websocket_metrics(self) -> WebSocketMetrics:
         """Gather WebSocket metrics from connection manager."""
-        from app.websocket.connection_manager import get_connection_manager
-        conn_manager = get_connection_manager()
-        conn_stats = await conn_manager.get_stats()
-        return self._build_websocket_metrics(conn_stats)
+        try:
+            from app.websocket.connection_manager import get_connection_manager
+            conn_manager = get_connection_manager()
+            if conn_manager is None:
+                return self._build_empty_websocket_metrics()
+            conn_stats = await conn_manager.get_stats()
+            return self._build_websocket_metrics(conn_stats)
+        except Exception as e:
+            logger.warning(f"Failed to gather WebSocket metrics: {e}")
+            return self._build_empty_websocket_metrics()
 
     def _build_websocket_metrics(self, conn_stats: Dict[str, Any]) -> WebSocketMetrics:
         """Build WebSocketMetrics from connection stats."""
         return WebSocketMetrics(
             active_connections=conn_stats.get("active_connections", 0),
             total_connections=conn_stats.get("total_connections", 0),
+            messages_sent=0, messages_received=0, failed_sends=0,
+            avg_message_size=0.0, batch_efficiency=0.0
+        )
+    
+    def _build_empty_websocket_metrics(self) -> WebSocketMetrics:
+        """Build empty WebSocketMetrics when connection manager unavailable."""
+        return WebSocketMetrics(
+            active_connections=0, total_connections=0,
             messages_sent=0, messages_received=0, failed_sends=0,
             avg_message_size=0.0, batch_efficiency=0.0
         )

@@ -89,12 +89,42 @@ class TestAgentE2ECriticalTools(AgentE2ETestBase):
         # Mock state persistence
         saved_states = {}
         
-        async def mock_save_state(run_id, thread_id, user_id, state, db_session):
-            saved_states[run_id] = {
-                "thread_id": thread_id,
-                "user_id": user_id,
-                "state": state.model_dump()
-            }
+        async def mock_save_state(*args, **kwargs):
+            # Handle both positional and keyword arguments
+            # The actual service can be called with StatePersistenceRequest or individual parameters
+            run_id = None
+            thread_id = None
+            user_id = None
+            state = None
+            
+            if len(args) >= 1:
+                # Check if first arg is a StatePersistenceRequest or similar object
+                first_arg = args[0]
+                if hasattr(first_arg, 'run_id'):
+                    run_id = first_arg.run_id
+                    thread_id = getattr(first_arg, 'thread_id', None)
+                    user_id = getattr(first_arg, 'user_id', None)
+                    state = getattr(first_arg, 'state_data', None)
+                else:
+                    # Traditional positional arguments
+                    if len(args) >= 5:
+                        run_id, thread_id, user_id, state = args[0], args[1], args[2], args[3]
+            
+            # Fallback to kwargs
+            if run_id is None:
+                run_id = kwargs.get('run_id')
+                thread_id = kwargs.get('thread_id') 
+                user_id = kwargs.get('user_id')
+                state = kwargs.get('state')
+            
+            if run_id is not None:
+                saved_states[run_id] = {
+                    "thread_id": thread_id,
+                    "user_id": user_id,
+                    "state": state.model_dump() if hasattr(state, 'model_dump') else state
+                }
+            
+            return True, "mock_snapshot_id"
             
         async def mock_load_state(run_id, db_session):
             if run_id in saved_states:

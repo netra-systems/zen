@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+  <title>WebSocket Message Processing Fix</title>
+  <date>2025-08-18</date>
+  <category>websocket</category>
+  <severity>critical</severity>
+  
+  <problem>
+    <description>WebSocket messages were being sent from client but agents were not starting</description>
+    <symptoms>
+      - Messages showed as sent in WebSocket connection
+      - No agent activity observed
+      - Critical tests failing for message validation
+    </symptoms>
+    <root_cause>
+      Multiple message handling regressions:
+      1. Unknown message types were not sending errors to users
+      2. Missing message type field was not properly validated
+      3. Malformed messages returned generic errors instead of specific format errors
+      4. Null payload fields returned None instead of empty strings
+    </root_cause>
+  </problem>
+  
+  <solution>
+    <changes>
+      <file path="app/services/agent_service_core.py">
+        <change>Added validation for missing message type field - returns error to user</change>
+        <change>Added error sending for unknown message types</change>
+        <change>Improved error messages for malformed messages based on exception type</change>
+        <change>Fixed JSON decode error message to include "JSON" for clarity</change>
+      </file>
+      <file path="app/services/message_handlers.py">
+        <change>Fixed _extract_message_data to always return empty string instead of None for null fields</change>
+      </file>
+      <file path="app/routes/websockets.py">
+        <change>Already had critical fix to always forward user messages to agent service</change>
+      </file>
+    </changes>
+    
+    <code_examples>
+      <example title="Message type validation">
+        <![CDATA[
+        # Validate message type is present
+        if not message_type:
+            await manager.send_error(user_id, "Message type is required")
+            return
+        ]]>
+      </example>
+      
+      <example title="Unknown message type handling">
+        <![CDATA[
+        logger.warning(f"Received unhandled message type '{message_type}' for user_id: {user_id}")
+        # Send error to user for unknown message type
+        await manager.send_error(user_id, f"Unknown message type: {message_type}")
+        ]]>
+      </example>
+      
+      <example title="Specific error messages">
+        <![CDATA[
+        # Provide more specific error messages based on exception type
+        error_message = "Internal server error"
+        if isinstance(e, (TypeError, AttributeError)):
+            error_message = "Invalid message format or structure"
+        elif isinstance(e, KeyError):
+            error_message = f"Missing required field: {str(e)}"
+        ]]>
+      </example>
+    </code_examples>
+  </solution>
+  
+  <testing>
+    <test_file>app/tests/critical/test_websocket_message_regression.py</test_file>
+    <test_results>All 23 tests passing after fixes</test_results>
+  </testing>
+  
+  <prevention>
+    <recommendations>
+      - Always validate message structure before processing
+      - Send clear error messages to users for invalid input
+      - Handle null/undefined fields gracefully
+      - Ensure critical message flow tests are comprehensive
+      - Test edge cases for message validation
+    </recommendations>
+  </prevention>
+  
+  <business_impact>
+    <impact>Critical - Users could not interact with agents</impact>
+    <value>Restored core functionality allowing agent interactions</value>
+    <segments_affected>All customer segments using agent features</segments_affected>
+  </business_impact>
+</learning>

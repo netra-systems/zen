@@ -11,8 +11,8 @@ import os
 import argparse
 from pathlib import Path
 
-# Set UTF-8 encoding for Windows
-if sys.platform == "win32":
+# Set UTF-8 encoding for Windows and Mac
+if sys.platform in ("win32", "darwin"):
     os.environ["PYTHONIOENCODING"] = "utf-8"
     if hasattr(sys.stdout, 'reconfigure'):
         sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -145,6 +145,29 @@ QUICK SHORTCUTS:
         action="store_true",
         help="Run in non-interactive mode (no prompts, use defaults)"
     )
+    ui_group.add_argument(
+        "--no-parallel",
+        action="store_true",
+        help="Disable parallel startup (use sequential startup)"
+    )
+    
+    # Startup mode configuration
+    ui_group.add_argument(
+        "-m", "--mode",
+        choices=["minimal", "standard", "verbose"],
+        default="minimal",
+        help="Startup output mode (default: minimal)"
+    )
+    ui_group.add_argument(
+        "--minimal",
+        action="store_true",
+        help="Use minimal output mode (cleanest)"
+    )
+    ui_group.add_argument(
+        "--standard",
+        action="store_true",
+        help="Use standard output mode (balanced)"
+    )
     
     # Build configuration
     build_group = parser.add_argument_group('Build Configuration')
@@ -157,6 +180,39 @@ QUICK SHORTCUTS:
         "--turbopack",
         action="store_true",
         help="Use turbopack (experimental, faster)"
+    )
+    
+    # Service mode configuration
+    service_group = parser.add_argument_group('Service Mode Configuration')
+    service_group.add_argument(
+        "--list-services",
+        action="store_true",
+        help="List current service configurations and exit"
+    )
+    service_group.add_argument(
+        "--set-redis",
+        choices=["local", "shared", "mock"],
+        help="Set Redis mode (local/shared/mock)"
+    )
+    service_group.add_argument(
+        "--set-clickhouse",
+        choices=["local", "shared", "mock"],
+        help="Set ClickHouse mode (local/shared/mock)"
+    )
+    service_group.add_argument(
+        "--set-postgres",
+        choices=["local", "shared", "mock"],
+        help="Set PostgreSQL mode (local/shared/mock)"
+    )
+    service_group.add_argument(
+        "--set-llm",
+        choices=["local", "shared", "mock"],
+        help="Set LLM mode (local/shared/mock)"
+    )
+    service_group.add_argument(
+        "--reset-services",
+        action="store_true",
+        help="Reset all services to default configuration"
     )
     
     # Boundary monitoring configuration
@@ -188,10 +244,112 @@ QUICK SHORTCUTS:
     return parser
 
 
+def handle_service_configuration(args):
+    """Handle service configuration commands."""
+    from dev_launcher.service_config import ServicesConfiguration, ResourceMode
+    from dev_launcher.unicode_utils import safe_print, get_emoji, setup_unicode_console
+    
+    setup_unicode_console()
+    config_path = Path.cwd() / "netra-core-generation-1" / ".dev_services.json"
+    if not config_path.parent.exists():
+        config_path = Path.cwd() / ".dev_services.json"
+    
+    # Load or create configuration
+    if config_path.exists():
+        config = ServicesConfiguration.load_from_file(config_path)
+    else:
+        config = ServicesConfiguration()
+    
+    # Handle reset
+    if args.reset_services:
+        config = ServicesConfiguration()
+        config.save_to_file(config_path)
+        safe_print(f"{get_emoji('check')} Services reset to default configuration")
+        return True
+    
+    # Handle service mode updates
+    updated = False
+    if args.set_redis:
+        config.redis.mode = ResourceMode(args.set_redis)
+        updated = True
+    if args.set_clickhouse:
+        config.clickhouse.mode = ResourceMode(args.set_clickhouse)
+        updated = True
+    if args.set_postgres:
+        config.postgres.mode = ResourceMode(args.set_postgres)
+        updated = True
+    if args.set_llm:
+        config.llm.mode = ResourceMode(args.set_llm)
+        updated = True
+    
+    if updated:
+        config.save_to_file(config_path)
+        safe_print(f"{get_emoji('check')} Service configuration updated")
+    
+    # List services
+    if args.list_services or updated:
+        print("\n" + "="*60)
+        safe_print(f"{get_emoji('gear')} Current Service Configuration")
+        print("="*60)
+        print(f"\nConfiguration file: {config_path}\n")
+        
+        services = [
+            ("Redis", config.redis),
+            ("ClickHouse", config.clickhouse),
+            ("PostgreSQL", config.postgres),
+            ("LLM", config.llm),
+            ("Auth Service", config.auth_service)
+        ]
+        
+        for name, service in services:
+            mode_emoji = {
+                ResourceMode.LOCAL: get_emoji('computer'),
+                ResourceMode.SHARED: get_emoji('cloud'),
+                ResourceMode.MOCK: get_emoji('test_tube'),
+                ResourceMode.DISABLED: get_emoji('x')
+            }.get(service.mode, '')
+            
+            mode_desc = {
+                ResourceMode.LOCAL: "Local instance",
+                ResourceMode.SHARED: "Cloud/shared resource",
+                ResourceMode.MOCK: "Mock implementation",
+                ResourceMode.DISABLED: "Disabled"
+            }.get(service.mode, service.mode.value)
+            
+            safe_print(f"  {mode_emoji} {name:15} : {service.mode.value:8} - {mode_desc}")
+            
+            # Show connection details for active services
+            if service.mode != ResourceMode.DISABLED:
+                config_details = service.get_config()
+                if service.mode == ResourceMode.LOCAL:
+                    if 'host' in config_details and 'port' in config_details:
+                        print(f"                       {config_details['host']}:{config_details['port']}")
+                elif service.mode == ResourceMode.SHARED and name != "LLM":
+                    if 'host' in config_details:
+                        host = config_details['host']
+                        if 'cloud' in host or 'com' in host:
+                            # Truncate long cloud URLs
+                            host_display = host[:30] + '...' if len(host) > 30 else host
+                            print(f"                       {host_display}")
+        
+        print("\n" + "="*60)
+        return True
+    
+    return False
+
+
 def main():
     """Main entry point."""
     parser = create_parser()
     args = parser.parse_args()
+    
+    # Handle service configuration commands first
+    if args.list_services or args.reset_services or \
+       args.set_redis or args.set_clickhouse or args.set_postgres or args.set_llm:
+        if handle_service_configuration(args):
+            if args.list_services:
+                sys.exit(0)  # Exit if only listing
+            # Continue to run launcher with new configuration
     
     # Create configuration from arguments
     config = LauncherConfig.from_args(args)

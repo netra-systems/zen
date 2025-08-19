@@ -12,7 +12,7 @@ import logging
 from typing import Dict, Any
 from datetime import datetime, UTC
 
-from app.routes.auth_routes import router as auth_router
+from auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -53,14 +53,37 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
-    logger.info(f"Service: auth-service")
+    from auth_core.config import AuthConfig
+    AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8081')}")
+    
+    # Initialize database connections on startup
+    from auth_core.database.connection import auth_db
+    from auth_core.database.main_db_sync import main_db_sync
+    
+    try:
+        await auth_db.initialize()
+        logger.info("Auth database initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize auth database: {e}")
+        raise
+    
+    try:
+        await main_db_sync.initialize()
+        logger.info("Main database sync initialized successfully")
+    except Exception as e:
+        logger.error(f"Failed to initialize main database sync: {e}")
+        raise
     
     yield
     
     # Cleanup
     logger.info("Shutting down Auth Service...")
+    
+    # Close database connections
+    await auth_db.close()
+    await main_db_sync.close()
+    logger.info("Database connections closed")
 
 # Create FastAPI app
 app = FastAPI(
@@ -74,26 +97,86 @@ app = FastAPI(
 )
 
 # Configure CORS
-cors_origins = os.getenv("CORS_ORIGINS", "").split(",")
-cors_origins = [origin.strip() for origin in cors_origins if origin.strip()]
+cors_origins_env = os.getenv("CORS_ORIGINS", "")
+env = os.getenv("ENVIRONMENT", "development")
 
-if not cors_origins:
-    # Default CORS origins for development
-    cors_origins = [
-        "http://localhost:3000",
-        "http://localhost:8000",
-        "http://localhost:8080",
-        "http://localhost:8081"
-    ]
+# Handle wildcard CORS for development
+if cors_origins_env == "*":
+    # Allow all origins in development
+    cors_origins = ["*"]
+elif cors_origins_env:
+    # Parse comma-separated origins
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+else:
+    # Default CORS origins based on environment
+    if env == "staging":
+        cors_origins = [
+            "https://staging.netrasystems.ai",
+            "https://app.staging.netrasystems.ai",
+            "https://api.staging.netrasystems.ai",
+            "https://auth.staging.netrasystems.ai",
+            "http://localhost:3000"
+        ]
+    elif env == "production":
+        cors_origins = [
+            "https://netrasystems.ai",
+            "https://app.netrasystems.ai",
+            "https://api.netrasystems.ai",
+            "https://auth.netrasystems.ai"
+        ]
+    else:
+        cors_origins = [
+            "http://localhost:3000",
+            "http://localhost:8000",
+            "http://localhost:8080",
+            "http://localhost:8081"
+        ]
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=cors_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"]
-)
+# When using wildcard with credentials, we need custom handling
+if cors_origins == ["*"]:
+    # In development with wildcard, we can't use credentials with "*"
+    # So we'll handle CORS dynamically
+    from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.responses import Response
+    
+    class DynamicCORSMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request, call_next):
+            origin = request.headers.get("origin")
+            
+            # Handle preflight
+            if request.method == "OPTIONS":
+                response = Response(status_code=200)
+                if origin:
+                    response.headers["Access-Control-Allow-Origin"] = origin
+                    response.headers["Access-Control-Allow-Credentials"] = "true"
+                    response.headers["Access-Control-Allow-Methods"] = "*"
+                    response.headers["Access-Control-Allow-Headers"] = "*"
+                return response
+            
+            # Process request
+            response = await call_next(request)
+            
+            # Add CORS headers to response
+            if origin:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "*"
+                response.headers["Access-Control-Allow-Headers"] = "*"
+                response.headers["Access-Control-Expose-Headers"] = "*"
+            
+            return response
+    
+    app.add_middleware(DynamicCORSMiddleware)
+else:
+    # Use standard CORS middleware for specific origins
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=["*"]
+    )
 
 # Security middleware for production
 if os.getenv("ENVIRONMENT") in ["staging", "production"]:

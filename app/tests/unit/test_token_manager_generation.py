@@ -11,7 +11,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from freezegun import freeze_time
 from jose import jwt, JWTError
 
-from app.auth.token_manager import JWTTokenManager, TokenClaims
+from app.auth_integration.auth import JWTTokenManager, TokenClaims
 from app.core.exceptions_auth import AuthenticationError
 from app.core.exceptions_base import ValidationError
 

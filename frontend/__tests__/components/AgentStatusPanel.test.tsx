@@ -8,18 +8,10 @@ import { TestProviders } from '../test-utils/providers';
 
 // Mock dependencies
 jest.mock('@/store/unified-chat');
-jest.mock('@/components/ui/progress', () => ({
-  Progress: ({ value, className }: any) => (
-    <div data-testid="progress-bar" data-value={value} className={className}>
-      {value}%
-    </div>
-  )
-}));
-jest.mock('@/components/ui/badge', () => ({
-  Badge: ({ children, variant }: any) => (
-    <span data-testid="badge" data-variant={variant}>{children}</span>
-  )
-}));
+
+// Import real UI components
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 describe('AgentStatusPanel Component', () => {
   const mockUnifiedChatStore = {

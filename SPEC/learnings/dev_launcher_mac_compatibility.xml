@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Dev Launcher Mac Compatibility</name>
+        <type>learnings</type>
+        <version>1.0</version>
+        <last_updated>2025-08-19</last_updated>
+        <description>Mac compatibility fixes and considerations for dev launcher</description>
+    </metadata>
+    
+    <learnings>
+        <learning id="mac-process-handling">
+            <title>Mac Process Handling Differences</title>
+            <problem>
+                Mac (Darwin) handles process groups differently than Linux.
+                Using os.setsid() can cause issues on Mac systems.
+            </problem>
+            <solution>
+                Differentiate between Mac and Linux for process management:
+                - Mac: Use direct kill signals without process groups
+                - Linux: Use process groups with os.setsid()
+            </solution>
+            <implementation>
+                <file>dev_launcher/utils.py</file>
+                <file>dev_launcher/process_manager.py</file>
+                <code><![CDATA[
+                if sys.platform == "darwin":
+                    # Mac: don't use setsid, use direct kill
+                    os.kill(process.pid, signal.SIGTERM)
+                else:
+                    # Linux: use process groups
+                    os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                ]]></code>
+            </implementation>
+        </learning>
+        
+        <learning id="mac-port-freeing">
+            <title>Mac Port Freeing Implementation</title>
+            <problem>
+                Port freeing only implemented for Windows, Mac uses different commands
+            </problem>
+            <solution>
+                Implement Mac-specific port freeing using lsof and kill commands
+            </solution>
+            <implementation>
+                <file>dev_launcher/launcher.py</file>
+                <code><![CDATA[
+                elif sys.platform == "darwin":
+                    # Mac: use lsof to find process using port
+                    result = subprocess.run(f"lsof -ti :{port}", shell=True, ...)
+                    if result.stdout:
+                        pids = result.stdout.strip().split('\n')
+                        for pid in pids:
+                            subprocess.run(f"kill -9 {pid}", shell=True)
+                ]]></code>
+            </implementation>
+        </learning>
+        
+        <learning id="mac-memory-monitoring">
+            <title>Mac Memory Monitoring</title>
+            <problem>
+                Mac doesn't have 'free' command, uses vm_stat instead
+            </problem>
+            <solution>
+                Implement Mac-specific memory checking using vm_stat
+            </solution>
+            <implementation>
+                <file>dev_launcher/system_diagnostics.py</file>
+                <code><![CDATA[
+                if sys.platform == "darwin":
+                    # Mac: use vm_stat
+                    result = await asyncio.to_thread(
+                        subprocess.run, ['vm_stat'], ...
+                    )
+                    # Parse vm_stat output for memory statistics
+                ]]></code>
+            </implementation>
+        </learning>
+        
+        <learning id="mac-utf8-encoding">
+            <title>Mac UTF-8 Terminal Encoding</title>
+            <problem>
+                UTF-8 encoding setup only applied to Windows terminals
+            </problem>
+            <solution>
+                Apply UTF-8 encoding setup to both Windows and Mac systems
+            </solution>
+            <implementation>
+                <file>dev_launcher/__main__.py</file>
+                <code><![CDATA[
+                if sys.platform in ("win32", "darwin"):
+                    os.environ["PYTHONIOENCODING"] = "utf-8"
+                    if hasattr(sys.stdout, 'reconfigure'):
+                        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+                ]]></code>
+            </implementation>
+        </learning>
+    </learnings>
+    
+    <testing_requirements>
+        <requirement>Test on Mac systems before deployment</requirement>
+        <requirement>Verify process termination works correctly on Mac</requirement>
+        <requirement>Test port freeing functionality on Mac</requirement>
+        <requirement>Verify memory monitoring reports correctly on Mac</requirement>
+    </testing_requirements>
+    
+    <cross_platform_considerations>
+        <consideration>
+            Always check sys.platform for OS-specific behavior:
+            - "win32" for Windows
+            - "darwin" for Mac
+            - Default to Linux behavior for other platforms
+        </consideration>
+        <consideration>
+            Mac command equivalents:
+            - Linux 'free' → Mac 'vm_stat'
+            - Linux 'netstat' → Mac 'lsof'
+            - Process groups behave differently on Mac
+        </consideration>
+    </cross_platform_considerations>
+</specification>

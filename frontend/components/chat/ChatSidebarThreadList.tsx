@@ -15,6 +15,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Thread, getThreadTitle } from '@/types/registry';
 
+const formatThreadTime = (thread: Thread): string => {
+  const timestamp = thread.updated_at || thread.created_at;
+  if (!timestamp) return 'Unknown';
+  const date = new Date(typeof timestamp === 'number' ? timestamp * 1000 : timestamp);
+  return isNaN(date.getTime()) ? 'Unknown' : formatDistanceToNow(date, { addSuffix: true });
+};
+
 const getThreadIcon = (thread: Thread, isActive: boolean) => {
   const baseClasses = "w-5 h-5 mt-0.5 flex-shrink-0";
   const activeColor = isActive ? "text-purple-600" : "text-purple-400";
@@ -87,7 +94,7 @@ const ThreadItem: React.FC<{
           <div className="flex items-center space-x-3 mt-1">
             <span className="text-xs text-gray-500 flex items-center">
               <Clock className="w-3 h-3 mr-1" />
-              {formatDistanceToNow(new Date((thread.updated_at || thread.created_at) * 1000), { addSuffix: true })}
+              {formatThreadTime(thread)}
             </span>
             {thread.message_count && thread.message_count > 0 && (
               <span className="text-xs text-gray-500">

@@ -23,7 +23,7 @@ from app.services.message_handler_utils import handle_thread_history as _handle_
 from app.services.message_handler_utils import handle_stop_agent as _handle_stop_agent
 from app.services.message_handler_base import MessageHandlerBase
 from app.services.message_processing import (
-    process_user_message as _process_user_message,
+    process_user_message_with_notifications as _process_user_message,
     execute_and_persist as _execute_and_persist,
     persist_response as _persist_response,
     save_assistant_message as _save_assistant_message,
@@ -163,6 +163,13 @@ class MessageHandlerService(IMessageHandlerService):
         """Handle user_message type"""
         text, references, thread_id = self._extract_message_data(payload)
         logger.info(f"Received user message from {user_id}: {text}, thread_id: {thread_id}")
+        
+        # Don't process empty messages - prevents wasted agent resources
+        if not text or not text.strip():
+            logger.warning(f"Empty message from {user_id}, not starting agent")
+            await manager.send_error(user_id, "Please enter a message")
+            return
+        
         thread, run = await self._setup_thread_and_run(user_id, text, references, thread_id, db_session)
         # Join user to thread room for WebSocket broadcasts
         if thread and thread_id:
@@ -170,8 +177,10 @@ class MessageHandlerService(IMessageHandlerService):
         await self._process_user_message(user_id, text, thread, run, db_session)
     
     def _extract_message_data(self, payload: UserMessagePayload) -> tuple:
-        """Extract message data from payload"""
-        text = payload.get("text", "")
+        """Extract message data from payload - supports both 'content' and 'text' fields"""
+        # Support both 'content' (from frontend) and 'text' (legacy) field names
+        # Ensure text is never None
+        text = payload.get("content") or payload.get("text") or ""
         references = payload.get("references", [])
         thread_id = payload.get("thread_id", None)
         return text, references, thread_id

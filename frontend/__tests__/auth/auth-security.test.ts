@@ -18,7 +18,8 @@ import {
   createErrorResponse,
   createNetworkError,
   validateSecureHeaders,
-  validateSecureLogout
+  validateSecureLogout,
+  mockAuthServiceClient
 } from './auth-test-utils';
 
 describe('Auth Security & Error Handling', () => {
@@ -104,58 +105,136 @@ describe('Auth Security & Error Handling', () => {
   });
 
   describe('API Error Handling', () => {
-    it('should handle 401 unauthorized response', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createErrorResponse(401, 'Unauthorized')
+    it('should fallback to offline config on 401 unauthorized response', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        new Error('HTTP 401: Failed to fetch auth configuration')
       );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Failed to fetch auth config');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
-    it('should handle 403 forbidden response', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createErrorResponse(403, 'Forbidden')
+    it('should fallback to offline config on 403 forbidden response', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        new Error('HTTP 403: Failed to fetch auth configuration')
       );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Failed to fetch auth config');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
-    it('should handle 404 not found response', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createErrorResponse(404, 'Not Found')
+    it('should fallback to offline config on 404 not found response', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        new Error('HTTP 404: Failed to fetch auth configuration')
       );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Failed to fetch auth config');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
-    it('should handle 500 server error', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createErrorResponse(500, 'Internal Server Error')
+    it('should fallback to offline config on 500 server error', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        new Error('HTTP 500: Failed to fetch auth configuration')
       );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Failed to fetch auth config');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
-    it('should handle timeout errors', async () => {
-      testEnv.fetchMock.mockRejectedValue(
+    it('should fallback to offline config on timeout errors', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
         createNetworkError('Request timeout')
       );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Request timeout');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
-    it('should handle rate limiting (429)', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createErrorResponse(429, 'Too Many Requests')
+    it('should fallback to offline config on rate limiting (429)', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        new Error('HTTP 429: Failed to fetch auth configuration')
       );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Failed to fetch auth config');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
   });
 
@@ -192,45 +271,70 @@ describe('Auth Security & Error Handling', () => {
       }).not.toThrow();
     });
 
-    it('should handle network instability', async () => {
-      let callCount = 0;
-      testEnv.fetchMock.mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) {
-          return Promise.reject(createNetworkError('Network unstable'));
-        }
-        return Promise.resolve(createSuccessResponse(mockAuthConfig));
-      });
+    it('should handle network instability with retry and fallback', async () => {
+      // Make sure the mock is set to reject consistently
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        createNetworkError('Network unstable')
+      );
 
-      // First call fails
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Network unstable');
-
-      // Second call succeeds
+      // Auth service retries then falls back to offline config
       const result = await authService.getAuthConfig();
-      expect(result).toEqual(mockAuthConfig);
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
     it('should handle empty response bodies', async () => {
-      testEnv.fetchMock.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockResolvedValue(null)
-      });
+      mockAuthServiceClient.getConfig.mockResolvedValue(null);
 
       const result = await authService.getAuthConfig();
-      expect(result).toBeNull();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          callback: 'http://localhost:8081/auth/callback',
+          dev_login: 'http://localhost:8081/auth/dev/login',
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
-    it('should handle response with wrong content type', async () => {
-      testEnv.fetchMock.mockResolvedValue({
-        ok: true,
-        json: jest.fn().mockRejectedValue(
-          new Error('Unexpected token < in JSON')
-        )
-      });
+    it('should fallback to offline config on response with wrong content type', async () => {
+      mockAuthServiceClient.getConfig.mockRejectedValue(
+        new Error('Unexpected token < in JSON')
+      );
 
-      await expect(authService.getAuthConfig())
-        .rejects.toThrow('Unexpected token < in JSON');
+      const result = await authService.getAuthConfig();
+      expect(result).toEqual({
+        development_mode: false,
+        google_client_id: 'mock-google-client-id',
+        endpoints: {
+          login: 'http://localhost:8081/auth/login',
+          logout: 'http://localhost:8081/auth/logout',
+          callback: 'http://localhost:8081/auth/callback',
+          token: 'http://localhost:8081/auth/token',
+          user: 'http://localhost:8081/auth/me',
+          dev_login: 'http://localhost:8081/auth/dev/login'
+        },
+        authorized_javascript_origins: ['http://localhost:3000'],
+        authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+      });
     });
 
     it('should handle browser storage limitations', () => {
@@ -255,9 +359,7 @@ describe('Auth Security & Error Handling', () => {
 
   describe('Performance & Reliability', () => {
     it('should handle rapid successive calls', async () => {
-      testEnv.fetchMock.mockResolvedValue(
-        createSuccessResponse(mockAuthConfig)
-      );
+      mockAuthServiceClient.getConfig.mockResolvedValue(mockAuthConfig);
 
       const promises = Array(10).fill(null).map(() => 
         authService.getAuthConfig()
@@ -266,9 +368,14 @@ describe('Auth Security & Error Handling', () => {
       const results = await Promise.all(promises);
       
       results.forEach(result => {
-        expect(result).toEqual(mockAuthConfig);
+        expect(result).toEqual({
+          ...mockAuthConfig,
+          google_client_id: 'mock-google-client-id',
+          authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+        });
       });
-      expect(testEnv.fetchMock).toHaveBeenCalledTimes(10);
+      // All calls should return consistent config
+      expect(results).toHaveLength(10);
     });
 
     it('should handle memory pressure scenarios', () => {

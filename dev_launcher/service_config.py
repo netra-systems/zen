@@ -85,7 +85,7 @@ class ServicesConfiguration:
     
     clickhouse: ServiceResource = field(default_factory=lambda: ServiceResource(
         name="clickhouse",
-        mode=ResourceMode.LOCAL if os.environ.get("CLICKHOUSE_MODE", "local").lower() == "local" else ResourceMode.SHARED,
+        mode=ResourceMode.LOCAL,  # Always use local ClickHouse for development
         local_config={
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
             "port": int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000")),
@@ -236,7 +236,8 @@ class ServicesConfiguration:
         auth_config = self.auth_service.get_config()
         if auth_config.get("enabled", True):
             env_vars["AUTH_SERVICE_ENABLED"] = "true"
-            host = auth_config.get("host", "localhost")
+            # Use 127.0.0.1 for Windows compatibility instead of localhost
+            host = auth_config.get("host", "127.0.0.1")
             port = auth_config.get("port", 8081)
             
             if self.auth_service.mode == ResourceMode.SHARED:

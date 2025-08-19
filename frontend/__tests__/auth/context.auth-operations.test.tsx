@@ -13,6 +13,7 @@ import {
   setupAuthStore,
   setupAuthConfigError,
   setupDevModeMocks,
+  setupAuthServiceMethods,
   renderAuthHook,
   mockAuthConfig
 } from './helpers/test-helpers';
@@ -21,6 +22,14 @@ import {
 jest.mock('@/auth/service');
 jest.mock('jwt-decode');
 jest.mock('@/store/authStore');
+jest.mock('@/lib/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    debug: jest.fn()
+  }
+}));
 
 describe('AuthContext - Auth Operations', () => {
   let mockAuthStore: any;
@@ -89,24 +98,27 @@ describe('AuthContext - Auth Operations', () => {
     await expectLogoutBehavior();
   });
 
-  const setupDevModeLogout = () => {
-    const devConfig = setupDevModeMocks(true);
-    (authService.getDevLogoutFlag as jest.Mock).mockReturnValue(false);
-    return { devConfig, result: renderAuthHook() };
-  };
-
-  const expectDevLogoutFlag = () => {
-    expect(authService.setDevLogoutFlag).toHaveBeenCalled();
-  };
-
   it('should set dev logout flag in development mode', async () => {
-    const { devConfig, result } = setupDevModeLogout();
+    // Override the auth config to be in development mode
+    const devConfig = { ...mockAuthConfig, development_mode: true };
+    (authService.getAuthConfig as jest.Mock).mockResolvedValue(devConfig);
+    
+    const { result } = renderAuthHook();
+    
+    // Wait for the context to load with dev config
     await waitFor(() => {
-      expect(result.current?.authConfig).toEqual(devConfig);
+      expect(result.current).toBeDefined();
+      expect(result.current?.authConfig?.development_mode).toBe(true);
     });
+    
+    // Perform logout
     await performLogout(result);
-    expectDevLogoutFlag();
-    expect(authService.handleLogout).toHaveBeenCalledWith(devConfig);
+    
+    // Check dev logout flag was set
+    expect(authService.setDevLogoutFlag).toHaveBeenCalled();
+    expect(authService.handleLogout).toHaveBeenCalledWith(
+      expect.objectContaining({ development_mode: true })
+    );
   });
 
   const setupLogoutWithError = () => {

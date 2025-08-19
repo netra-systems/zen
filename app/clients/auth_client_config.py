@@ -120,6 +120,9 @@ class OAuthCredentialManager:
     
     def _build_env_var_name(self, cred_type: str, env_suffix: str) -> str:
         """Build environment variable name for credential."""
+        # Handle CLIENT_SECRET to avoid double CLIENT_
+        if cred_type == "CLIENT_SECRET":
+            return f"GOOGLE_OAUTH_{cred_type}_{env_suffix}"
         return f"GOOGLE_OAUTH_CLIENT_{cred_type}_{env_suffix}"
     
     def _try_primary_credential(self, env_var: str) -> str:

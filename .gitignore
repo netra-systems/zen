@@ -19,6 +19,9 @@ htmlcov/
 .ruff_cache/
 .coverage*
 
+# Dev launcher cache
+.dev_cache/
+
 # Node.js
 node_modules/
 npm-debug.log*
@@ -110,3 +113,8 @@ terraform/staging/tfplan
 terraform-gcp/staging.tfplan
 terraform-gcp/staging.tfplan
 ...AAA launch CLAUDE WINDOWS.BAT
+.service_discovery/auth.json
+.service_discovery/auth.json
+.dev_launcher_cache/dependency_cache.json
+terraform-gcp/staging.tfplan
+.dev_launcher_cache/startup_cache.json

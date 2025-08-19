@@ -10,7 +10,7 @@ from .Agent import (
     SubAgentStatus,
     AgentResult,
 )
-from .Auth import (
+from .auth_types import (
     GoogleUser,
     DevUser,
     DevLoginRequest,

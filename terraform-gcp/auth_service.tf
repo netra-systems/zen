@@ -50,7 +50,7 @@ resource "google_cloud_run_service" "auth_service" {
           name = "DATABASE_URL"
           value_from {
             secret_key_ref {
-              name = google_secret_manager_secret.auth_database_url.secret_id
+              name = google_secret_manager_secret.DATABASE_URL.secret_id
               key  = "latest"
             }
           }
@@ -96,7 +96,7 @@ resource "google_cloud_run_service" "auth_service" {
   depends_on = [
     google_project_service.apis,
     google_secret_manager_secret_version.jwt_secret,
-    google_secret_manager_secret_version.auth_database_url,
+    google_secret_manager_secret_version.DATABASE_URL,
     google_secret_manager_secret_version.redis_url
   ]
 }
@@ -132,7 +132,7 @@ resource "google_secret_manager_secret_version" "jwt_secret" {
   secret_data = var.jwt_secret
 }
 
-resource "google_secret_manager_secret" "auth_database_url" {
+resource "google_secret_manager_secret" "DATABASE_URL" {
   secret_id = "auth-database-url"
   project   = var.project_id
 
@@ -141,9 +141,9 @@ resource "google_secret_manager_secret" "auth_database_url" {
   }
 }
 
-resource "google_secret_manager_secret_version" "auth_database_url" {
-  secret      = google_secret_manager_secret.auth_database_url.id
-  secret_data = var.auth_database_url
+resource "google_secret_manager_secret_version" "DATABASE_URL" {
+  secret      = google_secret_manager_secret.DATABASE_URL.id
+  secret_data = var.DATABASE_URL
 }
 
 resource "google_secret_manager_secret" "redis_url" {
@@ -169,7 +169,7 @@ resource "google_secret_manager_secret_iam_member" "auth_service_jwt_secret" {
 }
 
 resource "google_secret_manager_secret_iam_member" "auth_service_database_url" {
-  secret_id = google_secret_manager_secret.auth_database_url.id
+  secret_id = google_secret_manager_secret.DATABASE_URL.id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${google_service_account.auth_service_sa.email}"
   project   = var.project_id

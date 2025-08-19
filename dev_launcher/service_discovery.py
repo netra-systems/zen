@@ -77,6 +77,16 @@ class ServiceDiscovery:
                 return json.load(f)
         return None
     
+    def write_auth_info(self, info: Dict[str, Any]):
+        """Write auth service information."""
+        info_file = self.discovery_dir / "auth.json"
+        self._write_service_info(info_file, info, "auth")
+    
+    def read_auth_info(self) -> Optional[Dict[str, Any]]:
+        """Read auth service information."""
+        info_file = self.discovery_dir / "auth.json"
+        return self._read_service_info(info_file)
+    
     def clear_all(self):
         """Clear all service discovery information."""
         for file in self.discovery_dir.glob("*.json"):

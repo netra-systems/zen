@@ -3,7 +3,20 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MainChat from '@/components/chat/MainChat';
 
-// Mock all dependencies at the top level
+// Test wrapper for proper context
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  return (
+    <div data-testid="test-wrapper">
+      {children}
+    </div>
+  );
+};
+
+const renderWithProviders = (component: React.ReactElement) => {
+  return render(<TestWrapper>{component}</TestWrapper>);
+};
+
+// Mock only the hooks and services, NOT UI components
 jest.mock('@/store/unified-chat', () => ({
   useUnifiedChatStore: () => ({
     isProcessing: false,
@@ -47,33 +60,13 @@ jest.mock('@/hooks/useEventProcessor', () => ({
   })
 }));
 
-// Mock all child components
-jest.mock('@/components/chat/ChatHeader', () => ({
-  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
-}));
-
-jest.mock('@/components/chat/MessageList', () => ({
-  MessageList: () => <div data-testid="message-list">Message List</div>
-}));
-
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => <div data-testid="message-input">Message Input</div>
-}));
-
-jest.mock('@/components/chat/PersistentResponseCard', () => ({
-  PersistentResponseCard: () => <div data-testid="response-card">Response Card</div>
-}));
-
-jest.mock('@/components/chat/ExamplePrompts', () => ({
-  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
-}));
-
-jest.mock('@/components/chat/OverflowPanel', () => ({
-  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
-}));
-
-jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
-  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+jest.mock('@/hooks/useThreadNavigation', () => ({
+  useThreadNavigation: () => ({
+    currentThreadId: null,
+    isNavigating: false,
+    navigateToThread: jest.fn(),
+    createNewThread: jest.fn()
+  })
 }));
 
 // Mock framer-motion to avoid animation issues
@@ -82,6 +75,34 @@ jest.mock('framer-motion', () => ({
     div: 'div',
   },
   AnimatePresence: ({ children }: any) => children,
+}));
+
+// Mock utility services and dependencies
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn()
+  }
+}));
+
+jest.mock('@/lib/examplePrompts', () => ({
+  examplePrompts: [
+    { id: '1', title: 'Test Prompt', content: 'Test content', category: 'general' }
+  ]
+}));
+
+jest.mock('@/lib/utils', () => ({
+  generateUniqueId: () => 'test-id-123',
+  cn: (...args: any[]) => args.filter(Boolean).join(' ')
+}));
+
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: () => ({
+    isAuthenticated: true,
+    user: { id: '1', name: 'Test User' }
+  })
 }));
 
 describe('MainChat - Core Component Tests', () => {
@@ -96,21 +117,22 @@ describe('MainChat - Core Component Tests', () => {
 
   describe('UI layout and responsiveness', () => {
     it('should render all main components', () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-      expect(screen.getByTestId('message-input')).toBeInTheDocument();
+      // Look for real component elements instead of test IDs
+      expect(screen.getByRole('banner')).toBeInTheDocument(); // ChatHeader
+      expect(screen.getByRole('textbox')).toBeInTheDocument(); // MessageInput
     });
 
     it('should apply correct CSS classes', () => {
-      const { container } = render(<MainChat />);
+      const { container } = renderWithProviders(<MainChat />);
       
       const mainContainer = container.firstChild;
       expect(mainContainer).toHaveClass('flex', 'h-full');
     });
 
     it('should handle window resize', () => {
-      const { container } = render(<MainChat />);
+      const { container } = renderWithProviders(<MainChat />);
       
       // Simulate window resize
       global.innerWidth = 500;
@@ -121,28 +143,28 @@ describe('MainChat - Core Component Tests', () => {
     });
 
     it('should maintain layout during state changes', () => {
-      const { rerender } = render(<MainChat />);
+      const { rerender } = renderWithProviders(<MainChat />);
       
       rerender(<MainChat />);
       
       // All components should still be present
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-      expect(screen.getByTestId('message-input')).toBeInTheDocument();
-      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument(); // ChatHeader
+      expect(screen.getByRole('textbox')).toBeInTheDocument(); // MessageInput
+      expect(screen.getByText(/explore these examples/i)).toBeInTheDocument(); // ExamplePrompts
     });
 
     it('should handle scroll behavior correctly', () => {
-      const { container } = render(<MainChat />);
+      const { container } = renderWithProviders(<MainChat />);
       
       const scrollableArea = container.querySelector('.overflow-y-auto');
       expect(scrollableArea).toBeInTheDocument();
     });
 
     it('should apply animations correctly', async () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
       // Check for animation wrappers
-      const { container } = render(<MainChat />);
+      const { container } = renderWithProviders(<MainChat />);
       const animatedElements = container.querySelectorAll('[style*="opacity"]');
       
       // Some elements should have opacity styles from framer-motion
@@ -171,7 +193,7 @@ describe('MainChat - Core Component Tests', () => {
     });
 
     it('should handle rapid state updates', async () => {
-      const { rerender } = render(<MainChat />);
+      const { rerender } = renderWithProviders(<MainChat />);
       
       // Simulate rapid updates
       for (let i = 0; i < 10; i++) {
@@ -179,7 +201,7 @@ describe('MainChat - Core Component Tests', () => {
       }
       
       // Should still be stable
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
     it('should clean up timers on unmount', () => {
@@ -197,66 +219,66 @@ describe('MainChat - Core Component Tests', () => {
 
   describe('Integration with store and hooks', () => {
     it('should properly integrate with unified chat store', () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
       // Basic functionality test - component should render
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
     it('should properly integrate with chat WebSocket hook', () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
       // Basic functionality test - component should render
-      expect(screen.getByTestId('message-input')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     it('should respond to store updates', () => {
-      const { rerender } = render(<MainChat />);
+      const { rerender } = renderWithProviders(<MainChat />);
       
       rerender(<MainChat />);
       
       // Should maintain stable rendering
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
     it('should handle store reset', () => {
-      const { rerender } = render(<MainChat />);
+      const { rerender } = renderWithProviders(<MainChat />);
       
       rerender(<MainChat />);
       
       // Should show example prompts in basic state
-      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+      expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
     });
   });
 
   describe('Accessibility', () => {
     it('should have proper semantic structure', () => {
-      const { container } = render(<MainChat />);
+      const { container } = renderWithProviders(<MainChat />);
       
       // Should use semantic HTML
       expect(container.querySelector('div')).toBeInTheDocument();
     });
 
     it('should support keyboard navigation', () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
       // Basic keyboard navigation test - component should render and be accessible
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-      expect(screen.getByTestId('message-input')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     it('should handle focus management', () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
       // Initial focus should be manageable
       expect(document.activeElement).toBeInTheDocument();
     });
 
     it('should provide screen reader support', () => {
-      render(<MainChat />);
+      renderWithProviders(<MainChat />);
       
       // Check for accessible elements
-      const mainContent = screen.getByTestId('chat-header').parentElement;
+      const mainContent = screen.getByRole('banner').parentElement;
       expect(mainContent).toBeInTheDocument();
     });
   });

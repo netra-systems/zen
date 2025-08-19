@@ -72,7 +72,56 @@ class ConfigManager:
     def show_configuration(self):
         """Show configuration summary."""
         self._print("📝", "CONFIG", "Configuration:")
+        self._print_service_modes()
         self._print_config_options()
+    
+    def _print_service_modes(self):
+        """Print service mode configuration."""
+        from dev_launcher.service_config import ResourceMode
+        
+        # Print header
+        self._print("🔧", "SERVICES", "Service Modes:")
+        
+        # Map modes to descriptive text and emojis
+        mode_info = {
+            ResourceMode.LOCAL: ("Local", "💻"),
+            ResourceMode.SHARED: ("Cloud", "☁️"),
+            ResourceMode.MOCK: ("Mock", "🧪"),
+            ResourceMode.DISABLED: ("Off", "❌")
+        }
+        
+        # Display each service mode
+        services = [
+            ("Redis", self.services_config.redis),
+            ("ClickHouse", self.services_config.clickhouse),
+            ("PostgreSQL", self.services_config.postgres),
+            ("LLM", self.services_config.llm)
+        ]
+        
+        for name, service in services:
+            desc, emoji = mode_info.get(service.mode, (service.mode.value, "?"))
+            config = service.get_config()
+            
+            # Build detail string based on mode
+            detail = ""
+            if service.mode == ResourceMode.LOCAL:
+                if 'host' in config and 'port' in config:
+                    detail = f" ({config['host']}:{config['port']})"
+            elif service.mode == ResourceMode.SHARED:
+                if 'host' in config:
+                    host = config['host']
+                    # Shorten long cloud URLs
+                    if len(host) > 25:
+                        detail = f" ({host[:22]}...)"
+                    else:
+                        detail = f" ({host})"
+            
+            if self.use_emoji:
+                print(f"  {emoji} {name:12}: {desc:6}{detail}")
+            else:
+                print(f"  • {name:12}: {desc:6}{detail}")
+        
+        print()  # Add spacing after service modes
     
     def _print_config_options(self):
         """Print configuration options."""

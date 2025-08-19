@@ -5,9 +5,16 @@ Main launcher class for the development environment.
 import os
 import sys
 import time
+import json
+import hashlib
 import logging
-from typing import Optional
+import threading
+import signal
+import atexit
+from typing import Optional, Dict, List
 from pathlib import Path
+from datetime import datetime
+from concurrent.futures import ThreadPoolExecutor, Future
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.environment_checker import EnvironmentChecker
@@ -22,6 +29,11 @@ from dev_launcher.summary_display import SummaryDisplay
 from dev_launcher.utils import check_emoji_support, print_with_emoji
 from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.startup_validator import StartupValidator
+from dev_launcher.cache_manager import CacheManager
+from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
+from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
+from dev_launcher.legacy_service_runner import LegacyServiceRunner
+from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 
 logger = logging.getLogger(__name__)
 
@@ -38,11 +50,37 @@ class DevLauncher:
         """Initialize the development launcher."""
         self.config = config
         self.use_emoji = check_emoji_support()
+        self._shutting_down = False
         self._load_env_file()  # Load .env file first
+        self._setup_startup_mode()  # Setup startup mode and filtering
+        self._setup_new_cache_system()  # Setup new cache and optimizer
         self._setup_managers()
         self._setup_components()
         self._setup_helpers()
         self._setup_logging()
+        self._setup_signal_handlers()
+        self.startup_time = time.time()
+    
+    def _setup_startup_mode(self):
+        """Setup startup mode and filtering."""
+        # Get mode from config or environment
+        mode_str = getattr(self.config, 'startup_mode', None)
+        if not mode_str:
+            mode_str = os.environ.get("NETRA_STARTUP_MODE", "minimal")
+        
+        # Set startup mode
+        try:
+            self.startup_mode = StartupMode(mode_str.lower())
+        except ValueError:
+            self.startup_mode = StartupMode.MINIMAL
+        
+        # Create log filter and progress tracker
+        self.log_filter = LogFilter(self.startup_mode)
+        self.progress_tracker = StartupProgressTracker(self.startup_mode)
+        
+        # Override verbose if in minimal mode
+        if self.startup_mode == StartupMode.MINIMAL and self.config.verbose:
+            self.config.verbose = False
     
     def _setup_managers(self):
         """Setup manager instances."""
@@ -98,13 +136,191 @@ class DevLauncher:
         setup_logging(self.config.verbose)
         self.config_manager.log_verbose_config()
     
+    def _setup_signal_handlers(self):
+        """Setup signal handlers for graceful shutdown."""
+        if sys.platform == "win32":
+            # Windows signal handling
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
+            signal.signal(signal.SIGBREAK, self._signal_handler)
+        else:
+            # Unix signal handling  
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
+        
+        # Register cleanup on exit
+        atexit.register(self._ensure_cleanup)
+        logger.info("Signal handlers registered for graceful shutdown")
+    
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals gracefully."""
+        if self._shutting_down:
+            return  # Already shutting down
+        
+        self._shutting_down = True
+        signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
+        self._print("\n🛑", "SHUTDOWN", f"Received {signal_name}, shutting down gracefully...")
+        self._graceful_shutdown()
+        sys.exit(0)
+    
+    def _ensure_cleanup(self):
+        """Ensure cleanup is performed on exit."""
+        if not self._shutting_down:
+            self._graceful_shutdown()
+    
+    def _graceful_shutdown(self):
+        """Perform graceful shutdown of all services."""
+        self._print("🔄", "CLEANUP", "Starting graceful shutdown...")
+        
+        # Stop health monitoring first
+        if hasattr(self, 'health_monitor'):
+            self.health_monitor.stop()
+        
+        # Cleanup all processes with proper termination
+        if hasattr(self, 'process_manager'):
+            self._terminate_all_services()
+        
+        # Stop log streamers
+        if hasattr(self, 'log_manager'):
+            self.log_manager.stop_all()
+        
+        # Cleanup optimizers
+        if hasattr(self, 'startup_optimizer'):
+            self.startup_optimizer.cleanup()
+        
+        if hasattr(self, 'legacy_runner'):
+            self.legacy_runner.cleanup()
+        
+        # Verify ports are freed
+        self._verify_ports_freed()
+        
+        self._print("✅", "SHUTDOWN", "Graceful shutdown complete")
+    
+    def _terminate_all_services(self):
+        """Terminate all services in proper order."""
+        services_order = ["Frontend", "Backend", "Auth"]
+        
+        for service_name in services_order:
+            if self.process_manager.is_running(service_name):
+                self._print("🛑", "STOP", f"Stopping {service_name} service...")
+                if self.process_manager.terminate_process(service_name):
+                    self._print("✅", "STOPPED", f"{service_name} terminated")
+                else:
+                    self._print("⚠️", "WARN", f"{service_name} termination failed")
+        
+        # Final cleanup of any remaining processes
+        self.process_manager.cleanup_all()
+    
+    def _verify_ports_freed(self):
+        """Verify that service ports are freed."""
+        ports_to_check = [
+            (8081, "Auth"),
+            (self.config.backend_port or 8000, "Backend"),
+            (self.config.frontend_port or 3000, "Frontend")
+        ]
+        
+        for port, service in ports_to_check:
+            if self._is_port_in_use(port):
+                self._print("⚠️", "PORT", f"Port {port} ({service}) may still be in use")
+                self._force_free_port(port)
+    
+    def _is_port_in_use(self, port: int) -> bool:
+        """Check if a port is in use."""
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(('', port))
+                return False
+            except:
+                return True
+    
+    def _force_free_port(self, port: int):
+        """Force free a port cross-platform."""
+        if sys.platform == "win32":
+            try:
+                import subprocess
+                result = subprocess.run(
+                    f"netstat -ano | findstr :{port}",
+                    shell=True, capture_output=True, text=True
+                )
+                if result.stdout:
+                    lines = result.stdout.strip().split('\n')
+                    for line in lines:
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            pid = parts[-1]
+                            if pid.isdigit():
+                                subprocess.run(f"taskkill //F //PID {pid}", shell=True)
+                                self._print("✅", "PORT", f"Freed port {port}")
+            except Exception as e:
+                logger.error(f"Failed to free port {port}: {e}")
+        elif sys.platform == "darwin":
+            try:
+                import subprocess
+                result = subprocess.run(
+                    f"lsof -ti :{port}",
+                    shell=True, capture_output=True, text=True
+                )
+                if result.stdout:
+                    pids = result.stdout.strip().split('\n')
+                    for pid in pids:
+                        if pid.isdigit():
+                            subprocess.run(f"kill -9 {pid}", shell=True)
+                            self._print("✅", "PORT", f"Freed port {port}")
+            except Exception as e:
+                logger.error(f"Failed to free port {port}: {e}")
+    
+    def _setup_new_cache_system(self):
+        """Setup new cache and optimization system."""
+        self.cache_manager = CacheManager(self.config.project_root)
+        self.startup_optimizer = StartupOptimizer(self.cache_manager)
+        self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
+        self.optimized_startup = OptimizedStartupOrchestrator(self)
+        self.legacy_runner = LegacyServiceRunner(self)
+        self._register_optimization_steps()
+    
+    def _register_optimization_steps(self):
+        """Register startup optimization steps."""
+        steps = [
+            StartupStep("environment_check", self._check_environment_step, [], True, 10, True, "env_check"),
+            StartupStep("migration_check", self._check_migrations_step, ["environment_check"], True, 15, True, "migration_check"),
+            StartupStep("backend_deps", self._check_backend_deps, [], True, 20, False, "backend_deps"),
+            StartupStep("auth_deps", self._check_auth_deps, [], True, 20, False, "auth_deps"),
+            StartupStep("frontend_deps", self._check_frontend_deps, ["backend_deps"], True, 30, False, "frontend_deps"),
+        ]
+        self.startup_optimizer.register_steps(steps)
+    
     def _print(self, emoji: str, text: str, message: str):
         """Print with emoji support."""
         print_with_emoji(emoji, text, message, self.use_emoji)
     
     def check_environment(self) -> bool:
         """Check if environment is ready for launch."""
+        if not self.cache_manager.has_environment_changed():
+            self._print("✅", "CACHE", "Environment unchanged, skipping checks")
+            return True
         return self.environment_checker.check_environment()
+    
+    def _check_environment_step(self) -> bool:
+        """Environment check step for optimizer."""
+        return self.environment_checker.check_environment()
+    
+    def _check_migrations_step(self) -> bool:
+        """Migration check step for optimizer."""
+        return not self.cache_manager.has_migration_files_changed()
+    
+    def _check_backend_deps(self) -> bool:
+        """Backend dependencies check step."""
+        return not self.cache_manager.has_dependencies_changed("backend")
+    
+    def _check_auth_deps(self) -> bool:
+        """Auth dependencies check step."""
+        return not self.cache_manager.has_dependencies_changed("auth")
+    
+    def _check_frontend_deps(self) -> bool:
+        """Frontend dependencies check step."""
+        return not self.cache_manager.has_dependencies_changed("frontend")
+    
     
     def load_secrets(self) -> bool:
         """Load secrets if configured."""
@@ -125,24 +341,32 @@ class DevLauncher:
         """Register health monitoring after services are verified ready."""
         self.health_helper.register_all_services(
             self.service_startup.backend_health_info,
-            self.service_startup.frontend_health_info
+            self.service_startup.frontend_health_info,
+            self.service_startup.auth_health_info
         )
     
     def run(self) -> int:
-        """Run the development environment."""
+        """Run the development environment with optimized startup sequence."""
         self._print_startup_banner()
         self.config_manager.show_configuration()
-        if not self._run_pre_checks():
-            return 1
-        return self._run_services()
+        
+        # Start timing
+        self.startup_optimizer.start_timing()
+        
+        # Execute optimized startup sequence
+        return self.optimized_startup.run_optimized_startup()
+    
     
     def _run_services(self) -> int:
         """Run all services."""
         self._clear_service_discovery()
-        backend_result = self._start_and_verify_backend()
-        if backend_result != 0:
-            return backend_result
-        return self._start_and_run_services()
+        
+        # Use parallel startup if enabled
+        if self.parallel_enabled:
+            return self.legacy_runner.run_services_parallel()
+        else:
+            return self.legacy_runner.run_services_sequential()
+    
     
     def _print_startup_banner(self):
         """Print startup banner."""
@@ -172,64 +396,6 @@ class DevLauncher:
         """Clear old service discovery."""
         self.service_discovery.clear_all()
     
-    def _start_and_verify_backend(self) -> int:
-        """Start and verify backend."""
-        backend_process, backend_streamer = self.service_startup.start_backend()
-        if not backend_process:
-            self._print("❌", "ERROR", "Failed to start backend")
-            return 1
-        self.process_manager.add_process("Backend", backend_process)
-        return self._verify_backend_readiness()
-    
-    def _verify_backend_readiness(self) -> int:
-        """Verify backend readiness."""
-        backend_info = self.service_discovery.read_backend_info()
-        if not backend_info:
-            return 1
-        return self._validate_backend_health(backend_info)
-    
-    def _validate_backend_health(self, backend_info: dict) -> int:
-        """Validate backend health status."""
-        if not self.startup_validator.verify_backend_ready(backend_info):
-            self._handle_backend_failure()
-            return 1
-        return 0
-    
-    
-    def _handle_backend_failure(self):
-        """Handle backend failure."""
-        self._print("❌", "ERROR", "Backend failed to start - check database connection")
-        self.process_manager.cleanup_all()
-    
-    def _start_and_run_services(self) -> int:
-        """Start and run all services."""
-        frontend_result = self._start_and_verify_frontend()
-        if frontend_result != 0:
-            return frontend_result
-        self._run_main_loop()
-        return self._handle_cleanup()
-    
-    def _start_and_verify_frontend(self) -> int:
-        """Start and verify frontend."""
-        frontend_process, frontend_streamer = self.service_startup.start_frontend()
-        if not frontend_process:
-            return self._handle_frontend_failure()
-        self.process_manager.add_process("Frontend", frontend_process)
-        self._wait_for_frontend_ready()
-        return 0
-    
-    def _handle_frontend_failure(self) -> int:
-        """Handle frontend startup failure."""
-        self._print("❌", "ERROR", "Failed to start frontend")
-        self.process_manager.cleanup_all()
-        return 1
-    
-    def _wait_for_frontend_ready(self):
-        """Wait for frontend to be ready."""
-        self.startup_validator.verify_frontend_ready(
-            self.config.frontend_port,
-            self.config.no_browser
-        )
     
     def _run_main_loop(self):
         """Run main service loop."""
@@ -243,7 +409,9 @@ class DevLauncher:
         try:
             self.process_manager.wait_for_all()
         except KeyboardInterrupt:
-            self._print("\n🔄", "INTERRUPT", "Received interrupt signal")
+            if not self._shutting_down:
+                self._print("\n🔄", "INTERRUPT", "Received interrupt signal")
+                self._shutting_down = True
         except Exception as e:
             self._handle_main_loop_exception(e)
     
@@ -254,9 +422,29 @@ class DevLauncher:
     
     def _handle_cleanup(self) -> int:
         """Handle cleanup and return exit code."""
-        self.health_monitor.stop()
-        self.process_manager.cleanup_all()
-        self.log_manager.stop_all()
+        if self._shutting_down:
+            return 0  # Already handled by graceful shutdown
+        
+        # Show startup time and optimization report
+        elapsed = time.time() - self.startup_time
+        self._print("⏱️", "TIME", f"Total startup time: {elapsed:.1f}s")
+        
+        # Show optimization report
+        if self.config.verbose:
+            timing_report = self.startup_optimizer.get_timing_report()
+            self._print("📊", "PERF", f"Target met: {timing_report['target_met']}")
+            if timing_report['cached_steps']:
+                self._print("⚡", "CACHE", f"Cached steps: {len(timing_report['cached_steps'])}")
+        
+        # Save successful run to cache
+        self.cache_manager.mark_successful_startup(elapsed)
+        
+        # Mark as shutting down to prevent duplicate cleanup
+        self._shutting_down = True
+        
+        # Perform graceful shutdown
+        self._graceful_shutdown()
+        
         if not self.health_monitor.all_healthy():
             self._print("⚠️", "WARN", "Some services were unhealthy during execution")
             return 1

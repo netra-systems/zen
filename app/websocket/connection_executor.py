@@ -41,12 +41,8 @@ class ConnectionExecutor(BaseExecutionInterface):
         
     def _initialize_execution_engine(self):
         """Initialize execution engine."""
-        # Delayed import to avoid circular dependency
         from app.agents.base.executor import BaseExecutionEngine
-        self.execution_engine = BaseExecutionEngine(
-            reliability_manager=None,  # Using our custom reliability manager
-            monitor=self.monitor
-        )
+        self.execution_engine = BaseExecutionEngine(self.reliability_manager, self.monitor)
         
     async def execute_core_logic(self, context: ExecutionContext) -> Dict[str, Any]:
         """Execute connection operation core logic."""
@@ -254,7 +250,10 @@ class ConnectionOperationBuilder:
     def _create_agent_state(self):
         """Create agent state."""
         from app.agents.state import DeepAgentState
-        return DeepAgentState(user_request="websocket_operation_context")
+        # Extract user_request from operation_data or use operation-specific default
+        user_request = self._operation_data.get('user_request', 
+                                                f"websocket_{self._operation_type or 'operation'}")
+        return DeepAgentState(user_request=user_request)
         
     def _create_execution_context(self, state) -> ExecutionContext:
         """Create execution context."""

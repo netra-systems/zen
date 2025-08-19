@@ -56,7 +56,7 @@ def _build_server_config_dict() -> dict:
     """Build server configuration dictionary."""
     return {
         "app": "app.main:app", "host": "0.0.0.0", "port": get_port(),
-        "workers": get_workers(), "loop": "asyncio", "log_level": "info",
+        "loop": "asyncio", "log_level": "info",
         "access_log": True, "use_colors": False, "timeout_keep_alive": get_timeout()
     }
 

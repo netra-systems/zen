@@ -4,4 +4,4 @@ LOG_LEVEL: INFO
 JWT_SECRET: temp-jwt-secret-please-change
 DATABASE_URL: postgresql://postgres:password@localhost:5432/auth_db
 REDIS_URL: redis://localhost:6379/0
-CORS_ORIGINS: https://staging.netrasystems.ai,http://localhost:3000
+CORS_ORIGINS: https://staging.netrasystems.ai,https://app.staging.netrasystems.ai,http://localhost:3000

@@ -18,10 +18,18 @@ def validate_user_auth(user) -> None:
         )
 
 
-def create_token_response(security_service: SecurityService, user) -> dict:
-    """Create access token response for authenticated user."""
-    access_token = security_service.create_access_token(data=TokenPayload(sub=str(user.id)))
-    return {"access_token": access_token, "token_type": "bearer"}
+async def create_token_response(security_service: SecurityService, user) -> dict:
+    """Create access token response for authenticated user through auth service."""
+    from app.clients.auth_client import auth_client
+    token_data = {"user_id": str(user.id)}
+    result = await auth_client.create_token(token_data)
+    if not result or "access_token" not in result:
+        from fastapi import HTTPException
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to create access token"
+        )
+    return {"access_token": result["access_token"], "token_type": "bearer"}
 
 
 def _handle_oauth_redirect_error(e: Exception) -> RedirectResponse:

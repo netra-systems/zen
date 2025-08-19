@@ -46,6 +46,10 @@ export const ChatHistorySection: React.FC = () => {
   }, [isAuthenticated]);
 
   const loadThreads = async () => {
+    if (!isAuthenticated) {
+      setThreads([]);
+      return;
+    }
     try {
       setLoading(true);
       const fetchedThreads = await ThreadService.listThreads();

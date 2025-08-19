@@ -214,7 +214,7 @@ sqlalchemy.url = sqlite:///:memory:
         assert token is not None
         
         # Test token decoding
-        decoded = security_service.decode_access_token(token)
+        decoded = await security_service.decode_access_token(token)
         assert decoded["sub"] == "test_user"
     
     @pytest.mark.asyncio

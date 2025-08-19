@@ -44,7 +44,8 @@ class TestWorkloadTypeSelection:
         # Test multiple selections for distribution
         types = set()
         for _ in range(100):
-            workload_type = service._select_workload_type()
+            # Method is in the advanced generators module
+            workload_type = service.advanced._select_workload_type()
             types.add(workload_type)
             assert workload_type in [
                 "simple_queries", "tool_orchestration", "data_analysis",
@@ -66,5 +67,6 @@ class TestWorkloadTypeSelection:
         ]
         
         for workload_type, expected_agent in test_cases:
-            agent = service._select_agent_type(workload_type)
+            # Method is in the advanced generators module
+            agent = service.advanced._select_agent_type(workload_type)
             assert agent == expected_agent
