@@ -41,6 +41,65 @@ def _determine_urls() -> tuple[str, str]:
     """Determine auth service and frontend URLs based on environment"""
     return AuthConfig.get_auth_service_url(), AuthConfig.get_frontend_url()
 
+async def _sync_user_to_main_db(auth_user):
+    """Sync user from auth database to main app database"""
+    import os
+    from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy import select
+    
+    # Get main app database URL
+    main_db_url = os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/apex_development")
+    
+    # Create connection to main database
+    engine = create_async_engine(main_db_url, echo=False)
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    
+    try:
+        async with async_session() as session:
+            # Import main app User model
+            import sys
+            import os
+            from pathlib import Path
+            
+            # Add main app to path
+            auth_dir = Path(__file__).resolve().parent.parent.parent
+            app_dir = auth_dir.parent / "app"
+            if str(app_dir) not in sys.path:
+                sys.path.insert(0, str(app_dir.parent))
+            
+            from app.db.models_postgres import User
+            
+            # Check if user exists
+            result = await session.execute(
+                select(User).filter(User.id == auth_user.id)
+            )
+            existing_user = result.scalars().first()
+            
+            if not existing_user:
+                # Create new user in main database
+                new_user = User(
+                    id=auth_user.id,
+                    email=auth_user.email,
+                    full_name=auth_user.full_name or auth_user.email,
+                    is_active=auth_user.is_active,
+                    is_superuser=False,
+                    is_developer=False,
+                    role="user"
+                )
+                session.add(new_user)
+                await session.commit()
+                logger.info(f"Created user {auth_user.email} in main database with ID {auth_user.id}")
+            else:
+                # Update existing user
+                existing_user.email = auth_user.email
+                existing_user.full_name = auth_user.full_name or existing_user.full_name
+                existing_user.updated_at = auth_user.updated_at
+                await session.commit()
+                logger.info(f"Updated user {auth_user.email} in main database")
+    finally:
+        await engine.dispose()
+
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):
     """Returns authentication configuration for frontend integration"""
@@ -254,42 +313,67 @@ async def dev_login(
     request: Request,
     client_info: dict = Depends(get_client_info)
 ):
-    """Development mode login endpoint - bypasses authentication"""
+    """Development mode login endpoint - creates/uses real database user"""
     env = _detect_environment()
     if env != "development":
         raise HTTPException(status_code=403, detail="Dev login only available in development mode")
     
+    from ..database.connection import auth_db
+    from ..database.repository import AuthUserRepository
+    
     try:
-        # Create a dev user for testing
-        dev_user = {
-            "id": "dev-user-123",
-            "email": "dev@example.com",
-            "name": "Development User",
-            "permissions": ["read", "write", "admin"]
-        }
+        # Create or get dev user in auth database
+        async with auth_db.get_session() as session:
+            repo = AuthUserRepository(session)
+            
+            # Check if dev user exists
+            dev_user = await repo.get_by_email("dev@example.com")
+            
+            if not dev_user:
+                # Create dev user in auth database
+                from ..database.models import AuthUser
+                dev_user = AuthUser(
+                    id="dev-user-123",
+                    email="dev@example.com",
+                    full_name="Development User",
+                    auth_provider="dev",
+                    is_active=True,
+                    is_verified=True
+                )
+                session.add(dev_user)
+                await session.flush()
+                logger.info(f"Created dev user in auth database")
+            
+            # Sync to main database
+            await _sync_user_to_main_db(dev_user)
+            
+            # Use the real user ID
+            user_id = dev_user.id
+            user_email = dev_user.email
+            user_name = dev_user.full_name
         
-        # Generate tokens
+        # Generate tokens with real user ID
         access_token = auth_service.jwt_handler.create_access_token(
-            user_id=dev_user["id"],
-            email=dev_user["email"],
-            permissions=dev_user.get("permissions", [])
+            user_id=user_id,
+            email=user_email,
+            permissions=["read", "write", "admin"]
         )
         
         refresh_token = auth_service.jwt_handler.create_refresh_token(
-            user_id=dev_user["id"]
+            user_id=user_id
         )
         
         # Create session
         session_id = auth_service.session_manager.create_session(
-            user_id=dev_user["id"],
+            user_id=user_id,
             user_data={
-                "email": dev_user["email"],
+                "email": user_email,
                 "ip_address": client_info.get("ip"),
                 "user_agent": client_info.get("user_agent")
             }
         )
         
-        logger.info(f"Dev login successful for {dev_user['email']}")
+        logger.info(f"Dev login successful for {user_email} with user ID {user_id}")
         
         return {
             "access_token": access_token,
@@ -297,15 +381,15 @@ async def dev_login(
             "token_type": "Bearer",
             "expires_in": 900,  # 15 minutes
             "user": {
-                "id": dev_user["id"],
-                "email": dev_user["email"],
-                "name": dev_user["name"],
+                "id": user_id,
+                "email": user_email,
+                "name": user_name,
                 "session_id": session_id
             }
         }
         
     except Exception as e:
-        logger.error(f"Dev login error: {e}")
+        logger.error(f"Dev login error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Dev login failed: {str(e)}")
 
 @router.get("/callback")
@@ -316,6 +400,10 @@ async def oauth_callback(
 ):
     """Handle OAuth callback from Google"""
     from fastapi.responses import RedirectResponse
+    from ..database.connection import auth_db
+    from ..database.repository import AuthUserRepository
+    import uuid
+    
     try:
         # Exchange code for tokens
         google_client_id = AuthConfig.get_google_client_id()
@@ -351,16 +439,50 @@ async def oauth_callback(
             
             user_info = user_response.json()
         
-        # Create session and tokens
+        # Create or update user in main database
+        async with auth_db.get_session() as session:
+            repo = AuthUserRepository(session)
+            
+            # Prepare user data with consistent ID
+            user_data = {
+                "id": user_info.get("id", str(uuid.uuid4())),
+                "email": user_info["email"],
+                "name": user_info.get("name", ""),
+                "provider": "google",
+                **user_info
+            }
+            
+            # Create or update OAuth user in auth database
+            auth_user = await repo.create_oauth_user(user_data)
+            
+            # Also sync to main app database
+            await _sync_user_to_main_db(auth_user)
+            
+            # Use the database user ID for tokens
+            user_id = auth_user.id
+        
+        # Create session and tokens with real user ID
         access_token = auth_service.jwt_handler.create_access_token(
-            user_id=user_info["id"],
+            user_id=user_id,
             email=user_info["email"],
             permissions=[]
         )
         
         refresh_token = auth_service.jwt_handler.create_refresh_token(
-            user_id=user_info["id"]
+            user_id=user_id
         )
+        
+        # Create session
+        session_id = auth_service.session_manager.create_session(
+            user_id=user_id,
+            user_data={
+                "email": user_info["email"],
+                "ip_address": None,
+                "user_agent": None
+            }
+        )
+        
+        logger.info(f"OAuth login successful for {user_info['email']} with user ID {user_id}")
         
         # Redirect to frontend with tokens
         frontend_url = _determine_urls()[1]

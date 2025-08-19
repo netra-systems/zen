@@ -52,10 +52,15 @@ async def _handle_parsed_message(
 
 async def _process_single_message(user_id_str: str, websocket: WebSocket, agent_service):
     """Process a single WebSocket message."""
+    logger.info(f"[WS MESSAGE] Waiting for message from user {user_id_str}")
     data = await receive_message_with_timeout(websocket)
+    logger.info(f"[WS MESSAGE] Received raw data from {user_id_str}: {data[:100] if data else 'None'}")
     message = await parse_json_message(data, user_id_str, manager)
+    logger.info(f"[WS MESSAGE] Parsed message from {user_id_str}: {message}")
     if await handle_pong_message(data, user_id_str, websocket, manager):
+        logger.info(f"[WS MESSAGE] Handled pong from {user_id_str}")
         return True
+    logger.info(f"[WS MESSAGE] Processing message type: {message.get('type') if message else 'None'}")
     return await _handle_parsed_message(user_id_str, websocket, message, data, agent_service)
 
 async def _handle_message_timeout(conn_info, user_id_str: str) -> bool:

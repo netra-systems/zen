@@ -177,8 +177,54 @@
     </check>
   </compliance_check>
 
+  <user_persistence priority="CRITICAL">
+    <requirement>
+      <title>Real User Database Persistence</title>
+      <description>
+        🔴 CRITICAL: ALL authentication methods MUST create real users in the database.
+        Tokens are NOT sufficient - users MUST exist in the userbase table for:
+        - WebSocket authentication to work
+        - User context in services
+        - Audit logging and tracking
+        - Permission management
+      </description>
+    </requirement>
+    
+    <implementation>
+      <oauth_flow>
+        1. Exchange OAuth code for user info
+        2. Create/update user in auth_users table (auth service DB)
+        3. Sync user to main userbase table (main app DB)
+        4. Generate tokens with real user ID from database
+        5. All subsequent auth checks verify user exists in database
+      </oauth_flow>
+      
+      <dev_login_flow>
+        1. Check if dev user exists in auth database
+        2. Create dev user if needed (ID: dev-user-123)
+        3. Sync to main userbase table
+        4. Generate tokens with real user ID
+        5. Dev user persists across restarts
+      </dev_login_flow>
+      
+      <user_sync>
+        The auth service MUST sync users to main app database:
+        - Location: auth_service/auth_core/routes/auth_routes.py::_sync_user_to_main_db()
+        - Creates user in main PostgreSQL userbase table
+        - Ensures WebSocket and other services can find the user
+      </user_sync>
+    </implementation>
+    
+    <validation>
+      <check>Users created via OAuth MUST exist in userbase table</check>
+      <check>Dev user (dev-user-123) MUST exist in userbase table</check>
+      <check>WebSocket auth MUST find users in database</check>
+      <check>Token user_id MUST match database user.id</check>
+    </validation>
+  </user_persistence>
+  
   <consolidation_summary>
-    <date>2025-08-18</date>
+    <date>2025-08-19</date>
     <actions_completed>
       <action>Enhanced app/auth_integration/auth.py with missing utility functions</action>
       <action>Added password hashing functions (get_password_hash, verify_password)</action>
@@ -190,6 +236,11 @@
       <action>Verified core route imports working with shared auth service</action>
       <action>Added backward compatibility stubs to auth_integration/auth.py</action>
       <action>Identified all legacy auth imports that need migration</action>
+      <action>🔴 CRITICAL FIX: Auth service now creates real database users</action>
+      <action>Added _sync_user_to_main_db() to sync users between databases</action>
+      <action>OAuth callback creates/updates users in both auth and main databases</action>
+      <action>Dev login creates persistent dev user with ID dev-user-123</action>
+      <action>Fixed WebSocket authentication failures due to missing users</action>
     </actions_completed>
     
     <remaining_issues>

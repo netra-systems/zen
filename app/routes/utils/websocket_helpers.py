@@ -89,10 +89,21 @@ async def get_and_validate_user(
 
 async def authenticate_websocket_user(websocket: WebSocket, token: str, security_service) -> str:
     """Authenticate WebSocket user and return user ID string."""
-    payload = await decode_token_payload(security_service, token)
-    user_id = validate_user_id_in_payload(payload)
-    async with get_async_db() as db_session:
-        return await get_and_validate_user(security_service, db_session, user_id, payload)
+    logger.info(f"[WS AUTH] Starting authentication with token: {token[:20] if token else 'None'}...")
+    try:
+        payload = await decode_token_payload(security_service, token)
+        logger.info(f"[WS AUTH] Token decoded successfully, payload: {payload}")
+        user_id = validate_user_id_in_payload(payload)
+        logger.info(f"[WS AUTH] User ID validated: {user_id}")
+        async with get_async_db() as db_session:
+            logger.info(f"[WS AUTH] Database session acquired, fetching user {user_id}")
+            result = await get_and_validate_user(security_service, db_session, user_id, payload)
+            logger.info(f"[WS AUTH] User validated successfully: {result}")
+            return result
+    except Exception as e:
+        logger.error(f"[WS AUTH ERROR] Authentication failed: {e}", exc_info=True)
+        await websocket.close(code=1008, reason=f"Authentication failed: {str(e)}")
+        raise
 
 
 async def receive_message_with_timeout(websocket: WebSocket) -> str:
