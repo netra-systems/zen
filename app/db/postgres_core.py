@@ -276,5 +276,12 @@ def _initialize_async_engine():
         _handle_engine_creation_error(e)
 
 
-# Initialize the async engine
-_initialize_async_engine()
+# Initialize the async engine - moved to lazy initialization
+# _initialize_async_engine() is now called via initialize_postgres()
+
+def initialize_postgres():
+    """Initialize PostgreSQL connection if not already initialized."""
+    global async_engine, async_session_factory
+    if async_session_factory is None:
+        _initialize_async_engine()
+    return async_session_factory

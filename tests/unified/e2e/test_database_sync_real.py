@@ -326,8 +326,8 @@ class CrossServiceDatabaseSyncValidator:
             if cached_session is not None:
                 assert cached_session["user_id"] == user_id, "Foreign key mismatch"
             else:
-                # If Redis is not available, verify the session was at least cached in memory
-                assert user_id in session_data, "User ID must be present in session data"
+                # If Redis is not available, verify the session data contains the user_id
+                assert session_data["user_id"] == user_id, "User ID must match in session data"
             
             result.foreign_key_integrity = True
             logger.info(f"Foreign key integrity validated for user {user_id}")

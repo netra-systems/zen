@@ -19,7 +19,7 @@ from app.services.security_service import SecurityService
 from app.llm.llm_manager import LLMManager
 from app.background import BackgroundTaskManager
 from app.redis_manager import redis_manager
-from app.db.postgres import async_session_factory
+from app.db.postgres import initialize_postgres
 from app.db.migration_utils import (
     get_sync_database_url, get_current_revision, get_head_revision,
     create_alembic_config, needs_migration, execute_migration,
@@ -158,6 +158,7 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
 
 def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory."""
+    async_session_factory = initialize_postgres()
     app.state.db_session_factory = async_session_factory
 
 

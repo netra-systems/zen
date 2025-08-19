@@ -631,18 +631,18 @@ if __name__ == "__main__":
         
         try:
             await test_session_persistence_across_simulated_restart()
-            print("✓ Simulated restart test passed")
+            print("[PASS] Simulated restart test passed")
             
             await test_concurrent_session_persistence()
-            print("✓ Concurrent user test passed")
+            print("[PASS] Concurrent user test passed")
             
             await test_jwt_token_persistence()  
-            print("✓ JWT token persistence test passed")
+            print("[PASS] JWT token persistence test passed")
             
             print("=== All session persistence restart tests completed successfully! ===")
             
         except Exception as e:
-            print(f"❌ Test failed: {e}")
+            print(f"[FAIL] Test failed: {e}")
             raise
         
     asyncio.run(run_session_persistence_restart_tests())

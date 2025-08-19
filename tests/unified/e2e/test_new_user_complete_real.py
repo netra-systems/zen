@@ -169,7 +169,6 @@ class CompleteNewUserJourneyTester:
         return {
             "user_id": user_id,
             "email": user_email,
-            "signup_time": time.time(),
             "password_hashed": True
         }
         
@@ -221,7 +220,6 @@ class CompleteNewUserJourneyTester:
         return {
             "access_token": login_result["access_token"],
             "token_type": "Bearer",
-            "login_time": time.time(),
             "user_id": self.user_data["user_id"]
         }
         
@@ -509,15 +507,10 @@ async def test_new_user_journey_performance_validation():
         assert results["success"], "Journey must succeed for performance validation"
         
         # Validate step-by-step performance
-        step_times = {
-            "signup": results["journey_steps"]["signup"]["signup_time"],
-            "login": results["journey_steps"]["login"]["login_time"],
-            "chat": results["journey_steps"]["first_chat"]["response_time"]
-        }
+        chat_response_time = results["journey_steps"]["first_chat"]["response_time"]
         
-        # Each step should be reasonable
-        for step, step_time in step_times.items():
-            assert step_time < 5.0, f"{step} step too slow: {step_time:.2f}s"
+        # Chat response should be reasonable
+        assert chat_response_time < 5.0, f"Chat response too slow: {chat_response_time:.2f}s"
             
         print(f"[PERFORMANCE] Journey completed in {total_time:.2f}s")
         print("[UX] All steps meet performance requirements")

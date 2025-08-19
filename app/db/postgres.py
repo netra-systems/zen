@@ -11,7 +11,8 @@ from .postgres_config import DatabaseConfig
 from .postgres_core import (
     Database,
     async_engine,
-    async_session_factory
+    async_session_factory,
+    initialize_postgres
 )
 
 # Import session management
@@ -34,6 +35,7 @@ __all__ = [
     'DatabaseConfig',
     'async_engine',
     'async_session_factory',
+    'initialize_postgres',
     'validate_session',
     'get_session_validation_error',
     'get_async_db',

@@ -263,9 +263,14 @@ class ServiceStartupSequencer:
         """Verify services started in correct dependency order."""
         auth_started = results["auth"].started
         backend_deps_satisfied = results["backend"].dependencies_satisfied
-        frontend_deps_satisfied = results["frontend"].dependencies_satisfied
         
-        return auth_started and backend_deps_satisfied and frontend_deps_satisfied
+        # Frontend is optional in test environments
+        frontend_valid = (
+            not results["frontend"].started or  # Frontend not running (acceptable)
+            results["frontend"].dependencies_satisfied  # Frontend running with deps satisfied
+        )
+        
+        return auth_started and backend_deps_satisfied and frontend_valid
     
     def _calculate_startup_timing(self, results: Dict[str, ServiceStartupResult]) -> Dict[str, float]:
         """Calculate startup timing metrics."""
@@ -406,13 +411,15 @@ class TestServiceStartupHealthReal:
         
         # Verify each service in sequence
         services = sequence_result["services"]
-        assert services["auth"]["started"], "Auth service not properly started"
-        assert services["backend"]["started"], "Backend service not properly started"
-        assert services["backend"]["dependencies_satisfied"], "Backend dependencies not satisfied"
+        assert services["auth"].started, "Auth service not properly started"
+        assert services["backend"].started, "Backend service not properly started"
+        assert services["backend"].dependencies_satisfied, "Backend dependencies not satisfied"
         
-        # Frontend is optional but if running, should have dependencies satisfied
-        if services["frontend"]["started"]:
-            assert services["frontend"]["dependencies_satisfied"], "Frontend dependencies not satisfied"
+        # Frontend is optional in test environments but if running, should have dependencies satisfied
+        if services["frontend"].started:
+            assert services["frontend"].dependencies_satisfied, "Frontend dependencies not satisfied"
+        else:
+            logger.info("Frontend service not running (acceptable in test environment)")
         
         logger.info("✓ Service startup sequence validated successfully")
     
