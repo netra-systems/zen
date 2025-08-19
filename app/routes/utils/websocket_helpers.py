@@ -114,6 +114,10 @@ async def handle_pong_message(data: str, user_id_str: str, websocket: WebSocket,
 async def parse_json_message(data: str, user_id_str: str, manager):
     """Parse JSON message and handle errors."""
     try:
+        # Ensure data is not a coroutine before processing
+        if asyncio.iscoroutine(data):
+            logger.error(f"Received coroutine instead of data for user {user_id_str}")
+            return None
         return json.loads(data) if isinstance(data, str) else data
     except json.JSONDecodeError:
         logger.warning(f"Invalid JSON received from user {user_id_str}: {data[:100]}")
@@ -123,6 +127,10 @@ async def parse_json_message(data: str, user_id_str: str, manager):
 
 async def _handle_ping_message(message, websocket: WebSocket) -> bool:
     """Handle ping message and return True if handled."""
+    # Ensure message is not a coroutine
+    if asyncio.iscoroutine(message):
+        logger.error("Received coroutine instead of message in ping handler")
+        return False
     if isinstance(message, dict) and message.get("type") == "ping":
         await _send_pong_response(websocket)
         return True

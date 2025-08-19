@@ -9,6 +9,8 @@ import json
 import hashlib
 import logging
 import threading
+import signal
+import atexit
 from typing import Optional, Dict, List
 from pathlib import Path
 from datetime import datetime
@@ -47,12 +49,14 @@ class DevLauncher:
         """Initialize the development launcher."""
         self.config = config
         self.use_emoji = check_emoji_support()
+        self._shutting_down = False
         self._load_env_file()  # Load .env file first
         self._setup_new_cache_system()  # Setup new cache and optimizer
         self._setup_managers()
         self._setup_components()
         self._setup_helpers()
         self._setup_logging()
+        self._setup_signal_handlers()
         self.startup_time = time.time()
     
     def _setup_managers(self):
@@ -108,6 +112,125 @@ class DevLauncher:
         """Setup logging and show verbose configuration."""
         setup_logging(self.config.verbose)
         self.config_manager.log_verbose_config()
+    
+    def _setup_signal_handlers(self):
+        """Setup signal handlers for graceful shutdown."""
+        if sys.platform == "win32":
+            # Windows signal handling
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
+            signal.signal(signal.SIGBREAK, self._signal_handler)
+        else:
+            # Unix signal handling  
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
+        
+        # Register cleanup on exit
+        atexit.register(self._ensure_cleanup)
+        logger.info("Signal handlers registered for graceful shutdown")
+    
+    def _signal_handler(self, signum, frame):
+        """Handle shutdown signals gracefully."""
+        if self._shutting_down:
+            return  # Already shutting down
+        
+        self._shutting_down = True
+        signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
+        self._print("\n🛑", "SHUTDOWN", f"Received {signal_name}, shutting down gracefully...")
+        self._graceful_shutdown()
+        sys.exit(0)
+    
+    def _ensure_cleanup(self):
+        """Ensure cleanup is performed on exit."""
+        if not self._shutting_down:
+            self._graceful_shutdown()
+    
+    def _graceful_shutdown(self):
+        """Perform graceful shutdown of all services."""
+        self._print("🔄", "CLEANUP", "Starting graceful shutdown...")
+        
+        # Stop health monitoring first
+        if hasattr(self, 'health_monitor'):
+            self.health_monitor.stop()
+        
+        # Cleanup all processes with proper termination
+        if hasattr(self, 'process_manager'):
+            self._terminate_all_services()
+        
+        # Stop log streamers
+        if hasattr(self, 'log_manager'):
+            self.log_manager.stop_all()
+        
+        # Cleanup optimizers
+        if hasattr(self, 'startup_optimizer'):
+            self.startup_optimizer.cleanup()
+        
+        if hasattr(self, 'legacy_runner'):
+            self.legacy_runner.cleanup()
+        
+        # Verify ports are freed
+        self._verify_ports_freed()
+        
+        self._print("✅", "SHUTDOWN", "Graceful shutdown complete")
+    
+    def _terminate_all_services(self):
+        """Terminate all services in proper order."""
+        services_order = ["Frontend", "Backend", "Auth"]
+        
+        for service_name in services_order:
+            if self.process_manager.is_running(service_name):
+                self._print("🛑", "STOP", f"Stopping {service_name} service...")
+                if self.process_manager.terminate_process(service_name):
+                    self._print("✅", "STOPPED", f"{service_name} terminated")
+                else:
+                    self._print("⚠️", "WARN", f"{service_name} termination failed")
+        
+        # Final cleanup of any remaining processes
+        self.process_manager.cleanup_all()
+    
+    def _verify_ports_freed(self):
+        """Verify that service ports are freed."""
+        ports_to_check = [
+            (8081, "Auth"),
+            (self.config.backend_port or 8000, "Backend"),
+            (self.config.frontend_port or 3000, "Frontend")
+        ]
+        
+        for port, service in ports_to_check:
+            if self._is_port_in_use(port):
+                self._print("⚠️", "PORT", f"Port {port} ({service}) may still be in use")
+                self._force_free_port(port)
+    
+    def _is_port_in_use(self, port: int) -> bool:
+        """Check if a port is in use."""
+        import socket
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            try:
+                s.bind(('', port))
+                return False
+            except:
+                return True
+    
+    def _force_free_port(self, port: int):
+        """Force free a port on Windows."""
+        if sys.platform == "win32":
+            try:
+                import subprocess
+                result = subprocess.run(
+                    f"netstat -ano | findstr :{port}",
+                    shell=True, capture_output=True, text=True
+                )
+                if result.stdout:
+                    lines = result.stdout.strip().split('\n')
+                    for line in lines:
+                        parts = line.split()
+                        if len(parts) >= 5:
+                            pid = parts[-1]
+                            if pid.isdigit():
+                                subprocess.run(f"taskkill //F //PID {pid}", shell=True)
+                                self._print("✅", "PORT", f"Freed port {port}")
+            except Exception as e:
+                logger.error(f"Failed to free port {port}: {e}")
     
     def _setup_new_cache_system(self):
         """Setup new cache and optimization system."""
@@ -248,7 +371,9 @@ class DevLauncher:
         try:
             self.process_manager.wait_for_all()
         except KeyboardInterrupt:
-            self._print("\n🔄", "INTERRUPT", "Received interrupt signal")
+            if not self._shutting_down:
+                self._print("\n🔄", "INTERRUPT", "Received interrupt signal")
+                self._shutting_down = True
         except Exception as e:
             self._handle_main_loop_exception(e)
     
@@ -259,6 +384,9 @@ class DevLauncher:
     
     def _handle_cleanup(self) -> int:
         """Handle cleanup and return exit code."""
+        if self._shutting_down:
+            return 0  # Already handled by graceful shutdown
+        
         # Show startup time and optimization report
         elapsed = time.time() - self.startup_time
         self._print("⏱️", "TIME", f"Total startup time: {elapsed:.1f}s")
@@ -273,12 +401,11 @@ class DevLauncher:
         # Save successful run to cache
         self.cache_manager.mark_successful_startup(elapsed)
         
-        # Cleanup
-        self.health_monitor.stop()
-        self.process_manager.cleanup_all()
-        self.log_manager.stop_all()
-        self.startup_optimizer.cleanup()
-        self.legacy_runner.cleanup()
+        # Mark as shutting down to prevent duplicate cleanup
+        self._shutting_down = True
+        
+        # Perform graceful shutdown
+        self._graceful_shutdown()
         
         if not self.health_monitor.all_healthy():
             self._print("⚠️", "WARN", "Some services were unhealthy during execution")

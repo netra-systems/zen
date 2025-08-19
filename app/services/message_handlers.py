@@ -170,8 +170,9 @@ class MessageHandlerService(IMessageHandlerService):
         await self._process_user_message(user_id, text, thread, run, db_session)
     
     def _extract_message_data(self, payload: UserMessagePayload) -> tuple:
-        """Extract message data from payload"""
-        text = payload.get("text", "")
+        """Extract message data from payload - supports both 'content' and 'text' fields"""
+        # Support both 'content' (from frontend) and 'text' (legacy) field names
+        text = payload.get("content") or payload.get("text", "")
         references = payload.get("references", [])
         thread_id = payload.get("thread_id", None)
         return text, references, thread_id

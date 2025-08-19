@@ -265,7 +265,7 @@ class ModernConnectionManager:
         
     def _extract_modern_stats(self, result) -> Dict[str, any]:
         """Extract modern stats from orchestrator result."""
-        if result.success:
+        if result.success and result.result and "connection_stats" in result.result:
             return result.result["connection_stats"]
         else:
             return {}

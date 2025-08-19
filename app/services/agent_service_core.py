@@ -102,8 +102,10 @@ class AgentService(IAgentService):
     ) -> bool:
         """Handle standard message types, return True if handled."""
         if message_type == "start_agent":
+            logger.info(f"Processing start_agent for user {user_id}")
             await self.message_handler.handle_start_agent(user_id, payload, db_session)
         elif message_type == "user_message":
+            logger.info(f"Processing user_message for user {user_id}, payload keys: {list(payload.keys())}")
             await self.message_handler.handle_user_message(user_id, payload, db_session)
         elif message_type == "get_thread_history":
             await self.message_handler.handle_thread_history(user_id, db_session)

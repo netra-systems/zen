@@ -86,10 +86,12 @@ class ProcessManager:
             self._terminate_unix_process(process, name)
     
     def _terminate_windows_process(self, process: subprocess.Popen, name: str):
-        """Terminate Windows process using taskkill."""
+        """Terminate Windows process using taskkill with tree kill."""
         result = self._run_taskkill_command(process)
         if result.returncode != 0:
             logger.warning(f"taskkill failed for {name}: {result.stderr}")
+            # Try alternative kill method
+            self._force_kill_windows(process)
     
     def _run_taskkill_command(self, process: subprocess.Popen):
         """Run taskkill command for Windows process."""

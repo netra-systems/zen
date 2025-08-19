@@ -104,12 +104,7 @@ class ExecutionErrorHandler:
         self._fallback_data_cache[cache_key] = {
             "data": data,
             "timestamp": time.time(),
-            "context": {
-                "run_id": context.run_id,
-                "agent_name": context.agent_name,
-                "user_id": context.user_id,
-                "thread_id": context.thread_id
-            }
+            "context": context
         }
     
     def get_health_status(self) -> Dict[str, Any]:

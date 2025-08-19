@@ -406,6 +406,21 @@
                 Covers required fields, default values, backward compatibility, and testing strategies.
             </description>
         </category>
+        <category>
+            <name>Error Prevention</name>
+            <file>learnings/execution_context_hashable.xml</file>
+            <path>SPEC/learnings/execution_context_hashable.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>execution-context-hashable-type-error</id>
+            </learning_ids>
+            <important_note>ExecutionContext is now hashable with __hash__ and __eq__ methods</important_note>
+            <description>
+                Fixed "unhashable type: ExecutionContext" errors by adding __hash__ and __eq__ 
+                methods to the ExecutionContext class. The hash is based on (run_id, agent_name) 
+                tuple for uniqueness. Pattern can be applied to other dataclasses as needed.
+            </description>
+        </category>
     </categories>
     
     <usage>
