@@ -52,17 +52,33 @@ async def _handle_parsed_message(
     return await _handle_validated_message(user_id_str, websocket, message, data, agent_service)
 
 async def _process_single_message(user_id_str: str, websocket: WebSocket, agent_service):
-    """Process a single WebSocket message."""
-    logger.info(f"[WS MESSAGE] Waiting for message from user {user_id_str}")
-    data = await receive_message_with_timeout(websocket)
-    logger.info(f"[WS MESSAGE] Received raw data from {user_id_str}: {data[:100] if data else 'None'}")
-    message = await parse_json_message(data, user_id_str, manager)
-    logger.info(f"[WS MESSAGE] Parsed message from {user_id_str}: {message}")
-    if await handle_pong_message(data, user_id_str, websocket, manager):
-        logger.info(f"[WS MESSAGE] Handled pong from {user_id_str}")
-        return True
-    logger.info(f"[WS MESSAGE] Processing message type: {message.get('type') if message else 'None'}")
-    return await _handle_parsed_message(user_id_str, websocket, message, data, agent_service)
+    """Process a single WebSocket message with enhanced error handling."""
+    try:
+        logger.info(f"[WS MESSAGE] Waiting for message from user {user_id_str}")
+        data = await receive_message_with_timeout(websocket)
+        logger.info(f"[WS MESSAGE] Received raw data from {user_id_str}: {data[:100] if data else 'None'}")
+        
+        # Enhanced parsing with error recovery
+        message = await parse_json_message(data, user_id_str, manager)
+        logger.info(f"[WS MESSAGE] Parsed message from {user_id_str}: {message}")
+        
+        # Handle pong messages
+        if await handle_pong_message(data, user_id_str, websocket, manager):
+            logger.info(f"[WS MESSAGE] Handled pong from {user_id_str}")
+            return True
+        
+        # Process message with error recovery
+        logger.info(f"[WS MESSAGE] Processing message type: {message.get('type') if message else 'None'}")
+        return await _handle_parsed_message(user_id_str, websocket, message, data, agent_service)
+        
+    except Exception as e:
+        logger.error(f"[WS MESSAGE ERROR] Error processing message for user {user_id_str}: {e}", exc_info=True)
+        # Send error response but keep connection alive
+        try:
+            await manager.send_error(user_id_str, "Message processing failed")
+        except Exception as send_error:
+            logger.error(f"[WS MESSAGE ERROR] Failed to send error response: {send_error}")
+        return True  # Keep connection alive after errors
 
 async def _handle_message_timeout(conn_info, user_id_str: str) -> bool:
     """Handle message processing timeout."""
@@ -85,46 +101,114 @@ async def _process_message_with_timeout_handling(
         return await _handle_message_timeout(conn_info, user_id_str)
 
 async def _handle_message_loop(user_id_str: str, websocket: WebSocket, conn_info, agent_service):
-    """Handle the main message processing loop."""
+    """Handle the main message processing loop with error recovery."""
     logger.info(f"[MESSAGE LOOP] Starting message loop for user {user_id_str}")
     message_count = 0
+    error_count = 0
+    max_consecutive_errors = 5
+    
     while True:
         message_count += 1
         logger.info(f"[MESSAGE LOOP] Waiting for message #{message_count} from {user_id_str}")
-        continue_loop = await _process_message_with_timeout_handling(
-            user_id_str, websocket, conn_info, agent_service
-        )
-        if not continue_loop:
-            logger.info(f"[MESSAGE LOOP] Exiting loop for {user_id_str} after {message_count} messages")
-            break
+        
+        try:
+            continue_loop = await _process_message_with_timeout_handling(
+                user_id_str, websocket, conn_info, agent_service
+            )
+            
+            # Reset error count on successful processing
+            if continue_loop:
+                error_count = 0
+            
+            if not continue_loop:
+                logger.info(f"[MESSAGE LOOP] Exiting loop for {user_id_str} after {message_count} messages")
+                break
+                
+        except Exception as e:
+            error_count += 1
+            logger.error(f"[MESSAGE LOOP ERROR] Error #{error_count} for user {user_id_str}: {e}", exc_info=True)
+            
+            # If too many consecutive errors, exit loop but don't crash
+            if error_count >= max_consecutive_errors:
+                logger.error(f"[MESSAGE LOOP] Too many consecutive errors ({error_count}) for user {user_id_str}, exiting loop")
+                try:
+                    await manager.send_error(user_id_str, "Too many errors occurred, please reconnect")
+                except Exception:
+                    pass
+                break
+            
+            # Brief pause after error to prevent tight error loops
+            await asyncio.sleep(0.1)
 
 async def _handle_websocket_disconnect(e: WebSocketDisconnect, user_id_str: str, websocket: WebSocket):
-    """Handle WebSocket disconnect."""
+    """Handle WebSocket disconnect with proper cleanup for network drops."""
     logger.info(f"WebSocket disconnected for user {user_id_str}: {e.code} - {e.reason}")
-    reason = e.reason or "Client disconnect"
+    
+    # Determine if this is a network drop or abnormal disconnect
+    is_abnormal_disconnect = e.code in [1006, 1011, 1012, 1013, 1014] or "network" in (e.reason or "").lower()
+    
+    reason = e.reason or ("Network disconnect" if is_abnormal_disconnect else "Client disconnect")
+    
+    if is_abnormal_disconnect:
+        logger.warning(f"Abnormal disconnect detected for user {user_id_str}: code {e.code}, reason: {reason}")
+    
     await manager.disconnect_user(user_id_str, websocket, code=e.code, reason=reason)
 
 def _is_websocket_connected(websocket: WebSocket) -> bool:
     """Check if WebSocket is connected."""
-    return hasattr(websocket, 'application_state') and websocket.application_state == WebSocketState.CONNECTED
+    try:
+        return (hasattr(websocket, 'application_state') and 
+                websocket.application_state == WebSocketState.CONNECTED)
+    except Exception:
+        return False
+
+
+def _is_recoverable_error(error: Exception) -> bool:
+    """Determine if WebSocket error is recoverable."""
+    error_str = str(error).lower()
+    recoverable_indicators = [
+        'timeout', 'connection lost', 'connection reset', 'network', 
+        'temporary', 'rate limit', 'server overloaded'
+    ]
+    # JSON parsing and validation errors are recoverable
+    if any(indicator in error_str for indicator in recoverable_indicators):
+        return True
+    # Check error types
+    if isinstance(error, (TimeoutError, ConnectionError)):
+        return True
+    return False
 
 async def _handle_websocket_error(e: Exception, user_id_str: str, websocket: WebSocket):
-    """Handle WebSocket error with recovery attempt."""
+    """Handle WebSocket error with enhanced recovery attempt."""
     logger.error(f"WebSocket error for user {user_id_str}: {e}", exc_info=True)
     
     # Find connection info for error recovery
     conn_info = await manager.connection_manager.find_connection(user_id_str, websocket)
     reconnection_token = None
     
-    if conn_info:
-        # Attempt error recovery
-        error_handler = get_error_recovery_handler()
-        reconnection_token = await error_handler.handle_error(e, conn_info)
-        
+    # Determine if error is recoverable
+    is_recoverable = _is_recoverable_error(e)
+    
+    if conn_info and is_recoverable:
+        try:
+            # Attempt error recovery
+            error_handler = get_error_recovery_handler()
+            reconnection_token = await error_handler.handle_error(e, conn_info)
+        except Exception as recovery_error:
+            logger.error(f"Error recovery failed for user {user_id_str}: {recovery_error}")
+    
+    # Send error notification if connection is still alive
     if _is_websocket_connected(websocket):
-        # Disconnect with potential reconnection token
+        try:
+            await manager.send_error(user_id_str, 
+                "Connection error occurred" + (" - reconnection available" if reconnection_token else ""))
+        except Exception as notify_error:
+            logger.debug(f"Could not send error notification: {notify_error}")
+        
+        # Disconnect with appropriate code and potential reconnection token
+        disconnect_code = 1011 if not is_recoverable else 1012  # Server error vs Service restart
         await manager.disconnect_user(
-            user_id_str, websocket, code=1011, reason="Server error",
+            user_id_str, websocket, code=disconnect_code, reason="Server error",
             agent_state={"reconnection_token": reconnection_token} if reconnection_token else None
         )
 
@@ -164,7 +248,12 @@ async def _handle_general_exception(e: Exception, user_id_str: str, websocket: W
 
 async def _handle_websocket_exceptions(e: Exception, user_id_str: str, websocket: WebSocket):
     """Handle various WebSocket exceptions."""
-    if isinstance(e, WebSocketDisconnect):
+    from fastapi import WebSocketException, HTTPException
+    
+    if isinstance(e, (WebSocketException, HTTPException)):
+        # Re-raise these to let FastAPI handle the rejection properly
+        raise e
+    elif isinstance(e, WebSocketDisconnect):
         await _handle_disconnect_exception(e, user_id_str, websocket)
     elif isinstance(e, ValueError):
         return  # Authentication errors - connection already closed
@@ -179,9 +268,13 @@ async def _run_websocket_session(websocket: WebSocket):
 
 async def _execute_websocket_session(websocket: WebSocket):
     """Execute WebSocket session with error handling."""
+    from fastapi import WebSocketException, HTTPException
     user_id_str = None
     try:
         user_id_str = await _run_websocket_session(websocket)
+    except (WebSocketException, HTTPException):
+        # Re-raise these exceptions to let FastAPI handle the rejection
+        raise
     except Exception as e:
         await _handle_websocket_exceptions(e, user_id_str, websocket)
     return user_id_str

@@ -95,15 +95,32 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_both": True,
         "run_e2e": True
     },
+    "real_e2e": {
+        "description": "Full end-to-end tests with real LLM and services (20-30 minutes)",
+        "purpose": "Complete user journey validation with actual services",
+        "backend_args": ["-m", "real_e2e", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
+        "frontend_args": [],
+        "timeout": 1800,  # 30 minutes for E2E tests
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"],
+        "supports_real_llm": True,
+        "default_llm_timeout": 90,  # Higher timeout for E2E scenarios
+        "max_parallel_llm_calls": 2,  # Limit parallelism for stability
+        "business_critical": True
+    },
     "real_services": {
         "description": "Tests requiring real external services (LLM, DB, Redis, ClickHouse)",
         "purpose": "Validation with actual service dependencies",
-        "backend_args": ["-m", "real_services", "-v", "--fail-fast"],
+        "backend_args": ["-m", "real_services", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
         "frontend_args": [],
-        "timeout": 1800,  # 30 minutes for real service tests
+        "timeout": 2400,  # 40 minutes for real service tests with LLM retries
         "run_coverage": False,
         "run_both": False,
-        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"]
+        "requires_env": ["ENABLE_REAL_LLM_TESTING=true"],
+        "supports_real_llm": True,
+        "default_llm_timeout": 60,  # Higher default timeout for real services
+        "max_parallel_llm_calls": 2  # Limit parallel LLM calls to avoid rate limits
     },
     "performance": {
         "description": "Performance validation suite for SLA compliance (3-5 minutes)",
@@ -153,28 +170,43 @@ def configure_staging_environment(staging_url: str, staging_api_url: str):
     os.environ["CYPRESS_BASE_URL"] = staging_url
     os.environ["CYPRESS_API_URL"] = staging_api_url
 
-def configure_real_llm(model: str, timeout: int, parallel: str):
-    """Configure environment for real LLM testing."""
+def configure_real_llm(model: str, timeout: int, parallel: str, test_level: str = None):
+    """Configure environment for real LLM testing with smart defaults."""
+    # Get level-specific defaults if available
+    level_config = TEST_LEVELS.get(test_level, {}) if test_level else {}
+    
+    # Use level-specific timeout if not overridden
+    if timeout == 30 and level_config.get("default_llm_timeout"):
+        timeout = level_config["default_llm_timeout"]
+    
     # Handle special parallel values
     if parallel == "max":
         parallel_value = str(OPTIMAL_WORKERS)
     elif parallel == "auto":
-        parallel_value = "auto"
+        # For real LLM tests, limit parallelism to avoid rate limits
+        max_llm_parallel = level_config.get("max_parallel_llm_calls", 3)
+        parallel_value = str(min(max_llm_parallel, OPTIMAL_WORKERS))
     else:
         parallel_value = str(parallel)
     
     config = {
         "model": model,
         "timeout": timeout,
-        "parallel": parallel_value
+        "parallel": parallel_value,
+        "rate_limit_delay": 1 if int(parallel_value) > 2 else 0  # Add delay for high parallelism
     }
     
     # Set environment variables
     os.environ["TEST_USE_REAL_LLM"] = "true"
     os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
     os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
+    os.environ["TEST_LLM_MODEL"] = model
     
     if parallel_value != "auto":
         os.environ["TEST_PARALLEL"] = parallel_value
+    
+    # Add rate limit delay if needed
+    if config["rate_limit_delay"] > 0:
+        os.environ["TEST_LLM_RATE_LIMIT_DELAY"] = str(config["rate_limit_delay"])
     
     return config

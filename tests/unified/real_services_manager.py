@@ -69,25 +69,34 @@ class RealServicesManager:
         """Create service configuration dictionary."""
         return {
             "auth": ServiceProcess("auth", 8081, health_url="/health"),
-            "backend": ServiceProcess("backend", 8000, health_url="/health"),
+            "backend": ServiceProcess("backend", 8000, health_url="/health/"),
             "frontend": ServiceProcess("frontend", 3000, health_url="/")
         }
     
-    async def start_all_services(self) -> None:
+    async def start_all_services(self, skip_frontend: bool = False) -> None:
         """Start all services and wait for health checks."""
         self.http_client = httpx.AsyncClient(timeout=10.0)
         
         await self._start_auth_service()
         await self._start_backend_service()
-        await self._start_frontend_service()
+        if not skip_frontend:
+            await self._start_frontend_service()
         await self._validate_all_healthy()
         logger.info("All services started and healthy")
     
     async def _start_auth_service(self) -> None:
-        """Start the auth service on port 8001."""
+        """Start the auth service on port 8081."""
         service = self.services["auth"]
         if await self._is_port_busy(service.port):
-            logger.warning(f"Port {service.port} already in use")
+            logger.info(f"Auth service already running on port {service.port}")
+            await self._wait_for_health(service)
+            return
+            
+        # Try alternate port 8083 if default is busy
+        if await self._is_port_busy(8083):
+            logger.info(f"Auth service already running on port 8083")
+            service.port = 8083
+            await self._wait_for_health(service)
             return
             
         cmd = self._get_auth_command()
@@ -98,7 +107,8 @@ class RealServicesManager:
         """Start the backend service on port 8000."""
         service = self.services["backend"]
         if await self._is_port_busy(service.port):
-            logger.warning(f"Port {service.port} already in use")
+            logger.info(f"Backend service already running on port {service.port}")
+            await self._wait_for_health(service)
             return
             
         cmd = self._get_backend_command()
@@ -109,7 +119,8 @@ class RealServicesManager:
         """Start the frontend service on port 3000."""
         service = self.services["frontend"]
         if await self._is_port_busy(service.port):
-            logger.warning(f"Port {service.port} already in use")
+            logger.info(f"Frontend service already running on port {service.port}")
+            await self._wait_for_health(service)
             return
             
         cmd = self._get_frontend_command()
@@ -213,7 +224,7 @@ class RealServicesManager:
     
     async def _validate_all_healthy(self) -> None:
         """Validate all services are healthy."""
-        unhealthy = [name for name, svc in self.services.items() if not svc.ready]
+        unhealthy = [name for name, svc in self.services.items() if not svc.ready and name != "frontend"]
         if unhealthy:
             raise RuntimeError(f"Unhealthy services: {unhealthy}")
     

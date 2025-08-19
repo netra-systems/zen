@@ -119,6 +119,19 @@ class UnifiedMessagingManager:
         if not conn_info:
             logger.warning(f"Connection not found for user {user_id}")
             return False
+        
+        # Handle state synchronization messages first
+        message_type = message.get("type", "")
+        state_sync_types = {
+            "get_current_state", "state_update", "partial_state_update", "client_state_update"
+        }
+        
+        if message_type in state_sync_types:
+            connection_id = conn_info.connection_id
+            return await self.message_handler.handle_state_sync_message(
+                user_id, connection_id, websocket, message
+            )
+        
         return await self.message_processor.process_with_rate_limiting(conn_info, message)
 
     # Agent and tool communication methods

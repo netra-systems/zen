@@ -141,13 +141,39 @@ class ModernConnectionManager:
             
     async def _execute_disconnection_process(self, user_id: str, conn_info: ConnectionInfo,
                                            code: int, reason: str) -> None:
-        """Execute disconnection process with atomic state management."""
+        """Execute disconnection process with atomic state management and guaranteed cleanup."""
         success = await self.atomic_closer.close_connection_atomically(
             user_id, conn_info, code, reason
         )
-        if success:
-            await self.cleanup_manager.cleanup_connection_registry(user_id, conn_info)
         
+        # CRITICAL: Always clean up registry regardless of close success to prevent ghost connections
+        await self.cleanup_manager.cleanup_connection_registry(user_id, conn_info)
+        
+        # Additional cleanup for abnormal disconnects
+        if code != 1000:  # Not a normal closure
+            await self._handle_abnormal_disconnect_cleanup(user_id, conn_info, code, reason)
+    
+    async def _handle_abnormal_disconnect_cleanup(self, user_id: str, conn_info: ConnectionInfo,
+                                                code: int, reason: str) -> None:
+        """Handle additional cleanup for abnormal disconnections."""
+        logger.info(f"Abnormal disconnect cleanup for user {user_id}, code: {code}, reason: {reason}")
+        
+        # Force cleanup of any remaining resources
+        try:
+            # Ensure WebSocket state is properly cleared
+            if hasattr(conn_info.websocket, '_state'):
+                conn_info.websocket._state = 3  # CLOSED state
+            
+            # Clean up any heartbeat tracking
+            if hasattr(self, 'heartbeat_manager'):
+                await self.heartbeat_manager.cleanup_connection(conn_info.connection_id)
+                
+            # Force garbage collection hint for memory cleanup
+            import gc
+            gc.collect()
+            
+        except Exception as e:
+            logger.warning(f"Error during abnormal disconnect cleanup: {e}")
             
     async def get_ghost_connections_count(self) -> int:
         """Get count of ghost connections for monitoring."""

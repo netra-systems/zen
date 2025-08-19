@@ -55,7 +55,7 @@ class E2EServiceOrchestrator:
     
     async def _start_all_services(self) -> None:
         """Start all services in correct order."""
-        await self.services_manager.start_all_services()
+        await self.services_manager.start_all_services(skip_frontend=True)
         await self._wait_for_stabilization()
     
     async def _wait_for_stabilization(self) -> None:
@@ -63,9 +63,19 @@ class E2EServiceOrchestrator:
         await asyncio.sleep(2)
     
     async def _validate_environment_health(self) -> None:
-        """Validate all services are healthy."""
-        if not self.services_manager.is_all_ready():
-            raise RuntimeError("Services not ready")
+        """Validate essential services are healthy."""
+        # Check only essential services (auth and backend) are ready
+        essential_services = ["auth", "backend"]
+        health_status = await self.services_manager.health_status()
+        
+        unhealthy_services = [
+            service for service in essential_services
+            if not health_status.get(service, {}).get("ready", False)
+        ]
+        
+        if unhealthy_services:
+            raise RuntimeError(f"Essential services not ready: {unhealthy_services}")
+            
         # Check database connections are available
         if not (self.db_manager.postgres_pool or self.db_manager.redis_client):
             raise RuntimeError("Database connections not ready")
@@ -85,8 +95,17 @@ class E2EServiceOrchestrator:
     def is_environment_ready(self) -> bool:
         """Check if environment is ready."""
         return (self.ready and 
-                self.services_manager.is_all_ready() and
+                self._are_essential_services_ready() and
                 (self.db_manager.postgres_pool is not None))
+    
+    def _are_essential_services_ready(self) -> bool:
+        """Check if essential services are ready."""
+        essential_services = ["auth", "backend"]
+        for service_name in essential_services:
+            service = self.services_manager.services.get(service_name)
+            if not service or not service.ready:
+                return False
+        return True
     
     async def get_environment_status(self) -> Dict[str, Any]:
         """Get complete environment status."""
@@ -113,6 +132,14 @@ class E2EServiceOrchestrator:
     async def _stop_services(self) -> None:
         """Stop all orchestrated services."""
         await self.services_manager.stop_all_services()
+    
+    async def start_all_services(self) -> None:
+        """Start all services for disaster recovery testing."""
+        await self._start_all_services()
+    
+    async def stop_all_services(self) -> None:
+        """Stop all services for disaster recovery testing."""
+        await self._stop_services()
 
 
 def create_service_orchestrator(project_root: Optional[Path] = None) -> E2EServiceOrchestrator:

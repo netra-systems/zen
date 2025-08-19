@@ -4,6 +4,7 @@ Handles environment variable loading with staging/production awareness
 """
 import os
 import logging
+from .secret_loader import AuthSecretLoader
 
 logger = logging.getLogger(__name__)
 
@@ -20,57 +21,18 @@ class AuthConfig:
     
     @staticmethod
     def get_google_client_id() -> str:
-        """Get Google OAuth Client ID based on environment"""
-        env = AuthConfig.get_environment()
-        
-        # Check environment-specific variables first
-        if env == "staging":
-            client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING")
-            if client_id:
-                return client_id
-        elif env == "production":
-            client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
-            if client_id:
-                return client_id
-        
-        # Fall back to generic variable
-        return os.getenv("GOOGLE_CLIENT_ID", "")
+        """Get Google OAuth Client ID using unified secret loader"""
+        return AuthSecretLoader.get_google_client_id()
     
     @staticmethod
     def get_google_client_secret() -> str:
-        """Get Google OAuth Client Secret based on environment"""
-        env = AuthConfig.get_environment()
-        
-        # Check environment-specific variables first
-        if env == "staging":
-            secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
-            if secret:
-                return secret
-        elif env == "production":
-            secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
-            if secret:
-                return secret
-        
-        # Fall back to generic variable
-        return os.getenv("GOOGLE_CLIENT_SECRET", "")
+        """Get Google OAuth Client Secret using unified secret loader"""
+        return AuthSecretLoader.get_google_client_secret()
     
     @staticmethod
     def get_jwt_secret() -> str:
-        """Get JWT secret key"""
-        env = AuthConfig.get_environment()
-        
-        # Check environment-specific variables first
-        if env == "staging":
-            secret = os.getenv("JWT_SECRET_STAGING")
-            if secret:
-                return secret
-        elif env == "production":
-            secret = os.getenv("JWT_SECRET_PRODUCTION")
-            if secret:
-                return secret
-        
-        # Fall back to generic variable
-        return os.getenv("JWT_SECRET", os.getenv("JWT_SECRET_KEY", ""))
+        """Get JWT secret key using unified secret loader"""
+        return AuthSecretLoader.get_jwt_secret()
     
     @staticmethod
     def get_frontend_url() -> str:

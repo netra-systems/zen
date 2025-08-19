@@ -86,10 +86,31 @@ def _check_blocked_extensions(request: Request, path: str) -> JSONResponse:
 
 def _check_suspicious_headers(request: Request) -> JSONResponse:
     """Check headers for path injection."""
+    # Headers that should be excluded from path traversal checks
+    excluded_headers = {
+        'content-security-policy',
+        'content-security-policy-report-only',
+        'strict-transport-security',
+        'x-content-security-policy',
+        'x-webkit-csp',
+        'accept',
+        'accept-encoding',
+        'accept-language',
+        'content-type',
+        'user-agent',
+        'referer',
+        'origin'
+    }
+    
     for header_name, header_value in request.headers.items():
-        if is_suspicious_path(str(header_value)):
-            _log_suspicious_header(request, header_name, header_value)
-            return _create_bad_request_response()
+        # Skip security policy headers and other standard headers
+        if header_name.lower() in excluded_headers:
+            continue
+        # Only check headers that might contain file paths
+        if header_name.lower() in ['x-forwarded-path', 'x-original-url', 'x-rewrite-url']:
+            if is_suspicious_path(str(header_value)):
+                _log_suspicious_header(request, header_name, header_value)
+                return _create_bad_request_response()
     return None
 
 def _log_path_traversal_attempt(request: Request, path: str, query: str) -> None:

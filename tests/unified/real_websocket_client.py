@@ -53,15 +53,25 @@ class RealWebSocketClient:
     
     async def _establish_connection(self, headers: Optional[Dict[str, str]]):
         """Establish WebSocket connection"""
-        extra_headers = headers or {}
-        ssl_context = self.config.create_ssl_context()
+        # Extract token from Authorization header and convert to query param
+        token = None
+        if headers and "Authorization" in headers:
+            auth_header = headers["Authorization"]
+            if auth_header.startswith("Bearer "):
+                token = auth_header[7:]  # Remove "Bearer " prefix
         
-        return await websockets.connect(
-            self.ws_url,
-            extra_headers=extra_headers,
-            ssl=ssl_context,
-            ping_timeout=self.config.timeout
-        )
+        # Build WebSocket URL with token as query parameter
+        ws_url = self.ws_url
+        if token:
+            ws_url = f"{self.ws_url}?token={token}"
+        
+        # Only use SSL context for wss:// URLs
+        connection_kwargs = {"ping_timeout": self.config.timeout}
+        if ws_url.startswith("wss://"):
+            ssl_context = self.config.create_ssl_context()
+            connection_kwargs["ssl"] = ssl_context
+        
+        return await websockets.connect(ws_url, **connection_kwargs)
     
     async def send(self, message: Union[Dict[str, Any], str]) -> bool:
         """Send message through WebSocket"""

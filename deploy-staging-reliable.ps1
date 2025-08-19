@@ -337,13 +337,13 @@ if (-not $SkipErrorMonitoring) {
     # Wait a moment for any immediate errors to appear in GCP Error Reporting
     Start-Sleep -Seconds 15
 
-    try {
-        # Run the error monitoring script
-        $errorMonitorPath = "$PSScriptRoot\scripts\staging_error_monitor.py"
+    # Run the error monitoring script
+    $errorMonitorPath = "$PSScriptRoot\scripts\staging_error_monitor.py"
+    
+    if (Test-Path $errorMonitorPath) {
+        Write-Host "  Checking for deployment-related errors..." -ForegroundColor Cyan
         
-        if (Test-Path $errorMonitorPath) {
-            Write-Host "  Checking for deployment-related errors..." -ForegroundColor Cyan
-            
+        try {
             # Run error monitor with deployment time
             python $errorMonitorPath --deployment-time $deploymentTime --project-id $PROJECT_ID --service netra-backend
             
@@ -362,11 +362,11 @@ if (-not $SkipErrorMonitoring) {
             } else {
                 Write-Host "  ⚠ Error monitoring script failed to run" -ForegroundColor Yellow
             }
-        } else {
-            Write-Host "  ⚠ Error monitoring script not found at $errorMonitorPath" -ForegroundColor Yellow
+        } catch {
+            Write-Host "  ⚠ Error monitoring check failed: $_" -ForegroundColor Yellow
         }
-    } catch {
-        Write-Host "  ⚠ Error monitoring check failed: $_" -ForegroundColor Yellow
+    } else {
+        Write-Host "  ⚠ Error monitoring script not found at $errorMonitorPath" -ForegroundColor Yellow
     }
 } else {
     Write-Host ""

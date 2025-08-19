@@ -16,13 +16,11 @@ import tempfile
 import os
 
 # Core feature imports
-from app.services.corpus.document_processor import DocumentProcessor
-from app.services.analytics.real_time_engine import RealTimeAnalyticsEngine
-from app.agents.state_manager import AgentStateManager
-from app.services.synthetic_data.generator import SyntheticDataGenerator
-from app.services.github.integration_service import GitHubIntegrationService
-from app.schemas.corpus import DocumentMetadata, SearchQuery, EmbeddingVector
-from app.schemas.analytics import MetricSnapshot, DashboardData
+from app.services.corpus.document_manager import DocumentManager
+from app.services.demo.analytics_tracker import AnalyticsTracker
+from app.services.state.state_manager import StateManager
+from app.services.synthetic_data.core_service import SyntheticDataService
+from app.agents.github_analyzer.github_client import GitHubAPIClient
 
 
 class TestCoreFeaturesIntegration:
@@ -38,11 +36,11 @@ class TestCoreFeaturesIntegration:
 
     async def _create_core_infrastructure(self):
         """Create comprehensive core infrastructure"""
-        doc_processor = Mock(spec=DocumentProcessor)
-        analytics_engine = Mock(spec=RealTimeAnalyticsEngine)
-        state_manager = Mock(spec=AgentStateManager)
-        data_generator = Mock(spec=SyntheticDataGenerator)
-        github_service = Mock(spec=GitHubIntegrationService)
+        doc_processor = Mock(spec=DocumentManager)
+        analytics_engine = Mock(spec=AnalyticsTracker)
+        state_manager = Mock(spec=StateManager)
+        data_generator = Mock(spec=SyntheticDataService)
+        github_service = Mock(spec=GitHubAPIClient)
         
         return {
             "doc_processor": doc_processor,

@@ -77,21 +77,49 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
-// Enhanced WebSocket Mock - Use the comprehensive version from mocks (conditional)
+// Enhanced WebSocket Mock with unique URL support
 try {
   const { installWebSocketMock } = require('./__tests__/mocks/websocket-mocks');
   // Install the enhanced WebSocket mock globally
   installWebSocketMock();
 } catch (error) {
-  // Fallback to simple WebSocket mock if enhanced version fails
+  // Fallback to improved WebSocket mock with unique URL generation
   class SimpleWebSocket {
     constructor(url) {
-      this.url = url;
+      // Generate unique URL if conflicting URLs detected
+      this.url = url.includes('-test-') ? url : `${url}-test-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
       this.readyState = 1; // OPEN
       this.send = jest.fn();
       this.close = jest.fn();
       this.addEventListener = jest.fn();
       this.removeEventListener = jest.fn();
+      this.onopen = null;
+      this.onclose = null;
+      this.onerror = null;
+      this.onmessage = null;
+      
+      // Simulate async connection
+      setTimeout(() => {
+        if (this.onopen) {
+          this.onopen(new Event('open'));
+        }
+      }, 0);
+    }
+    
+    // Simulate message reception
+    simulateMessage(data) {
+      const event = new MessageEvent('message', { data: typeof data === 'string' ? data : JSON.stringify(data) });
+      if (this.onmessage) {
+        this.onmessage(event);
+      }
+    }
+    
+    // Simulate error
+    simulateError(error) {
+      const event = new ErrorEvent('error', { error });
+      if (this.onerror) {
+        this.onerror(event);
+      }
     }
   }
   SimpleWebSocket.CONNECTING = 0;
@@ -211,6 +239,15 @@ afterEach(() => {
   if (sessionStorage && sessionStorage.clear) sessionStorage.clear();
   mockCookieData.clear();
   Date.now = originalDateNow;
+  
+  // Safe WebSocket cleanup to prevent conflicts
+  try {
+    if (typeof window !== 'undefined' && window.WS) {
+      window.WS.clean();
+    }
+  } catch (error) {
+    // Ignore WebSocket cleanup errors
+  }
 });
 
 // Mock the useWebSocket hook to avoid WebSocket connections in tests
@@ -235,6 +272,86 @@ jest.mock('@/hooks/useWebSocket', () => ({
 
 // Setup auth service mocks for independent service
 require('./__tests__/setup/auth-service-setup');
+
+// Mock the authService class completely
+jest.mock('@/auth/service', () => {
+  const mockAuthConfig = {
+    development_mode: true,
+    google_client_id: 'mock-google-client-id',
+    endpoints: {
+      login: 'http://localhost:8081/auth/login',
+      logout: 'http://localhost:8081/auth/logout',
+      callback: 'http://localhost:8081/auth/callback',
+      token: 'http://localhost:8081/auth/token',
+      user: 'http://localhost:8081/auth/me',
+      dev_login: 'http://localhost:8081/auth/dev/login'
+    },
+    authorized_javascript_origins: ['http://localhost:3000'],
+    authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+  };
+
+  const mockAuthService = {
+    getAuthConfig: jest.fn().mockResolvedValue(mockAuthConfig),
+    handleDevLogin: jest.fn().mockResolvedValue({
+      access_token: 'mock-token',
+      token_type: 'Bearer'
+    }),
+    getToken: jest.fn().mockReturnValue('mock-token'),
+    getAuthHeaders: jest.fn().mockReturnValue({ Authorization: 'Bearer mock-token' }),
+    removeToken: jest.fn(),
+    getDevLogoutFlag: jest.fn().mockReturnValue(false),
+    setDevLogoutFlag: jest.fn(),
+    clearDevLogoutFlag: jest.fn(),
+    handleLogin: jest.fn(),
+    handleLogout: jest.fn(),
+    useAuth: jest.fn().mockReturnValue({
+      user: { id: 'test-user', email: 'test@example.com', full_name: 'Test User' },
+      login: jest.fn(),
+      logout: jest.fn(),
+      loading: false,
+      authConfig: mockAuthConfig,
+      token: 'mock-token'
+    })
+  };
+
+  return {
+    authService: mockAuthService
+  };
+});
+
+// Mock the auth context
+jest.mock('@/auth/context', () => {
+  const React = require('react');
+  const mockAuthContextValue = {
+    user: { id: 'test-user', email: 'test@example.com', full_name: 'Test User' },
+    login: jest.fn(),
+    logout: jest.fn(),
+    loading: false,
+    authConfig: {
+      development_mode: true,
+      google_client_id: 'mock-google-client-id',
+      endpoints: {
+        login: 'http://localhost:8081/auth/login',
+        logout: 'http://localhost:8081/auth/logout',
+        callback: 'http://localhost:8081/auth/callback',
+        token: 'http://localhost:8081/auth/token',
+        user: 'http://localhost:8081/auth/me',
+        dev_login: 'http://localhost:8081/auth/dev/login'
+      },
+      authorized_javascript_origins: ['http://localhost:3000'],
+      authorized_redirect_uris: ['http://localhost:3000/auth/callback']
+    },
+    token: 'mock-token'
+  };
+
+  const MockAuthContext = React.createContext(mockAuthContextValue);
+
+  return {
+    AuthContext: MockAuthContext,
+    AuthProvider: ({ children }) => React.createElement(MockAuthContext.Provider, { value: mockAuthContextValue }, children),
+    useAuth: () => mockAuthContextValue
+  };
+});
 
 // Optional MSW setup - only load if explicitly enabled via environment variable
 if (process.env.ENABLE_MSW_MOCKS === 'true') {

@@ -200,12 +200,14 @@ class ConnectionCloseReliability:
         return ConnectionValidator.should_attempt_close(conn_info.websocket)
         
     async def _perform_websocket_close(self, websocket, code: int, reason: str) -> None:
-        """Perform the websocket close operation."""
+        """Perform the websocket close operation with resource cleanup."""
         try:
             await websocket.close(code=code, reason=reason)
+            logger.debug(f"WebSocket closed successfully with code {code}: {reason}")
         except Exception as e:
             logger.debug(f"Error closing WebSocket: {e}")
-            raise
+            # Even if close fails, we should continue with cleanup
+            pass
 
 
 class ConnectionEstablishmentReliability:

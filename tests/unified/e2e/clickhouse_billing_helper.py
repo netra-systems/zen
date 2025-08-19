@@ -137,10 +137,12 @@ class BillingRecordValidator:
         }
         
         # Check amount consistency
-        if payment_data.get("amount_cents") != billing_record.get("amount_cents"):
+        payment_amount = payment_data.get("amount_cents", payment_data.get("amount", 0))
+        billing_amount = billing_record.get("amount_cents")
+        if payment_amount != billing_amount:
             consistency_result["mismatches"].append(
-                f"Amount mismatch: payment={payment_data.get('amount_cents')}, "
-                f"billing={billing_record.get('amount_cents')}"
+                f"Amount mismatch: payment={payment_amount}, "
+                f"billing={billing_amount}"
             )
             consistency_result["consistent"] = False
         
@@ -182,7 +184,7 @@ class ClickHouseBillingHelper:
             "id": str(uuid.uuid4()),
             "user_id": user_data["id"],
             "payment_id": payment_data["id"],
-            "amount_cents": payment_data["amount_cents"],
+            "amount_cents": payment_data.get("amount_cents", payment_data.get("amount", 0)),
             "tier": tier.value,
             "status": "completed",
             "created_at": time.time(),

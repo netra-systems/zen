@@ -19,37 +19,75 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseManager:
-    """Simple database manager for testing"""
+    """Enhanced database manager for testing"""
     
     def __init__(self, harness):
         self.harness = harness
+        self.logger = logging.getLogger(f"{__name__}.DatabaseManager")
+        self.initialized = False
     
     async def setup_databases(self) -> None:
-        """Setup test databases"""
-        pass
+        """Setup test databases with in-memory SQLite for speed."""
+        try:
+            # Initialize test database connections
+            self._setup_sqlite_database()
+            self._setup_redis_connection()
+            self._setup_clickhouse_connection()
+            
+            self.initialized = True
+            self.logger.info("Test databases initialized successfully")
+        except Exception as e:
+            self.logger.error(f"Database setup failed: {e}")
+            raise
+    
+    def _setup_sqlite_database(self) -> None:
+        """Setup in-memory SQLite database for testing."""
+        import os
+        os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+        self.logger.debug("SQLite in-memory database configured")
+    
+    def _setup_redis_connection(self) -> None:
+        """Setup Redis connection for testing."""
+        import os
+        os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
+        self.logger.debug("Redis test database configured")
+    
+    def _setup_clickhouse_connection(self) -> None:
+        """Setup ClickHouse connection for testing."""
+        import os
+        os.environ["CLICKHOUSE_URL"] = "clickhouse://localhost:8123/test"
+        self.logger.debug("ClickHouse test database configured")
     
     async def cleanup_databases(self) -> None:
         """Cleanup test databases"""
-        pass
+        self.initialized = False
+        self.logger.info("Test databases cleaned up")
 
 
 class ServiceManager:
-    """Simple service manager for testing"""
+    """Enhanced service manager for testing - delegates to real ServiceManager"""
     
     def __init__(self, harness):
         self.harness = harness
+        self.logger = logging.getLogger(f"{__name__}.ServiceManager")
+        # Import the real service manager
+        from .service_manager import ServiceManager as RealServiceManager
+        self._real_manager = RealServiceManager(harness)
     
     async def start_auth_service(self) -> None:
-        """Start auth service"""
-        pass
+        """Start auth service using real service manager"""
+        self.logger.info("Starting auth service")
+        await self._real_manager.start_auth_service()
     
     async def start_backend_service(self) -> None:
-        """Start backend service"""
-        pass
+        """Start backend service using real service manager"""
+        self.logger.info("Starting backend service")
+        await self._real_manager.start_backend_service()
     
     async def stop_all_services(self) -> None:
-        """Stop all services"""
-        pass
+        """Stop all services using real service manager"""
+        self.logger.info("Stopping all services")
+        await self._real_manager.stop_all_services()
 
 
 class TestDataSeeder:
@@ -72,28 +110,35 @@ class TestDataSeeder:
 
 
 class HealthMonitor:
-    """Simple health monitor for testing"""
+    """Enhanced health monitor for testing - delegates to real HealthMonitor"""
     
     def __init__(self, harness):
         self.harness = harness
+        self.logger = logging.getLogger(f"{__name__}.HealthMonitor")
+        # Import the real health monitor
+        from .service_manager import HealthMonitor as RealHealthMonitor
+        self._real_monitor = RealHealthMonitor(harness)
     
     async def wait_for_all_ready(self) -> None:
-        """Wait for all services to be ready"""
-        pass
+        """Wait for all services to be ready using real health monitor"""
+        self.logger.info("Waiting for all services to be ready")
+        await self._real_monitor.wait_for_all_ready()
     
     async def check_system_health(self) -> Dict[str, Any]:
-        """Check system health"""
-        return {"status": "healthy", "services": ["auth", "backend"]}
+        """Check system health using real health monitor"""
+        return await self._real_monitor.check_system_health()
 
 
 class TestState:
-    """Simple state object for testing"""
+    """Enhanced state object for testing"""
     
     def __init__(self):
         self.services = {}
         self.temp_dir = None
         self.cleanup_tasks = []
         self.ready = False
+        self.startup_time = None
+        self.databases = None  # Will be initialized by DatabaseManager
 
 
 class UnifiedTestHarnessComplete(UnifiedTestHarness):
@@ -106,7 +151,13 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
         """Initialize complete test harness with all managers."""
         super().__init__()
         self.test_name = test_name
+        self.logger = logging.getLogger(f"{__name__}.{test_name}")
+        
+        # Initialize state with service configurations
         self.state = TestState()
+        self._initialize_service_configs()
+        
+        # Initialize managers
         self.database_manager = DatabaseManager(self)
         self.service_manager = ServiceManager(self)
         self.data_seeder = TestDataSeeder(self)
@@ -129,12 +180,27 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
         await self.health_monitor.wait_for_all_ready()
     
     async def start_services(self) -> None:
-        """Start all services for testing."""
+        """Start all services for testing in correct dependency order."""
+        self.logger.info("Starting unified test harness service orchestration")
+        
+        # Step 1: Setup test environment and databases
+        await self._setup_test_environment()
         await self._setup_databases()
+        
+        # Step 2: Start auth service first (no dependencies)
         await self._start_auth_service()
+        
+        # Step 3: Start backend service (depends on auth)
         await self._start_backend_service()
+        
+        # Step 4: Wait for all services to be ready
         await self._wait_for_readiness()
+        
+        # Step 5: Verify system health
+        await self._verify_system_health()
+        
         self.state.ready = True
+        self.logger.info("All services started and verified healthy")
     
     async def seed_test_data(self) -> None:
         """Seed test data for realistic testing scenarios."""
@@ -186,7 +252,43 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
                 logger.error(f"Cleanup task failed: {e}")
         
         self.state.ready = False
-        logger.info("Test harness shutdown complete")
+        self.logger.info("Test harness shutdown complete")
+    
+    def _initialize_service_configs(self) -> None:
+        """Initialize service configurations with proper settings."""
+        from .test_harness import ServiceConfig
+        
+        self.state.services = {
+            "auth_service": ServiceConfig(
+                name="auth_service", 
+                host="localhost", 
+                port=8001, 
+                health_endpoint="/health",
+                startup_timeout=30
+            ),
+            "backend": ServiceConfig(
+                name="backend", 
+                host="localhost", 
+                port=8000, 
+                health_endpoint="/health",
+                startup_timeout=45  # Backend needs more time
+            )
+        }
+    
+    async def _setup_test_environment(self) -> None:
+        """Setup test environment variables and configuration."""
+        from .config import setup_test_environment
+        setup_test_environment()
+        self.logger.info("Test environment configured")
+    
+    async def _verify_system_health(self) -> None:
+        """Verify all services are healthy and responding."""
+        health_status = await self.check_system_health()
+        
+        if not health_status.get("services_ready", False):
+            raise RuntimeError(f"System health check failed: {health_status}")
+        
+        self.logger.info(f"System health verified: {health_status['ready_services']}/{health_status['service_count']} services ready")
 
 
 # Context manager for easy usage

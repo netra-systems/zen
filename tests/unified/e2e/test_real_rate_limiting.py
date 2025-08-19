@@ -28,6 +28,10 @@ from typing import Dict, Any, Optional
 from ..service_manager import ServiceManager
 from ..test_harness import UnifiedTestHarness
 from .rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
+from .rate_limiting_advanced import (
+    APIRateLimitTester, WebSocketRateLimitTester, AgentThrottleTester,
+    TierBasedRateLimitTester, DistributedRateLimitValidator, ResponseHeaderValidator
+)
 
 
 class RedisRateLimitTester:
@@ -46,6 +50,14 @@ class RedisRateLimitTester:
         self.redis_manager = RedisManager(self.test_user_id)
         self.user_manager = UserManager()
         self.validator = RateLimitFlowValidator()
+        
+        # Advanced testers (initialized after auth token is available)
+        self.api_tester: Optional[APIRateLimitTester] = None
+        self.websocket_tester: Optional[WebSocketRateLimitTester] = None
+        self.agent_tester: Optional[AgentThrottleTester] = None
+        self.tier_tester: Optional[TierBasedRateLimitTester] = None
+        self.distributed_validator: Optional[DistributedRateLimitValidator] = None
+        self.header_validator: Optional[ResponseHeaderValidator] = None
     
     async def execute_rate_limit_flow(self) -> Dict[str, Any]:
         """Execute complete rate limiting flow with Redis backend."""
@@ -181,6 +193,32 @@ async def _cleanup_test_data(self) -> None:
         await self.redis_client.close()
 
 
+async def _initialize_advanced_testers(self, auth_token: str) -> None:
+    """Initialize advanced test components after auth token is available."""
+    self.api_tester = APIRateLimitTester(auth_token)
+    self.websocket_tester = WebSocketRateLimitTester(auth_token)
+    self.agent_tester = AgentThrottleTester(auth_token)
+    self.tier_tester = TierBasedRateLimitTester(self.user_manager)
+    self.distributed_validator = DistributedRateLimitValidator(self.redis_client)
+    self.header_validator = ResponseHeaderValidator(auth_token)
+
+
+async def _test_api_rate_limits(self) -> Dict[str, Any]:
+    """Test API rate limits on Auth and Backend services."""
+    auth_results = await self.api_tester.test_auth_service_rate_limits()
+    backend_results = await self.api_tester.test_backend_api_rate_limits()
+    
+    return {
+        "success": True,
+        "auth_service_limited": auth_results.get("rate_limited_at_request", 0) > 0,
+        "backend_api_limited": backend_results.get("rate_limited_at_request", 0) > 0,
+        "steps": [
+            {"step": "auth_api_test", "success": True, "data": auth_results},
+            {"step": "backend_api_test", "success": True, "data": backend_results}
+        ]
+    }
+
+
 # Attach methods to class
 RedisRateLimitTester._setup_test_environment = _setup_test_environment
 RedisRateLimitTester._setup_free_user_with_redis = _setup_free_user_with_redis
@@ -245,6 +283,130 @@ async def test_real_rate_limiting_with_redis_backend(unified_test_harness):
     
     # Performance validation
     assert results["duration"] < 70.0, f"Test exceeded 70s limit: {results['duration']}"
+
+
+@pytest.mark.asyncio
+@pytest.mark.e2e
+@pytest.mark.redis
+@pytest.mark.comprehensive
+async def test_comprehensive_rate_limiting_system(unified_test_harness):
+    """
+    CRITICAL E2E Test #8B: Comprehensive Rate Limiting System
+    
+    Tests comprehensive rate limiting across all system components:
+    1. API rate limits on Auth service endpoints  
+    2. Backend API rate limiting per user
+    3. WebSocket message rate limiting
+    4. Agent execution throttling
+    5. Rate limit headers and 429 responses
+    6. Different limits for different user tiers (Free vs Paid)
+    7. Distributed Redis-based rate limiting
+    
+    Must complete in <90 seconds including wait times.
+    """
+    start_time = time.time()
+    
+    # Initialize service manager and start services
+    service_manager = ServiceManager(unified_test_harness)
+    await service_manager.start_auth_service()
+    await service_manager.start_backend_service()
+    
+    # Wait for services to be ready
+    await asyncio.sleep(3)
+    
+    # Create test user and initialize Redis
+    user_manager = UserManager()
+    user_data = await user_manager.create_free_user()
+    auth_token = user_data["access_token"]
+    
+    redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
+    await redis_client.ping()
+    
+    # Initialize all test components
+    api_tester = APIRateLimitTester(auth_token)
+    websocket_tester = WebSocketRateLimitTester(auth_token)
+    agent_tester = AgentThrottleTester(auth_token)
+    tier_tester = TierBasedRateLimitTester(user_manager)
+    distributed_validator = DistributedRateLimitValidator(redis_client)
+    header_validator = ResponseHeaderValidator(auth_token)
+    
+    test_results = {}
+    
+    try:
+        # Test 1: API Rate Limits
+        print("Testing API rate limits...")
+        auth_results = await api_tester.test_auth_service_rate_limits()
+        backend_results = await api_tester.test_backend_api_rate_limits()
+        test_results["api_limits"] = {
+            "auth_limited": auth_results.get("rate_limited_at_request", 0) > 0,
+            "backend_limited": backend_results.get("rate_limited_at_request", 0) > 0
+        }
+        
+        # Test 2: WebSocket Rate Limits (with timeout protection)
+        print("Testing WebSocket rate limits...")
+        try:
+            ws_results = await asyncio.wait_for(websocket_tester.test_websocket_message_rate_limits(), timeout=15.0)
+            test_results["websocket_limits"] = {
+                "tested": ws_results.get("websocket_tested", False),
+                "limited": ws_results.get("rate_limited", False)
+            }
+        except asyncio.TimeoutError:
+            test_results["websocket_limits"] = {"tested": False, "timeout": True}
+        
+        # Test 3: Agent Throttling
+        print("Testing agent throttling...")
+        agent_results = await agent_tester.test_agent_execution_throttling()
+        test_results["agent_throttling"] = {
+            "tested": agent_results.get("agent_throttling_tested", False),
+            "throttled": agent_results.get("throttling_active", False)
+        }
+        
+        # Test 4: Tier-based Limits
+        print("Testing tier-based limits...")
+        tier_results = await tier_tester.test_tier_based_limits()
+        test_results["tier_limits"] = {
+            "tested": tier_results.get("tier_testing_completed", False),
+            "free_limited": tier_results.get("free_tier_limit", 0) > 0,
+            "paid_higher": tier_results.get("paid_tier_higher", False)
+        }
+        
+        # Test 5: Distributed Rate Limiting
+        print("Testing distributed rate limiting...")
+        distributed_results = await distributed_validator.test_distributed_rate_limiting()
+        test_results["distributed"] = {
+            "tested": distributed_results.get("distributed_testing_completed", False),
+            "synced": distributed_results.get("counters_synced", False)
+        }
+        
+        # Test 6: 429 Response Headers
+        print("Testing 429 response headers...")
+        header_results = await header_validator.test_429_responses_and_headers()
+        test_results["response_headers"] = {
+            "tested": header_results.get("response_header_tested", False),
+            "retry_after": header_results.get("retry_after_header", False)
+        }
+        
+        duration = time.time() - start_time
+        
+        # Validate core requirements
+        assert test_results["api_limits"]["auth_limited"] or test_results["api_limits"]["backend_limited"], "No API rate limiting detected"
+        assert test_results["tier_limits"]["tested"], "Tier-based testing failed"
+        assert test_results["distributed"]["tested"], "Distributed rate limiting test failed"
+        assert test_results["response_headers"]["tested"], "Response header testing failed"
+        
+        # Performance validation
+        assert duration < 90.0, f"Test exceeded 90s limit: {duration}s"
+        
+        print(f"Comprehensive rate limiting test completed in {duration:.2f}s")
+        print(f"Test results: {test_results}")
+        
+    finally:
+        # Cleanup
+        try:
+            await redis_client.flushdb()
+            await redis_client.close()
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

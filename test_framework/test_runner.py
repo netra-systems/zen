@@ -364,7 +364,7 @@ def add_llm_arguments(parser):
     )
     parser.add_argument(
         "--llm-timeout", type=int, default=30,
-        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 30-120)"
+        help="Timeout in seconds for individual LLM calls (default: 30, recommended: 60-120 for real services)"
     )
     parser.add_argument(
         "--parallel", type=str, default="auto",

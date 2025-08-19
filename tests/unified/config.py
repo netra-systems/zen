@@ -87,7 +87,10 @@ class UnifiedTestConfig:
         return {
             "TESTING": "1",
             "ENVIRONMENT": "test",
-            "LOG_LEVEL": "WARNING"
+            "LOG_LEVEL": "WARNING",
+            "AUTH_FAST_TEST_MODE": "true",
+            "CORS_ORIGINS": "*",
+            "SECURE_HEADERS_ENABLED": "false"
         }
     
     def _get_db_env(self) -> Dict[str, str]:
@@ -95,7 +98,9 @@ class UnifiedTestConfig:
         return {
             "REDIS_HOST": "localhost",
             "CLICKHOUSE_HOST": "localhost",
-            "DATABASE_URL": "sqlite+aiosqlite:///:memory:"
+            "DATABASE_URL": "sqlite+aiosqlite:///:memory:",
+            "CLICKHOUSE_URL": "clickhouse://localhost:8123",
+            "REDIS_URL": "redis://localhost:6379/0"
         }
     
     def _create_test_secrets(self) -> TestSecrets:
@@ -111,12 +116,19 @@ class UnifiedTestConfig:
         os.environ["JWT_SECRET_KEY"] = jwt
         os.environ["FERNET_KEY"] = fernet
         os.environ["ENCRYPTION_KEY"] = encrypt
+        # Set additional test secrets
+        os.environ["GOOGLE_CLIENT_ID"] = "test-google-client-id"
+        os.environ["GOOGLE_CLIENT_SECRET"] = "test-google-client-secret"
+        os.environ["GEMINI_API_KEY"] = "test-gemini-api-key"
     
     def _create_test_endpoints(self) -> TestEndpoints:
         """Create test endpoint configuration"""
         ws_url = "ws://localhost:8000/ws"
         api_base = "http://localhost:8000"
         auth_base = "http://localhost:8001"
+        # Set environment variables for service discovery
+        os.environ["AUTH_SERVICE_URL"] = auth_base
+        os.environ["BACKEND_SERVICE_URL"] = api_base
         return TestEndpoints(ws_url, api_base, auth_base)
     
     def _create_test_users(self) -> Dict[str, TestUser]:

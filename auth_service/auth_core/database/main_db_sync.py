@@ -84,67 +84,19 @@ class MainDatabaseSync:
     
     async def sync_user(self, auth_user) -> Optional[str]:
         """
-        Sync auth user to main database
-        Returns: user_id if successful, None if failed
+        DEPRECATED: Auth service must be independent - no main database sync.
+        This method should not be used. Services communicate via APIs only.
+        
+        Returns: user_id (just auth_user.id for compatibility)
         """
-        try:
-            async with self.get_session() as session:
-                # Import main app User model
-                import sys
-                from pathlib import Path
-                import uuid
-                
-                # Add main app to path
-                auth_dir = Path(__file__).resolve().parent.parent.parent
-                app_dir = auth_dir.parent / "app"
-                if str(app_dir) not in sys.path:
-                    sys.path.insert(0, str(app_dir.parent))
-                
-                from app.db.models_postgres import User
-                
-                # First check by email to avoid duplicate conflicts
-                email_result = await session.execute(
-                    select(User).filter(User.email == auth_user.email)
-                )
-                existing_by_email = email_result.scalars().first()
-                
-                if existing_by_email:
-                    # User exists, update and return existing ID
-                    existing_by_email.full_name = auth_user.full_name or existing_by_email.full_name
-                    existing_by_email.updated_at = auth_user.updated_at
-                    logger.info(f"Found existing user {auth_user.email} with ID {existing_by_email.id}")
-                    return existing_by_email.id
-                
-                # No user with this email, create new one
-                # Generate a proper unique ID if the provided one might conflict
-                new_id = auth_user.id
-                
-                # Check if this ID already exists
-                id_result = await session.execute(
-                    select(User).filter(User.id == new_id)
-                )
-                if id_result.scalars().first():
-                    # ID conflict, generate new one
-                    new_id = f"dev-{uuid.uuid4().hex[:8]}"
-                    logger.info(f"ID conflict detected, using new ID: {new_id}")
-                
-                # Create new user
-                new_user = User(
-                    id=new_id,
-                    email=auth_user.email,
-                    full_name=auth_user.full_name or auth_user.email,
-                    is_active=auth_user.is_active,
-                    is_superuser=False,
-                    is_developer=False,
-                    role="user"
-                )
-                session.add(new_user)
-                logger.info(f"Created new user {auth_user.email} with ID {new_id}")
-                return new_id
-                
-        except Exception as e:
-            logger.error(f"Failed to sync user: {e}")
-            return None
+        logger.warning(
+            "sync_user called but auth service must be independent. "
+            "Main app should call auth service APIs instead."
+        )
+        
+        # Return the auth user ID for backward compatibility
+        # The main app should use the auth service API to get user data
+        return auth_user.id if auth_user else None
     
     async def close(self):
         """Close the engine connection"""

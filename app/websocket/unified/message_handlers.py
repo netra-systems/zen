@@ -14,6 +14,7 @@ from app.schemas.websocket_message_types import WebSocketValidationError
 from app.core.json_utils import prepare_websocket_message
 from app.websocket.connection import ConnectionInfo
 from app.websocket.validation import MessageValidator
+from app.websocket.state_synchronization_manager import StateSynchronizationManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -24,6 +25,7 @@ class MessageHandler:
     def __init__(self, manager):
         self.manager = manager
         self.validator = MessageValidator()
+        self.state_sync = StateSynchronizationManager()
     
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
         """Validate message structure and content."""
@@ -75,6 +77,39 @@ class MessageHandler:
         """Handle ping message with pong response."""
         pong_response = {"type": "pong", "timestamp": time.time()}
         await websocket.send_json(pong_response)
+    
+    async def handle_state_sync_message(self, user_id: str, connection_id: str, 
+                                      websocket: WebSocket, message: Dict[str, Any]) -> bool:
+        """Handle state synchronization messages."""
+        message_type = message.get("type")
+        payload = message.get("payload", {})
+        
+        if message_type == "get_current_state":
+            session_id = payload.get("session_id", "")
+            await self.state_sync.handle_get_current_state(user_id, session_id, websocket)
+        elif message_type == "state_update":
+            await self.state_sync.handle_state_update(user_id, payload)
+        elif message_type == "partial_state_update":
+            await self.state_sync.handle_partial_state_update(user_id, payload)
+        elif message_type == "client_state_update":
+            await self.state_sync.handle_state_update(user_id, payload)
+        else:
+            logger.warning(f"Unknown state sync message type: {message_type}")
+            return False
+        
+        return True
+    
+    async def handle_new_connection_state_sync(self, user_id: str, connection_id: str, websocket: WebSocket) -> None:
+        """Handle state synchronization for new connections."""
+        await self.state_sync.handle_new_connection(user_id, connection_id, websocket)
+    
+    async def handle_reconnection_state_sync(self, user_id: str, connection_id: str, websocket: WebSocket) -> None:
+        """Handle state synchronization for reconnections."""
+        await self.state_sync.handle_reconnection(user_id, connection_id, websocket)
+    
+    async def handle_disconnection_state_sync(self, user_id: str, connection_id: str) -> None:
+        """Handle state synchronization cleanup for disconnections."""
+        await self.state_sync.handle_disconnection(user_id, connection_id)
 
 
 class MessageBuilder:
@@ -154,6 +189,7 @@ class MessageProcessor:
         self.manager = manager
         self.handler = handler
         self.message_stats = {"sent": 0, "received": 0, "failed": 0, "validated": 0}
+        self._last_validation_error = None
     
     async def process_with_rate_limiting(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> bool:
         """Process message with rate limiting checks."""
@@ -181,9 +217,12 @@ class MessageProcessor:
             await self.handler.handle_ping_message(conn_info.websocket)
             return True
         
-        # First validate the message
-        if not await self._validate_message_and_update_stats(message):
-            return False
+        # First validate the message and send error if validation fails
+        validation_result = await self._validate_message_and_update_stats(message)
+        if not validation_result:
+            # Send validation error response to client
+            await self._send_validation_error_response(conn_info, message)
+            return True  # Keep connection alive after validation error
         
         # CRITICAL: Actually process the message through agent service
         return await self._forward_to_agent_service(conn_info, message)
@@ -243,9 +282,12 @@ class MessageProcessor:
         validation_result = self.handler.validate_message(message)
         if isinstance(validation_result, WebSocketValidationError):
             logger.warning(f"Message validation failed: {validation_result.message}")
+            # Store validation error for detailed error response
+            self._last_validation_error = validation_result
             return False
         self.message_stats["received"] += 1
         self.message_stats["validated"] += 1
+        self._last_validation_error = None
         return True
     
     async def _send_system_message(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> None:
@@ -259,6 +301,37 @@ class MessageProcessor:
             self.message_stats["sent"] += 1
         else:
             self.message_stats["failed"] += 1
+    
+    async def _send_validation_error_response(self, conn_info: ConnectionInfo, message: Dict[str, Any]) -> None:
+        """Send detailed validation error response to client."""
+        error_response = self._create_validation_error_response(message)
+        await self._send_system_message(conn_info, error_response)
+    
+    def _create_validation_error_response(self, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Create detailed validation error response."""
+        validation_error = self._last_validation_error
+        error_details = {
+            "type": "error",
+            "error": validation_error.message if validation_error else "Validation failed",
+            "error_type": validation_error.error_type if validation_error else "validation_error",
+            "code": "VALIDATION_ERROR",
+            "timestamp": time.time(),
+            "recoverable": True,
+            "details": self._get_validation_error_details(validation_error, message)
+        }
+        return error_details
+    
+    def _get_validation_error_details(self, validation_error, message: Dict[str, Any]) -> Dict[str, Any]:
+        """Get detailed validation error information."""
+        details = {"received_message_type": type(message).__name__}
+        if validation_error:
+            if hasattr(validation_error, 'field') and validation_error.field:
+                details["invalid_field"] = validation_error.field
+            if hasattr(validation_error, 'error_type'):
+                details["validation_type"] = validation_error.error_type
+        if isinstance(message, dict) and "type" in message:
+            details["message_type"] = message["type"]
+        return details
     
     def get_stats(self) -> Dict[str, int]:
         """Get message processing statistics."""

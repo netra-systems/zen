@@ -58,6 +58,12 @@ class DatabaseConnectionManager:
         except Exception:
             self.clickhouse_client = None
             
+    async def postgres_session(self):
+        """Get PostgreSQL session context manager."""
+        if not self.postgres_pool:
+            raise RuntimeError("PostgreSQL pool not initialized")
+        return self.postgres_pool.acquire()
+
     async def cleanup(self):
         """Close all database connections."""
         await self._cleanup_postgres()

@@ -3,6 +3,8 @@ Auth Service Main Application
 Standalone microservice for authentication
 """
 import os
+from pathlib import Path
+from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +13,17 @@ from fastapi.responses import JSONResponse
 import logging
 from typing import Dict, Any
 from datetime import datetime, UTC
+
+# Load environment variables from .env file
+# Try parent directory first (where main .env is located)
+env_path = Path(__file__).parent.parent / ".env"
+if env_path.exists():
+    load_dotenv(env_path)
+    print(f"Loaded environment from: {env_path}")
+else:
+    # Fallback to current directory
+    load_dotenv()
+    print("Loaded environment from current directory or system")
 
 from auth_core.routes.auth_routes import router as auth_router
 

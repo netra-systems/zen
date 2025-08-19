@@ -141,6 +141,30 @@ class UserManager:
             auth_data = response.json()
             return {"access_token": auth_data["access_token"], "user_created": True}
     
+    async def create_paid_user(self, plan: str = "pro") -> Dict[str, Any]:
+        """Create a paid tier user."""
+        async with httpx.AsyncClient() as client:
+            # First create user
+            auth_response = await client.post(f"{self.auth_base_url}/auth/dev/login")
+            assert auth_response.status_code == 200, f"User creation failed: {auth_response.status_code}"
+            
+            auth_data = auth_response.json()
+            access_token = auth_data["access_token"]
+            
+            # Then upgrade to paid plan
+            headers = {"Authorization": f"Bearer {access_token}"}
+            upgrade_response = await client.post(
+                f"{self.backend_base_url}/api/v1/user/upgrade",
+                headers=headers,
+                json={"plan": plan}
+            )
+            
+            if upgrade_response.status_code == 200:
+                return {"access_token": access_token, "user_created": True, "plan": plan}
+            else:
+                # Return free user if upgrade fails (for testing)
+                return {"access_token": access_token, "user_created": True, "plan": "free"}
+    
     async def upgrade_user_plan(self, auth_token: str, plan: str = "pro") -> Dict[str, Any]:
         """Upgrade user to paid tier."""
         headers = {"Authorization": f"Bearer {auth_token}"}

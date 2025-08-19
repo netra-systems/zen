@@ -89,16 +89,20 @@ def configure_real_llm_if_requested(args, level: str, config: Dict):
         return None
     
     from .test_config import configure_real_llm
-    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel)
-    print_llm_configuration(args, config)
+    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel, test_level=level)
+    print_llm_configuration(real_llm_config, config)
     return real_llm_config
 
-def print_llm_configuration(args, config: Dict):
+def print_llm_configuration(real_llm_config: Dict, config: Dict):
     """Print real LLM configuration details."""
     print(f"[INFO] Real LLM testing enabled")
-    print(f"  - Model: {args.llm_model}")
-    print(f"  - Timeout: {args.llm_timeout}s per call")
-    print(f"  - Parallelism: {args.parallel}")
+    print(f"  - Model: {real_llm_config['model']}")
+    print(f"  - Timeout: {real_llm_config['timeout']}s per call")
+    print(f"  - Parallelism: {real_llm_config['parallel']}")
+    
+    if real_llm_config.get('rate_limit_delay'):
+        print(f"  - Rate limit delay: {real_llm_config['rate_limit_delay']}s between calls")
+    
     adjusted_timeout = config.get('timeout', 300) * 3
     config['timeout'] = adjusted_timeout
     print(f"  - Adjusted test timeout: {adjusted_timeout}s")
