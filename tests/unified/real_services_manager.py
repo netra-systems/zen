@@ -300,5 +300,17 @@ class RealServicesManager:
 
 # Factory function for easy instantiation
 def create_real_services_manager(project_root: Optional[Path] = None) -> RealServicesManager:
-    """Create a real services manager instance."""
-    return RealServicesManager(project_root)
+    """Create a real services manager instance.
+    
+    NOTE: Consider using dev_launcher_real_system.create_dev_launcher_system()
+    for better integration with the actual dev launcher.
+    """
+    # Try to use the new dev_launcher integration if available
+    try:
+        from .dev_launcher_real_system import create_dev_launcher_system
+        logger.info("Using dev_launcher_real_system for service management")
+        return create_dev_launcher_system(skip_frontend=True)
+    except ImportError:
+        # Fallback to traditional approach
+        logger.info("Using traditional RealServicesManager")
+        return RealServicesManager(project_root)
