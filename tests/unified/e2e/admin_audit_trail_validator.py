@@ -17,7 +17,7 @@ REQUIREMENTS:
 """
 import time
 from typing import Dict, Any, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 from .auth_flow_testers import AuthFlowE2ETester
 
@@ -123,7 +123,7 @@ class AdminAuditTrailValidator:
             "action": action,
             "admin_user_id": admin_id,
             "target_user_id": target_id,
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z'),
             "details": {"operation": action, "success": True}
         }
     

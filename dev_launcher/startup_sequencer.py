@@ -316,7 +316,7 @@ def create_launch_phase_steps(service_starter) -> List[PhaseStep]:
 def create_verify_phase_steps(health_checker, cache_mgr, reporter) -> List[PhaseStep]:
     """Create standard VERIFY phase steps."""
     return [
-        PhaseStep("health_check", health_checker.quick_health_check, 1.0, True, False),
+        PhaseStep("health_check", health_checker.run_quick_checks, 1.0, True, False),
         PhaseStep("update_cache", cache_mgr.update_success_cache, 0.5, False, False),
         PhaseStep("show_summary", reporter.show_startup_summary, 1.5, False, False)
     ]

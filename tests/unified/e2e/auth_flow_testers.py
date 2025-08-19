@@ -85,6 +85,9 @@ class AuthFlowE2ETester:
 class MockAPIClient:
     """Mock API client for testing admin operations."""
     
+    def __init__(self):
+        self.suspended_users = set()  # Track suspended users
+    
     async def call_api(self, method: str, endpoint: str, data: Dict = None, headers: Dict = None) -> Dict:
         """Mock API call with basic admin operation simulation."""
         if endpoint == "/admin/users" and method == "GET":
@@ -107,11 +110,19 @@ class MockAPIClient:
     
     def _mock_suspend_user(self, data: Dict) -> Dict:
         """Mock suspend user response."""
-        return {"success": True, "user_id": data.get("user_id"), "action": "suspended"}
+        user_id = data.get("user_id")
+        self.suspended_users.add(user_id)
+        return {"success": True, "user_id": user_id, "action": "suspended"}
     
     def _mock_reactivate_user(self, data: Dict) -> Dict:
         """Mock reactivate user response."""
-        return {"success": True, "user_id": data.get("user_id"), "action": "reactivated"}
+        user_id = data.get("user_id")
+        self.suspended_users.discard(user_id)
+        return {"success": True, "user_id": user_id, "action": "reactivated"}
+    
+    def is_user_suspended(self, user_id: str) -> bool:
+        """Check if user is suspended."""
+        return user_id in self.suspended_users
     
     def _mock_bulk_operation(self, data: Dict) -> Dict:
         """Mock bulk operation response."""
