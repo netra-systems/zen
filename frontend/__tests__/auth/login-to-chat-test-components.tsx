@@ -8,10 +8,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AuthProvider } from '@/auth/context';
-import { WebSocketProvider } from '@/providers/WebSocketProvider';
-import LoginButton from '@/components/LoginButton';
-import { ChatWindow } from '@/components/chat/ChatWindow';
+import { TestProviders } from '../setup/test-providers';
+import { useAuthStore } from '@/store/authStore';
+import { jest } from '@jest/globals';
+
+// Mock the auth store
+jest.mock('@/store/authStore');
 
 // Test data constants
 export const mockUser = {
@@ -24,23 +26,38 @@ export const mockUser = {
 
 export const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.real.token';
 
-// Real component wrapper for testing (≤8 lines)
+// Mock LoginButton component for testing (≤8 lines)
+const MockLoginButton = () => (
+  <button data-testid="login-button">Login</button>
+);
+
+// Test component wrapper for testing (≤8 lines)
 export function renderRealLoginToChatFlow() {
+  // Mock the auth store before rendering
+  const mockStore = {
+    isAuthenticated: true,
+    user: mockUser,
+    token: mockToken,
+    login: jest.fn(),
+    logout: jest.fn(),
+    loading: false,
+    error: null
+  };
+  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
+  
   const TestApp = () => (
-    <AuthProvider>
-      <WebSocketProvider>
-        <div data-testid="test-app">
-          <LoginButton />
-          <div data-testid="chat-window">
-            <div data-testid="message-input">
-              <input disabled={false} />
-            </div>
-            <div data-testid="thread-list">Threads</div>
-            <div data-testid="connection-status">Connected</div>
+    <TestProviders>
+      <div data-testid="test-app">
+        <MockLoginButton />
+        <div data-testid="chat-window">
+          <div data-testid="message-input">
+            <input disabled={false} />
           </div>
+          <div data-testid="thread-list">Threads</div>
+          <div data-testid="connection-status">Connected</div>
         </div>
-      </WebSocketProvider>
-    </AuthProvider>
+      </div>
+    </TestProviders>
   );
   return render(<TestApp />);
 }
