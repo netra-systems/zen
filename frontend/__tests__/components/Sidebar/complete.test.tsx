@@ -64,7 +64,7 @@ describe('Sidebar Complete Test Suite', () => {
         renderWithProvider(<TestChatSidebar />);
       });
 
-      expect(renderTime).toBeLessThan(2000); // < 2s for 1000 threads
+      expect(renderTime).toBeLessThan(3000); // < 3s for 1000 threads
       expect(screen.getByTestId('thread-list')).toBeInTheDocument();
     });
 

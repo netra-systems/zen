@@ -78,17 +78,15 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
     if (token && !isConnectingRef.current) {
       isConnectingRef.current = true;
       
-      const fetchConfigAndConnect = async () => {
+      const connectToWebSocket = async () => {
         try {
-          const response = await fetch(`${appConfig.apiUrl}/api/config`);
-          const config = await response.json();
-          
           // Set up event handlers
           webSocketService.onStatusChange = handleStatusChange;
           webSocketService.onMessage = handleMessage;
           
-          // Connect to WebSocket
-          webSocketService.connect(`${config.ws_url}?token=${token}`);
+          // Connect to WebSocket using configured URL
+          const wsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
+          webSocketService.connect(`${wsUrl}?token=${token}`);
           
           // Store cleanup function
           cleanupRef.current = () => {
@@ -98,16 +96,16 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           };
           
         } catch (error) {
-          logger.error('Failed to fetch config and connect to WebSocket', error as Error, {
+          logger.error('Failed to connect to WebSocket', error as Error, {
             component: 'WebSocketProvider',
-            action: 'fetch_config_and_connect'
+            action: 'connect_websocket'
           });
         } finally {
           isConnectingRef.current = false;
         }
       };
 
-      fetchConfigAndConnect();
+      connectToWebSocket();
     }
 
     return () => {
