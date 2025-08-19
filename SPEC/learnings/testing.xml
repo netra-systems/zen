@@ -604,6 +604,83 @@
                 Real behavior validation: Critical user journeys tested with actual flows
             </verification>
         </learning>
+        <learning id="critical-tests-websocket-patterns">
+            <title>WebSocket Database Session Pattern for FastAPI</title>
+            <problem>
+                FastAPI Depends() doesn't work properly with WebSocket endpoints
+                Causes '_AsyncGeneratorContextManager' errors in production
+                WebSocket endpoints using Depends(get_async_db) fail silently
+            </problem>
+            <solution>
+                WebSocket endpoints must use async context managers directly
+                Pattern: async with get_async_db() as db_session
+                Never use Depends() in WebSocket endpoint parameters
+                Call service factories directly in WebSocket handlers
+            </solution>
+            <files_affected>
+                <file>app/routes/demo.py</file>
+                <file>app/routes/websockets.py</file>
+                <file>tests/unified/e2e/test_websocket_db_session_handling.py</file>
+            </files_affected>
+            <verification>WebSocket DB session tests validate correct patterns</verification>
+        </learning>
+        
+        <learning id="pytest-asyncio-import-pattern">
+            <title>Pytest Asyncio Correct Import Pattern</title>
+            <problem>
+                Tests importing pytest_asyncio.async_test which doesn't exist
+                Should use @pytest.mark.asyncio decorator instead
+            </problem>
+            <solution>
+                Import pytest, not pytest_asyncio for decorators
+                Use @pytest.mark.asyncio for async test functions
+                pytest-asyncio is installed but decorator comes from pytest
+            </solution>
+            <files_affected>
+                <file>tests/unified/e2e/test_oauth_proxy_staging.py</file>
+            </files_affected>
+            <verification>OAuth proxy tests now run without import errors</verification>
+        </learning>
+        
+        <learning id="dev-launcher-real-system-integration">
+            <title>Dev Launcher Real System Integration for Tests</title>
+            <problem>
+                Tests using subprocess to start services causing reliability issues
+                Services not properly coordinated, health checks unreliable
+                Different test suites using different service management approaches
+            </problem>
+            <solution>
+                Created dev_launcher_real_system module for test integration
+                Uses actual DevLauncher with LauncherConfig for consistency
+                Provides proper health monitoring via dev_launcher's HealthMonitor
+                Factory pattern allows gradual migration from old approach
+            </solution>
+            <files_affected>
+                <file>tests/unified/dev_launcher_real_system.py</file>
+                <file>tests/unified/real_services_manager.py</file>
+            </files_affected>
+            <verification>Services start reliably with proper health checking</verification>
+        </learning>
+        
+        <learning id="test-authentication-database-state">
+            <title>Test Authentication Requires Database State</title>
+            <problem>
+                WebSocket and auth tests failing with "User not found" errors
+                Tests assume test users exist in database
+                No automatic test user creation before tests run
+            </problem>
+            <solution>
+                Tests need to create test users in database before authentication
+                Use test fixtures to ensure database has required test data
+                Consider using dev_launcher's create_dev_user functionality
+                Tests should be self-contained with their own data setup
+            </solution>
+            <files_affected>
+                <file>tests/unified/e2e/test_websocket_event_completeness.py</file>
+                <file>tests/unified/e2e/test_cross_service_session_sync.py</file>
+            </files_affected>
+            <verification>Tests pass when database properly seeded with test users</verification>
+        </learning>
     </learnings>
     
     <best_practices>

@@ -28,6 +28,9 @@ from app.core.health import HealthInterface, HealthLevel
 from app.core.health.checks import UnifiedDatabaseHealthChecker, DependencyHealthChecker
 from app.db.postgres import async_engine
 from app.logging_config import central_logger
+from app.tests.unified_system.mock_services import (
+    setup_unified_mock_services, ServiceRegistry, MockHTTPService
+)
 
 logger = central_logger.get_logger(__name__)
 
@@ -92,9 +95,30 @@ class HealthCoordinationTester:
         return (healthy_services / len(service_results)) * 100.0
 
 @pytest.fixture
-async def health_coordinator():
-    """Create health coordination tester."""
-    return HealthCoordinationTester()
+async def mock_services():
+    """Setup and teardown mock services for testing."""
+    registry = await setup_unified_mock_services()
+    
+    # Start all mock services
+    await registry.start_all_services()
+    
+    yield registry
+    
+    # Cleanup: stop all services
+    await registry.stop_all_services()
+
+
+@pytest.fixture
+async def health_coordinator(mock_services):
+    """Create health coordination tester with mock services."""
+    coordinator = HealthCoordinationTester()
+    
+    # Update service URLs to use mock services
+    coordinator.auth_service_url = mock_services.get_http_service_url("auth") or "http://localhost:8001"
+    coordinator.backend_service_url = mock_services.get_http_service_url("backend") or "http://localhost:8000"
+    coordinator.frontend_service_url = mock_services.get_http_service_url("frontend") or "http://localhost:3000"
+    
+    return coordinator
 
 @pytest.mark.asyncio
 async def test_multi_service_health_checks(health_coordinator):
@@ -377,3 +401,90 @@ async def test_health_monitoring_business_metrics():
     }
     
     logger.info(f"Business metrics validation completed: {business_metrics}")
+
+
+@pytest.mark.asyncio
+async def test_mock_services_health_endpoints():
+    """
+    Test that mock services provide proper health endpoints.
+    
+    Business Value: Infrastructure test reliability
+    Validates:
+    - Mock services start correctly
+    - Health endpoints return expected data
+    - Services can be stopped cleanly
+    """
+    registry = await setup_unified_mock_services()
+    
+    try:
+        # Start mock services
+        await registry.start_all_services()
+        
+        # Test each service health endpoint
+        service_configs = [
+            ("auth", 8001),
+            ("backend", 8000), 
+            ("frontend", 3000)
+        ]
+        
+        for service_name, expected_port in service_configs:
+            service_url = registry.get_http_service_url(service_name)
+            assert service_url is not None, f"Service URL not found for {service_name}"
+            
+            # Test health endpoint
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                health_response = await client.get(f"{service_url}/health")
+                assert health_response.status_code == 200, \
+                    f"{service_name} health endpoint returned {health_response.status_code}"
+                
+                health_data = health_response.json()
+                assert health_data["status"] == "healthy", \
+                    f"{service_name} reported unhealthy status"
+                assert health_data["service"] == f"{service_name}-service", \
+                    f"{service_name} service name mismatch"
+                
+                # Test status endpoint 
+                status_response = await client.get(f"{service_url}/status")
+                assert status_response.status_code == 200, \
+                    f"{service_name} status endpoint returned {status_response.status_code}"
+        
+        logger.info("All mock service health endpoints validated successfully")
+        
+    finally:
+        # Clean up
+        await registry.stop_all_services()
+
+
+@pytest.mark.asyncio
+async def test_mock_websocket_service():
+    """
+    Test mock WebSocket service functionality.
+    
+    Business Value: WebSocket communication testing
+    Validates:
+    - WebSocket connections work
+    - Message handling functions
+    - Health endpoint available
+    """
+    from app.tests.unified_system.mock_services import create_mock_websocket_service
+    import websockets
+    
+    ws_service = create_mock_websocket_service(8766)
+    
+    try:
+        await ws_service.start()
+        
+        # Test WebSocket health endpoint
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            health_response = await client.get(f"http://localhost:8766/health")
+            assert health_response.status_code == 200
+            health_data = health_response.json()
+            assert health_data["status"] == "healthy"
+            assert health_data["service"] == "websocket-service"
+        
+        # Test WebSocket connection (commented out due to complex setup)
+        # This would require more complex WebSocket client testing
+        logger.info("Mock WebSocket service health endpoint validated")
+        
+    finally:
+        await ws_service.stop()

@@ -462,6 +462,14 @@ class ServiceRegistry:
         """Register WebSocket server mock."""
         self._services[f"websocket_{name}"] = server
     
+    def register_http_service(self, name: str, service: MockHTTPService) -> None:
+        """Register HTTP service mock."""
+        self._services[f"http_{name}"] = service
+    
+    def register_websocket_service(self, name: str, service: MockWebSocketService) -> None:
+        """Register WebSocket service mock."""
+        self._services[f"ws_{name}"] = service
+    
     async def start_all_services(self) -> None:
         """Start all registered services that have start methods."""
         for name, service in self._services.items():
@@ -479,3 +487,58 @@ class ServiceRegistry:
     def get_service(self, name: str) -> Optional[Any]:
         """Get registered service by name."""
         return self._services.get(name)
+    
+    def get_http_service_url(self, service_name: str) -> Optional[str]:
+        """Get HTTP service URL by name."""
+        service = self._services.get(f"http_{service_name}")
+        if service and hasattr(service, 'url'):
+            return service.url
+        return None
+
+
+# Convenience functions for creating mock services
+def create_mock_auth_service(port: int = 8001) -> MockHTTPService:
+    """Create mock auth service."""
+    return MockHTTPService("auth-service", port)
+
+
+def create_mock_backend_service(port: int = 8000) -> MockHTTPService:
+    """Create mock backend service."""
+    return MockHTTPService("backend-service", port)
+
+
+def create_mock_frontend_service(port: int = 3000) -> MockHTTPService:
+    """Create mock frontend service."""
+    return MockHTTPService("frontend-service", port)
+
+
+def create_mock_websocket_service(port: int = 8765) -> MockWebSocketService:
+    """Create mock WebSocket service."""
+    return MockWebSocketService(port=port)
+
+
+async def setup_unified_mock_services() -> ServiceRegistry:
+    """Setup complete mock service environment for unified testing."""
+    registry = ServiceRegistry()
+    
+    # Register HTTP services
+    auth_service = create_mock_auth_service(8001)
+    backend_service = create_mock_backend_service(8000)
+    frontend_service = create_mock_frontend_service(3000)
+    
+    registry.register_http_service("auth", auth_service)
+    registry.register_http_service("backend", backend_service)
+    registry.register_http_service("frontend", frontend_service)
+    
+    # Register WebSocket service
+    ws_service = create_mock_websocket_service(8765)
+    registry.register_websocket_service("main", ws_service)
+    
+    # Register other mock services
+    oauth_provider = MockOAuthProvider("google")
+    llm_service = MockLLMService("mock-gpt-4")
+    
+    registry.register_oauth_provider("google", oauth_provider)
+    registry.register_llm_service("openai", llm_service)
+    
+    return registry
