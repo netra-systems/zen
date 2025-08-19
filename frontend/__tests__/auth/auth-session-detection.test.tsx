@@ -1,7 +1,6 @@
 /**
- * Auth Session Timeout Tests - Elite Edge Case Coverage
- * ====================================================
- * Tests session timeout handling, auto-logout, and cleanup mechanisms
+ * Auth Session Detection Tests
+ * Tests session expiry detection and warning system
  * 
  * BVJ: Enterprise segment - prevents security breaches, ensures compliance
  * Architecture: ≤300 lines, functions ≤8 lines
@@ -31,9 +30,8 @@ jest.mock('@/store/authStore');
 // Session timeout constants
 const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
 const WARNING_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes before timeout
-const CHECK_INTERVAL_MS = 60 * 1000; // Check every minute
 
-describe('Auth Session Timeout Handling', () => {
+describe('Auth Session Detection', () => {
   let mocks: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthStore: any;
   let realDateNow: typeof Date.now;
@@ -50,11 +48,9 @@ describe('Auth Session Timeout Handling', () => {
     
     require('@/store/authStore').useAuthStore.mockReturnValue(mockAuthStore);
     
-    // Mock Date.now for time-based tests
     realDateNow = Date.now;
     Date.now = jest.fn();
     
-    // Setup basic auth config
     const mockConfig = createMockAuthConfig();
     (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockConfig);
   });
@@ -138,7 +134,6 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Advance time past expiry
       await act(async () => {
         advanceTimeBy(SESSION_TIMEOUT_MS + 1000);
       });
@@ -173,12 +168,10 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Advance to warning threshold
       await act(async () => {
         advanceTimeBy(WARNING_THRESHOLD_MS - 1000);
       });
 
-      // Should warn about upcoming expiry
       await waitFor(() => {
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringMatching(/session.*expir/i),
@@ -199,10 +192,8 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Simulate user activity during warning period
       await act(async () => {
         advanceTimeBy(WARNING_THRESHOLD_MS - 2000);
-        // User activity should trigger extension
         const appContent = screen.getByTestId('app-content');
         await userEvent.click(appContent);
       });
@@ -245,178 +236,16 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Advance time and check countdown
       await act(async () => {
         advanceTimeBy(5 * 60 * 1000); // 5 minutes
       });
 
       await waitFor(() => {
-        // Should log remaining time
         expect(logger.debug).toHaveBeenCalledWith(
           expect.stringMatching(/session.*remaining/i),
           expect.any(Object)
         );
       });
-    });
-  });
-
-  describe('Auto-Logout Mechanism', () => {
-    it('should automatically logout on session expiry', async () => {
-      jest.useFakeTimers();
-      const expiryTime = Date.now() + 1000; // 1 second
-      setupTokenWithExpiry(expiryTime);
-      
-      await act(async () => {
-        renderWithSession();
-      });
-
-      // Advance past expiry
-      await act(async () => {
-        advanceTimeBy(2000);
-      });
-
-      await waitFor(() => {
-        expect(authService.removeToken).toHaveBeenCalled();
-        expect(mockAuthStore.logout).toHaveBeenCalled();
-      });
-    });
-
-    it('should clear all session data on auto-logout', async () => {
-      jest.useFakeTimers();
-      const expiryTime = Date.now() + 1000;
-      setupTokenWithExpiry(expiryTime);
-      
-      await act(async () => {
-        renderWithSession();
-      });
-
-      await act(async () => {
-        advanceTimeBy(2000);
-      });
-
-      await waitFor(() => {
-        expect(mocks.localStorageMock.removeItem).toHaveBeenCalledWith('jwt_token');
-        expect(mockAuthStore.reset).toHaveBeenCalled();
-      });
-    });
-
-    it('should redirect to login after auto-logout', async () => {
-      jest.useFakeTimers();
-      const expiryTime = Date.now() + 1000;
-      setupTokenWithExpiry(expiryTime);
-      
-      await act(async () => {
-        renderWithSession();
-      });
-
-      await act(async () => {
-        advanceTimeBy(2000);
-      });
-
-      await waitFor(() => {
-        expect(mocks.locationUtils.mockLocationAssign).toHaveBeenCalledWith('/');
-      });
-    });
-
-    it('should handle concurrent logout attempts gracefully', async () => {
-      jest.useFakeTimers();
-      const expiryTime = Date.now() + 1000;
-      setupTokenWithExpiry(expiryTime);
-      
-      await act(async () => {
-        renderWithSession();
-      });
-
-      // Simulate multiple logout triggers
-      await act(async () => {
-        advanceTimeBy(2000);
-        // Manual logout during auto-logout
-        mockAuthStore.logout();
-      });
-
-      await waitFor(() => {
-        // Should only logout once
-        expect(authService.removeToken).toHaveBeenCalledTimes(1);
-      });
-    });
-  });
-
-  describe('Session Monitoring Performance', () => {
-    it('should monitor session efficiently', async () => {
-      jest.useFakeTimers();
-      const futureTime = Date.now() + SESSION_TIMEOUT_MS;
-      setupTokenWithExpiry(futureTime);
-      
-      const startTime = performance.now();
-      
-      await act(async () => {
-        renderWithSession();
-        advanceTimeBy(CHECK_INTERVAL_MS * 5); // 5 minutes
-      });
-
-      const endTime = performance.now();
-      const totalTime = endTime - startTime;
-      
-      expect(totalTime).toBeLessThan(100); // Should be very fast
-    });
-
-    it('should not cause memory leaks during monitoring', async () => {
-      jest.useFakeTimers();
-      const futureTime = Date.now() + SESSION_TIMEOUT_MS;
-      setupTokenWithExpiry(futureTime);
-      
-      await act(async () => {
-        renderWithSession();
-      });
-
-      // Simulate long session monitoring
-      await act(async () => {
-        for (let i = 0; i < 10; i++) {
-          advanceTimeBy(CHECK_INTERVAL_MS);
-        }
-      });
-
-      // Should not accumulate timers or listeners
-      expect(jest.getTimerCount()).toBeLessThan(5);
-    });
-
-    it('should cleanup timers on unmount', async () => {
-      jest.useFakeTimers();
-      const futureTime = Date.now() + SESSION_TIMEOUT_MS;
-      setupTokenWithExpiry(futureTime);
-      
-      const { unmount } = await act(async () => {
-        return renderWithSession();
-      });
-
-      await act(async () => {
-        unmount();
-      });
-
-      // All timers should be cleared
-      expect(jest.getTimerCount()).toBe(0);
-    });
-
-    it('should handle rapid session checks without performance impact', async () => {
-      jest.useFakeTimers();
-      const futureTime = Date.now() + SESSION_TIMEOUT_MS;
-      setupTokenWithExpiry(futureTime);
-      
-      await act(async () => {
-        renderWithSession();
-      });
-
-      const startTime = performance.now();
-      
-      // Rapid session checks
-      await act(async () => {
-        for (let i = 0; i < 100; i++) {
-          advanceTimeBy(1000); // Check every second
-        }
-      });
-
-      const endTime = performance.now();
-      expect(endTime - startTime).toBeLessThan(500);
     });
   });
 
@@ -430,13 +259,11 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Simulate system clock jump backwards
       await act(async () => {
         (Date.now as jest.Mock).mockReturnValue(Date.now() - (24 * 60 * 60 * 1000));
         advanceTimeBy(1000);
       });
 
-      // Should handle gracefully without immediate logout
       await waitFor(() => {
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringMatching(/clock.*change/i),
@@ -450,14 +277,13 @@ describe('Auth Session Timeout Handling', () => {
       const futureTime = Date.now() + SESSION_TIMEOUT_MS;
       setupTokenWithExpiry(futureTime);
       
-      // Mock network failure
       (authService as any).validateSession = jest.fn().mockRejectedValue(
         new Error('Network error')
       );
 
       await act(async () => {
         renderWithSession();
-        advanceTimeBy(CHECK_INTERVAL_MS);
+        advanceTimeBy(60 * 1000); // 1 minute
       });
 
       await waitFor(() => {
@@ -479,7 +305,6 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Should not crash, should use default timeout
       await waitFor(() => {
         expect(logger.warn).toHaveBeenCalledWith(
           expect.stringMatching(/missing.*expiry/i),
@@ -497,7 +322,6 @@ describe('Auth Session Timeout Handling', () => {
         renderWithSession();
       });
 
-      // Simulate tab becoming hidden
       Object.defineProperty(document, 'hidden', { value: true, writable: true });
       document.dispatchEvent(new Event('visibilitychange'));
 
@@ -505,7 +329,6 @@ describe('Auth Session Timeout Handling', () => {
         advanceTimeBy(SESSION_TIMEOUT_MS + 1000);
       });
 
-      // Should still logout when tab is hidden
       await waitFor(() => {
         expect(mockAuthStore.logout).toHaveBeenCalled();
       });

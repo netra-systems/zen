@@ -24,38 +24,14 @@ jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: jest.fn()
 }));
 
-// Mock UI components
-jest.mock('@/components/chat/ChatHeader', () => ({
-  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
-}));
-
-jest.mock('@/components/chat/MessageList', () => ({
-  MessageList: () => <div data-testid="message-list">Message List</div>
-}));
-
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => <div data-testid="message-input">Message Input</div>
-}));
-
-jest.mock('@/components/chat/PersistentResponseCard', () => ({
-  PersistentResponseCard: ({ isCollapsed, onToggleCollapse }: any) => (
-    <div data-testid="response-card" data-collapsed={isCollapsed}>
-      <button onClick={onToggleCollapse}>Toggle</button>
-      Response Card
-    </div>
-  )
-}));
-
-jest.mock('@/components/chat/ExamplePrompts', () => ({
-  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
-}));
-
-jest.mock('@/components/chat/OverflowPanel', () => ({
-  OverflowPanel: () => <div data-testid="overflow-panel">Overflow Panel</div>
-}));
-
-jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
-  EventDiagnosticsPanel: () => <div data-testid="event-diagnostics">Event Diagnostics</div>
+// Mock utility services but NOT UI components
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn()
+  }
 }));
 
 // Mock framer-motion
@@ -187,7 +163,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       rerender(<MainChat />);
       
       // Component should still render without errors
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
     it('should handle WebSocket errors gracefully', () => {
@@ -200,8 +176,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       render(<MainChat />);
       
       // Component should still render
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-      expect(screen.getByTestId('message-input')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     it('should reconnect WebSocket on error', async () => {
@@ -249,7 +225,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       }
       
       // Component should remain stable
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
   });
 
@@ -287,7 +263,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       rerender(<MainChat />);
       
       // Should render normally after recovery
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
 
     it('should handle message processing errors', () => {
@@ -300,8 +276,8 @@ describe('MainChat - WebSocket Connection Tests', () => {
       render(<MainChat />);
       
       // Should still render UI
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-      expect(screen.getByTestId('message-input')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
+      expect(screen.getByRole('textbox')).toBeInTheDocument();
     });
 
     it('should retry failed operations', async () => {
@@ -351,7 +327,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       render(<MainChat />);
       
       // Messages should still be displayed
-      expect(screen.getByTestId('message-list')).toBeInTheDocument();
+      expect(screen.getByRole('list')).toBeInTheDocument();
     });
 
     it('should handle network interruptions', async () => {
@@ -372,7 +348,7 @@ describe('MainChat - WebSocket Connection Tests', () => {
       });
       
       // Component should remain functional
-      expect(screen.getByTestId('chat-header')).toBeInTheDocument();
+      expect(screen.getByRole('banner')).toBeInTheDocument();
     });
   });
 });

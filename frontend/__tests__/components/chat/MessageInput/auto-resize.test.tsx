@@ -75,58 +75,59 @@ describe('MessageInput - Auto-resize Textarea Behavior', () => {
       await verifyMaxRowsRespected(textarea);
     });
 
-    it('should reset to single row after sending', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      // Set multiline content directly to ensure it works
-      const multilineText = 'Line 1\nLine 2';
-      fireEvent.change(textarea, { target: { value: multilineText } });
-      
-      await waitFor(() => {
-        expect(textarea.rows).toBeGreaterThan(1);
-        expect(textarea.value).toBe(multilineText);
-      });
-      
-      // Send message by pressing Enter
-      fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
-      
+    const verifyTextareaReset = async (textarea: HTMLTextAreaElement) => {
       await waitFor(() => {
         expect(textarea.rows).toBe(1);
         expect(textarea.value).toBe('');
       });
+    };
+
+    it('should reset to single row after sending', async () => {
+      renderMessageInput();
+      const textarea = getTextarea();
+      const multilineText = 'Line 1\nLine 2';
+      setMultilineContent(textarea, multilineText);
+      await verifyTextareaExpanded(textarea, multilineText);
+      fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+      await verifyTextareaReset(textarea);
     });
+
+    const pasteMultilineContent = async (textarea: HTMLTextAreaElement, text: string) => {
+      await userEvent.click(textarea);
+      await userEvent.paste(text);
+    };
+
+    const verifyPastedContent = async (textarea: HTMLTextAreaElement, text: string) => {
+      await waitFor(() => {
+        expect(textarea.value).toBe(text);
+        expect(textarea.rows).toBeGreaterThan(1);
+        expect(textarea.rows).toBeLessThanOrEqual(5);
+      });
+    };
 
     it('should handle paste of multiline content', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
+      renderMessageInput();
+      const textarea = getTextarea();
       const multilineText = 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5';
-      
-      // Simulate paste
-      await userEvent.click(textarea);
-      await userEvent.paste(multilineText);
-      
-      await waitFor(() => {
-        expect(textarea.value).toBe(multilineText);
-        expect(textarea.rows).toBeGreaterThan(1);
-        expect(textarea.rows).toBeLessThanOrEqual(5); // MAX_ROWS
-      });
+      await pasteMultilineContent(textarea, multilineText);
+      await verifyPastedContent(textarea, multilineText);
     });
 
-    it('should maintain scroll position during resize', async () => {
-      render(<MessageInput />);
-      const textarea = screen.getByPlaceholderText(/Type a message/i) as HTMLTextAreaElement;
-      
-      // Type content
+    const typeInitialContent = async (textarea: HTMLTextAreaElement) => {
       await userEvent.type(textarea, 'First line');
-      const initialScrollTop = textarea.scrollTop;
-      
-      // Add more content
+      return textarea.scrollTop;
+    };
+
+    const addMoreContent = async (textarea: HTMLTextAreaElement) => {
       await userEvent.type(textarea, '{shift>}{enter}{/shift}');
       await userEvent.type(textarea, 'Second line');
-      
-      // Scroll position should be maintained
+    };
+
+    it('should maintain scroll position during resize', async () => {
+      renderMessageInput();
+      const textarea = getTextarea();
+      const initialScrollTop = await typeInitialContent(textarea);
+      await addMoreContent(textarea);
       expect(textarea.scrollTop).toBeGreaterThanOrEqual(initialScrollTop);
     });
   });

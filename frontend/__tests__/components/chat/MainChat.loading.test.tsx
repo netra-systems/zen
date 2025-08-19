@@ -32,26 +32,14 @@ jest.mock('@/hooks/useEventProcessor', () => ({
 jest.mock('@/hooks/useThreadNavigation', () => ({
   useThreadNavigation: jest.fn()
 }));
-jest.mock('@/components/chat/ChatHeader', () => ({
-  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
-}));
-jest.mock('@/components/chat/MessageList', () => ({
-  MessageList: () => <div data-testid="message-list">Message List</div>
-}));
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => <div data-testid="message-input">Message Input</div>
-}));
-jest.mock('@/components/chat/ExamplePrompts', () => ({
-  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
-}));
-jest.mock('@/components/chat/PersistentResponseCard', () => ({
-  PersistentResponseCard: () => <div data-testid="response-card">Response Card</div>
-}));
-jest.mock('@/components/chat/OverflowPanel', () => ({
-  OverflowPanel: () => null
-}));
-jest.mock('@/components/chat/EventDiagnosticsPanel', () => ({
-  EventDiagnosticsPanel: () => null
+// Mock utility services but NOT UI components  
+jest.mock('@/utils/debug-logger', () => ({
+  logger: {
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn()
+  }
 }));
 
 describe('MainChat Loading States', () => {
@@ -132,9 +120,9 @@ describe('MainChat Loading States', () => {
     // Should show loading spinner
     expect(screen.getByText('Loading chat...')).toBeInTheDocument();
     // Should not show other components
-    expect(screen.queryByTestId('chat-header')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('message-list')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+    expect(screen.queryByRole('banner')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    expect(screen.queryByText(/explore these examples/i)).not.toBeInTheDocument();
   });
 
   /**
@@ -166,9 +154,9 @@ describe('MainChat Loading States', () => {
     render(<MainChat />);
 
     // Should show main UI components
-    expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-    expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
-    expect(screen.getByTestId('message-input')).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
     
     // Should not show loading
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
@@ -195,12 +183,12 @@ describe('MainChat Loading States', () => {
     expect(screen.getByText(/Create a new conversation/)).toBeInTheDocument();
     
     // Should show main UI components
-    expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-    expect(screen.getByTestId('message-input')).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
     
     // Should not show loading or example prompts
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+    expect(screen.queryByText(/explore these examples/i)).not.toBeInTheDocument();
   });
 
   /**
@@ -244,11 +232,11 @@ describe('MainChat Loading States', () => {
     render(<MainChat />);
 
     // Should show message list
-    expect(screen.getByTestId('message-list')).toBeInTheDocument();
+    expect(screen.getByRole('list')).toBeInTheDocument();
     
     // Should not show loading or example prompts
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+    expect(screen.queryByText(/explore these examples/i)).not.toBeInTheDocument();
   });
 
   /**
@@ -282,8 +270,8 @@ describe('MainChat Loading States', () => {
     expect(screen.getByText('Loading thread messages...')).toBeInTheDocument();
     
     // Should not show other content
-    expect(screen.queryByTestId('message-list')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('example-prompts')).not.toBeInTheDocument();
+    expect(screen.queryByRole('list')).not.toBeInTheDocument();
+    expect(screen.queryByText(/explore these examples/i)).not.toBeInTheDocument();
   });
 
   /**
@@ -314,10 +302,10 @@ describe('MainChat Loading States', () => {
     render(<MainChat />);
 
     // Should show response card for processing
-    expect(screen.getByTestId('response-card')).toBeInTheDocument();
+    expect(screen.getByText(/response card/i)).toBeInTheDocument();
     
     // Should also show message list
-    expect(screen.getByTestId('message-list')).toBeInTheDocument();
+    expect(screen.getByRole('list')).toBeInTheDocument();
     
     // Should not show loading spinner
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
@@ -374,7 +362,7 @@ describe('MainChat Loading States', () => {
 
     await waitFor(() => {
       expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
-      expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+      expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
     });
   });
 
@@ -419,7 +407,7 @@ describe('MainChat Loading States', () => {
 
     // Final state should be correct
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
-    expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+    expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
   });
 
   /**
@@ -461,10 +449,10 @@ describe('MainChat Loading States', () => {
     expect(screen.queryByText('Loading chat...')).not.toBeInTheDocument();
     
     // Should show example prompts for empty thread
-    expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+    expect(screen.getByText(/explore these examples/i)).toBeInTheDocument();
     
     // Should show all UI components
-    expect(screen.getByTestId('chat-header')).toBeInTheDocument();
-    expect(screen.getByTestId('message-input')).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toBeInTheDocument();
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
 });

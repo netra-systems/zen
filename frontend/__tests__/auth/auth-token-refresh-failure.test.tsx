@@ -1,15 +1,13 @@
 /**
- * Auth Token Refresh Tests - Elite Edge Case Coverage
- * ==================================================
- * Tests token refresh during active sessions, automatic refresh, and failure handling
+ * Auth Token Refresh Failure Handling Tests
+ * Tests failure handling, persistence, and performance scenarios
  * 
- * BVJ: Enterprise segment - ensures seamless user experience, prevents auth interruptions
+ * BVJ: Enterprise segment - ensures robust error handling and optimal performance
  * Architecture: ≤300 lines, functions ≤8 lines
  */
 
 import React from 'react';
 import { render, screen, waitFor, act } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { AuthProvider } from '@/auth/context';
 import { authService } from '@/auth/service';
 import { jwtDecode } from 'jwt-decode';
@@ -18,9 +16,7 @@ import '@testing-library/jest-dom';
 import {
   setupAuthTestEnvironment,
   createMockAuthConfig,
-  createMockToken,
-  createSuccessResponse,
-  createErrorResponse
+  createMockToken
 } from './auth-test-utils';
 
 // Mock dependencies
@@ -31,11 +27,10 @@ jest.mock('@/store/authStore');
 jest.mock('@/lib/auth-service-config');
 
 // Token refresh constants
-const REFRESH_THRESHOLD_MS = 5 * 60 * 1000; // Refresh 5 minutes before expiry
 const REFRESH_RETRY_DELAY_MS = 1000; // 1 second retry delay
 const MAX_REFRESH_RETRIES = 3;
 
-describe('Auth Token Refresh During Activity', () => {
+describe('Auth Token Refresh Failure Handling', () => {
   let mocks: ReturnType<typeof setupAuthTestEnvironment>;
   let mockAuthStore: any;
   let realDateNow: typeof Date.now;
@@ -53,16 +48,12 @@ describe('Auth Token Refresh During Activity', () => {
     
     require('@/store/authStore').useAuthStore.mockReturnValue(mockAuthStore);
     
-    // Mock Date.now for time-based tests
     realDateNow = Date.now;
     Date.now = jest.fn().mockReturnValue(Date.now());
     
-    // Setup auth service client mocks
     const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
     mockAuthServiceClient.refreshToken = jest.fn();
-    mockAuthServiceClient.validateToken = jest.fn();
     
-    // Setup basic auth config
     const mockConfig = createMockAuthConfig();
     (authService.getAuthConfig as jest.Mock).mockResolvedValue(mockConfig);
   });
@@ -88,21 +79,6 @@ describe('Auth Token Refresh During Activity', () => {
     return { mockToken, mockUser, expiryTime };
   };
 
-  const createRefreshedToken = () => {
-    const newExpiryTime = Date.now() + (30 * 60 * 1000); // 30 minutes
-    const refreshedUser = {
-      id: 'test-user',
-      email: 'test@example.com',
-      exp: Math.floor(newExpiryTime / 1000)
-    };
-    
-    return {
-      token: 'new-jwt-token-123',
-      user: refreshedUser,
-      expiryTime: newExpiryTime
-    };
-  };
-
   const renderWithTokenRefresh = () => {
     return render(
       <AuthProvider>
@@ -116,207 +92,6 @@ describe('Auth Token Refresh During Activity', () => {
     (Date.now as jest.Mock).mockReturnValue(currentTime + milliseconds);
     jest.advanceTimersByTime(milliseconds);
   };
-
-  describe('Automatic Token Refresh', () => {
-    it('should refresh token before expiry threshold', async () => {
-      jest.useFakeTimers();
-      createExpiringToken(6); // 6 minutes until expiry
-      
-      const refreshedData = createRefreshedToken();
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockResolvedValue({
-        access_token: refreshedData.token,
-        expires_in: 1800
-      });
-
-      await act(async () => {
-        renderWithTokenRefresh();
-      });
-
-      // Advance to refresh threshold
-      await act(async () => {
-        advanceTimeBy(2 * 60 * 1000); // 2 minutes - should trigger refresh
-      });
-
-      await waitFor(() => {
-        expect(mockAuthServiceClient.refreshToken).toHaveBeenCalled();
-        expect(mocks.localStorageMock.setItem).toHaveBeenCalledWith(
-          'jwt_token',
-          refreshedData.token
-        );
-      });
-    });
-
-    it('should update auth store with refreshed token', async () => {
-      jest.useFakeTimers();
-      createExpiringToken(4); // 4 minutes until expiry
-      
-      const refreshedData = createRefreshedToken();
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockResolvedValue({
-        access_token: refreshedData.token,
-        expires_in: 1800
-      });
-
-      await act(async () => {
-        renderWithTokenRefresh();
-        advanceTimeBy(1000); // Trigger refresh check
-      });
-
-      await waitFor(() => {
-        expect(mockAuthStore.updateToken).toHaveBeenCalledWith(refreshedData.token);
-      });
-    });
-
-    it('should refresh token on user activity near expiry', async () => {
-      jest.useFakeTimers();
-      createExpiringToken(3); // 3 minutes until expiry
-      
-      const refreshedData = createRefreshedToken();
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockResolvedValue({
-        access_token: refreshedData.token,
-        expires_in: 1800
-      });
-
-      await act(async () => {
-        renderWithTokenRefresh();
-      });
-
-      // User activity should trigger refresh
-      await act(async () => {
-        const appContent = screen.getByTestId('app-content');
-        await userEvent.click(appContent);
-      });
-
-      await waitFor(() => {
-        expect(mockAuthServiceClient.refreshToken).toHaveBeenCalled();
-      });
-    });
-
-    it('should not refresh if token has sufficient time remaining', async () => {
-      jest.useFakeTimers();
-      createExpiringToken(10); // 10 minutes until expiry - no refresh needed
-      
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-
-      await act(async () => {
-        renderWithTokenRefresh();
-        advanceTimeBy(1000);
-      });
-
-      await waitFor(() => {
-        expect(mockAuthServiceClient.refreshToken).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('Token Refresh on API Calls', () => {
-    it('should refresh token before making authenticated API calls', async () => {
-      createExpiringToken(4); // 4 minutes until expiry
-      
-      const refreshedData = createRefreshedToken();
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockResolvedValue({
-        access_token: refreshedData.token,
-        expires_in: 1800
-      });
-
-      // Mock API call that requires auth
-      mocks.fetchMock.mockResolvedValue(createSuccessResponse({ data: 'test' }));
-      
-      await act(async () => {
-        renderWithTokenRefresh();
-      });
-
-      // Simulate authenticated API call
-      await act(async () => {
-        await fetch('/api/protected', {
-          headers: authService.getAuthHeaders()
-        });
-      });
-
-      await waitFor(() => {
-        expect(mockAuthServiceClient.refreshToken).toHaveBeenCalled();
-      });
-    });
-
-    it('should retry API call with refreshed token', async () => {
-      createExpiringToken(2); // 2 minutes until expiry
-      
-      const refreshedData = createRefreshedToken();
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockResolvedValue({
-        access_token: refreshedData.token,
-        expires_in: 1800
-      });
-
-      // First call fails with 401, second succeeds
-      mocks.fetchMock
-        .mockResolvedValueOnce(createErrorResponse(401, 'Unauthorized'))
-        .mockResolvedValueOnce(createSuccessResponse({ data: 'success' }));
-
-      await act(async () => {
-        renderWithTokenRefresh();
-      });
-
-      // Should retry with new token
-      await waitFor(() => {
-        expect(mocks.fetchMock).toHaveBeenCalledTimes(2);
-        expect(mockAuthServiceClient.refreshToken).toHaveBeenCalled();
-      });
-    });
-
-    it('should handle 401 responses by triggering token refresh', async () => {
-      createExpiringToken(10); // Valid token but server rejects
-      
-      const refreshedData = createRefreshedToken();
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockResolvedValue({
-        access_token: refreshedData.token,
-        expires_in: 1800
-      });
-
-      mocks.fetchMock.mockResolvedValue(createErrorResponse(401, 'Token expired'));
-
-      await act(async () => {
-        renderWithTokenRefresh();
-        // Simulate API call that returns 401
-        await fetch('/api/test');
-      });
-
-      await waitFor(() => {
-        expect(mockAuthServiceClient.refreshToken).toHaveBeenCalled();
-      });
-    });
-
-    it('should prevent multiple concurrent refresh attempts', async () => {
-      createExpiringToken(3); // 3 minutes until expiry
-      
-      const mockAuthServiceClient = require('@/lib/auth-service-config').authService;
-      mockAuthServiceClient.refreshToken.mockImplementation(() => 
-        new Promise(resolve => setTimeout(resolve, 1000))
-      );
-
-      await act(async () => {
-        renderWithTokenRefresh();
-      });
-
-      // Trigger multiple refresh attempts
-      await act(async () => {
-        Promise.all([
-          fetch('/api/test1'),
-          fetch('/api/test2'),
-          fetch('/api/test3')
-        ]);
-      });
-
-      await waitFor(() => {
-        // Should only call refresh once despite multiple triggers
-        expect(mockAuthServiceClient.refreshToken).toHaveBeenCalledTimes(1);
-      });
-    });
-  });
 
   describe('Token Refresh Failure Handling', () => {
     it('should logout user on refresh failure', async () => {
@@ -358,7 +133,6 @@ describe('Auth Token Refresh During Activity', () => {
         renderWithTokenRefresh();
       });
 
-      // Should retry with backoff
       await act(async () => {
         for (let i = 0; i < MAX_REFRESH_RETRIES; i++) {
           advanceTimeBy(REFRESH_RETRY_DELAY_MS * Math.pow(2, i));
@@ -545,14 +319,12 @@ describe('Auth Token Refresh During Activity', () => {
 
       await act(async () => {
         renderWithTokenRefresh();
-        // Multiple rapid refresh triggers
         for (let i = 0; i < 5; i++) {
           advanceTimeBy(100);
         }
       });
 
       await waitFor(() => {
-        // Should deduplicate refresh attempts
         expect(refreshCount).toBeLessThanOrEqual(2);
       });
     });
@@ -564,7 +336,6 @@ describe('Auth Token Refresh During Activity', () => {
       
       await act(async () => {
         renderWithTokenRefresh();
-        // Simulate frequent validation checks
         for (let i = 0; i < 50; i++) {
           authService.getAuthHeaders();
         }

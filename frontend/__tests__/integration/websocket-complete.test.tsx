@@ -1,6 +1,7 @@
 /**
- * WebSocket Complete Integration Tests
+ * WebSocket Complete Integration Tests - Real Behavior Simulation
  * Tests complete WebSocket connection lifecycle with realistic conditions
+ * Replaces excessive jest.fn() mocking with real WebSocket behavior simulation
  * Agent 10 Implementation - P1 Priority for real-time communication
  */
 
@@ -9,14 +10,18 @@ import { render, screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
-import { WebSocketTestManager } from '../helpers/websocket-test-manager';
+import { WebSocketTestManager, createWebSocketManager, createMultipleWebSocketManagers } from '../helpers/websocket-test-manager';
 import {
   WebSocketConnectionLifecycle,
   MessageMetrics,
   ConnectionStateManager,
   MessageBuffer,
   generateLargeMessage,
-  measurePerformance
+  measurePerformance,
+  TestWebSocket,
+  AdvancedWebSocketTester,
+  measureConnectionTime,
+  measureMessageLatency
 } from '../helpers/websocket-test-utilities';
 
 // Test component for WebSocket lifecycle
@@ -96,120 +101,198 @@ const WebSocketLifecycleTest: React.FC = () => {
 
 // Utilities imported from websocket-test-utilities.ts
 
-describe('WebSocket Complete Integration Tests', () => {
+describe('WebSocket Complete Integration Tests - Real Behavior', () => {
   let wsManager: WebSocketTestManager;
   let stateManager: ConnectionStateManager;
   let messageBuffer: MessageBuffer;
+  let advancedTester: AdvancedWebSocketTester;
 
   beforeEach(() => {
-    wsManager = new WebSocketTestManager();
-    stateManager = new ConnectionStateManager();
-    messageBuffer = new MessageBuffer();
+    // Use real WebSocket simulation instead of mocks
+    wsManager = createWebSocketManager(undefined, true);
+    stateManager = wsManager.getStateManager();
+    messageBuffer = wsManager.getMessageBuffer();
+    advancedTester = new AdvancedWebSocketTester();
     wsManager.setup();
   });
 
   afterEach(() => {
     wsManager.cleanup();
+    advancedTester.closeAllConnections();
+    advancedTester.clearLog();
     jest.clearAllMocks();
   });
 
-  describe('Connection Lifecycle', () => {
-    it('should handle complete connection lifecycle', async () => {
+  describe('Real Connection Lifecycle Simulation', () => {
+    it('should handle complete connection lifecycle with real timing', async () => {
       render(
         <TestProviders>
           <WebSocketLifecycleTest />
         </TestProviders>
       );
 
-      // Start connecting
-      await userEvent.click(screen.getByTestId('btn-connecting'));
-      expect(screen.getByTestId('ws-connecting')).toHaveTextContent('true');
+      // Wait for real connection
+      await waitFor(() => {
+        expect(wsManager.getConnectionState()).toBe('connected');
+      }, { timeout: 2000 });
 
-      // Become connected
-      await userEvent.click(screen.getByTestId('btn-connected'));
-      expect(screen.getByTestId('ws-connected')).toHaveTextContent('true');
+      // Verify real connection state
+      expect(wsManager.isReady()).toBe(true);
+      expect(wsManager.getConnectionHistory()).toContainEqual(
+        expect.objectContaining({ event: 'open' })
+      );
 
-      // Handle disconnection
-      await userEvent.click(screen.getByTestId('btn-disconnected'));
-      expect(screen.getByTestId('ws-disconnected')).toHaveTextContent('true');
+      // Test real disconnection
+      wsManager.close(1000, 'Test close');
+      
+      await waitFor(() => {
+        expect(wsManager.getConnectionState()).toBe('disconnected');
+      });
     });
 
-    it('should handle connection errors', async () => {
+    it('should handle real connection errors with proper state transitions', async () => {
       render(
         <TestProviders>
           <WebSocketLifecycleTest />
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('btn-error'));
-      expect(screen.getByTestId('ws-error')).toHaveTextContent('true');
+      // Simulate real error
+      wsManager.simulateError(new Error('Connection failed'));
+      
+      await waitFor(() => {
+        expect(wsManager.getConnectionState()).toBe('error');
+      });
+      
+      expect(wsManager.getConnectionHistory()).toContainEqual(
+        expect.objectContaining({ event: 'error' })
+      );
     });
 
-    it('should handle reconnection attempts', async () => {
+    it('should handle real reconnection with timing simulation', async () => {
       render(
         <TestProviders>
           <WebSocketLifecycleTest />
         </TestProviders>
       );
 
-      await userEvent.click(screen.getByTestId('btn-reconnecting'));
-      expect(screen.getByTestId('ws-reconnecting')).toHaveTextContent('true');
+      // Wait for initial connection
+      await wsManager.waitForConnection();
+      expect(wsManager.isReady()).toBe(true);
+
+      // Test real reconnection
+      wsManager.simulateReconnect();
+      
+      await waitFor(() => {
+        expect(wsManager.getConnectionState()).toBe('reconnecting');
+      });
+      
+      await waitFor(() => {
+        expect(wsManager.getConnectionState()).toBe('connected');
+      }, { timeout: 1000 });
     });
 
-    it('should track connection state transitions', () => {
-      stateManager.setState('connecting');
-      expect(stateManager.getState()).toBe('connecting');
-
-      stateManager.setState('connected');
+    it('should track real connection state transitions with history', async () => {
+      // Test real state transitions
+      await wsManager.waitForConnection();
       expect(stateManager.getState()).toBe('connected');
+      
+      wsManager.close();
+      await waitFor(() => {
+        expect(stateManager.getState()).toBe('disconnected');
+      });
+      
+      const history = stateManager.getStateHistory();
+      expect(history.length).toBeGreaterThan(0);
+      expect(history[history.length - 1].state).toBe('disconnected');
+    });
+
+    it('should measure real connection performance', async () => {
+      const connectionTime = await wsManager.measureConnectionTime();
+      expect(connectionTime).toBeGreaterThan(0);
+      expect(connectionTime).toBeLessThan(1000); // Should be fast in tests
     });
   });
 
-  describe('Message Processing', () => {
-    it('should track sent messages', async () => {
-      render(
-        <TestProviders>
-          <WebSocketLifecycleTest />
-        </TestProviders>
-      );
-
-      await userEvent.click(screen.getByTestId('btn-send'));
-      await userEvent.click(screen.getByTestId('btn-send'));
-      expect(screen.getByTestId('metrics-sent')).toHaveTextContent('2');
+  describe('Real Message Processing Simulation', () => {
+    it('should handle real message sending with queue tracking', async () => {
+      await wsManager.waitForConnection();
+      
+      const testMessage = { type: 'test', data: 'Hello WebSocket' };
+      wsManager.sendMessage(testMessage);
+      wsManager.sendMessage({ type: 'test2', data: 'Second message' });
+      
+      const sentMessages = wsManager.getSentMessages();
+      expect(sentMessages).toHaveLength(2);
+      expect(sentMessages[0]).toContain('Hello WebSocket');
     });
 
-    it('should track received messages', async () => {
-      render(
-        <TestProviders>
-          <WebSocketLifecycleTest />
-        </TestProviders>
-      );
-
-      await userEvent.click(screen.getByTestId('btn-receive'));
-      expect(screen.getByTestId('metrics-received')).toHaveTextContent('1');
+    it('should handle real message receiving with event simulation', async () => {
+      await wsManager.waitForConnection();
+      
+      const testMessage = { type: 'incoming', data: 'Server message' };
+      wsManager.simulateIncomingMessage(testMessage);
+      
+      await waitFor(() => {
+        const receivedMessages = wsManager.getReceivedMessages();
+        expect(receivedMessages).toHaveLength(1);
+        expect(receivedMessages[0]).toContain('Server message');
+      });
     });
 
-    it('should track queued messages', async () => {
-      render(
-        <TestProviders>
-          <WebSocketLifecycleTest />
-        </TestProviders>
-      );
-
-      await userEvent.click(screen.getByTestId('btn-queue'));
-      await userEvent.click(screen.getByTestId('btn-queue'));
-      expect(screen.getByTestId('metrics-queued')).toHaveTextContent('2');
+    it('should handle message queuing with real buffer behavior', async () => {
+      const buffer = wsManager.getMessageBuffer();
+      
+      const success1 = buffer.add('Message 1');
+      const success2 = buffer.add('Message 2');
+      
+      expect(success1).toBe(true);
+      expect(success2).toBe(true);
+      expect(buffer.size()).toBe(2);
+      
+      const flushed = buffer.flush();
+      expect(flushed).toHaveLength(2);
+      expect(buffer.size()).toBe(0);
     });
 
-    it('should track failed messages', async () => {
-      render(
-        <TestProviders>
-          <WebSocketLifecycleTest />
-        </TestProviders>
-      );
+    it('should handle failed messages with real error conditions', async () => {
+      // Close connection to simulate failure
+      wsManager.close();
+      
+      await waitFor(() => {
+        expect(wsManager.isReady()).toBe(false);
+      });
+      
+      // Attempt to send message on closed connection
+      expect(() => {
+        wsManager.sendMessage('Should fail');
+      }).toThrow();
+    });
 
-      await userEvent.click(screen.getByTestId('btn-fail'));
-      expect(screen.getByTestId('metrics-failed')).toHaveTextContent('1');
+    it('should measure real message round-trip latency', async () => {
+      await wsManager.waitForConnection();
+      
+      const testMessage = { id: 'test-123', echo: true };
+      const latency = await wsManager.measureMessageRoundTrip(testMessage);
+      
+      expect(latency).toBeGreaterThan(0);
+      expect(latency).toBeLessThan(100); // Should be fast in tests
+    });
+
+    it('should handle concurrent message processing', async () => {
+      await wsManager.waitForConnection();
+      
+      const promises = Array(10).fill(0).map((_, i) => {
+        return new Promise<void>((resolve) => {
+          wsManager.sendMessage({ id: i, data: `Message ${i}` });
+          resolve();
+        });
+      });
+      
+      await Promise.all(promises);
+      
+      const sentMessages = wsManager.getSentMessages();
+      expect(sentMessages.length).toBe(10);
     });
   });
 

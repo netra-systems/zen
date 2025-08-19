@@ -50,27 +50,7 @@ jest.mock('@/utils/debug-logger', () => ({
   }
 }));
 
-// Mock child components
-jest.mock('@/components/chat/ChatHeader', () => ({
-  ChatHeader: () => <div data-testid="chat-header">Chat Header</div>
-}));
-
-jest.mock('@/components/chat/MessageList', () => ({
-  MessageList: () => <div data-testid="message-list">Message List</div>
-}));
-
-jest.mock('@/components/chat/MessageInput', () => ({
-  MessageInput: () => <div data-testid="message-input">Message Input</div>
-}));
-
-jest.mock('@/components/chat/ExamplePrompts', () => ({
-  ExamplePrompts: () => <div data-testid="example-prompts">Example Prompts</div>
-}));
-
-jest.mock('@/components/chat/PersistentResponseCard', () => ({
-  PersistentResponseCard: () => <div data-testid="response-card">Response Card</div>
-}));
-
+// Use real child components - only mock complex diagnostics components
 jest.mock('@/components/chat/OverflowPanel', () => ({
   OverflowPanel: () => null
 }));
@@ -194,7 +174,7 @@ describe('Startup Message Comprehensive Tests', () => {
     
     render(<MainChat />);
     
-    expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+    expect(screen.getByText('Quick Start Examples')).toBeInTheDocument();
     expect(screen.queryByText('Welcome to Netra AI')).not.toBeInTheDocument();
   });
 
@@ -325,7 +305,7 @@ describe('Startup Message Comprehensive Tests', () => {
     
     // Final state should be stable
     expect(screen.queryByText('Welcome to Netra AI')).not.toBeInTheDocument();
-    expect(screen.getByTestId('example-prompts')).toBeInTheDocument();
+    expect(screen.getByText('Quick Start Examples')).toBeInTheDocument();
   });
 
   /**
