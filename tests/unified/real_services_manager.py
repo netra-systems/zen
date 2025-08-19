@@ -11,6 +11,8 @@ CRITICAL REQUIREMENTS:
 - NO MOCKING - real services only
 - Maximum 300 lines, functions ≤8 lines each
 - Handle Windows/Unix compatibility
+
+NOTE: Now uses dev_launcher_real_system for better integration
 """
 
 import os
