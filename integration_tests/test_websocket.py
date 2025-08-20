@@ -11,7 +11,7 @@ from app.services.security_service import SecurityService
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 import asyncio
-from app.tests.test_utilities.auth_test_helpers import create_test_token
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Skip startup checks for integration tests
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
@@ -57,7 +57,8 @@ def test_websocket_sends_message_to_agent_service(client, mock_agent_service):
     user_id = str(uuid.uuid4())
     
     # Create a valid test token
-    test_token = create_test_token(user_id)
+    jwt_helper = JWTTestHelper()
+    test_token = jwt_helper.create_access_token(user_id, "test@example.com")
     
     try:
         # Connect to WebSocket with proper authentication token
@@ -84,7 +85,8 @@ def test_websocket_receives_message_from_server(client, mock_agent_service):
     user_id = str(uuid.uuid4())
     
     # Create a valid test token
-    test_token = create_test_token(user_id)
+    jwt_helper = JWTTestHelper()
+    test_token = jwt_helper.create_access_token(user_id, "test@example.com")
     
     try:
         # Connect to WebSocket with proper authentication token

@@ -194,18 +194,192 @@ python scripts/test_backend.py --no-bad-test-detection
 
 ## 📋 SPECIFICATION FILES (`/SPEC/`)
 
-### Priority Specs (Check First)
-1. `type_safety.xml` - Type safety rules
-2. `conventions.xml` - Coding standards & 300-line limit
-3. `code_changes.xml` - Change checklist
-4. `learnings/index.xml` - Past issues & solutions
+### 🔴 CRITICAL Priority Specs (ALWAYS Check First)
+| Spec | Purpose | When to Use |
+|------|---------|-------------|
+| **`type_safety.xml`** | Type safety, SSOT enforcement | BEFORE any code changes |
+| **`conventions.xml`** | 300/8 rule, coding standards | BEFORE generating code |
+| **`code_changes.xml`** | Change checklist protocol | BEFORE making changes |
+| **`learnings/index.xml`** | Index of all past issues & solutions | ALWAYS check first |
+| **`anti_regression.xml`** | System stability requirements | Before commits |
+| **`no_test_stubs.xml`** | Production test purity | When writing tests |
+| **`ai_factory_patterns.xml`** | Multi-agent workflows | Complex coding tasks |
 
-### Domain-Specific Specs
-- `websockets.xml` - WebSocket implementation
-- `clickhouse.xml` - ClickHouse patterns
-- `postgres.xml` - PostgreSQL patterns
-- `security.xml` - Security requirements
-- `testing.xml` - Testing standards
+### 📚 Knowledge Base & Learnings (`/SPEC/learnings/`)
+| Category | File | Critical Takeaways |
+|----------|------|-------------------|
+| **Index** | `index.xml` | Master retrieval map for all learnings |
+| **Authentication** | `auth.xml`, `jwt_secret_configuration.xml` | Shared auth service integration |
+| **WebSocket** | `websocket_message_paradox.xml`, `websocket_*.xml` | Async handling, error patterns |
+| **Configuration** | `configuration_secrets.xml`, `environment_*.xml` | Unified config system |
+| **Testing** | `testing.xml`, `e2e_testing.xml`, `bad_test_detection.xml` | TDD workflows, real vs mock |
+| **Database** | `database_asyncio.xml`, `database_*.xml` | Async patterns, connections |
+| **Frontend** | `frontend.xml`, `react-content-handling.xml` | Zustand patterns, React |
+| **Deployment** | `deployment_staging.xml`, `gcp_deployment.xml` | Cloud Run, staging |
+| **Startup** | `startup.xml`, `startup_optimization.xml` | Initialization order |
+| **Compliance** | `architectural_compliance.xml`, `compliance_improvements.xml` | 300/8 enforcement |
+
+### 🏗️ Architecture & System Design
+| Spec | Purpose | Key Requirements |
+|------|---------|-----------------|
+| **`architecture.xml`** | System architecture | Component relationships |
+| **`system_boundaries.xml`** | Boundary definitions | Module separation |
+| **`independent_services.xml`** | Microservice independence | 100% isolation requirement |
+| **`growth_control.xml`** | Healthy growth patterns | Composition over monoliths |
+| **`directory_structure.xml`** | File organization | Standard layout |
+| **`deployment_naming_standards.xml`** | Naming conventions | Service naming rules |
+
+### 🔧 Core Infrastructure
+| Domain | Specs | Purpose |
+|--------|-------|---------|
+| **Databases** | `clickhouse.xml`, `postgres.xml`, `database.xml` | Database patterns |
+| **WebSocket** | `websockets.xml`, `websocket_*.xml` | Real-time communication |
+| **Authentication** | `auth_*.xml`, `shared_auth_integration.xml`, `PRODUCTION_SECRETS_ISOLATION.xml` | Auth & secrets |
+| **Testing** | `testing.xml`, `enhanced_testing.xml`, `coverage_requirements.xml` | Test standards |
+| **CI/CD** | `github_actions.xml`, `cicd_testing.xml` | Pipeline configuration |
+| **Deployment** | `deployment.xml`, `staging_*.xml`, `terraform_gcp.xml` | Deployment configs |
+
+### 🤖 Agent System Specifications
+| Spec | Purpose | Components |
+|------|---------|------------|
+| **`agent_architecture.xml`** | Agent system design | Base patterns |
+| **`subagents.xml`** | SubAgent definitions | Agent types |
+| **`agent_tracking.xml`** | Agent monitoring | Tracking patterns |
+| **`agent_testing.xml`** | Agent test patterns | Testing agents |
+| **`supervisor_observability.xml`** | Supervisor monitoring | Observability |
+| **`TRIAGE_SUB_AGENT_SPEC.xml`** | Triage agent spec | Specific agent |
+| **`supply_researcher_agent.xml`** | Supply agent spec | Research agent |
+| **`github_code_analysis_agent.xml`** | GitHub analysis | Code analysis |
+| **`data_sub_agent_enhancement.xml`** | Data agent improvements | Enhancements |
+
+### 🎨 UI/UX Specifications
+| Spec | Purpose | Focus Area |
+|------|---------|------------|
+| **`ui_ux_master.xml`** | Master UI/UX guide | Overall design |
+| **`ui_ux_chat_architecture.xml`** | Chat interface | Chat design |
+| **`ui_ux_websocket.xml`** | WebSocket UI | Real-time UI |
+| **`ui_ux_visual_design.xml`** | Visual design | Look & feel |
+| **`ui_ux_developer_tools.xml`** | Dev tools UI | Developer UX |
+| **`ui_ux_response_card.xml`** | Response cards | UI components |
+| **`ui_ux_thread_state_management.xml`** | Thread state | State management |
+| **`ui_ux_fluid_updates.xml`** | Fluid updates | Smooth UX |
+| **`unified_chat_ui_ux.xml`** | Unified chat | Complete chat UX |
+| **`admin_unified_experience.xml`** | Admin panel | Admin interface |
+
+### 🧪 Testing & Quality
+| Spec | Purpose | Coverage |
+|------|---------|----------|
+| **`testing.xml`** | Core testing standards | All tests |
+| **`enhanced_testing.xml`** | Advanced patterns | Complex testing |
+| **`coverage_requirements.xml`** | Coverage targets | Minimum coverage |
+| **`e2e-testing-spec.xml`** | E2E test patterns | End-to-end |
+| **`e2e-agent-workflows-unified.xml`** | Agent E2E tests | Agent testing |
+| **`failing_test_management.xml`** | Test failure handling | Failure patterns |
+| **`missing_tests.xml`** | Test gap analysis | Coverage gaps |
+| **`startup_coverage.xml`** | Startup test coverage | Initialization |
+| **`local_actions_testing.xml`** | Local test patterns | Local testing |
+| **`frontend_testing_*.xml`** | Frontend test specs | React testing |
+
+### 📊 Monitoring & Observability
+| Spec | Purpose | Systems |
+|------|---------|---------|
+| **`gcp_observability.xml`** | GCP monitoring | Cloud monitoring |
+| **`supervisor_observability.xml`** | Supervisor metrics | Agent monitoring |
+| **`compliance_reporting.xml`** | Compliance tracking | Architecture compliance |
+| **`test_reporting.xml`** | Test result reporting | Test metrics |
+| **`ai_factory_status_report.xml`** | AI factory status | Factory metrics |
+
+### 🔐 Security & Configuration
+| Spec | Purpose | Scope |
+|------|---------|-------|
+| **`security.xml`** | Security requirements | All services |
+| **`PRODUCTION_SECRETS_ISOLATION.xml`** | Secret management | Production secrets |
+| **`auth_environment_isolation.xml`** | Auth isolation | Environment separation |
+| **`environment_loading.xml`** | Environment config | Config loading |
+| **`unified_configuration_management.xml`** | Config management | Unified config |
+| **`tool_auth_system.xml`** | Tool authentication | Tool access |
+| **`feature_flags.xml`** | Feature toggles | Feature management |
+
+### 🚀 Deployment & Infrastructure
+| Spec | Purpose | Environment |
+|------|---------|-------------|
+| **`deployment.xml`** | Deployment patterns | All environments |
+| **`staging_environment.xml`** | Staging setup | Staging env |
+| **`staging_workflow.xml`** | Staging processes | Staging workflow |
+| **`terraform_gcp.xml`** | Terraform configs | GCP infrastructure |
+| **`cloud-run-*.xml`** | Cloud Run specs | GCP Cloud Run |
+| **`dev_launcher*.xml`** | Dev environment | Local development |
+| **`local_deployment.xml`** | Local deploy | Local setup |
+
+### 💡 AI Development Patterns
+| Spec | Purpose | Usage |
+|------|---------|-------|
+| **`ai_factory_patterns.xml`** | AI factory workflows | Multi-agent patterns |
+| **`ai-dev-productivity.xml`** | AI productivity | Development efficiency |
+| **`ai_slop_prevention_*.xml`** | Prevent AI slop | Quality control |
+| **`context_optimization.xml`** | Context efficiency | Token optimization |
+| **`corpus_generation.xml`** | Corpus creation | Data generation |
+| **`synthetic_data_generation.xml`** | Synthetic data | Test data |
+
+### 🔄 Business & Operations
+| Spec | Purpose | Focus |
+|------|---------|-------|
+| **`app_business_value.xml`** | Business value tracking | Value metrics |
+| **`business_value_test_coverage.xml`** | Value-based testing | Test prioritization |
+| **`master_wip_index.xml`** | WIP tracking | Work in progress |
+| **`master_orchestration.xml`** | Orchestration patterns | System coordination |
+| **`team_updates.xml`** | Team communication | Updates & status |
+
+### 🔌 Integrations
+| Spec | Purpose | Integration |
+|------|---------|-------------|
+| **`mcp.xml`, `mcp_*.xml`** | MCP integration | Model Context Protocol |
+| **`lark_github_integration.xml`** | Lark/GitHub | External integrations |
+| **`api_routes.xml`** | API definitions | Route specifications |
+
+### 📝 Documentation & Examples
+| Spec | Purpose | Content |
+|------|---------|---------|
+| **`doc_overall.xml`** | Documentation guide | Doc standards |
+| **`documentation_maintenance.xml`** | Doc maintenance | Keeping docs updated |
+| **`exampleNetraPrompts.xml`** | Example prompts | Usage examples |
+| **`instructions.xml`** | General instructions | Guidelines |
+
+### 🔍 String Literals & Constants
+| Spec | Purpose | Usage |
+|------|---------|-------|
+| **`string_literals_index.xml`** | String literal system | Constant management |
+| **`/SPEC/generated/string_literals.json`** | Generated index | 35,000+ constants |
+
+### 📁 Archived & Historical
+| Directory | Purpose | Contents |
+|-----------|---------|----------|
+| **`/SPEC/archived_implementations/`** | Deprecated patterns | Old implementations |
+| **`/SPEC/history/`** | Historical records | Past changes & reviews |
+
+### 🛠️ Development Tools & Utilities
+| Spec | Purpose | Tools |
+|------|---------|-------|
+| **`build_bot.xml`** | Build automation | Build patterns |
+| **`coding-agent.xml`** | Coding agent spec | Agent coding |
+| **`error_handling_principles.xml`** | Error handling | Error patterns |
+| **`selfchecks.xml`** | Self-check patterns | Validation |
+
+### 📊 Data & State Management
+| Spec | Purpose | Scope |
+|------|---------|-------|
+| **`data.xml`** | Data patterns | Data handling |
+| **`core.xml`** | Core patterns | Fundamental patterns |
+| **`types.xml`** | Type definitions | Type system |
+| **`swimlane.xml`** | Process flows | Workflow lanes |
+| **`Status.xml`** | Status tracking | System status |
+
+### Critical Update Reminders
+- **ALWAYS** check `learnings/index.xml` before any task
+- **NEVER** violate the 300/8 rule from `conventions.xml`
+- **MANDATORY** shared auth integration per `shared_auth_integration.xml`
+- **VALIDATE** string literals using the index system
+- **ENFORCE** type safety per `type_safety.xml`
 
 ---
 
@@ -454,4 +628,4 @@ state = DeepAgentState(...)
 
 ---
 
-Last Updated: 2025-08-17
+Last Updated: 2025-08-20

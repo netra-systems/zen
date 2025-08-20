@@ -33,12 +33,12 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "purpose": "Quick validation of agent functionality during development",
         "backend_args": [
             "--category", "agent", 
-            "-v", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}",
+            "-v", "--coverage", "--fail-fast", f"--parallel={min(4, OPTIMAL_WORKERS)}",
             "--markers", "not real_services"
         ],
         "frontend_args": [],
         "timeout": 180,
-        "run_coverage": False,
+        "run_coverage": True,
         "run_both": False
     },
     "agent-startup": {

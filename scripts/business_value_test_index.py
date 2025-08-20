@@ -118,11 +118,20 @@ class BusinessValueTestIndexer:
 
     def scan_tests(self) -> None:
         """Scan all test files in the project"""
-        # Focus on specific test directories for faster execution
+        # Focus on specific test directories
         test_dirs = ['app/tests', 'tests', 'test_framework', 'dev_launcher/tests']
         test_count = 0
-        max_tests = 500  # Limit for faster execution
+        max_tests = 5000  # Increased limit to catch all e2e tests
         
+        # First, prioritize e2e tests to ensure they're counted
+        e2e_dir = self.project_root / 'tests' / 'unified' / 'e2e'
+        if e2e_dir.exists():
+            for test_file in e2e_dir.glob('test_*.py'):
+                if 'node_modules' not in str(test_file) and '.venv' not in str(test_file):
+                    self._scan_python_test(test_file)
+                    test_count += 1
+        
+        # Then scan other directories
         for test_dir in test_dirs:
             dir_path = self.project_root / test_dir
             if not dir_path.exists():
@@ -133,8 +142,10 @@ class BusinessValueTestIndexer:
                     break
                 if test_file.name.startswith('test_') or test_file.name.endswith('_test.py'):
                     if 'node_modules' not in str(test_file) and '.venv' not in str(test_file):
-                        self._scan_python_test(test_file)
-                        test_count += 1
+                        # Skip if already scanned (e2e tests)
+                        if '/e2e/' not in str(test_file) and '\\e2e\\' not in str(test_file):
+                            self._scan_python_test(test_file)
+                            test_count += 1
         
         # Also scan frontend tests if they exist (limited)
         frontend_dir = self.project_root / 'frontend'
@@ -146,6 +157,7 @@ class BusinessValueTestIndexer:
 
     def _scan_python_test(self, file_path: Path) -> None:
         """Scan a Python test file"""
+        self._current_file_path = file_path  # Store for test type determination
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
@@ -197,7 +209,7 @@ class BusinessValueTestIndexer:
         # Check for real services
         real_services = self._detect_real_services(content)
         uses_real_llm = 'real_llm' in decorators or 'real_llm' in test_type
-        is_e2e = test_type == 'e2e' or 'e2e' in decorators
+        is_e2e = test_type == 'e2e' or 'e2e' in decorators or '/e2e/' in str(rel_path).replace('\\', '/')
         is_multi_service = len(real_services) > 1
         
         # Calculate business value score
@@ -262,6 +274,14 @@ class BusinessValueTestIndexer:
         """Determine the type of test"""
         name_lower = name.lower()
         content_lower = content.lower()
+        
+        # Check file path for e2e directory - highest priority
+        if hasattr(self, '_current_file_path'):
+            file_path = str(self._current_file_path).replace('\\', '/')
+            if '/e2e/' in file_path:
+                return 'e2e'
+            if 'tests/unified/e2e' in file_path:
+                return 'e2e'
         
         for test_type, pattern in self.test_patterns.items():
             if re.search(pattern, name_lower) or re.search(pattern, ' '.join(decorators).lower()):

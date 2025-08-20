@@ -33,6 +33,7 @@ Netra Apex captures value proportional to customer AI spend by delivering:
 ## 📋 Table of Contents
 
 - [Business Value & Monetization](#-business-value--monetization)
+- [System Status & Health](#-system-status--health) **← Real-time Compliance Tracking**
 - [Developer Guidelines](#-developer-guidelines) **← Revenue-Driven Development**
 - [Quick Start](#-quick-start)
 - [Architecture](#-architecture) **← Module-Based (300 lines max)**
@@ -70,6 +71,46 @@ Netra Apex captures value proportional to customer AI spend by delivering:
 4. **300-line modules, 8-line functions** for maintainability
 
 📖 **[Read CLAUDE.md →](CLAUDE.md)** for complete development philosophy
+
+## 📊 System Status & Health
+
+### Real-Time System Alignment Dashboard
+
+The Netra Apex platform maintains comprehensive tracking of system health and specification compliance:
+
+#### 🎯 Master Status Reports
+
+- **[MASTER_WIP_STATUS.md](MASTER_WIP_STATUS.md)** - Real-time system health dashboard
+  - Overall compliance score with trend analysis
+  - Per-service and per-category alignment metrics
+  - Critical violations requiring immediate attention
+  - Prioritized action items by business impact
+
+#### 📈 Specialized Reports
+
+- **[Compliance Report](SPEC/compliance_reporting.xml)** - Architecture and code quality metrics
+- **[Test Coverage Report](SPEC/test_reporting.xml)** - Testing metrics against 97% target
+- **[AI Factory Status](SPEC/ai_factory_status_report.xml)** - Development velocity metrics
+- **[Team Updates](SPEC/team_updates.xml)** - Sprint progress and blockers
+
+#### 🔧 Health Check Commands
+
+```bash
+# Check overall system compliance
+python scripts/check_architecture_compliance.py
+
+# Generate updated WIP status report
+python scripts/generate_wip_report.py
+
+# Run test coverage analysis
+python -m test_framework.test_runner --report-only
+
+# Validate string literals consistency
+python scripts/query_string_literals.py validate
+```
+
+**Update Frequency:** Daily automated checks, mandatory before releases
+**Methodology:** [SPEC/master_wip_index.xml](SPEC/master_wip_index.xml)
 
 ## 🏃 Quick Start
 

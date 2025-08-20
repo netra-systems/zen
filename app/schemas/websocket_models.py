@@ -251,6 +251,43 @@ class ServerMessage(BaseModel):
     )
 
 
+class RateLimitInfo(BaseModel):
+    """Rate limit configuration info."""
+    max_connections_per_user: int = Field(default=5)
+    max_messages_per_minute: int = Field(default=60)
+    max_message_size: int = Field(default=10240)
+    window_seconds: int = Field(default=60)
+
+
+class WebSocketStats(BaseModel):
+    """WebSocket manager statistics."""
+    total_connections: int = Field(default=0, description="Total connections made")
+    active_connections: int = Field(default=0, description="Currently active connections")
+    active_users: int = Field(default=0, description="Number of users with active connections")
+    total_messages_sent: int = Field(default=0, description="Total messages sent")
+    total_messages_received: int = Field(default=0, description="Total messages received")
+    total_errors: int = Field(default=0, description="Total errors encountered")
+    connection_failures: int = Field(default=0, description="Connection establishment failures")
+    rate_limited_requests: int = Field(default=0, description="Rate limited requests")
+    rate_limit_settings: RateLimitInfo = Field(default_factory=RateLimitInfo)
+
+
+class BroadcastResult(BaseModel):
+    """Result of broadcast operation."""
+    successful: int = Field(description="Number of successful sends")
+    failed: int = Field(description="Number of failed sends")
+    total_connections: int = Field(description="Total connections attempted")
+    message_type: str = Field(description="Type of message broadcast")
+
+
+class WebSocketValidationError(BaseModel):
+    """WebSocket message validation error."""
+    error_type: Literal["format_error", "type_error", "validation_error", "security_error"] = Field(description="Error type")
+    message: str = Field(description="Error message")
+    field: Optional[str] = Field(default=None, description="Field that caused error")
+    received_data: Optional[Dict[str, Any]] = Field(default=None, description="Data that failed validation")
+
+
 # Export all WebSocket models
 __all__ = [
     "BaseWebSocketPayload",
@@ -285,5 +322,9 @@ __all__ = [
     "StopAgent",
     "AgentCompletedPayload",
     "AgentStoppedPayload",
-    "ServerMessage"
+    "ServerMessage",
+    "RateLimitInfo",
+    "WebSocketStats",
+    "BroadcastResult",
+    "WebSocketValidationError"
 ]

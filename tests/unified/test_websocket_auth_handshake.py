@@ -26,13 +26,29 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import patch, Mock
 from datetime import datetime, timedelta
 
-from app.tests.test_utilities.auth_test_helpers import (
-    create_test_token, create_expired_token, create_invalid_token
-)
+from tests.unified.jwt_token_helpers import JWTTestHelper
 from app.tests.test_utilities.websocket_mocks import MockWebSocket
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+# Helper functions for backward compatibility
+jwt_helper = JWTTestHelper()
+
+def create_test_token(user_id: str) -> str:
+    """Create a valid test token."""
+    return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")
+
+def create_expired_token(user_id: str) -> str:
+    """Create an expired test token."""
+    payload = jwt_helper.create_expired_payload()
+    payload["sub"] = user_id
+    payload["email"] = f"{user_id}@example.com"
+    return jwt_helper.create_token(payload)
+
+def create_invalid_token(user_id: str) -> str:
+    """Create an invalid test token."""
+    return f"invalid_token_{user_id}"
 
 
 class WebSocketAuthHandshakeTester:

@@ -385,13 +385,30 @@ class DevLauncher:
             "AUTH_PORT": "8081",
             "WEBSOCKET_PORT": "8000",
             "LOG_LEVEL": "INFO",
-            "ENVIRONMENT": "development"
+            "ENVIRONMENT": "development",
+            "CORS_ORIGINS": "*"  # Set CORS_ORIGINS=* for development
         }
         
         for var, default_value in defaults.items():
             if not os.environ.get(var):
                 os.environ[var] = default_value
                 self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
+        
+        # Generate cross-service auth token if not present
+        self._ensure_cross_service_auth_token()
+    
+    def _ensure_cross_service_auth_token(self):
+        """Ensure cross-service authentication token exists."""
+        existing_token = self.service_discovery.get_cross_service_auth_token()
+        if not existing_token:
+            import secrets
+            token = secrets.token_urlsafe(32)
+            self.service_discovery.set_cross_service_auth_token(token)
+            os.environ['CROSS_SERVICE_AUTH_TOKEN'] = token
+            self._print("🔑", "TOKEN", "Generated cross-service auth token")
+        else:
+            os.environ['CROSS_SERVICE_AUTH_TOKEN'] = existing_token
+            self._print("🔑", "TOKEN", "Using existing cross-service auth token")
     
     def _validate_critical_env_vars(self):
         """Validate required environment variables."""
@@ -692,16 +709,34 @@ class DevLauncher:
         # Register database connector with health monitor
         self.health_monitor.set_database_connector(self.database_connector)
         
+        # Set service discovery for cross-service health monitoring
+        self.health_monitor.set_service_discovery(self.service_discovery)
+        
         # Register health monitoring for all services
         self.register_health_monitoring()
         
         # Start the health monitor thread (but monitoring is disabled)
         self.health_monitor.start()
         
+        # Verify cross-service connectivity before enabling monitoring
+        cross_service_healthy = self.health_monitor.verify_cross_service_connectivity()
+        if not cross_service_healthy:
+            self._print("⚠️", "WARNING", "Cross-service connectivity issues detected")
+        
         # Enable monitoring only after all services are confirmed ready
         if self.health_monitor.all_services_ready():
             self.health_monitor.enable_monitoring()
+            
+            # Get comprehensive status report
+            status_report = self.health_monitor.get_cross_service_health_status()
+            cors_enabled = status_report['cross_service_integration']['cors_enabled']
+            service_discovery_active = status_report['cross_service_integration']['service_discovery_active']
+            
             self._print("✅", "MONITORING", "Health monitoring enabled")
+            if cors_enabled:
+                self._print("🌐", "CORS", "Cross-service CORS integration active")
+            if service_discovery_active:
+                self._print("🔍", "DISCOVERY", "Service discovery integration active")
         else:
             self._print("⚠️", "WARNING", "Not all services ready - health monitoring delayed")
     

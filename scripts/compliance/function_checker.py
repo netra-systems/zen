@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Function complexity compliance checker.
-Enforces CLAUDE.md function size limits (8 lines max).
+Enforces CLAUDE.md function size limits (25 lines max).
 """
 
 import ast

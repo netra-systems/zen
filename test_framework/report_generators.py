@@ -56,7 +56,8 @@ def calculate_overall_coverage(results: Dict) -> float:
 
 
 def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code: int) -> str:
-    """Generate markdown report following spec structure."""
+    """Generate markdown report following SPEC structure (SPEC/testing.xml lines 1479-1495)."""
+    # Calculate totals and component data
     total_counts = calculate_total_counts(results)
     overall_coverage = calculate_overall_coverage(results)
     backend_counts = results["backend"]["test_counts"]
@@ -70,11 +71,17 @@ def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code:
         results["frontend"]["status"] in ["passed", "skipped"]
     )
     
+    # SPEC-compliant report structure:
+    # 1. Test Summary with counts (AT THE TOP)
+    # 2. Coverage Summary (if applicable)  
+    # 3. Environment/Configuration
+    # 4. Test Output
+    # 5. Error Details (if any)
+    
     md_content = f"""# Netra AI Platform - Test Report
 
 **Generated:** {datetime.now().isoformat()}  
 **Test Level:** {level} - {config['description']}  
-**Purpose:** {config['purpose']}
 
 ## Test Summary
 
@@ -93,13 +100,13 @@ def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code:
 | Frontend  | {frontend_counts['total']} | {frontend_counts['passed']} | {frontend_counts['failed']} | {frontend_counts['skipped']} | {frontend_counts['errors']} | {results['frontend']['duration']:.2f}s | {status_badge(results['frontend']['status'])} |"""
     
     # Add E2E row if E2E tests were run
-    if results.get("e2e", {}).get("status") != "pending":
+    if results.get("e2e", {}).get("status") != "pending" and "e2e" in results:
         md_content += f"""
 | E2E       | {e2e_counts['total']} | {e2e_counts['passed']} | {e2e_counts['failed']} | {e2e_counts['skipped']} | {e2e_counts['errors']} | {results['e2e']['duration']:.2f}s | {status_badge(results['e2e']['status'])} |"""
     
     md_content += "\n"
     
-    # Add coverage summary if applicable
+    # 2. Coverage Summary (near the top, after test counts)
     if config.get('run_coverage', False) and overall_coverage is not None:
         md_content += f"""
 ## Coverage Summary
@@ -111,6 +118,7 @@ def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code:
         if results["frontend"]["coverage"] is not None:
             md_content += f"**Frontend Coverage:** {results['frontend']['coverage']:.1f}%  \n"
     
+    # 3. Environment and Configuration
     md_content += f"""
 ## Environment and Configuration
 
@@ -131,7 +139,10 @@ def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code:
 ```
 {' '.join(config.get('frontend_args', []))}
 ```
-
+"""
+    
+    # 4. Test Output
+    md_content += f"""
 ## Test Output
 
 ### Backend Output
@@ -145,7 +156,7 @@ def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code:
 ```"""
     
     # Add E2E output if E2E tests were run
-    if results.get("e2e", {}).get("status") != "pending":
+    if results.get("e2e", {}).get("status") != "pending" and "e2e" in results:
         md_content += f"""
 
 ### E2E Output
@@ -153,11 +164,11 @@ def generate_markdown_report(results: Dict, level: str, config: Dict, exit_code:
 {results['e2e']['output'][:10000]}{'...(truncated)' if len(results['e2e']['output']) > 10000 else ''}
 ```"""
     
-    # Add error summary if there were failures
+    # 5. Error Details (if any) - at the end
     if total_counts['failed'] > 0 or total_counts['errors'] > 0:
         md_content += """
 
-## Error Summary
+## Error Details
 
 """
         # Extract error details from output

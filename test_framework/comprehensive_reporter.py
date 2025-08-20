@@ -5,12 +5,14 @@ No legacy reports, no confusion, just clarity.
 """
 
 import json
+import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Dict
 
 from test_framework.reporter_base import ReporterConstants
 from test_framework.reporter_updater import TestResultsUpdater
+from test_framework.report_generators import generate_markdown_report
 
 
 class ComprehensiveTestReporter:
@@ -19,6 +21,10 @@ class ComprehensiveTestReporter:
     def __init__(self, reports_dir: Path):
         self.reports_dir = reports_dir
         self.reports_dir.mkdir(exist_ok=True)
+        
+        # Create history directory for archiving
+        self.history_dir = reports_dir / "history"
+        self.history_dir.mkdir(exist_ok=True)
         
         # SINGLE authoritative results file
         self.results_file = reports_dir / "test_results.json"
@@ -104,6 +110,9 @@ class ComprehensiveTestReporter:
         
         # Save the single file
         self._save_results()
+        
+        # Generate and save markdown report with history archiving
+        self._generate_and_archive_markdown_report(level, results, config, exit_code)
     
     def _save_results(self):
         """Save the single test results file."""

@@ -74,6 +74,21 @@
           <spec>test_runner_guide.xml</spec>
           <spec>e2e-testing-spec.xml</spec>
         </specs>
+        <test_discovery>
+          <pattern type="e2e">
+            <path_pattern>tests/unified/e2e/</path_pattern>
+            <name_pattern>test_.*_e2e|e2e_test_|TestE2E|test_end_to_end</name_pattern>
+            <decorator_pattern>@e2e|@real_services</decorator_pattern>
+          </pattern>
+          <pattern type="integration">
+            <path_pattern>tests/unified/(?!e2e)</path_pattern>
+            <name_pattern>test_.*_integration|integration_test_</name_pattern>
+          </pattern>
+          <pattern type="unit">
+            <path_pattern>app/tests/unit/</path_pattern>
+            <name_pattern>test_.*|Test.*</name_pattern>
+          </pattern>
+        </test_discovery>
       </category>
       
       <category name="agents">
@@ -194,6 +209,7 @@
     <scripts>
       <script>scripts/generate_wip_report.py</script>
       <script>scripts/check_spec_alignment.py</script>
+      <script>scripts/business_value_test_index.py</script>
     </scripts>
     
     <sub_agent_tasks>

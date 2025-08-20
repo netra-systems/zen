@@ -43,12 +43,12 @@ Examples:
         parser.add_argument('--path', default='.', help='Root path to check')
         parser.add_argument('--fail-on-violation', action='store_true', 
                            help='Exit with non-zero code on violations')
-        parser.add_argument('--max-file-lines', type=int, default=300,
-                           help='Maximum lines per file (default: 300)')
-        parser.add_argument('--max-function-lines', type=int, default=8,
-                           help='Maximum lines per function (default: 8)')
+        parser.add_argument('--max-file-lines', type=int, default=500,
+                           help='Maximum lines per file (default: 500 per CLAUDE.md)')
+        parser.add_argument('--max-function-lines', type=int, default=25,
+                           help='Maximum lines per function (default: 25 per CLAUDE.md)')
         parser.add_argument('--target-folders', nargs='+', 
-                           help='Folders to check (default: app frontend)')
+                           help='Folders to check (default: app frontend auth_service)')
         parser.add_argument('--ignore-folders', nargs='+',
                            help='Folders to ignore (default: scripts test_framework)')
         CLIHandler._add_display_arguments(parser)

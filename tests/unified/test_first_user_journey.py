@@ -12,7 +12,14 @@ from typing import Dict, Any
 
 from app.schemas.registry import User, UserCreate
 from app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
-from app.tests.test_utilities.auth_test_helpers import create_test_token
+from tests.unified.jwt_token_helpers import JWTTestHelper
+
+# Helper function for backward compatibility
+jwt_helper = JWTTestHelper()
+
+def create_test_token(user_id: str) -> str:
+    """Create a valid test token."""
+    return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")
 
 
 @pytest.mark.asyncio

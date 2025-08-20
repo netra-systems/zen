@@ -22,7 +22,7 @@ import threading
 import logging
 import sys
 import subprocess
-from typing import Dict, Optional, Callable, Set
+from typing import Dict, Optional, Callable, Set, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -66,6 +66,17 @@ class HealthStatus:
         # Calculate grace period end time
         if self.startup_time and self.grace_period_end is None:
             self.grace_period_end = self.startup_time + timedelta(seconds=self.grace_period_seconds)
+    
+    def update_cross_service_status(self, cors_enabled: bool = False, service_discovery_active: bool = False) -> None:
+        """Update cross-service integration status."""
+        if not hasattr(self, 'cross_service_status'):
+            self.cross_service_status = {}
+        
+        self.cross_service_status.update({
+            'cors_enabled': cors_enabled,
+            'service_discovery_active': service_discovery_active,
+            'last_updated': datetime.now().isoformat()
+        })
     
     def is_grace_period_over(self) -> bool:
         """Check if grace period has ended."""
@@ -532,6 +543,110 @@ class HealthMonitor:
                     if elapsed < status.grace_period_seconds:
                         return False
             return True
+
+    def add_cors_metrics_monitoring(self, cors_middleware_getter: Callable = None) -> None:
+        """Add CORS metrics monitoring to health checks."""
+        if cors_middleware_getter:
+            self._cors_middleware_getter = cors_middleware_getter
+            logger.info("CORS metrics monitoring enabled")
+    
+    def get_cross_service_health_status(self) -> Dict[str, Any]:
+        """Get comprehensive cross-service health status."""
+        status_report = {
+            'timestamp': datetime.now().isoformat(),
+            'services': {},
+            'cross_service_integration': {
+                'cors_enabled': False,
+                'service_discovery_active': False,
+                'auth_tokens_valid': False
+            }
+        }
+        
+        with self._lock:
+            # Service health status
+            for name, status in self.health_status.items():
+                service_info = {
+                    'healthy': status.is_healthy,
+                    'state': status.state.value,
+                    'ready_confirmed': status.ready_confirmed,
+                    'consecutive_failures': status.consecutive_failures,
+                    'last_check': status.last_check.isoformat() if status.last_check else None,
+                    'startup_time': status.startup_time.isoformat() if status.startup_time else None,
+                    'grace_period_remaining': status.time_remaining_in_grace_period()
+                }
+                
+                # Add cross-service status if available
+                if hasattr(status, 'cross_service_status'):
+                    service_info['cross_service'] = status.cross_service_status
+                
+                status_report['services'][name] = service_info
+            
+            # Overall cross-service integration status
+            if hasattr(self, '_cors_middleware_getter') and self._cors_middleware_getter:
+                try:
+                    cors_middleware = self._cors_middleware_getter()
+                    if cors_middleware and hasattr(cors_middleware, 'get_cors_metrics'):
+                        cors_metrics = cors_middleware.get_cors_metrics()
+                        if cors_metrics:
+                            status_report['cross_service_integration']['cors_enabled'] = True
+                            status_report['cross_service_integration']['cors_metrics'] = cors_metrics
+                except Exception as e:
+                    logger.debug(f"Could not get CORS metrics: {e}")
+            
+            # Check service discovery status
+            if hasattr(self, '_service_discovery'):
+                try:
+                    origins = self._service_discovery.get_all_service_origins()
+                    status_report['cross_service_integration']['service_discovery_active'] = len(origins) > 0
+                    status_report['cross_service_integration']['registered_service_origins'] = origins
+                except Exception as e:
+                    logger.debug(f"Could not get service discovery status: {e}")
+        
+        return status_report
+    
+    def set_service_discovery(self, service_discovery) -> None:
+        """Set service discovery instance for health monitoring integration."""
+        self._service_discovery = service_discovery
+        logger.debug("Service discovery integration enabled in health monitor")
+    
+    def verify_cross_service_connectivity(self) -> bool:
+        """Verify cross-service connectivity and authentication."""
+        if not hasattr(self, '_service_discovery'):
+            return True  # Skip if no service discovery
+        
+        try:
+            # Check if cross-service auth token exists
+            auth_token = self._service_discovery.get_cross_service_auth_token()
+            if not auth_token:
+                logger.warning("No cross-service auth token found")
+                return False
+            
+            # Verify service origins are accessible
+            origins = self._service_discovery.get_all_service_origins()
+            accessible_count = 0
+            
+            for origin in origins:
+                if self._check_service_origin_accessibility(origin):
+                    accessible_count += 1
+            
+            success_rate = accessible_count / len(origins) if origins else 1.0
+            logger.debug(f"Cross-service connectivity: {accessible_count}/{len(origins)} services accessible")
+            
+            return success_rate >= 0.7  # At least 70% of services must be accessible
+        
+        except Exception as e:
+            logger.error(f"Cross-service connectivity check failed: {e}")
+            return False
+    
+    def _check_service_origin_accessibility(self, origin: str) -> bool:
+        """Check if a service origin is accessible."""
+        try:
+            import requests
+            # Simple connectivity check - just check if we can reach the service
+            response = requests.get(f"{origin}/health", timeout=2)
+            return response.status_code in [200, 404]  # 404 is acceptable for some services
+        except Exception:
+            return False
 
 
 def create_url_health_check(url: str, timeout: int = 5) -> Callable[[], bool]:

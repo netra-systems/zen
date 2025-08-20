@@ -23,14 +23,38 @@ from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone, timedelta
 
-from app.tests.test_utilities.auth_test_helpers import (
-    create_test_token, create_expired_token, create_invalid_token
-)
-from app.tests.test_utilities.websocket_mocks import MockWebSocket
+from tests.unified.jwt_token_helpers import JWTTestHelper
+# Import MockWebSocket from the actual location
+try:
+    from app.tests.services.test_ws_connection_mocks import MockWebSocket
+except ImportError:
+    # Fallback if even this doesn't work
+    class MockWebSocket:
+        def __init__(self, user_id=None):
+            self.user_id = user_id
+            self.sent_messages = []
 from app.tests.integration.test_unified_message_flow import MessageFlowTracker
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+# Helper functions for backward compatibility
+jwt_helper = JWTTestHelper()
+
+def create_test_token(user_id: str) -> str:
+    """Create a valid test token."""
+    return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")
+
+def create_expired_token(user_id: str) -> str:
+    """Create an expired test token."""
+    payload = jwt_helper.create_expired_payload()
+    payload["sub"] = user_id
+    payload["email"] = f"{user_id}@example.com"
+    return jwt_helper.create_token(payload)
+
+def create_invalid_token(user_id: str) -> str:
+    """Create an invalid test token."""
+    return f"invalid_token_{user_id}"
 
 
 class AuthFlowTracker(MessageFlowTracker):

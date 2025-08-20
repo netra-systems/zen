@@ -21,10 +21,9 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import (
+from app.schemas.registry import WebSocketMessage, ServerMessage
+from app.schemas.websocket_models import (
     WebSocketValidationError,
-    ServerMessage,
     WebSocketStats,
     RateLimitInfo,
     BroadcastResult

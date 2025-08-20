@@ -83,6 +83,27 @@ class SecureWebSocketManager:
             "security_violations": 0,
             "start_time": time.time()
         }
+        # Initialize agent response handler
+        self._init_agent_response_integration()
+    
+    def _init_agent_response_integration(self) -> None:
+        """Initialize integration with WebSocket manager for agent responses."""
+        # Register this manager as the response handler for agent messages
+        from app.ws_manager import manager as ws_manager
+        
+        # Override the send_message method to route through secure connections
+        original_send_message = ws_manager.send_message_to_user
+        
+        async def secure_send_message(user_id: str, message, retry: bool = True) -> bool:
+            # First try to send through secure connections
+            if await self.send_to_user(user_id, message):
+                return True
+            # Fallback to original method
+            return await original_send_message(user_id, message, retry)
+        
+        # Monkey patch for this instance
+        ws_manager.send_message_to_user = secure_send_message
+        ws_manager.send_message = secure_send_message
     
     async def validate_secure_auth(self, websocket: WebSocket) -> Dict[str, Any]:
         """Validate JWT token from secure sources (headers or subprotocols).
@@ -313,25 +334,50 @@ class SecureWebSocketManager:
     
     async def process_user_message(self, user_id: str, message_data: Dict[str, Any]) -> None:
         """Process user message through agent service with proper session handling."""
+        connection_ids = [cid for cid, conn in self.connections.items() if conn["user_id"] == user_id]
+        
         try:
+            # Update connection state to processing
+            await self._update_connection_state(user_id, "processing", "Processing message...")
+            
+            from app.services.agent_service_factory import _create_supervisor_agent
             from app.services.agent_service_core import AgentService
-            agent_service = AgentService()
+            from app.llm.llm_manager import LLMManager
+            
+            # Create properly configured agent service
+            llm_manager = LLMManager()
+            supervisor = _create_supervisor_agent(self.db_session, llm_manager)
+            agent_service = AgentService(supervisor)
+            
+            logger.info(f"Processing agent message for user {user_id}: {message_data.get('type', 'unknown')}")
             
             # Process message using injected database session
             await agent_service.handle_websocket_message(
                 user_id, 
-                json.dumps(message_data), 
+                message_data,  # Pass dict directly, not JSON string
                 self.db_session
             )
             
             # Commit transaction
             await self.db_session.commit()
-            logger.debug(f"Agent message processed for user: {user_id}")
+            
+            # Update connection state to ready
+            await self._update_connection_state(user_id, "ready", "Message processed successfully")
+            
+            logger.info(f"Agent message processed successfully for user: {user_id}")
             
         except Exception as e:
             # Rollback on error
             await self.db_session.rollback()
-            logger.error(f"Agent message processing failed for {user_id}: {e}")
+            
+            # Update connection state to error
+            await self._update_connection_state(user_id, "error", f"Processing failed: {str(e)[:100]}")
+            
+            logger.error(f"Agent message processing failed for {user_id}: {e}", exc_info=True)
+            
+            # Send error response to user
+            await self._send_processing_error(user_id, str(e))
+            
             raise
     
     async def send_error(self, websocket: WebSocket, message: str, error_code: str) -> None:
@@ -378,15 +424,27 @@ class SecureWebSocketManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get connection and processing statistics."""
         uptime = time.time() - self._stats["start_time"]
+        
+        # Calculate connection states
+        connection_states = {}
+        for conn in self.connections.values():
+            state = conn.get("status", "unknown")
+            connection_states[state] = connection_states.get(state, 0) + 1
+        
         return {
             **self._stats,
             "uptime_seconds": uptime,
             "active_connections": len(self.connections),
             "messages_per_second": self._stats["messages_processed"] / max(uptime, 1),
+            "connection_states": connection_states,
             "connections_by_user": {
                 user_id: len([c for c in self.connections.values() if c["user_id"] == user_id])
                 for user_id in set(c["user_id"] for c in self.connections.values())
-            }
+            },
+            "average_errors_per_connection": (
+                sum(c.get("error_count", 0) for c in self.connections.values()) / 
+                max(len(self.connections), 1)
+            )
         }
     
     async def cleanup(self) -> None:
@@ -411,6 +469,33 @@ class SecureWebSocketManager:
             await self.db_session.close()
         
         logger.info("SecureWebSocketManager cleanup completed")
+    
+    async def _update_connection_state(self, user_id: str, state: str, status: str) -> None:
+        """Update connection state for all user connections."""
+        for connection_id, conn in self.connections.items():
+            if conn["user_id"] == user_id:
+                conn["status"] = state
+                conn["last_activity"] = datetime.now(timezone.utc)
+                conn["status_message"] = status
+                
+        logger.debug(f"Updated connection state for {user_id}: {state} - {status}")
+    
+    async def _send_processing_error(self, user_id: str, error_message: str) -> None:
+        """Send processing error to user through WebSocket."""
+        try:
+            error_response = {
+                "type": "agent_error",
+                "payload": {
+                    "error": error_message,
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "recoverable": True,
+                    "suggestion": "Please try again or rephrase your message"
+                }
+            }
+            await self.send_to_user(user_id, error_response)
+            
+        except Exception as e:
+            logger.error(f"Failed to send processing error to user {user_id}: {e}")
 
 
 @asynccontextmanager

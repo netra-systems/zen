@@ -4,7 +4,7 @@ Handles CORS, session, and other middleware setup for FastAPI.
 """
 import os
 import re
-from typing import Any, Callable, Optional, List
+from typing import Any, Callable, Optional, List, Dict
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
@@ -99,8 +99,18 @@ def setup_cors_middleware(app: FastAPI) -> None:
         _setup_production_cors_middleware(app)
 
 def _setup_custom_cors_middleware(app: FastAPI) -> None:
-    """Setup custom CORS middleware for staging/development."""
-    app.add_middleware(CustomCORSMiddleware)
+    """Setup custom CORS middleware for staging/development with service discovery integration."""
+    from dev_launcher.service_discovery import ServiceDiscovery
+    from pathlib import Path
+    
+    # Initialize service discovery for CORS integration
+    service_discovery = ServiceDiscovery(Path.cwd())
+    
+    app.add_middleware(
+        CustomCORSMiddleware,
+        service_discovery=service_discovery,
+        enable_metrics=True
+    )
 
 def _setup_production_cors_middleware(app: FastAPI) -> None:
     """Setup production CORS middleware."""
@@ -228,52 +238,171 @@ def _check_localhost_pattern(origin: str) -> bool:
 
 
 class CustomCORSMiddleware(BaseHTTPMiddleware):
-    """Custom CORS middleware with wildcard subdomain support."""
+    """Custom CORS middleware with wildcard subdomain support and enhanced cross-service integration."""
+    
+    def __init__(self, app, **kwargs):
+        """Initialize CORS middleware with service discovery integration."""
+        super().__init__(app)
+        self._service_discovery = kwargs.get('service_discovery')
+        self._metrics_enabled = kwargs.get('enable_metrics', True)
+        self._cors_metrics = self._setup_metrics() if self._metrics_enabled else None
+    
+    def _setup_metrics(self) -> Optional[Dict]:
+        """Setup CORS metrics tracking."""
+        return {
+            'requests_processed': 0,
+            'cors_rejections': 0,
+            'preflight_requests': 0,
+            'origins_allowed': set(),
+            'origins_rejected': set()
+        }
     
     async def dispatch(self, request: Request, call_next):
-        """Handle CORS with wildcard support."""
+        """Handle CORS with wildcard support and service discovery integration."""
         origin = request.headers.get("origin")
+        
+        # Update metrics
+        if self._cors_metrics:
+            self._cors_metrics['requests_processed'] += 1
+            if request.method == "OPTIONS":
+                self._cors_metrics['preflight_requests'] += 1
+        
         response = await self._handle_request(request, call_next)
-        await self._process_cors_response(response, origin)
+        await self._process_cors_response(response, origin, request)
         return response
 
     async def _handle_request(self, request: Request, call_next) -> Response:
-        """Handle request and return response."""
+        """Handle request and return response with enhanced preflight support."""
         if request.method == "OPTIONS":
-            response = Response(status_code=200)
-            origin = request.headers.get("origin")
-            if origin:
-                response.headers["Access-Control-Allow-Origin"] = origin
-                response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-                response.headers["Access-Control-Max-Age"] = "3600"
-            return response
+            return await self._handle_preflight_request(request)
         return await call_next(request)
-
-    async def _process_cors_response(self, response: Response, origin: Optional[str]) -> None:
-        """Process CORS headers for response."""
-        if not origin:
-            return
-        allowed_origins = get_cors_origins()
-        if is_origin_allowed(origin, allowed_origins):
-            self._add_cors_headers(response, origin)
-        else:
-            self._log_cors_rejection(origin, allowed_origins)
-
-    def _add_cors_headers(self, response: Response, origin: str) -> None:
-        """Add CORS headers to response."""
+    
+    async def _handle_preflight_request(self, request: Request) -> Response:
+        """Handle preflight requests with service discovery awareness."""
+        response = Response(status_code=200)
+        origin = request.headers.get("origin")
+        
+        if origin and self._is_origin_allowed_with_discovery(origin):
+            self._add_preflight_headers(response, origin)
+            # Track successful preflight
+            if self._cors_metrics:
+                self._cors_metrics['origins_allowed'].add(origin)
+        
+        return response
+    
+    def _add_preflight_headers(self, response: Response, origin: str) -> None:
+        """Add comprehensive preflight headers."""
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
         response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
-        response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
-        response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
+        response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth"
+        response.headers["Access-Control-Max-Age"] = "3600"
+        response.headers["Vary"] = "Origin"
 
-    def _log_cors_rejection(self, origin: str, allowed_origins: list[str]) -> None:
-        """Log CORS rejection for debugging."""
+    async def _process_cors_response(self, response: Response, origin: Optional[str], request: Request) -> None:
+        """Process CORS headers for response with enhanced validation."""
+        if not origin:
+            return
+        
+        if self._is_origin_allowed_with_discovery(origin):
+            self._add_enhanced_cors_headers(response, origin, request)
+            # Track successful CORS
+            if self._cors_metrics:
+                self._cors_metrics['origins_allowed'].add(origin)
+        else:
+            self._log_cors_rejection(origin, request)
+            # Track rejection
+            if self._cors_metrics:
+                self._cors_metrics['cors_rejections'] += 1
+                self._cors_metrics['origins_rejected'].add(origin)
+    
+    def _is_origin_allowed_with_discovery(self, origin: str) -> bool:
+        """Check if origin is allowed with service discovery integration."""
+        allowed_origins = get_cors_origins()
+        
+        # Basic origin check
+        if is_origin_allowed(origin, allowed_origins):
+            return True
+        
+        # Service discovery integration - check registered services
+        if self._service_discovery:
+            return self._check_service_discovery_origins(origin)
+        
+        return False
+    
+    def _check_service_discovery_origins(self, origin: str) -> bool:
+        """Check origins from service discovery registry."""
+        try:
+            # Check if origin matches any registered service
+            backend_info = self._service_discovery.read_backend_info()
+            frontend_info = self._service_discovery.read_frontend_info()
+            auth_info = self._service_discovery.read_auth_info()
+            
+            service_origins = set()
+            
+            if backend_info:
+                service_origins.add(backend_info.get('api_url', ''))
+            if frontend_info:
+                service_origins.add(frontend_info.get('url', ''))
+            if auth_info:
+                service_origins.add(auth_info.get('url', ''))
+                service_origins.add(auth_info.get('api_url', ''))
+            
+            return origin in service_origins
+        except Exception as e:
+            logger.warning(f"Service discovery CORS check failed: {e}")
+            return False
+
+    def _add_enhanced_cors_headers(self, response: Response, origin: str, request: Request) -> None:
+        """Add enhanced CORS headers with service metadata."""
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+        response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With, X-Service-ID, X-Cross-Service-Auth"
+        response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type, X-Service-Response-Time"
+        response.headers["Vary"] = "Origin"
+        
+        # Add service identification for cross-service requests
+        if self._is_cross_service_request(request):
+            response.headers["X-Service-ID"] = "netra-backend"
+            response.headers["X-Cross-Service-Response"] = "true"
+
+    def _is_cross_service_request(self, request: Request) -> bool:
+        """Check if request is from another service."""
+        service_id_header = request.headers.get("x-service-id")
+        cross_service_auth = request.headers.get("x-cross-service-auth")
+        return bool(service_id_header or cross_service_auth)
+
+    def _log_cors_rejection(self, origin: str, request: Request) -> None:
+        """Log CORS rejection with enhanced debugging info."""
         import logging
         logger = logging.getLogger(__name__)
-        logger.debug(f"CORS: Origin {origin} not allowed. Allowed: {allowed_origins}")
+        
+        allowed_origins = get_cors_origins()
+        user_agent = request.headers.get("user-agent", "unknown")
+        request_id = request.headers.get("x-request-id", "no-id")
+        
+        logger.warning(
+            f"CORS rejection: origin={origin}, user_agent={user_agent[:50]}, "
+            f"request_id={request_id}, allowed_origins={len(allowed_origins)} entries"
+        )
+        
+        # In development, log more details
+        config = get_configuration()
+        if config.environment == "development":
+            logger.debug(f"CORS: Detailed rejection - Origin {origin} not in {allowed_origins}")
+    
+    def get_cors_metrics(self) -> Optional[Dict]:
+        """Get CORS metrics for monitoring."""
+        if not self._cors_metrics:
+            return None
+        
+        # Convert sets to lists for JSON serialization
+        return {
+            **self._cors_metrics,
+            'origins_allowed': list(self._cors_metrics['origins_allowed']),
+            'origins_rejected': list(self._cors_metrics['origins_rejected'])
+        }
 
 
 def setup_session_middleware(app: FastAPI) -> None:

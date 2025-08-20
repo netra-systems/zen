@@ -31,10 +31,10 @@ def should_skip_file(file_path):
         # Test outputs
         'test_reports', 'test-results', 'junit', 'allure-results', 'cypress',
         # Documentation and marketing
-        'docs', 'marketing_materials', 'technical_marketing', 
-        'technical_marketing_deep', 'business-context', 'architecture_docs',
-        'deployment_docs', 'implementation_docs', 'reports', 'plans',
-        'agent_to_agent', 'agent_to_agent_status_updates', 'team_updates',
+        'docs', 'marketing_materials', 'technical_content', 
+        'business-context', 'architecture_docs',
+        'deployment_docs', 'reports', 'plans',
+        'agent_communications', 'team_updates',
         # Infrastructure
         'terraform', 'terraform-dev-postgres', 'terraform-gcp', 
         'terraform-github-gemini', 'infrastructure', 'lark',

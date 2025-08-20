@@ -202,14 +202,14 @@ Ensure adherence to these core specifications throughout the development process
 
 | Spec | Purpose | When |
 | :--- | :--- | :--- |
-| [`learnings/index.xml`](SPEC/learnings/index.xml) | Master index of all learnings | ALWAYS check first |
+| [`learnings/index.xml`](SPEC/learnings/index.xml) | Index of all learnings | ALWAYS check first |
 | [`type_safety.xml`](SPEC/type_safety.xml) | Type safety, duplication-free | BEFORE any code |
 | [`conventions.xml`](SPEC/conventions.xml) | Standards and guidelines | BEFORE any code |
 | [`code_changes.xml`](SPEC/code_changes.xml) | Change checklist | BEFORE changes |
 | [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | Maintain stub-free production tests | Always check |
 | [`anti_regression.xml`](SPEC/anti_regression.xml) | Ensure system stability | Before commits |
 | [`independent_services.xml`](SPEC/independent_services.xml) | Microservice independence | When modifying services |
-| [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Master index of platform constants | BEFORE using string literals |
+| [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Index of platform constants | BEFORE using string literals |
 
 ### 7.2. Domain Specs
 
@@ -222,16 +222,40 @@ Ensure adherence to these core specifications throughout the development process
 | **GitHub Actions** | [`github_actions.xml`](SPEC/github_actions.xml) - Check permissions first |
 | **Startup** | [`learnings/startup.xml`](SPEC/learnings/startup.xml) - Initialization insights |
 
-## 8. Execution Checklist
+## 8. System Status and Compliance Tracking
+
+### Master Work-In-Progress Index
+**CRITICAL: Check system alignment status BEFORE any major work**
+
+The [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) provides real-time system health metrics:
+- Overall compliance score with specifications
+- Per-service and per-category alignment scores  
+- Critical violations requiring immediate attention
+- Action items prioritized by business impact
+
+**Update Process:**
+1. **ALWAYS CHECK FIRST:** Review [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) before starting work
+2. **UPDATE AFTER WORK:** Regenerate report after significant changes
+3. **MONITOR TRENDS:** Track score improvements/degradations
+
+**Related Status Reports:**
+- [`SPEC/master_wip_index.xml`](SPEC/master_wip_index.xml) - Scoring methodology and process
+- [`SPEC/ai_factory_status_report.xml`](SPEC/ai_factory_status_report.xml) - AI factory patterns status
+- [`SPEC/compliance_reporting.xml`](SPEC/compliance_reporting.xml) - Compliance tracking system
+- [`SPEC/test_reporting.xml`](SPEC/test_reporting.xml) - Testing metrics and coverage
+
+## 9. Execution Checklist
 
 ### BEFORE and AFTER Any Code Change:
-1.  **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related insights FIRST.
-2.  **VERIFY** String literals using `python scripts/query_string_literals.py validate "literal_value"` to prevent hallucination.
-3.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-4.  **RUN** `python -m test_framework.test_runner --level integration --no-coverage --fast-fail`.
-5.  **VALIDATE** changes in Dev and Staging environments as required (See 3.3).
-6.  **UPDATE** specs and documentation to reflect the implemented reality.
-7.  **REFRESH** String literals index if adding new constants: `python scripts/scan_string_literals.py`
+1.  **CHECK STATUS** [`MASTER_WIP_STATUS.md`](MASTER_WIP_STATUS.md) - Review current system alignment.
+2.  **CHECK LEARNINGS** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related insights.
+3.  **VERIFY** String literals using `python scripts/query_string_literals.py validate "literal_value"` to prevent hallucination.
+4.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
+5.  **RUN** `python -m test_framework.test_runner --level integration --no-coverage --fast-fail`.
+6.  **VALIDATE** changes in Dev and Staging environments as required (See 3.3).
+7.  **UPDATE** specs and documentation to reflect the implemented reality.
+8.  **REFRESH** String literals index if adding new constants: `python scripts/scan_string_literals.py`
+9.  **UPDATE STATUS** Regenerate WIP report if significant changes: `python scripts/generate_wip_report.py`
 
 ### Key Patterns
 *   Type Safety (See specs)

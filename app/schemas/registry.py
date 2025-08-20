@@ -55,7 +55,8 @@ from app.schemas.websocket_models import (
     WebSocketMessage, WebSocketMessageIn, MessageData, ThreadHistoryResponse,
     AgentResponseData, AgentResponse, MessageToUser, AnalysisRequest,
     UserMessage, AgentMessage, StopAgent, AgentCompletedPayload,
-    AgentStoppedPayload, ServerMessage
+    AgentStoppedPayload, ServerMessage, WebSocketValidationError,
+    WebSocketStats, RateLimitInfo, BroadcastResult
 )
 
 # Import all audit models from the dedicated module

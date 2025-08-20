@@ -21,11 +21,16 @@
         <tier name="all" description="Platform-wide features affecting all customers">
             <revenue_impact>$347K+ MRR protection</revenue_impact>
             <critical_coverage_target>100%</critical_coverage_target>
-            <current_coverage>51.4%</current_coverage>
+            <current_coverage>0%</current_coverage>
+            <test_count>2497</test_count>
+            <average_value_score>59.1</average_value_score>
         </tier>
         <tier name="free" description="Features for free tier conversion">
             <revenue_impact>Conversion funnel to paid tiers</revenue_impact>
             <critical_coverage_target>95%</critical_coverage_target>
+            <current_coverage>0%</current_coverage>
+            <test_count>273</test_count>
+            <average_value_score>51.7</average_value_score>
             <focus_areas>
                 <area>Onboarding flow</area>
                 <area>Feature discovery</area>
@@ -35,6 +40,9 @@
         <tier name="early" description="Early adopter features">
             <revenue_impact>$50K-$100K MRR</revenue_impact>
             <critical_coverage_target>97%</critical_coverage_target>
+            <current_coverage>0%</current_coverage>
+            <test_count>109</test_count>
+            <average_value_score>60.2</average_value_score>
             <focus_areas>
                 <area>Core agent functionality</area>
                 <area>Basic analytics</area>
@@ -44,6 +52,9 @@
         <tier name="mid" description="Mid-market features">
             <revenue_impact>$100K-$200K MRR</revenue_impact>
             <critical_coverage_target>98%</critical_coverage_target>
+            <current_coverage>0%</current_coverage>
+            <test_count>269</test_count>
+            <average_value_score>57.5</average_value_score>
             <focus_areas>
                 <area>Advanced agent chains</area>
                 <area>Custom workflows</area>
@@ -53,6 +64,9 @@
         <tier name="enterprise" description="Enterprise features">
             <revenue_impact>$200K+ MRR</revenue_impact>
             <critical_coverage_target>100%</critical_coverage_target>
+            <current_coverage>0%</current_coverage>
+            <test_count>74</test_count>
+            <average_value_score>55.4</average_value_score>
             <focus_areas>
                 <area>SSO/SAML authentication</area>
                 <area>Advanced security</area>
@@ -175,25 +189,25 @@
     <test_quality_metrics>
         <metric name="real_llm_coverage">
             <description>Percentage of agent tests using real LLM APIs</description>
-            <current>60%</current>
+            <current>0%</current>
             <target>85%</target>
             <business_impact>Ensures AI quality meets customer expectations</business_impact>
         </metric>
         <metric name="e2e_coverage">
             <description>End-to-end tests covering complete user journeys</description>
-            <current>45%</current>
+            <current>0.06%</current>
             <target>75%</target>
             <business_impact>Validates entire customer workflows</business_impact>
         </metric>
         <metric name="multi_environment_pass_rate">
             <description>Tests passing in dev, staging, and production configs</description>
-            <current>72%</current>
+            <current>0%</current>
             <target>95%</target>
             <business_impact>Deployment confidence and reduced incidents</business_impact>
         </metric>
         <metric name="unified_service_coverage">
             <description>Tests validating multi-service interactions</description>
-            <current>38%</current>
+            <current>28.5%</current>
             <target>80%</target>
             <business_impact>System integration reliability</business_impact>
         </metric>
