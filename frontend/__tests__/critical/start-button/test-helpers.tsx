@@ -3,7 +3,7 @@
  * Modular helper functions for comprehensive button testing
  * 
  * BVJ: Shared utilities reduce test maintenance and ensure consistency
- * @compliance conventions.xml - Under 300 lines, 8-line functions
+ * @compliance conventions.xml - Under 300 lines, 25-line functions
  */
 
 import React from 'react';

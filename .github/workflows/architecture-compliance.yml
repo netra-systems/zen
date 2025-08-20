@@ -18,7 +18,7 @@ on:
 
 jobs:
   architectural-limits-enforcement:
-    name: Enforce 300-Line & 8-Line Limits
+    name: Enforce 450-line & 25-line Limits
     runs-on: warp-custom-default
     
     steps:
@@ -161,8 +161,8 @@ jobs:
           echo "- Breaks Elite Engineering standards"
           echo ""
           echo "Required Actions:"
-          echo "1. Fix all file size violations (300-line limit)"
-          echo "2. Fix all function size violations (8-line limit)"
+          echo "1. Fix all file size violations (450-line limit)"
+          echo "2. Fix all function size violations (25-line limit)"
           echo "3. Re-run checks until compliance is achieved"
           
           # Exit with the original compliance check exit code
@@ -235,9 +235,9 @@ jobs:
             FUNCTION_VIOLATIONS=$(cat function-report.json | jq '.total_violations')
             
             if [ "$FUNCTION_VIOLATIONS" -eq 0 ]; then
-              echo "✅ **All functions comply with 8-line limit**" >> function-analysis.md
+              echo "✅ **All functions comply with 25-line limit**" >> function-analysis.md
             else
-              echo "🔴 **Functions exceeding 8-line limit: $FUNCTION_VIOLATIONS**" >> function-analysis.md
+              echo "🔴 **Functions exceeding 25-line limit: $FUNCTION_VIOLATIONS**" >> function-analysis.md
               echo "" >> function-analysis.md
               echo "### Violations:" >> function-analysis.md
               cat function-report.json | jq -r '.violations[] | "- **\(.function)** in \(.file) (Line \(.line)): \(.actual_lines) lines"' >> function-analysis.md

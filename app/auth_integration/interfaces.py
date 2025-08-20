@@ -9,8 +9,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: +$1K MRR from stability
 
 Architecture:
-- 300-line module limit enforced
-- 8-line function limit enforced  
+- 450-line module limit enforced
+- 25-line function limit enforced  
 - Protocol-based interfaces for type safety
 - Clear contracts for auth service integration
 """

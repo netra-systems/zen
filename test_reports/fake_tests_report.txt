@@ -1,0 +1,247 @@
+================================================================================
+FAKE TEST DETECTION REPORT
+================================================================================
+Scan Date: 2025-08-20 14:44:38
+Total Tests Scanned: 0
+Total Fake Tests Found: 22
+Files with Fake Tests: 3
+
+FAKE TESTS BY TYPE:
+----------------------------------------
+  auto_pass_flags: 1 (Tests with flags/conditions that force them to pass)
+  tautological_tests: 21 (Tests that test their own test setup)
+
+FAKE TESTS BY SEVERITY:
+----------------------------------------
+  CRITICAL: 1
+  MEDIUM: 21
+
+DETAILED RESULTS:
+========================================
+
+CRITICAL SEVERITY (1 tests):
+----------------------------------------
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestUnifiedLogging::test_correlation_id_support
+Line: 102
+Types: auto_pass_flags
+Confidence: 0.85
+Recommendation: Remove skip decorator and implement proper test logic
+Evidence:
+  - Standalone 'assert True' found
+
+MEDIUM SEVERITY (21 tests):
+----------------------------------------
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestAuthenticationCompliant::test_successful_login
+Line: 25
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = aut
+  - Circular logic pattern: id == valid_user.id
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestAuthenticationCompliant::test_invalid_credentials
+Line: 34
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = aut
+  - Circular logic pattern: r == "Invalid cr
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestAuthenticationCompliant::test_account_locked
+Line: 43
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = aut
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestDataProcessingCompliant::test_process_user_data_valid
+Line: 57
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: data = self._create_valid_user_data
+  - Circular logic pattern: t = processor.process(dat
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestDataProcessingCompliant::test_process_user_data_invalid
+Line: 65
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: data = self._create_invalid_user_data
+  - Circular logic pattern: t = processor.process(dat
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestValidationCompliant::test_email_validation
+Line: 107
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = validator.validat
+  - Circular logic pattern: d == expected
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestAPIIntegrationCompliant::test_create_user_api
+Line: 156
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: se = client.post("/users", json=valid_use
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestAPIIntegrationCompliant::test_get_user_api
+Line: 164
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: se = client.get(f"/users/{existing_use
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: test_complex_workflow_bad
+Line: 176
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: user = create_test_user
+  - Circular logic pattern: ervice = AuthService
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestComplexWorkflowGood::test_user_login_success
+Line: 200
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = aut
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestComplexWorkflowGood::test_user_logout_success
+Line: 207
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = auth_service.logout
+
+File: app\tests\examples\test_size_compliance_examples.py
+Test: TestComplexWorkflowGood::test_user_login_invalid_password
+Line: 214
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: t = aut
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestConfigValidator::test_invalid_db_url_rejected
+Line: 28
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: l = "mysql://inval
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestErrorContext::test_trace_id_generation
+Line: 48
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: trace_id = error_context.generate_trace_id
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestCustomExceptions::test_netra_exception_structure
+Line: 68
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: xc = NetraExc
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestArchitecturalCompliance::test_file_line_count_under_300
+Line: 117
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: line_count = self._get_current_file_line_count
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestArchitecturalCompliance::test_helper_functions_extracted
+Line: 122
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: mock_config = create_mock_config
+
+File: app\tests\core\test_missing_tests_final.py
+Test: TestArchitecturalCompliance::test_functions_are_short
+Line: 127
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: s = inspect.getmembers(self, inspect.is
+
+File: app\tests\examples\test_real_functionality_examples.py
+Test: TestUnitTestMinimalMocking::test_user_validation_real_logic
+Line: 57
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: ser = User(email="test@example.com", name="Test User
+
+File: app\tests\examples\test_real_functionality_examples.py
+Test: TestUnitTestMinimalMocking::test_thread_creation_with_real_data
+Line: 64
+Types: tautological_tests
+Confidence: 0.65
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: hread = Thread(title="Test Thread
+
+File: app\tests\examples\test_real_functionality_examples.py
+Test: TestAntiPatternsWhatNotToDo::test_example_of_circular_testing_antipattern
+Line: 287
+Types: tautological_tests
+Confidence: 0.70
+Recommendation: Refactor to test actual functionality, not test setup
+Evidence:
+  - Circular logic pattern: ervice = MockUserService
+  - Circular logic pattern: t = mock_service.create_user("test@example.com", "Test
+
+========================================
+RECOMMENDATIONS:
+========================================
+1. Remove or fix CRITICAL fake tests immediately
+2. Address HIGH severity fake tests in current sprint
+3. Schedule MEDIUM/LOW severity fixes for technical debt
+4. Run fake test detection in CI to prevent regressions
+5. Use examples from test_real_functionality_examples.py
+
+For detailed guidance, see:
+- SPEC/testing.xml (fake_test_detection section)
+- app/tests/examples/test_real_functionality_examples.py
+- CLAUDE.md (Testing best practices)
+
+================================================================================

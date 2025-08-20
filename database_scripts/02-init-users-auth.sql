@@ -1,6 +1,6 @@
 -- User and Authentication Tables
 -- Purpose: Create user management and authentication related tables
--- Module: Users & Auth (adheres to 300-line limit)
+-- Module: Users & Auth (adheres to 450-line limit)
 
 -- Main user table (using 'userbase' to match SQLAlchemy models)
 CREATE TABLE IF NOT EXISTS userbase (

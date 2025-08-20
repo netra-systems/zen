@@ -1,5 +1,5 @@
 """
-LEGACY FILE - EXCEEDS 300-LINE LIMIT (1563 lines)
+LEGACY FILE - EXCEEDS 450-line LIMIT (1563 lines)
 
 This file violates architecture compliance and must be split into modules.
 Tests should be moved to focused modules under test_critical_*.py

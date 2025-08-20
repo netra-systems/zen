@@ -8,6 +8,7 @@ import os
 import logging
 from pathlib import Path
 from typing import Dict, Set, Optional
+import time
 
 from dev_launcher.local_secrets import LocalSecretManager
 from dev_launcher.secret_cache import SecretCache
@@ -30,13 +31,16 @@ class SecretLoader:
                  project_id: Optional[str] = None, 
                  verbose: bool = False,
                  project_root: Optional[Path] = None,
-                 load_secrets: bool = False):
+                 load_secrets: bool = False,
+                 local_first: bool = True):
         """Initialize the secret loader."""
         self.project_id = SecretConfig.determine_project_id(project_id)
         self.verbose = verbose
         self.project_root = project_root or Path.cwd()
         self.load_secrets = load_secrets
+        self.local_first = local_first
         self.loaded_secrets: Dict[str, str] = {}
+        self._fast_mode = False
         self._setup_components()
     
     def _setup_components(self):
@@ -165,3 +169,50 @@ class SecretLoader:
         logger.info("[TIP] Create a .env file for local development")
         logger.info("[TIP] Use 'cp .env.example .env' to start from example")
         logger.info("=" * 70)
+    
+    def enable_fast_mode(self) -> None:
+        """Enable fast mode for sub-100ms secret loading."""
+        self._fast_mode = True
+        self.local_first = True
+        logger.info("Fast mode enabled for secret loading")
+    
+    def load_secrets_fast(self, required_secrets: Set[str]) -> Dict[str, str]:
+        """Fast secret loading using only local sources."""
+        if not self._fast_mode:
+            return self.load_all_secrets()
+        
+        # Try cache first
+        if self._try_load_cached_secrets(required_secrets):
+            return self.loaded_secrets
+        
+        # Fast local-only loading
+        secrets, _ = self.local_secret_manager.load_secrets_with_fallback(required_secrets)
+        self._set_environment_from_secrets(secrets)
+        return secrets
+    
+    def validate_local_env_files(self) -> bool:
+        """Validate that local environment files are sufficient."""
+        required_secrets = SecretConfig.get_required_secrets()
+        env_secrets = {}
+        
+        # Check .env files
+        for env_file in [".env.local", ".env"]:
+            env_path = self.project_root / env_file
+            if env_path.exists():
+                with open(env_path, 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith('#') and '=' in line:
+                            key, value = line.split('=', 1)
+                            env_secrets[key.strip()] = value.strip('"\'')
+        
+        # Check OS environment
+        for key in required_secrets:
+            if key in os.environ:
+                env_secrets[key] = os.environ[key]
+        
+        missing = required_secrets - set(env_secrets.keys())
+        if missing:
+            logger.warning(f"Missing local secrets: {missing}")
+            return False
+        return True

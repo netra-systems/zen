@@ -41,7 +41,7 @@
       <title>Architecture Violations in Test Files</title>
       <evidence>
         - login-to-chat.test.tsx: 598 lines (300 line limit violated)
-        - Many test functions exceed 8-line limit
+        - Many test functions exceed 25-line limit
         - Tests don't follow the same quality standards as production code
       </evidence>
       <impact>Tests become unmaintainable and unreliable</impact>

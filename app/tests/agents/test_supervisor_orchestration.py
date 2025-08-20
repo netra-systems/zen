@@ -1,7 +1,7 @@
 """
 Supervisor Agent Orchestration Tests - Index
 Central index for all supervisor orchestration tests split across modules.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 # Import all supervisor orchestration test modules

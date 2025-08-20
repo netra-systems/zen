@@ -1,7 +1,7 @@
 /**
  * WebSocket Complete Integration Tests - REFACTORED (Modular)
  * 
- * This file was refactored from 580 lines to comply with 300-line limit.
+ * This file was refactored from 580 lines to comply with 450-line limit.
  * The original refactored test file has been reorganized to leverage the
  * existing modular WebSocket test architecture:
  * 
@@ -65,7 +65,7 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
 
   describe('Refactored Architecture Validation', () => {
     it('should maintain function size limit (≤8 lines)', () => {
-      // All functions in modular files comply with 8-line limit
+      // All functions in modular files comply with 25-line limit
       expect(true).toBe(true);
     });
 
@@ -194,7 +194,7 @@ describe('WebSocket Complete Integration Tests - Refactored Modular', () => {
  * - Resource management validation
  * 
  * Benefits:
- * - Maintains 300-line limit compliance
+ * - Maintains 450-line limit compliance
  * - Preserves all refactored functionality  
  * - Leverages shared modular components
  * - Reduces code duplication

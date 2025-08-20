@@ -1,7 +1,7 @@
 """
 Database connection and infrastructure tests
 Tests ClickHouse connection pooling, migration safety, and health checks
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

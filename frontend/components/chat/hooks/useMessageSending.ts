@@ -137,7 +137,7 @@ export const useMessageSending = () => {
   };
 
   // ========================================================================
-  // Optimistic Update Helpers (8-line functions)
+  // Optimistic Update Helpers (25-line functions)
   // ========================================================================
 
   const handleOptimisticSend = async (message: string, threadId: string): Promise<void> => {

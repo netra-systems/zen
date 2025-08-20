@@ -742,8 +742,8 @@ def validate_test_sizes(args):
         violations = results["summary"]["total_violations"]
         if violations > 0:
             print(f"\n[X] TEST SIZE VIOLATIONS DETECTED: {violations} violations")
-            print(f"Files exceeding 300-line limit: {results['summary']['files_exceeding_limit']}")
-            print(f"Functions exceeding 8-line limit: {results['summary']['functions_exceeding_limit']}")
+            print(f"Files exceeding 450-line limit: {results['summary']['files_exceeding_limit']}")
+            print(f"Functions exceeding 25-line limit: {results['summary']['functions_exceeding_limit']}")
             print("\nViolation Details:")
             
             # Show top 5 worst violations for immediate action

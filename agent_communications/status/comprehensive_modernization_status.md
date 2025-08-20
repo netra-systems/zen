@@ -53,8 +53,8 @@ All agents must implement:
 3. ✅ **ReliabilityManager** from `app/agents/base/reliability_manager.py`
 4. ✅ **ExecutionMonitor** from `app/agents/base/monitoring.py`
 5. ✅ **ExecutionErrorHandler** from `app/agents/base/errors.py`
-6. ✅ **300-line module limit** - Split files exceeding limit
-7. ✅ **8-line function limit** - Refactor all functions
+6. ✅ **450-line module limit** - Split files exceeding limit
+7. ✅ **25-line function limit** - Refactor all functions
 
 ## Agent Spawning Plan
 

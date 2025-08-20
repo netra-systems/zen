@@ -4,7 +4,7 @@ E2E tests for service health check endpoints in DEV MODE.
 Tests health endpoints for all services, monitors health status during startup,
 validates graceful degradation, and verifies health check reliability.
 
-Follows 300-line file limit and 8-line function limit constraints.
+Follows 450-line file limit and 25-line function limit constraints.
 """
 
 import os

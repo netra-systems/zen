@@ -1,5 +1,5 @@
 // Tool tracking service - Manages tool lifecycle, deduplication, auto-removal
-// Modular service following 8-line function limits
+// Modular service following 25-line function limits
 
 import { 
   ToolLifecycleMap, 

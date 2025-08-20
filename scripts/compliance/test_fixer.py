@@ -199,7 +199,7 @@ class TestFixer:
         return f'''"""
 {group_name} Tests - Split from {base_name}
 
-Modular test file created to comply with 300-line limit requirement.
+Modular test file created to comply with 450-line limit requirement.
 Contains {group_name} functionality tests.
 """
 

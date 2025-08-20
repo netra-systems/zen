@@ -13,8 +13,8 @@ The Unified Test Configuration system provides consistent, tier-based testing in
 
 ## Architecture Compliance
 
-✅ **300-line file limit**: All files ≤300 lines  
-✅ **8-line function limit**: All functions ≤8 lines  
+✅ **450-line file limit**: All files ≤300 lines  
+✅ **25-line function limit**: All functions ≤8 lines  
 ✅ **Modular design**: Clear separation of concerns  
 ✅ **Type safety**: Strong typing throughout  
 
@@ -182,7 +182,7 @@ All tests should pass with:
 ## Contributing
 
 When extending the unified test configuration:
-1. Maintain 300-line file limit
+1. Maintain 450-line file limit
 2. Keep all functions ≤8 lines
 3. Add comprehensive tests
 4. Update documentation

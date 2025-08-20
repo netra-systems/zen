@@ -1,6 +1,6 @@
 """
 Session Manager - Centralized session handling with Redis
-Maintains 300-line limit with focused session management
+Maintains 450-line limit with focused session management
 """
 import os
 import json

@@ -149,7 +149,7 @@
   <testing_architecture_insights>
     <insight category="Modular Test Design">
       <finding>
-        Tests must follow 300-line module limit and 8-line function limit.
+        Tests must follow 450-line module limit and 25-line function limit.
         This forces better test organization and readability while maintaining
         comprehensive coverage of revenue-critical scenarios.
       </finding>

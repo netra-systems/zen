@@ -129,7 +129,7 @@ Each release includes:
 ### Changed
 - **Module Architecture Enforcement (300/8 Rule)**
   - Impact: 40% reduction in bug rate
-  - Change: Enforced 300-line file, 8-line function limits
+  - Change: Enforced 450-line file, 25-line function limits
   - Metrics: 60% faster feature development
 
 ---
@@ -186,7 +186,7 @@ Each release includes:
 - Next.js 14 frontend
 - PostgreSQL + ClickHouse databases
 - 97% test coverage target
-- 300-line module architecture
+- 450-line module architecture
 
 ---
 

@@ -1,7 +1,7 @@
 """MCP Intent Detection Module.
 
 Detects when user requests require MCP tool execution and routes them appropriately.
-Follows strict 8-line function design and 300-line limit.
+Follows strict 25-line function design and 450-line limit.
 """
 
 from typing import Dict, List, Optional, Tuple

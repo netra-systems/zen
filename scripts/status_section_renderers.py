@@ -2,7 +2,7 @@
 """
 Status Section Renderers Module
 Handles rendering of specific report sections.
-Complies with 300-line and 8-line function limits.
+Complies with 450-line and 25-line function limits.
 """
 
 from typing import Dict, List, Tuple

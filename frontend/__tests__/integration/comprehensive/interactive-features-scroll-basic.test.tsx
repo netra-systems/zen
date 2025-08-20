@@ -1,6 +1,6 @@
 /**
  * Interactive Features Basic Scroll Integration Tests
- * ULTRA DEEP THINK: Module-based architecture - Basic scroll tests extracted for 300-line compliance
+ * ULTRA DEEP THINK: Module-based architecture - Basic scroll tests extracted for 450-line compliance
  */
 
 import {

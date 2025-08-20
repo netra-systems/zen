@@ -17,7 +17,7 @@ REQUIREMENTS:
 - Complete profile setup and settings
 - Zero mocking - all services must be real
 - Performance: <15 seconds for complete journey
-- Architecture compliance: 300-line limit, 8-line functions
+- Architecture compliance: 450-line limit, 25-line functions
 """
 
 import pytest

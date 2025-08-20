@@ -425,7 +425,7 @@ Frontend (Next.js) ↔ WebSocket/REST API ↔ Multi-Agent System ↔ LLM Provide
   - `supervisor/supervisor.py` - Orchestrates sub-agents
   - `triage_sub_agent/` - Request classification
   - `data_sub_agent/` - Data processing
-- **Pattern**: Each agent extends `BaseSubAgent` with 8-line function limit
+- **Pattern**: Each agent extends `BaseSubAgent` with 25-line function limit
 
 #### WebSocket Management
 - **Location**: `app/routes/websockets.py`, `app/websocket/`

@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Resource efficiency enables +$30K annual cost savings
 
 Architecture:
-- 300-line file limit enforced through focused resource testing
-- 8-line function limit for all functions
+- 450-line file limit enforced through focused resource testing
+- 25-line function limit for all functions
 - Real resource monitoring for production accuracy
 - Agent resource initialization validation patterns
 """

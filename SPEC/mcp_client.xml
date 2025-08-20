@@ -28,7 +28,7 @@
 
   <architecture>
     <principles>
-      <principle>Modular design with 300-line maximum per file</principle>
+      <principle>Modular design with 450-line maximum per file</principle>
       <principle>Functions limited to 8 lines maximum</principle>
       <principle>Strong typing with Pydantic models</principle>
       <principle>Async-first implementation</principle>

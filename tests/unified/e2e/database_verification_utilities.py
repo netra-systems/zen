@@ -4,7 +4,7 @@ Database connection verification utilities for dev launcher testing.
 Provides utilities for verifying database connectivity, testing connection pools,
 monitoring database health, and validating database configurations.
 
-Follows 300-line file limit and 8-line function limit constraints.
+Follows 450-line file limit and 25-line function limit constraints.
 """
 
 import os

@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Testing quality directly protects revenue streams
 
 Architecture:
-- 300-line file limit enforced
-- 8-line function limit for all functions
+- 450-line file limit enforced
+- 25-line function limit for all functions
 - Supports concurrent test execution with unique data
 """
 

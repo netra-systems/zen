@@ -2,7 +2,7 @@
 JWT Token Test Helpers - Utility classes for cross-service token testing
 
 Supports both test and dev mode configurations with automatic environment detection.
-Maintains 300-line limit through focused helper functionality.
+Maintains 450-line limit through focused helper functionality.
 
 Business Value: Enables comprehensive JWT testing across all services
 

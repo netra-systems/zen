@@ -1,7 +1,7 @@
 """
 Comprehensive Unit Tests for Startup Status Manager
 Tests all critical paths, edge cases, and error conditions with strong typing.
-COMPLIANCE: 300-line max file, 8-line max functions, async test support.
+COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
 import pytest

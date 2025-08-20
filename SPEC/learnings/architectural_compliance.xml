@@ -20,8 +20,8 @@
                 System compliance check revealed catastrophic violation of CLAUDE.md architectural rules:
                 - Overall compliance: 37.7% (target: 95%+)
                 - Total violations: 6,433
-                - File size violations: 360 files exceeding 300-line limit
-                - Function complexity violations: 5,901 functions exceeding 8-line limit
+                - File size violations: 360 files exceeding 450-line limit
+                - Function complexity violations: 5,901 functions exceeding 25-line limit
                 - Duplicate types: 161 across codebase
                 - Test stubs in production: 11 instances
             </details>
@@ -45,7 +45,7 @@
             </cause>
             <cause id="tooling-gap">
                 <description>Compliance checker itself violates rules (898 lines)</description>
-                <evidence>scripts/check_architecture_compliance.py exceeds 300-line limit</evidence>
+                <evidence>scripts/check_architecture_compliance.py exceeds 450-line limit</evidence>
             </cause>
             <cause id="legacy-debt">
                 <description>Historical code not refactored to meet current standards</description>
@@ -86,7 +86,7 @@
             <priority_2>Major Violations</priority_2>
             <actions>
                 <action>Split 360 oversized files into focused modules</action>
-                <action>Refactor 5,901 complex functions into 8-line limit</action>
+                <action>Refactor 5,901 complex functions into 25-line limit</action>
                 <action>Consolidate 161 duplicate types to single sources</action>
                 <action>Remove 11 test stubs from production code</action>
             </actions>

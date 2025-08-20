@@ -2,7 +2,7 @@
 Domain and Workload Optimization Profiles
 
 Contains domain-specific and workload-specific configuration profiles
-extracted from suggestions.py to maintain 300-line limit.
+extracted from suggestions.py to maintain 450-line limit.
 """
 
 from typing import Dict, Any, List

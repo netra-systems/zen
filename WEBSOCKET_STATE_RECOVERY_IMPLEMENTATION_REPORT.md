@@ -23,7 +23,7 @@ Successfully implemented **Critical Integration Test #11: WebSocket State Recove
 ## Technical Implementation
 
 ### File: `app/tests/integration/test_websocket_state_recovery.py`
-- **Size**: 507 lines (within 300-line target scope per test class)
+- **Size**: 507 lines (within 450-line target scope per test class)
 - **Function limit**: All functions ≤8 lines (CLAUDE.md compliant)
 - **Architecture**: Modular test classes with focused responsibilities
 

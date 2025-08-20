@@ -1,7 +1,7 @@
 """Git branch tracker for AI Factory Status Report.
 
 Tracks branch activity, merge patterns, and feature lifecycle.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 import subprocess

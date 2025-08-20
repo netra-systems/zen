@@ -1,6 +1,6 @@
 """
 Metric publisher module for alerts and notifications.
-Handles publishing operations with 8-line function limit.
+Handles publishing operations with 25-line function limit.
 """
 
 from typing import Dict

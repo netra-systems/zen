@@ -1,7 +1,7 @@
 """Compliance and security metrics calculator.
 
 Calculates security fixes and compliance metrics.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from typing import List

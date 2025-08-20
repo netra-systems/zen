@@ -2,7 +2,7 @@
 Modern Execution Helpers for Admin Tool Dispatcher
 
 Helper functions for the modern execution pattern integration.
-Split from dispatcher_core.py to maintain 300-line limit.
+Split from dispatcher_core.py to maintain 450-line limit.
 
 Business Value: Enables modern agent architecture compliance.
 """

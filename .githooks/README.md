@@ -6,8 +6,8 @@ This directory contains git hooks that enforce the architectural rules defined i
 
 The pre-commit hook automatically checks staged files before allowing commits, ensuring compliance with:
 
-- **300-line file limit** - Files must not exceed 300 lines
-- **8-line function limit** - All functions must be 8 lines or fewer  
+- **450-line file limit** - Files must not exceed 300 lines
+- **25-line function limit** - All functions must be 8 lines or fewer  
 - **No test stubs** - Production code cannot contain test stubs or mock implementations
 
 ## Quick Start

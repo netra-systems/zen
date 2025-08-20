@@ -2,7 +2,7 @@
 
 This module provides version management and migration capabilities
 for agent state data structures. All implementations are now modularized
-for maintainability and adherence to the 300-line limit.
+for maintainability and adherence to the 450-line limit.
 """
 
 # Re-export core classes for backward compatibility

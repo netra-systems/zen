@@ -68,7 +68,7 @@ Netra Apex captures value proportional to customer AI spend by delivering:
 1. **Business Value Justification (BVJ)** required for all features
 2. **Customer Segment** targeting (Free → Paid conversion focus)  
 3. **Revenue Impact** estimation before implementation
-4. **300-line modules, 8-line functions** for maintainability
+4. **450-line modules, 25-line functions** for maintainability
 
 📖 **[Read CLAUDE.md →](CLAUDE.md)** for complete development philosophy
 

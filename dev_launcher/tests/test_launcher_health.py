@@ -2,7 +2,7 @@
 Health monitoring tests for the dev launcher.
 
 Tests cover HealthMonitor, recovery mechanisms, and error handling.
-All functions follow 8-line maximum rule per CLAUDE.md.
+All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
 import unittest

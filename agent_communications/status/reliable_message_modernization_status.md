@@ -46,7 +46,7 @@ Successfully modernized the WebSocket reliable message handler from legacy archi
 
 ### File Structure
 - **File**: `app/websocket/message_handler_core.py`
-- **Line Count**: 289 lines (✅ Under 300-line limit)
+- **Line Count**: 289 lines (✅ Under 450-line limit)
 - **Architecture**: Modern agent execution pattern
 - **Compatibility**: Full backward compatibility
 
@@ -78,7 +78,7 @@ Successfully modernized the WebSocket reliable message handler from legacy archi
 
 ## Compliance Status
 
-- ✅ **300-Line Limit**: File is 289 lines (compliant)
+- ✅ **450-line Limit**: File is 289 lines (compliant)
 - ✅ **Modern Architecture**: Follows BaseExecutionInterface pattern exactly
 - ✅ **Backward Compatibility**: Zero breaking changes
 - ✅ **Error Handling**: Comprehensive error management

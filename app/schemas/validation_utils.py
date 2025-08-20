@@ -2,7 +2,7 @@
 Validation utilities for schema operations.
 
 Provides common validation functions to ensure all schema validators
-follow the 8-line function limit while maintaining consistency.
+follow the 25-line function limit while maintaining consistency.
 Maximum 300 lines per conventions.xml, each function ≤8 lines.
 """
 

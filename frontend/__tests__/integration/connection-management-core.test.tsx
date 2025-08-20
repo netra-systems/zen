@@ -1,6 +1,6 @@
 /**
  * Connection Management Core Tests
- * Split from connection-management.test.tsx for 300-line limit compliance
+ * Split from connection-management.test.tsx for 450-line limit compliance
  * Agent 10 Implementation - Core connection state and heartbeat tests
  */
 

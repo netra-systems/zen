@@ -2,7 +2,7 @@
 Migration Tracker for Netra AI Platform.
 
 Implements intelligent migration tracking and execution (GAP-001 CRITICAL).
-Maintains 300-line limit and 8-line functions for modular architecture.
+Maintains 450-line limit and 25-line functions for modular architecture.
 """
 
 import asyncio

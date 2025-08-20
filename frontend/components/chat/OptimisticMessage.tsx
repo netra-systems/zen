@@ -37,7 +37,7 @@ interface RetryButtonProps {
 }
 
 // ============================================================================
-// Loading Skeleton Component (8-line functions)
+// Loading Skeleton Component (25-line functions)
 // ============================================================================
 
 const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ type, animate = true }) => {
@@ -54,7 +54,7 @@ const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({ type, animate = true 
 };
 
 // ============================================================================
-// Retry Button Component (8-line functions)
+// Retry Button Component (25-line functions)
 // ============================================================================
 
 const RetryButton: React.FC<RetryButtonProps> = ({ onRetry, isRetrying }) => {
@@ -86,7 +86,7 @@ const RetryButton: React.FC<RetryButtonProps> = ({ onRetry, isRetrying }) => {
 };
 
 // ============================================================================
-// Status Indicator Component (8-line functions)
+// Status Indicator Component (25-line functions)
 // ============================================================================
 
 const StatusIndicator: React.FC<{ status: OptimisticStatus }> = ({ status }) => {
@@ -112,7 +112,7 @@ const StatusIndicator: React.FC<{ status: OptimisticStatus }> = ({ status }) => 
 };
 
 // ============================================================================
-// Message Avatar Component (8-line functions)
+// Message Avatar Component (25-line functions)
 // ============================================================================
 
 const MessageAvatar: React.FC<{ role: 'user' | 'assistant' }> = ({ role }) => {
@@ -129,7 +129,7 @@ const MessageAvatar: React.FC<{ role: 'user' | 'assistant' }> = ({ role }) => {
 };
 
 // ============================================================================
-// Content Renderer Component (8-line functions)
+// Content Renderer Component (25-line functions)
 // ============================================================================
 
 const MessageContent: React.FC<{ message: OptimisticMessage }> = ({ message }) => {
@@ -153,7 +153,7 @@ const MessageContent: React.FC<{ message: OptimisticMessage }> = ({ message }) =
 };
 
 // ============================================================================
-// Main OptimisticMessage Component (8-line functions)
+// Main OptimisticMessage Component (25-line functions)
 // ============================================================================
 
 export const OptimisticMessage: React.FC<OptimisticMessageProps> = ({
@@ -193,7 +193,7 @@ export const OptimisticMessage: React.FC<OptimisticMessageProps> = ({
 };
 
 // ============================================================================
-// Message Header Component (8-line functions)
+// Message Header Component (25-line functions)
 // ============================================================================
 
 const MessageHeader: React.FC<{ message: OptimisticMessage }> = ({ message }) => {
@@ -212,7 +212,7 @@ const MessageHeader: React.FC<{ message: OptimisticMessage }> = ({ message }) =>
 };
 
 // ============================================================================
-// Message Footer Component (8-line functions)
+// Message Footer Component (25-line functions)
 // ============================================================================
 
 const MessageFooter: React.FC<{
@@ -237,7 +237,7 @@ const MessageFooter: React.FC<{
 };
 
 // ============================================================================
-// Optimistic Message List Component (8-line functions)
+// Optimistic Message List Component (25-line functions)
 // ============================================================================
 
 export interface OptimisticMessageListProps {

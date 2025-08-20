@@ -1,7 +1,7 @@
 """Error pattern aggregation and intelligent reporting system.
 
 REFACTORED: This file now imports from modular components that comply
-with 300-line module and 8-line function requirements while maintaining
+with 450-line module and 25-line function requirements while maintaining
 backward compatibility for existing code.
 """
 

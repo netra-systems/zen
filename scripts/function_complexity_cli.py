@@ -14,7 +14,7 @@ from function_complexity_templates import create_pre_commit_hook, handle_fix_sug
 def create_argument_parser() -> argparse.ArgumentParser:
     """Create and configure CLI argument parser"""
     parser = argparse.ArgumentParser(
-        description="Function Complexity Linter - Enforce 8-line function limit"
+        description="Function Complexity Linter - Enforce 25-line function limit"
     )
     _add_basic_arguments(parser)
     _add_action_arguments(parser)
@@ -63,7 +63,7 @@ def handle_exit_conditions(args: argparse.Namespace, has_violations: bool) -> No
         sys.exit(1 if has_violations else 0)
 
 def main() -> None:
-    """Main CLI entry point with 8-line limit compliance"""
+    """Main CLI entry point with 25-line limit compliance"""
     parser = create_argument_parser()
     args = parser.parse_args()
     if args.install_hook:

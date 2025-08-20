@@ -1,4 +1,4 @@
-// Content-specific WebSocket event handlers - Modular 8-line functions
+// Content-specific WebSocket event handlers - Modular 25-line functions
 // Handles partial results, final reports, streaming content
 
 import { generateUniqueId } from '@/lib/utils';

@@ -95,8 +95,8 @@ const handleStorageEvent = (event: StorageEvent) => {
 ```
 
 ## Compliance Status
-- ✅ All files maintain 300-line limit
-- ✅ All functions follow 8-line limit
+- ✅ All files maintain 450-line limit
+- ✅ All functions follow 25-line limit
 - ✅ Type safety preserved
 - ✅ Single source of truth maintained
 

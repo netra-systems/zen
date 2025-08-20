@@ -1,4 +1,4 @@
-"""Error codes and severity levels - compliant with 8-line function limit."""
+"""Error codes and severity levels - compliant with 25-line function limit."""
 
 from enum import Enum
 

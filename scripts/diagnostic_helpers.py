@@ -1,6 +1,6 @@
 """
 Diagnostic Helpers Module
-Support functions for startup diagnostics - separated to maintain 300-line limit
+Support functions for startup diagnostics - separated to maintain 450-line limit
 """
 
 import os

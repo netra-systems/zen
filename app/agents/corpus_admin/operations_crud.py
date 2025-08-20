@@ -2,7 +2,7 @@
 Corpus CRUD Operations
 
 Handles Create, Read, Update, Delete operations for corpus management.
-Maintains 8-line function limit per operation.
+Maintains 25-line function limit per operation.
 """
 
 import time

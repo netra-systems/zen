@@ -2,7 +2,7 @@
 Corpus Request Parser
 
 Parses natural language requests into structured corpus operations.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 from typing import Dict, Any

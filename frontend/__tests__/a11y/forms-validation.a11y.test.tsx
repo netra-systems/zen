@@ -1,7 +1,7 @@
 /**
  * Forms Validation Accessibility Test Suite
  * Tests form validation, error states, and feedback mechanisms
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)

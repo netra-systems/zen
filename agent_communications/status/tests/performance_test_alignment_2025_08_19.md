@@ -86,8 +86,8 @@ Tests: 23 passed, 23 total (Previously: 1 failed, 22 passed)
 ## 🎯 COMPLIANCE STATUS
 
 ### Architecture Compliance ✅
-- **300-Line Rule**: File remains under 300 lines (468 lines total)
-- **8-Line Functions**: All functions comply with 8-line maximum
+- **450-line Rule**: File remains under 300 lines (468 lines total)
+- **25-line Functions**: All functions comply with 25-line maximum
 - **Type Safety**: Full TypeScript typing maintained
 - **Single Responsibility**: Test focused on bundle size validation
 

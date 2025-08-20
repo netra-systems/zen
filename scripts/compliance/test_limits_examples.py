@@ -4,9 +4,9 @@ Test Limits Violation Examples and Fixes
 Demonstrates how to fix common test limit violations according to SPEC/testing.xml
 """
 
-# BEFORE: Test function violating 8-line limit
+# BEFORE: Test function violating 25-line limit
 def test_user_authentication_flow_long():
-    """Test complete user authentication flow - VIOLATES 8-line limit"""
+    """Test complete user authentication flow - VIOLATES 25-line limit"""
     # Setup user data
     user_data = {"email": "test@example.com", "password": "secure_password"}
     
@@ -62,7 +62,7 @@ def get_test_auth_token(user):
     return authenticate_user(user.email, "secure_password")
 
 
-# BEFORE: Large test file violating 300-line limit
+# BEFORE: Large test file violating 450-line limit
 # test_user_management_comprehensive.py (500+ lines)
 """
 This would contain:
@@ -161,7 +161,7 @@ class FunctionSplittingExamples:
     
     def before_function_too_long(self):
         """
-        BEFORE: 25-line function violating 8-line limit
+        BEFORE: 25-line function violating 25-line limit
         
         def test_complete_user_workflow():
             # Setup (5 lines)

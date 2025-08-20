@@ -4,8 +4,8 @@
 """
 Pre-commit Hook for Architecture Enforcement
 Enforces CLAUDE.md architectural rules before allowing commits:
-- 300-line file limit
-- 8-line function limit  
+- 450-line file limit
+- 25-line function limit  
 - No test stubs in production code
 - Fast execution optimized for git hooks
 """

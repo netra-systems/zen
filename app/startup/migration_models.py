@@ -2,7 +2,7 @@
 Migration Models for Netra AI Platform.
 
 Pydantic models for migration tracking and state management.
-Extracted from migration_tracker.py for 300-line compliance.
+Extracted from migration_tracker.py for 450-line compliance.
 """
 
 from datetime import datetime

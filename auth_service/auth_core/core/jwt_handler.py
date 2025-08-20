@@ -1,6 +1,6 @@
 """
 JWT Token Handler - Core authentication token management
-Maintains 300-line limit with focused single responsibility
+Maintains 450-line limit with focused single responsibility
 """
 import os
 import jwt

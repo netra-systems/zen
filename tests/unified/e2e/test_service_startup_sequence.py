@@ -14,7 +14,7 @@ REQUIREMENTS:
 - Tests inter-service communication after startup
 - Performance assertions for <60s startup time
 - Failure scenario testing for dependency failures
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import pytest
 from pathlib import Path

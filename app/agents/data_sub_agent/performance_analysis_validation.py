@@ -1,7 +1,7 @@
 """Performance Analysis Validation Helpers
 
 Validation and health check functions for performance analysis.
-Extracted to maintain 300-line module limit.
+Extracted to maintain 450-line module limit.
 
 Business Value: Ensures performance analysis data quality.
 """

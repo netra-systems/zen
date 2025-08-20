@@ -76,7 +76,7 @@
         </category>
 
         <category name="Architecture/Compliance" path="SPEC/learnings/compliance_improvements.xml" keywords="300/8, Compliance, Architecture">
-            <critical-takeaway>Maintain 300-line file limit and 8-line function limit. Use compliance check script.</critical-takeaway>
+            <critical-takeaway>Maintain 450-line file limit and 25-line function limit. Use compliance check script.</critical-takeaway>
         </category>
 
         <category name="Context Optimization" path="SPEC/learnings/context_optimization.xml" keywords="AI Context, Token Optimization">

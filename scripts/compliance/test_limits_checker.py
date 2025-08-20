@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Test file and function limits compliance checker.
-Enforces SPEC/testing.xml rules: test files MUST follow same 300-line limit as production code,
-test functions MUST follow same 8-line limit as production code.
+Enforces SPEC/testing.xml rules: test files MUST follow same 450-line limit as production code,
+test functions MUST follow same 25-line limit as production code.
 """
 
 import ast

@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 3. Value Impact: Enables comprehensive testing that prevents revenue loss from data corruption
 4. Revenue Impact: Testing reliability directly supports revenue protection (-$50K ARR risk mitigation)
 
-Architecture: 300-line limit, 8-line functions, modular design
+Architecture: 450-line limit, 25-line functions, modular design
 """
 
 import uuid

@@ -110,8 +110,8 @@ Successfully identified and fixed multiple critical integration test issues, ach
 ## Architecture Compliance
 
 All fixes maintained strict architectural requirements:
-- ✅ **300-line file limit**: All modified files remain under 300 lines
-- ✅ **8-line function limit**: All new helper functions ≤8 lines
+- ✅ **450-line file limit**: All modified files remain under 300 lines
+- ✅ **25-line function limit**: All new helper functions ≤8 lines
 - ✅ **Single Source of Truth**: Updated existing files rather than creating duplicates
 - ✅ **Modular Design**: Leveraged existing ActUtils and mock frameworks
 
@@ -138,7 +138,7 @@ frontend/__tests__/integration/comprehensive/performance-benchmarks/concurrent-p
 3. **CI Pipeline Integration**: Add test reliability metrics to deployment process
 
 ### Long-Term Architecture
-1. **Test Suite Modularization**: Consider splitting large test files approaching 300-line limit
+1. **Test Suite Modularization**: Consider splitting large test files approaching 450-line limit
 2. **Mock Framework Consolidation**: Centralize all mocking patterns through unified API
 3. **Performance Benchmarking**: Establish automated performance regression detection
 

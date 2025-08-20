@@ -1,7 +1,7 @@
 """Quality Dashboard API Routes
 
 This module provides API endpoints for quality monitoring, reporting, and management.
-Refactored to comply with 300-line architectural limit.
+Refactored to comply with 450-line architectural limit.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks

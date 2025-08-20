@@ -16,7 +16,7 @@ REQUIREMENTS:
 - Limits removed immediately post-upgrade
 - Service resumes normal operation
 - Performance validation (<30 seconds total)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 
 This test protects the entire free-to-paid conversion funnel.
 Without effective limit enforcement, free users never convert.

@@ -1,7 +1,7 @@
 # Demo Chat Test Modules
 
 ## Architecture Overview
-The demo chat component tests have been split into focused, modular files following the 300-line limit requirement. Each module contains specific functionality areas with reusable helper utilities.
+The demo chat component tests have been split into focused, modular files following the 450-line limit requirement. Each module contains specific functionality areas with reusable helper utilities.
 
 ## Module Structure
 

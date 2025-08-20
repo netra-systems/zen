@@ -312,7 +312,7 @@
                 <id>windows-jest-bus-error-fix</id>
                 <id>websocket-mock-server-conflicts</id>
                 <id>frontend-testing-complete-guide</id>
-                <id>test-modularization-300-line-compliance</id>
+                <id>test-modularization-450-line-compliance</id>
                 <id>feature-flags-tdd-workflow</id>
                 <id>frontend-test-paradox-report</id>
                 <id>test-compliance-validation-comprehensive</id>
@@ -375,7 +375,7 @@
                 <id>MR-002</id>
                 <id>MR-003</id>
             </learning_ids>
-            <important_note>CRITICAL: 6 files exceed 300-line limit blocking Enterprise sales. Build config bypasses type safety. Comprehensive fixes and patterns documented.</important_note>
+            <important_note>CRITICAL: 6 files exceed 450-line limit blocking Enterprise sales. Build config bypasses type safety. Comprehensive fixes and patterns documented.</important_note>
         </category>
         <category>
             <name>E2E Testing</name>

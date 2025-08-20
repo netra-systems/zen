@@ -1,17 +1,17 @@
 # First-Time User E2E Tests - Refactoring Summary
 
 ## 🚨 CRITICAL REQUIREMENT FULFILLED
-**MANDATORY 300-line limit violation has been RESOLVED**
+**MANDATORY 450-line limit violation has been RESOLVED**
 
 ### Previous State
 - **Original file**: `test_first_time_user_critical_e2e.py`
-- **Line count**: 575 lines (91% over the 300-line MANDATORY limit)
+- **Line count**: 575 lines (91% over the 450-line MANDATORY limit)
 - **Status**: ❌ VIOLATION of architecture requirements
 
 ### Refactored State
 - **Modular architecture**: 5 focused test modules + 1 helpers module
-- **All files**: ✅ Under 300-line MANDATORY limit
-- **All functions**: ✅ Under 8-line MANDATORY limit
+- **All files**: ✅ Under 450-line MANDATORY limit
+- **All functions**: ✅ Under 25-line MANDATORY limit
 
 ## 📊 Refactored Module Breakdown
 
@@ -45,8 +45,8 @@
 - **Testable**: Isolated components can be tested independently
 
 ### Compliance with MANDATORY Requirements
-- ✅ **300-line limit**: All files under 300 lines
-- ✅ **8-line functions**: All helper methods ≤8 lines  
+- ✅ **450-line limit**: All files under 300 lines
+- ✅ **25-line functions**: All helper methods ≤8 lines  
 - ✅ **Modular design**: Planned boundaries before coding
 - ✅ **Strong typing**: Maintained type safety throughout
 - ✅ **Business focus**: Revenue-critical tests preserved
@@ -77,7 +77,7 @@ All 10 CRITICAL first-time user conversion tests preserved:
 
 - [x] **Split oversized file** into modular components
 - [x] **Maintain all 10 critical tests** - no functionality lost
-- [x] **Ensure 300-line compliance** - all files under limit
+- [x] **Ensure 450-line compliance** - all files under limit
 - [x] **Preserve business value** - BVJ maintained in all modules
 - [x] **Create shared helpers** - reduce code duplication
 - [x] **Maintain test structure** - same test patterns and assertions

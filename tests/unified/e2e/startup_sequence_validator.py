@@ -1,7 +1,7 @@
 """
 Service Startup Sequence Validator Module
 Business Value: Ensures proper service dependency order for system availability
-Modular design: <300 lines, 8-line functions max
+Modular design: <300 lines, 25-line functions max
 """
 import asyncio
 import time

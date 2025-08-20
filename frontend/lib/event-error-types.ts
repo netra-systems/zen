@@ -1,6 +1,6 @@
 /**
  * Type definitions for event error handling
- * Separated for modularity and compliance with 300-line limit
+ * Separated for modularity and compliance with 450-line limit
  */
 
 export interface EventError {

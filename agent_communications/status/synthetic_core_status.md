@@ -49,7 +49,7 @@ class SyntheticDataAgentCore(BaseExecutionInterface):
 ```
 
 ### Function Compliance: ≤8 Lines Each
-✅ All 40+ functions comply with 8-line maximum  
+✅ All 40+ functions comply with 25-line maximum  
 ✅ Extracted helper methods for complex operations  
 ✅ Composed small focused functions for readability  
 
@@ -111,8 +111,8 @@ synthetic_data/
 ## 🔍 Code Quality Metrics
 
 ### Architecture Compliance
-- ✅ **300-line limit**: Core module = 295 lines (5 under limit)
-- ✅ **8-line functions**: All 35+ functions compliant
+- ✅ **450-line limit**: Core module = 295 lines (5 under limit)
+- ✅ **25-line functions**: All 35+ functions compliant
 - ✅ **Single responsibility**: Each module has focused purpose
 - ✅ **Strong typing**: All parameters properly typed
 - ✅ **Error handling**: Modern error classification and fallbacks

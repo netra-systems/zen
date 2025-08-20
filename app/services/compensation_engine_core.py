@@ -1,7 +1,7 @@
 """Core compensation engine for executing compensation actions.
 
 Provides centralized compensation execution with handler registration and management.
-All functions strictly adhere to 8-line limit.
+All functions strictly adhere to 25-line limit.
 """
 
 import uuid

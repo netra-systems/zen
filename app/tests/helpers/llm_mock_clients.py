@@ -1,6 +1,6 @@
 """
 LLM Mock Clients - Mock implementations for LLM testing
-Extracted from test_llm_manager_provider_switching.py for 8-line function compliance
+Extracted from test_llm_manager_provider_switching.py for 25-line function compliance
 """
 
 import asyncio

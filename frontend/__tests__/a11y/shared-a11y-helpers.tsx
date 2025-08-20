@@ -1,7 +1,7 @@
 /**
  * Shared Accessibility Test Helpers
  * Reusable utilities for accessibility testing across all components
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)

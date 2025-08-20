@@ -175,8 +175,8 @@ def test_mfa_bypass_prevention():
 ## Compliance Verification
 
 ### ✅ CLAUDE.md Requirements
-- **300-line limit**: All modules ≤300 lines
-- **8-line functions**: All functions ≤8 lines  
+- **450-line limit**: All modules ≤300 lines
+- **25-line functions**: All functions ≤8 lines  
 - **Strong typing**: Type hints preserved throughout
 - **Modular design**: Clear interfaces and responsibilities
 - **Security preservation**: No degradation of security posture

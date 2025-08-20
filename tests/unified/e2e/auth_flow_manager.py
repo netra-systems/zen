@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Controlled test environment management
 - Context manager for resource cleanup
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import os
 from contextlib import asynccontextmanager

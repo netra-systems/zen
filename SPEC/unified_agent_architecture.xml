@@ -24,7 +24,7 @@
         </description>
         <key_principles>
             <principle id="UP-001">Business Value Justification (BVJ) required for every agent</principle>
-            <principle id="UP-002">Single responsibility with 300-line file and 8-line function limits</principle>
+            <principle id="UP-002">Single responsibility with 450-line file and 25-line function limits</principle>
             <principle id="UP-003">Strong typing with Pydantic models for all interfaces</principle>
             <principle id="UP-004">Real LLM integration with intelligent fallback mechanisms</principle>
             <principle id="UP-005">Complete observability through metrics, logs, and traces</principle>

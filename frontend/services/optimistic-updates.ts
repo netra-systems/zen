@@ -62,7 +62,7 @@ export class OptimisticMessageManager {
   }
 
   // ========================================================================
-  // State Management (8-line functions)
+  // State Management (25-line functions)
   // ========================================================================
 
   private createInitialState(): OptimisticState {
@@ -90,7 +90,7 @@ export class OptimisticMessageManager {
   }
 
   // ========================================================================
-  // Optimistic Message Creation (8-line functions)
+  // Optimistic Message Creation (25-line functions)
   // ========================================================================
 
   createOptimisticUserMessage(content: string, threadId?: string): OptimisticMessage {
@@ -131,7 +131,7 @@ export class OptimisticMessageManager {
   }
 
   // ========================================================================
-  // Message Lifecycle Management (8-line functions)
+  // Message Lifecycle Management (25-line functions)
   // ========================================================================
 
   addOptimisticUserMessage(content: string, threadId?: string): OptimisticMessage {
@@ -173,7 +173,7 @@ export class OptimisticMessageManager {
   }
 
   // ========================================================================
-  // Backend Reconciliation (8-line functions)
+  // Backend Reconciliation (25-line functions)
   // ========================================================================
 
   reconcileWithBackend(backendMessages: ChatMessage[]): ReconciliationResult {
@@ -254,7 +254,7 @@ export class OptimisticMessageManager {
   }
 
   // ========================================================================
-  // Failure Handling and Retry (8-line functions)
+  // Failure Handling and Retry (25-line functions)
   // ========================================================================
 
   retryMessage(localId: string): Promise<void> {
@@ -289,7 +289,7 @@ export class OptimisticMessageManager {
   }
 
   // ========================================================================
-  // Utility Methods (8-line functions)
+  // Utility Methods (25-line functions)
   // ========================================================================
 
   getOptimisticMessages(): OptimisticMessage[] {

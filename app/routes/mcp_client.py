@@ -215,7 +215,7 @@ def _handle_cache_unexpected_error(e: Exception) -> None:
     raise HTTPException(status_code=500, detail="Internal server error")
 
 
-# Unified error handlers (8-line limit compliance)
+# Unified error handlers (25-line limit compliance)
 def _handle_register_error(e: Exception) -> None:
     """Handle registration error"""
     if isinstance(e, ServiceError):
@@ -273,7 +273,7 @@ def _handle_cache_error(e: Exception) -> None:
         _handle_cache_unexpected_error(e)
 
 
-# Helper functions to maintain 8-line limit
+# Helper functions to maintain 25-line limit
 
 async def _process_server_registration(request: RegisterServerRequest, mcp_service: IMCPClientService) -> RegisterServerResponse:
     """Process server registration request"""

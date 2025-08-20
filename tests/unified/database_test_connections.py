@@ -1,7 +1,7 @@
 """
 Database Connection Management for Tests
 Handles database connections across PostgreSQL, ClickHouse, and Redis.
-ARCHITECTURE: Under 300 lines, 8-line functions max
+ARCHITECTURE: Under 300 lines, 25-line functions max
 """
 
 import os

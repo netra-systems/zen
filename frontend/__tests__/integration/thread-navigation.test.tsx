@@ -2,7 +2,7 @@
  * Thread Navigation Integration Tests
  * Agent 3: Tests complete thread navigation flow and state management
  * Covers thread switching, URL sync, state persistence, and error recovery
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  */
 
 import React from 'react';

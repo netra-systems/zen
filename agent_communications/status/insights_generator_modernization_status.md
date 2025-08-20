@@ -75,14 +75,14 @@ InsightsGenerator Modular Architecture:
 
 ### Compliance Status
 
-#### ✅ 300-Line Module Compliance
+#### ✅ 450-line Module Compliance
 - **Main File**: 148 lines ✅ (50% under limit)
 - **Performance Analyzer**: 137 lines ✅ (54% under limit)
 - **Usage Analyzer**: 108 lines ✅ (64% under limit)
 - **Recommendations**: 85 lines ✅ (72% under limit)
 - **Perfect Compliance**: 100% compliant
 
-#### ✅ 8-Line Function Compliance
+#### ✅ 25-line Function Compliance
 - All functions ≤8 lines across all modules
 - Maximum function length: 8 lines
 - Full compliance achieved with smart decomposition

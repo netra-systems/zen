@@ -12,7 +12,7 @@ REQUIREMENTS:
 - Real tier upgrade logic with database updates
 - Billing record creation in ClickHouse
 - Performance validation (<30 seconds total)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 import uuid

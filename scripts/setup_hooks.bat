@@ -60,7 +60,7 @@ REM Create a temporary test file that violates rules
 set "TEST_FILE=test_hook_violation.py"
 (
 echo def test_function^(^):
-echo     # This function intentionally violates the 8-line rule
+echo     # This function intentionally violates the 25-line rule
 echo     line1 = 1
 echo     line2 = 2
 echo     line3 = 3

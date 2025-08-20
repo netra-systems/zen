@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Each Enterprise customer represents 20x value of Mid-tier customers
 
 Architecture:
-- 300-line file limit enforced through modular test design
-- 8-line function limit for all test methods
+- 450-line file limit enforced through modular test design
+- 25-line function limit for all test methods
 - Real service integration with zero mocking of security layers
 - Covers OWASP Top 10 attack vectors with automated detection
 """

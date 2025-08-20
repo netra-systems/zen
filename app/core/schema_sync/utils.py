@@ -2,7 +2,7 @@
 Schema Sync Utilities
 
 Utility functions for schema synchronization and database validation.
-Maintains 8-line function limit and focused functionality.
+Maintains 25-line function limit and focused functionality.
 """
 
 import sys

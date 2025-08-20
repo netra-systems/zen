@@ -60,8 +60,8 @@ All `.ts` files in `frontend/__tests__/components/chat/`:
 - ⚠️ Functional test failures remain (separate issue - component logic)
 
 ## Compliance Check
-- ✅ 300-line file limit maintained
-- ✅ 8-line function limit maintained  
+- ✅ 450-line file limit maintained
+- ✅ 25-line function limit maintained  
 - ✅ Type safety preserved
 - ✅ Single source of truth pattern maintained
 

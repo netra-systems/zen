@@ -14,7 +14,7 @@ REQUIREMENTS:
 - Error response validation
 - Audit trail creation and validation
 - Cross-service permission boundary testing
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 from typing import Dict, Any, List

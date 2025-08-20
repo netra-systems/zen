@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents chat failures that could lose customers, protecting 100% of revenue
 
 Architecture:
-- 300-line file limit enforced through focused test modules
-- 8-line function limit for all functions
+- 450-line file limit enforced through focused test modules
+- 25-line function limit for all functions
 - Tests real message flow end-to-end with all persistence layers
 - Validates both success and failure scenarios for comprehensive coverage
 """

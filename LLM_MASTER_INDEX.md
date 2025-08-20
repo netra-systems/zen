@@ -162,7 +162,7 @@ python scripts/test_backend.py --no-bad-test-detection
 ### Scripts (`/scripts/`)
 | Script | Purpose | When to Use |
 |--------|---------|-------------|
-| `check_architecture_compliance.py` | Check 300-line & 8-line limits | Before commits, CI/CD |
+| `check_architecture_compliance.py` | Check 450-line & 25-line limits | Before commits, CI/CD |
 | `dev_launcher.py` | Development launcher | Start dev environment |
 | `test_runner.py` | Test runner | Run tests |
 
@@ -176,8 +176,8 @@ python scripts/test_backend.py --no-bad-test-detection
 | `reporter_stats.py` | Statistics calculation (61 lines) | StatisticsCalculator class |
 | `reporter_utils.py` | Reporting utilities (47 lines) | ReporterUtils, sorting, limits |
 | `cli.py` | CLI argument handling | CLIHandler, OutputHandler |
-| `file_checker.py` | File size validation | Checks 300-line limit |
-| `function_checker.py` | Function complexity | Checks 8-line limit |
+| `file_checker.py` | File size validation | Checks 450-line limit |
+| `function_checker.py` | Function complexity | Checks 25-line limit |
 | `type_checker.py` | Duplicate type detection | Single source of truth |
 | `stub_checker.py` | Test stub detection | No stubs in production |
 
@@ -423,7 +423,7 @@ python scripts/test_backend.py --no-bad-test-detection
 ### Making changes:
 1. Read relevant spec files first
 2. Check for existing implementations
-3. Follow 300-line module limit
+3. Follow 450-line module limit
 4. Run tests before and after
 5. Update specs if learning something new
 

@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Cost savings translate to +$25K annual profit increase
 
 Architecture:
-- 300-line file limit enforced through modular design
-- 8-line function limit for all functions
+- 450-line file limit enforced through modular design
+- 25-line function limit for all functions
 - Independent resource monitoring and validation
 - Sustainable scaling patterns for growth
 """

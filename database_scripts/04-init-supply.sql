@@ -1,6 +1,6 @@
 -- Supply Research Tables
 -- Purpose: Create AI supply research, model catalog, and research session tables
--- Module: Supply (adheres to 300-line limit)
+-- Module: Supply (adheres to 450-line limit)
 
 -- Basic supplies table
 CREATE TABLE IF NOT EXISTS supplies (

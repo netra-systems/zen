@@ -27,7 +27,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class AdminToolPermissionManager:
-    """Manages permissions for admin tools with strict 8-line function limit"""
+    """Manages permissions for admin tools with strict 25-line function limit"""
     
     def __init__(self, db: AsyncSession, user: User):
         self.db = db

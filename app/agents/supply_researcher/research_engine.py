@@ -2,7 +2,7 @@
 Supply Research Engine
 
 Handles Google Deep Research API integration and query generation.
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 from typing import Dict, Any, Optional

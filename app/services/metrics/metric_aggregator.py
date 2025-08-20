@@ -1,6 +1,6 @@
 """
 Metric aggregator module for calculating and updating metrics.
-Handles aggregation operations with 8-line function limit.
+Handles aggregation operations with 25-line function limit.
 """
 
 from typing import Dict, Any

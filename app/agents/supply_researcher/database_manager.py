@@ -2,7 +2,7 @@
 Supply Database Manager
 
 Manages database operations for supply research results.
-Maintains 8-line function limit and focused database logic.
+Maintains 25-line function limit and focused database logic.
 """
 
 from typing import Dict, Any, List

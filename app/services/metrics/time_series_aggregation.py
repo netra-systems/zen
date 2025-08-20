@@ -1,7 +1,7 @@
 """
 Time Series Aggregation Functions
 
-Extracted from time_series.py to maintain 300-line limit.
+Extracted from time_series.py to maintain 450-line limit.
 Provides aggregation and statistical analysis for time-series data.
 """
 

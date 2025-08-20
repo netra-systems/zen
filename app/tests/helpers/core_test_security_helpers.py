@@ -1,7 +1,7 @@
 """
 Helper functions for core infrastructure security and logging tests.
 Provides reusable security mock creation and logging utilities.
-Split from core_test_helpers.py to maintain 300-line limit.
+Split from core_test_helpers.py to maintain 450-line limit.
 """
 
 from typing import Dict, Any, List

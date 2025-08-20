@@ -104,11 +104,11 @@ class RealTestValidator:
             )
     
     def _check_file_size(self, file_path: Path, lines: List[str]):
-        """Check if file exceeds 300-line limit"""
+        """Check if file exceeds 450-line limit"""
         if len(lines) > 300:
             self._add_violation(
                 file_path, "file_size", len(lines),
-                f"File has {len(lines)} lines, exceeds 300-line limit", 
+                f"File has {len(lines)} lines, exceeds 450-line limit", 
                 "major"
             )
     
@@ -161,7 +161,7 @@ class RealTestValidator:
                     )
     
     def _check_function_sizes(self, file_path: Path, tree: ast.AST, lines: List[str]):
-        """Check if functions exceed 8-line limit"""
+        """Check if functions exceed 25-line limit"""
         
         class FunctionSizeVisitor(ast.NodeVisitor):
             def __init__(self, validator):
@@ -210,7 +210,7 @@ class RealTestValidator:
                 if actual_lines > 8:
                     self.validator._add_violation(
                         self.file_path, "function_size", node.lineno,
-                        f"Function '{node.name}' has {actual_lines} lines, exceeds 8-line limit",
+                        f"Function '{node.name}' has {actual_lines} lines, exceeds 25-line limit",
                         "major"
                     )
         

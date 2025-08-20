@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Value Impact: Maintains service availability preventing customer churn 
 - Revenue Impact: Protects $500K+ ARR by preventing cascade failure outages
 
-Architecture: 300-line compliance with 8-line function limit enforced
+Architecture: 450-line compliance with 25-line function limit enforced
 """
 
 import pytest

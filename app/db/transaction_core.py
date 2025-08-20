@@ -1,7 +1,7 @@
 """Transaction core logic and management module.
 
 Handles transaction execution, isolation levels, and retry coordination.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 import time

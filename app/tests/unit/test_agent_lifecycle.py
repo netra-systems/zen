@@ -86,7 +86,7 @@ def mock_websocket_manager():
     return manager
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def assert_agent_state(agent, expected_state):
     """Assert agent is in expected state."""
     assert agent.state == expected_state

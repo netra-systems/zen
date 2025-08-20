@@ -8,7 +8,7 @@
 # Session: architecture-compliance | Seq: 4
 # Review: Pending | Score: 95
 # ================================
-"""Utility functions for agent operations - compliant with 8-line limit."""
+"""Utility functions for agent operations - compliant with 25-line limit."""
 
 from typing import Any, Dict, Optional
 

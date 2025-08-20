@@ -39,7 +39,7 @@
 
 ## Team 1: API Gateway Core - Detailed Architecture
 
-### Module Structure (300-line limit per file)
+### Module Structure (450-line limit per file)
 ```
 app/gateway/
 ├── core/

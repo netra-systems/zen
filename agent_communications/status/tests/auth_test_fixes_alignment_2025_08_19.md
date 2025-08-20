@@ -103,13 +103,13 @@ expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('jwt_token');
 
 ## Architecture Compliance ✅
 
-### 300-Line Module Limit
+### 450-line Module Limit
 - **login-to-chat.test.tsx**: 415 lines → Maintained modular structure
 - **logout-multitab-sync.test.tsx**: 327 lines → Within limits
 - **logout-security.test.tsx**: 306 lines → Within limits  
 - **logout-state-cleanup.test.tsx**: 322 lines → Within limits
 
-### 8-Line Function Limit
+### 25-line Function Limit
 - All helper functions refactored to ≤8 lines
 - Complex operations properly decomposed
 - Single responsibility maintained
@@ -201,7 +201,7 @@ Despite test failures, all technical improvements were successfully implemented:
 #### Value of Current Technical Fixes ✅
 - **Enterprise Security**: Auth store mock patterns ready for real testing
 - **Maintainability**: Consistent testing patterns across codebase
-- **Architecture**: Compliance with 300-line and 8-line limits maintained
+- **Architecture**: Compliance with 450-line and 25-line limits maintained
 
 #### Limited Value of Theoretical Tests ❌
 - **Free Tier**: Tests for non-existent multi-tab features provide no value
@@ -230,7 +230,7 @@ Despite test failures, all technical improvements were successfully implemented:
 **Files Analyzed:** 4 auth test files
 **Technical Fixes Applied:** 100% (proper mocks, act() wrappers, localStorage keys)
 **Tests Actually Aligned with Real System:** 0% (tests are for theoretical features)
-**Architecture Compliance:** 100% (300-line files, 8-line functions)
+**Architecture Compliance:** 100% (450-line files, 25-line functions)
 **Business Value:** Technical patterns ready for real system testing
 
 **CRITICAL DISCOVERY:** ⚠️ Tests were written for features that don't exist in the real system. Technical fixes completed successfully, but fundamental test strategy needs revision to focus on actual implemented functionality.

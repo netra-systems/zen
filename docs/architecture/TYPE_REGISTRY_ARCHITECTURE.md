@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-This document outlines the canonical type registry architecture for Netra Apex to eliminate 201 duplicate type definitions across frontend and backend. The design follows the 300-line file limit and 8-line function limit mandates while ensuring backward compatibility during migration.
+This document outlines the canonical type registry architecture for Netra Apex to eliminate 201 duplicate type definitions across frontend and backend. The design follows the 450-line file limit and 25-line function limit mandates while ensuring backward compatibility during migration.
 
 ## Current State Analysis
 
@@ -377,7 +377,7 @@ import { Message } from '@/types/registry';
 - Maintain import aliases for 2 releases
 - Comprehensive test coverage for rollback scenarios
 
-## 5. MODULE BOUNDARIES (300-LINE COMPLIANCE)
+## 5. MODULE BOUNDARIES (450-line COMPLIANCE)
 
 ### 5.1 File Size Management
 
@@ -393,7 +393,7 @@ domains/chat/
 └── websocket.ts      # WebSocket message types
 ```
 
-### 5.2 Function Decomposition (8-LINE COMPLIANCE)
+### 5.2 Function Decomposition (25-line COMPLIANCE)
 
 ```typescript
 // Type generation functions - each ≤8 lines
@@ -535,4 +535,4 @@ def generate():
 - **Team Coordination**: Clear migration timeline and communication
 - **Rollback Capability**: Maintain legacy imports for safe rollback
 
-This architecture provides a comprehensive solution for eliminating type duplication while maintaining strict architectural compliance and enabling smooth migration. The modular design ensures each component stays within the 300-line limit while providing clear separation of concerns and strong type safety across the entire Netra Apex platform.
+This architecture provides a comprehensive solution for eliminating type duplication while maintaining strict architectural compliance and enabling smooth migration. The modular design ensures each component stays within the 450-line limit while providing clear separation of concerns and strong type safety across the entire Netra Apex platform.

@@ -1,4 +1,4 @@
-"""Configuration and validation exceptions - compliant with 8-line function limit."""
+"""Configuration and validation exceptions - compliant with 25-line function limit."""
 
 from typing import List, Optional, Dict, Any
 from app.core.exceptions_base import NetraException

@@ -1,7 +1,7 @@
 """
 Mock Services Manager for Startup Sequence Tests
 Business Value: Fast test execution without real service startup overhead
-Modular design: <300 lines, 8-line functions max
+Modular design: <300 lines, 25-line functions max
 """
 import asyncio
 import time

@@ -324,6 +324,101 @@ class StartupOptimizer:
         
         logger.info("StartupOptimizer cleanup completed")
     
+    def enable_async_mode(self) -> None:
+        """Enable async mode for parallel I/O operations."""
+        self._async_mode = True
+        logger.info("Async mode enabled for startup optimization")
+    
+    async def execute_step_async(self, step_name: str, *args, **kwargs) -> StepResult:
+        """Execute a single step asynchronously."""
+        step = self.steps.get(step_name)
+        if not step:
+            return StepResult(step_name, False, 0.0, f"Step '{step_name}' not registered")
+        
+        # Check if step can be skipped
+        if self.can_skip_step(step_name):
+            logger.info(f"Skipping {step_name} (cached)")
+            return StepResult(step_name, True, 0.0, cached=True)
+        
+        start_time = time.time()
+        try:
+            # Run in executor for CPU-bound tasks
+            if asyncio.iscoroutinefunction(step.func):
+                result = await step.func(*args, **kwargs)
+            else:
+                loop = asyncio.get_event_loop()
+                result = await loop.run_in_executor(self.executor, step.func, *args, **kwargs)
+            
+            duration = time.time() - start_time
+            self.timing_data[step_name] = duration
+            
+            success = result if isinstance(result, bool) else True
+            return StepResult(step_name, success, duration)
+            
+        except Exception as e:
+            duration = time.time() - start_time
+            error_msg = str(e)
+            logger.error(f"Async step {step_name} failed: {error_msg}")
+            return StepResult(step_name, False, duration, error_msg)
+    
+    async def execute_parallel_async(self, step_names: List[str], *args, **kwargs) -> Dict[str, StepResult]:
+        """Execute multiple steps in parallel using async/await."""
+        if not self._async_mode:
+            return self.execute_parallel(step_names, *args, **kwargs)
+        
+        # Create tasks for parallel execution
+        tasks = []
+        for step_name in step_names:
+            task = asyncio.create_task(self.execute_step_async(step_name, *args, **kwargs))
+            tasks.append((step_name, task))
+        
+        # Wait for all tasks to complete
+        results = {}
+        for step_name, task in tasks:
+            try:
+                result = await task
+                results[step_name] = result
+                self.step_results[step_name] = result
+            except Exception as e:
+                error_msg = f"Async parallel execution failed: {str(e)}"
+                result = StepResult(step_name, False, 0.0, error_msg)
+                results[step_name] = result
+                self.step_results[step_name] = result
+        
+        return results
+    
+    async def execute_optimized_sequence_async(self, step_names: List[str], *args, **kwargs) -> Dict[str, StepResult]:
+        """Execute an optimized startup sequence with async parallelization."""
+        if not self._async_mode:
+            return self.execute_optimized_sequence(step_names, *args, **kwargs)
+        
+        self.start_timing()
+        
+        # Optimize the sequence
+        dependency_levels = self.optimize_startup_sequence(step_names)
+        logger.info(f"Async optimized sequence: {dependency_levels}")
+        
+        all_results = {}
+        
+        for level_steps in dependency_levels:
+            # Execute all steps in this level in parallel
+            level_results = await self.execute_parallel_async(level_steps, *args, **kwargs)
+            all_results.update(level_results)
+            
+            # Check for critical failures
+            level_failures = [name for name, result in level_results.items() 
+                            if not result.success 
+                            and self.steps.get(name, StartupStep("", lambda: None, [], required=True)).required]
+            
+            if level_failures:
+                logger.error(f"Critical async failures in level {level_steps}: {level_failures}")
+                break
+        
+        total_time = self.get_total_startup_time()
+        self.cache_manager.mark_successful_startup(total_time)
+        
+        return all_results
+    
     # Phase-based execution methods (consolidated from startup_sequencer.py)
     def register_phase(self, phase: StartupPhase, steps: List[PhaseStep]):
         """Register steps for a startup phase."""

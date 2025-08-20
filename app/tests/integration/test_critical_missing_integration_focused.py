@@ -1,7 +1,7 @@
 """
 TOP 30 CRITICAL MISSING INTEGRATION TESTS - Focused Implementation
 BVJ: Protects $100K+ MRR through comprehensive system validation
-Architecture: 300-line limit compliant with ≤8 line functions
+Architecture: 450-line limit compliant with ≤8 line functions
 """
 
 import pytest

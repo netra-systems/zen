@@ -11,6 +11,7 @@ from pathlib import Path
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 import httpx
 
+from test_framework.mock_utils import mock_justified
 from app.clients.auth_client_core import AuthServiceClient
 from dev_launcher.service_discovery import ServiceDiscovery
 
@@ -134,7 +135,7 @@ class TestAuthClientCrossServiceIntegration:
             'permissions': ['cross_service_access']
         }
         
-        # First validation - should cache result
+        # Mock justification: Remote auth service API not available in test environment - testing caching behavior
         with patch.object(auth_client, '_validate_token_remote', new_callable=AsyncMock) as mock_validate:
             mock_validate.return_value = mock_result
             

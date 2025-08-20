@@ -2,8 +2,8 @@
 """
 Comprehensive Enforcement Tools for Netra Codebase
 Creates production-ready tools that enforce CLAUDE.md architectural rules:
-- 300-line file limit
-- 8-line function limit
+- 450-line file limit
+- 25-line function limit
 - No test stubs in production code
 - No duplicate type definitions
 

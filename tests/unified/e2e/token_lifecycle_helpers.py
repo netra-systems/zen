@@ -1,6 +1,6 @@
 """
 Token Lifecycle E2E Test Helpers - Modular support functions
-Maintains 300-line limit through focused helper functionality
+Maintains 450-line limit through focused helper functionality
 """
 
 import asyncio

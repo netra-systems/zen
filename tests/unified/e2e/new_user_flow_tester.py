@@ -11,7 +11,7 @@ REQUIREMENTS:
 - Real JWT token creation and validation
 - Real authentication business logic simulation
 - Performance validation (<5 seconds)  
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 import uuid

@@ -111,7 +111,7 @@ def main():
     print(f"SUMMARY:")
     print(f"  Files with violations: {files_with_violations}")
     print(f"  Total function violations: {total_violations}")
-    print(f"  Functions need splitting to comply with 8-line limit")
+    print(f"  Functions need splitting to comply with 25-line limit")
     
     if total_violations == 0:
         print("\n✅ ALL FUNCTIONS ARE COMPLIANT!")

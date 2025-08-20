@@ -16,7 +16,7 @@ Requirements:
 6. Test session timeout handled consistently
 
 Compliance:
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 - Real service testing (no internal mocking)
 - Performance assertions < 30 seconds
 """

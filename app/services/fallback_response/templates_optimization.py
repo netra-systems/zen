@@ -1,7 +1,7 @@
 """Optimization Templates - Templates for AI optimization failures and guidance.
 
 This module provides templates for optimization-related content types and failures
-with 8-line function compliance.
+with 25-line function compliance.
 """
 
 from typing import Dict, List, Tuple

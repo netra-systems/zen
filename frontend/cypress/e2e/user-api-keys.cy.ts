@@ -1,6 +1,6 @@
 /**
  * User API Keys & Credentials E2E Tests
- * Split from user-profile-settings.cy.ts for 300-line compliance
+ * Split from user-profile-settings.cy.ts for 450-line compliance
  * 
  * BVJ: Growth & Enterprise - API key management drives platform adoption
  * Value Impact: Secure credential management = customer trust

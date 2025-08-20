@@ -1,7 +1,7 @@
 """Quality validation WebSocket handler.
 
 Handles on-demand content quality validation.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Dict, Any

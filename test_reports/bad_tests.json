@@ -1,0 +1,992 @@
+{
+  "version": "1.0",
+  "tests": {
+    "test_sample_bad_test.py::test_always_fails": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:35:04.497767",
+      "last_failure": "2025-08-20T14:35:47.970844",
+      "last_pass": null,
+      "total_failures": 5,
+      "total_passes": 0,
+      "consecutive_failures": 5,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_143504_4257",
+          "timestamp": "2025-08-20T14:35:04.497767",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: This test is intentionally designed to fail\nassert False"
+        },
+        {
+          "run_id": "run_20250820_143539_39657",
+          "timestamp": "2025-08-20T14:35:39.800822",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: This test is intentionally designed to fail\nassert False"
+        },
+        {
+          "run_id": "run_20250820_143542_42348",
+          "timestamp": "2025-08-20T14:35:42.472007",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: This test is intentionally designed to fail\nassert False"
+        },
+        {
+          "run_id": "run_20250820_143545_45022",
+          "timestamp": "2025-08-20T14:35:45.135863",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: This test is intentionally designed to fail\nassert False"
+        },
+        {
+          "run_id": "run_20250820_143547_47820",
+          "timestamp": "2025-08-20T14:35:47.970844",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: This test is intentionally designed to fail\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_quality_gate_pipeline_integration.py::TestQualityGatePipelineIntegration::test_threshold_enforcement_for_quality_levels": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:35:20.938759",
+      "last_failure": "2025-08-20T14:37:02.438163",
+      "last_pass": "2025-08-20T14:38:26.542859",
+      "total_failures": 3,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_143520_20332",
+          "timestamp": "2025-08-20T14:35:20.938759",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert False == True\n +  where False = ValidationResult(passed=False, metrics=QualityMetrics(specificity_score=0.45, actionability_score=0.3, quantification_score=0.9999999999999999, relevance_score=0.5, completeness_score=0.0, novelty_score=0.8, clarity_score=1.0, generic_phrase_count=0, circular_reasoning_detected=False, hallucination_risk=0.0, redundancy_ratio=0.0, word_count=11, sentence_count=4, numeric_values_count=8, specific_terms_count=0, overall_score=0.54, quality_leve"
+        },
+        {
+          "run_id": "run_20250820_143622_82934",
+          "timestamp": "2025-08-20T14:36:23.741413",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert True == False\n +  where True = ValidationResult(passed=True, metrics=QualityMetrics(specificity_score=0.45, actionability_score=0.3, quantification_score=0.9999999999999999, relevance_score=0.5, completeness_score=0.0, novelty_score=0.8, clarity_score=1.0, generic_phrase_count=0, circular_reasoning_detected=False, hallucination_risk=0.0, redundancy_ratio=0.0, word_count=11, sentence_count=4, numeric_values_count=8, specific_terms_count=0, overall_score=0.54, quality_level="
+        },
+        {
+          "run_id": "run_20250820_143700_20970",
+          "timestamp": "2025-08-20T14:37:02.438163",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert <QualityLevel.POOR: 'poor'> in [<QualityLevel.UNACCEPTABLE: 'unacceptable'>, <QualityLevel.POOR: 'poor'>, <QualityLevel.ACCEPTABLE: 'acceptable'>, <QualityLevel.GOOD: 'good'>, <QualityLevel.EXCELLENT: 'excellent'>]\n +  where <QualityLevel.POOR: 'poor'> = QualityMetrics(specificity_score=0.15000000000000002, actionability_score=0.0, quantification_score=0.0, relevance_score=0.5, completeness_score=0.4, novelty_score=0.8, clarity_score=1.0, generic_phrase_count=0, circular_r"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_quality_gate_pipeline_integration.py::TestQualityGatePipelineIntegration::test_rejection_and_retry_mechanisms": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:35:20.950777",
+      "last_failure": "2025-08-20T14:38:06.086547",
+      "last_pass": "2025-08-20T14:38:26.550996",
+      "total_failures": 3,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_143520_20332",
+          "timestamp": "2025-08-20T14:35:20.950777",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert ('specificity' in {'additional_instructions': ['Be extremely specific. Include exact parameter values, configuration settings, and metrics.', 'Provide step-by-step actionable instructions with specific commands or code.', 'Include numerical values for all claims. Show before/after metrics with percentages.'], 'temperature': 0.3} or 'quantification' in {'additional_instructions': ['Be extremely specific. Include exact parameter values, configuration settings, and metrics.',"
+        },
+        {
+          "run_id": "run_20250820_143700_20970",
+          "timestamp": "2025-08-20T14:37:02.460683",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert ('specificity' in {'additional_instructions': ['Be extremely specific. Include exact parameter values, configuration settings, and metrics.', 'Provide step-by-step actionable instructions with specific commands or code.', 'Include numerical values for all claims. Show before/after metrics with percentages.'], 'temperature': 0.3} or 'quantification' in {'additional_instructions': ['Be extremely specific. Include exact parameter values, configuration settings, and metrics.',"
+        },
+        {
+          "run_id": "run_20250820_143805_85272",
+          "timestamp": "2025-08-20T14:38:06.086547",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 0 > 0\n +  where 0 = len([])\n +    where [] = QualityMetrics(specificity_score=0.0, actionability_score=0.0, quantification_score=0.0, relevance_score=0.5, completeness_score=0.0, novelty_score=0.8, clarity_score=1.0, generic_phrase_count=0, circular_reasoning_detected=False, hallucination_risk=0.0, redundancy_ratio=0.0, word_count=5, sentence_count=2, numeric_values_count=0, specific_terms_count=0, overall_score=0.255, quality_level=<QualityLevel.UNACCEPTABLE: 'unacceptabl"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_quality_gate_pipeline_integration.py::TestQualityGatePipelineIntegration::test_pipeline_integration_with_redis_persistence": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:35:20.979705",
+      "last_failure": "2025-08-20T14:37:02.515255",
+      "last_pass": "2025-08-20T14:38:26.690937",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_143520_20332",
+          "timestamp": "2025-08-20T14:35:20.979705",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert False == True\n +  where False = ValidationResult(passed=False, metrics=QualityMetrics(specificity_score=0.30000000000000004, actionability_score=0.3, quantification_score=0.6, relevance_score=0.5, completeness_score=0.0, novelty_score=0.8, clarity_score=1.0, generic_phrase_count=0, circular_reasoning_detected=False, hallucination_risk=0.0, redundancy_ratio=0.0, word_count=11, sentence_count=4, numeric_values_count=8, specific_terms_count=0, overall_score=0.45, quality_leve"
+        },
+        {
+          "run_id": "run_20250820_143700_20970",
+          "timestamp": "2025-08-20T14:37:02.515255",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert False == True\n +  where False = ValidationResult(passed=False, metrics=QualityMetrics(specificity_score=0.30000000000000004, actionability_score=0.3, quantification_score=0.6, relevance_score=0.5, completeness_score=0.0, novelty_score=0.8, clarity_score=1.0, generic_phrase_count=0, circular_reasoning_detected=False, hallucination_risk=0.0, redundancy_ratio=0.0, word_count=11, sentence_count=4, numeric_values_count=8, specific_terms_count=0, overall_score=0.45, quality_leve"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_quality_gate_pipeline_integration.py::TestQualityGatePipelineIntegration::test_enterprise_sla_compliance_validation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:35:20.996147",
+      "last_failure": "2025-08-20T14:35:20.996147",
+      "last_pass": "2025-08-20T14:38:26.738903",
+      "total_failures": 1,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_143520_20332",
+          "timestamp": "2025-08-20T14:35:20.996147",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Enterprise SLA not met: 0.0% < 70%\nassert 0.0 >= 70.0"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_payment_gateway_integration.py::TestPaymentGatewayIntegration::test_07_webhook_signature_validation_security": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:38:58.921737",
+      "last_failure": "2025-08-20T14:38:58.921737",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_143858_38083",
+          "timestamp": "2025-08-20T14:38:58.921737",
+          "error_type": "Error",
+          "error_message": "Failed: DID NOT RAISE <class 'Exception'>"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_payment_webhook_processing.py::TestPaymentWebhookProcessing::test_webhook_idempotency_duplicate_prevention": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:41:19.338805",
+      "last_failure": "2025-08-20T14:41:19.338805",
+      "last_pass": "2025-08-20T14:42:48.188800",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144118_78616",
+          "timestamp": "2025-08-20T14:41:19.338805",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: expected call not found.\nExpected: check_processed('evt_08a109a75ffb4fa5a02c83101746d6ce')\n  Actual: not called."
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_payment_webhook_processing.py::TestPaymentWebhookProcessing::test_chargeback_and_dispute_handling": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:41:19.499729",
+      "last_failure": "2025-08-20T14:41:19.499729",
+      "last_pass": "2025-08-20T14:42:48.281989",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144118_78616",
+          "timestamp": "2025-08-20T14:41:19.499729",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Expected 'notify_finance_team' to have been called once. Called 0 times."
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_payment_webhook_processing.py::TestPaymentWebhookProcessing::test_webhook_error_recovery_and_alerting": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:41:19.531883",
+      "last_failure": "2025-08-20T14:41:19.531883",
+      "last_pass": "2025-08-20T14:42:48.287560",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144118_78616",
+          "timestamp": "2025-08-20T14:41:19.531883",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 1 == 3\n +  where 1 = <AsyncMock name='mock.send_critical_alert' id='1675162083184'>.call_count\n +    where <AsyncMock name='mock.send_critical_alert' id='1675162083184'> = <Mock id='1675164634960'>.send_critical_alert"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_payment_webhook_processing.py::TestPaymentWebhookProcessing::test_payment_failure_refund_processing": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:41:19.544642",
+      "last_failure": "2025-08-20T14:42:09.285891",
+      "last_pass": "2025-08-20T14:42:48.290561",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144118_78616",
+          "timestamp": "2025-08-20T14:41:19.544642",
+          "error_type": "TypeError",
+          "error_message": "TypeError: object Mock can't be used in 'await' expression"
+        },
+        {
+          "run_id": "run_20250820_144208_28347",
+          "timestamp": "2025-08-20T14:42:09.285891",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Expected 'handle_payment_failure' to have been called once. Called 0 times."
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_startup_configuration_validation.py::TestStagingStartupConfigurationValidation::test_staging_ssl_requirements_enforced": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:42:25.258079",
+      "last_failure": "2025-08-20T14:43:44.732559",
+      "last_pass": "2025-08-20T14:46:04.023756",
+      "total_failures": 3,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144224_44634",
+          "timestamp": "2025-08-20T14:42:25.258079",
+          "error_type": "Error",
+          "error_message": "Failed: DID NOT RAISE <class 'Exception'>"
+        },
+        {
+          "run_id": "run_20250820_144304_84597",
+          "timestamp": "2025-08-20T14:43:05.193775",
+          "error_type": "Error",
+          "error_message": "Failed: DID NOT RAISE <class 'app.core.exceptions_config.ConfigurationError'>"
+        },
+        {
+          "run_id": "run_20250820_144343_23971",
+          "timestamp": "2025-08-20T14:43:44.732559",
+          "error_type": "Error",
+          "error_message": "Failed: DID NOT RAISE <class 'app.core.exceptions_config.ConfigurationError'>"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_startup_configuration_validation.py::TestStagingStartupConfigurationValidation::test_database_summary_reflects_staging_state": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:45:26.634751",
+      "last_failure": "2025-08-20T14:45:26.634751",
+      "last_pass": "2025-08-20T14:46:04.069700",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144525_25929",
+          "timestamp": "2025-08-20T14:45:26.634751",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert True == 'True'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cold_start_to_agent_response.py::test_cold_start_to_first_agent_response_e2e": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:45:34.888472",
+      "last_failure": "2025-08-20T14:45:34.888472",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144532_32475",
+          "timestamp": "2025-08-20T14:45:34.888472",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Services failed to start in 0.00s\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_correct_startup_order_auth_backend_frontend": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.918746",
+      "last_failure": "2025-08-20T14:46:02.918746",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.918746",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_health_check_cascade_validation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.932537",
+      "last_failure": "2025-08-20T14:46:02.932537",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.932537",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_service_dependency_resolution": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.938954",
+      "last_failure": "2025-08-20T14:46:02.938954",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.938954",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_startup_timing_and_readiness_checks": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.948782",
+      "last_failure": "2025-08-20T14:46:02.948782",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.948782",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_startup_failure_handling": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.956866",
+      "last_failure": "2025-08-20T14:46:02.956866",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.956866",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_inter_service_communication_validation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.966923",
+      "last_failure": "2025-08-20T14:46:02.966923",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.966923",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_staging_specific_service_configuration": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.973066",
+      "last_failure": "2025-08-20T14:46:02.973066",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.973066",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_service_monitoring_and_observability": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.979676",
+      "last_failure": "2025-08-20T14:46:02.979676",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.979676",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_rollback_capability_on_startup_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.986871",
+      "last_failure": "2025-08-20T14:46:02.986871",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.986871",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_multi_service_startup_sequence.py::TestStagingMultiServiceStartupSequence::test_load_balancer_integration_during_startup": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:02.993909",
+      "last_failure": "2025-08-20T14:46:02.993909",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:02.993909",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_secrets_manager_integration.py::TestStagingSecretsManagerIntegration::test_google_secret_manager_client_initialization": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:03.567050",
+      "last_failure": "2025-08-20T14:46:03.567050",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:03.567050",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher.google_secret_manager' has no attribute 'secretmanager'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_secrets_manager_integration.py::TestStagingSecretsManagerIntegration::test_secret_retrieval_from_google_secret_manager": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:03.646999",
+      "last_failure": "2025-08-20T14:46:03.646999",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:03.646999",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher.google_secret_manager' has no attribute 'secretmanager'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_secrets_manager_integration.py::TestStagingSecretsManagerIntegration::test_secret_rotation_without_disruption": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:03.736876",
+      "last_failure": "2025-08-20T14:46:03.736876",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:03.736876",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher.google_secret_manager' has no attribute 'secretmanager'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_secrets_manager_integration.py::TestStagingSecretsManagerIntegration::test_error_handling_for_unavailable_secrets": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:46:03.916698",
+      "last_failure": "2025-08-20T14:46:03.916698",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144602_62692",
+          "timestamp": "2025-08-20T14:46:03.916698",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher.google_secret_manager' has no attribute 'secretmanager'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_cache_invalidation_chain.py::TestCacheInvalidationChain::test_race_condition_prevention": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:48:34.214378",
+      "last_failure": "2025-08-20T14:48:34.214378",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144812_92811",
+          "timestamp": "2025-08-20T14:48:34.214378",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Too many failed operations: 340/500\nassert (340 / 500) >= 0.95"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_cache_invalidation_chain.py::TestCacheInvalidationChain::test_cache_warming_performance": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:48:35.058925",
+      "last_failure": "2025-08-20T14:48:35.058925",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144812_92811",
+          "timestamp": "2025-08-20T14:48:35.058925",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Cache warming for small_batch took 804.2006492614746ms, exceeds 100ms target\nassert 804.2006492614746 < 100"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_cache_invalidation_chain.py::test_comprehensive_cache_invalidation_validation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:48:35.828412",
+      "last_failure": "2025-08-20T14:48:35.828412",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144812_92811",
+          "timestamp": "2025-08-20T14:48:35.828412",
+          "error_type": "Error",
+          "error_message": "Failed: Fixture \"setup_test_environment\" called directly. Fixtures are not meant to be called directly,\nbut are created automatically when test functions request them as parameters.\nSee https://docs.pytest.org/en/stable/explanation/fixtures.html for more information about fixtures, and\nhttps://docs.pytest.org/en/stable/deprecations.html#calling-fixtures-directly"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_usage_metering_billing.py::TestUsageMeteringBilling::test_03_concurrent_usage_metering_accuracy": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:49:01.847414",
+      "last_failure": "2025-08-20T14:49:01.847414",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_144852_32613",
+          "timestamp": "2025-08-20T14:49:01.847414",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Not all concurrent usage tracking succeeded\nassert 1 == 10\n +  where 1 = len([{'cost_cents': 0, 'metadata': '{\"endpoint\": \"/endpoint_0\", \"method\": \"POST\"}', 'quantity': 1, 'resource_type': 'api_call'}])"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    }
+  },
+  "runs": [
+    {
+      "run_id": "run_20250820_143422_62564",
+      "timestamp": "2025-08-20T14:34:23.540343",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143431_71524",
+      "timestamp": "2025-08-20T14:34:31.858564",
+      "total_tests": 11,
+      "passed": 11,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143504_4257",
+      "timestamp": "2025-08-20T14:35:04.500273",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143513_13765",
+      "timestamp": "2025-08-20T14:35:13.832044",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143520_20332",
+      "timestamp": "2025-08-20T14:35:21.012178",
+      "total_tests": 8,
+      "passed": 4,
+      "failed": 4,
+      "bad_tests_count": 4
+    },
+    {
+      "run_id": "run_20250820_143526_26636",
+      "timestamp": "2025-08-20T14:35:26.765152",
+      "total_tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143539_39345",
+      "timestamp": "2025-08-20T14:35:39.590097",
+      "total_tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143539_39657",
+      "timestamp": "2025-08-20T14:35:39.805354",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143542_42348",
+      "timestamp": "2025-08-20T14:35:42.474515",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143545_45022",
+      "timestamp": "2025-08-20T14:35:45.138878",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143547_47820",
+      "timestamp": "2025-08-20T14:35:47.974348",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143554_54390",
+      "timestamp": "2025-08-20T14:35:57.683292",
+      "total_tests": 5,
+      "passed": 5,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143622_82934",
+      "timestamp": "2025-08-20T14:36:23.754811",
+      "total_tests": 8,
+      "passed": 7,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143700_20970",
+      "timestamp": "2025-08-20T14:37:02.551551",
+      "total_tests": 8,
+      "passed": 5,
+      "failed": 3,
+      "bad_tests_count": 3
+    },
+    {
+      "run_id": "run_20250820_143805_85272",
+      "timestamp": "2025-08-20T14:38:06.276745",
+      "total_tests": 8,
+      "passed": 7,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_143826_6263",
+      "timestamp": "2025-08-20T14:38:26.754870",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_143858_38083",
+      "timestamp": "2025-08-20T14:38:58.940548",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144103_63909",
+      "timestamp": "2025-08-20T14:41:04.322009",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144118_78616",
+      "timestamp": "2025-08-20T14:41:19.562724",
+      "total_tests": 8,
+      "passed": 4,
+      "failed": 4,
+      "bad_tests_count": 4
+    },
+    {
+      "run_id": "run_20250820_144154_14843",
+      "timestamp": "2025-08-20T14:41:55.080436",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144208_28347",
+      "timestamp": "2025-08-20T14:42:09.307713",
+      "total_tests": 8,
+      "passed": 7,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144224_44634",
+      "timestamp": "2025-08-20T14:42:25.274957",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144231_51396",
+      "timestamp": "2025-08-20T14:42:31.630233",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144247_67929",
+      "timestamp": "2025-08-20T14:42:48.307797",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144304_84597",
+      "timestamp": "2025-08-20T14:43:05.207637",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144343_23971",
+      "timestamp": "2025-08-20T14:43:44.745769",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144359_39724",
+      "timestamp": "2025-08-20T14:43:59.752807",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144408_48699",
+      "timestamp": "2025-08-20T14:44:10.628126",
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144511_11997",
+      "timestamp": "2025-08-20T14:45:12.267851",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144525_25929",
+      "timestamp": "2025-08-20T14:45:26.656318",
+      "total_tests": 9,
+      "passed": 8,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144532_32475",
+      "timestamp": "2025-08-20T14:45:34.894526",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_144538_38080",
+      "timestamp": "2025-08-20T14:45:38.327178",
+      "total_tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144547_47379",
+      "timestamp": "2025-08-20T14:45:47.681766",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144602_62692",
+      "timestamp": "2025-08-20T14:46:04.097229",
+      "total_tests": 28,
+      "passed": 14,
+      "failed": 14,
+      "bad_tests_count": 14
+    },
+    {
+      "run_id": "run_20250820_144615_75949",
+      "timestamp": "2025-08-20T14:46:16.171711",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144628_88167",
+      "timestamp": "2025-08-20T14:46:28.423074",
+      "total_tests": 13,
+      "passed": 13,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144729_49175",
+      "timestamp": "2025-08-20T14:47:30.095763",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144756_76242",
+      "timestamp": "2025-08-20T14:47:56.911928",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_144812_92811",
+      "timestamp": "2025-08-20T14:48:35.848136",
+      "total_tests": 7,
+      "passed": 4,
+      "failed": 3,
+      "bad_tests_count": 3
+    },
+    {
+      "run_id": "run_20250820_144852_32613",
+      "timestamp": "2025-08-20T14:50:00.831496",
+      "total_tests": 7,
+      "passed": 6,
+      "failed": 1,
+      "bad_tests_count": 1
+    }
+  ],
+  "stats": {
+    "total_runs": 40,
+    "last_updated": "2025-08-20T14:50:00.831496"
+  }
+}

@@ -13,7 +13,7 @@ import './MainChat.loading.transitions.test';
 
 /**
  * This file coordinates the MainChat loading state tests
- * split across focused modules to maintain the 300-line limit.
+ * split across focused modules to maintain the 450-line limit.
  * 
  * Test Coverage:
  * - Basic loading states (MainChat.loading.basic.test.tsx)

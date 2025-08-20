@@ -43,7 +43,7 @@
                 Mocks hide integration bugs. Confidence is built by testing real interactions. If a dependency can be run (imported or containerized), it MUST be used instead of a mock.
             </principle>
             <principle name="Test Code is Production Code">
-                Test code must adhere to the same quality standards, reviews, and architectural rigor as production code (e.g., 450-line file limit, 8-line function limit).
+                Test code must adhere to the same quality standards, reviews, and architectural rigor as production code (e.g., 450-line file limit, 25-line function limit).
             </principle>
             <principle name="Shift Left, Shift Right">
                 Integrate quality early (Shift Left: Unit, Integration, CI) and validate behavior in production (Shift Right: Monitoring, Canary, TiP).

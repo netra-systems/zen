@@ -10,7 +10,7 @@ Architecture:
 - file_upload_test_context.py: Test context and file generation (110 lines)  
 - file_upload_pipeline_executor.py: Pipeline execution logic (173 lines)
 
-All modules follow 300-line limit and 8-line function requirements.
+All modules follow 450-line limit and 25-line function requirements.
 """
 
 from .test_file_upload_pipeline import (
@@ -68,6 +68,6 @@ def get_test_suite_info():
             "context": "file_upload_test_context.py (110 lines)",
             "executor": "file_upload_pipeline_executor.py (173 lines)",
             "total_lines": 450,
-            "compliance": "All modules under 300-line limit"
+            "compliance": "All modules under 450-line limit"
         }
     }

@@ -139,7 +139,7 @@ class BadTestPlugin:
         # Print summary
         stats = self.detector.get_statistics()
         if stats["consistently_failing"] > 0:
-            print(f"\n⚠️  WARNING: {stats['consistently_failing']} tests are consistently failing!")
+            print(f"\nWARNING: {stats['consistently_failing']} tests are consistently failing!")
             print("Run 'python -m test_framework.bad_test_reporter' for detailed report")
     
     def _has_bad_tests(self, bad_tests: dict) -> bool:

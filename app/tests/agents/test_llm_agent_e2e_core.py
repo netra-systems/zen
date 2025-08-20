@@ -1,7 +1,7 @@
 """
 Core E2E LLM Agent Tests
 Basic functionality, initialization, and core agent tests
-Split from oversized test_llm_agent_e2e_real.py to maintain 300-line limit
+Split from oversized test_llm_agent_e2e_real.py to maintain 450-line limit
 
 BVJ:
 1. Segment: Growth & Enterprise  

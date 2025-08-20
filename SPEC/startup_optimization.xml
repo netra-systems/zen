@@ -98,7 +98,7 @@
 
   <architecture_notes>
     <note priority="HIGH">
-      All new files follow 300-line limit and 8-line function requirements
+      All new files follow 450-line limit and 25-line function requirements
     </note>
     <note priority="HIGH">
       Modular design allows easy extension and testing

@@ -1,7 +1,7 @@
 """
 Config Validator Tests - Index
 Central index for all configuration validation tests split across modules.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 # Import all config validator test modules

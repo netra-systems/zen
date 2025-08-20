@@ -1,7 +1,7 @@
 """Value calculator for customer impact and revenue metrics.
 
 Handles customer impact analysis and revenue metric calculations.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 from typing import Dict, List

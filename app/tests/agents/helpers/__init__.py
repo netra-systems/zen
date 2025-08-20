@@ -1,4 +1,4 @@
 """
 Test helpers for agent tests
-Maintains modular architecture with 300-line limit compliance
+Maintains modular architecture with 450-line limit compliance
 """

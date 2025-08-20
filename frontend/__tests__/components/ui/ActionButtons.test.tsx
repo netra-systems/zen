@@ -1,7 +1,7 @@
 /**
  * ActionButtons Test Suite
  * Tests action button groups, state management, and complex interactions
- * Follows 8-line function rule and covers all action button patterns
+ * Follows 25-line function rule and covers all action button patterns
  */
 
 import React from 'react';

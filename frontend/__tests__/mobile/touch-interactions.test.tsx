@@ -2,7 +2,7 @@
  * Touch Interactions Mobile Test Suite
  * Tests touch events, gestures, and mobile-specific interactions
  * Business Value: Ensures mobile users can interact effectively = 30% of user base
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  */
 
 import React from 'react';

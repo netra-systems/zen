@@ -1,7 +1,7 @@
 """Real Client Types and Configuration
 
 Core types, enums, and configuration classes for the real client factory.
-Separated for architectural compliance with 300-line limit.
+Separated for architectural compliance with 450-line limit.
 
 Business Value Justification (BVJ):
 - Segment: All customer tiers

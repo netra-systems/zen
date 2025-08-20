@@ -1,6 +1,6 @@
 """Triage Execution Helper Functions
 
-Helper functions for triage execution to maintain 300-line module limit.
+Helper functions for triage execution to maintain 450-line module limit.
 Contains utility functions for result processing, state management, and messaging.
 """
 

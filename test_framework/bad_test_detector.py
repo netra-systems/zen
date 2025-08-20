@@ -357,5 +357,27 @@ class BadTestDetector:
             "total_runs": self.failure_data["stats"]["total_runs"],
             "consistently_failing": len(bad_tests["consistently_failing"]),
             "high_failure_rate": len(bad_tests["high_failure_rate"]),
-            "last_updated": self.failure_data["stats"]["last_updated"]
+            "last_updated": self.failure_data["stats"]["last_updated"],
+            "fake_tests_detected": self.get_fake_tests_count()
         }
+    
+    def get_fake_tests_count(self) -> int:
+        """Get count of fake tests detected in current run.
+        
+        Returns:
+            Number of fake tests detected
+        """
+        try:
+            from .fake_test_detector import FakeTestDetector
+            # This would be set by the test runner when fake tests are detected
+            return getattr(self, '_fake_tests_count', 0)
+        except ImportError:
+            return 0
+    
+    def set_fake_tests_count(self, count: int):
+        """Set the fake tests count for current run.
+        
+        Args:
+            count: Number of fake tests detected
+        """
+        self._fake_tests_count = count

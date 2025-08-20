@@ -12,7 +12,7 @@ import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
-// Import modular utilities (following 300-line limit)
+// Import modular utilities (following 450-line limit)
 import {
   setupMockWebSocket,
   setupMockThreadsApi,

@@ -42,7 +42,7 @@ The suite validates these critical SLA thresholds:
 1. **test_unified_performance.py** (299 lines - within 300 line limit)
    - Complete SLA validation suite
    - Self-contained with minimal dependencies
-   - Follows 8-line function limit mandate
+   - Follows 25-line function limit mandate
 
 2. **PerformanceBaseline Class**
    - Automated baseline establishment
@@ -143,8 +143,8 @@ python -m pytest tests/test_unified_performance.py -m performance
 
 ### CLAUDE.md Compliance ✅
 
-- **300-line limit**: test_unified_performance.py = 299 lines ✅
-- **8-line functions**: All functions comply ✅
+- **450-line limit**: test_unified_performance.py = 299 lines ✅
+- **25-line functions**: All functions comply ✅
 - **Modular design**: Self-contained components ✅
 - **Business value focus**: BVJ included for each test ✅
 

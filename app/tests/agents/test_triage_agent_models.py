@@ -1,7 +1,7 @@
 """
 Triage agent model validation and cleanup tests
 Tests Pydantic model validation and cleanup functionality
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

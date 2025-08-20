@@ -1,4 +1,4 @@
-// Core WebSocket event handler functions - Modular 8-line functions
+// Core WebSocket event handler functions - Modular 25-line functions
 // Core routing and logging functions
 
 import { logger } from '@/lib/logger';

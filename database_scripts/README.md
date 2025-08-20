@@ -165,7 +165,7 @@ If you encounter foreign key violations:
 2. **Performance**: No migration overhead for fresh installs
 3. **Modularity**: Each file has single responsibility
 4. **Maintainability**: Easy to understand and modify
-5. **Compliance**: Adheres to 300-line architecture limit
+5. **Compliance**: Adheres to 450-line architecture limit
 6. **Debugging**: Direct SQL is easier to troubleshoot
 
 ## Related Documentation

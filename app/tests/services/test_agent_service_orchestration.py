@@ -2,7 +2,7 @@
 DEPRECATED: This file has been split into modular components for architecture compliance.
 
 ARCHITECTURE COMPLIANCE SPLIT:
-This 888-line file exceeded the 300-line MANDATORY limit and has been split into
+This 8825-line file exceeded the 450-line MANDATORY limit and has been split into
 focused modules following the modular architecture requirements.
 
 NEW MODULE STRUCTURE:

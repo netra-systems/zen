@@ -2,7 +2,7 @@
 Corpus Admin Tools
 
 Corpus-specific admin tools for generation, optimization, and export.
-All functions maintain 8-line limit with single responsibility.
+All functions maintain 25-line limit with single responsibility.
 """
 
 from typing import Dict, Any, List, Optional, Callable

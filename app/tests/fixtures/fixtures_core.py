@@ -1,7 +1,7 @@
 """
 Realistic Test Fixtures - Core
 Core fixture generator with user and organization data.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import asyncio

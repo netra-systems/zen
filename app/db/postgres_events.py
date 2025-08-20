@@ -1,7 +1,7 @@
 """PostgreSQL connection event handling module.
 
 Handles connection events, monitoring, and timeout configuration.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from sqlalchemy import event

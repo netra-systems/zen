@@ -12,7 +12,7 @@ REQUIREMENTS:
 - Billing record validation and integrity checks
 - Performance validation for billing operations
 - Data consistency verification
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import uuid
 import time

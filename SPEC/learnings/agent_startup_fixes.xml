@@ -161,7 +161,7 @@
     <architectural_compliance>
         <module_compliance>
             <status>MAINTAINED</status>
-            <details>All fixes maintained the 300-line module limit and 8-line function limit</details>
+            <details>All fixes maintained the 450-line module limit and 25-line function limit</details>
         </module_compliance>
         <type_safety>
             <status>IMPROVED</status>

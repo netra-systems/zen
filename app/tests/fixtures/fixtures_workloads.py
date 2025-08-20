@@ -1,7 +1,7 @@
 """
 Realistic Test Fixtures - Workloads
 Workload fixtures including training jobs, inference endpoints, and batch jobs.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import random

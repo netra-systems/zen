@@ -1,5 +1,5 @@
 // Event payload mapper - Maps backend event structures to frontend expectations
-// Modular approach following CLAUDE.md 8-line function limit
+// Modular approach following CLAUDE.md 25-line function limit
 
 /**
  * Maps backend agent_started payload to frontend expected structure

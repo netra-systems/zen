@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Code Review AI Coding Issue Detection
-ULTRA DEEP THINK: Module-based architecture - AI issue detection extracted for 300-line compliance
+ULTRA DEEP THINK: Module-based architecture - AI issue detection extracted for 450-line compliance
 """
 
 import subprocess

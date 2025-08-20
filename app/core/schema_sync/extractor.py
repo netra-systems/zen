@@ -2,7 +2,7 @@
 Schema Extractor
 
 Extracts schema information from Pydantic models.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 from typing import Any, Dict, List, Type

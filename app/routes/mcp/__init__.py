@@ -1,7 +1,7 @@
 """
 MCP Routes Module
 
-Modular MCP API endpoints split into focused components under 300-line limit.
+Modular MCP API endpoints split into focused components under 450-line limit.
 Each module handles specific MCP functionality with single responsibility.
 """
 

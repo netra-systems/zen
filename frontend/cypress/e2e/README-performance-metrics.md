@@ -4,7 +4,7 @@
 
 ## Modular Test Architecture
 
-This test suite has been split into focused modules following the 300-line limit:
+This test suite has been split into focused modules following the 450-line limit:
 
 ### Core Test Files
 
@@ -147,8 +147,8 @@ MetricsTestHelper.verifyThresholdCompliance('[data-testid="p99-latency"]',
 
 ## Architecture Compliance
 
-✅ **300-Line Limit**: All files under 300 lines
-✅ **8-Line Functions**: All functions ≤8 lines
+✅ **450-line Limit**: All files under 300 lines
+✅ **25-line Functions**: All functions ≤8 lines
 ✅ **Modular Design**: Clear separation of concerns
 ✅ **Single Responsibility**: Each module has focused purpose
 ✅ **Business Value**: Aligned with Enterprise segment needs

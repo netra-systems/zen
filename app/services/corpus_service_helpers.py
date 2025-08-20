@@ -1,6 +1,6 @@
 """Corpus service helper functions for function decomposition.
 
-Decomposes large functions into 8-line focused helpers.
+Decomposes large functions into 25-line focused helpers.
 """
 
 from typing import Dict, List, Any, Optional

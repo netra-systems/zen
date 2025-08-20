@@ -1,6 +1,6 @@
 /**
  * User 2FA Setup E2E Tests  
- * Split from user-2fa-management.cy.ts for 300-line compliance
+ * Split from user-2fa-management.cy.ts for 450-line compliance
  * 
  * BVJ: Enterprise segment - 2FA setup drives security compliance
  * Value Impact: Authentication security = Enterprise trust

@@ -1,7 +1,7 @@
 /**
  * Thread Sidebar Utilities
  * 
- * Extracted helper functions from ThreadSidebar.tsx to maintain 300-line file limit
+ * Extracted helper functions from ThreadSidebar.tsx to maintain 450-line file limit
  * Provides specialized operations for thread management
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines

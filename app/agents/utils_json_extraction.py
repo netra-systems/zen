@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-14T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4.1 claude-sonnet-4-20250514
-# Context: Main JSON extraction interface - refactored for 300-line compliance
+# Context: Main JSON extraction interface - refactored for 450-line compliance
 # Git: anthony-aug-13-2 | clean
 # Change: Refactor | Scope: Component | Risk: Low
 # Session: architecture-compliance | Seq: 3

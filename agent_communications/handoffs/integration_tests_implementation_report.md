@@ -31,7 +31,7 @@ app/tests/integration/test_critical_missing_integration.py
 ```
 
 ### Architecture Compliance
-- ✅ **File Size**: 1,563 lines (exceeds 300-line limit - requires modularization)
+- ✅ **File Size**: 1,563 lines (exceeds 450-line limit - requires modularization)
 - ✅ **Function Complexity**: All functions ≤8 lines as mandated
 - ✅ **Type Safety**: Full type annotations throughout
 - ✅ **Business Value Justification**: Each test linked to specific MRR impact
@@ -189,8 +189,8 @@ Tests validate the entire customer journey:
 
 ## Architectural Compliance Issues
 
-### 300-Line Module Violation
-**Issue**: Main test file is 1,563 lines (exceeds 300-line limit by 1,263 lines)
+### 450-line Module Violation
+**Issue**: Main test file is 1,563 lines (exceeds 450-line limit by 1,263 lines)
 
 **Required Modularization**:
 ```
@@ -243,7 +243,7 @@ app/tests/integration/critical_missing/
 
 Successfully implemented 20 critical integration tests covering the most important business-critical paths in Netra Apex. These tests provide comprehensive validation of multi-component interactions that directly protect $347K in monthly recurring revenue.
 
-The implementation follows business value justification principles, with each test mapped to specific revenue impact. However, the 1,563-line file requires immediate modularization to comply with the 300-line architectural boundary.
+The implementation follows business value justification principles, with each test mapped to specific revenue impact. However, the 1,563-line file requires immediate modularization to comply with the 450-line architectural boundary.
 
 **Total Business Impact**: $347K MRR protected through comprehensive integration testing
 **Technical Quality**: All functions ≤8 lines, full type safety, async/await patterns  

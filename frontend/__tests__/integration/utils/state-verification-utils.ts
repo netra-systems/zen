@@ -1,6 +1,6 @@
 /**
  * State Verification Utilities
- * Async operations and component state verification with 8-line function limit enforcement
+ * Async operations and component state verification with 25-line function limit enforcement
  */
 
 import { waitFor, screen } from '@testing-library/react';

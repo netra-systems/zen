@@ -69,7 +69,7 @@
     
     <learning id="modular-observability-architecture">
         <problem>
-            Observability code could easily exceed 300-line module limit if monolithic.
+            Observability code could easily exceed 450-line module limit if monolithic.
         </problem>
         
         <solution>

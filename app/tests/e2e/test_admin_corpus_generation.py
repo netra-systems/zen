@@ -2,7 +2,7 @@
 E2E Admin Corpus Generation Test Suite
 
 Comprehensive E2E testing for admin corpus generation workflow.
-Follows 300-line limit and 8-line function requirements.
+Follows 450-line limit and 25-line function requirements.
 Targets 95% coverage of corpus generation functionality.
 """
 

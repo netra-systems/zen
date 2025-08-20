@@ -1,7 +1,7 @@
 /**
  * Event Diagnostics Panel Component
  * 
- * Extracted from MainChat.tsx to maintain 300-line file limit
+ * Extracted from MainChat.tsx to maintain 450-line file limit
  * Provides real-time diagnostics for WebSocket event processing
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines

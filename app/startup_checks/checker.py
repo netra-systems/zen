@@ -2,7 +2,7 @@
 Startup Checker
 
 Main orchestrator for startup checks with modular delegation.
-Maintains 8-line function limit and coordinating responsibility.
+Maintains 25-line function limit and coordinating responsibility.
 """
 
 import os

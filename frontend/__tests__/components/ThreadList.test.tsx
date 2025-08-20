@@ -2,7 +2,7 @@
  * ThreadList Component Tests
  * Agent 3: Comprehensive tests for thread list rendering and interactions
  * Covers virtual scrolling, performance, accessibility, and state management
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  */
 
 import React from 'react';

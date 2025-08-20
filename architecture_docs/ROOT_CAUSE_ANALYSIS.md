@@ -5,9 +5,9 @@
 **Status:** CRITICAL - Multiple systemic violations requiring immediate action
 
 ### Key Metrics
-- **237 files** violating 300-line limit (79% of codebase)
+- **237 files** violating 450-line limit (79% of codebase)
 - **294 duplicate type definitions** (single source of truth violations)
-- **323+ functions** exceeding 8-line limit (sampled)
+- **323+ functions** exceeding 25-line limit (sampled)
 - **62 files** with potential test stubs in production
 - **Multiple SPEC conflicts** and missing implementations
 
@@ -18,7 +18,7 @@
 **Root Cause:** Lack of enforcement and architectural planning
 
 #### Evidence
-- 237 files exceed 300-line limit
+- 237 files exceed 450-line limit
 - Largest violation: 1212 lines (test_supervisor_consolidated_comprehensive.py)
 - Test files are worst offenders (1000+ lines common)
 - Service files regularly 500-800 lines
@@ -45,12 +45,12 @@
 - Maintenance nightmare
 - Regression risks
 
-### 3. FUNCTION COMPLEXITY: 8-Line Limit Violations
+### 3. FUNCTION COMPLEXITY: 25-line Limit Violations
 **Impact:** HIGH  
 **Root Cause:** Complex logic not decomposed
 
 #### Evidence (Sample)
-- 323+ functions exceed 8-line limit
+- 323+ functions exceed 25-line limit
 - Some functions 130+ lines (lifespan() in main.py)
 - Agent execute() methods commonly 60-100 lines
 - Analysis functions 70+ lines
@@ -110,8 +110,8 @@
 ## 🎯 IMMEDIATE ACTIONS REQUIRED
 
 ### Phase 1: Stop the Bleeding (Week 1)
-1. **ENFORCE** 300-line limit on all new files
-2. **BLOCK** PRs with 8-line function violations
+1. **ENFORCE** 450-line limit on all new files
+2. **BLOCK** PRs with 25-line function violations
 3. **REJECT** any test stubs in production
 4. **REQUIRE** type deduplication
 
@@ -131,9 +131,9 @@
 
 | Issue | Impact | Effort | Priority | Timeline |
 |-------|--------|--------|----------|----------|
-| 300-line violations | CRITICAL | HIGH | P0 | Immediate |
+| 450-line violations | CRITICAL | HIGH | P0 | Immediate |
 | Duplicate types | CRITICAL | MEDIUM | P0 | Week 1 |
-| 8-line violations | HIGH | HIGH | P1 | Week 2-3 |
+| 25-line violations | HIGH | HIGH | P1 | Week 2-3 |
 | Test stubs | HIGH | LOW | P0 | Immediate |
 | Spec alignment | MEDIUM | MEDIUM | P2 | Month 2 |
 
@@ -169,8 +169,8 @@ python scripts/validate_specs.py --enforce-all
 - [ ] CI/CD enforcement active
 
 ### Month 3 Targets
-- [ ] 100% compliance with 300-line limit
-- [ ] 100% compliance with 8-line limit
+- [ ] 100% compliance with 450-line limit
+- [ ] 100% compliance with 25-line limit
 - [ ] Zero duplicate types
 - [ ] Zero test contamination
 

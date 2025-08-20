@@ -2,7 +2,7 @@
 Integration tests for the dev launcher.
 
 Tests cover full launch cycles, multi-service coordination, and complex scenarios.
-All functions follow 8-line maximum rule per CLAUDE.md.
+All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
 import unittest

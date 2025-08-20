@@ -1,7 +1,7 @@
 """Analysis Engine Helper Methods
 
 Modular helper functions for statistical analysis operations.
-Maintains the 8-line function limit and provides reusable utilities.
+Maintains the 25-line function limit and provides reusable utilities.
 
 Business Value: Supports critical data analysis features for customer insights.
 """

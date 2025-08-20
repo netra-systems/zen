@@ -1,6 +1,6 @@
 /**
  * User Privacy Settings E2E Tests
- * Split from user-profile-settings.cy.ts for 300-line compliance
+ * Split from user-profile-settings.cy.ts for 450-line compliance
  * 
  * BVJ: Enterprise segment - Privacy compliance (GDPR, CCPA) = Enterprise requirement
  * Value Impact: Data export/deletion compliance = regulatory requirement satisfaction

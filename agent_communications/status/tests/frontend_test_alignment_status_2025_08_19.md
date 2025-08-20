@@ -75,8 +75,8 @@ Successfully fixed critical hook tests:
 8. **Store Counting**: Off-by-one errors common in derived state calculations
 
 ### Compliance Status
-- ✅ All fixed tests comply with 300-line file limit
-- ✅ All functions maintain 8-line maximum
+- ✅ All fixed tests comply with 450-line file limit
+- ✅ All functions maintain 25-line maximum
 - ✅ Type safety preserved
 - ✅ Single source of truth pattern maintained
 

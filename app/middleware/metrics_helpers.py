@@ -1,6 +1,6 @@
 """
 Metrics middleware helper functions.
-Extracted from metrics_middleware.py to maintain 8-line function limits.
+Extracted from metrics_middleware.py to maintain 25-line function limits.
 """
 
 import asyncio

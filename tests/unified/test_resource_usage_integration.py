@@ -10,8 +10,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Maintains service quality for 90%+ of customer interactions
 
 Architecture:
-- 300-line file limit enforced through focused integration tests
-- 8-line function limit for all functions
+- 450-line file limit enforced through focused integration tests
+- 25-line function limit for all functions
 - Builds on ResourceMonitor from main test file
 - Tests system behavior under concurrent load patterns
 """

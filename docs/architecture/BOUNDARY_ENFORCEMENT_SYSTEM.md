@@ -100,7 +100,7 @@ python scripts/emergency_boundary_actions.py --report
 
 ### 5. VS Code Integration
 
-- **Rulers**: Visual 300-line boundary in editor
+- **Rulers**: Visual 450-line boundary in editor
 - **Tasks**: Quick access to boundary tools via Ctrl+Shift+P
 - **Linting**: Real-time feedback with flake8 configuration
 

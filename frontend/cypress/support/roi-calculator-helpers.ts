@@ -2,7 +2,7 @@
 
 // ROI Calculator Test Helper Utilities
 // Supports Enterprise segment value demonstration and sales conversion
-// Modular design following 300-line limit and 8-line function requirements
+// Modular design following 450-line limit and 25-line function requirements
 
 export class ROICalculatorHelpers {
   // Navigation and setup helpers

@@ -1,7 +1,7 @@
 """
 Comprehensive tests for Permission Service - Integration Tests
 Critical security component - Real-world integration scenarios
-Split from test_permission_service.py to maintain 300-line limit
+Split from test_permission_service.py to maintain 450-line limit
 """
 
 import pytest

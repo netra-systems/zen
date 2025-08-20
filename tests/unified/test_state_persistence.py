@@ -24,6 +24,7 @@ from typing import Dict, List, Any, Optional, Tuple
 from unittest.mock import patch, AsyncMock
 import pytest
 from datetime import datetime, timezone
+from test_framework.mock_utils import mock_justified
 
 from tests.unified.config import TEST_USERS, TestDataFactory
 from tests.unified.test_harness import UnifiedTestHarness
@@ -291,7 +292,7 @@ async def test_conversation_history_continuity(persistence_tester, context_valid
     # Capture context and simulate reconnection
     context_snapshot = context_validator.capture_conversation_context(run_id)
     
-    # Mock state persistence and retrieval
+    # Mock justification: Testing state loading without database to verify memory preservation logic
     with patch.object(state_persistence_service, 'load_agent_state') as mock_load:
         mock_load.return_value = agent_state
         
@@ -358,6 +359,7 @@ async def test_agent_decision_consistency(persistence_tester, reconnection_manag
         run_id, mock_db_session
     )
     
+    # Mock justification: Testing decision context restoration without database dependency
     with patch.object(state_persistence_service, 'load_agent_state') as mock_load:
         mock_load.return_value = agent_state
         

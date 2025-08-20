@@ -2,7 +2,7 @@
 MCP Service Models
 
 Pydantic models for MCP client and tool execution records.
-Extracted from main service to maintain 300-line module limit.
+Extracted from main service to maintain 450-line module limit.
 """
 
 import uuid

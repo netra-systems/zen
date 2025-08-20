@@ -70,7 +70,7 @@ Successfully fixed all failures in the `frontend/__tests__/integration/auth-comp
 
 ### Code Quality Improvements:
 - All functions remain ≤8 lines (MANDATORY requirement met)
-- Test file stays within 300-line limit
+- Test file stays within 450-line limit
 - Enhanced readability and maintainability
 - Proper async/await patterns throughout
 - Comprehensive error handling coverage
@@ -94,8 +94,8 @@ Successfully fixed all failures in the `frontend/__tests__/integration/auth-comp
 
 ### CLAUDE.md Requirements:
 - ✅ Business Value Justification provided
-- ✅ 300-line file limit maintained
-- ✅ 8-line function limit enforced
+- ✅ 450-line file limit maintained
+- ✅ 25-line function limit enforced
 - ✅ Type safety preserved
 - ✅ Test coverage maintained
 

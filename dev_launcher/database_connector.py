@@ -154,14 +154,17 @@ class DatabaseConnector:
     def _construct_clickhouse_url_from_env(self) -> Optional[str]:
         """Construct ClickHouse URL from environment variables."""
         host = os.environ.get("CLICKHOUSE_HOST", HostConstants.LOCALHOST)
-        port = os.environ.get("CLICKHOUSE_HTTP_PORT", str(ServicePorts.CLICKHOUSE_HTTP))
+        # Force port 8123 for HTTP connections in dev launcher
+        port = os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")
         user = os.environ.get("CLICKHOUSE_USER", DatabaseConstants.CLICKHOUSE_DEFAULT_USER)
         password = os.environ.get("CLICKHOUSE_PASSWORD", "")
         database = os.environ.get("CLICKHOUSE_DB", DatabaseConstants.CLICKHOUSE_DEFAULT_DB)
         
+        # Ensure we use port 8123 for HTTP
+        http_port = 8123 if port == "8123" or not port else int(port)
         return DatabaseConstants.build_clickhouse_url(
             host=host,
-            port=int(port),
+            port=http_port,
             database=database,
             user=user,
             password=password if password else None

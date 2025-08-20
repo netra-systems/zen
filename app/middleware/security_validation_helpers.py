@@ -1,6 +1,6 @@
 """
 Security validation helper functions for middleware.
-Extracted from security_middleware.py to maintain 8-line function limits.
+Extracted from security_middleware.py to maintain 25-line function limits.
 """
 
 import re
@@ -67,7 +67,7 @@ class SecurityPatterns:
 
 
 class SecurityValidators:
-    """Security validation functions with 8-line limit compliance."""
+    """Security validation functions with 25-line limit compliance."""
     
     def __init__(self):
         self.sql_regex = self._compile_pattern_regex(SecurityPatterns.SQL_INJECTION_PATTERNS)

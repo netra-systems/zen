@@ -1,6 +1,6 @@
 /**
  * WebSocket Test Operations
- * Extracted test operations with 8-line function limit enforcement
+ * Extracted test operations with 25-line function limit enforcement
  */
 
 import { waitFor, render } from '@testing-library/react';

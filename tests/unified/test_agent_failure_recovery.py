@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Value Impact: Prevents complete service outages, maintains partial functionality
 - Revenue Impact: High availability protects against churn and maintains SLA commitments
 
-Architecture: 300-line compliance through focused failure scenario testing
+Architecture: 450-line compliance through focused failure scenario testing
 """
 
 import pytest

@@ -1,7 +1,7 @@
 """
 Base Test Classes
 Common functionality for auth service tests with proper setup and teardown.
-Follows 300-line limit with focused test infrastructure.
+Follows 450-line limit with focused test infrastructure.
 """
 
 import asyncio

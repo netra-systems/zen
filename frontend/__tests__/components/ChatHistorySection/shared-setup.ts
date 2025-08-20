@@ -1,6 +1,6 @@
 /**
  * Shared setup for ChatHistorySection tests - Real Components Only
- * Follows 300-line limit and 8-line function requirements
+ * Follows 450-line limit and 25-line function requirements
  */
 
 import React from 'react';

@@ -11,7 +11,7 @@ REQUIREMENTS:
 - Real JWT token validation and session management
 - Multi-device authentication simulation
 - Token invalidation security testing
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 import uuid

@@ -61,8 +61,8 @@ Successfully created comprehensive reusable test utilities for Netra Apex fronte
 ## Architecture Compliance ✅
 
 ### Mandatory Requirements Met:
-- ✅ **8-Line Function Rule**: Every function ≤8 lines (MANDATORY)
-- ✅ **300-Line File Rule**: All files ≤300 lines (MANDATORY) 
+- ✅ **25-line Function Rule**: Every function ≤8 lines (MANDATORY)
+- ✅ **450-line File Rule**: All files ≤300 lines (MANDATORY) 
 - ✅ **Type Safety**: Full TypeScript typing throughout
 - ✅ **Single Responsibility**: Each module has clear, focused purpose
 - ✅ **Composable Design**: All utilities can be used independently or together

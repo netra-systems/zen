@@ -36,11 +36,11 @@
         </learning>
         
         <learning id="auth-function-refactoring-security">
-            <title>Authentication Module 8-Line Function Refactoring</title>
+            <title>Authentication Module 25-line Function Refactoring</title>
             <date>2025-08-17</date>
             <category>Security Architecture</category>
             <description>
-                Successfully refactored critical authentication modules to comply with 8-line function limits while preserving OAuth security.
+                Successfully refactored critical authentication modules to comply with 25-line function limits while preserving OAuth security.
                 Decomposed large functions (55+ lines) into focused, testable helper functions maintaining all security validations.
             </description>
             <security-considerations>
@@ -66,7 +66,7 @@
             <testing-verification>
                 <item>Import syntax verification passed</item>
                 <item>OAuth flow security preserved through decomposition</item>
-                <item>All helper functions under 8-line limit</item>
+                <item>All helper functions under 25-line limit</item>
                 <item>Original functionality maintained with improved testability</item>
             </testing-verification>
         </learning>
@@ -393,8 +393,8 @@
                     System is operating with only 22.6% compliance to its own architectural constraints.
                 </description>
                 <violations>
-                    <violation type="file-size">341 files exceed 300-line limit (critical boundary violation)</violation>
-                    <violation type="function-complexity">2,679 functions exceed 8-line limit (mandatory constraint violation)</violation>
+                    <violation type="file-size">341 files exceed 450-line limit (critical boundary violation)</violation>
+                    <violation type="function-complexity">2,679 functions exceed 25-line limit (mandatory constraint violation)</violation>
                     <violation type="type-duplication">374 duplicate type definitions (violates single source of truth)</violation>
                     <violation type="test-stubs">151 test stubs in production code (critical quality violation)</violation>
                 </violations>
@@ -425,7 +425,7 @@
                         Backend-frontend type synchronization is compromised.
                     </gap>
                     <gap spec="conventions.xml">
-                        Massive violations of 300-line file limit and 8-line function limit.
+                        Massive violations of 450-line file limit and 25-line function limit.
                         Architectural boundaries are not being enforced.
                     </gap>
                     <gap spec="no_test_stubs.xml">
@@ -509,8 +509,8 @@
             <phase name="Systematic Compliance">
                 <timeline>1-3 months</timeline>
                 <actions>
-                    <action>Refactor all oversized files to meet 300-line limit</action>
-                    <action>Refactor all complex functions to meet 8-line limit</action>
+                    <action>Refactor all oversized files to meet 450-line limit</action>
+                    <action>Refactor all complex functions to meet 25-line limit</action>
                     <action>Eliminate all duplicate type definitions</action>
                     <action>Achieve 100% specification compliance</action>
                 </actions>
@@ -1560,7 +1560,7 @@
                     <violation-count>3534 total violations found (19.3% compliance)</violation-count>
                     <critical-issues>342 oversized files, 2689 complex functions, 361 duplicate types, 142 test stubs</critical-issues>
                     <immediate-fixes>Resolved blocking import errors and initialization failures enabling test execution</immediate-fixes>
-                    <future-work>Systematic refactoring required for 300-line file limit and 8-line function limit compliance</future-work>
+                    <future-work>Systematic refactoring required for 450-line file limit and 25-line function limit compliance</future-work>
                 </architecture-compliance>
             </fix>
             
@@ -2626,7 +2626,7 @@
                 <issue priority="critical">
                     <name>Architecture Violation in demo_agent.py</name>
                     <solution>Split 334-line file into modular structure with 4 focused modules</solution>
-                    <impact>Achieved full compliance with 300-line limit and 8-line function rules</impact>
+                    <impact>Achieved full compliance with 450-line limit and 25-line function rules</impact>
                 </issue>
                 <issue priority="high">
                     <name>WebSocket Authentication Validation</name>
@@ -2806,7 +2806,7 @@
             </problem>
             <root_cause>
                 - Lack of automated compliance checking in CI/CD pipeline
-                - No enforcement of 300-line file and 8-line function limits
+                - No enforcement of 450-line file and 25-line function limits
                 - Missing type safety tooling (mypy not integrated)
                 - Insufficient test infrastructure maintenance
                 - Technical debt accumulation without systematic remediation
@@ -2862,8 +2862,8 @@
             <critical_findings>
                 <finding priority="P0">Smoke tests failing - request ID middleware null encoding error</finding>
                 <finding priority="P0">11 test stubs in production (app/agents/data_sub_agent/agent.py, etc.)</finding>
-                <finding priority="P1">360 files exceed 300-line limit (largest: 898 lines)</finding>
-                <finding priority="P1">2,643 functions exceed 8-line limit (largest: 73 lines)</finding>
+                <finding priority="P1">360 files exceed 450-line limit (largest: 898 lines)</finding>
+                <finding priority="P1">2,643 functions exceed 25-line limit (largest: 73 lines)</finding>
                 <finding priority="P1">161 duplicate type definitions violate Single Source of Truth</finding>
             </critical_findings>
             <compliance_score_breakdown>

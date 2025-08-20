@@ -1,7 +1,7 @@
 """
 Comprehensive Unit Tests for Staged Health Monitor
 Tests progressive health monitoring, adaptive rules, and stage-based checks.
-COMPLIANCE: 300-line max file, 8-line max functions, async test support.
+COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
 import pytest

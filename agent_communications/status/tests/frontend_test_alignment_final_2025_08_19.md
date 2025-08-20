@@ -35,7 +35,7 @@ Successfully aligned all frontend tests with the current real codebase implement
 - **Key Fixes**:
   - Reduced file sizes from 433+505 lines to 223+205 lines
   - Fixed component imports and mock methods
-  - Full compliance with 300-line limit
+  - Full compliance with 450-line limit
 - **Tests Fixed**: 20 previously failing tests
 
 ### 5. HOOK TESTS ✅
@@ -52,12 +52,12 @@ Successfully aligned all frontend tests with the current real codebase implement
 
 ## Architecture Compliance ✅
 
-### 300-Line Module Limit
-- All test files now comply with 300-line maximum
+### 450-line Module Limit
+- All test files now comply with 450-line maximum
 - Several large files were split or refactored
 
-### 8-Line Function Limit  
-- All functions in fixed tests comply with 8-line maximum
+### 25-line Function Limit  
+- All functions in fixed tests comply with 25-line maximum
 - Complex logic properly decomposed
 
 ### Type Safety

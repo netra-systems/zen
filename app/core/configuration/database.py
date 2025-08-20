@@ -61,7 +61,8 @@ class DatabaseConfigManager:
             "postgres_dev": "postgresql+asyncpg://postgres:postgres@localhost:5432/netra",
             "postgres_staging": "postgresql+asyncpg://user:pass@staging-host:5432/netra",
             "postgres_production": "postgresql+asyncpg://user:pass@prod-host:5432/netra",
-            "clickhouse_dev": "clickhouse://default:@localhost:8123/default"
+            "clickhouse_dev": "clickhouse://default:@localhost:8123/default",
+            "clickhouse_http_dev": "http://localhost:8123"
         }
     
     def populate_database_config(self, config: AppConfig) -> None:
@@ -158,9 +159,11 @@ class DatabaseConfigManager:
     
     def _get_clickhouse_configuration(self) -> Dict[str, str]:
         """Get ClickHouse configuration from environment."""
+        # Ensure HTTP port 8123 is used for development
+        default_port = "8123"  # Always use HTTP port for dev launcher
         return {
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
-            "port": os.environ.get("CLICKHOUSE_HTTP_PORT", "8123"),
+            "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": os.environ.get("CLICKHOUSE_PASSWORD", ""),
             "database": os.environ.get("CLICKHOUSE_DB", "default")
@@ -184,7 +187,8 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse HTTPS connection."""
         if hasattr(config, 'clickhouse_https'):
             config.clickhouse_https.host = ch_config["host"]
-            config.clickhouse_https.port = int(ch_config["port"])  # Use HTTP port for development
+            # Force HTTP port 8123 for dev launcher compatibility
+            config.clickhouse_https.port = 8123 if self._environment == "development" else int(ch_config["port"])
             config.clickhouse_https.user = ch_config["user"]
             config.clickhouse_https.password = ch_config["password"]
             config.clickhouse_https.database = ch_config["database"]
@@ -201,7 +205,9 @@ class DatabaseConfigManager:
     def _build_clickhouse_url(self, ch_config) -> str:
         """Build ClickHouse URL from configuration object."""
         password_part = f":{ch_config.password}" if ch_config.password else ""
-        return f"clickhouse://{ch_config.user}{password_part}@{ch_config.host}:{ch_config.port}/{ch_config.database}"
+        # Ensure we use port 8123 for HTTP connections in development
+        port = 8123 if self._environment == "development" and hasattr(ch_config, 'port') and ch_config.port == 8123 else ch_config.port
+        return f"clickhouse://{ch_config.user}{password_part}@{ch_config.host}:{port}/{ch_config.database}"
     
     def _get_redis_url(self) -> Optional[str]:
         """Get Redis URL from environment."""

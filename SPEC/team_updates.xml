@@ -253,8 +253,8 @@
       <format>
         ## 📏 Code Quality & Compliance
         ### Architecture Compliance
-        - **300-line rule**: {compliant_files}/{total_files} compliant
-        - **8-line functions**: {compliant_functions}/{total_functions} compliant
+        - **450-line rule**: {compliant_files}/{total_files} compliant
+        - **25-line functions**: {compliant_functions}/{total_functions} compliant
         - **New Violations**: {new_violations}
         - **Fixed Violations**: {fixed_violations}
         

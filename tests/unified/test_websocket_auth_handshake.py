@@ -26,6 +26,7 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import patch, Mock
 from datetime import datetime, timedelta
 
+from test_framework.mock_utils import mock_justified
 from tests.unified.jwt_token_helpers import JWTTestHelper
 from app.tests.test_utilities.websocket_mocks import MockWebSocket
 from app.logging_config import central_logger
@@ -102,6 +103,7 @@ class TestWebSocketAuthHandshake:
     @pytest.fixture  
     def mock_security_service(self):
         """Mock security service for token validation."""
+        # Mock justification: External auth service API not available in test environment - testing handshake flow
         service = Mock()
         service.decode_access_token = Mock()
         service.get_user_by_id = Mock()
@@ -110,6 +112,7 @@ class TestWebSocketAuthHandshake:
     @pytest.fixture
     def mock_agent_service(self):
         """Mock agent service for message handling."""
+        # Mock justification: Agent service subsystem is not part of WebSocket auth handshake SUT
         service = Mock()
         service.handle_websocket_message = Mock()
         return service

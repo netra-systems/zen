@@ -1,6 +1,6 @@
 """
 Comprehensive Repository Tests - Modular Index
-Redirects to focused test modules following 300-line architecture
+Redirects to focused test modules following 450-line architecture
 COMPLIANCE: Modular split from 521-line monolith
 """
 

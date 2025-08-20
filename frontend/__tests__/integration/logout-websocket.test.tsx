@@ -2,7 +2,7 @@
  * Logout WebSocket Disconnection Tests
  * Tests WebSocket disconnection and connection state cleanup
  * BUSINESS VALUE: Security & compliance (enterprise data protection)
- * Following 300-line limit and 8-line function requirements
+ * Following 450-line limit and 25-line function requirements
  */
 
 import React from 'react';
@@ -19,7 +19,7 @@ jest.mock('@/services/webSocketService');
 jest.mock('@/store/authStore');
 jest.mock('@/lib/logger');
 
-// Test helpers following 8-line limit
+// Test helpers following 25-line limit
 const createMockUser = () => ({
   id: 'user-123',
   email: 'test@example.com',

@@ -2,7 +2,7 @@
  * Core Chat UI/UX Test Coordinator
  * ================================
  * Modular test suite coordinator for chat UI components
- * Split from 570-line monolithic test file into focused ≤300-line modules
+ * Split from 570-line monolithic test file into focused ≤450-line modules
  * Enforces Elite Engineering standards: modular, maintainable, comprehensive
  */
 

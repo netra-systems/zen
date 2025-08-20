@@ -1,7 +1,7 @@
 """
 Service Failure Scenario Tester Module
 Business Value: Prevents cascading failures that cause total system outage
-Modular design: <300 lines, 8-line functions max
+Modular design: <300 lines, 25-line functions max
 """
 from typing import Dict, Any
 from .mock_services_manager import MockHttpClient, MockTimeoutException

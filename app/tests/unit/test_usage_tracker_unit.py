@@ -189,7 +189,7 @@ def heavy_usage_free_user():
     return user
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def assert_usage_recorded_successfully(result):
     """Assert usage was recorded successfully."""
     assert result["recorded"] is True

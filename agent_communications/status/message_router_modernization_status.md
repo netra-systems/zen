@@ -23,8 +23,8 @@
 - **✅ Legacy MessageTypeRouter**: Backward-compatible wrapper maintaining original API
 
 ### 3. Architecture Compliance
-- **✅ 300-Line Limit**: File is 246 lines (under limit)
-- **✅ 8-Line Function Limit**: All functions now ≤8 lines through modular decomposition
+- **✅ 450-line Limit**: File is 246 lines (under limit)
+- **✅ 25-line Function Limit**: All functions now ≤8 lines through modular decomposition
 - **✅ Single Responsibility**: Each function handles one specific task
 - **✅ Modern Patterns**: Circuit breaker, retry, monitoring, error handling
 
@@ -67,7 +67,7 @@
 ### Architecture Requirements
 - **✅ Module Boundaries**: Clear separation between legacy and modern components
 - **✅ Function Size**: All functions ≤8 lines through decomposition
-- **✅ File Size**: 246 lines (well under 300-line limit)
+- **✅ File Size**: 246 lines (well under 450-line limit)
 - **✅ Type Safety**: Strong typing throughout with proper type hints
 - **✅ Error Handling**: Comprehensive error management with ExecutionErrorHandler
 

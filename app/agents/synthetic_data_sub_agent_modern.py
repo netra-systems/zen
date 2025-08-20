@@ -99,7 +99,7 @@ class ModernSyntheticDataSubAgent(BaseExecutionInterface):
         """Initialize approval handling components."""
         self.approval_handler = SyntheticDataApprovalHandler(self._send_legacy_update)
         # Note: Additional approval components would be initialized here
-        # keeping within 8-line function limit
+        # keeping within 25-line function limit
     
     def _initialize_generation_flow(self) -> None:
         """Initialize generation flow components."""

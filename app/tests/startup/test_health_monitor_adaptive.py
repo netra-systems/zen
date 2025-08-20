@@ -1,7 +1,7 @@
 """
 Health monitor adaptive rules tests
 Tests adaptive monitoring rules, service status, and health check factories
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

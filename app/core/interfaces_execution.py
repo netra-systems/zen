@@ -2,7 +2,7 @@
 
 Consolidated execution strategies merging enum-based types with strategy pattern
 implementations for agent pipelines and LLM fallback execution.
-Follows 300-line limit and 8-line functions.
+Follows 450-line limit and 25-line functions.
 """
 
 import asyncio

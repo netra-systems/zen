@@ -2,7 +2,7 @@
 System Checks
 
 Handles system resource and network connectivity checks.
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 import socket

@@ -1,7 +1,7 @@
 """PostgreSQL core connection and engine setup module.
 
 Handles database engine creation, connection management, and initialization.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from contextlib import contextmanager

@@ -1,7 +1,7 @@
 """Service Locator facade for dependency injection.
 
 Provides backward compatibility while using modular architecture.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Type, TypeVar

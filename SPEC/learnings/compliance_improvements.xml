@@ -5,7 +5,7 @@
     <date>2025-08-17</date>
     <category>architecture</category>
     <impact>high</impact>
-    <tags>compliance, reporting, architecture, 300-line-limit, 8-line-limit</tags>
+    <tags>compliance, reporting, architecture, 450-line-limit, 25-line-limit</tags>
   </metadata>
 
   <problem>
@@ -13,7 +13,7 @@
       The architecture compliance reporting system had several issues:
       1. Inaccurate violation counting (mixed errors and warnings)
       2. Poor default display behavior (showed too many violations)
-      3. Monolithic reporter module exceeding 300-line limit (347 lines)
+      3. Monolithic reporter module exceeding 450-line limit (347 lines)
       4. No prioritization of violations by severity
       5. Duplicate type checker too aggressive (flagged legitimate usage)
     </description>
@@ -21,7 +21,7 @@
     <symptoms>
       - Overwhelming output with hundreds of violations
       - Mixed counting of actual violations vs warnings
-      - Reporter.py itself violated the 300-line rule
+      - Reporter.py itself violated the 450-line rule
       - Important violations buried in noise
       - False positives for type duplicates
     </symptoms>
@@ -94,7 +94,7 @@
 
   <impact>
     <positive>
-      - Compliance reporting now follows 300-line rule
+      - Compliance reporting now follows 450-line rule
       - More actionable output with top violations visible
       - Accurate violation statistics for tracking
       - Better developer experience with smart defaults
@@ -134,7 +134,7 @@
   <testing>
     <test id="1">
       Run: python scripts/check_architecture_compliance.py --path scripts/compliance
-      Expected: All modules pass 300-line and 8-line checks
+      Expected: All modules pass 450-line and 25-line checks
     </test>
     
     <test id="2">

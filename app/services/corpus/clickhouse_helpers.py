@@ -1,6 +1,6 @@
 """ClickHouse operation helpers for function decomposition.
 
-Decomposes large ClickHouse functions into 8-line focused helpers.
+Decomposes large ClickHouse functions into 25-line focused helpers.
 """
 
 from typing import Dict, Any, Optional, Tuple

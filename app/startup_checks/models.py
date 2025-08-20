@@ -2,7 +2,7 @@
 Startup Check Models
 
 Data models for startup check results and configuration.
-Maintains simple structure under 300-line limit.
+Maintains simple structure under 450-line limit.
 """
 
 

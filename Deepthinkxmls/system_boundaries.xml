@@ -193,7 +193,7 @@
             <review id="architecture-review">
                 <trigger>New modules, major refactoring</trigger>
                 <checklist>
-                    <item>Module fits within 300-line limit</item>
+                    <item>Module fits within 450-line limit</item>
                     <item>Single responsibility clearly defined</item>
                     <item>Dependencies flow in correct direction</item>
                     <item>Public interface minimal and clear</item>
@@ -259,8 +259,8 @@
 
     <boundary-benefits>
         <cognitive-load>
-            <benefit>300-line limit keeps entire file in working memory</benefit>
-            <benefit>8-line functions reduce cognitive complexity</benefit>
+            <benefit>450-line limit keeps entire file in working memory</benefit>
+            <benefit>25-line functions reduce cognitive complexity</benefit>
             <benefit>Clear module boundaries reduce mental context switching</benefit>
         </cognitive-load>
         

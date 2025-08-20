@@ -1,6 +1,6 @@
 """JWT token operations tests - refresh, revocation, and convenience functions.
 
-Split from test_token_manager.py to meet 300-line architecture limit.
+Split from test_token_manager.py to meet 450-line architecture limit.
 Tests for token lifecycle operations and module-level convenience functions.
 """
 

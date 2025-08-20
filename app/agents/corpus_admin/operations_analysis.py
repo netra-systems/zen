@@ -2,7 +2,7 @@
 Corpus Analysis Operations
 
 Handles analysis, export, import, and validation operations for corpus.
-Maintains 8-line function limit per operation.
+Maintains 25-line function limit per operation.
 """
 
 import time

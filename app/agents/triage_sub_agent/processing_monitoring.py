@@ -1,6 +1,6 @@
 """Triage Processing Monitoring Helpers
 
-Helper functions for processing monitoring to maintain 300-line module limit.
+Helper functions for processing monitoring to maintain 450-line module limit.
 Contains metrics tracking, performance monitoring, and WebSocket enhancements.
 """
 

@@ -36,12 +36,12 @@ app/schemas/
 
 ## COMPLIANCE WITH ARCHITECTURAL MANDATES
 
-### ✅ 300-LINE FILE LIMIT
+### ✅ 450-line FILE LIMIT
 - Domain files split when approaching 250 lines
 - Registry files act as barrel exports
 - Modular design prevents growth violations
 
-### ✅ 8-LINE FUNCTION LIMIT  
+### ✅ 25-line FUNCTION LIMIT  
 - Type generation broken into focused functions
 - Validation logic decomposed into small utilities
 - Import/export logic kept minimal
@@ -126,7 +126,7 @@ app/schemas/
 
 The architecture is designed for immediate implementation with:
 1. **Minimal disruption** - Backward compatibility maintained
-2. **Clear boundaries** - 300-line modular design
+2. **Clear boundaries** - 450-line modular design
 3. **Automated validation** - Prevents regression
 4. **Team enablement** - CLI tools and documentation
 

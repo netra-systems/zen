@@ -1,7 +1,7 @@
 /**
  * WebSocket Complete Integration Tests - Modular Architecture
  * 
- * This file was refactored from 758 lines to comply with 300-line limit.
+ * This file was refactored from 758 lines to comply with 450-line limit.
  * The original oversized test file has been split into focused modules:
  * 
  * - websocket-lifecycle.test.tsx (226 lines) - Connection lifecycle tests
@@ -12,7 +12,7 @@
  * - utils/websocket-test-components.tsx (117 lines) - Shared components
  * 
  * Each module maintains focused responsibility and complies with the
- * MANDATORY 300-line limit for Elite Engineering standards.
+ * MANDATORY 450-line limit for Elite Engineering standards.
  * 
  * All test functionality has been preserved and is now more maintainable
  * through proper modular architecture. Tests can be run individually

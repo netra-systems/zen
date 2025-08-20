@@ -1,6 +1,6 @@
 """JWT token manager test documentation and aggregation.
 
-This test module was refactored to meet the 300-line architecture limit by splitting into:
+This test module was refactored to meet the 450-line architecture limit by splitting into:
 
 - test_token_manager_core.py (10 tests):
   * Secret key retrieval and configuration tests

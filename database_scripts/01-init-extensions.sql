@@ -1,6 +1,6 @@
 -- PostgreSQL Extensions Initialization
 -- Purpose: Install required PostgreSQL extensions for the application
--- Module: Extensions (adheres to 300-line limit)
+-- Module: Extensions (adheres to 450-line limit)
 
 -- UUID generation support
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

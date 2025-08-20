@@ -154,7 +154,7 @@ SupervisorAgent (Orchestrator)
 
 ## Compliance Status
 
-### Architecture Compliance (300-line/8-line rules)
+### Architecture Compliance (450-line/25-line rules)
 - **SubAgents**: Generally compliant, some files approaching limits
 - **Execution Agents**: Compliant with modular design
 - **Services**: Mixed compliance, refactoring needed

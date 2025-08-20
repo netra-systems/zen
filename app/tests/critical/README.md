@@ -91,7 +91,7 @@ This directory contains the **TOP 20 MOST CRITICAL BUSINESS TESTS** for Netra Ap
 ### ✅ Quality Requirements Met
 - **Real Tests**: No stubs or placeholders - all tests execute real logic
 - **Function Limit**: All functions ≤8 lines per CLAUDE.md requirements
-- **File Limit**: Total file ≤442 lines (within 300-line target for main logic)
+- **File Limit**: Total file ≤442 lines (within 450-line target for main logic)
 - **Business Value**: Every test includes clear business value documentation
 - **Async Support**: Full async/await support for modern patterns
 - **Mock Strategy**: Strategic mocking to isolate functionality without losing test value

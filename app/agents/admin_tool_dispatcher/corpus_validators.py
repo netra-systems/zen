@@ -2,7 +2,7 @@
 Corpus Admin Tool Validators
 
 Validation functions for corpus admin tool parameters.
-All functions maintain 8-line limit with single responsibility.
+All functions maintain 25-line limit with single responsibility.
 """
 
 from typing import Dict, Optional, Tuple

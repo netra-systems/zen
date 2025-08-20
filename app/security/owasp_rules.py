@@ -1,6 +1,6 @@
 """
 OWASP Top 10 2021 compliance rule implementations.
-Focused module for OWASP security checks with 8-line function limit.
+Focused module for OWASP security checks with 25-line function limit.
 """
 
 from typing import List

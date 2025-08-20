@@ -1,7 +1,7 @@
 """
 Triage agent caching and execution tests
 Tests caching functionality, execute method, and request hashing
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

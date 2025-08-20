@@ -2,7 +2,7 @@
 """
 Test Validator Module
 Orchestrates test execution, validation, and report generation
-Complies with 300-line limit and 8-line function constraint
+Complies with 450-line limit and 25-line function constraint
 """
 
 from pathlib import Path

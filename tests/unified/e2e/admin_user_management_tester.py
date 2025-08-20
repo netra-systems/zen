@@ -13,7 +13,7 @@ REQUIREMENTS:
 - RBAC permission validation
 - Audit trail generation
 - Performance validation
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 from typing import Dict, Any, List

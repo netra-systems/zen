@@ -86,11 +86,11 @@ await waitFor(() => {
 
 ## Architecture Compliance ✅
 
-**300-Line Module Limit**: All modified files remain under 300 lines
+**450-line Module Limit**: All modified files remain under 300 lines
 - MessageActions.test.tsx: 423 lines (existing file, no major expansion)
 - keyboard-shortcuts.test.tsx: 304 lines (existing file, minimal change)
 
-**8-Line Function Limit**: All changes used simple, focused edits
+**25-line Function Limit**: All changes used simple, focused edits
 - Clipboard mock setup: 6 lines
 - Test expectation fix: 3 lines
 

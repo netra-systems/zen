@@ -1,7 +1,7 @@
 """PostgreSQL session management and validation module.
 
 Handles session validation, error handling, and async session context management.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from contextlib import asynccontextmanager

@@ -9,8 +9,8 @@ This report documents the complete implementation of **Fix #2: Test Size Limits 
 
 1. **Test Size Validator** (`scripts/compliance/test_size_validator.py`)
    - Scans all test files for size violations
-   - Reports files exceeding 300-line limit
-   - Reports functions exceeding 8-line limit
+   - Reports files exceeding 450-line limit
+   - Reports functions exceeding 25-line limit
    - Provides refactoring suggestions
    - Can auto-split large test files
    - Multiple output formats (text, JSON, markdown)
@@ -120,7 +120,7 @@ python scripts/compliance/test_refactor_helper.py validate app/tests/test_large.
 **Location:** `app/tests/examples/test_size_compliance_examples.py`
 
 **Demonstrates:**
-- Functions under 8-line limit
+- Functions under 25-line limit
 - Helper method extraction
 - Parametrized tests
 - Fixture usage patterns
@@ -146,12 +146,12 @@ def test_complex_workflow_bad():
 ### Requirements Met:
 
 1. **File Size Limits**
-   - ✅ Test files MUST follow same 300-line limit as production code
+   - ✅ Test files MUST follow same 450-line limit as production code
    - ✅ Validator detects and reports violations
    - ✅ Splitting suggestions provided
 
 2. **Function Size Limits**
-   - ✅ Test functions MUST follow same 8-line limit as production code
+   - ✅ Test functions MUST follow same 25-line limit as production code
    - ✅ AST-based analysis excludes docstrings and comments
    - ✅ Refactoring suggestions provided
 
@@ -265,7 +265,7 @@ The Test Size Limits Enforcement system is **fully implemented and operational**
 ✅ **Well Documented**: Examples and usage patterns provided
 ✅ **CI/CD Ready**: Command-line tools for automation
 
-The system successfully enforces the 300-line file limit and 8-line function limit for test files, preventing the accumulation of unmaintainable "ravioli code" while providing clear guidance for refactoring.
+The system successfully enforces the 450-line file limit and 25-line function limit for test files, preventing the accumulation of unmaintainable "ravioli code" while providing clear guidance for refactoring.
 
 ---
 

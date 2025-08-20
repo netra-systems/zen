@@ -1,7 +1,7 @@
 """Quality content analysis methods - Single source of truth.
 
 Contains analysis helper methods extracted from interfaces_quality.py to maintain
-the 300-line limit per CLAUDE.md requirements.
+the 450-line limit per CLAUDE.md requirements.
 """
 
 import re

@@ -18,7 +18,7 @@ Successfully modernized the WebSocket error handler (`app/websocket/error_handle
 - **Used ExecutionErrorHandler** for unified error management with fallback strategies
 
 ### 2. Architectural Compliance ✅
-- **File size:** 280 lines (within 300-line limit)
+- **File size:** 280 lines (within 450-line limit)
 - **Function compliance:** All functions are ≤8 lines (100% compliant)
 - **Modern patterns:** Full integration with agent base architecture
 - **Backward compatibility:** Zero breaking changes via wrapper pattern
@@ -101,7 +101,7 @@ Circuit Breaker → Retry Logic → Core Logic → Recovery → Monitoring
 
 ### File Size Compliance
 ```bash
-✅ 280 lines (within 300-line limit)
+✅ 280 lines (within 450-line limit)
 ```
 
 ### Modern Pattern Integration

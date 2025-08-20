@@ -1,7 +1,7 @@
 """MCP Client Tool Executor.
 
 Handles tool discovery and execution on external MCP servers.
-Modular component extracted to maintain 300-line limit compliance.
+Modular component extracted to maintain 450-line limit compliance.
 """
 
 import asyncio

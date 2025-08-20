@@ -3,8 +3,8 @@
 Test Size Compliance Examples
 
 This file demonstrates proper test organization following SPEC/testing.xml requirements:
-- Test files MUST follow same 300-line limit as production code
-- Test functions MUST follow same 8-line limit as production code
+- Test files MUST follow same 450-line limit as production code
+- Test functions MUST follow same 25-line limit as production code
 
 Examples show:
 1. How to split large test classes
@@ -20,7 +20,7 @@ from unittest.mock import Mock, patch
 # ===== EXAMPLE 1: PROPERLY SIZED TEST FUNCTIONS =====
 
 class TestAuthenticationCompliant:
-    """Example of compliant test class with 8-line function limit"""
+    """Example of compliant test class with 25-line function limit"""
     
     def test_successful_login(self, auth_service, valid_user):
         """Test successful user login - compliant 8 lines"""
@@ -256,7 +256,7 @@ class TestFileOrganizationExample:
     3. Fixtures for test data
     4. Parametrized tests for multiple scenarios
     5. Clear test naming
-    6. Compliance with 8-line limit per function
+    6. Compliance with 25-line limit per function
     """
     
     def test_basic_functionality(self):

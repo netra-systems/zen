@@ -151,8 +151,8 @@
         <rule id="test-size-limits" severity="MEDIUM">
             <title>Test Size Limits</title>
             <description>
-                Test files MUST follow same 300-line limit as production code.
-                Test functions MUST follow same 8-line limit as production code.
+                Test files MUST follow same 450-line limit as production code.
+                Test functions MUST follow same 25-line limit as production code.
             </description>
             <rationale>
                 Large test files and functions become unmaintainable and often

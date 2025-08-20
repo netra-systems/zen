@@ -1,6 +1,6 @@
 """
 Synthetic Data Audit Logger - Modular audit logging for generation operations
-Follows 300-line limit and 8-line function rule
+Follows 450-line limit and 25-line function rule
 """
 
 from typing import Optional, List, Dict, Any

@@ -89,7 +89,7 @@ The test was likely failing in a different context or previous state. The change
 - Proper service method mocking through `setupAuthServiceMethods`
 - Clear separation between setup and execution phases
 
-### Test Structure (300-line limit compliant)
+### Test Structure (450-line limit compliant)
 - Each helper function ≤8 lines
 - Clear single responsibility for each test function
 - Modular mock setup allowing precise control

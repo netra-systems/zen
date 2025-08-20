@@ -3,7 +3,7 @@
 Focused helper methods for modern execution patterns.
 Keeps supervisor main file under 300 lines.
 
-Business Value: Standardized execution patterns with 8-line function limit.
+Business Value: Standardized execution patterns with 25-line function limit.
 """
 
 from typing import Dict, Any

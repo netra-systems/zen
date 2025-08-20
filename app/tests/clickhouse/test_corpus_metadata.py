@@ -1,7 +1,7 @@
 """
 Corpus metadata and error recovery tests
 Tests metadata tracking throughout corpus lifecycle and error recovery mechanisms
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

@@ -12,7 +12,7 @@ REQUIREMENTS:
 - Reuses existing test infrastructure patterns
 - 10 specific test cases covering OAuth lifecycle
 - Independent tests with proper error handling
-- 8-line function limit, 300-line file limit
+- 25-line function limit, 450-line file limit
 """
 import pytest
 import uuid

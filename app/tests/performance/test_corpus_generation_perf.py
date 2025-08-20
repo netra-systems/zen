@@ -2,7 +2,7 @@
 Performance tests for corpus generation
 
 Tests performance, scalability, and resource usage of corpus generation.
-All functions maintain 8-line limit with single responsibility.
+All functions maintain 25-line limit with single responsibility.
 """
 
 import pytest

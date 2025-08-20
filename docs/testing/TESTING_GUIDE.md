@@ -980,7 +980,7 @@ locust -f tests/performance/locustfile.py \
 
 ## Architecture Compliance Testing
 
-### CRITICAL: 300-Line and 8-Line Limits
+### CRITICAL: 450-line and 25-line Limits
 
 **MANDATORY**: All code must pass architecture compliance checks:
 
@@ -1005,8 +1005,8 @@ python scripts/check_architecture_compliance.py --report --output test_reports/
 
 ### 1. Architecture-First Testing
 - **Always check compliance first**: Run architecture checks before functional tests
-- **Module isolation**: Each 300-line module should be independently testable
-- **Function composition**: Test 8-line functions in combination and isolation
+- **Module isolation**: Each 450-line module should be independently testable
+- **Function composition**: Test 25-line functions in combination and isolation
 
 ### 2. Test Isolation
 - Each test should be independent

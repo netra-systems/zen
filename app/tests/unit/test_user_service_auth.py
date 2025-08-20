@@ -26,7 +26,7 @@ CRITICAL SECURITY SCENARIOS TESTED:
 - Cross-tenant data access attempts
 - Privilege escalation attempts
 
-Architecture: 300-line module limit, 8-line function limit enforced
+Architecture: 450-line module limit, 25-line function limit enforced
 """
 
 import pytest

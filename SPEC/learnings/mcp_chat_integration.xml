@@ -139,9 +139,9 @@
   </learning>
 
   <learning id="mcp-007">
-    <title>Modular Component Design for 300-Line Limit</title>
+    <title>Modular Component Design for 450-line Limit</title>
     <problem>
-      Complex MCP components could easily exceed 300-line limit if designed monolithically.
+      Complex MCP components could easily exceed 450-line limit if designed monolithically.
     </problem>
     <solution>
       Proactively split components into focused modules during design phase. Each module
@@ -162,7 +162,7 @@
   </learning>
 
   <learning id="mcp-008">
-    <title>8-Line Function Constraint Patterns</title>
+    <title>25-line Function Constraint Patterns</title>
     <problem>
       Complex MCP operations naturally want to be longer than 8 lines.
     </problem>

@@ -47,7 +47,7 @@ interface/
 ```
 
 ### Key Principles
-- **8-line function limit**: All test helpers ≤ 8 lines
+- **25-line function limit**: All test helpers ≤ 8 lines
 - **Modular design**: Reusable mocks and utilities
 - **Real workflow testing**: Tests mirror actual user behavior
 - **Performance validation**: Timing constraints enforced
@@ -155,7 +155,7 @@ describe('My Chat Feature', () => {
 ## Maintenance
 
 ### Adding New Tests
-1. Follow 8-line function limit
+1. Follow 25-line function limit
 2. Use shared test utilities
 3. Include business value justification
 4. Add performance validations

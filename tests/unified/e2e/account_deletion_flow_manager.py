@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Complete data removal across all services (Auth, Backend, ClickHouse)
 - GDPR compliance validation
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import os
 from contextlib import asynccontextmanager

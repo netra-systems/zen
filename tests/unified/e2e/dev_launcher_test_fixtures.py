@@ -4,7 +4,7 @@ Dev launcher test fixtures and utilities for startup testing.
 Provides fixtures for managing dev launcher lifecycle, capturing logs,
 monitoring health checks, and verifying database connections.
 
-Follows 300-line file limit and 8-line function limit constraints.
+Follows 450-line file limit and 25-line function limit constraints.
 """
 
 import os

@@ -9,7 +9,7 @@
     <title>Modular Service Architecture for GCP Integration</title>
     <context>
       Implementing GCP Error Reporting API integration required careful modularization
-      to stay within 300-line file limits while maintaining functionality.
+      to stay within 450-line file limits while maintaining functionality.
     </context>
     <solution>
       Split the service into focused modules:

@@ -1,7 +1,7 @@
 """Message Flow Validation Components
 
 Focused validation utilities for message flow testing.
-Extracted to maintain 300-line file limit compliance.
+Extracted to maintain 450-line file limit compliance.
 
 Business Value: Reliable validation ensures chat quality and customer satisfaction.
 """

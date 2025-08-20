@@ -3,8 +3,8 @@
 /**
  * Synthetic Data Generation Page E2E Tests - Master Index
  * 
- * This file has been modularized to maintain the 300-line architectural requirement.
- * The original 478-line test file has been split into focused modules:
+ * This file has been modularized to maintain the 450-line architectural requirement.
+ * The original 4725-line test file has been split into focused modules:
  * 
  * Architecture Compliance:
  * - Each module ≤300 lines

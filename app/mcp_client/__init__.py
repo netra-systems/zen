@@ -13,7 +13,7 @@ Architecture:
 - security: Authentication and authorization
 - cache: Performance optimization through caching
 
-All modules follow strict 300-line and 8-line function limits.
+All modules follow strict 450-line and 25-line function limits.
 """
 
 from .client_core import MCPClient, MCPClientError, MCPConnectionError, MCPProtocolError

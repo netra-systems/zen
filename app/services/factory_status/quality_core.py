@@ -1,7 +1,7 @@
 """Core types and interfaces for quality metrics.
 
 Defines enums, dataclasses and interfaces for quality assessment.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 from typing import Dict, List

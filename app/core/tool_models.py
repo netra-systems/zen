@@ -1,7 +1,7 @@
 """Tool model classes - Single source of truth.
 
 Contains core tool model classes extracted from interfaces_tools.py 
-to maintain the 300-line limit per CLAUDE.md requirements.
+to maintain the 450-line limit per CLAUDE.md requirements.
 """
 
 from typing import Dict, Any, Optional, TYPE_CHECKING

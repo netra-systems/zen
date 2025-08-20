@@ -1,6 +1,6 @@
 /**
  * User Active Sessions E2E Tests
- * Split from user-device-sessions.cy.ts for 300-line compliance
+ * Split from user-device-sessions.cy.ts for 450-line compliance
  * 
  * BVJ: Growth & Enterprise - Session visibility drives security transparency
  * Value Impact: Device awareness = security control = user confidence

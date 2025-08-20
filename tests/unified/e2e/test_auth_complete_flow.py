@@ -11,7 +11,7 @@ REQUIREMENTS:
 - Real authentication logic and JWT operations
 - Controlled service dependencies for reliability
 - Must complete in <5 seconds
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 - Multi-device session security validation
 """
 import pytest

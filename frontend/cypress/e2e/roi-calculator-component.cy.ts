@@ -4,7 +4,7 @@ import { ROICalculatorHelpers } from '../support/roi-calculator-helpers'
 
 // ROI Calculator Component Basic Initialization Tests
 // BVJ: Enterprise segment - validates core component functionality
-// Modular design following 300-line limit and 8-line function requirements
+// Modular design following 450-line limit and 25-line function requirements
 // 
 // NOTE: Comprehensive tests are now split into focused modules:
 // - roi-calculator-inputs.cy.ts - Input validation and interactions

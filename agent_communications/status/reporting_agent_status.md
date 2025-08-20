@@ -34,13 +34,13 @@
    - All existing interfaces continue to work
 
 ### Architecture Status
-- **Current File Size**: 382 lines (⚠️ EXCEEDS 300-line limit)
-- **Function Compliance**: Some functions exceed 8-line limit
+- **Current File Size**: 382 lines (⚠️ EXCEEDS 450-line limit)
+- **Function Compliance**: Some functions exceed 25-line limit
 - **Modern Patterns**: ✅ Fully integrated
 - **Backward Compatibility**: ✅ 100% maintained
 
 ### ⚠️ ARCHITECTURE COMPLIANCE ISSUE
-The modernized file exceeds the 300-line limit. This requires module extraction:
+The modernized file exceeds the 450-line limit. This requires module extraction:
 
 **Recommended Split**:
 1. `reporting_sub_agent.py` (core agent class) - ~150 lines
@@ -61,7 +61,7 @@ The modernized file exceeds the 300-line limit. This requires module extraction:
 4. **Future-Proof**: Ready for additional modern patterns
 
 ### Next Steps:
-1. **Module Extraction**: Split file to meet 300-line limit
+1. **Module Extraction**: Split file to meet 450-line limit
 2. **Function Optimization**: Reduce functions to ≤8 lines
 3. **Integration Testing**: Verify both legacy and modern execution paths
 4. **Performance Validation**: Confirm reporting reliability improvements

@@ -2,7 +2,7 @@
 Environment Checks
 
 Handles environment variable and configuration validation.
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 import os

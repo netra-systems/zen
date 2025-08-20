@@ -1,7 +1,7 @@
 """Quality validation for architecture compliance and technical debt.
 
 Handles architecture compliance checking and technical debt calculation.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 import re
@@ -73,7 +73,7 @@ class ArchitectureValidator:
         )
 
     def _check_file_line_limits(self) -> int:
-        """Check files exceeding 300-line limit."""
+        """Check files exceeding 450-line limit."""
         cmd = ["find", ".", "-name", "*.py", "-o", "-name", "*.ts", "-o", "-name", "*.tsx"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         files = self._extract_file_list(result)
@@ -107,7 +107,7 @@ class ArchitectureValidator:
             return 0
     
     def _check_function_line_limits(self) -> int:
-        """Check functions exceeding 8-line limit."""
+        """Check functions exceeding 25-line limit."""
         cmd = ["find", ".", "-name", "*.py"]
         result = subprocess.run(cmd, capture_output=True, text=True)
         files = self._extract_python_files(result)

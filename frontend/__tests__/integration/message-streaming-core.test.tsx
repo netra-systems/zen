@@ -1,7 +1,7 @@
 /**
  * Message Streaming Core Tests
  * Core streaming functionality tests
- * Agent 10 Implementation - Split for 300-line compliance
+ * Agent 10 Implementation - Split for 450-line compliance
  */
 
 import React from 'react';

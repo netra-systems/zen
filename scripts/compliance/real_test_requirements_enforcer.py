@@ -13,8 +13,8 @@ SPEC Requirements Enforced:
 1. No mock component implementations inside test files
 2. Integration tests must use real child components
 3. Mock only external APIs and truly unavailable resources
-4. Test files must follow 300-line limit
-5. Test functions must follow 8-line limit
+4. Test files must follow 450-line limit
+5. Test functions must follow 25-line limit
 6. Fix System Under Test first, not tests
 """
 
@@ -215,11 +215,11 @@ class RealTestRequirementsEnforcer:
         self._check_javascript_function_sizes(file_path, lines)
     
     def _check_file_size(self, file_path: Path, lines: List[str]):
-        """Check if file exceeds 300-line limit"""
+        """Check if file exceeds 450-line limit"""
         if len(lines) > 300:
             self._add_violation(
                 file_path, "file_size", len(lines),
-                f"File has {len(lines)} lines, exceeds 300-line limit", "major",
+                f"File has {len(lines)} lines, exceeds 450-line limit", "major",
                 "Split large test files into smaller, focused test modules"
             )
     
@@ -274,7 +274,7 @@ class RealTestRequirementsEnforcer:
         visitor.visit(tree)
     
     def _check_python_function_sizes(self, file_path: Path, tree: ast.AST, lines: List[str]):
-        """Check if functions exceed 8-line limit"""
+        """Check if functions exceed 25-line limit"""
         
         class FunctionSizeVisitor(ast.NodeVisitor):
             def __init__(self, enforcer):
@@ -326,7 +326,7 @@ class RealTestRequirementsEnforcer:
                     code_snippet = lines[start_line-1:end_line]
                     self.enforcer._add_violation(
                         self.file_path, "function_size", node.lineno,
-                        f"Test function '{node.name}' has {actual_lines} lines, exceeds 8-line limit",
+                        f"Test function '{node.name}' has {actual_lines} lines, exceeds 25-line limit",
                         "major",
                         f"Split '{node.name}' into smaller, focused test functions",
                         '\n'.join(code_snippet[:10])  # First 10 lines

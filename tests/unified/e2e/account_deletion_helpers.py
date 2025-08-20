@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Real service integration for data cleanup validation
 - Cross-service data consistency verification
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 from typing import Dict, List, Optional

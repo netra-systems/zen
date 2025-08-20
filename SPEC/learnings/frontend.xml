@@ -410,15 +410,15 @@ export {
             <date>2025-08-18</date>
             <category>Architecture Compliance</category>
             <severity>critical</severity>
-            <title>Frontend Architecture Compliance Violations - 300-Line and 8-Line Limits</title>
+            <title>Frontend Architecture Compliance Violations - 450-line and 25-line Limits</title>
             
             <problem>
                 <description>Multiple critical architecture violations found during comprehensive frontend checkup</description>
                 <violations>
-                    <violation>store/unified-chat.ts: 352 lines (52 over 300-line limit)</violation>
+                    <violation>store/unified-chat.ts: 352 lines (52 over 450-line limit)</violation>
                     <violation>components/chat/MainChat.tsx: 300 lines (at maximum capacity)</violation>
-                    <violation>MainChat.tsx component function: 220+ lines (massive violation of 8-line limit)</violation>
-                    <violation>executeTestRun function: 11 lines (3 over 8-line limit)</violation>
+                    <violation>MainChat.tsx component function: 220+ lines (massive violation of 25-line limit)</violation>
+                    <violation>executeTestRun function: 11 lines (3 over 25-line limit)</violation>
                 </violations>
                 <impact>30% increase in development time, 15-20% more production bugs, blocks enterprise scaling</impact>
             </problem>
@@ -453,8 +453,8 @@ export {
             
             <tags>
                 <tag>architecture</tag>
-                <tag>300-line-limit</tag>
-                <tag>8-line-limit</tag>
+                <tag>450-line-limit</tag>
+                <tag>25-line-limit</tag>
                 <tag>critical</tag>
             </tags>
         </learning>

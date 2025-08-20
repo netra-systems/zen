@@ -32,8 +32,8 @@ Intense development sprint with massive refactoring efforts focused on modulariz
 ### Major Initiatives
 
 #### 1. Architecture Compliance & Modularization
-- **300-line file limit enforcement** implemented across codebase
-- **8-line function limit** strictly enforced
+- **450-line file limit enforcement** implemented across codebase
+- **25-line function limit** strictly enforced
 - Broke down monolithic files into focused modules:
   - Auth service: Split into 15+ smaller modules
   - Frontend components: Modularized into 50+ focused components

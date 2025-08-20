@@ -3,8 +3,8 @@
 Comprehensive test size limits validator for Netra testing system.
 
 Enforces SPEC/testing.xml requirements:
-- Test files MUST follow same 300-line limit as production code
-- Test functions MUST follow same 8-line limit as production code
+- Test files MUST follow same 450-line limit as production code
+- Test functions MUST follow same 25-line limit as production code
 - Prevents test files from becoming unmaintainable "ravioli code"
 
 Features:

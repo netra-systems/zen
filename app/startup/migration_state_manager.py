@@ -2,7 +2,7 @@
 Migration State Management Helper.
 
 Helper functions for migration state file operations.
-Extracted from migration_tracker.py for 300-line compliance.
+Extracted from migration_tracker.py for 450-line compliance.
 """
 
 import asyncio

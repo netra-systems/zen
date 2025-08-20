@@ -2,7 +2,7 @@
  * ThreadList Navigation Tests
  * Tests for hover states, click responsiveness, keyboard navigation, and focus management
  * Phase 3, Agent 9 - Critical for user experience and engagement
- * Follows 300-line file limit and 8-line function rule
+ * Follows 450-line file limit and 25-line function rule
  */
 
 import React from 'react';

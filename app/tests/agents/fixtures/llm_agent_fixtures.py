@@ -1,6 +1,6 @@
 """
 Shared fixtures for LLM Agent E2E tests
-Extracted from oversized test files to maintain 300-line limit
+Extracted from oversized test files to maintain 450-line limit
 """
 
 import pytest

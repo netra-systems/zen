@@ -138,8 +138,8 @@ This session achieved significant improvement in auth test reliability with 126 
 While some complex integration tests still need work, the critical path tests for basic auth operations are now stable and reliable.
 
 **Elite Engineering Standards Maintained:**
-- 300-line file limit enforced
-- 8-line function limit enforced  
+- 450-line file limit enforced
+- 25-line function limit enforced  
 - Modular architecture preserved
 - Business value focused fixes
 - Type safety maintained

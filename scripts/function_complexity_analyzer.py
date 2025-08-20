@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-FUNCTION COMPLEXITY ANALYZER - Identifies functions exceeding 8-line mandate
+FUNCTION COMPLEXITY ANALYZER - Identifies functions exceeding 25-line mandate
 
 Systematically analyzes Python functions across critical modules to identify
-violations of the 8-line function limit per CLAUDE.md specifications.
+violations of the 25-line function limit per CLAUDE.md specifications.
 """
 
 import ast
@@ -210,10 +210,10 @@ class FunctionComplexityAnalyzer:
         """Create report header."""
         return """
 # FUNCTION COMPLEXITY REDUCTION REPORT
-Generated: Function exceeding 8-line mandate analysis
+Generated: Function exceeding 25-line mandate analysis
 
 ## EXECUTIVE SUMMARY
-This report identifies all functions exceeding the mandatory 8-line limit 
+This report identifies all functions exceeding the mandatory 25-line limit 
 per CLAUDE.md specifications across critical system modules.
 
 """

@@ -1,7 +1,7 @@
 """Performance Analysis Helper Functions
 
 Helper functions for performance metrics analysis operations.
-Extracted to maintain 300-line module limit.
+Extracted to maintain 450-line module limit.
 
 Business Value: Modular performance analysis utilities.
 """

@@ -1,6 +1,6 @@
 """
 Common test fixtures and utilities for route testing.
-Shared components extracted from oversized test file to maintain 300-line architecture limit.
+Shared components extracted from oversized test file to maintain 450-line architecture limit.
 """
 
 import pytest

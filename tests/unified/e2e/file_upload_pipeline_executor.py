@@ -3,7 +3,7 @@ File Upload Pipeline Executor - E2E Testing Core
 Business Value: $45K MRR - Enables enterprise document processing validation
 
 Executes complete file upload and processing pipeline validation.
-Follows 300-line limit and 8-line function rules.
+Follows 450-line limit and 25-line function rules.
 """
 
 import asyncio

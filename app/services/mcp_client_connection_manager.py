@@ -2,7 +2,7 @@
 
 Handles connection establishment to external MCP servers using different transports.
 Implements real MCP protocol connections for production use.
-Modular component extracted to maintain 300-line limit compliance.
+Modular component extracted to maintain 450-line limit compliance.
 """
 
 import hashlib

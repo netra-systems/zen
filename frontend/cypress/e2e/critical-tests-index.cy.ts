@@ -3,7 +3,7 @@
 /**
  * Critical Tests Index - Test Suite Orchestrator
  * 
- * Modular test architecture following 300-line limit requirement
+ * Modular test architecture following 450-line limit requirement
  * Each test module focuses on specific business-critical functionality
  * 
  * Business Value Justification (BVJ):

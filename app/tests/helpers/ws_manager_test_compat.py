@@ -1,7 +1,7 @@
 """WebSocket Manager Test Compatibility Layer.
 
 Provides connection-ID-based API for test compatibility while maintaining
-the 8-line-per-function limit as per CLAUDE.md requirements.
+the 25-line-per-function limit as per CLAUDE.md requirements.
 """
 
 from typing import Dict, Any, Union, List, Optional

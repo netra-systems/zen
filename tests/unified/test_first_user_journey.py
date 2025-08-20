@@ -2,7 +2,7 @@
 FIRST USER JOURNEY INTEGRATION TEST - Phase 2 Unified Testing
 
 BVJ: Free → Paid conversion (100% new revenue). Prevents $50K+ MRR loss.
-ARCHITECTURE: 300-line limit, ≤8 lines per function
+ARCHITECTURE: 450-line limit, ≤8 lines per function
 """
 import pytest
 import uuid

@@ -198,14 +198,14 @@ class RealTestLinter:
         
         if fix_plan["file_splits"]:
             report.extend(["## File Splits Required", ""])
-            report.append("These files exceed 300-line limit and should be split:")
+            report.append("These files exceed 450-line limit and should be split:")
             for split in fix_plan["file_splits"]:
                 report.append(f"- [ ] {split}")
             report.append("")
         
         if fix_plan["function_refactors"]:
             report.extend(["## Function Refactoring Required", ""])
-            report.append("These functions exceed 8-line limit and need helper extraction:")
+            report.append("These functions exceed 25-line limit and need helper extraction:")
             for refactor in fix_plan["function_refactors"][:20]:  # Show top 20
                 report.append(f"- [ ] {refactor}")
             if len(fix_plan["function_refactors"]) > 20:

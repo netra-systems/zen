@@ -1,7 +1,7 @@
 /**
  * Visual Regression Tests - Responsive Design
  * Tests responsive breakpoints, mobile layouts, and cross-browser compatibility
- * Follows 8-line function rule and comprehensive viewport coverage
+ * Follows 25-line function rule and comprehensive viewport coverage
  * Business Impact: Ensures consistent UI across all devices and browsers
  */
 

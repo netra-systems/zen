@@ -1,7 +1,7 @@
 """Dependency injection decorators.
 
 Provides decorators for automatic service injection.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 import asyncio

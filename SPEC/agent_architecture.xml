@@ -15,7 +15,7 @@
             categories and their proper usage patterns to ensure business value creation.
         </description>
         <key_principles>
-            <principle>Single responsibility per component (300-line maximum)</principle>
+            <principle>Single responsibility per component (450-line maximum)</principle>
             <principle>Strong typing throughout all interfaces</principle>
             <principle>Modular design enabling composable reuse</principle>
             <principle>Business value justification for every component</principle>
@@ -312,7 +312,7 @@
             <description>Maintain architectural standards throughout development</description>
             <process>
                 <step>Plan module boundaries before coding</step>
-                <step>Implement with 300-line and 8-line limits</step>
+                <step>Implement with 450-line and 25-line limits</step>
                 <step>Run architecture compliance checks regularly</step>
                 <step>Address compliance issues immediately</step>
             </process>
@@ -343,8 +343,8 @@
         <requirement name="Architecture Validation">
             <description>Automated validation of architectural compliance</description>
             <validation_checks>
-                <check>300-line file limit enforcement</check>
-                <check>8-line function limit enforcement</check>
+                <check>450-line file limit enforcement</check>
+                <check>25-line function limit enforcement</check>
                 <check>Type safety validation</check>
                 <check>Interface contract verification</check>
             </validation_checks>

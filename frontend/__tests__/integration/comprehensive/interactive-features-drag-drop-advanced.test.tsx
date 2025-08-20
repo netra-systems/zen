@@ -1,6 +1,6 @@
 /**
  * Interactive Features Advanced Drag and Drop Integration Tests
- * ULTRA DEEP THINK: Module-based architecture - Advanced drag-drop tests extracted for 300-line compliance
+ * ULTRA DEEP THINK: Module-based architecture - Advanced drag-drop tests extracted for 450-line compliance
  */
 
 import {

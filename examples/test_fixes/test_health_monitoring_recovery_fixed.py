@@ -2,7 +2,7 @@
 Example of Fixed Health Monitoring Recovery Test
 
 This demonstrates how to fix function size violations by extracting helper methods.
-Original function had 32+ lines, violating the 8-line limit.
+Original function had 32+ lines, violating the 25-line limit.
 
 BEFORE: One large test function with all steps inline
 AFTER: Main test function + helper methods, each under 8 lines

@@ -1,7 +1,7 @@
 """Concurrent User Isolation Manager
 
 Manages concurrent user sessions with complete isolation testing.
-Split from main test file to maintain 300-line architectural compliance.
+Split from main test file to maintain 450-line architectural compliance.
 
 Business Value: Multi-tenant security and data isolation validation
 """

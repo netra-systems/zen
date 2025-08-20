@@ -55,7 +55,7 @@
             <title>Test Code Quality Double Standard</title>
             <example>
                 - login-to-chat.test.tsx: 598 lines (300 line limit violated by 2x)
-                - Test functions routinely exceed 8-line limit
+                - Test functions routinely exceed 25-line limit
                 - No enforcement of code quality standards in tests
             </example>
             <pattern>Tests don't follow production code quality standards</pattern>

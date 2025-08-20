@@ -2,7 +2,7 @@
 Configuration tests for the dev launcher.
 
 Tests cover LauncherConfig, ServiceDiscovery, and resource configuration.
-All functions follow 8-line maximum rule per CLAUDE.md.
+All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
 import unittest

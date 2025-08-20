@@ -59,11 +59,11 @@ Comprehensive frontend checkup completed with 4 specialized agents performing de
 
 ### 🔴 PRIORITY 1 - CRITICAL (Business Blocking)
 
-#### 1. **300-Line Module Violations**
+#### 1. **450-line Module Violations**
 - `store/unified-chat.ts`: **352 lines** (+52 over limit)
 - `components/chat/MainChat.tsx`: **300 lines** (at capacity)
 
-#### 2. **8-Line Function Violations**
+#### 2. **25-line Function Violations**
 - MainChat.tsx component function: **220+ lines**
 - executeTestRun function: **11 lines**
 

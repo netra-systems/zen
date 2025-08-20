@@ -14,7 +14,7 @@ TEST FLOW:
 4. Cache active sessions in Redis
 5. Validate cross-database consistency
 
-ARCHITECTURE: Modular design with 8-line function limit, under 300 lines total
+ARCHITECTURE: Modular design with 25-line function limit, under 300 lines total
 """
 
 import pytest

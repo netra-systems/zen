@@ -1,7 +1,7 @@
 /**
  * Forms Groups Accessibility Test Suite - Modular Architecture
  * 
- * This file was refactored from 481 lines to comply with 300-line limit.
+ * This file was refactored from 481 lines to comply with 450-line limit.
  * The original oversized test file has been split into focused modules:
  * 
  * - forms-groups-basic.a11y.test.tsx - Basic form structures, radio groups, validation
@@ -9,7 +9,7 @@
  * - forms-groups-validation.a11y.test.tsx - Validation features, collapsible sections, error handling
  * 
  * Each module maintains focused responsibility and complies with the
- * MANDATORY 300-line limit for Elite Engineering standards.
+ * MANDATORY 450-line limit for Elite Engineering standards.
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)

@@ -16,7 +16,7 @@ REQUIREMENTS:
 - Audit log created for all operations
 - Role-based access control (RBAC) validation
 - Must complete in <30 seconds
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import pytest
 import time

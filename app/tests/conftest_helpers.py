@@ -1,4 +1,4 @@
-"""Helper functions for conftest.py fixtures to maintain 8-line function limit."""
+"""Helper functions for conftest.py fixtures to maintain 25-line function limit."""
 
 from unittest.mock import AsyncMock, MagicMock
 

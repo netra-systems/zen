@@ -1,6 +1,6 @@
 /**
  * Authentication Flow Utilities
- * Reusable auth test components and utilities with 8-line function limit enforcement
+ * Reusable auth test components and utilities with 25-line function limit enforcement
  */
 
 import React from 'react';

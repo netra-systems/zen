@@ -1,6 +1,6 @@
 /**
  * WebSocket Component Utilities
- * Reusable WebSocket test components with 8-line function limit enforcement
+ * Reusable WebSocket test components with 25-line function limit enforcement
  */
 
 import React from 'react';

@@ -2,7 +2,7 @@
 Supply Researcher Agent
 
 Main agent class for supply research with modular operation handling.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 import json

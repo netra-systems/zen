@@ -1,7 +1,7 @@
 /**
  * Visual Regression Tests - UI Components
  * Tests all component visual snapshots with variants and states
- * Follows 8-line function rule and comprehensive coverage
+ * Follows 25-line function rule and comprehensive coverage
  * Business Impact: Prevents UI regression bugs affecting user experience
  */
 

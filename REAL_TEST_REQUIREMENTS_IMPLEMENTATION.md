@@ -87,7 +87,7 @@ This eliminates the critical violation of defining mock components inside test f
 ### Example Fixes Created
 
 1. **Function Size Fix:** `examples/test_fixes/test_health_monitoring_recovery_fixed.py`
-   - Shows how to split 32-line function into 8-line helpers
+   - Shows how to split 32-line function into 25-line helpers
    - Maintains test readability while enforcing size limits
 
 2. **Excessive Mocking Fix:** `examples/test_fixes/test_integration_real_components.py`
@@ -103,7 +103,7 @@ Large files needing modular splitting:
 - `app/tests/integration/test_multi_service_health.py` (562 lines)
 
 ### Function Size Violations (6,721 functions)
-Functions exceeding 8-line limit need helper extraction:
+Functions exceeding 25-line limit need helper extraction:
 - Test functions with complex setup/validation logic
 - Long assertion sequences
 - Multi-step integration tests

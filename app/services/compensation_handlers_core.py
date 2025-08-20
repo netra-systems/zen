@@ -1,7 +1,7 @@
 """Core compensation handlers for different operation types.
 
 Implements concrete handlers for database, filesystem, cache, and external services.
-All functions strictly adhere to 8-line limit.
+All functions strictly adhere to 25-line limit.
 """
 
 import os

@@ -2,7 +2,7 @@
 MCP Main Router
 
 Main FastAPI router for MCP endpoints with delegated handlers.
-Maintains clean API structure under 300-line limit.
+Maintains clean API structure under 450-line limit.
 """
 
 from typing import Optional

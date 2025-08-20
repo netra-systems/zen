@@ -73,8 +73,8 @@ await manager.stop_all_services()
 
 ## Architecture Compliance
 
-- **300-line limit**: Split into `real_services_manager.py` (291 lines) and `real_services_health.py` (87 lines)
-- **8-line functions**: All functions ≤8 lines (MANDATORY compliance)
+- **450-line limit**: Split into `real_services_manager.py` (291 lines) and `real_services_health.py` (87 lines)
+- **25-line functions**: All functions ≤8 lines (MANDATORY compliance)
 - **Modular design**: Separated concerns between core manager and health monitoring
 - **Type safety**: Full type annotations with runtime safety
 

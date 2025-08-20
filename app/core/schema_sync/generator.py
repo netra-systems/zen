@@ -2,7 +2,7 @@
 TypeScript Generator
 
 Generates TypeScript type definitions from schemas.
-Maintains 8-line function limit and modular design.
+Maintains 25-line function limit and modular design.
 """
 
 from typing import Dict, Any, List

@@ -36,14 +36,17 @@ class CacheManager:
     hashing, time-to-live management, and cache warming capabilities.
     """
     
-    def __init__(self, project_root: Path, cache_dir_name: str = ".dev_launcher_cache"):
+    def __init__(self, project_root: Path, cache_dir_name: str = ".dev_launcher_cache", aggressive_mode: bool = False):
         """Initialize enhanced cache manager."""
         self.project_root = project_root
         self.cache_dir = project_root / cache_dir_name
         self.cache_dir.mkdir(exist_ok=True)
+        self.aggressive_mode = aggressive_mode
         self._setup_cache_files()
         self._setup_encryption()
         self.warmer = CacheWarmer(project_root, self)
+        if aggressive_mode:
+            self._extend_cache_ttl()
 
     def _setup_cache_files(self) -> None:
         """Setup cache file structure."""
@@ -387,6 +390,44 @@ class CacheManager:
                 self._save_cache_file(self.cache_files[cache_type], entries)
         
         return removed_count
+    
+    def _extend_cache_ttl(self) -> None:
+        """Extend TTL for aggressive caching mode."""
+        for cache_type, entries in self.cache_data.items():
+            for entry in entries.values():
+                # Extend TTL to 7 days for aggressive mode
+                entry.ttl_seconds = 7 * 24 * 3600
+    
+    def enable_aggressive_caching(self) -> None:
+        """Enable aggressive caching mode for faster startup."""
+        self.aggressive_mode = True
+        self._extend_cache_ttl()
+        logger.info("Aggressive caching mode enabled")
+    
+    def is_cache_hot(self) -> bool:
+        """Check if cache is 'hot' (recently used and valid)."""
+        if not self.aggressive_mode:
+            return False
+        return self.is_cache_valid(max_age_hours=1)  # Hot if used within 1 hour
+    
+    def preload_cache_keys(self, keys: List[str]) -> Dict[str, bool]:
+        """Preload specific cache keys for aggressive mode."""
+        results = {}
+        for key in keys:
+            try:
+                # Check if key exists in any cache type
+                found = False
+                for cache_type in self.cache_data:
+                    if self.get_cache_entry(cache_type, key):
+                        results[key] = True
+                        found = True
+                        break
+                if not found:
+                    results[key] = False
+            except Exception as e:
+                logger.error(f"Failed to preload cache key {key}: {e}")
+                results[key] = False
+        return results
     
     def _create_startup_metrics_entry(
         self, startup_time: float, phase_times: Dict[str, float]

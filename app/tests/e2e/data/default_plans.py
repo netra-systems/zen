@@ -294,4 +294,4 @@ def _create_capacity_planning_risks() -> List[str]:
 
 
 # Additional step creators are implemented in plan_step_definitions.py
-# This maintains the 300-line module limit and provides modular expansion
+# This maintains the 450-line module limit and provides modular expansion

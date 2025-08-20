@@ -79,8 +79,8 @@ REFACTOR HELPER TEST:
 ## Compliance with Requirements
 
 ### SPEC/testing.xml Requirements
-1. **300-line file limit**: ✅ Detected and enforced
-2. **8-line function limit**: ✅ Detected and enforced  
+1. **450-line file limit**: ✅ Detected and enforced
+2. **25-line function limit**: ✅ Detected and enforced  
 3. **Prevent ravioli code**: ✅ Examples and guidance provided
 4. **Refactoring suggestions**: ✅ Automated suggestions implemented
 

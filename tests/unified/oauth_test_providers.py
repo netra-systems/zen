@@ -7,7 +7,7 @@ OAuth Test Data Providers - Phase 2 Unified Testing
 3. **Value Impact**: Prevents OAuth integration failures blocking enterprise deals
 4. **Revenue Impact**: Critical for $1M+ ARR enterprise customer acquisition
 
-**ARCHITECTURE:** 300-line limit, 8-line functions, focused test data provision
+**ARCHITECTURE:** 450-line limit, 25-line functions, focused test data provision
 """
 
 import uuid

@@ -2,7 +2,7 @@
 """
 Test Generator Module
 Handles automated test file generation for untested modules
-Complies with 300-line limit and 8-line function constraint
+Complies with 450-line limit and 25-line function constraint
 """
 
 from pathlib import Path

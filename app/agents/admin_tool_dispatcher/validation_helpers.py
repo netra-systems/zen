@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-18T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4 claude-sonnet-4-20250514
-# Context: Split validation helpers to maintain 300-line limit
+# Context: Split validation helpers to maintain 450-line limit
 # Git: 8-18-25-AM | Agent architecture modernization
 # Change: Create | Scope: Module | Risk: Low
 # Session: admin-tool-modernization | Seq: 6b
@@ -11,7 +11,7 @@
 """
 Validation Helper Functions Module
 
-Input validation functions extracted to maintain 300-line limit per module.
+Input validation functions extracted to maintain 450-line limit per module.
 Provides specific validation logic for each admin tool type.
 
 Business Value: Modular validation ensures scalable admin tool validation.

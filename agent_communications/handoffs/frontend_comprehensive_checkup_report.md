@@ -66,7 +66,7 @@ Four specialized agents conducted a comprehensive frontend checkup for Netra Ape
 ## Agent 4: Code Quality Audit
 **Status**: ✅ COMPLETED  
 **Compliance Score**: 67.2%  
-**Critical Violations**: 6 files exceeding 300-line limit
+**Critical Violations**: 6 files exceeding 450-line limit
 
 ### 🔴 CRITICAL Architecture Violations:
 | File | Lines | Severity |
@@ -95,7 +95,7 @@ Four specialized agents conducted a comprehensive frontend checkup for Netra Ape
 ### Enterprise Segment (Primary Target)
 **Current State**: Functional but not scalable  
 **Required Actions**:
-1. Architecture compliance (300-line limit) - **MANDATORY**
+1. Architecture compliance (450-line limit) - **MANDATORY**
 2. Type safety enforcement - **CRITICAL**
 3. Performance optimization - **HIGH**
 

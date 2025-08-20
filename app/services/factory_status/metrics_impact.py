@@ -1,7 +1,7 @@
 """Code impact metrics for AI Factory Status Report.
 
 Measures lines of code, change complexity, and module coverage.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 import math

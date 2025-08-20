@@ -1,7 +1,7 @@
 """
 Integration E2E LLM Agent Tests
 State transitions, WebSocket messaging, tool integration, and persistence tests
-Split from oversized test_llm_agent_e2e_real.py to maintain 300-line limit
+Split from oversized test_llm_agent_e2e_real.py to maintain 450-line limit
 
 BVJ:
 1. Segment: Growth & Enterprise

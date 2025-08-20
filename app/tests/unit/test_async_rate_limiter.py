@@ -34,7 +34,7 @@ def fast_limiter():
     return AsyncRateLimiter(max_calls=10, time_window=0.1)
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 async def acquire_calls(limiter, count):
     """Acquire multiple calls from limiter."""
     for _ in range(count):

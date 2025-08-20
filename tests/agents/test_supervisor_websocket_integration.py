@@ -20,6 +20,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
 from typing import Dict, Any
 
+from test_framework.mock_utils import mock_justified
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.supervisor_consolidated import SupervisorAgent
@@ -170,7 +171,7 @@ class TestSupervisorWebSocketIntegration:
         user_id = "user-updates"  
         run_id = "run-updates"
         
-        # Mock the execution helpers to track WebSocket updates
+        # Mock justification: Agent workflow execution subsystem is complex orchestration not part of WebSocket integration SUT
         with patch.object(supervisor_agent, 'workflow_executor') as mock_executor:
             mock_state = DeepAgentState(
                 user_request=user_prompt,
@@ -179,7 +180,7 @@ class TestSupervisorWebSocketIntegration:
             )
             mock_executor.execute_workflow_steps.return_value = mock_state
             
-            # Mock flow logger
+            # Mock justification: Flow logging subsystem is peripheral to WebSocket message handling SUT
             with patch.object(supervisor_agent, 'flow_logger') as mock_logger:
                 mock_logger.generate_flow_id.return_value = "flow-123"
                 mock_logger.start_flow.return_value = None
@@ -206,7 +207,7 @@ class TestSupervisorWebSocketIntegration:
             ("user3", "Message 3", "thread3", "run3")
         ]
         
-        # Mock execution helpers
+        # Mock justification: Agent workflow execution subsystem is complex orchestration not part of concurrent WebSocket SUT
         with patch.object(supervisor_agent, 'workflow_executor') as mock_executor:
             responses = []
             for i, (user_id, prompt, thread_id, run_id) in enumerate(messages):
@@ -219,7 +220,7 @@ class TestSupervisorWebSocketIntegration:
             
             mock_executor.execute_workflow_steps.side_effect = responses
             
-            # Mock flow logger for concurrent execution
+            # Mock justification: Flow logging subsystem is peripheral to concurrent WebSocket processing SUT
             with patch.object(supervisor_agent, 'flow_logger') as mock_logger:
                 mock_logger.generate_flow_id.side_effect = [f"flow-{i}" for i in range(3)]
                 mock_logger.start_flow.return_value = None
@@ -280,12 +281,12 @@ class TestSupervisorWebSocketIntegration:
         user_id = "user-disconnect"
         run_id = "run-disconnect"
         
-        # Mock workflow executor to simulate disconnection
+        # Mock justification: Agent workflow execution subsystem is not part of WebSocket disconnection handling SUT
         with patch.object(supervisor_agent, 'workflow_executor') as mock_executor:
             from starlette.websockets import WebSocketDisconnect
             mock_executor.execute_workflow_steps.side_effect = WebSocketDisconnect(code=1001, reason="Client disconnected")
             
-            # Mock flow logger
+            # Mock justification: Flow logging subsystem is peripheral to WebSocket disconnection handling SUT
             with patch.object(supervisor_agent, 'flow_logger') as mock_logger:
                 mock_logger.generate_flow_id.return_value = "flow-disconnect"
                 mock_logger.start_flow.return_value = None

@@ -13,7 +13,7 @@ The Netra Apex codebase demonstrates **30-40% AI Factory implementation** with s
 
 #### 1. Modular Agent Architecture
 - **Location**: `app/agents/`
-- **Compliance**: 95% adherence to 300-line/8-line limits
+- **Compliance**: 95% adherence to 450-line/25-line limits
 - **Business Value**: 2x development velocity improvement
 - **Components**:
   - `BaseSubAgent` - Foundation for all LLM agents
@@ -210,8 +210,8 @@ The Netra Apex codebase has solid foundations but is capturing only **30-40% of 
 ## Appendix: Compliance Status
 
 ### Architecture Compliance
-- ✅ 300-line module limit: 95% compliance
-- ✅ 8-line function limit: 92% compliance
+- ✅ 450-line module limit: 95% compliance
+- ✅ 25-line function limit: 92% compliance
 - ✅ Naming conventions: 100% compliance
 - ⚠️ AI Factory patterns: 30-40% implementation
 

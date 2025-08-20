@@ -109,7 +109,7 @@ describe('Authentication UI Tests Index', () => {
   });
 
   describe('Architecture Compliance', () => {
-    it('should maintain 8-line function limits', () => {
+    it('should maintain 25-line function limits', () => {
       // All test functions are ≤8 lines as per architecture requirements
       const testComponent = () => {
         render(<LoginButton />);

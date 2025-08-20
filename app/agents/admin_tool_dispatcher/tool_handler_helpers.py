@@ -217,7 +217,7 @@ def create_presets_list_response(presets: Any,
     return response
 
 
-# Modern execution support functions (8-line limit compliance)
+# Modern execution support functions (25-line limit compliance)
 def create_execution_result(success: bool, result: Dict[str, Any], 
                            execution_time_ms: float = 0.0) -> ExecutionResult:
     """Create ExecutionResult from helper function execution"""
@@ -231,7 +231,7 @@ def get_helper_monitor() -> ExecutionMonitor:
     return _helper_monitor
 
 
-# Internal helper functions for 8-line compliance
+# Internal helper functions for 25-line compliance
 def _create_base_corpus_params(kwargs: Dict[str, Any], domain: str, user: User) -> Dict[str, Any]:
     """Create base corpus parameters dictionary"""
     return {

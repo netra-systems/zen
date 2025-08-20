@@ -1,6 +1,6 @@
 """
 Performance Test Helpers
-Helper functions for E2E performance testing to maintain 300-line limit
+Helper functions for E2E performance testing to maintain 450-line limit
 """
 
 import asyncio

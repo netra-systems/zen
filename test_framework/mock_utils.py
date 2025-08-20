@@ -27,7 +27,7 @@ def mock_justified(reason: str) -> Callable:
             ...
     
     Examples of valid justifications:
-        - "External API not available in test environment"
+        - "External API not available in default test environment"
         - "Filesystem operations would pollute test environment"
         - "Network calls would make tests non-deterministic"
         - "Third-party service requires paid credentials"

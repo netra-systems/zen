@@ -1,6 +1,6 @@
 -- Agent and Assistant Tables
 -- Purpose: Create AI agent, assistant, thread, and message related tables
--- Module: Agents (adheres to 300-line limit)
+-- Module: Agents (adheres to 450-line limit)
 
 -- Assistants table
 CREATE TABLE IF NOT EXISTS assistants (

@@ -2,7 +2,7 @@
 Database Checks
 
 Handles database connectivity and schema validation.
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 import os

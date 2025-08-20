@@ -16,6 +16,7 @@ import time
 from typing import Dict, Any
 from unittest.mock import patch, AsyncMock
 
+from test_framework.mock_utils import mock_justified
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -235,7 +236,7 @@ class TestWebSocketMessageProcessing:
         websocket = MockWebSocket()
         connection_id = await manager.add_connection("test_user", websocket, {})
         
-        # Mock agent service processing
+        # Mock justification: Preventing actual LLM API calls in test environment during message flow testing
         with patch.object(manager, 'process_user_message') as mock_process:
             mock_process.return_value = None
             

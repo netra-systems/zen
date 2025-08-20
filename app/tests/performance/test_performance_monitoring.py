@@ -1,7 +1,7 @@
 """
 Performance Tests - Monitoring and Integration
 Tests for performance monitoring, database optimization, and integration tests.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import asyncio

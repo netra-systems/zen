@@ -1,7 +1,7 @@
 """Business reporting for ROI estimation and overall business metrics.
 
 Handles ROI calculations, innovation metrics, and overall business value.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 from typing import List

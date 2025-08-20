@@ -1,7 +1,7 @@
 """
 Helper functions for core infrastructure tests.
 Provides reusable setup, assertions, and mock creation.
-Security and logging helpers moved to core_test_security_helpers.py to maintain 300-line limit.
+Security and logging helpers moved to core_test_security_helpers.py to maintain 450-line limit.
 """
 
 import json

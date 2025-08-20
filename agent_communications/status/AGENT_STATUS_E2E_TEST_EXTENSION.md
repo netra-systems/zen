@@ -84,7 +84,7 @@
 
 ### Test Architecture:
 - All tests follow module architecture compliance (< 300 lines)
-- Functions follow 8-line limit where practical
+- Functions follow 25-line limit where practical
 - Tests use real service interactions, minimal mocking
 - Proper async/await patterns throughout
 - Comprehensive fixtures for test isolation

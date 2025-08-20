@@ -2,7 +2,7 @@
 MCP Tool Proxy Module
 
 Proxies tool execution to external MCP servers.
-Compliant with 300-line limit and 8-line function requirements.
+Compliant with 450-line limit and 25-line function requirements.
 """
 
 import json

@@ -1,7 +1,7 @@
 """PostgreSQL connection pool monitoring module.
 
 Handles connection pool metrics, monitoring, and status reporting.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from typing import Dict, Any, Optional

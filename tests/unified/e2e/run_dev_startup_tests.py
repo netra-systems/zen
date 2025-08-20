@@ -2,7 +2,7 @@
 Test runner for dev launcher startup E2E tests.
 
 Executes comprehensive startup tests with proper setup and teardown.
-Follows 300-line file limit and 8-line function limit constraints.
+Follows 450-line file limit and 25-line function limit constraints.
 """
 
 import os

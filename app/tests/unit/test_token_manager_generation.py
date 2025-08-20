@@ -1,6 +1,6 @@
 """JWT token generation and validation tests.
 
-Split from test_token_manager.py to meet 300-line architecture limit.
+Split from test_token_manager.py to meet 450-line architecture limit.
 Tests for JWT token creation, validation, and claims extraction.
 """
 
@@ -77,7 +77,7 @@ def valid_jwt_token(jwt_manager, sample_token_claims):
     return jwt.encode(sample_token_claims, secret, algorithm="HS256")
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def create_malformed_token():
     """Create malformed JWT token for testing."""
     return "invalid.jwt.token.format"

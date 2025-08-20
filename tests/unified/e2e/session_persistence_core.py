@@ -2,7 +2,7 @@
 Session Persistence Core - Core manager for Test #4
 
 Business Value: Enterprise SLA compliance through session persistence testing
-Modular design: <300 lines, 8-line functions max
+Modular design: <300 lines, 25-line functions max
 """
 
 import asyncio

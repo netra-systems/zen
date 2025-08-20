@@ -1,7 +1,7 @@
 """WebSocket Reconnection Test Methods
 
 Helper methods for reconnection testing scenarios.
-Contains decomposed test methods to comply with 8-line function limit.
+Contains decomposed test methods to comply with 25-line function limit.
 
 Business Value: Modular test methods for reliable reconnection validation
 """

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully created a comprehensive performance testing suite for corpus generation with **40 performance tests** across 4 modular test categories. All files comply with the 300-line limit and 8-line function rule.
+Successfully created a comprehensive performance testing suite for corpus generation with **40 performance tests** across 4 modular test categories. All files comply with the 450-line limit and 25-line function rule.
 
 ## Architecture Compliance ✅
 
@@ -148,7 +148,7 @@ pytest app/tests/performance/ -m performance -v
 ## Technical Highlights
 
 ### Architecture Compliance
-- Strict adherence to 300-line file limit through modular design
+- Strict adherence to 450-line file limit through modular design
 - Every function ≤8 lines with clear single responsibility
 - Full type safety with Pydantic models and type annotations
 - Proper async patterns for all I/O operations

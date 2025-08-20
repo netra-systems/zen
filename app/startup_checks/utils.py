@@ -2,7 +2,7 @@
 Startup Check Utils
 
 Utility functions for startup check execution and reporting.
-Maintains 8-line function limit and focused functionality.
+Maintains 25-line function limit and focused functionality.
 """
 
 from typing import Dict, Any

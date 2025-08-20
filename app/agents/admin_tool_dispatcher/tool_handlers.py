@@ -163,7 +163,7 @@ __all__ = [
 ]
 
 
-# Helper functions for compliance (8-line limit)
+# Helper functions for compliance (25-line limit)
 def _create_handler_context(handler, action: str, user: User, db: AsyncSession, kwargs: Dict[str, Any], prefix: str):
     """Create execution context for handler."""
     params = {'action': action, 'user': user, 'db': db, 'kwargs': kwargs}

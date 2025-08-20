@@ -11,7 +11,7 @@
   <overview>
     <description>
       This specification defines the architecture compliance reporting system
-      that enforces CLAUDE.md rules including 300-line file limits and 8-line
+      that enforces CLAUDE.md rules including 450-line file limits and 25-line
       function limits. The system provides accurate counting, smart defaults,
       and prioritized violation reporting.
     </description>

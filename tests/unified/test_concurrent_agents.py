@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Value Impact: Prevents security breaches and data leaks between customers
 - Revenue Impact: Enterprise trust required for $50K+ contracts
 
-Architecture: 300-line compliance through focused concurrent testing
+Architecture: 450-line compliance through focused concurrent testing
 """
 
 import pytest

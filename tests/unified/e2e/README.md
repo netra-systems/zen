@@ -143,8 +143,8 @@ This implementation provides comprehensive validation of Netra's concurrent user
 3. **Enhanced `database_test_connections.py`** - Real database connection management
 
 ## Architecture Compliance
-- ✅ **300-line file limit**: Both files under 300 lines
-- ✅ **8-line function limit**: All functions comply
+- ✅ **450-line file limit**: Both files under 300 lines
+- ✅ **25-line function limit**: All functions comply
 - ✅ **Modular design**: Separated core logic from test execution
 - ✅ **NO MOCKING**: Uses real database connections only
 
@@ -216,7 +216,7 @@ pytest -m "performance" tests/unified/e2e/test_cross_service_transaction.py
 ✅ **Atomic Operations** - Full transaction consistency across services  
 ✅ **Rollback Verification** - Proven rollback on mid-transaction failures  
 ✅ **Performance Compliance** - <5 second execution requirement  
-✅ **Architecture Compliance** - 300-line files, 8-line functions  
+✅ **Architecture Compliance** - 450-line files, 25-line functions  
 ✅ **Business Value** - $60K MRR data integrity protection
 
 ## Business Impact

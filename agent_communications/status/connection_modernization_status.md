@@ -3,8 +3,8 @@
 ## ULTRA DEEP THINK ANALYSIS PHASE
 
 ### Current State Analysis
-- **Current File**: `app/websocket/connection.py` - 341 lines (EXCEEDS 300-line limit)
-- **Functions**: Multiple functions exceed 8-line limit
+- **Current File**: `app/websocket/connection.py` - 341 lines (EXCEEDS 450-line limit)
+- **Functions**: Multiple functions exceed 25-line limit
 - **Architecture**: Legacy monolithic design without modern patterns
 - **Functionality**: Comprehensive WebSocket connection management
 

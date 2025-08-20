@@ -2,7 +2,7 @@
 
 Consolidated cache management for both schema-specific agent caching
 and general LLM caching with memory limits and TTL management.
-Follows 300-line limit and 8-line functions.
+Follows 450-line limit and 25-line functions.
 """
 
 import asyncio
