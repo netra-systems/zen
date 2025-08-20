@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>GCP Database Connection Failures - Backend and Auth Service</title>
+  <date>2025-08-20</date>
+  <severity>CRITICAL</severity>
+  <summary>
+    Both backend and auth services are failing database connections in GCP staging.
+    Backend: sslmode parameter incompatibility with asyncpg.
+    Auth: Password authentication failure for postgres user.
+    Root cause: Incorrect database configuration and URL parameter handling.
+  </summary>
+  
+  <issue_discovery>
+    <backend_service>
+      <symptom>Readiness probe failed: connect() got an unexpected keyword argument 'sslmode'</symptom>
+      <root_cause>Backend health check passes sslmode to asyncpg which expects 'ssl' parameter</root_cause>
+      <location>app/routes/health.py:72</location>
+    </backend_service>
+    
+    <auth_service>
+      <symptom>RuntimeError: Critical database failures: password authentication failed for user "postgres"</symptom>
+      <root_cause>Incorrect database credentials in staging secret</root_cause>
+      <additional_issue>Worker failed to boot due to database initialization failure</additional_issue>
+    </auth_service>
+  </issue_discovery>
+  
+  <current_state_analysis>
+    <database_instances>
+      <instance>
+        <name>staging-shared-postgres</name>
+        <ip>34.171.226.17</ip>
+        <connection_name>netra-staging:us-central1:staging-shared-postgres</connection_name>
+        <status>Active and configured with Cloud SQL proxy</status>
+      </instance>
+    </database_instances>
+    
+    <service_configurations>
+      <backend>
+        <service_name>netra-backend-staging</service_name>
+        <cloudsql_instances>Not configured</cloudsql_instances>
+        <database_url_secret>database-url-staging</database_url_secret>
+      </backend>
+      
+      <auth>
+        <service_name>netra-auth-service</service_name>
+        <cloudsql_instances>netra-staging:us-central1:staging-shared-postgres</cloudsql_instances>
+        <database_url_secret>database-url-staging</database_url_secret>
+      </auth>
+    </service_configurations>
+  </current_state_analysis>
+  
+  <required_fixes>
+    <fix priority="1">
+      <title>Fix Backend sslmode Parameter Handling</title>
+      <description>
+        Backend health check must convert sslmode to ssl for asyncpg.
+        The conversion should skip Unix socket connections.
+      </description>
+      <location>app/routes/health.py</location>
+      <solution>
+        Convert sslmode= to ssl= for asyncpg connections except Unix sockets.
+        Follow the pattern already used in auth service.
+      </solution>
+    </fix>
+    
+    <fix priority="2">
+      <title>Update Database URL Secret</title>
+      <description>
+        Current secret has incorrect IP and/or credentials.
+        Must use Unix socket format for Cloud SQL proxy connections.
+      </description>
+      <required_format>postgresql://netra:correct-password@/netra_staging?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres</required_format>
+      <commands>
+        <verify>gcloud secrets versions access latest --secret=database-url-staging --project=netra-staging</verify>
+        <update>echo -n "NEW_URL" | gcloud secrets versions add database-url-staging --data-file=- --project=netra-staging</update>
+      </commands>
+    </fix>
+    
+    <fix priority="3">
+      <title>Add Cloud SQL Proxy to Backend Service</title>
+      <description>
+        Backend service needs Cloud SQL proxy configuration like auth service.
+      </description>
+      <command>
+        gcloud run services update netra-backend-staging \
+          --set-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres \
+          --region=us-central1 \
+          --project=netra-staging
+      </command>
+    </fix>
+    
+    <fix priority="4">
+      <title>Verify Database User and Password</title>
+      <description>
+        Ensure postgres user exists with correct password in Cloud SQL instance.
+        Consider using netra user instead of postgres for better security.
+      </description>
+      <commands>
+        <check_users>gcloud sql users list --instance=staging-shared-postgres --project=netra-staging</check_users>
+        <reset_password>gcloud sql users set-password netra --instance=staging-shared-postgres --password=NEW_PASSWORD --project=netra-staging</reset_password>
+      </commands>
+    </fix>
+  </required_fixes>
+  
+  <implementation_plan>
+    <step number="1">
+      <action>Fix backend health check sslmode handling</action>
+      <files>app/routes/health.py, app/core/postgres.py</files>
+      <test>Verify health check passes with asyncpg connection</test>
+    </step>
+    
+    <step number="2">
+      <action>Verify correct database credentials</action>
+      <commands>
+        - Check existing users in Cloud SQL
+        - Reset password if needed
+        - Test connection with psql client
+      </commands>
+    </step>
+    
+    <step number="3">
+      <action>Update database-url-staging secret</action>
+      <format>Unix socket format with correct credentials</format>
+      <validation>Test connection from both services</validation>
+    </step>
+    
+    <step number="4">
+      <action>Configure Cloud SQL proxy for backend</action>
+      <command>Update Cloud Run service with cloudsql-instances</command>
+      <validation>Check service configuration shows Cloud SQL instance</validation>
+    </step>
+    
+    <step number="5">
+      <action>Redeploy both services</action>
+      <sequence>
+        1. Deploy backend with fixes
+        2. Deploy auth service to pick up new secret
+        3. Monitor startup logs
+        4. Verify health checks pass
+      </sequence>
+    </step>
+  </implementation_plan>
+  
+  <testing_checklist>
+    <test name="health_check_backend">
+      <endpoint>/health/ready</endpoint>
+      <expected>200 OK with database connectivity confirmed</expected>
+    </test>
+    
+    <test name="health_check_auth">
+      <endpoint>/health/ready</endpoint>
+      <expected>200 OK with database initialized</expected>
+    </test>
+    
+    <test name="database_queries">
+      <description>Verify actual database operations work</description>
+      <operations>
+        - Create a test user
+        - Query existing data
+        - Test transactions
+      </operations>
+    </test>
+  </testing_checklist>
+  
+  <monitoring>
+    <log_queries>
+      <backend_errors>
+        gcloud logging read "resource.type=cloud_run_revision AND 
+        resource.labels.service_name=netra-backend-staging AND 
+        severity>=ERROR" --limit=20 --format=json --project=netra-staging
+      </backend_errors>
+      
+      <auth_errors>
+        gcloud logging read "resource.type=cloud_run_revision AND 
+        resource.labels.service_name=netra-auth-service AND 
+        severity>=ERROR" --limit=20 --format=json --project=netra-staging
+      </auth_errors>
+    </log_queries>
+    
+    <metrics>
+      <health_check_success_rate>Monitor /health/ready success rate</health_check_success_rate>
+      <database_connection_pool>Track active connections</database_connection_pool>
+      <query_latency>Monitor database query performance</query_latency>
+    </metrics>
+  </monitoring>
+  
+  <prevention>
+    <practice>Always test database connections in staging before production</practice>
+    <practice>Use Cloud SQL proxy for all GCP deployments</practice>
+    <practice>Maintain consistent URL handling across all services</practice>
+    <practice>Document all Cloud SQL instances and their purposes</practice>
+    <practice>Use service accounts instead of user/password when possible</practice>
+  </prevention>
+</learnings>

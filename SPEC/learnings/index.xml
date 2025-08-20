@@ -123,8 +123,28 @@
         
         <category name="Database/CloudSQL" path="SPEC/learnings/cloud_sql_url_handling.xml" keywords="Cloud SQL, Database URL, Unix Socket, AsyncPG, PostgreSQL">
             <critical-takeaway>Keep database URL conversion simple - only change scheme from postgresql:// to postgresql+asyncpg://</critical-takeaway>
-            <critical-takeaway>Do NOT manipulate sslmode or other parameters - let the driver handle them</critical-takeaway>
+            <critical-takeaway>Convert sslmode= to ssl= for asyncpg (except for Unix socket connections)</critical-takeaway>
             <critical-takeaway>Cloud SQL Unix socket URLs work with format: postgresql://user:pass@/db?host=/cloudsql/project:region:instance</critical-takeaway>
+        </category>
+        
+        <category name="Database/URLConsistency" path="SPEC/learnings/database_url_consistency.xml" keywords="Database URL, Secret Management, Cloud SQL Proxy, Service Consistency">
+            <critical-takeaway>All services MUST use the same DATABASE_URL secret for consistency</critical-takeaway>
+            <critical-takeaway>When using Cloud SQL proxy, use Unix socket format not direct IP</critical-takeaway>
+            <critical-takeaway>Verify IP addresses in secrets match actual Cloud SQL instances</critical-takeaway>
+        </category>
+        
+        <category name="Frontend URL Configuration" path="SPEC/frontend_base_url_configuration.xml" keywords="Base URL, URL Construction, apiClientWrapper, Invalid URL, Frontend Config">
+            <critical-takeaway>NEVER use empty string as base URL - use window.location.origin in browser contexts</critical-takeaway>
+            <critical-takeaway>Base URL must always be a valid URL for the JavaScript URL constructor</critical-takeaway>
+            <critical-takeaway>Use window.location.origin for browser, full backend URL for SSR contexts</critical-takeaway>
+            <critical-takeaway>Validate URL construction to prevent "Failed to construct 'URL': Invalid base URL" errors</critical-takeaway>
+        </category>
+        
+        <category name="GCP Database Connection Failures" path="SPEC/learnings/gcp_database_connection_failures.xml" keywords="GCP, Database, Connection, sslmode, asyncpg, Cloud SQL, Authentication">
+            <critical-takeaway>Backend health checks must convert sslmode= to ssl= for asyncpg connections</critical-takeaway>
+            <critical-takeaway>Use Unix socket format for Cloud SQL proxy connections: postgresql://user:pass@/db?host=/cloudsql/instance</critical-takeaway>
+            <critical-takeaway>Both backend and auth services must have Cloud SQL proxy configured</critical-takeaway>
+            <critical-takeaway>Verify database credentials match actual Cloud SQL users and passwords</critical-takeaway>
         </category>
     </categories>
 </specification>

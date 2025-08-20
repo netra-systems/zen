@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+  <metadata>
+    <title>Frontend Base URL Configuration Specification</title>
+    <version>1.0.0</version>
+    <created>2025-08-20</created>
+    <purpose>
+      Define the correct configuration and handling of base URLs in the frontend application
+      to prevent "Invalid base URL" errors and ensure robust API communication.
+    </purpose>
+    <cross-references>
+      <ref>SPEC/cors_configuration.xml</ref>
+      <ref>SPEC/dev_environment.xml</ref>
+      <ref>SPEC/staging_environment.xml</ref>
+      <ref>SPEC/learnings/auth.xml</ref>
+      <ref>SPEC/learnings/frontend.xml</ref>
+      <ref>SPEC/learnings/environment_detection.xml</ref>
+    </cross-references>
+  </metadata>
+
+  <problem-statement>
+    <issue>
+      Frontend applications encounter "Failed to construct 'URL': Invalid base URL" errors
+      when attempting to make API calls through apiClientWrapper.
+    </issue>
+    <root-cause>
+      The apiClientWrapper sets baseURL to an empty string ('') in browser contexts,
+      which is not a valid base URL for the JavaScript URL constructor.
+    </root-cause>
+    <impact>
+      - API calls fail completely
+      - Thread loading fails
+      - WebSocket connections cannot be established
+      - Authentication flows break
+      - Overall application functionality is severely degraded
+    </impact>
+  </problem-statement>
+
+  <requirements>
+    <requirement id="REQ-001">
+      <description>Base URL must always be a valid URL string in all contexts</description>
+      <priority>CRITICAL</priority>
+    </requirement>
+    <requirement id="REQ-002">
+      <description>Support relative URLs for API calls through Next.js proxy</description>
+      <priority>HIGH</priority>
+    </requirement>
+    <requirement id="REQ-003">
+      <description>Maintain compatibility with existing proxy patterns</description>
+      <priority>HIGH</priority>
+    </requirement>
+    <requirement id="REQ-004">
+      <description>Properly handle different environments (development, staging, production)</description>
+      <priority>HIGH</priority>
+    </requirement>
+    <requirement id="REQ-005">
+      <description>Prevent mixed content errors (HTTP/HTTPS)</description>
+      <priority>HIGH</priority>
+    </requirement>
+    <requirement id="REQ-006">
+      <description>Support server-side rendering (SSR) contexts</description>
+      <priority>MEDIUM</priority>
+    </requirement>
+  </requirements>
+
+  <solution-architecture>
+    <principle>
+      Use window.location.origin as the base URL in browser contexts to ensure
+      valid URL construction while maintaining relative path behavior.
+    </principle>
+    
+    <base-url-resolution>
+      <browser-context>
+        <description>
+          In browser contexts, use window.location.origin as the base URL.
+          This provides a valid base URL while maintaining relative path behavior
+          through the Next.js proxy.
+        </description>
+        <implementation>
+          this.baseURL = typeof window !== 'undefined' 
+            ? window.location.origin 
+            : secureApiConfig.apiUrl;
+        </implementation>
+      </browser-context>
+      
+      <server-context>
+        <description>
+          In server-side contexts (SSR), use the full backend URL from configuration.
+        </description>
+        <implementation>
+          this.baseURL = secureApiConfig.apiUrl; // Full backend URL
+        </implementation>
+      </server-context>
+    </base-url-resolution>
+
+    <url-construction>
+      <pattern>
+        Always use the URL constructor with proper base URL:
+        const fullUrl = new URL(url, this.baseURL);
+      </pattern>
+      <validation>
+        - Ensure url parameter can be relative or absolute
+        - Handle leading slashes appropriately
+        - Validate constructed URL before making requests
+      </validation>
+    </url-construction>
+
+    <environment-specific-configuration>
+      <development>
+        <base-url>http://localhost:3000</base-url>
+        <api-proxy>/api → http://localhost:8000</api-proxy>
+        <auth-proxy>/auth → http://localhost:8081</auth-proxy>
+      </development>
+      <staging>
+        <base-url>https://app.staging.netrasystems.ai</base-url>
+        <api-proxy>/api → https://api.staging.netrasystems.ai</api-proxy>
+        <auth-proxy>/auth → https://auth.staging.netrasystems.ai</auth-proxy>
+      </staging>
+      <production>
+        <base-url>https://app.netrasystems.ai</base-url>
+        <api-proxy>/api → https://api.netrasystems.ai</api-proxy>
+        <auth-proxy>/auth → https://auth.netrasystems.ai</auth-proxy>
+      </production>
+    </environment-specific-configuration>
+  </solution-architecture>
+
+  <implementation-checklist>
+    <item priority="1">
+      <file>frontend/services/apiClientWrapper.ts</file>
+      <change>
+        Update constructor to use window.location.origin instead of empty string
+      </change>
+      <code>
+        constructor() {
+          this.baseURL = typeof window !== 'undefined' 
+            ? window.location.origin 
+            : secureApiConfig.apiUrl;
+          this.checkConnection();
+        }
+      </code>
+    </item>
+    
+    <item priority="2">
+      <file>frontend/services/apiClientWrapper.ts</file>
+      <change>
+        Add URL validation before requests
+      </change>
+      <code>
+        private validateUrl(url: string): string {
+          // Remove double slashes except after protocol
+          return url.replace(/([^:]\/)\/+/g, "$1");
+        }
+      </code>
+    </item>
+    
+    <item priority="3">
+      <file>frontend/lib/secure-api-config.ts</file>
+      <change>
+        Export helper function for getting base URL
+      </change>
+      <code>
+        export const getBaseUrl = (): string => {
+          if (typeof window !== 'undefined') {
+            return window.location.origin;
+          }
+          // SSR context
+          return process.env.NEXT_PUBLIC_APP_URL || 
+                 (process.env.NEXT_PUBLIC_ENVIRONMENT === 'production' 
+                   ? 'https://app.netrasystems.ai'
+                   : process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
+                   ? 'https://app.staging.netrasystems.ai'
+                   : 'http://localhost:3000');
+        };
+      </code>
+    </item>
+    
+    <item priority="4">
+      <file>frontend/services/url-sync/utils.ts</file>
+      <change>
+        Update URL construction to use window.location.origin
+      </change>
+      <code>
+        export const createUrlWithThread = (threadId: string | null, config: UrlSyncConfig): string => {
+          const url = new URL(config.basePath, window.location.origin);
+          if (threadId) {
+            url.searchParams.set(config.paramName, threadId);
+          }
+          return url.toString();
+        };
+      </code>
+    </item>
+    
+    <item priority="5">
+      <file>frontend/.env.example</file>
+      <change>
+        Add NEXT_PUBLIC_APP_URL for SSR contexts
+      </change>
+      <code>
+        # Application base URL (used in SSR contexts)
+        NEXT_PUBLIC_APP_URL=http://localhost:3000
+      </code>
+    </item>
+  </implementation-checklist>
+
+  <testing-requirements>
+    <test-scenario id="TEST-001">
+      <name>Browser Context URL Construction</name>
+      <steps>
+        1. Load application in browser
+        2. Verify window.location.origin is used as base URL
+        3. Make API call to relative path (e.g., '/api/threads')
+        4. Verify URL is correctly constructed
+      </steps>
+      <expected>API calls succeed with proper URL construction</expected>
+    </test-scenario>
+    
+    <test-scenario id="TEST-002">
+      <name>SSR Context URL Construction</name>
+      <steps>
+        1. Render page on server
+        2. Verify configured backend URL is used
+        3. Make API call during SSR
+        4. Verify URL is correctly constructed
+      </steps>
+      <expected>SSR API calls use full backend URL</expected>
+    </test-scenario>
+    
+    <test-scenario id="TEST-003">
+      <name>Environment-Specific URLs</name>
+      <steps>
+        1. Test in development environment
+        2. Test in staging environment
+        3. Test in production environment
+      </steps>
+      <expected>Each environment uses correct base URLs and proxies</expected>
+    </test-scenario>
+  </testing-requirements>
+
+  <edge-cases>
+    <case id="EDGE-001">
+      <description>URL with double slashes</description>
+      <input>/api//threads</input>
+      <expected-output>http://localhost:3000/api/threads</expected-output>
+    </case>
+    
+    <case id="EDGE-002">
+      <description>Absolute URL passed to API client</description>
+      <input>https://external-api.com/endpoint</input>
+      <expected-output>https://external-api.com/endpoint</expected-output>
+    </case>
+    
+    <case id="EDGE-003">
+      <description>URL without leading slash</description>
+      <input>api/threads</input>
+      <expected-output>http://localhost:3000/api/threads</expected-output>
+    </case>
+    
+    <case id="EDGE-004">
+      <description>WebSocket URL construction</description>
+      <input>ws://localhost:8000/ws</input>
+      <expected-output>ws://localhost:8000/ws (unchanged for WebSocket)</expected-output>
+    </case>
+  </edge-cases>
+
+  <monitoring-and-debugging>
+    <logging>
+      <item>Log base URL on initialization</item>
+      <item>Log constructed URLs before requests</item>
+      <item>Log any URL construction errors</item>
+    </logging>
+    <debugging>
+      <item>Add debug mode to output URL construction details</item>
+      <item>Provide clear error messages for URL construction failures</item>
+    </debugging>
+  </monitoring-and-debugging>
+
+  <rollback-plan>
+    <step>1. If issues arise, temporarily hardcode base URLs per environment</step>
+    <step>2. Use environment variables as immediate fallback</step>
+    <step>3. Maintain backward compatibility with existing proxy patterns</step>
+  </rollback-plan>
+
+  <future-considerations>
+    <consideration>
+      Consider implementing a URL builder service that centralizes all URL construction logic
+    </consideration>
+    <consideration>
+      Evaluate using a configuration service that provides URLs dynamically based on environment
+    </consideration>
+    <consideration>
+      Consider implementing automatic retry with different URL patterns on failure
+    </consideration>
+  </future-considerations>
+</specification>

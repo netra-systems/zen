@@ -84,6 +84,23 @@ export const getSecureApiConfig = (): ApiConfig => {
   };
 };
 
+/**
+ * Gets the base URL for the frontend application
+ * Provides a centralized way to get the base URL that can be reused across the application
+ */
+export const getBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  // SSR context
+  return process.env.NEXT_PUBLIC_APP_URL || 
+         (process.env.NEXT_PUBLIC_ENVIRONMENT === 'production' 
+           ? 'https://app.netrasystems.ai'
+           : process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging'
+           ? 'https://app.staging.netrasystems.ai'
+           : 'http://localhost:3000');
+};
+
 // Export singleton instance
 export const secureApiConfig = getSecureApiConfig();
 
