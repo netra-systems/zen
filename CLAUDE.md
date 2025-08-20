@@ -40,7 +40,7 @@ We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclom
 *   **Module Guidelines:** Aim for focused modules (approx. <500 lines). Modules should be testable units.
 *   **The Standard:** Exceeding these guidelines is a signal to reassess the design for SRP adherence and complexity reduction. Maintain readable, cohesive structures, ensuring clarity over fragmentation (ravioli code).
 * Only take on as much work as you can do. If the work is too big sub divide the work.
-As needed make plans and spawn agents with fresh context windows to work on it. 
+As needed make plans and spawn agents with fresh context windows to work on it.
 Always keep the overall context of the scope in mind and only report on your success relative to that gobal context. If you are running out capacity to work then save a report of your progress so far and next steps needed.
 
 ### 2.3. Code Quality Standards
@@ -59,6 +59,15 @@ We cannot optimize what we do not measure. The system must be observable by desi
 *   **SLIs/SLOs/SLAs:** Define Service Level Indicators (SLIs) and Objectives (SLOs) for all critical services, mapping directly to customer-facing SLAs.
 *   **Error Budgets:** Utilize error budgets to balance innovation velocity with stability. If an SLO is breached, development focus MUST shift to restoring stability before shipping new features.
 *   **Actionable Alerting:** Alerts must be directly linked to SLO breaches, minimize noise, and have a corresponding runbook.
+
+### 2.6. Pragmatic Rigor and Resilience
+
+We value high standards, but they must serve business velocity and system stability. Standards must be functional and resilient, not theoretical and brittle.
+
+*   **The Anti-Pattern (The Brittle Standard):** An "over-eager engineer" mentality often prioritizes the strictest possible interpretation of a standard (local optimization for purity). This frequently leads to brittleness, where minor deviations in interconnected systems cause cascading failures. This pattern is the root cause of many operational issues.
+*   **Pragmatic Rigor:** Rigor ensures correctness and stability; it is distinct from rigidity. We apply standards intelligently, focusing on the minimum constraints necessary for correctness, rather than the maximum constraints possible for purity.
+*   **Default to Resilience (Relaxed Configuration):** Systems, configurations, and validation logic should default to a functional, permissive state. Strictness (e.g., for security or compliance) should be progressively enhanced only where explicitly required.
+*   **Application:** Adhere to Postel's Law: "Be conservative in what you send, and liberal in what you accept." When designing interfaces or validation, accommodate valid variations to ensure interoperability and prevent accidental breakage when integrating with diverse systems.
 
 ## 3. The Development Process: Structured Analysis
 
@@ -79,7 +88,16 @@ Before implementation, execute a structured analysis. Prioritize concise, critic
 *   **Testing Focus:** Use real tests with minimal mocks. Real > Mock. E2E > Integration > Unit.
 *   **Reporting:** Be measured, accurate, and contextually precise in reporting.
 
-### 3.3. Bug Fixing: Test-Driven Correction (TDC)
+### 3.3. Multi-Environment Validation
+
+Code is not validated until it has been tested in environments mirroring the production topology. Local testing (using isolated test configurations) is insufficient for guaranteeing interoperability, catching configuration drift, and ensuring stability.
+
+*   **Mandatory Validation Pipeline:** The development and deployment process MUST include validation across distinct environments:
+    1.  **Local/Test Config (CI):** Initial unit and integration tests for fast feedback.
+    2.  **Development Environment (Dev):** Run applicable tests (integration/E2E) against the Dev environment to validate interoperability with the current state of trunk services and development configurations.
+    3.  **Staging Environment (Staging):** Run applicable tests (critical E2E/smoke tests) against the Staging environment for pre-production verification and validation of production-like configuration.
+
+### 3.4. Bug Fixing: Test-Driven Correction (TDC)
 
 When addressing bugs, understand the required behavior objectively. Focus on satisfying a precise, verifiable constraint.
 
@@ -88,7 +106,7 @@ When addressing bugs, understand the required behavior objectively. Focus on sat
     *   *Example Prompt:* "The `calculate_discount` function diverges from requirements when a user has a loyalty card but zero previous purchases. Write a unit test that specifically asserts the correct behavior (a 10% discount) in this scenario. This test should currently expose the discrepancy."
 3.  **Surgical Strike:** Identify the exact code block requiring correction and explicitly define the boundaries of the required changes. Changes must be scoped to either unified system-wide fixes or surgical isolated fixes.
 4.  **Prioritize Discovery:** When the solution requires investigation, use search tools (codebase, web, XMLs) to understand the context thoroughly before hypothesizing a fix.
-5.  **Verification:** All bug fixes require a dedicated Quality Assurance review, full regression testing, and updates to the learnings xml and spec.
+5.  **Verification:** All bug fixes require a dedicated Quality Assurance review, full regression testing (including Dev/Staging validation per 3.3), and updates to the learnings xml and spec.
 
 ## 4. Knowledge Management: The Living Source of Truth
 
@@ -160,21 +178,21 @@ See [`SPEC/ai_factory_patterns.xml`](SPEC/ai_factory_patterns.xml) for detailed 
 ### 6.1. Quick Start
 ```bash
 python scripts/dev_launcher.py
-python test_runner.py
+python -m test_framework.test_runner
 ```
 
 ### 6.2. Unified Test Runner
 → See [`SPEC/test_runner_guide.xml`](SPEC/test_runner_guide.xml).
 
-*   **DEFAULT (Fast Feedback):** `python test_runner.py --level integration --no-coverage --fast-fail`
-*   **AGENT CHANGES:** `python test_runner.py --level agents --real-llm`
-*   **BEFORE RELEASES:** `python test_runner.py --level integration --real-llm`
+*   **DEFAULT (Fast Feedback):** `python -m test_framework.test_runner --level integration --no-coverage --fast-fail`
+*   **AGENT CHANGES:** `python -m test_framework.test_runner --level agents --real-llm`
+*   **BEFORE RELEASES (Includes Staging Validation):** `python -m test_framework.test_runner --level integration --real-llm --env staging`
 
 ### 6.3. Deployment (GCP Staging)
 → See [`SPEC/learnings/deployment_staging.xml`](SPEC/learnings/deployment_staging.xml).
 
-*   **Quick Deploy**: `python deploy_staging_reliable.py`
-*   **Auth Issues**: `python setup_staging_auth.py --force-new-key`
+*   **Quick Deploy**: `python organized_root/deployment_configs/deploy_staging.py`
+*   **Auth Issues**: `python organized_root/deployment_configs/setup_staging_auth.py --force-new-key`
 
 ## 7. Critical Specifications Reference
 
@@ -210,9 +228,10 @@ Ensure adherence to these core specifications throughout the development process
 1.  **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related insights FIRST.
 2.  **VERIFY** String literals using `python scripts/query_string_literals.py validate "literal_value"` to prevent hallucination.
 3.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-4.  **RUN** `python test_runner.py --level integration --no-coverage --fast-fail`.
-5.  **UPDATE** specs and documentation to reflect the implemented reality.
-6.  **REFRESH** String literals index if adding new constants: `python scripts/scan_string_literals.py`
+4.  **RUN** `python -m test_framework.test_runner --level integration --no-coverage --fast-fail`.
+5.  **VALIDATE** changes in Dev and Staging environments as required (See 3.3).
+6.  **UPDATE** specs and documentation to reflect the implemented reality.
+7.  **REFRESH** String literals index if adding new constants: `python scripts/scan_string_literals.py`
 
 ### Key Patterns
 *   Type Safety (See specs)
