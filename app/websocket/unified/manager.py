@@ -133,6 +133,10 @@ class UnifiedWebSocketManager:
     def _initialize_telemetry(self) -> None:
         """Initialize real-time telemetry tracking."""
         self.telemetry = self._create_telemetry_config()
+        # Initialize transactional message tracking
+        self.pending_messages: Dict[str, Dict[str, Any]] = {}
+        self.sending_messages: Dict[str, Dict[str, Any]] = {}
+        self.message_lock = asyncio.Lock()
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish WebSocket connection with circuit breaker protection."""
@@ -205,11 +209,32 @@ class UnifiedWebSocketManager:
     async def send_message_to_user(self, user_id: str, 
                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
                                   retry: bool = True) -> bool:
-        """Send message to user through unified messaging system."""
-        result = await self.messaging.send_to_user(user_id, message, retry)
-        if result:
-            self.telemetry["messages_sent"] += 1
-        return result
+        """Send message to user through unified messaging system with transactional processing."""
+        # Mark message as sending before attempting to send (transactional pattern)
+        message_id = f"msg_{user_id}_{int(time.time() * 1000)}"
+        
+        try:
+            # Track message as 'sending' before actual send
+            await self._mark_message_sending(message_id, user_id, message)
+            
+            # Attempt to send message
+            result = await self.messaging.send_to_user(user_id, message, retry)
+            
+            if result:
+                # Only mark as sent on confirmed success
+                await self._mark_message_sent(message_id)
+                self.telemetry["messages_sent"] += 1
+                return True
+            else:
+                # Revert to pending if send failed
+                await self._mark_message_pending(message_id, user_id, message)
+                return False
+                
+        except Exception as e:
+            # Revert to pending on exception
+            await self._mark_message_pending(message_id, user_id, message)
+            logger.error(f"Transactional message send failed for {user_id}: {e}")
+            raise
 
     async def broadcast_to_job(self, job_id: str, 
                               message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
@@ -336,9 +361,96 @@ class UnifiedWebSocketManager:
     async def shutdown(self) -> None:
         """Gracefully shutdown unified WebSocket manager."""
         logger.info("Starting unified WebSocket manager shutdown...")
+        
+        # Handle any pending messages before shutdown
+        async with self.message_lock:
+            if self.pending_messages or self.sending_messages:
+                logger.warning(f"Shutting down with {len(self.pending_messages)} pending and {len(self.sending_messages)} sending messages")
+        
         await self.state.persist_state()
         await self.connection_manager.shutdown()
         logger.info(f"Unified shutdown complete. Final telemetry: {self.telemetry}")
+
+    # Transactional message processing methods
+    async def _mark_message_sending(self, message_id: str, user_id: str, 
+                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> None:
+        """Mark message as currently being sent (transactional pattern)."""
+        async with self.message_lock:
+            message_data = {
+                "message_id": message_id,
+                "user_id": user_id,
+                "message": message,
+                "timestamp": time.time(),
+                "status": "sending"
+            }
+            self.sending_messages[message_id] = message_data
+            # Remove from pending if it was there
+            self.pending_messages.pop(message_id, None)
+
+    async def _mark_message_sent(self, message_id: str) -> None:
+        """Mark message as successfully sent and remove from tracking."""
+        async with self.message_lock:
+            self.sending_messages.pop(message_id, None)
+            # Message successfully sent, no need to track further
+
+    async def _mark_message_pending(self, message_id: str, user_id: str, 
+                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> None:
+        """Mark message as pending for retry (transactional pattern)."""
+        async with self.message_lock:
+            message_data = {
+                "message_id": message_id,
+                "user_id": user_id,
+                "message": message,
+                "timestamp": time.time(),
+                "status": "pending",
+                "retry_count": self.sending_messages.get(message_id, {}).get("retry_count", 0) + 1
+            }
+            self.pending_messages[message_id] = message_data
+            # Remove from sending
+            self.sending_messages.pop(message_id, None)
+
+    async def _retry_pending_messages(self) -> None:
+        """Retry all pending messages that failed to send."""
+        async with self.message_lock:
+            pending_to_retry = list(self.pending_messages.items())
+        
+        retry_count = 0
+        for message_id, message_data in pending_to_retry:
+            if message_data["retry_count"] < 3:  # Max 3 retries
+                try:
+                    result = await self.send_message_to_user(
+                        message_data["user_id"], 
+                        message_data["message"], 
+                        retry=False  # Prevent infinite recursion
+                    )
+                    if result:
+                        retry_count += 1
+                except Exception as e:
+                    logger.error(f"Retry failed for message {message_id}: {e}")
+            else:
+                # Max retries exceeded, remove from pending
+                async with self.message_lock:
+                    self.pending_messages.pop(message_id, None)
+                logger.error(f"Message {message_id} exceeded max retries, dropping")
+        
+        if retry_count > 0:
+            logger.info(f"Successfully retried {retry_count} pending messages")
+
+    async def get_transactional_stats(self) -> Dict[str, Any]:
+        """Get statistics about transactional message processing."""
+        async with self.message_lock:
+            return {
+                "pending_messages": len(self.pending_messages),
+                "sending_messages": len(self.sending_messages),
+                "oldest_pending": min(
+                    [msg["timestamp"] for msg in self.pending_messages.values()], 
+                    default=time.time()
+                ),
+                "oldest_sending": min(
+                    [msg["timestamp"] for msg in self.sending_messages.values()], 
+                    default=time.time()
+                )
+            }
 
     # Legacy compatibility methods (delegate to unified modules)
     async def send_error_to_user(self, user_id: str, error_message: str, 

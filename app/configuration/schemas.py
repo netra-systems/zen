@@ -10,6 +10,9 @@ from pydantic import BaseModel, Field
 from app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
 from app.schemas.registry import User
 from app.schemas.llm_types import LLMProvider
+from app.core.environment_constants import (
+    Environment, EnvironmentVariables, get_current_project_id, get_current_environment
+)
 
 
 class ClickHouseCredentials(BaseModel):
@@ -24,9 +27,7 @@ class SecretReference(BaseModel):
     name: str
     target_field: str
     target_models: Optional[List[str]] = None
-    project_id: str = Field(default_factory=lambda: os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                                                                   os.environ.get("SECRET_MANAGER_PROJECT_ID", 
-                                                                   "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870")))
+    project_id: str = Field(default_factory=get_current_project_id)
     version: str = "latest"
 
 
@@ -135,7 +136,7 @@ class WebSocketConfig(BaseModel):
 class AppConfig(BaseModel):
     """Base configuration class."""
 
-    environment: str = "development"
+    environment: str = Environment.DEVELOPMENT.value
     app_name: str = "netra"  # Application name for identification
     google_cloud: GoogleCloudConfig = GoogleCloudConfig()
     oauth_config: OAuthConfig = Field(default_factory=OAuthConfig)
@@ -333,7 +334,7 @@ class DevelopmentConfig(AppConfig):
     
     def _load_database_url(self, data: dict, os_module) -> None:
         """Load database URL from environment - always prefer environment over defaults."""
-        env_db_url = os_module.environ.get('DATABASE_URL')
+        env_db_url = os_module.environ.get(EnvironmentVariables.DATABASE_URL)
         if env_db_url:
             data['database_url'] = env_db_url
         elif 'database_url' not in data or data.get('database_url') is None:
@@ -343,19 +344,19 @@ class DevelopmentConfig(AppConfig):
     def _get_service_modes(self, os_module) -> dict:
         """Get service modes from environment variables."""
         return {
-            'redis': os_module.environ.get("REDIS_MODE", "shared").lower(),
-            'clickhouse': os_module.environ.get("CLICKHOUSE_MODE", "shared").lower(),
-            'llm': os_module.environ.get("LLM_MODE", "shared").lower()
+            'redis': os_module.environ.get(EnvironmentVariables.REDIS_MODE, "shared").lower(),
+            'clickhouse': os_module.environ.get(EnvironmentVariables.CLICKHOUSE_MODE, "shared").lower(),
+            'llm': os_module.environ.get(EnvironmentVariables.LLM_MODE, "shared").lower()
         }
     
     def _load_clickhouse_config(self, data: dict, os_module) -> None:
         """Load ClickHouse configuration from environment variables."""
-        ch_host = os_module.environ.get('CLICKHOUSE_HOST', 'localhost')
-        ch_http_port = int(os_module.environ.get('CLICKHOUSE_HTTP_PORT', '8123'))
-        ch_native_port = int(os_module.environ.get('CLICKHOUSE_NATIVE_PORT', '9000'))
-        ch_user = os_module.environ.get('CLICKHOUSE_USER', 'default')
-        ch_password = os_module.environ.get('CLICKHOUSE_PASSWORD', '')
-        ch_db = os_module.environ.get('CLICKHOUSE_DB', 'default')
+        ch_host = os_module.environ.get(EnvironmentVariables.CLICKHOUSE_HOST, 'localhost')
+        ch_http_port = int(os_module.environ.get(EnvironmentVariables.CLICKHOUSE_HTTP_PORT, '8123'))
+        ch_native_port = int(os_module.environ.get(EnvironmentVariables.CLICKHOUSE_NATIVE_PORT, '9000'))
+        ch_user = os_module.environ.get(EnvironmentVariables.CLICKHOUSE_USER, 'default')
+        ch_password = os_module.environ.get(EnvironmentVariables.CLICKHOUSE_PASSWORD, '')
+        ch_db = os_module.environ.get(EnvironmentVariables.CLICKHOUSE_DB, 'default')
         
         # ALWAYS override ClickHouse configs with env values
         # Do NOT check if already exists - parent class sets placeholders
@@ -377,7 +378,7 @@ class DevelopmentConfig(AppConfig):
     
     def _load_redis_config(self, data: dict, os_module) -> None:
         """Load Redis configuration from environment variables."""
-        redis_url = os_module.environ.get('REDIS_URL')
+        redis_url = os_module.environ.get(EnvironmentVariables.REDIS_URL)
         if redis_url:
             # Parse Redis URL if provided
             from urllib.parse import urlparse
@@ -387,9 +388,9 @@ class DevelopmentConfig(AppConfig):
             redis_password = parsed.password
         else:
             # Use individual env vars
-            redis_host = os_module.environ.get('REDIS_HOST', 'localhost')
-            redis_port = int(os_module.environ.get('REDIS_PORT', '6379'))
-            redis_password = os_module.environ.get('REDIS_PASSWORD')
+            redis_host = os_module.environ.get(EnvironmentVariables.REDIS_HOST, 'localhost')
+            redis_port = int(os_module.environ.get(EnvironmentVariables.REDIS_PORT, '6379'))
+            redis_password = os_module.environ.get(EnvironmentVariables.REDIS_PASSWORD)
         
         # ALWAYS override Redis config with env values
         # Do NOT check if already exists - parent class sets placeholders
@@ -438,14 +439,14 @@ class DevelopmentConfig(AppConfig):
 
 class ProductionConfig(AppConfig):
     """Production-specific settings."""
-    environment: str = "production"
+    environment: str = Environment.PRODUCTION.value
     debug: bool = False
     log_level: str = "INFO"
 
 
 class StagingConfig(AppConfig):
     """Staging-specific settings."""
-    environment: str = "staging"
+    environment: str = Environment.STAGING.value
     debug: bool = False
     log_level: str = "INFO"
     # Staging uses production-like settings but with relaxed validation
@@ -454,13 +455,13 @@ class StagingConfig(AppConfig):
         """Initialize staging config with environment variables."""
         import os
         # Load database URL from environment if not provided
-        if 'database_url' not in data and os.environ.get('DATABASE_URL'):
-            data['database_url'] = os.environ.get('DATABASE_URL')
+        if 'database_url' not in data and os.environ.get(EnvironmentVariables.DATABASE_URL):
+            data['database_url'] = os.environ.get(EnvironmentVariables.DATABASE_URL)
         super().__init__(**data)
     
 
 class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
-    environment: str = "testing"
+    environment: str = Environment.TESTING.value
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
     auth_service_url: str = "http://localhost:8001"

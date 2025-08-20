@@ -4,7 +4,14 @@ import logging
 from typing import Optional
 from pathlib import Path
 
-from dev_launcher.discovery import ServiceDiscovery
+try:
+    from dev_launcher.discovery import ServiceDiscovery
+    HAS_DEV_LAUNCHER = True
+except ImportError:
+    # Fallback for environments without dev_launcher
+    ServiceDiscovery = None
+    HAS_DEV_LAUNCHER = False
+
 from .auth_client import AuthTestClient
 from .backend_client import BackendTestClient
 from .websocket_client import WebSocketTestClient
@@ -21,7 +28,14 @@ class TestClientFactory:
         Args:
             discovery: Service discovery instance. Creates default if not provided.
         """
-        self.discovery = discovery or ServiceDiscovery()
+        if discovery is not None:
+            self.discovery = discovery
+        elif HAS_DEV_LAUNCHER and ServiceDiscovery is not None:
+            self.discovery = ServiceDiscovery()
+        else:
+            # Fallback for environments without dev_launcher
+            self.discovery = None
+            
         self._auth_client: Optional[AuthTestClient] = None
         self._backend_client: Optional[BackendTestClient] = None
         
@@ -32,9 +46,16 @@ class TestClientFactory:
             AuthTestClient connected to the real auth service
         """
         if not self._auth_client:
-            info = await self.discovery.get_service_info("auth")
-            self._auth_client = AuthTestClient(base_url=info.base_url)
-            logger.info(f"Created auth client for {info.base_url}")
+            if self.discovery is not None:
+                info = await self.discovery.get_service_info("auth")
+                base_url = info.base_url
+            else:
+                # Fallback URL when discovery is unavailable
+                base_url = "http://localhost:8001"
+                logger.warning("Using fallback auth URL - dev_launcher discovery unavailable")
+                
+            self._auth_client = AuthTestClient(base_url=base_url)
+            logger.info(f"Created auth client for {base_url}")
             
         return self._auth_client
         
@@ -47,9 +68,16 @@ class TestClientFactory:
         Returns:
             BackendTestClient connected to the real backend service
         """
-        info = await self.discovery.get_service_info("backend")
-        client = BackendTestClient(base_url=info.base_url, token=token)
-        logger.info(f"Created backend client for {info.base_url}")
+        if self.discovery is not None:
+            info = await self.discovery.get_service_info("backend")
+            base_url = info.base_url
+        else:
+            # Fallback URL when discovery is unavailable
+            base_url = "http://localhost:8000"
+            logger.warning("Using fallback backend URL - dev_launcher discovery unavailable")
+            
+        client = BackendTestClient(base_url=base_url, token=token)
+        logger.info(f"Created backend client for {base_url}")
         return client
         
     async def create_websocket_client(self, token: str) -> WebSocketTestClient:
@@ -61,7 +89,13 @@ class TestClientFactory:
         Returns:
             WebSocketTestClient configured for real WebSocket connection
         """
-        ws_url = await self.discovery.get_websocket_url("backend", token=token)
+        if self.discovery is not None:
+            ws_url = await self.discovery.get_websocket_url("backend", token=token)
+        else:
+            # Fallback URL when discovery is unavailable
+            ws_url = f"ws://localhost:8000/websocket?token={token}"
+            logger.warning("Using fallback WebSocket URL - dev_launcher discovery unavailable")
+            
         client = WebSocketTestClient(url=ws_url)
         logger.info(f"Created WebSocket client for {ws_url}")
         return client

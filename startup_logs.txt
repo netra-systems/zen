@@ -1,0 +1,113 @@
+11:02:35 | [37mINFO[0m | Signal handlers registered for graceful shutdown
+11:02:35 | [37mINFO[0m | ======================================================================
+11:02:35 | [37mINFO[0m | [SECRET LOADER] Local-First Environment Loading
+11:02:35 | [37mINFO[0m | ======================================================================
+11:02:35 | [37mINFO[0m | GSM Fallback: DISABLED (use --load-secrets to enable)
+11:02:35 | [37mINFO[0m | 
+[CACHE] Checking for cached secrets...
+11:02:35 | [37mINFO[0m |   [MISS] Cache miss, loading from files
+11:02:35 | [37mINFO[0m | 
+[LOCAL SECRETS] Loading with fallback chain...
+11:02:35 | [37mINFO[0m |   [ENV] Loaded 42 from .env
+11:02:35 | [37mINFO[0m |   [LOCAL] Loaded 13 from .env.local
+11:02:35 | [37mINFO[0m |   [OS] Found 24 in OS environment
+11:02:35 | [37mINFO[0m | 
+[INTERPOLATION] Resolving variable references...
+11:02:35 | [37mINFO[0m | 
+[RESULTS] Loaded 48 secrets total
+11:02:35 | [33mWARNING[0m |   [MISSING] 3 required secrets:
+11:02:35 | [33mWARNING[0m |     - CLICKHOUSE_DEFAULT_PASSWORD
+11:02:35 | [33mWARNING[0m |     - CLICKHOUSE_DEVELOPMENT_PASSWORD
+11:02:35 | [33mWARNING[0m |     - REDIS_PASSWORD
+11:02:35 | [33mWARNING[0m |   [INVALID] 2 invalid secrets:
+11:02:35 | [33mWARNING[0m |     - ANTHROPIC_API_KEY
+11:02:35 | [33mWARNING[0m |     - OPENAI_API_KEY
+11:02:35 | [37mINFO[0m |   [WARNINGS] 2 potential issues:
+11:02:35 | [37mINFO[0m |     - Secret OPENAI_API_KEY has invalid/placeholder value
+11:02:35 | [37mINFO[0m |     - Secret ANTHROPIC_API_KEY has invalid/placeholder value
+11:02:35 | [33mWARNING[0m | 
+[WARN] 3 secrets missing:
+11:02:35 | [33mWARNING[0m |   - CLICKHOUSE_DEFAULT_PASSWORD
+11:02:35 | [33mWARNING[0m |   - CLICKHOUSE_DEVELOPMENT_PASSWORD
+11:02:35 | [33mWARNING[0m |   - REDIS_PASSWORD
+11:02:35 | [33mWARNING[0m | 
+[SOLUTION] Options to resolve:
+11:02:35 | [33mWARNING[0m |   1. Add to .env file (recommended for dev)
+11:02:35 | [33mWARNING[0m |   2. Set as OS environment variables
+11:02:35 | [33mWARNING[0m |   3. Use --load-secrets flag for GSM fallback
+11:02:35 | [37mINFO[0m | 
+[ENVIRONMENT] Setting 48 environment variables...
+11:02:35 | [37mINFO[0m | 
+======================================================================
+11:02:35 | [37mINFO[0m | [SUMMARY] Local-First Secret Loading Complete
+11:02:35 | [37mINFO[0m | ======================================================================
+11:02:35 | [37mINFO[0m | Total secrets loaded: 48
+11:02:35 | [37mINFO[0m | Priority: OS Environment > .env.local > .env > Google Secrets > Defaults
+11:02:35 | [37mINFO[0m | [TIP] Create a .env file for local development
+11:02:35 | [37mINFO[0m | [TIP] Use 'cp .env.example .env' to start from example
+11:02:35 | [37mINFO[0m | ======================================================================
+11:02:37 | [33mWARNING[0m | aioredis not available for Redis validation
+11:02:51 | [31mERROR[0m | Cleanup error: 'DevLauncher' object has no attribute 'emergency_cleanup'
+🔍 DISCOVER | POSTGRESQL: postgresql+asyncpg://postgres:***@localhost:5433/netra_dev
+🔍 DISCOVER | CLICKHOUSE: clickhouse://default:***@localhost:8123/netra_dev
+🔍 DISCOVER | REDIS: redis://localhost:6379/0
+🔍 WEBSOCKET | Discovered endpoint: backend_ws -> ws://localhost:8000/ws
+🚀 Starting Netra AI Development Environment...
+   → Windows environment detected
+   → Enhanced process tree management enabled
+   → Port cleanup verification enabled
+============================================================
+🚀 Netra AI Development Environment
+============================================================
+📝 Configuration:
+🔧 Service Modes:
+  💻 Redis       : Local  (localhost:6379)
+  💻 ClickHouse  : Local  (localhost:9000)
+  💻 PostgreSQL  : Local  (localhost:5433)
+  ☁️ LLM         : Cloud 
+
+  • Dynamic ports: YES
+  • Backend hot reload: NO
+  • Frontend hot reload: YES (Next.js native)
+  • Real-time logging: YES
+  • Turbopack: YES
+  • Secret loading: YES
+  • Verbose output: NO
+
+🔄 Running pre-checks in parallel...
+🔐 Starting enhanced environment variable loading...
+🔍 Checking environment...
+✅ Environment check passed
+ℹ️ Set BACKEND_PORT=8000
+ℹ️ Set FRONTEND_PORT=3000
+ℹ️ Set AUTH_PORT=8081
+ℹ️ Set WEBSOCKET_PORT=8000
+🔄 Checking cache and environment...
+🔄 Loading secrets...
+🔄 Validating database connections...
+🔄 DATABASE | Validating 3 database connections...
+🔄 CONNECT | main_postgres: Attempt 1/5
+🔄 CONNECT | main_clickhouse: Attempt 1/5
+🔄 CONNECT | main_redis: Attempt 1/5
+✅ CONNECT | main_redis: Connected successfully
+✅ CONNECT | main_clickhouse: Connected successfully
+🔄 CONNECT | main_postgres: Attempt 2/5
+🔄 CONNECT | main_postgres: Attempt 3/5
+🔄 CONNECT | main_postgres: Attempt 4/5
+🔄 CONNECT | main_postgres: Attempt 5/5
+❌ CONNECT | main_postgres: Failed after 5 attempts - Connection test failed
+❌ DATABASE | Database validation failed - check logs for details
+❌ Database validation failed
+❌ Failed to start services
+
+❌ FAILURE | Development environment failed to start (exit code: 1)
+
+🔧 TROUBLESHOOTING (Windows):
+   1. Check if ports are in use: netstat -ano | findstr ":8000 :3000 :8081"
+   2. Kill hanging processes: tasklist | findstr "node python uvicorn"
+   3. Force kill if needed: taskkill /F /T /IM "process_name.exe"
+   4. Check Windows Defender/Firewall settings
+   5. Run as Administrator if permission issues persist
+   5. Try running with --verbose for more details
+   6. Check that all dependencies are installed
+   7. Ensure .env files are properly configured

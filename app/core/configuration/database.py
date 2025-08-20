@@ -18,6 +18,7 @@ from urllib.parse import urlparse, urlunparse
 from app.schemas.Config import AppConfig
 from app.logging_config import central_logger as logger
 from app.core.exceptions_config import ConfigurationError
+from app.core.environment_constants import get_current_environment
 
 
 class DatabaseConfigManager:
@@ -36,7 +37,7 @@ class DatabaseConfigManager:
     
     def _get_environment(self) -> str:
         """Get current environment for database configuration."""
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        return get_current_environment()
     
     def refresh_environment(self) -> None:
         """Refresh environment detection for testing scenarios."""

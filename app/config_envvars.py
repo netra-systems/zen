@@ -107,21 +107,24 @@ class ConfigEnvVarsManager:
             
     def _get_oauth_mappings(self) -> Dict[str, Tuple[str, str]]:
         """Get OAuth environment mappings."""
+        from app.core.auth_constants import CredentialConstants
         return {
-            "GOOGLE_CLIENT_ID": ("oauth_config", "client_id"),
-            "GOOGLE_CLIENT_SECRET": ("oauth_config", "client_secret"),
+            CredentialConstants.GOOGLE_CLIENT_ID: ("oauth_config", "client_id"),
+            CredentialConstants.GOOGLE_CLIENT_SECRET: ("oauth_config", "client_secret"),
         }
         
     def _get_llm_mappings(self) -> Dict[str, Tuple[str, str]]:
         """Get LLM-related mappings."""
-        return {"GEMINI_API_KEY": ("llm_configs.default", "api_key")}
+        from app.core.auth_constants import CredentialConstants
+        return {CredentialConstants.GEMINI_API_KEY: ("llm_configs.default", "api_key")}
         
     def _get_security_mappings(self) -> Dict[str, Tuple[None, str]]:
         """Get security-related mappings."""
+        from app.core.auth_constants import JWTConstants, CredentialConstants
         return {
-            "JWT_SECRET_KEY": (None, "jwt_secret_key"),
-            "FERNET_KEY": (None, "fernet_key"),
-            "DATABASE_URL": (None, "database_url"),
+            JWTConstants.JWT_SECRET_KEY: (None, "jwt_secret_key"),
+            JWTConstants.FERNET_KEY: (None, "fernet_key"),
+            CredentialConstants.DATABASE_URL: (None, "database_url"),
             "LOG_LEVEL": (None, "log_level"),
         }
         
@@ -172,13 +175,14 @@ class ConfigEnvVarsManager:
     
     def _get_unified_config_value(self, unified_config, env_var: str) -> Optional[str]:
         """Get value from unified config based on environment variable name."""
+        from app.core.auth_constants import CredentialConstants, JWTConstants
         mapping = {
-            "GOOGLE_CLIENT_ID": lambda: unified_config.oauth_config.client_id,
-            "GOOGLE_CLIENT_SECRET": lambda: unified_config.oauth_config.client_secret,
-            "GEMINI_API_KEY": lambda: unified_config.llm_configs.get('default', {}).api_key if unified_config.llm_configs else None,
-            "JWT_SECRET_KEY": lambda: unified_config.jwt_secret_key,
-            "FERNET_KEY": lambda: unified_config.fernet_key,
-            "DATABASE_URL": lambda: unified_config.database_url,
+            CredentialConstants.GOOGLE_CLIENT_ID: lambda: unified_config.oauth_config.client_id,
+            CredentialConstants.GOOGLE_CLIENT_SECRET: lambda: unified_config.oauth_config.client_secret,
+            CredentialConstants.GEMINI_API_KEY: lambda: unified_config.llm_configs.get('default', {}).api_key if unified_config.llm_configs else None,
+            JWTConstants.JWT_SECRET_KEY: lambda: unified_config.jwt_secret_key,
+            JWTConstants.FERNET_KEY: lambda: unified_config.fernet_key,
+            CredentialConstants.DATABASE_URL: lambda: unified_config.database_url,
             "LOG_LEVEL": lambda: unified_config.log_level,
         }
         getter = mapping.get(env_var)

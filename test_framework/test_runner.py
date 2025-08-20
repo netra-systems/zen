@@ -47,7 +47,7 @@ load_dotenv()
 
 # Import test framework modules
 from .runner import UnifiedTestRunner
-from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_real_llm
+from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_dev_environment, configure_real_llm
 from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
 
@@ -399,6 +399,10 @@ def add_staging_arguments(parser):
     parser.add_argument(
         "--staging-api-url", type=str, help="Override staging API URL"
     )
+    parser.add_argument(
+        "--env", type=str, choices=["test", "dev", "staging"], default="test",
+        help="Environment to use for testing (default: test)"
+    )
 
 def add_cicd_arguments(parser):
     """Add CI/CD specific arguments"""
@@ -476,7 +480,7 @@ def execute_test_run(parser, args):
     """Execute the main test run"""
     handle_cicd_aliases(args)
     print_header()
-    configure_staging_if_requested(args)
+    configure_environment_if_requested(args)
     speed_opts = configure_speed_options(args)
     runner = initialize_test_runner()
     handle_failing_test_commands(args, runner)
@@ -513,14 +517,28 @@ def print_feature_flag_summary():
         print("  Use feature flags for TDD: tests can be written before implementation")
         print("=" * 80)
 
-def configure_staging_if_requested(args):
-    """Configure staging environment if requested"""
+def configure_environment_if_requested(args):
+    """Configure test environment based on --env parameter and legacy --staging flag"""
+    # Handle legacy --staging flag for backward compatibility
     if args.staging or args.staging_url or args.staging_api_url:
         staging_url = args.staging_url or os.getenv("STAGING_URL")
         staging_api_url = args.staging_api_url or os.getenv("STAGING_API_URL")
         validate_staging_configuration(staging_url, staging_api_url)
         print_staging_configuration(staging_url, staging_api_url)
         configure_staging_environment(staging_url, staging_api_url)
+        return
+        
+    # Handle --env parameter
+    if args.env == "staging":
+        staging_url = os.getenv("STAGING_URL")
+        staging_api_url = os.getenv("STAGING_API_URL")
+        validate_staging_configuration(staging_url, staging_api_url)
+        print_staging_configuration(staging_url, staging_api_url)
+        configure_staging_environment(staging_url, staging_api_url)
+    elif args.env == "dev":
+        print_dev_configuration()
+        configure_dev_environment()
+    # For test environment (default), no additional configuration needed
 
 def validate_staging_configuration(staging_url, staging_api_url):
     """Validate staging configuration"""
@@ -534,6 +552,12 @@ def print_staging_configuration(staging_url, staging_api_url):
     print(f"[STAGING MODE] Testing against staging environment:")
     print(f"  Frontend: {staging_url}")
     print(f"  API: {staging_api_url}")
+
+def print_dev_configuration():
+    """Print dev configuration info"""
+    print(f"[DEV MODE] Testing against local development environment:")
+    print(f"  Backend: http://localhost:8001")
+    print(f"  Environment: development")
 
 def configure_speed_options(args):
     """Configure speed optimization options based on arguments"""
@@ -607,8 +631,11 @@ def handle_fix_failing_command():
 
 def run_tests_with_configuration(args, runner, speed_opts):
     """Run tests with the specified configuration"""
-    if args.staging:
+    # Set environment mode on runner for backward compatibility
+    if args.staging or args.env == "staging":
         runner.staging_mode = True
+    elif args.env == "dev":
+        runner.dev_mode = True
     
     return run_level_based_tests(args, runner, speed_opts)
 

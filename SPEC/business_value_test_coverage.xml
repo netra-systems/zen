@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<business_value_test_coverage>
+    <metadata>
+        <title>Business Value Test Coverage Master Index</title>
+        <version>1.0.0</version>
+        <created>2025-08-20</created>
+        <purpose>
+            Track test coverage from business value perspective, ensuring every test 
+            delivers measurable value aligned with customer segments and revenue goals.
+        </purpose>
+        <principles>
+            <principle>Business Value First: Every test must justify its existence through customer value</principle>
+            <principle>Tier-Based Coverage: Group by customer segments (Free, Early, Mid, Enterprise)</principle>
+            <principle>Real Behavior Focus: Prioritize real LLM, E2E, and multi-service tests</principle>
+            <principle>Environment Validation: Track tests passing across ALL environments</principle>
+            <principle>Revenue Protection: Critical paths must have 100% coverage</principle>
+        </principles>
+    </metadata>
+
+    <business_tiers>
+        <tier name="all" description="Platform-wide features affecting all customers">
+            <revenue_impact>$347K+ MRR protection</revenue_impact>
+            <critical_coverage_target>100%</critical_coverage_target>
+            <current_coverage>51.4%</current_coverage>
+        </tier>
+        <tier name="free" description="Features for free tier conversion">
+            <revenue_impact>Conversion funnel to paid tiers</revenue_impact>
+            <critical_coverage_target>95%</critical_coverage_target>
+            <focus_areas>
+                <area>Onboarding flow</area>
+                <area>Feature discovery</area>
+                <area>Usage limits enforcement</area>
+            </focus_areas>
+        </tier>
+        <tier name="early" description="Early adopter features">
+            <revenue_impact>$50K-$100K MRR</revenue_impact>
+            <critical_coverage_target>97%</critical_coverage_target>
+            <focus_areas>
+                <area>Core agent functionality</area>
+                <area>Basic analytics</area>
+                <area>Standard integrations</area>
+            </focus_areas>
+        </tier>
+        <tier name="mid" description="Mid-market features">
+            <revenue_impact>$100K-$200K MRR</revenue_impact>
+            <critical_coverage_target>98%</critical_coverage_target>
+            <focus_areas>
+                <area>Advanced agent chains</area>
+                <area>Custom workflows</area>
+                <area>Team collaboration</area>
+            </focus_areas>
+        </tier>
+        <tier name="enterprise" description="Enterprise features">
+            <revenue_impact>$200K+ MRR</revenue_impact>
+            <critical_coverage_target>100%</critical_coverage_target>
+            <focus_areas>
+                <area>SSO/SAML authentication</area>
+                <area>Advanced security</area>
+                <area>SLA compliance</area>
+                <area>Custom deployments</area>
+            </focus_areas>
+        </tier>
+    </business_tiers>
+
+    <coverage_categories>
+        <category name="infrastructure_plumbing" description="Foundation that enables business value">
+            <components>
+                <component name="authentication" tier="all">
+                    <business_value>Security foundation for all customer data</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="100%">Auth token validation</requirement>
+                        <requirement type="integration" coverage_target="100%">JWT flow</requirement>
+                        <requirement type="e2e" coverage_target="100%">Full auth lifecycle</requirement>
+                        <requirement type="real_service" coverage_target="100%">Redis session management</requirement>
+                    </test_requirements>
+                </component>
+                <component name="websocket_infrastructure" tier="all">
+                    <business_value>Real-time communication enabling agent interactions</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="95%">Message routing</requirement>
+                        <requirement type="integration" coverage_target="98%">Connection management</requirement>
+                        <requirement type="e2e" coverage_target="100%">Reconnection with state</requirement>
+                        <requirement type="real_service" coverage_target="100%">Multi-client scenarios</requirement>
+                    </test_requirements>
+                </component>
+                <component name="database_layer" tier="all">
+                    <business_value>Data persistence and analytics foundation</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="90%">ORM operations</requirement>
+                        <requirement type="integration" coverage_target="95%">Transaction integrity</requirement>
+                        <requirement type="performance" coverage_target="100%">Query optimization</requirement>
+                        <requirement type="real_service" coverage_target="100%">PostgreSQL + ClickHouse</requirement>
+                    </test_requirements>
+                </component>
+                <component name="observability" tier="all">
+                    <business_value>SLA compliance and incident response</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="85%">Metric collection</requirement>
+                        <requirement type="integration" coverage_target="90%">Alert triggering</requirement>
+                        <requirement type="e2e" coverage_target="95%">Full observability pipeline</requirement>
+                    </test_requirements>
+                </component>
+            </components>
+        </category>
+
+        <category name="customer_value_features" description="Direct value delivery to customers">
+            <components>
+                <component name="agent_orchestration" tier="all">
+                    <business_value>Core AI optimization reducing customer costs by 30-50%</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="95%">Agent lifecycle</requirement>
+                        <requirement type="integration" coverage_target="98%">Chain execution</requirement>
+                        <requirement type="real_llm" coverage_target="100%">LLM interaction quality</requirement>
+                        <requirement type="e2e" coverage_target="100%">Complete workflows</requirement>
+                    </test_requirements>
+                    <test_scenarios>
+                        <scenario tier="free">Basic single agent execution</scenario>
+                        <scenario tier="early">Multi-agent chains</scenario>
+                        <scenario tier="mid">Custom workflow automation</scenario>
+                        <scenario tier="enterprise">Complex orchestration with SLA</scenario>
+                    </test_scenarios>
+                </component>
+                <component name="cost_optimization" tier="early,mid,enterprise">
+                    <business_value>Direct cost savings on AI spend</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="90%">Cost calculation</requirement>
+                        <requirement type="integration" coverage_target="95%">Optimization algorithms</requirement>
+                        <requirement type="real_llm" coverage_target="100%">Model selection</requirement>
+                        <requirement type="performance" coverage_target="100%">Optimization speed</requirement>
+                    </test_requirements>
+                </component>
+                <component name="analytics_dashboard" tier="all">
+                    <business_value>Insights enabling customer optimization decisions</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="85%">Data aggregation</requirement>
+                        <requirement type="integration" coverage_target="90%">Real-time updates</requirement>
+                        <requirement type="e2e" coverage_target="95%">Full dashboard flow</requirement>
+                        <requirement type="performance" coverage_target="90%">Query response times</requirement>
+                    </test_requirements>
+                </component>
+                <component name="team_collaboration" tier="mid,enterprise">
+                    <business_value>Multi-user productivity enhancement</business_value>
+                    <test_requirements>
+                        <requirement type="unit" coverage_target="90%">Permission management</requirement>
+                        <requirement type="integration" coverage_target="95%">Shared resources</requirement>
+                        <requirement type="e2e" coverage_target="98%">Collaboration workflows</requirement>
+                        <requirement type="real_service" coverage_target="100%">Concurrent user scenarios</requirement>
+                    </test_requirements>
+                </component>
+            </components>
+        </category>
+
+        <category name="quality_gates" description="Tests ensuring production readiness">
+            <components>
+                <component name="performance_sla" tier="enterprise">
+                    <business_value>Meeting contractual SLA obligations</business_value>
+                    <test_requirements>
+                        <requirement type="performance" coverage_target="100%">Response time &lt; 100ms p99</requirement>
+                        <requirement type="performance" coverage_target="100%">Availability &gt; 99.9%</requirement>
+                        <requirement type="load" coverage_target="100%">1000 concurrent users</requirement>
+                    </test_requirements>
+                </component>
+                <component name="security_compliance" tier="enterprise">
+                    <business_value>Enterprise security requirements</business_value>
+                    <test_requirements>
+                        <requirement type="security" coverage_target="100%">OWASP Top 10</requirement>
+                        <requirement type="security" coverage_target="100%">Data encryption</requirement>
+                        <requirement type="compliance" coverage_target="100%">SOC2 requirements</requirement>
+                    </test_requirements>
+                </component>
+            </components>
+        </category>
+    </coverage_categories>
+
+    <test_quality_metrics>
+        <metric name="real_llm_coverage">
+            <description>Percentage of agent tests using real LLM APIs</description>
+            <current>60%</current>
+            <target>85%</target>
+            <business_impact>Ensures AI quality meets customer expectations</business_impact>
+        </metric>
+        <metric name="e2e_coverage">
+            <description>End-to-end tests covering complete user journeys</description>
+            <current>45%</current>
+            <target>75%</target>
+            <business_impact>Validates entire customer workflows</business_impact>
+        </metric>
+        <metric name="multi_environment_pass_rate">
+            <description>Tests passing in dev, staging, and production configs</description>
+            <current>72%</current>
+            <target>95%</target>
+            <business_impact>Deployment confidence and reduced incidents</business_impact>
+        </metric>
+        <metric name="unified_service_coverage">
+            <description>Tests validating multi-service interactions</description>
+            <current>38%</current>
+            <target>80%</target>
+            <business_impact>System integration reliability</business_impact>
+        </metric>
+    </test_quality_metrics>
+
+    <test_value_scoring>
+        <scoring_model>
+            <factor name="revenue_impact" weight="0.35">
+                <description>Direct revenue protection or generation potential</description>
+            </factor>
+            <factor name="customer_tier" weight="0.25">
+                <description>Higher tiers get higher scores</description>
+            </factor>
+            <factor name="test_depth" weight="0.20">
+                <description>E2E and real LLM tests score higher</description>
+            </factor>
+            <factor name="environment_coverage" weight="0.10">
+                <description>Tests passing in multiple environments</description>
+            </factor>
+            <factor name="failure_cost" weight="0.10">
+                <description>Cost of failure in production</description>
+            </factor>
+        </scoring_model>
+        <value_categories>
+            <category score="90-100" label="Critical">Must have 100% coverage</category>
+            <category score="70-89" label="High">Target 95%+ coverage</category>
+            <category score="50-69" label="Medium">Target 85%+ coverage</category>
+            <category score="30-49" label="Low">Target 75%+ coverage</category>
+            <category score="0-29" label="Nice-to-have">Best effort coverage</category>
+        </value_categories>
+    </test_value_scoring>
+
+    <reporting_structure>
+        <report name="executive_dashboard">
+            <sections>
+                <section>Revenue Protection Coverage</section>
+                <section>Tier-Based Test Health</section>
+                <section>Critical Path Coverage</section>
+                <section>SLA Compliance Testing</section>
+            </sections>
+        </report>
+        <report name="engineering_detail">
+            <sections>
+                <section>Component Coverage Matrix</section>
+                <section>Test Type Distribution</section>
+                <section>Environment Pass Rates</section>
+                <section>Real vs Mock Coverage</section>
+            </sections>
+        </report>
+        <report name="quality_trends">
+            <sections>
+                <section>Coverage Trends by Tier</section>
+                <section>Test Value Score Trends</section>
+                <section>Regression Detection Rate</section>
+                <section>Deployment Confidence Score</section>
+            </sections>
+        </report>
+    </reporting_structure>
+
+    <implementation_requirements>
+        <requirement type="data_collection">
+            <description>Automated test metadata extraction from all test files</description>
+            <tools>AST parsing, decorator analysis, test naming conventions</tools>
+        </requirement>
+        <requirement type="value_mapping">
+            <description>Map each test to business tier and value category</description>
+            <tools>Test annotations, path analysis, feature flag mapping</tools>
+        </requirement>
+        <requirement type="coverage_aggregation">
+            <description>Roll up coverage from function → file → component → tier</description>
+            <tools>Coverage.py, Jest coverage, custom aggregation</tools>
+        </requirement>
+        <requirement type="environment_validation">
+            <description>Track test results across all environments</description>
+            <tools>CI/CD integration, test result parsing, environment markers</tools>
+        </requirement>
+        <requirement type="reporting">
+            <description>Generate human-readable and machine-readable reports</description>
+            <tools>HTML dashboards, JSON metrics, trend analysis</tools>
+        </requirement>
+    </implementation_requirements>
+
+    <success_criteria>
+        <criterion>All critical business paths have 100% test coverage</criterion>
+        <criterion>Enterprise tier features have 100% real service test coverage</criterion>
+        <criterion>95% of tests pass in all environments (dev, staging, prod config)</criterion>
+        <criterion>Real LLM tests cover 85%+ of agent functionality</criterion>
+        <criterion>Test value scores correlate with production incident rates</criterion>
+        <criterion>Coverage trends show continuous improvement across all tiers</criterion>
+    </success_criteria>
+</business_value_test_coverage>

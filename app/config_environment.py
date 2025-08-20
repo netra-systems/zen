@@ -11,6 +11,9 @@ from typing import Dict, Type
 from app.schemas.Config import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
 from app.config_loader import detect_cloud_run_environment
 from app.logging_config import central_logger as logger
+from app.core.environment_constants import (
+    Environment, EnvironmentVariables, get_current_environment
+)
 
 
 class ConfigEnvironment:
@@ -21,8 +24,8 @@ class ConfigEnvironment:
     
     def get_environment(self) -> str:
         """Determine the current environment."""
-        if os.environ.get("TESTING"):
-            return "testing"
+        if os.environ.get(EnvironmentVariables.TESTING):
+            return Environment.TESTING.value
         cloud_env = detect_cloud_run_environment()
         if cloud_env:
             return cloud_env
@@ -30,7 +33,7 @@ class ConfigEnvironment:
         
     def _get_default_environment(self) -> str:
         """Get default environment from env vars."""
-        env = os.environ.get("ENVIRONMENT", "development").lower()
+        env = get_current_environment()
         self._logger.debug(f"Environment determined as: {env}")
         return env
     
@@ -42,10 +45,10 @@ class ConfigEnvironment:
     def _get_config_classes(self) -> Dict[str, Type]:
         """Get configuration classes mapping."""
         return {
-            "production": ProductionConfig,
-            "staging": StagingConfig,
-            "testing": NetraTestingConfig,
-            "development": DevelopmentConfig
+            Environment.PRODUCTION.value: ProductionConfig,
+            Environment.STAGING.value: StagingConfig,
+            Environment.TESTING.value: NetraTestingConfig,
+            Environment.DEVELOPMENT.value: DevelopmentConfig
         }
     
     def _init_config(self, config_classes: dict, env: str) -> AppConfig:

@@ -170,6 +170,29 @@ def configure_staging_environment(staging_url: str, staging_api_url: str):
     os.environ["CYPRESS_BASE_URL"] = staging_url
     os.environ["CYPRESS_API_URL"] = staging_api_url
 
+def configure_dev_environment():
+    """Configure environment variables for dev mode testing."""
+    # Set environment to development
+    os.environ["ENVIRONMENT"] = "development"
+    
+    # Remove TESTING environment variable if present to allow dev mode detection
+    if "TESTING" in os.environ:
+        del os.environ["TESTING"]
+    
+    # Configure dev service URLs
+    os.environ["DEV_MODE"] = "true"
+    os.environ["BASE_URL"] = "http://localhost:8001"
+    os.environ["API_BASE_URL"] = "http://localhost:8001"
+    os.environ["BACKEND_URL"] = "http://localhost:8001"
+    
+    # Frontend URLs (if needed)
+    os.environ["FRONTEND_URL"] = "http://localhost:3000"
+    
+    # Database and service URLs for dev environment
+    os.environ["DATABASE_URL"] = "postgresql://postgres:password@localhost:5432/netra_dev"
+    os.environ["REDIS_URL"] = "redis://localhost:6379"
+    os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
+
 def configure_real_llm(model: str, timeout: int, parallel: str, test_level: str = None):
     """Configure environment for real LLM testing with smart defaults."""
     # Get level-specific defaults if available

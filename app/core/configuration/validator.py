@@ -13,6 +13,7 @@ from typing import Dict, List, Tuple
 
 from app.schemas.Config import AppConfig
 from app.logging_config import central_logger as logger
+from app.core.environment_constants import get_current_environment
 
 from .validator_types import ValidationResult
 from .validator_database import DatabaseValidator
@@ -38,8 +39,7 @@ class ConfigurationValidator:
     
     def _get_environment(self) -> str:
         """Get current environment for validation rules."""
-        import os
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        return get_current_environment()
     
     def _init_validators(self) -> None:
         """Initialize all validation helper modules."""

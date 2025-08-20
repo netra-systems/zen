@@ -1,7 +1,13 @@
 """
 Process management for development services.
 
-This module provides simple process management without auto-restart.
+This module provides robust process management with platform-specific optimizations.
+Windows-specific features:
+- Enhanced process tree termination with taskkill /F /T
+- Process verification using tasklist and netstat
+- Proper handling of Node.js child processes
+- Port cleanup verification after process termination
+
 Services rely on their native reload capabilities (uvicorn, Next.js).
 """
 
@@ -11,8 +17,9 @@ import signal
 import subprocess
 import threading
 import time
+import socket
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Set
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,24 +27,61 @@ logger = logging.getLogger(__name__)
 
 class ProcessManager:
     """
-    Manages development service processes.
+    Manages development service processes with enhanced Windows compatibility.
     
     This class handles starting, stopping, and tracking processes
-    without auto-restart functionality. Services use their native
-    reload capabilities instead.
+    with platform-specific optimizations:
+    
+    Windows:
+    - Process tree termination with taskkill /F /T
+    - Port cleanup verification using netstat
+    - Child process tracking for Node.js applications
+    
+    Unix/Linux/Mac:
+    - Process group management
+    - Signal-based termination with fallback to SIGKILL
+    - Resource cleanup verification
+    
+    Services use their native reload capabilities instead of auto-restart.
     """
     
     def __init__(self, health_monitor=None):
-        """Initialize the process manager."""
+        """Initialize the process manager with platform detection."""
         self.processes: Dict[str, subprocess.Popen] = {}
+        self.process_ports: Dict[str, Set[int]] = {}  # Track ports used by each process
+        self.process_info: Dict[str, Dict[str, Any]] = {}  # Track additional process metadata
         self._lock = threading.Lock()
         self.health_monitor = health_monitor
+        self.is_windows = sys.platform == "win32"
+        self.shutdown_timeout = 10  # Seconds to wait for graceful shutdown
+        
+        logger.info(f"ProcessManager initialized for {sys.platform}")
+        if self.is_windows:
+            logger.info("Enhanced Windows process tree management enabled")
     
-    def add_process(self, name: str, process: subprocess.Popen):
-        """Add a process to be managed."""
+    def add_process(self, name: str, process: subprocess.Popen, ports: Optional[Set[int]] = None):
+        """Add a process to be managed with optional port tracking."""
         with self._lock:
             self.processes[name] = process
+            self.process_ports[name] = ports or set()
+            self.process_info[name] = {
+                'pid': process.pid,
+                'start_time': time.time(),
+                'name': name,
+                'platform': sys.platform
+            }
+            
             logger.info(f"Added process: {name} (PID: {process.pid})")
+            if ports:
+                logger.info(f"Process {name} using ports: {sorted(ports)}")
+    
+    def register_process_port(self, name: str, port: int):
+        """Register a port used by a process."""
+        with self._lock:
+            if name not in self.process_ports:
+                self.process_ports[name] = set()
+            self.process_ports[name].add(port)
+            logger.debug(f"Registered port {port} for process {name}")
     
     def terminate_process(self, name: str) -> bool:
         """Terminate a specific process."""
@@ -86,20 +130,117 @@ class ProcessManager:
             self._terminate_unix_process(process, name)
     
     def _terminate_windows_process(self, process: subprocess.Popen, name: str):
-        """Terminate Windows process using taskkill with tree kill."""
-        result = self._run_taskkill_command(process)
-        if result.returncode != 0:
-            logger.warning(f"taskkill failed for {name}: {result.stderr}")
-            # Try alternative kill method
-            self._force_kill_windows(process)
+        """Enhanced Windows process termination with tree kill and verification."""
+        logger.info(f"Terminating Windows process tree for {name} (PID: {process.pid})")
+        
+        # Step 1: Try graceful termination first for certain processes
+        if name.lower() in ['backend', 'frontend']:
+            try:
+                process.terminate()  # Send SIGTERM equivalent
+                if self._wait_for_process_termination(process, timeout=5):
+                    logger.info(f"Process {name} terminated gracefully")
+                    return
+            except Exception as e:
+                logger.debug(f"Graceful termination failed for {name}: {e}")
+        
+        # Step 2: Use taskkill with process tree termination
+        result = self._run_taskkill_tree_command(process)
+        if result.returncode == 0:
+            logger.info(f"Successfully terminated process tree for {name}")
+            # Verify termination
+            if self._verify_process_termination(process, name):
+                return
+        else:
+            logger.warning(f"taskkill /T failed for {name}: {result.stderr}")
+        
+        # Step 3: Force kill if tree termination failed
+        logger.warning(f"Attempting force kill for {name}")
+        self._force_kill_windows_enhanced(process, name)
+    
+    def _run_taskkill_tree_command(self, process: subprocess.Popen):
+        """Run taskkill command with tree termination for Windows process."""
+        try:
+            return subprocess.run(
+                ["taskkill", "/F", "/T", "/PID", str(process.pid)],
+                capture_output=True,
+                text=True,
+                timeout=10  # Add timeout to prevent hanging
+            )
+        except subprocess.TimeoutExpired:
+            logger.error("taskkill command timed out")
+            return subprocess.CompletedProcess(
+                args=[], returncode=1, stdout="", stderr="Timeout"
+            )
+    
+    def _wait_for_process_termination(self, process: subprocess.Popen, timeout: int = 5) -> bool:
+        """Wait for process to terminate within timeout."""
+        try:
+            process.wait(timeout=timeout)
+            return True
+        except subprocess.TimeoutExpired:
+            return False
+    
+    def _verify_process_termination(self, process: subprocess.Popen, name: str) -> bool:
+        """Verify that process has actually terminated on Windows."""
+        try:
+            # Check using tasklist
+            result = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {process.pid}"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if result.returncode == 0:
+                # If the process is not found, tasklist will show "No tasks running"
+                if "No tasks are running" in result.stdout:
+                    logger.info(f"Verified: Process {name} (PID: {process.pid}) terminated")
+                    return True
+                else:
+                    logger.warning(f"Process {name} (PID: {process.pid}) still running according to tasklist")
+                    return False
+            else:
+                logger.debug(f"tasklist verification failed: {result.stderr}")
+                # If tasklist fails, assume termination succeeded
+                return True
+                
+        except Exception as e:
+            logger.debug(f"Process verification error for {name}: {e}")
+            return True  # Assume success if verification fails
+    
+    def _force_kill_windows_enhanced(self, process: subprocess.Popen, name: str):
+        """Enhanced force kill for Windows with multiple attempts."""
+        attempts = [
+            # Attempt 1: Direct PID kill
+            ["taskkill", "/F", "/PID", str(process.pid)],
+            # Attempt 2: Kill by process name if we can determine it
+            ["taskkill", "/F", "/IM", f"python.exe"],  # For Python processes
+            ["taskkill", "/F", "/IM", f"node.exe"],    # For Node.js processes
+        ]
+        
+        for i, cmd in enumerate(attempts):
+            try:
+                if i == 0:  # Direct PID kill
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                    if result.returncode == 0:
+                        logger.info(f"Force kill succeeded for {name}")
+                        return
+                elif name.lower() == 'frontend' and 'node.exe' in cmd:
+                    # Only kill node.exe for frontend processes
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+                    logger.debug(f"Attempted to kill Node.js processes for {name}")
+                elif name.lower() == 'backend' and 'python.exe' in cmd:
+                    # Only kill python.exe for backend processes (more targeted)
+                    continue  # Skip generic python kill to avoid killing dev launcher
+                    
+            except Exception as e:
+                logger.debug(f"Force kill attempt {i+1} failed for {name}: {e}")
+        
+        logger.error(f"All force kill attempts failed for {name}")
     
     def _run_taskkill_command(self, process: subprocess.Popen):
-        """Run taskkill command for Windows process."""
-        return subprocess.run(
-            ["taskkill", "/F", "/T", "/PID", str(process.pid)],
-            capture_output=True,
-            text=True
-        )
+        """Legacy method - kept for compatibility."""
+        return self._run_taskkill_tree_command(process)
     
     def _terminate_unix_process(self, process: subprocess.Popen, name: str):
         """Terminate Unix process using process group."""
@@ -163,9 +304,139 @@ class ProcessManager:
         return True
     
     def cleanup_all(self):
-        """Clean up all processes."""
+        """Clean up all processes with port verification."""
+        logger.info("Starting cleanup of all managed processes")
+        
+        # Collect all ports before cleanup
+        all_ports = set()
+        for ports in self.process_ports.values():
+            all_ports.update(ports)
+        
+        # Terminate all processes
+        terminated_processes = []
         for name, process in list(self.processes.items()):
-            self.terminate_process(name)
+            if self.terminate_process(name):
+                terminated_processes.append(name)
+        
+        # Verify port cleanup on Windows
+        if self.is_windows and all_ports:
+            self._verify_port_cleanup(all_ports, terminated_processes)
+        
+        logger.info(f"Cleanup completed for {len(terminated_processes)} processes")
+    
+    def _verify_port_cleanup(self, ports: Set[int], process_names: List[str], max_attempts: int = 3):
+        """Verify that ports are no longer in use after process termination."""
+        if not ports:
+            return
+            
+        logger.info(f"Verifying cleanup of ports: {sorted(ports)}")
+        
+        for attempt in range(max_attempts):
+            time.sleep(1)  # Give processes time to release ports
+            
+            still_in_use = self._check_ports_in_use(ports)
+            if not still_in_use:
+                logger.info("All ports successfully released")
+                return
+            
+            logger.warning(f"Attempt {attempt + 1}: Ports still in use: {sorted(still_in_use)}")
+            
+            if attempt < max_attempts - 1:  # Not the last attempt
+                # Try to find and kill processes still using these ports
+                self._cleanup_port_processes(still_in_use)
+        
+        # Final check and warning
+        final_check = self._check_ports_in_use(ports)
+        if final_check:
+            logger.error(f"WARNING: Ports still in use after cleanup: {sorted(final_check)}")
+            logger.error("You may need to manually kill processes or restart your system")
+            
+    def _check_ports_in_use(self, ports: Set[int]) -> Set[int]:
+        """Check which ports are still in use using netstat."""
+        in_use = set()
+        
+        if not ports:
+            return in_use
+        
+        try:
+            if self.is_windows:
+                # Use netstat on Windows
+                result = subprocess.run(
+                    ["netstat", "-ano"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10
+                )
+                
+                if result.returncode == 0:
+                    for line in result.stdout.splitlines():
+                        for port in ports:
+                            # Look for lines containing the port
+                            if f":{port} " in line and "LISTENING" in line:
+                                in_use.add(port)
+                                logger.debug(f"Port {port} still in use: {line.strip()}")
+            else:
+                # Use lsof on Unix-like systems
+                for port in ports:
+                    result = subprocess.run(
+                        ["lsof", "-i", f":{port}"],
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if result.returncode == 0 and result.stdout.strip():
+                        in_use.add(port)
+                        
+        except Exception as e:
+            logger.debug(f"Error checking port usage: {e}")
+        
+        return in_use
+    
+    def _cleanup_port_processes(self, ports: Set[int]):
+        """Try to cleanup processes still using specific ports."""
+        if not self.is_windows:
+            return
+            
+        for port in ports:
+            try:
+                # Find process using the port
+                result = subprocess.run(
+                    ["netstat", "-ano", "|", "findstr", f":{port}"],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                    shell=True  # Required for pipe on Windows
+                )
+                
+                if result.returncode == 0:
+                    for line in result.stdout.splitlines():
+                        if "LISTENING" in line:
+                            # Extract PID from netstat output
+                            parts = line.split()
+                            if parts:
+                                try:
+                                    pid = parts[-1]
+                                    logger.info(f"Attempting to kill process {pid} using port {port}")
+                                    subprocess.run(
+                                        ["taskkill", "/F", "/PID", pid],
+                                        capture_output=True,
+                                        timeout=5
+                                    )
+                                except (ValueError, IndexError):
+                                    continue
+                                    
+            except Exception as e:
+                logger.debug(f"Error cleaning up port {port}: {e}")
+    
+    def check_port_available(self, port: int) -> bool:
+        """Check if a port is available for binding."""
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)
+                result = sock.connect_ex(('127.0.0.1', port))
+                return result != 0  # Port is available if connection failed
+        except Exception:
+            return False
     
     def wait_for_all(self):
         """Wait for all processes to complete."""

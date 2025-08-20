@@ -1,14 +1,28 @@
 """
 Health monitoring for dev launcher processes.
 
-This module provides health checks and automatic recovery
-to ensure processes stay running.
+This module provides health checks and automatic recovery with enhanced grace period
+implementation per SPEC/dev_launcher.xml requirements:
+
+CRITICAL REQUIREMENTS:
+- HEALTH-001: Health monitoring MUST NOT start immediately after service launch
+- HEALTH-002: Grace period implementation (Backend: 30s, Frontend: 90s) 
+- HEALTH-003: Health checks begin AFTER grace period AND readiness confirmation
+
+Windows Enhancements:
+- Process verification using tasklist
+- Port monitoring integration
+- Enhanced error reporting with Windows-specific troubleshooting
+
+This module ensures processes stay running while respecting startup timing requirements.
 """
 
 import time
 import threading
 import logging
-from typing import Dict, Optional, Callable
+import sys
+import subprocess
+from typing import Dict, Optional, Callable, Set
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -27,7 +41,7 @@ class ServiceState(Enum):
 
 @dataclass
 class HealthStatus:
-    """Health status for a service."""
+    """Health status for a service with enhanced grace period tracking."""
     is_healthy: bool
     last_check: datetime
     consecutive_failures: int
@@ -36,6 +50,48 @@ class HealthStatus:
     startup_time: Optional[datetime] = None
     grace_period_seconds: int = 30
     ready_confirmed: bool = False
+    
+    # Enhanced tracking
+    readiness_check_attempts: int = 0
+    last_successful_check: Optional[datetime] = None
+    grace_period_end: Optional[datetime] = None
+    process_verified: bool = False
+    ports_verified: Set[int] = None
+    
+    def __post_init__(self):
+        """Initialize computed fields."""
+        if self.ports_verified is None:
+            self.ports_verified = set()
+        
+        # Calculate grace period end time
+        if self.startup_time and self.grace_period_end is None:
+            self.grace_period_end = self.startup_time + timedelta(seconds=self.grace_period_seconds)
+    
+    def is_grace_period_over(self) -> bool:
+        """Check if grace period has ended."""
+        if not self.grace_period_end:
+            return True  # No grace period set
+        return datetime.now() >= self.grace_period_end
+    
+    def time_remaining_in_grace_period(self) -> float:
+        """Get remaining time in grace period (in seconds)."""
+        if not self.grace_period_end:
+            return 0.0
+        
+        remaining = (self.grace_period_end - datetime.now()).total_seconds()
+        return max(0.0, remaining)
+    
+    def should_start_monitoring(self) -> bool:
+        """Determine if health monitoring should start based on SPEC requirements."""
+        # Per SPEC HEALTH-001: Must wait for readiness confirmation
+        if not self.ready_confirmed:
+            return False
+        
+        # Per SPEC HEALTH-002: Must wait for grace period to end
+        if not self.is_grace_period_over():
+            return False
+        
+        return True
 
 
 class HealthMonitor:
@@ -52,20 +108,26 @@ class HealthMonitor:
     
     def __init__(self, check_interval: int = 30):
         """
-        Initialize the health monitor.
+        Initialize the health monitor with enhanced grace period support.
         
         Args:
-            check_interval: Seconds between health checks (default 30 per SPEC)
+            check_interval: Seconds between health checks (default 30 per SPEC HEALTH-003)
         """
         self.check_interval = check_interval
         self.services: Dict[str, Dict] = {}
         self.running = False
-        self.monitoring_enabled = False  # New: monitoring only starts after readiness
+        self.monitoring_enabled = False  # Monitoring only starts after readiness per SPEC HEALTH-001
         self.thread: Optional[threading.Thread] = None
         self._lock = threading.Lock()
         self.health_status: Dict[str, HealthStatus] = {}
         self.startup_complete = False  # Track when all services are ready
         self.database_connector = None  # Will be set by launcher
+        self.is_windows = sys.platform == "win32"
+        self.port_manager = None  # Will be set by launcher for port verification
+        
+        logger.info(f"HealthMonitor initialized (check_interval: {check_interval}s)")
+        if self.is_windows:
+            logger.info("Windows process verification enabled")
     
     def register_service(
         self,
@@ -145,11 +207,15 @@ class HealthMonitor:
             self.startup_complete = True
             logger.info("Health monitoring enabled - all services confirmed ready")
     
-    def mark_service_ready(self, name: str) -> bool:
-        """Mark a service as ready after successful readiness check.
+    def mark_service_ready(self, name: str, process_pid: Optional[int] = None, 
+                          ports: Optional[Set[int]] = None) -> bool:
+        """
+        Mark a service as ready after successful readiness check.
         
         Args:
             name: Service name
+            process_pid: Process ID for verification
+            ports: Set of ports used by the service
             
         Returns:
             True if service was marked ready
@@ -159,8 +225,53 @@ class HealthMonitor:
                 status = self.health_status[name]
                 status.ready_confirmed = True
                 status.state = ServiceState.READY
+                status.readiness_check_attempts += 1
+                status.last_successful_check = datetime.now()
+                
+                # Store port information for monitoring
+                if ports:
+                    status.ports_verified = ports
+                
+                # Log detailed readiness info
+                grace_remaining = status.time_remaining_in_grace_period()
                 logger.info(f"Service {name} marked as ready")
+                logger.info(f"  → Grace period remaining: {grace_remaining:.1f}s")
+                if ports:
+                    logger.info(f"  → Verified ports: {sorted(ports)}")
+                if process_pid:
+                    logger.info(f"  → Process PID: {process_pid}")
+                    
+                # Verify process on Windows
+                if self.is_windows and process_pid:
+                    status.process_verified = self._verify_windows_process(process_pid, name)
+                
                 return True
+            return False
+    
+    def _verify_windows_process(self, pid: int, service_name: str) -> bool:
+        """Verify that a Windows process is running using tasklist."""
+        try:
+            result = subprocess.run(
+                ["tasklist", "/FI", f"PID eq {pid}", "/FO", "CSV"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            
+            if result.returncode == 0:
+                lines = result.stdout.strip().split('\n')
+                if len(lines) > 1:  # Has header + data
+                    process_info = lines[1].split(',')
+                    if len(process_info) >= 2:
+                        process_name = process_info[0].strip('"')
+                        logger.debug(f"Verified {service_name} process: {process_name} (PID: {pid})")
+                        return True
+                        
+            logger.warning(f"Could not verify {service_name} process (PID: {pid})")
+            return False
+            
+        except Exception as e:
+            logger.debug(f"Process verification failed for {service_name}: {e}")
             return False
     
     def stop(self):
@@ -256,21 +367,57 @@ class HealthMonitor:
                     status.error_message = str(e)
     
     def _should_monitor_service(self, name: str, status: HealthStatus) -> bool:
-        """Determine if a service should be monitored based on its state and grace period.
-        
-        Per SPEC HEALTH-002: Health checks begin AFTER grace period AND readiness confirmation.
         """
-        if not status.ready_confirmed:
+        Determine if a service should be monitored based on SPEC requirements.
+        
+        Per SPEC HEALTH-001: Must wait for readiness confirmation
+        Per SPEC HEALTH-002: Must wait for grace period AND readiness confirmation
+        Per SPEC HEALTH-003: Only check health AFTER service is confirmed ready
+        """
+        # Use the enhanced method from HealthStatus
+        should_monitor = status.should_start_monitoring()
+        
+        if not should_monitor:
+            # Log why we're not monitoring yet
+            if not status.ready_confirmed:
+                logger.debug(f"Not monitoring {name}: waiting for readiness confirmation")
+            elif not status.is_grace_period_over():
+                remaining = status.time_remaining_in_grace_period()
+                logger.debug(f"Not monitoring {name}: grace period remaining {remaining:.1f}s")
             return False
         
-        if status.startup_time is None:
-            return True  # Fallback - monitor if no startup time
+        # Additional state checks
+        if status.state not in [ServiceState.READY, ServiceState.MONITORING]:
+            logger.debug(f"Not monitoring {name}: state is {status.state}")
+            return False
         
-        # Check if grace period has elapsed
-        elapsed = (datetime.now() - status.startup_time).total_seconds()
-        grace_period_elapsed = elapsed >= status.grace_period_seconds
+        return True
+    
+    def get_grace_period_status(self) -> Dict[str, Dict[str, any]]:
+        """Get detailed grace period status for all services."""
+        status_info = {}
         
-        return grace_period_elapsed and status.state in [ServiceState.READY, ServiceState.MONITORING]
+        with self._lock:
+            for name, status in self.health_status.items():
+                remaining = status.time_remaining_in_grace_period()
+                grace_over = status.is_grace_period_over()
+                should_monitor = status.should_start_monitoring()
+                
+                status_info[name] = {
+                    'state': status.state.value,
+                    'ready_confirmed': status.ready_confirmed,
+                    'grace_period_seconds': status.grace_period_seconds,
+                    'grace_period_remaining': remaining,
+                    'grace_period_over': grace_over,
+                    'should_monitor': should_monitor,
+                    'startup_time': status.startup_time.isoformat() if status.startup_time else None,
+                    'process_verified': status.process_verified,
+                    'ports_verified': sorted(status.ports_verified),
+                    'consecutive_failures': status.consecutive_failures,
+                    'last_check': status.last_check.isoformat() if status.last_check else None
+                }
+        
+        return status_info
     
     def _trigger_recovery(self, name: str, config: Dict):
         """

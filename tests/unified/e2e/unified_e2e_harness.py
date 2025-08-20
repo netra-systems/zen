@@ -12,6 +12,11 @@ from dataclasses import dataclass
 
 from .service_orchestrator import E2EServiceOrchestrator
 from .user_journey_executor import UserJourneyExecutor, TestUser
+from ..test_environment_config import (
+    get_test_environment_config,
+    TestEnvironmentConfig,
+    TestEnvironmentType
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,14 +33,26 @@ class UnifiedE2ETestHarness:
     """
     Unified E2E Test Harness for complete service orchestration.
     Manages Auth, Backend, Frontend with health checks and cleanup.
+    Supports test, dev, and staging environments with automatic detection.
     """
     
-    def __init__(self, project_root: Optional[Path] = None):
-        """Initialize E2E test harness."""
-        self.orchestrator = E2EServiceOrchestrator(project_root)
+    def __init__(self, 
+                 project_root: Optional[Path] = None,
+                 environment: Optional[TestEnvironmentType] = None):
+        """Initialize E2E test harness.
+        
+        Args:
+            project_root: Optional project root path
+            environment: Optional environment override (test, dev, staging)
+        """
+        # Setup environment configuration first
+        self.env_config = get_test_environment_config(environment=environment)
+        self.orchestrator = E2EServiceOrchestrator(project_root, self.env_config)
         self.journey_executor = UserJourneyExecutor(self.orchestrator)
         self.session = self._create_test_session()
         self.ready = False
+        
+        logger.info(f"E2E Harness initialized for {self.env_config.environment.value} environment")
     
     def _create_test_session(self) -> E2ETestSession:
         """Create new test session."""
@@ -85,11 +102,24 @@ class UnifiedE2ETestHarness:
     
     def get_service_url(self, service_name: str) -> str:
         """Get URL for specific service."""
+        # Use environment-aware service URLs
+        service_urls_map = {
+            "backend": self.env_config.services.backend,
+            "auth": self.env_config.services.auth,
+            "auth_service": self.env_config.services.auth,  # Alias for backward compatibility
+            "frontend": self.env_config.services.frontend
+        }
+        
+        if service_name in service_urls_map:
+            return service_urls_map[service_name]
+        
+        # Fallback to orchestrator for other services
         return self.orchestrator.get_service_url(service_name)
     
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for backend service."""
-        return self.orchestrator.get_websocket_url()
+        # Use environment-specific WebSocket URL
+        return self.env_config.services.websocket
     
     def is_environment_ready(self) -> bool:
         """Check if test environment is ready."""
@@ -100,9 +130,17 @@ class UnifiedE2ETestHarness:
         status = await self.orchestrator.get_environment_status()
         status.update({
             "harness_ready": self.ready,
+            "environment": self.env_config.environment.value,
             "session_id": self.session.session_id,
             "active_users": len(self.journey_executor.test_users),
-            "active_connections": len(self.journey_executor.websocket_connections)
+            "active_connections": len(self.journey_executor.websocket_connections),
+            "service_urls": {
+                "backend": self.env_config.services.backend,
+                "auth": self.env_config.services.auth,
+                "frontend": self.env_config.services.frontend,
+                "websocket": self.env_config.services.websocket
+            },
+            "database_url": self.env_config.database.url
         })
         return status
     
@@ -131,13 +169,29 @@ class UnifiedE2ETestHarness:
 
 
 # Factory functions for easy instantiation
-def create_e2e_harness(project_root: Optional[Path] = None) -> UnifiedE2ETestHarness:
-    """Create unified E2E test harness instance."""
-    return UnifiedE2ETestHarness(project_root)
+def create_e2e_harness(project_root: Optional[Path] = None, 
+                      environment: Optional[TestEnvironmentType] = None) -> UnifiedE2ETestHarness:
+    """Create unified E2E test harness instance.
+    
+    Args:
+        project_root: Optional project root path
+        environment: Optional environment override (test, dev, staging)
+        
+    Returns:
+        UnifiedE2ETestHarness instance configured for the specified environment
+    """
+    return UnifiedE2ETestHarness(project_root, environment)
 
 
-async def quick_e2e_test() -> Dict[str, Any]:
-    """Quick E2E test for validation."""
-    async with create_e2e_harness().test_environment() as harness:
+async def quick_e2e_test(environment: Optional[TestEnvironmentType] = None) -> Dict[str, Any]:
+    """Quick E2E test for validation.
+    
+    Args:
+        environment: Optional environment override
+        
+    Returns:
+        Test results dictionary
+    """
+    async with create_e2e_harness(environment=environment).test_environment() as harness:
         user = await harness.create_test_user()
         return await harness.simulate_user_journey(user)

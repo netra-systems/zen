@@ -72,8 +72,8 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 ### Test Files (Multiple Test Types)
 | Test Type | Location | Pattern | Run Command |
 |-----------|----------|---------|-------------|
-| Unit Tests | `/app/tests/unit/` | `test_*.py` | `python test_runner.py --level unit` |
-| E2E Tests | `/app/tests/e2e/` | `test_e2e_*.py` | `python test_runner.py --level e2e` |
+| Unit Tests | `/app/tests/unit/` | `test_*.py` | `python -m test_framework.test_runner --level unit` |
+| E2E Tests | `/app/tests/e2e/` | `test_e2e_*.py` | `python -m test_framework.test_runner --level e2e` |
 | Real Agent Tests | `/app/tests/` | `test_real_agent_services.py` | Direct test file |
 | Frontend Tests | `/frontend/__tests__/` | `*.test.tsx` | `npm test` |
 
@@ -111,7 +111,7 @@ python scripts/test_backend.py --no-bad-test-detection
 ### Backend Entry Points
 - **Main App**: `/app/main.py` - FastAPI application entry
 - **Dev Launcher**: `/scripts/dev_launcher.py` - Development server starter
-- **Test Runner**: `/scripts/test_runner.py` - Test execution entry
+- **Test Runner**: `/test_framework/test_runner.py` - Test execution entry (run with `python -m test_framework.test_runner`)
 
 ### Frontend Entry Points
 - **Next.js App**: `/frontend/app/page.tsx` - Main page component
@@ -231,7 +231,7 @@ python scripts/test_backend.py --no-bad-test-detection
 - **Types**: `/app/schemas/websocket_types.py`
 
 ### Issue: "Tests failing"
-- **Runner**: `/scripts/test_runner.py`
+- **Runner**: `/test_framework/test_runner.py` (use `python -m test_framework.test_runner`)
 - **Unit tests**: `/app/tests/unit/`
 - **E2E tests**: `/app/tests/e2e/`
 

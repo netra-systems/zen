@@ -22,6 +22,13 @@ from urllib.parse import urlparse
 from enum import Enum
 from pathlib import Path
 
+from app.core.network_constants import (
+    DatabaseConstants,
+    ServicePorts,
+    HostConstants,
+    NetworkEnvironmentHelper
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -78,7 +85,7 @@ class DatabaseConnector:
     - Graceful connection cleanup
     """
     
-    def __init__(self, use_emoji: bool = True):
+    def __init__(self, use_emoji: bool = False):
         """Initialize database connector."""
         self.use_emoji = use_emoji
         self.connections: Dict[str, DatabaseConnection] = {}
@@ -116,53 +123,69 @@ class DatabaseConnector:
     
     def _discover_database_connections(self) -> None:
         """Discover database connections from environment variables."""
-        # Load .env file first if not already loaded
         self._ensure_env_loaded()
-        
-        # PostgreSQL
-        if os.environ.get("DATABASE_URL"):
-            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, os.environ["DATABASE_URL"])
-        
-        # ClickHouse
+        self._discover_postgres_connection()
+        self._discover_clickhouse_connection()
+        self._discover_redis_connection()
+        logger.info(f"Discovered {len(self.connections)} database connections")
+    
+    def _discover_postgres_connection(self) -> None:
+        """Discover PostgreSQL connection."""
+        postgres_url = os.environ.get(DatabaseConstants.DATABASE_URL)
+        if postgres_url:
+            self._add_connection("main_postgres", DatabaseType.POSTGRESQL, postgres_url)
+    
+    def _discover_clickhouse_connection(self) -> None:
+        """Discover ClickHouse connection."""
         clickhouse_url = self._build_clickhouse_url()
         if clickhouse_url:
             self._add_connection("main_clickhouse", DatabaseType.CLICKHOUSE, clickhouse_url)
-        
-        # Redis
+    
+    def _discover_redis_connection(self) -> None:
+        """Discover Redis connection."""
         redis_url = self._build_redis_url()
         if redis_url:
             self._add_connection("main_redis", DatabaseType.REDIS, redis_url)
-        
-        logger.info(f"Discovered {len(self.connections)} database connections")
     
     def _build_clickhouse_url(self) -> Optional[str]:
         """Build ClickHouse URL from environment variables."""
-        host = os.environ.get("CLICKHOUSE_HOST", "localhost")
-        port = os.environ.get("CLICKHOUSE_HTTP_PORT", "8123")
-        user = os.environ.get("CLICKHOUSE_USER", "default")
+        return self._construct_clickhouse_url_from_env()
+    
+    def _construct_clickhouse_url_from_env(self) -> Optional[str]:
+        """Construct ClickHouse URL from environment variables."""
+        host = os.environ.get("CLICKHOUSE_HOST", HostConstants.LOCALHOST)
+        port = os.environ.get("CLICKHOUSE_HTTP_PORT", str(ServicePorts.CLICKHOUSE_HTTP))
+        user = os.environ.get("CLICKHOUSE_USER", DatabaseConstants.CLICKHOUSE_DEFAULT_USER)
         password = os.environ.get("CLICKHOUSE_PASSWORD", "")
-        database = os.environ.get("CLICKHOUSE_DB", "default")
+        database = os.environ.get("CLICKHOUSE_DB", DatabaseConstants.CLICKHOUSE_DEFAULT_DB)
         
-        password_part = f":{password}" if password else ""
-        return f"clickhouse://{user}{password_part}@{host}:{port}/{database}"
+        return DatabaseConstants.build_clickhouse_url(
+            host=host,
+            port=int(port),
+            database=database,
+            user=user,
+            password=password if password else None
+        )
     
     def _build_redis_url(self) -> Optional[str]:
         """Build Redis URL from environment variables."""
-        # First check if REDIS_URL is already set
-        if os.environ.get("REDIS_URL"):
-            return os.environ["REDIS_URL"]
-        
-        # Build from components
-        host = os.environ.get("REDIS_HOST", "localhost")
-        port = os.environ.get("REDIS_PORT", "6379")
+        if os.environ.get(DatabaseConstants.REDIS_URL):
+            return os.environ[DatabaseConstants.REDIS_URL]
+        return self._construct_redis_url_from_env()
+    
+    def _construct_redis_url_from_env(self) -> Optional[str]:
+        """Construct Redis URL from environment variables."""
+        host = os.environ.get("REDIS_HOST", HostConstants.LOCALHOST)
+        port = os.environ.get("REDIS_PORT", str(ServicePorts.REDIS_DEFAULT))
         password = os.environ.get("REDIS_PASSWORD", "")
-        db = os.environ.get("REDIS_DB", "0")
+        db = os.environ.get("REDIS_DB", str(DatabaseConstants.REDIS_DEFAULT_DB))
         
-        # Build URL
-        if password:
-            return f"redis://:{password}@{host}:{port}/{db}"
-        else:
-            return f"redis://{host}:{port}/{db}"
+        return DatabaseConstants.build_redis_url(
+            host=host,
+            port=int(port),
+            database=int(db),
+            password=password if password else None
+        )
     
     def _add_connection(self, name: str, db_type: DatabaseType, url: str) -> None:
         """Add a database connection for monitoring."""
@@ -383,17 +406,19 @@ class DatabaseConnector:
         
         conn = None
         try:
-            # Handle Cloud SQL vs regular connections
-            if "/cloudsql/" in connection.url:
-                conn = await self._connect_cloud_sql(connection)
-            else:
-                conn = await self._connect_standard_tcp(connection)
-            
+            conn = await self._establish_postgres_connection(connection)
             await self._validate_postgres_health(conn)
             return True
         finally:
             if conn:
                 await conn.close()
+    
+    async def _establish_postgres_connection(self, connection: DatabaseConnection):
+        """Establish PostgreSQL connection based on URL type."""
+        if "/cloudsql/" in connection.url:
+            return await self._connect_cloud_sql(connection)
+        else:
+            return await self._connect_standard_tcp(connection)
     
     async def _connect_cloud_sql(self, connection: DatabaseConnection) -> object:
         """Connect to Cloud SQL PostgreSQL."""
@@ -406,9 +431,19 @@ class DatabaseConnector:
     async def _connect_standard_tcp(self, connection: DatabaseConnection) -> object:
         """Connect to standard TCP PostgreSQL."""
         import asyncpg
+        # Fix URL format - asyncpg expects 'postgresql://' not 'postgresql+asyncpg://'
+        clean_url = self._normalize_postgres_url(connection.url)
         return await asyncio.wait_for(
-            asyncpg.connect(connection.url),
+            asyncpg.connect(clean_url),
             timeout=self.retry_config.timeout
+        )
+    
+    def _normalize_postgres_url(self, url: str) -> str:
+        """Normalize PostgreSQL URL for asyncpg driver."""
+        # Convert postgresql+asyncpg:// to postgresql:// for asyncpg
+        return url.replace(
+            DatabaseConstants.POSTGRES_ASYNC_SCHEME,
+            DatabaseConstants.POSTGRES_SCHEME
         )
     
     async def _validate_postgres_health(self, conn) -> None:
@@ -443,32 +478,46 @@ class DatabaseConnector:
         """Test ClickHouse connection."""
         try:
             import aiohttp
-            
-            parsed = urlparse(connection.url)
-            
-            # Build HTTP URL for health check
-            scheme = "https" if parsed.port == 8443 else "http"
-            base_url = f"{scheme}://{parsed.hostname}:{parsed.port}"
-            
-            auth = None
-            if parsed.username:
-                auth = aiohttp.BasicAuth(parsed.username, parsed.password or "")
-            
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"{base_url}/ping",
-                    auth=auth,
-                    timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
-                ) as response:
-                    return response.status == 200
-                    
+            return await self._perform_clickhouse_health_check(connection)
         except ImportError:
-            # aiohttp not available, skip validation
             logger.warning("aiohttp not available for ClickHouse validation")
             return True
         except Exception as e:
             connection.last_error = f"ClickHouse connection failed: {str(e)}"
             return False
+    
+    async def _perform_clickhouse_health_check(self, connection: DatabaseConnection) -> bool:
+        """Perform ClickHouse health check via HTTP."""
+        import aiohttp
+        parsed = urlparse(connection.url)
+        
+        base_url = self._build_clickhouse_http_url(parsed)
+        auth = self._build_clickhouse_auth(parsed)
+        
+        return await self._execute_clickhouse_ping(base_url, auth)
+    
+    def _build_clickhouse_http_url(self, parsed_url) -> str:
+        """Build HTTP URL for ClickHouse health check."""
+        scheme = "https" if parsed_url.port == 8443 else "http"
+        return f"{scheme}://{parsed_url.hostname}:{parsed_url.port}"
+    
+    def _build_clickhouse_auth(self, parsed_url):
+        """Build authentication for ClickHouse connection."""
+        import aiohttp
+        if parsed_url.username:
+            return aiohttp.BasicAuth(parsed_url.username, parsed_url.password or "")
+        return None
+    
+    async def _execute_clickhouse_ping(self, base_url: str, auth) -> bool:
+        """Execute ClickHouse ping request."""
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                f"{base_url}/ping",
+                auth=auth,
+                timeout=aiohttp.ClientTimeout(total=self.retry_config.timeout)
+            ) as response:
+                return response.status == 200
     
     async def _test_redis_connection(self, connection: DatabaseConnection) -> bool:
         """Test Redis connection."""

@@ -8,18 +8,28 @@ import asyncio
 import uuid
 import time
 import json
+import logging
 import subprocess
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+from .test_environment_config import (
+    get_test_environment_config,
+    TestEnvironmentConfig,
+    TestEnvironmentType
+)
+
+logger = logging.getLogger(__name__)
+
 
 class ServiceConfig:
     """Configuration for a test service."""
     
     def __init__(self, name: str, host: str = "localhost", port: int = 8000, 
-                 health_endpoint: str = "/health", startup_timeout: int = 30):
+                 health_endpoint: str = "/health", startup_timeout: int = 30,
+                 url: Optional[str] = None):
         self.name = name
         self.host = host
         self.port = port
@@ -27,13 +37,15 @@ class ServiceConfig:
         self.startup_timeout = startup_timeout
         self.ready = False
         self.process: Optional[subprocess.Popen] = None
+        self.url = url or f"http://{host}:{port}"
 
 
 class DatabaseManager:
     """Manages database connections and setup for testing."""
     
-    def __init__(self, harness):
+    def __init__(self, harness, env_config: Optional[TestEnvironmentConfig] = None):
         self.harness = harness
+        self.env_config = env_config
         self.initialized = False
     
     async def setup_databases(self) -> None:
@@ -48,12 +60,29 @@ class DatabaseManager:
 class TestState:
     """State management for test harness."""
     
-    def __init__(self):
-        self.services: Dict[str, ServiceConfig] = {
-            "auth_service": ServiceConfig("auth_service", port=8001),
-            "backend": ServiceConfig("backend", port=8000)
-        }
-        self.databases = DatabaseManager(None)
+    def __init__(self, env_config: Optional[TestEnvironmentConfig] = None):
+        self.env_config = env_config
+        
+        # Initialize services with environment-aware configuration
+        if env_config:
+            self.services: Dict[str, ServiceConfig] = {
+                "auth_service": ServiceConfig(
+                    "auth_service", 
+                    url=env_config.services.auth
+                ),
+                "backend": ServiceConfig(
+                    "backend", 
+                    url=env_config.services.backend
+                )
+            }
+        else:
+            # Fallback to default configuration
+            self.services: Dict[str, ServiceConfig] = {
+                "auth_service": ServiceConfig("auth_service", port=8001),
+                "backend": ServiceConfig("backend", port=8000)
+            }
+        
+        self.databases = DatabaseManager(None, env_config)
         self.ready = False
         self.cleanup_tasks: List[callable] = []
         self.project_root = Path.cwd()
@@ -63,15 +92,26 @@ class UnifiedTestHarness:
     """
     Unified test harness for comprehensive system testing.
     Supports authentication, WebSocket, and service integration testing.
+    Now with environment-aware configuration for test, dev, and staging.
     """
     
-    def __init__(self):
+    def __init__(self, environment: Optional[TestEnvironmentType] = None):
+        """Initialize unified test harness.
+        
+        Args:
+            environment: Optional environment override (test, dev, staging)
+        """
         self.test_session_id = str(uuid.uuid4())
         self.mock_services = {}
         self.test_data = {}
-        self.state = TestState()
+        
+        # Setup environment configuration
+        self.env_config = get_test_environment_config(environment=environment)
+        self.state = TestState(self.env_config)
         self.state.databases.harness = self
         self.project_root = Path.cwd()
+        
+        logger.info(f"Test Harness initialized for {self.env_config.environment.value} environment")
     
     # Authentication Testing Support
     def create_test_user(self, user_id: str = None) -> Dict[str, str]:
@@ -111,6 +151,41 @@ class UnifiedTestHarness:
                 **payload
             }
         }
+    
+    def get_service_url(self, service_name: str) -> str:
+        """Get URL for specific service based on environment."""
+        service_config = self.state.services.get(service_name)
+        if service_config:
+            return service_config.url
+        
+        # Environment-aware fallback
+        if self.env_config:
+            service_urls_map = {
+                "backend": self.env_config.services.backend,
+                "auth": self.env_config.services.auth,
+                "auth_service": self.env_config.services.auth,
+                "frontend": self.env_config.services.frontend
+            }
+            if service_name in service_urls_map:
+                return service_urls_map[service_name]
+        
+        raise ValueError(f"Service {service_name} not configured")
+    
+    def get_websocket_url(self) -> str:
+        """Get WebSocket URL based on environment."""
+        if self.env_config:
+            return self.env_config.services.websocket
+        
+        # Fallback to backend URL conversion
+        backend_url = self.get_service_url("backend")
+        return backend_url.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
+    
+    def get_database_url(self) -> str:
+        """Get database URL based on environment."""
+        if self.env_config:
+            return self.env_config.database.url
+        
+        return "sqlite+aiosqlite:///:memory:"  # Default for tests
     
     def create_chat_message(self, content: str, thread_id: str = None) -> Dict:
         """Create chat message for testing"""
@@ -265,7 +340,7 @@ class WebSocketTestHelper:
     def create_connection_scenario(self, user_tokens: Dict) -> Dict:
         """Create WebSocket connection test scenario"""
         return {
-            "ws_url": f"/ws?token={user_tokens['access_token']}",
+            "ws_url": self.harness.get_websocket_url(),
             "headers": self.harness.create_auth_headers(user_tokens["access_token"]),
             "test_messages": [
                 self.harness.create_chat_message("Hello"),

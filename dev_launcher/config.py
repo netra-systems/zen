@@ -7,6 +7,10 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Dict, Any
+from app.core.network_constants import ServicePorts, HostConstants
+from app.core.environment_constants import (
+    Environment, EnvironmentVariables, get_current_environment, get_current_project_id
+)
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +20,7 @@ class LauncherConfig:
     
     # Port configuration
     backend_port: Optional[int] = None
-    frontend_port: int = 3000
+    frontend_port: int = ServicePorts.FRONTEND_DEFAULT
     dynamic_ports: bool = True  # Default to dynamic allocation
     
     # Reload configuration (uses native reload)
@@ -79,10 +83,8 @@ class LauncherConfig:
         
         # Set project ID from environment if not provided
         if self.project_id is None:
-            # Determine project ID based on environment
-            environment = os.environ.get("ENVIRONMENT", "development").lower()
-            default_project_id = "701982941522" if environment == "staging" else "304612253870"
-            self.project_id = os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
+            # Use centralized project ID determination
+            self.project_id = get_current_project_id()
         
         # Validate configuration
         self._validate()
@@ -93,8 +95,8 @@ class LauncherConfig:
     def _validate(self):
         """Validate configuration values."""
         # Validate ports
-        if self.backend_port and not (1 <= self.backend_port <= 65535):
-            raise ValueError(f"Invalid backend port: {self.backend_port}. Must be between 1 and 65535.")
+        if self.backend_port and not (ServicePorts.DYNAMIC_PORT_MIN <= self.backend_port <= ServicePorts.DYNAMIC_PORT_MAX):
+            raise ValueError(f"Invalid backend port: {self.backend_port}. Must be between {ServicePorts.DYNAMIC_PORT_MIN} and {ServicePorts.DYNAMIC_PORT_MAX}.")
         
         if not (1 <= self.frontend_port <= 65535):
             raise ValueError(f"Invalid frontend port: {self.frontend_port}. Must be between 1 and 65535.")

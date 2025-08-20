@@ -8,6 +8,9 @@ import os
 import logging
 from typing import Dict, Set
 from dataclasses import dataclass
+from app.core.environment_constants import (
+    Environment, get_current_environment
+)
 
 logger = logging.getLogger(__name__)
 
@@ -82,8 +85,8 @@ class SecretValidator:
         
         # Check for localhost in production-like settings
         if key.endswith('_HOST') and 'localhost' in value.lower():
-            env = os.environ.get('ENVIRONMENT', 'development').lower()
-            if env in ['staging', 'production']:
+            env = get_current_environment()
+            if env in [Environment.STAGING.value, Environment.PRODUCTION.value]:
                 return True
         
         return False

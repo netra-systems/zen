@@ -1,5 +1,6 @@
 import os
 import sys
+from app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
@@ -15,10 +16,16 @@ else:
     # Standard test environment setup
     os.environ["TESTING"] = "1"
     # Use PostgreSQL URL format even for tests to satisfy validator
-    os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/netra_test"
-    os.environ["REDIS_URL"] = "redis://localhost:6379/1"
-    os.environ["REDIS_HOST"] = "localhost"
-    os.environ["REDIS_PORT"] = "6379"
+    os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
+        user="test", password="test", 
+        port=ServicePorts.POSTGRES_DEFAULT,
+        database="netra_test"
+    )
+    os.environ["REDIS_URL"] = DatabaseConstants.build_redis_url(
+        database=DatabaseConstants.REDIS_TEST_DB
+    )
+    os.environ["REDIS_HOST"] = HostConstants.LOCALHOST
+    os.environ["REDIS_PORT"] = str(ServicePorts.REDIS_DEFAULT)
     os.environ["REDIS_USERNAME"] = ""
     os.environ["REDIS_PASSWORD"] = ""
     os.environ["TEST_DISABLE_REDIS"] = "true"

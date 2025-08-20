@@ -15,6 +15,7 @@ sys.path.insert(0, str(project_root))
 
 from tests.unified.real_services_manager import RealServicesManager
 from tests.unified.database_test_connections import DatabaseConnectionManager
+from tests.unified.test_environment_config import TestEnvironmentConfig
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +23,17 @@ logger = logging.getLogger(__name__)
 class E2EServiceOrchestrator:
     """Orchestrates all services for E2E testing."""
     
-    def __init__(self, project_root: Optional[Path] = None):
-        """Initialize service orchestrator."""
+    def __init__(self, project_root: Optional[Path] = None, env_config: Optional[TestEnvironmentConfig] = None):
+        """Initialize service orchestrator.
+        
+        Args:
+            project_root: Optional project root path
+            env_config: Environment configuration for environment-aware service management
+        """
         self.project_root = project_root or self._detect_project_root()
-        self.services_manager = RealServicesManager(self.project_root)
-        self.db_manager = DatabaseConnectionManager()
+        self.env_config = env_config
+        self.services_manager = RealServicesManager(self.project_root, env_config)
+        self.db_manager = DatabaseConnectionManager(env_config)
         self.ready = False
     
     def _detect_project_root(self) -> Path:
@@ -82,6 +89,19 @@ class E2EServiceOrchestrator:
     
     def get_service_url(self, service_name: str) -> str:
         """Get URL for specific service."""
+        # Use environment configuration if available
+        if self.env_config:
+            service_urls_map = {
+                "backend": self.env_config.services.backend,
+                "auth": self.env_config.services.auth,
+                "auth_service": self.env_config.services.auth,  # Alias
+                "frontend": self.env_config.services.frontend
+            }
+            
+            if service_name in service_urls_map:
+                return service_urls_map[service_name]
+        
+        # Fallback to services manager
         service_urls = self.services_manager.get_service_urls()
         if service_name not in service_urls:
             raise ValueError(f"Service {service_name} not available")
@@ -89,8 +109,13 @@ class E2EServiceOrchestrator:
     
     def get_websocket_url(self) -> str:
         """Get WebSocket URL for backend service."""
+        # Use environment configuration if available
+        if self.env_config:
+            return self.env_config.services.websocket
+        
+        # Fallback to dynamic generation
         backend_url = self.get_service_url("backend")
-        return backend_url.replace("http://", "ws://") + "/ws"
+        return backend_url.replace("http://", "ws://").replace("https://", "wss://") + "/ws"
     
     def is_environment_ready(self) -> bool:
         """Check if environment is ready."""
@@ -142,6 +167,15 @@ class E2EServiceOrchestrator:
         await self._stop_services()
 
 
-def create_service_orchestrator(project_root: Optional[Path] = None) -> E2EServiceOrchestrator:
-    """Create service orchestrator instance."""
-    return E2EServiceOrchestrator(project_root)
+def create_service_orchestrator(project_root: Optional[Path] = None, 
+                               env_config: Optional[TestEnvironmentConfig] = None) -> E2EServiceOrchestrator:
+    """Create service orchestrator instance.
+    
+    Args:
+        project_root: Optional project root path
+        env_config: Environment configuration
+        
+    Returns:
+        E2EServiceOrchestrator instance
+    """
+    return E2EServiceOrchestrator(project_root, env_config)

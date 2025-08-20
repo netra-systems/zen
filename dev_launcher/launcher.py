@@ -37,6 +37,7 @@ from dev_launcher.migration_runner import MigrationRunner
 from dev_launcher.database_connector import DatabaseConnector
 from dev_launcher.websocket_validator import WebSocketValidator
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
+from dev_launcher.environment_validator import EnvironmentValidator
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +112,7 @@ class DevLauncher:
         self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
         self.database_connector = DatabaseConnector(self.use_emoji)
         self.websocket_validator = WebSocketValidator(self.use_emoji)
+        self.environment_validator = EnvironmentValidator()
     
     def _create_secret_loader(self) -> SecretLoader:
         """Create secret loader instance."""
@@ -338,9 +340,36 @@ class DevLauncher:
         if not self.cache_manager.has_environment_changed():
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
+        
+        # Run comprehensive environment validation
+        self._print("🔍", "ENV", "Checking environment...")
+        validation_result = self.environment_validator.validate_all()
+        
+        if not validation_result.is_valid:
+            self._print("❌", "ENV", "Environment validation failed")
+            self.environment_validator.print_validation_summary(validation_result)
+            
+            # Print fix suggestions
+            suggestions = self.environment_validator.get_fix_suggestions(validation_result)
+            if suggestions:
+                self._print("💡", "HELP", "Suggestions:")
+                for suggestion in suggestions:
+                    print(f"  • {suggestion}")
+            
+            return False
+        
+        # Run basic environment checks
         result = self.environment_checker.check_environment()
+        
         # Check and set defaults for critical environment variables
         self._check_critical_env_vars()
+        
+        # Print summary if there were warnings
+        if validation_result.warnings:
+            self.environment_validator.print_validation_summary(validation_result)
+        else:
+            self._print("✅", "ENV", "Environment check passed")
+        
         return result
     
     def _check_critical_env_vars(self):
