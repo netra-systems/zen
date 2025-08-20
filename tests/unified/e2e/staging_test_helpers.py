@@ -154,80 +154,42 @@ class StagingTestSuite:
     async def run_health_checks(self) -> Dict[str, ServiceHealthStatus]:
         """Run health checks for all configured services."""
         services = self.env_config.services
-        health_results = {}
-        
-        # Define service health endpoints
-        service_endpoints = {
+        endpoints = {
             "backend": f"{services.backend}/health/",
             "auth": f"{services.auth}/health",
-            "frontend": services.frontend,  # Just check accessibility
+            "frontend": services.frontend
         }
         
-        # Check WebSocket via HTTP health endpoint if available
-        if services.websocket:
-            ws_health_url = services.websocket.replace("wss://", "https://").replace("/ws", "/health/")
-            service_endpoints["websocket"] = ws_health_url
-        
-        # Run health checks concurrently
-        tasks = []
-        for service_name, endpoint in service_endpoints.items():
-            task = asyncio.create_task(
-                self.check_service_health(endpoint),
-                name=f"health_check_{service_name}"
-            )
-            tasks.append((service_name, task))
-        
-        # Collect results
-        for service_name, task in tasks:
+        health_results = {}
+        for name, endpoint in endpoints.items():
             try:
-                health_result = await task
-                health_results[service_name] = health_result
+                result = await self.check_service_health(endpoint)
+                health_results[name] = result
             except Exception as e:
-                health_results[service_name] = ServiceHealthStatus(
-                    service_name=service_name,
-                    url=service_endpoints.get(service_name, "unknown"),
-                    status_code=0,
-                    response_time_ms=0,
-                    healthy=False,
-                    details={"error": f"Health check failed: {str(e)}"}
+                health_results[name] = ServiceHealthStatus(
+                    service_name=name, url=endpoint, status_code=0,
+                    response_time_ms=0, healthy=False, details={"error": str(e)}
                 )
-        
         return health_results
     
     async def cleanup(self) -> None:
         """Cleanup test environment resources."""
-        cleanup_errors = []
+        for client in [self.test_client, self.aio_session]:
+            if client:
+                try:
+                    await client.aclose() if hasattr(client, 'aclose') else await client.close()
+                except Exception:
+                    pass
         
-        # Close HTTP clients
-        if self.test_client:
-            try:
-                await self.test_client.aclose()
-            except Exception as e:
-                cleanup_errors.append(f"test_client cleanup: {e}")
-        
-        if self.aio_session:
-            try:
-                await self.aio_session.close()
-            except Exception as e:
-                cleanup_errors.append(f"aio_session cleanup: {e}")
-        
-        # Cleanup harness
-        if self.harness:
-            try:
-                await self.harness.cleanup_test_environment()
-            except Exception as e:
-                cleanup_errors.append(f"harness cleanup: {e}")
-        
-        # Stop services
-        if self.services_manager:
-            try:
-                await self.services_manager.stop_all_services()
-            except Exception as e:
-                cleanup_errors.append(f"services cleanup: {e}")
-        
-        # Log cleanup errors but don't fail
-        if cleanup_errors:
-            print(f"Cleanup warnings: {cleanup_errors}")
+        for manager in [self.harness, self.services_manager]:
+            if manager:
+                try:
+                    if hasattr(manager, 'cleanup_test_environment'):
+                        await manager.cleanup_test_environment()
+                    elif hasattr(manager, 'stop_all_services'):
+                        await manager.stop_all_services()
+                except Exception:
+                    pass
         
         self._setup_complete = False
 
@@ -278,36 +240,23 @@ async def staging_suite_session_cleanup():
 
 def validate_staging_environment() -> tuple[bool, List[str]]:
     """Validate staging environment configuration and return issues."""
-    issues = []
-    
-    # Check critical environment variables
     required_vars = [
         "DATABASE_URL", "REDIS_URL", "CLICKHOUSE_URL",
-        "JWT_SECRET_KEY", "FERNET_KEY",
-        "GOOGLE_CLIENT_ID", "GEMINI_API_KEY"
+        "JWT_SECRET_KEY", "FERNET_KEY", "GOOGLE_CLIENT_ID", "GEMINI_API_KEY"
     ]
     
-    for var in required_vars:
-        if not os.getenv(var):
-            issues.append(f"Missing environment variable: {var}")
+    issues = [f"Missing: {var}" for var in required_vars if not os.getenv(var)]
     
-    # Validate URL formats
-    db_url = os.getenv("DATABASE_URL", "")
-    if db_url and not db_url.startswith("postgresql://"):
-        issues.append("DATABASE_URL must start with 'postgresql://'")
+    # Basic URL validation
+    for var, prefix in [("DATABASE_URL", "postgresql://"), ("REDIS_URL", "redis://"), ("CLICKHOUSE_URL", "clickhouse://")]:
+        value = os.getenv(var, "")
+        if value and not value.startswith(prefix):
+            issues.append(f"{var} invalid format")
     
-    redis_url = os.getenv("REDIS_URL", "")
-    if redis_url and not redis_url.startswith("redis://"):
-        issues.append("REDIS_URL must start with 'redis://'")
-    
-    clickhouse_url = os.getenv("CLICKHOUSE_URL", "")
-    if clickhouse_url and not clickhouse_url.startswith("clickhouse://"):
-        issues.append("CLICKHOUSE_URL must start with 'clickhouse://'")
-    
-    # Validate secret key lengths
+    # JWT secret length check
     jwt_secret = os.getenv("JWT_SECRET_KEY", "")
     if jwt_secret and len(jwt_secret) < 32:
-        issues.append("JWT_SECRET_KEY must be at least 32 characters")
+        issues.append("JWT_SECRET_KEY too short")
     
     return len(issues) == 0, issues
 
@@ -315,45 +264,21 @@ def validate_staging_environment() -> tuple[bool, List[str]]:
 async def run_staging_environment_check() -> Dict[str, Any]:
     """Run comprehensive staging environment check and return results."""
     try:
-        # Validate environment configuration
         is_valid, issues = validate_staging_environment()
         if not is_valid:
-            return {
-                "status": "failed",
-                "reason": "Environment validation failed",
-                "issues": issues
-            }
+            return {"status": "failed", "issues": issues}
         
-        # Test service connectivity
         suite = await get_staging_suite()
         health_results = await suite.run_health_checks()
-        
-        healthy_services = [name for name, result in health_results.items() if result.healthy]
-        unhealthy_services = [name for name, result in health_results.items() if not result.healthy]
+        healthy_count = sum(1 for result in health_results.values() if result.healthy)
         
         return {
-            "status": "passed" if len(unhealthy_services) == 0 else "partial",
-            "environment": "staging",
-            "healthy_services": healthy_services,
-            "unhealthy_services": unhealthy_services,
-            "total_services": len(health_results),
-            "health_details": {
-                name: {
-                    "healthy": result.healthy,
-                    "status_code": result.status_code,
-                    "response_time_ms": result.response_time_ms
-                }
-                for name, result in health_results.items()
-            },
-            "timestamp": datetime.now().isoformat()
+            "status": "passed" if healthy_count == len(health_results) else "partial",
+            "healthy_services": healthy_count,
+            "total_services": len(health_results)
         }
-        
     except Exception as e:
-        return {
-            "status": "error",
-            "reason": f"Staging environment check failed: {str(e)}",
-            "timestamp": datetime.now().isoformat()
-        }
+        return {"status": "error", "reason": str(e)}
 
 
 # Convenience functions for common staging test patterns
@@ -368,10 +293,7 @@ async def create_test_user_with_token(suite: StagingTestSuite) -> Dict[str, Any]
             "email": getattr(user, 'email', 'test@example.com')
         }
     except Exception as e:
-        return {
-            "success": False,
-            "error": str(e)
-        }
+        return {"success": False, "error": str(e)}
 
 
 async def test_websocket_connection_flow(suite: StagingTestSuite, user_data: Dict[str, Any]) -> bool:
@@ -386,25 +308,20 @@ async def test_websocket_connection_flow(suite: StagingTestSuite, user_data: Dic
         async with suite.aio_session.ws_connect(
             ws_url, headers=headers, ssl=False, timeout=10
         ) as ws:
-            # Send connection init
             await ws.send_json({
                 "type": "connection_init",
                 "payload": {"auth_token": user_data['access_token']}
             })
             
-            # Wait for ack
             msg = await ws.receive()
             if msg.type == aiohttp.WSMsgType.TEXT:
                 data = json.loads(msg.data)
                 return data.get("type") in ["connection_ack", "connected"]
-        
         return False
-        
     except Exception:
         return False
 
 
 if __name__ == "__main__":
-    # Direct execution for staging environment validation
     result = asyncio.run(run_staging_environment_check())
     print(json.dumps(result, indent=2))

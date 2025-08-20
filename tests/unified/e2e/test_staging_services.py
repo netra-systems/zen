@@ -298,66 +298,11 @@ class TestStagingServiceIntegration:
             await ws.close()
 
 
-# Convenience function for running service health validation
-async def run_staging_service_validation() -> Dict[str, Any]:
-    """Run comprehensive staging service validation."""
-    try:
-        suite = await get_staging_suite()
-        results = {
-            "backend_healthy": False,
-            "auth_healthy": False,
-            "frontend_accessible": False,
-            "websocket_configured": False,
-            "databases_configured": False
-        }
-        
-        # Check backend health
-        try:
-            backend_health = await suite.check_service_health(
-                f"{suite.env_config.services.backend}/health/"
-            )
-            results["backend_healthy"] = backend_health.healthy
-        except Exception:
-            pass
-        
-        # Check auth health
-        try:
-            auth_health = await suite.check_service_health(
-                f"{suite.env_config.services.auth}/health"
-            )
-            results["auth_healthy"] = auth_health.healthy
-        except Exception:
-            pass
-        
-        # Check frontend accessibility
-        try:
-            response = await suite.test_client.get(suite.env_config.services.frontend)
-            results["frontend_accessible"] = response.status_code == 200
-        except Exception:
-            pass
-        
-        # Check WebSocket configuration
-        ws_url = suite.env_config.services.websocket
-        results["websocket_configured"] = ws_url.startswith("wss://")
-        
-        # Check database configuration
-        db_vars = ["DATABASE_URL", "REDIS_URL", "CLICKHOUSE_URL"]
-        results["databases_configured"] = all(os.getenv(var) for var in db_vars)
-        
-        healthy_services = sum(results.values())
-        return {
-            "status": "passed" if healthy_services >= 4 else "partial",
-            "healthy_services": healthy_services,
-            "total_services": len(results),
-            "details": results
-        }
-        
-    except Exception as e:
-        return {
-            "status": "error",
-            "reason": f"Service validation failed: {str(e)}"
-        }
-
-
 if __name__ == "__main__":
-    asyncio.run(run_staging_service_validation())
+    async def run_validation():
+        suite = await get_staging_suite()
+        health_results = await suite.run_health_checks()
+        healthy = sum(1 for result in health_results.values() if result.healthy)
+        print(f"Healthy services: {healthy}/{len(health_results)}")
+    
+    asyncio.run(run_validation())

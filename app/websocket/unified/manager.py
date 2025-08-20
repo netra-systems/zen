@@ -137,9 +137,16 @@ class UnifiedWebSocketManager:
         self.pending_messages: Dict[str, Dict[str, Any]] = {}
         self.sending_messages: Dict[str, Dict[str, Any]] = {}
         self.message_lock = asyncio.Lock()
+        
+        # Initialize cleanup task as None - will be started on first connection
+        self._cleanup_task = None
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish WebSocket connection with circuit breaker protection."""
+        # Start cleanup task on first connection if not already started
+        if self._cleanup_task is None:
+            self._cleanup_task = asyncio.create_task(self._periodic_cleanup())
+            
         if not self.circuit_breaker.can_execute():
             self._record_circuit_break()
             raise ConnectionError("Circuit breaker is open")
@@ -359,17 +366,37 @@ class UnifiedWebSocketManager:
         await self.error_handler.handle_generic_error(error, context)
 
     async def shutdown(self) -> None:
-        """Gracefully shutdown unified WebSocket manager."""
+        """Gracefully shutdown unified WebSocket manager with memory leak prevention."""
         logger.info("Starting unified WebSocket manager shutdown...")
+        
+        # Cancel cleanup task if it exists and is running
+        if hasattr(self, '_cleanup_task') and self._cleanup_task is not None and not self._cleanup_task.done():
+            self._cleanup_task.cancel()
+            try:
+                await self._cleanup_task
+            except asyncio.CancelledError:
+                pass
         
         # Handle any pending messages before shutdown
         async with self.message_lock:
-            if self.pending_messages or self.sending_messages:
-                logger.warning(f"Shutting down with {len(self.pending_messages)} pending and {len(self.sending_messages)} sending messages")
+            pending_count = len(self.pending_messages)
+            sending_count = len(self.sending_messages)
+            
+            if pending_count > 0 or sending_count > 0:
+                logger.warning(f"Shutting down with {pending_count} pending and {sending_count} sending messages")
+                
+                # Clear all message tracking to prevent memory leaks
+                self.pending_messages.clear()
+                self.sending_messages.clear()
+                logger.info("Cleared all pending/sending message queues to prevent memory leaks")
         
         await self.state.persist_state()
         await self.connection_manager.shutdown()
-        logger.info(f"Unified shutdown complete. Final telemetry: {self.telemetry}")
+        
+        # Clear telemetry data
+        self.telemetry.clear()
+        
+        logger.info("Unified shutdown complete with memory cleanup")
 
     # Transactional message processing methods
     async def _mark_message_sending(self, message_id: str, user_id: str, 
@@ -435,6 +462,44 @@ class UnifiedWebSocketManager:
         
         if retry_count > 0:
             logger.info(f"Successfully retried {retry_count} pending messages")
+    
+    async def _periodic_cleanup(self) -> None:
+        """Periodic cleanup to prevent memory leaks from stale messages."""
+        while True:
+            try:
+                await asyncio.sleep(300)  # Clean up every 5 minutes
+                
+                current_time = time.time()
+                max_age = 1800  # 30 minutes
+                
+                async with self.message_lock:
+                    # Clean up old pending messages
+                    old_pending = [
+                        msg_id for msg_id, msg_data in self.pending_messages.items()
+                        if current_time - msg_data["timestamp"] > max_age
+                    ]
+                    
+                    # Clean up old sending messages
+                    old_sending = [
+                        msg_id for msg_id, msg_data in self.sending_messages.items()
+                        if current_time - msg_data["timestamp"] > max_age
+                    ]
+                    
+                    # Remove old messages
+                    for msg_id in old_pending:
+                        del self.pending_messages[msg_id]
+                    
+                    for msg_id in old_sending:
+                        del self.sending_messages[msg_id]
+                    
+                    if old_pending or old_sending:
+                        logger.info(f"Cleaned up {len(old_pending)} old pending and {len(old_sending)} old sending messages")
+                
+            except asyncio.CancelledError:
+                logger.debug("Periodic cleanup task cancelled")
+                break
+            except Exception as e:
+                logger.error(f"Error in periodic cleanup: {e}")
 
     async def get_transactional_stats(self) -> Dict[str, Any]:
         """Get statistics about transactional message processing."""

@@ -25,7 +25,8 @@ def _get_api_route_configs(modules: dict) -> dict:
 def _get_service_route_configs(modules: dict) -> dict:
     """Get service route configurations."""
     return {"quality": (modules["quality"].router, "", ["quality"]),
-        "websockets": (modules["websockets_router"], "", ["websockets"])}
+        "websockets": (modules["websockets_router"], "", ["websockets"]),
+        "websocket_secure": (modules["websocket_secure_router"], "", ["websocket_secure"])}
 
 
 def get_business_route_configs(modules: dict) -> dict:

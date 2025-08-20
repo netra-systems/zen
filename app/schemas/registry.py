@@ -55,7 +55,7 @@ from app.schemas.websocket_models import (
     WebSocketMessage, WebSocketMessageIn, MessageData, ThreadHistoryResponse,
     AgentResponseData, AgentResponse, MessageToUser, AnalysisRequest,
     UserMessage, AgentMessage, StopAgent, AgentCompletedPayload,
-    AgentStoppedPayload
+    AgentStoppedPayload, ServerMessage
 )
 
 # Import all audit models from the dedicated module
@@ -101,7 +101,7 @@ __all__ = [
     "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",
     "AgentUpdate", "AgentLog", "ToolCall", "ToolResult", "StreamChunk", "StreamComplete",
-    "BaseWebSocketMessage", "ClientToServerMessage", "ServerToClientMessage",
+    "BaseWebSocketMessage", "ClientToServerMessage", "ServerToClientMessage", "ServerMessage",
     
     # Audit models
     "CorpusAuditRecord", "CorpusAuditMetadata", "CorpusAuditSearchFilter", 
@@ -164,6 +164,7 @@ TYPE_REGISTRY = {
     "BaseWebSocketMessage": BaseWebSocketMessage,
     "ClientToServerMessage": ClientToServerMessage,
     "ServerToClientMessage": ServerToClientMessage,
+    "ServerMessage": ServerMessage,
     
     # Enums
     "MessageType": MessageType,

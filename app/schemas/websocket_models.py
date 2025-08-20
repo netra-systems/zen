@@ -238,6 +238,19 @@ class AgentStoppedPayload(TypedDict):
     status: Literal["stopped"]
 
 
+class ServerMessage(BaseModel):
+    """Server-to-client WebSocket message."""
+    type: str
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    server_id: Optional[str] = None
+    correlation_id: Optional[str] = None
+    
+    model_config = ConfigDict(
+        extra="allow"
+    )
+
+
 # Export all WebSocket models
 __all__ = [
     "BaseWebSocketPayload",
@@ -271,5 +284,6 @@ __all__ = [
     "AgentMessage",
     "StopAgent",
     "AgentCompletedPayload",
-    "AgentStoppedPayload"
+    "AgentStoppedPayload",
+    "ServerMessage"
 ]

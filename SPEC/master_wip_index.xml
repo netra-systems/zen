@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <name>Master WIP and Status Index</name>
+    <description>Living index tracking alignment between codebase implementation and specifications</description>
+    <version>1.0.0</version>
+    <created>2025-01-20</created>
+    <last_updated>2025-01-20</last_updated>
+    <priority>CRITICAL</priority>
+    <update_frequency>DAILY</update_frequency>
+  </metadata>
+
+  <purpose>
+    Track the alignment between Netra Apex codebase and its specifications,
+    providing a quantitative scoring system and actionable insights for
+    maintaining architectural compliance and system coherence.
+  </purpose>
+
+  <scoring_methodology>
+    <scale>0-100 percentage scale</scale>
+    <thresholds>
+      <excellent>90-100%</excellent>
+      <good>75-89%</good>
+      <needs_attention>60-74%</needs_attention>
+      <critical>0-59%</critical>
+    </thresholds>
+    
+    <dimensions>
+      <dimension name="implementation_completeness">
+        Are all specified components implemented?
+      </dimension>
+      <dimension name="architectural_compliance">
+        Does the code follow specified patterns and boundaries?
+      </dimension>
+      <dimension name="test_coverage">
+        Are testing requirements met per specification?
+      </dimension>
+      <dimension name="documentation_alignment">
+        Is documentation current with implementation?
+      </dimension>
+      <dimension name="performance_standards">
+        Are specified performance metrics achieved?
+      </dimension>
+    </dimensions>
+    
+    <rollup_strategy>
+      Weighted average with critical violations having veto power.
+      System score = MIN(critical_compliance, weighted_average(all_scores))
+    </rollup_strategy>
+  </scoring_methodology>
+
+  <index_structure>
+    <hierarchy>
+      <level1>System Overall Score</level1>
+      <level2>Service Scores (Backend, Auth, Frontend)</level2>
+      <level3>Category Scores (Architecture, Testing, etc.)</level3>
+      <level4>Individual Spec Scores</level4>
+    </hierarchy>
+    
+    <categories>
+      <category name="core_architecture">
+        <specs>
+          <spec>architecture.xml</spec>
+          <spec>system_boundaries.xml</spec>
+          <spec>independent_services.xml</spec>
+          <spec>growth_control.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="testing">
+        <specs>
+          <spec>testing.xml</spec>
+          <spec>coverage_requirements.xml</spec>
+          <spec>test_runner_guide.xml</spec>
+          <spec>e2e-testing-spec.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="agents">
+        <specs>
+          <spec>agent_architecture.xml</spec>
+          <spec>subagents.xml</spec>
+          <spec>agent_tracking.xml</spec>
+          <spec>supervisor_observability.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="infrastructure">
+        <specs>
+          <spec>staging_environment.xml</spec>
+          <spec>terraform_gcp.xml</spec>
+          <spec>github_actions.xml</spec>
+          <spec>deployment_naming_standards.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="data">
+        <specs>
+          <spec>clickhouse.xml</spec>
+          <spec>postgres.xml</spec>
+          <spec>database.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="frontend">
+        <specs>
+          <spec>ui_ux_master.xml</spec>
+          <spec>frontend_layout.xml</spec>
+          <spec>websockets.xml</spec>
+          <spec>frontend_testing_guide.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="security">
+        <specs>
+          <spec>PRODUCTION_SECRETS_ISOLATION.xml</spec>
+          <spec>auth_environment_isolation.xml</spec>
+          <spec>tool_auth_system.xml</spec>
+        </specs>
+      </category>
+      
+      <category name="quality">
+        <specs>
+          <spec>type_safety.xml</spec>
+          <spec>conventions.xml</spec>
+          <spec>ai_slop_prevention_spec.xml</spec>
+          <spec>compliance_reporting.xml</spec>
+        </specs>
+      </category>
+    </categories>
+  </index_structure>
+
+  <update_process>
+    <steps>
+      <step order="1">
+        Check this document (master_wip_index.xml) for current methodology
+      </step>
+      <step order="2">
+        Run compliance checking tools:
+        - python scripts/check_architecture_compliance.py
+        - python -m test_framework.test_runner --report-only
+      </step>
+      <step order="3">
+        Analyze spec alignment using sub-agents for each category
+      </step>
+      <step order="4">
+        Calculate scores using defined methodology
+      </step>
+      <step order="5">
+        Generate/update MASTER_WIP_STATUS.md with results
+      </step>
+      <step order="6">
+        Update this spec with any methodology improvements
+      </step>
+    </steps>
+    
+    <triggers>
+      <trigger>Daily automated check</trigger>
+      <trigger>Before major releases</trigger>
+      <trigger>After significant refactors</trigger>
+      <trigger>On-demand via command</trigger>
+    </triggers>
+  </update_process>
+
+  <report_format>
+    <sections>
+      <section name="executive_summary">
+        Overall system health score with trend
+      </section>
+      <section name="service_breakdown">
+        Per-service scores with critical issues
+      </section>
+      <section name="category_analysis">
+        Detailed category scores with spec links
+      </section>
+      <section name="critical_violations">
+        High-priority issues requiring immediate attention
+      </section>
+      <section name="improvement_areas">
+        Actionable recommendations with priorities
+      </section>
+      <section name="progress_tracking">
+        Historical trends and improvement velocity
+      </section>
+    </sections>
+    
+    <linking>
+      Always link to source specs rather than duplicating content.
+      Include last_updated timestamps for all referenced materials.
+    </linking>
+  </report_format>
+
+  <automation>
+    <scripts>
+      <script>scripts/generate_wip_report.py</script>
+      <script>scripts/check_spec_alignment.py</script>
+    </scripts>
+    
+    <sub_agent_tasks>
+      <task>Analyze architecture compliance per service</task>
+      <task>Evaluate test coverage against requirements</task>
+      <task>Check API contract adherence</task>
+      <task>Verify security implementation</task>
+    </sub_agent_tasks>
+  </automation>
+
+  <learnings>
+    <learning>
+      Use existing reporting infrastructure from compliance_reporting.xml
+    </learning>
+    <learning>
+      Leverage test_reporting.xml patterns for metric collection
+    </learning>
+    <learning>
+      Reference ai_factory_status_report.xml for report structure
+    </learning>
+  </learnings>
+</spec>
