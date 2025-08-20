@@ -28,10 +28,10 @@ class BadTestDetector:
     
     def _get_default_data_file(self) -> Path:
         """Get default data file path."""
-        # Now using single test_results.json file
+        # Using dedicated bad_tests.json file as per specification
         reports_dir = Path(__file__).parent.parent / "test_reports"
         reports_dir.mkdir(exist_ok=True)
-        return reports_dir / "test_results.json"
+        return reports_dir / "bad_tests.json"
     
     def _generate_run_id(self) -> str:
         """Generate unique run ID."""
@@ -209,17 +209,19 @@ class BadTestDetector:
                 })
                 bad_tests["recommended_for_fix"].append(test_name)
             
-            # High failure rate
-            if failure_rate > 0.7 and test_data["total_failures"] >= 10:
+            # High failure rate (70% failure with 10+ total runs)
+            total_runs = test_data["total_failures"] + test_data["total_passes"]
+            if failure_rate > 0.7 and total_runs >= 10:
                 bad_tests["high_failure_rate"].append({
                     "test": test_name,
                     "failure_rate": failure_rate,
+                    "total_runs": total_runs,
                     "total_failures": test_data["total_failures"],
                     "component": test_data["component"]
                 })
                 
-                # If very high failure rate, recommend deletion
-                if failure_rate > 0.9:
+                # If very high failure rate (90%+), recommend deletion
+                if failure_rate >= 0.9:
                     bad_tests["recommended_for_deletion"].append(test_name)
             
             # Recent failures (failed in last run)

@@ -72,8 +72,17 @@
             </rule>
             
             <rule id="minimal-mocking">
-                Mock ONLY external APIs and truly unavailable resources.
+                Mock ONLY truly unavailable resources.
                 WebSocket, state management, and UI components should be real.
+            </rule>
+            
+            <rule id="mock-justification-required">
+                ALL mocks MUST be justified with explicit documentation.
+                A mock without justification is a violation.
+                Use @mock_justified decorator or inline comment with rationale.
+                Example for unit test: @mock_justified("Because of the scope of this being a unit test of {insert more info}, the 
+                   api {more info} is not part of the SUT and therefore acceptable to be mocked.")
+                Example for E2E tests: @mock_justified("This subsystem is very far from SUT yet required for one small sub item")
             </rule>
             
             <rule id="fix-sut-not-tests">
@@ -101,6 +110,8 @@
             <anti_pattern>Modifying tests to pass instead of fixing bugs</anti_pattern>
             <anti_pattern>Tests longer than 300 lines</anti_pattern>
             <anti_pattern>Test functions longer than 8 lines</anti_pattern>
+            <anti_pattern>Mocks without explicit justification</anti_pattern>
+            <anti_pattern>Using @patch or Mock() without @mock_justified decorator</anti_pattern>
         </anti_patterns>
     </real_test_requirements>
     

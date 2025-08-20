@@ -17,6 +17,7 @@ from .type_checker import TypeChecker
 from .stub_checker import StubChecker
 from .ssot_checker import SSOTChecker
 from .test_limits_checker import TestLimitsChecker
+from .mock_justification_checker import MockJustificationChecker
 from .reporter import ComplianceReporter
 
 
@@ -37,6 +38,7 @@ class ArchitectureEnforcer:
         self.stub_checker = StubChecker(self.config)
         self.ssot_checker = SSOTChecker(self.config)
         self.test_limits_checker = TestLimitsChecker(self.config) if check_test_limits else None
+        self.mock_justification_checker = MockJustificationChecker(self.config)
         self.reporter = ComplianceReporter(max_file_lines, max_function_lines,
                                           violation_limit, smart_limits, use_emoji)
     
@@ -62,6 +64,7 @@ class ArchitectureEnforcer:
         violations.extend(self.ssot_checker.check_ssot_violations())
         if self.test_limits_checker:
             violations.extend(self.test_limits_checker.check_test_limits())
+        violations.extend(self.mock_justification_checker.check_mock_justifications())
         return violations
     
     def _group_violations_by_type(self, violations: List[Violation]) -> Dict[str, int]:

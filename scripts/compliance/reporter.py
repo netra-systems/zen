@@ -41,6 +41,7 @@ class ComplianceReporter:
         self._report_function_complexity_violations(results)
         self._report_duplicate_type_violations(results)
         self._report_test_stub_violations(results)
+        self._report_mock_justification_violations(results)
     
     def _report_file_size_violations(self, results: ComplianceResults) -> None:
         """Report file size violations"""
@@ -195,6 +196,36 @@ class ComplianceReporter:
         remaining = len(test_stub_violations) - limit
         if remaining > 0:
             print(f"  ... and {remaining} more files")
+    
+    def _report_mock_justification_violations(self, results: ComplianceResults) -> None:
+        """Report mock justification violations"""
+        print("\n[UNJUSTIFIED MOCKS]")
+        print("-" * 40)
+        mock_violations = self._get_violations_by_type(results, "mock_justification")
+        self._print_mock_violations(mock_violations)
+    
+    def _print_mock_violations(self, mock_violations: List[Violation]) -> None:
+        """Print mock justification violation details"""
+        if mock_violations:
+            self._print_mock_list(mock_violations)
+            print(f"\n  Total unjustified mocks: {len(mock_violations)}")
+        else:
+            print("  [PASS] All mocks are justified")
+    
+    def _print_mock_list(self, mock_violations: List[Violation]) -> None:
+        """Print mock violation list"""
+        sorted_mocks = self.utils.sort_violations_by_severity(mock_violations)
+        limit = self.utils.get_smart_limit(len(sorted_mocks), base_limit=5)
+        for violation in sorted_mocks[:limit]:
+            line_info = f":L{violation.line_number}" if violation.line_number else ""
+            print(f"  {violation.file_path}{line_info}: {violation.description}")
+        self._print_mock_truncation(sorted_mocks, limit)
+    
+    def _print_mock_truncation(self, mock_violations: List[Violation], limit: int) -> None:
+        """Print mock truncation message if needed"""
+        remaining = len(mock_violations) - limit
+        if remaining > 0:
+            print(f"  ... and {remaining} more unjustified mocks")
     
     def _print_category_scores(self, results: ComplianceResults) -> None:
         """Print compliance scores by category"""

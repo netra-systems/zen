@@ -13,10 +13,10 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
     "smoke": {
         "description": "Quick smoke tests for basic functionality (< 30 seconds)",
         "purpose": "Pre-commit validation, basic health checks",
-        "backend_args": ["--category", "smoke", "--fail-fast", "--markers", "not real_services"],
+        "backend_args": ["--category", "smoke", "--fail-fast", "--coverage", "--markers", "not real_services"],
         "frontend_args": [],
         "timeout": 30,
-        "run_coverage": False,
+        "run_coverage": True,
         "run_both": False  # Only run backend smoke tests for now
     },
     "unit": {

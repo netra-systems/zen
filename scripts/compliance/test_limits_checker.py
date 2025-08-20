@@ -10,7 +10,7 @@ import glob
 from pathlib import Path
 from typing import List, Optional, Dict
 
-from core import Violation, ComplianceConfig, ViolationBuilder
+from .core import Violation, ComplianceConfig, ViolationBuilder
 
 
 class TestLimitsChecker:

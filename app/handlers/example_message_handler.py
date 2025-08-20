@@ -17,11 +17,6 @@ from pydantic import BaseModel, Field, ValidationError
 
 from app.logging_config import central_logger
 from app.schemas.registry import WebSocketMessage
-from app.agents.supervisor.execution_engine import get_execution_engine
-from app.agents.triage_sub_agent.core import TriageSubAgent
-from app.agents.data_sub_agent.agent_core import DataSubAgent
-from app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsAgent
-from app.agents.reporting_sub_agent import ReportingSubAgent
 from app.agents.example_message_processor import get_example_message_supervisor
 from app.ws_manager import get_manager
 from app.database import get_async_db
