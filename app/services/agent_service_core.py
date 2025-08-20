@@ -117,6 +117,10 @@ class AgentService(IAgentService):
             await self.message_handler.handle_thread_history(user_id, db_session)
         elif message_type == "stop_agent":
             await self.message_handler.handle_stop_agent(user_id)
+        elif message_type == "get_conversation_history":
+            await self.message_handler.handle_get_conversation_history(user_id, payload, db_session)
+        elif message_type == "get_agent_context":
+            await self.message_handler.handle_get_agent_context(user_id, payload, db_session)
         else:
             return False
         return True

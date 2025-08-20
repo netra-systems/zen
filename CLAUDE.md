@@ -95,6 +95,7 @@ When addressing bugs, understand the required behavior objectively. Focus on sat
 *   **Update Timing:** Specs must be *reviewed* before starting work and *finalized* immediately after code changes are validated to reflect the implemented reality.
 *   **Learnings:** Document insights in specs (using positive wording) to ensure continuous improvement and stability.
 *   **Navigation:** Consult and update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
+* Refactors must delete all legacy code. Refactors must be complete system wide and "atomic" operations that leave a clean and better system.
 
 ## 5. Architecture and Conventions
 

@@ -18,10 +18,10 @@ class JWTTestHelper:
     """Helper class for JWT token operations in tests."""
     
     def __init__(self):
-        self.auth_url = "http://localhost:8081"  # Updated to match services
+        self.auth_url = "http://localhost:8080"  # Updated to match running auth service
         self.backend_url = "http://localhost:8000"
         self.websocket_url = "ws://localhost:8000"
-        self.test_secret = "test-jwt-secret-key-32-chars-min"
+        self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"  # Use actual env JWT secret
     
     def create_valid_payload(self) -> Dict:
         """Create standard valid token payload."""
@@ -189,11 +189,11 @@ class JWTSecurityTester:
         results = {}
         
         # Test auth service
-        auth_result = await self.helper.make_auth_request("/auth/validate", token)
+        auth_result = await self.helper.make_auth_request("/auth/verify", token)
         results["auth_service"] = auth_result["status"]
         
         # Test backend service
-        backend_result = await self.helper.make_backend_request("/health", token)
+        backend_result = await self.helper.make_backend_request("/api/users/profile", token)
         results["backend_service"] = backend_result["status"]
         
         # Test WebSocket
@@ -228,7 +228,7 @@ class JWTTokenTestHelper:
     """Additional JWT token test helper for service-to-service auth testing."""
     
     def __init__(self):
-        self.test_secret = "test-jwt-secret-key-32-chars-min"
+        self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"  # Use actual env JWT secret
     
     def decode_token_unsafe(self, token: str) -> Optional[Dict]:
         """Decode JWT token without verification (for testing only)."""

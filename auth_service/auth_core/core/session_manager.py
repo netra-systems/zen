@@ -6,6 +6,7 @@ import os
 import json
 import uuid
 import redis
+import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 import logging
@@ -24,6 +25,10 @@ class SessionManager:
             self._connect_redis()
         else:
             logger.info("Redis disabled for current environment")
+        
+        # Initialize race condition protection
+        self.used_refresh_tokens = set()
+        self._session_locks = {}
             
     def _should_enable_redis(self) -> bool:
         """Determine if Redis should be enabled based on environment"""
@@ -179,15 +184,29 @@ class SessionManager:
             return []
     
     async def invalidate_user_sessions(self, user_id: str) -> int:
-        """Invalidate all sessions for a user"""
-        sessions = await self.get_user_sessions(user_id)
-        count = 0
+        """Invalidate all sessions for a user with race condition protection"""
+        # Use a lock to prevent concurrent invalidation operations for the same user
+        if user_id not in self._session_locks:
+            self._session_locks[user_id] = asyncio.Lock()
         
-        for session in sessions:
-            if self.delete_session(session["session_id"]):
-                count += 1
+        async with self._session_locks[user_id]:
+            sessions = await self.get_user_sessions(user_id)
+            count = 0
+            
+            # Process session deletions concurrently but safely
+            delete_tasks = []
+            for session in sessions:
+                delete_tasks.append(self._delete_session_async(session["session_id"]))
+            
+            if delete_tasks:
+                results = await asyncio.gather(*delete_tasks, return_exceptions=True)
+                count = sum(1 for result in results if result is True)
                 
         return count
+    
+    async def _delete_session_async(self, session_id: str) -> bool:
+        """Async wrapper for session deletion"""
+        return self.delete_session(session_id)
     
     def _store_session(self, session_id: str, 
                       session_data: Dict) -> bool:

@@ -85,30 +85,21 @@ async def lifespan(app: FastAPI):
         yield
         return
     
-    # Initialize database connections on startup
+    # Initialize single database connection
     from auth_core.database.connection import auth_db
-    from auth_core.database.main_db_sync import main_db_sync
     
     initialization_errors = []
     
-    # Try to initialize auth database
+    # Initialize auth database (uses the same DATABASE_URL as main app)
     try:
         await auth_db.initialize()
         logger.info("Auth database initialized successfully")
     except Exception as e:
         error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
         logger.warning(f"Auth database initialization failed: {error_msg}")
-        initialization_errors.append(f"Auth DB: {error_msg}")
+        initialization_errors.append(f"Database: {error_msg}")
     
-    # Try to initialize main database sync (non-critical for basic auth)
-    try:
-        await main_db_sync.initialize()
-        logger.info("Main database sync initialized successfully")
-    except Exception as e:
-        logger.warning(f"Main database sync failed (non-critical): {e}")
-        initialization_errors.append(f"Main DB Sync: {e}")
-    
-    # In development, allow service to start even with some DB issues
+    # In development, allow service to start even with DB issues
     if env == "development" and initialization_errors:
         logger.warning(f"Starting with {len(initialization_errors)} DB issues in development mode")
     elif initialization_errors and env in ["staging", "production"]:
@@ -119,18 +110,13 @@ async def lifespan(app: FastAPI):
     # Cleanup
     logger.info("Shutting down Auth Service...")
     
-    # Close database connections safely
+    # Close database connection safely
     try:
         await auth_db.close()
     except Exception as e:
-        logger.warning(f"Error closing auth DB: {e}")
+        logger.warning(f"Error closing database: {e}")
     
-    try:
-        await main_db_sync.close()
-    except Exception as e:
-        logger.warning(f"Error closing main DB sync: {e}")
-    
-    logger.info("Database connections closed")
+    logger.info("Database connection closed")
 
 # Create FastAPI app
 app = FastAPI(

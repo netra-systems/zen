@@ -109,6 +109,40 @@ class ServiceStartupCoordinator:
             )
         return result
     
+    def start_all_services(self, process_manager, health_monitor, parallel: bool = True) -> bool:
+        """Start all services with unified approach.
+        
+        Args:
+            process_manager: Process manager instance
+            health_monitor: Health monitor instance  
+            parallel: Whether to start services in parallel
+            
+        Returns:
+            True if all services started successfully
+        """
+        try:
+            if parallel:
+                # Start services in parallel
+                services = self.start_services_parallel()
+            else:
+                # Start services sequentially
+                services = {}
+                services["auth"] = self.start_auth_service()
+                services["backend"] = self.start_backend()
+                services["frontend"] = self.start_frontend()
+            
+            # Register processes with process manager
+            for name, (process, streamer) in services.items():
+                if process:
+                    process_manager.register_process(name.capitalize(), process, streamer)
+            
+            # Verify all services started
+            return all(process is not None for process, _ in services.values())
+            
+        except Exception as e:
+            logger.error(f"Failed to start services: {e}")
+            return False
+    
     def start_services_parallel(self) -> Dict[str, Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]]:
         """Start all services in parallel with progressive readiness."""
         start_time = time.time()

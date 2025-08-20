@@ -289,6 +289,16 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
             raise RuntimeError(f"System health check failed: {health_status}")
         
         self.logger.info(f"System health verified: {health_status['ready_services']}/{health_status['service_count']} services ready")
+    
+    async def __aenter__(self):
+        """Async context manager entry."""
+        await self.start_services()
+        await self.seed_test_data()
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        await self.stop_all_services()
 
 
 # Context manager for easy usage

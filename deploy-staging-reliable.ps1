@@ -375,7 +375,8 @@ $backendDeployArgs = @(
     "--min-instances", "0",
     "--max-instances", "10",
     "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=backend",
-    "--set-secrets=DATABASE_URL=database-url-staging:latest",
+    "--add-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres",
+    "--set-secrets=DATABASE_URL=database-url-staging:latest,GEMINI_API_KEY=gemini-api-key-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,FERNET_KEY=fernet-key-staging:latest",
     "--quiet"
 )
 gcloud @backendDeployArgs
@@ -426,7 +427,8 @@ if ($AuthServiceExists) {
         "--min-instances", "1",
         "--max-instances", "2",
         "--set-env-vars=ENVIRONMENT=staging,SERVICE_NAME=auth",
-        "--set-secrets=DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest",
+        "--add-cloudsql-instances=netra-staging:us-central1:staging-shared-postgres",
+        "--set-secrets=DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,FERNET_KEY=fernet-key-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest",
         "--quiet"
     )
     gcloud @authDeployArgs

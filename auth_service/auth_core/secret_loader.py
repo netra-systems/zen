@@ -116,16 +116,24 @@ class AuthSecretLoader:
         
         # Environment-specific
         if env == "staging":
+            # First check staging-specific env var
             client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID_STAGING")
             if client_id:
+                logger.info("Using GOOGLE_OAUTH_CLIENT_ID_STAGING from environment")
                 return client_id
         elif env == "production":
             client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID_PRODUCTION")
             if client_id:
+                logger.info("Using GOOGLE_OAUTH_CLIENT_ID_PRODUCTION from environment")
                 return client_id
         
-        # Generic fallback
-        return os.getenv("GOOGLE_CLIENT_ID", "")
+        # Generic fallback - this is what Cloud Run sets from secrets
+        client_id = os.getenv("GOOGLE_CLIENT_ID", "")
+        if client_id:
+            logger.info("Using GOOGLE_CLIENT_ID from environment")
+        else:
+            logger.warning("No Google Client ID found in environment")
+        return client_id
     
     @staticmethod
     def get_google_client_secret() -> str:
@@ -134,13 +142,21 @@ class AuthSecretLoader:
         
         # Environment-specific
         if env == "staging":
+            # First check staging-specific env var
             secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_STAGING")
             if secret:
+                logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_STAGING from environment")
                 return secret
         elif env == "production":
             secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION")
             if secret:
+                logger.info("Using GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION from environment")
                 return secret
         
-        # Generic fallback
-        return os.getenv("GOOGLE_CLIENT_SECRET", "")
+        # Generic fallback - this is what Cloud Run sets from secrets
+        secret = os.getenv("GOOGLE_CLIENT_SECRET", "")
+        if secret:
+            logger.info("Using GOOGLE_CLIENT_SECRET from environment")
+        else:
+            logger.warning("No Google Client Secret found in environment")
+        return secret

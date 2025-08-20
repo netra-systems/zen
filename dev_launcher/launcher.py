@@ -18,7 +18,6 @@ from concurrent.futures import ThreadPoolExecutor, Future
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.environment_checker import EnvironmentChecker
-from dev_launcher.config_manager import ConfigManager
 from dev_launcher.secret_loader import SecretLoader
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
@@ -31,8 +30,6 @@ from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
-from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
-from dev_launcher.legacy_service_runner import LegacyServiceRunner
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 from dev_launcher.critical_error_handler import critical_handler, CriticalError
 from dev_launcher.migration_runner import MigrationRunner
@@ -94,7 +91,7 @@ class DevLauncher:
     def _setup_components(self):
         """Setup component instances."""
         self.environment_checker = EnvironmentChecker(self.config.project_root, self.use_emoji)
-        self.config_manager = ConfigManager(self.config, self.use_emoji)
+        self.config.set_emoji_support(self.use_emoji)
         self.secret_loader = self._create_secret_loader()
         self.service_startup = self._create_service_startup()
         self.summary_display = SummaryDisplay(self.config, self.service_discovery, self.use_emoji)
@@ -116,7 +113,7 @@ class DevLauncher:
     def _create_service_startup(self) -> ServiceStartupCoordinator:
         """Create service startup coordinator."""
         return ServiceStartupCoordinator(
-            self.config, self.config_manager.services_config,
+            self.config, self.config.services_config,
             self.log_manager, self.service_discovery, self.use_emoji)
     
     def _load_env_file(self):
@@ -137,7 +134,7 @@ class DevLauncher:
     def _setup_logging(self):
         """Setup logging and show verbose configuration."""
         setup_logging(self.config.verbose)
-        self.config_manager.log_verbose_config()
+        self.config.log_verbose_config()
     
     def _setup_signal_handlers(self):
         """Setup signal handlers for graceful shutdown."""
@@ -195,9 +192,6 @@ class DevLauncher:
         # Cleanup optimizers
         if hasattr(self, 'startup_optimizer'):
             self.startup_optimizer.cleanup()
-        
-        if hasattr(self, 'legacy_runner'):
-            self.legacy_runner.cleanup()
         
         # Verify ports are freed
         self._verify_ports_freed()
@@ -285,8 +279,6 @@ class DevLauncher:
         self.cache_manager = CacheManager(self.config.project_root)
         self.startup_optimizer = StartupOptimizer(self.cache_manager)
         self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
-        self.optimized_startup = OptimizedStartupOrchestrator(self)
-        self.legacy_runner = LegacyServiceRunner(self)
         self._register_optimization_steps()
     
     def _register_optimization_steps(self):
@@ -362,7 +354,7 @@ class DevLauncher:
         self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
         result = self.secret_loader.load_all_secrets()
         if self.config.verbose:
-            self.config_manager.show_env_var_debug_info()
+            self.config.show_env_var_debug_info()
         return result
     
     def register_health_monitoring(self):
@@ -374,14 +366,21 @@ class DevLauncher:
         )
     
     def run(self) -> int:
-        """Run the development environment with optimized startup sequence."""
+        """Run the development environment."""
         try:
-            # Check for legacy mode
-            if self.config.legacy_mode:
-                return self._run_legacy_mode()
+            if not self.config.silent_mode:
+                self._print_startup_banner()
+                self.config.show_configuration()
             
-            # Use optimized startup by default
-            return self._run_optimized_mode()
+            # Start timing
+            self.startup_optimizer.start_timing()
+            
+            # Run pre-checks
+            if not self._run_pre_checks():
+                return 1
+            
+            # Run services
+            return self._run_services()
         except CriticalError as e:
             # Handle critical errors
             critical_handler.exit_on_critical(e)
@@ -390,36 +389,42 @@ class DevLauncher:
             logger.error(f"Unexpected error during startup: {e}")
             return 1
     
-    def _run_legacy_mode(self) -> int:
-        """Run in legacy mode with old behavior."""
-        self._print_startup_banner()
-        self.config_manager.show_configuration()
-        
-        # Use legacy service runner
-        return self.legacy_runner.run_services_sequential()
-    
-    def _run_optimized_mode(self) -> int:
-        """Run optimized startup sequence."""
-        if not self.config.silent_mode:
-            self._print_startup_banner()
-            self.config_manager.show_configuration()
-        
-        # Start timing
-        self.startup_optimizer.start_timing()
-        
-        # Execute optimized startup sequence
-        return self.optimized_startup.run_optimized_startup()
-    
     
     def _run_services(self) -> int:
         """Run all services."""
         self._clear_service_discovery()
         
-        # Use parallel startup if enabled
-        if self.parallel_enabled:
-            return self.legacy_runner.run_services_parallel()
-        else:
-            return self.legacy_runner.run_services_sequential()
+        try:
+            # Start services using the unified service startup coordinator
+            success = self.service_startup.start_all_services(
+                self.process_manager,
+                self.health_monitor,
+                parallel=self.parallel_enabled
+            )
+            
+            if not success:
+                self._print("❌", "ERROR", "Failed to start services")
+                return 1
+            
+            # Register health monitoring
+            self.register_health_monitoring()
+            
+            # Start health monitoring
+            self.health_monitor.start()
+            
+            # Show summary
+            self.summary_display.show_summary()
+            
+            # Monitor services
+            self._monitor_services()
+            return 0
+            
+        except KeyboardInterrupt:
+            self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
+            return 0
+        except Exception as e:
+            logger.error(f"Service startup failed: {e}")
+            return 1
     
     
     def _print_startup_banner(self):
@@ -450,6 +455,16 @@ class DevLauncher:
         """Clear old service discovery."""
         self.service_discovery.clear_all()
     
+    def _monitor_services(self):
+        """Monitor running services."""
+        try:
+            # Wait for all processes
+            self.process_manager.wait_for_all()
+        except KeyboardInterrupt:
+            self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
+        except Exception as e:
+            logger.error(f"Service monitoring error: {e}")
+            self._print("❌", "ERROR", f"Service monitoring failed: {str(e)[:100]}")
     
     def _run_main_loop(self):
         """Run main service loop."""

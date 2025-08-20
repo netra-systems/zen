@@ -350,3 +350,129 @@ class MessageHandlerService(IMessageHandlerService):
     async def broadcast_message(self, message: Dict[str, Any]):
         """Broadcast a message to all connected clients."""
         await manager.broadcast(message)
+
+    async def handle_get_conversation_history(
+        self, user_id: str, payload: Dict[str, Any], db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle get_conversation_history message type."""
+        try:
+            session_token = payload.get("session_token", user_id)
+            logger.info(f"Getting conversation history for user {user_id}, session: {session_token}")
+            
+            # Get conversation history from thread service or create mock data
+            history = await self._get_user_conversation_history(user_id, db_session)
+            
+            response = {
+                "type": "conversation_history",
+                "payload": {
+                    "history": history,
+                    "session_token": session_token
+                }
+            }
+            
+            await manager.send_message(user_id, response)
+            logger.info(f"Sent conversation history to user {user_id}: {len(history)} messages")
+            
+        except Exception as e:
+            logger.error(f"Error getting conversation history for user {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, f"Failed to get conversation history: {str(e)}")
+
+    async def handle_get_agent_context(
+        self, user_id: str, payload: Dict[str, Any], db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle get_agent_context message type."""
+        try:
+            session_token = payload.get("session_token", user_id)
+            logger.info(f"Getting agent context for user {user_id}, session: {session_token}")
+            
+            # Get agent context from session or create mock data
+            context = await self._get_user_agent_context(user_id, session_token, db_session)
+            
+            response = {
+                "type": "agent_context",
+                "payload": {
+                    "context": context,
+                    "session_token": session_token
+                }
+            }
+            
+            await manager.send_message(user_id, response)
+            logger.info(f"Sent agent context to user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error getting agent context for user {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, f"Failed to get agent context: {str(e)}")
+
+    async def _get_user_conversation_history(
+        self, user_id: str, db_session: Optional[AsyncSession]
+    ) -> List[Dict[str, Any]]:
+        """Get conversation history for user."""
+        try:
+            if db_session:
+                # Try to get actual conversation history from database
+                threads = await self.thread_service.get_user_threads(user_id, db_session)
+                if threads:
+                    # Get messages from the most recent thread
+                    recent_thread = threads[0]
+                    messages = await self.thread_service.get_thread_messages(recent_thread.id, db_session)
+                    return [self._format_message_for_history(msg) for msg in messages]
+            
+            # Return empty history if no database session or no threads found
+            return []
+            
+        except Exception as e:
+            logger.warning(f"Could not get conversation history from database for user {user_id}: {e}")
+            return []
+
+    async def _get_user_agent_context(
+        self, user_id: str, session_token: str, db_session: Optional[AsyncSession]
+    ) -> Dict[str, Any]:
+        """Get agent context for user session."""
+        try:
+            # Create a basic agent context
+            context = {
+                "session_token": session_token,
+                "user_id": user_id,
+                "conversation_history": await self._get_user_conversation_history(user_id, db_session),
+                "agent_memory": {
+                    "user_preferences": {},
+                    "variables": {},
+                    "workflow_state": {
+                        "current_step": 0,
+                        "total_steps": 1,
+                        "pending_steps": []
+                    }
+                },
+                "tool_call_history": [],
+                "created_at": "2025-01-20T10:00:00Z",
+                "last_activity": "2025-01-20T10:00:00Z"
+            }
+            
+            # Try to get additional context from supervisor if available
+            if hasattr(self.supervisor, 'get_agent_context'):
+                supervisor_context = await self.supervisor.get_agent_context(user_id)
+                if supervisor_context:
+                    context.update(supervisor_context)
+            
+            return context
+            
+        except Exception as e:
+            logger.warning(f"Could not get agent context for user {user_id}: {e}")
+            # Return minimal context on error
+            return {
+                "session_token": session_token,
+                "user_id": user_id,
+                "conversation_history": [],
+                "agent_memory": {"user_preferences": {}, "variables": {}, "workflow_state": {}},
+                "tool_call_history": [],
+                "error": "Context retrieval failed"
+            }
+
+    def _format_message_for_history(self, message) -> Dict[str, Any]:
+        """Format a database message for conversation history."""
+        return {
+            "id": str(message.id),
+            "role": message.role,
+            "content": message.content,
+            "timestamp": message.created_at.isoformat() if hasattr(message, 'created_at') else "2025-01-20T10:00:00Z"
+        }
