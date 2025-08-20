@@ -140,6 +140,23 @@ class BackendTestClient:
         response.raise_for_status()
         return response.json()
         
+    async def get_user_profile(self, token: Optional[str] = None) -> Dict[str, Any]:
+        """Get user profile information.
+        
+        Args:
+            token: Optional token override
+            
+        Returns:
+            User profile data
+        """
+        headers = {}
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
+            
+        response = await self.client.get("/api/user/profile", headers=headers)
+        response.raise_for_status()
+        return response.json()
+        
     async def get_user_settings(self) -> Dict[str, Any]:
         """Get user settings.
         
