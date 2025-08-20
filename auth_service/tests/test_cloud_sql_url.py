@@ -42,6 +42,29 @@ async def test_cloud_sql_url_format():
 
 
 @pytest.mark.asyncio
+async def test_regular_postgres_url_with_ssl():
+    """Test that PostgreSQL URLs with sslmode are converted correctly"""
+    test_url = "postgresql://user:pass@localhost:5432/dbname?sslmode=require"
+    
+    with patch.dict(os.environ, {"DATABASE_URL": test_url, "ENVIRONMENT": "staging"}):
+        with patch("auth_core.database.connection.create_async_engine") as mock_engine:
+            mock_engine.return_value = MagicMock()
+            
+            db = AuthDatabase()
+            await db.initialize()
+            
+            # Verify the URL was converted to asyncpg format
+            mock_engine.assert_called_once()
+            call_args = mock_engine.call_args[0][0]
+            
+            # Should convert postgresql:// to postgresql+asyncpg://
+            assert call_args.startswith("postgresql+asyncpg://")
+            # Should convert sslmode to ssl for asyncpg
+            assert "ssl=require" in call_args
+            assert "sslmode=" not in call_args
+
+
+@pytest.mark.asyncio
 async def test_regular_postgres_url():
     """Test that regular PostgreSQL URLs are handled correctly"""
     test_url = "postgresql://user:pass@localhost:5432/dbname"

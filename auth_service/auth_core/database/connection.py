@@ -42,9 +42,15 @@ class AuthDatabase:
             elif database_url.startswith("postgresql://"):
                 # Convert to async PostgreSQL URL
                 database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+                # Convert sslmode to ssl for asyncpg (unless it's a Unix socket connection)
+                if "sslmode=" in database_url and "/cloudsql/" not in database_url:
+                    database_url = database_url.replace("sslmode=", "ssl=")
             elif database_url.startswith("postgres://"):
                 # Handle Heroku-style URLs
                 database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
+                # Convert sslmode to ssl for asyncpg (unless it's a Unix socket connection)
+                if "sslmode=" in database_url and "/cloudsql/" not in database_url:
+                    database_url = database_url.replace("sslmode=", "ssl=")
         
         # Create async engine with optimizations
         connect_args = {}

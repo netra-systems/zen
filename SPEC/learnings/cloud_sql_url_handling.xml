@@ -38,18 +38,23 @@
     </incorrect_approach>
     
     <correct_approach>
-      <description>Simple URL scheme replacement like backend service</description>
+      <description>Simple URL scheme replacement with sslmode conversion</description>
       <code>
-        # CORRECT: Simple replacement
+        # CORRECT: Simple replacement with sslmode conversion
         if database_url.startswith("postgresql://"):
             database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+            # Convert sslmode to ssl for asyncpg (unless Unix socket)
+            if "sslmode=" in database_url and "/cloudsql/" not in database_url:
+                database_url = database_url.replace("sslmode=", "ssl=")
         elif database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
+            if "sslmode=" in database_url and "/cloudsql/" not in database_url:
+                database_url = database_url.replace("sslmode=", "ssl=")
       </code>
       <benefits>
-        - Consistent with backend service
+        - Handles asyncpg's different SSL parameter name
         - Works with all PostgreSQL URL formats
-        - No special handling needed for Cloud SQL
+        - Skips conversion for Unix socket connections
       </benefits>
     </correct_approach>
   </root_cause_analysis>
@@ -85,7 +90,12 @@
     <url_conversion>
       <from>postgresql://</from>
       <to>postgresql+asyncpg://</to>
-      <preserves>All query parameters including host, sslmode, etc.</preserves>
+      <sslmode_conversion>
+        <from>sslmode=require</from>
+        <to>ssl=require</to>
+        <reason>asyncpg uses 'ssl' parameter instead of 'sslmode'</reason>
+        <exception>Not needed for Unix socket connections (/cloudsql/)</exception>
+      </sslmode_conversion>
     </url_conversion>
     <unix_socket_support>
       <supported>Yes, via host parameter in query string</supported>
@@ -163,13 +173,16 @@
   
   <action_items>
     <action priority="COMPLETED">
-      Simplified auth service database URL handling to match backend
+      Updated auth service database URL handling with sslmode to ssl conversion
     </action>
     <action priority="COMPLETED">
-      Added comprehensive tests for all URL formats
+      Added comprehensive tests for all URL formats including SSL mode conversion
+    </action>
+    <action priority="COMPLETED">
+      Deployed updated auth service to staging
     </action>
     <action priority="PENDING">
-      Deploy updated auth service to staging
+      Fix incorrect database IP in staging secret (34.68.229.240 is wrong)
     </action>
     <action priority="LOW">
       Consider extracting common database connection logic to shared module
