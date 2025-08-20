@@ -162,20 +162,37 @@ class JWTSecretSynchronizationTester:
         user_id = f"test-user-{int(time.time())}"
         
         # Create edge case tokens
-        expired_payload = self._create_test_payload(user_id)
-        expired_payload["exp"] = int((datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp())
-        expired_token = self.jwt_helper.create_token(expired_payload, self.test_secret)
+        edge_tokens = self._create_edge_case_tokens(user_id)
         
-        expired_results, malformed_results = await asyncio.gather(
-            self._test_token_across_services(expired_token),
-            self._test_token_across_services("invalid.jwt.token")
-        )
+        # Test edge cases
+        edge_results = await self._test_edge_case_tokens(edge_tokens)
         
         total_duration = time.time() - start_time
+        return self._build_edge_case_result(edge_results, total_duration)
+    
+    def _create_edge_case_tokens(self, user_id: str) -> Dict[str, str]:
+        """Create tokens for edge case testing."""
+        expired_payload = self._create_test_payload(user_id)
+        expired_payload["exp"] = int((datetime.now(timezone.utc) - timedelta(minutes=1)).timestamp())
         return {
-            "expired_token_rejected": all(r["status"] == 401 for r in expired_results.values() if r["status"] != 500),
-            "malformed_token_rejected": all(r["status"] == 401 for r in malformed_results.values() if r["status"] != 500),
-            "performance_ok": total_duration < 0.05
+            "expired_token": self.jwt_helper.create_token(expired_payload, self.test_secret),
+            "malformed_token": "invalid.jwt.token"
+        }
+    
+    async def _test_edge_case_tokens(self, edge_tokens: Dict[str, str]) -> Dict[str, Dict]:
+        """Test expired and malformed tokens across services."""
+        expired_results, malformed_results = await asyncio.gather(
+            self._test_token_across_services(edge_tokens["expired_token"]),
+            self._test_token_across_services(edge_tokens["malformed_token"])
+        )
+        return {"expired": expired_results, "malformed": malformed_results}
+    
+    def _build_edge_case_result(self, edge_results: Dict, duration: float) -> Dict[str, Any]:
+        """Build edge case test result from service responses."""
+        return {
+            "expired_token_rejected": all(r["status"] == 401 for r in edge_results["expired"].values() if r["status"] != 500),
+            "malformed_token_rejected": all(r["status"] == 401 for r in edge_results["malformed"].values() if r["status"] != 500),
+            "performance_ok": duration < 0.05
         }
     
     def _create_test_payload(self, user_id: str) -> Dict[str, Any]:

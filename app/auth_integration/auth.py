@@ -174,6 +174,11 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     logger.warning("verify_password is deprecated - use auth service")
     return False
 
+def _check_password_rehash_needed(hashed_password: str) -> bool:
+    """DEPRECATED: Use auth service instead"""
+    logger.warning("_check_password_rehash_needed is deprecated - use auth service")
+    return False
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """DEPRECATED: Use auth service instead"""
     logger.warning("create_access_token is deprecated - use auth service")
