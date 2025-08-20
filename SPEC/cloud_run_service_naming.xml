@@ -68,7 +68,7 @@
     <rule id="1">
       <description>ALL deployment scripts MUST use these exact names</description>
       <files>
-        - deploy-staging-reliable.ps1
+        - deploy_staging_reliable.py
         - terraform-gcp/*.tf
         - .github/workflows/*.yml
         - config/cloudbuild*.yaml

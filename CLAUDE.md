@@ -144,8 +144,8 @@ python test_runner.py
 ### 6.3. Deployment (GCP Staging)
 → See [`SPEC/learnings/deployment_staging.xml`](SPEC/learnings/deployment_staging.xml).
 
-*   **Quick Deploy**: `.\deploy-staging-reliable.ps1`
-*   **Auth Issues**: `.\setup-staging-auth.ps1 -ForceNewKey`
+*   **Quick Deploy**: `python deploy_staging_reliable.py`
+*   **Auth Issues**: `python setup_staging_auth.py --force-new-key`
 
 ## 7. Critical Specifications Reference
 

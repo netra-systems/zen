@@ -97,6 +97,7 @@ class ServiceConfigManager:
         self._populate_service_flags(config)
         self._populate_external_urls(config)
         self._populate_oauth_config(config)
+        self._populate_cors_config(config)
         self._logger.info(f"Populated service config for {self._environment}")
     
     def _populate_service_modes(self, config: AppConfig) -> None:
@@ -130,6 +131,12 @@ class ServiceConfigManager:
         if hasattr(config, 'oauth_config'):
             self._set_oauth_urls(config)
             self._set_oauth_scopes(config)
+    
+    def _populate_cors_config(self, config: AppConfig) -> None:
+        """Populate CORS configuration from environment."""
+        cors_origins_env = os.environ.get("CORS_ORIGINS")
+        if cors_origins_env:
+            config.cors_origins = self._parse_cors_origins(cors_origins_env)
     
     def _get_llm_api_key(self) -> Optional[str]:
         """Get LLM API key from environment."""
@@ -205,6 +212,12 @@ class ServiceConfigManager:
         """Get boolean environment variable with default."""
         value = os.environ.get(env_var, str(default)).lower()
         return value in ["true", "1", "yes", "on"]
+    
+    def _parse_cors_origins(self, cors_origins_env: str) -> List[str]:
+        """Parse CORS origins from environment string."""
+        if cors_origins_env.strip() == "*":
+            return ["*"]
+        return [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
     
     def validate_service_consistency(self, config: AppConfig) -> List[str]:
         """Validate service configuration consistency."""

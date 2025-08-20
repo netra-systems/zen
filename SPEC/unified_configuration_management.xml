@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Unified Configuration Management System</name>
+        <type>architecture</type>
+        <category>Configuration</category>
+        <version>1.0</version>
+        <last_updated>2025-08-20</last_updated>
+        <description>
+            Comprehensive specification for the Netra Apex unified configuration management system.
+            Defines the single source of truth for all application configuration, ensuring Enterprise-grade
+            reliability and eliminating configuration-related revenue losses.
+        </description>
+        <business_value>
+            <segment>Enterprise</segment>
+            <business_goal>Zero configuration-related incidents</business_goal>
+            <value_impact>+$12K MRR from improved reliability</value_impact>
+            <revenue_impact>Prevents data inconsistency losses and service disruptions</revenue_impact>
+        </business_value>
+    </metadata>
+
+    <architecture_overview>
+        <title>Unified Configuration Architecture</title>
+        <description>
+            The unified configuration management system provides a single source of truth for all application
+            configuration across development, staging, and production environments. It orchestrates configuration
+            loading from multiple sources (environment variables, secrets, defaults) through a centralized interface.
+        </description>
+        
+        <key_principles>
+            <principle id="single-source-truth">
+                <name>Single Source of Truth</name>
+                <description>All configuration access MUST go through the unified system via get_config()</description>
+                <enforcement>MANDATORY - Direct os.environ.get() calls are prohibited in application code</enforcement>
+            </principle>
+            
+            <principle id="lazy-loading">
+                <name>Lazy Configuration Loading</name>
+                <description>Configuration loads on first access, not at module import time</description>
+                <rationale>Prevents timing issues with subprocess environment setup</rationale>
+            </principle>
+            
+            <principle id="environment-awareness">
+                <name>Environment-Aware Configuration</name>
+                <description>Configuration adapts automatically based on detected environment</description>
+                <environments>development, staging, production, testing</environments>
+            </principle>
+            
+            <principle id="validation-first">
+                <name>Validation-First Design</name>
+                <description>All configuration undergoes strict validation before use</description>
+                <failure_mode>Fast-fail on invalid configuration to prevent runtime issues</failure_mode>
+            </principle>
+        </key_principles>
+        
+        <entry_points>
+            <primary_entry>
+                <file>app/config.py</file>
+                <function>get_config() -> AppConfig</function>
+                <description>Primary access point for all configuration</description>
+                <usage>from app.config import get_config; config = get_config()</usage>
+            </primary_entry>
+            
+            <legacy_entry>
+                <file>app/config.py</file>
+                <attribute>settings</attribute>
+                <description>Lazy-loaded settings attribute for backward compatibility</description>
+                <usage>from app.config import settings</usage>
+                <status>DEPRECATED - Use get_config() for new code</status>
+            </legacy_entry>
+        </entry_points>
+    </architecture_overview>
+
+    <core_principles>
+        <title>Configuration Management Core Principles</title>
+        
+        <principle id="CM-001" priority="CRITICAL">
+            <name>No Direct Environment Access</name>
+            <rule>Application code MUST NOT directly access os.environ.get()</rule>
+            <rationale>Ensures consistent configuration values and proper validation</rationale>
+            <violation_example>
+                <before>host = os.environ.get("CLICKHOUSE_HOST", "localhost")</before>
+                <after>config = get_config(); host = config.clickhouse_https.host</after>
+            </violation_example>
+        </principle>
+        
+        <principle id="CM-002" priority="CRITICAL">
+            <name>Unified Schema Definition</name>
+            <rule>All configuration fields MUST be defined in AppConfig schema</rule>
+            <location>app/schemas/Config.py</location>
+            <benefits>Type safety, IDE support, validation, documentation</benefits>
+        </principle>
+        
+        <principle id="CM-003" priority="HIGH">
+            <name>Environment-Specific Behavior</name>
+            <rule>Configuration behavior adapts to detected environment</rule>
+            <detection_logic>
+                <testing>TESTING environment variable present</testing>
+                <staging>ENVIRONMENT=staging or K_SERVICE contains "staging"</staging>
+                <production>ENVIRONMENT=production</production>
+                <development>Default fallback</development>
+            </detection_logic>
+        </principle>
+        
+        <principle id="CM-004" priority="HIGH">
+            <name>Secrets Staging Suffix Support</name>
+            <rule>Staging environment supports both regular and _STAGING suffixed environment variables</rule>
+            <example>GEMINI_API_KEY_STAGING takes precedence over GEMINI_API_KEY in staging</example>
+            <rationale>Supports deployment script patterns while maintaining flexibility</rationale>
+        </principle>
+    </core_principles>
+
+    <component_structure>
+        <title>Configuration System Components</title>
+        
+        <component name="base.py" type="orchestrator" priority="CRITICAL">
+            <location>app/core/configuration/base.py</location>
+            <purpose>Central orchestration of all configuration loading</purpose>
+            <key_classes>
+                <class name="UnifiedConfigManager">
+                    <responsibility>Singleton configuration manager</responsibility>
+                    <patterns>Singleton, lazy loading, caching</patterns>
+                    <methods>
+                        <method>get_config() -> AppConfig</method>
+                        <method>reload_config(force: bool = False)</method>
+                        <method>validate_configuration_integrity() -> Tuple[bool, list]</method>
+                    </methods>
+                </class>
+            </key_classes>
+            <dependencies>database.py, services.py, secrets.py, validator.py</dependencies>
+        </component>
+        
+        <component name="database.py" type="manager" priority="HIGH">
+            <location>app/core/configuration/database.py</location>
+            <purpose>Database connection configuration management</purpose>
+            <responsibilities>
+                <item>PostgreSQL configuration</item>
+                <item>ClickHouse configuration (native and HTTPS)</item>
+                <item>Redis configuration</item>
+                <item>Database URL parsing and validation</item>
+            </responsibilities>
+        </component>
+        
+        <component name="services.py" type="manager" priority="HIGH">
+            <location>app/core/configuration/services.py</location>
+            <purpose>External services configuration management</purpose>
+            <responsibilities>
+                <item>LLM provider configurations</item>
+                <item>OAuth/Google Cloud configuration</item>
+                <item>Service operation modes (shared/isolated)</item>
+                <item>Environment-specific service defaults</item>
+            </responsibilities>
+        </component>
+        
+        <component name="secrets.py" type="manager" priority="CRITICAL">
+            <location>app/core/configuration/secrets.py</location>
+            <purpose>Secrets management and population</purpose>
+            <responsibilities>
+                <item>Google Secret Manager integration</item>
+                <item>Environment variable fallback</item>
+                <item>Staging suffix handling (_STAGING)</item>
+                <item>Secret validation and consistency checks</item>
+            </responsibilities>
+            <secret_mapping>
+                <secret name="gemini-api-key" target="llm_configs.*.api_key" />
+                <secret name="google-client-id" target="google_cloud.client_id, oauth_config.client_id" />
+                <secret name="clickhouse-default-password" target="clickhouse_*.password" />
+                <secret name="jwt-secret-key" target="jwt_secret_key" />
+                <secret name="fernet-key" target="fernet_key" />
+            </secret_mapping>
+        </component>
+        
+        <component name="validator.py" type="validator" priority="HIGH">
+            <location>app/core/configuration/validator.py</location>
+            <purpose>Configuration validation and integrity checks</purpose>
+            <validation_types>
+                <type>Schema validation (Pydantic)</type>
+                <type>Business logic validation</type>
+                <type>Cross-component consistency</type>
+                <type>Environment-specific requirements</type>
+            </validation_types>
+        </component>
+        
+        <component name="environment.py" type="utility" priority="MEDIUM">
+            <location>app/core/configuration/environment.py</location>
+            <purpose>Environment detection and configuration</purpose>
+            <functions>
+                <function>detect_environment() -> str</function>
+                <function>is_staging_environment() -> bool</function>
+                <function>get_environment_overrides() -> Dict[str, str]</function>
+            </functions>
+        </component>
+    </component_structure>
+
+    <configuration_flow>
+        <title>Configuration Loading Process</title>
+        
+        <flow_sequence>
+            <step id="1" name="Lazy Initialization">
+                <trigger>First call to get_config() or access to settings attribute</trigger>
+                <action>UnifiedConfigManager singleton creation if not exists</action>
+                <timing>After subprocess environment is fully available</timing>
+            </step>
+            
+            <step id="2" name="Environment Detection">
+                <action>Detect current environment from TESTING, ENVIRONMENT, K_SERVICE variables</action>
+                <priority_order>TESTING > ENVIRONMENT > K_SERVICE pattern > "development"</priority_order>
+            </step>
+            
+            <step id="3" name="Base Configuration Creation">
+                <action>Create environment-specific configuration class instance</action>
+                <classes>
+                    <class env="development">DevelopmentConfig</class>
+                    <class env="staging">StagingConfig</class>
+                    <class env="production">ProductionConfig</class>
+                    <class env="testing">NetraTestingConfig</class>
+                </classes>
+            </step>
+            
+            <step id="4" name="Database Configuration Population">
+                <manager>DatabaseConfigManager</manager>
+                <actions>
+                    <action>Populate PostgreSQL connection settings</action>
+                    <action>Configure ClickHouse native and HTTPS connections</action>
+                    <action>Set Redis connection parameters</action>
+                </actions>
+            </step>
+            
+            <step id="5" name="Services Configuration Population">
+                <manager>ServiceConfigManager</manager>
+                <actions>
+                    <action>Configure LLM providers and API endpoints</action>
+                    <action>Set OAuth and Google Cloud parameters</action>
+                    <action>Determine service operation modes</action>
+                </actions>
+            </step>
+            
+            <step id="6" name="Secrets Population">
+                <manager>SecretManager</manager>
+                <sequence>
+                    <substep>Attempt Google Secret Manager retrieval</substep>
+                    <substep>Fallback to environment variables (with staging suffix support)</substep>
+                    <substep>Populate target configuration fields</substep>
+                </sequence>
+            </step>
+            
+            <step id="7" name="Final Validation">
+                <validator>ConfigurationValidator</validator>
+                <validations>
+                    <validation>Pydantic schema validation</validation>
+                    <validation>Business logic constraints</validation>
+                    <validation>Cross-component consistency</validation>
+                    <validation>Environment-specific requirements</validation>
+                </validations>
+                <failure_mode>Raise ConfigurationError on any validation failure</failure_mode>
+            </step>
+            
+            <step id="8" name="Caching and Return">
+                <action>Cache validated configuration in singleton</action>
+                <caching>LRU cache with maxsize=1 for performance</caching>
+                <return>Return immutable AppConfig instance</return>
+            </step>
+        </flow_sequence>
+    </configuration_flow>
+
+    <environment_handling>
+        <title>Environment-Specific Configuration</title>
+        
+        <environment name="development" default="true">
+            <characteristics>
+                <item>Local development with dev_launcher</item>
+                <item>Wildcard CORS origins (*) for dynamic ports</item>
+                <item>Local database connections with defaults</item>
+                <item>Mock/stub services when real services unavailable</item>
+            </characteristics>
+            <configuration_sources>
+                <source priority="1">Environment variables from dev_launcher</source>
+                <source priority="2">Local .env files (if present)</source>
+                <source priority="3">Development defaults</source>
+            </configuration_sources>
+        </environment>
+        
+        <environment name="staging">
+            <characteristics>
+                <item>Cloud Run deployment on GCP staging</item>
+                <item>Staging-specific domains and certificates</item>
+                <item>Real database connections with staging data</item>
+                <item>_STAGING suffix support for environment variables</item>
+            </characteristics>
+            <configuration_sources>
+                <source priority="1">Google Secret Manager (staging project)</source>
+                <source priority="2">Environment variables with _STAGING suffix</source>
+                <source priority="3">Terraform-injected environment variables</source>
+                <source priority="4">Staging defaults</source>
+            </configuration_sources>
+            <special_handling>
+                <item>Support both GEMINI_API_KEY and GEMINI_API_KEY_STAGING</item>
+                <item>Cloud Run URL pattern matching for CORS</item>
+                <item>Staging domain validation</item>
+            </special_handling>
+        </environment>
+        
+        <environment name="production">
+            <characteristics>
+                <item>Cloud Run deployment on GCP production</item>
+                <item>Production domains and security certificates</item>
+                <item>Production database connections</item>
+                <item>Strict security and validation</item>
+            </characteristics>
+            <configuration_sources>
+                <source priority="1">Google Secret Manager (production project)</source>
+                <source priority="2">Terraform-injected environment variables</source>
+                <source priority="3">Production defaults</source>
+            </configuration_sources>
+            <security_requirements>
+                <requirement>All secrets MUST come from Secret Manager</requirement>
+                <requirement>No fallback to environment variables for secrets</requirement>
+                <requirement>Explicit CORS origins (no wildcards)</requirement>
+            </security_requirements>
+        </environment>
+        
+        <environment name="testing">
+            <characteristics>
+                <item>Test suite execution context</item>
+                <item>Isolated test databases</item>
+                <item>Mock services and controlled data</item>
+                <item>Fast configuration loading</item>
+            </characteristics>
+            <configuration_sources>
+                <source priority="1">TESTING environment variable detection</source>
+                <source priority="2">Test-specific environment variables</source>
+                <source priority="3">Test defaults and mocks</source>
+            </configuration_sources>
+        </environment>
+    </environment_handling>
+
+    <validation_requirements>
+        <title>Configuration Validation Standards</title>
+        
+        <validation_level name="schema" priority="CRITICAL">
+            <description>Pydantic schema validation for type safety</description>
+            <validates>
+                <item>Field types and constraints</item>
+                <item>Required vs optional fields</item>
+                <item>Field format validation (URLs, emails, etc.)</item>
+                <item>Enum value validation</item>
+            </validates>
+            <failure_action>Immediate ConfigurationError with detailed field information</failure_action>
+        </validation_level>
+        
+        <validation_level name="business_logic" priority="HIGH">
+            <description>Business rule validation for operational correctness</description>
+            <validates>
+                <item>Database connectivity requirements</item>
+                <item>Required secrets presence for environment</item>
+                <item>Service endpoint accessibility</item>
+                <item>CORS configuration correctness</item>
+            </validates>
+            <failure_action>ConfigurationError with business context</failure_action>
+        </validation_level>
+        
+        <validation_level name="consistency" priority="HIGH">
+            <description>Cross-component consistency validation</description>
+            <validates>
+                <item>Database and service mode alignment</item>
+                <item>Secret-to-field mapping completeness</item>
+                <item>Environment-specific requirement satisfaction</item>
+                <item>Configuration component interdependencies</item>
+            </validates>
+            <failure_action>ConfigurationError with consistency details</failure_action>
+        </validation_level>
+        
+        <validation_triggers>
+            <trigger name="startup">Every configuration load</trigger>
+            <trigger name="reload">Hot reload operations</trigger>
+            <trigger name="testing">Test suite configuration setup</trigger>
+            <trigger name="deployment">Pre-deployment validation checks</trigger>
+        </validation_triggers>
+    </validation_requirements>
+
+    <anti_patterns>
+        <title>Configuration Anti-Patterns to Avoid</title>
+        
+        <anti_pattern id="AP-001" severity="CRITICAL">
+            <name>Direct Environment Access</name>
+            <description>Directly calling os.environ.get() in application code</description>
+            <example>host = os.environ.get("DATABASE_HOST", "localhost")</example>
+            <why_harmful>Bypasses validation, caching, and consistency checks</why_harmful>
+            <correct_approach>config = get_config(); host = config.database_url.host</correct_approach>
+        </anti_pattern>
+        
+        <anti_pattern id="AP-002" severity="CRITICAL">
+            <name>Module-Level Configuration Loading</name>
+            <description>Loading configuration at module import time</description>
+            <example>settings = get_config()  # At module level</example>
+            <why_harmful>Executes before subprocess environment is ready</why_harmful>
+            <correct_approach>Use lazy loading with __getattr__ or function-level access</correct_approach>
+        </anti_pattern>
+        
+        <anti_pattern id="AP-003" severity="HIGH">
+            <name>Hardcoded Defaults in Business Logic</name>
+            <description>Using hardcoded fallback values in business logic</description>
+            <example>timeout = config.timeout or 30  # Hardcoded fallback</example>
+            <why_harmful>Inconsistent defaults across codebase</why_harmful>
+            <correct_approach>Define defaults in schema or environment-specific config</correct_approach>
+        </anti_pattern>
+        
+        <anti_pattern id="AP-004" severity="HIGH">
+            <name>Configuration Mutation</name>
+            <description>Modifying configuration objects after creation</description>
+            <example>config.database_url = "modified://url"</example>
+            <why_harmful>Breaks singleton consistency and caching</why_harmful>
+            <correct_approach>Configuration should be immutable; use reload for changes</correct_approach>
+        </anti_pattern>
+        
+        <anti_pattern id="AP-005" severity="MEDIUM">
+            <name>Environment-Specific Code Branches</name>
+            <description>Using if/else based on environment in business logic</description>
+            <example>if environment == "production": use_real_service() else: use_mock()</example>
+            <why_harmful>Scattered environment logic, hard to maintain</why_harmful>
+            <correct_approach>Encode environment behavior in configuration schema</correct_approach>
+        </anti_pattern>
+    </anti_patterns>
+
+    <migration_guidelines>
+        <title>Legacy Code Migration Guidelines</title>
+        
+        <migration_phase name="assessment" priority="1">
+            <description>Identify and catalog legacy configuration usage</description>
+            <actions>
+                <action>Search for os.environ.get() calls in application code</action>
+                <action>Identify hardcoded configuration values</action>
+                <action>Catalog environment-specific code branches</action>
+                <action>Document current configuration dependencies</action>
+            </actions>
+            <tools>
+                <tool>grep -r "os.environ.get" --include="*.py" app/</tool>
+                <tool>grep -r "getenv" --include="*.py" app/</tool>
+                <tool>grep -r "if.*environment" --include="*.py" app/</tool>
+            </tools>
+        </migration_phase>
+        
+        <migration_phase name="schema_integration" priority="2">
+            <description>Add legacy configuration fields to unified schema</description>
+            <actions>
+                <action>Add missing fields to AppConfig in app/schemas/Config.py</action>
+                <action>Define appropriate types and default values</action>
+                <action>Add validation rules for new fields</action>
+                <action>Update secret mapping for any secret fields</action>
+            </actions>
+            <example>
+                <before>DATABASE_HOST = os.environ.get("DATABASE_HOST", "localhost")</before>
+                <after>
+                    <!-- In AppConfig schema -->
+                    database_host: str = Field(default="localhost", description="Database host")
+                    
+                    <!-- In application code -->
+                    config = get_config()
+                    DATABASE_HOST = config.database_host
+                </after>
+            </example>
+        </migration_phase>
+        
+        <migration_phase name="code_replacement" priority="3">
+            <description>Replace legacy configuration access with unified system</description>
+            <replacement_patterns>
+                <pattern>
+                    <old>os.environ.get("VAR_NAME", "default")</old>
+                    <new>get_config().var_name</new>
+                </pattern>
+                <pattern>
+                    <old>settings = SomeConfigClass()</old>
+                    <new>config = get_config()</new>
+                </pattern>
+                <pattern>
+                    <old>if os.environ.get("ENVIRONMENT") == "production":</old>
+                    <new>if get_config().environment == "production":</new>
+                </pattern>
+            </replacement_patterns>
+        </migration_phase>
+        
+        <migration_phase name="validation_testing" priority="4">
+            <description>Validate migration with comprehensive testing</description>
+            <testing_requirements>
+                <requirement>Unit tests for all migrated configuration access</requirement>
+                <requirement>Integration tests with different environments</requirement>
+                <requirement>Configuration validation tests</requirement>
+                <requirement>Backward compatibility verification</requirement>
+            </testing_requirements>
+        </migration_phase>
+        
+        <migration_phase name="cleanup" priority="5">
+            <description>Remove legacy configuration code and dependencies</description>
+            <cleanup_actions>
+                <action>Remove old configuration classes and managers</action>
+                <action>Delete unused environment variable references</action>
+                <action>Update documentation and examples</action>
+                <action>Archive legacy configuration files</action>
+            </cleanup_actions>
+        </migration_phase>
+    </migration_guidelines>
+
+    <testing_requirements>
+        <title>Configuration Testing Standards</title>
+        
+        <test_category name="unit_tests" priority="HIGH">
+            <description>Unit tests for configuration components</description>
+            <test_cases>
+                <test_case>Configuration manager singleton behavior</test_case>
+                <test_case>Environment detection logic</test_case>
+                <test_case>Secret loading with staging suffix support</test_case>
+                <test_case>Configuration validation error handling</test_case>
+                <test_case>Schema field type validation</test_case>
+            </test_cases>
+            <coverage_requirement>95% for all configuration modules</coverage_requirement>
+        </test_category>
+        
+        <test_category name="integration_tests" priority="HIGH">
+            <description>Integration tests for configuration system</description>
+            <test_cases>
+                <test_case>End-to-end configuration loading in each environment</test_case>
+                <test_case>Secret Manager integration with fallback to environment</test_case>
+                <test_case>Configuration hot reload functionality</test_case>
+                <test_case>Cross-component configuration consistency</test_case>
+                <test_case>Database and service configuration population</test_case>
+            </test_cases>
+        </test_category>
+        
+        <test_category name="environment_tests" priority="CRITICAL">
+            <description>Environment-specific configuration tests</description>
+            <test_environments>
+                <environment name="development">
+                    <test>Dev launcher environment variable injection</test>
+                    <test>Local service defaults and fallbacks</test>
+                    <test>Wildcard CORS configuration</test>
+                </environment>
+                <environment name="staging">
+                    <test>Staging suffix environment variable support</test>
+                    <test>Cloud Run URL pattern matching</test>
+                    <test>Terraform environment variable integration</test>
+                </environment>
+                <environment name="production">
+                    <test>Secret Manager requirement enforcement</test>
+                    <test>Production security validation</test>
+                    <test>No wildcard CORS in production</test>
+                </environment>
+                <environment name="testing">
+                    <test>TESTING environment variable detection</test>
+                    <test>Test-specific configuration isolation</test>
+                    <test>Mock service configuration</test>
+                </environment>
+            </test_environments>
+        </test_category>
+        
+        <test_category name="regression_tests" priority="CRITICAL">
+            <description>Regression prevention for configuration issues</description>
+            <regression_scenarios>
+                <scenario>Module import timing with subprocess environment</scenario>
+                <scenario>Secret loading fallback when Secret Manager unavailable</scenario>
+                <scenario>Configuration consistency across service restarts</scenario>
+                <scenario>Environment detection edge cases</scenario>
+            </regression_scenarios>
+        </test_category>
+        
+        <test_commands>
+            <command name="unit">python -m pytest tests/unit/test_configuration.py -v</command>
+            <command name="integration">python -m pytest tests/integration/test_configuration_integration.py -v</command>
+            <command name="all_config">python -m pytest -k "config" --no-cov -v</command>
+        </test_commands>
+    </testing_requirements>
+
+    <implementation_checklist>
+        <title>Configuration System Implementation Checklist</title>
+        
+        <checklist_section name="before_changes">
+            <title>Before Making Configuration Changes</title>
+            <item id="BC-001">Check SPEC/learnings/configuration_secrets.xml for related learnings</item>
+            <item id="BC-002">Review existing configuration schema in app/schemas/Config.py</item>
+            <item id="BC-003">Verify current environment detection logic</item>
+            <item id="BC-004">Check for existing similar configuration fields to avoid duplication</item>
+            <item id="BC-005">Review secret mapping in SECRET_CONFIG list</item>
+        </checklist_section>
+        
+        <checklist_section name="during_implementation">
+            <title>During Implementation</title>
+            <item id="DI-001">Add new fields to AppConfig schema with proper types and defaults</item>
+            <item id="DI-002">Update appropriate configuration manager (database, services, secrets)</item>
+            <item id="DI-003">Add validation logic in ConfigurationValidator if needed</item>
+            <item id="DI-004">Ensure environment-specific behavior is properly handled</item>
+            <item id="DI-005">Test configuration loading in all target environments</item>
+        </checklist_section>
+        
+        <checklist_section name="after_changes">
+            <title>After Making Changes</title>
+            <item id="AC-001">Run configuration validation tests: python -m pytest -k "config" -v</item>
+            <item id="AC-002">Test hot reload functionality if applicable</item>
+            <item id="AC-003">Verify configuration integrity check passes</item>
+            <item id="AC-004">Update related documentation and specs</item>
+            <item id="AC-005">Add regression test if fixing a configuration bug</item>
+            <item id="AC-006">Update SPEC/learnings/configuration_secrets.xml with new insights</item>
+        </checklist_section>
+    </implementation_checklist>
+
+    <monitoring_observability>
+        <title>Configuration Monitoring and Observability</title>
+        
+        <monitoring_points>
+            <point name="configuration_load_time">
+                <metric>Time taken to load complete configuration</metric>
+                <alert_threshold>>2 seconds</alert_threshold>
+                <business_impact>Slow startup affecting user experience</business_impact>
+            </point>
+            
+            <point name="configuration_validation_failures">
+                <metric>Count of configuration validation failures</metric>
+                <alert_threshold>>0 in production</alert_threshold>
+                <business_impact>Service unavailability due to configuration issues</business_impact>
+            </point>
+            
+            <point name="secret_retrieval_success_rate">
+                <metric>Percentage of successful secret retrievals from Secret Manager</metric>
+                <alert_threshold><95%</alert_threshold>
+                <business_impact>Service degradation due to missing secrets</business_impact>
+            </point>
+            
+            <point name="configuration_hot_reloads">
+                <metric>Count of configuration hot reloads</metric>
+                <alert_threshold>>5 per hour</alert_threshold>
+                <business_impact>Potential configuration instability</business_impact>
+            </point>
+        </monitoring_points>
+        
+        <logging_requirements>
+            <requirement>Log all configuration loading attempts with timing</requirement>
+            <requirement>Log validation failures with detailed error context</requirement>
+            <requirement>Log secret retrieval attempts and fallback usage</requirement>
+            <requirement>Log environment detection results and overrides</requirement>
+            <requirement>Log configuration hot reload events with reasons</requirement>
+        </logging_requirements>
+        
+        <health_checks>
+            <check name="configuration_integrity">
+                <endpoint>/health/config</endpoint>
+                <validates>Configuration can be loaded and validated successfully</validates>
+                <frequency>Every 30 seconds</frequency>
+            </check>
+            
+            <check name="secret_availability">
+                <endpoint>/health/secrets</endpoint>
+                <validates>All required secrets are available and accessible</validates>
+                <frequency>Every 60 seconds</frequency>
+            </check>
+        </health_checks>
+    </monitoring_observability>
+
+    <security_considerations>
+        <title>Configuration Security Requirements</title>
+        
+        <security_principle name="secret_isolation">
+            <description>Secrets must never appear in logs, error messages, or debugging output</description>
+            <implementation>Use SecretStr type for sensitive fields in Pydantic schemas</implementation>
+            <validation>Automated testing to ensure secrets are properly masked</validation>
+        </security_principle>
+        
+        <security_principle name="environment_segregation">
+            <description>Production secrets must not be accessible from non-production environments</description>
+            <implementation>Separate Google Secret Manager projects per environment</implementation>
+            <validation>Cross-environment access testing to ensure proper isolation</validation>
+        </security_principle>
+        
+        <security_principle name="minimal_exposure">
+            <description>Configuration should expose minimal necessary information</description>
+            <implementation>Separate internal configuration from API-exposed configuration</implementation>
+            <validation>Review of all configuration fields exposed through APIs</validation>
+        </security_principle>
+        
+        <security_requirements>
+            <requirement>All secret fields must use SecretStr or similar secure type</requirement>
+            <requirement>Configuration logging must exclude sensitive values</requirement>
+            <requirement>Environment validation must prevent cross-environment access</requirement>
+            <requirement>Configuration endpoints must not expose internal details</requirement>
+        </security_requirements>
+    </security_considerations>
+
+    <references>
+        <title>Related Specifications and Documentation</title>
+        
+        <internal_references>
+            <reference>SPEC/learnings/configuration_secrets.xml - Configuration learnings and fixes</reference>
+            <reference>SPEC/conventions.xml - Coding conventions and constraints</reference>
+            <reference>SPEC/type_safety.xml - Type safety requirements</reference>
+            <reference>SPEC/independent_services.xml - Microservice independence requirements</reference>
+            <reference>SPEC/PRODUCTION_SECRETS_ISOLATION.xml - Production secrets isolation</reference>
+        </internal_references>
+        
+        <key_files>
+            <file>app/config.py - Main configuration entry point</file>
+            <file>app/core/configuration/base.py - Unified configuration manager</file>
+            <file>app/schemas/Config.py - Configuration schema definitions</file>
+            <file>app/core/configuration/secrets.py - Secrets management</file>
+            <file>app/core/configuration/services.py - Services configuration</file>
+            <file>app/core/configuration/database.py - Database configuration</file>
+            <file>app/core/configuration/validator.py - Configuration validation</file>
+        </key_files>
+        
+        <external_references>
+            <reference>Pydantic Documentation - Schema validation and type safety</reference>
+            <reference>Google Secret Manager API - Secret storage and retrieval</reference>
+            <reference>Cloud Run Environment Variables - Deployment configuration</reference>
+        </external_references>
+    </references>
+</specification>

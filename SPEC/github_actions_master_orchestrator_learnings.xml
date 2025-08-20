@@ -72,7 +72,7 @@ if (botComment) {
             <title>Intelligent Skip Conditions</title>
             <discovery>Many CI runs waste resources on unnecessary tests for docs-only or frontend-only changes</discovery>
             <impact>Reduced CI time and resource consumption</impact>
-            <solution>Implemented determine-strategy.sh to analyze changes and set skip conditions</solution>
+            <solution>Implemented determine-strategy.py to analyze changes and set skip conditions</solution>
             <patterns>
                 <pattern>Docs-only: Skip all tests for *.md, docs/**, SPEC/** changes</pattern>
                 <pattern>[skip ci]: Honor commit message skip markers</pattern>
@@ -168,7 +168,7 @@ if (botComment) {
             <file>.github/workflows/config/features.json</file>
             <file>.github/workflows/config/environments.json</file>
             <file>.github/workflows/config/secrets-mapping.json</file>
-            <file>.github/scripts/determine-strategy.sh</file>
+            <file>.github/scripts/determine-strategy.py</file>
             <file>.github/scripts/parse-config.py</file>
             <file>.github/actions/comment-updater/action.yml</file>
             <file>scripts/verify_workflow_status.py</file>

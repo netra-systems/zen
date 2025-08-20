@@ -11,29 +11,34 @@ from starlette.middleware.sessions import SessionMiddleware
 from starlette.responses import RedirectResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from app.config import settings
+from app.core.configuration import get_configuration
 
 
 def get_cors_origins() -> list[str]:
     """Get CORS origins based on environment."""
-    if settings.environment == "production":
+    config = get_configuration()
+    if config.environment == "production":
         return _get_production_cors_origins()
-    elif settings.environment == "staging":
+    elif config.environment == "staging":
         return _get_staging_cors_origins()
     return _get_development_cors_origins()
 
 
 def _get_production_cors_origins() -> list[str]:
     """Get CORS origins for production environment."""
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    return cors_origins_env.split(",") if cors_origins_env else ["https://netrasystems.ai"]
+    config = get_configuration()
+    cors_origins = getattr(config, 'cors_origins', None)
+    if cors_origins:
+        return cors_origins if isinstance(cors_origins, list) else cors_origins.split(",")
+    return ["https://netrasystems.ai"]
 
 
 def _get_staging_cors_origins() -> list[str]:
     """Get CORS origins for staging environment."""
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    if cors_origins_env:
-        return cors_origins_env.split(",")
+    config = get_configuration()
+    cors_origins = getattr(config, 'cors_origins', None)
+    if cors_origins:
+        return cors_origins if isinstance(cors_origins, list) else cors_origins.split(",")
     return _get_default_staging_origins()
 
 def _get_default_staging_origins() -> list[str]:
@@ -66,16 +71,19 @@ def _get_localhost_origins() -> list[str]:
 
 def _get_development_cors_origins() -> list[str]:
     """Get CORS origins for development environment."""
-    cors_origins_env = os.environ.get("CORS_ORIGINS", "")
-    if cors_origins_env:
-        return _handle_dev_env_origins(cors_origins_env)
+    config = get_configuration()
+    cors_origins = getattr(config, 'cors_origins', None)
+    if cors_origins:
+        return _handle_dev_env_origins(cors_origins)
     return _get_default_dev_origins()
 
-def _handle_dev_env_origins(cors_origins_env: str) -> list[str]:
-    """Handle development environment origins from env var."""
-    if cors_origins_env == "*":
+def _handle_dev_env_origins(cors_origins: any) -> list[str]:
+    """Handle development environment origins from config."""
+    if isinstance(cors_origins, list):
+        return cors_origins
+    if cors_origins == "*":
         return ["*"]
-    return cors_origins_env.split(",")
+    return cors_origins.split(",") if isinstance(cors_origins, str) else ["*"]
 
 def _get_default_dev_origins() -> list[str]:
     """Get default development origins."""
@@ -84,7 +92,8 @@ def _get_default_dev_origins() -> list[str]:
 
 def setup_cors_middleware(app: FastAPI) -> None:
     """Configure CORS middleware."""
-    if settings.environment in ["staging", "development"]:
+    config = get_configuration()
+    if config.environment in ["staging", "development"]:
         _setup_custom_cors_middleware(app)
     else:
         _setup_production_cors_middleware(app)
@@ -112,7 +121,8 @@ def _get_production_cors_config(allowed_origins: list[str]) -> dict:
 
 def should_add_cors_headers(response: Any) -> bool:
     """Check if CORS headers should be added to response."""
-    return isinstance(response, RedirectResponse) and settings.environment in ["development", "staging"]
+    config = get_configuration()
+    return isinstance(response, RedirectResponse) and config.environment in ["development", "staging"]
 
 
 def add_cors_headers_to_response(response: Any, origin: str) -> None:
@@ -169,14 +179,16 @@ def _check_wildcard_match(allowed_origins: List[str]) -> bool:
 
 def _evaluate_wildcard_environment() -> bool:
     """Evaluate if current environment allows wildcards."""
-    if settings.environment == "development":
+    config = get_configuration()
+    if config.environment == "development":
         return True
-    return settings.environment not in ["staging"]
+    return config.environment not in ["staging"]
 
 
 def _check_pattern_matches(origin: str) -> bool:
     """Check if origin matches environment-specific patterns."""
-    if settings.environment not in ["staging", "development"]:
+    config = get_configuration()
+    if config.environment not in ["staging", "development"]:
         return False
     return _evaluate_pattern_matches(origin)
 
@@ -280,15 +292,18 @@ def _determine_session_config(current_environment) -> dict:
 
 def _check_localhost_environment() -> bool:
     """Check if running in localhost environment."""
+    config = get_configuration()
     return any([
-        "localhost" in os.getenv("FRONTEND_URL", ""),
-        "localhost" in os.getenv("API_URL", ""),
-        os.getenv("PORT", "8000") in ["8000", "3000", "3010"],
+        "localhost" in config.frontend_url,
+        "localhost" in config.api_base_url,
+        config.environment == "development",
     ])
 
 def _create_session_config(is_localhost: bool, is_deployed: bool) -> dict:
     """Create session configuration dictionary."""
-    if is_localhost or os.getenv("DISABLE_HTTPS_ONLY") == "true":
+    config = get_configuration()
+    disable_https = getattr(config, 'disable_https_only', False)
+    if is_localhost or disable_https:
         return {"same_site": "lax", "https_only": False}
     return {
         "same_site": "none" if is_deployed else "lax",
@@ -306,9 +321,10 @@ def _log_session_config(session_config: dict, current_environment) -> None:
 
 def _add_session_middleware(app: FastAPI, session_config: dict) -> None:
     """Add session middleware to app."""
+    config = get_configuration()
     app.add_middleware(
         SessionMiddleware,
-        secret_key=settings.secret_key,
+        secret_key=config.secret_key,
         same_site=session_config["same_site"],
         https_only=session_config["https_only"],
         max_age=3600,  # 1 hour session

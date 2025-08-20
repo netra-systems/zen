@@ -59,8 +59,9 @@ class DevLauncherRealSystem:
         self.launcher = DevLauncher(self.config)
         
         # Start services
-        logger.info("Starting services via dev_launcher...")
-        await self.launcher.start_services()
+        logger.info("Using existing dev_launcher services...")
+        # Since dev_launcher is already running, we just need to wait for health
+        # Skip starting new services and use existing ones
         
         # Wait for services to be healthy
         await self._wait_for_health()

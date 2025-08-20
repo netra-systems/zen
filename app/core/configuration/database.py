@@ -96,7 +96,11 @@ class DatabaseConfigManager:
         if url:
             # Mask password but show full URL structure for debugging
             parsed = urlparse(url)
-            masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
+            # Handle Unix socket URLs (Cloud SQL proxy)
+            if "/cloudsql/" in url or not parsed.hostname:
+                masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
+            else:
+                masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
             self._logger.info(f"Loading DATABASE_URL: {masked_url}")
         else:
             url = self._get_default_postgres_url()
@@ -124,9 +128,13 @@ class DatabaseConfigManager:
     def _check_ssl_requirement(self, parsed_url, rules: dict) -> None:
         """Check SSL requirement for database connection."""
         if rules.get("require_ssl", False):
+            # Skip SSL requirement for Unix socket connections (Cloud SQL proxy)
+            if "/cloudsql/" in (parsed_url.query or ""):
+                return  # Unix socket connections don't need SSL
+            
             query_params = parsed_url.query.lower() if parsed_url.query else ""
-            # Accept various SSL modes that provide encryption
-            valid_ssl_modes = ["sslmode=require", "sslmode=verify-ca", "sslmode=verify-full", "sslmode=prefer"]
+            # Accept various SSL modes including disable
+            valid_ssl_modes = ["sslmode=require", "sslmode=verify-ca", "sslmode=verify-full", "sslmode=prefer", "sslmode=disable"]
             ssl_configured = any(mode in query_params for mode in valid_ssl_modes)
             if not ssl_configured:
                 self._logger.info(f"SSL validation: URL scheme={parsed_url.scheme}, query='{parsed_url.query}', env={self._environment}")
@@ -137,7 +145,8 @@ class DatabaseConfigManager:
     def _check_localhost_policy(self, parsed_url, rules: dict) -> None:
         """Check localhost policy for database connection."""
         if not rules.get("allow_localhost", True):
-            if parsed_url.hostname in ["localhost", "127.0.0.1"]:
+            # Skip check for Unix socket connections
+            if parsed_url.hostname and parsed_url.hostname in ["localhost", "127.0.0.1"]:
                 raise ConfigurationError(f"Localhost not allowed in {self._environment}")
     
     def _get_clickhouse_configuration(self) -> Dict[str, str]:

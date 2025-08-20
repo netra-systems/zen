@@ -14,6 +14,7 @@ from urllib.parse import urlparse
 
 from app.logging_config import central_logger as logger
 from app.core.exceptions import NetraException
+from app.core.configuration import get_configuration
 
 
 class GitHubAPIClient:
@@ -22,7 +23,8 @@ class GitHubAPIClient:
     def __init__(self):
         """Initialize GitHub client."""
         self.temp_dir = None
-        self.github_token = os.environ.get("GITHUB_TOKEN")
+        config = get_configuration()
+        self.github_token = getattr(config, 'github_token', None)
     
     async def clone_repository(self, repo_url: str) -> str:
         """Clone or access repository."""

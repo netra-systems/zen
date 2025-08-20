@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-19T20:39:49.987574",
-    "total_runs": 180
+    "last_update": "2025-08-19T22:29:12.112997",
+    "total_runs": 183
   },
   "current_state": {
     "overall_status": "[FAILED] 3 failures",
     "last_run_level": "unit",
-    "last_run_time": "2025-08-19T20:39:49.987574",
-    "last_exit_code": 255
+    "last_run_time": "2025-08-19T22:29:12.112997",
+    "last_exit_code": 15
   },
   "known_test_counts": {
     "unit:backend": {
@@ -17,7 +17,7 @@
       "failed": 3,
       "skipped": 17,
       "errors": 1,
-      "last_update": "2025-08-19T20:39:49.987574"
+      "last_update": "2025-08-19T22:29:12.112997"
     },
     "critical:backend": {
       "total": 85,
@@ -33,7 +33,7 @@
       "failed": 0,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-19T20:38:16.893382"
+      "last_update": "2025-08-19T22:22:58.312106"
     },
     "integration:backend": {
       "total": 24,
@@ -131,7 +131,7 @@
       "actual": 7,
       "passed": 7,
       "failed": 0,
-      "last_run": "2025-08-19T20:38:16.893382",
+      "last_run": "2025-08-19T22:22:58.312785",
       "status": "[PASSED] 7 tests"
     },
     "unit": {
@@ -140,7 +140,7 @@
       "actual": 450,
       "passed": 429,
       "failed": 3,
-      "last_run": "2025-08-19T20:39:49.987574",
+      "last_run": "2025-08-19T22:29:12.112997",
       "status": "[FAILED] 3 failures"
     },
     "integration": {
@@ -283,8 +283,8 @@
         "test_files": 54,
         "status": "failed"
       },
-      "last_duration": 59.391799211502075,
-      "last_run": "2025-08-19T20:39:49.987574"
+      "last_duration": 59.20168399810791,
+      "last_run": "2025-08-19T22:29:12.112997"
     },
     "frontend": {
       "status": "failed",
@@ -298,8 +298,8 @@
         "test_files": 0,
         "status": "unknown"
       },
-      "last_duration": 0.3023800849914551,
-      "last_run": "2025-08-19T20:39:49.987574"
+      "last_duration": 0.30294370651245117,
+      "last_run": "2025-08-19T22:29:12.112997"
     },
     "e2e": {
       "status": "pending",
@@ -311,84 +311,42 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-19T20:39:49.987574"
+      "last_run": "2025-08-19T22:29:12.112997"
     }
   },
   "failing_tests": [
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentServiceOrchestrationCore::test_websocket_message_handling_json_error <- tests\\services\\test_agent_service_orchestration_core.py",
-      "timestamp": "2025-08-19T20:39:49.987574"
+      "timestamp": "2025-08-19T22:29:12.112997"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\test_permission_service_admin.py::TestRoleManagement::test_grant_permission",
-      "timestamp": "2025-08-19T20:39:49.987574"
+      "timestamp": "2025-08-19T22:29:12.112997"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::TestToolInvocations::test_generate_tool_invocations_error_scenarios Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-19T20:39:49.987574"
+      "timestamp": "2025-08-19T22:29:12.112997"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::\u001b[1mTestAgentServiceOrchestrationCore::test_websocket_message_handling_json_error\u001b[0m - AssertionError: expected call not found.",
-      "timestamp": "2025-08-19T20:39:49.987574"
+      "timestamp": "2025-08-19T22:29:12.112997"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\test_permission_service_admin.py::\u001b[1mTestRoleManagement::test_grant_permission\u001b[0m - TypeError: 'NoneType' object is not subscriptable",
-      "timestamp": "2025-08-19T20:39:49.987574"
+      "timestamp": "2025-08-19T22:29:12.112997"
     },
     {
       "component": "backend",
       "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::\u001b[1mTestToolInvocations::test_generate_tool_invocations_error_scenarios\u001b[0m - AttributeError: 'SyntheticDataService' object has no attribute '_generate_tool_invocations'. Did you mean: 'generate_tool_invocations'?",
-      "timestamp": "2025-08-19T20:39:49.987574"
+      "timestamp": "2025-08-19T22:29:12.112997"
     }
   ],
   "test_history": [
-    {
-      "timestamp": "2025-08-19T15:58:20.176512",
-      "level": "all",
-      "exit_code": 2,
-      "status": "[ERRORS] 8 errors",
-      "statistics": {
-        "total_tests_known": 666,
-        "total_tests_run": 9,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 1,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-19T16:03:08.676347",
-      "level": "all",
-      "exit_code": 2,
-      "status": "[ERRORS] 8 errors",
-      "statistics": {
-        "total_tests_known": 666,
-        "total_tests_run": 9,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 1,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-19T16:10:08.904045",
-      "level": "unit",
-      "exit_code": 15,
-      "status": "[FAILED] 3 failures",
-      "statistics": {
-        "total_tests_known": 666,
-        "total_tests_run": 413,
-        "total_passed": 392,
-        "total_failed": 3,
-        "total_skipped": 17,
-        "pass_rate": 94.92
-      }
-    },
     {
       "timestamp": "2025-08-19T16:10:22.519023",
       "level": "smoke",
@@ -617,6 +575,48 @@
       "timestamp": "2025-08-19T20:39:49.987574",
       "level": "unit",
       "exit_code": 255,
+      "status": "[FAILED] 3 failures",
+      "statistics": {
+        "total_tests_known": 666,
+        "total_tests_run": 450,
+        "total_passed": 429,
+        "total_failed": 3,
+        "total_skipped": 17,
+        "pass_rate": 95.33
+      }
+    },
+    {
+      "timestamp": "2025-08-19T22:22:02.460262",
+      "level": "unit",
+      "exit_code": 255,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 666,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-19T22:22:58.312106",
+      "level": "smoke",
+      "exit_code": 0,
+      "status": "[PASSED]",
+      "statistics": {
+        "total_tests_known": 666,
+        "total_tests_run": 7,
+        "total_passed": 7,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 100.0
+      }
+    },
+    {
+      "timestamp": "2025-08-19T22:29:12.112997",
+      "level": "unit",
+      "exit_code": 15,
       "status": "[FAILED] 3 failures",
       "statistics": {
         "total_tests_known": 666,
@@ -1310,10 +1310,34 @@
       "passed": 119,
       "failed": 3,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_220550_50233",
+      "timestamp": "2025-08-19T22:06:19.178535",
+      "total_tests": 122,
+      "passed": 119,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_220715_35958",
+      "timestamp": "2025-08-19T22:07:48.095487",
+      "total_tests": 122,
+      "passed": 119,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_222435_75958",
+      "timestamp": "2025-08-19T22:25:07.127603",
+      "total_tests": 138,
+      "passed": 134,
+      "failed": 4,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 84,
-    "last_updated": "2025-08-19T22:02:19.502730"
+    "total_runs": 87,
+    "last_updated": "2025-08-19T22:25:07.127603"
   }
 }

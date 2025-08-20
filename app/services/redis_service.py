@@ -10,11 +10,11 @@ Business Value Justification (BVJ):
 4. Revenue Impact: Critical for performance and user experience
 """
 
-import os
 import redis.asyncio as redis
 from typing import Optional, List, Any
 import logging
 import json
+from app.core.configuration import get_configuration
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,8 @@ class RedisService:
     def __init__(self):
         """Initialize Redis service."""
         self.client: Optional[redis.Redis] = None
-        self.url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        config = get_configuration()
+        self.url = config.redis_url or f"redis://{config.redis.host}:{config.redis.port}"
         
     async def connect(self):
         """Connect to Redis."""

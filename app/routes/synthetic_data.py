@@ -17,6 +17,7 @@ from app.schemas.shared_types import BaseAgentConfig
 from app.db.models_postgres import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.synthetic_data_service import SyntheticDataService
+from app.services import synthetic_data_service as sds
 from app.routes.utils.synthetic_data_helpers import (
     build_generation_config, execute_generation_safely, extract_result_fields,
     fetch_and_validate_job_status, extract_status_fields, cancel_job_safely,
@@ -215,6 +216,105 @@ async def _get_templates_safe(db: AsyncSession) -> Dict:
 async def _fetch_templates(db: AsyncSession) -> Dict:
     """Fetch synthetic data templates"""
     return await _get_templates_safe(db)
+
+
+# Additional endpoints for synthetic data management
+@router.post("/export")
+async def export_synthetic_data(
+    export_request: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Export synthetic data"""
+    try:
+        result = await sds.export_data(export_request)
+        return result
+    except Exception as e:
+        logger.error(f"Export error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/analyze")
+async def analyze_synthetic_data_quality(
+    analysis_request: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Analyze synthetic data quality"""
+    try:
+        result = await sds.analyze_quality(analysis_request)
+        return result
+    except Exception as e:
+        logger.error(f"Analysis error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/cleanup")
+async def cleanup_synthetic_data(
+    cleanup_request: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Clean up synthetic data jobs"""
+    try:
+        result = await sds.cleanup_jobs(cleanup_request)
+        return result
+    except Exception as e:
+        logger.error(f"Cleanup error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/convert")
+async def convert_synthetic_data_format(
+    conversion_request: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Convert synthetic data format"""
+    try:
+        result = await sds.convert_format(conversion_request)
+        return result
+    except Exception as e:
+        logger.error(f"Conversion error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/compare")
+async def compare_synthetic_with_real_data(
+    comparison_request: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Compare synthetic with real data"""
+    try:
+        result = await sds.compare_with_real_data(comparison_request)
+        return result
+    except Exception as e:
+        logger.error(f"Comparison error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/version")
+async def create_synthetic_data_version(
+    versioning_request: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Create synthetic data version"""
+    try:
+        result = await sds.create_version(versioning_request)
+        return result
+    except Exception as e:
+        logger.error(f"Versioning error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/auto-refresh")
+async def setup_auto_refresh(
+    refresh_config: dict,
+    current_user: User = Depends(get_current_user),
+):
+    """Setup automated synthetic data refresh"""
+    try:
+        result = await sds.setup_auto_refresh(refresh_config)
+        return result
+    except Exception as e:
+        logger.error(f"Auto-refresh setup error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 

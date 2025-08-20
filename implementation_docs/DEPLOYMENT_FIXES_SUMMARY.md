@@ -31,7 +31,7 @@
 - Resolves module import errors during build
 
 #### 4. Created Deployment Scripts
-- `deploy_staging_local.sh`: Simplified deployment script supporting Docker and ACT
+- `deploy_staging_local.py`: Simplified deployment script supporting Docker and ACT
 - Supports cached and no-cache builds
 - Provides easy commands for local staging deployment
 
@@ -48,22 +48,22 @@ docker-compose -f docker-compose.staging.yml up -d
 ### Method 2: Using Deployment Script
 ```bash
 # Deploy with Docker Compose (uses cache)
-./deploy_staging_local.sh docker cache
+python deploy_staging_local.py docker cache
 
 # Deploy without cache
-./deploy_staging_local.sh docker no-cache
+python deploy_staging_local.py docker no-cache
 
 # Deploy with ACT (GitHub Actions locally)
-./deploy_staging_local.sh act
+python deploy_staging_local.py act
 
 # Stop services
-./deploy_staging_local.sh stop
+python deploy_staging_local.py stop
 ```
 
 ### Method 3: ACT (GitHub Actions Locally)
 ```bash
 # Run staging workflow locally
-./run_staging_with_act.sh
+python run_staging_with_act.py
 ```
 
 ## Performance Improvements

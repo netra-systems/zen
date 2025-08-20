@@ -109,8 +109,21 @@ class StartupChecker:
             result = await check_func()
             logger.debug(f"Check {check_name} completed successfully: {result.message if result else 'No message'}")
             self._record_check_success(result, start)
+            
+            # In staging, fail immediately on any check failure
+            if self.is_staging and not result.success:
+                error_msg = f"Staging startup check failed: {check_name} - {result.message}"
+                logger.critical(error_msg)
+                raise RuntimeError(error_msg)
         except Exception as e:
             logger.error(f"Check {check_name} failed with exception: {e}")
+            
+            # In staging, raise the error immediately for observability
+            if self.is_staging:
+                error_msg = f"Staging startup check crashed: {check_name} - {str(e)}"
+                logger.critical(error_msg)
+                raise RuntimeError(error_msg) from e
+            
             self._record_check_failure(check_func, e)
     
     def _create_final_report(self) -> Dict[str, Any]:
@@ -150,9 +163,11 @@ class StartupChecker:
         """Record failed check result"""
         logger.error(f"Check {check_func.__name__} failed unexpectedly: {error}")
         
-        # Special handling for assistant check - make it non-critical
-        is_critical = not self.is_staging
-        if check_func.__name__ == "check_or_create_assistant":
+        # In staging, ALL failures are critical
+        is_critical = self.is_staging
+        
+        # In non-staging, special handling for assistant check - make it non-critical
+        if not self.is_staging and check_func.__name__ == "check_or_create_assistant":
             is_critical = False
             logger.info("Treating assistant check failure as non-critical")
         

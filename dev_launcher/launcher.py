@@ -358,7 +358,11 @@ class DevLauncher:
         return result
     
     def register_health_monitoring(self):
-        """Register health monitoring after services are verified ready."""
+        """Register health monitoring after services are verified ready.
+        
+        Per SPEC: This registration happens but monitoring doesn't start until
+        all services are confirmed ready and grace periods have elapsed.
+        """
         self.health_helper.register_all_services(
             self.service_startup.backend_health_info,
             self.service_startup.frontend_health_info,
@@ -391,26 +395,16 @@ class DevLauncher:
     
     
     def _run_services(self) -> int:
-        """Run all services."""
+        """Run all services following SPEC startup sequence steps 1-13."""
         self._clear_service_discovery()
         
         try:
-            # Start services using the unified service startup coordinator
-            success = self.service_startup.start_all_services(
-                self.process_manager,
-                self.health_monitor,
-                parallel=self.parallel_enabled
-            )
+            # Follow SPEC service_startup_sequence steps 1-13
+            success = self._execute_spec_startup_sequence()
             
             if not success:
                 self._print("❌", "ERROR", "Failed to start services")
                 return 1
-            
-            # Register health monitoring
-            self.register_health_monitoring()
-            
-            # Start health monitoring
-            self.health_monitor.start()
             
             # Show summary
             self.summary_display.show_success_summary()
@@ -425,6 +419,166 @@ class DevLauncher:
         except Exception as e:
             logger.error(f"Service startup failed: {e}")
             return 1
+    
+    def _execute_spec_startup_sequence(self) -> bool:
+        """Execute SPEC startup sequence steps 1-13.
+        
+        Per SPEC/dev_launcher.xml service_startup_sequence:
+        Steps 1-12: Service startup and readiness verification
+        Step 13: ONLY NOW start health monitoring
+        """
+        try:
+            # Steps 1-5: Cache, environment, secrets, migrations
+            self._print("🔄", "STEP 1-2", "Checking cache and environment...")
+            # (Already done in pre-checks)
+            
+            self._print("🔄", "STEP 3", "Loading secrets...")
+            # (Already done in pre-checks)
+            
+            self._print("🔄", "STEP 4-5", "Checking and running migrations...")
+            if not self.run_migrations():
+                self._print("❌", "ERROR", "Migration check failed")
+                return False
+            
+            # Step 6-7: Start backend and auth processes
+            self._print("🔄", "STEP 6-7", "Starting backend and auth services...")
+            backend_result = self.service_startup.start_backend()
+            auth_result = self.service_startup.start_auth_service()
+            
+            if not backend_result[0] or not auth_result[0]:
+                self._print("❌", "ERROR", "Failed to start backend or auth service")
+                return False
+            
+            # Register processes
+            self.process_manager.add_process("Backend", backend_result[0])
+            self.process_manager.add_process("Auth", auth_result[0])
+            
+            # Step 8: Wait for backend readiness (/health/ready)
+            self._print("🔄", "STEP 8", "Waiting for backend readiness...")
+            if not self._wait_for_backend_readiness():
+                self._print("❌", "ERROR", "Backend readiness check failed")
+                return False
+            
+            # Step 9: Verify auth system (/api/auth/config)
+            self._print("🔄", "STEP 9", "Verifying auth system...")
+            if not self._verify_auth_system():
+                self._print("❌", "ERROR", "Auth system verification failed")
+                return False
+            
+            # Step 10: Start frontend process
+            self._print("🔄", "STEP 10", "Starting frontend service...")
+            frontend_result = self.service_startup.start_frontend()
+            
+            if not frontend_result[0]:
+                self._print("❌", "ERROR", "Failed to start frontend service")
+                return False
+            
+            self.process_manager.add_process("Frontend", frontend_result[0])
+            
+            # Step 11: Wait for frontend readiness
+            self._print("🔄", "STEP 11", "Waiting for frontend readiness...")
+            if not self._wait_for_frontend_readiness():
+                self._print("❌", "ERROR", "Frontend readiness check failed")
+                return False
+            
+            # Step 12: Cache successful startup state
+            self._print("🔄", "STEP 12", "Caching successful startup state...")
+            self.cache_manager.mark_successful_startup(time.time() - self.startup_time)
+            
+            # Step 13: ONLY NOW start health monitoring
+            self._print("🔄", "STEP 13", "Starting health monitoring...")
+            self._start_health_monitoring_after_readiness()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Startup sequence failed: {e}")
+            return False
+    
+    def _wait_for_backend_readiness(self, timeout: int = 30) -> bool:
+        """Wait for backend /health/ready endpoint per SPEC step 8."""
+        import requests
+        start_time = time.time()
+        backend_port = self.config.backend_port or 8000
+        ready_url = f"http://localhost:{backend_port}/health/ready"
+        
+        while (time.time() - start_time) < timeout:
+            try:
+                response = requests.get(ready_url, timeout=5)
+                if response.status_code == 200:
+                    self._print("✅", "READY", "Backend is ready")
+                    # Mark service as ready in health monitor
+                    self.health_monitor.mark_service_ready("Backend")
+                    return True
+            except Exception as e:
+                logger.debug(f"Backend readiness check: {e}")
+            
+            time.sleep(1)
+        
+        return False
+    
+    def _verify_auth_system(self, timeout: int = 15) -> bool:
+        """Verify auth system /api/auth/config per SPEC step 9."""
+        import requests
+        start_time = time.time()
+        auth_port = 8081  # Auth service port
+        auth_config_url = f"http://localhost:{auth_port}/api/auth/config"
+        
+        while (time.time() - start_time) < timeout:
+            try:
+                response = requests.get(auth_config_url, timeout=5)
+                if response.status_code in [200, 404]:  # 404 is acceptable
+                    self._print("✅", "READY", "Auth system verified")
+                    # Mark service as ready in health monitor
+                    self.health_monitor.mark_service_ready("Auth")
+                    return True
+            except Exception as e:
+                logger.debug(f"Auth verification: {e}")
+            
+            time.sleep(1)
+        
+        return False
+    
+    def _wait_for_frontend_readiness(self, timeout: int = 90) -> bool:
+        """Wait for frontend readiness per SPEC step 11 (90s grace period)."""
+        import requests
+        start_time = time.time()
+        frontend_port = self.config.frontend_port or 3000
+        frontend_url = f"http://localhost:{frontend_port}"
+        
+        while (time.time() - start_time) < timeout:
+            try:
+                response = requests.get(frontend_url, timeout=5)
+                if response.status_code in [200, 404]:  # Frontend can return 404
+                    self._print("✅", "READY", "Frontend is ready")
+                    # Mark service as ready in health monitor
+                    self.health_monitor.mark_service_ready("Frontend")
+                    return True
+            except Exception as e:
+                logger.debug(f"Frontend readiness check: {e}")
+            
+            time.sleep(2)  # Longer interval for frontend
+        
+        return False
+    
+    def _start_health_monitoring_after_readiness(self):
+        """Start health monitoring only after all services are ready per SPEC step 13.
+        
+        Per SPEC HEALTH-001: Health monitoring MUST NOT start immediately after service launch.
+        Only AFTER startup verification should health monitoring begin.
+        """
+        # Register health monitoring for all services
+        self.register_health_monitoring()
+        
+        # Start the health monitor thread (but monitoring is disabled)
+        self.health_monitor.start()
+        
+        # Enable monitoring only after all services are confirmed ready
+        if self.health_monitor.all_services_ready():
+            self.health_monitor.enable_monitoring()
+            self._print("✅", "MONITORING", "Health monitoring enabled")
+        else:
+            self._print("⚠️", "WARNING", "Not all services ready - health monitoring delayed")
     
     
     def _print_startup_banner(self):

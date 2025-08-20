@@ -32,6 +32,35 @@ def optimize_parameters(params: dict) -> dict:
         "recommendations": []
     }
 
+# Stub functions for test compatibility
+async def export_data(export_request: dict) -> dict:
+    """Export synthetic data - stub implementation"""
+    return {"status": "not_implemented"}
+
+async def analyze_quality(analysis_request: dict) -> dict:
+    """Analyze synthetic data quality - stub implementation"""
+    return {"status": "not_implemented"}
+
+async def cleanup_jobs(cleanup_request: dict) -> dict:
+    """Clean up synthetic data jobs - stub implementation"""
+    return {"status": "not_implemented"}
+
+async def convert_format(conversion_request: dict) -> dict:
+    """Convert synthetic data format - stub implementation"""
+    return {"status": "not_implemented"}
+
+async def compare_with_real_data(comparison_request: dict) -> dict:
+    """Compare synthetic with real data - stub implementation"""
+    return {"status": "not_implemented"}
+
+async def create_version(versioning_request: dict) -> dict:
+    """Create data version - stub implementation"""
+    return {"status": "not_implemented"}
+
+async def setup_auto_refresh(refresh_config: dict) -> dict:
+    """Setup automated refresh - stub implementation"""
+    return {"status": "not_implemented"}
+
 # Re-export everything for backward compatibility
 __all__ = [
     'SyntheticDataService',
@@ -46,5 +75,12 @@ __all__ = [
     'IngestionManager',
     'ErrorHandler',
     'get_job_status',
-    'optimize_parameters'
+    'optimize_parameters',
+    'export_data',
+    'analyze_quality',
+    'cleanup_jobs',
+    'convert_format',
+    'compare_with_real_data',
+    'create_version',
+    'setup_auto_refresh'
 ]

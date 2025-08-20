@@ -107,8 +107,8 @@ python test_runner.py --level integration --no-coverage --fast-fail # DEFAULT te
 ```
 
 ### Deployment (GCP Staging)
-- Quick Deploy: .\deploy-staging-reliable.ps1
-- Auth Issues: .\setup-staging-auth.ps1 -ForceNewKey
+- Quick Deploy: python deploy_staging_reliable.py
+- Auth Issues: python setup_staging_auth.py --force-new-key
 
 ### Critical Specs to Always Consult
 1. learnings/index.xml - Master index

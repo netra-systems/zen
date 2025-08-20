@@ -190,5 +190,13 @@
     <practice>Maintain consistent URL handling across all services</practice>
     <practice>Document all Cloud SQL instances and their purposes</practice>
     <practice>Use service accounts instead of user/password when possible</practice>
+    <practice>Avoid special characters in database passwords that may break URL parsing</practice>
+    <practice>Test URL parsing logic with Unix socket connections before deployment</practice>
   </prevention>
+  
+  <resolution_status>
+    <backend_sslmode_fix>COMPLETED - Code fixed and deployed</backend_sslmode_fix>
+    <database_password_issue>PENDING - Password contains special characters breaking URL parsing</database_password_issue>
+    <url_parsing_fix>REQUIRED - Modify configuration to handle Unix socket URLs properly</url_parsing_fix>
+  </resolution_status>
 </learnings>

@@ -32,6 +32,7 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
+    SecretReference(name="github-token", target_field="github_token"),
 ]
 
 class RedisConfig(BaseModel):
@@ -187,6 +188,24 @@ class AppConfig(BaseModel):
     dev_mode_llm_enabled: bool = Field(
         default=True, 
         description="LLM service status (managed by dev launcher)"
+    )
+    
+    # GitHub integration
+    github_token: Optional[str] = Field(
+        default=None,
+        description="GitHub token for repository access"
+    )
+    
+    # CORS configuration
+    cors_origins: Optional[List[str]] = Field(
+        default=None,
+        description="Allowed CORS origins - can be list or comma-separated string"
+    )
+    
+    # Additional middleware configuration
+    disable_https_only: bool = Field(
+        default=False,
+        description="Disable HTTPS-only mode for sessions (dev/testing)"
     )
 
     llm_configs: Dict[str, LLMConfig] = {

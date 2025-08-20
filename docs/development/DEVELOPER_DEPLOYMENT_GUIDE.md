@@ -5,7 +5,7 @@
 | Environment | Command | Where It Runs | URL |
 |------------|---------|---------------|-----|
 | **Local Dev** | `python scripts/dev_launcher.py` | Your machine | `http://localhost:8000` |
-| **GCP Staging** | `.\deploy-staging-automated.ps1` | Google Cloud | `https://netra-*.run.app` |
+| **GCP Staging** | `python deploy_staging_automated.py` | Google Cloud | `https://netra-*.run.app` |
 | **Production** | Via GitHub Actions only | Google Cloud | `https://api.netrasystems.ai` |
 
 ## 🚀 Quick Commands
@@ -22,19 +22,19 @@ python test_runner.py --level integration --no-coverage --fast-fail
 ### Deploy to GCP Staging (REAL CLOUD)
 ```bash
 # One-time setup (first deployment only)
-.\setup-gcp-staging-resources.ps1
+python setup_gcp_staging_resources.py
 
 # Deploy to GCP staging environment
-.\deploy-staging-automated.ps1
+python deploy_staging_automated.py
 
 # Fast deploy (skip health checks)
-.\deploy-staging-automated.ps1 -SkipHealthChecks
+python deploy_staging_automated.py -SkipHealthChecks
 
 # Pre-create all required resources
-.\deploy-staging-automated.ps1 -PreCreateResources
+python deploy_staging_automated.py -PreCreateResources
 
 # Deploy with custom service account key
-.\deploy-staging-automated.ps1 -ServiceAccountKeyPath "./path/to/key.json"
+python deploy_staging_automated.py -ServiceAccountKeyPath "./path/to/key.json"
 ```
 
 ## 📋 Prerequisites
@@ -67,7 +67,7 @@ $env:GCP_STAGING_SA_KEY_PATH = ".\gcp-staging-sa-key.json"
 ### Option 2: Generate New Key
 ```bash
 # Run setup script - it will prompt to generate a key
-.\setup-gcp-staging-resources.ps1
+python setup_gcp_staging_resources.py
 
 # Or manually create one
 gcloud iam service-accounts keys create gcp-staging-sa-key.json \
@@ -170,7 +170,7 @@ gcloud logging read "resource.type=cloud_run_revision AND resource.labels.servic
 | **"Docker daemon not running"** | Start Docker Desktop |
 | **"Authentication failed"** | Check service account key path and permissions |
 | **"Artifact Registry not found"** | Use `-PreCreateResources` flag to auto-create |
-| **"Health check failed"** | Use `-SkipHealthChecks` for faster deployment |
+| **"Health check failed"** | Use `--skip-health-checks` for faster deployment |
 | **"Permission denied"** | Ensure you have access to `netra-staging` project |
 | **"Service account key not found"** | Set `$env:GCP_STAGING_SA_KEY_PATH` or use `-ServiceAccountKeyPath` |
 | **"APIs not enabled"** | Script auto-enables APIs, wait for propagation |
@@ -262,10 +262,10 @@ python scripts/dev_launcher.py         # Start local dev
 python test_runner.py --level smoke    # Quick test
 
 # GCP STAGING (real cloud)
-.\deploy-staging-automated.ps1         # Deploy to staging
-.\deploy-staging-automated.ps1 -SkipHealthChecks  # Fast deploy
-.\deploy-staging-automated.ps1 -PreCreateResources  # With resource creation
-$env:GCP_STAGING_SA_KEY_PATH="./key.json"; .\deploy-staging-automated.ps1  # Custom key
+python deploy_staging_automated.py         # Deploy to staging
+python deploy_staging_automated.py -SkipHealthChecks  # Fast deploy
+python deploy_staging_automated.py -PreCreateResources  # With resource creation
+$env:GCP_STAGING_SA_KEY_PATH="./key.json"; python deploy_staging_automated.py  # Custom key
 
 # DEBUGGING
 gcloud run services list               # List services

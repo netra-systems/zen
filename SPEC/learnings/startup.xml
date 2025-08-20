@@ -312,4 +312,68 @@
             </when_to_investigate>
         </learning>
     </startup_logs>
+    
+    <staging_startup_checks>
+        <learning>
+            <id>staging-startup-crash-on-failure</id>
+            <category>startup</category>
+            <date>2025-08-19</date>
+            <severity>critical</severity>
+            <title>Staging Environment Crashes on Any Startup Check Failure</title>
+            
+            <description>
+                In staging environments, the system now crashes immediately on any startup
+                check failure to ensure observability and prevent deployment of broken services.
+                Each error is raised as a fresh individual error for better tracking.
+            </description>
+            
+            <implementation>
+                <file>app/startup_checks/checker.py</file>
+                <changes>
+                    <change line="102-115">Modified _execute_check to raise RuntimeError immediately in staging on any failure</change>
+                    <change line="149-162">Modified _record_check_failure to treat all failures as critical in staging</change>
+                </changes>
+                
+                <file>app/startup_checks/utils.py</file>
+                <changes>
+                    <change line="72-79">Modified _handle_startup_results to treat non-critical failures as critical in staging</change>
+                    <change line="81-92">Enhanced _handle_critical_failures to provide detailed error messages with all failure information</change>
+                    <change line="94-97">Added _is_staging_environment helper function</change>
+                </changes>
+            </implementation>
+            
+            <behavior>
+                <environment name="development">
+                    <description>Allows non-critical failures to proceed</description>
+                    <critical_failures>Crash with RuntimeError</critical_failures>
+                    <non_critical_failures>Log as warnings and continue</non_critical_failures>
+                </environment>
+                
+                <environment name="staging">
+                    <description>Treats ALL failures as critical</description>
+                    <critical_failures>Crash immediately with detailed RuntimeError</critical_failures>
+                    <non_critical_failures>Treated as critical, crash immediately</non_critical_failures>
+                    <detection>
+                        <method>ENVIRONMENT=staging</method>
+                        <method>K_SERVICE environment variable present (Cloud Run)</method>
+                    </detection>
+                </environment>
+            </behavior>
+            
+            <benefits>
+                <benefit>Immediate failure visibility in staging deployments</benefit>
+                <benefit>Prevents broken services from being deployed</benefit>
+                <benefit>Individual error reporting for better observability</benefit>
+                <benefit>Detailed error messages with all failure information</benefit>
+            </benefits>
+            
+            <testing>
+                <test>Verify staging detection via ENVIRONMENT variable</test>
+                <test>Verify staging detection via K_SERVICE (Cloud Run)</test>
+                <test>Verify all failures are critical in staging</test>
+                <test>Verify immediate crash on first failure in staging</test>
+                <test>Verify detailed error messages include all failure info</test>
+            </testing>
+        </learning>
+    </staging_startup_checks>
 </specification>

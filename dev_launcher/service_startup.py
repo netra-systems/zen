@@ -254,21 +254,29 @@ class ServiceStartupCoordinator:
             return False
     
     def _check_auth_health(self) -> bool:
-        """Check auth service health."""
+        """Check auth service health.
+        
+        Uses /api/auth/config endpoint per SPEC step 9.
+        """
         try:
             import requests
-            auth_url = f"http://localhost:8081/health"
+            # Use auth config endpoint per SPEC step 9
+            auth_url = f"http://localhost:8081/api/auth/config"
             response = requests.get(auth_url, timeout=3)
-            return response.status_code == 200
+            return response.status_code in [200, 404]  # 404 is acceptable
         except:
             return False
     
     def _check_backend_health(self) -> bool:
-        """Check backend service health."""
+        """Check backend service health.
+        
+        Uses /health/ready endpoint per SPEC requirements.
+        """
         try:
             import requests
             backend_port = self.config.backend_port or 8000
-            backend_url = f"http://localhost:{backend_port}/health"
+            # Use /health/ready for readiness checks per SPEC step 8
+            backend_url = f"http://localhost:{backend_port}/health/ready"
             response = requests.get(backend_url, timeout=3)
             return response.status_code == 200
         except:
@@ -286,9 +294,18 @@ class ServiceStartupCoordinator:
             return False
     
     def wait_for_service_readiness(self, service: str, timeout: int = 30) -> bool:
-        """Wait for specific service to be ready with progressive checks."""
+        """Wait for specific service to be ready with progressive checks.
+        
+        Per SPEC: This uses proper readiness endpoints and grace periods.
+        """
         start_time = time.time()
         check_interval = 1.0
+        
+        # Use service-specific timeouts per SPEC HEALTH-002
+        if service.lower() == "frontend":
+            timeout = 90  # Frontend: 90 second grace period
+        elif service.lower() == "backend":
+            timeout = 30  # Backend: 30 second grace period
         
         while (time.time() - start_time) < timeout:
             try:

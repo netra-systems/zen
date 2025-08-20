@@ -18,9 +18,9 @@ class JWTTestHelper:
     """Helper class for JWT token operations in tests."""
     
     def __init__(self):
-        self.auth_url = "http://localhost:8080"  # Updated to match running auth service
-        self.backend_url = "http://localhost:8000"
-        self.websocket_url = "ws://localhost:8000"
+        self.auth_url = "http://localhost:8083"  # Correct port for auth service
+        self.backend_url = "http://localhost:8001"  # Correct port for backend service
+        self.websocket_url = "ws://localhost:8001"  # Correct port for WebSocket
         self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"  # Use actual env JWT secret
     
     def create_valid_payload(self) -> Dict:

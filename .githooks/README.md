@@ -19,8 +19,7 @@ scripts\setup_hooks.bat
 
 ### Unix/Linux/macOS
 ```bash
-chmod +x scripts/setup_hooks.sh
-./scripts/setup_hooks.sh
+python scripts/setup_hooks.py
 ```
 
 ## How It Works
@@ -38,8 +37,7 @@ chmod +x scripts/setup_hooks.sh
 └── README.md          # This file
 
 scripts/
-├── setup_hooks.sh     # Unix/Linux/macOS installation
-├── setup_hooks.bat    # Windows installation  
+├── setup_hooks.py     # Cross-platform installation script  
 └── check_architecture_compliance.py  # Full codebase checker
 ```
 
@@ -109,7 +107,7 @@ git config --get core.hooksPath
 ls -la .githooks/pre-commit
 
 # Re-run setup
-./scripts/setup_hooks.sh  # Unix
+python scripts/setup_hooks.py
 # OR
 scripts\setup_hooks.bat   # Windows
 ```

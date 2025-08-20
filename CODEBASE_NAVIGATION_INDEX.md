@@ -235,7 +235,7 @@ python test_runner.py
 python scripts/check_architecture_compliance.py
 
 # Deploy to staging
-./deploy-staging-reliable.ps1
+python deploy_staging_reliable.py
 ```
 
 ### Configuration Files:

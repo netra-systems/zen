@@ -326,27 +326,21 @@ class OAuthConfigGenerator:
     
     def _get_staging_redirect_uris(self) -> List[str]:
         """Get staging redirect URIs."""
-        return ["https://staging.netrasystems.ai/auth/callback",
-                "https://auth.staging.netrasystems.ai/auth/callback",
-                "https://app.staging.netrasystems.ai/auth/callback"]
+        return ["https://auth.staging.netrasystems.ai/auth/callback"]
     
     def _get_staging_js_origins(self) -> List[str]:
         """Get staging JavaScript origins."""
-        return ["https://staging.netrasystems.ai", 
-                "https://auth.staging.netrasystems.ai",
-                "https://app.staging.netrasystems.ai"]
+        return ["https://app.staging.netrasystems.ai",
+                "https://auth.staging.netrasystems.ai"]
     
     def _get_prod_redirect_uris(self) -> List[str]:
         """Get production redirect URIs."""
-        return ["https://netrasystems.ai/auth/callback",
-                "https://auth.netrasystems.ai/auth/callback",
-                "https://app.netrasystems.ai/auth/callback"]
+        return ["https://auth.netrasystems.ai/auth/callback"]
     
     def _get_prod_js_origins(self) -> List[str]:
         """Get production JavaScript origins."""
-        return ["https://netrasystems.ai", 
-                "https://auth.netrasystems.ai",
-                "https://app.netrasystems.ai"]
+        return ["https://app.netrasystems.ai",
+                "https://auth.netrasystems.ai"]
     
     def _get_fallback_client_id(self) -> str:
         """Get fallback client ID with multiple attempts."""

@@ -41,7 +41,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for validation errors."""
-        self._logger.error(f"Validation error: {str(exc)}")
+        self._logger.error("Validation error: {}", str(exc))
         
         return ErrorResponse(
             error_code=ErrorCode.VALIDATION_ERROR.value,
@@ -60,7 +60,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for database errors."""
-        self._logger.error(f"Database error: {str(exc)}", exc_info=True)
+        self._logger.error("Database error: {}", str(exc), exc_info=True)
         
         return ErrorResponse(
             error_code=ErrorCode.DATABASE_ERROR.value,
@@ -79,7 +79,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for HTTP exceptions."""
-        self._logger.warning(f"HTTP error: {str(exc)}")
+        self._logger.warning("HTTP error: {}", str(exc))
         
         # Map specific HTTP status codes to appropriate error codes
         error_code = self._map_http_status_to_error_code(exc)
@@ -127,7 +127,7 @@ class ErrorResponseBuilder:
         request_id: Optional[str]
     ) -> ErrorResponse:
         """Build response for unknown exceptions."""
-        self._logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+        self._logger.error("Unhandled exception: {}", str(exc), exc_info=True)
         
         return ErrorResponse(
             error_code=ErrorCode.INTERNAL_ERROR.value,
@@ -165,7 +165,7 @@ class ErrorResponseBuilder:
         """Log error based on severity level."""
         severity_value = self._normalize_severity(severity)
         log_method = self._get_log_method(severity_value)
-        log_method(f"{severity_value.title()} severity error: {exc}")
+        log_method("{} severity error: {}", severity_value.title(), exc)
     
     def _normalize_severity(self, severity: Union[ErrorSeverity, str]) -> str:
         """Normalize severity to string value."""
