@@ -31,10 +31,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=builder /app/wheels /wheels
 RUN pip install --no-cache-dir /wheels/* && rm -rf /wheels
 
-# Copy application code - proper directory structure
-COPY auth_service/ ./auth_service/
-# Copy auth_core to root level for proper imports
-COPY auth_service/auth_core/ ./auth_core/
+# Copy application code - service isolation
+COPY auth_service/ ./
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser && \
@@ -67,7 +65,7 @@ EXPOSE 8080
 
 # Use exec form to ensure proper signal handling for Cloud Run
 # Cloud Run sends SIGTERM for graceful shutdown
-CMD ["sh", "-c", "exec gunicorn auth_service.main:app \
+CMD ["sh", "-c", "exec gunicorn main:app \
     --bind 0.0.0.0:${PORT} \
     --workers ${WORKERS} \
     --worker-class uvicorn.workers.UvicornWorker \
