@@ -125,6 +125,35 @@ class TestFreeToPaidConversionRevenuePipeline:
         await self._verify_single_conversion_success(test_infra, user, results)
         await self._cleanup(test_infra)
 
+    @pytest.mark.asyncio
+    async def test_05_trial_extension_and_downgrade_prevention(self, test_infra, service_mocks):
+        """BVJ: Optimizes trial experience and prevents downgrades to protect MRR."""
+        # Test trial extension for high-engagement users
+        trial_user = await self._create_expiring_trial_user(test_infra)
+        extension_result = await self._evaluate_trial_extension(trial_user, service_mocks)
+        await self._verify_trial_extension_success(test_infra, trial_user, extension_result)
+        
+        # Test downgrade prevention for paying customers
+        paid_user = await self._create_paid_user_for_retention(test_infra)
+        downgrade_attempt = await self._simulate_downgrade_request(paid_user, service_mocks)
+        retention_outcome = await self._execute_retention_strategy(downgrade_attempt, service_mocks)
+        await self._verify_downgrade_prevention(test_infra, paid_user, retention_outcome)
+        
+        await self._cleanup(test_infra)
+
+    @pytest.mark.asyncio
+    async def test_06_webhook_subscription_state_sync(self, test_infra, service_mocks):
+        """BVJ: Ensures subscription state consistency via payment gateway webhooks."""
+        user = await self._create_trial_user(test_infra)
+        
+        # Simulate webhook events during conversion
+        webhook_events = await self._simulate_payment_webhook_events(user, service_mocks)
+        await self._process_webhook_state_updates(test_infra, user, webhook_events)
+        
+        # Verify state consistency
+        await self._verify_webhook_state_synchronization(test_infra, user, webhook_events)
+        await self._cleanup(test_infra)
+
     # Helper methods for test implementation
     async def _create_trial_user(self, infra):
         """Create trial user with realistic data"""
