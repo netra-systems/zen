@@ -104,9 +104,9 @@ def _get_production_cors_config(allowed_origins: list[str]) -> dict:
     return {
         "allow_origins": allowed_origins,
         "allow_credentials": True,
-        "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        "allow_headers": ["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID"],
-        "expose_headers": ["X-Trace-ID", "X-Request-ID"]
+        "allow_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
+        "allow_headers": ["Authorization", "Content-Type", "X-Request-ID", "X-Trace-ID", "Accept", "Origin", "Referer", "X-Requested-With"],
+        "expose_headers": ["X-Trace-ID", "X-Request-ID", "Content-Length", "Content-Type"]
     }
 
 
@@ -119,8 +119,8 @@ def add_cors_headers_to_response(response: Any, origin: str) -> None:
     """Add CORS headers to response."""
     response.headers["Access-Control-Allow-Origin"] = origin
     response.headers["Access-Control-Allow-Credentials"] = "true"
-    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
 
 
 def process_cors_if_needed(request: Request, response: Any) -> None:
@@ -228,7 +228,15 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
     async def _handle_request(self, request: Request, call_next) -> Response:
         """Handle request and return response."""
         if request.method == "OPTIONS":
-            return Response(status_code=200)
+            response = Response(status_code=200)
+            origin = request.headers.get("origin")
+            if origin:
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+                response.headers["Access-Control-Max-Age"] = "3600"
+            return response
         return await call_next(request)
 
     async def _process_cors_response(self, response: Response, origin: Optional[str]) -> None:
@@ -245,9 +253,9 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
         """Add CORS headers to response."""
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
-        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH"
-        response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID"
-        response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+        response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+        response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
 
     def _log_cors_rejection(self, origin: str, allowed_origins: list[str]) -> None:
         """Log CORS rejection for debugging."""

@@ -60,7 +60,7 @@ substitutions:
   _BRANCH_NAME: ${BRANCH_NAME}
 
 options:
-  machineType: 'N1_HIGHCPU_8'
+  machineType: 'E2_HIGHCPU_8'
   logging: CLOUD_LOGGING_ONLY
 
 timeout: '900s'
