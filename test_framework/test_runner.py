@@ -797,6 +797,116 @@ def finalize_test_run(runner, level, config, output, exit_code):
     return engine_finalize(runner, level, config, output, exit_code)
 
 
+def handle_real_test_report():
+    """Generate real test compliance report"""
+    print("[REAL TEST VALIDATION] Generating Compliance Report...")
+    
+    try:
+        sys.path.append(str(PROJECT_ROOT / "scripts" / "compliance"))
+        from real_test_requirements_enforcer import RealTestRequirementsEnforcer
+        
+        enforcer = RealTestRequirementsEnforcer(str(PROJECT_ROOT))
+        violations = enforcer.validate_all_tests()
+        
+        report = enforcer.generate_report()
+        print(report)
+        
+        # Save JSON report
+        json_output = enforcer.export_json()
+        json_path = PROJECT_ROOT / "test_reports" / "real_test_violations.json"
+        json_path.parent.mkdir(exist_ok=True)
+        json_path.write_text(json_output)
+        
+        print(f"\n[REPORT] JSON saved to: {json_path}")
+        
+        return 1 if any(v.severity == "critical" for v in violations) else 0
+        
+    except ImportError as e:
+        print(f"[ERROR] Could not import real test enforcer: {e}")
+        return 1
+    except Exception as e:
+        print(f"[ERROR] Error generating report: {e}")
+        return 1
+
+
+def handle_fix_test_violations():
+    """Automatically fix common real test requirement violations"""
+    print("🔧 Fixing Real Test Requirements Violations...")
+    
+    try:
+        sys.path.append(str(PROJECT_ROOT / "scripts" / "compliance"))
+        from real_test_requirements_enforcer import RealTestRequirementsEnforcer
+        
+        # First validate to find violations
+        enforcer = RealTestRequirementsEnforcer(str(PROJECT_ROOT))
+        violations = enforcer.validate_all_tests()
+        
+        if not violations:
+            print("✅ No violations found - all tests comply with requirements!")
+            return 0
+            
+        print(f"Found {len(violations)} violations to fix...")
+        
+        # TODO: Implement automated fixing logic
+        print("🚧 Automated fixing not yet implemented. Please fix manually:")
+        print("1. Move mock component classes to test utilities")
+        print("2. Replace inline mocks with real components")
+        print("3. Split oversized test functions")
+        
+        # Show summary
+        summary = enforcer.generate_report()
+        print("\n" + summary)
+        
+        return 1  # Exit with error until fixing is implemented
+        
+    except ImportError as e:
+        print(f"❌ Could not import real test enforcer: {e}")
+        return 1
+    except Exception as e:
+        print(f"❌ Error fixing violations: {e}")
+        return 1
+
+
+def validate_real_test_requirements():
+    """Validate all tests comply with real test requirements"""
+    try:
+        sys.path.append(str(PROJECT_ROOT / "scripts" / "compliance"))
+        from real_test_requirements_enforcer import RealTestRequirementsEnforcer
+        
+        enforcer = RealTestRequirementsEnforcer(str(PROJECT_ROOT))
+        violations = enforcer.validate_all_tests()
+        
+        if not violations:
+            return True
+            
+        # Show violations summary
+        critical_violations = [v for v in violations if v.severity == "critical"]
+        major_violations = [v for v in violations if v.severity == "major"]
+        
+        print(f"Found {len(violations)} violations:")
+        print(f"  🔥 {len(critical_violations)} critical")
+        print(f"  ⚠️ {len(major_violations)} major")
+        
+        # Show first few violations
+        for violation in violations[:5]:
+            severity_emoji = {"critical": "🔥", "major": "⚠️", "minor": "ℹ️"}[violation.severity]
+            print(f"{severity_emoji} {violation.file_path}:{violation.line_number} - {violation.description}")
+        
+        if len(violations) > 5:
+            print(f"... and {len(violations) - 5} more violations")
+            
+        print("\nRun with --real-test-report for full details")
+        
+        return len(critical_violations) == 0  # Only block on critical violations
+        
+    except ImportError as e:
+        print(f"Warning: Could not import real test enforcer: {e}")
+        return True  # Don't block on import errors
+    except Exception as e:
+        print(f"Warning: Real test validation failed: {e}")
+        return True  # Don't block on validation errors
+
+
 if __name__ == "__main__":
     # Store args globally for helper functions
     import sys

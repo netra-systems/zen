@@ -42,7 +42,9 @@ class ComplianceConfig:
                  max_function_lines: int = 25, target_folders: List[str] = None,
                  ignore_folders: List[str] = None):
         self.root_path = Path(root_path)
+        # CLAUDE.md 2.2: Modules should aim for <500 lines (approx)
         self.max_file_lines = max_file_lines
+        # CLAUDE.md 2.2: Functions should strive for <25 lines (approx)
         self.max_function_lines = max_function_lines
         self.target_folders = target_folders or ['app', 'frontend', 'auth_service']
         self.ignore_folders = ignore_folders or ['scripts', 'test_framework']

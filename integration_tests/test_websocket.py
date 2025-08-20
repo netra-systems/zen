@@ -60,12 +60,14 @@ def mock_security_service():
 
 @pytest.fixture(scope="function")
 def client(mock_agent_service, mock_security_service, mock_demo_service):
-    app.dependency_overrides[get_agent_service] = lambda: mock_agent_service
-    app.dependency_overrides[get_security_service] = lambda: mock_security_service
-    app.dependency_overrides[get_demo_service] = lambda: mock_demo_service
-    with TestClient(app) as c:
-        yield c
-    app.dependency_overrides = {}
+    # Since WebSocket endpoint calls get_demo_service() directly, we need to patch it
+    with patch('app.routes.demo.get_demo_service', return_value=mock_demo_service):
+        app.dependency_overrides[get_agent_service] = lambda: mock_agent_service
+        app.dependency_overrides[get_security_service] = lambda: mock_security_service
+        app.dependency_overrides[get_demo_service] = lambda: mock_demo_service
+        with TestClient(app) as c:
+            yield c
+        app.dependency_overrides = {}
 
 def test_websocket_sends_message_to_agent_service(client, mock_demo_service):
     """Test that WebSocket messages are sent to agent service"""

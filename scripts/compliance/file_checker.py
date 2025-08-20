@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 File size and naming compliance checker.
-Enforces CLAUDE.md file size limits (500 lines max) and clean naming conventions.
+Enforces CLAUDE.md module size guidelines (approx <500 lines) and clean naming conventions.
+Per CLAUDE.md 2.2: Exceeding guidelines signals need to reassess design for clarity over fragmentation.
 """
 
 import glob
