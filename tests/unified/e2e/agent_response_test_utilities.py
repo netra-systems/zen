@@ -164,6 +164,19 @@ class QualityMetricValidator:
             return 0.0
         weights = {"specificity": 0.3, "actionability": 0.3, "completeness": 0.2, "clarity": 0.2}
         return sum(metrics.get(metric, 0.0) * weight for metric, weight in weights.items())
+    
+    async def _calculate_quality_metrics(self, content: str) -> Dict[str, float]:
+        """Calculate quality metrics for content."""
+        if not content:
+            return {"specificity": 0.0, "actionability": 0.0, "completeness": 0.0, "clarity": 0.0}
+        length_factor = min(1.0, len(content) / 200.0)
+        word_count = len(content.split())
+        return {
+            "specificity": min(1.0, word_count / 50.0) * 0.8, 
+            "actionability": length_factor * 0.7, 
+            "completeness": min(1.0, word_count / 100.0) * 0.8, 
+            "clarity": length_factor * 0.9
+        }
 
 
 class ResponseStreamingVerifier:
@@ -292,10 +305,3 @@ class ErrorScenarioTester:
             "type": response_type.value
         }
     
-    async def _calculate_quality_metrics(self, content: str) -> Dict[str, float]:
-        """Calculate quality metrics for content."""
-        if not content:
-            return {"specificity": 0.0, "actionability": 0.0, "completeness": 0.0, "clarity": 0.0}
-        length_factor = min(1.0, len(content) / 200.0)
-        word_count = len(content.split())
-        return {"specificity": min(1.0, word_count / 50.0) * 0.8, "actionability": length_factor * 0.7, "completeness": min(1.0, word_count / 100.0) * 0.8, "clarity": length_factor * 0.9}

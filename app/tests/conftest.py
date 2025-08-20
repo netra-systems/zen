@@ -67,6 +67,12 @@ from app.tests.conftest_helpers import (
     _import_agent_classes, _instantiate_agents
 )
 
+# Import all models to ensure they are registered with Base before creating tables
+from app.db.models_user import User, Secret, ToolUsageLog
+from app.db.models_postgres import *  # Import all postgres models
+from app.db.models_content import *  # Import all content models
+from app.db.models_agent_state import *  # Import all agent state models
+
 # Initialize database on import to ensure async_session_factory is available
 from app.db.postgres import initialize_postgres
 try:

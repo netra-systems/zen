@@ -10,7 +10,7 @@ def test_websocket_connection():
     client = TestClient(app)
     
     # The demo WebSocket endpoint accepts connections immediately
-    with client.websocket_connect("/ws") as websocket:
+    with client.websocket_connect("/api/demo/ws") as websocket:
         # Should receive connection established message
         data = websocket.receive_json()
         assert data["type"] == "connection_established"
@@ -28,7 +28,7 @@ def test_websocket_invalid_message_type():
     """Test WebSocket handles invalid message types gracefully."""
     client = TestClient(app)
     
-    with client.websocket_connect("/ws") as websocket:
+    with client.websocket_connect("/api/demo/ws") as websocket:
         # Receive connection established
         data = websocket.receive_json()
         assert data["type"] == "connection_established"

@@ -13,6 +13,13 @@ from .critical_integration_helpers import (
     MiscTestHelpers
 )
 
+# Check if the new user flow helpers exist before importing
+try:
+    from ..test_helpers.user_flow_base import UserFlowTestBase, UserFlowAssertions
+    USER_FLOW_HELPERS_AVAILABLE = True
+except ImportError:
+    USER_FLOW_HELPERS_AVAILABLE = False
+
 __all__ = [
     'RevenueTestHelpers',
     'AuthenticationTestHelpers',
@@ -22,3 +29,6 @@ __all__ = [
     'MonitoringTestHelpers',
     'MiscTestHelpers'
 ]
+
+if USER_FLOW_HELPERS_AVAILABLE:
+    __all__.extend(['UserFlowTestBase', 'UserFlowAssertions'])

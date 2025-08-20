@@ -327,8 +327,14 @@ async def _cleanup_connections() -> None:
 async def validate_schema(logger: logging.Logger) -> None:
     """Perform comprehensive schema validation."""
     from app.services.schema_validation_service import run_comprehensive_validation
-    from app.db.postgres import async_engine
+    from app.db.postgres import initialize_postgres
+    from app.db.postgres_core import async_engine
     if "pytest" not in sys.modules:
+        # Ensure database is initialized before validation
+        initialize_postgres()
+        if async_engine is None:
+            logger.warning("Database engine not initialized, skipping schema validation")
+            return
         validation_passed = await run_comprehensive_validation(async_engine)
         _handle_schema_validation_result(logger, validation_passed)
 

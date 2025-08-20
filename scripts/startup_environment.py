@@ -106,9 +106,15 @@ class DependencyChecker:
     def _check_npm(self, checks: List) -> List:
         """Check npm availability"""
         try:
-            result = subprocess.run(["npm", "--version"], capture_output=True, text=True)
-            checks.append(("npm", True, result.stdout.strip()))
-        except FileNotFoundError:
+            # Use shell=True on Windows to properly resolve npm.cmd
+            import platform
+            shell_needed = platform.system() == "Windows"
+            result = subprocess.run(["npm", "--version"], capture_output=True, text=True, shell=shell_needed)
+            if result.returncode == 0:
+                checks.append(("npm", True, result.stdout.strip()))
+            else:
+                checks.append(("npm", False, "Command failed"))
+        except (FileNotFoundError, OSError):
             checks.append(("npm", False, "Not installed"))
         return checks
     

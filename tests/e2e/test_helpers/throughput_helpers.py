@@ -9,18 +9,18 @@ import uuid
 import json
 import logging
 import statistics
-import threading
-import gc
 import psutil
 import os
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any, Tuple, Union, NamedTuple
-from collections import defaultdict, deque
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Any
 
-import websockets
-import httpx
+# Import metrics and data structures
+from ..fixtures.throughput_metrics import (
+    ThroughputMetrics, LatencyMeasurement, LoadTestResults,
+    ThroughputAnalyzer, HIGH_VOLUME_CONFIG
+)
+
+# Import server infrastructure
+from .high_volume_server import HighVolumeWebSocketServer, HighVolumeThroughputClient
 
 logger = logging.getLogger(__name__)
 
@@ -32,70 +32,6 @@ E2E_TEST_CONFIG = {
     "skip_real_services": os.getenv("SKIP_REAL_SERVICES", "true").lower() == "true",
     "test_timeout": int(os.getenv("E2E_TEST_TIMEOUT", "300")),
 }
-
-class ThroughputMetrics(NamedTuple):
-    """Core throughput measurement data structure"""
-    messages_sent: int
-    messages_received: int
-    start_time: float
-    end_time: float
-    total_duration: float
-    throughput_per_second: float
-    success_rate: float
-    latency_p50: float
-    latency_p95: float
-    latency_p99: float
-
-@dataclass
-class LatencyMeasurement:
-    """Individual message latency tracking"""
-    message_id: str
-    sent_timestamp: float
-    received_timestamp: Optional[float] = None
-    latency_ms: Optional[float] = None
-    
-    def calculate_latency(self) -> float:
-        if self.received_timestamp:
-            self.latency_ms = (self.received_timestamp - self.sent_timestamp) * 1000
-        return self.latency_ms or 0.0
-
-@dataclass
-class LoadTestResults:
-    """Comprehensive load test results container"""
-    test_name: str
-    start_time: datetime
-    end_time: Optional[datetime] = None
-    total_messages_sent: int = 0
-    total_messages_received: int = 0
-    successful_connections: int = 0
-    failed_connections: int = 0
-    latency_measurements: List[LatencyMeasurement] = field(default_factory=list)
-    error_messages: List[str] = field(default_factory=list)
-    memory_usage_mb: float = 0.0
-    cpu_usage_percent: float = 0.0
-    
-    def add_latency(self, measurement: LatencyMeasurement):
-        self.latency_measurements.append(measurement)
-    
-    def calculate_metrics(self) -> ThroughputMetrics:
-        if not self.end_time:
-            self.end_time = datetime.now(timezone.utc)
-            
-        duration = (self.end_time - self.start_time).total_seconds()
-        latencies = [m.latency_ms for m in self.latency_measurements if m.latency_ms]
-        
-        return ThroughputMetrics(
-            messages_sent=self.total_messages_sent,
-            messages_received=self.total_messages_received,
-            start_time=self.start_time.timestamp(),
-            end_time=self.end_time.timestamp(),
-            total_duration=duration,
-            throughput_per_second=self.total_messages_received / duration if duration > 0 else 0,
-            success_rate=self.total_messages_received / self.total_messages_sent if self.total_messages_sent > 0 else 0,
-            latency_p50=statistics.median(latencies) if latencies else 0,
-            latency_p95=statistics.quantiles(latencies, n=20)[18] if len(latencies) > 20 else (max(latencies) if latencies else 0),
-            latency_p99=statistics.quantiles(latencies, n=100)[98] if len(latencies) > 100 else (max(latencies) if latencies else 0),
-        )
 
 def create_test_message(message_id: str = None, size_bytes: int = 1024) -> Dict[str, Any]:
     """Create standardized test message with specified size"""

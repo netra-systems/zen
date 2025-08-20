@@ -12,6 +12,36 @@ class TestUser:
     role: str = "user"
 
 
+@dataclass
+class TestEndpoints:
+    """Test endpoint configuration."""
+    ws_url: str = "ws://localhost:8000/ws"
+    api_url: str = "http://localhost:8000"
+    auth_url: str = "http://localhost:8001"
+
+
+class TestDataFactory:
+    """Factory for creating test data structures."""
+    
+    @staticmethod
+    def create_websocket_auth(token: str) -> Dict[str, str]:
+        """Create WebSocket authentication headers."""
+        return {
+            "Authorization": f"Bearer {token}",
+            "X-Test-Mode": "true"
+        }
+    
+    @staticmethod
+    def create_message_data(user_id: str, content: str) -> Dict[str, Any]:
+        """Create test message data."""
+        return {
+            "type": "message",
+            "user_id": user_id,
+            "content": content,
+            "timestamp": "2024-01-01T00:00:00Z"
+        }
+
+
 # Test users for different segments
 TEST_USERS = {
     "free": TestUser(id="test_user_free", email="free@test.com", role="user"),
@@ -19,6 +49,10 @@ TEST_USERS = {
     "mid": TestUser(id="test_user_mid", email="mid@test.com", role="user"),
     "enterprise": TestUser(id="test_user_enterprise", email="enterprise@test.com", role="admin")
 }
+
+
+# Test endpoints
+TEST_ENDPOINTS = TestEndpoints()
 
 
 # Test configuration

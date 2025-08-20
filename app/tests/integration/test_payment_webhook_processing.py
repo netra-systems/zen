@@ -36,13 +36,13 @@ class TestPaymentWebhookProcessing:
         """Setup webhook processing infrastructure"""
         return {
             "webhook_secret": webhook_secret,
-            "webhook_processor": Mock(),
-            "idempotency_store": Mock(),
-            "database_manager": Mock(),
-            "alert_manager": Mock(),
-            "billing_service": Mock(),
-            "webhook_handler": Mock(),
-            "retry_manager": Mock()
+            "webhook_processor": AsyncMock(),
+            "idempotency_store": AsyncMock(),
+            "database_manager": AsyncMock(),
+            "alert_manager": AsyncMock(),
+            "billing_service": AsyncMock(),
+            "webhook_handler": AsyncMock(),
+            "retry_manager": AsyncMock()
         }
 
     def generate_webhook_signature(self, payload: str, secret: str, timestamp: int) -> str:
@@ -356,18 +356,17 @@ class TestPaymentWebhookProcessing:
         }
         refund_payload = self.create_webhook_payload("charge.refund.created", refund_data)
         
-        # Mock failure handling
-        webhook_infrastructure["billing_service"].handle_payment_failure = AsyncMock(
-            return_value={"retry_scheduled": True, "customer_notified": True}
-        )
+        # Mock failure handling - already AsyncMock from fixture
+        webhook_infrastructure["billing_service"].handle_payment_failure.return_value = {
+            "retry_scheduled": True, "customer_notified": True
+        }
         
-        # Mock refund processing
-        webhook_infrastructure["billing_service"].process_refund = AsyncMock(
-            return_value={"refund_processed": True, "accounting_updated": True}
-        )
+        # Mock refund processing - already AsyncMock from fixture
+        webhook_infrastructure["billing_service"].process_refund.return_value = {
+            "refund_processed": True, "accounting_updated": True
+        }
         
-        # Setup webhook handler as AsyncMock
-        webhook_infrastructure["webhook_handler"].process_event = AsyncMock()
+        # Webhook handler is already AsyncMock from fixture
         
         # Process payment failure
         await webhook_infrastructure["webhook_handler"].process_event(failure_payload)
