@@ -413,7 +413,7 @@ class DevLauncher:
             self.health_monitor.start()
             
             # Show summary
-            self.summary_display.show_summary()
+            self.summary_display.show_success_summary()
             
             # Monitor services
             self._monitor_services()

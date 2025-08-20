@@ -7,7 +7,7 @@ Maintains 8-line function limit and focused database logic.
 
 from typing import Dict, Any, List
 from datetime import datetime, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 from app.logging_config import central_logger as logger
 
@@ -15,7 +15,7 @@ from app.logging_config import central_logger as logger
 class SupplyDatabaseManager:
     """Manages database operations for supply research"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
     
     async def update_database(

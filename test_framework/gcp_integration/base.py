@@ -11,7 +11,6 @@ from datetime import datetime
 import asyncio
 from google.cloud import logging as gcp_logging
 from google.cloud import secretmanager
-from google.cloud import run_v2
 from google.auth import default
 from google.auth.exceptions import GoogleAuthError
 import aiohttp

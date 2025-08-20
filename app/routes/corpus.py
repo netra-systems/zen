@@ -1,6 +1,6 @@
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app import schemas
 from app.services import clickhouse_service
 from app.services.corpus_service import corpus_service_instance as corpus_service
@@ -28,11 +28,11 @@ class ExtractMetadataRequest(BaseModel):
 async def list_corpus_tables(current_user: User = Depends(get_current_user)) -> List[str]:
     return await clickhouse_service.list_corpus_tables()
 
-def _create_corpus_record(db: Session, corpus: schemas.CorpusCreate, user_id: int) -> schemas.Corpus:
+def _create_corpus_record(db: AsyncSession, corpus: schemas.CorpusCreate, user_id: int) -> schemas.Corpus:
     """Create corpus database record."""
     return corpus_service.create_corpus(db=db, corpus=corpus, user_id=user_id)
 
-def _schedule_corpus_generation(request: Request, corpus_id: str, db: Session) -> None:
+def _schedule_corpus_generation(request: Request, corpus_id: str, db: AsyncSession) -> None:
     """Schedule background corpus generation task."""
     task = corpus_service.generate_corpus_task(corpus_id, db)
     request.app.state.background_task_manager.add_task(task)
@@ -40,7 +40,7 @@ def _schedule_corpus_generation(request: Request, corpus_id: str, db: Session) -
 @router.post("/", response_model=schemas.Corpus)
 def create_corpus(
     corpus: schemas.CorpusCreate, request: Request,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:
     db_corpus = _create_corpus_record(db, corpus, current_user.id)
@@ -51,7 +51,7 @@ def create_corpus(
 def read_corpora(
     skip: int = 0,
     limit: int = 100,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> List[schemas.Corpus]:
     corpora = corpus_service.get_corpora(db, skip=skip, limit=limit)
@@ -62,7 +62,7 @@ def _validate_corpus_exists(db_corpus) -> None:
     if db_corpus is None:
         raise HTTPException(status_code=404, detail="Corpus not found")
 
-def _get_corpus_by_id(db: Session, corpus_id: str) -> schemas.Corpus:
+def _get_corpus_by_id(db: AsyncSession, corpus_id: str) -> schemas.Corpus:
     """Get and validate corpus by ID."""
     db_corpus = corpus_service.get_corpus(db, corpus_id=corpus_id)
     _validate_corpus_exists(db_corpus)
@@ -71,12 +71,12 @@ def _get_corpus_by_id(db: Session, corpus_id: str) -> schemas.Corpus:
 @router.get("/{corpus_id}", response_model=schemas.Corpus)
 def read_corpus(
     corpus_id: str,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:
     return _get_corpus_by_id(db, corpus_id)
 
-def _update_corpus_record(db: Session, corpus_id: str, corpus: schemas.CorpusUpdate) -> schemas.Corpus:
+def _update_corpus_record(db: AsyncSession, corpus_id: str, corpus: schemas.CorpusUpdate) -> schemas.Corpus:
     """Update corpus and validate existence."""
     db_corpus = corpus_service.update_corpus(db, corpus_id=corpus_id, corpus=corpus)
     _validate_corpus_exists(db_corpus)
@@ -86,12 +86,12 @@ def _update_corpus_record(db: Session, corpus_id: str, corpus: schemas.CorpusUpd
 def update_corpus(
     corpus_id: str,
     corpus: schemas.CorpusUpdate,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:
     return _update_corpus_record(db, corpus_id, corpus)
 
-def _delete_corpus_record(db: Session, corpus_id: str) -> schemas.Corpus:
+def _delete_corpus_record(db: AsyncSession, corpus_id: str) -> schemas.Corpus:
     """Delete corpus and validate existence."""
     db_corpus = corpus_service.delete_corpus(db, corpus_id=corpus_id)
     _validate_corpus_exists(db_corpus)
@@ -100,7 +100,7 @@ def _delete_corpus_record(db: Session, corpus_id: str) -> schemas.Corpus:
 @router.delete("/{corpus_id}", response_model=schemas.Corpus)
 def delete_corpus(
     corpus_id: str,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:
     return _delete_corpus_record(db, corpus_id)
@@ -108,14 +108,14 @@ def delete_corpus(
 @router.post("/{corpus_id}/generate", response_model=schemas.Corpus)
 def regenerate_corpus(
     corpus_id: str, request: Request,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> schemas.Corpus:
     db_corpus = _get_corpus_by_id(db, corpus_id)
     _schedule_corpus_generation(request, db_corpus.id, db)
     return db_corpus
 
-def _get_corpus_status_validated(db: Session, corpus_id: str) -> str:
+def _get_corpus_status_validated(db: AsyncSession, corpus_id: str) -> str:
     """Get corpus status with validation."""
     status = corpus_service.get_corpus_status(db, corpus_id=corpus_id)
     if status is None:
@@ -125,13 +125,13 @@ def _get_corpus_status_validated(db: Session, corpus_id: str) -> str:
 @router.get("/{corpus_id}/status")
 def get_corpus_status(
     corpus_id: str,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> Dict[str, Any]:
     status = _get_corpus_status_validated(db, corpus_id)
     return {"status": status}
 
-def _get_corpus_content_validated(db: Session, corpus_id: str) -> Any:
+def _get_corpus_content_validated(db: AsyncSession, corpus_id: str) -> Any:
     """Get corpus content with validation."""
     content = corpus_service.get_corpus_content(db, corpus_id=corpus_id)
     if content is None:
@@ -141,7 +141,7 @@ def _get_corpus_content_validated(db: Session, corpus_id: str) -> Any:
 @router.get("/{corpus_id}/content")
 def get_corpus_content(
     corpus_id: str,
-    db: Session = Depends(get_db_session),
+    db: AsyncSession = Depends(get_db_session),
     current_user: User = Depends(get_current_user)
 ) -> Any:
     return _get_corpus_content_validated(db, corpus_id)

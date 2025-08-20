@@ -8,7 +8,7 @@ Adheres to SPEC/type_safety.xml and SPEC/conventions.xml.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Any, Protocol, TypeVar, Generic
+from typing import Dict, List, Optional, Any, Protocol, TypeVar, Generic, AsyncIterator
 from datetime import datetime
 import asyncio
 

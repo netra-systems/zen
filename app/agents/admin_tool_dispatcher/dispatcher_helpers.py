@@ -8,7 +8,7 @@ Business Value: Enables modern agent architecture compliance for admin tools.
 """
 from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.schemas.admin_tool_types import (
     AdminToolType, AdminToolInfo, ToolStatus as AdminToolStatus

@@ -17,7 +17,10 @@ class SessionManager:
     """Single Source of Truth for session management"""
     
     def __init__(self):
-        self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        # In containerized environments, Redis should connect to a Redis service, not localhost
+        # For staging/production, Redis is disabled by environment check
+        default_redis_url = "redis://redis:6379" if os.getenv("ENVIRONMENT") not in ["development", "test"] else "redis://localhost:6379"
+        self.redis_url = os.getenv("REDIS_URL", default_redis_url)
         self.session_ttl = int(os.getenv("SESSION_TTL_HOURS", "24"))
         self.redis_client = None
         self.redis_enabled = self._should_enable_redis()

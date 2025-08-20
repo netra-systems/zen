@@ -4,7 +4,7 @@ Research Session Operations - Management of research sessions and update logs
 
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import desc
 
 from app.db.models_postgres import ResearchSession, SupplyUpdateLog
@@ -14,7 +14,7 @@ from app.logging_config import central_logger as logger
 class ResearchSessionOperations:
     """Handles research session management and update logging"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
     
     def _build_research_sessions_base_query(self):

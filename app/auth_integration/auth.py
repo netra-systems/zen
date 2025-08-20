@@ -26,7 +26,6 @@ from typing import Optional, Annotated, Dict, Any
 from datetime import timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
 from app.clients.auth_client import auth_client
 from app.db.models_postgres import User
 from app.db.session import get_db_session
@@ -93,7 +92,7 @@ async def get_current_user(
 
 async def get_current_user_optional(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Optional[User]:
     """
     Get current user if authenticated, otherwise return None

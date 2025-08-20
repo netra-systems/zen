@@ -17,7 +17,7 @@ All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
 from typing import List, Dict, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.services.permission_service import PermissionService
 from app.schemas.admin_tool_types import AdminToolType, ToolPermissionCheck
@@ -29,7 +29,7 @@ logger = central_logger.get_logger(__name__)
 class AdminToolPermissionManager:
     """Manages permissions for admin tools with strict 8-line function limit"""
     
-    def __init__(self, db: Session, user: User):
+    def __init__(self, db: AsyncSession, user: User):
         self.db = db
         self.user = user
         self.permission_map = self._create_permission_map()

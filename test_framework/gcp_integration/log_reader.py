@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 import asyncio
 import json
 from google.cloud import logging as gcp_logging
-from google.cloud.logging_v2 import enums
 
 from .base import GCPBaseClient, GCPConfig
 from ..unified.base_interfaces import ILogAnalyzer
@@ -39,9 +38,12 @@ class LogEntry:
     @classmethod
     def from_gcp_entry(cls, entry: Any) -> 'LogEntry':
         """Create LogEntry from GCP log entry."""
+        # Handle severity - in v3.x it's already a string
+        severity = str(entry.severity) if entry.severity else 'DEFAULT'
+        
         return cls(
             timestamp=entry.timestamp,
-            severity=entry.severity.name if hasattr(entry.severity, 'name') else str(entry.severity),
+            severity=severity,
             message=entry.payload.get('message', '') if isinstance(entry.payload, dict) else str(entry.payload),
             service_name=entry.resource.labels.get('service_name', 'unknown'),
             trace_id=entry.trace,

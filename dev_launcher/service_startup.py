@@ -134,7 +134,7 @@ class ServiceStartupCoordinator:
             # Register processes with process manager
             for name, (process, streamer) in services.items():
                 if process:
-                    process_manager.register_process(name.capitalize(), process, streamer)
+                    process_manager.add_process(name.capitalize(), process)
             
             # Verify all services started
             return all(process is not None for process, _ in services.values())

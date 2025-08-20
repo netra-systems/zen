@@ -5,7 +5,7 @@ Corpus management operations - CRUD operations for corpus metadata
 import json
 from datetime import datetime, UTC
 from typing import Dict, List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...db import models_postgres as models
 from ... import schemas
@@ -19,7 +19,7 @@ class CorpusManager:
     
     async def get_corpus(
         self,
-        db: Session,
+        db: AsyncSession,
         corpus_id: str
     ) -> Optional[models.Corpus]:
         """Get corpus by ID"""
@@ -37,7 +37,7 @@ class CorpusManager:
 
     async def get_corpora(
         self,
-        db: Session,
+        db: AsyncSession,
         skip: int = 0,
         limit: int = 100,
         status: Optional[str] = None,
@@ -72,14 +72,14 @@ class CorpusManager:
         """Save updated metadata to corpus model"""
         db_corpus.metadata_ = json.dumps(metadata)
 
-    def _commit_corpus_update(self, db: Session, db_corpus) -> models.Corpus:
+    def _commit_corpus_update(self, db: AsyncSession, db_corpus) -> models.Corpus:
         """Commit corpus update and refresh model"""
         db.commit()
         db.refresh(db_corpus)
         return db_corpus
 
     async def update_corpus(
-        self, db: Session, corpus_id: str, update_data: schemas.CorpusUpdate
+        self, db: AsyncSession, corpus_id: str, update_data: schemas.CorpusUpdate
     ) -> Optional[models.Corpus]:
         """Update corpus metadata"""
         db_corpus = await self.get_corpus(db, corpus_id)
@@ -115,7 +115,7 @@ class CorpusManager:
             table_name=table_name, status=CorpusStatus.CREATING.value, created_by_id=user_id,
             domain=source_corpus.domain, metadata_=metadata)
 
-    def _save_corpus(self, db: Session, db_corpus: models.Corpus) -> models.Corpus:
+    def _save_corpus(self, db: AsyncSession, db_corpus: models.Corpus) -> models.Corpus:
         """Save corpus to database"""
         db.add(db_corpus)
         db.commit()
@@ -124,7 +124,7 @@ class CorpusManager:
 
     async def clone_corpus(
         self,
-        db: Session,
+        db: AsyncSession,
         source_corpus: models.Corpus,
         new_name: str,
         user_id: str
@@ -135,19 +135,19 @@ class CorpusManager:
         db_corpus = self._create_corpus_model(corpus_id, table_name, new_name, source_corpus, user_id, metadata)
         return self._save_corpus(db, db_corpus)
     
-    def _update_corpus_status_query(self, db: Session, corpus_id: str, status: str) -> int:
+    def _update_corpus_status_query(self, db: AsyncSession, corpus_id: str, status: str) -> int:
         """Execute corpus status update query"""
         return db.query(models.Corpus).filter(
             models.Corpus.id == corpus_id
         ).update({"status": status})
 
-    def _handle_successful_status_update(self, db: Session, corpus_id: str, status: str) -> bool:
+    def _handle_successful_status_update(self, db: AsyncSession, corpus_id: str, status: str) -> bool:
         """Handle successful status update"""
         db.commit()
         central_logger.info(f"Updated corpus {corpus_id} status to {status}")
         return True
 
-    def _handle_status_update_error(self, db: Session, corpus_id: str, error: Exception) -> bool:
+    def _handle_status_update_error(self, db: AsyncSession, corpus_id: str, error: Exception) -> bool:
         """Handle status update error"""
         central_logger.error(f"Failed to update corpus {corpus_id} status: {str(error)}")
         db.rollback()
@@ -155,7 +155,7 @@ class CorpusManager:
 
     async def set_corpus_status(
         self,
-        db: Session,
+        db: AsyncSession,
         corpus_id: str,
         status: str
     ) -> bool:
@@ -168,7 +168,7 @@ class CorpusManager:
         except Exception as e:
             return self._handle_status_update_error(db, corpus_id, e)
     
-    def _delete_corpus_from_db(self, db: Session, db_corpus: models.Corpus) -> None:
+    def _delete_corpus_from_db(self, db: AsyncSession, db_corpus: models.Corpus) -> None:
         """Delete corpus from database"""
         db.delete(db_corpus)
         db.commit()
@@ -179,13 +179,13 @@ class CorpusManager:
             "type": "corpus:deleted", "payload": {"corpus_id": corpus_id}
         })
 
-    def _handle_deletion_error(self, db: Session, corpus_id: str, error: Exception) -> bool:
+    def _handle_deletion_error(self, db: AsyncSession, corpus_id: str, error: Exception) -> bool:
         """Handle corpus deletion error"""
         central_logger.error(f"Failed to delete corpus record {corpus_id}: {str(error)}")
         db.rollback()
         return False
 
-    async def _perform_corpus_deletion(self, db: Session, db_corpus: models.Corpus, corpus_id: str) -> bool:
+    async def _perform_corpus_deletion(self, db: AsyncSession, db_corpus: models.Corpus, corpus_id: str) -> bool:
         """Perform corpus deletion with notification"""
         self._delete_corpus_from_db(db, db_corpus)
         await self._send_deletion_notification(corpus_id)
@@ -194,7 +194,7 @@ class CorpusManager:
 
     async def delete_corpus_record(
         self,
-        db: Session,
+        db: AsyncSession,
         corpus_id: str
     ) -> bool:
         """Delete corpus record from PostgreSQL"""

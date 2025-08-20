@@ -1,7 +1,7 @@
 # app/services/supply_catalog_service.py
 from app.logging_config import central_logger
 from typing import List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from ..db import models_postgres
 from ..schemas import SupplyOptionCreate, SupplyOptionUpdate
 
@@ -12,19 +12,19 @@ class SupplyCatalogService:
     Manages CRUD operations for LLM supply options.
     """
 
-    def get_all_options(self, db_session: Session) -> List[models_postgres.SupplyOption]:
+    def get_all_options(self, db_session: AsyncSession) -> List[models_postgres.SupplyOption]:
         """Returns all available supply options from the database."""
         return db_session.query(models_postgres.SupplyOption).all()
 
-    def get_option_by_id(self, db_session: Session, option_id: int) -> Optional[models_postgres.SupplyOption]:
+    def get_option_by_id(self, db_session: AsyncSession, option_id: int) -> Optional[models_postgres.SupplyOption]:
         """Retrieves a specific supply option by its unique ID."""
         return db_session.get(models_postgres.SupplyOption, option_id)
         
-    def get_option_by_name(self, db_session: Session, name: str) -> Optional[models_postgres.SupplyOption]:
+    def get_option_by_name(self, db_session: AsyncSession, name: str) -> Optional[models_postgres.SupplyOption]:
         """Retrieves a supply option by its model name."""
         return db_session.query(models_postgres.SupplyOption).filter(models_postgres.SupplyOption.name == name).first()
 
-    def create_option(self, db_session: Session, option_data: SupplyOptionCreate) -> models_postgres.SupplyOption:
+    def create_option(self, db_session: AsyncSession, option_data: SupplyOptionCreate) -> models_postgres.SupplyOption:
         """Adds a new supply option to the database."""
         db_option = models_postgres.SupplyOption(**option_data.model_dump())
         db_session.add(db_option)
@@ -32,7 +32,7 @@ class SupplyCatalogService:
         db_session.refresh(db_option)
         return db_option
     
-    def update_option(self, db_session: Session, option_id: int, option_data: SupplyOptionUpdate) -> Optional[models_postgres.SupplyOption]:
+    def update_option(self, db_session: AsyncSession, option_id: int, option_data: SupplyOptionUpdate) -> Optional[models_postgres.SupplyOption]:
         """Updates an existing supply option."""
         db_option = self.get_option_by_id(db_session, option_id)
         if db_option:
@@ -44,7 +44,7 @@ class SupplyCatalogService:
             db_session.refresh(db_option)
         return db_option
 
-    def delete_option(self, db_session: Session, option_id: int) -> bool:
+    def delete_option(self, db_session: AsyncSession, option_id: int) -> bool:
         """Deletes a supply option from the database."""
         db_option = self.get_option_by_id(db_session, option_id)
         if db_option:
@@ -53,7 +53,7 @@ class SupplyCatalogService:
             return True
         return False
         
-    def autofill_catalog(self, db_session: Session):
+    def autofill_catalog(self, db_session: AsyncSession):
         """Populates the catalog with a default set of common models."""
         if self.get_all_options(db_session):
             logger.info("Catalog already contains data. Skipping autofill.")

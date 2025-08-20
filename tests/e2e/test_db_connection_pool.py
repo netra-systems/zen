@@ -22,7 +22,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool, QueuePool
 from sqlalchemy import text
 
-from app.core.database_connection_manager import database_recovery_registry, DatabaseConnectionManager
+from app.core.database_connection_manager import database_recovery_registry
+from app.core.database_health_monitoring import PoolHealthChecker
 from app.core.async_connection_pool import AsyncConnectionPool
 from app.services.database.pool_metrics import ConnectionPoolMetrics
 from app.db.postgres import async_engine, async_session_factory, initialize_postgres

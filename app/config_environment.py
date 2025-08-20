@@ -1,6 +1,9 @@
 """Configuration Environment Detection Module
 
 Handles environment detection, config creation, and basic setup.
+
+DEPRECATED: This module is deprecated. Use app.core.configuration instead.
+Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 """
 
 import os

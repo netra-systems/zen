@@ -3,7 +3,7 @@ Supply Research Service - Business logic for AI supply research operations
 """
 
 from typing import Dict, List, Optional, Any, Tuple
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.exceptions_base import NetraException
 from app.redis_manager import RedisManager
@@ -22,7 +22,7 @@ from .supply_research.supply_validation import SupplyValidation
 class SupplyResearchService:
     """Service for managing AI supply research operations"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
         self.redis_manager = None
         self.cache_ttl = 3600  # 1 hour cache

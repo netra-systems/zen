@@ -8,7 +8,7 @@ Maintains 8-line function limit and single responsibility.
 import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.base import BaseSubAgent
 from app.agents.state import DeepAgentState
 from app.llm.llm_manager import LLMManager
@@ -28,7 +28,7 @@ class SupplyResearcherAgent(BaseSubAgent):
     def __init__(
         self,
         llm_manager: LLMManager,
-        db: Session,
+        db: AsyncSession,
         supply_service: Optional[SupplyResearchService] = None
     ):
         super().__init__(llm_manager, name="SupplyResearcherAgent", 
@@ -36,14 +36,14 @@ class SupplyResearcherAgent(BaseSubAgent):
         self._init_database_components(db, supply_service)
         self._init_research_components(db)
     
-    def _init_database_components(self, db: Session, supply_service: Optional[SupplyResearchService]) -> None:
+    def _init_database_components(self, db: AsyncSession, supply_service: Optional[SupplyResearchService]) -> None:
         """Initialize database-related components."""
         self.db = db
         self.supply_service = supply_service or SupplyResearchService(db)
         self.research_timeout = 300
         self.confidence_threshold = 0.7
     
-    def _init_research_components(self, db: Session) -> None:
+    def _init_research_components(self, db: AsyncSession) -> None:
         """Initialize research-related components."""
         self.parser = SupplyRequestParser()
         self.research_engine = SupplyResearchEngine()

@@ -2,7 +2,7 @@
 
 import asyncio
 from typing import Dict, List, Optional, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.clickhouse import get_clickhouse_client
 from app.logging_config import central_logger
 from .core_service_base import CoreServiceBase
@@ -16,7 +16,7 @@ class GenerationCoordinator(CoreServiceBase):
         job_id: str,
         config,
         corpus_id: Optional[str],
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str]
     ) -> None:
         """Execute complete generation workflow"""
@@ -34,7 +34,7 @@ class GenerationCoordinator(CoreServiceBase):
         job_id: str,
         config,
         corpus_id: Optional[str],
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str]
     ) -> None:
         """Run the generation pipeline"""
@@ -46,7 +46,7 @@ class GenerationCoordinator(CoreServiceBase):
         await self.job_manager.complete_job(job_id, self.active_jobs, db, synthetic_data_id)
     
     async def _prepare_generation_environment(
-        self, job_id: str, corpus_id: Optional[str], db: Optional[Session]
+        self, job_id: str, corpus_id: Optional[str], db: Optional[AsyncSession]
     ) -> Optional[List[Dict]]:
         """Prepare generation environment with corpus and destination"""
         corpus_content = await self._load_corpus(corpus_id, db)
@@ -56,7 +56,7 @@ class GenerationCoordinator(CoreServiceBase):
     async def _load_corpus(
         self,
         corpus_id: Optional[str],
-        db: Optional[Session]
+        db: Optional[AsyncSession]
     ) -> Optional[List[Dict]]:
         """Load corpus content if specified"""
         if corpus_id:
@@ -78,7 +78,7 @@ class GenerationCoordinator(CoreServiceBase):
         corpus_id: Optional[str],
         user_id: Optional[str],
         table_name: str,
-        db: Optional[Session]
+        db: Optional[AsyncSession]
     ) -> Dict:
         """Create job tracking record"""
         job_data = self.job_manager.create_job(
@@ -89,7 +89,7 @@ class GenerationCoordinator(CoreServiceBase):
         return job_data
 
     async def _enhance_job_with_database_record(
-        self, job_data: Dict, job_id: str, db: Optional[Session], table_name: str, user_id: Optional[str]
+        self, job_data: Dict, job_id: str, db: Optional[AsyncSession], table_name: str, user_id: Optional[str]
     ) -> Dict:
         """Enhance job data with database record if available"""
         if db is not None:
@@ -101,7 +101,7 @@ class GenerationCoordinator(CoreServiceBase):
 
     async def _create_database_record(
         self,
-        db: Session,
+        db: AsyncSession,
         table_name: str,
         job_id: str,
         user_id: Optional[str]
@@ -115,7 +115,7 @@ class GenerationCoordinator(CoreServiceBase):
         job_id: str,
         config,
         corpus_id: Optional[str],
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str]
     ) -> None:
         """Start generation worker task"""

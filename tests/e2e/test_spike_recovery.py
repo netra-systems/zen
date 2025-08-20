@@ -62,7 +62,7 @@ SPIKE_TEST_CONFIG = {
 # Service endpoints
 SERVICE_ENDPOINTS = {
     "backend": "http://localhost:8000",
-    "auth_service": "http://localhost:8001",
+    "auth_service": "http://localhost:8001",  # Note: May not be available in test environment
     "websocket": "ws://localhost:8000/ws",
     "health_check": "/health",
     "login_endpoint": "/auth/login",

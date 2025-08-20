@@ -6,7 +6,7 @@ import json
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timedelta, UTC
 from decimal import Decimal
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, or_, desc
 
 from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
@@ -16,7 +16,7 @@ from app.logging_config import central_logger as logger
 class PriceAnalysisOperations:
     """Handles price analysis, market reports, and anomaly detection"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
     
     def _calculate_cutoff_date(self, days_back: int) -> datetime:

@@ -208,6 +208,26 @@
     <practice>Use exit codes for script integration communication</practice>
   </best_practices>
 
+  <learning id="gcp-error-011">
+    <title>Google Cloud Logging API v3 Changes</title>
+    <context>
+      The google-cloud-logging library v3.x removed the enums module that was present in v2.x.
+      Code importing from google.cloud.logging_v2.enums will fail with ImportError.
+    </context>
+    <solution>
+      Remove the enums import entirely. Severity handling is now done differently:
+      - Severity is accessed as a string attribute on log entries
+      - Use hasattr() to check for severity attribute existence
+      - Convert severity to string for compatibility
+      - No need to import separate enums module
+    </solution>
+    <impact>
+      Code remains compatible with google-cloud-logging v3.x,
+      maintains backward compatibility with different severity representations,
+      simplifies dependency management.
+    </impact>
+  </learning>
+
   <common_pitfalls>
     <pitfall>
       <issue>Treating all errors during deployment as deployment-caused</issue>
@@ -224,6 +244,10 @@
     <pitfall>
       <issue>Exposing sensitive data in error messages</issue>
       <solution>Implement comprehensive PII redaction</solution>
+    </pitfall>
+    <pitfall>
+      <issue>Importing google.cloud.logging_v2.enums in v3.x</issue>
+      <solution>Remove enums import, handle severity as string attribute</solution>
     </pitfall>
   </common_pitfalls>
 </learnings>

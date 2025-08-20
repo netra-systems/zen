@@ -7,7 +7,7 @@ import asyncio
 import uuid
 import warnings
 from typing import Dict, List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import schemas
 from app.logging_config import central_logger as logger
@@ -59,67 +59,67 @@ class CorpusService:
         self.query_expansion = None  # Mock attribute for tests
         self._active_filters = {}  # Store active search filters
     
-    async def create_corpus(self, db: Session, corpus_data: schemas.CorpusCreate, user_id: str):
+    async def create_corpus(self, db: AsyncSession, corpus_data: schemas.CorpusCreate, user_id: str):
         """Create corpus with proper type safety and validation"""
         validate_corpus_creation_params(db, corpus_data, user_id)
         return await self._modular_service.create_corpus(db, corpus_data, user_id)
     
     
     # Core CRUD operations - delegate to modular service
-    async def upload_content(self, db: Session, corpus_id: str, content_data: Dict):
+    async def upload_content(self, db: AsyncSession, corpus_id: str, content_data: Dict):
         """Upload content with type safety"""
         validate_content_upload_params(db, corpus_id, content_data)
         return await self._modular_service.upload_content(db, corpus_id, content_data)
     
-    async def get_corpus(self, db: Session, corpus_id: str):
+    async def get_corpus(self, db: AsyncSession, corpus_id: str):
         """Get corpus by ID"""
         return await self._modular_service.get_corpus(db, corpus_id)
     
-    async def get_corpora(self, db: Session, skip: int = 0, limit: int = 100,
+    async def get_corpora(self, db: AsyncSession, skip: int = 0, limit: int = 100,
                          status: Optional[str] = None, user_id: Optional[str] = None):
         """Get corpora list with filtering"""
         return await self._modular_service.get_corpora(db, skip, limit, status, user_id)
     
-    async def update_corpus(self, db: Session, corpus_id: str, 
+    async def update_corpus(self, db: AsyncSession, corpus_id: str, 
                           update_data: schemas.CorpusUpdate):
         """Update corpus metadata"""
         return await self._modular_service.update_corpus(db, corpus_id, update_data)
     
-    async def delete_corpus(self, db: Session, corpus_id: str):
+    async def delete_corpus(self, db: AsyncSession, corpus_id: str):
         """Delete corpus and associated resources"""
         return await self._modular_service.delete_corpus(db, corpus_id)
     
-    async def get_corpus_content(self, db: Session, corpus_id: str, limit: int = 100,
+    async def get_corpus_content(self, db: AsyncSession, corpus_id: str, limit: int = 100,
                                offset: int = 0, workload_type: Optional[str] = None):
         """Get corpus content with pagination"""
         return await self._modular_service.get_corpus_content(
             db, corpus_id, limit, offset, workload_type
         )
     
-    async def get_corpus_statistics(self, db: Session, corpus_id: str):
+    async def get_corpus_statistics(self, db: AsyncSession, corpus_id: str):
         """Get corpus statistics"""
         return await self._modular_service.get_corpus_statistics(db, corpus_id)
     
-    async def clone_corpus(self, db: Session, source_corpus_id: str, new_name: str, user_id: str):
+    async def clone_corpus(self, db: AsyncSession, source_corpus_id: str, new_name: str, user_id: str):
         """Clone existing corpus"""
         return await self._modular_service.clone_corpus(
             db, source_corpus_id, new_name, user_id
         )
     
-    async def search_corpus_content(self, db: Session, corpus_id: str, search_params: Dict):
+    async def search_corpus_content(self, db: AsyncSession, corpus_id: str, search_params: Dict):
         """Search corpus content"""
         return await self._modular_service.search_corpus_content(
             db, corpus_id, search_params
         )
     
-    async def get_corpus_sample(self, db: Session, corpus_id: str, sample_size: int = 10,
+    async def get_corpus_sample(self, db: AsyncSession, corpus_id: str, sample_size: int = 10,
                               workload_type: Optional[str] = None):
         """Get random corpus sample"""
         return await self._modular_service.get_corpus_sample(
             db, corpus_id, sample_size, workload_type
         )
     
-    async def get_workload_type_analytics(self, db: Session, corpus_id: str):
+    async def get_workload_type_analytics(self, db: AsyncSession, corpus_id: str):
         """Get workload type analytics"""
         return await self._modular_service.get_workload_type_analytics(db, corpus_id)
     
@@ -302,7 +302,7 @@ class CorpusService:
 # Create module-level instance for compatibility
 corpus_service_instance = CorpusService()
 
-async def create_document(db: Session, corpus_id: str, document_data: schemas.DocumentCreate) -> Dict:
+async def create_document(db: AsyncSession, corpus_id: str, document_data: schemas.DocumentCreate) -> Dict:
     """Create a document in the corpus with proper validation"""
     validate_document_creation_params(db, corpus_id, document_data)
     return await corpus_service.create_document(db, corpus_id, document_data)

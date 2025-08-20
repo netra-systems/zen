@@ -5,7 +5,7 @@ Handles table creation, management, and database-specific operations
 
 import asyncio
 from typing import Dict
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...db import models_postgres as models
 from ...db.clickhouse import get_clickhouse_client
@@ -65,7 +65,7 @@ class CorpusClickHouseOperations:
         async with get_clickhouse_client() as client:
             await client.execute(query)
 
-    def _update_corpus_status_success(self, corpus_id: str, db: Session):
+    def _update_corpus_status_success(self, corpus_id: str, db: AsyncSession):
         """Update corpus status to AVAILABLE in PostgreSQL"""
         db.query(models.Corpus).filter(
             models.Corpus.id == corpus_id
@@ -91,7 +91,7 @@ class CorpusClickHouseOperations:
             f"Created ClickHouse table {table_name} for corpus {corpus_id}"
         )
 
-    def _update_corpus_status_failed(self, corpus_id: str, db: Session):
+    def _update_corpus_status_failed(self, corpus_id: str, db: AsyncSession):
         """Update corpus status to FAILED in PostgreSQL"""
         db.query(models.Corpus).filter(
             models.Corpus.id == corpus_id
@@ -115,7 +115,7 @@ class CorpusClickHouseOperations:
         )
 
     async def _handle_creation_error(
-        self, corpus_id: str, error: Exception, db: Session
+        self, corpus_id: str, error: Exception, db: AsyncSession
     ):
         """Handle corpus table creation error"""
         self._log_creation_error(corpus_id, error)
@@ -124,14 +124,14 @@ class CorpusClickHouseOperations:
         raise ClickHouseOperationError(f"Failed to create table: {str(error)}")
 
     async def _execute_success_flow(
-        self, corpus_id: str, table_name: str, db: Session
+        self, corpus_id: str, table_name: str, db: AsyncSession
     ):
         """Execute successful table creation flow"""
         self._update_corpus_status_success(corpus_id, db)
         await self._send_success_notification(corpus_id, table_name)
         self._log_creation_success(corpus_id, table_name)
 
-    async def create_corpus_table(self, corpus_id: str, table_name: str, db: Session):
+    async def create_corpus_table(self, corpus_id: str, table_name: str, db: AsyncSession):
         """Create ClickHouse table for corpus content"""
         try:
             query = self._build_create_table_query(table_name)

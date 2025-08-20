@@ -2,7 +2,7 @@
 
 import asyncio
 from typing import Dict, List, Optional, Any, Union
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app import schemas
 from .generation_coordinator import GenerationCoordinator
 from .job_operations import JobOperations
@@ -31,7 +31,7 @@ class SyntheticDataService(RecoveryMixin):
     async def generate_synthetic_data(
         self,
         config: schemas.LogGenParams,
-        db: Optional[Session] = None,
+        db: Optional[AsyncSession] = None,
         user_id: Optional[str] = None,
         corpus_id: Optional[str] = None,
         job_id: Optional[str] = None
@@ -56,12 +56,12 @@ class SyntheticDataService(RecoveryMixin):
         """Cancel generation job"""
         return await self.job_ops.cancel_job(job_id, reason)
 
-    async def get_audit_logs(self, job_id: str, db: Optional[Session] = None) -> List[Dict]:
+    async def get_audit_logs(self, job_id: str, db: Optional[AsyncSession] = None) -> List[Dict]:
         """Retrieve audit logs for a specific job"""
         return await self.job_ops.get_audit_logs(job_id, db)
 
     async def generate_with_audit(
-        self, config, job_id: str, user_id: str, db: Optional[Session] = None
+        self, config, job_id: str, user_id: str, db: Optional[AsyncSession] = None
     ) -> Dict:
         """Generate synthetic data with comprehensive audit logging"""
         return await self.job_ops.generate_with_audit(config, job_id, user_id, db)

@@ -4,7 +4,7 @@ Market Operations - Provider comparison, anomaly detection, and market reporting
 
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models_postgres import AISupplyItem
 from .supply_item_operations import SupplyItemOperations
@@ -16,7 +16,7 @@ from app.logging_config import central_logger as logger
 class MarketOperations:
     """Handles market analysis, provider comparison, and anomaly detection"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
         self.supply_ops = SupplyItemOperations(db)
         self.price_ops = PriceAnalysisOperations(db) 

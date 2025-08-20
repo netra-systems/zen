@@ -1,0 +1,66 @@
+# Cloud Build configuration for auth service deployment
+steps:
+  # Build auth service image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-auth'
+    args:
+      - 'build'
+      - '-f'
+      - 'Dockerfile.auth'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/netra-auth-service:${_BRANCH_NAME}-${SHORT_SHA}'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/netra-auth-service:latest'
+      - '.'
+
+  # Push auth service image
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-auth'
+    args:
+      - 'push'
+      - '--all-tags'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/netra-auth-service'
+    waitFor: ['build-auth']
+
+  # Deploy auth service to Cloud Run
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy-auth'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'netra-auth-service'
+      - '--image'
+      - 'us-central1-docker.pkg.dev/${PROJECT_ID}/netra-staging/netra-auth-service:${_BRANCH_NAME}-${SHORT_SHA}'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--set-env-vars'
+      - 'ENVIRONMENT=staging,SERVICE_NAME=auth,PYTHONUNBUFFERED=1'
+      - '--set-secrets'
+      - 'DATABASE_URL=database-url-staging:latest,JWT_SECRET_KEY=jwt-secret-staging:latest,GOOGLE_CLIENT_ID=google-client-id-staging:latest,GOOGLE_CLIENT_SECRET=google-client-secret-staging:latest'
+      - '--set-cloudsql-instances'
+      - 'netra-staging:us-central1:staging-shared-postgres'
+      - '--min-instances'
+      - '1'
+      - '--max-instances'
+      - '2'
+      - '--cpu'
+      - '1'
+      - '--memory'
+      - '512Mi'
+      - '--timeout'
+      - '300'
+      - '--concurrency'
+      - '80'
+    waitFor: ['push-auth']
+
+substitutions:
+  _BRANCH_NAME: ${BRANCH_NAME}
+
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: '900s'

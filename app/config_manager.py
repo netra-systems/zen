@@ -1,6 +1,9 @@
 """Configuration Manager Module
 
 Main configuration manager that orchestrates all configuration loading.
+
+DEPRECATED: This module is deprecated. Use app.core.configuration instead.
+Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 """
 
 from functools import lru_cache

@@ -18,7 +18,7 @@ Business Value: Standardizes tool execution across all admin operations.
 Target Segments: Growth & Enterprise (improved admin reliability).
 """
 from typing import Dict, Any, Optional, Callable
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models_postgres import User
 from app.logging_config import central_logger
@@ -85,13 +85,13 @@ class CorpusManagerHandler(ModernToolHandler):
             'validate': lambda user, db, **kwargs: self._handle_corpus_validate(**kwargs)
         }
     
-    async def _handle_corpus_create(self, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+    async def _handle_corpus_create(self, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle corpus creation"""
         params = extract_corpus_create_params(kwargs, user)
         result = await _execute_corpus_creation(params, db)
         return _create_corpus_response(result)
     
-    async def _handle_corpus_list(self, db: Session) -> Dict[str, Any]:
+    async def _handle_corpus_list(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle corpus listing"""
         from app.services import corpus_service
         from .tool_handler_helpers import create_corpus_list_response
@@ -137,14 +137,14 @@ class SyntheticGeneratorHandler(ModernToolHandler):
             'list_presets': lambda user, db, **kwargs: self._handle_synthetic_list_presets(db)
         }
     
-    async def _handle_synthetic_generate(self, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+    async def _handle_synthetic_generate(self, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle synthetic data generation"""
         synthetic_service = _create_synthetic_service(db)
         params = extract_synthetic_params(kwargs, user)
         result = await synthetic_service.generate_synthetic_data(**params)
         return _create_synthetic_response(result)
     
-    async def _handle_synthetic_list_presets(self, db: Session) -> Dict[str, Any]:
+    async def _handle_synthetic_list_presets(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle listing synthetic data presets"""
         from app.services.synthetic_data_service import SyntheticDataService
         from .tool_handler_helpers import create_presets_list_response
@@ -183,7 +183,7 @@ class UserAdminHandler(ModernToolHandler):
             'grant_permission': self._handle_user_grant_permission
         }
     
-    async def _handle_user_create(self, db: Session, **kwargs) -> Dict[str, Any]:
+    async def _handle_user_create(self, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle user creation"""
         from .tool_handler_helpers import check_email_required
         email = kwargs.get('email')
@@ -192,7 +192,7 @@ class UserAdminHandler(ModernToolHandler):
         result = await _execute_user_creation(params)
         return _create_user_response(result)
     
-    async def _handle_user_grant_permission(self, db: Session, **kwargs) -> Dict[str, Any]:
+    async def _handle_user_grant_permission(self, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle granting user permissions"""
         from .tool_handler_helpers import check_user_permission_params
         user_email, permission = _extract_permission_params(kwargs)
@@ -252,7 +252,7 @@ class LogAnalyzerHandler(ModernToolHandler):
             return await self._handle_log_analyze(user, db, **params.get('kwargs', {}))
         return {"error": f"Unknown log analyzer action: {action}"}
     
-    async def _handle_log_analyze(self, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+    async def _handle_log_analyze(self, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
         """Handle log analysis"""
         from .tool_handler_helpers import extract_log_analysis_params
         query, time_range = extract_log_analysis_params(kwargs)

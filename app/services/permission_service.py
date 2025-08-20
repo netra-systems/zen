@@ -3,7 +3,7 @@ Permission Service - Handles user permissions and developer auto-detection
 """
 import os
 from typing import Dict, List, Optional, Set
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.logging_config import central_logger
 
@@ -89,20 +89,20 @@ class PermissionService:
         return is_not_developer and is_not_elevated
     
     @staticmethod
-    def _elevate_user_to_developer(db: Session, user: User) -> None:
+    async def _elevate_user_to_developer(db: AsyncSession, user: User) -> None:
         """Elevate user to developer role"""
         user.role = "developer"
         user.is_developer = True
-        db.commit()
+        await db.commit()
         logger.info(f"Auto-elevated user {user.email} to developer role")
     
     @staticmethod
-    def update_user_role(db: Session, user: User, check_developer: bool = True) -> User:
+    async def update_user_role(db: AsyncSession, user: User, check_developer: bool = True) -> User:
         """Update user role based on detection rules"""
         should_check_dev = check_developer and PermissionService.detect_developer_status(user)
         should_elevate = PermissionService._should_elevate_to_developer(user)
         if should_check_dev and should_elevate:
-            PermissionService._elevate_user_to_developer(db, user)
+            await PermissionService._elevate_user_to_developer(db, user)
         return user
     
     @staticmethod
@@ -183,18 +183,18 @@ class PermissionService:
             user.permissions["additional"] = []
     
     @staticmethod
-    def _add_permission_if_new(db: Session, user: User, permission: str) -> None:
+    async def _add_permission_if_new(db: AsyncSession, user: User, permission: str) -> None:
         """Add permission if not already present"""
         if permission not in user.permissions["additional"]:
             user.permissions["additional"].append(permission)
-            db.commit()
+            await db.commit()
             logger.info(f"Granted permission '{permission}' to user {user.email}")
     
     @staticmethod
-    def grant_permission(db: Session, user: User, permission: str) -> User:
+    async def grant_permission(db: AsyncSession, user: User, permission: str) -> User:
         """Grant a specific permission to a user"""
         PermissionService._ensure_permissions_structure(user)
-        PermissionService._add_permission_if_new(db, user, permission)
+        await PermissionService._add_permission_if_new(db, user, permission)
         return user
     
     @staticmethod
@@ -206,18 +206,18 @@ class PermissionService:
             user.permissions["revoked"] = []
     
     @staticmethod
-    def _add_revoked_permission_if_new(db: Session, user: User, permission: str) -> None:
+    async def _add_revoked_permission_if_new(db: AsyncSession, user: User, permission: str) -> None:
         """Add revoked permission if not already present"""
         if permission not in user.permissions["revoked"]:
             user.permissions["revoked"].append(permission)
-            db.commit()
+            await db.commit()
             logger.info(f"Revoked permission '{permission}' from user {user.email}")
     
     @staticmethod
-    def revoke_permission(db: Session, user: User, permission: str) -> User:
+    async def revoke_permission(db: AsyncSession, user: User, permission: str) -> User:
         """Revoke a specific permission from a user"""
         PermissionService._ensure_revoked_permissions_structure(user)
-        PermissionService._add_revoked_permission_if_new(db, user, permission)
+        await PermissionService._add_revoked_permission_if_new(db, user, permission)
         return user
     
     @staticmethod
@@ -235,10 +235,10 @@ class PermissionService:
         return old_role
     
     @staticmethod
-    def set_user_role(db: Session, user: User, role: str) -> User:
+    async def set_user_role(db: AsyncSession, user: User, role: str) -> User:
         """Set a user's role"""
         PermissionService._validate_role(role)
         old_role = PermissionService._update_user_role_fields(user, role)
-        db.commit()
+        await db.commit()
         logger.info(f"Changed role for user {user.email} from {old_role} to {role}")
         return user

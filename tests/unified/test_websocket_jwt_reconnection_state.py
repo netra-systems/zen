@@ -22,7 +22,7 @@ from enum import Enum
 
 from .config import TEST_USERS, TEST_ENDPOINTS, TEST_SECRETS
 from .jwt_token_helpers import JWTTestHelper
-from .reconnection_test_helpers import ReconnectionTestFixture
+from .reconnection_test_helpers import ReconnectionTestHelpers
 
 
 class ReconnectionPhase(Enum):
@@ -68,7 +68,7 @@ class WebSocketJWTReconnectionTester:
     def __init__(self):
         self.jwt_helper = JWTTestHelper()
         self.ws_url = TEST_ENDPOINTS.ws_url
-        self.reconnection_fixture = ReconnectionTestFixture()
+        self.reconnection_fixture = ReconnectionTestHelpers()
         self.performance_threshold = 2.0  # 2 second requirement
         
     async def setup_authenticated_session(self, user_id: str) -> JWTSessionState:

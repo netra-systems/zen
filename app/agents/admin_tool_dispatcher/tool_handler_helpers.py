@@ -9,7 +9,7 @@ Business Value: Improves admin tool reliability by 15-20% through modern executi
 Target Segments: Growth & Enterprise (enhanced admin operations).
 """
 from typing import Dict, Any, Optional, Tuple
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.agents.base.interface import ExecutionContext, ExecutionResult
 from app.schemas.core_enums import ExecutionStatus
