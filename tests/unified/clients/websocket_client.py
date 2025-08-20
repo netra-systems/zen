@@ -25,18 +25,25 @@ class WebSocketTestClient:
         self._received_messages: List[Dict[str, Any]] = []
         self._message_queue: asyncio.Queue = asyncio.Queue()
         
-    async def connect(self, timeout: float = 10.0) -> bool:
+    async def connect(self, token: Optional[str] = None, timeout: float = 10.0) -> bool:
         """Connect to the WebSocket server.
         
         Args:
+            token: Optional auth token
             timeout: Connection timeout in seconds
             
         Returns:
             True if connected successfully
         """
         try:
+            # Add token to URL if provided
+            url = self.url
+            if token:
+                separator = "&" if "?" in url else "?"
+                url = f"{url}{separator}token={token}"
+                
             self._websocket = await asyncio.wait_for(
-                websockets.connect(self.url),
+                websockets.connect(url),
                 timeout=timeout
             )
             
@@ -199,6 +206,40 @@ class WebSocketTestClient:
             True if connected
         """
         return self._websocket is not None and not self._websocket.closed
+    
+    async def send_command(self, command: Dict[str, Any]) -> Dict[str, Any]:
+        """Send a command and wait for response.
+        
+        Args:
+            command: Command to send
+            
+        Returns:
+            Command response
+        """
+        if not self.is_connected:
+            return {"success": False, "error": "Not connected"}
+            
+        try:
+            await self.send(command)
+            # Wait for response (simplified)
+            response = await self.receive(timeout=5.0)
+            return response or {"success": False, "error": "No response"}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+    
+    async def check_permission(self, token: str, permission: str) -> bool:
+        """Check permission via WebSocket.
+        
+        Args:
+            token: Auth token
+            permission: Permission to check
+            
+        Returns:
+            True if permission is granted
+        """
+        command = {"type": "check_permission", "data": {"permission": permission}}
+        response = await self.send_command(command)
+        return response.get("success", False)
         
     async def __aenter__(self):
         """Async context manager entry."""

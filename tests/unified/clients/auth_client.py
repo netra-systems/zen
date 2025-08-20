@@ -2,7 +2,7 @@
 
 import httpx
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 logger = logging.getLogger(__name__)
 
@@ -186,6 +186,37 @@ class AuthTestClient:
             "token": token
         }
         
+    async def update_user_permissions(self, user_id: str, permissions: List[str]) -> Dict[str, Any]:
+        """Update user permissions.
+        
+        Args:
+            user_id: User ID
+            permissions: List of permissions to set
+            
+        Returns:
+            Updated user data
+        """
+        response = await self.client.put(
+            f"/auth/users/{user_id}/permissions",
+            json={"permissions": permissions}
+        )
+        response.raise_for_status()
+        return response.json()
+    
+    async def get_user_permissions(self, user_id: str) -> List[str]:
+        """Get user permissions.
+        
+        Args:
+            user_id: User ID
+            
+        Returns:
+            List of user permissions
+        """
+        response = await self.client.get(f"/auth/users/{user_id}/permissions")
+        response.raise_for_status()
+        data = response.json()
+        return data.get("permissions", [])
+    
     async def close(self) -> None:
         """Close the HTTP client."""
         await self.client.aclose()

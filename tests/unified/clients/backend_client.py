@@ -203,6 +203,25 @@ class BackendTestClient:
         response.raise_for_status()
         return response.json()
         
+    async def check_permission(self, token: str, permission: str) -> bool:
+        """Check if user has specific permission.
+        
+        Args:
+            token: JWT token
+            permission: Permission to check
+            
+        Returns:
+            True if user has permission
+        """
+        try:
+            response = await self.client.get(
+                f"/api/auth/check-permission/{permission}",
+                headers={"Authorization": f"Bearer {token}"}
+            )
+            return response.status_code == 200
+        except Exception:
+            return False
+    
     async def close(self) -> None:
         """Close the HTTP client."""
         await self.client.aclose()

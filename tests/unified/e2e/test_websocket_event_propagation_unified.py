@@ -19,8 +19,21 @@ import pytest
 
 pytestmark = pytest.mark.asyncio
 
-from ..config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
+try:
+    from ..config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+except ImportError:
+    # Fallback if config not available
+    TEST_CONFIG = {}
+    TEST_USERS = {}
+    TEST_ENDPOINTS = {}
+    class TestDataFactory:
+        pass
+
+try:
+    from ..real_websocket_client import RealWebSocketClient
+except ImportError:
+    # Use clients factory if available
+    from ..clients.websocket_client import WebSocketTestClient as RealWebSocketClient
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -117,7 +130,7 @@ class EventPropagationTester:
                 "run_id": self.test_run_id
             }
         }
-        await self.ws_client.send_message(test_message)
+        await self.ws_client.send(test_message)
     
     async def listen_for_events(self, timeout: float = 10.0) -> List[Dict[str, Any]]:
         """Listen for WebSocket events and validate propagation"""
@@ -126,7 +139,7 @@ class EventPropagationTester:
         
         while time.time() - start_time < timeout:
             try:
-                event = await asyncio.wait_for(self.ws_client.receive_message(), timeout=1.0)
+                event = await asyncio.wait_for(self.ws_client.receive(timeout=1.0), timeout=1.0)
                 if event:
                     self.validator.record_event(event)
                     events.append(event)
@@ -159,6 +172,11 @@ class EventPropagationTester:
 
 
 @pytest.fixture
+async def real_websocket_client(real_services):
+    """Create authenticated WebSocket client for testing"""
+    return await real_services.create_websocket_client()
+
+@pytest.fixture
 async def event_tester(real_websocket_client):
     """Create event propagation tester with authenticated WebSocket"""
     return EventPropagationTester(real_websocket_client)
@@ -167,65 +185,118 @@ async def event_tester(real_websocket_client):
 async def test_agent_thinking_event_propagation(event_tester):
     """Test agent_thinking event reaches frontend with correct payload"""
     # BVJ: Medium UI layer | Agent reasoning visibility | $20K+ MRR impact
+    
+    # ARRANGE - Setup test for agent thinking events
+    assert event_tester.ws_client.state.name == "CONNECTED", "WebSocket must be connected"
+    initial_event_count = len(event_tester.validator.events_received)
+    
+    # ACT - Trigger agent execution and collect events
     await event_tester.trigger_agent_events()
     events = await event_tester.listen_for_events()
     
+    # ASSERT - Validate agent_thinking events received
     thinking_events = [e for e in events if e.get("type") == "agent_thinking"]
     assert len(thinking_events) > 0, "No agent_thinking events received"
+    assert len(events) > initial_event_count, "Should receive new events"
     
     for event in thinking_events:
         payload = event.get("payload", {})
         assert "thought" in payload, "Missing 'thought' field"
         assert "agent_name" in payload, "Missing 'agent_name' field"
         assert isinstance(payload["thought"], str) and len(payload["thought"]) > 0
+        assert event.get("received_at", 0) <= 1.0, "Should arrive within medium layer timing"
 
 
 async def test_partial_result_streaming_updates(event_tester):
     """Test partial_result streaming with content accumulation"""
     # BVJ: Medium UI layer | Real-time content updates | $25K+ MRR impact
+    
+    # ARRANGE - Setup for streaming content validation
+    accumulated_content = ""
+    received_times = []
+    
+    # ACT - Trigger agent execution and collect streaming events
     await event_tester.trigger_agent_events()
     events = await event_tester.listen_for_events()
     
+    # ASSERT - Validate partial_result streaming behavior
     partial_events = [e for e in events if e.get("type") == "partial_result"]
     assert len(partial_events) > 0, "No partial_result events received"
     
-    accumulated_content = ""
     for event in partial_events:
         payload = event.get("payload", {})
-        assert all(f in payload for f in ["content", "agent_name", "is_complete"])
+        required_fields = ["content", "agent_name", "is_complete"]
+        assert all(f in payload for f in required_fields), f"Missing fields in payload"
+        
         accumulated_content += payload["content"]
+        received_times.append(event.get("received_at", 0))
+        
+        # Validate streaming semantics
+        assert isinstance(payload["is_complete"], bool), "is_complete must be boolean"
+        assert event.get("received_at", 0) <= 1.0, "Should arrive within medium layer timing"
     
-    assert len(accumulated_content) > 0, "Content should accumulate"
+    assert len(accumulated_content) > 0, "Content should accumulate from streaming"
+    assert len(received_times) > 1, "Should receive multiple streaming updates"
 
 
 async def test_tool_executing_notifications(event_tester):
     """Test tool_executing events with tool details and timing"""
     # BVJ: Fast UI layer | Immediate tool feedback | $15K+ MRR impact
+    
+    # ARRANGE - Setup for fast layer tool execution validation
+    start_time = time.time()
+    tool_timestamps = []
+    
+    # ACT - Trigger agent execution and monitor tool events
     await event_tester.trigger_agent_events()
     events = await event_tester.listen_for_events()
     
+    # ASSERT - Validate tool_executing events for fast UI layer
     tool_events = [e for e in events if e.get("type") == "tool_executing"]
     assert len(tool_events) > 0, "No tool_executing events received"
     
     for event in tool_events:
         payload = event.get("payload", {})
-        assert all(f in payload for f in ["tool_name", "agent_name", "timestamp"])
+        required_fields = ["tool_name", "agent_name", "timestamp"]
+        assert all(f in payload for f in required_fields), f"Missing required fields"
+        
+        # Validate fast layer timing requirement (<100ms)
+        event_time = event.get("received_at", 0)
+        assert event_time <= 0.1, f"tool_executing took {event_time}s, must be <100ms"
+        
+        tool_timestamps.append(payload["timestamp"])
+        assert isinstance(payload["tool_name"], str) and len(payload["tool_name"]) > 0
+        assert isinstance(payload["agent_name"], str) and len(payload["agent_name"]) > 0
 
 
 async def test_final_report_delivery(event_tester):
     """Test final_report with complete results and metrics"""
     # BVJ: Slow UI layer | Complete analysis results | $30K+ MRR impact
+    
+    # ARRANGE - Setup for final report validation
+    execution_start = time.time()
+    
+    # ACT - Trigger agent execution and wait for completion
     await event_tester.trigger_agent_events()
     events = await event_tester.listen_for_events()
     
+    # ASSERT - Validate final_report events for slow UI layer
     final_events = [e for e in events if e.get("type") == "final_report"]
     assert len(final_events) > 0, "No final_report events received"
     
     for event in final_events:
         payload = event.get("payload", {})
-        assert "report" in payload, "Missing 'report' field"
-        assert "total_duration_ms" in payload, "Missing 'total_duration_ms' field"
-        assert isinstance(payload["total_duration_ms"], (int, float))
+        required_fields = ["report", "total_duration_ms"]
+        assert all(f in payload for f in required_fields), f"Missing required fields"
+        
+        # Validate payload structure
+        assert isinstance(payload["total_duration_ms"], (int, float)), "Duration must be numeric"
+        assert payload["total_duration_ms"] > 0, "Duration must be positive"
+        assert isinstance(payload["report"], (dict, str)), "Report must be object or string"
+        
+        # Validate slow layer timing (should arrive after other events)
+        event_time = event.get("received_at", 0)
+        assert event_time >= 1.0, f"final_report arrived too early at {event_time}s"
 
 
 async def test_ui_layer_timing_validation(event_tester):
@@ -258,3 +329,64 @@ async def test_event_ordering_consistency(event_tester):
     missing_types = required_types - received_types
     if missing_types:
         logger.warning(f"Missing event types: {missing_types}")
+
+
+async def test_websocket_event_structure_compliance(event_tester):
+    """Test all events follow consistent message structure {type, payload}"""
+    # BVJ: All UI layers | Message structure consistency | $10K+ MRR impact
+    
+    # ARRANGE - Setup for message structure validation
+    structure_violations = []
+    
+    # ACT - Collect all WebSocket events
+    await event_tester.trigger_agent_events()
+    events = await event_tester.listen_for_events()
+    
+    # ASSERT - Validate consistent message structure per SPEC/websocket_communication.xml
+    assert len(events) > 0, "Should receive at least one event"
+    
+    for event in events:
+        # Validate basic structure
+        if "type" not in event:
+            structure_violations.append(f"Missing 'type' field in event: {event}")
+        if "payload" not in event:
+            structure_violations.append(f"Missing 'payload' field in event: {event}")
+        
+        # Validate no legacy {event, data} structure
+        if "event" in event or "data" in event:
+            structure_violations.append(f"Legacy structure detected: {event}")
+    
+    assert len(structure_violations) == 0, f"Message structure violations: {structure_violations}"
+
+
+async def test_event_propagation_performance_targets(event_tester):
+    """Test event propagation meets business performance requirements"""
+    # BVJ: All UI layers | User experience optimization | $25K+ MRR impact
+    
+    # ARRANGE - Setup performance measurement
+    performance_results = {"fast": [], "medium": [], "slow": []}
+    
+    # ACT - Measure event propagation timing
+    await event_tester.trigger_agent_events()
+    events = await event_tester.listen_for_events()
+    
+    # ASSERT - Validate performance targets by UI layer
+    for event in events:
+        event_type = event.get("type", "")
+        event_time = event.get("received_at", 0)
+        
+        # Categorize by UI layer and validate timing
+        if event_type == "tool_executing":
+            performance_results["fast"].append(event_time)
+            assert event_time < 0.1, f"Fast layer violation: {event_time}s > 100ms"
+        elif event_type in ["agent_thinking", "partial_result"]:
+            performance_results["medium"].append(event_time)
+            assert event_time < 1.0, f"Medium layer violation: {event_time}s > 1s"
+        elif event_type == "final_report":
+            performance_results["slow"].append(event_time)
+            # Slow layer should be >1s but reasonable upper bound
+            assert 1.0 <= event_time <= 10.0, f"Slow layer timing issue: {event_time}s"
+    
+    # Validate we tested all layers
+    assert len(performance_results["fast"]) > 0, "No fast layer events tested"
+    assert len(performance_results["medium"]) > 0, "No medium layer events tested"

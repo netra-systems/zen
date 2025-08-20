@@ -186,5 +186,6 @@ Ensure adherence to these core specifications throughout the development process
 *   Type Safety (See specs)
 *   async/await for ALL I/O
 *   Ensure all code is implementation-complete (placeholder-free).
+*   ALWAYS use Python for scripts instead of shell/PowerShell (See [`SPEC/learnings/scripting_preference.xml`](SPEC/learnings/scripting_preference.xml)).
 
 **Final Reminder:** Generate monetization-focused value. Ensure every feature creates and captures value proportional to AI spend. Prioritize the unified system, global coherence, and end-to-end value.

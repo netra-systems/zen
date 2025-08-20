@@ -114,5 +114,11 @@
         <category name="Demo Readiness" path="SPEC/learnings/demo_readiness.xml" keywords="Demo, Presentation, Testing">
             <critical-takeaway>Ensure comprehensive demo preparation with all features tested.</critical-takeaway>
         </category>
+
+        <category name="Scripting/Automation" path="SPEC/learnings/scripting_preference.xml" keywords="Script, Shell, PowerShell, Bash, Python, Automation">
+            <critical-takeaway>ALWAYS use Python for scripts instead of shell/PowerShell for cross-platform compatibility.</critical-takeaway>
+            <critical-takeaway>Convert existing shell scripts to Python during refactoring.</critical-takeaway>
+            <critical-takeaway>Use subprocess.run() for external commands and pathlib for file operations.</critical-takeaway>
+        </category>
     </categories>
 </specification>
