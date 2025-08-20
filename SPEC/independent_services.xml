@@ -2,23 +2,36 @@
 <specification>
   <metadata>
     <name>Microservice.IndependenceProtocol</name>
-    <version>2.0.0</version>
+    <version>2.1.0</version>
     <priority>CRITICAL</priority>
     <description>
-      MANDATORY protocol for designing and validating independent microservices. 
+      MANDATORY protocol for designing and validating independent backend microservices. 
       Ensures zero coupling with the main application monolith.
+      NOTE: This protocol applies to backend services only. Frontend is excluded from these isolation requirements.
     </description>
   </metadata>
   
   <critical-principle id="MS-P1">
-    <title>Absolute Independence</title>
-    <instruction>Ensure each microservice is 100% self-contained. ZERO direct code dependencies (imports) on the main application (`app/`) or other services.</instruction>
+    <title>Absolute Independence (Backend Services Only)</title>
+    <instruction>Ensure each backend microservice is 100% self-contained. ZERO direct code dependencies (imports) on the main application (`app/`) or other services. This principle applies to backend services only - frontend is excluded.</instruction>
   </critical-principle>
+  
+  <scope-clarification id="MS-SCOPE-001">
+    <title>Backend-Only Application</title>
+    <instruction>This specification applies exclusively to backend microservices (e.g., auth_service). The frontend is NOT considered a microservice for the purposes of this protocol and is exempt from these isolation requirements.</instruction>
+    <backend-services>
+      <service>auth_service</service>
+      <service>Main Backend (/app)</service>
+    </backend-services>
+    <excluded>
+      <component>Frontend (/frontend)</component>
+    </excluded>
+  </scope-clarification>
 
-  <section title="Architectural Constraints">
+  <section title="Architectural Constraints (Backend Services)">
     <constraint id="MS-ARC-001" priority="CRITICAL">
       <title>Unique Module Namespace (NO 'app')</title>
-      <instruction>Do not use 'app' as the root module name within a microservice. Use `{service_name}_core/`.</instruction>
+      <instruction>Backend services must not use 'app' as the root module name. Use `{service_name}_core/`. This constraint does not apply to the frontend.</instruction>
       <code-example language="directory-structure">
         <before description="VIOLATION: Namespace collision">
 auth_service/
@@ -35,8 +48,9 @@ auth_service/
 
     <constraint id="MS-ARC-002" priority="CRITICAL">
       <title>Forbidden Cross-Service Imports</title>
-      <instruction>Services must not import code from the main `app/` directory.</instruction>
+      <instruction>Backend services must not import code from the main `app/` directory. Frontend is exempt from this restriction.</instruction>
       <forbidden-import-pattern>from app\.</forbidden-import-pattern>
+      <exemption>Frontend may import from app/ as needed</exemption>
     </constraint>
   </section>
 
@@ -81,21 +95,28 @@ CMD exec gunicorn main:app --bind 0.0.0.0:$PORT --workers $WORKERS --worker-clas
 
   <section title="Validation and Regression Prevention">
     <protocol id="MS-VAL-001">
-      <title>Automated Independence Validation (AI Workflow)</title>
-      <instruction>AI Agents must execute this validation protocol when creating or modifying a microservice before finalizing the task.</instruction>
+      <title>Automated Independence Validation (Backend Services Only)</title>
+      <instruction>AI Agents must execute this validation protocol when creating or modifying a backend microservice before finalizing the task. Frontend is excluded from this validation.</instruction>
       <validation-steps language="bash">
 <![CDATA[
 SERVICE_DIR=$1
 cd $SERVICE_DIR
 
+# Skip validation for frontend
+if [ "$SERVICE_DIR" == "frontend" ]; then 
+  echo "INFO: Frontend is exempt from isolation validation."; 
+  exit 0; 
+fi
+
+# Backend service validation only
 # 1. Check for forbidden 'app' directory (MS-ARC-001)
-if [ -d "app" ]; then echo "ERROR: 'app' directory found."; exit 1; fi
+if [ -d "app" ]; then echo "ERROR: 'app' directory found in backend service."; exit 1; fi
 
 # 2. Check for imports from main app (MS-ARC-002)
-if grep -r "from app\." . --exclude-dir=venv; then echo "ERROR: Imports from main app found."; exit 1; fi
+if grep -r "from app\." . --exclude-dir=venv; then echo "ERROR: Imports from main app found in backend service."; exit 1; fi
 
 # 3. Test isolation import
-python -c "from main import app" || (echo "ERROR: Isolated startup failed."; exit 1)
+python -c "from main import app" || (echo "ERROR: Isolated startup failed for backend service."; exit 1)
 ]]>
       </validation-steps>
     </protocol>
