@@ -1,0 +1,20 @@
+# Pre-commit hooks configuration for real test requirements
+
+repos:
+  - repo: local
+    hooks:
+      - id: real-test-requirements
+        name: Real Test Requirements Linter
+        entry: python scripts/compliance/real_test_linter.py --git-diff
+        language: system
+        files: '.*test.*\.py$'
+        stages: [commit]
+        
+  - repo: local  
+    hooks:
+      - id: real-test-requirements-strict
+        name: Real Test Requirements (Strict)
+        entry: python scripts/compliance/real_test_linter.py --strict
+        language: system
+        files: '.*test.*\.py$'
+        stages: [push]

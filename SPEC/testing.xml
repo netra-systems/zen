@@ -1327,6 +1327,10 @@
             <problem>LLM API rate limits</problem>
             <solution>Add delays between tests or use retry logic</solution>
         </issue>
+        <issue>
+            <problem>Test runner scanning site-packages and virtual environments</problem>
+            <solution>Exclude venv, .venv, venv_test, and site-packages directories from test discovery. Test scanners must only search project test directories, not dependencies.</solution>
+        </issue>
     </troubleshooting>
     
     <best_practices>

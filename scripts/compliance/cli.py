@@ -35,6 +35,8 @@ Examples:
   python check_architecture_compliance.py --json-output report.json
   python check_architecture_compliance.py --max-file-lines 250 --threshold 90
   python check_architecture_compliance.py --fail-on-violation --json-only
+  python check_architecture_compliance.py --check-test-limits --test-suggestions
+  python check_architecture_compliance.py --no-test-limits
         """
     
     @staticmethod
@@ -51,8 +53,19 @@ Examples:
                            help='Folders to check (default: app frontend auth_service)')
         parser.add_argument('--ignore-folders', nargs='+',
                            help='Folders to ignore (default: scripts test_framework)')
+        CLIHandler._add_test_arguments(parser)
         CLIHandler._add_display_arguments(parser)
         CLIHandler._add_output_arguments(parser)
+    
+    @staticmethod
+    def _add_test_arguments(parser: argparse.ArgumentParser) -> None:
+        """Add test-specific arguments"""
+        parser.add_argument('--check-test-limits', action='store_true', default=True,
+                           help='Check test file limits (300 lines) and test function limits (8 lines)')
+        parser.add_argument('--no-test-limits', action='store_true',
+                           help='Skip test limits checking')
+        parser.add_argument('--test-suggestions', action='store_true',
+                           help='Generate automated splitting suggestions for test violations')
     
     @staticmethod
     def _add_display_arguments(parser: argparse.ArgumentParser) -> None:
@@ -80,18 +93,43 @@ class OutputHandler:
     """Handles output processing and formatting"""
     
     @staticmethod
-    def process_output(args: Any, reporter: Any, results: ComplianceResults) -> None:
+    def process_output(args: Any, enforcer: Any, results: ComplianceResults) -> None:
         """Process and output results"""
         if args.json_only:
             OutputHandler._print_json_output(results)
         else:
-            reporter.generate_report()
+            enforcer.reporter.generate_report(results)
+        
+        # Generate test splitting suggestions if requested
+        if getattr(args, 'test_suggestions', False):
+            OutputHandler._print_test_suggestions(enforcer)
+        
         OutputHandler._save_json_output(args, results)
     
     @staticmethod
     def _print_json_output(results: ComplianceResults) -> None:
         """Print JSON output to stdout"""
         print(json.dumps(asdict(results), indent=2))
+    
+    @staticmethod
+    def _print_test_suggestions(enforcer: Any) -> None:
+        """Print test splitting suggestions"""
+        suggestions = enforcer.generate_test_splitting_suggestions()
+        if not suggestions:
+            print("\n✅ No test splitting suggestions needed.")
+            return
+        
+        print("\n" + "="*80)
+        print("🔧 TEST SPLITTING SUGGESTIONS")
+        print("="*80)
+        
+        for identifier, suggestion_list in suggestions.items():
+            print(f"\n📁 {identifier}")
+            print("-" * 60)
+            for suggestion in suggestion_list:
+                print(f"  {suggestion}")
+        
+        print("\n" + "="*80)
     
     @staticmethod
     def _save_json_output(args: Any, results: ComplianceResults) -> None:

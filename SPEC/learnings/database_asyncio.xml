@@ -167,4 +167,11 @@
         </learning>
 
     </learnings>
+    
+    <references>
+        <reference>SPEC/learnings/alembic_asyncpg_greenlet.xml</reference>
+        <reference>app/alembic/env.py</reference>
+        <reference>app/db/postgres_core.py</reference>
+        <reference>app/core/configuration/database.py</reference>
+    </references>
 </specification>

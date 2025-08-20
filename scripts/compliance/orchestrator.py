@@ -16,6 +16,7 @@ from .function_checker import FunctionChecker
 from .type_checker import TypeChecker
 from .stub_checker import StubChecker
 from .ssot_checker import SSOTChecker
+from .test_limits_checker import TestLimitsChecker
 from .reporter import ComplianceReporter
 
 
@@ -25,14 +26,17 @@ class ArchitectureEnforcer:
     def __init__(self, root_path: str = ".", max_file_lines: int = 500, 
                  max_function_lines: int = 25, violation_limit: int = 10,
                  smart_limits: bool = True, use_emoji: bool = True,
-                 target_folders: List[str] = None, ignore_folders: List[str] = None):
+                 target_folders: List[str] = None, ignore_folders: List[str] = None,
+                 check_test_limits: bool = True):
         self.config = ComplianceConfig(root_path, max_file_lines, max_function_lines,
                                       target_folders, ignore_folders)
+        self.check_test_limits = check_test_limits
         self.file_checker = FileChecker(self.config)
         self.function_checker = FunctionChecker(self.config)
         self.type_checker = TypeChecker(self.config)
         self.stub_checker = StubChecker(self.config)
         self.ssot_checker = SSOTChecker(self.config)
+        self.test_limits_checker = TestLimitsChecker(self.config) if check_test_limits else None
         self.reporter = ComplianceReporter(max_file_lines, max_function_lines,
                                           violation_limit, smart_limits, use_emoji)
     
@@ -56,6 +60,8 @@ class ArchitectureEnforcer:
         violations.extend(self.type_checker.check_duplicate_types())
         violations.extend(self.stub_checker.check_test_stubs())
         violations.extend(self.ssot_checker.check_ssot_violations())
+        if self.test_limits_checker:
+            violations.extend(self.test_limits_checker.check_test_limits())
         return violations
     
     def _group_violations_by_type(self, violations: List[Violation]) -> Dict[str, int]:
@@ -151,3 +157,17 @@ class ArchitectureEnforcer:
         """Generate compliance report"""
         results = self.run_all_checks()
         return self.reporter.generate_report(results)
+    
+    def generate_test_splitting_suggestions(self) -> Dict[str, List[str]]:
+        """Generate automated splitting suggestions for test violations"""
+        if not self.test_limits_checker:
+            return {}
+        
+        test_violations = []
+        all_violations = self._collect_all_violations()
+        
+        for violation in all_violations:
+            if violation.violation_type in ["test_file_size", "test_function_complexity"]:
+                test_violations.append(violation)
+        
+        return self.test_limits_checker.generate_splitting_suggestions(test_violations)

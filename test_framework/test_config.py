@@ -76,6 +76,71 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_coverage": True,
         "run_both": True
     },
+    "comprehensive-backend": {
+        "description": "Comprehensive backend tests only (15-20 minutes)",
+        "purpose": "Full backend validation without frontend",
+        "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast", "--markers", "not frontend"],
+        "frontend_args": [],
+        "timeout": 1200,  # 20 minutes
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-frontend": {
+        "description": "Comprehensive frontend tests only (10-15 minutes)",
+        "purpose": "Full frontend validation without backend",
+        "backend_args": [],
+        "frontend_args": ["--coverage", "--e2e", "--fail-fast"],
+        "timeout": 900,  # 15 minutes
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-core": {
+        "description": "Core functionality comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of core components only",
+        "backend_args": ["app/core", "app/config", "app/dependencies", "app/tests/unit/test_*core*", "app/tests/*core*", "tests/*core*", "tests/unified/test_*core*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,  # 15 minutes
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-agents": {
+        "description": "Agent system comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of multi-agent system",
+        "backend_args": ["app/agents", "app/services/agent*", "app/tests/*agent*", "app/tests/**/*agent*", "tests/*agent*", "tests/**/*agent*", "tests/unified/test_*agent*", "tests/agents", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,  # 15 minutes
+        "run_coverage": True,
+        "run_both": False,
+        "supports_real_llm": True,
+        "business_critical": True
+    },
+    "comprehensive-websocket": {
+        "description": "WebSocket comprehensive tests (5-10 minutes)",
+        "purpose": "Deep validation of WebSocket functionality",
+        "backend_args": ["app/websocket", "app/routes/websocket_secure.py", "app/tests/*websocket*", "app/tests/**/*websocket*", "tests/*websocket*", "tests/**/*websocket*", "integration_tests/test_websocket*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 600,  # 10 minutes
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-database": {
+        "description": "Database comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of all database operations",
+        "backend_args": ["app/db", "app/repositories", "app/tests/*database*", "app/tests/*db*", "app/tests/**/*database*", "tests/*database*", "tests/*db*", "tests/**/*database*", "tests/unified/test_*database*", "--coverage", f"--parallel={min(3, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,  # 15 minutes
+        "run_coverage": True,
+        "run_both": False
+    },
+    "comprehensive-api": {
+        "description": "API comprehensive tests (10-15 minutes)",
+        "purpose": "Deep validation of all API endpoints",
+        "backend_args": ["app/routes", "app/handlers", "app/tests/*api*", "app/tests/*auth*", "app/tests/**/*api*", "tests/*api*", "tests/*auth*", "tests/**/*api*", "tests/unified/test_*api*", "integration_tests/test_*api*", "--coverage", f"--parallel={min(4, OPTIMAL_WORKERS)}", "--fail-fast"],
+        "frontend_args": [],
+        "timeout": 900,  # 15 minutes
+        "run_coverage": True,
+        "run_both": False
+    },
     "critical": {
         "description": "Critical path tests only (1-2 minutes)",
         "purpose": "Essential functionality verification",
@@ -193,8 +258,8 @@ def configure_dev_environment():
     os.environ["REDIS_URL"] = "redis://localhost:6379"
     os.environ["CLICKHOUSE_URL"] = "http://localhost:8123"
 
-def configure_real_llm(model: str, timeout: int, parallel: str, test_level: str = None):
-    """Configure environment for real LLM testing with smart defaults."""
+def configure_real_llm(model: str, timeout: int, parallel: str, test_level: str = None, use_dedicated_env: bool = True):
+    """Configure environment for real LLM testing with smart defaults and dedicated test environment."""
     # Get level-specific defaults if available
     level_config = TEST_LEVELS.get(test_level, {}) if test_level else {}
     
@@ -216,10 +281,11 @@ def configure_real_llm(model: str, timeout: int, parallel: str, test_level: str 
         "model": model,
         "timeout": timeout,
         "parallel": parallel_value,
-        "rate_limit_delay": 1 if int(parallel_value) > 2 else 0  # Add delay for high parallelism
+        "rate_limit_delay": 1 if int(parallel_value) > 2 else 0,  # Add delay for high parallelism
+        "dedicated_environment": use_dedicated_env
     }
     
-    # Set environment variables
+    # Set basic LLM environment variables
     os.environ["TEST_USE_REAL_LLM"] = "true"
     os.environ["ENABLE_REAL_LLM_TESTING"] = "true"
     os.environ["TEST_LLM_TIMEOUT"] = str(timeout)
@@ -232,4 +298,50 @@ def configure_real_llm(model: str, timeout: int, parallel: str, test_level: str 
     if config["rate_limit_delay"] > 0:
         os.environ["TEST_LLM_RATE_LIMIT_DELAY"] = str(config["rate_limit_delay"])
     
+    # Configure dedicated test environment if requested
+    if use_dedicated_env:
+        configure_dedicated_test_environment()
+    
     return config
+
+
+def configure_dedicated_test_environment():
+    """Configure dedicated test environment with isolated resources."""
+    # Database configuration for test_dedicated environment
+    test_db_url = os.getenv("TEST_DATABASE_URL")
+    if not test_db_url:
+        # Fallback to main database with test schema
+        main_db_url = os.getenv("DATABASE_URL", "postgresql://localhost/netra_main")
+        test_db_url = main_db_url.replace("/netra_main", "/netra_test")
+        os.environ["TEST_DATABASE_URL"] = test_db_url
+    
+    # Redis configuration with test namespace
+    test_redis_url = os.getenv("TEST_REDIS_URL")
+    if not test_redis_url:
+        main_redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+        # Use database index 1 for tests
+        test_redis_url = main_redis_url.replace("/0", "/1")
+        os.environ["TEST_REDIS_URL"] = test_redis_url
+    
+    # Set Redis namespace prefix for test isolation
+    os.environ["TEST_REDIS_NAMESPACE"] = "test:"
+    
+    # ClickHouse configuration with test database
+    test_clickhouse_url = os.getenv("TEST_CLICKHOUSE_URL")
+    if not test_clickhouse_url:
+        main_clickhouse_url = os.getenv("CLICKHOUSE_URL", "clickhouse://localhost:8123/netra_main")
+        test_clickhouse_url = main_clickhouse_url.replace("/netra_main", "/netra_test")
+        os.environ["TEST_CLICKHOUSE_URL"] = test_clickhouse_url
+    
+    # Set ClickHouse table prefix for test isolation
+    os.environ["TEST_CLICKHOUSE_TABLES_PREFIX"] = "test_"
+    
+    # Configure separate LLM API keys for testing if available
+    for provider in ["ANTHROPIC", "GOOGLE", "OPENAI"]:
+        test_key = os.getenv(f"TEST_{provider}_API_KEY")
+        if test_key:
+            os.environ[f"{provider}_API_KEY"] = test_key
+    
+    # Set test environment flag
+    os.environ["TEST_ENVIRONMENT"] = "test_dedicated"
+    os.environ["USE_TEST_ISOLATION"] = "true"

@@ -28,6 +28,7 @@ def _create_enforcer(args):
     use_emoji = not getattr(args, 'no_emoji', False)
     target_folders = getattr(args, 'target_folders', None)
     ignore_folders = getattr(args, 'ignore_folders', None)
+    check_test_limits = not getattr(args, 'no_test_limits', False)
     return ArchitectureEnforcer(
         root_path=args.path,
         max_file_lines=args.max_file_lines,
@@ -36,7 +37,8 @@ def _create_enforcer(args):
         smart_limits=smart_limits,
         use_emoji=use_emoji,
         target_folders=target_folders,
-        ignore_folders=ignore_folders
+        ignore_folders=ignore_folders,
+        check_test_limits=check_test_limits
     )
 
 

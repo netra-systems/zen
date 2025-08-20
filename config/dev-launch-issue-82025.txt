@@ -1,0 +1,84 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\__main__.py", line 4, in <module>
+    main(prog="alembic")
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\config.py", line 1016, in main
+    CommandLine(prog=prog).main(argv=argv)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\config.py", line 1006, in main
+    self.run_cmd(cfg, options)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\config.py", line 940, in run_cmd
+    fn(
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\command.py", line 483, in upgrade
+    script.run_env()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\script\base.py", line 549, in run_env
+    util.load_python_file(self.dir, "env.py")
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\util\pyfiles.py", line 116, in load_python_file
+    module = load_module_py(module_id, path)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\alembic\util\pyfiles.py", line 136, in load_module_py
+    spec.loader.exec_module(module)  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap_external>", line 995, in exec_module
+  File "<frozen importlib._bootstrap>", line 488, in _call_with_frames_removed
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\alembic\env.py", line 87, in <module>
+    run_migrations_online()
+  File "C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\app\alembic\env.py", line 80, in run_migrations_online
+    with connectable.connect() as connection:
+         ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\engine\base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\engine\base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\engine\base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\impl.py", line 306, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 673, in __init__
+    self.__connect()
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\util\langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\pool\base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\engine\create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\engine\default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\dialects\postgresql\asyncpg.py", line 964, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\util\_concurrency_py3k.py", line 123, in await_only
+    raise exc.MissingGreenlet(
+sqlalchemy.exc.MissingGreenlet: greenlet_spawn has not been called; can't call await_only() here. Was IO attempted in an unexpected place? (Background on this error at: https://sqlalche.me/e/20/xd2s)
+
+❌ Migration failed: 2025-08-20 13:54:17.748 | INFO     | app.core.unified_logging:_emit_log:117 | Created development configuration
+2025-08-20 13:54:17.748 | INFO     | app.core.unified_logging:_emit_log:117 | Loading DA
+❌ Migration check failed
+❌ Failed to start services
+
+❌ FAILURE | Development environment failed to start (exit code: 1)
+
+🔧 TROUBLESHOOTING (Windows):
+   1. Check if ports are in use: netstat -ano | findstr ":8000 :3000 :8081"
+   2. Kill hanging processes: tasklist | findstr "node python uvicorn"

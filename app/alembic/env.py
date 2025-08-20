@@ -37,6 +37,9 @@ target_metadata = Base.metadata
 def _configure_offline_context() -> None:
     """Configure context for offline migrations."""
     url = config.get_main_option("sqlalchemy.url")
+    # Ensure synchronous URL for offline migrations
+    if url:
+        url = _ensure_sync_database_url(url)
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -50,13 +53,33 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def _ensure_sync_database_url(url: str) -> str:
+    """Ensure database URL uses synchronous driver for migrations."""
+    if not url:
+        return url
+    
+    # Remove async driver if present
+    if "postgresql+asyncpg://" in url:
+        url = url.replace("postgresql+asyncpg://", "postgresql://", 1)
+        # Convert ssl back to sslmode for psycopg2
+        if "ssl=" in url and "/cloudsql/" not in url:
+            url = url.replace("ssl=", "sslmode=")
+    
+    # Ensure we're using psycopg2 (sync) driver
+    if url.startswith("postgres://"):
+        url = url.replace("postgres://", "postgresql://", 1)
+    
+    return url
+
 def _get_configuration() -> dict:
     """Get database configuration from environment."""
     from app.config import get_config
     app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
     if app_config.database_url:
-        configuration['sqlalchemy.url'] = app_config.database_url
+        # Ensure synchronous URL for migrations
+        sync_url = _ensure_sync_database_url(app_config.database_url)
+        configuration['sqlalchemy.url'] = sync_url
     return configuration
 
 def _create_connectable(configuration: dict):

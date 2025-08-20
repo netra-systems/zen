@@ -1,0 +1,114 @@
+{
+  "features": {
+    "roi_calculator": {
+      "status": "enabled",
+      "description": "ROI calculator for customer value analysis",
+      "owner": "product-team",
+      "target_release": "v1.2.0",
+      "dependencies": [],
+      "metadata": {
+        "jira_ticket": "NETRA-101",
+        "business_value": "Core monetization feature"
+      }
+    },
+    "first_time_user_flow": {
+      "status": "in_development",
+      "description": "Onboarding flow for first-time users",
+      "owner": "frontend-team",
+      "target_release": "v1.3.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-205",
+        "business_value": "User conversion optimization"
+      }
+    },
+    "auth_integration": {
+      "status": "enabled",
+      "description": "Authentication and authorization system",
+      "owner": "backend-team",
+      "target_release": "v1.1.0",
+      "dependencies": [],
+      "metadata": {
+        "jira_ticket": "NETRA-050",
+        "business_value": "Platform security foundation"
+      }
+    },
+    "usage_tracking": {
+      "status": "enabled",
+      "description": "Track user usage patterns and API calls",
+      "owner": "analytics-team",
+      "target_release": "v1.1.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-075",
+        "business_value": "Usage analytics for billing"
+      }
+    },
+    "websocket_streaming": {
+      "status": "enabled",
+      "description": "Real-time WebSocket streaming for agent communication",
+      "owner": "backend-team",
+      "target_release": "v1.2.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-120",
+        "business_value": "Real-time agent interactions"
+      }
+    },
+    "agent_orchestration": {
+      "status": "enabled",
+      "description": "Multi-agent orchestration and coordination",
+      "owner": "ai-team",
+      "target_release": "v1.2.0",
+      "dependencies": ["auth_integration", "websocket_streaming"],
+      "metadata": {
+        "jira_ticket": "NETRA-150",
+        "business_value": "Core AI platform capability"
+      }
+    },
+    "github_integration": {
+      "status": "in_development",
+      "description": "GitHub repository analysis and integration",
+      "owner": "integrations-team",
+      "target_release": "v1.4.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-300",
+        "business_value": "Developer workflow integration"
+      }
+    },
+    "clickhouse_analytics": {
+      "status": "enabled",
+      "description": "ClickHouse-based analytics and reporting",
+      "owner": "analytics-team",
+      "target_release": "v1.2.0",
+      "dependencies": ["usage_tracking"],
+      "metadata": {
+        "jira_ticket": "NETRA-180",
+        "business_value": "Advanced analytics capabilities"
+      }
+    },
+    "enterprise_sso": {
+      "status": "disabled",
+      "description": "Enterprise single sign-on integration",
+      "owner": "enterprise-team",
+      "target_release": "v2.0.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-500",
+        "business_value": "Enterprise customer acquisition"
+      }
+    },
+    "ml_rate_limiting": {
+      "status": "experimental",
+      "description": "Machine learning-based intelligent rate limiting",
+      "owner": "research-team",
+      "target_release": "TBD",
+      "dependencies": ["usage_tracking"],
+      "metadata": {
+        "jira_ticket": "NETRA-999",
+        "business_value": "Research: Smart resource management"
+      }
+    }
+  }
+}

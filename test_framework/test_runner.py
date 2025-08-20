@@ -311,6 +311,7 @@ def add_all_arguments(parser):
     add_cicd_arguments(parser)
     add_discovery_arguments(parser)
     add_failing_test_arguments(parser)
+    add_real_test_validation_arguments(parser)
 
 def add_main_test_arguments(parser):
     """Add main test level selection arguments"""
@@ -475,15 +476,54 @@ def add_failing_test_arguments(parser):
         "--clear-failing", action="store_true",
         help="Clear the failing tests log"
     )
+    parser.add_argument(
+        "--strict-size", action="store_true",
+        help="Skip oversized tests (files >300 lines, functions >8 lines)"
+    )
+    parser.add_argument(
+        "--skip-size-validation", action="store_true",
+        help="Skip pre-run test size validation"
+    )
+
+def add_real_test_validation_arguments(parser):
+    """Add real test requirements validation arguments"""
+    parser.add_argument(
+        "--validate-real-tests", action="store_true",
+        help="Validate tests comply with real test requirements before running"
+    )
+    parser.add_argument(
+        "--real-test-report", action="store_true", 
+        help="Generate real test compliance report without running tests"
+    )
+    parser.add_argument(
+        "--fix-test-violations", action="store_true",
+        help="Automatically fix common real test requirement violations"
+    )
 
 def execute_test_run(parser, args):
     """Execute the main test run"""
     handle_cicd_aliases(args)
     print_header()
+    
+    # Handle real test validation requests
+    if hasattr(args, 'real_test_report') and args.real_test_report:
+        return handle_real_test_report()
+    if hasattr(args, 'fix_test_violations') and args.fix_test_violations:
+        return handle_fix_test_violations()
+    
     configure_environment_if_requested(args)
     speed_opts = configure_speed_options(args)
     runner = initialize_test_runner()
     handle_failing_test_commands(args, runner)
+    
+    # Validate real test requirements before running if requested
+    if hasattr(args, 'validate_real_tests') and args.validate_real_tests:
+        print("🔍 Validating real test requirements...")
+        if not validate_real_test_requirements():
+            print("❌ Real test requirement violations found. Fix before running tests.")
+            return 1
+        print("✅ All tests comply with real test requirements!")
+    
     return run_tests_with_configuration(args, runner, speed_opts)
 
 def handle_cicd_aliases(args):
@@ -690,8 +730,64 @@ def configure_real_llm_if_requested(args, level, config):
     from .test_execution_engine import configure_real_llm_if_requested as engine_configure
     return engine_configure(args, level, config)
 
+def validate_test_sizes(args):
+    """Run pre-test validation for test size limits (SPEC/testing.xml enforcement)"""
+    try:
+        sys.path.insert(0, str(PROJECT_ROOT / "scripts" / "compliance"))
+        from test_size_validator import TestSizeValidator
+        
+        validator = TestSizeValidator()
+        results = validator.validate_all_tests()
+        
+        violations = results["summary"]["total_violations"]
+        if violations > 0:
+            print(f"\n[X] TEST SIZE VIOLATIONS DETECTED: {violations} violations")
+            print(f"Files exceeding 300-line limit: {results['summary']['files_exceeding_limit']}")
+            print(f"Functions exceeding 8-line limit: {results['summary']['functions_exceeding_limit']}")
+            print("\nViolation Details:")
+            
+            # Show top 5 worst violations for immediate action
+            worst_violations = sorted(results["violations"], 
+                                    key=lambda v: v.get("actual_value", 0), reverse=True)[:5]
+            for violation in worst_violations:
+                print(f"  * {violation['file_path']}: {violation['actual_value']} lines "
+                      f"({violation['violation_type']})")
+            
+            print(f"\nTest size limits are MANDATORY per SPEC/testing.xml:")
+            print("  * Test files: 300 lines maximum (same as production code)")
+            print("  * Test functions: 8 lines maximum (same as production code)")
+            
+            # Always enforce limits - no bypass option
+            enforce_strict = getattr(args, 'strict_size', True) or violations > 10
+            if enforce_strict:
+                print("\n[X] ENFORCEMENT ACTIVE: Tests cannot run with size violations")
+                print("Run 'python scripts/compliance/test_size_validator.py --format markdown' for fixing guide")
+                return False  # Block test execution
+            else:
+                print("\n[!] Tests will run with warnings (violations < 10)")
+                print("Use 'python scripts/compliance/test_size_validator.py' for refactoring help")
+        else:
+            print("[OK] Test size validation passed - all tests comply with limits")
+        
+        return True  # Allow test execution
+        
+    except ImportError as e:
+        print(f"Warning: Could not import test size validator: {e}")
+        return True  # Don't block on import errors
+    except Exception as e:
+        print(f"Warning: Test size validation failed: {e}")
+        return True  # Don't block on validation errors
+
 def execute_test_suite(args, config, runner, real_llm_config, speed_opts, test_level):
     """Execute the test suite based on configuration"""
+    # Run pre-test validation for test size limits (MANDATORY per SPEC/testing.xml)
+    if not getattr(args, 'skip_size_validation', False):
+        size_validation_passed = validate_test_sizes(args)
+        if not size_validation_passed:
+            print("\n[X] Test execution blocked due to size violations")
+            print("Fix test size violations before running tests")
+            sys.exit(1)
+    
     from .test_execution_engine import execute_test_suite as engine_execute
     return engine_execute(args, config, runner, real_llm_config, speed_opts, test_level)
 

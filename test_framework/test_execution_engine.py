@@ -81,7 +81,7 @@ def execute_full_test_suite(config: Dict, runner, real_llm_config: Optional[Dict
         return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
 
 def configure_real_llm_if_requested(args, level: str, config: Dict):
-    """Configure real LLM testing if requested."""
+    """Configure real LLM testing with dedicated environment if requested."""
     if not args.real_llm:
         return None
     if level == "smoke":
@@ -89,8 +89,37 @@ def configure_real_llm_if_requested(args, level: str, config: Dict):
         return None
     
     from .test_config import configure_real_llm
-    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel, test_level=level)
+    from .test_environment_setup import TestEnvironmentValidator
+    
+    # Validate environment before proceeding
+    validator = TestEnvironmentValidator()
+    
+    # Validate API keys for real LLM testing
+    import asyncio
+    try:
+        api_validation = asyncio.run(validator.validate_api_keys(True))
+        if not api_validation:
+            print("[ERROR] Real LLM testing requires valid API keys")
+            print("  Set TEST_ANTHROPIC_API_KEY, TEST_OPENAI_API_KEY, or TEST_GOOGLE_API_KEY")
+            return None
+    except Exception as e:
+        print(f"[WARNING] Could not validate API keys: {e}")
+    
+    # Configure real LLM with dedicated environment
+    real_llm_config = configure_real_llm(
+        args.llm_model, 
+        args.llm_timeout, 
+        args.parallel, 
+        test_level=level,
+        use_dedicated_env=True
+    )
+    
     print_llm_configuration(real_llm_config, config)
+    
+    # Print environment setup information
+    if real_llm_config.get('dedicated_environment'):
+        print_dedicated_environment_info()
+    
     return real_llm_config
 
 def print_llm_configuration(real_llm_config: Dict, config: Dict):
@@ -106,6 +135,47 @@ def print_llm_configuration(real_llm_config: Dict, config: Dict):
     adjusted_timeout = config.get('timeout', 300) * 3
     config['timeout'] = adjusted_timeout
     print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+
+
+def print_dedicated_environment_info():
+    """Print dedicated test environment configuration details."""
+    import os
+    print(f"[INFO] Dedicated test environment configured")
+    
+    # Database configuration
+    test_db = os.getenv('TEST_DATABASE_URL', 'not_configured')
+    if 'not_configured' not in test_db:
+        db_name = test_db.split('/')[-1] if '/' in test_db else 'unknown'
+        print(f"  - Test Database: {db_name}")
+    
+    # Redis configuration
+    test_redis = os.getenv('TEST_REDIS_URL', 'not_configured')
+    if 'not_configured' not in test_redis:
+        redis_db = test_redis.split('/')[-1] if '/' in test_redis else 'default'
+        namespace = os.getenv('TEST_REDIS_NAMESPACE', 'test:')
+        print(f"  - Test Redis: DB {redis_db} with namespace '{namespace}'")
+    
+    # ClickHouse configuration  
+    test_clickhouse = os.getenv('TEST_CLICKHOUSE_URL', 'not_configured')
+    if 'not_configured' not in test_clickhouse:
+        ch_db = test_clickhouse.split('/')[-1] if '/' in test_clickhouse else 'unknown'
+        prefix = os.getenv('TEST_CLICKHOUSE_TABLES_PREFIX', 'test_')
+        print(f"  - Test ClickHouse: {ch_db} with table prefix '{prefix}'")
+    
+    # API key configuration
+    test_keys = []
+    for provider in ['ANTHROPIC', 'GOOGLE', 'OPENAI']:
+        if os.getenv(f'TEST_{provider}_API_KEY'):
+            test_keys.append(provider.lower())
+    
+    if test_keys:
+        print(f"  - Test API keys configured: {', '.join(test_keys)}")
+    else:
+        print(f"  - Using production API keys (no test keys configured)")
+    
+    # Environment isolation
+    isolation = os.getenv('USE_TEST_ISOLATION', 'false')
+    print(f"  - Transaction isolation: {'enabled' if isolation == 'true' else 'disabled'}")
 
 def finalize_test_run(runner, level: str, config: Dict, output: str, exit_code: int) -> int:
     """Finalize test run with reporting and cleanup."""

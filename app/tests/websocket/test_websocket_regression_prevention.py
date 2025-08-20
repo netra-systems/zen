@@ -51,17 +51,21 @@ class TestAgentRegistration:
     """Test agent registration during initialization."""
     
     @pytest.fixture
-    def mock_components(self):
-        """Create mock components for testing."""
-        llm_manager = Mock()
-        tool_dispatcher = Mock()
-        websocket_manager = Mock()
+    def real_components(self):
+        """Create real components for testing."""
+        from app.llm.llm_manager import LLMManager
+        from app.agents.tool_dispatcher import ToolDispatcher
+        from app.websocket.unified.manager import UnifiedWebSocketManager
+        
+        llm_manager = LLMManager()
+        tool_dispatcher = ToolDispatcher(llm_manager)
+        websocket_manager = UnifiedWebSocketManager()
         return llm_manager, tool_dispatcher, websocket_manager
     
-    def test_registry_registers_default_agents(self, mock_components):
+    def test_registry_registers_default_agents(self, real_components):
         """Test that default agents are registered."""
         from app.agents.supervisor.agent_registry import AgentRegistry
-        llm_manager, tool_dispatcher, _ = mock_components
+        llm_manager, tool_dispatcher, _ = real_components
         
         registry = AgentRegistry(llm_manager, tool_dispatcher)
         registry.register_default_agents()
@@ -73,10 +77,10 @@ class TestAgentRegistration:
         assert "actions" in registry.agents
         assert "reporting" in registry.agents
     
-    def test_supervisor_initializes_with_agents(self, mock_components):
+    def test_supervisor_initializes_with_agents(self, real_components):
         """Test supervisor initialization with agent registry."""
         from app.agents.supervisor_consolidated import SupervisorAgent
-        llm_manager, tool_dispatcher, websocket_manager = mock_components
+        llm_manager, tool_dispatcher, websocket_manager = real_components
         
         with patch('app.agents.supervisor_consolidated.AsyncSession'):
             supervisor = SupervisorAgent(

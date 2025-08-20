@@ -252,22 +252,59 @@ class TestDevLauncherIntegration:
     
     def test_cors_environment_variable_setup(self, launcher_config):
         """Test CORS environment variables are set correctly."""
-        launcher = DevLauncher(launcher_config)
-        
-        # Check that CORS_ORIGINS is set to wildcard for development
         import os
-        assert os.environ.get('CORS_ORIGINS') == '*'
+        
+        # Clear CORS_ORIGINS first to test default setting
+        original_cors = os.environ.get('CORS_ORIGINS')
+        if 'CORS_ORIGINS' in os.environ:
+            del os.environ['CORS_ORIGINS']
+        
+        try:
+            launcher = DevLauncher(launcher_config)
+            
+            # Force cache miss to trigger environment setup
+            launcher.cache_manager.invalidate_environment_cache()
+            
+            # Trigger environment check which sets defaults
+            launcher.check_environment()
+            
+            # Check that CORS_ORIGINS is set to wildcard for development
+            assert os.environ.get('CORS_ORIGINS') == '*'
+        finally:
+            # Restore original value
+            if original_cors is not None:
+                os.environ['CORS_ORIGINS'] = original_cors
     
     def test_cross_service_auth_token_setup(self, launcher_config):
         """Test cross-service auth token is set up during launcher initialization."""
-        with patch.dict('os.environ', {}, clear=False):
+        import os
+        
+        # Clear existing token to test generation
+        original_token = os.environ.get('CROSS_SERVICE_AUTH_TOKEN')
+        if 'CROSS_SERVICE_AUTH_TOKEN' in os.environ:
+            del os.environ['CROSS_SERVICE_AUTH_TOKEN']
+        
+        try:
             launcher = DevLauncher(launcher_config)
             
+            # Force cache miss to trigger environment setup
+            launcher.cache_manager.invalidate_environment_cache()
+            
+            # Trigger environment check which sets up tokens
+            launcher.check_environment()
+            
             # Check that cross-service auth token is generated
-            import os
             token = os.environ.get('CROSS_SERVICE_AUTH_TOKEN')
             assert token is not None
             assert len(token) > 10  # Should be a meaningful token
+            
+            # Verify it's stored in service discovery too
+            stored_token = launcher.service_discovery.get_cross_service_auth_token()
+            assert stored_token == token
+        finally:
+            # Restore original value
+            if original_token is not None:
+                os.environ['CROSS_SERVICE_AUTH_TOKEN'] = original_token
     
     def test_service_discovery_integration_in_launcher(self, launcher_config):
         """Test service discovery is properly integrated in launcher."""

@@ -1,0 +1,298 @@
+{
+  "metadata": {
+    "description": "Basic cost and latency optimization scenarios",
+    "version": "1.0",
+    "created": "2025-01-20T00:00:00Z",
+    "record_count": {
+      "users": 5,
+      "threads": 10,
+      "metrics": 1000,
+      "models": 3
+    }
+  },
+  "users": [
+    {
+      "id": "test_user_1",
+      "email": "user1@netra-test.com",
+      "permissions": ["basic_optimization"],
+      "tier": "free",
+      "created_at": "2025-01-15T10:00:00Z"
+    },
+    {
+      "id": "test_user_2",
+      "email": "user2@netra-test.com",
+      "permissions": ["basic_optimization", "cost_analysis"],
+      "tier": "early",
+      "created_at": "2025-01-16T10:00:00Z"
+    },
+    {
+      "id": "test_user_3",
+      "email": "user3@netra-test.com",
+      "permissions": ["basic_optimization", "cost_analysis", "latency_analysis"],
+      "tier": "mid",
+      "created_at": "2025-01-17T10:00:00Z"
+    },
+    {
+      "id": "test_user_4",
+      "email": "user4@netra-test.com",
+      "permissions": ["basic_optimization", "cost_analysis", "latency_analysis", "advanced_analytics"],
+      "tier": "enterprise",
+      "created_at": "2025-01-18T10:00:00Z"
+    },
+    {
+      "id": "test_user_5",
+      "email": "admin@netra-test.com",
+      "permissions": ["admin", "all_features"],
+      "tier": "admin",
+      "created_at": "2025-01-10T10:00:00Z"
+    }
+  ],
+  "threads": [
+    {
+      "id": "thread_basic_1",
+      "user_id": "test_user_1",
+      "title": "Basic cost optimization inquiry",
+      "status": "active",
+      "created_at": "2025-01-19T09:00:00Z",
+      "last_activity": "2025-01-19T09:30:00Z",
+      "message_count": 5,
+      "optimization_focus": "cost_reduction"
+    },
+    {
+      "id": "thread_basic_2",
+      "user_id": "test_user_2",
+      "title": "Latency improvement request",
+      "status": "active",
+      "created_at": "2025-01-19T10:00:00Z",
+      "last_activity": "2025-01-19T10:45:00Z",
+      "message_count": 8,
+      "optimization_focus": "latency_reduction"
+    },
+    {
+      "id": "thread_basic_3",
+      "user_id": "test_user_3",
+      "title": "Combined cost and latency analysis",
+      "status": "completed",
+      "created_at": "2025-01-18T14:00:00Z",
+      "last_activity": "2025-01-18T15:30:00Z",
+      "message_count": 12,
+      "optimization_focus": "balanced_optimization"
+    },
+    {
+      "id": "thread_basic_4",
+      "user_id": "test_user_1",
+      "title": "Model selection guidance",
+      "status": "pending",
+      "created_at": "2025-01-19T11:00:00Z",
+      "last_activity": "2025-01-19T11:00:00Z",
+      "message_count": 1,
+      "optimization_focus": "model_selection"
+    },
+    {
+      "id": "thread_basic_5",
+      "user_id": "test_user_4",
+      "title": "Enterprise optimization strategy",
+      "status": "active",
+      "created_at": "2025-01-17T08:00:00Z",
+      "last_activity": "2025-01-19T12:00:00Z",
+      "message_count": 25,
+      "optimization_focus": "comprehensive_strategy"
+    },
+    {
+      "id": "thread_basic_6",
+      "user_id": "test_user_2",
+      "title": "Quick cost estimate",
+      "status": "completed",
+      "created_at": "2025-01-19T08:00:00Z",
+      "last_activity": "2025-01-19T08:15:00Z",
+      "message_count": 3,
+      "optimization_focus": "cost_estimation"
+    },
+    {
+      "id": "thread_basic_7",
+      "user_id": "test_user_3",
+      "title": "Performance benchmarking",
+      "status": "active",
+      "created_at": "2025-01-18T16:00:00Z",
+      "last_activity": "2025-01-19T09:00:00Z",
+      "message_count": 15,
+      "optimization_focus": "performance_benchmarking"
+    },
+    {
+      "id": "thread_basic_8",
+      "user_id": "test_user_5",
+      "title": "Admin system overview",
+      "status": "active",
+      "created_at": "2025-01-19T07:00:00Z",
+      "last_activity": "2025-01-19T13:00:00Z",
+      "message_count": 10,
+      "optimization_focus": "system_monitoring"
+    },
+    {
+      "id": "thread_basic_9",
+      "user_id": "test_user_1",
+      "title": "Basic usage patterns",
+      "status": "archived",
+      "created_at": "2025-01-15T12:00:00Z",
+      "last_activity": "2025-01-16T10:00:00Z",
+      "message_count": 6,
+      "optimization_focus": "usage_analysis"
+    },
+    {
+      "id": "thread_basic_10",
+      "user_id": "test_user_4",
+      "title": "Advanced optimization techniques",
+      "status": "active",
+      "created_at": "2025-01-16T15:00:00Z",
+      "last_activity": "2025-01-19T11:30:00Z",
+      "message_count": 32,
+      "optimization_focus": "advanced_techniques"
+    }
+  ],
+  "models": [
+    {
+      "id": "gpt-4-turbo",
+      "provider": "openai",
+      "cost_per_1k_tokens": 0.03,
+      "avg_response_time_ms": 2500,
+      "performance_rating": "high",
+      "use_cases": ["complex_analysis", "detailed_optimization"]
+    },
+    {
+      "id": "gemini-2.5-flash",
+      "provider": "google",
+      "cost_per_1k_tokens": 0.002,
+      "avg_response_time_ms": 800,
+      "performance_rating": "medium",
+      "use_cases": ["quick_analysis", "cost_sensitive_tasks"]
+    },
+    {
+      "id": "claude-3-sonnet",
+      "provider": "anthropic",
+      "cost_per_1k_tokens": 0.015,
+      "avg_response_time_ms": 1800,
+      "performance_rating": "high",
+      "use_cases": ["balanced_optimization", "comprehensive_analysis"]
+    }
+  ],
+  "metrics": {
+    "description": "Sample metrics over 7 days",
+    "period": {
+      "start": "2025-01-13T00:00:00Z",
+      "end": "2025-01-19T23:59:59Z"
+    },
+    "daily_aggregates": [
+      {
+        "date": "2025-01-13",
+        "total_requests": 120,
+        "total_cost": 15.30,
+        "avg_response_time_ms": 1850,
+        "successful_requests": 118,
+        "failed_requests": 2,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 65, "cost": 2.10},
+          {"model": "claude-3-sonnet", "usage_count": 35, "cost": 8.50},
+          {"model": "gpt-4-turbo", "usage_count": 20, "cost": 4.70}
+        ]
+      },
+      {
+        "date": "2025-01-14",
+        "total_requests": 145,
+        "total_cost": 18.75,
+        "avg_response_time_ms": 1920,
+        "successful_requests": 142,
+        "failed_requests": 3,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 78, "cost": 2.55},
+          {"model": "claude-3-sonnet", "usage_count": 42, "cost": 9.80},
+          {"model": "gpt-4-turbo", "usage_count": 25, "cost": 6.40}
+        ]
+      },
+      {
+        "date": "2025-01-15",
+        "total_requests": 168,
+        "total_cost": 22.10,
+        "avg_response_time_ms": 1780,
+        "successful_requests": 165,
+        "failed_requests": 3,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 95, "cost": 3.20},
+          {"model": "claude-3-sonnet", "usage_count": 48, "cost": 11.50},
+          {"model": "gpt-4-turbo", "usage_count": 25, "cost": 7.40}
+        ]
+      },
+      {
+        "date": "2025-01-16",
+        "total_requests": 192,
+        "total_cost": 26.40,
+        "avg_response_time_ms": 1650,
+        "successful_requests": 190,
+        "failed_requests": 2,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 108, "cost": 3.80},
+          {"model": "claude-3-sonnet", "usage_count": 55, "cost": 13.20},
+          {"model": "gpt-4-turbo", "usage_count": 29, "cost": 9.40}
+        ]
+      },
+      {
+        "date": "2025-01-17",
+        "total_requests": 210,
+        "total_cost": 29.80,
+        "avg_response_time_ms": 1580,
+        "successful_requests": 208,
+        "failed_requests": 2,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 118, "cost": 4.15},
+          {"model": "claude-3-sonnet", "usage_count": 62, "cost": 15.20},
+          {"model": "gpt-4-turbo", "usage_count": 30, "cost": 10.45}
+        ]
+      },
+      {
+        "date": "2025-01-18",
+        "total_requests": 185,
+        "total_cost": 24.90,
+        "avg_response_time_ms": 1720,
+        "successful_requests": 183,
+        "failed_requests": 2,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 98, "cost": 3.45},
+          {"model": "claude-3-sonnet", "usage_count": 58, "cost": 13.80},
+          {"model": "gpt-4-turbo", "usage_count": 29, "cost": 7.65}
+        ]
+      },
+      {
+        "date": "2025-01-19",
+        "total_requests": 165,
+        "total_cost": 21.50,
+        "avg_response_time_ms": 1820,
+        "successful_requests": 162,
+        "failed_requests": 3,
+        "top_models": [
+          {"model": "gemini-2.5-flash", "usage_count": 88, "cost": 3.10},
+          {"model": "claude-3-sonnet", "usage_count": 48, "cost": 11.90},
+          {"model": "gpt-4-turbo", "usage_count": 29, "cost": 6.50}
+        ]
+      }
+    ],
+    "optimization_opportunities": [
+      {
+        "type": "cost_reduction",
+        "description": "Switch 30% of gpt-4-turbo calls to gemini-2.5-flash for simple queries",
+        "potential_savings": "40%",
+        "risk_level": "low"
+      },
+      {
+        "type": "latency_improvement",
+        "description": "Use model-specific caching for repeated queries",
+        "potential_improvement": "25% faster responses",
+        "risk_level": "very_low"
+      },
+      {
+        "type": "efficiency_gain",
+        "description": "Batch similar requests for processing",
+        "potential_improvement": "15% cost reduction",
+        "risk_level": "medium"
+      }
+    ]
+  }
+}

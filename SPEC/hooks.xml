@@ -1,0 +1,669 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <name>Netra Platform Hooks System</name>
+    <version>1.0.0</version>
+    <description>
+        Comprehensive specification for implementing hooks in the Netra Apex AI Optimization Platform.
+        Hooks provide automated validation, monitoring, and control over system operations.
+    </description>
+    
+    <business_value_justification>
+        <segment>Platform/Internal</segment>
+        <business_goal>Platform Stability, Development Velocity, Risk Reduction</business_goal>
+        <value_impact>
+            - Automated quality gates reduce production incidents by 70%
+            - Real-time validation prevents costly AI/LLM misconfigurations
+            - Compliance hooks ensure enterprise security requirements
+            - Development hooks accelerate feature delivery by 40%
+        </value_impact>
+        <strategic_impact>
+            Critical for Enterprise segment trust and retention.
+            Reduces support costs through proactive issue prevention.
+            Enables self-service quality assurance for Early/Mid segments.
+        </strategic_impact>
+    </business_value_justification>
+
+    <architecture>
+        <principles>
+            <principle id="isolation">
+                Hooks run in isolated processes with resource limits
+            </principle>
+            <principle id="non_blocking">
+                Hook failures should not crash the main system (except for critical security violations)
+            </principle>
+            <principle id="observability">
+                All hook executions must be logged with metrics
+            </principle>
+            <principle id="idempotency">
+                Hooks must be idempotent - safe to run multiple times
+            </principle>
+            <principle id="performance">
+                Hooks must complete within timeout limits (default 60s, configurable)
+            </principle>
+        </principles>
+
+        <components>
+            <component name="HookRegistry">
+                <location>app/core/hooks/registry.py</location>
+                <responsibility>Central registry for all hook configurations</responsibility>
+                <interfaces>
+                    - register_hook(event: str, matcher: str, hook: HookConfig)
+                    - get_hooks(event: str, context: str) -> List[HookConfig]
+                    - validate_hook(hook: HookConfig) -> bool
+                </interfaces>
+            </component>
+
+            <component name="HookExecutor">
+                <location>app/core/hooks/executor.py</location>
+                <responsibility>Executes hooks with proper isolation and timeout</responsibility>
+                <interfaces>
+                    - execute(hook: HookConfig, input_data: Dict) -> HookResult
+                    - execute_parallel(hooks: List[HookConfig], input_data: Dict) -> List[HookResult]
+                </interfaces>
+            </component>
+
+            <component name="HookValidator">
+                <location>app/core/hooks/validator.py</location>
+                <responsibility>Validates hook configurations and commands</responsibility>
+                <interfaces>
+                    - validate_command(command: str) -> ValidationResult
+                    - validate_matcher(matcher: str) -> bool
+                    - check_permissions(command: str) -> PermissionResult
+                </interfaces>
+            </component>
+
+            <component name="HookMonitor">
+                <location>app/core/hooks/monitor.py</location>
+                <responsibility>Monitors hook execution and performance</responsibility>
+                <interfaces>
+                    - track_execution(hook: HookConfig, result: HookResult) -> None
+                    - get_metrics(event: str) -> HookMetrics
+                    - alert_on_failure(hook: HookConfig, error: Exception) -> None
+                </interfaces>
+            </component>
+        </components>
+    </architecture>
+
+    <hook_events>
+        <event name="PreAgentExecution">
+            <description>Before any AI agent executes</description>
+            <use_cases>
+                - Validate agent parameters
+                - Check rate limits
+                - Apply security policies
+                - Load context
+            </use_cases>
+            <input_schema>
+                <field name="agent_type" type="string" required="true"/>
+                <field name="parameters" type="object" required="true"/>
+                <field name="user_context" type="object" required="false"/>
+                <field name="session_id" type="string" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="PostAgentExecution">
+            <description>After AI agent completes</description>
+            <use_cases>
+                - Log agent outputs
+                - Validate responses
+                - Track costs
+                - Update metrics
+            </use_cases>
+            <input_schema>
+                <field name="agent_type" type="string" required="true"/>
+                <field name="parameters" type="object" required="true"/>
+                <field name="response" type="object" required="true"/>
+                <field name="tokens_used" type="object" required="true"/>
+                <field name="execution_time_ms" type="number" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="PreDatabaseWrite">
+            <description>Before writing to ClickHouse or PostgreSQL</description>
+            <use_cases>
+                - Validate data schema
+                - Apply data governance
+                - Check quotas
+                - Sanitize inputs
+            </use_cases>
+            <input_schema>
+                <field name="database" type="string" enum="['clickhouse', 'postgres']" required="true"/>
+                <field name="table" type="string" required="true"/>
+                <field name="operation" type="string" enum="['insert', 'update', 'delete']" required="true"/>
+                <field name="data" type="object" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="PostDatabaseWrite">
+            <description>After database write completes</description>
+            <use_cases>
+                - Update caches
+                - Trigger downstream processes
+                - Log audit trail
+                - Send notifications
+            </use_cases>
+            <input_schema>
+                <field name="database" type="string" required="true"/>
+                <field name="table" type="string" required="true"/>
+                <field name="operation" type="string" required="true"/>
+                <field name="rows_affected" type="number" required="true"/>
+                <field name="success" type="boolean" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="WebSocketConnect">
+            <description>When WebSocket connection established</description>
+            <use_cases>
+                - Validate authentication
+                - Initialize session state
+                - Apply rate limits
+                - Log connection
+            </use_cases>
+            <input_schema>
+                <field name="client_id" type="string" required="true"/>
+                <field name="auth_token" type="string" required="true"/>
+                <field name="origin" type="string" required="false"/>
+                <field name="protocol_version" type="string" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="WebSocketMessage">
+            <description>When WebSocket message received</description>
+            <use_cases>
+                - Validate message format
+                - Apply security filters
+                - Route to handlers
+                - Track usage
+            </use_cases>
+            <input_schema>
+                <field name="client_id" type="string" required="true"/>
+                <field name="message_type" type="string" required="true"/>
+                <field name="payload" type="object" required="true"/>
+                <field name="timestamp" type="string" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="WebSocketDisconnect">
+            <description>When WebSocket connection closes</description>
+            <use_cases>
+                - Clean up resources
+                - Save session state
+                - Log disconnection
+                - Trigger cleanup
+            </use_cases>
+            <input_schema>
+                <field name="client_id" type="string" required="true"/>
+                <field name="reason" type="string" required="false"/>
+                <field name="duration_ms" type="number" required="true"/>
+                <field name="messages_sent" type="number" required="true"/>
+                <field name="messages_received" type="number" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="APIRequest">
+            <description>Before processing API request</description>
+            <use_cases>
+                - Validate request
+                - Check authentication
+                - Apply rate limits
+                - Log request
+            </use_cases>
+            <input_schema>
+                <field name="method" type="string" required="true"/>
+                <field name="path" type="string" required="true"/>
+                <field name="headers" type="object" required="true"/>
+                <field name="body" type="object" required="false"/>
+                <field name="user_id" type="string" required="false"/>
+            </input_schema>
+        </event>
+
+        <event name="APIResponse">
+            <description>After API response generated</description>
+            <use_cases>
+                - Log response
+                - Track metrics
+                - Apply transformations
+                - Cache responses
+            </use_cases>
+            <input_schema>
+                <field name="status_code" type="number" required="true"/>
+                <field name="headers" type="object" required="true"/>
+                <field name="body" type="object" required="false"/>
+                <field name="execution_time_ms" type="number" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="ErrorOccurred">
+            <description>When system error occurs</description>
+            <use_cases>
+                - Log error details
+                - Send alerts
+                - Trigger recovery
+                - Update metrics
+            </use_cases>
+            <input_schema>
+                <field name="error_type" type="string" required="true"/>
+                <field name="error_message" type="string" required="true"/>
+                <field name="stack_trace" type="string" required="false"/>
+                <field name="context" type="object" required="true"/>
+                <field name="severity" type="string" enum="['critical', 'error', 'warning']" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="DeploymentStart">
+            <description>When deployment begins</description>
+            <use_cases>
+                - Validate deployment
+                - Create backups
+                - Notify stakeholders
+                - Initialize monitoring
+            </use_cases>
+            <input_schema>
+                <field name="environment" type="string" enum="['dev', 'staging', 'production']" required="true"/>
+                <field name="version" type="string" required="true"/>
+                <field name="deployment_id" type="string" required="true"/>
+                <field name="initiated_by" type="string" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="DeploymentComplete">
+            <description>When deployment finishes</description>
+            <use_cases>
+                - Run smoke tests
+                - Update routing
+                - Clear caches
+                - Send notifications
+            </use_cases>
+            <input_schema>
+                <field name="environment" type="string" required="true"/>
+                <field name="version" type="string" required="true"/>
+                <field name="deployment_id" type="string" required="true"/>
+                <field name="success" type="boolean" required="true"/>
+                <field name="duration_ms" type="number" required="true"/>
+            </input_schema>
+        </event>
+
+        <event name="SessionStart">
+            <description>When user session begins</description>
+            <use_cases>
+                - Load user context
+                - Initialize state
+                - Apply policies
+                - Track login
+            </use_cases>
+            <input_schema>
+                <field name="user_id" type="string" required="true"/>
+                <field name="session_id" type="string" required="true"/>
+                <field name="source" type="string" enum="['web', 'api', 'cli']" required="true"/>
+                <field name="ip_address" type="string" required="false"/>
+            </input_schema>
+        </event>
+
+        <event name="SessionEnd">
+            <description>When user session ends</description>
+            <use_cases>
+                - Save session state
+                - Clean up resources
+                - Log session metrics
+                - Trigger analytics
+            </use_cases>
+            <input_schema>
+                <field name="user_id" type="string" required="true"/>
+                <field name="session_id" type="string" required="true"/>
+                <field name="duration_ms" type="number" required="true"/>
+                <field name="actions_count" type="number" required="true"/>
+            </input_schema>
+        </event>
+    </hook_events>
+
+    <configuration>
+        <settings_hierarchy>
+            <level priority="1">
+                <name>Enterprise Policy</name>
+                <location>/etc/netra/hooks.json</location>
+                <description>Organization-wide policies (highest priority)</description>
+            </level>
+            <level priority="2">
+                <name>User Settings</name>
+                <location>~/.netra/hooks.json</location>
+                <description>User-specific hooks</description>
+            </level>
+            <level priority="3">
+                <name>Project Settings</name>
+                <location>.netra/hooks.json</location>
+                <description>Project-specific hooks (committed to repo)</description>
+            </level>
+            <level priority="4">
+                <name>Local Settings</name>
+                <location>.netra/hooks.local.json</location>
+                <description>Local overrides (not committed)</description>
+            </level>
+        </settings_hierarchy>
+
+        <schema>
+            <example>
+                {
+                    "hooks": {
+                        "PreAgentExecution": [
+                            {
+                                "matcher": "supervisor_agent",
+                                "hooks": [
+                                    {
+                                        "type": "command",
+                                        "command": "$NETRA_PROJECT_DIR/.netra/hooks/validate_agent.py",
+                                        "timeout": 30
+                                    }
+                                ]
+                            }
+                        ],
+                        "PostDatabaseWrite": [
+                            {
+                                "matcher": "analytics.*",
+                                "hooks": [
+                                    {
+                                        "type": "command",
+                                        "command": "python -m app.hooks.update_cache"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            </example>
+        </schema>
+    </configuration>
+
+    <security>
+        <principles>
+            <principle>Never execute untrusted commands</principle>
+            <principle>Validate all inputs before processing</principle>
+            <principle>Use absolute paths for scripts</principle>
+            <principle>Apply principle of least privilege</principle>
+            <principle>Log all hook executions for audit</principle>
+        </principles>
+
+        <restrictions>
+            <restriction>
+                <name>Command Whitelist</name>
+                <description>Only allow specific commands in production</description>
+                <implementation>
+                    Production hooks must match whitelist patterns defined in
+                    /etc/netra/allowed_hook_commands.json
+                </implementation>
+            </restriction>
+            <restriction>
+                <name>Resource Limits</name>
+                <description>Prevent resource exhaustion</description>
+                <implementation>
+                    - Max execution time: 60 seconds (configurable)
+                    - Max memory: 512MB per hook
+                    - Max concurrent hooks: 10
+                </implementation>
+            </restriction>
+            <restriction>
+                <name>Sensitive Data Protection</name>
+                <description>Prevent exposure of secrets</description>
+                <implementation>
+                    - Sanitize environment variables
+                    - Mask sensitive fields in logs
+                    - Never pass credentials as command arguments
+                </implementation>
+            </restriction>
+        </restrictions>
+
+        <audit>
+            <requirement>All hook executions logged to audit trail</requirement>
+            <requirement>Include user, timestamp, command, result</requirement>
+            <requirement>Retain logs for 90 days minimum</requirement>
+            <requirement>Alert on suspicious patterns</requirement>
+        </audit>
+    </security>
+
+    <implementation_guide>
+        <phase number="1">
+            <name>Core Infrastructure</name>
+            <tasks>
+                - Implement HookRegistry with configuration loading
+                - Create HookExecutor with timeout and isolation
+                - Build HookValidator for command validation
+                - Set up HookMonitor with metrics collection
+            </tasks>
+            <files>
+                - app/core/hooks/__init__.py
+                - app/core/hooks/registry.py
+                - app/core/hooks/executor.py
+                - app/core/hooks/validator.py
+                - app/core/hooks/monitor.py
+                - app/core/hooks/models.py
+            </files>
+        </phase>
+
+        <phase number="2">
+            <name>Event Integration</name>
+            <tasks>
+                - Integrate hooks with agent execution pipeline
+                - Add hooks to database operations
+                - Wire hooks into WebSocket handlers
+                - Connect hooks to API middleware
+            </tasks>
+            <files>
+                - app/agents/base_agent.py (add hook triggers)
+                - app/database/operations.py (add hook triggers)
+                - app/websocket/unified/manager.py (add hook triggers)
+                - app/core/middleware_setup.py (add hook middleware)
+            </files>
+        </phase>
+
+        <phase number="3">
+            <name>Default Hooks</name>
+            <tasks>
+                - Create validation hooks for agents
+                - Implement security hooks for API
+                - Build monitoring hooks for database
+                - Add compliance hooks for enterprise
+            </tasks>
+            <files>
+                - app/hooks/validators/agent_validator.py
+                - app/hooks/security/api_security.py
+                - app/hooks/monitoring/database_monitor.py
+                - app/hooks/compliance/enterprise_compliance.py
+            </files>
+        </phase>
+
+        <phase number="4">
+            <name>Testing and Documentation</name>
+            <tasks>
+                - Unit tests for all hook components
+                - Integration tests for event triggers
+                - E2E tests for critical paths
+                - Create developer documentation
+            </tasks>
+            <files>
+                - tests/unit/hooks/test_registry.py
+                - tests/unit/hooks/test_executor.py
+                - tests/integration/test_hook_events.py
+                - tests/e2e/test_hook_workflows.py
+                - docs/hooks/developer_guide.md
+            </files>
+        </phase>
+    </implementation_guide>
+
+    <testing_requirements>
+        <unit_tests>
+            <test>Hook configuration parsing and validation</test>
+            <test>Hook matcher pattern matching</test>
+            <test>Command execution with timeout</test>
+            <test>JSON input/output handling</test>
+            <test>Exit code interpretation</test>
+        </unit_tests>
+
+        <integration_tests>
+            <test>Hook triggers for each event type</test>
+            <test>Parallel hook execution</test>
+            <test>Hook blocking behavior</test>
+            <test>Configuration hierarchy loading</test>
+            <test>Resource limit enforcement</test>
+        </integration_tests>
+
+        <e2e_tests>
+            <test>Agent execution with validation hooks</test>
+            <test>Database write with compliance hooks</test>
+            <test>API request with security hooks</test>
+            <test>Error recovery with monitoring hooks</test>
+            <test>Deployment with notification hooks</test>
+        </e2e_tests>
+
+        <performance_tests>
+            <test>Hook execution under load (1000 req/s)</test>
+            <test>Timeout behavior with slow commands</test>
+            <test>Memory usage with concurrent hooks</test>
+            <test>Impact on request latency (&lt;5ms overhead)</test>
+        </performance_tests>
+    </testing_requirements>
+
+    <monitoring>
+        <metrics>
+            <metric name="hook_execution_duration">
+                <type>histogram</type>
+                <labels>event, matcher, status</labels>
+                <description>Time taken to execute hooks</description>
+            </metric>
+            <metric name="hook_execution_total">
+                <type>counter</type>
+                <labels>event, matcher, status</labels>
+                <description>Total number of hook executions</description>
+            </metric>
+            <metric name="hook_failures_total">
+                <type>counter</type>
+                <labels>event, matcher, error_type</labels>
+                <description>Total number of hook failures</description>
+            </metric>
+            <metric name="hook_blocked_operations">
+                <type>counter</type>
+                <labels>event, matcher, reason</labels>
+                <description>Operations blocked by hooks</description>
+            </metric>
+        </metrics>
+
+        <alerts>
+            <alert name="HookExecutionTimeout">
+                <condition>hook_execution_duration > 30s</condition>
+                <severity>warning</severity>
+            </alert>
+            <alert name="HookFailureRate">
+                <condition>rate(hook_failures_total) > 0.1</condition>
+                <severity>error</severity>
+            </alert>
+            <alert name="HookBlockingCriticalPath">
+                <condition>hook_blocked_operations{event="PreAgentExecution"} > 10/min</condition>
+                <severity>critical</severity>
+            </alert>
+        </alerts>
+    </monitoring>
+
+    <examples>
+        <example name="Agent Cost Control Hook">
+            <description>Prevent expensive agent operations</description>
+            <code language="python">
+#!/usr/bin/env python3
+import json
+import sys
+
+data = json.load(sys.stdin)
+agent_type = data.get("agent_type")
+parameters = data.get("parameters", {})
+
+# Check estimated cost
+estimated_tokens = parameters.get("estimated_tokens", 0)
+if agent_type == "gpt4" and estimated_tokens > 10000:
+    output = {
+        "decision": "block",
+        "reason": f"Operation would use {estimated_tokens} tokens. Requires approval for operations over 10k tokens."
+    }
+    print(json.dumps(output))
+    sys.exit(0)
+
+sys.exit(0)
+            </code>
+        </example>
+
+        <example name="Database Schema Validation">
+            <description>Validate data before writing to database</description>
+            <code language="python">
+#!/usr/bin/env python3
+import json
+import sys
+from jsonschema import validate, ValidationError
+
+data = json.load(sys.stdin)
+table = data.get("table")
+write_data = data.get("data")
+
+# Load schema for table
+schemas = {
+    "analytics_events": {
+        "type": "object",
+        "required": ["event_type", "timestamp", "user_id"],
+        "properties": {
+            "event_type": {"type": "string"},
+            "timestamp": {"type": "string", "format": "date-time"},
+            "user_id": {"type": "string"}
+        }
+    }
+}
+
+if table in schemas:
+    try:
+        validate(write_data, schemas[table])
+    except ValidationError as e:
+        print(f"Schema validation failed: {e.message}", file=sys.stderr)
+        sys.exit(2)  # Block the write
+
+sys.exit(0)
+            </code>
+        </example>
+
+        <example name="Deployment Safety Check">
+            <description>Run safety checks before deployment</description>
+            <code language="bash">
+#!/bin/bash
+# Check for pending migrations
+if [ -n "$(python manage.py showmigrations --plan | grep '\[ \]')" ]; then
+    echo "ERROR: Pending database migrations detected" >&2
+    exit 2
+fi
+
+# Check test coverage
+coverage=$(python -m pytest --cov --cov-report=term | grep TOTAL | awk '{print $4}' | sed 's/%//')
+if [ "$coverage" -lt "80" ]; then
+    echo "ERROR: Test coverage ${coverage}% is below 80% threshold" >&2
+    exit 2
+fi
+
+echo "Deployment safety checks passed"
+exit 0
+            </code>
+        </example>
+    </examples>
+
+    <best_practices>
+        <practice>Always validate hook inputs before processing</practice>
+        <practice>Use structured logging for debugging</practice>
+        <practice>Implement graceful degradation on hook failure</practice>
+        <practice>Cache hook results when appropriate</practice>
+        <practice>Use async execution for non-blocking hooks</practice>
+        <practice>Document hook purpose and requirements</practice>
+        <practice>Version control hook configurations</practice>
+        <practice>Test hooks in isolated environments first</practice>
+        <practice>Monitor hook performance impact</practice>
+        <practice>Implement circuit breakers for failing hooks</practice>
+    </best_practices>
+
+    <compliance_notes>
+        - Hooks must comply with SPEC/type_safety.xml
+        - Follow SPEC/conventions.xml for naming
+        - Adhere to SPEC/security.xml for sensitive operations
+        - Update SPEC/learnings/hooks.xml with insights
+        - Maintain backward compatibility for hook schemas
+    </compliance_notes>
+</specification>
