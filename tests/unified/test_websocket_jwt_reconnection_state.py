@@ -226,8 +226,6 @@ class TestWebSocketJWTReconnectionState:
     async def test_session_state_restoration_completeness(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 4: Complete session state restored after reconnection."""
         session_state = await jwt_reconnection_tester.setup_authenticated_session(enterprise_user_id)
-        
-        # Establish complex session state
         await jwt_reconnection_tester.simulate_session_activity(session_state)
         session_state.agent_context.update({
             "workspace": {"files": ["data.csv", "analysis.py"]},
@@ -235,60 +233,42 @@ class TestWebSocketJWTReconnectionState:
             "user_preferences": {"format": "detailed", "notifications": True}
         })
         
-        # Execute reconnection
         await jwt_reconnection_tester.execute_controlled_disconnection(session_state)
         metrics = await jwt_reconnection_tester.execute_jwt_reconnection(session_state)
         
-        # Verify complete state restoration
-        assert "workspace" in session_state.agent_context
-        assert "execution_state" in session_state.agent_context  
-        assert "user_preferences" in session_state.agent_context
-        assert metrics.state_restoration_time < 1.0  # State restoration under 1 second
+        assert all(key in session_state.agent_context for key in ["workspace", "execution_state", "user_preferences"])
+        assert metrics.state_restoration_time < 1.0
     
     async def test_performance_requirements_compliance(self, jwt_reconnection_tester, enterprise_user_id):
         """Test Case 5: Performance requirements met consistently."""
         performance_results = []
         
-        # Execute multiple reconnection cycles to test consistency
         for cycle in range(3):
-            session_state = await jwt_reconnection_tester.setup_authenticated_session(
-                f"{enterprise_user_id}_cycle_{cycle}"
-            )
-            
+            session_state = await jwt_reconnection_tester.setup_authenticated_session(f"{enterprise_user_id}_cycle_{cycle}")
             await jwt_reconnection_tester.simulate_session_activity(session_state)
             await jwt_reconnection_tester.execute_controlled_disconnection(session_state)
             metrics = await jwt_reconnection_tester.execute_jwt_reconnection(session_state)
-            
             performance_results.append(metrics.total_cycle_time)
         
-        # Verify all cycles meet performance requirements
-        max_time = max(performance_results)
-        avg_time = sum(performance_results) / len(performance_results)
-        
+        max_time, avg_time = max(performance_results), sum(performance_results) / len(performance_results)
         assert max_time < 2.0, f"Max reconnection time {max_time:.2f}s exceeds 2s requirement"
         assert avg_time < 1.5, f"Average reconnection time {avg_time:.2f}s exceeds 1.5s target"
     
     async def test_concurrent_reconnection_isolation(self, jwt_reconnection_tester):
         """Test Case 6: Concurrent user reconnections don't interfere."""
-        # Setup multiple user sessions
         user_sessions = []
         for i in range(2):
             user_id = f"{TEST_USERS['enterprise'].id}_concurrent_{i}"
             session_state = await jwt_reconnection_tester.setup_authenticated_session(user_id)
             user_sessions.append(session_state)
         
-        # Execute concurrent reconnections
-        reconnection_tasks = []
-        for session_state in user_sessions:
-            task = asyncio.create_task(self._execute_full_reconnection_cycle(
-                jwt_reconnection_tester, session_state
-            ))
-            reconnection_tasks.append(task)
+        reconnection_tasks = [
+            asyncio.create_task(self._execute_full_reconnection_cycle(jwt_reconnection_tester, session_state))
+            for session_state in user_sessions
+        ]
         
-        # Wait for all reconnections to complete
         results = await asyncio.gather(*reconnection_tasks, return_exceptions=True)
         
-        # Verify all reconnections successful and isolated
         for i, result in enumerate(results):
             assert not isinstance(result, Exception), f"Reconnection {i} failed: {result}"
             assert result["success"], f"Reconnection {i} unsuccessful"
