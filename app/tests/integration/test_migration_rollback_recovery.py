@@ -22,7 +22,7 @@ from unittest.mock import patch, AsyncMock
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 from app.db.base import Base
-from app.db.postgres_core import Database, AsyncDatabase
+from app.db.postgres_core import Database
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

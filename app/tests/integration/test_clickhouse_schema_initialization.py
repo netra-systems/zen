@@ -14,8 +14,9 @@ to ensure production-level schema consistency and version tracking.
 import pytest
 import asyncio
 import time
+import subprocess
+import os
 from typing import Dict, Any, List, Optional, Tuple
-from testcontainers.clickhouse import ClickHouseContainer
 from clickhouse_driver import Client
 import aiohttp
 from app.db.clickhouse_init import initialize_clickhouse_tables, verify_workload_events_table
@@ -35,17 +36,53 @@ class TestClickHouseSchemaInitialization:
 
     @pytest.fixture(scope="function")
     def clickhouse_container(self):
-        """Create real ClickHouse container for L3 testing."""
-        with ClickHouseContainer("clickhouse/clickhouse-server:23.3") as clickhouse:
+        """Create real ClickHouse container for L3 testing using Docker CLI."""
+        container_name = f"test_clickhouse_{os.getpid()}_{id(self)}"
+        
+        try:
+            # Start ClickHouse container
+            subprocess.run([
+                "docker", "run", "-d", "--name", container_name,
+                "-p", "0:8123",  # HTTP interface
+                "-p", "0:9000",  # Native interface
+                "--ulimit", "nofile=262144:262144",
+                "clickhouse/clickhouse-server:23.3"
+            ], check=True, capture_output=True)
+            
+            # Get assigned ports
+            http_port_result = subprocess.run([
+                "docker", "port", container_name, "8123"
+            ], capture_output=True, text=True, check=True)
+            
+            native_port_result = subprocess.run([
+                "docker", "port", container_name, "9000"  
+            ], capture_output=True, text=True, check=True)
+            
+            http_port = int(http_port_result.stdout.strip().split(':')[1])
+            native_port = int(native_port_result.stdout.strip().split(':')[1])
+            
             # Wait for ClickHouse to be ready
-            self._wait_for_clickhouse_ready(clickhouse)
-            yield clickhouse
+            self._wait_for_clickhouse_ready(container_name, native_port)
+            
+            yield {
+                "container_name": container_name,
+                "host": "localhost",
+                "http_port": http_port,
+                "native_port": native_port
+            }
+            
+        finally:
+            # Cleanup container
+            subprocess.run(["docker", "rm", "-f", container_name], capture_output=True)
 
-    @pytest.fixture
+    @pytest.fixture  
     def schema_config(self, clickhouse_container):
         """Configuration for schema initialization testing."""
+        ch = clickhouse_container
         return {
-            "clickhouse_url": f"http://{clickhouse_container.get_container_host_ip()}:{clickhouse_container.get_exposed_port(8123)}",
+            "clickhouse_url": f"http://{ch['host']}:{ch['http_port']}",
+            "host": ch["host"],
+            "native_port": ch["native_port"],
             "database": "default",
             "timeout_seconds": 30,
             "expected_tables": [
@@ -136,24 +173,20 @@ class TestClickHouseSchemaInitialization:
 
     # Helper methods (each under 25 lines)
 
-    def _wait_for_clickhouse_ready(self, container) -> None:
+    def _wait_for_clickhouse_ready(self, container_name: str, native_port: int, max_wait: int = 60) -> None:
         """Wait for ClickHouse container to be ready."""
-        max_wait = 60
         start_time = time.time()
         
         while time.time() - start_time < max_wait:
             try:
-                host = container.get_container_host_ip()
-                port = container.get_exposed_port(8123)
-                
-                # Try to connect
-                client = Client(host=host, port=port)
+                # Try to connect using native client
+                client = Client(host="localhost", port=native_port)
                 client.execute("SELECT 1")
                 return
             except Exception:
                 time.sleep(2)
         
-        raise TimeoutError("ClickHouse container did not become ready")
+        raise TimeoutError(f"ClickHouse container {container_name} did not become ready within {max_wait}s")
 
     async def _perform_schema_initialization(self, config: Dict[str, Any]) -> bool:
         """Perform ClickHouse schema initialization."""
@@ -373,24 +406,16 @@ class TestClickHouseSchemaInitialization:
 
     def _get_clickhouse_client(self, config: Dict[str, Any]) -> Client:
         """Get ClickHouse client for testing."""
-        url_parts = config["clickhouse_url"].replace("http://", "").split(":")
-        host = url_parts[0]
-        port = int(url_parts[1])
-        return Client(host=host, port=port)
+        return Client(host=config["host"], port=config["native_port"])
 
     def _mock_clickhouse_settings(self, config: Dict[str, Any]):
         """Mock ClickHouse settings to point to test container."""
         from unittest.mock import patch
         
-        # Extract host and port from URL
-        url_parts = config["clickhouse_url"].replace("http://", "").split(":")
-        host = url_parts[0]
-        port = int(url_parts[1])
-        
         return patch.multiple(
             'app.config.settings',
-            clickhouse_host=host,
-            clickhouse_port=port,
+            clickhouse_host=config["host"],
+            clickhouse_port=config["native_port"],
             clickhouse_url=config["clickhouse_url"],
             environment="testing"
         )

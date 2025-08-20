@@ -121,15 +121,23 @@ class BusinessValueTestIndexer:
         # Focus on specific test directories
         test_dirs = ['app/tests', 'tests', 'test_framework', 'dev_launcher/tests']
         test_count = 0
-        max_tests = 5000  # Increased limit to catch all e2e tests
+        max_tests = 10000  # Increased limit to catch all tests
+        scanned_files = set()  # Track already scanned files
         
-        # First, prioritize e2e tests to ensure they're counted
-        e2e_dir = self.project_root / 'tests' / 'unified' / 'e2e'
-        if e2e_dir.exists():
-            for test_file in e2e_dir.glob('test_*.py'):
-                if 'node_modules' not in str(test_file) and '.venv' not in str(test_file):
-                    self._scan_python_test(test_file)
-                    test_count += 1
+        # First, prioritize ALL e2e test directories to ensure they're counted
+        e2e_dirs = [
+            self.project_root / 'tests' / 'unified' / 'e2e',
+            self.project_root / 'tests' / 'e2e'
+        ]
+        
+        for e2e_dir in e2e_dirs:
+            if e2e_dir.exists():
+                for test_file in e2e_dir.glob('**/*.py'):
+                    if test_file.name.startswith('test_'):
+                        if str(test_file) not in scanned_files:
+                            self._scan_python_test(test_file)
+                            scanned_files.add(str(test_file))
+                            test_count += 1
         
         # Then scan other directories
         for test_dir in test_dirs:
@@ -142,9 +150,10 @@ class BusinessValueTestIndexer:
                     break
                 if test_file.name.startswith('test_') or test_file.name.endswith('_test.py'):
                     if 'node_modules' not in str(test_file) and '.venv' not in str(test_file):
-                        # Skip if already scanned (e2e tests)
-                        if '/e2e/' not in str(test_file) and '\\e2e\\' not in str(test_file):
+                        # Skip if already scanned
+                        if str(test_file) not in scanned_files:
                             self._scan_python_test(test_file)
+                            scanned_files.add(str(test_file))
                             test_count += 1
         
         # Also scan frontend tests if they exist (limited)
@@ -271,28 +280,50 @@ class BusinessValueTestIndexer:
             print(f"Error scanning {file_path}: {e}")
 
     def _determine_test_type(self, name: str, decorators: List[str], content: str) -> str:
-        """Determine the type of test"""
+        """Determine the type of test based on testing.xml categorization"""
         name_lower = name.lower()
         content_lower = content.lower()
         
-        # Check file path for e2e directory - highest priority
+        # Check file path for test type directories - highest priority
         if hasattr(self, '_current_file_path'):
             file_path = str(self._current_file_path).replace('\\', '/')
-            if '/e2e/' in file_path:
+            
+            # E2E tests (L4 realism level)
+            if any(marker in file_path for marker in ['/e2e/', '/tests/e2e/', '/tests/unified/e2e/']):
                 return 'e2e'
-            if 'tests/unified/e2e' in file_path:
-                return 'e2e'
+            
+            # Integration tests (L2-L3 realism level)
+            if any(marker in file_path for marker in ['/integration/', '/tests/integration/', 
+                                                       '/app/tests/integration/']):
+                return 'integration'
+            
+            # Unit tests (L1 realism level)
+            if any(marker in file_path for marker in ['/unit/', '/tests/unit/']):
+                return 'unit'
         
+        # Check decorators and test patterns
         for test_type, pattern in self.test_patterns.items():
             if re.search(pattern, name_lower) or re.search(pattern, ' '.join(decorators).lower()):
                 return test_type
-                
-        # Default classification based on content
-        if 'mock' in content_lower and 'real' not in content_lower:
-            return 'unit'
-        elif any(service in content_lower for service in ['redis', 'postgres', 'clickhouse']):
+        
+        # Content-based classification following testing.xml spectrum levels
+        # L3-L4: Real services (integration/e2e)
+        if any(service in content_lower for service in ['testcontainers', 'docker', 'compose',
+                                                         'real_websocket', 'staging', 'localhost:']):
+            return 'integration' if 'integration' in name_lower else 'e2e'
+        
+        # L2: Real internal dependencies
+        elif any(service in content_lower for service in ['redis', 'postgres', 'clickhouse', 
+                                                           'websocket', 'database']):
             return 'integration'
+        
+        # L1: Mocked dependencies
+        elif 'mock' in content_lower or '@patch' in content_lower:
+            return 'unit'
+        
+        # Default based on file location patterns
         else:
+            # If it's in a test directory but not categorized, assume unit test
             return 'unit'
 
     def _determine_component(self, file_path: str, name: str, content: str) -> str:

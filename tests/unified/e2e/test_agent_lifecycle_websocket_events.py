@@ -334,7 +334,7 @@ class AgentLifecycleEventTestCore:
     def _create_test_token(self, user_id: str) -> str:
         """Create test JWT token."""
         try:
-            from app.auth.auth import create_access_token
+            from app.auth_integration.auth import create_access_token
             return create_access_token(data={"sub": f"test-{user_id}"})
         except ImportError:
             return f"mock-token-{user_id}"

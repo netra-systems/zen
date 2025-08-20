@@ -374,3 +374,36 @@ def get_performance_metrics(metrics_request: dict) -> dict:
             "completion_rate": "stable"
         }
     }
+
+def search_messages_in_thread(thread_id: str, search_query: dict) -> dict:
+    """Search messages within a specific thread - placeholder implementation"""
+    return {
+        "messages": [
+            {
+                "id": "msg123",
+                "content": f"This message contains the search query: {search_query.get('query', '')}",
+                "sender": "user",
+                "timestamp": "2024-01-15T10:30:00Z",
+                "relevance_score": 0.95
+            },
+            {
+                "id": "msg124", 
+                "content": f"Another message matching: {search_query.get('query', '')}",
+                "sender": "assistant",
+                "timestamp": "2024-01-16T11:15:00Z",
+                "relevance_score": 0.87
+            }
+        ],
+        "total_matches": 2,
+        "query": search_query.get("query", "")
+    }
+
+def add_message_reaction(message_id: str, reaction_type: str, user_id: str) -> dict:
+    """Add a reaction to a message - placeholder implementation"""
+    from datetime import datetime
+    return {
+        "message_id": message_id,
+        "reaction_type": reaction_type,
+        "user_id": user_id,
+        "added_at": datetime.now().isoformat()
+    }

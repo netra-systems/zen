@@ -272,105 +272,107 @@ class TestColdStartToAgentResponse:
         """Test complete cold start to first agent response flow."""
         start_time = time.time()
         step_times = {}
-        
         try:
-            # Step 1: Cold Start Initialization
-            step_start = time.time()
-            startup_success = await self.service_manager.start_services()
-            step_times["cold_start"] = time.time() - step_start
-            
-            assert startup_success, "Mock services failed to start from cold state"
-            
-            # Step 2: Authentication Flow
-            step_start = time.time()
-            auth_result = await self.authenticator.authenticate_user()
-            step_times["authentication"] = time.time() - step_start
-            
-            assert auth_result["success"], "Authentication flow failed"
-            
-            # Step 3: WebSocket Connection
-            step_start = time.time()
-            websocket_tester = WebSocketTester(auth_result["token"])
-            connection_success = await websocket_tester.establish_connection()
-            step_times["websocket_connection"] = time.time() - step_start
-            
-            assert connection_success, "WebSocket connection failed"
-            
-            # Step 4: Agent Interaction
-            step_start = time.time()
-            message_content = "Hello, I'm a new user. Can you help me optimize my AI workloads?"
-            response_received = await websocket_tester.send_agent_message(message_content)
-            step_times["agent_interaction"] = time.time() - step_start
-            
-            assert response_received, "Agent response not received within timeout"
-            
-            # Step 5: State Verification
-            step_start = time.time()
-            session_verification = await self.state_verifier.verify_session_state("cold_start_test_user")
-            thread_verification = await self.state_verifier.verify_thread_creation("cold_start_test_thread")
-            metrics_verification = await self.state_verifier.verify_metrics_collection()
-            step_times["state_verification"] = time.time() - step_start
-            
-            # Verify all state checks passed
-            assert session_verification["session_exists"], "Session state not persisted"
-            assert thread_verification["thread_exists"], "Thread not created in database"
-            assert metrics_verification["response_time_recorded"], "Metrics not collected"
-            
-            # Step 6: Response Quality Validation
-            step_start = time.time()
-            if websocket_tester.messages_received:
-                last_message = websocket_tester.messages_received[-1]
-                response_content = last_message.get("payload", {}).get("content", "")
-                quality_result = await self.quality_validator.validate_response_quality(
-                    response_content, expected_quality="good"
-                )
-                step_times["quality_validation"] = time.time() - step_start
-                
-                assert quality_result["passed"], f"Response quality below threshold: {quality_result}"
-            
-            # Final verification
-            total_time = time.time() - start_time
-            
-            # Performance assertions
-            assert total_time < 60.0, f"Total flow took too long: {total_time}s"
-            assert step_times["cold_start"] < 30.0, f"Cold start too slow: {step_times['cold_start']}s"
-            assert step_times["agent_interaction"] < 30.0, f"Agent response too slow: {step_times['agent_interaction']}s"
-            
-            # Success result
-            test_result = ColdStartTestResult(
-                success=True,
-                total_time=total_time,
-                step_times=step_times,
-                error_message=None,
-                response_received=response_received,
-                final_state={
-                    "session": session_verification,
-                    "thread": thread_verification,
-                    "metrics": metrics_verification
-                }
-            )
-            
-            print(f"[SUCCESS] Cold start to agent response test completed successfully in {total_time:.2f}s")
-            print(f"  - Cold start: {step_times['cold_start']:.2f}s")
-            print(f"  - Authentication: {step_times['authentication']:.2f}s")
-            print(f"  - WebSocket: {step_times['websocket_connection']:.2f}s")
-            print(f"  - Agent response: {step_times['agent_interaction']:.2f}s")
-            
-            # Cleanup WebSocket
-            await websocket_tester.cleanup()
-            
+            await self._execute_cold_start_workflow(step_times)
+            await self._validate_final_results(start_time, step_times)
         except Exception as e:
-            test_result = ColdStartTestResult(
-                success=False,
-                total_time=time.time() - start_time,
-                step_times=step_times,
-                error_message=str(e),
-                response_received=False,
-                final_state={}
-            )
-            
-            print(f"[FAILED] Cold start test failed: {e}")
-            raise
+            await self._handle_test_failure(e, start_time, step_times)
+    
+    async def _execute_cold_start_workflow(self, step_times: Dict[str, float]) -> Dict[str, Any]:
+        """Execute the main cold start workflow steps."""
+        startup_success = await self._step_1_cold_start_initialization(step_times)
+        auth_result = await self._step_2_authentication_flow(step_times)
+        websocket_tester = await self._step_3_websocket_connection(step_times, auth_result)
+        response_received = await self._step_4_agent_interaction(step_times, websocket_tester)
+        verification_results = await self._step_5_state_verification(step_times)
+        await self._step_6_quality_validation(step_times, websocket_tester)
+        await websocket_tester.cleanup()
+        return {"response_received": response_received, "verification": verification_results}
+    
+    async def _step_1_cold_start_initialization(self, step_times: Dict[str, float]) -> bool:
+        """Execute Step 1: Cold Start Initialization."""
+        step_start = time.time()
+        startup_success = await self.service_manager.start_services()
+        step_times["cold_start"] = time.time() - step_start
+        assert startup_success, "Mock services failed to start from cold state"
+        return startup_success
+    
+    async def _step_2_authentication_flow(self, step_times: Dict[str, float]) -> Dict[str, Any]:
+        """Execute Step 2: Authentication Flow."""
+        step_start = time.time()
+        auth_result = await self.authenticator.authenticate_user()
+        step_times["authentication"] = time.time() - step_start
+        assert auth_result["success"], "Authentication flow failed"
+        return auth_result
+    
+    async def _step_3_websocket_connection(self, step_times: Dict[str, float], auth_result: Dict[str, Any]):
+        """Execute Step 3: WebSocket Connection."""
+        step_start = time.time()
+        websocket_tester = WebSocketTester(auth_result["token"])
+        connection_success = await websocket_tester.establish_connection()
+        step_times["websocket_connection"] = time.time() - step_start
+        assert connection_success, "WebSocket connection failed"
+        return websocket_tester
+    
+    async def _step_4_agent_interaction(self, step_times: Dict[str, float], websocket_tester) -> bool:
+        """Execute Step 4: Agent Interaction."""
+        step_start = time.time()
+        message_content = "Hello, I'm a new user. Can you help me optimize my AI workloads?"
+        response_received = await websocket_tester.send_agent_message(message_content)
+        step_times["agent_interaction"] = time.time() - step_start
+        assert response_received, "Agent response not received within timeout"
+        return response_received
+    
+    async def _step_5_state_verification(self, step_times: Dict[str, float]) -> Dict[str, Any]:
+        """Execute Step 5: State Verification."""
+        step_start = time.time()
+        session_verification = await self.state_verifier.verify_session_state("cold_start_test_user")
+        thread_verification = await self.state_verifier.verify_thread_creation("cold_start_test_thread")
+        metrics_verification = await self.state_verifier.verify_metrics_collection()
+        step_times["state_verification"] = time.time() - step_start
+        self._assert_state_verifications(session_verification, thread_verification, metrics_verification)
+        return {"session": session_verification, "thread": thread_verification, "metrics": metrics_verification}
+    
+    def _assert_state_verifications(self, session_verification, thread_verification, metrics_verification):
+        """Assert all state verification checks passed."""
+        assert session_verification["session_exists"], "Session state not persisted"
+        assert thread_verification["thread_exists"], "Thread not created in database"
+        assert metrics_verification["response_time_recorded"], "Metrics not collected"
+    
+    async def _step_6_quality_validation(self, step_times: Dict[str, float], websocket_tester):
+        """Execute Step 6: Response Quality Validation."""
+        step_start = time.time()
+        if websocket_tester.messages_received:
+            last_message = websocket_tester.messages_received[-1]
+            response_content = last_message.get("payload", {}).get("content", "")
+            quality_result = await self.quality_validator.validate_response_quality(response_content, expected_quality="good")
+            step_times["quality_validation"] = time.time() - step_start
+            assert quality_result["passed"], f"Response quality below threshold: {quality_result}"
+    
+    async def _validate_final_results(self, start_time: float, step_times: Dict[str, float]):
+        """Validate final test results and performance."""
+        total_time = time.time() - start_time
+        assert total_time < 60.0, f"Total flow took too long: {total_time}s"
+        assert step_times["cold_start"] < 30.0, f"Cold start too slow: {step_times['cold_start']}s"
+        assert step_times["agent_interaction"] < 30.0, f"Agent response too slow: {step_times['agent_interaction']}s"
+        self._print_success_summary(total_time, step_times)
+    
+    def _print_success_summary(self, total_time: float, step_times: Dict[str, float]):
+        """Print success summary with timing details."""
+        print(f"[SUCCESS] Cold start to agent response test completed successfully in {total_time:.2f}s")
+        print(f"  - Cold start: {step_times['cold_start']:.2f}s")
+        print(f"  - Authentication: {step_times['authentication']:.2f}s")
+        print(f"  - WebSocket: {step_times['websocket_connection']:.2f}s")
+        print(f"  - Agent response: {step_times['agent_interaction']:.2f}s")
+    
+    async def _handle_test_failure(self, e: Exception, start_time: float, step_times: Dict[str, float]):
+        """Handle test failure and create failure result."""
+        test_result = ColdStartTestResult(
+            success=False, total_time=time.time() - start_time, step_times=step_times,
+            error_message=str(e), response_received=False, final_state={}
+        )
+        print(f"[FAILED] Cold start test failed: {e}")
+        raise
     
     async def test_cold_start_error_recovery(self):
         """Test error recovery during cold start flow."""

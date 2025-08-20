@@ -344,47 +344,39 @@ class TestAuthTokenCacheE2E:
     async def test_e2e_complete_in_under_10_seconds(self, auth_client, mock_auth_service, test_tokens):
         """Test that entire E2E test completes in under 10 seconds."""
         start_time = time.time()
-        
-        # Set up responses first
-        for i, token in enumerate(test_tokens[:3]):
+        self._setup_mock_responses(mock_auth_service, test_tokens[:3])
+        results = await self._execute_cache_validation_sequence(auth_client, test_tokens)
+        total_time = time.time() - start_time
+        assert total_time < 10.0
+        self._validate_e2e_results(results, mock_auth_service)
+    
+    def _setup_mock_responses(self, mock_auth_service, tokens):
+        """Set up mock auth service responses for test tokens."""
+        for i, token in enumerate(tokens):
             mock_auth_service.set_response(token, {
-                "valid": True,
-                "user_id": f"user-{i}",
-                "email": f"user{i}@example.com",
-                "permissions": ["read"]
+                "valid": True, "user_id": f"user-{i}",
+                "email": f"user{i}@example.com", "permissions": ["read"]
             })
-        
-        # Perform operations sequentially to test cache behavior properly
+    
+    async def _execute_cache_validation_sequence(self, auth_client, test_tokens):
+        """Execute sequence of token validations to test cache behavior."""
         results = []
-        
         # Initial validations (cache misses)
-        results.append(await auth_client.validate_token(test_tokens[0]))
-        results.append(await auth_client.validate_token(test_tokens[1]))
-        results.append(await auth_client.validate_token(test_tokens[2]))
-        
+        for token in test_tokens[:3]:
+            results.append(await auth_client.validate_token(token))
         # Repeat validations (cache hits)
-        results.append(await auth_client.validate_token(test_tokens[0]))
-        results.append(await auth_client.validate_token(test_tokens[1]))
-        results.append(await auth_client.validate_token(test_tokens[2]))
-        
+        for token in test_tokens[:3]:
+            results.append(await auth_client.validate_token(token))
         # Additional cache hits
         results.append(await auth_client.validate_token(test_tokens[0]))
         results.append(await auth_client.validate_token(test_tokens[1]))
-        
-        end_time = time.time()
-        total_time = end_time - start_time
-        
-        # Should complete in under 10 seconds
-        assert total_time < 10.0
-        
-        # Verify results are valid
+        return results
+    
+    def _validate_e2e_results(self, results, mock_auth_service):
+        """Validate E2E test results and cache behavior."""
         for result in results:
             assert result is not None
             assert result.get("valid") is True
-        
-        # Auth service should be called fewer times than total operations due to caching
-        # 8 operations, but only 3 unique tokens, so significant cache benefit expected
-        # Sequential operations should show clear cache benefit
         total_operations = len(results)
-        assert mock_auth_service.call_count < total_operations  # Must be fewer than total operations
+        assert mock_auth_service.call_count < total_operations  # Cache benefit expected
         assert mock_auth_service.call_count >= 3  # At least once per unique token

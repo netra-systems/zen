@@ -24,7 +24,7 @@ class TestSupervisorAgentInitializationChain:
     @pytest.fixture
     async def mock_dependencies(self):
         """Create mock dependencies for supervisor."""
-        @mock_justified("L2: Mocking external deps for supervisor chain testing")
+        # Mocking external deps for supervisor chain testing (L2)
         deps = {
             "llm_manager": Mock(generate_response=AsyncMock(return_value="Response")),
             "tool_dispatcher": Mock(dispatch=AsyncMock(return_value={"status": "ok"})),

@@ -320,7 +320,7 @@ class WebSocketEventCompletenessTestCore:
         """Create test JWT token with proper authentication"""
         try:
             # Try to create real JWT token first
-            from app.auth.auth import create_access_token
+            from app.auth_integration.auth import create_access_token
             token_data = {"sub": user_id, "user_id": user_id, "email": f"{user_id}@test.com"}
             return create_access_token(data=token_data)
         except (ImportError, Exception) as e:

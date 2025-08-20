@@ -5,7 +5,7 @@ from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, Query, Depends
 
 # Import auth functions (will need to be uncommented when auth is configured)
-# from app.auth.enhanced_auth_security import get_current_user, require_admin
+# from app.auth_integration.enhanced_auth_security import get_current_user, require_admin
 
 from .dashboard_routes import (
     get_dashboard_handler, get_current_metrics_handler, 

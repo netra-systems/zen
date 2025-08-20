@@ -24,10 +24,16 @@ logger = central_logger.get_logger(__name__)
 health_interface = HealthInterface("netra-ai-platform", "1.0.0")
 response_builder = HealthResponseBuilder("netra-ai-platform", "1.0.0")
 
-# Register health checkers
-health_interface.register_checker(DatabaseHealthChecker("postgres"))
-health_interface.register_checker(DatabaseHealthChecker("clickhouse"))
-health_interface.register_checker(DatabaseHealthChecker("redis"))
+# Register health checkers - using simple names for critical component matching
+class SimpleNameDatabaseHealthChecker(DatabaseHealthChecker):
+    """Database health checker with simple naming for critical component matching."""
+    def __init__(self, db_type: str, timeout: float = 5.0):
+        super().__init__(db_type, timeout)
+        self.name = db_type  # Override to use simple name instead of "database_{db_type}"
+
+health_interface.register_checker(SimpleNameDatabaseHealthChecker("postgres"))
+health_interface.register_checker(SimpleNameDatabaseHealthChecker("clickhouse"))
+health_interface.register_checker(SimpleNameDatabaseHealthChecker("redis"))
 health_interface.register_checker(DependencyHealthChecker("websocket"))
 health_interface.register_checker(DependencyHealthChecker("llm"))
 

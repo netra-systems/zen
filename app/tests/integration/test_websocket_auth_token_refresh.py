@@ -50,7 +50,7 @@ class TestWebSocketAuthTokenRefresh:
             "exp": (datetime.now(timezone.utc) + timedelta(minutes=5)).timestamp()
         }
         
-        @mock_justified("L2: Mocking JWT for expiry testing")
+        # Mock JWT for expiry testing (L2)
         near_expiry_token = jwt.encode(near_expiry_payload, "secret", algorithm="HS256")
         
         # Check if refresh needed (threshold: 10 minutes)

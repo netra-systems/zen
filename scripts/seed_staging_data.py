@@ -29,7 +29,7 @@ from app.services.database.user_repository import UserRepository
 from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.services.database.optimization_repository import OptimizationRepository
-from app.auth.auth_utils import get_password_hash
+from app.auth_integration.auth_utils import get_password_hash
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.asyncio import AsyncSession
 

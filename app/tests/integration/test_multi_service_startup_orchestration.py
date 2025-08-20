@@ -15,12 +15,11 @@ import pytest
 import asyncio
 import time
 import subprocess
+import os
+import tempfile
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 from unittest.mock import patch, AsyncMock
-from testcontainers.compose import DockerCompose
-from testcontainers.postgres import PostgresContainer
-from testcontainers.redis import RedisContainer
 import aiohttp
 import yaml
 from app.logging_config import central_logger
@@ -35,11 +34,34 @@ class TestMultiServiceStartupOrchestration:
     @pytest.fixture(scope="function")
     def service_containers(self):
         """Create multi-service environment with Docker Compose."""
-        compose_config = self._create_compose_config()
-        with DockerCompose(".", compose_file_name="test-compose.yml") as compose:
+        test_id = f"test_{os.getpid()}_{id(self)}"
+        compose_file = self._create_compose_config(test_id)
+        
+        try:
+            # Start services with Docker Compose
+            subprocess.run([
+                "docker-compose", "-f", compose_file, "-p", test_id, "up", "-d"
+            ], check=True, capture_output=True)
+            
             # Wait for services to be ready
-            self._wait_for_services_ready(compose)
-            yield compose
+            self._wait_for_services_ready(test_id)
+            
+            yield {
+                "project_name": test_id,
+                "compose_file": compose_file
+            }
+            
+        finally:
+            # Cleanup services
+            subprocess.run([
+                "docker-compose", "-f", compose_file, "-p", test_id, "down", "-v"
+            ], capture_output=True)
+            
+            # Remove compose file
+            try:
+                os.unlink(compose_file)
+            except FileNotFoundError:
+                pass
 
     @pytest.fixture
     def orchestration_config(self, service_containers):
@@ -142,72 +164,103 @@ class TestMultiServiceStartupOrchestration:
 
     # Helper methods (each under 25 lines)
 
-    def _create_compose_config(self) -> str:
+    def _create_compose_config(self, test_id: str) -> str:
         """Create Docker Compose configuration for testing."""
         compose_content = {
             "version": "3.8",
-            "services": {
-                "postgres": {
-                    "image": "postgres:15",
-                    "environment": {
-                        "POSTGRES_DB": "netra_test",
-                        "POSTGRES_USER": "test",
-                        "POSTGRES_PASSWORD": "test"
-                    },
-                    "ports": ["5432:5432"],
-                    "healthcheck": {
-                        "test": ["CMD-SHELL", "pg_isready -U test"],
-                        "interval": "5s",
-                        "timeout": "3s",
-                        "retries": 3
-                    }
-                },
-                "redis": {
-                    "image": "redis:7-alpine",
-                    "ports": ["6379:6379"],
-                    "healthcheck": {
-                        "test": ["CMD", "redis-cli", "ping"],
-                        "interval": "5s",
-                        "timeout": "3s",
-                        "retries": 3
-                    }
-                },
-                "auth_service": {
-                    "image": "python:3.11-slim",
-                    "command": ["python", "-m", "http.server", "8001"],
-                    "ports": ["8001:8001"],
-                    "healthcheck": {
-                        "test": ["CMD", "curl", "-f", "http://localhost:8001"],
-                        "interval": "5s",
-                        "timeout": "3s",
-                        "retries": 3
-                    }
-                }
-            }
+            "services": self._get_compose_services()
         }
         
-        # Write compose file
-        with open("test-compose.yml", "w") as f:
+        # Write compose file with unique name
+        compose_file = f"test-compose-{test_id}.yml"
+        with open(compose_file, "w") as f:
             yaml.dump(compose_content, f)
-        return "test-compose.yml"
+        return compose_file
 
-    def _wait_for_services_ready(self, compose) -> None:
+    def _get_compose_services(self) -> Dict[str, Any]:
+        """Get compose service definitions."""
+        return {
+            "postgres": self._get_postgres_service_config(),
+            "redis": self._get_redis_service_config(),
+            "auth_service": self._get_auth_service_config()
+        }
+
+    def _get_postgres_service_config(self) -> Dict[str, Any]:
+        """Get PostgreSQL service configuration."""
+        return {
+            "image": "postgres:15",
+            "environment": {
+                "POSTGRES_DB": "netra_test",
+                "POSTGRES_USER": "test", 
+                "POSTGRES_PASSWORD": "test"
+            },
+            "ports": ["0:5432"],
+            "healthcheck": {
+                "test": ["CMD-SHELL", "pg_isready -U test"],
+                "interval": "5s", "timeout": "3s", "retries": 3
+            }
+        }
+
+    def _get_redis_service_config(self) -> Dict[str, Any]:
+        """Get Redis service configuration."""
+        return {
+            "image": "redis:7-alpine",
+            "ports": ["0:6379"],
+            "healthcheck": {
+                "test": ["CMD", "redis-cli", "ping"],
+                "interval": "5s", "timeout": "3s", "retries": 3
+            }
+        }
+
+    def _get_auth_service_config(self) -> Dict[str, Any]:
+        """Get auth service configuration."""
+        return {
+            "image": "nginx:alpine",
+            "ports": ["0:80"],
+            "healthcheck": {
+                "test": ["CMD", "curl", "-f", "http://localhost/"],
+                "interval": "5s", "timeout": "3s", "retries": 3
+            }
+        }
+
+    def _wait_for_services_ready(self, project_name: str) -> None:
         """Wait for all services to be ready."""
         max_wait = 60
         start_time = time.time()
         
         while time.time() - start_time < max_wait:
-            if self._check_all_services_healthy(compose):
+            if self._check_all_services_healthy(project_name):
                 return
             time.sleep(2)
         
         raise TimeoutError("Services did not become ready within timeout")
 
-    def _check_all_services_healthy(self, compose) -> bool:
+    def _check_all_services_healthy(self, project_name: str) -> bool:
         """Check if all services are healthy."""
         try:
-            # This is a simplified check - in real implementation would use Docker API
-            return True  # Placeholder for actual health checks
+            # Check if all containers are running and healthy
+            result = subprocess.run([
+                "docker-compose", "-p", project_name, "ps", "-q"
+            ], capture_output=True, text=True, check=True)
+            
+            container_ids = result.stdout.strip().split('\n')
+            if not container_ids or container_ids == ['']:
+                return False
+            
+            # Check each container health
+            for container_id in container_ids:
+                if not container_id:
+                    continue
+                    
+                inspect_result = subprocess.run([
+                    "docker", "inspect", "--format", "{{.State.Health.Status}}", container_id
+                ], capture_output=True, text=True)
+                
+                health_status = inspect_result.stdout.strip()
+                if health_status not in ["healthy", ""]:  # Empty means no healthcheck
+                    return False
+            
+            return True
         except Exception:
             return False
 

@@ -31,15 +31,25 @@ class RealWebSocketClient:
             if headers:
                 self._auth_headers = headers
             
-            # Try to establish connection
+            # Try to establish connection - append token to URL if provided
+            url = self.url
+            if headers and "Authorization" in headers:
+                token = headers["Authorization"].replace("Bearer ", "")
+                separator = "&" if "?" in url else "?"
+                url = f"{url}{separator}token={token}"
+            
             self._websocket = await asyncio.wait_for(
-                websockets.connect(self.url, extra_headers=headers or {}),
+                websockets.connect(url),
                 timeout=self.config.timeout
             )
             self.state = ConnectionState.CONNECTED
             return True
             
         except (ConnectionClosedError, asyncio.TimeoutError, OSError) as e:
+            self.state = ConnectionState.DISCONNECTED
+            return False
+        except Exception as e:
+            # Handle other WebSocket errors (like 403 Forbidden)
             self.state = ConnectionState.DISCONNECTED
             return False
     
@@ -68,6 +78,18 @@ class RealWebSocketClient:
             return json.loads(message_str)
         except (ConnectionClosedError, asyncio.TimeoutError, json.JSONDecodeError, OSError):
             return None
+    
+    async def send_message(self, message: str) -> bool:
+        """Send string message to WebSocket server."""
+        if not self._websocket or self.state != ConnectionState.CONNECTED:
+            return False
+        
+        try:
+            await self._websocket.send(message)
+            return True
+        except (ConnectionClosedError, OSError):
+            self.state = ConnectionState.DISCONNECTED
+            return False
     
     async def close(self):
         """Close WebSocket connection."""

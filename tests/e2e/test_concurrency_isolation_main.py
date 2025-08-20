@@ -21,23 +21,39 @@ import pytest
 import asyncio
 import time
 import logging
-import random
 from typing import Dict, Any, List
 
 from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from tests.e2e.test_helpers.concurrency_base import (
+    ConcurrencyTestBase, ConcurrencyTestConfig, StressTestGenerator, PerformanceAnalyzer
+)
+from tests.e2e.fixtures.concurrency_scenarios import (
+    ConcurrencyScenarioRunner, get_load_levels_for_scaling
+)
+from tests.e2e.test_helpers.performance_testing import (
+    PerformanceTestOrchestrator, StressTestOrchestrator, ResourceMonitoringHelper,
+    TestResultValidator, create_session_result_converter
+)
 
 logger = logging.getLogger(__name__)
 
-CONCURRENCY_CONFIG = {
-    "max_concurrent_users": 100,
-    "test_duration": 120,        # 2 minutes
-    "stress_test_duration": 300, # 5 minutes  
-    "p95_response_time_ms": 2000,
-    "availability_target": 0.999  # 99.9%
-}
 
 class TestConcurrencyIsolationIntegration:
     """Integration tests for concurrency and isolation system"""
+    
+    def setup_method(self):
+        """Setup test fixtures"""
+        self.config = ConcurrencyTestConfig()
+        self.base = ConcurrencyTestBase(self.config)
+        self.scenario_runner = ConcurrencyScenarioRunner(self.config)
+        self._setup_orchestrators()
+        self.result_validator = TestResultValidator(self.config)
+        self.convert_session_result = create_session_result_converter()
+    
+    def _setup_orchestrators(self):
+        """Setup performance and stress test orchestrators"""
+        self.performance_orchestrator = PerformanceTestOrchestrator(self.scenario_runner, PerformanceAnalyzer())
+        self.stress_orchestrator = StressTestOrchestrator(StressTestGenerator(), self.config)
     
     @pytest.mark.asyncio
     @pytest.mark.e2e
@@ -45,252 +61,61 @@ class TestConcurrencyIsolationIntegration:
     async def test_100_concurrent_user_isolation(self):
         """Test isolation with 100+ concurrent users"""
         logger.info("Testing 100+ concurrent user isolation")
-        
-        concurrent_users = CONCURRENCY_CONFIG["max_concurrent_users"]
-        
-        monitor = ResourceMonitor(interval_seconds=2.0)
-        await monitor.start()
-        
-        try:
-            # Simulate concurrent users
-            user_results = await self._simulate_concurrent_users(concurrent_users)
-            
-            # Analyze results
-            successful_users = sum(1 for r in user_results if r.get("success", False))
-            success_rate = successful_users / concurrent_users
-            
-            assert success_rate >= 0.95, \
-                f"Success rate too low: {success_rate:.3f}"
-            
-            # Check for cross-contamination
-            contamination_count = sum(1 for r in user_results if r.get("cross_contamination", False))
-            assert contamination_count == 0, \
-                f"Cross-contamination detected: {contamination_count} instances"
-            
-        finally:
-            stats = await monitor.stop()
-            
-        # Validate system remained stable
-        assert stats["cpu"]["max"] <= 95, f"CPU too high: {stats['cpu']['max']:.1f}%"
-        assert stats["memory"]["growth_mb"] <= 1000, "Excessive memory growth"
-        
-        logger.info(f"100+ user isolation validated: {success_rate:.3f} success rate")
+        user_results = await self._run_user_isolation_test()
+        self._validate_isolation_results(user_results)
+        logger.info("100+ user isolation validated")
     
     @pytest.mark.asyncio
     async def test_performance_under_concurrent_load(self):
         """Test performance characteristics under concurrent load"""
         logger.info("Testing performance under concurrent load")
-        
-        # Run performance test with varying load levels
-        load_levels = [10, 25, 50, 75, 100]
-        performance_results = {}
-        
-        for load in load_levels:
-            logger.info(f"Testing load level: {load} concurrent users")
-            
-            perf_result = await self._measure_performance_at_load(load)
-            performance_results[load] = perf_result
-            
-            # Validate performance requirements
-            assert perf_result["p95_response_time_ms"] <= CONCURRENCY_CONFIG["p95_response_time_ms"], \
-                f"P95 response time too high at {load} users: {perf_result['p95_response_time_ms']:.1f}ms"
-            
-            assert perf_result["availability"] >= CONCURRENCY_CONFIG["availability_target"], \
-                f"Availability too low at {load} users: {perf_result['availability']:.4f}"
-            
-            # Allow system to stabilize
-            await asyncio.sleep(5.0)
-        
-        # Validate performance scaling characteristics
-        self._validate_performance_scaling(performance_results)
-        
+        performance_results = await self._run_performance_scaling_test()
+        self.performance_analyzer.validate_performance_scaling(performance_results)
         logger.info("Performance under concurrent load validated")
     
     @pytest.mark.asyncio
     async def test_system_resilience_under_stress(self):
         """Test overall system resilience under stress conditions"""
         logger.info("Testing system resilience under stress")
-        
-        duration = CONCURRENCY_CONFIG["stress_test_duration"]
-        
-        # Create multiple types of stress concurrently
-        stress_tasks = [
-            self._concurrent_user_stress(duration // 3),
-            self._database_connection_stress(duration // 3),
-            self._cache_contention_stress(duration // 3)
-        ]
-        
-        start_time = time.time()
-        stress_results = await asyncio.gather(*stress_tasks, return_exceptions=True)
-        actual_duration = time.time() - start_time
-        
-        # Analyze resilience
-        successful_stress_tests = sum(
-            1 for r in stress_results 
-            if isinstance(r, dict) and r.get("success", False)
-        )
-        
-        resilience_score = successful_stress_tests / len(stress_tasks)
-        
-        assert resilience_score >= 0.8, \
-            f"System resilience too low: {resilience_score:.3f}"
-        
-        assert actual_duration <= duration * 1.2, \
-            f"Stress test took too long: {actual_duration:.1f}s"
-        
+        stress_results, actual_duration = await self._run_stress_resilience_test()
+        resilience_score = PerformanceAnalyzer().calculate_resilience_score(stress_results)
+        self._validate_resilience_requirements(resilience_score, actual_duration)
         logger.info(f"System resilience validated: {resilience_score:.3f} score")
     
-    async def _simulate_concurrent_users(self, user_count: int) -> List[Dict[str, Any]]:
-        """Simulate concurrent user sessions"""
-        async def single_user_session(user_id: int):
-            """Simulate single user session"""
-            try:
-                start_time = time.time()
-                
-                # Simulate user actions
-                actions = ["login", "create_thread", "send_message", "receive_response"]
-                
-                for action in actions:
-                    # Simulate action processing time
-                    processing_time = random.uniform(0.1, 0.5)
-                    await asyncio.sleep(processing_time)
-                    
-                    # Check for cross-contamination (mock check)
-                    cross_contamination = False  # In real test, would check actual isolation
-                
-                session_time = time.time() - start_time
-                
-                return {
-                    "user_id": user_id,
-                    "success": True,
-                    "session_time": session_time,
-                    "cross_contamination": cross_contamination,
-                    "actions_completed": len(actions)
-                }
-                
-            except Exception as e:
-                return {
-                    "user_id": user_id,
-                    "success": False,
-                    "error": str(e),
-                    "cross_contamination": False
-                }
-        
-        # Run all user sessions concurrently
-        tasks = [single_user_session(i) for i in range(user_count)]
-        return await asyncio.gather(*tasks)
+    async def _run_user_isolation_test(self) -> List[Dict[str, Any]]:
+        """Run user isolation test with resource monitoring"""
+        monitor_helper = ResourceMonitoringHelper(ResourceMonitor)
+        await monitor_helper.start_monitoring()
+        try:
+            return await self._execute_user_isolation_scenario()
+        finally:
+            await monitor_helper.stop_monitoring()
     
-    async def _measure_performance_at_load(self, concurrent_users: int) -> Dict[str, Any]:
-        """Measure performance metrics at specific load level"""
-        # Simulate load testing
-        response_times = []
-        successful_requests = 0
-        total_requests = concurrent_users * 10  # 10 requests per user
-        
-        async def single_request():
-            """Simulate single request"""
-            try:
-                start_time = time.time()
-                
-                # Simulate request processing
-                await asyncio.sleep(random.uniform(0.1, 0.3))
-                
-                response_time = (time.time() - start_time) * 1000  # Convert to ms
-                response_times.append(response_time)
-                
-                return True
-            except:
-                return False
-        
-        # Run requests with concurrent users
-        tasks = [single_request() for _ in range(total_requests)]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        successful_requests = sum(1 for r in results if r is True)
-        availability = successful_requests / total_requests if total_requests > 0 else 0
-        
-        # Calculate percentiles
-        if response_times:
-            response_times.sort()
-            p95_index = int(len(response_times) * 0.95)
-            p95_response_time = response_times[p95_index] if p95_index < len(response_times) else max(response_times)
-        else:
-            p95_response_time = float('inf')
-        
-        return {
-            "concurrent_users": concurrent_users,
-            "total_requests": total_requests,
-            "successful_requests": successful_requests,
-            "availability": availability,
-            "p95_response_time_ms": p95_response_time,
-            "avg_response_time_ms": sum(response_times) / len(response_times) if response_times else 0
-        }
+    def _validate_isolation_results(self, user_results: List[Dict[str, Any]]):
+        """Validate isolation test results meet requirements"""
+        converted_results = [self.convert_session_result(r) for r in user_results]
+        self.result_validator.validate_user_session_results(converted_results)
+        self.result_validator.validate_no_cross_contamination(converted_results)
     
-    def _validate_performance_scaling(self, performance_results: Dict[int, Dict]):
-        """Validate performance scaling characteristics"""
-        load_levels = sorted(performance_results.keys())
-        
-        for i in range(1, len(load_levels)):
-            current_load = load_levels[i]
-            prev_load = load_levels[i-1]
-            
-            current_perf = performance_results[current_load]
-            prev_perf = performance_results[prev_load]
-            
-            # Response time should not degrade too dramatically
-            response_time_ratio = current_perf["p95_response_time_ms"] / prev_perf["p95_response_time_ms"]
-            load_ratio = current_load / prev_load
-            
-            # Response time should not increase faster than load squared
-            max_acceptable_ratio = load_ratio ** 1.5
-            
-            assert response_time_ratio <= max_acceptable_ratio, \
-                f"Performance degraded too much at {current_load} users: {response_time_ratio:.2f}x"
     
-    async def _concurrent_user_stress(self, duration: int) -> Dict[str, Any]:
-        """Apply concurrent user stress"""
-        end_time = time.time() + duration
-        stress_count = 0
-        
-        while time.time() < end_time:
-            # Simulate user bursts
-            burst_size = random.randint(10, 30)
-            tasks = [self._single_user_action() for _ in range(burst_size)]
-            await asyncio.gather(*tasks, return_exceptions=True)
-            
-            stress_count += burst_size
-            await asyncio.sleep(random.uniform(0.5, 2.0))
-        
-        return {"success": True, "stress_count": stress_count, "type": "concurrent_user"}
+    async def _run_performance_scaling_test(self) -> Dict[int, Any]:
+        """Run performance scaling test across load levels"""
+        load_levels = get_load_levels_for_scaling()
+        return await self.performance_orchestrator.run_load_test_sequence(load_levels)
     
-    async def _database_connection_stress(self, duration: int) -> Dict[str, Any]:
-        """Apply database connection stress"""
-        # Mock database stress
-        end_time = time.time() + duration
-        connection_count = 0
-        
-        while time.time() < end_time:
-            # Simulate database connections
-            await asyncio.sleep(0.1)
-            connection_count += 1
-        
-        return {"success": True, "connection_count": connection_count, "type": "database"}
+    async def _run_stress_resilience_test(self) -> tuple:
+        """Run stress resilience test with multiple stress types"""
+        return await self.stress_orchestrator.run_multi_stress_test()
     
-    async def _cache_contention_stress(self, duration: int) -> Dict[str, Any]:
-        """Apply cache contention stress"""
-        # Mock cache stress
-        end_time = time.time() + duration
-        cache_operations = 0
-        
-        while time.time() < end_time:
-            # Simulate cache operations
-            await asyncio.sleep(0.05)
-            cache_operations += 1
-        
-        return {"success": True, "cache_operations": cache_operations, "type": "cache"}
     
-    async def _single_user_action(self):
-        """Simulate single user action"""
-        # Mock user action
-        await asyncio.sleep(random.uniform(0.01, 0.1))
-        return True
+    def _validate_resilience_requirements(self, resilience_score: float, actual_duration: float):
+        """Validate resilience test meets performance requirements"""
+        self.result_validator.validate_resilience_score(resilience_score)
+        self.result_validator.validate_test_duration(actual_duration)
+    
+    async def _execute_user_isolation_scenario(self) -> List[Dict[str, Any]]:
+        """Execute user isolation scenario with configured parameters"""
+        return await self.scenario_runner.run_user_isolation_scenario(
+            self.config.max_concurrent_users
+        )
+    

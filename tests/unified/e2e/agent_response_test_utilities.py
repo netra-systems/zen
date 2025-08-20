@@ -115,6 +115,23 @@ class AgentResponseSimulator:
             "complexity": len(content.split()) / 100.0,
             "estimated_quality": min(1.0, len(content) / 200.0)
         }
+    
+    async def _generate_simulated_response(self, agent: BaseSubAgent, query: str, 
+                                         response_type: ResponseTestType) -> Dict[str, Any]:
+        """Generate simulated response based on type."""
+        base_response = f"Simulated {response_type.value} response from {agent.name}: {query[:50]}"
+        
+        if response_type == ResponseTestType.QUALITY:
+            base_response += " with detailed analysis and specific recommendations."
+        elif response_type == ResponseTestType.PERFORMANCE:
+            base_response += " optimized for performance with metrics."
+        
+        return {
+            "content": base_response,
+            "agent_name": agent.name,
+            "query": query,
+            "type": response_type.value
+        }
 
 
 class QualityMetricValidator:
@@ -286,22 +303,5 @@ class ErrorScenarioTester:
             "content": chunk,
             "timestamp": time.time(),
             "event_type": "response_chunk"
-        }
-    
-    async def _generate_simulated_response(self, agent: BaseSubAgent, query: str, 
-                                         response_type: ResponseTestType) -> Dict[str, Any]:
-        """Generate simulated response based on type."""
-        base_response = f"Simulated {response_type.value} response from {agent.name}: {query[:50]}"
-        
-        if response_type == ResponseTestType.QUALITY:
-            base_response += " with detailed analysis and specific recommendations."
-        elif response_type == ResponseTestType.PERFORMANCE:
-            base_response += " optimized for performance with metrics."
-        
-        return {
-            "content": base_response,
-            "agent_name": agent.name,
-            "query": query,
-            "type": response_type.value
         }
     

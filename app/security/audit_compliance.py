@@ -9,8 +9,8 @@ from abc import ABC, abstractmethod
 
 from app.logging_config import central_logger
 # NOTE: Temporarily commented out - these modules need to be moved to auth_integration
-# from app.auth.enhanced_auth_security import enhanced_auth_security
-# from app.auth.api_key_manager import api_key_manager
+# from app.auth_integration.enhanced_auth_security import enhanced_auth_security
+# from app.auth_integration.api_key_manager import api_key_manager
 enhanced_auth_security = None  # Placeholder until consolidation complete
 api_key_manager = None  # Placeholder until consolidation complete
 from app.security.audit_findings import SecurityFinding, SecuritySeverity, SecurityCategory

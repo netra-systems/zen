@@ -194,7 +194,7 @@ def test_user():
 @pytest.fixture
 def auth_headers(test_user):
     try:
-        from app.auth.auth import create_access_token
+        from app.auth_integration.auth import create_access_token
         token = create_access_token(data={"sub": test_user.email})
         return {"Authorization": f"Bearer {token}"}
     except ImportError:
