@@ -2,9 +2,9 @@
 
 from typing import Optional, Dict, Any
 from pydantic import BaseModel, Field
-import os
 
 from app.schemas.shared_types import RetryConfig, BaseAgentConfig
+from app.config import get_config
 
 
 class AgentCacheConfig(BaseModel):
@@ -14,12 +14,13 @@ class AgentCacheConfig(BaseModel):
     redis_ttl: int = Field(default=3600, description="Redis cache TTL in seconds")
     
     @classmethod
-    def from_env(cls) -> 'AgentCacheConfig':
-        """Create config from environment variables."""
+    def from_unified_config(cls) -> 'AgentCacheConfig':
+        """Create config from unified configuration system."""
+        config = get_config()
         return cls(
-            default_ttl=int(os.getenv('AGENT_CACHE_TTL', 300)),
-            max_cache_size=int(os.getenv('AGENT_MAX_CACHE_SIZE', 1000)),
-            redis_ttl=int(os.getenv('AGENT_REDIS_TTL', 3600))
+            default_ttl=getattr(config, 'agent_cache_ttl', 300),
+            max_cache_size=getattr(config, 'agent_max_cache_size', 1000),
+            redis_ttl=getattr(config, 'agent_redis_ttl', 3600)
         )
 
 
@@ -33,12 +34,13 @@ class TimeoutConfig(BaseModel):
     recovery_timeout: float = Field(default=30.0, description="Recovery timeout")
     
     @classmethod
-    def from_env(cls) -> 'TimeoutConfig':
-        """Create config from environment variables."""
+    def from_unified_config(cls) -> 'TimeoutConfig':
+        """Create config from unified configuration system."""
+        config = get_config()
         return cls(
-            default_timeout=float(os.getenv('AGENT_DEFAULT_TIMEOUT', 30.0)),
-            long_timeout=float(os.getenv('AGENT_LONG_TIMEOUT', 300.0)),
-            recovery_timeout=float(os.getenv('AGENT_RECOVERY_TIMEOUT', 45.0))
+            default_timeout=getattr(config, 'agent_default_timeout', 30.0),
+            long_timeout=getattr(config, 'agent_long_timeout', 300.0),
+            recovery_timeout=getattr(config, 'agent_recovery_timeout', 45.0)
         )
 
 
@@ -48,11 +50,12 @@ class UserConfig(BaseModel):
     admin_user_id: str = Field(default="admin", description="Admin user ID")
     
     @classmethod
-    def from_env(cls) -> 'UserConfig':
-        """Create config from environment variables."""
+    def from_unified_config(cls) -> 'UserConfig':
+        """Create config from unified configuration system."""
+        config = get_config()
         return cls(
-            default_user_id=os.getenv('AGENT_DEFAULT_USER_ID', 'default_user'),
-            admin_user_id=os.getenv('AGENT_ADMIN_USER_ID', 'admin')
+            default_user_id=getattr(config, 'agent_default_user_id', 'default_user'),
+            admin_user_id=getattr(config, 'agent_admin_user_id', 'admin')
         )
 
 
@@ -63,24 +66,25 @@ class AgentConfig(BaseAgentConfig):
     user: UserConfig = Field(default_factory=UserConfig)
     
     @classmethod
-    def from_env(cls) -> 'AgentConfig':
-        """Create complete config from environment variables."""
+    def from_unified_config(cls) -> 'AgentConfig':
+        """Create complete config from unified configuration system."""
+        config = get_config()
         return cls(
-            cache=AgentCacheConfig.from_env(),
+            cache=AgentCacheConfig.from_unified_config(),
             retry=RetryConfig(
-                max_retries=int(os.getenv('AGENT_MAX_RETRIES', 3)),
-                base_delay=float(os.getenv('AGENT_BASE_DELAY', 1.0)),
-                max_delay=float(os.getenv('AGENT_MAX_DELAY', 60.0)),
-                backoff_factor=float(os.getenv('AGENT_BACKOFF_FACTOR', 2.0))
+                max_retries=getattr(config, 'agent_max_retries', 3),
+                base_delay=getattr(config, 'agent_base_delay', 1.0),
+                max_delay=getattr(config, 'agent_max_delay', 60.0),
+                backoff_factor=getattr(config, 'agent_backoff_factor', 2.0)
             ),
-            timeout=TimeoutConfig.from_env(),
-            user=UserConfig.from_env(),
-            failure_threshold=int(os.getenv('AGENT_FAILURE_THRESHOLD', 3)),
-            reset_timeout=float(os.getenv('AGENT_RESET_TIMEOUT', 30.0)),
-            max_concurrent_operations=int(os.getenv('AGENT_MAX_CONCURRENT', 10)),
-            batch_size=int(os.getenv('AGENT_BATCH_SIZE', 100))
+            timeout=TimeoutConfig.from_unified_config(),
+            user=UserConfig.from_unified_config(),
+            failure_threshold=getattr(config, 'agent_failure_threshold', 3),
+            reset_timeout=getattr(config, 'agent_reset_timeout', 30.0),
+            max_concurrent_operations=getattr(config, 'agent_max_concurrent', 10),
+            batch_size=getattr(config, 'agent_batch_size', 100)
         )
 
 
 # Global configuration instance
-agent_config = AgentConfig.from_env()
+agent_config = AgentConfig.from_unified_config()

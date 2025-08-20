@@ -134,7 +134,7 @@ class ValidationProcessor(ExceptionProcessor):
     def _handle_validation_error(self, exc: ValidationError, context: ErrorContext) -> ErrorResponse:
         """Handle Pydantic validation errors."""
         validation_errors = self._extract_validation_errors(exc)
-        logger.warning(f"Validation error: {validation_errors}")
+        logger.warning("Validation error: {}", validation_errors)
         return self._create_validation_response(validation_errors, context)
     
     def _extract_validation_errors(self, exc: ValidationError) -> List[str]:
@@ -170,7 +170,7 @@ class DatabaseProcessor(ExceptionProcessor):
     
     def _handle_integrity_error(self, exc: IntegrityError, context: ErrorContext) -> ErrorResponse:
         """Handle database integrity constraint violations."""
-        logger.warning(f"Database integrity error: {exc}")
+        logger.warning("Database integrity error: {}", exc)
         base_response = context.create_base_response(
             ErrorCode.DATABASE_CONSTRAINT_VIOLATION.value,
             "Database constraint violation"
@@ -183,7 +183,7 @@ class DatabaseProcessor(ExceptionProcessor):
     
     def _handle_general_db_error(self, exc: SQLAlchemyError, context: ErrorContext) -> ErrorResponse:
         """Handle general SQLAlchemy database errors."""
-        logger.error(f"Database error: {str(exc)}", exc_info=True)
+        logger.error("Database error: {}", str(exc), exc_info=True)
         base_response = context.create_base_response(
             ErrorCode.DATABASE_QUERY_FAILED.value,
             "Database operation failed"
@@ -201,7 +201,7 @@ class HTTPProcessor(ExceptionProcessor):
     def _handle_http_exception(self, exc: HTTPException, context: ErrorContext) -> ErrorResponse:
         """Handle FastAPI HTTP exceptions."""
         error_code = self._map_status_to_error_code(exc.status_code)
-        logger.warning(f"HTTP exception {exc.status_code}: {exc.detail}")
+        logger.warning("HTTP exception {}: {}", exc.status_code, exc.detail)
         return self._create_http_response(exc, error_code, context)
     
     def _map_status_to_error_code(self, status_code: int) -> ErrorCode:
@@ -228,7 +228,7 @@ class HTTPProcessor(ExceptionProcessor):
     
     def _handle_unknown_exception(self, exc: Exception, context: ErrorContext) -> ErrorResponse:
         """Handle unknown exceptions."""
-        logger.error(f"Unhandled exception: {exc}", exc_info=True)
+        logger.error("Unhandled exception: {}", exc, exc_info=True)
         base_response = context.create_base_response(
             ErrorCode.INTERNAL_ERROR.value,
             "An internal server error occurred"

@@ -207,6 +207,24 @@ class AppConfig(BaseModel):
         default=False,
         description="Disable HTTPS-only mode for sessions (dev/testing)"
     )
+    
+    # Agent Configuration
+    agent_cache_ttl: int = Field(default=300, description="Agent cache TTL in seconds")
+    agent_max_cache_size: int = Field(default=1000, description="Agent maximum cache entries")
+    agent_redis_ttl: int = Field(default=3600, description="Agent Redis cache TTL in seconds")
+    agent_default_timeout: float = Field(default=30.0, description="Agent default timeout in seconds")
+    agent_long_timeout: float = Field(default=300.0, description="Agent long operation timeout in seconds")
+    agent_recovery_timeout: float = Field(default=45.0, description="Agent recovery timeout in seconds")
+    agent_default_user_id: str = Field(default="default_user", description="Agent default user ID")
+    agent_admin_user_id: str = Field(default="admin", description="Agent admin user ID")
+    agent_max_retries: int = Field(default=3, description="Agent maximum retry attempts")
+    agent_base_delay: float = Field(default=1.0, description="Agent base retry delay in seconds")
+    agent_max_delay: float = Field(default=60.0, description="Agent maximum retry delay in seconds")
+    agent_backoff_factor: float = Field(default=2.0, description="Agent retry backoff factor")
+    agent_failure_threshold: int = Field(default=3, description="Agent failure threshold")
+    agent_reset_timeout: float = Field(default=30.0, description="Agent reset timeout in seconds")
+    agent_max_concurrent: int = Field(default=10, description="Agent maximum concurrent operations")
+    agent_batch_size: int = Field(default=100, description="Agent batch size")
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(

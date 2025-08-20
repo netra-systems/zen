@@ -121,6 +121,12 @@ class DatabaseConfigManager:
         # Accept both postgresql:// and postgresql+asyncpg:// schemes
         if parsed.scheme not in ["postgresql", "postgresql+asyncpg", "postgres"]:
             return  # Skip validation for non-PostgreSQL URLs
+        
+        # Skip validation for Cloud SQL Unix socket connections (like auth service)
+        if "/cloudsql/" in url:
+            self._logger.info("Cloud SQL Unix socket detected, skipping SSL validation")
+            return
+        
         rules = self._validation_rules.get(self._environment, {})
         self._check_ssl_requirement(parsed, rules)
         self._check_localhost_policy(parsed, rules)
