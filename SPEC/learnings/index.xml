@@ -120,5 +120,11 @@
             <critical-takeaway>Convert existing shell scripts to Python during refactoring.</critical-takeaway>
             <critical-takeaway>Use subprocess.run() for external commands and pathlib for file operations.</critical-takeaway>
         </category>
+        
+        <category name="Database/CloudSQL" path="SPEC/learnings/cloud_sql_url_handling.xml" keywords="Cloud SQL, Database URL, Unix Socket, AsyncPG, PostgreSQL">
+            <critical-takeaway>Keep database URL conversion simple - only change scheme from postgresql:// to postgresql+asyncpg://</critical-takeaway>
+            <critical-takeaway>Do NOT manipulate sslmode or other parameters - let the driver handle them</critical-takeaway>
+            <critical-takeaway>Cloud SQL Unix socket URLs work with format: postgresql://user:pass@/db?host=/cloudsql/project:region:instance</critical-takeaway>
+        </category>
     </categories>
 </specification>

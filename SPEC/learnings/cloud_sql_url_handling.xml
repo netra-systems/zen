@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learnings>
+  <title>Cloud SQL URL Format Handling - Auth Service Fix</title>
+  <date>2025-08-20</date>
+  <severity>HIGH</severity>
+  <summary>
+    Auth service failed to handle Cloud SQL Unix socket URLs correctly due to unnecessary URL manipulation.
+    Backend service works correctly by simply converting postgresql:// to postgresql+asyncpg:// without further modifications.
+  </summary>
+  
+  <issue_discovery>
+    <symptom>Auth service fails to connect when using Cloud SQL Unix socket format</symptom>
+    <initial_assumption>SSL mode incompatibility with asyncpg</initial_assumption>
+    <actual_problem>Over-engineering URL conversion logic</actual_problem>
+    <discovery_method>
+      <step>Compared backend service database connection handling</step>
+      <step>Found backend uses simple URL replacement</step>
+      <step>Auth service had complex logic removing sslmode parameters</step>
+    </discovery_method>
+  </issue_discovery>
+  
+  <root_cause_analysis>
+    <incorrect_approach>
+      <description>Auth service tried to handle Cloud SQL URLs specially</description>
+      <code>
+        # WRONG: Unnecessary manipulation
+        if "/cloudsql/" in database_url or "?host=/cloudsql/" in database_url:
+            database_url = database_url.replace("?sslmode=require", "")
+            database_url = database_url.replace("&sslmode=require", "")
+        else:
+            database_url = database_url.replace("sslmode=", "ssl=")
+      </code>
+      <issues>
+        - Breaks asyncpg connection parameters
+        - Inconsistent with backend service
+        - Unnecessary complexity
+      </issues>
+    </incorrect_approach>
+    
+    <correct_approach>
+      <description>Simple URL scheme replacement like backend service</description>
+      <code>
+        # CORRECT: Simple replacement
+        if database_url.startswith("postgresql://"):
+            database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
+        elif database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
+      </code>
+      <benefits>
+        - Consistent with backend service
+        - Works with all PostgreSQL URL formats
+        - No special handling needed for Cloud SQL
+      </benefits>
+    </correct_approach>
+  </root_cause_analysis>
+  
+  <cloud_sql_formats>
+    <format type="unix_socket">
+      <example>postgresql://user:pass@/dbname?host=/cloudsql/project:region:instance</example>
+      <description>Uses Unix socket for connection via Cloud SQL proxy</description>
+      <usage>Cloud Run services with Cloud SQL proxy sidecar</usage>
+    </format>
+    
+    <format type="unix_socket_with_ssl">
+      <example>postgresql://user:pass@/dbname?host=/cloudsql/project:region:instance&sslmode=require</example>
+      <description>Unix socket with SSL mode parameter (ignored for Unix sockets)</description>
+      <usage>Cloud Run with enforced SSL policies</usage>
+    </format>
+    
+    <format type="public_ip">
+      <example>postgresql://user:pass@34.132.142.103:5432/dbname?sslmode=require</example>
+      <description>Direct connection to Cloud SQL public IP</description>
+      <usage>External applications or authorized networks</usage>
+    </format>
+    
+    <format type="private_ip">
+      <example>postgresql://user:pass@10.107.1.3:5432/dbname</example>
+      <description>Private IP connection within VPC</description>
+      <usage>Internal services on same VPC</usage>
+    </format>
+  </cloud_sql_formats>
+  
+  <asyncpg_considerations>
+    <note>asyncpg handles connection parameters differently than psycopg2</note>
+    <url_conversion>
+      <from>postgresql://</from>
+      <to>postgresql+asyncpg://</to>
+      <preserves>All query parameters including host, sslmode, etc.</preserves>
+    </url_conversion>
+    <unix_socket_support>
+      <supported>Yes, via host parameter in query string</supported>
+      <format>?host=/path/to/socket</format>
+    </unix_socket_support>
+  </asyncpg_considerations>
+  
+  <best_practices>
+    <practice priority="1">
+      <title>Keep URL conversion simple</title>
+      <description>
+        Only change the scheme from postgresql:// to postgresql+asyncpg://.
+        Let the driver handle parameter interpretation.
+      </description>
+    </practice>
+    
+    <practice priority="2">
+      <title>Maintain consistency across services</title>
+      <description>
+        All services should handle database URLs the same way.
+        Backend and auth service should use identical conversion logic.
+      </description>
+    </practice>
+    
+    <practice priority="3">
+      <title>Test all URL formats</title>
+      <description>
+        Test Unix socket, public IP, and private IP formats.
+        Include tests with and without SSL parameters.
+      </description>
+    </practice>
+    
+    <practice priority="4">
+      <title>Use Cloud SQL proxy in production</title>
+      <description>
+        Prefer Unix socket connections via Cloud SQL proxy for security.
+        Avoids exposing database to public internet.
+      </description>
+    </practice>
+  </best_practices>
+  
+  <testing_requirements>
+    <test name="cloud_sql_unix_socket">
+      <description>Verify Unix socket URLs work correctly</description>
+      <url_format>postgresql://user:pass@/db?host=/cloudsql/project:region:instance</url_format>
+    </test>
+    
+    <test name="regular_postgres">
+      <description>Verify standard PostgreSQL URLs work</description>
+      <url_format>postgresql://user:pass@host:5432/db</url_format>
+    </test>
+    
+    <test name="heroku_style">
+      <description>Verify Heroku-style postgres:// URLs work</description>
+      <url_format>postgres://user:pass@host:5432/db</url_format>
+    </test>
+  </testing_requirements>
+  
+  <deployment_notes>
+    <note type="cloud_run">
+      Cloud Run services automatically get Cloud SQL proxy sidecar when configured.
+      Use Unix socket format for best performance and security.
+    </note>
+    
+    <note type="local_development">
+      For local development, use standard PostgreSQL URLs with host and port.
+      Cloud SQL proxy can be run locally for testing Cloud SQL connections.
+    </note>
+    
+    <note type="staging">
+      Staging uses Cloud SQL with Unix socket connections.
+      DATABASE_URL should be in format: postgresql://user:pass@/db?host=/cloudsql/instance
+    </note>
+  </deployment_notes>
+  
+  <action_items>
+    <action priority="COMPLETED">
+      Simplified auth service database URL handling to match backend
+    </action>
+    <action priority="COMPLETED">
+      Added comprehensive tests for all URL formats
+    </action>
+    <action priority="PENDING">
+      Deploy updated auth service to staging
+    </action>
+    <action priority="LOW">
+      Consider extracting common database connection logic to shared module
+    </action>
+  </action_items>
+</learnings>
