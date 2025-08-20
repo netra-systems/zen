@@ -116,6 +116,7 @@ class TestStagingMultiServiceStartupSequence:
         orch.register_service(frontend_service)
         return orch
     
+    @pytest.mark.asyncio
     @mock_justified("Service startup coordination is external system behavior not available in test")
     async def test_correct_startup_order_auth_backend_frontend(self, orchestrator):
         """Test services start in correct order: Auth → Backend → Frontend."""
@@ -129,6 +130,7 @@ class TestStagingMultiServiceStartupSequence:
         assert orchestrator.services["backend"].startup_order == 2
         assert orchestrator.services["frontend"].startup_order == 3
     
+    @pytest.mark.asyncio
     @mock_justified("Service health checks are external system behavior not available in test")
     async def test_health_check_cascade_validation(self, orchestrator):
         """Test health check cascade validates all services properly."""
@@ -150,6 +152,7 @@ class TestStagingMultiServiceStartupSequence:
         assert health_results["backend"] is False
         assert health_results["frontend"] is True  # Frontend can still be healthy
     
+    @pytest.mark.asyncio
     @mock_justified("Service dependency resolution is external system behavior not available in test")
     async def test_service_dependency_resolution(self, orchestrator):
         """Test service dependency resolution prevents invalid startup orders."""
@@ -167,6 +170,7 @@ class TestStagingMultiServiceStartupSequence:
         # Auth should have no dependencies
         assert len(auth_service.dependencies) == 0
     
+    @pytest.mark.asyncio
     @mock_justified("Service startup timing is external system behavior not available in test")
     async def test_startup_timing_and_readiness_checks(self, orchestrator):
         """Test startup timing and readiness validation."""
@@ -186,6 +190,7 @@ class TestStagingMultiServiceStartupSequence:
             assert service.started is True
             assert service.healthy is True
     
+    @pytest.mark.asyncio
     @mock_justified("Service failure scenarios are external system behavior not available in test")
     async def test_startup_failure_handling(self, orchestrator):
         """Test handling of service startup failures."""
@@ -211,6 +216,7 @@ class TestStagingMultiServiceStartupSequence:
             # Or handle the exception appropriately
             pass
     
+    @pytest.mark.asyncio
     @mock_justified("Service communication is external system behavior not available in test")
     async def test_inter_service_communication_validation(self, orchestrator):
         """Test inter-service communication works after startup."""
@@ -234,6 +240,7 @@ class TestStagingMultiServiceStartupSequence:
         auth_result = backend_service.authenticate()
         assert auth_result is True
     
+    @pytest.mark.asyncio
     @mock_justified("Service configuration is external system state not available in test")
     async def test_staging_specific_service_configuration(self, orchestrator):
         """Test staging-specific service configuration is applied correctly."""
@@ -275,6 +282,7 @@ class TestStagingMultiServiceStartupSequence:
         frontend_config = orchestrator.services["frontend"].config
         assert "staging-api" in frontend_config["api_base_url"]
     
+    @pytest.mark.asyncio
     @mock_justified("Service monitoring is external system behavior not available in test")
     async def test_service_monitoring_and_observability(self, orchestrator):
         """Test service monitoring and observability during startup."""
@@ -306,6 +314,7 @@ class TestStagingMultiServiceStartupSequence:
             assert metrics["success"] is True
             assert metrics["duration"] > 0
     
+    @pytest.mark.asyncio
     @mock_justified("Service rollback is external system behavior not available in test")
     async def test_rollback_capability_on_startup_failure(self, orchestrator):
         """Test rollback capability when startup sequence fails."""
@@ -335,6 +344,7 @@ class TestStagingMultiServiceStartupSequence:
         for service in orchestrator.services.values():
             assert service.started is False
     
+    @pytest.mark.asyncio
     @mock_justified("Load balancer configuration is external system behavior not available in test")
     async def test_load_balancer_integration_during_startup(self, orchestrator):
         """Test load balancer integration during service startup sequence."""

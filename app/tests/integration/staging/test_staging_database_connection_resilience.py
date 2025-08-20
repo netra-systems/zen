@@ -19,8 +19,7 @@ from typing import Dict, List, Optional
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Configure pytest-asyncio for all async tests
-pytestmark = pytest.mark.asyncio
+# Individual test methods will use @pytest.mark.asyncio decorator
 
 from test_framework.mock_utils import mock_justified
 from app.tests.fixtures.database_test_fixtures import (
@@ -76,6 +75,7 @@ def staging_db_resilience():
 class TestStagingDatabaseConnectionResilience:
     """Test database connection resilience in staging environment."""
     
+    @pytest.mark.asyncio
     @mock_justified("PostgreSQL connection behavior in staging is external system not available in test")
     async def test_postgresql_connection_pooling_and_failover(self, staging_db_resilience, connection_pool):
         """Test PostgreSQL connection pooling and failover mechanisms."""
@@ -111,6 +111,7 @@ class TestStagingDatabaseConnectionResilience:
         assert failover_result is True
         assert staging_db_resilience.recovery_attempts["postgres"] == 1
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse connection behavior in staging is external system not available in test")
     async def test_clickhouse_connection_handling_staging_ports(self, staging_db_resilience):
         """Test ClickHouse connection handling with staging-specific port configuration."""
@@ -154,6 +155,7 @@ class TestStagingDatabaseConnectionResilience:
         await staging_db_resilience.simulate_failover("clickhouse")
         assert staging_db_resilience.recovery_attempts["clickhouse"] == 1
     
+    @pytest.mark.asyncio
     @mock_justified("Redis connection behavior in staging is external system not available in test")
     async def test_redis_connection_pooling_and_clustering(self, staging_db_resilience):
         """Test Redis connection pooling and clustering in staging."""
@@ -179,6 +181,7 @@ class TestStagingDatabaseConnectionResilience:
         # Verify recovery attempt was recorded
         assert staging_db_resilience.recovery_attempts["redis"] == 1
     
+    @pytest.mark.asyncio
     @mock_justified("Database migration execution is external system behavior not available in test")
     async def test_database_migration_execution_staging(self, staging_db_resilience):
         """Test database migration execution in staging environment."""
@@ -207,6 +210,7 @@ class TestStagingDatabaseConnectionResilience:
         successful_migrations = [r for r in migration_results if r["status"] == "success"]
         assert len(successful_migrations) == 5
     
+    @pytest.mark.asyncio
     @mock_justified("Database transaction behavior in staging is external system not available in test")
     async def test_connection_recovery_after_network_issues(self, staging_db_resilience, async_session_mock):
         """Test connection recovery after network failures."""
@@ -230,6 +234,7 @@ class TestStagingDatabaseConnectionResilience:
         postgres_test = await staging_db_resilience.test_connection("postgres")
         assert postgres_test is True
     
+    @pytest.mark.asyncio
     @mock_justified("Transaction rollback behavior is external system behavior not available in test")
     async def test_transaction_rollback_on_connection_loss(self, staging_db_resilience, transaction_session_mock):
         """Test transaction rollback on connection loss."""
@@ -263,6 +268,7 @@ class TestStagingDatabaseConnectionResilience:
         transaction_session_mock.add.assert_called()
         assert len(transaction_session_mock.commit.call_args_list) >= 1
     
+    @pytest.mark.asyncio
     @mock_justified("Database health monitoring is external system behavior not available in test")
     async def test_database_health_monitoring_staging(self, staging_db_resilience):
         """Test database health monitoring and alerting in staging."""
@@ -292,6 +298,7 @@ class TestStagingDatabaseConnectionResilience:
         assert metrics["environment"] == "staging"
         assert isinstance(metrics["connection_pools"], int)
     
+    @pytest.mark.asyncio
     @mock_justified("Connection timeout handling is external system behavior not available in test")
     async def test_connection_timeout_and_retry_logic(self, staging_db_resilience, async_session_mock):
         """Test connection timeout handling and retry logic."""
@@ -320,6 +327,7 @@ class TestStagingDatabaseConnectionResilience:
         result = await async_session_mock.execute("SELECT 1")
         assert result is not None
     
+    @pytest.mark.asyncio
     @mock_justified("Database performance monitoring is external system behavior not available in test")
     async def test_connection_performance_monitoring_staging(self, staging_db_resilience):
         """Test connection performance monitoring in staging environment."""

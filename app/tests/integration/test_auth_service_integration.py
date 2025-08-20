@@ -11,11 +11,14 @@ import json
 import jwt
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, Mock, patch
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.schemas import UserInDB
-from app.core.config import settings
+from app.config import get_config
 from test_framework.mock_utils import mock_justified
+
+# Get configuration settings
+settings = get_config()
 
 
 @pytest.mark.asyncio
@@ -30,7 +33,7 @@ class TestAuthServiceIntegration:
             email="auth@example.com",
             username="authuser",
             is_active=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
     
     @pytest.fixture
@@ -40,11 +43,11 @@ class TestAuthServiceIntegration:
             "sub": test_user.id,
             "email": test_user.email,
             "username": test_user.username,
-            "exp": datetime.utcnow() + timedelta(hours=1),
-            "iat": datetime.utcnow(),
+            "exp": datetime.now(timezone.utc) + timedelta(hours=1),
+            "iat": datetime.now(timezone.utc),
             "type": "access"
         }
-        return jwt.encode(payload, settings.SECRET_KEY, algorithm="HS256")
+        return jwt.encode(payload, settings.secrets.jwt_secret_key, algorithm="HS256")
     
     @pytest.fixture
     async def auth_service_mock(self, test_user, valid_token):
@@ -129,7 +132,7 @@ class TestAuthServiceIntegration:
         assert validated_user.email == test_user.email
         
         # Test token claims by decoding
-        decoded = jwt.decode(valid_token, settings.SECRET_KEY, algorithms=["HS256"])
+        decoded = jwt.decode(valid_token, settings.secrets.jwt_secret_key, algorithms=["HS256"])
         assert decoded["sub"] == test_user.id
         assert decoded["email"] == test_user.email
         assert decoded["type"] == "access"
@@ -138,10 +141,10 @@ class TestAuthServiceIntegration:
         expired_payload = {
             "sub": test_user.id,
             "email": test_user.email,
-            "exp": datetime.utcnow() - timedelta(hours=1),  # Expired
+            "exp": datetime.now(timezone.utc) - timedelta(hours=1),  # Expired
             "type": "access"
         }
-        expired_token = jwt.encode(expired_payload, settings.SECRET_KEY, algorithm="HS256")
+        expired_token = jwt.encode(expired_payload, settings.secrets.jwt_secret_key, algorithm="HS256")
         
         # Mock service should reject expired token
         auth_service_mock.validate_token.side_effect = [
@@ -248,7 +251,7 @@ class TestAuthServiceIntegration:
         auth_state = {
             "user_id": test_user.id,
             "token": valid_token,
-            "last_activity": datetime.utcnow().isoformat(),
+            "last_activity": datetime.now(timezone.utc).isoformat(),
             "permissions": ["read", "write"],
             "roles": ["user", "premium"]
         }
@@ -296,7 +299,7 @@ class TestAuthServiceIntegration:
             auth_results[service] = {
                 "user_id": validated_user.id,
                 "email": validated_user.email,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         
         # Verify consistent auth results across services
@@ -391,7 +394,7 @@ class TestAuthServiceIntegration:
             email="inactive@example.com",
             username="inactive",
             is_active=False,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
         
         auth_service_mock.validate_token.side_effect = None

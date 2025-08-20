@@ -19,7 +19,7 @@ from app.logging_config import central_logger
 from app.schemas.registry import WebSocketMessage
 from app.agents.example_message_processor import get_example_message_supervisor
 from app.ws_manager import get_manager
-from app.database import get_async_db
+from app.db.postgres import get_async_db
 from app.error_handling import handle_example_message_error, ErrorContext, ErrorCategory
 
 logger = central_logger.get_logger(__name__)
@@ -28,9 +28,9 @@ logger = central_logger.get_logger(__name__)
 class ExampleMessageMetadata(BaseModel):
     """Metadata for example messages"""
     title: str
-    category: str = Field(..., regex=r'^(cost-optimization|latency-optimization|model-selection|scaling|advanced)$')
-    complexity: str = Field(..., regex=r'^(basic|intermediate|advanced)$')
-    business_value: str = Field(..., regex=r'^(conversion|retention|expansion)$', alias='businessValue')
+    category: str = Field(..., pattern=r'^(cost-optimization|latency-optimization|model-selection|scaling|advanced)$')
+    complexity: str = Field(..., pattern=r'^(basic|intermediate|advanced)$')
+    business_value: str = Field(..., pattern=r'^(conversion|retention|expansion)$', alias='businessValue')
     estimated_time: str = Field(..., alias='estimatedTime')
 
 

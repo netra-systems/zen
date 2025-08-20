@@ -79,66 +79,121 @@ class TestEnvironmentValidator:
             return False
     
     async def validate_api_keys(self, use_real_llm: bool) -> bool:
-        """Validate required API keys for LLM testing."""
+        """Validate required API keys for LLM testing with enhanced TEST_* preference."""
         if not use_real_llm:
             self.validation_results['api_keys'] = 'not_required'
             return True
         
-        required_keys = ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY', 'GOOGLE_API_KEY']
-        test_keys = [f'TEST_{key}' for key in required_keys]
+        # Check for test-specific API keys first, then fallback to production keys
+        provider_keys = {
+            'openai': ['TEST_OPENAI_API_KEY', 'OPENAI_API_KEY'],
+            'anthropic': ['TEST_ANTHROPIC_API_KEY', 'ANTHROPIC_API_KEY'],
+            'google': ['TEST_GOOGLE_API_KEY', 'GOOGLE_API_KEY']
+        }
         
-        available_keys = []
-        missing_keys = []
+        available_providers = []
+        production_key_warnings = []
+        missing_providers = []
         
-        for key in required_keys + test_keys:
-            if os.getenv(key):
-                available_keys.append(key)
+        for provider, key_options in provider_keys.items():
+            found_key = None
+            for key in key_options:
+                if os.getenv(key):
+                    found_key = key
+                    break
+            
+            if found_key:
+                available_providers.append(provider)
+                if not found_key.startswith('TEST_'):
+                    production_key_warnings.append(f"Using production {provider.upper()} key - recommend TEST_{found_key}")
             else:
-                if key.startswith('TEST_'):
-                    missing_keys.append(key)
+                missing_providers.append(provider)
         
-        if len(available_keys) == 0:
+        # At least one provider must be available
+        if not available_providers:
             logger.error("No LLM API keys found for real LLM testing")
             self.validation_results['api_keys'] = 'none_available'
             return False
         
-        if missing_keys:
-            logger.warning(f"Some test-specific API keys missing: {missing_keys}")
-            
+        # Log warnings about production keys
+        for warning in production_key_warnings:
+            logger.warning(warning)
+        
         self.validation_results['api_keys'] = {
-            'available': available_keys,
-            'missing_test_keys': missing_keys,
-            'status': 'partial' if missing_keys else 'complete'
+            'available_providers': available_providers,
+            'missing_providers': missing_providers,
+            'production_key_warnings': production_key_warnings,
+            'status': 'complete' if not missing_providers else 'partial',
+            'isolation_level': 'test_keys' if not production_key_warnings else 'mixed'
         }
+        
+        logger.info(f"API key validation: {len(available_providers)} providers available ({available_providers})")
         return True
     
     def validate_seed_data_files(self, datasets_required: List[str]) -> bool:
-        """Validate that required seed data files exist."""
+        """Validate that required seed data files exist and are valid."""
         test_data_dir = Path(__file__).parent.parent / "test_data" / "seed"
+        
+        if not test_data_dir.exists():
+            logger.error(f"Seed data directory does not exist: {test_data_dir}")
+            self.validation_results['seed_data'] = {
+                'status': 'directory_missing',
+                'directory': str(test_data_dir)
+            }
+            return False
         
         missing_files = []
         existing_files = []
+        invalid_files = []
+        file_details = {}
         
         for dataset in datasets_required:
             data_file = test_data_dir / f"{dataset}.json"
             if data_file.exists():
-                existing_files.append(str(data_file))
+                try:
+                    # Validate JSON structure
+                    import json
+                    with open(data_file, 'r', encoding='utf-8') as f:
+                        data = json.load(f)
+                    
+                    # Check for required structure
+                    if 'metadata' not in data:
+                        invalid_files.append(f"{dataset}: missing metadata")
+                    else:
+                        metadata = data['metadata']
+                        file_details[dataset] = {
+                            'size_bytes': data_file.stat().st_size,
+                            'description': metadata.get('description', 'No description'),
+                            'record_count': metadata.get('record_count', {})
+                        }
+                    
+                    existing_files.append(str(data_file))
+                    
+                except Exception as e:
+                    invalid_files.append(f"{dataset}: {str(e)}")
+                    logger.error(f"Invalid seed data file {data_file}: {e}")
             else:
                 missing_files.append(str(data_file))
         
-        if missing_files:
-            logger.error(f"Missing seed data files: {missing_files}")
+        if missing_files or invalid_files:
+            logger.error(f"Seed data validation failed - Missing: {missing_files}, Invalid: {invalid_files}")
             self.validation_results['seed_data'] = {
                 'status': 'incomplete',
                 'missing': missing_files,
-                'existing': existing_files
+                'invalid': invalid_files,
+                'existing': existing_files,
+                'file_details': file_details
             }
             return False
         
         self.validation_results['seed_data'] = {
             'status': 'complete',
-            'files': existing_files
+            'files': existing_files,
+            'file_details': file_details,
+            'total_size_bytes': sum(details['size_bytes'] for details in file_details.values())
         }
+        
+        logger.info(f"Seed data validation: {len(existing_files)} files validated successfully")
         return True
     
     def get_validation_summary(self) -> Dict[str, Any]:
@@ -292,38 +347,68 @@ class TestEnvironmentOrchestrator:
         return [self.get_session_info(sid) for sid in self.active_sessions.keys()]
     
     async def _validate_session_requirements(self, session: TestSession) -> bool:
-        """Validate requirements for a test session."""
-        database_url = os.getenv('TEST_DATABASE_URL', os.getenv('DATABASE_URL', ''))
+        """Validate requirements for a test session with comprehensive checks."""
+        # Get database URL with TEST_ preference
+        database_url = (
+            os.getenv('TEST_DATABASE_URL') or 
+            os.getenv('DATABASE_URL', '')
+        )
         
-        validations = [
-            await self.validator.validate_database_connection(database_url),
-            await self.validator.validate_api_keys(session.use_real_llm),
-            self.validator.validate_seed_data_files(session.datasets_required)
+        if not database_url:
+            logger.error("No database URL configured for testing")
+            return False
+        
+        # Run all validations in parallel for better performance
+        validation_tasks = [
+            self.validator.validate_database_connection(database_url),
+            self.validator.validate_api_keys(session.use_real_llm)
         ]
         
+        # Seed data validation is synchronous
+        seed_data_valid = self.validator.validate_seed_data_files(session.datasets_required)
+        
+        # Wait for async validations
+        async_results = await asyncio.gather(*validation_tasks, return_exceptions=True)
+        
+        # Check for exceptions in async validations
+        for i, result in enumerate(async_results):
+            if isinstance(result, Exception):
+                logger.error(f"Validation task {i} failed with exception: {result}")
+                return False
+        
+        # Combine all validation results
+        all_validations_passed = all(async_results) and seed_data_valid
+        
         validation_summary = self.validator.get_validation_summary()
+        
         if validation_summary['overall_status'] == 'failed':
-            logger.error(f"Validation failed: {validation_summary}")
+            logger.error(f"Session validation failed: {validation_summary}")
             return False
         
         if validation_summary['overall_status'] == 'passed_with_warnings':
-            logger.warning(f"Validation passed with warnings: {validation_summary}")
+            logger.warning(f"Session validation passed with warnings: {validation_summary}")
+        else:
+            logger.info(f"Session validation passed successfully")
         
-        return True
+        return all_validations_passed
     
     def _get_datasets_for_level(self, test_level: str) -> List[str]:
-        """Get required datasets based on test level."""
+        """Get required datasets based on test level with enhanced mapping."""
         dataset_mappings = {
-            'smoke': [],
+            'smoke': [],  # No seed data needed for smoke tests
             'unit': ['basic_optimization'],
             'integration': ['basic_optimization', 'complex_workflows'],
-            'agents': ['basic_optimization', 'complex_workflows'],
+            'agents': ['basic_optimization', 'complex_workflows'],  # LLM agents need comprehensive data
+            'e2e': ['basic_optimization', 'complex_workflows', 'edge_cases'],  # Full E2E needs all data
             'comprehensive': ['basic_optimization', 'complex_workflows', 'edge_cases'],
-            'critical': ['basic_optimization'],
-            'performance': ['basic_optimization', 'complex_workflows']
+            'critical': ['basic_optimization'],  # Critical tests use minimal, reliable data
+            'performance': ['basic_optimization'],  # Performance tests use consistent baseline data
+            'real_llm': ['basic_optimization', 'complex_workflows'],  # Real LLM tests need realistic scenarios
         }
         
-        return dataset_mappings.get(test_level, ['basic_optimization'])
+        datasets = dataset_mappings.get(test_level, ['basic_optimization'])
+        logger.debug(f"Test level '{test_level}' requires datasets: {datasets}")
+        return datasets
 
 
 # Context manager for test sessions
@@ -351,11 +436,17 @@ async def test_session_context(test_level: str, use_real_llm: bool = False,
 _test_orchestrator: Optional[TestEnvironmentOrchestrator] = None
 
 async def get_test_orchestrator() -> TestEnvironmentOrchestrator:
-    """Get global test orchestrator instance."""
+    """Get global test orchestrator instance with error handling."""
     global _test_orchestrator
     if _test_orchestrator is None:
-        _test_orchestrator = TestEnvironmentOrchestrator()
-        await _test_orchestrator.initialize()
+        try:
+            _test_orchestrator = TestEnvironmentOrchestrator()
+            await _test_orchestrator.initialize()
+            logger.info("Test orchestrator initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize test orchestrator: {e}")
+            _test_orchestrator = None
+            raise
     return _test_orchestrator
 
 

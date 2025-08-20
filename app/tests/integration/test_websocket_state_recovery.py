@@ -163,14 +163,7 @@ class TestWebSocketStateRecovery:
         manager = UnifiedWebSocketManager()
         helper = StateRecoveryTestHelper()
         
-        # Ensure telemetry is properly initialized
-        if not hasattr(manager, 'telemetry') or not isinstance(manager.telemetry, dict):
-            manager.telemetry = {
-                "connections_opened": 0, "connections_closed": 0,
-                "messages_sent": 0, "messages_received": 0,
-                "errors_handled": 0, "circuit_breaks": 0,
-                "start_time": time.time()
-            }
+        # Telemetry is now managed by TelemetryManager, so no manual initialization needed
         
         return {"manager": manager, "helper": helper}
     
@@ -502,14 +495,7 @@ class TestWebSocketStateRecoveryPerformance:
         """Test WebSocket performance under connection load."""
         manager = UnifiedWebSocketManager()
         
-        # Ensure telemetry is initialized
-        if not hasattr(manager, 'telemetry') or not isinstance(manager.telemetry, dict):
-            manager.telemetry = {
-                "connections_opened": 0, "connections_closed": 0,
-                "messages_sent": 0, "messages_received": 0,
-                "errors_handled": 0, "circuit_breaks": 0,
-                "start_time": time.time()
-            }
+        # Telemetry is now managed by TelemetryManager
         
         start_time = time.time()
         connections = []
@@ -658,6 +644,8 @@ class TestWebSocketStateRecoveryErrorScenarios:
 @pytest.mark.asyncio
 async def test_comprehensive_websocket_reconnection_and_state_recovery():
     """Comprehensive integration test covering all reconnection and state recovery scenarios."""
+    # Reset singleton to ensure clean state for this test
+    UnifiedWebSocketManager._instance = None
     manager = UnifiedWebSocketManager()
     helper = StateRecoveryTestHelper()
     user_id = "comprehensive_test_user"
@@ -769,6 +757,8 @@ async def test_comprehensive_websocket_reconnection_and_state_recovery():
 @pytest.mark.asyncio
 async def test_no_message_loss_during_reconnection():
     """Critical test ensuring zero message loss during reconnection scenarios."""
+    # Reset singleton to ensure clean state for this test
+    UnifiedWebSocketManager._instance = None
     manager = UnifiedWebSocketManager()
     user_id = "zero_loss_test_user"
     message_tracker = []

@@ -45,20 +45,20 @@ class TestCustomDeploymentConfig:
         health_checker = Mock()
         domain_manager = Mock()
         
-        # Setup service discovery for testing
-        with tempfile.TemporaryDirectory() as temp_dir:
-            service_discovery = ServiceDiscovery(Path(temp_dir))
-            
-            return {
-                "deployment_manager": deployment_manager,
-                "config_validator": config_validator,
-                "environment_loader": environment_loader,
-                "resource_scaler": resource_scaler,
-                "health_checker": health_checker,
-                "domain_manager": domain_manager,
-                "service_discovery": service_discovery,
-                "temp_config_dir": temp_dir
-            }
+        # Mock service discovery for testing to avoid file system issues
+        service_discovery = Mock()
+        service_discovery.register_service_for_cors = Mock()
+        
+        return {
+            "deployment_manager": deployment_manager,
+            "config_validator": config_validator,
+            "environment_loader": environment_loader,
+            "resource_scaler": resource_scaler,
+            "health_checker": health_checker,
+            "domain_manager": domain_manager,
+            "service_discovery": service_discovery,
+            "temp_config_dir": "/tmp/mock_dir"
+        }
 
     @pytest.mark.asyncio
     async def test_01_custom_environment_variable_injection(self, enterprise_deployment_infrastructure):

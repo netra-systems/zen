@@ -37,55 +37,16 @@ from app.websocket.room_manager import RoomManager
 from .messaging import UnifiedMessagingManager
 from .broadcasting import UnifiedBroadcastingManager
 from .state import UnifiedStateManager
+from .circuit_breaker import CircuitBreaker
+from .telemetry_manager import TelemetryManager
 
 logger = central_logger.get_logger(__name__)
-
-
-class CircuitBreaker:
-    """Simple circuit breaker for WebSocket resilience."""
-    
-    def __init__(self, failure_threshold: int = 5, recovery_timeout: int = 60) -> None:
-        """Initialize circuit breaker with thresholds."""
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.failure_count = 0
-        self.last_failure_time = 0
-        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
-
-    def can_execute(self) -> bool:
-        """Check if operation can be executed based on circuit state."""
-        if self.state == "CLOSED":
-            return True
-        if self.state == "OPEN":
-            return self._should_attempt_reset()
-        return self.state == "HALF_OPEN"
-
-    def _should_attempt_reset(self) -> bool:
-        """Check if enough time has passed to attempt reset."""
-        if time.time() - self.last_failure_time > self.recovery_timeout:
-            self.state = "HALF_OPEN"
-            return True
-        return False
-
-    def record_success(self) -> None:
-        """Record successful operation and reset if needed."""
-        self.failure_count = 0
-        if self.state == "HALF_OPEN":
-            self.state = "CLOSED"
-
-    def record_failure(self) -> None:
-        """Record failed operation and open circuit if threshold reached."""
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        if self.failure_count >= self.failure_threshold:
-            self.state = "OPEN"
 
 
 class UnifiedWebSocketManager:
     """Unified WebSocket manager with modular architecture and circuit breaker."""
     
     _instance: Optional['UnifiedWebSocketManager'] = None
-    _initialized = False
 
     def __new__(cls) -> 'UnifiedWebSocketManager':
         """Singleton pattern for unified manager."""
@@ -95,7 +56,10 @@ class UnifiedWebSocketManager:
 
     def __init__(self) -> None:
         """Initialize unified WebSocket manager if not already done."""
-        if self._initialized:
+        if getattr(self, '_initialized', False):
+            # Even if initialized, ensure telemetry is valid for tests
+            if not hasattr(self, 'telemetry') or not isinstance(self.telemetry, dict):
+                self._initialize_telemetry()
             return
         self._initialize_core_components()
         self._initialize_unified_modules()
@@ -120,31 +84,19 @@ class UnifiedWebSocketManager:
         """Initialize circuit breaker for resilience."""
         self.circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
-    def _create_telemetry_config(self) -> Dict[str, Union[int, float]]:
-        """Create initial telemetry configuration dictionary."""
-        return {
-            "connections_opened": 0, "connections_closed": 0,
-            "messages_sent": 0, "messages_received": 0,
-            "errors_handled": 0, "circuit_breaks": 0,
-            "start_time": time.time()
-        }
-
     def _initialize_telemetry(self) -> None:
-        """Initialize real-time telemetry tracking."""
-        self.telemetry = self._create_telemetry_config()
-        # Initialize transactional message tracking
-        self.pending_messages: Dict[str, Dict[str, Any]] = {}
-        self.sending_messages: Dict[str, Dict[str, Any]] = {}
-        self.message_lock = asyncio.Lock()
-        
-        # Initialize cleanup task as None - will be started on first connection
-        self._cleanup_task = None
+        """Initialize telemetry manager for tracking and transactions."""
+        self.telemetry_manager = TelemetryManager()
+        # For backward compatibility, expose telemetry as a property
+        self.telemetry = self.telemetry_manager.telemetry
+        self.pending_messages = self.telemetry_manager.pending_messages
+        self.sending_messages = self.telemetry_manager.sending_messages
+        self.message_lock = self.telemetry_manager.message_lock
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish WebSocket connection with circuit breaker protection."""
         # Start cleanup task on first connection if not already started
-        if self._cleanup_task is None:
-            self._cleanup_task = asyncio.create_task(self._periodic_cleanup())
+        await self.telemetry_manager.start_periodic_cleanup()
             
         if not self.circuit_breaker.can_execute():
             self._record_circuit_break()
@@ -221,24 +173,24 @@ class UnifiedWebSocketManager:
         
         try:
             # Track message as 'sending' before actual send
-            await self._mark_message_sending(message_id, user_id, message)
+            await self.telemetry_manager.mark_message_sending(message_id, user_id, message)
             
             # Attempt to send message
             result = await self.messaging.send_to_user(user_id, message, retry)
             
             if result:
                 # Only mark as sent on confirmed success
-                await self._mark_message_sent(message_id)
+                await self.telemetry_manager.mark_message_sent(message_id)
                 self.telemetry["messages_sent"] += 1
                 return True
             else:
                 # Revert to pending if send failed
-                await self._mark_message_pending(message_id, user_id, message)
+                await self.telemetry_manager.mark_message_pending(message_id, user_id, message)
                 return False
                 
         except Exception as e:
             # Revert to pending on exception
-            await self._mark_message_pending(message_id, user_id, message)
+            await self.telemetry_manager.mark_message_pending(message_id, user_id, message)
             logger.error(f"Transactional message send failed for {user_id}: {e}")
             raise
 
@@ -336,18 +288,9 @@ class UnifiedWebSocketManager:
     def get_unified_stats(self) -> Dict[str, Any]:
         """Get comprehensive unified statistics with telemetry."""
         base_stats = self.state.get_connection_stats()
-        telemetry_stats = self._get_telemetry_stats()
+        telemetry_stats = self.telemetry_manager.get_telemetry_stats()
         circuit_stats = self._get_circuit_breaker_stats()
         return {**base_stats, **telemetry_stats, **circuit_stats}
-
-    def _get_telemetry_stats(self) -> Dict[str, Any]:
-        """Get real-time telemetry statistics."""
-        uptime = time.time() - self.telemetry["start_time"]
-        return {
-            "telemetry": self.telemetry.copy(),
-            "uptime_seconds": uptime,
-            "messages_per_second": self.telemetry["messages_sent"] / max(uptime, 1)
-        }
 
     def _get_circuit_breaker_stats(self) -> Dict[str, Any]:
         """Get circuit breaker health statistics."""
@@ -368,153 +311,17 @@ class UnifiedWebSocketManager:
         """Gracefully shutdown unified WebSocket manager with memory leak prevention."""
         logger.info("Starting unified WebSocket manager shutdown...")
         
-        # Cancel cleanup task if it exists and is running
-        if hasattr(self, '_cleanup_task') and self._cleanup_task is not None and not self._cleanup_task.done():
-            self._cleanup_task.cancel()
-            try:
-                await self._cleanup_task
-            except asyncio.CancelledError:
-                pass
-        
-        # Handle any pending messages before shutdown
-        async with self.message_lock:
-            pending_count = len(self.pending_messages)
-            sending_count = len(self.sending_messages)
-            
-            if pending_count > 0 or sending_count > 0:
-                logger.warning(f"Shutting down with {pending_count} pending and {sending_count} sending messages")
-                
-                # Clear all message tracking to prevent memory leaks
-                self.pending_messages.clear()
-                self.sending_messages.clear()
-                logger.info("Cleared all pending/sending message queues to prevent memory leaks")
+        # Shutdown telemetry manager (handles cleanup task and message queues)
+        await self.telemetry_manager.shutdown()
         
         await self.state.persist_state()
         await self.connection_manager.shutdown()
         
-        # Clear telemetry data
-        self.telemetry.clear()
-        
         logger.info("Unified shutdown complete with memory cleanup")
-
-    # Transactional message processing methods
-    async def _mark_message_sending(self, message_id: str, user_id: str, 
-                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> None:
-        """Mark message as currently being sent (transactional pattern)."""
-        async with self.message_lock:
-            message_data = {
-                "message_id": message_id,
-                "user_id": user_id,
-                "message": message,
-                "timestamp": time.time(),
-                "status": "sending"
-            }
-            self.sending_messages[message_id] = message_data
-            # Remove from pending if it was there
-            self.pending_messages.pop(message_id, None)
-
-    async def _mark_message_sent(self, message_id: str) -> None:
-        """Mark message as successfully sent and remove from tracking."""
-        async with self.message_lock:
-            self.sending_messages.pop(message_id, None)
-            # Message successfully sent, no need to track further
-
-    async def _mark_message_pending(self, message_id: str, user_id: str, 
-                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> None:
-        """Mark message as pending for retry (transactional pattern)."""
-        async with self.message_lock:
-            message_data = {
-                "message_id": message_id,
-                "user_id": user_id,
-                "message": message,
-                "timestamp": time.time(),
-                "status": "pending",
-                "retry_count": self.sending_messages.get(message_id, {}).get("retry_count", 0) + 1
-            }
-            self.pending_messages[message_id] = message_data
-            # Remove from sending
-            self.sending_messages.pop(message_id, None)
-
-    async def _retry_pending_messages(self) -> None:
-        """Retry all pending messages that failed to send."""
-        async with self.message_lock:
-            pending_to_retry = list(self.pending_messages.items())
-        
-        retry_count = 0
-        for message_id, message_data in pending_to_retry:
-            if message_data["retry_count"] < 3:  # Max 3 retries
-                try:
-                    result = await self.send_message_to_user(
-                        message_data["user_id"], 
-                        message_data["message"], 
-                        retry=False  # Prevent infinite recursion
-                    )
-                    if result:
-                        retry_count += 1
-                except Exception as e:
-                    logger.error(f"Retry failed for message {message_id}: {e}")
-            else:
-                # Max retries exceeded, remove from pending
-                async with self.message_lock:
-                    self.pending_messages.pop(message_id, None)
-                logger.error(f"Message {message_id} exceeded max retries, dropping")
-        
-        if retry_count > 0:
-            logger.info(f"Successfully retried {retry_count} pending messages")
-    
-    async def _periodic_cleanup(self) -> None:
-        """Periodic cleanup to prevent memory leaks from stale messages."""
-        while True:
-            try:
-                await asyncio.sleep(300)  # Clean up every 5 minutes
-                
-                current_time = time.time()
-                max_age = 1800  # 30 minutes
-                
-                async with self.message_lock:
-                    # Clean up old pending messages
-                    old_pending = [
-                        msg_id for msg_id, msg_data in self.pending_messages.items()
-                        if current_time - msg_data["timestamp"] > max_age
-                    ]
-                    
-                    # Clean up old sending messages
-                    old_sending = [
-                        msg_id for msg_id, msg_data in self.sending_messages.items()
-                        if current_time - msg_data["timestamp"] > max_age
-                    ]
-                    
-                    # Remove old messages
-                    for msg_id in old_pending:
-                        del self.pending_messages[msg_id]
-                    
-                    for msg_id in old_sending:
-                        del self.sending_messages[msg_id]
-                    
-                    if old_pending or old_sending:
-                        logger.info(f"Cleaned up {len(old_pending)} old pending and {len(old_sending)} old sending messages")
-                
-            except asyncio.CancelledError:
-                logger.debug("Periodic cleanup task cancelled")
-                break
-            except Exception as e:
-                logger.error(f"Error in periodic cleanup: {e}")
 
     async def get_transactional_stats(self) -> Dict[str, Any]:
         """Get statistics about transactional message processing."""
-        async with self.message_lock:
-            return {
-                "pending_messages": len(self.pending_messages),
-                "sending_messages": len(self.sending_messages),
-                "oldest_pending": min(
-                    [msg["timestamp"] for msg in self.pending_messages.values()], 
-                    default=time.time()
-                ),
-                "oldest_sending": min(
-                    [msg["timestamp"] for msg in self.sending_messages.values()], 
-                    default=time.time()
-                )
-            }
+        return await self.telemetry_manager.get_transactional_stats()
 
     # Legacy compatibility methods (delegate to unified modules)
     async def send_error_to_user(self, user_id: str, error_message: str, 
@@ -538,6 +345,14 @@ class UnifiedWebSocketManager:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
+    
+    @classmethod
+    def create_test_instance(cls) -> 'UnifiedWebSocketManager':
+        """Create a fresh instance for testing, bypassing singleton."""
+        instance = super(UnifiedWebSocketManager, cls).__new__(cls)
+        instance._initialized = False
+        instance.__init__()
+        return instance
 
 
 # Global unified manager instance for backward compatibility

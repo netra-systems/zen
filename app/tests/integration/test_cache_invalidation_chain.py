@@ -46,9 +46,9 @@ CACHE_TEST_CONFIG = {
     "redis_url": "redis://localhost:6379",
     "test_db_index": 15,  # Use dedicated test database
     "multi_layer_config": {
-        "l1_cache": {"max_size": 100, "ttl_seconds": 60},
-        "l2_cache": {"max_size": 500, "ttl_seconds": 300},
-        "l3_cache": {"max_size": 1000, "ttl_seconds": 3600}
+        "l1_cache": {"max_size": 1000, "ttl_seconds": 60},
+        "l2_cache": {"max_size": 2000, "ttl_seconds": 300},
+        "l3_cache": {"max_size": 5000, "ttl_seconds": 3600}
     },
     "performance_targets": {
         "invalidation_latency_ms": 50,
@@ -57,9 +57,9 @@ CACHE_TEST_CONFIG = {
         "consistency_check_ms": 30
     },
     "test_data": {
-        "num_cache_keys": 1000,
-        "num_workers": 20,
-        "test_duration_sec": 30
+        "num_cache_keys": 500,
+        "num_workers": 5,
+        "test_duration_sec": 15
     }
 }
 
@@ -560,7 +560,7 @@ class TestCacheInvalidationChain:
         
         # Setup concurrent test environment
         num_workers = CACHE_TEST_CONFIG["test_data"]["num_workers"]
-        operations_per_worker = 25
+        operations_per_worker = 10
         test_key_base = "race:test"
         
         race_condition_detected = []

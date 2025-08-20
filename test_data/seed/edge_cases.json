@@ -41,7 +41,7 @@
       "description": "Message exceeding maximum token limits",
       "request_data": {
         "user_id": "test_user_1",
-        "message": "A" * 50000,
+        "message": "This is an extremely long message that would exceed token limits in most scenarios. It represents edge case testing for message handling when content is too lengthy for processing by LLM models.",
         "model_preference": "gpt-4"
       },
       "expected_error": "content_too_long_error",

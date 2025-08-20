@@ -453,20 +453,20 @@ class TestSizeValidator:
         """Generate markdown format report"""
         lines = []
         lines.append("# Test Size Compliance Report")
-        lines.append()
+        lines.append("")
         
         summary = results["summary"]
         lines.append("## Summary")
-        lines.append()
+        lines.append("")
         lines.append(f"- **Total test files scanned:** {results['total_files']}")
         lines.append(f"- **Files exceeding {self.MAX_TEST_FILE_LINES} line limit:** {summary['files_exceeding_limit']}")
         lines.append(f"- **Functions exceeding {self.MAX_TEST_FUNCTION_LINES} line limit:** {summary['functions_exceeding_limit']}")
         lines.append(f"- **Total violations:** {summary['total_violations']}")
-        lines.append()
+        lines.append("")
         
         if results["violations"]:
             lines.append("## Violations")
-            lines.append()
+            lines.append("")
             
             # Group violations by type
             file_violations = [v for v in results["violations"] if v["violation_type"] == "file_size"]
@@ -474,32 +474,32 @@ class TestSizeValidator:
             
             if file_violations:
                 lines.append("### File Size Violations")
-                lines.append()
+                lines.append("")
                 lines.append("| File | Lines | Limit | Fix Suggestion |")
                 lines.append("|------|-------|-------|----------------|")
                 for v in file_violations:
                     lines.append(f"| {v['file_path']} | {v['actual_value']} | {v['expected_value']} | {v['fix_suggestion']} |")
-                lines.append()
+                lines.append("")
             
             if func_violations:
                 lines.append("### Function Size Violations")
-                lines.append()
+                lines.append("")
                 lines.append("| File | Function | Lines | Limit | Fix Suggestion |")
                 lines.append("|------|----------|-------|-------|----------------|")
                 for v in func_violations:
                     lines.append(f"| {v['file_path']} | {v['function_name']} | {v['actual_value']} | {v['expected_value']} | {v['fix_suggestion']} |")
-                lines.append()
+                lines.append("")
         
         # Add splitting suggestions for large files
         lines.append("## Splitting Suggestions")
-        lines.append()
+        lines.append("")
         for file_path, analysis in results["file_analyses"].items():
             if analysis["splitting_suggestions"]:
                 lines.append(f"### {file_path}")
-                lines.append()
+                lines.append("")
                 for suggestion in analysis["splitting_suggestions"]:
                     lines.append(f"- {suggestion}")
-                lines.append()
+                lines.append("")
         
         return "\n".join(lines)
 

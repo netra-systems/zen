@@ -13,11 +13,12 @@ from typing import Dict, Any, Optional, List, Callable
 from uuid import uuid4
 
 from app.agents.base_agent import BaseSubAgent
-from app.agents.interfaces import BaseAgentProtocol
+from app.agents.interfaces import BaseAgentProtocol, AgentStateProtocol
 from app.logging_config import central_logger
 from app.llm.llm_manager import LLMManager
 from app.ws_manager import get_manager
 from app.schemas import SubAgentLifecycle
+from app.schemas.agent_result_types import TypedAgentResult
 
 logger = central_logger.get_logger(__name__)
 
@@ -39,6 +40,41 @@ class ExampleMessageProcessor(BaseSubAgent):
             'scaling': self._process_scaling_analysis,
             'advanced': self._process_advanced_optimization
         }
+        
+    async def execute(self, state: AgentStateProtocol, run_id: str, stream_updates: bool = False) -> TypedAgentResult:
+        """Execute the example message processor with agent state interface."""
+        try:
+            # Extract message content from state
+            user_request = getattr(state, 'user_request', '')
+            user_id = getattr(state, 'user_id', 'default_user')
+            
+            # Create example message metadata (default for interface compliance)
+            metadata = {
+                'example_message_id': run_id,
+                'category': 'general',
+                'complexity': 'basic',
+                'business_value': 'conversion',
+                'estimated_time': '1-2 minutes'
+            }
+            
+            # Process the message
+            result = await self.process_example_message(user_id, user_request, metadata)
+            
+            return TypedAgentResult(
+                success=True,
+                result=result,
+                error=None,
+                metadata={'agent_name': self.name, 'run_id': run_id}
+            )
+            
+        except Exception as e:
+            logger.error(f"Example message processor execution failed: {e}")
+            return TypedAgentResult(
+                success=False,
+                result=None,
+                error=str(e),
+                metadata={'agent_name': self.name, 'run_id': run_id}
+            )
         
     async def process_example_message(
         self,

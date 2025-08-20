@@ -337,6 +337,8 @@ class MessageHandlerService(IMessageHandlerService):
             await self.handle_stop_agent(user_id)
         elif message_type == "switch_thread":
             await self.handle_switch_thread(user_id, payload, None)
+        elif message_type == "example_message":
+            await self.handle_example_message(user_id, payload, None)
         else:
             await manager.send_error(user_id, f"Unknown message type: {message_type}")
 
@@ -468,6 +470,50 @@ class MessageHandlerService(IMessageHandlerService):
                 "error": "Context retrieval failed"
             }
 
+    async def handle_example_message(
+        self,
+        user_id: str,
+        payload: Dict[str, Any],
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle example_message message type."""
+        try:
+            logger.info(f"Processing example message for user {user_id}")
+            
+            # Import the example message handler with deferred import to avoid circular dependencies
+            try:
+                from app.handlers.example_message_handler import handle_example_message
+            except ImportError as import_error:
+                logger.error(f"Failed to import example message handler: {import_error}")
+                await manager.send_error(user_id, "Example message handler not available")
+                return
+            
+            # Add user_id to payload if not present
+            if "user_id" not in payload:
+                payload["user_id"] = user_id
+                
+            # Process the example message
+            response = await handle_example_message(payload)
+            
+            # Send success response back to user
+            success_message = {
+                "type": "example_message_response",
+                "payload": {
+                    "status": response.status,
+                    "message_id": response.message_id,
+                    "result": response.result,
+                    "processing_time_ms": response.processing_time_ms,
+                    "business_insights": response.business_insights
+                }
+            }
+            
+            await manager.send_message(user_id, success_message)
+            logger.info(f"Successfully processed example message for user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error processing example message for user {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, f"Failed to process example message: {str(e)}")
+    
     def _format_message_for_history(self, message) -> Dict[str, Any]:
         """Format a database message for conversation history."""
         return {

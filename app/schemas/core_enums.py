@@ -109,6 +109,10 @@ class WebSocketMessageType(str, Enum):
     MCP_TOOL_RESULT = "mcp_tool_result"
     MCP_SERVER_CONNECTED = "mcp_server_connected"
     MCP_SERVER_DISCONNECTED = "mcp_server_disconnected"
+    
+    # Example message handling for DEV MODE
+    EXAMPLE_MESSAGE = "example_message"
+    EXAMPLE_MESSAGE_RESPONSE = "example_message_response"
 
 
 class WebSocketConnectionState(str, Enum):

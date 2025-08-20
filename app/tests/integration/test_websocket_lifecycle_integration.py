@@ -10,7 +10,7 @@ import asyncio
 import json
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
@@ -33,7 +33,7 @@ class TestWebSocketLifecycleIntegration:
             email="ws@example.com",
             username="wsuser",
             is_active=True,
-            created_at=datetime.utcnow()
+            created_at=datetime.now(timezone.utc)
         )
     
     @pytest.fixture
@@ -153,7 +153,7 @@ class TestWebSocketLifecycleIntegration:
             message = {
                 "type": "thread_update",
                 "data": {"thread_id": "thread_123", "content": "New message"},
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
             
             # Publish message through Redis

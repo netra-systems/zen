@@ -42,13 +42,24 @@ def mock_justified(reason: str) -> Callable:
         # Store justification as function attribute for validation
         func.__mock_justification__ = reason
         
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
-            return func(*args, **kwargs)
+        import asyncio
         
-        # Preserve the justification on the wrapper
-        wrapper.__mock_justification__ = reason
-        return wrapper
+        if asyncio.iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(*args, **kwargs) -> Any:
+                return await func(*args, **kwargs)
+            
+            # Preserve the justification on the wrapper
+            async_wrapper.__mock_justification__ = reason
+            return async_wrapper
+        else:
+            @wraps(func)
+            def wrapper(*args, **kwargs) -> Any:
+                return func(*args, **kwargs)
+            
+            # Preserve the justification on the wrapper
+            wrapper.__mock_justification__ = reason
+            return wrapper
     
     return decorator
 

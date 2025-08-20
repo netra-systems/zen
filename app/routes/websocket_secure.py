@@ -526,10 +526,7 @@ async def get_secure_websocket_config():
 
 
 @router.websocket("/ws/secure")
-async def secure_websocket_endpoint(
-    websocket: WebSocket,
-    db_session: AsyncSession = Depends(get_async_db)
-):
+async def secure_websocket_endpoint(websocket: WebSocket):
     """Secure WebSocket endpoint with comprehensive security measures.
     
     Security features:
@@ -551,110 +548,113 @@ async def secure_websocket_endpoint(
         
         logger.info("Secure WebSocket connection request - CORS validated")
         
-        # Step 2: Create secure manager with injected database session
-        async with get_secure_websocket_manager(db_session) as manager:
+        # Step 2: Create database session and secure manager
+        async with get_async_db() as db_session:
+            async with get_secure_websocket_manager(db_session) as manager:
+                
+                # Step 3: Validate secure authentication
+                session_info = await manager.validate_secure_auth(websocket)
+                user_id = session_info["user_id"]
+                
+                # Step 4: Validate user exists in database
+                if not await manager.validate_user_exists(user_id):
+                    logger.error(f"WebSocket connection denied: User {user_id} validation failed")
+                    await websocket.close(code=1008, reason="User validation failed")
+                    return
             
-            # Step 3: Validate secure authentication
-            session_info = await manager.validate_secure_auth(websocket)
-            user_id = session_info["user_id"]
-            
-            # Step 4: Validate user exists in database
-            if not await manager.validate_user_exists(user_id):
-                logger.error(f"WebSocket connection denied: User {user_id} validation failed")
-                await websocket.close(code=1008, reason="User validation failed")
-                return
-            
-            # Step 5: Accept WebSocket connection
-            # Handle subprotocol authentication if used
-            protocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
-            selected_protocol = None
-            for protocol in protocols:
-                protocol = protocol.strip()
-                if protocol.startswith("jwt."):
-                    selected_protocol = "jwt-auth"
-                    break
-            
-            if selected_protocol:
-                await websocket.accept(subprotocol=selected_protocol)
-            else:
-                await websocket.accept()
-            
-            logger.info(f"Secure WebSocket connection accepted for user: {user_id}")
-            
-            # Step 6: Register connection
-            connection_id = await manager.add_connection(user_id, websocket, session_info)
-            
-            # Step 7: Send welcome message
-            welcome_message = {
-                "type": "connection_established",
-                "payload": {
-                    "connection_id": connection_id,
-                    "user_id": user_id,
-                    "auth_method": session_info["auth_method"],
-                    "server_time": datetime.now(timezone.utc).isoformat(),
-                    "features": SECURE_WEBSOCKET_CONFIG["features"],
-                    "limits": SECURE_WEBSOCKET_CONFIG["limits"]
+                
+                # Step 5: Accept WebSocket connection
+                # Handle subprotocol authentication if used
+                protocols = websocket.headers.get("sec-websocket-protocol", "").split(",")
+                selected_protocol = None
+                for protocol in protocols:
+                    protocol = protocol.strip()
+                    if protocol.startswith("jwt."):
+                        selected_protocol = "jwt-auth"
+                        break
+                
+                if selected_protocol:
+                    await websocket.accept(subprotocol=selected_protocol)
+                else:
+                    await websocket.accept()
+                
+                logger.info(f"Secure WebSocket connection accepted for user: {user_id}")
+                
+                # Step 6: Register connection
+                connection_id = await manager.add_connection(user_id, websocket, session_info)
+                
+                # Step 7: Send welcome message
+                welcome_message = {
+                    "type": "connection_established",
+                    "payload": {
+                        "connection_id": connection_id,
+                        "user_id": user_id,
+                        "auth_method": session_info["auth_method"],
+                        "server_time": datetime.now(timezone.utc).isoformat(),
+                        "features": SECURE_WEBSOCKET_CONFIG["features"],
+                        "limits": SECURE_WEBSOCKET_CONFIG["limits"]
+                    }
                 }
-            }
-            await websocket.send_json(welcome_message)
+                await websocket.send_json(welcome_message)
             
-            # Step 8: Message handling loop with heartbeat
-            heartbeat_interval = SECURE_WEBSOCKET_CONFIG["limits"]["heartbeat_interval"]
-            last_heartbeat = time.time()
-            error_count = 0
-            max_errors = 3
-            
-            logger.info(f"Secure WebSocket ready for messages: {connection_id}")
-            
-            while True:
-                try:
-                    # Receive message with timeout
-                    raw_message = await asyncio.wait_for(
-                        websocket.receive_text(),
-                        timeout=heartbeat_interval
-                    )
-                    
-                    # Handle message
-                    success = await manager.handle_message(connection_id, raw_message)
-                    if success:
-                        error_count = 0  # Reset on success
-                        last_heartbeat = time.time()
-                    else:
-                        error_count += 1
-                    
-                    if error_count >= max_errors:
-                        logger.error(f"Too many errors for connection {connection_id}")
+                
+                # Step 8: Message handling loop with heartbeat
+                heartbeat_interval = SECURE_WEBSOCKET_CONFIG["limits"]["heartbeat_interval"]
+                last_heartbeat = time.time()
+                error_count = 0
+                max_errors = 3
+                
+                logger.info(f"Secure WebSocket ready for messages: {connection_id}")
+                
+                while True:
+                    try:
+                        # Receive message with timeout
+                        raw_message = await asyncio.wait_for(
+                            websocket.receive_text(),
+                            timeout=heartbeat_interval
+                        )
+                        
+                        # Handle message
+                        success = await manager.handle_message(connection_id, raw_message)
+                        if success:
+                            error_count = 0  # Reset on success
+                            last_heartbeat = time.time()
+                        else:
+                            error_count += 1
+                        
+                        if error_count >= max_errors:
+                            logger.error(f"Too many errors for connection {connection_id}")
+                            break
+                            
+                    except asyncio.TimeoutError:
+                        # Send heartbeat
+                        current_time = time.time()
+                        if current_time - last_heartbeat > heartbeat_interval:
+                            try:
+                                await websocket.send_json({
+                                    "type": "heartbeat",
+                                    "timestamp": current_time,
+                                    "connection_id": connection_id
+                                })
+                                last_heartbeat = current_time
+                            except Exception as e:
+                                logger.warning(f"Heartbeat failed for {connection_id}: {e}")
+                                break
+                        continue
+                        
+                    except WebSocketDisconnect as e:
+                        logger.info(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
                         break
                         
-                except asyncio.TimeoutError:
-                    # Send heartbeat
-                    current_time = time.time()
-                    if current_time - last_heartbeat > heartbeat_interval:
-                        try:
-                            await websocket.send_json({
-                                "type": "heartbeat",
-                                "timestamp": current_time,
-                                "connection_id": connection_id
-                            })
-                            last_heartbeat = current_time
-                        except Exception as e:
-                            logger.warning(f"Heartbeat failed for {connection_id}: {e}")
+                    except Exception as e:
+                        error_count += 1
+                        logger.error(f"Error in message loop for {connection_id}: {e}", exc_info=True)
+                        
+                        if error_count >= max_errors:
+                            logger.error(f"Too many errors for {connection_id}, closing connection")
                             break
-                    continue
-                    
-                except WebSocketDisconnect as e:
-                    logger.info(f"WebSocket disconnected: {connection_id} ({e.code}: {e.reason})")
-                    break
-                    
-                except Exception as e:
-                    error_count += 1
-                    logger.error(f"Error in message loop for {connection_id}: {e}", exc_info=True)
-                    
-                    if error_count >= max_errors:
-                        logger.error(f"Too many errors for {connection_id}, closing connection")
-                        break
-                    
-                    await asyncio.sleep(0.1)  # Brief pause after error
+                        
+                        await asyncio.sleep(0.1)  # Brief pause after error
     
     except HTTPException as e:
         # Authentication/authorization errors

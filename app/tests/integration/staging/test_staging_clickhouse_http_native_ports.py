@@ -19,8 +19,7 @@ from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
-# Configure pytest-asyncio for all async tests
-pytestmark = pytest.mark.asyncio
+# Individual test methods will use @pytest.mark.asyncio decorator
 
 from test_framework.mock_utils import mock_justified
 
@@ -155,6 +154,7 @@ def clickhouse_manager():
 class TestStagingClickHouseHttpNativePorts:
     """Test ClickHouse HTTP/Native port configuration and behavior in staging."""
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse connection configuration is external system not available in test")
     async def test_correct_port_configuration_http_native_https(self, clickhouse_manager):
         """Test correct port configuration for HTTP (8123), Native (9000), and HTTPS (8443)."""
@@ -183,6 +183,7 @@ class TestStagingClickHouseHttpNativePorts:
         assert https_conn["protocol"] == "https"
         assert "https://staging-clickhouse.netra.ai:8443" in https_conn["url"]
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse connection mode selection is external system behavior not available in test")
     async def test_connection_mode_selection_based_on_environment(self, clickhouse_manager):
         """Test connection mode selection based on staging environment requirements."""
@@ -219,6 +220,7 @@ class TestStagingClickHouseHttpNativePorts:
         assert summary["connections_by_protocol"]["native"] == 1
         assert summary["connections_by_protocol"]["https"] == 1
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse query execution is external system behavior not available in test")
     async def test_query_execution_across_connection_types(self, clickhouse_manager):
         """Test query execution across different connection types."""
@@ -259,6 +261,7 @@ class TestStagingClickHouseHttpNativePorts:
         assert "native" in protocols_executed
         assert "https" in protocols_executed
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse data consistency is external system behavior not available in test")
     async def test_data_consistency_across_connection_modes(self, clickhouse_manager):
         """Test data consistency across different connection modes."""
@@ -288,6 +291,7 @@ class TestStagingClickHouseHttpNativePorts:
         assert native_conn_updated["query_count"] == 1
         assert https_conn_updated["query_count"] == 1
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse performance testing is external system behavior not available in test")
     async def test_performance_differences_between_connection_types(self, clickhouse_manager):
         """Test performance differences between HTTP, Native, and HTTPS connections."""
@@ -333,6 +337,7 @@ class TestStagingClickHouseHttpNativePorts:
         for protocol_metrics in performance_summary.values():
             assert protocol_metrics["avg_time"] < 0.5  # Under 500ms average
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse URL parsing is external system behavior not available in test")
     async def test_connection_url_validation_and_parsing(self, clickhouse_manager):
         """Test connection URL validation and parsing for staging environment."""
@@ -373,6 +378,7 @@ class TestStagingClickHouseHttpNativePorts:
         for expected, actual in zip(expected_urls, actual_urls):
             assert expected == actual
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse connection pooling is external system behavior not available in test")
     async def test_connection_pooling_across_protocols(self, clickhouse_manager):
         """Test connection pooling behavior across different protocols."""
@@ -413,6 +419,7 @@ class TestStagingClickHouseHttpNativePorts:
             assert protocol in performance_metrics
             assert performance_metrics[protocol]["total_queries"] == pool_sizes[protocol]
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse configuration validation is external system behavior not available in test")
     async def test_staging_environment_configuration_validation(self, clickhouse_manager):
         """Test staging-specific ClickHouse configuration validation."""
@@ -453,6 +460,7 @@ class TestStagingClickHouseHttpNativePorts:
         
         assert all(staging_indicators.values())
     
+    @pytest.mark.asyncio
     @mock_justified("ClickHouse error handling is external system behavior not available in test")
     async def test_connection_error_handling_and_recovery(self, clickhouse_manager):
         """Test connection error handling and recovery across protocols."""

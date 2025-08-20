@@ -114,6 +114,9 @@ class AgentService(IAgentService):
         elif message_type == "user_message":
             logger.info(f"Processing user_message for user {user_id}, payload keys: {list(payload.keys())}")
             await self.message_handler.handle_user_message(user_id, payload, db_session)
+        elif message_type == "example_message":
+            logger.info(f"Processing example_message for user {user_id}")
+            await self.message_handler.handle_example_message(user_id, payload, db_session)
         elif message_type == "get_thread_history":
             await self.message_handler.handle_thread_history(user_id, db_session)
         elif message_type == "stop_agent":

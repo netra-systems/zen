@@ -75,6 +75,9 @@ class RealLLMConfig:
     cost_tracking: bool = True
     cost_budget_per_run: float = 50.0  # Maximum cost per test run
     testing_mode: TestingMode = TestingMode.DEVELOPMENT
+    use_test_keys: bool = True  # Prefer TEST_* environment variables
+    rate_limit_per_minute: int = 60  # Conservative rate limiting for tests
+    circuit_breaker_threshold: int = 5  # Failures before circuit breaker opens
     
     def __post_init__(self):
         """Initialize default models if none provided."""
@@ -82,31 +85,39 @@ class RealLLMConfig:
             self.models = self._get_default_models()
     
     def _get_default_models(self) -> Dict[str, ModelConfig]:
-        """Get default model configurations."""
+        """Get default model configurations optimized for testing."""
         return {
             "gpt-4": ModelConfig(
                 name="gpt-4-turbo-preview",
                 provider=LLMProvider.OPENAI,
-                max_tokens=4000,
-                temperature=0.3,
+                max_tokens=2000,  # Reduced for testing
+                temperature=0.0,  # Deterministic for testing
                 timeout_seconds=30,
                 cost_per_1k_tokens=0.03
             ),
             "gpt-3.5": ModelConfig(
                 name="gpt-3.5-turbo",
                 provider=LLMProvider.OPENAI,
-                max_tokens=2000,
-                temperature=0.3,
+                max_tokens=1500,  # Reduced for testing
+                temperature=0.0,  # Deterministic for testing
                 timeout_seconds=20,
                 cost_per_1k_tokens=0.002
             ),
             "claude-3": ModelConfig(
                 name="claude-3-opus-20240229",
                 provider=LLMProvider.ANTHROPIC,
-                max_tokens=4000,
-                temperature=0.3,
+                max_tokens=2000,  # Reduced for testing
+                temperature=0.0,  # Deterministic for testing
                 timeout_seconds=30,
                 cost_per_1k_tokens=0.075
+            ),
+            "gemini-2.5-flash": ModelConfig(
+                name="gemini-2.5-flash",
+                provider=LLMProvider.MOCK,  # Placeholder for Google
+                max_tokens=2000,
+                temperature=0.0,
+                timeout_seconds=25,
+                cost_per_1k_tokens=0.001
             ),
             "mock": ModelConfig(
                 name="mock-model",
@@ -126,6 +137,9 @@ class RealLLMConfigManager:
         self.config = self._load_configuration()
         self.cost_tracker = CostTracker(self.config.cost_budget_per_run)
         self.response_cache = ResponseCache() if self.config.cache_responses else None
+        self.api_keys = self._load_api_keys()
+        self.rate_limiter = RateLimiter(self.config.rate_limit_per_minute)
+        self.circuit_breaker = CircuitBreaker(self.config.circuit_breaker_threshold)
         
     def _load_configuration(self) -> RealLLMConfig:
         """Load configuration from environment variables."""
@@ -151,20 +165,73 @@ class RealLLMConfigManager:
         
         return config
     
+    def _load_api_keys(self) -> Dict[str, str]:
+        """Load API keys, preferring TEST_* variants."""
+        api_keys = {}
+        
+        # OpenAI API key
+        openai_key = os.getenv('TEST_OPENAI_API_KEY') or os.getenv('OPENAI_API_KEY')
+        if openai_key:
+            api_keys['openai'] = openai_key
+        
+        # Anthropic API key
+        anthropic_key = os.getenv('TEST_ANTHROPIC_API_KEY') or os.getenv('ANTHROPIC_API_KEY')
+        if anthropic_key:
+            api_keys['anthropic'] = anthropic_key
+        
+        # Google API key
+        google_key = os.getenv('TEST_GOOGLE_API_KEY') or os.getenv('GOOGLE_API_KEY')
+        if google_key:
+            api_keys['google'] = google_key
+        
+        return api_keys
+    
+    def get_api_key(self, provider: str) -> Optional[str]:
+        """Get API key for specific provider."""
+        return self.api_keys.get(provider.lower())
+    
+    def has_provider(self, provider: str) -> bool:
+        """Check if provider is available."""
+        return provider.lower() in self.api_keys
+    
     def _validate_api_keys(self):
-        """Validate required API keys are present."""
-        required_keys = {
-            "OPENAI_API_KEY": "OpenAI API key required for real LLM testing",
-            "ANTHROPIC_API_KEY": "Anthropic API key required for real LLM testing"
+        """Validate required API keys are present, preferring TEST_* variants."""
+        required_providers = {
+            "openai": ["TEST_OPENAI_API_KEY", "OPENAI_API_KEY"],
+            "anthropic": ["TEST_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY"],
+            "google": ["TEST_GOOGLE_API_KEY", "GOOGLE_API_KEY"]
         }
         
-        missing_keys = []
-        for key, description in required_keys.items():
-            if not os.getenv(key):
-                missing_keys.append(f"{key}: {description}")
+        available_providers = []
+        warnings = []
+        missing_providers = []
         
-        if missing_keys:
-            raise ValueError(f"Missing API keys for real LLM testing:\n" + "\n".join(missing_keys))
+        for provider, key_options in required_providers.items():
+            found_key = None
+            for key in key_options:
+                if os.getenv(key):
+                    found_key = key
+                    break
+            
+            if found_key:
+                available_providers.append(provider)
+                if not found_key.startswith('TEST_'):
+                    warnings.append(f"Using production {provider.upper()} API key - consider using TEST_{found_key}")
+            else:
+                missing_providers.append(provider)
+        
+        # Log warnings about production keys
+        for warning in warnings:
+            logger.warning(warning)
+        
+        # Require at least one provider to be available
+        if not available_providers:
+            raise ValueError(f"No API keys found for real LLM testing. Need at least one of: {list(required_providers.keys())}")
+        
+        if missing_providers:
+            logger.info(f"Optional providers not configured: {missing_providers}")
+        
+        logger.info(f"Real LLM testing configured with providers: {available_providers}")
     
     def is_enabled(self) -> bool:
         """Check if real LLM testing is enabled."""
@@ -188,6 +255,23 @@ class RealLLMConfigManager:
         cost = (tokens_used / 1000) * model_config.cost_per_1k_tokens
         
         self.cost_tracker.record_usage(model_key, tokens_used, cost, execution_time)
+    
+    async def wait_for_rate_limit(self) -> bool:
+        """Wait for rate limit if necessary."""
+        return await self.rate_limiter.wait_if_needed()
+    
+    def can_make_request(self) -> bool:
+        """Check if request can be made (circuit breaker and rate limit)."""
+        return self.circuit_breaker.can_make_request() and self.rate_limiter.can_make_request()
+    
+    def record_success(self):
+        """Record successful request."""
+        self.circuit_breaker.record_success()
+    
+    def record_failure(self, error: Exception):
+        """Record failed request."""
+        self.circuit_breaker.record_failure()
+        logger.warning(f"LLM request failed: {error}")
 
 
 class CostTracker:
@@ -287,6 +371,14 @@ class RealLLMTestManager:
         if not self.config_manager.is_enabled():
             return self._generate_mock_response(prompt, model_key)
         
+        # Check circuit breaker and rate limiting
+        if not self.config_manager.can_make_request():
+            logger.warning("Request blocked by circuit breaker or rate limit")
+            return self._generate_mock_response(prompt, model_key, circuit_breaker_blocked=True)
+        
+        # Wait for rate limit if needed
+        await self.config_manager.wait_for_rate_limit()
+        
         model_config = self.config_manager.get_model_config(model_key)
         actual_temperature = temperature if temperature is not None else model_config.temperature
         
@@ -323,11 +415,13 @@ class RealLLMTestManager:
             if self.config_manager.response_cache:
                 self.config_manager.response_cache.set(cache_key, response)
             
+            self.config_manager.record_success()
             self.execution_stats["successful_calls"] += 1
             return response
             
         except Exception as e:
             logger.error(f"LLM call failed: {str(e)}")
+            self.config_manager.record_failure(e)
             self.execution_stats["failed_calls"] += 1
             
             if self.config_manager.config.max_retries > 0:
@@ -392,9 +486,14 @@ class RealLLMTestManager:
         except Exception as e:
             return await self._retry_llm_call(model_config, prompt, temperature, attempt + 1)
     
-    def _generate_mock_response(self, prompt: str, model_key: str, budget_exceeded: bool = False) -> Dict[str, Any]:
+    def _generate_mock_response(self, prompt: str, model_key: str, budget_exceeded: bool = False, 
+                              circuit_breaker_blocked: bool = False) -> Dict[str, Any]:
         """Generate mock response for testing."""
-        prefix = "BUDGET_EXCEEDED: " if budget_exceeded else ""
+        prefix = ""
+        if budget_exceeded:
+            prefix = "BUDGET_EXCEEDED: "
+        elif circuit_breaker_blocked:
+            prefix = "CIRCUIT_BREAKER_OPEN: "
         
         return {
             "content": f"{prefix}Mock {model_key} response for: {prompt[:100]}...",
@@ -403,7 +502,8 @@ class RealLLMTestManager:
             "execution_time": 0.5,
             "real_llm": False,
             "provider": "mock",
-            "budget_exceeded": budget_exceeded
+            "budget_exceeded": budget_exceeded,
+            "circuit_breaker_blocked": circuit_breaker_blocked
         }
     
     def _generate_error_response(self, error_message: str, model_key: str) -> Dict[str, Any]:
@@ -481,6 +581,76 @@ def pytest_unconfigure_real_llm():
                 json.dump(stats, f, indent=2)
             
             logger.info(f"Usage report saved to {report_path}")
+
+
+class RateLimiter:
+    """Rate limiter for API calls."""
+    
+    def __init__(self, calls_per_minute: int):
+        self.calls_per_minute = calls_per_minute
+        self.call_times = []
+        self.min_interval = 60.0 / calls_per_minute
+    
+    async def wait_if_needed(self) -> bool:
+        """Wait if rate limit would be exceeded."""
+        now = time.time()
+        
+        # Remove calls older than 1 minute
+        self.call_times = [t for t in self.call_times if now - t < 60]
+        
+        if len(self.call_times) >= self.calls_per_minute:
+            sleep_time = 60 - (now - self.call_times[0])
+            if sleep_time > 0:
+                logger.debug(f"Rate limiting: sleeping {sleep_time:.2f} seconds")
+                await asyncio.sleep(sleep_time)
+                return True
+        
+        self.call_times.append(now)
+        return False
+    
+    def can_make_request(self) -> bool:
+        """Check if request can be made without waiting."""
+        now = time.time()
+        recent_calls = [t for t in self.call_times if now - t < 60]
+        return len(recent_calls) < self.calls_per_minute
+
+
+class CircuitBreaker:
+    """Circuit breaker for LLM API calls."""
+    
+    def __init__(self, failure_threshold: int):
+        self.failure_threshold = failure_threshold
+        self.failure_count = 0
+        self.last_failure_time = None
+        self.state = "closed"  # closed, open, half_open
+        self.recovery_timeout = 60  # seconds
+    
+    def can_make_request(self) -> bool:
+        """Check if request can be made."""
+        if self.state == "closed":
+            return True
+        elif self.state == "open":
+            if self.last_failure_time and time.time() - self.last_failure_time > self.recovery_timeout:
+                self.state = "half_open"
+                return True
+            return False
+        else:  # half_open
+            return True
+    
+    def record_success(self):
+        """Record successful request."""
+        if self.state == "half_open":
+            self.state = "closed"
+            self.failure_count = 0
+    
+    def record_failure(self):
+        """Record failed request."""
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = "open"
+            logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
 
 
 # Utility functions for test files
