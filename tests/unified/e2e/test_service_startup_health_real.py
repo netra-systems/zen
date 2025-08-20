@@ -40,7 +40,7 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from dev_launcher.startup_sequencer import SmartStartupSequencer, StartupPhase, PhaseStep
+from dev_launcher.startup_optimizer import StartupPhase, PhaseStep
 from dev_launcher.service_discovery import ServiceDiscovery
 from tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, create_healthy_result, create_service_error_result
@@ -502,12 +502,12 @@ class TestServiceStartupHealthReal:
         services = sequence_result["services"]
         
         # Backend should handle auth dependency status
-        if services["backend"]["started"]:
-            assert services["backend"]["dependencies_satisfied"] is not None, "Backend not checking auth dependency"
+        if services["backend"].started:
+            assert services["backend"].dependencies_satisfied is not None, "Backend not checking auth dependency"
         
         # Frontend should handle backend dependency status  
-        if services["frontend"]["started"]:
-            assert services["frontend"]["dependencies_satisfied"] is not None, "Frontend not checking backend dependency"
+        if services["frontend"].started:
+            assert services["frontend"].dependencies_satisfied is not None, "Frontend not checking backend dependency"
         
         # Verify graceful degradation in health cascade
         cascade_details = health_result["details"]
