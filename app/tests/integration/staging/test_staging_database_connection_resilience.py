@@ -19,6 +19,9 @@ from typing import Dict, List, Optional
 from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Configure pytest-asyncio for all async tests
+pytestmark = pytest.mark.asyncio
+
 from test_framework.mock_utils import mock_justified
 from app.tests.fixtures.database_test_fixtures import (
     async_session_mock, transaction_session_mock, connection_pool,

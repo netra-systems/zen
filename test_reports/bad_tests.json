@@ -589,17 +589,23 @@
     "tests/integration/test_cache_invalidation_chain.py::TestCacheInvalidationChain::test_race_condition_prevention": {
       "component": "backend",
       "first_seen": "2025-08-20T14:48:34.214378",
-      "last_failure": "2025-08-20T14:48:34.214378",
+      "last_failure": "2025-08-20T14:51:47.269195",
       "last_pass": null,
-      "total_failures": 1,
+      "total_failures": 2,
       "total_passes": 0,
-      "consecutive_failures": 1,
+      "consecutive_failures": 2,
       "recent_failures": [
         {
           "run_id": "run_20250820_144812_92811",
           "timestamp": "2025-08-20T14:48:34.214378",
           "error_type": "AssertionError",
           "error_message": "AssertionError: Too many failed operations: 340/500\nassert (340 / 500) >= 0.95"
+        },
+        {
+          "run_id": "run_20250820_145145_5514",
+          "timestamp": "2025-08-20T14:51:47.269195",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Too many failed operations: 340/500\nassert (340 / 500) >= 0.7"
         }
       ],
       "marked_as_bad": false,
@@ -657,6 +663,316 @@
           "timestamp": "2025-08-20T14:49:01.847414",
           "error_type": "AssertionError",
           "error_message": "AssertionError: Not all concurrent usage tracking succeeded\nassert 1 == 10\n +  where 1 = len([{'cost_cents': 0, 'metadata': '{\"endpoint\": \"/endpoint_0\", \"method\": \"POST\"}', 'quantity': 1, 'resource_type': 'api_call'}])"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_postgresql_connection_pooling_and_failover": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.809436",
+      "last_failure": "2025-08-20T14:51:37.376856",
+      "last_pass": null,
+      "total_failures": 2,
+      "total_passes": 0,
+      "consecutive_failures": 2,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.809436",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        },
+        {
+          "run_id": "run_20250820_145136_96970",
+          "timestamp": "2025-08-20T14:51:37.376856",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_clickhouse_connection_handling_staging_ports": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.815655",
+      "last_failure": "2025-08-20T14:51:09.815655",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.815655",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_redis_connection_pooling_and_clustering": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.821392",
+      "last_failure": "2025-08-20T14:51:09.821392",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.821392",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_database_migration_execution_staging": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.829176",
+      "last_failure": "2025-08-20T14:51:09.829176",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.829176",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_connection_recovery_after_network_issues": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.835886",
+      "last_failure": "2025-08-20T14:51:09.836898",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.836898",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_transaction_rollback_on_connection_loss": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.847496",
+      "last_failure": "2025-08-20T14:51:09.847496",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.847496",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_database_health_monitoring_staging": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.855565",
+      "last_failure": "2025-08-20T14:51:09.855565",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.855565",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_connection_timeout_and_retry_logic": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.864929",
+      "last_failure": "2025-08-20T14:51:09.864929",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.864929",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/staging/test_staging_database_connection_resilience.py::TestStagingDatabaseConnectionResilience::test_connection_performance_monitoring_staging": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:09.871341",
+      "last_failure": "2025-08-20T14:51:09.871341",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145109_69571",
+          "timestamp": "2025-08-20T14:51:09.871341",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_session_creation_and_storage": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.192687",
+      "last_failure": "2025-08-20T14:51:41.192687",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.192687",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Session data was not stored\nassert None is not None"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_session_retrieval_and_validation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.208412",
+      "last_failure": "2025-08-20T14:51:41.208412",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.208412",
+          "error_type": "Error",
+          "error_message": "assert None is not None"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_session_expiration_and_ttl_management": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.228918",
+      "last_failure": "2025-08-20T14:51:41.228918",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.228918",
+          "error_type": "Error",
+          "error_message": "assert None is not None"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_concurrent_session_handling": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.241357",
+      "last_failure": "2025-08-20T14:51:41.241357",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.241357",
+          "error_type": "Error",
+          "error_message": "assert None is not None"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_session_synchronization_across_services": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.259954",
+      "last_failure": "2025-08-20T14:51:41.259954",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.259954",
+          "error_type": "TypeError",
+          "error_message": "TypeError: the JSON object must be str, bytes or bytearray, not NoneType"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_redis_connection_recovery_scenarios": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.281720",
+      "last_failure": "2025-08-20T14:51:41.281720",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.281720",
+          "error_type": "Error",
+          "error_message": "Failed: async def functions are not natively supported.\nYou need to install a suitable plugin for your async framework, for example:\n  - anyio\n  - pytest-asyncio\n  - pytest-tornasync\n  - pytest-trio\n  - pytest-twisted"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_redis_session_integration.py::TestRedisSessionIntegration::test_session_data_integrity": {
+      "component": "backend",
+      "first_seen": "2025-08-20T14:51:41.300932",
+      "last_failure": "2025-08-20T14:51:41.300932",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_145139_99434",
+          "timestamp": "2025-08-20T14:51:41.300932",
+          "error_type": "Error",
+          "error_message": "assert None is not None"
         }
       ],
       "marked_as_bad": false,
@@ -983,10 +1299,66 @@
       "passed": 6,
       "failed": 1,
       "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_145011_11288",
+      "timestamp": "2025-08-20T14:50:13.409046",
+      "total_tests": 7,
+      "passed": 7,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_145013_13440",
+      "timestamp": "2025-08-20T14:50:13.958276",
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_145023_23735",
+      "timestamp": "2025-08-20T14:50:25.809077",
+      "total_tests": 8,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_145109_69571",
+      "timestamp": "2025-08-20T14:51:09.889894",
+      "total_tests": 9,
+      "passed": 0,
+      "failed": 9,
+      "bad_tests_count": 9
+    },
+    {
+      "run_id": "run_20250820_145136_96970",
+      "timestamp": "2025-08-20T14:51:37.410099",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_145139_99434",
+      "timestamp": "2025-08-20T14:51:41.329360",
+      "total_tests": 7,
+      "passed": 0,
+      "failed": 7,
+      "bad_tests_count": 7
+    },
+    {
+      "run_id": "run_20250820_145145_5514",
+      "timestamp": "2025-08-20T14:51:47.300090",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
     }
   ],
   "stats": {
-    "total_runs": 40,
-    "last_updated": "2025-08-20T14:50:00.831496"
+    "total_runs": 47,
+    "last_updated": "2025-08-20T14:51:47.300090"
   }
 }
