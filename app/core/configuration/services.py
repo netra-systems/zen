@@ -98,6 +98,7 @@ class ServiceConfigManager:
         self._populate_external_urls(config)
         self._populate_oauth_config(config)
         self._populate_cors_config(config)
+        self._populate_environment_vars(config)
         self._logger.info(f"Populated service config for {self._environment}")
     
     def _populate_service_modes(self, config: AppConfig) -> None:
@@ -270,6 +271,32 @@ class ServiceConfigManager:
                 enabled_count += 1
         return enabled_count
     
+    def _populate_environment_vars(self, config: AppConfig) -> None:
+        """Populate environment variables into config."""
+        # Environment detection variables
+        config.pytest_current_test = os.environ.get("PYTEST_CURRENT_TEST")
+        config.testing = os.environ.get("TESTING")
+        config.environment = os.environ.get("ENVIRONMENT", config.environment)
+        
+        # Auth service configuration
+        config.auth_service_url = os.environ.get("AUTH_SERVICE_URL", config.auth_service_url)
+        config.auth_service_enabled = os.environ.get("AUTH_SERVICE_ENABLED", config.auth_service_enabled)
+        config.auth_fast_test_mode = os.environ.get("AUTH_FAST_TEST_MODE", config.auth_fast_test_mode)
+        config.auth_cache_ttl_seconds = os.environ.get("AUTH_CACHE_TTL_SECONDS", config.auth_cache_ttl_seconds)
+        config.service_id = os.environ.get("SERVICE_ID", config.service_id)
+        config.service_secret = os.environ.get("SERVICE_SECRET", config.service_secret)
+        
+        # Cloud Run environment variables
+        config.k_service = os.environ.get("K_SERVICE")
+        config.k_revision = os.environ.get("K_REVISION")
+        
+        # PR environment variables
+        config.pr_number = os.environ.get("PR_NUMBER")
+        
+        # OAuth client ID fallback variables
+        config.google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+        config.google_oauth_client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+
     def get_service_summary(self) -> Dict[str, Any]:
         """Get service configuration summary for monitoring."""
         return {

@@ -75,7 +75,9 @@ async def get_current_user(
         
         if not user:
             # In development mode, create and persist a dev user
-            if os.getenv("ENVIRONMENT", "development") == "development":
+            from app.config import get_config
+            config = get_config()
+            if config.environment == "development":
                 from app.services.user_service import user_service
                 
                 # Use centralized dev user creation

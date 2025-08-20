@@ -1,0 +1,93 @@
+# syntax=docker/dockerfile:1
+# Optimized Frontend Dockerfile with Multi-Stage Caching
+# Requires Docker BuildKit: DOCKER_BUILDKIT=1
+FROM node:20-alpine AS deps
+WORKDIR /app
+
+# Copy package files
+COPY frontend/package*.json ./
+
+# Install dependencies with better retry logic and cache mount
+RUN --mount=type=cache,target=/root/.npm \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 60000 && \
+    npm config set fetch-retry-maxtimeout 300000 && \
+    npm config set maxsockets 5 && \
+    npm config set cache /root/.npm && \
+    npm ci --legacy-peer-deps || \
+    (npm cache verify && npm ci --legacy-peer-deps)
+
+# Builder stage
+FROM node:20-alpine AS builder
+WORKDIR /app
+
+# Copy node_modules from deps
+COPY --from=deps /app/node_modules ./node_modules
+
+# Copy config files for better layer caching
+COPY frontend/package*.json ./
+COPY frontend/tsconfig.json ./
+COPY frontend/next.config.ts ./
+COPY frontend/tailwind.config.ts ./
+COPY frontend/postcss.config.mjs ./
+COPY frontend/eslint.config.mjs ./
+COPY frontend/components.json ./
+
+# Build args
+ARG NEXT_PUBLIC_API_URL=http://localhost:8080
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
+# Copy source files in order of change frequency (least to most)
+# Static assets and configs change less frequently
+COPY frontend/public ./public
+COPY frontend/lib ./lib
+
+# Type definitions and utilities
+COPY frontend/types ./types
+COPY frontend/utils ./utils
+
+# Services and state management
+COPY frontend/services ./services
+COPY frontend/store ./store
+COPY frontend/hooks ./hooks
+COPY frontend/auth ./auth
+
+# Additional required directories
+COPY frontend/config ./config
+COPY frontend/providers ./providers
+COPY frontend/styles ./styles
+
+# UI components and pages (most frequently changed)
+COPY frontend/components ./components
+COPY frontend/app ./app
+
+# Build with memory optimization and cache mounts
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+RUN --mount=type=cache,target=/app/.next/cache \
+    --mount=type=cache,target=/root/.npm \
+    npm run build && \
+    echo "Build cache size: $(du -sh /app/.next/cache 2>/dev/null || echo 'N/A')"
+
+# Runtime stage
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Create user
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nextjs -u 1001
+
+# Copy built app
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+USER nextjs
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})" || exit 1
+
+CMD ["node", "server.js"]

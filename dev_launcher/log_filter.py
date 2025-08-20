@@ -49,9 +49,13 @@ class LogFilter:
     Filters logs based on startup mode and importance.
     """
     
-    def __init__(self, mode: StartupMode = StartupMode.MINIMAL):
-        """Initialize log filter with specified mode."""
+    def __init__(self, mode: StartupMode = StartupMode.MINIMAL, 
+                 verbose_background: bool = False,
+                 verbose_tables: bool = False):
+        """Initialize log filter with specified mode and visibility flags."""
         self.mode = mode
+        self.verbose_background = verbose_background
+        self.verbose_tables = verbose_tables
         self.seen_messages: Set[str] = set()
         self.condensed_groups: Dict[str, int] = {}
         
@@ -60,6 +64,13 @@ class LogFilter:
         # Always show critical messages
         if self._is_critical(message):
             return True
+        
+        # Check visibility flags for specific content types
+        if self._is_background_task(message) and not self.verbose_background:
+            return False
+        
+        if self._is_table_check(message) and not self.verbose_tables:
+            return False
             
         # Mode-specific filtering
         if self.mode == StartupMode.SILENT:
@@ -94,6 +105,34 @@ class LogFilter:
             if re.search(pattern, message, re.IGNORECASE):
                 return True
         return False
+    
+    def _is_background_task(self, message: str) -> bool:
+        """Check if message is from a background task."""
+        background_patterns = [
+            r'background.*task',
+            r'executor.*parallel',
+            r'health.*monitor',
+            r'cache.*warmer',
+            r'dependency.*checker',
+            r'ThreadPoolExecutor',
+            r'ProcessPoolExecutor',
+            r'async.*task'
+        ]
+        return any(re.search(pattern, message, re.IGNORECASE) for pattern in background_patterns)
+    
+    def _is_table_check(self, message: str) -> bool:
+        """Check if message is from table/database checks."""
+        table_patterns = [
+            r'table.*check',
+            r'database.*schema',
+            r'ClickHouse.*table',
+            r'PostgreSQL.*table',
+            r'migration.*check',
+            r'table.*count',
+            r'schema.*validation',
+            r'connected with \d+ tables'
+        ]
+        return any(re.search(pattern, message, re.IGNORECASE) for pattern in table_patterns)
     
     def _filter_silent(self, message: str, level: str) -> bool:
         """Filter for silent mode - errors and critical only."""

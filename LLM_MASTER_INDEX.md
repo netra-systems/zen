@@ -49,6 +49,14 @@ This index helps LLMs quickly locate and understand the purpose of files in the 
 | `rate_limiter.py` | `/app/websocket/rate_limiter.py` | Rate limiting | RateLimiter class |
 | `validation.py` | `/app/websocket/validation.py` | Message validation | validate_message() |
 
+### String Literals Index (Platform Constants)
+| File | Location | Purpose | Usage |
+|------|----------|---------|-------|
+| `string_literals_index.xml` | `/SPEC/string_literals_index.xml` | Master spec for string literals | Defines structure and purpose |
+| `string_literals.json` | `/SPEC/generated/string_literals.json` | Generated index of all platform strings | Query for exact values |
+| `scan_string_literals.py` | `/scripts/scan_string_literals.py` | Scanner to generate index | Run to update index |
+| `query_string_literals.py` | `/scripts/query_string_literals.py` | Query tool for string validation | Use to validate/search literals |
+
 ### Agent Files (Multi-Agent System)
 | Agent Type | Location | Main File | Purpose |
 |------------|----------|-----------|---------|

@@ -1,14 +1,14 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-19T22:29:12.112997",
-    "total_runs": 183
+    "last_update": "2025-08-19T23:22:29.876052",
+    "total_runs": 185
   },
   "current_state": {
-    "overall_status": "[FAILED] 3 failures",
-    "last_run_level": "unit",
-    "last_run_time": "2025-08-19T22:29:12.112997",
-    "last_exit_code": 15
+    "overall_status": "[ERRORS] 1 errors",
+    "last_run_level": "real_e2e",
+    "last_run_time": "2025-08-19T23:22:29.876052",
+    "last_exit_code": 2
   },
   "known_test_counts": {
     "unit:backend": {
@@ -52,12 +52,12 @@
       "last_update": "2025-08-19T11:43:18.692277"
     },
     "real_e2e:backend": {
-      "total": 2,
+      "total": 1,
       "passed": 0,
       "failed": 0,
-      "skipped": 1,
+      "skipped": 0,
       "errors": 1,
-      "last_update": "2025-08-19T17:29:45.217447"
+      "last_update": "2025-08-19T23:22:29.876052"
     },
     "agents:backend": {
       "total": 144,
@@ -146,11 +146,11 @@
     "integration": {
       "description": "Integration tests",
       "expected": 60,
-      "actual": 24,
-      "passed": 24,
+      "actual": 0,
+      "passed": 0,
       "failed": 0,
-      "last_run": "2025-08-19T17:56:46.269205",
-      "status": "[PASSED] 24 tests"
+      "last_run": "2025-08-19T22:44:33.408603",
+      "status": "[NO TESTS]"
     },
     "critical": {
       "description": "Critical path tests",
@@ -274,32 +274,29 @@
     "backend": {
       "status": "failed",
       "last_counts": {
-        "total": 450,
-        "passed": 429,
-        "failed": 3,
-        "skipped": 17,
+        "total": 1,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0,
         "errors": 1,
-        "import_errors": 0,
-        "test_files": 54,
-        "status": "failed"
+        "import_errors": 2,
+        "status": "import_error",
+        "test_files": 0
       },
-      "last_duration": 59.20168399810791,
-      "last_run": "2025-08-19T22:29:12.112997"
+      "last_duration": 51.740482330322266,
+      "last_run": "2025-08-19T23:22:29.876052"
     },
     "frontend": {
-      "status": "failed",
+      "status": "skipped",
       "last_counts": {
         "total": 0,
         "passed": 0,
         "failed": 0,
         "skipped": 0,
-        "errors": 0,
-        "import_errors": 0,
-        "test_files": 0,
-        "status": "unknown"
+        "errors": 0
       },
-      "last_duration": 0.30294370651245117,
-      "last_run": "2025-08-19T22:29:12.112997"
+      "last_duration": 0,
+      "last_run": "2025-08-19T23:22:29.876052"
     },
     "e2e": {
       "status": "pending",
@@ -311,70 +308,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-19T22:29:12.112997"
+      "last_run": "2025-08-19T23:22:29.876052"
     }
   },
-  "failing_tests": [
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::TestAgentServiceOrchestrationCore::test_websocket_message_handling_json_error <- tests\\services\\test_agent_service_orchestration_core.py",
-      "timestamp": "2025-08-19T22:29:12.112997"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_permission_service_admin.py::TestRoleManagement::test_grant_permission",
-      "timestamp": "2025-08-19T22:29:12.112997"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::TestToolInvocations::test_generate_tool_invocations_error_scenarios Loaded .env file from C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\.env",
-      "timestamp": "2025-08-19T22:29:12.112997"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_agent_service_orchestration.py::\u001b[1mTestAgentServiceOrchestrationCore::test_websocket_message_handling_json_error\u001b[0m - AssertionError: expected call not found.",
-      "timestamp": "2025-08-19T22:29:12.112997"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\test_permission_service_admin.py::\u001b[1mTestRoleManagement::test_grant_permission\u001b[0m - TypeError: 'NoneType' object is not subscriptable",
-      "timestamp": "2025-08-19T22:29:12.112997"
-    },
-    {
-      "component": "backend",
-      "test": "\u001b[0m app\\tests\\services\\synthetic_data\\test_tool_invocations.py::\u001b[1mTestToolInvocations::test_generate_tool_invocations_error_scenarios\u001b[0m - AttributeError: 'SyntheticDataService' object has no attribute '_generate_tool_invocations'. Did you mean: 'generate_tool_invocations'?",
-      "timestamp": "2025-08-19T22:29:12.112997"
-    }
-  ],
+  "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-19T16:10:22.519023",
-      "level": "smoke",
-      "exit_code": 0,
-      "status": "[PASSED]",
-      "statistics": {
-        "total_tests_known": 666,
-        "total_tests_run": 7,
-        "total_passed": 7,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 100.0
-      }
-    },
-    {
-      "timestamp": "2025-08-19T16:10:44.525406",
-      "level": "agents",
-      "exit_code": 2,
-      "status": "[FAILED] 4 failures",
-      "statistics": {
-        "total_tests_known": 666,
-        "total_tests_run": 144,
-        "total_passed": 140,
-        "total_failed": 4,
-        "total_skipped": 0,
-        "pass_rate": 97.22
-      }
-    },
     {
       "timestamp": "2025-08-19T17:19:54.885954",
       "level": "real_e2e",
@@ -626,43 +564,47 @@
         "total_skipped": 17,
         "pass_rate": 95.33
       }
+    },
+    {
+      "timestamp": "2025-08-19T22:44:33.408603",
+      "level": "integration",
+      "exit_code": 4,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 666,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-19T23:22:29.876052",
+      "level": "real_e2e",
+      "exit_code": 2,
+      "status": "[ERRORS] 1 errors",
+      "statistics": {
+        "total_tests_known": 666,
+        "total_tests_run": 1,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
     }
   ],
   "statistics": {
     "total_tests_known": 666,
-    "total_tests_run": 450,
-    "total_passed": 429,
-    "total_failed": 3,
-    "total_skipped": 17,
-    "pass_rate": 95.33
+    "total_tests_run": 1,
+    "total_passed": 0,
+    "total_failed": 0,
+    "total_skipped": 0,
+    "pass_rate": 0.0
   },
   "version": "1.0",
   "tests": {},
   "runs": [
-    {
-      "run_id": "run_20250818_114152_12062",
-      "timestamp": "2025-08-18T11:42:20.081680",
-      "total_tests": 42,
-      "passed": 38,
-      "failed": 2,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_125307_87300",
-      "timestamp": "2025-08-18T12:54:53.578432",
-      "total_tests": 86,
-      "passed": 82,
-      "failed": 2,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250818_125919_59734",
-      "timestamp": "2025-08-18T12:59:34.866853",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
     {
       "run_id": "run_20250818_132355_35067",
       "timestamp": "2025-08-18T13:24:56.362952",
@@ -1350,10 +1292,122 @@
       "passed": 134,
       "failed": 3,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_224446_86242",
+      "timestamp": "2025-08-19T22:46:05.680086",
+      "total_tests": 144,
+      "passed": 140,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_224609_69928",
+      "timestamp": "2025-08-19T22:46:45.753464",
+      "total_tests": 144,
+      "passed": 140,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_224720_40034",
+      "timestamp": "2025-08-19T22:48:39.517560",
+      "total_tests": 144,
+      "passed": 140,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_224931_71761",
+      "timestamp": "2025-08-19T22:51:08.317206",
+      "total_tests": 143,
+      "passed": 140,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_230028_28655",
+      "timestamp": "2025-08-19T23:01:37.225682",
+      "total_tests": 125,
+      "passed": 120,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_230401_41020",
+      "timestamp": "2025-08-19T23:05:09.274720",
+      "total_tests": 125,
+      "passed": 120,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_230542_42613",
+      "timestamp": "2025-08-19T23:07:03.102064",
+      "total_tests": 125,
+      "passed": 120,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_230719_39158",
+      "timestamp": "2025-08-19T23:08:38.409581",
+      "total_tests": 125,
+      "passed": 120,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_231506_6341",
+      "timestamp": "2025-08-19T23:16:29.490638",
+      "total_tests": 151,
+      "passed": 147,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_231644_4833",
+      "timestamp": "2025-08-19T23:18:16.782272",
+      "total_tests": 151,
+      "passed": 147,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_231910_50307",
+      "timestamp": "2025-08-19T23:20:46.069061",
+      "total_tests": 153,
+      "passed": 149,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250819_232327_7720",
+      "timestamp": "2025-08-19T23:24:40.851474",
+      "total_tests": 155,
+      "passed": 151,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_075144_4454",
+      "timestamp": "2025-08-20T07:53:53.123664",
+      "total_tests": 157,
+      "passed": 153,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_075535_35923",
+      "timestamp": "2025-08-20T07:56:44.087747",
+      "total_tests": 173,
+      "passed": 170,
+      "failed": 2,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 89,
-    "last_updated": "2025-08-19T22:36:50.951288"
+    "total_runs": 103,
+    "last_updated": "2025-08-20T07:56:44.087747"
   }
 }

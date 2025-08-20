@@ -237,6 +237,29 @@ class AppConfig(BaseModel):
     auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
     service_id: str = Field(default="backend", description="Service ID for authentication")
     service_secret: Optional[str] = Field(default=None, description="Service secret for authentication")
+    
+    # Cloud Run environment variables
+    k_service: Optional[str] = Field(default=None, description="Cloud Run service name")
+    k_revision: Optional[str] = Field(default=None, description="Cloud Run service revision")
+    
+    # PR environment variables
+    pr_number: Optional[str] = Field(default=None, description="Pull request number for PR environments")
+    
+    # OAuth client ID fallback variables
+    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID fallback")
+    google_oauth_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID alternative")
+    
+    # Google App Engine environment variables
+    gae_application: Optional[str] = Field(default=None, description="Google App Engine application ID")
+    gae_version: Optional[str] = Field(default=None, description="Google App Engine version")
+    
+    # Google Kubernetes Engine environment variables  
+    kubernetes_service_host: Optional[str] = Field(default=None, description="Kubernetes service host for GKE detection")
+    
+    # Startup control environment variables
+    fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
+    skip_migrations: str = Field(default="false", description="Skip migrations flag")
+    disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -381,3 +404,5 @@ class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
+    auth_service_url: str = "http://localhost:8001"
+    fast_startup_mode: str = "true"  # Enable fast startup for tests

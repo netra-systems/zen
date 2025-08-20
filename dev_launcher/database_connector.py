@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 from enum import Enum
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -88,8 +89,36 @@ class DatabaseConnector:
         # Initialize connections from environment
         self._discover_database_connections()
     
+    def _ensure_env_loaded(self) -> None:
+        """Ensure .env file is loaded into environment variables."""
+        # Find project root
+        project_root = Path.cwd()
+        for parent in [Path.cwd(), Path(__file__).parent.parent]:
+            if (parent / '.env').exists() or (parent / 'app').exists():
+                project_root = parent
+                break
+        
+        # Load .env file if it exists
+        env_file = project_root / '.env'
+        if env_file.exists():
+            with open(env_file, 'r') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        key = key.strip()
+                        value = value.strip('"\'').strip()
+                        # Only set if not already in environment
+                        if key not in os.environ:
+                            os.environ[key] = value
+                            if key == "DATABASE_URL":
+                                logger.debug(f"Loaded DATABASE_URL from .env file")
+    
     def _discover_database_connections(self) -> None:
         """Discover database connections from environment variables."""
+        # Load .env file first if not already loaded
+        self._ensure_env_loaded()
+        
         # PostgreSQL
         if os.environ.get("DATABASE_URL"):
             self._add_connection("main_postgres", DatabaseType.POSTGRESQL, os.environ["DATABASE_URL"])
@@ -100,8 +129,9 @@ class DatabaseConnector:
             self._add_connection("main_clickhouse", DatabaseType.CLICKHOUSE, clickhouse_url)
         
         # Redis
-        if os.environ.get("REDIS_URL"):
-            self._add_connection("main_redis", DatabaseType.REDIS, os.environ["REDIS_URL"])
+        redis_url = self._build_redis_url()
+        if redis_url:
+            self._add_connection("main_redis", DatabaseType.REDIS, redis_url)
         
         logger.info(f"Discovered {len(self.connections)} database connections")
     
@@ -115,6 +145,24 @@ class DatabaseConnector:
         
         password_part = f":{password}" if password else ""
         return f"clickhouse://{user}{password_part}@{host}:{port}/{database}"
+    
+    def _build_redis_url(self) -> Optional[str]:
+        """Build Redis URL from environment variables."""
+        # First check if REDIS_URL is already set
+        if os.environ.get("REDIS_URL"):
+            return os.environ["REDIS_URL"]
+        
+        # Build from components
+        host = os.environ.get("REDIS_HOST", "localhost")
+        port = os.environ.get("REDIS_PORT", "6379")
+        password = os.environ.get("REDIS_PASSWORD", "")
+        db = os.environ.get("REDIS_DB", "0")
+        
+        # Build URL
+        if password:
+            return f"redis://:{password}@{host}:{port}/{db}"
+        else:
+            return f"redis://{host}:{port}/{db}"
     
     def _add_connection(self, name: str, db_type: DatabaseType, url: str) -> None:
         """Add a database connection for monitoring."""
@@ -177,6 +225,13 @@ class DatabaseConnector:
         
         self._print_validation_summary(all_healthy)
         return all_healthy
+    
+    def _handle_validation_exception(self, connection: DatabaseConnection, exception: Exception) -> None:
+        """Handle validation exception during startup."""
+        connection.status = ConnectionStatus.FAILED
+        connection.last_error = str(exception)
+        emoji = "❌" if self.use_emoji else ""
+        print(f"{emoji} ERROR | {connection.name}: Validation failed - {str(exception)}")
     
     def _print_no_databases(self) -> None:
         """Print message when no databases are configured."""
@@ -312,38 +367,53 @@ class DatabaseConnector:
             return False
     
     async def _test_postgresql_connection(self, connection: DatabaseConnection) -> bool:
-        """Test PostgreSQL connection."""
+        """Test PostgreSQL connection with proper asyncpg handling."""
         try:
             import asyncpg
-            
-            # Parse URL for asyncpg
-            parsed = urlparse(connection.url)
-            
-            # Handle different URL formats
-            if "/cloudsql/" in connection.url:
-                # Cloud SQL Unix socket connection
-                conn = await asyncio.wait_for(
-                    asyncpg.connect(connection.url),
-                    timeout=self.retry_config.timeout
-                )
-            else:
-                # Standard TCP connection
-                conn = await asyncio.wait_for(
-                    asyncpg.connect(connection.url),
-                    timeout=self.retry_config.timeout
-                )
-            
-            # Test connection with simple query
-            await conn.execute("SELECT 1")
-            await conn.close()
-            return True
-            
+            return await self._test_asyncpg_connection(connection)
         except ImportError:
-            # asyncpg not available, try basic connection test
             return await self._test_postgresql_basic(connection)
         except Exception as e:
             connection.last_error = f"PostgreSQL connection failed: {str(e)}"
             return False
+    
+    async def _test_asyncpg_connection(self, connection: DatabaseConnection) -> bool:
+        """Test PostgreSQL with asyncpg driver."""
+        import asyncpg
+        
+        conn = None
+        try:
+            # Handle Cloud SQL vs regular connections
+            if "/cloudsql/" in connection.url:
+                conn = await self._connect_cloud_sql(connection)
+            else:
+                conn = await self._connect_standard_tcp(connection)
+            
+            await self._validate_postgres_health(conn)
+            return True
+        finally:
+            if conn:
+                await conn.close()
+    
+    async def _connect_cloud_sql(self, connection: DatabaseConnection) -> object:
+        """Connect to Cloud SQL PostgreSQL."""
+        import asyncpg
+        return await asyncio.wait_for(
+            asyncpg.connect(connection.url),
+            timeout=self.retry_config.timeout
+        )
+    
+    async def _connect_standard_tcp(self, connection: DatabaseConnection) -> object:
+        """Connect to standard TCP PostgreSQL."""
+        import asyncpg
+        return await asyncio.wait_for(
+            asyncpg.connect(connection.url),
+            timeout=self.retry_config.timeout
+        )
+    
+    async def _validate_postgres_health(self, conn) -> None:
+        """Validate PostgreSQL connection health."""
+        await conn.execute("SELECT 1")
     
     async def _test_postgresql_basic(self, connection: DatabaseConnection) -> bool:
         """Test PostgreSQL connection without asyncpg."""

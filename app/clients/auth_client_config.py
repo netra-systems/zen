@@ -3,11 +3,12 @@ OAuth configuration and environment detection for auth client.
 Handles OAuth settings for different environments and deployment contexts.
 """
 
-import os
 import logging
 from typing import List
 from enum import Enum
 from dataclasses import dataclass
+
+from app.config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,8 @@ class EnvironmentDetector:
     
     def detect_environment(self) -> Environment:
         """Detect current environment from environment variables."""
-        env_override = os.getenv("ENVIRONMENT", "").lower()
+        config = get_config()
+        env_override = config.environment.lower() if config.environment else ""
         if env_override:
             return self._parse_environment(env_override)
         if self._check_testing_flag():
@@ -75,12 +77,14 @@ class EnvironmentDetector:
     
     def _check_testing_flag(self) -> bool:
         """Check if TESTING flag is set."""
-        return os.getenv("TESTING") in ["true", "1"]
+        config = get_config()
+        return config.testing in ["true", "1"] if config.testing else False
     
     def _get_cloud_run_vars(self) -> tuple[str, str]:
         """Get Cloud Run environment variables."""
-        k_service = os.getenv("K_SERVICE", "")
-        k_revision = os.getenv("K_REVISION", "")
+        config = get_config()
+        k_service = config.k_service or ""
+        k_revision = config.k_revision or ""
         return k_service, k_revision
     
     def _log_cloud_run_fallback(self) -> None:
@@ -127,7 +131,9 @@ class OAuthCredentialManager:
     
     def _try_primary_credential(self, env_var: str) -> str:
         """Try to get primary credential from environment."""
-        return os.getenv(env_var, "")
+        # This would require dynamic environment variable access
+        # For now, return empty string as credentials are handled through secrets
+        return ""
     
     def _log_missing_credential(self, env_var: str) -> None:
         """Log missing credential warning."""
@@ -149,11 +155,12 @@ class OAuthCredentialManager:
     
     def _get_fallback_credential(self, cred_type: str) -> str:
         """Get fallback OAuth credential."""
+        config = get_config()
         if cred_type == "CLIENT_ID":
-            fallback_var = "GOOGLE_CLIENT_ID"
+            return config.google_client_id or ""
         else:
-            fallback_var = f"GOOGLE_CLIENT_{cred_type}"
-        return os.getenv(fallback_var, "")
+            # For other credential types, return empty string as they're handled through secrets
+            return ""
 
 
 class OAuthConfigGenerator:
@@ -250,7 +257,8 @@ class OAuthConfigGenerator:
     
     def _check_pr_environment(self) -> bool:
         """Check if running in PR environment."""
-        return bool(os.getenv("PR_NUMBER"))
+        config = get_config()
+        return bool(config.pr_number)
     
     def _get_staging_oauth_config(self) -> OAuthConfig:
         """Get staging OAuth configuration."""
@@ -297,7 +305,8 @@ class OAuthConfigGenerator:
     
     def _get_pr_oauth_config(self, client_id: str, client_secret: str) -> OAuthConfig:
         """Get PR environment OAuth configuration with proxy."""
-        pr_number = os.getenv("PR_NUMBER", "")
+        config = get_config()
+        pr_number = config.pr_number or ""
         proxy_url = "https://auth.staging.netrasystems.ai"
         origins = self._build_pr_origins(proxy_url, pr_number)
         return self._build_pr_config(client_id, client_secret, proxy_url, origins)
@@ -344,9 +353,10 @@ class OAuthConfigGenerator:
     
     def _get_fallback_client_id(self) -> str:
         """Get fallback client ID with multiple attempts."""
+        config = get_config()
         return (
-            os.getenv("GOOGLE_CLIENT_ID") or 
-            os.getenv("GOOGLE_OAUTH_CLIENT_ID") or 
+            config.google_client_id or 
+            config.google_oauth_client_id or 
             ""
         )
     

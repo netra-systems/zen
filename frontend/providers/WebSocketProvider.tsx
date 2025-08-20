@@ -84,9 +84,34 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           webSocketService.onStatusChange = handleStatusChange;
           webSocketService.onMessage = handleMessage;
           
-          // Connect to WebSocket using configured URL
+          // Connect to WebSocket using configured URL - ensure immediate connection on app load
           const wsUrl = appConfig.wsUrl || `${appConfig.apiUrl.replace(/^http/, 'ws')}/ws`;
-          webSocketService.connect(`${wsUrl}?token=${token}`);
+          
+          debugLogger.debug('[WebSocketProvider] Establishing WebSocket connection on app load', {
+            wsUrl,
+            hasToken: !!token
+          });
+          
+          webSocketService.connect(`${wsUrl}?token=${token}`, {
+            onOpen: () => {
+              debugLogger.debug('[WebSocketProvider] WebSocket connection established on app load');
+            },
+            onError: (error) => {
+              logger.error('WebSocket connection error on app load', undefined, {
+                component: 'WebSocketProvider',
+                action: 'connection_error',
+                metadata: { error: error.message }
+              });
+            },
+            onReconnect: () => {
+              debugLogger.debug('[WebSocketProvider] WebSocket reconnecting after connection loss');
+            },
+            heartbeatInterval: 30000, // 30 second heartbeat
+            rateLimit: {
+              messages: 60,
+              window: 60000 // 60 messages per minute
+            }
+          });
           
           // Store cleanup function
           cleanupRef.current = () => {
@@ -105,6 +130,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
         }
       };
 
+      // Establish connection immediately on app load
       connectToWebSocket();
     }
 

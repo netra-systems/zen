@@ -65,6 +65,7 @@ class HealthMonitor:
         self._lock = threading.Lock()
         self.health_status: Dict[str, HealthStatus] = {}
         self.startup_complete = False  # Track when all services are ready
+        self.database_connector = None  # Will be set by launcher
     
     def register_service(
         self,
@@ -106,6 +107,11 @@ class HealthMonitor:
                 ready_confirmed=False
             )
             logger.info(f"Registered health monitoring for {name} (grace period: {grace_period_seconds}s)")
+    
+    def set_database_connector(self, database_connector):
+        """Set database connector for database health monitoring."""
+        self.database_connector = database_connector
+        logger.info("Database connector registered with health monitor")
     
     def unregister_service(self, name: str):
         """Remove a service from monitoring."""
@@ -299,9 +305,24 @@ class HealthMonitor:
             return self.health_status.get(name)
     
     def get_all_status(self) -> Dict[str, HealthStatus]:
-        """Get health status for all services."""
+        """Get health status for all services including databases."""
         with self._lock:
-            return dict(self.health_status)
+            status = dict(self.health_status)
+            
+            # Add database status if available
+            if self.database_connector:
+                db_status = self.database_connector.get_connection_status()
+                for db_name, db_info in db_status.items():
+                    # Convert database status to HealthStatus format
+                    status[f"database_{db_name}"] = HealthStatus(
+                        is_healthy=(db_info["status"] == "connected"),
+                        last_check=datetime.fromisoformat(db_info["last_check"]) if db_info["last_check"] else datetime.now(),
+                        consecutive_failures=db_info["failure_count"],
+                        error_message=db_info["last_error"],
+                        state=ServiceState.MONITORING if db_info["status"] == "connected" else ServiceState.FAILED
+                    )
+            
+            return status
     
     def is_healthy(self, name: str) -> bool:
         """
@@ -325,11 +346,12 @@ class HealthMonitor:
         return status.is_healthy
     
     def all_healthy(self) -> bool:
-        """Check if all services are healthy.
+        """Check if all services are healthy including databases.
         
         During startup, considers services healthy until monitoring begins.
         """
         with self._lock:
+            # Check service health
             for status in self.health_status.values():
                 # During startup/grace period, consider healthy
                 if status.state in [ServiceState.STARTING, ServiceState.GRACE_PERIOD]:
@@ -337,6 +359,12 @@ class HealthMonitor:
                 # Once monitoring, check actual health
                 if not status.is_healthy:
                     return False
+            
+            # Check database health if available
+            if self.database_connector:
+                if not self.database_connector.is_all_healthy():
+                    return False
+            
             return True
     
     def all_services_ready(self) -> bool:

@@ -224,6 +224,11 @@ class AppConfig(BaseModel):
         default=False,
         description="Disable HTTPS-only mode for sessions (dev/testing)"
     )
+    
+    # Startup control environment variables
+    fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
+    skip_migrations: str = Field(default="false", description="Skip migrations flag")
+    disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -256,6 +261,29 @@ class AppConfig(BaseModel):
             model_name="gemini-2.5-pro",
         ),
     }
+    
+    # Environment detection for tests and development
+    pytest_current_test: Optional[str] = Field(default=None, description="Current pytest test indicator")
+    testing: Optional[str] = Field(default=None, description="Testing flag for environment detection")
+    
+    # Auth service configuration
+    auth_service_url: str = Field(default="http://127.0.0.1:8081", description="Auth service URL")
+    auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
+    auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
+    auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
+    service_id: str = Field(default="backend", description="Service ID for authentication")
+    service_secret: Optional[str] = Field(default=None, description="Service secret for authentication")
+    
+    # Cloud Run environment variables
+    k_service: Optional[str] = Field(default=None, description="Cloud Run service name")
+    k_revision: Optional[str] = Field(default=None, description="Cloud Run service revision")
+    
+    # PR environment variables
+    pr_number: Optional[str] = Field(default=None, description="Pull request number for PR environments")
+    
+    # OAuth client ID fallback variables
+    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID fallback")
+    google_oauth_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID alternative")
 
 
 class DevelopmentConfig(AppConfig):
@@ -435,3 +463,4 @@ class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
+    auth_service_url: str = "http://localhost:8001"

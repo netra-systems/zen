@@ -32,16 +32,22 @@ async def _handle_validated_message(
     # The manager handles WebSocket-level concerns (ping/pong, routing, etc)
     # But messages still need to go to the agent service for actual processing
     
+    message_type = message.get("type", "unknown")
+    logger.info(f"[WS MESSAGE ROUTING] Processing message type: {message_type} for user {user_id_str}")
+    
     # Let manager handle WebSocket-specific messages (ping/pong, etc)
     manager_handled = await validate_and_handle_message(user_id_str, websocket, message, manager)
     
     # If it's a ping or other system message, manager handles it completely
-    if message.get("type") in ["ping", "pong", "auth"]:
+    if message_type in ["ping", "pong", "auth"]:
+        logger.debug(f"[WS SYSTEM] System message {message_type} handled by manager")
         return True
     
     # For user messages, ALWAYS forward to agent service
-    logger.info(f"[CRITICAL FIX] Processing message through agent service: {message.get('type')}")
-    return await _process_valid_message(user_id_str, data, agent_service)
+    logger.info(f"[WS AGENT] Forwarding {message_type} to agent service for user {user_id_str}")
+    success = await _process_valid_message(user_id_str, data, agent_service)
+    logger.info(f"[WS AGENT] Agent processing completed for {message_type}, success: {success}")
+    return success
 
 async def _handle_parsed_message(
     user_id_str: str, websocket: WebSocket, message, data: str, agent_service

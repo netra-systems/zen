@@ -36,11 +36,14 @@ Netra Apex captures value proportional to customer AI spend by delivering:
 - [Developer Guidelines](#-developer-guidelines) **← Revenue-Driven Development**
 - [Quick Start](#-quick-start)
 - [Architecture](#-architecture) **← Module-Based (300 lines max)**
+- [String Literals Index](#-string-literals-index) **← LLM Consistency**
 - [Installation](#-installation)
 - [Development](#-development)
-- [API Documentation](#-api-documentation)
+- [API Documentation](#-api-documentation) **← Tier-Specific Endpoints**
 - [Testing](#-testing) **← 97% Coverage Target**
 - [Deployment](#-deployment)
+- [Production Deployment](#-production-deployment) **← Production Guide**
+- [Performance Monitoring](#-performance-monitoring) **← SLA Compliance**
 - [Contributing](#-contributing)
 
 ## 💰 Business Value & Monetization
@@ -308,6 +311,44 @@ For local development mode:
 - **Authentication**: OAuth 2.0, JWT
 - **Testing**: Pytest, Jest, Cypress
 - **Infrastructure**: Docker, Kubernetes-ready
+
+## 🔤 String Literals Index
+
+Netra maintains a centralized index of all platform-specific string literals to prevent LLM hallucination and ensure consistency across the codebase.
+
+### Purpose
+- **Single Source of Truth**: All configuration keys, endpoints, identifiers, and system constants
+- **LLM Consistency**: Prevents agents from using incorrect string values
+- **Development Efficiency**: Reduces debugging time from typos and inconsistencies
+
+### Structure
+```
+SPEC/
+├── string_literals_index.xml     # Master specification
+└── generated/
+    └── string_literals.json       # Generated index
+```
+
+### Categories
+- **Configuration**: `database_url`, `api_key`, `max_retries`
+- **Paths**: `/api/v1/threads`, `/websocket`, `logs/`
+- **Identifiers**: `supervisor_agent`, `auth_service`
+- **Database**: `threads`, `messages`, `created_at`
+- **Events**: `thread_created`, `websocket_connect`
+- **Metrics**: `request_duration_seconds`, `error_rate`
+- **Environment**: `NETRA_API_KEY`, `DATABASE_URL`
+- **States**: `pending`, `active`, `completed`, `failed`
+
+### Usage
+```bash
+# Update the index after code changes
+python scripts/scan_string_literals.py
+
+# Query the index (for agents)
+python scripts/query_string_literals.py --category paths --type websocket
+```
+
+**Development Rule**: Always check the string literals index before using platform-specific constants. Reference: [`SPEC/string_literals_index.xml`](SPEC/string_literals_index.xml)
 
 ## 💾 Installation
 
@@ -586,6 +627,30 @@ mypy app/              # Backend
 - `POST /api/generation/start` - Start content generation
 - `GET /api/generation/status/{job_id}` - Check generation status
 
+#### Business Metrics Integration
+- `GET /api/metrics/savings/{user_id}` - Get user savings analytics
+- `POST /api/metrics/track` - Track optimization events
+- `GET /api/metrics/roi` - Calculate return on investment
+- `GET /api/metrics/tier/{tier}/limits` - Get tier-specific limits
+
+#### Tier-Specific Endpoints
+
+##### Free Tier
+- `GET /api/free/demo` - Demo optimization features
+- `POST /api/free/sample-analysis` - Limited sample analysis
+- `GET /api/free/conversion-triggers` - Conversion opportunities
+
+##### Early/Mid Tier
+- `GET /api/tier/usage` - Current usage vs limits
+- `POST /api/tier/optimize` - Full optimization suite
+- `GET /api/tier/savings-report` - Detailed savings report
+
+##### Enterprise Tier
+- `GET /api/enterprise/custom-integrations` - Custom integration options
+- `POST /api/enterprise/bulk-optimization` - Bulk workload optimization
+- `GET /api/enterprise/sla-compliance` - SLA compliance metrics
+- `GET /api/enterprise/dedicated-support` - Support channel access
+
 #### Health & Monitoring
 - `GET /health` - Basic health check
 - `GET /health/ready` - Readiness with dependency checks
@@ -671,8 +736,14 @@ python test_runner.py --level smoke --fast-fail
 # Unit tests (1-2 minutes) - Development validation
 python test_runner.py --level unit --no-coverage --fast-fail
 
-# Integration tests (3-5 minutes) - Feature validation (DEFAULT for features)
+# Integration tests (3-5 minutes) - Feature validation (DEFAULT)
 python test_runner.py --level integration --no-coverage --fast-fail
+
+# Agent changes with real LLM testing
+python test_runner.py --level agents --real-llm
+
+# Before releases - comprehensive with real LLM
+python test_runner.py --level integration --real-llm
 
 # Comprehensive tests with coverage (30-45 minutes)
 python test_runner.py --level comprehensive
@@ -683,6 +754,11 @@ python test_runner.py --level critical
 # Simple fallback runner if main runner has issues
 python test_runner.py --simple
 ```
+
+**Testing Strategy from CLAUDE.md**:
+- **DEFAULT (Fast Feedback)**: `python test_runner.py --level integration --no-coverage --fast-fail`
+- **AGENT CHANGES**: `python test_runner.py --level agents --real-llm`
+- **BEFORE RELEASES**: `python test_runner.py --level integration --real-llm`
 
 ### Traditional Backend Testing
 
@@ -771,10 +847,29 @@ docker-compose logs -f
 docker-compose down
 ```
 
-### Production Configuration
+## 🚀 Production Deployment
+
+### Production Deployment Overview
+
+**For complete production deployment procedures, see**: [`docs/deployment/PRODUCTION_DEPLOYMENT.md`](docs/deployment/PRODUCTION_DEPLOYMENT.md)
+
+#### Quick Production Setup
+
+```bash
+# 1. Deploy to GCP Staging (recommended for testing)
+python deploy_staging_reliable.py
+
+# 2. Setup production secrets
+python setup_staging_auth.py --force-new-key
+
+# 3. Production Docker deployment
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+#### Production Configuration
 
 ```yaml
-# docker-compose.prod.yml
+# docker-compose.prod.yml (excerpt)
 version: '3.8'
 services:
   backend:
@@ -784,71 +879,102 @@ services:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
       - SECRET_KEY=${SECRET_KEY}
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-    ports:
-      - "8000:8000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health/ready"]
       interval: 30s
       timeout: 10s
       retries: 3
-    
-  frontend:
-    image: netra/frontend:latest
-    environment:
-      - NEXT_PUBLIC_API_URL=https://api.netrasystems.ai
-      - NEXT_PUBLIC_WS_URL=wss://api.netrasystems.ai/ws
-    ports:
-      - "3000:3000"
-    
-  postgres:
-    image: postgres:14
-    environment:
-      - POSTGRES_DB=netra_db
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    
-  clickhouse:
-    image: clickhouse/clickhouse-server
-    volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    
-  redis:
-    image: redis:7-alpine
-    volumes:
-      - redis_data:/data
-
-volumes:
-  postgres_data:
-  clickhouse_data:
-  redis_data:
 ```
 
-### Environment Variables
-
-Production environment variables:
+#### Critical Production Environment Variables
 
 ```env
 # Production URLs
 API_URL=https://api.netrasystems.ai
 FRONTEND_URL=https://app.netrasystems.ai
 
-# Security
-JWT_SECRET_KEY=<strong-secret-key>
+# Security (use strong values in production)
+JWT_SECRET_KEY=<generate-256-bit-key>
+FERNET_KEY=<generate-with-cryptography>
+SECRET_KEY=<generate-strong-secret>
 ALLOWED_ORIGINS=https://app.netrasystems.ai
 
-# Database
+# Database (with connection pooling)
 DATABASE_URL=postgresql://user:pass@db:5432/netra_prod
 DATABASE_POOL_SIZE=20
 DATABASE_MAX_OVERFLOW=40
 
-# Monitoring
+# Monitoring & Observability
 SENTRY_DSN=your-sentry-dsn
 LOG_LEVEL=INFO
+
+# LLM Providers (production keys)
+GEMINI_API_KEY=<production-gemini-key>
+OPENAI_API_KEY=<production-openai-key>
+ANTHROPIC_API_KEY=<production-anthropic-key>
 ```
+
+**Security Note**: Never commit production secrets. Use Google Secret Manager or similar for production deployments. See [`SPEC/PRODUCTION_SECRETS_ISOLATION.xml`](SPEC/PRODUCTION_SECRETS_ISOLATION.xml).
+
+## 📊 Performance Monitoring
+
+**For comprehensive monitoring setup, see**: [`docs/operations/MONITORING_GUIDE.md`](docs/operations/MONITORING_GUIDE.md)
+
+### SLA Compliance & Performance Benchmarks
+
+#### Service Level Objectives (SLOs)
+
+| Metric | Target | Error Budget |
+|--------|--------|-------------|
+| **API Latency (p99)** | < 2000ms | 5% above threshold |
+| **WebSocket Connection** | < 500ms | 1% connection failures |
+| **Agent Response Time** | < 30s | 2% timeout rate |
+| **System Availability** | 99.9% | 43 minutes/month downtime |
+| **Data Accuracy** | > 99.5% | 0.5% error rate |
+
+#### Key Performance Indicators (KPIs)
+
+```bash
+# Check current system performance
+curl http://localhost:8000/health/dependencies
+
+# Monitor agent response times
+curl http://localhost:8000/api/metrics/performance
+
+# Business metrics
+curl http://localhost:8000/api/metrics/savings/summary
+```
+
+#### Monitoring Stack
+
+- **Metrics**: Prometheus + Grafana
+- **Logging**: Structured JSON logging
+- **Tracing**: OpenTelemetry distributed tracing
+- **Alerting**: Grafana alerts → Slack/PagerDuty
+- **Business Metrics**: Custom ROI/savings dashboards
+
+#### Critical Alerts
+
+1. **SLO Breach**: Any SLO threshold exceeded
+2. **Agent Failures**: > 5% agent execution failures
+3. **Database Issues**: Connection pool exhaustion
+4. **Authentication Failures**: > 10% auth failures
+5. **Revenue Impact**: Savings calculation errors
+
+### Performance Monitoring Commands
+
+```bash
+# Real-time performance monitoring
+python scripts/performance_monitor.py --realtime
+
+# Generate performance report
+python scripts/performance_report.py --timeframe 24h
+
+# Check SLA compliance
+python scripts/sla_checker.py --validate
+```
+
+**Monitoring Philosophy**: "We cannot optimize what we do not measure." All system components are observable by design with the Three Pillars: Logs, Metrics, and Traces.
 
 ## 🤝 Contributing
 
@@ -886,13 +1012,18 @@ This project is proprietary software owned by Netra Systems.
 
 ## 🔗 Links
 
-- **[Developer Welcome Guide](DEVELOPER_WELCOME_GUIDE.md)** - Essential reading for AI-native development
-- [Documentation](docs/)
-- [Deployment Guides](deployment_docs/)
-- [API Reference](docs/API_REFERENCE.md)
-- [Testing Guide](docs/TESTING_GUIDE.md)
-- [Architecture Overview](docs/ARCHITECTURE.md)
-- [WebSocket Implementation](docs/WEBSOCKET_IMPLEMENTATION.md)
+- **[Developer Welcome Guide](docs/development/DEVELOPER_WELCOME_GUIDE.md)** - Essential reading for AI-native development
+- **[Customer Getting Started Guide](docs/development/CUSTOMER_GETTING_STARTED.md)** - Complete development and usage guide
+- [Documentation Index](docs/README.md) - Complete documentation catalog
+- [Production Deployment Guide](docs/deployment/PRODUCTION_DEPLOYMENT.md) - Production deployment procedures
+- [Monitoring Guide](docs/operations/MONITORING_GUIDE.md) - Performance monitoring and SLA compliance
+- [Revenue Tracking Guide](docs/business/REVENUE_TRACKING.md) - Business metrics and ROI calculation
+- [Configuration Guide](docs/configuration/CONFIGURATION_GUIDE.md) - Complete environment configuration
+- [API Reference](docs/architecture/API_REFERENCE.md) - Complete API documentation
+- [Testing Guide](docs/testing/TESTING_GUIDE.md) - Comprehensive testing documentation
+- [Architecture Overview](docs/architecture/ARCHITECTURE.md) - System architecture details
+- [WebSocket Implementation](docs/architecture/WEBSOCKET_IMPLEMENTATION.md) - Real-time communication
+- [String Literals Index](SPEC/string_literals_index.xml) - Platform constants reference
 - [Issue Tracker](https://github.com/netrasystems/netra-core/issues)
 
 

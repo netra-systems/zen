@@ -8,6 +8,7 @@ This module can be run directly as:
 
 import sys
 import os
+import asyncio
 import argparse
 from pathlib import Path
 
@@ -379,7 +380,16 @@ def main():
     
     # Create and run launcher
     launcher = DevLauncher(config)
-    exit_code = launcher.run()
+    
+    # Run the async launcher
+    try:
+        exit_code = asyncio.run(launcher.run())
+    except KeyboardInterrupt:
+        print("\n🛑 SHUTDOWN | Interrupted by user")
+        exit_code = 0
+    except Exception as e:
+        print(f"\n❌ ERROR | Launcher failed: {e}")
+        exit_code = 1
     
     sys.exit(exit_code)
 

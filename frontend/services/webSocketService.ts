@@ -129,10 +129,9 @@ class WebSocketService {
   }
 
   private sendAuthToken(): void {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      this.send({ type: 'auth', token } as AuthMessage);
-    }
+    // Token is already sent in query params during connection
+    // No need to send again in auth message
+    logger.debug('Token authentication already handled via query params');
   }
 
   private processQueuedMessages(): void {
@@ -289,11 +288,9 @@ class WebSocketService {
         this.status = 'OPEN';
         this.onStatusChange?.(this.status);
         
-        // Send auth token
-        const token = localStorage.getItem('authToken');
-        if (token) {
-          this.send({ type: 'auth', token } as AuthMessage);
-        }
+        // Token is already sent in query params during connection
+        // No need to send again in auth message
+        logger.debug('WebSocket connected, token authentication handled via query params');
         
         // Send queued messages
         while (this.messageQueue.length > 0) {

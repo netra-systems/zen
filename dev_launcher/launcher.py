@@ -11,6 +11,7 @@ import logging
 import threading
 import signal
 import atexit
+import asyncio
 from typing import Optional, Dict, List
 from pathlib import Path
 from datetime import datetime
@@ -34,6 +35,8 @@ from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTrack
 from dev_launcher.critical_error_handler import critical_handler, CriticalError
 from dev_launcher.migration_runner import MigrationRunner
 from dev_launcher.database_connector import DatabaseConnector
+from dev_launcher.websocket_validator import WebSocketValidator
+from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
 
 logger = logging.getLogger(__name__)
 
@@ -74,8 +77,12 @@ class DevLauncher:
         except ValueError:
             self.startup_mode = StartupMode.MINIMAL
         
-        # Create log filter and progress tracker
-        self.log_filter = LogFilter(self.startup_mode)
+        # Create log filter and progress tracker with visibility flags
+        self.log_filter = LogFilter(
+            self.startup_mode, 
+            verbose_background=self.config.verbose_background,
+            verbose_tables=self.config.verbose_tables
+        )
         self.progress_tracker = StartupProgressTracker(self.startup_mode)
         
         # Override verbose if in minimal mode
@@ -103,6 +110,7 @@ class DevLauncher:
         self.startup_validator = StartupValidator(self.use_emoji)
         self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
         self.database_connector = DatabaseConnector(self.use_emoji)
+        self.websocket_validator = WebSocketValidator(self.use_emoji)
     
     def _create_secret_loader(self) -> SecretLoader:
         """Create secret loader instance."""
@@ -191,13 +199,28 @@ class DevLauncher:
         if hasattr(self, 'log_manager'):
             self.log_manager.stop_all()
         
-        # Cleanup optimizers
+        # Cleanup optimizers and parallel executor
         if hasattr(self, 'startup_optimizer'):
             self.startup_optimizer.cleanup()
         
+        if hasattr(self, 'parallel_executor') and self.parallel_executor:
+            self.parallel_executor.cleanup()
+        
         # Stop database monitoring and cleanup connections
         if hasattr(self, 'database_connector'):
-            asyncio.run(self.database_connector.stop_health_monitoring())
+            try:
+                # Check if we're in an event loop
+                loop = asyncio.get_running_loop()
+                # If we're in an event loop, we can't use asyncio.run
+                # Set shutdown flag and let monitoring loop handle cleanup
+                self.database_connector._shutdown_requested = True
+                logger.info("Database monitoring shutdown requested")
+            except RuntimeError:
+                # No running event loop, safe to use asyncio.run
+                try:
+                    asyncio.run(self.database_connector.stop_health_monitoring())
+                except Exception as e:
+                    logger.error(f"Error stopping database monitoring: {e}")
         
         # Verify ports are freed
         self._verify_ports_freed()
@@ -285,6 +308,13 @@ class DevLauncher:
         self.cache_manager = CacheManager(self.config.project_root)
         self.startup_optimizer = StartupOptimizer(self.cache_manager)
         self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
+        
+        # Setup parallel executor for pre-checks
+        if self.parallel_enabled:
+            self.parallel_executor = ParallelExecutor(max_cpu_workers=2, max_io_workers=4)
+        else:
+            self.parallel_executor = None
+            
         self._register_optimization_steps()
     
     def _register_optimization_steps(self):
@@ -309,17 +339,36 @@ class DevLauncher:
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
         result = self.environment_checker.check_environment()
-        # Check for critical environment variables
+        # Check and set defaults for critical environment variables
         self._check_critical_env_vars()
         return result
     
     def _check_critical_env_vars(self):
-        """Check critical environment variables."""
-        critical_vars = [
-            "DATABASE_URL",
-            "JWT_SECRET_KEY"
-        ]
-        for var in critical_vars:
+        """Check and set defaults for critical environment variables."""
+        self._set_env_var_defaults()
+        self._validate_critical_env_vars()
+    
+    def _set_env_var_defaults(self):
+        """Set default values for critical environment variables."""
+        defaults = {
+            "BACKEND_PORT": "8000",
+            "FRONTEND_PORT": "3000", 
+            "AUTH_PORT": "8081",
+            "WEBSOCKET_PORT": "8000",
+            "LOG_LEVEL": "INFO",
+            "ENVIRONMENT": "development"
+        }
+        
+        for var, default_value in defaults.items():
+            if not os.environ.get(var):
+                os.environ[var] = default_value
+                self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
+    
+    def _validate_critical_env_vars(self):
+        """Validate required environment variables."""
+        required_vars = ["DATABASE_URL", "JWT_SECRET_KEY"]
+        
+        for var in required_vars:
             value = os.environ.get(var)
             if not value:
                 critical_handler.check_env_var(var, value)
@@ -344,6 +393,15 @@ class DevLauncher:
         except Exception as e:
             logger.error(f"Database validation failed: {e}")
             self._print("❌", "DATABASE", f"Validation error: {str(e)}")
+            return False
+    
+    async def _validate_websocket_endpoints(self) -> bool:
+        """Validate WebSocket endpoints after frontend is ready."""
+        try:
+            return await self.websocket_validator.validate_all_endpoints()
+        except Exception as e:
+            logger.error(f"WebSocket validation failed: {e}")
+            self._print("❌", "WEBSOCKET", f"Validation error: {str(e)}")
             return False
     
     def run_migrations(self, env: Optional[Dict] = None) -> bool:
@@ -507,6 +565,12 @@ class DevLauncher:
                 self._print("❌", "ERROR", "Frontend readiness check failed")
                 return False
             
+            # Step 11.5: Validate WebSocket endpoints
+            self._print("🔄", "STEP 11.5", "Validating WebSocket endpoints...")
+            if not await self._validate_websocket_endpoints():
+                self._print("⚠️", "WARNING", "WebSocket validation failed - continuing startup")
+                # Don't fail startup for WebSocket issues, just warn
+            
             # Step 12: Cache successful startup state
             self._print("🔄", "STEP 12", "Caching successful startup state...")
             self.cache_manager.mark_successful_startup(time.time() - self.startup_time)
@@ -596,6 +660,9 @@ class DevLauncher:
         Per SPEC HEALTH-001: Health monitoring MUST NOT start immediately after service launch.
         Only AFTER startup verification should health monitoring begin.
         """
+        # Register database connector with health monitor
+        self.health_monitor.set_database_connector(self.database_connector)
+        
         # Register health monitoring for all services
         self.register_health_monitoring()
         
@@ -617,10 +684,70 @@ class DevLauncher:
         print("=" * 60)
     
     def _run_pre_checks(self) -> bool:
-        """Run pre-launch checks."""
+        """Run pre-launch checks with parallel execution where possible."""
+        if self.parallel_enabled and self.parallel_executor:
+            return self._run_parallel_pre_checks()
+        else:
+            return self._run_sequential_pre_checks()
+    
+    def _run_parallel_pre_checks(self) -> bool:
+        """Run pre-checks in parallel for faster startup."""
+        self._print("🔄", "PARALLEL", "Running pre-checks in parallel...")
+        
+        # Create parallel tasks for independent checks
+        tasks = [
+            ParallelTask(
+                task_id="environment_check",
+                func=self.check_environment,
+                task_type=TaskType.IO_BOUND,
+                timeout=30,
+                priority=1
+            ),
+            ParallelTask(
+                task_id="secret_loading",
+                func=self._load_secrets_task,
+                task_type=TaskType.IO_BOUND,
+                timeout=45,
+                priority=2
+            )
+        ]
+        
+        # Add tasks to executor
+        for task in tasks:
+            self.parallel_executor.add_task(task)
+        
+        # Execute all tasks
+        results = self.parallel_executor.execute_all(timeout=60)
+        
+        # Check results
+        for task_id, result in results.items():
+            if not result.success:
+                self._print("❌", "ERROR", f"Pre-check {task_id} failed: {result.error}")
+                return False
+            elif not result.result:
+                self._print("⚠️", "WARN", f"Pre-check {task_id} returned False")
+                if task_id == "environment_check":
+                    return False
+                # Allow secret loading to fail non-critically
+        
+        return True
+    
+    def _run_sequential_pre_checks(self) -> bool:
+        """Run pre-checks sequentially (fallback)."""
         if not self.check_environment():
             return False
         return self._handle_secret_loading()
+    
+    def _load_secrets_task(self) -> bool:
+        """Secret loading task for parallel execution."""
+        try:
+            result = self.load_secrets()
+            if not result:
+                self._print_secret_loading_warning()
+            return True  # Allow to proceed even if secrets fail
+        except Exception as e:
+            logger.warning(f"Secret loading failed: {e}")
+            return True  # Non-critical failure
     
     def _handle_secret_loading(self) -> bool:
         """Handle secret loading with warnings."""

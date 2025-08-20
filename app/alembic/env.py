@@ -52,10 +52,11 @@ def run_migrations_offline() -> None:
 
 def _get_configuration() -> dict:
     """Get database configuration from environment."""
-    database_url = os.environ.get('DATABASE_URL')
+    from app.config import get_config
+    app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
-    if database_url:
-        configuration['sqlalchemy.url'] = database_url
+    if app_config.database_url:
+        configuration['sqlalchemy.url'] = app_config.database_url
     return configuration
 
 def _create_connectable(configuration: dict):

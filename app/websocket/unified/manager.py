@@ -12,6 +12,7 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
+import json
 import time
 from typing import Dict, Any, Union, List, Optional, Literal
 from datetime import datetime, timezone
@@ -224,8 +225,56 @@ class UnifiedWebSocketManager:
         return result
 
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
-        """Validate message through unified messaging system."""
-        return self.messaging.validate_message(message)
+        """Validate message through unified messaging system with JSON-first enforcement."""
+        # JSON-first validation: Ensure message is properly structured dict
+        if not isinstance(message, dict):
+            return WebSocketValidationError(
+                error_type="type_error",
+                message="Message must be a JSON object (dict)",
+                field="message",
+                received_data={"type": type(message).__name__, "value": str(message)[:100]}
+            )
+        
+        # Ensure required 'type' field exists
+        if "type" not in message:
+            return WebSocketValidationError(
+                error_type="validation_error", 
+                message="Message must contain 'type' field",
+                field="type",
+                received_data=message
+            )
+        
+        # Validate type field is string
+        if not isinstance(message["type"], str):
+            return WebSocketValidationError(
+                error_type="type_error",
+                message="Message 'type' field must be a string",
+                field="type", 
+                received_data={"type_received": type(message["type"]).__name__, "value": message["type"]}
+            )
+        
+        # Pass to existing validation system through message handler
+        return self.messaging.message_handler.validate_message(message)
+
+    def parse_and_validate_json_message(self, raw_message: str) -> Union[Dict[str, Any], WebSocketValidationError]:
+        """Parse and validate JSON message from WebSocket ensuring JSON-first communication."""
+        try:
+            # Parse JSON
+            message = json.loads(raw_message)
+        except json.JSONDecodeError as e:
+            return WebSocketValidationError(
+                error_type="format_error",
+                message=f"Invalid JSON message: {str(e)}",
+                field="raw_message",
+                received_data={"raw": raw_message[:100]}  # Truncate for logging
+            )
+        
+        # Validate parsed message structure
+        validation_result = self.validate_message(message)
+        if isinstance(validation_result, WebSocketValidationError):
+            return validation_result
+        
+        return message
 
     async def connect_to_job(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
         """Connect WebSocket to specific job with room management."""

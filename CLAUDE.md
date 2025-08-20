@@ -39,6 +39,9 @@ We prioritize logical clarity. Focus on maximizing clarity and minimizing Cyclom
 *   **Function Guidelines:** Strive for concise functions (approx. <25 lines). Functions should perform a single task.
 *   **Module Guidelines:** Aim for focused modules (approx. <500 lines). Modules should be testable units.
 *   **The Standard:** Exceeding these guidelines is a signal to reassess the design for SRP adherence and complexity reduction. Maintain readable, cohesive structures, ensuring clarity over fragmentation (ravioli code).
+* Only take on as much work as you can do. If the work is too big sub divide the work.
+As needed make plans and spawn agents with fresh context windows to work on it. 
+Always keep the overall context of the scope in mind and only report on your success relative to that gobal context. If you are running out capacity to work then save a report of your progress so far and next steps needed.
 
 ### 2.3. Code Quality Standards
 *   **Single Source of Truth (SSOT):** Ensure implementations are duplication-free. Extend existing functions with options/parameters instead of creating new variants.
@@ -96,6 +99,32 @@ When addressing bugs, understand the required behavior objectively. Focus on sat
 *   **Learnings:** Document insights in specs (using positive wording) to ensure continuous improvement and stability.
 *   **Navigation:** Consult and update [`LLM_MASTER_INDEX.md`](LLM_MASTER_INDEX.md) before searching for files or functionality.
 * Refactors must delete all legacy code. Refactors must be complete system wide and "atomic" operations that leave a clean and better system.
+
+### 4.1. String Literals Index: Preventing Hallucination
+
+The **String Literals Index** is a critical system for maintaining consistency and preventing LLM hallucination of platform-specific values.
+
+**Purpose:** Single source of truth for all Netra platform constants, configurations, paths, and identifiers.
+
+**Key Components:**
+*   **Index File:** `SPEC/generated/string_literals.json` - Generated index containing 35,000+ categorized string literals
+*   **Scanner:** `scripts/scan_string_literals.py` - AST-based scanner to extract and categorize literals
+*   **Query Tool:** `scripts/query_string_literals.py` - Validate and search for correct string values
+
+**Usage Requirements:**
+1.  **ALWAYS validate** string literals before use: `python scripts/query_string_literals.py validate "your_string"`
+2.  **NEVER guess** configuration keys, paths, or identifiers - query the index first
+3.  **UPDATE index** after adding new constants: `python scripts/scan_string_literals.py`
+
+**Categories Tracked:**
+*   `configuration`: Config keys, settings, parameters (e.g., "redis_url", "max_retries")
+*   `paths`: API endpoints, file paths, directories (e.g., "/api/v1/threads", "/websocket")
+*   `identifiers`: Service names, agent types (e.g., "supervisor_agent", "auth_service")
+*   `database`: Table/column names (e.g., "threads", "created_at")
+*   `events`: Event names, message types (e.g., "thread_created", "websocket_connect")
+*   `metrics`: Metric names and labels (e.g., "request_duration_seconds")
+*   `environment`: Environment variables (e.g., "NETRA_API_KEY", "DATABASE_URL")
+*   `states`: Status values, conditions (e.g., "pending", "active", "healthy")
 
 ## 5. Architecture and Conventions
 
@@ -162,6 +191,7 @@ Ensure adherence to these core specifications throughout the development process
 | [`no_test_stubs.xml`](SPEC/no_test_stubs.xml) | Maintain stub-free production tests | Always check |
 | [`anti_regression.xml`](SPEC/anti_regression.xml) | Ensure system stability | Before commits |
 | [`independent_services.xml`](SPEC/independent_services.xml) | Microservice independence | When modifying services |
+| [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Master index of platform constants | BEFORE using string literals |
 
 ### 7.2. Domain Specs
 
@@ -178,9 +208,11 @@ Ensure adherence to these core specifications throughout the development process
 
 ### BEFORE and AFTER Any Code Change:
 1.  **CHECK** [`learnings/index.xml`](SPEC/learnings/index.xml) - Search for related insights FIRST.
-2.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
-3.  **RUN** `python test_runner.py --level integration --no-coverage --fast-fail`.
-4.  **UPDATE** specs and documentation to reflect the implemented reality.
+2.  **VERIFY** String literals using `python scripts/query_string_literals.py validate "literal_value"` to prevent hallucination.
+3.  **REVIEW** [`type_safety.xml`](SPEC/type_safety.xml) and [`conventions.xml`](SPEC/conventions.xml).
+4.  **RUN** `python test_runner.py --level integration --no-coverage --fast-fail`.
+5.  **UPDATE** specs and documentation to reflect the implemented reality.
+6.  **REFRESH** String literals index if adding new constants: `python scripts/scan_string_literals.py`
 
 ### Key Patterns
 *   Type Safety (See specs)

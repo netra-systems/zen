@@ -64,8 +64,9 @@ class AgentService(IAgentService):
         db_session: Optional[AsyncSession] = None
     ) -> None:
         """Handles a message from the WebSocket."""
-        logger.info(f"handle_websocket_message called for user_id: {user_id}")
+        logger.info(f"[AGENT SERVICE] Processing WebSocket message for user {user_id}: {type(message)}")
         await self._handle_message_with_error_handling(user_id, message, db_session)
+        logger.info(f"[AGENT SERVICE] Completed WebSocket message processing for user {user_id}")
     
     async def _handle_message_with_error_handling(
         self, user_id: str, message: Union[str, Dict[str, Any]], 

@@ -38,6 +38,7 @@ class ConfigurationValidator:
     
     def _get_environment(self) -> str:
         """Get current environment for validation rules."""
+        import os
         return os.environ.get("ENVIRONMENT", "development").lower()
     
     def _init_validators(self) -> None:

@@ -13,7 +13,7 @@ from fastapi import FastAPI
 
 from app.logging_config import central_logger
 from app.utils.multiprocessing_cleanup import setup_multiprocessing
-from app.config import settings
+from app.config import settings, get_config
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService
 from app.llm.llm_manager import LLMManager
@@ -106,8 +106,9 @@ def _perform_database_validation(logger: logging.Logger) -> None:
 
 def run_database_migrations(logger: logging.Logger) -> None:
     """Run database migrations if not in test mode."""
-    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
-    skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
+    config = get_config()
+    fast_startup = config.fast_startup_mode.lower() == "true"
+    skip_migrations = config.skip_migrations.lower() == "true"
     
     if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
@@ -203,7 +204,8 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
 
 async def initialize_clickhouse(logger: logging.Logger) -> None:
     """Initialize ClickHouse tables based on service mode."""
-    clickhouse_mode = os.getenv('CLICKHOUSE_MODE', 'shared').lower()
+    config = get_config()
+    clickhouse_mode = config.clickhouse_mode.lower()
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         await _setup_clickhouse_tables(logger, clickhouse_mode)
     else:
@@ -279,8 +281,9 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     """Run application startup checks."""
-    disable_checks = os.getenv("DISABLE_STARTUP_CHECKS", "false").lower() == "true"
-    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
+    config = get_config()
+    disable_checks = config.disable_startup_checks.lower() == "true"
+    fast_startup = config.fast_startup_mode.lower() == "true"
     
     if disable_checks or fast_startup:
         logger.info("Skipping startup health checks (fast startup mode)")

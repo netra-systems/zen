@@ -42,6 +42,10 @@ class LauncherConfig:
     # Startup mode configuration
     startup_mode: str = "minimal"  # minimal, standard, or verbose
     
+    # Visibility control flags
+    verbose_background: bool = False  # Show background task logs
+    verbose_tables: bool = False  # Show table check details
+    
     # Phase 6 Integration: New optimization flags
     silent_mode: bool = False  # Silent logging with minimal output
     no_cache: bool = False  # Bypass all caching
@@ -155,6 +159,10 @@ class LauncherConfig:
         elif hasattr(args, 'mode'):
             startup_mode = args.mode
         
+        # Handle visibility control flags
+        verbose_background = hasattr(args, 'verbose_background') and args.verbose_background
+        verbose_tables = hasattr(args, 'verbose_tables') and args.verbose_tables
+        
         # Handle new optimization flags
         silent_mode = hasattr(args, 'silent') and args.silent
         no_cache = hasattr(args, 'no_cache') and args.no_cache
@@ -182,6 +190,8 @@ class LauncherConfig:
             use_turbopack=not args.no_turbopack if hasattr(args, 'no_turbopack') else False,
             parallel_startup=not args.no_parallel if hasattr(args, 'no_parallel') else True,
             startup_mode=startup_mode,
+            verbose_background=verbose_background,
+            verbose_tables=verbose_tables,
             silent_mode=silent_mode,
             no_cache=no_cache,
             profile_startup=profile_startup,
