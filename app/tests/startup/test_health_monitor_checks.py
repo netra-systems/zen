@@ -1,7 +1,7 @@
 """
 Health monitor check tests
 Tests health check execution, result processing, and stage progression
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

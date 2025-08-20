@@ -2,7 +2,7 @@
 """
 Status Data Collection Module
 Handles file scanning, pattern detection, and data gathering.
-Complies with 300-line and 8-line function limits.
+Complies with 450-line and 25-line function limits.
 """
 
 import os

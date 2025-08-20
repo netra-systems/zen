@@ -1,4 +1,4 @@
-// Tool-specific WebSocket event handlers - Modular 8-line functions
+// Tool-specific WebSocket event handlers - Modular 25-line functions
 // Handles tool executing, completed events
 
 import { mapEventPayload } from '@/utils/event-payload-mapper';

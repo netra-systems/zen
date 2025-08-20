@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Function complexity compliance checker.
-Enforces CLAUDE.md function size limits (8 lines max).
+Enforces CLAUDE.md function size guidelines (approx <25 lines).
+Per CLAUDE.md 2.2: Exceeding guidelines signals need to reassess design for SRP adherence.
 """
 
 import ast

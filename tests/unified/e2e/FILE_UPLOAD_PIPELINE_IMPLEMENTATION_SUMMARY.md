@@ -10,7 +10,7 @@
 - [x] Real file upload through entire pipeline (Frontend→Backend→Agent→Storage)
 - [x] NO MOCKING - Uses real file processing and agent analysis
 - [x] Test completes in < 10 seconds
-- [x] Follows 300-line file limit and 8-line function limit
+- [x] Follows 450-line file limit and 25-line function limit
 - [x] Business value: Document analysis features for enterprise
 
 ### Pipeline Flow Tested ✅
@@ -142,8 +142,8 @@ print(f"Business Value: {info['business_value']}")
 - [x] Error handling implemented
 
 ### Architecture Compliance
-- [x] 300-line module limit enforced
-- [x] 8-line function limit enforced
+- [x] 450-line module limit enforced
+- [x] 25-line function limit enforced
 - [x] Single responsibility per module
 - [x] Clear interfaces between modules
 - [x] Testable units with proper isolation

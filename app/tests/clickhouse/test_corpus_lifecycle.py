@@ -1,7 +1,7 @@
 """
 Corpus lifecycle and workload types tests
 Tests complete corpus lifecycle from creation to deletion and workload type coverage
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

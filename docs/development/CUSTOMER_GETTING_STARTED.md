@@ -118,6 +118,31 @@ python test_runner.py --level integration --no-coverage --fast-fail
 python test_runner.py --simple
 ```
 
+### Step 5: Validate String Literals Index
+
+Netra uses a centralized string literals index to prevent LLM hallucination and ensure consistency:
+
+```bash
+# Generate/update the string literals index
+python scripts/scan_string_literals.py
+
+# Validate existing string usage
+python scripts/query_string_literals.py --validate
+
+# Check for inconsistencies
+python scripts/query_string_literals.py --category all --format table
+```
+
+**Why This Matters**: The string literals index ensures that all agents use correct platform-specific constants (API endpoints, configuration keys, database table names, etc.). This prevents bugs from typos and improves system reliability.
+
+**What It Does**:
+- Scans codebase for all string constants
+- Categorizes them by type (config, paths, identifiers, etc.)
+- Creates a searchable index at `SPEC/generated/string_literals.json`
+- Validates consistency across the platform
+
+**Integration**: The dev_launcher automatically validates string literals on startup. Any inconsistencies are reported in the logs.
+
 ## Quick Start for Users
 
 ### Step 1: Access the Platform
@@ -422,18 +447,96 @@ Remember: Netra is your optimization copilot. The more you interact with it, the
 
 ## Development Workflow
 
+### Complete Developer Workflow: Setup to First Commit
+
+#### 1. Initial Setup
+```bash
+# Clone and setup (Steps 1-2 above)
+git clone https://github.com/netra-systems/netra-apex.git
+cd netra-core-generation-1
+python -m venv venv && source venv/bin/activate  # or venv\Scripts\activate on Windows
+pip install -r requirements.txt requirements-dev.txt
+```
+
+#### 2. Environment Configuration
+```bash
+# Option A: Auto-fetch secrets (if Google Cloud is configured)
+python scripts/fetch_secrets_to_env.py
+
+# Option B: Manual .env creation (see Step 2 above for template)
+cp config/.env.example .env  # Edit with your settings
+```
+
+#### 3. String Literals Validation
+```bash
+# Update string literals index (critical for consistency)
+python scripts/scan_string_literals.py
+python scripts/query_string_literals.py --validate
+```
+
+#### 4. Development Environment Start
+```bash
+# Start development environment
+python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets
+```
+
+#### 5. Pre-Development Validation
+```bash
+# Smoke tests (< 30s) - ALWAYS run before starting work
+python test_runner.py --level smoke --fast-fail
+
+# If working on agents specifically
+python test_runner.py --level agents --real-llm
+```
+
+#### 6. Development & Testing Cycle
+```bash
+# During development - fast feedback loop
+python test_runner.py --level integration --no-coverage --fast-fail
+
+# Code quality checks
+ruff check app/ && black app/ --check && mypy app/
+cd frontend && npm run lint && npm run typecheck
+```
+
+#### 7. Pre-Commit Validation
+```bash
+# Before committing - comprehensive validation
+python test_runner.py --level integration --no-coverage --fast-fail
+
+# Update string literals if you added new constants
+python scripts/scan_string_literals.py
+
+# Architecture compliance check
+python scripts/check_architecture_compliance.py
+```
+
+#### 8. Commit & Push
+```bash
+# Standard commit workflow
+git add .
+git commit -m "feat: add optimization feature with BVJ analysis"
+git push origin feature/optimization-feature
+```
+
 ### Running Tests
 
 #### Unified Test Runner (Recommended)
 ```bash
 # Quick validation before commits (< 30s)
-python test_runner.py --level smoke
+python test_runner.py --level smoke --fast-fail
 
 # Development testing (1-2 min)
-python test_runner.py --level unit
+python test_runner.py --level unit --no-coverage --fast-fail
 
-# Feature validation (3-5 min)
-python test_runner.py --level integration
+# Feature validation (3-5 min) - DEFAULT
+python test_runner.py --level integration --no-coverage --fast-fail
+
+# Agent changes with real LLM
+python test_runner.py --level agents --real-llm
+
+# Before releases
+python test_runner.py --level integration --real-llm
 
 # Full suite with coverage (10-15 min)
 python test_runner.py --level comprehensive
@@ -484,6 +587,30 @@ cd frontend && rm -rf node_modules package-lock.json
 npm install
 ```
 
+#### String Literals Validation Errors
+```bash
+# Regenerate the index
+python scripts/scan_string_literals.py --force
+
+# Check for specific category issues
+python scripts/query_string_literals.py --category config --validate
+
+# View inconsistencies in table format
+python scripts/query_string_literals.py --category all --format table
+```
+
+#### Architecture Compliance Issues
+```bash
+# Check compliance status
+python scripts/check_architecture_compliance.py
+
+# View detailed compliance report
+python scripts/check_architecture_compliance.py --detailed
+
+# Fix specific compliance issues
+python scripts/check_architecture_compliance.py --fix-module <module_name>
+```
+
 #### LLM API Errors
 ```bash
 # Disable LLM for development
@@ -510,11 +637,33 @@ When developing, always refer to `CLAUDE.md` for:
 - **UI Design**: Glassmorphic design, NO blue gradient bars
 - **NO Test Stubs**: Never add test implementations in production services
 
-### Before Any Code Change
-1. ✅ Consult `SPEC/code_changes.xml`
-2. ✅ Run smoke tests: `python test_runner.py --level smoke`
-3. ✅ Update import tests when adding dependencies
-4. ✅ Check `SPEC/no_test_stubs.xml` - NO test stubs in production
+### Before Any Code Change (Critical Checklist)
+1. ✅ **Check Learnings**: Consult [`SPEC/learnings/index.xml`](../../SPEC/learnings/index.xml) for related insights
+2. ✅ **Review Specs**: Check [`SPEC/type_safety.xml`](../../SPEC/type_safety.xml) and [`SPEC/conventions.xml`](../../SPEC/conventions.xml)
+3. ✅ **Code Changes**: Consult [`SPEC/code_changes.xml`](../../SPEC/code_changes.xml) for change checklist
+4. ✅ **Smoke Tests**: Run `python test_runner.py --level smoke --fast-fail`
+5. ✅ **String Literals**: Update index if adding new constants: `python scripts/scan_string_literals.py`
+6. ✅ **No Test Stubs**: Check [`SPEC/no_test_stubs.xml`](../../SPEC/no_test_stubs.xml) - NO test stubs in production
+7. ✅ **Update Specs**: Update documentation to reflect implemented reality
+
+### After Code Changes (Verification Checklist)
+1. ✅ **Integration Tests**: `python test_runner.py --level integration --no-coverage --fast-fail`
+2. ✅ **Architecture Compliance**: `python scripts/check_architecture_compliance.py`
+3. ✅ **String Literals**: Validate consistency: `python scripts/query_string_literals.py --validate`
+4. ✅ **Update Specs**: Finalize specs to reflect implemented changes
+5. ✅ **Commit Message**: Include BVJ (Business Value Justification) context
+
+### Business Value Justification (BVJ) Template
+
+Every development task must include BVJ context:
+
+```
+**BVJ**: 
+- Segment: [Free/Early/Mid/Enterprise/Platform]
+- Business Goal: [Conversion/Expansion/Retention/Stability]
+- Value Impact: [How this enhances customer AI operations]
+- Strategic/Revenue Impact: [Quantifiable benefit to Netra]
+```
 
 ---
 

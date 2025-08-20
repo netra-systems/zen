@@ -1,6 +1,6 @@
 /**
  * Integration Test Setup Utilities
- * Multi-component setup for integration tests with 8-line function limit enforcement
+ * Multi-component setup for integration tests with 25-line function limit enforcement
  */
 
 import { render, RenderResult } from '@testing-library/react';

@@ -1,7 +1,7 @@
 """
 Agent Health Checking Functionality
 
-Extracted from system_health_monitor.py to maintain 300-line limit.
+Extracted from system_health_monitor.py to maintain 450-line limit.
 Provides specialized health checking for agent components.
 """
 

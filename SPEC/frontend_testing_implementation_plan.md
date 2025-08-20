@@ -261,8 +261,8 @@ Files to create/update:
 ## Implementation Guidelines for Agents
 
 ### Code Quality Requirements
-1. **8-Line Function Rule**: Every test function ≤ 8 lines
-2. **300-Line File Rule**: Every test file ≤ 300 lines
+1. **25-line Function Rule**: Every test function ≤ 8 lines
+2. **450-line File Rule**: Every test file ≤ 300 lines
 3. **Type Safety**: Full TypeScript typing for all tests
 4. **No Stubs**: Real implementations, no placeholder code
 
@@ -321,8 +321,8 @@ Files to create/update:
 
 ## Validation Checklist
 Each agent must ensure:
-- [ ] Tests follow 8-line function rule
-- [ ] Files follow 300-line limit
+- [ ] Tests follow 25-line function rule
+- [ ] Files follow 450-line limit
 - [ ] Full type safety implemented
 - [ ] Tests are deterministic (no flakiness)
 - [ ] Coverage targets met for assigned area

@@ -60,7 +60,7 @@
                 </after>
             </example>
             <benefits>
-                <benefit>Maintains 300-line limit</benefit>
+                <benefit>Maintains 450-line limit</benefit>
                 <benefit>Clear separation of concerns</benefit>
                 <benefit>Easier testing and maintenance</benefit>
                 <benefit>Supports team parallelization</benefit>
@@ -140,7 +140,7 @@
                 <bad>
                     class MonolithicNotificationService:
                         # 400+ lines handling all notification types
-                        # VIOLATES 300-line limit
+                        # VIOLATES 450-line limit
                         # Complex, hard to test, tightly coupled
                 </bad>
             </example>

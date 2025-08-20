@@ -107,8 +107,8 @@ Some thresholds are relaxed for test environments:
 
 ## 🔧 Test Implementation Guidelines
 
-### 8-Line Function Rule
-All test functions follow the 8-line maximum:
+### 25-line Function Rule
+All test functions follow the 25-line maximum:
 ```typescript
 function createProfilerCallback(): [ProfilerOnRenderCallback, PerformanceData[]] {
   const performanceData: PerformanceData[] = [];
@@ -123,7 +123,7 @@ function createProfilerCallback(): [ProfilerOnRenderCallback, PerformanceData[]]
 }
 ```
 
-### 300-Line File Rule
+### 450-line File Rule
 Each test file is under 300 lines, split by:
 - Import and interface definitions
 - Helper functions and utilities

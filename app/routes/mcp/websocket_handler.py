@@ -2,7 +2,7 @@
 MCP WebSocket Handler
 
 Handles WebSocket connections for MCP protocol.
-Maintains single responsibility under 300-line limit.
+Maintains single responsibility under 450-line limit.
 """
 
 from typing import Optional

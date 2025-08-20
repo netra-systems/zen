@@ -1,9 +1,9 @@
 """
 Auth Configuration Handler
 """
-import os
 from typing import Optional
 from fastapi import Request
+from app.config import get_config
 from app.clients.auth_client import auth_client
 from app.schemas.auth_types import AuthConfigResponse, AuthEndpoints
 
@@ -55,9 +55,10 @@ def build_base_auth_response(oauth_config, endpoints: AuthEndpoints) -> AuthConf
 
 def add_pr_configuration(response: AuthConfigResponse, oauth_config) -> None:
     """Add PR-specific configuration to auth response."""
-    is_pr_environment = bool(os.getenv("PR_NUMBER"))
+    config = get_config()
+    is_pr_environment = bool(config.pr_number)
     if is_pr_environment:
-        response.pr_number = os.getenv("PR_NUMBER")
+        response.pr_number = config.pr_number
         response.use_proxy = oauth_config.use_proxy
         response.proxy_url = oauth_config.proxy_url
 
@@ -69,7 +70,8 @@ def determine_environment_urls() -> tuple[str, str]:
         return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
     elif environment.value == 'production':
         return 'https://auth.netrasystems.ai', 'https://netrasystems.ai'
-    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081'), 'http://localhost:3000'
+    config = get_config()
+    return config.auth_service_url, 'http://localhost:3000'
 
 
 def _get_dev_login_url(auth_service_url: str, oauth_config) -> Optional[str]:
@@ -88,7 +90,8 @@ def build_environment_endpoints(auth_service_url: str, frontend_url: str, oauth_
 
 def _get_google_client_id(oauth_config) -> str:
     """Get Google client ID from config or environment."""
-    return oauth_config.client_id or os.getenv('GOOGLE_CLIENT_ID', '')
+    config = get_config()
+    return oauth_config.client_id or config.google_client_id or ''
 
 def _create_config_dict(environment, endpoints: AuthEndpoints, oauth_config) -> dict:
     """Create authentication configuration dictionary."""
@@ -126,8 +129,9 @@ def build_fallback_endpoints() -> AuthEndpoints:
 
 def _create_fallback_config(fallback_endpoints: AuthEndpoints, frontend_url: str) -> AuthConfigResponse:
     """Create fallback configuration with endpoints."""
+    config = get_config()
     return AuthConfigResponse(
-        development_mode=False, google_client_id=os.getenv('GOOGLE_CLIENT_ID', ''),
+        development_mode=False, google_client_id=config.google_client_id or '',
         endpoints=fallback_endpoints, authorized_javascript_origins=[frontend_url],
         authorized_redirect_uris=[f"{frontend_url}/auth/callback"]
     )

@@ -1,7 +1,7 @@
 """
 Supervisor Agent Orchestration Tests - Workflow Patterns
 Tests for advanced workflow patterns, resource management, and coordination strategies.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import pytest

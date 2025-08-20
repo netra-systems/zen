@@ -2,7 +2,7 @@
  * Responsive Layout Mobile Test Suite
  * Tests viewport sizes, breakpoints, and responsive component behavior
  * Business Value: Ensures optimal UX across devices = 60% mobile/tablet traffic
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  */
 
 import React from 'react';

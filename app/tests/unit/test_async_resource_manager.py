@@ -49,7 +49,7 @@ async def cleanup_callback():
     return callback
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def assert_resource_count(manager, expected):
     """Assert resource manager has expected resource count."""
     assert manager.resource_count == expected

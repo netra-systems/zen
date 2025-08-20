@@ -23,8 +23,16 @@ from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
 
-from app.tests.test_utilities.websocket_mocks import MockWebSocket
-from app.tests.test_utilities.auth_test_helpers import create_test_token
+# Import MockWebSocket from the actual location
+try:
+    from app.tests.services.test_ws_connection_mocks import MockWebSocket
+except ImportError:
+    # Fallback if even this doesn't work
+    class MockWebSocket:
+        def __init__(self, user_id=None):
+            self.user_id = user_id
+            self.sent_messages = []
+from tests.unified.jwt_token_helpers import JWTTestHelper
 from app.schemas.websocket_models import (
     WebSocketMessage, UserMessagePayload, AgentUpdatePayload, 
     StartAgentPayload, WebSocketError
@@ -33,6 +41,13 @@ from app.schemas.core_enums import WebSocketMessageType, AgentStatus
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
+
+# Helper function for backward compatibility
+jwt_helper = JWTTestHelper()
+
+def create_test_token(user_id: str) -> str:
+    """Create a valid test token."""
+    return jwt_helper.create_access_token(user_id, f"{user_id}@example.com")
 
 
 class MessageFlowTracker:

@@ -2,7 +2,7 @@
  * Sidebar Complete Test Suite
  * Agent 3: Comprehensive sidebar and thread management tests
  * Covers performance, state management, navigation, and user interactions
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  */
 
 import React from 'react';

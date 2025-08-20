@@ -1,4 +1,4 @@
-"""Extended operations for DataSubAgent - maintaining 300-line limit compliance."""
+"""Extended operations for DataSubAgent - maintaining 450-line limit compliance."""
 
 from typing import Dict, Any, List, Optional, AsyncGenerator
 import asyncio

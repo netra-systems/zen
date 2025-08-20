@@ -10,7 +10,7 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - This file maintains strong typing and single sources of truth
 - Maximum file size: 300 lines (ACHIEVED by modular design)
 
-The registry now imports from focused modules to maintain the 300-line limit:
+The registry now imports from focused modules to maintain the 450-line limit:
 - core_enums.py: All enumeration types
 - core_models.py: User, Message, Thread models  
 - agent_models.py: Agent-related models and states
@@ -25,7 +25,7 @@ from typing import Dict, List, Optional, Union, Any, Literal, TypedDict
 from datetime import datetime
 
 # ============================================================================
-# IMPORTS FROM FOCUSED MODULES (300-LINE COMPLIANCE)
+# IMPORTS FROM FOCUSED MODULES (450-line COMPLIANCE)
 # ============================================================================
 
 # Import all enums from the dedicated module
@@ -55,7 +55,8 @@ from app.schemas.websocket_models import (
     WebSocketMessage, WebSocketMessageIn, MessageData, ThreadHistoryResponse,
     AgentResponseData, AgentResponse, MessageToUser, AnalysisRequest,
     UserMessage, AgentMessage, StopAgent, AgentCompletedPayload,
-    AgentStoppedPayload
+    AgentStoppedPayload, ServerMessage, WebSocketValidationError,
+    WebSocketStats, RateLimitInfo, BroadcastResult
 )
 
 # Import all audit models from the dedicated module
@@ -101,7 +102,7 @@ __all__ = [
     "DeleteThreadPayload", "MessageData", "ThreadHistoryResponse",
     "AgentResponseData", "AgentResponse", "AgentCompletedPayload", "AgentStoppedPayload",
     "AgentUpdate", "AgentLog", "ToolCall", "ToolResult", "StreamChunk", "StreamComplete",
-    "BaseWebSocketMessage", "ClientToServerMessage", "ServerToClientMessage",
+    "BaseWebSocketMessage", "ClientToServerMessage", "ServerToClientMessage", "ServerMessage",
     
     # Audit models
     "CorpusAuditRecord", "CorpusAuditMetadata", "CorpusAuditSearchFilter", 
@@ -164,6 +165,7 @@ TYPE_REGISTRY = {
     "BaseWebSocketMessage": BaseWebSocketMessage,
     "ClientToServerMessage": ClientToServerMessage,
     "ServerToClientMessage": ServerToClientMessage,
+    "ServerMessage": ServerMessage,
     
     # Enums
     "MessageType": MessageType,

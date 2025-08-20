@@ -1,6 +1,6 @@
 """
 Database Repository Helpers - Modular Index
-Redirects to focused helper modules following 300-line architecture
+Redirects to focused helper modules following 450-line architecture
 COMPLIANCE: Modular split from 501-line monolith
 """
 

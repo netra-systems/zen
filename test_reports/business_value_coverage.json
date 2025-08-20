@@ -1,0 +1,378 @@
+{
+  "metadata": {
+    "generated_at": "2025-08-20T11:19:26.797214",
+    "total_tests": 3222,
+    "total_business_value": 187723.0,
+    "average_value_score": 58.26288019863439
+  },
+  "tier_coverage": {
+    "all": {
+      "total_tests": 2497,
+      "average_value_score": 59.059671605927115,
+      "components_covered": 9,
+      "coverage_percentage": 0.0
+    },
+    "enterprise": {
+      "total_tests": 74,
+      "average_value_score": 55.432432432432435,
+      "components_covered": 5,
+      "coverage_percentage": 0.0
+    },
+    "free": {
+      "total_tests": 273,
+      "average_value_score": 51.684981684981686,
+      "components_covered": 8,
+      "coverage_percentage": 0.0
+    },
+    "mid": {
+      "total_tests": 269,
+      "average_value_score": 57.531598513011154,
+      "components_covered": 8,
+      "coverage_percentage": 0.0
+    },
+    "early": {
+      "total_tests": 109,
+      "average_value_score": 60.211009174311926,
+      "components_covered": 5,
+      "coverage_percentage": 0.0
+    }
+  },
+  "component_coverage": {
+    "authentication": {
+      "component_name": "authentication",
+      "tier": "all",
+      "total_tests": 432,
+      "unit_tests": 329,
+      "integration_tests": 95,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 29614.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "agent_orchestration": {
+      "component_name": "agent_orchestration",
+      "tier": "all",
+      "total_tests": 704,
+      "unit_tests": 624,
+      "integration_tests": 64,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 14,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 48272.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "database": {
+      "component_name": "database",
+      "tier": "enterprise",
+      "total_tests": 485,
+      "unit_tests": 327,
+      "integration_tests": 138,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 18,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 23973.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "websocket": {
+      "component_name": "websocket",
+      "tier": "all",
+      "total_tests": 208,
+      "unit_tests": 201,
+      "integration_tests": 7,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 14374.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "cost_optimization": {
+      "component_name": "cost_optimization",
+      "tier": "all",
+      "total_tests": 122,
+      "unit_tests": 108,
+      "integration_tests": 14,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 6844.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "backend": {
+      "component_name": "backend",
+      "tier": "all",
+      "total_tests": 1041,
+      "unit_tests": 955,
+      "integration_tests": 64,
+      "e2e_tests": 2,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 51890.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "analytics": {
+      "component_name": "analytics",
+      "tier": "all",
+      "total_tests": 146,
+      "unit_tests": 94,
+      "integration_tests": 52,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 8692.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "observability": {
+      "component_name": "observability",
+      "tier": "all",
+      "total_tests": 48,
+      "unit_tests": 46,
+      "integration_tests": 0,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 2560.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    },
+    "team_collaboration": {
+      "component_name": "team_collaboration",
+      "tier": "all",
+      "total_tests": 36,
+      "unit_tests": 34,
+      "integration_tests": 0,
+      "e2e_tests": 0,
+      "real_llm_tests": 0,
+      "performance_tests": 0,
+      "line_coverage": 0.0,
+      "branch_coverage": 0.0,
+      "business_value_total": 1504.0,
+      "critical_paths_covered": 0,
+      "critical_paths_total": 0,
+      "multi_env_pass_rate": 0.0
+    }
+  },
+  "test_type_distribution": {
+    "integration": 434,
+    "unit": 2718,
+    "performance": 32,
+    "security": 22,
+    "load": 14,
+    "e2e": 2
+  },
+  "quality_metrics": {
+    "real_llm_coverage": 0.0,
+    "e2e_coverage": 0.06207324643078833,
+    "multi_service_coverage": 28.46058348851645,
+    "high_value_test_count": 532,
+    "critical_test_count": 0,
+    "critical_test_percentage": 0.0
+  },
+  "top_value_tests": [
+    {
+      "name": "TestAgentRoute.test_agent_performance_metrics",
+      "file": "app\\tests\\routes\\test_agent_routes.py",
+      "score": 85.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for mid customers - Validates SLA compliance"
+    },
+    {
+      "name": "test_agent_performance_metrics",
+      "file": "app\\tests\\routes\\test_agent_routes.py",
+      "score": 85.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for mid customers - Validates SLA compliance"
+    },
+    {
+      "name": "TestSupplyResearcherPersistence.test_large_dataset_performance",
+      "file": "app\\tests\\agents\\test_supply_researcher_persistence.py",
+      "score": 83.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers - Validates SLA compliance"
+    },
+    {
+      "name": "test_large_dataset_performance",
+      "file": "app\\tests\\agents\\test_supply_researcher_persistence.py",
+      "score": 83.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers - Validates SLA compliance"
+    },
+    {
+      "name": "TestToolRecommendation.test_recommend_tools_for_performance",
+      "file": "app\\tests\\agents\\test_triage_agent_validation.py",
+      "score": 83.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers - Validates SLA compliance"
+    },
+    {
+      "name": "test_recommend_tools_for_performance",
+      "file": "app\\tests\\agents\\test_triage_agent_validation.py",
+      "score": 83.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers - Validates SLA compliance"
+    },
+    {
+      "name": "TestToolRecommendation.test_recommend_tools_for_performance",
+      "file": "app\\tests\\agents\\test_triage_sub_agent.py",
+      "score": 83.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers - Validates SLA compliance"
+    },
+    {
+      "name": "test_recommend_tools_for_performance",
+      "file": "app\\tests\\agents\\test_triage_sub_agent.py",
+      "score": 83.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers - Validates SLA compliance"
+    },
+    {
+      "name": "TestAgentRoute.test_agent_websocket_integration",
+      "file": "app\\tests\\routes\\test_agent_routes.py",
+      "score": 82.0,
+      "justification": "Enables real-time agent interactions for mid tier"
+    },
+    {
+      "name": "test_agent_websocket_integration",
+      "file": "app\\tests\\routes\\test_agent_routes.py",
+      "score": 82.0,
+      "justification": "Enables real-time agent interactions for mid tier"
+    },
+    {
+      "name": "TestStartAgentUserMessagePayloadConsistency.test_extract_user_request_priority_order",
+      "file": "app\\tests\\critical\\test_websocket_message_regression.py",
+      "score": 80.0,
+      "justification": "Protects all tier customer data and access control"
+    },
+    {
+      "name": "test_extract_user_request_priority_order",
+      "file": "app\\tests\\critical\\test_websocket_message_regression.py",
+      "score": 80.0,
+      "justification": "Protects all tier customer data and access control"
+    },
+    {
+      "name": "test_data_factory",
+      "file": "app\\tests\\examples\\test_pattern_examples.py",
+      "score": 80.0,
+      "justification": "Enables real-time agent interactions for all tier"
+    },
+    {
+      "name": "TestDataClasses.test_agent_quality_profile_creation",
+      "file": "app\\tests\\services\\test_quality_monitoring_alerts.py",
+      "score": 80.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers"
+    },
+    {
+      "name": "test_agent_quality_profile_creation",
+      "file": "app\\tests\\services\\test_quality_monitoring_alerts.py",
+      "score": 80.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers"
+    },
+    {
+      "name": "TestReportSectionsIndividually.test_provider_comparison_section_formatting",
+      "file": "app\\tests\\services\\test_supply_research_service_reports.py",
+      "score": 80.0,
+      "justification": "Protects all tier customer data and access control"
+    },
+    {
+      "name": "TestReportSectionsIndividually.test_recent_research_section_formatting",
+      "file": "app\\tests\\services\\test_supply_research_service_reports.py",
+      "score": 80.0,
+      "justification": "Protects all tier customer data and access control"
+    },
+    {
+      "name": "test_provider_comparison_section_formatting",
+      "file": "app\\tests\\services\\test_supply_research_service_reports.py",
+      "score": 80.0,
+      "justification": "Protects all tier customer data and access control"
+    },
+    {
+      "name": "test_recent_research_section_formatting",
+      "file": "app\\tests\\services\\test_supply_research_service_reports.py",
+      "score": 80.0,
+      "justification": "Protects all tier customer data and access control"
+    },
+    {
+      "name": "TestSpecificationValidation.test_data_agent_integration_section_exists",
+      "file": "app\\tests\\services\\test_synthetic_data_validation.py",
+      "score": 80.0,
+      "justification": "Core AI optimization delivering 30-50% cost savings for all customers"
+    }
+  ],
+  "coverage_gaps": [
+    {
+      "type": "missing_e2e",
+      "component": "authentication",
+      "severity": "high",
+      "message": "authentication has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "agent_orchestration",
+      "severity": "high",
+      "message": "agent_orchestration has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "database",
+      "severity": "high",
+      "message": "database has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "websocket",
+      "severity": "high",
+      "message": "websocket has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "cost_optimization",
+      "severity": "high",
+      "message": "cost_optimization has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "analytics",
+      "severity": "high",
+      "message": "analytics has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "observability",
+      "severity": "high",
+      "message": "observability has no end-to-end tests"
+    },
+    {
+      "type": "missing_e2e",
+      "component": "team_collaboration",
+      "severity": "high",
+      "message": "team_collaboration has no end-to-end tests"
+    }
+  ],
+  "recommendations": [
+    "Increase real LLM test coverage from 0.0% to target 85%",
+    "Add more end-to-end tests (current: 0.1%, target: 75%)"
+  ]
+}

@@ -1,6 +1,6 @@
 """Core JWT token manager tests - secret key and revocation key functionality.
 
-Split from test_token_manager.py to meet 300-line architecture limit.
+Split from test_token_manager.py to meet 450-line architecture limit.
 Tests for basic JWT manager setup and utility functions.
 """
 
@@ -40,7 +40,7 @@ def jwt_manager(mock_config, mock_redis_manager):
     return manager
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def assert_revocation_key_format(key, expected_jti):
     """Assert revocation key follows expected format."""
     assert key == f"revoked_token:{expected_jti}"

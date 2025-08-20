@@ -1,7 +1,7 @@
 """
 Config Validator Tests - Validation Logic
 Tests for file checking, config loading, endpoint validation, and main workflow.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import pytest

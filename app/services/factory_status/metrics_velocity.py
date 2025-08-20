@@ -1,7 +1,7 @@
 """Development velocity metrics for AI Factory Status Report.
 
 Calculates velocity trends, peak activity, and feature delivery speed.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 import statistics

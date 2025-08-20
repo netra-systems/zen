@@ -1,6 +1,6 @@
 -- Performance Indexes
 -- Purpose: Create additional performance indexes and constraints
--- Module: Indexes (adheres to 300-line limit)
+-- Module: Indexes (adheres to 450-line limit)
 
 -- Composite indexes for common query patterns
 

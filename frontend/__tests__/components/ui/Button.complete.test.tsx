@@ -1,7 +1,7 @@
 /**
  * Button Component Complete Test Suite
  * Tests all button states, interactions, and accessibility features
- * Follows 8-line function rule and P0 critical path testing
+ * Follows 25-line function rule and P0 critical path testing
  */
 
 import React from 'react';

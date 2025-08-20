@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Modular execution components
 - Performance validation (<10 seconds)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 from typing import Dict, Any

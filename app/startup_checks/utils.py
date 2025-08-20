@@ -2,7 +2,7 @@
 Startup Check Utils
 
 Utility functions for startup check execution and reporting.
-Maintains 8-line function limit and focused functionality.
+Maintains 25-line function limit and focused functionality.
 """
 
 from typing import Dict, Any
@@ -35,7 +35,9 @@ def _log_critical_failures(results: Dict[str, Any]) -> None:
     logger.error("Critical startup checks failed:")
     for failure in results['failures']:
         if failure.critical:
-            logger.error(f"  - {failure.name}: {failure.message}")
+            logger.error(f"  - CRITICAL FAILURE: {failure.name}: {failure.message}")
+            if hasattr(failure, 'duration_ms') and failure.duration_ms:
+                logger.error(f"    Duration: {failure.duration_ms:.2f}ms")
 
 
 def _log_non_critical_failures(results: Dict[str, Any]) -> None:
@@ -70,13 +72,37 @@ async def _execute_startup_checks(app: FastAPI) -> Dict[str, Any]:
 def _handle_startup_results(results: Dict[str, Any]) -> None:
     """Handle startup check results and log appropriately"""
     _log_startup_results(results)
+    
+    # In staging, treat ALL failures as critical
+    import os
+    is_staging = os.getenv("ENVIRONMENT", "development").lower() == "staging" or bool(os.getenv("K_SERVICE"))
+    
     if results['failed_critical'] > 0:
         _handle_critical_failures(results)
-    if results['failed_non_critical'] > 0:
+    elif is_staging and results['failed_non_critical'] > 0:
+        # In staging, non-critical failures become critical
+        logger.critical("Staging environment: Treating non-critical failures as critical")
+        _handle_critical_failures(results)
+    elif results['failed_non_critical'] > 0:
         _log_non_critical_failures(results)
 
 
 def _handle_critical_failures(results: Dict[str, Any]) -> None:
     """Handle critical startup failures"""
     _log_critical_failures(results)
-    raise RuntimeError(f"Startup failed: {results['failed_critical']} critical checks failed")
+    
+    # Collect all failure details for better observability
+    failure_details = []
+    for failure in results['failures']:
+        if failure.critical or _is_staging_environment():
+            failure_details.append(f"{failure.name}: {failure.message}")
+    
+    # Raise detailed error with all failure information
+    error_msg = f"Startup failed: {len(failure_details)} critical checks failed\n" + "\n".join(failure_details)
+    raise RuntimeError(error_msg)
+
+
+def _is_staging_environment() -> bool:
+    """Check if running in staging environment"""
+    import os
+    return os.getenv("ENVIRONMENT", "development").lower() == "staging" or bool(os.getenv("K_SERVICE"))

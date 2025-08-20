@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Mock email service for testing
 - Password reset flow validation helpers
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import asyncio
 import re

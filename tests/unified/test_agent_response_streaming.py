@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Value Impact: Real-time streaming increases user engagement and perceived value
 - Revenue Impact: Premium UX justifies higher pricing tiers and reduces churn
 
-Architecture: 300-line compliance through focused streaming scenario testing
+Architecture: 450-line compliance through focused streaming scenario testing
 """
 
 import pytest

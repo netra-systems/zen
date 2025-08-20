@@ -6,8 +6,8 @@ This directory contains git hooks that enforce the architectural rules defined i
 
 The pre-commit hook automatically checks staged files before allowing commits, ensuring compliance with:
 
-- **300-line file limit** - Files must not exceed 300 lines
-- **8-line function limit** - All functions must be 8 lines or fewer  
+- **450-line file limit** - Files must not exceed 300 lines
+- **25-line function limit** - All functions must be 8 lines or fewer  
 - **No test stubs** - Production code cannot contain test stubs or mock implementations
 
 ## Quick Start
@@ -19,8 +19,7 @@ scripts\setup_hooks.bat
 
 ### Unix/Linux/macOS
 ```bash
-chmod +x scripts/setup_hooks.sh
-./scripts/setup_hooks.sh
+python scripts/setup_hooks.py
 ```
 
 ## How It Works
@@ -38,8 +37,7 @@ chmod +x scripts/setup_hooks.sh
 └── README.md          # This file
 
 scripts/
-├── setup_hooks.sh     # Unix/Linux/macOS installation
-├── setup_hooks.bat    # Windows installation  
+├── setup_hooks.py     # Cross-platform installation script  
 └── check_architecture_compliance.py  # Full codebase checker
 ```
 
@@ -109,7 +107,7 @@ git config --get core.hooksPath
 ls -la .githooks/pre-commit
 
 # Re-run setup
-./scripts/setup_hooks.sh  # Unix
+python scripts/setup_hooks.py
 # OR
 scripts\setup_hooks.bat   # Windows
 ```

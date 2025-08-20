@@ -1,11 +1,12 @@
 """
 Session Manager - Centralized session handling with Redis
-Maintains 300-line limit with focused session management
+Maintains 450-line limit with focused session management
 """
 import os
 import json
 import uuid
 import redis
+import asyncio
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Any
 import logging
@@ -16,10 +17,31 @@ class SessionManager:
     """Single Source of Truth for session management"""
     
     def __init__(self):
-        self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
+        # In containerized environments, Redis should connect to a Redis service, not localhost
+        # For staging/production, Redis is disabled by environment check
+        default_redis_url = "redis://redis:6379" if os.getenv("ENVIRONMENT") not in ["development", "test"] else "redis://localhost:6379"
+        self.redis_url = os.getenv("REDIS_URL", default_redis_url)
         self.session_ttl = int(os.getenv("SESSION_TTL_HOURS", "24"))
         self.redis_client = None
-        self._connect_redis()
+        self.redis_enabled = self._should_enable_redis()
+        if self.redis_enabled:
+            self._connect_redis()
+        else:
+            logger.info("Redis disabled for current environment")
+        
+        # Initialize race condition protection
+        self.used_refresh_tokens = set()
+        self._session_locks = {}
+            
+    def _should_enable_redis(self) -> bool:
+        """Determine if Redis should be enabled based on environment"""
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        redis_disabled = os.getenv("REDIS_DISABLED", "false").lower() == "true"
+        
+        # Disable Redis in staging or if explicitly disabled
+        if env == "staging" or redis_disabled:
+            return False
+        return True
         
     def _connect_redis(self):
         """Establish Redis connection"""
@@ -44,13 +66,20 @@ class SessionManager:
             **user_data
         }
         
+        if not self.redis_enabled:
+            # Return session ID but don't store when Redis is disabled
+            logger.debug(f"Created session {session_id} (Redis disabled - not stored)")
+            return session_id
+        
         if self._store_session(session_id, session_data):
             return session_id
         return None
     
     async def get_session(self, session_id: str) -> Optional[Dict]:
         """Retrieve session data"""
-        if not self.redis_client:
+        if not self.redis_enabled or not self.redis_client:
+            # Return None when Redis is disabled - sessions won't be stored/retrieved
+            logger.debug(f"Session retrieval skipped for {session_id} (Redis disabled)")
             return None
             
         try:
@@ -71,6 +100,11 @@ class SessionManager:
     async def update_session(self, session_id: str, 
                       updates: Dict) -> bool:
         """Update existing session data"""
+        if not self.redis_enabled:
+            # Return True to indicate operation "succeeded" when Redis is disabled
+            logger.debug(f"Session update skipped for {session_id} (Redis disabled)")
+            return True
+            
         session = await self.get_session(session_id)
         if not session:
             return False
@@ -82,8 +116,10 @@ class SessionManager:
     
     def delete_session(self, session_id: str) -> bool:
         """Delete session (logout)"""
-        if not self.redis_client:
-            return False
+        if not self.redis_enabled or not self.redis_client:
+            # Return True to indicate operation "succeeded" when Redis is disabled
+            logger.debug(f"Session deletion skipped for {session_id} (Redis disabled)")
+            return True
             
         try:
             key = self._get_session_key(session_id)
@@ -96,6 +132,12 @@ class SessionManager:
     
     async def validate_session(self, session_id: str) -> bool:
         """Check if session is valid and active"""
+        if not self.redis_enabled:
+            # When Redis is disabled, sessions are not validated server-side
+            # Rely on JWT token validation instead
+            logger.debug(f"Session validation skipped for {session_id} (Redis disabled)")
+            return True
+            
         session = await self.get_session(session_id)
         if not session:
             return False
@@ -119,7 +161,8 @@ class SessionManager:
 
     async def get_user_sessions(self, user_id: str) -> list:
         """Get all active sessions for a user"""
-        if not self.redis_client:
+        if not self.redis_enabled or not self.redis_client:
+            logger.debug(f"User sessions retrieval skipped for {user_id} (Redis disabled)")
             return []
             
         try:
@@ -144,21 +187,36 @@ class SessionManager:
             return []
     
     async def invalidate_user_sessions(self, user_id: str) -> int:
-        """Invalidate all sessions for a user"""
-        sessions = await self.get_user_sessions(user_id)
-        count = 0
+        """Invalidate all sessions for a user with race condition protection"""
+        # Use a lock to prevent concurrent invalidation operations for the same user
+        if user_id not in self._session_locks:
+            self._session_locks[user_id] = asyncio.Lock()
         
-        for session in sessions:
-            if self.delete_session(session["session_id"]):
-                count += 1
+        async with self._session_locks[user_id]:
+            sessions = await self.get_user_sessions(user_id)
+            count = 0
+            
+            # Process session deletions concurrently but safely
+            delete_tasks = []
+            for session in sessions:
+                delete_tasks.append(self._delete_session_async(session["session_id"]))
+            
+            if delete_tasks:
+                results = await asyncio.gather(*delete_tasks, return_exceptions=True)
+                count = sum(1 for result in results if result is True)
                 
         return count
+    
+    async def _delete_session_async(self, session_id: str) -> bool:
+        """Async wrapper for session deletion"""
+        return self.delete_session(session_id)
     
     def _store_session(self, session_id: str, 
                       session_data: Dict) -> bool:
         """Store session data in Redis"""
-        if not self.redis_client:
-            return False
+        if not self.redis_enabled or not self.redis_client:
+            logger.debug(f"Session storage skipped for {session_id} (Redis disabled)")
+            return True  # Return True to indicate operation "succeeded"
             
         try:
             key = self._get_session_key(session_id)
@@ -176,6 +234,9 @@ class SessionManager:
     
     def _update_activity(self, session_id: str):
         """Update session last activity timestamp"""
+        if not self.redis_enabled or not self.redis_client:
+            return
+            
         try:
             key = self._get_session_key(session_id)
             # Reset TTL
@@ -188,6 +249,9 @@ class SessionManager:
     
     async def _update_activity_async(self, session_id: str):
         """Update session last activity timestamp (async version)"""
+        if not self.redis_enabled or not self.redis_client:
+            return
+            
         try:
             key = self._get_session_key(session_id)
             # Reset TTL
@@ -204,6 +268,10 @@ class SessionManager:
     
     def health_check(self) -> bool:
         """Check Redis connection health"""
+        if not self.redis_enabled:
+            # When Redis is disabled, consider it "healthy" since it's intentionally disabled
+            return True
+            
         if not self.redis_client:
             return False
             

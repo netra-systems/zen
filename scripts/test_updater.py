@@ -2,7 +2,7 @@
 """
 Test Update Automation System
 Modular architecture for achieving 97% test coverage with ultra-thinking
-Complies with 300-line limit and 8-line function constraint
+Complies with 450-line limit and 25-line function constraint
 """
 
 import argparse

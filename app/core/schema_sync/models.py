@@ -2,7 +2,7 @@
 Schema Sync Data Models
 
 Pydantic models and enums for schema synchronization.
-Maintains type safety under 300-line limit.
+Maintains type safety under 450-line limit.
 """
 
 from typing import List, Optional

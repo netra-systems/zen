@@ -46,8 +46,8 @@ Comprehensive testing strategy for the Netra AI platform's multi-agent system, e
 ## Testing Principles
 
 ### 1. Module Architecture Compliance
-- **300-Line Limit:** All test files ≤300 lines
-- **8-Line Functions:** All test functions ≤8 lines
+- **450-line Limit:** All test files ≤300 lines
+- **25-line Functions:** All test functions ≤8 lines
 - **Single Responsibility:** Each test validates one aspect
 
 ### 2. Comprehensive Coverage

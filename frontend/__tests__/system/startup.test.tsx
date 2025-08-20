@@ -89,11 +89,11 @@ describe('Frontend System Startup - Modular Test Suite', () => {
         'Improved code maintainability',
         'Enhanced test reliability'
       ],
-      compliance: 'CLAUDE.md 300-line module requirement'
+      compliance: 'CLAUDE.md 450-line module requirement'
     };
     
     expect(businessValue.segments).toHaveLength(4);
     expect(businessValue.benefits).toHaveLength(5);
-    expect(businessValue.compliance).toContain('300-line');
+    expect(businessValue.compliance).toContain('450-line');
   });
 });

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Automated Function Decomposition Tool
-Automatically refactors functions exceeding the 8-line boundary.
+Automatically refactors functions exceeding the 25-line boundary.
 Follows CLAUDE.md requirements: intelligent decomposition strategies.
 """
 
@@ -414,7 +414,7 @@ class FunctionDecomposer:
         decompositions = self.scan_for_complex_functions()
         
         if not decompositions:
-            return "No functions exceed the 8-line boundary. Excellent compliance!"
+            return "No functions exceed the 25-line boundary. Excellent compliance!"
         
         report = ["FUNCTION DECOMPOSITION ANALYSIS", "=" * 50, ""]
         

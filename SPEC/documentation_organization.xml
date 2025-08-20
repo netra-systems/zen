@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<documentation_organization>
+  <purpose>Define clear rules and structure for .md file organization across the Netra Apex platform</purpose>
+  
+  <principles>
+    <principle>Documentation should be colocated with the code it documents</principle>
+    <principle>Root directory should be minimal and clean</principle>
+    <principle>Agent-to-agent communication should be centralized</principle>
+    <principle>Status reports should be organized by type and date</principle>
+    <principle>Technical documentation should be categorized by domain</principle>
+  </principles>
+
+  <directory_structure>
+    <location path="/">
+      <allowed>
+        <file>README.md</file>
+        <file>CLAUDE.md</file>
+        <file>LLM_MASTER_INDEX.md</file>
+        <file>MASTER_WIP_STATUS.md</file>
+      </allowed>
+      <rule>Only essential project-level documentation at root</rule>
+    </location>
+
+    <location path="/docs">
+      <purpose>Primary documentation directory for all non-code documentation</purpose>
+      <subdirectories>
+        <dir path="/docs/architecture">
+          <purpose>System architecture and design documentation</purpose>
+          <examples>API_DOCUMENTATION.md, DATABASE_SCHEMA.md, WEBSOCKET_IMPLEMENTATION.md</examples>
+        </dir>
+        
+        <dir path="/docs/deployment">
+          <purpose>Deployment guides and configurations</purpose>
+          <examples>STAGING_DEPLOYMENT.md, PRODUCTION_DEPLOYMENT.md, GCP_STAGING_DEPLOYMENT.md</examples>
+        </dir>
+        
+        <dir path="/docs/development">
+          <purpose>Developer guides and setup instructions</purpose>
+          <examples>DEVELOPMENT_SETUP.md, CONTRIBUTING.md, DEVELOPER_WELCOME_GUIDE.md</examples>
+        </dir>
+        
+        <dir path="/docs/testing">
+          <purpose>Testing strategies and guides</purpose>
+          <examples>TESTING_GUIDE.md, E2E_TESTING_GUIDE.md, TEST_OPERATIONS_RUNBOOK.md</examples>
+        </dir>
+        
+        <dir path="/docs/auth">
+          <purpose>Authentication and security documentation</purpose>
+          <examples>AUTH_ARCHITECTURE_README.md, OAUTH_SERVICE_DOCUMENTATION.md</examples>
+        </dir>
+        
+        <dir path="/docs/business">
+          <purpose>Business context and value documentation</purpose>
+          <examples>REVENUE_TRACKING.md, BUSINESS_VALUE_REPORT.md</examples>
+        </dir>
+        
+        <dir path="/docs/operations">
+          <purpose>Operational guides and monitoring</purpose>
+          <examples>MONITORING_GUIDE.md, RUNBOOK.md</examples>
+        </dir>
+      </subdirectories>
+    </location>
+
+    <location path="/reports">
+      <purpose>System-generated and analysis reports</purpose>
+      <subdirectories>
+        <dir path="/reports/status">
+          <purpose>Current system status reports</purpose>
+          <rule>Date-stamped or versioned reports</rule>
+        </dir>
+        
+        <dir path="/reports/analysis">
+          <purpose>Code analysis and audit reports</purpose>
+          <examples>ARCHITECTURE_COMPLIANCE_REPORT.md, CODE_REVIEW_*.md</examples>
+        </dir>
+        
+        <dir path="/reports/tests">
+          <purpose>Test execution reports</purpose>
+          <examples>test_report_*.md, TEST_COVERAGE_REPORT.md</examples>
+        </dir>
+        
+        <dir path="/reports/history">
+          <purpose>Historical reports and archives</purpose>
+          <rule>Older reports moved here for reference</rule>
+        </dir>
+      </subdirectories>
+    </location>
+
+    <location path="/agent_communications">
+      <purpose>Centralized agent-to-agent communication logs</purpose>
+      <subdirectories>
+        <dir path="/agent_communications/status">
+          <purpose>Agent status updates and completion reports</purpose>
+          <rule>Organized by date or sprint</rule>
+        </dir>
+        
+        <dir path="/agent_communications/handoffs">
+          <purpose>Inter-agent task handoffs and context transfers</purpose>
+        </dir>
+        
+        <dir path="/agent_communications/analysis">
+          <purpose>Agent system analysis and improvements</purpose>
+        </dir>
+      </subdirectories>
+    </location>
+
+    <location path="/SPEC">
+      <purpose>System specifications and learnings (XML files primarily)</purpose>
+      <allowed>
+        <file>*.xml</file>
+        <file>README.md</file>
+      </allowed>
+      <subdirectories>
+        <dir path="/SPEC/learnings">
+          <purpose>System learnings and insights</purpose>
+          <allowed>README.md for index</allowed>
+        </dir>
+        
+        <dir path="/SPEC/history">
+          <purpose>Historical specifications and changes</purpose>
+          <allowed>*.md for historical context</allowed>
+        </dir>
+      </subdirectories>
+    </location>
+
+    <location path="/plans">
+      <purpose>Implementation and feature plans</purpose>
+      <examples>database-plan.md, websockets-plan.md, chat-ui-ux-plan.md</examples>
+      <rule>Active plans only, completed plans move to /docs or /reports</rule>
+    </location>
+
+    <location path="/technical_content">
+      <purpose>Technical marketing and educational content</purpose>
+      <subdirectories>
+        <dir path="/technical_content/marketing">
+          <purpose>Technical marketing materials</purpose>
+        </dir>
+        
+        <dir path="/technical_content/deep_dives">
+          <purpose>In-depth technical articles</purpose>
+        </dir>
+        
+        <dir path="/technical_content/tutorials">
+          <purpose>Step-by-step tutorials</purpose>
+        </dir>
+      </subdirectories>
+    </location>
+
+    <location path="/[service_directory]">
+      <purpose>Service-specific documentation</purpose>
+      <examples>
+        <example>/app/README.md - Main backend documentation</example>
+        <example>/frontend/README.md - Frontend documentation</example>
+        <example>/auth_service/README.md - Auth service documentation</example>
+      </examples>
+      <rule>Service-specific docs stay with the service code</rule>
+      
+      <subdirectories>
+        <dir path="/[service]/tests">
+          <allowed>README.md for test documentation</allowed>
+        </dir>
+        
+        <dir path="/[service]/docs">
+          <purpose>Additional service-specific documentation if needed</purpose>
+        </dir>
+      </subdirectories>
+    </location>
+  </directory_structure>
+
+  <file_naming_conventions>
+    <convention name="status_reports">
+      <pattern>[TOPIC]_STATUS_[DATE].md</pattern>
+      <example>DEPLOYMENT_STATUS_2025_08_18.md</example>
+    </convention>
+    
+    <convention name="implementation_reports">
+      <pattern>[FEATURE]_IMPLEMENTATION_[STATUS].md</pattern>
+      <example>WEBSOCKET_IMPLEMENTATION_COMPLETE.md</example>
+    </convention>
+    
+    <convention name="test_reports">
+      <pattern>test_report_[TIMESTAMP].md</pattern>
+      <example>test_report_20250810_110008.md</example>
+    </convention>
+    
+    <convention name="guides">
+      <pattern>[TOPIC]_GUIDE.md</pattern>
+      <example>TESTING_GUIDE.md, DEPLOYMENT_GUIDE.md</example>
+    </convention>
+    
+    <convention name="plans">
+      <pattern>[feature]-plan.md</pattern>
+      <example>websockets-plan.md, database-plan.md</example>
+    </convention>
+  </file_naming_conventions>
+
+  <migration_rules>
+    <rule priority="1">
+      <description>Clean root directory - move all non-essential .md files</description>
+      <keep_in_root>README.md, CLAUDE.md, LLM_MASTER_INDEX.md, MASTER_WIP_STATUS.md</keep_in_root>
+    </rule>
+    
+    <rule priority="2">
+      <description>Consolidate agent communications</description>
+      <from>agent_to_agent/, agent_to_agent_status_updates/</from>
+      <to>/agent_communications/</to>
+    </rule>
+    
+    <rule priority="3">
+      <description>Organize reports by type</description>
+      <from>Various locations</from>
+      <to>/reports/[category]/</to>
+    </rule>
+    
+    <rule priority="4">
+      <description>Move implementation docs to appropriate locations</description>
+      <from>implementation_docs/</from>
+      <to>/docs/development/ or /reports/implementation/</to>
+    </rule>
+    
+    <rule priority="5">
+      <description>Consolidate technical marketing content</description>
+      <from>technical_marketing/, technical_marketing_deep/</from>
+      <to>/technical_content/</to>
+    </rule>
+    
+    <rule priority="6">
+      <description>Archive old status updates</description>
+      <action>Move outdated status reports to /reports/history/</action>
+    </rule>
+  </migration_rules>
+
+  <enforcement>
+    <check name="root_cleanliness">
+      <description>Ensure only allowed files exist in root</description>
+      <script>scripts/compliance/documentation_checker.py</script>
+    </check>
+    
+    <check name="naming_conventions">
+      <description>Verify files follow naming conventions</description>
+    </check>
+    
+    <check name="location_compliance">
+      <description>Ensure documentation is in correct directories</description>
+    </check>
+  </enforcement>
+</documentation_organization>

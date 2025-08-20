@@ -339,8 +339,8 @@ Ensure all mock data uses the correct TypeScript types from `@/types/domains/*`.
 
 ## Architecture Compliance
 
-- ✅ **300-line limit**: Each file ≤300 lines
-- ✅ **8-line functions**: All functions ≤8 lines  
+- ✅ **450-line limit**: Each file ≤300 lines
+- ✅ **25-line functions**: All functions ≤8 lines  
 - ✅ **Type safety**: Full TypeScript support
 - ✅ **Modular design**: Clear separation of concerns
 - ✅ **Business value**: Enables comprehensive testing reducing customer-facing bugs

@@ -22,7 +22,7 @@
 
     <requirement id="AGT-002" priority="CRITICAL">
       <title>Module Architecture Compliance</title>
-      <description>All test files MUST adhere to 300-line limit and 8-line function limit</description>
+      <description>All test files MUST adhere to 450-line limit and 25-line function limit</description>
       <implementation>
         - Test files must be ≤300 lines
         - Each test function must be ≤8 lines
@@ -262,7 +262,7 @@
     </learning>
 
     <learning date="2025-08-14">
-      <issue>Test files exceeding 300-line limit</issue>
+      <issue>Test files exceeding 450-line limit</issue>
       <solution>Split tests into focused groups, extract common setup to fixtures</solution>
     </learning>
   </learnings>

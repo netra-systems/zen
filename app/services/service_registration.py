@@ -1,7 +1,7 @@
 """Service registration helpers for dependency injection.
 
 Provides functions to register services with the service locator.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from app.logging_config import central_logger

@@ -1,195 +1,124 @@
 {
   "features": {
     "roi_calculator": {
-      "status": "in_development",
-      "description": "ROI Calculator feature for demonstrating value to customers",
-      "owner": "frontend-team",
+      "status": "enabled",
+      "description": "ROI calculator for customer value analysis",
+      "owner": "product-team",
       "target_release": "v1.2.0",
       "dependencies": [],
       "metadata": {
-        "jira_ticket": "NETRA-456",
-        "added_date": "2025-01-18"
+        "jira_ticket": "NETRA-101",
+        "business_value": "Core monetization feature"
       }
     },
     "first_time_user_flow": {
       "status": "in_development",
-      "description": "Comprehensive first-time user onboarding and experience",
-      "owner": "product-team",
-      "target_release": "v1.1.0",
+      "description": "Onboarding flow for first-time users",
+      "owner": "frontend-team",
+      "target_release": "v1.3.0",
       "dependencies": ["auth_integration"],
       "metadata": {
-        "jira_ticket": "NETRA-123",
-        "added_date": "2025-01-18"
+        "jira_ticket": "NETRA-205",
+        "business_value": "User conversion optimization"
       }
     },
     "auth_integration": {
       "status": "enabled",
-      "description": "Unified authentication service integration",
+      "description": "Authentication and authorization system",
       "owner": "backend-team",
-      "target_release": "v1.0.0",
+      "target_release": "v1.1.0",
       "dependencies": [],
       "metadata": {
-        "completed_date": "2025-01-15"
+        "jira_ticket": "NETRA-050",
+        "business_value": "Platform security foundation"
+      }
+    },
+    "usage_tracking": {
+      "status": "enabled",
+      "description": "Track user usage patterns and API calls",
+      "owner": "analytics-team",
+      "target_release": "v1.1.0",
+      "dependencies": ["auth_integration"],
+      "metadata": {
+        "jira_ticket": "NETRA-075",
+        "business_value": "Usage analytics for billing"
       }
     },
     "websocket_streaming": {
       "status": "enabled",
-      "description": "WebSocket-based real-time streaming",
+      "description": "Real-time WebSocket streaming for agent communication",
       "owner": "backend-team",
-      "target_release": "v1.0.0",
-      "dependencies": [],
+      "target_release": "v1.2.0",
+      "dependencies": ["auth_integration"],
       "metadata": {
-        "completed_date": "2025-01-10"
+        "jira_ticket": "NETRA-120",
+        "business_value": "Real-time agent interactions"
       }
     },
     "agent_orchestration": {
       "status": "enabled",
-      "description": "Multi-agent orchestration system",
+      "description": "Multi-agent orchestration and coordination",
       "owner": "ai-team",
-      "target_release": "v1.0.0",
-      "dependencies": [],
+      "target_release": "v1.2.0",
+      "dependencies": ["auth_integration", "websocket_streaming"],
       "metadata": {
-        "completed_date": "2025-01-12"
-      }
-    },
-    "clickhouse_analytics": {
-      "status": "disabled",
-      "description": "ClickHouse-based analytics pipeline",
-      "owner": "data-team",
-      "target_release": "v2.0.0",
-      "dependencies": ["clickhouse_setup"],
-      "metadata": {
-        "reason": "Awaiting infrastructure setup"
-      }
-    },
-    "advanced_rate_limiting": {
-      "status": "experimental",
-      "description": "Advanced ML-based rate limiting",
-      "owner": "security-team",
-      "target_release": "v1.3.0",
-      "dependencies": [],
-      "metadata": {
-        "experiment_start": "2025-01-16"
+        "jira_ticket": "NETRA-150",
+        "business_value": "Core AI platform capability"
       }
     },
     "github_integration": {
       "status": "in_development",
       "description": "GitHub repository analysis and integration",
       "owner": "integrations-team",
-      "target_release": "v1.2.0",
-      "dependencies": [],
+      "target_release": "v1.4.0",
+      "dependencies": ["auth_integration"],
       "metadata": {
-        "jira_ticket": "NETRA-789"
+        "jira_ticket": "NETRA-300",
+        "business_value": "Developer workflow integration"
+      }
+    },
+    "clickhouse_analytics": {
+      "status": "enabled",
+      "description": "ClickHouse-based analytics and reporting",
+      "owner": "analytics-team",
+      "target_release": "v1.2.0",
+      "dependencies": ["usage_tracking"],
+      "metadata": {
+        "jira_ticket": "NETRA-180",
+        "business_value": "Advanced analytics capabilities"
       }
     },
     "enterprise_sso": {
       "status": "disabled",
-      "description": "Enterprise SSO integration",
+      "description": "Enterprise single sign-on integration",
       "owner": "enterprise-team",
       "target_release": "v2.0.0",
       "dependencies": ["auth_integration"],
       "metadata": {
-        "reason": "Enterprise tier not yet launched"
+        "jira_ticket": "NETRA-500",
+        "business_value": "Enterprise customer acquisition"
       }
     },
-    "usage_tracking": {
-      "status": "enabled",
-      "description": "User usage tracking and analytics",
-      "owner": "product-team",
-      "target_release": "v1.0.0",
-      "dependencies": [],
-      "metadata": {
-        "completed_date": "2025-01-14"
-      }
-    },
-    "chat_sidebar": {
-      "status": "enabled",
-      "description": "Chat sidebar with thread management",
-      "owner": "frontend-team",
-      "target_release": "v1.0.0",
-      "dependencies": ["auth_integration"],
-      "metadata": {
-        "completed_date": "2025-01-10"
-      }
-    },
-    "chat_sidebar_edge_cases": {
-      "status": "in_development",
-      "description": "Edge case handling for ChatSidebar component",
-      "owner": "frontend-team",
-      "target_release": "v1.1.0",
-      "dependencies": ["chat_sidebar"],
-      "metadata": {
-        "added_date": "2025-01-18"
-      }
-    },
-    "thread_management": {
-      "status": "enabled",
-      "description": "Thread creation, deletion, and navigation",
-      "owner": "frontend-team",
-      "target_release": "v1.0.0",
-      "dependencies": [],
-      "metadata": {
-        "completed_date": "2025-01-12"
-      }
-    },
-    "message_input": {
-      "status": "enabled",
-      "description": "Message input component with commands",
-      "owner": "frontend-team",
-      "target_release": "v1.0.0",
-      "dependencies": [],
-      "metadata": {
-        "completed_date": "2025-01-11"
-      }
-    },
-    "final_report_view": {
-      "status": "in_development",
-      "description": "Final report generation and display",
-      "owner": "frontend-team",
-      "target_release": "v1.2.0",
-      "dependencies": [],
-      "metadata": {
-        "added_date": "2025-01-18"
-      }
-    },
-    "mcp_integration": {
+    "ml_rate_limiting": {
       "status": "experimental",
-      "description": "Model Context Protocol integration",
-      "owner": "ai-team",
-      "target_release": "v1.3.0",
-      "dependencies": [],
+      "description": "Machine learning-based intelligent rate limiting",
+      "owner": "research-team",
+      "target_release": "TBD",
+      "dependencies": ["usage_tracking"],
       "metadata": {
-        "experiment_start": "2025-01-17"
+        "jira_ticket": "NETRA-999",
+        "business_value": "Research: Smart resource management"
       }
     },
-    "collaborative_features": {
-      "status": "disabled",
-      "description": "Real-time collaboration features",
-      "owner": "frontend-team",
-      "target_release": "v2.0.0",
-      "dependencies": [],
-      "metadata": {
-        "reason": "Requires infrastructure changes"
-      }
-    },
-    "advanced_search": {
+    "smart_caching": {
       "status": "in_development",
-      "description": "Advanced search and filtering capabilities",
-      "owner": "frontend-team",
-      "target_release": "v1.2.0",
-      "dependencies": [],
+      "description": "Intelligent caching system with ML-based optimization",
+      "owner": "performance-team",
+      "target_release": "v1.3.0",
+      "dependencies": ["usage_tracking"],
       "metadata": {
-        "added_date": "2025-01-18"
-      }
-    },
-    "performance_monitoring": {
-      "status": "enabled",
-      "description": "Frontend performance monitoring",
-      "owner": "frontend-team",
-      "target_release": "v1.0.0",
-      "dependencies": [],
-      "metadata": {
-        "completed_date": "2025-01-13"
+        "jira_ticket": "NETRA-400",
+        "business_value": "Performance optimization and cost reduction"
       }
     }
   }

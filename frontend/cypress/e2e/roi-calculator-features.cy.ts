@@ -4,7 +4,7 @@ import { ROICalculatorHelpers, TestData } from '../support/roi-calculator-helper
 
 // ROI Calculator Advanced Features Tests
 // BVJ: Enterprise segment - demonstrates advanced capabilities for enterprise sales
-// Modular design following 300-line limit and 8-line function requirements
+// Modular design following 450-line limit and 25-line function requirements
 
 describe('ROI Calculator Advanced Features Tests', () => {
   beforeEach(() => {

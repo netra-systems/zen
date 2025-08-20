@@ -2,7 +2,7 @@
 MCP Helper Functions
 
 Utility functions for MCP operations.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 import time

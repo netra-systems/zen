@@ -7,7 +7,7 @@ OAuth Flow Manager - Phase 2 Unified Testing
 3. **Value Impact**: Ensures OAuth flows work correctly across all enterprise scenarios
 4. **Revenue Impact**: Prevents OAuth failures that block $1M+ ARR deals
 
-**ARCHITECTURE:** 300-line limit, 8-line functions, focused flow management
+**ARCHITECTURE:** 450-line limit, 25-line functions, focused flow management
 """
 
 import asyncio

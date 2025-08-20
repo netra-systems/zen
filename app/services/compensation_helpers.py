@@ -1,6 +1,6 @@
 """Compensation base helper functions for function decomposition.
 
-Decomposes large compensation functions into 8-line focused helpers.
+Decomposes large compensation functions into 25-line focused helpers.
 """
 
 from typing import Dict, Any, List

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Automated File Splitting Tool
-Automatically splits files exceeding the 300-line boundary.
+Automatically splits files exceeding the 450-line boundary.
 Follows CLAUDE.md requirements: intelligent splitting strategies.
 """
 
@@ -323,7 +323,7 @@ class FileSplitter:
         suggestions = self.scan_for_oversized_files()
         
         if not suggestions:
-            return "No files exceed the 300-line boundary. Excellent compliance!"
+            return "No files exceed the 450-line boundary. Excellent compliance!"
         
         report = ["FILE SPLITTING ANALYSIS", "=" * 50, ""]
         

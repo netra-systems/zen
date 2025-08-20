@@ -2,7 +2,7 @@
  * Message Display Utilities
  * 
  * Utilities for handling message display logic, particularly for agent name display.
- * This module follows the 8-line function limit and provides clean, type-safe utilities.
+ * This module follows the 25-line function limit and provides clean, type-safe utilities.
  */
 
 import { MessageType } from '@/types/backend_schema_base';

@@ -1,7 +1,7 @@
 """Technical debt metrics calculator.
 
 Calculates code smells, duplication, and complexity metrics.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 
 This module imports from the canonical TechnicalDebtCalculator implementation.
 """

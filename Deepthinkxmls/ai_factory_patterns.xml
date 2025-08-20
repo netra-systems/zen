@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <meta>
+    <title>AI Factory Patterns and Complex Coding Process</title>
+    <category>patterns</category>
+    <created>2025-08-18</created>
+    <cross_references>
+      <ref>CLAUDE.md#ai-factory-productivity</ref>
+      <ref>CLAUDE.md#complex-coding</ref>
+      <ref>agent_architecture.xml</ref>
+    </cross_references>
+  </meta>
+
+  <ai_factory_productivity>
+    <overview>
+      The system is built by Agents (LLM based) based on XML specs.
+      This document defines patterns for efficient AI-driven development.
+    </overview>
+
+    <principles>
+      <principle>Use "Tasks" system to spawn new agents as needed</principle>
+      <principle>NEWLY SPAWNED AGENTS MUST SCOPE WORK TO RETURN SINGLE UNIT OF WORK BACK TO YOU (MASTER)</principle>
+      <principle>Assume that other agents are working alongside and aim to do one atomic unit of work at a time</principle>
+      <principle>Think about managing context and AI Factory Productivity</principle>
+    </principles>
+
+    <complex_coding_process mandatory="true">
+      <overview>
+        MULTI STEP PLAN Process for complex coding tasks.
+        EVERY AGENT MUST HAVE A FRESH CONTEXT WINDOW TO MAINTAIN INTEGRITY OF PROCESS.
+      </overview>
+
+      <task number="1" name="Code Writing">
+        <description>Spawn an Isolated ULTRA THINK ELITE ENGINEER agent to write the code</description>
+        <output>Return the code result</output>
+      </task>
+
+      <task number="2" name="Code Review">
+        <description>Spawn an Isolated ULTRA THINK ELITE REVIEWER agent to review the code</description>
+        <output>Return the review result (CRITICAL: Critic's comments only without code)</output>
+      </task>
+
+      <task number="3" name="Code Refinement">
+        <description>Spawn an Isolated ULTRA THINK ELITE ENGINEER agent</description>
+        <input>
+          <item>Original goal</item>
+          <item>Output from Task 1</item>
+          <item>Output from Task 2</item>
+        </input>
+        <instruction>Address all critique points and rewrite higher quality code</instruction>
+      </task>
+
+      <task number="4" name="Testing">
+        <description>Spawn an Isolated ULTRA THINK TESTING agent</description>
+        <input>Code from agent 3</input>
+        <action>Run tests on the refined code</action>
+      </task>
+    </complex_coding_process>
+
+    <debugging_patterns>
+      <pattern name="Root Cause Analysis">
+        <method>5 Whys</method>
+        <when>Complex debugging scenarios</when>
+      </pattern>
+    </debugging_patterns>
+  </ai_factory_productivity>
+
+  <key_patterns>
+    <type_safety priority="TOP">
+      <backend>Pydantic models</backend>
+      <frontend>TypeScript types</frontend>
+      <reference>type_safety.xml</reference>
+    </type_safety>
+
+    <async_repository_pattern>
+      <rule>async/await for ALL I/O</rule>
+      <rule>Database via repositories only</rule>
+      <rule>NetraException for errors</rule>
+    </async_repository_pattern>
+  </key_patterns>
+</spec>

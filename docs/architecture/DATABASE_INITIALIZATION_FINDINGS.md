@@ -43,7 +43,7 @@ After ULTRA DEEP THINKING about the database initialization architecture, I've i
   - `trial_period`
 
 ### 3. Architecture Violations
-- Schema.sql file doesn't follow 300-line limit principle
+- Schema.sql file doesn't follow 450-line limit principle
 - No modular separation of concerns
 - Mixed responsibilities (core tables + demo tables)
 

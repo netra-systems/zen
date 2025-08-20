@@ -1,7 +1,7 @@
 """Mock data generator for factory status reports.
 
 Provides mock data for testing and development.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 from typing import Dict, List, Any

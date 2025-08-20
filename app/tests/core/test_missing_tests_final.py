@@ -125,7 +125,7 @@ class TestArchitecturalCompliance:
         self._assert_helper_works(mock_config)
     
     def test_functions_are_short(self):
-        """Test functions follow 8-line rule."""
+        """Test functions follow 25-line rule."""
         # This meta-test verifies the pattern
         import inspect
         methods = inspect.getmembers(self, inspect.ismethod)

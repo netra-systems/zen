@@ -2,7 +2,7 @@
 Real LLM Testing Framework Manager - Core orchestration module
 
 Provides real LLM client support for multiple models with intelligent fallback
-to mocks when real testing is disabled. Follows 300-line/8-line limits.
+to mocks when real testing is disabled. Follows 450-line/25-line limits.
 """
 import os
 import time

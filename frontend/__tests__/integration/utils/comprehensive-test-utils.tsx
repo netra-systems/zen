@@ -1,6 +1,6 @@
 /**
  * Comprehensive Integration Test Utilities
- * Complex test components and operations with 8-line function limit enforcement
+ * Complex test components and operations with 25-line function limit enforcement
  */
 
 import React from 'react';

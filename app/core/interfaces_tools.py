@@ -1,7 +1,7 @@
 """Tool interfaces - Single source of truth.
 
 Main ToolExecutionEngine implementation with proper modular design.
-Follows 300-line limit and 8-line functions.
+Follows 450-line limit and 25-line functions.
 """
 
 from typing import Dict, Any, Optional, List, TYPE_CHECKING

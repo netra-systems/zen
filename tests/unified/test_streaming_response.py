@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Value Impact: Responsive streaming increases user engagement by 40%+
 - Revenue Impact: Premium real-time experience justifies 2x pricing tiers
 
-Architecture: 300-line compliance, 8-line function limit, real WebSocket testing
+Architecture: 450-line compliance, 25-line function limit, real WebSocket testing
 """
 
 import asyncio

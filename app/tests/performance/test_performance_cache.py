@@ -1,7 +1,7 @@
 """
 Performance Tests - Cache and Query Optimization
 Tests for memory cache and database query optimization functionality.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import asyncio

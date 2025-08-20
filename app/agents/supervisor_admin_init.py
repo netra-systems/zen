@@ -15,7 +15,7 @@ This module provides factory functions for creating supervisor agents
 with admin tool support using the unified supervisor architecture.
 """
 from typing import Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
 from app.agents.admin_tool_dispatcher import AdminToolDispatcher
@@ -28,14 +28,14 @@ from typing import List
 
 logger = central_logger
 
-def _determine_admin_access(db: Optional[Session], user: Optional[User]) -> bool:
+def _determine_admin_access(db: Optional[AsyncSession], user: Optional[User]) -> bool:
     """Determine if user has admin access."""
     if not db or not user:
         return False
     return PermissionService.is_developer_or_higher(user)
 
 
-def _create_admin_tool_dispatcher(tools: List[BaseTool], db: Session, user: User) -> AdminToolDispatcher:
+def _create_admin_tool_dispatcher(tools: List[BaseTool], db: AsyncSession, user: User) -> AdminToolDispatcher:
     """Create admin tool dispatcher and log information."""
     logger.info(f"Creating supervisor with admin tools for user {user.email}")
     tool_dispatcher = AdminToolDispatcher(tools, db, user)
@@ -68,7 +68,7 @@ def _create_supervisor_config(mode: SupervisorMode, enable_quality_gates: bool, 
 
 
 def _create_supervisor_instance(
-    db: Optional[Session],
+    db: Optional[AsyncSession],
     llm_manager: LLMManager,
     websocket_manager,
     tool_dispatcher,
@@ -91,7 +91,7 @@ def _create_supervisor_instance(
 def create_supervisor_with_admin_support(
     llm_manager: LLMManager,
     tools: List[BaseTool],
-    db: Optional[Session] = None,
+    db: Optional[AsyncSession] = None,
     user: Optional[User] = None,
     websocket_manager=None,
     thread_id: Optional[str] = None,
@@ -116,7 +116,7 @@ def create_supervisor_with_admin_support(
     supervisor_config = _setup_supervisor_configuration(has_admin_access, enable_quality_gates)
     return _create_supervisor_instance(db, llm_manager, websocket_manager, tool_dispatcher, supervisor_config, user, thread_id)
 
-def _setup_tool_dispatcher(tools: List[BaseTool], db: Optional[Session], user: Optional[User], has_admin_access: bool):
+def _setup_tool_dispatcher(tools: List[BaseTool], db: Optional[AsyncSession], user: Optional[User], has_admin_access: bool):
     """Setup appropriate tool dispatcher based on admin access."""
     if has_admin_access:
         return _create_admin_tool_dispatcher(tools, db, user)

@@ -1,7 +1,7 @@
 """Quality metrics data models.
 
 Core data structures for quality assessment tracking.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from dataclasses import dataclass

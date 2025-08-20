@@ -2,7 +2,7 @@
 
 Consolidated validation error handling for both document validation failures
 and LLM error classification using chain of responsibility pattern.
-Follows 300-line limit and 8-line functions.
+Follows 450-line limit and 25-line functions.
 """
 
 from abc import ABC, abstractmethod

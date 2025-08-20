@@ -1,7 +1,7 @@
 """Enhanced Agent State Persistence Service
 
 This service provides atomic state persistence with versioning,
-compression, and recovery capabilities following the 8-line function limit.
+compression, and recovery capabilities following the 25-line function limit.
 """
 
 import json

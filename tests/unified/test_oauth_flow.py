@@ -14,7 +14,7 @@ OAuth Integration Testing - Phase 2 Unified System Testing
 - User merge scenarios for existing accounts
 - Cross-service data consistency validation
 
-**ARCHITECTURE:** 300-line limit, 8-line functions, modular enterprise testing
+**ARCHITECTURE:** 450-line limit, 25-line functions, modular enterprise testing
 """
 
 import pytest

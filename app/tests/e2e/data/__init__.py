@@ -9,7 +9,7 @@ This module provides comprehensive test data generation for E2E testing:
 - Error injection scenarios
 
 ARCHITECTURAL COMPLIANCE:
-- Modular design with 300-line file limits
+- Modular design with 450-line file limits
 - Strong typing throughout
 - Single responsibility per module
 - Composable generators

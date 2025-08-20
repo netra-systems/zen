@@ -1,7 +1,7 @@
 """Quality metrics calculator for test coverage and documentation.
 
 Handles test coverage analysis and documentation quality assessment.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 import subprocess

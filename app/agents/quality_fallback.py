@@ -31,7 +31,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class QualityFallbackManager:
-    """Manages quality-based fallback responses with 8-line function limit"""
+    """Manages quality-based fallback responses with 25-line function limit"""
     
     def __init__(self, fallback_service: Optional[FallbackResponseService]):
         self.fallback_service = fallback_service

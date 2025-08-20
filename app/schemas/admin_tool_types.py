@@ -217,6 +217,18 @@ class AdminToolMetrics(BaseModel):
     usage_by_hour: Dict[int, int] = Field(default_factory=dict)
 
 
+class ToolPermissionCheck(BaseModel):
+    """Permission check result for admin tool access"""
+    tool_name: str
+    user_id: str
+    required_permissions: List[str]
+    has_access: bool
+    missing_permissions: List[str] = Field(default_factory=list)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    
+    model_config = ConfigDict(use_enum_values=True)
+
+
 class AdminToolAuditLog(BaseModel):
     """Audit log entry for admin tool usage"""
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))

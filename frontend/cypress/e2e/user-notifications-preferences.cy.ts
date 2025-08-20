@@ -1,6 +1,6 @@
 /**
  * User Notifications & Preferences E2E Tests
- * Split from user-profile-settings.cy.ts for 300-line compliance
+ * Split from user-profile-settings.cy.ts for 450-line compliance
  * 
  * BVJ: Growth & Enterprise - Personalized preferences drive user engagement
  * Value Impact: Customization options reduce churn and increase satisfaction

@@ -1,5 +1,6 @@
 import os
 import sys
+from app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
@@ -15,10 +16,16 @@ else:
     # Standard test environment setup
     os.environ["TESTING"] = "1"
     # Use PostgreSQL URL format even for tests to satisfy validator
-    os.environ["DATABASE_URL"] = "postgresql://test:test@localhost:5432/netra_test"
-    os.environ["REDIS_URL"] = "redis://localhost:6379/1"
-    os.environ["REDIS_HOST"] = "localhost"
-    os.environ["REDIS_PORT"] = "6379"
+    os.environ["DATABASE_URL"] = DatabaseConstants.build_postgres_url(
+        user="test", password="test", 
+        port=ServicePorts.POSTGRES_DEFAULT,
+        database="netra_test"
+    )
+    os.environ["REDIS_URL"] = DatabaseConstants.build_redis_url(
+        database=DatabaseConstants.REDIS_TEST_DB
+    )
+    os.environ["REDIS_HOST"] = HostConstants.LOCALHOST
+    os.environ["REDIS_PORT"] = str(ServicePorts.REDIS_DEFAULT)
     os.environ["REDIS_USERNAME"] = ""
     os.environ["REDIS_PASSWORD"] = ""
     os.environ["TEST_DISABLE_REDIS"] = "true"
@@ -60,6 +67,15 @@ from app.tests.conftest_helpers import (
     _import_agent_classes, _instantiate_agents
 )
 
+# Initialize database on import to ensure async_session_factory is available
+from app.db.postgres import initialize_postgres
+try:
+    initialize_postgres()
+except Exception as e:
+    # Log but don't fail on import - some tests may not need database
+    import logging
+    logging.getLogger(__name__).warning(f"Failed to initialize database in conftest.py: {e}")
+
 # Temporarily disabled to fix test hanging issue
 # @pytest.fixture(scope="function")
 # def event_loop():
@@ -67,6 +83,20 @@ from app.tests.conftest_helpers import (
 #     loop = asyncio.get_event_loop()
 #     yield loop
 #     loop.close()
+
+@pytest.fixture(scope="function")
+def ensure_db_initialized():
+    """Ensure database is initialized for tests that need it."""
+    from app.db.postgres import async_session_factory, initialize_postgres
+    
+    if async_session_factory is None:
+        try:
+            initialize_postgres()
+        except Exception as e:
+            pytest.skip(f"Cannot initialize database for test: {e}")
+    
+    # Return the session factory for convenience
+    return async_session_factory
 
 @pytest.fixture(scope="function")
 async def test_engine():

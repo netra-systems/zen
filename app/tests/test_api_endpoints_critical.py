@@ -1,8 +1,8 @@
 """
 Critical API endpoint tests - MODULAR ARCHITECTURE.
 
-This file imports from focused test modules to maintain the 300-line limit.
-Each module contains specific test categories with 8-line maximum functions.
+This file imports from focused test modules to maintain the 450-line limit.
+Each module contains specific test categories with 25-line maximum functions.
 """
 
 # Import all critical API tests from focused modules

@@ -24,7 +24,6 @@ import websockets
 from websockets.exceptions import ConnectionClosed
 
 from app.ws_manager import WebSocketManager
-from app.websocket.connection import WebSocketConnection
 from app.websocket.rate_limiter import RateLimiter
 from app.schemas.registry import (
     WebSocketMessage, SubAgentUpdate, AgentCompleted, AgentStarted

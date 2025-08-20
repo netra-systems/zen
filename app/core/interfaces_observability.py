@@ -2,7 +2,7 @@
 
 Consolidated supervisor flow logging with comprehensive TODO tracking,
 metrics collection, and structured observability features.
-Follows 300-line limit and 8-line functions.
+Follows 450-line limit and 25-line functions.
 """
 
 import time

@@ -12,7 +12,7 @@ REQUIREMENTS:
 - Complete free tier limit enforcement flow execution
 - Mock service integration for reliable testing
 - Performance validation (<30 seconds total)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 import uuid

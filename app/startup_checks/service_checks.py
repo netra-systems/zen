@@ -2,7 +2,7 @@
 Service Checks
 
 Handles external service connectivity (Redis, ClickHouse, LLM providers).
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 import os

@@ -9,7 +9,7 @@ First-Time User E2E Test Package
 5. **Growth Engine**: First experience determines 95% of conversion probability
 
 This package contains the TOP 10 CRITICAL First-Time User E2E Tests split into
-modular components following the MANDATORY 300-line limit.
+modular components following the MANDATORY 450-line limit.
 
 Modules:
 - test_onboarding_e2e.py: Tests 1, 2, 5 (onboarding and demo)

@@ -267,8 +267,8 @@ class CorpusMetricsCollector:
 - [ ] Set up test environments
 
 ### During Implementation
-- [ ] Follow 300-line module limit
-- [ ] Maintain 8-line function limit
+- [ ] Follow 450-line module limit
+- [ ] Maintain 25-line function limit
 - [ ] Write tests alongside code
 - [ ] Update documentation
 - [ ] Regular code reviews
@@ -359,7 +359,7 @@ class CorpusMetricsCollector:
 
 ## ✅ Definition of Done
 
-- All code follows 300-line/8-line limits
+- All code follows 450-line/25-line limits
 - Test coverage ≥95%
 - Documentation complete
 - Performance benchmarks met

@@ -23,7 +23,7 @@
         <issue>Functions with 60+ lines requiring full file context</issue>
         <root_cause>Complex business logic in single functions</root_cause>
         <solution>
-            <step>Apply 8-line function rule strictly</step>
+            <step>Apply 25-line function rule strictly</step>
             <step>Use function composition pattern</step>
             <step>Extract complex logic to helper modules</step>
         </solution>

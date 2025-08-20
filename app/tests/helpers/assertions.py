@@ -2,7 +2,7 @@
 
 This module provides assertion helpers and reference test operations
 on database repositories. All functions are ≤8 lines.
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 from datetime import datetime

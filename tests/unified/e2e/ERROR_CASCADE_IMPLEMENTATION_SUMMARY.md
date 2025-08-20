@@ -13,8 +13,8 @@
 2. **`error_cascade_core.py`** (176 lines) - Core components for service failure simulation
 
 ## Architecture Compliance
-- ✅ **300-line file limit**: Both files under 300 lines
-- ✅ **8-line function limit**: All functions comply
+- ✅ **450-line file limit**: Both files under 300 lines
+- ✅ **25-line function limit**: All functions comply
 - ✅ **Modular design**: Separated core logic from test execution
 - ✅ **NO MOCKING**: Uses real service instances only
 
@@ -84,7 +84,7 @@ pytest tests/unified/e2e/test_error_cascade_prevention.py::TestErrorCascadePreve
 ✅ **Graceful Degradation** - Frontend shows user-friendly error messages  
 ✅ **Auto-Recovery** - System automatically recovers after service restart  
 ✅ **Performance Compliance** - <30 second execution requirement  
-✅ **Architecture Compliance** - 300-line files, 8-line functions  
+✅ **Architecture Compliance** - 450-line files, 25-line functions  
 ✅ **Business Value** - $35K MRR service resilience protection
 
 ## Business Impact

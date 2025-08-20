@@ -29,15 +29,26 @@ def parse_test_counts(output: str, component: str) -> Dict:
             test_files.add(match.group(2))
         counts["test_files"] = len(test_files)
     
-    # Common pytest patterns
+    # Improved pytest patterns with more precise regex
     patterns = [
+        # Standard pytest result patterns - match exact format from pytest summary line
+        (r"=+ (\d+) passed[,\s]", "passed"),
+        (r"=+ (\d+) failed[,\s]", "failed"),
+        (r"=+ (\d+) skipped[,\s]", "skipped"),
+        (r"=+ (\d+) error[s]?[,\s]", "errors"),
+        (r"=+ (\d+) deselected[,\s]", "skipped"),
+        (r"=+ (\d+) xfailed[,\s]", "skipped"),
+        (r"=+ (\d+) xpassed[,\s]", "passed"),
+        # Alternative patterns for different pytest output formats
+        (r", (\d+) passed", "passed"),
+        (r", (\d+) failed", "failed"),
+        (r", (\d+) skipped", "skipped"),
+        (r", (\d+) error", "errors"),
+        # Short form patterns
         (r"(\d+) passed", "passed"),
         (r"(\d+) failed", "failed"),
         (r"(\d+) skipped", "skipped"),
         (r"(\d+) error", "errors"),
-        (r"(\d+) deselected", "skipped"),
-        (r"(\d+) xfailed", "skipped"),
-        (r"(\d+) xpassed", "passed"),
     ]
     
     # Jest patterns for frontend

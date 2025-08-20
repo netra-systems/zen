@@ -1,0 +1,91 @@
+{
+  "timestamp": "2025-08-19T18:08:52.021713",
+  "summary": {
+    "total_checks": 8,
+    "successes": 4,
+    "warnings": 1,
+    "failures": 3
+  },
+  "results": [
+    {
+      "service": "Backend",
+      "endpoint": "/health",
+      "status": "success",
+      "message": "Endpoint responsive (status: 200)",
+      "response_time_ms": 137.15390000288608,
+      "details": {
+        "status": "healthy",
+        "services": {
+          "quality_gate": "active",
+          "monitoring": "inactive",
+          "fallback": "active"
+        },
+        "statistics": {
+          "total_validations": 0,
+          "active_alerts": 0,
+          "monitored_agents": 0
+        },
+        "timestamp": "2025-08-20T01:07:39.987081Z",
+        "error": null,
+        "uptime_percentage": null,
+        "response_time_ms": null
+      }
+    },
+    {
+      "service": "Backend",
+      "endpoint": "/docs",
+      "status": "success",
+      "message": "Endpoint responsive (status: 200)",
+      "response_time_ms": 106.28550000546966,
+      "details": null
+    },
+    {
+      "service": "Backend",
+      "endpoint": "/ws (availability)",
+      "status": "failure",
+      "message": "Expected status [400, 426], got 404",
+      "response_time_ms": 103.13879999739584,
+      "details": null
+    },
+    {
+      "service": "Auth",
+      "endpoint": "/health",
+      "status": "failure",
+      "message": "Expected status [200], got 503",
+      "response_time_ms": 12666.28099999798,
+      "details": null
+    },
+    {
+      "service": "Auth",
+      "endpoint": "/api/v1/auth/login (CORS)",
+      "status": "failure",
+      "message": "Request timeout",
+      "response_time_ms": 30385.989900001732,
+      "details": null
+    },
+    {
+      "service": "Backend",
+      "endpoint": "SSL Certificate",
+      "status": "success",
+      "message": "Valid SSL certificate",
+      "response_time_ms": 0,
+      "details": null
+    },
+    {
+      "service": "Auth",
+      "endpoint": "SSL Certificate",
+      "status": "warning",
+      "message": "Could not verify SSL: ",
+      "response_time_ms": 0,
+      "details": null
+    },
+    {
+      "service": "Connectivity",
+      "endpoint": "Backend->Auth",
+      "status": "success",
+      "message": "Services are accessible (assumed connectivity)",
+      "response_time_ms": 0,
+      "details": null
+    }
+  ]
+}

@@ -11,6 +11,8 @@ CRITICAL REQUIREMENTS:
 - NO MOCKING - real services only
 - Maximum 300 lines, functions ≤8 lines each
 - Handle Windows/Unix compatibility
+
+NOTE: Now uses dev_launcher_real_system for better integration
 """
 
 import os
@@ -25,6 +27,12 @@ import httpx
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
 from dataclasses import dataclass
+
+# Import test environment config for environment-aware configuration
+try:
+    from .test_environment_config import TestEnvironmentConfig
+except ImportError:
+    TestEnvironmentConfig = None
 
 logger = logging.getLogger(__name__)
 
@@ -43,9 +51,15 @@ class ServiceProcess:
 class RealServicesManager:
     """Manages starting/stopping real services for E2E testing."""
     
-    def __init__(self, project_root: Optional[Path] = None):
-        """Initialize the real services manager."""
+    def __init__(self, project_root: Optional[Path] = None, env_config=None):
+        """Initialize the real services manager.
+        
+        Args:
+            project_root: Optional project root path
+            env_config: Optional TestEnvironmentConfig for environment-aware configuration
+        """
         self.project_root = project_root or self._detect_project_root()
+        self.env_config = env_config
         self.services: Dict[str, ServiceProcess] = {}
         self.http_client: Optional[httpx.AsyncClient] = None
         self.cleanup_handlers: List[callable] = []
@@ -66,12 +80,42 @@ class RealServicesManager:
         logger.info(f"Configured {len(self.services)} services")
     
     def _create_service_configs(self) -> Dict[str, ServiceProcess]:
-        """Create service configuration dictionary."""
+        """Create service configuration dictionary with environment-aware ports."""
+        # Use environment configuration if available for port extraction
+        if self.env_config:
+            # Extract ports from environment URLs
+            backend_port = self._extract_port_from_url(self.env_config.services.backend, 8000)
+            auth_port = self._extract_port_from_url(self.env_config.services.auth, 8081)  
+            frontend_port = self._extract_port_from_url(self.env_config.services.frontend, 3000)
+        else:
+            # Fallback to default ports
+            backend_port = 8000
+            auth_port = 8081
+            frontend_port = 3000
+        
         return {
-            "auth": ServiceProcess("auth", 8081, health_url="/health"),
-            "backend": ServiceProcess("backend", 8000, health_url="/health/"),
-            "frontend": ServiceProcess("frontend", 3000, health_url="/")
+            "auth": ServiceProcess("auth", auth_port, health_url="/health"),
+            "backend": ServiceProcess("backend", backend_port, health_url="/health/"),
+            "frontend": ServiceProcess("frontend", frontend_port, health_url="/")
         }
+    
+    def _extract_port_from_url(self, url: str, default_port: int) -> int:
+        """Extract port from URL or return default."""
+        try:
+            if ":" in url and not url.startswith("https://"):
+                # Handle http://localhost:8000 format
+                port_part = url.split(":")[-1]
+                if "/" in port_part:
+                    port_part = port_part.split("/")[0]
+                return int(port_part)
+            elif url.startswith("https://"):
+                return 443  # HTTPS default
+            elif url.startswith("http://"):
+                return 80   # HTTP default
+            else:
+                return default_port
+        except (ValueError, IndexError):
+            return default_port
     
     async def start_all_services(self, skip_frontend: bool = False) -> None:
         """Start all services and wait for health checks."""
@@ -266,12 +310,27 @@ class RealServicesManager:
         logger.info("All services stopped")
     
     def get_service_urls(self) -> Dict[str, str]:
-        """Get URLs for all services."""
-        return {
-            name: f"http://localhost:{svc.port}"
-            for name, svc in self.services.items()
-            if svc.ready
-        }
+        """Get URLs for all services, using environment configuration when available."""
+        # Use environment configuration if available
+        if self.env_config:
+            env_urls = {
+                "backend": self.env_config.services.backend,
+                "auth": self.env_config.services.auth,
+                "frontend": self.env_config.services.frontend
+            }
+            # Return only ready services
+            return {
+                name: env_urls.get(name, f"http://localhost:{svc.port}")
+                for name, svc in self.services.items()
+                if svc.ready
+            }
+        else:
+            # Fallback to localhost URLs
+            return {
+                name: f"http://localhost:{svc.port}"
+                for name, svc in self.services.items()
+                if svc.ready
+            }
     
     def is_all_ready(self) -> bool:
         """Check if all services are ready."""
@@ -298,5 +357,17 @@ class RealServicesManager:
 
 # Factory function for easy instantiation
 def create_real_services_manager(project_root: Optional[Path] = None) -> RealServicesManager:
-    """Create a real services manager instance."""
-    return RealServicesManager(project_root)
+    """Create a real services manager instance.
+    
+    NOTE: Consider using dev_launcher_real_system.create_dev_launcher_system()
+    for better integration with the actual dev launcher.
+    """
+    # Try to use the new dev_launcher integration if available
+    try:
+        from .dev_launcher_real_system import create_dev_launcher_system
+        logger.info("Using dev_launcher_real_system for service management")
+        return create_dev_launcher_system(skip_frontend=True)
+    except ImportError:
+        # Fallback to traditional approach
+        logger.info("Using traditional RealServicesManager")
+        return RealServicesManager(project_root)

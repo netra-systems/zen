@@ -64,8 +64,9 @@ class AgentService(IAgentService):
         db_session: Optional[AsyncSession] = None
     ) -> None:
         """Handles a message from the WebSocket."""
-        logger.info(f"handle_websocket_message called for user_id: {user_id}")
+        logger.info(f"[AGENT SERVICE] Processing WebSocket message for user {user_id}: {type(message)}")
         await self._handle_message_with_error_handling(user_id, message, db_session)
+        logger.info(f"[AGENT SERVICE] Completed WebSocket message processing for user {user_id}")
     
     async def _handle_message_with_error_handling(
         self, user_id: str, message: Union[str, Dict[str, Any]], 
@@ -113,10 +114,17 @@ class AgentService(IAgentService):
         elif message_type == "user_message":
             logger.info(f"Processing user_message for user {user_id}, payload keys: {list(payload.keys())}")
             await self.message_handler.handle_user_message(user_id, payload, db_session)
+        elif message_type == "example_message":
+            logger.info(f"Processing example_message for user {user_id}")
+            await self.message_handler.handle_example_message(user_id, payload, db_session)
         elif message_type == "get_thread_history":
             await self.message_handler.handle_thread_history(user_id, db_session)
         elif message_type == "stop_agent":
             await self.message_handler.handle_stop_agent(user_id)
+        elif message_type == "get_conversation_history":
+            await self.message_handler.handle_get_conversation_history(user_id, payload, db_session)
+        elif message_type == "get_agent_context":
+            await self.message_handler.handle_get_agent_context(user_id, payload, db_session)
         else:
             return False
         return True

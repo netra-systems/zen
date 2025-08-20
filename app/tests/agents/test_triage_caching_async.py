@@ -1,6 +1,6 @@
 """
 Tests for TriageSubAgent caching mechanisms and async operations
-Refactored to comply with 8-line function limit and 300-line file limit
+Refactored to comply with 25-line function limit and 450-line file limit
 """
 
 import pytest

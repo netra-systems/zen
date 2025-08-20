@@ -1,7 +1,7 @@
 """Agent State Reconnection Manager
 
 Manages WebSocket reconnection with agent state preservation for E2E testing.
-Split from main test file to maintain 300-line architectural compliance.
+Split from main test file to maintain 450-line architectural compliance.
 
 Business Value: Reliable agent state management across network interruptions
 """

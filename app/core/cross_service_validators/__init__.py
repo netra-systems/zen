@@ -43,6 +43,8 @@ from .validator_framework import (
     CrossServiceValidatorFramework,
     ValidationReport,
     ValidationResult,
+    ValidationStatus,
+    ValidationSeverity,
     ValidatorRegistry
 )
 
@@ -66,5 +68,7 @@ __all__ = [
     "CrossServiceValidatorFramework",
     "ValidationReport",
     "ValidationResult",
+    "ValidationStatus",
+    "ValidationSeverity",
     "ValidatorRegistry"
 ]

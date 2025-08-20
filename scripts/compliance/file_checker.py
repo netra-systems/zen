@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-File size compliance checker.
-Enforces CLAUDE.md file size limits (300 lines max).
+File size and naming compliance checker.
+Enforces CLAUDE.md module size guidelines (approx <500 lines) and clean naming conventions.
+Per CLAUDE.md 2.2: Exceeding guidelines signals need to reassess design for clarity over fragmentation.
 """
 
 import glob
@@ -23,7 +24,35 @@ class FileChecker:
         patterns = self.config.get_patterns()
         for pattern in patterns:
             violations.extend(self._check_pattern(pattern))
+        violations.extend(self.check_file_naming())
         return self._sort_violations(violations)
+    
+    def check_file_naming(self) -> List[Violation]:
+        """Check for files with legacy suffixes"""
+        violations = []
+        bad_suffixes = ['_enhanced', '_fixed', '_backup', '_old', '_new', '_temp', '_copy']
+        patterns = self.config.get_patterns()
+        
+        for pattern in patterns:
+            filepaths = self._get_matching_files(pattern)
+            for filepath in filepaths:
+                if self.config.should_skip_file(filepath):
+                    continue
+                
+                file_stem = Path(filepath).stem
+                for suffix in bad_suffixes:
+                    if file_stem.endswith(suffix):
+                        rel_path = str(Path(filepath).relative_to(self.config.root_path))
+                        violations.append(Violation(
+                            file_path=rel_path,
+                            violation_type="file_naming",
+                            severity="medium",
+                            description=f"File has legacy suffix '{suffix}'",
+                            fix_suggestion="Remove suffix and ensure single clean implementation"
+                        ))
+                        break
+        
+        return violations
     
     def _check_pattern(self, pattern: str) -> List[Violation]:
         """Check files matching pattern for size violations"""

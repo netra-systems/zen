@@ -24,7 +24,7 @@ const config = {
     'react-markdown': '<rootDir>/__mocks__/react-markdown.tsx',
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-markdown|remark-.*|rehype-.*)/)',
+    'node_modules/(?!(react-markdown|remark-.*|rehype-.*|micromark.*|mdast-.*|unist-.*|vfile.*|unified.*|bail|is-plain-obj|trough|zwitch)/)',
   ],
   coverageReporters: ['text-summary'],
   collectCoverage: false,

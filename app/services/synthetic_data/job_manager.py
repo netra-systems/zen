@@ -4,7 +4,7 @@ Job Management Module - Handles job lifecycle and status tracking
 
 from datetime import datetime, UTC
 from typing import Dict, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import schemas
 from app.db import models_postgres as models
@@ -157,7 +157,7 @@ class JobManager:
         self,
         job_id: str,
         active_jobs: Dict,
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str]
     ) -> None:
         """Complete job successfully"""
@@ -168,7 +168,7 @@ class JobManager:
         self,
         job_id: str,
         active_jobs: Dict,
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str]
     ) -> None:
         """Process job completion steps"""
@@ -183,7 +183,7 @@ class JobManager:
 
     async def _update_database_status(
         self,
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str],
         status: str
     ) -> None:
@@ -191,11 +191,11 @@ class JobManager:
         if self._can_update_database(db, synthetic_data_id):
             self._perform_database_update(db, synthetic_data_id, status)
 
-    def _can_update_database(self, db: Optional[Session], synthetic_data_id: Optional[str]) -> bool:
+    def _can_update_database(self, db: Optional[AsyncSession], synthetic_data_id: Optional[str]) -> bool:
         """Check if database update is possible"""
         return db is not None and synthetic_data_id is not None
 
-    def _perform_database_update(self, db: Session, synthetic_data_id: str, status: str) -> None:
+    def _perform_database_update(self, db: AsyncSession, synthetic_data_id: str, status: str) -> None:
         """Perform database status update"""
         db.query(models.Corpus).filter(
             models.Corpus.id == synthetic_data_id

@@ -1,7 +1,7 @@
 """Architecture compliance checking module.
 
 Checks compliance against 300/8 line limits.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 import re
@@ -70,7 +70,7 @@ class ArchitectureComplianceChecker:
         }
     
     def _check_file_line_limits(self) -> int:
-        """Check files exceeding 300-line limit."""
+        """Check files exceeding 450-line limit."""
         violations = 0
         files = self._get_source_files()
         for file_path in files:
@@ -98,7 +98,7 @@ class ArchitectureComplianceChecker:
             return 0
     
     def _check_function_line_limits(self) -> int:
-        """Check functions exceeding 8-line limit."""
+        """Check functions exceeding 25-line limit."""
         violations = 0
         python_files = self._get_python_files()
         for file_path in python_files:

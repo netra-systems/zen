@@ -1,7 +1,7 @@
 """PostgreSQL core connection and engine setup module.
 
 Handles database engine creation, connection management, and initialization.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from contextlib import contextmanager
@@ -127,14 +127,18 @@ async_session_factory: Optional[async_sessionmaker] = None
 def _convert_postgresql_url(db_url: str) -> str:
     """Convert postgresql:// URL to async format."""
     url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    # Convert sslmode to ssl for asyncpg
-    return url.replace("sslmode=", "ssl=")
+    # Convert sslmode to ssl for asyncpg (unless it's a Unix socket connection)
+    if "sslmode=" in url and "/cloudsql/" not in url:
+        url = url.replace("sslmode=", "ssl=")
+    return url
 
 def _convert_postgres_url(db_url: str) -> str:
     """Convert postgres:// URL to async format."""
     url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-    # Convert sslmode to ssl for asyncpg
-    return url.replace("sslmode=", "ssl=")
+    # Convert sslmode to ssl for asyncpg (unless it's a Unix socket connection)
+    if "sslmode=" in url and "/cloudsql/" not in url:
+        url = url.replace("sslmode=", "ssl=")
+    return url
 
 def _convert_sqlite_url(db_url: str) -> str:
     """Convert sqlite:// URL to async format."""
@@ -249,11 +253,9 @@ def _setup_global_engine_objects(engine):
     setup_async_engine_events(async_engine)
 
 def _handle_engine_creation_error(e):
-    """Handle engine creation error and reset globals."""
-    global async_engine, async_session_factory
+    """Handle engine creation error with proper logging and re-raise."""
     logger.error(f"Failed to create PostgreSQL async engine: {e}")
-    async_engine = None
-    async_session_factory = None
+    raise RuntimeError(f"Database engine creation failed: {e}") from e
 
 def _create_and_setup_engine(async_db_url: str, engine_args: dict):
     """Create engine and setup global objects."""
@@ -268,13 +270,53 @@ def _initialize_engine_with_url(db_url: str):
 
 def _initialize_async_engine():
     """Initialize the async PostgreSQL engine."""
+    logger.debug("_initialize_async_engine called")
     try:
         db_url = _validate_database_url()
+        logger.debug(f"Database URL validated: {db_url is not None}")
         if db_url:
+            logger.debug(f"Initializing engine with URL...")
             _initialize_engine_with_url(db_url)
+            logger.debug("Engine initialization completed")
+        else:
+            logger.error("Database URL is None or empty")
     except Exception as e:
+        logger.error(f"Exception in _initialize_async_engine: {e}")
         _handle_engine_creation_error(e)
 
 
-# Initialize the async engine
-_initialize_async_engine()
+# Initialize the async engine - moved to lazy initialization
+# _initialize_async_engine() is now called via initialize_postgres()
+
+def initialize_postgres():
+    """Initialize PostgreSQL connection if not already initialized."""
+    global async_engine, async_session_factory
+    logger.debug(f"initialize_postgres called. Current async_engine: {async_engine is not None}, async_session_factory: {async_session_factory is not None}")
+    
+    # Check if both engine and session factory are properly initialized
+    if async_engine is not None and async_session_factory is not None:
+        logger.debug("Database already initialized, reusing existing connection")
+        return async_session_factory
+    
+    # Reset both if either is None to ensure clean initialization
+    if async_engine is None or async_session_factory is None:
+        logger.debug("Database not fully initialized, performing clean initialization...")
+        async_engine = None
+        async_session_factory = None
+        
+        try:
+            _initialize_async_engine()
+            logger.debug(f"After _initialize_async_engine(), async_engine: {async_engine is not None}, async_session_factory: {async_session_factory is not None}")
+            
+            if async_engine is None or async_session_factory is None:
+                raise RuntimeError("Engine or session factory is None after initialization")
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize PostgreSQL: {e}")
+            # Ensure both are None on failure for clean state
+            async_engine = None
+            async_session_factory = None
+            raise RuntimeError(f"Failed to initialize PostgreSQL: {e}") from e
+    
+    logger.debug(f"initialize_postgres returning: {async_session_factory}")
+    return async_session_factory

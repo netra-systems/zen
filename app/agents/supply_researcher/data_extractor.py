@@ -2,7 +2,7 @@
 Supply Data Extractor
 
 Extracts structured supply data from research results.
-Maintains 8-line function limit and focused extraction logic.
+Maintains 25-line function limit and focused extraction logic.
 """
 
 import re

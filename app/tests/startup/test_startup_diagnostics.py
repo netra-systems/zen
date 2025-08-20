@@ -1,7 +1,7 @@
 """
 Comprehensive Unit Tests for Startup Diagnostics
 Tests system error collection, automatic fixes, and CLI interface.
-COMPLIANCE: 300-line max file, 8-line max functions, async test support.
+COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
 import pytest

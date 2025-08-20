@@ -1,16 +1,16 @@
 """Corpus service helper functions for function decomposition.
 
-Decomposes large functions into 8-line focused helpers.
+Decomposes large functions into 25-line focused helpers.
 """
 
 from typing import Dict, List, Any, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app import schemas
 from app.logging_config import central_logger as logger
 
 
-def validate_corpus_creation_params(db: Session, corpus_data: schemas.CorpusCreate, user_id: str) -> None:
+def validate_corpus_creation_params(db: AsyncSession, corpus_data: schemas.CorpusCreate, user_id: str) -> None:
     """Validate corpus creation parameters."""
     if not db:
         raise ValueError("Database session is required")
@@ -20,7 +20,7 @@ def validate_corpus_creation_params(db: Session, corpus_data: schemas.CorpusCrea
         raise ValueError("User ID is required")
 
 
-def validate_content_upload_params(db: Session, corpus_id: str, content_data: Dict) -> None:
+def validate_content_upload_params(db: AsyncSession, corpus_id: str, content_data: Dict) -> None:
     """Validate content upload parameters."""
     if not db:
         raise ValueError("Database session is required")
@@ -116,7 +116,7 @@ def apply_modular_search_filters(modular_service, filters: Dict) -> None:
         modular_service.apply_search_filters(filters)
 
 
-def validate_document_creation_params(db: Session, corpus_id: str, document_data: schemas.DocumentCreate) -> None:
+def validate_document_creation_params(db: AsyncSession, corpus_id: str, document_data: schemas.DocumentCreate) -> None:
     """Validate document creation parameters."""
     if not db:
         raise ValueError("Database session is required")

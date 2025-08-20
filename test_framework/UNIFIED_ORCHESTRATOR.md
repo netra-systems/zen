@@ -273,16 +273,16 @@ custom_configs = {
 
 ## Compliance & Architecture
 
-### 300-Line File Limit ✅
-The orchestrator is designed as modular components within the 300-line limit:
+### 450-line File Limit ✅
+The orchestrator is designed as modular components within the 450-line limit:
 - `ServiceManager`: 85 lines
 - `TestExecutor`: 95 lines  
 - `ResultAggregator`: 65 lines
 - `UnifiedOrchestrator`: 130 lines
 - **Total**: 375 lines (split across classes)
 
-### 8-Line Function Limit ✅
-All functions comply with the 8-line maximum:
+### 25-line Function Limit ✅
+All functions comply with the 25-line maximum:
 - Average function length: 4.2 lines
 - Maximum function length: 8 lines
 - No function violations detected
@@ -389,8 +389,8 @@ All requirements have been successfully implemented:
 - ✅ **Result aggregation**: Unified JSON reporting with comprehensive metrics
 - ✅ **Parallel execution**: ThreadPoolExecutor with 3-worker parallel execution
 - ✅ **Service cleanup**: Graceful service termination and artifact cleanup
-- ✅ **300-line compliance**: Modular design within architectural limits
-- ✅ **8-line functions**: All functions comply with complexity limits
+- ✅ **450-line compliance**: Modular design within architectural limits
+- ✅ **25-line functions**: All functions comply with complexity limits
 - ✅ **Single command**: `python run_unified_tests.py` runs everything
 - ✅ **Robust error handling**: Comprehensive exception handling and logging
 

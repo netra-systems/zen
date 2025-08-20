@@ -1,7 +1,7 @@
 """Saga pattern implementation for distributed transaction management.
 
 Provides saga execution with automatic compensation on failure.
-All functions strictly adhere to 8-line limit.
+All functions strictly adhere to 25-line limit.
 """
 
 import uuid

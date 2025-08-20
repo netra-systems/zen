@@ -26,9 +26,19 @@ class BadTestPlugin:
         Args:
             config: Pytest config object
         """
-        # Bad test detection is now disabled - using single test_results.json
-        self.enabled = False
-        return
+        # Check if bad test detection is explicitly disabled
+        self.enabled = not getattr(config.option, 'no_bad_test_detection', False)
+        
+        if not self.enabled:
+            return
+        
+        # Set component type
+        self.component = getattr(config.option, 'test_component', 'backend')
+        self.verbose = getattr(config.option, 'verbose', False)
+        
+        # Initialize detector with configured data file
+        data_file = self._get_data_file(config)
+        self.detector = BadTestDetector(data_file=data_file)
     
     def _get_data_file(self, config) -> Optional[Path]:
         """Get data file path from config.
@@ -41,8 +51,8 @@ class BadTestPlugin:
         """
         if hasattr(config.option, 'bad_test_data_file') and config.option.bad_test_data_file:
             return Path(config.option.bad_test_data_file)
-        # Default to test_reports/test_results.json (single source of truth)
-        return Path("test_reports/test_results.json")
+        # Default to test_reports/bad_tests.json as per specification
+        return Path("test_reports/bad_tests.json")
     
     def record_test_outcome(self, nodeid: str, outcome: str, 
                            longrepr=None):
@@ -129,7 +139,7 @@ class BadTestPlugin:
         # Print summary
         stats = self.detector.get_statistics()
         if stats["consistently_failing"] > 0:
-            print(f"\n⚠️  WARNING: {stats['consistently_failing']} tests are consistently failing!")
+            print(f"\nWARNING: {stats['consistently_failing']} tests are consistently failing!")
             print("Run 'python -m test_framework.bad_test_reporter' for detailed report")
     
     def _has_bad_tests(self, bad_tests: dict) -> bool:

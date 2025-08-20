@@ -1,6 +1,6 @@
 /**
  * User Flow Simulation Utilities
- * Complex authentication and websocket flows with 8-line function limit enforcement
+ * Complex authentication and websocket flows with 25-line function limit enforcement
  */
 
 import { fireEvent, waitFor, screen } from '@testing-library/react';

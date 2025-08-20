@@ -15,6 +15,7 @@ from app.routes.utils.thread_helpers import (
     handle_auto_rename_request, handle_route_with_error_logging
 )
 from pydantic import BaseModel
+from app.services import thread_service, thread_analytics
 import time
 
 logger = central_logger.get_logger(__name__)
@@ -104,3 +105,59 @@ async def auto_rename_thread(
     """Automatically generate a title for thread based on first message"""
     handler = lambda: handle_auto_rename_request(db, thread_id, current_user.id)
     return await handle_route_with_error_logging(handler, f"auto-renaming thread {thread_id}")
+
+@router.post("/statistics")
+async def get_thread_statistics(
+    stats_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Get thread usage statistics"""
+    return thread_service.get_thread_statistics(stats_request)
+
+@router.post("/analytics/dashboard")
+async def get_analytics_dashboard(
+    dashboard_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Get thread analytics dashboard"""
+    return await thread_analytics.get_analytics_dashboard(dashboard_request)
+
+@router.post("/analytics")
+async def get_thread_analytics(
+    analytics_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Get thread analytics data"""
+    return await thread_analytics.get_dashboard_data(analytics_request)
+
+@router.post("/bulk")
+async def bulk_thread_operations(
+    bulk_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Perform bulk operations on threads"""
+    return thread_service.bulk_operation(bulk_request)
+
+@router.post("/sentiment")
+async def analyze_thread_sentiment(
+    sentiment_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Analyze sentiment of threads"""
+    return thread_service.analyze_sentiment(sentiment_request)
+
+@router.post("/metrics")
+async def get_thread_metrics(
+    metrics_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Get thread performance metrics"""
+    return thread_service.get_performance_metrics(metrics_request)
+
+@router.post("/cleanup")
+async def cleanup_old_threads(
+    cleanup_request: dict,
+    current_user = Depends(get_current_active_user)
+):
+    """Cleanup old inactive threads"""
+    return thread_service.cleanup_old_threads(cleanup_request)

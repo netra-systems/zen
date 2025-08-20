@@ -1,7 +1,7 @@
 """
 Triage agent core functionality tests
 Tests agent initialization, request validation, entity extraction, and intent determination
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

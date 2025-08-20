@@ -11,6 +11,7 @@ import logging
 import threading
 import signal
 import atexit
+import asyncio
 from typing import Optional, Dict, List
 from pathlib import Path
 from datetime import datetime
@@ -18,7 +19,6 @@ from concurrent.futures import ThreadPoolExecutor, Future
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.environment_checker import EnvironmentChecker
-from dev_launcher.config_manager import ConfigManager
 from dev_launcher.secret_loader import SecretLoader
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.service_startup import ServiceStartupCoordinator
@@ -31,10 +31,13 @@ from dev_launcher.health_registration import HealthRegistrationHelper
 from dev_launcher.startup_validator import StartupValidator
 from dev_launcher.cache_manager import CacheManager
 from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
-from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
-from dev_launcher.legacy_service_runner import LegacyServiceRunner
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 from dev_launcher.critical_error_handler import critical_handler, CriticalError
+from dev_launcher.migration_runner import MigrationRunner
+from dev_launcher.database_connector import DatabaseConnector
+from dev_launcher.websocket_validator import WebSocketValidator
+from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
+from dev_launcher.environment_validator import EnvironmentValidator
 
 logger = logging.getLogger(__name__)
 
@@ -75,8 +78,12 @@ class DevLauncher:
         except ValueError:
             self.startup_mode = StartupMode.MINIMAL
         
-        # Create log filter and progress tracker
-        self.log_filter = LogFilter(self.startup_mode)
+        # Create log filter and progress tracker with visibility flags
+        self.log_filter = LogFilter(
+            self.startup_mode, 
+            verbose_background=self.config.verbose_background,
+            verbose_tables=self.config.verbose_tables
+        )
         self.progress_tracker = StartupProgressTracker(self.startup_mode)
         
         # Override verbose if in minimal mode
@@ -93,7 +100,7 @@ class DevLauncher:
     def _setup_components(self):
         """Setup component instances."""
         self.environment_checker = EnvironmentChecker(self.config.project_root, self.use_emoji)
-        self.config_manager = ConfigManager(self.config, self.use_emoji)
+        self.config.set_emoji_support(self.use_emoji)
         self.secret_loader = self._create_secret_loader()
         self.service_startup = self._create_service_startup()
         self.summary_display = SummaryDisplay(self.config, self.service_discovery, self.use_emoji)
@@ -102,6 +109,10 @@ class DevLauncher:
         """Setup helper instances."""
         self.health_helper = HealthRegistrationHelper(self.health_monitor, self.use_emoji)
         self.startup_validator = StartupValidator(self.use_emoji)
+        self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
+        self.database_connector = DatabaseConnector(self.use_emoji)
+        self.websocket_validator = WebSocketValidator(self.use_emoji)
+        self.environment_validator = EnvironmentValidator()
     
     def _create_secret_loader(self) -> SecretLoader:
         """Create secret loader instance."""
@@ -114,7 +125,7 @@ class DevLauncher:
     def _create_service_startup(self) -> ServiceStartupCoordinator:
         """Create service startup coordinator."""
         return ServiceStartupCoordinator(
-            self.config, self.config_manager.services_config,
+            self.config, self.config.services_config,
             self.log_manager, self.service_discovery, self.use_emoji)
     
     def _load_env_file(self):
@@ -135,7 +146,7 @@ class DevLauncher:
     def _setup_logging(self):
         """Setup logging and show verbose configuration."""
         setup_logging(self.config.verbose)
-        self.config_manager.log_verbose_config()
+        self.config.log_verbose_config()
     
     def _setup_signal_handlers(self):
         """Setup signal handlers for graceful shutdown."""
@@ -190,12 +201,28 @@ class DevLauncher:
         if hasattr(self, 'log_manager'):
             self.log_manager.stop_all()
         
-        # Cleanup optimizers
+        # Cleanup optimizers and parallel executor
         if hasattr(self, 'startup_optimizer'):
             self.startup_optimizer.cleanup()
         
-        if hasattr(self, 'legacy_runner'):
-            self.legacy_runner.cleanup()
+        if hasattr(self, 'parallel_executor') and self.parallel_executor:
+            self.parallel_executor.cleanup()
+        
+        # Stop database monitoring and cleanup connections
+        if hasattr(self, 'database_connector'):
+            try:
+                # Check if we're in an event loop
+                loop = asyncio.get_running_loop()
+                # If we're in an event loop, we can't use asyncio.run
+                # Set shutdown flag and let monitoring loop handle cleanup
+                self.database_connector._shutdown_requested = True
+                logger.info("Database monitoring shutdown requested")
+            except RuntimeError:
+                # No running event loop, safe to use asyncio.run
+                try:
+                    asyncio.run(self.database_connector.stop_health_monitoring())
+                except Exception as e:
+                    logger.error(f"Error stopping database monitoring: {e}")
         
         # Verify ports are freed
         self._verify_ports_freed()
@@ -283,15 +310,21 @@ class DevLauncher:
         self.cache_manager = CacheManager(self.config.project_root)
         self.startup_optimizer = StartupOptimizer(self.cache_manager)
         self.parallel_enabled = getattr(self.config, 'parallel_startup', True)
-        self.optimized_startup = OptimizedStartupOrchestrator(self)
-        self.legacy_runner = LegacyServiceRunner(self)
+        
+        # Setup parallel executor for pre-checks
+        if self.parallel_enabled:
+            self.parallel_executor = ParallelExecutor(max_cpu_workers=2, max_io_workers=4)
+        else:
+            self.parallel_executor = None
+            
         self._register_optimization_steps()
     
     def _register_optimization_steps(self):
         """Register startup optimization steps."""
         steps = [
             StartupStep("environment_check", self._check_environment_step, [], True, 10, True, "env_check"),
-            StartupStep("migration_check", self._check_migrations_step, ["environment_check"], True, 15, True, "migration_check"),
+            StartupStep("database_check", self._check_database_step, ["environment_check"], True, 15, True, "database_check"),
+            StartupStep("migration_check", self._check_migrations_step, ["database_check"], True, 15, True, "migration_check"),
             StartupStep("backend_deps", self._check_backend_deps, [], True, 20, False, "backend_deps"),
             StartupStep("auth_deps", self._check_auth_deps, [], True, 20, False, "auth_deps"),
             StartupStep("frontend_deps", self._check_frontend_deps, ["backend_deps"], True, 30, False, "frontend_deps"),
@@ -307,18 +340,81 @@ class DevLauncher:
         if not self.cache_manager.has_environment_changed():
             self._print("✅", "CACHE", "Environment unchanged, skipping checks")
             return True
+        
+        # Run comprehensive environment validation
+        self._print("🔍", "ENV", "Checking environment...")
+        validation_result = self.environment_validator.validate_all()
+        
+        if not validation_result.is_valid:
+            self._print("❌", "ENV", "Environment validation failed")
+            self.environment_validator.print_validation_summary(validation_result)
+            
+            # Print fix suggestions
+            suggestions = self.environment_validator.get_fix_suggestions(validation_result)
+            if suggestions:
+                self._print("💡", "HELP", "Suggestions:")
+                for suggestion in suggestions:
+                    print(f"  • {suggestion}")
+            
+            return False
+        
+        # Run basic environment checks
         result = self.environment_checker.check_environment()
-        # Check for critical environment variables
+        
+        # Check and set defaults for critical environment variables
         self._check_critical_env_vars()
+        
+        # Print summary if there were warnings
+        if validation_result.warnings:
+            self.environment_validator.print_validation_summary(validation_result)
+        else:
+            self._print("✅", "ENV", "Environment check passed")
+        
         return result
     
     def _check_critical_env_vars(self):
-        """Check critical environment variables."""
-        critical_vars = [
-            "DATABASE_URL",
-            "JWT_SECRET_KEY"
-        ]
-        for var in critical_vars:
+        """Check and set defaults for critical environment variables."""
+        self._set_env_var_defaults()
+        self._validate_critical_env_vars()
+    
+    def _set_env_var_defaults(self):
+        """Set default values for critical environment variables."""
+        defaults = {
+            "BACKEND_PORT": "8000",
+            "FRONTEND_PORT": "3000", 
+            "AUTH_PORT": "8081",
+            "WEBSOCKET_PORT": "8000",
+            "LOG_LEVEL": "INFO",
+            "ENVIRONMENT": "development",
+            "CORS_ORIGINS": "*"  # Set CORS_ORIGINS=* for development
+        }
+        
+        for var, default_value in defaults.items():
+            if not os.environ.get(var):
+                os.environ[var] = default_value
+                self._print("ℹ️", "DEFAULT", f"Set {var}={default_value}")
+        
+        # Generate cross-service auth token if not present
+        self._ensure_cross_service_auth_token()
+    
+    def _ensure_cross_service_auth_token(self):
+        """Ensure cross-service authentication token exists."""
+        existing_token = self.service_discovery.get_cross_service_auth_token()
+        if not existing_token:
+            import secrets
+            token = secrets.token_urlsafe(32)
+            self.service_discovery.set_cross_service_auth_token(token)
+            os.environ['CROSS_SERVICE_AUTH_TOKEN'] = token
+            self._print("🔑", "TOKEN", "Generated cross-service auth token")
+        else:
+            os.environ['CROSS_SERVICE_AUTH_TOKEN'] = existing_token
+            self._print("🔑", "TOKEN", "Using existing cross-service auth token")
+    
+    def _validate_critical_env_vars(self):
+        """Validate required environment variables."""
+        required_vars = ["DATABASE_URL", "JWT_SECRET_KEY"]
+        
+        for var in required_vars:
             value = os.environ.get(var)
             if not value:
                 critical_handler.check_env_var(var, value)
@@ -327,9 +423,36 @@ class DevLauncher:
         """Environment check step for optimizer."""
         return self.environment_checker.check_environment()
     
+    def _check_database_step(self) -> bool:
+        """Database connectivity check step for optimizer."""
+        # For cache purposes, always return False to force database validation
+        return False
+    
     def _check_migrations_step(self) -> bool:
         """Migration check step for optimizer."""
         return not self.cache_manager.has_migration_files_changed()
+    
+    async def _validate_databases(self) -> bool:
+        """Validate database connections before service startup."""
+        try:
+            return await self.database_connector.validate_all_connections()
+        except Exception as e:
+            logger.error(f"Database validation failed: {e}")
+            self._print("❌", "DATABASE", f"Validation error: {str(e)}")
+            return False
+    
+    async def _validate_websocket_endpoints(self) -> bool:
+        """Validate WebSocket endpoints after frontend is ready."""
+        try:
+            return await self.websocket_validator.validate_all_endpoints()
+        except Exception as e:
+            logger.error(f"WebSocket validation failed: {e}")
+            self._print("❌", "WEBSOCKET", f"Validation error: {str(e)}")
+            return False
+    
+    def run_migrations(self, env: Optional[Dict] = None) -> bool:
+        """Run database migrations if needed."""
+        return self.migration_runner.check_and_run_migrations(env)
     
     def _check_backend_deps(self) -> bool:
         """Backend dependencies check step."""
@@ -356,26 +479,37 @@ class DevLauncher:
         self._print("🔐", "SECRETS", "Starting enhanced environment variable loading...")
         result = self.secret_loader.load_all_secrets()
         if self.config.verbose:
-            self.config_manager.show_env_var_debug_info()
+            self.config.show_env_var_debug_info()
         return result
     
     def register_health_monitoring(self):
-        """Register health monitoring after services are verified ready."""
+        """Register health monitoring after services are verified ready.
+        
+        Per SPEC: This registration happens but monitoring doesn't start until
+        all services are confirmed ready and grace periods have elapsed.
+        """
         self.health_helper.register_all_services(
             self.service_startup.backend_health_info,
             self.service_startup.frontend_health_info,
             self.service_startup.auth_health_info
         )
     
-    def run(self) -> int:
-        """Run the development environment with optimized startup sequence."""
+    async def run(self) -> int:
+        """Run the development environment."""
         try:
-            # Check for legacy mode
-            if self.config.legacy_mode:
-                return self._run_legacy_mode()
+            if not self.config.silent_mode:
+                self._print_startup_banner()
+                self.config.show_configuration()
             
-            # Use optimized startup by default
-            return self._run_optimized_mode()
+            # Start timing
+            self.startup_optimizer.start_timing()
+            
+            # Run pre-checks
+            if not self._run_pre_checks():
+                return 1
+            
+            # Run services
+            return await self._run_services()
         except CriticalError as e:
             # Handle critical errors
             critical_handler.exit_on_critical(e)
@@ -384,36 +518,227 @@ class DevLauncher:
             logger.error(f"Unexpected error during startup: {e}")
             return 1
     
-    def _run_legacy_mode(self) -> int:
-        """Run in legacy mode with old behavior."""
-        self._print_startup_banner()
-        self.config_manager.show_configuration()
-        
-        # Use legacy service runner
-        return self.legacy_runner.run_services_sequential()
     
-    def _run_optimized_mode(self) -> int:
-        """Run optimized startup sequence."""
-        if not self.config.silent_mode:
-            self._print_startup_banner()
-            self.config_manager.show_configuration()
-        
-        # Start timing
-        self.startup_optimizer.start_timing()
-        
-        # Execute optimized startup sequence
-        return self.optimized_startup.run_optimized_startup()
-    
-    
-    def _run_services(self) -> int:
-        """Run all services."""
+    async def _run_services(self) -> int:
+        """Run all services following SPEC startup sequence steps 1-13."""
         self._clear_service_discovery()
         
-        # Use parallel startup if enabled
-        if self.parallel_enabled:
-            return self.legacy_runner.run_services_parallel()
+        try:
+            # Follow SPEC service_startup_sequence steps 1-13
+            success = await self._execute_spec_startup_sequence()
+            
+            if not success:
+                self._print("❌", "ERROR", "Failed to start services")
+                return 1
+            
+            # Show summary
+            self.summary_display.show_success_summary()
+            
+            # Monitor services
+            self._monitor_services()
+            return 0
+            
+        except KeyboardInterrupt:
+            self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
+            return 0
+        except Exception as e:
+            logger.error(f"Service startup failed: {e}")
+            return 1
+    
+    async def _execute_spec_startup_sequence(self) -> bool:
+        """Execute SPEC startup sequence steps 1-13.
+        
+        Per SPEC/dev_launcher.xml service_startup_sequence:
+        Steps 1-12: Service startup and readiness verification
+        Step 13: ONLY NOW start health monitoring
+        """
+        try:
+            # Steps 1-5: Cache, environment, secrets, database validation, migrations
+            self._print("🔄", "STEP 1-2", "Checking cache and environment...")
+            # (Already done in pre-checks)
+            
+            self._print("🔄", "STEP 3", "Loading secrets...")
+            # (Already done in pre-checks)
+            
+            self._print("🔄", "STEP 4", "Validating database connections...")
+            if not await self._validate_databases():
+                self._print("❌", "ERROR", "Database validation failed")
+                return False
+            
+            self._print("🔄", "STEP 5", "Checking and running migrations...")
+            if not self.run_migrations():
+                self._print("❌", "ERROR", "Migration check failed")
+                return False
+            
+            # Step 6-7: Start backend and auth processes
+            self._print("🔄", "STEP 6-7", "Starting backend and auth services...")
+            backend_result = self.service_startup.start_backend()
+            auth_result = self.service_startup.start_auth_service()
+            
+            if not backend_result[0] or not auth_result[0]:
+                self._print("❌", "ERROR", "Failed to start backend or auth service")
+                return False
+            
+            # Register processes
+            self.process_manager.add_process("Backend", backend_result[0])
+            self.process_manager.add_process("Auth", auth_result[0])
+            
+            # Step 8: Wait for backend readiness (/health/ready)
+            self._print("🔄", "STEP 8", "Waiting for backend readiness...")
+            if not self._wait_for_backend_readiness():
+                self._print("❌", "ERROR", "Backend readiness check failed")
+                return False
+            
+            # Step 9: Verify auth system (/api/auth/config)
+            self._print("🔄", "STEP 9", "Verifying auth system...")
+            if not self._verify_auth_system():
+                self._print("❌", "ERROR", "Auth system verification failed")
+                return False
+            
+            # Step 10: Start frontend process
+            self._print("🔄", "STEP 10", "Starting frontend service...")
+            frontend_result = self.service_startup.start_frontend()
+            
+            if not frontend_result[0]:
+                self._print("❌", "ERROR", "Failed to start frontend service")
+                return False
+            
+            self.process_manager.add_process("Frontend", frontend_result[0])
+            
+            # Step 11: Wait for frontend readiness
+            self._print("🔄", "STEP 11", "Waiting for frontend readiness...")
+            if not self._wait_for_frontend_readiness():
+                self._print("❌", "ERROR", "Frontend readiness check failed")
+                return False
+            
+            # Step 11.5: Validate WebSocket endpoints
+            self._print("🔄", "STEP 11.5", "Validating WebSocket endpoints...")
+            if not await self._validate_websocket_endpoints():
+                self._print("⚠️", "WARNING", "WebSocket validation failed - continuing startup")
+                # Don't fail startup for WebSocket issues, just warn
+            
+            # Step 12: Cache successful startup state
+            self._print("🔄", "STEP 12", "Caching successful startup state...")
+            self.cache_manager.mark_successful_startup(time.time() - self.startup_time)
+            
+            # Step 13: ONLY NOW start health monitoring
+            self._print("🔄", "STEP 13", "Starting health monitoring...")
+            self._start_health_monitoring_after_readiness()
+            
+            # Start database health monitoring
+            await self.database_connector.start_health_monitoring()
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Startup sequence failed: {e}")
+            return False
+    
+    def _wait_for_backend_readiness(self, timeout: int = 30) -> bool:
+        """Wait for backend /health/ready endpoint per SPEC step 8."""
+        import requests
+        start_time = time.time()
+        backend_port = self.config.backend_port or 8000
+        ready_url = f"http://localhost:{backend_port}/health/ready"
+        
+        while (time.time() - start_time) < timeout:
+            try:
+                response = requests.get(ready_url, timeout=5)
+                if response.status_code == 200:
+                    self._print("✅", "READY", "Backend is ready")
+                    # Mark service as ready in health monitor
+                    self.health_monitor.mark_service_ready("Backend")
+                    return True
+            except Exception as e:
+                logger.debug(f"Backend readiness check: {e}")
+            
+            time.sleep(1)
+        
+        return False
+    
+    def _verify_auth_system(self, timeout: int = 15) -> bool:
+        """Verify auth system /api/auth/config per SPEC step 9."""
+        import requests
+        start_time = time.time()
+        auth_port = 8081  # Auth service port
+        auth_config_url = f"http://localhost:{auth_port}/api/auth/config"
+        
+        while (time.time() - start_time) < timeout:
+            try:
+                response = requests.get(auth_config_url, timeout=5)
+                if response.status_code in [200, 404]:  # 404 is acceptable
+                    self._print("✅", "READY", "Auth system verified")
+                    # Mark service as ready in health monitor
+                    self.health_monitor.mark_service_ready("Auth")
+                    return True
+            except Exception as e:
+                logger.debug(f"Auth verification: {e}")
+            
+            time.sleep(1)
+        
+        return False
+    
+    def _wait_for_frontend_readiness(self, timeout: int = 90) -> bool:
+        """Wait for frontend readiness per SPEC step 11 (90s grace period)."""
+        import requests
+        start_time = time.time()
+        frontend_port = self.config.frontend_port or 3000
+        frontend_url = f"http://localhost:{frontend_port}"
+        
+        while (time.time() - start_time) < timeout:
+            try:
+                response = requests.get(frontend_url, timeout=5)
+                if response.status_code in [200, 404]:  # Frontend can return 404
+                    self._print("✅", "READY", "Frontend is ready")
+                    # Mark service as ready in health monitor
+                    self.health_monitor.mark_service_ready("Frontend")
+                    return True
+            except Exception as e:
+                logger.debug(f"Frontend readiness check: {e}")
+            
+            time.sleep(2)  # Longer interval for frontend
+        
+        return False
+    
+    def _start_health_monitoring_after_readiness(self):
+        """Start health monitoring only after all services are ready per SPEC step 13.
+        
+        Per SPEC HEALTH-001: Health monitoring MUST NOT start immediately after service launch.
+        Only AFTER startup verification should health monitoring begin.
+        """
+        # Register database connector with health monitor
+        self.health_monitor.set_database_connector(self.database_connector)
+        
+        # Set service discovery for cross-service health monitoring
+        self.health_monitor.set_service_discovery(self.service_discovery)
+        
+        # Register health monitoring for all services
+        self.register_health_monitoring()
+        
+        # Start the health monitor thread (but monitoring is disabled)
+        self.health_monitor.start()
+        
+        # Verify cross-service connectivity before enabling monitoring
+        cross_service_healthy = self.health_monitor.verify_cross_service_connectivity()
+        if not cross_service_healthy:
+            self._print("⚠️", "WARNING", "Cross-service connectivity issues detected")
+        
+        # Enable monitoring only after all services are confirmed ready
+        if self.health_monitor.all_services_ready():
+            self.health_monitor.enable_monitoring()
+            
+            # Get comprehensive status report
+            status_report = self.health_monitor.get_cross_service_health_status()
+            cors_enabled = status_report['cross_service_integration']['cors_enabled']
+            service_discovery_active = status_report['cross_service_integration']['service_discovery_active']
+            
+            self._print("✅", "MONITORING", "Health monitoring enabled")
+            if cors_enabled:
+                self._print("🌐", "CORS", "Cross-service CORS integration active")
+            if service_discovery_active:
+                self._print("🔍", "DISCOVERY", "Service discovery integration active")
         else:
-            return self.legacy_runner.run_services_sequential()
+            self._print("⚠️", "WARNING", "Not all services ready - health monitoring delayed")
     
     
     def _print_startup_banner(self):
@@ -423,10 +748,70 @@ class DevLauncher:
         print("=" * 60)
     
     def _run_pre_checks(self) -> bool:
-        """Run pre-launch checks."""
+        """Run pre-launch checks with parallel execution where possible."""
+        if self.parallel_enabled and self.parallel_executor:
+            return self._run_parallel_pre_checks()
+        else:
+            return self._run_sequential_pre_checks()
+    
+    def _run_parallel_pre_checks(self) -> bool:
+        """Run pre-checks in parallel for faster startup."""
+        self._print("🔄", "PARALLEL", "Running pre-checks in parallel...")
+        
+        # Create parallel tasks for independent checks
+        tasks = [
+            ParallelTask(
+                task_id="environment_check",
+                func=self.check_environment,
+                task_type=TaskType.IO_BOUND,
+                timeout=30,
+                priority=1
+            ),
+            ParallelTask(
+                task_id="secret_loading",
+                func=self._load_secrets_task,
+                task_type=TaskType.IO_BOUND,
+                timeout=45,
+                priority=2
+            )
+        ]
+        
+        # Add tasks to executor
+        for task in tasks:
+            self.parallel_executor.add_task(task)
+        
+        # Execute all tasks
+        results = self.parallel_executor.execute_all(timeout=60)
+        
+        # Check results
+        for task_id, result in results.items():
+            if not result.success:
+                self._print("❌", "ERROR", f"Pre-check {task_id} failed: {result.error}")
+                return False
+            elif not result.result:
+                self._print("⚠️", "WARN", f"Pre-check {task_id} returned False")
+                if task_id == "environment_check":
+                    return False
+                # Allow secret loading to fail non-critically
+        
+        return True
+    
+    def _run_sequential_pre_checks(self) -> bool:
+        """Run pre-checks sequentially (fallback)."""
         if not self.check_environment():
             return False
         return self._handle_secret_loading()
+    
+    def _load_secrets_task(self) -> bool:
+        """Secret loading task for parallel execution."""
+        try:
+            result = self.load_secrets()
+            if not result:
+                self._print_secret_loading_warning()
+            return True  # Allow to proceed even if secrets fail
+        except Exception as e:
+            logger.warning(f"Secret loading failed: {e}")
+            return True  # Non-critical failure
     
     def _handle_secret_loading(self) -> bool:
         """Handle secret loading with warnings."""
@@ -444,6 +829,16 @@ class DevLauncher:
         """Clear old service discovery."""
         self.service_discovery.clear_all()
     
+    def _monitor_services(self):
+        """Monitor running services."""
+        try:
+            # Wait for all processes
+            self.process_manager.wait_for_all()
+        except KeyboardInterrupt:
+            self._print("\n🛑", "SHUTDOWN", "Interrupted by user")
+        except Exception as e:
+            logger.error(f"Service monitoring error: {e}")
+            self._print("❌", "ERROR", f"Service monitoring failed: {str(e)[:100]}")
     
     def _run_main_loop(self):
         """Run main service loop."""

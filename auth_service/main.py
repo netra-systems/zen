@@ -25,7 +25,7 @@ else:
     load_dotenv()
     print("Loaded environment from current directory or system")
 
-from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -66,9 +66,15 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    from auth_service.auth_core.config import AuthConfig
+    from auth_core.config import AuthConfig
     AuthConfig.log_configuration()
-    logger.info(f"Port: {os.getenv('PORT', '8081')}")
+    logger.info(f"Port: {os.getenv('PORT', '8080')}")
+    
+    # Log Redis configuration status
+    from auth_core.routes.auth_routes import auth_service
+    redis_enabled = auth_service.session_manager.redis_enabled
+    redis_status = "enabled" if redis_enabled else "disabled (staging environment)"
+    logger.info(f"Redis session management: {redis_status}")
     
     # Check if we're in fast test mode
     fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
@@ -79,29 +85,21 @@ async def lifespan(app: FastAPI):
         yield
         return
     
-    # Initialize database connections on startup
-    from auth_service.auth_core.database.connection import auth_db
-    from auth_service.auth_core.database.main_db_sync import main_db_sync
+    # Initialize single database connection
+    from auth_core.database.connection import auth_db
     
     initialization_errors = []
     
-    # Try to initialize auth database
+    # Initialize auth database (uses the same DATABASE_URL as main app)
     try:
         await auth_db.initialize()
         logger.info("Auth database initialized successfully")
     except Exception as e:
-        logger.warning(f"Auth database initialization failed: {e}")
-        initialization_errors.append(f"Auth DB: {e}")
+        error_msg = str(e) if str(e) else f"{type(e).__name__}: {repr(e)}"
+        logger.warning(f"Auth database initialization failed: {error_msg}")
+        initialization_errors.append(f"Database: {error_msg}")
     
-    # Try to initialize main database sync (non-critical for basic auth)
-    try:
-        await main_db_sync.initialize()
-        logger.info("Main database sync initialized successfully")
-    except Exception as e:
-        logger.warning(f"Main database sync failed (non-critical): {e}")
-        initialization_errors.append(f"Main DB Sync: {e}")
-    
-    # In development, allow service to start even with some DB issues
+    # In development, allow service to start even with DB issues
     if env == "development" and initialization_errors:
         logger.warning(f"Starting with {len(initialization_errors)} DB issues in development mode")
     elif initialization_errors and env in ["staging", "production"]:
@@ -112,18 +110,13 @@ async def lifespan(app: FastAPI):
     # Cleanup
     logger.info("Shutting down Auth Service...")
     
-    # Close database connections safely
+    # Close database connection safely
     try:
         await auth_db.close()
     except Exception as e:
-        logger.warning(f"Error closing auth DB: {e}")
+        logger.warning(f"Error closing database: {e}")
     
-    try:
-        await main_db_sync.close()
-    except Exception as e:
-        logger.warning(f"Error closing main DB sync: {e}")
-    
-    logger.info("Database connections closed")
+    logger.info("Database connection closed")
 
 # Create FastAPI app
 app = FastAPI(
@@ -189,8 +182,9 @@ if cors_origins == ["*"]:
                 if origin:
                     response.headers["Access-Control-Allow-Origin"] = origin
                     response.headers["Access-Control-Allow-Credentials"] = "true"
-                    response.headers["Access-Control-Allow-Methods"] = "*"
-                    response.headers["Access-Control-Allow-Headers"] = "*"
+                    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+                    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+                    response.headers["Access-Control-Max-Age"] = "3600"
                 return response
             
             # Process request
@@ -200,9 +194,9 @@ if cors_origins == ["*"]:
             if origin:
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
-                response.headers["Access-Control-Allow-Methods"] = "*"
-                response.headers["Access-Control-Allow-Headers"] = "*"
-                response.headers["Access-Control-Expose-Headers"] = "*"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+                response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Request-ID, X-Trace-ID, Accept, Origin, Referer, X-Requested-With"
+                response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
             
             return response
     
@@ -262,7 +256,47 @@ async def health() -> Dict[str, Any]:
     """Basic health check with unified health system"""
     return health_interface.get_basic_health()
 
+# Readiness check endpoint
+@app.get("/health/ready")
+async def health_ready() -> Dict[str, Any]:
+    """Readiness probe to check if the service is ready to serve requests"""
+    # Check if database connections are available
+    from auth_core.database.connection import auth_db
+    
+    try:
+        # Try to check database connectivity
+        is_ready = await auth_db.is_ready() if hasattr(auth_db, 'is_ready') else True
+        
+        if is_ready:
+            return {
+                "status": "ready",
+                "service": "auth-service",
+                "version": "1.0.0",
+                "timestamp": datetime.now(UTC).isoformat()
+            }
+        else:
+            return JSONResponse(
+                status_code=503,
+                content={"status": "not_ready", "service": "auth-service", "reason": "Database not ready"}
+            )
+    except Exception as e:
+        logger.warning(f"Readiness check failed: {e}")
+        # In development, we might still be ready even if DB check fails
+        env = os.getenv("ENVIRONMENT", "development")
+        if env == "development":
+            return {
+                "status": "ready",
+                "service": "auth-service", 
+                "version": "1.0.0",
+                "timestamp": datetime.now(UTC).isoformat(),
+                "warning": "Database check failed but continuing in development mode"
+            }
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "service": "auth-service", "reason": str(e)}
+        )
+
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.getenv("PORT", "8081"))
+    port = int(os.getenv("PORT", "8080"))
     uvicorn.run(app, host="0.0.0.0", port=port)

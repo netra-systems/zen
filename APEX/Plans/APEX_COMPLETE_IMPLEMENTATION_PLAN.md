@@ -394,8 +394,8 @@ Every feature must answer:
 4. What is the revenue impact?
 
 ### Technical Excellence
-- 300-line file limit (enforced)
-- 8-line function limit (enforced)
+- 450-line file limit (enforced)
+- 25-line function limit (enforced)
 - Strong typing throughout
 - Modular architecture
 - Single source of truth

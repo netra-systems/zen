@@ -1,5 +1,5 @@
 // Main WebSocket event handlers registry - Modular approach following CLAUDE.md
-// Aggregates handlers from modular files to stay under 300-line limit
+// Aggregates handlers from modular files to stay under 450-line limit
 
 import { handleWebSocketEvent as coreHandler } from './websocket-event-handlers-core';
 import { 

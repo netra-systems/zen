@@ -15,7 +15,7 @@ REQUIREMENTS:
 - Audit trail creation
 - Must ensure 0% unauthorized access
 - Complete in <30 seconds
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import pytest
 import time

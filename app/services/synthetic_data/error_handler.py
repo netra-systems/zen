@@ -3,7 +3,7 @@ Error Handler Module - Comprehensive error handling and recovery
 """
 
 from typing import Dict, Optional, List
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.ws_manager import manager
 
@@ -15,7 +15,7 @@ class ErrorHandler:
         self,
         job_id: str,
         error: Exception,
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str],
         active_jobs: Dict
     ) -> None:
@@ -23,7 +23,7 @@ class ErrorHandler:
         await self._log_error(job_id, error)
         await self._process_error_by_severity(job_id, error, db, synthetic_data_id, active_jobs)
     
-    async def _process_error_by_severity(self, job_id: str, error: Exception, db: Optional[Session], 
+    async def _process_error_by_severity(self, job_id: str, error: Exception, db: Optional[AsyncSession], 
                                        synthetic_data_id: Optional[str], active_jobs: Dict) -> None:
         """Process error based on severity level."""
         if self._is_critical_error(error):
@@ -31,7 +31,7 @@ class ErrorHandler:
         else:
             await self._attempt_error_recovery(job_id, error, active_jobs)
 
-    async def _handle_critical_error(self, job_id: str, error: Exception, db: Optional[Session], 
+    async def _handle_critical_error(self, job_id: str, error: Exception, db: Optional[AsyncSession], 
                                    synthetic_data_id: Optional[str], active_jobs: Dict):
         """Handle critical error processing"""
         await self._mark_job_failed(job_id, error, active_jobs)
@@ -67,14 +67,14 @@ class ErrorHandler:
 
     async def _update_database_status(
         self,
-        db: Optional[Session],
+        db: Optional[AsyncSession],
         synthetic_data_id: Optional[str]
     ) -> None:
         """Update database record to failed status"""
         if db and synthetic_data_id:
             await self._execute_status_update(db, synthetic_data_id)
 
-    async def _execute_status_update(self, db: Session, synthetic_data_id: str):
+    async def _execute_status_update(self, db: AsyncSession, synthetic_data_id: str):
         """Execute database status update"""
         from app.db import models_postgres as models
         db.query(models.Corpus).filter(

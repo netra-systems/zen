@@ -16,6 +16,10 @@ from typing import Dict, List, Optional, Any
 from app.schemas.Config import AppConfig
 from app.schemas.llm_types import LLMProvider
 from app.logging_config import central_logger as logger
+from app.core.network_constants import ServicePorts, HostConstants, URLConstants, ServiceEndpoints
+from app.core.environment_constants import (
+    Environment, EnvironmentVariables, get_current_environment
+)
 
 
 class ServiceConfigManager:
@@ -34,24 +38,24 @@ class ServiceConfigManager:
     
     def _get_environment(self) -> str:
         """Get current environment for service configuration."""
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        return get_current_environment()
     
     def _load_service_modes(self) -> Dict[str, str]:
         """Load service operation modes from environment."""
         return {
-            "llm": os.environ.get("LLM_MODE", "shared").lower(),
-            "redis": os.environ.get("REDIS_MODE", "shared").lower(),
-            "clickhouse": os.environ.get("CLICKHOUSE_MODE", "shared").lower(),
-            "auth": os.environ.get("AUTH_MODE", "shared").lower()
+            "llm": os.environ.get(EnvironmentVariables.LLM_MODE, "shared").lower(),
+            "redis": os.environ.get(EnvironmentVariables.REDIS_MODE, "shared").lower(),
+            "clickhouse": os.environ.get(EnvironmentVariables.CLICKHOUSE_MODE, "shared").lower(),
+            "auth": os.environ.get(EnvironmentVariables.AUTH_MODE, "shared").lower()
         }
     
     def _load_service_defaults(self) -> Dict[str, dict]:
         """Load default service configurations per environment."""
         return {
-            "development": self._get_development_defaults(),
-            "staging": self._get_staging_defaults(),
-            "production": self._get_production_defaults(),
-            "testing": self._get_testing_defaults()
+            Environment.DEVELOPMENT.value: self._get_development_defaults(),
+            Environment.STAGING.value: self._get_staging_defaults(),
+            Environment.PRODUCTION.value: self._get_production_defaults(),
+            Environment.TESTING.value: self._get_testing_defaults()
         }
     
     def _get_development_defaults(self) -> dict:
@@ -59,8 +63,10 @@ class ServiceConfigManager:
         return {
             "llm_enabled": True,
             "redis_enabled": True,
-            "auth_service_url": "http://localhost:8001",
-            "frontend_url": "http://localhost:3000"
+            "auth_service_url": ServiceEndpoints.build_auth_service_url(
+                port=ServicePorts.AUTH_SERVICE_TEST
+            ),
+            "frontend_url": ServiceEndpoints.build_frontend_url()
         }
     
     def _get_staging_defaults(self) -> dict:
@@ -69,7 +75,7 @@ class ServiceConfigManager:
             "llm_enabled": True,
             "redis_enabled": True,
             "auth_service_url": "https://auth-staging.netrasystems.ai",
-            "frontend_url": "https://staging.netrasystems.ai"
+            "frontend_url": URLConstants.STAGING_FRONTEND
         }
     
     def _get_production_defaults(self) -> dict:
@@ -78,7 +84,7 @@ class ServiceConfigManager:
             "llm_enabled": True,
             "redis_enabled": True,
             "auth_service_url": "https://auth.netrasystems.ai",
-            "frontend_url": "https://app.netrasystems.ai"
+            "frontend_url": URLConstants.PRODUCTION_APP
         }
     
     def _get_testing_defaults(self) -> dict:
@@ -86,8 +92,10 @@ class ServiceConfigManager:
         return {
             "llm_enabled": False,
             "redis_enabled": False,
-            "auth_service_url": "http://localhost:8001",
-            "frontend_url": "http://localhost:3000"
+            "auth_service_url": ServiceEndpoints.build_auth_service_url(
+                port=ServicePorts.AUTH_SERVICE_TEST
+            ),
+            "frontend_url": ServiceEndpoints.build_frontend_url()
         }
     
     def populate_service_config(self, config: AppConfig) -> None:
@@ -97,6 +105,8 @@ class ServiceConfigManager:
         self._populate_service_flags(config)
         self._populate_external_urls(config)
         self._populate_oauth_config(config)
+        self._populate_cors_config(config)
+        self._populate_environment_vars(config)
         self._logger.info(f"Populated service config for {self._environment}")
     
     def _populate_service_modes(self, config: AppConfig) -> None:
@@ -131,6 +141,12 @@ class ServiceConfigManager:
             self._set_oauth_urls(config)
             self._set_oauth_scopes(config)
     
+    def _populate_cors_config(self, config: AppConfig) -> None:
+        """Populate CORS configuration from environment."""
+        cors_origins_env = os.environ.get("CORS_ORIGINS")
+        if cors_origins_env:
+            config.cors_origins = self._parse_cors_origins(cors_origins_env)
+    
     def _get_llm_api_key(self) -> Optional[str]:
         """Get LLM API key from environment."""
         return os.environ.get("GEMINI_API_KEY") or os.environ.get("LLM_API_KEY")
@@ -158,53 +174,68 @@ class ServiceConfigManager:
     
     def _get_api_base_url(self) -> str:
         """Get API base URL for current environment."""
-        if self._environment == "production":
+        if self._environment == Environment.PRODUCTION.value:
             return "https://api.netrasystems.ai"
-        elif self._environment == "staging":
+        elif self._environment == Environment.STAGING.value:
             return "https://api-staging.netrasystems.ai"
-        return "http://localhost:8000"
+        return ServiceEndpoints.build_backend_service_url()
     
     def _set_oauth_urls(self, config: AppConfig) -> None:
         """Set OAuth redirect URLs based on environment."""
-        if self._environment == "development":
+        if self._environment == Environment.DEVELOPMENT.value:
             self._set_development_oauth_urls(config)
-        elif self._environment == "staging":
+        elif self._environment == Environment.STAGING.value:
             self._set_staging_oauth_urls(config)
-        elif self._environment == "production":
+        elif self._environment == Environment.PRODUCTION.value:
             self._set_production_oauth_urls(config)
     
     def _set_development_oauth_urls(self, config: AppConfig) -> None:
         """Set development OAuth URLs."""
         config.oauth_config.authorized_redirect_uris = [
-            "http://localhost:8000/api/auth/callback",
-            "http://localhost:8001/api/auth/callback",
-            "http://localhost:3000/auth/callback"
+            URLConstants.build_http_url(
+                port=ServicePorts.BACKEND_DEFAULT,
+                path=URLConstants.API_PREFIX + URLConstants.AUTH_CALLBACK_PATH
+            ),
+            URLConstants.build_http_url(
+                port=ServicePorts.AUTH_SERVICE_TEST,
+                path=URLConstants.API_PREFIX + URLConstants.AUTH_CALLBACK_PATH
+            ),
+            URLConstants.build_http_url(
+                port=ServicePorts.FRONTEND_DEFAULT,
+                path=URLConstants.AUTH_CALLBACK_PATH
+            )
         ]
     
     def _set_staging_oauth_urls(self, config: AppConfig) -> None:
         """Set staging OAuth URLs."""
         config.oauth_config.authorized_redirect_uris = [
-            "https://staging.netrasystems.ai/auth/callback",
-            "https://api-staging.netrasystems.ai/api/auth/callback"
+            URLConstants.STAGING_FRONTEND + URLConstants.AUTH_CALLBACK_PATH,
+            "https://api-staging.netrasystems.ai" + URLConstants.API_PREFIX + URLConstants.AUTH_CALLBACK_PATH
         ]
     
     def _set_production_oauth_urls(self, config: AppConfig) -> None:
         """Set production OAuth URLs."""
         config.oauth_config.authorized_redirect_uris = [
-            "https://app.netrasystems.ai/auth/callback",
-            "https://api.netrasystems.ai/api/auth/callback"
+            URLConstants.PRODUCTION_APP + URLConstants.AUTH_CALLBACK_PATH,
+            "https://api.netrasystems.ai" + URLConstants.API_PREFIX + URLConstants.AUTH_CALLBACK_PATH
         ]
     
     def _set_oauth_scopes(self, config: AppConfig) -> None:
         """Set OAuth scopes for current environment."""
         config.oauth_config.scopes = ["openid", "email", "profile"]
-        if self._environment == "development":
+        if self._environment == Environment.DEVELOPMENT.value:
             config.oauth_config.scopes.append("https://www.googleapis.com/auth/userinfo.email")
     
     def _get_bool_env(self, env_var: str, default: bool) -> bool:
         """Get boolean environment variable with default."""
         value = os.environ.get(env_var, str(default)).lower()
         return value in ["true", "1", "yes", "on"]
+    
+    def _parse_cors_origins(self, cors_origins_env: str) -> List[str]:
+        """Parse CORS origins from environment string."""
+        if cors_origins_env.strip() == "*":
+            return ["*"]
+        return [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
     
     def validate_service_consistency(self, config: AppConfig) -> List[str]:
         """Validate service configuration consistency."""
@@ -230,7 +261,7 @@ class ServiceConfigManager:
         """Validate URL configuration consistency."""
         issues = []
         if hasattr(config, 'frontend_url') and hasattr(config, 'api_base_url'):
-            if self._environment == "production":
+            if self._environment == Environment.PRODUCTION.value:
                 if "localhost" in config.frontend_url:
                     issues.append("Production frontend_url contains localhost")
                 if "localhost" in config.api_base_url:
@@ -243,7 +274,7 @@ class ServiceConfigManager:
         if hasattr(config, 'oauth_config'):
             if not config.oauth_config.authorized_redirect_uris:
                 issues.append("No OAuth redirect URIs configured")
-            elif self._environment == "production":
+            elif self._environment == Environment.PRODUCTION.value:
                 for uri in config.oauth_config.authorized_redirect_uris:
                     if "localhost" in uri:
                         issues.append("Production OAuth redirect URI contains localhost")
@@ -257,6 +288,32 @@ class ServiceConfigManager:
                 enabled_count += 1
         return enabled_count
     
+    def _populate_environment_vars(self, config: AppConfig) -> None:
+        """Populate environment variables into config."""
+        # Environment detection variables
+        config.pytest_current_test = os.environ.get("PYTEST_CURRENT_TEST")
+        config.testing = os.environ.get("TESTING")
+        config.environment = os.environ.get("ENVIRONMENT", config.environment)
+        
+        # Auth service configuration
+        config.auth_service_url = os.environ.get("AUTH_SERVICE_URL", config.auth_service_url)
+        config.auth_service_enabled = os.environ.get("AUTH_SERVICE_ENABLED", config.auth_service_enabled)
+        config.auth_fast_test_mode = os.environ.get("AUTH_FAST_TEST_MODE", config.auth_fast_test_mode)
+        config.auth_cache_ttl_seconds = os.environ.get("AUTH_CACHE_TTL_SECONDS", config.auth_cache_ttl_seconds)
+        config.service_id = os.environ.get("SERVICE_ID", config.service_id)
+        config.service_secret = os.environ.get("SERVICE_SECRET", config.service_secret)
+        
+        # Cloud Run environment variables
+        config.k_service = os.environ.get("K_SERVICE")
+        config.k_revision = os.environ.get("K_REVISION")
+        
+        # PR environment variables
+        config.pr_number = os.environ.get("PR_NUMBER")
+        
+        # OAuth client ID fallback variables
+        config.google_client_id = os.environ.get("GOOGLE_CLIENT_ID")
+        config.google_oauth_client_id = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+
     def get_service_summary(self) -> Dict[str, Any]:
         """Get service configuration summary for monitoring."""
         return {

@@ -1,6 +1,6 @@
 /**
  * User 2FA Backup Codes E2E Tests
- * Split from user-2fa-management.cy.ts for 300-line compliance
+ * Split from user-2fa-management.cy.ts for 450-line compliance
  * 
  * BVJ: Enterprise segment - Backup codes = account recovery = business continuity
  * Value Impact: Recovery mechanisms = reduced support burden

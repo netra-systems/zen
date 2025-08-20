@@ -1,7 +1,7 @@
 """
 Supervisor Agent Orchestration Tests - Basic Operations
 Tests for basic agent coordination, sequential/parallel execution, and state management.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import pytest

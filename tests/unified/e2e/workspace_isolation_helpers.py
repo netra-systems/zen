@@ -12,7 +12,7 @@ REQUIREMENTS:
 - Complete RBAC enforcement across all endpoints
 - Cross-workspace query prevention validation
 - Comprehensive audit trail verification
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 - Modular design for security testing reuse
 """
 import asyncio

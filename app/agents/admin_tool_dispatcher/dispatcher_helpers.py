@@ -2,13 +2,13 @@
 Modernized Admin Tool Dispatcher Helper Functions
 
 Helper functions integrating modern execution patterns with ExecutionContext
-and ExecutionResult types. Maintains 8-line function limit and modular architecture.
+and ExecutionResult types. Maintains 25-line function limit and modular architecture.
 
 Business Value: Enables modern agent architecture compliance for admin tools.
 """
 from typing import List, Dict, Any, Optional
 from datetime import datetime, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.schemas.admin_tool_types import (
     AdminToolType, AdminToolInfo, ToolStatus as AdminToolStatus

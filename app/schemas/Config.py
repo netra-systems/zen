@@ -32,6 +32,7 @@ SECRET_CONFIG: List[SecretReference] = [
     SecretReference(name="jwt-secret-key", target_field="jwt_secret_key"),
     SecretReference(name="fernet-key", target_field="fernet_key"),
     SecretReference(name="redis-default", target_models=["redis"], target_field="password"),
+    SecretReference(name="github-token", target_field="github_token"),
 ]
 
 class RedisConfig(BaseModel):
@@ -188,6 +189,77 @@ class AppConfig(BaseModel):
         default=True, 
         description="LLM service status (managed by dev launcher)"
     )
+    
+    # GitHub integration
+    github_token: Optional[str] = Field(
+        default=None,
+        description="GitHub token for repository access"
+    )
+    
+    # CORS configuration
+    cors_origins: Optional[List[str]] = Field(
+        default=None,
+        description="Allowed CORS origins - can be list or comma-separated string"
+    )
+    
+    # Additional middleware configuration
+    disable_https_only: bool = Field(
+        default=False,
+        description="Disable HTTPS-only mode for sessions (dev/testing)"
+    )
+    
+    # Agent Configuration
+    agent_cache_ttl: int = Field(default=300, description="Agent cache TTL in seconds")
+    agent_max_cache_size: int = Field(default=1000, description="Agent maximum cache entries")
+    agent_redis_ttl: int = Field(default=3600, description="Agent Redis cache TTL in seconds")
+    agent_default_timeout: float = Field(default=30.0, description="Agent default timeout in seconds")
+    agent_long_timeout: float = Field(default=300.0, description="Agent long operation timeout in seconds")
+    agent_recovery_timeout: float = Field(default=45.0, description="Agent recovery timeout in seconds")
+    agent_default_user_id: str = Field(default="default_user", description="Agent default user ID")
+    agent_admin_user_id: str = Field(default="admin", description="Agent admin user ID")
+    agent_max_retries: int = Field(default=3, description="Agent maximum retry attempts")
+    agent_base_delay: float = Field(default=1.0, description="Agent base retry delay in seconds")
+    agent_max_delay: float = Field(default=60.0, description="Agent maximum retry delay in seconds")
+    agent_backoff_factor: float = Field(default=2.0, description="Agent retry backoff factor")
+    agent_failure_threshold: int = Field(default=3, description="Agent failure threshold")
+    agent_reset_timeout: float = Field(default=30.0, description="Agent reset timeout in seconds")
+    agent_max_concurrent: int = Field(default=10, description="Agent maximum concurrent operations")
+    agent_batch_size: int = Field(default=100, description="Agent batch size")
+    
+    # Environment detection for tests and development
+    pytest_current_test: Optional[str] = Field(default=None, description="Current pytest test indicator")
+    testing: Optional[str] = Field(default=None, description="Testing flag for environment detection")
+    
+    # Auth service configuration
+    auth_service_url: str = Field(default="http://127.0.0.1:8081", description="Auth service URL")
+    auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
+    auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
+    auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
+    service_id: str = Field(default="backend", description="Service ID for authentication")
+    service_secret: Optional[str] = Field(default=None, description="Service secret for authentication")
+    
+    # Cloud Run environment variables
+    k_service: Optional[str] = Field(default=None, description="Cloud Run service name")
+    k_revision: Optional[str] = Field(default=None, description="Cloud Run service revision")
+    
+    # PR environment variables
+    pr_number: Optional[str] = Field(default=None, description="Pull request number for PR environments")
+    
+    # OAuth client ID fallback variables
+    google_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID fallback")
+    google_oauth_client_id: Optional[str] = Field(default=None, description="Google OAuth client ID alternative")
+    
+    # Google App Engine environment variables
+    gae_application: Optional[str] = Field(default=None, description="Google App Engine application ID")
+    gae_version: Optional[str] = Field(default=None, description="Google App Engine version")
+    
+    # Google Kubernetes Engine environment variables  
+    kubernetes_service_host: Optional[str] = Field(default=None, description="Kubernetes service host for GKE detection")
+    
+    # Startup control environment variables
+    fast_startup_mode: str = Field(default="false", description="Fast startup mode flag")
+    skip_migrations: str = Field(default="false", description="Skip migrations flag")
+    disable_startup_checks: str = Field(default="false", description="Disable startup checks flag")
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(
@@ -332,3 +404,5 @@ class NetraTestingConfig(AppConfig):
     """Testing-specific settings."""
     environment: str = "testing"
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
+    auth_service_url: str = "http://localhost:8001"
+    fast_startup_mode: str = "true"  # Enable fast startup for tests

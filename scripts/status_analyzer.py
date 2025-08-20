@@ -2,7 +2,7 @@
 """
 Status Analysis Module - Main Aggregator
 Aggregates status analysis from specialized analyzers.
-Complies with 300-line and 8-line function limits.
+Complies with 450-line and 25-line function limits.
 """
 
 # Import all analyzer classes for easy access

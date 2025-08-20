@@ -1,6 +1,6 @@
 """
 Permission Service Core Tests - Constants, Detection, Role Updates, Permissions
-Split from test_permission_service.py to maintain 300-line limit
+Split from test_permission_service.py to maintain 450-line limit
 """
 
 import pytest

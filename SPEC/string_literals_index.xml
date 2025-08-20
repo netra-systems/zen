@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <title>String Literals Master Index</title>
+  <category>Core Infrastructure</category>
+  <priority>High</priority>
+  <last_updated>2025-01-20</last_updated>
+  
+  <purpose>
+    Master index of all string literal types unique to the Netra platform.
+    Serves as a single source of truth for concrete values, preventing LLM hallucination
+    and ensuring consistency across the codebase.
+  </purpose>
+
+  <scope>
+    <include>
+      - Configuration keys and values
+      - File paths and directory names
+      - API endpoints and routes
+      - Service names and identifiers
+      - Database table and column names
+      - Event names and types
+      - Metric names and labels
+      - Environment variable names
+      - Command names and arguments
+      - WebSocket message types
+      - Agent names and types
+      - Status codes and states
+      - Feature flags and toggles
+      - Cache keys and prefixes
+      - Queue names and topics
+      - Log formats and levels
+    </include>
+    <exclude>
+      - User-facing messages (dynamic)
+      - Error messages (unless standardized codes)
+      - Comments and documentation strings
+      - Test data and fixtures
+      - Third-party library constants
+    </exclude>
+  </scope>
+
+  <structure>
+    <format>
+      Each category contains entries with:
+      - value: The exact string literal
+      - context: Where it's used (file:line references)
+      - type: The semantic type (config_key, path, endpoint, etc.)
+      - description: Brief explanation of purpose
+      - related: Related string literals (if any)
+    </format>
+    
+    <categories>
+      <category name="configuration">
+        <description>Configuration keys, settings, and parameters</description>
+        <examples>
+          - "redis_url", "database_url", "api_key"
+          - "max_retries", "timeout_seconds"
+        </examples>
+      </category>
+      
+      <category name="paths">
+        <description>File paths, directories, and URL paths</description>
+        <examples>
+          - "/api/v1/threads", "/websocket"
+          - "logs/", "configs/", ".env"
+        </examples>
+      </category>
+      
+      <category name="identifiers">
+        <description>Service names, agent types, component IDs</description>
+        <examples>
+          - "supervisor_agent", "fallback_manager"
+          - "auth_service", "main_backend"
+        </examples>
+      </category>
+      
+      <category name="database">
+        <description>Table names, column names, query constants</description>
+        <examples>
+          - "threads", "messages", "users"
+          - "created_at", "status", "thread_id"
+        </examples>
+      </category>
+      
+      <category name="events">
+        <description>Event names, message types, signals</description>
+        <examples>
+          - "thread_created", "message_received"
+          - "websocket_connect", "auth_success"
+        </examples>
+      </category>
+      
+      <category name="metrics">
+        <description>Metric names, labels, and monitoring keys</description>
+        <examples>
+          - "request_duration_seconds", "error_rate"
+          - "service_health", "queue_depth"
+        </examples>
+      </category>
+      
+      <category name="environment">
+        <description>Environment variable names</description>
+        <examples>
+          - "NETRA_API_KEY", "DATABASE_URL"
+          - "LOG_LEVEL", "ENV"
+        </examples>
+      </category>
+      
+      <category name="states">
+        <description>Status values, state names, conditions</description>
+        <examples>
+          - "pending", "active", "completed", "failed"
+          - "healthy", "degraded", "offline"
+        </examples>
+      </category>
+    </categories>
+  </structure>
+
+  <implementation>
+    <scanner>
+      <path>scripts/scan_string_literals.py</path>
+      <description>
+        Python script that scans the codebase for string literals,
+        categorizes them, and updates the index.
+      </description>
+      <features>
+        - AST-based parsing for accuracy
+        - Pattern matching for categorization
+        - Incremental updates
+        - Validation against existing index
+      </features>
+    </scanner>
+    
+    <index_file>
+      <path>SPEC/generated/string_literals.json</path>
+      <format>JSON for easy parsing and updating</format>
+      <versioning>Tracked in git with semantic versioning</versioning>
+    </index_file>
+    
+    <agent_integration>
+      <description>
+        Agents can query the index for correct string values,
+        reducing hallucination and ensuring consistency.
+      </description>
+      <usage>
+        - Import index at agent initialization
+        - Query by category or search by partial match
+        - Validate string literals before use
+      </usage>
+    </agent_integration>
+  </implementation>
+
+  <maintenance>
+    <update_triggers>
+      - Pre-commit hook to scan changed files
+      - CI/CD pipeline validation
+      - Manual trigger via script
+    </update_triggers>
+    
+    <validation>
+      - Check for duplicates within categories
+      - Verify all referenced files exist
+      - Ensure no breaking changes to existing entries
+      - Flag deprecated entries for removal
+    </validation>
+  </maintenance>
+
+  <usage_guidelines>
+    <for_llms>
+      1. ALWAYS check this index before using string literals
+      2. Use exact values from the index, no variations
+      3. If a needed literal is missing, flag for addition
+      4. Reference by category and key for clarity
+    </for_llms>
+    
+    <for_developers>
+      1. Run scanner after adding new string constants
+      2. Update descriptions when changing usage
+      3. Mark deprecated entries before removal
+      4. Use constants from index in new code
+    </for_developers>
+  </usage_guidelines>
+
+  <examples>
+    <example type="query">
+      <description>Finding the correct WebSocket endpoint</description>
+      <query>category: paths, type: websocket</query>
+      <result>"/websocket", "/ws"</result>
+    </example>
+    
+    <example type="validation">
+      <description>Checking if a config key exists</description>
+      <input>"max_retry_attempts"</input>
+      <result>Not found. Did you mean "max_retries"?</result>
+    </example>
+  </examples>
+
+  <related_specs>
+    <spec>conventions.xml</spec>
+    <spec>type_safety.xml</spec>
+    <spec>system_boundaries.xml</spec>
+  </related_specs>
+</spec>

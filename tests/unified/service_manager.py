@@ -2,7 +2,7 @@
 Service Manager - Part 2 of Unified Test Harness
 Handles service startup, health checks, and coordination
 
-Continues from test_harness.py due to 300-line limit requirement.
+Continues from test_harness.py due to 450-line limit requirement.
 All functions ≤8 lines as per SPEC/conventions.xml
 """
 

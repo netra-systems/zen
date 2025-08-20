@@ -16,8 +16,8 @@
 - **Mock-Based Tests:** ~85% of total test coverage
 
 ### Architecture Impact on Testing Quality
-- **267 files** exceed 300-line limit (reduces test maintainability)
-- **1,770 functions** exceed 8-line limit (increases test complexity)
+- **267 files** exceed 450-line limit (reduces test maintainability)
+- **1,770 functions** exceed 25-line limit (increases test complexity)
 - **315 duplicate type definitions** (causes validation confusion in tests)
 - **116 test stubs** in production code (creates false positive test results)
 

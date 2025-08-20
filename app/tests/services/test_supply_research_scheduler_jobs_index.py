@@ -1,6 +1,6 @@
 """
 Supply Research Scheduler Job Tests - Modular Index
-Redirects to focused test modules following 300-line architecture
+Redirects to focused test modules following 450-line architecture
 COMPLIANCE: Modular split from 549-line monolith
 """
 

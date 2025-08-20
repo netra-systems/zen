@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
 
 from app.db.clickhouse import ClickHouseDatabase
-from app.db.postgres import PostgresDatabase
+from app.db.postgres import Database as PostgresDatabase
 from app.websocket.performance_monitor import PerformanceMonitor
 from app.services.generation_service import save_corpus_to_clickhouse
 

@@ -2,7 +2,7 @@
 Production-realistic WebSocket tests - main module with imports.
 
 This module imports and re-exports all WebSocket tests from specialized modules
-to maintain backward compatibility while adhering to the 300-line limit.
+to maintain backward compatibility while adhering to the 450-line limit.
 
 Tests cover:
 1. Concurrent connection limits (>1000 users)

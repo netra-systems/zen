@@ -1,6 +1,6 @@
 """
 Helper functions and fixtures for async_utils tests
-Supports 8-line function limit and reduces code duplication
+Supports 25-line function limit and reduces code duplication
 """
 
 import asyncio

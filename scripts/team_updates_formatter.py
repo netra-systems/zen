@@ -203,7 +203,7 @@ In the {time_desc}, the team:
             lines.append("- **Fix failing tests** before next deployment")
         
         if data.get("compliance_violations", 0) > 10:
-            lines.append("- **Refactor large files** to meet 300-line limit")
+            lines.append("- **Refactor large files** to meet 450-line limit")
         
         if data.get("coverage_info", {}).get("delta", 0) < -5:
             lines.append("- **Add tests** to restore coverage levels")

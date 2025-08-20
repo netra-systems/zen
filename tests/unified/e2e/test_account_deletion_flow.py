@@ -17,7 +17,7 @@ REQUIREMENTS:
 - No orphaned records remain anywhere
 - GDPR compliance validation
 - Complete in <30 seconds
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 
 SUCCESS CRITERIA:
 - Complete data removal across all services

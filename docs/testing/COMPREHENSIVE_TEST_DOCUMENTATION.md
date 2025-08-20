@@ -96,8 +96,8 @@ test_framework/
 ### Key Principles
 
 1. **Revenue-Driven Testing**: Every test validates business-critical functionality
-2. **300-Line Module Limit**: All test files must be ≤300 lines
-3. **8-Line Function Limit**: All test functions must be ≤8 lines  
+2. **450-line Module Limit**: All test files must be ≤300 lines
+3. **25-line Function Limit**: All test functions must be ≤8 lines  
 4. **Single Test Runner**: Only use `test_runner.py` - no alternative runners
 5. **Feature Flag Support**: Tests can be written before implementation using feature flags
 
@@ -257,7 +257,7 @@ from unittest.mock import Mock, patch
 from app.core.types import [StronglyTypedModels]
 
 class TestComponentName:
-    """Test class following 300-line limit."""
+    """Test class following 450-line limit."""
     
     def test_core_functionality(self):
         """Test core business-critical functionality (≤8 lines)."""
@@ -309,7 +309,7 @@ def test_response_time_sla():
 ```python
 @pytest.mark.asyncio
 async def test_async_functionality():
-    """Async test following 8-line limit."""
+    """Async test following 25-line limit."""
     # Setup
     service = await ServiceFactory.create_async()
     

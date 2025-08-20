@@ -1,6 +1,6 @@
 """
 LLM Manager Test Helpers - Reusable functions for LLM testing
-Extracted from test_llm_manager_provider_switching.py for 8-line function compliance
+Extracted from test_llm_manager_provider_switching.py for 25-line function compliance
 """
 
 import asyncio

@@ -124,8 +124,9 @@ async def get_demo_analytics(
 
 
 @router.websocket("/ws")
-async def demo_websocket_endpoint(
-    websocket: WebSocket, demo_service: DemoService = Depends(get_demo_service)
-) -> None:
+async def demo_websocket_endpoint(websocket: WebSocket) -> None:
     """WebSocket endpoint for real-time demos."""
+    # Manually create demo service instance for WebSocket endpoint
+    # FastAPI Depends() doesn't work properly with WebSocket endpoints
+    demo_service = get_demo_service()
     await handle_demo_websocket(websocket, demo_service)

@@ -1,6 +1,6 @@
 """
 Metric formatter module for preparing and formatting metric data.
-Handles data formatting operations with 8-line function limit.
+Handles data formatting operations with 25-line function limit.
 """
 
 from datetime import datetime

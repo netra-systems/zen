@@ -19,7 +19,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, List
 
 
 def execute_test_suite(args, config: Dict, runner, real_llm_config: Optional[Dict], speed_opts: Optional[Dict], test_level: str) -> int:
@@ -81,21 +81,110 @@ def execute_full_test_suite(config: Dict, runner, real_llm_config: Optional[Dict
         return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
 
 def configure_real_llm_if_requested(args, level: str, config: Dict):
-    """Configure real LLM testing if requested."""
+    """Configure real LLM testing with comprehensive environment validation and setup."""
     if not args.real_llm:
         return None
     if level == "smoke":
         print("[WARNING] Real LLM testing disabled for smoke tests (use unit or higher)")
         return None
     
+    print("[INFO] Configuring real LLM testing environment...")
+    
     from .test_config import configure_real_llm
-    real_llm_config = configure_real_llm(args.llm_model, args.llm_timeout, args.parallel, test_level=level)
+    from .test_environment_setup import TestEnvironmentValidator, get_test_orchestrator
+    from .real_llm_config import get_real_llm_manager, configure_real_llm_testing
+    import asyncio
+    import os
+    
+    # Initialize environment validator
+    validator = TestEnvironmentValidator()
+    
+    # Comprehensive environment validation
+    try:
+        print("[INFO] Validating test environment...")
+        
+        # Check database configuration
+        database_url = os.getenv('TEST_DATABASE_URL') or os.getenv('DATABASE_URL', '')
+        if not database_url:
+            print("[ERROR] No database URL configured. Set TEST_DATABASE_URL or DATABASE_URL")
+            return None
+        
+        # Run async validations
+        async def validate_environment():
+            return await asyncio.gather(
+                validator.validate_database_connection(database_url),
+                validator.validate_api_keys(True),
+                return_exceptions=True
+            )
+        
+        db_validation, api_validation = asyncio.run(validate_environment())
+        
+        # Handle validation results
+        if isinstance(db_validation, Exception):
+            print(f"[ERROR] Database validation failed: {db_validation}")
+            return None
+        if not db_validation:
+            print("[ERROR] Database connection validation failed")
+            return None
+        
+        if isinstance(api_validation, Exception):
+            print(f"[ERROR] API key validation failed: {api_validation}")
+            return None
+        if not api_validation:
+            print("[ERROR] Real LLM testing requires valid API keys")
+            print("  Recommended: Set TEST_ANTHROPIC_API_KEY, TEST_OPENAI_API_KEY, or TEST_GOOGLE_API_KEY")
+            print("  Fallback: Production keys (ANTHROPIC_API_KEY, OPENAI_API_KEY, GOOGLE_API_KEY) will be used")
+            return None
+        
+        # Seed data validation for real LLM tests
+        required_datasets = get_datasets_for_llm_level(level)
+        if required_datasets:
+            seed_validation = validator.validate_seed_data_files(required_datasets)
+            if not seed_validation:
+                print(f"[ERROR] Required seed data validation failed for level '{level}'")
+                return None
+        
+        print("[SUCCESS] Environment validation passed")
+        
+    except Exception as e:
+        print(f"[ERROR] Environment validation failed: {e}")
+        return None
+    
+    # Initialize real LLM configuration
+    try:
+        llm_config = configure_real_llm_testing()
+        if not llm_config.enabled:
+            print("[ERROR] Real LLM configuration initialization failed")
+            return None
+    except Exception as e:
+        print(f"[ERROR] Failed to initialize real LLM configuration: {e}")
+        return None
+    
+    # Configure test runner real LLM settings
+    real_llm_config = configure_real_llm(
+        args.llm_model, 
+        args.llm_timeout, 
+        args.parallel, 
+        test_level=level,
+        use_dedicated_env=True
+    )
+    
+    # Enhance configuration with validation results
+    real_llm_config.update({
+        'validation_passed': True,
+        'required_datasets': required_datasets,
+        'environment_isolation': True,
+        'cost_budget': llm_config.cost_budget_per_run
+    })
+    
     print_llm_configuration(real_llm_config, config)
+    print_dedicated_environment_info()
+    
     return real_llm_config
 
 def print_llm_configuration(real_llm_config: Dict, config: Dict):
-    """Print real LLM configuration details."""
-    print(f"[INFO] Real LLM testing enabled")
+    """Print comprehensive real LLM configuration details."""
+    print(f"[INFO] Real LLM testing configuration:")
     print(f"  - Model: {real_llm_config['model']}")
     print(f"  - Timeout: {real_llm_config['timeout']}s per call")
     print(f"  - Parallelism: {real_llm_config['parallel']}")
@@ -103,9 +192,103 @@ def print_llm_configuration(real_llm_config: Dict, config: Dict):
     if real_llm_config.get('rate_limit_delay'):
         print(f"  - Rate limit delay: {real_llm_config['rate_limit_delay']}s between calls")
     
-    adjusted_timeout = config.get('timeout', 300) * 3
+    if real_llm_config.get('cost_budget'):
+        print(f"  - Cost budget: ${real_llm_config['cost_budget']:.2f} per test run")
+    
+    if real_llm_config.get('required_datasets'):
+        datasets = ', '.join(real_llm_config['required_datasets'])
+        print(f"  - Seed datasets: {datasets}")
+    
+    if real_llm_config.get('environment_isolation'):
+        print(f"  - Environment isolation: enabled")
+    
+    # Adjust timeouts for real LLM testing
+    timeout_multiplier = 4 if real_llm_config.get('parallel', 'auto') == '1' else 3
+    adjusted_timeout = config.get('timeout', 300) * timeout_multiplier
     config['timeout'] = adjusted_timeout
-    print(f"  - Adjusted test timeout: {adjusted_timeout}s")
+    print(f"  - Test timeout (adjusted): {adjusted_timeout}s")
+    
+    print(f"[INFO] Ready for real LLM testing")
+
+
+def print_dedicated_environment_info():
+    """Print comprehensive dedicated test environment configuration details."""
+    import os
+    print(f"[INFO] Test environment configuration:")
+    
+    # Database configuration with enhanced details
+    test_db = os.getenv('TEST_DATABASE_URL')
+    prod_db = os.getenv('DATABASE_URL')
+    
+    if test_db:
+        db_name = test_db.split('/')[-1] if '/' in test_db else 'unknown'
+        print(f"  - Database: {db_name} (dedicated test DB)")
+    elif prod_db:
+        db_name = prod_db.split('/')[-1] if '/' in prod_db else 'unknown'
+        print(f"  - Database: {db_name} (production DB - CAUTION)")
+    else:
+        print(f"  - Database: not configured")
+    
+    # Redis configuration
+    test_redis = os.getenv('TEST_REDIS_URL')
+    prod_redis = os.getenv('REDIS_URL')
+    
+    if test_redis:
+        redis_db = test_redis.split('/')[-1] if '/' in test_redis else 'default'
+        namespace = os.getenv('TEST_REDIS_NAMESPACE', 'test:')
+        print(f"  - Redis: DB {redis_db} with namespace '{namespace}' (dedicated)")
+    elif prod_redis:
+        redis_db = prod_redis.split('/')[-1] if '/' in prod_redis else 'default'
+        print(f"  - Redis: DB {redis_db} (production Redis - CAUTION)")
+    else:
+        print(f"  - Redis: not configured")
+    
+    # ClickHouse configuration  
+    test_clickhouse = os.getenv('TEST_CLICKHOUSE_URL')
+    prod_clickhouse = os.getenv('CLICKHOUSE_URL')
+    
+    if test_clickhouse:
+        ch_db = test_clickhouse.split('/')[-1] if '/' in test_clickhouse else 'unknown'
+        prefix = os.getenv('TEST_CLICKHOUSE_TABLES_PREFIX', 'test_')
+        print(f"  - ClickHouse: {ch_db} with prefix '{prefix}' (dedicated)")
+    elif prod_clickhouse:
+        ch_db = prod_clickhouse.split('/')[-1] if '/' in prod_clickhouse else 'unknown'
+        print(f"  - ClickHouse: {ch_db} (production ClickHouse - CAUTION)")
+    else:
+        print(f"  - ClickHouse: not configured")
+    
+    # API key configuration with isolation status
+    test_keys = []
+    prod_keys = []
+    
+    for provider in ['ANTHROPIC', 'GOOGLE', 'OPENAI']:
+        test_key = os.getenv(f'TEST_{provider}_API_KEY')
+        prod_key = os.getenv(f'{provider}_API_KEY')
+        
+        if test_key:
+            test_keys.append(provider.lower())
+        elif prod_key:
+            prod_keys.append(provider.lower())
+    
+    if test_keys:
+        print(f"  - API keys: {', '.join(test_keys)} (dedicated test keys)")
+    if prod_keys:
+        status = "(FALLBACK)" if test_keys else "(PRODUCTION KEYS - CAUTION)"
+        print(f"  - API keys: {', '.join(prod_keys)} {status}")
+    
+    if not test_keys and not prod_keys:
+        print(f"  - API keys: none configured")
+    
+    # Environment isolation status
+    isolation = os.getenv('USE_TEST_ISOLATION', 'true')
+    schema_isolation = os.getenv('TEST_SCHEMA_ISOLATION', 'true')
+    
+    print(f"  - Transaction isolation: {'enabled' if isolation.lower() == 'true' else 'disabled'}")
+    print(f"  - Schema isolation: {'enabled' if schema_isolation.lower() == 'true' else 'disabled'}")
+    
+    # Environment safety assessment
+    safety_score = calculate_environment_safety_score(test_db, test_redis, test_clickhouse, test_keys)
+    print(f"  - Environment safety: {safety_score}")
 
 def finalize_test_run(runner, level: str, config: Dict, output: str, exit_code: int) -> int:
     """Finalize test run with reporting and cleanup."""
@@ -120,6 +303,62 @@ def finalize_test_run(runner, level: str, config: Dict, output: str, exit_code: 
     generate_test_reports(runner, level, config, output, exit_code)
     runner.print_summary()
     return exit_code
+
+def get_datasets_for_llm_level(test_level: str) -> List[str]:
+    """Get required datasets for real LLM testing based on test level."""
+    level_datasets = {
+        'unit': ['basic_optimization'],
+        'integration': ['basic_optimization', 'complex_workflows'],
+        'agents': ['basic_optimization', 'complex_workflows'],
+        'e2e': ['basic_optimization', 'complex_workflows', 'edge_cases'],
+        'comprehensive': ['basic_optimization', 'complex_workflows', 'edge_cases'],
+        'critical': ['basic_optimization'],
+        'performance': ['basic_optimization']
+    }
+    return level_datasets.get(test_level, ['basic_optimization'])
+
+
+def calculate_environment_safety_score(test_db: str, test_redis: str, test_clickhouse: str, test_keys: List[str]) -> str:
+    """Calculate environment safety score for real LLM testing."""
+    safety_factors = []
+    
+    # Database isolation
+    if test_db:
+        safety_factors.append("DB_ISOLATED")
+    else:
+        safety_factors.append("DB_SHARED")
+    
+    # Redis isolation
+    if test_redis:
+        safety_factors.append("REDIS_ISOLATED")
+    else:
+        safety_factors.append("REDIS_SHARED")
+    
+    # ClickHouse isolation
+    if test_clickhouse:
+        safety_factors.append("CH_ISOLATED")
+    else:
+        safety_factors.append("CH_SHARED")
+    
+    # API key isolation
+    if test_keys:
+        safety_factors.append("API_ISOLATED")
+    else:
+        safety_factors.append("API_SHARED")
+    
+    # Calculate safety score
+    isolated_count = sum(1 for factor in safety_factors if "ISOLATED" in factor)
+    total_factors = len(safety_factors)
+    
+    if isolated_count == total_factors:
+        return "EXCELLENT (fully isolated)"
+    elif isolated_count >= total_factors * 0.75:
+        return "GOOD (mostly isolated)"
+    elif isolated_count >= total_factors * 0.5:
+        return "FAIR (partially isolated)"
+    else:
+        return "POOR (limited isolation)"
+
 
 def generate_test_reports(runner, level: str, config: Dict, output: str, exit_code: int):
     """Generate test reports in requested formats."""

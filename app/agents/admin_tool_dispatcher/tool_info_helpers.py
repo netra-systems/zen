@@ -2,7 +2,7 @@
 Tool Information Management Helpers
 
 Helper functions for tool information retrieval and management.
-Split from dispatcher_core.py to maintain 300-line limit.
+Split from dispatcher_core.py to maintain 450-line limit.
 
 Business Value: Provides comprehensive tool information for admin operations.
 """

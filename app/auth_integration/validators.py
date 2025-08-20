@@ -9,8 +9,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: +$2K MRR from better UX
 
 Architecture:
-- 300-line module limit enforced
-- 8-line function limit enforced
+- 450-line module limit enforced
+- 25-line function limit enforced
 - Reusable validation functions
 - Strong typing with proper error handling
 """

@@ -44,9 +44,10 @@ def _determine_urls() -> tuple[str, str]:
     return AuthConfig.get_auth_service_url(), AuthConfig.get_frontend_url()
 
 async def _sync_user_to_main_db(auth_user):
-    """Sync user from auth database to main app database"""
-    from ..database.main_db_sync import main_db_sync
-    return await main_db_sync.sync_user(auth_user)
+    """Return user ID - no sync needed as auth service uses same database"""
+    # Auth service uses the same database as main app
+    # No separate sync needed - just return the user ID
+    return auth_user.id if auth_user else None
 
 @router.get("/config", response_model=AuthConfigResponse)
 async def get_auth_config(request: Request):
@@ -485,10 +486,14 @@ async def oauth_callback(
 async def health_check():
     """Health check endpoint"""
     redis_ok = auth_service.session_manager.health_check()
+    redis_enabled = auth_service.session_manager.redis_enabled
+    
+    # If Redis is disabled by design, the service is still healthy
+    service_status = "healthy" if (redis_ok or not redis_enabled) else "degraded"
     
     return HealthResponse(
-        status="healthy" if redis_ok else "degraded",
-        redis_connected=redis_ok,
+        status=service_status,
+        redis_connected=redis_ok if redis_enabled else None,  # None when Redis is disabled
         database_connected=True  # Placeholder
     )
 

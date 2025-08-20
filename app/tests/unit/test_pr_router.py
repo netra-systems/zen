@@ -1,7 +1,7 @@
 """
 Comprehensive unit tests for PR router implementation.
 
-This file was refactored to meet the 300-line limit by splitting into:
+This file was refactored to meet the 450-line limit by splitting into:
 - test_pr_router_auth.py - route_pr_auth and validation tests (8 tests)
 - test_pr_router_state.py - state encoding/decoding tests (12 tests) 
 - test_pr_router_security.py - security and validation tests (15 tests)

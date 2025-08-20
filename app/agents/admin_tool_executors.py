@@ -18,7 +18,7 @@ All functions are ≤8 lines as per CLAUDE.md requirements.
 
 from typing import Dict, Any
 from app.schemas.shared_types import ToolResult
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.db.models_postgres import User
 from app.logging_config import central_logger
 
@@ -26,9 +26,9 @@ logger = central_logger.get_logger(__name__)
 
 
 class AdminToolExecutors:
-    """Executes individual admin tools with strict 8-line function limit"""
+    """Executes individual admin tools with strict 25-line function limit"""
     
-    def __init__(self, db: Session, user: User):
+    def __init__(self, db: AsyncSession, user: User):
         self.db = db
         self.user = user
     

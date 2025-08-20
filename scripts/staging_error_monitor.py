@@ -19,7 +19,7 @@ import json
 from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from loguru import logger
 
 # Import existing monitoring infrastructure
@@ -46,7 +46,7 @@ class MonitorConfig:
     project_id: str = "netra-staging"
     service_filter: str = "netra-backend"
     check_window_minutes: int = 15
-    threshold: ErrorThreshold = ErrorThreshold()
+    threshold: ErrorThreshold = field(default_factory=ErrorThreshold)
     enable_notifications: bool = False
     notification_webhook: Optional[str] = None
 

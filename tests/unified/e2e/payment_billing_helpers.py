@@ -13,7 +13,7 @@ REQUIREMENTS:
 - Test subscription state transitions (Free → Early → Mid → Enterprise)
 - Verify invoice generation and payment failure handling
 - Performance validation (<5 seconds per test)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import json
 import time

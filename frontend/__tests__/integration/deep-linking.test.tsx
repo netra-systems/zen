@@ -2,7 +2,7 @@
  * Deep Linking Integration Tests
  * Agent 13: Tests deep linking, URL parameters, and state restoration
  * Covers thread deep links, query parameters, hash routing, and SEO
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value: Enables sharing and bookmarking for improved user retention
  * Revenue Impact: Facilitates collaboration features driving Enterprise sales

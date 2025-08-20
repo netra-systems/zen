@@ -2,7 +2,7 @@
 Supply Researcher Models
 
 Data models and enums for supply research operations.
-Maintains type safety under 300-line limit.
+Maintains type safety under 450-line limit.
 """
 
 from typing import Dict, List, Any

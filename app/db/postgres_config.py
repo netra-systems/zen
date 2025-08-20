@@ -1,7 +1,7 @@
 """PostgreSQL configuration and connection parameters module.
 
 Defines database configuration settings and connection parameters.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from typing import Optional

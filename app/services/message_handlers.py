@@ -337,6 +337,8 @@ class MessageHandlerService(IMessageHandlerService):
             await self.handle_stop_agent(user_id)
         elif message_type == "switch_thread":
             await self.handle_switch_thread(user_id, payload, None)
+        elif message_type == "example_message":
+            await self.handle_example_message(user_id, payload, None)
         else:
             await manager.send_error(user_id, f"Unknown message type: {message_type}")
 
@@ -350,3 +352,173 @@ class MessageHandlerService(IMessageHandlerService):
     async def broadcast_message(self, message: Dict[str, Any]):
         """Broadcast a message to all connected clients."""
         await manager.broadcast(message)
+
+    async def handle_get_conversation_history(
+        self, user_id: str, payload: Dict[str, Any], db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle get_conversation_history message type."""
+        try:
+            session_token = payload.get("session_token", user_id)
+            logger.info(f"Getting conversation history for user {user_id}, session: {session_token}")
+            
+            # Get conversation history from thread service or create mock data
+            history = await self._get_user_conversation_history(user_id, db_session)
+            
+            response = {
+                "type": "conversation_history",
+                "payload": {
+                    "history": history,
+                    "session_token": session_token
+                }
+            }
+            
+            await manager.send_message(user_id, response)
+            logger.info(f"Sent conversation history to user {user_id}: {len(history)} messages")
+            
+        except Exception as e:
+            logger.error(f"Error getting conversation history for user {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, f"Failed to get conversation history: {str(e)}")
+
+    async def handle_get_agent_context(
+        self, user_id: str, payload: Dict[str, Any], db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle get_agent_context message type."""
+        try:
+            session_token = payload.get("session_token", user_id)
+            logger.info(f"Getting agent context for user {user_id}, session: {session_token}")
+            
+            # Get agent context from session or create mock data
+            context = await self._get_user_agent_context(user_id, session_token, db_session)
+            
+            response = {
+                "type": "agent_context",
+                "payload": {
+                    "context": context,
+                    "session_token": session_token
+                }
+            }
+            
+            await manager.send_message(user_id, response)
+            logger.info(f"Sent agent context to user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error getting agent context for user {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, f"Failed to get agent context: {str(e)}")
+
+    async def _get_user_conversation_history(
+        self, user_id: str, db_session: Optional[AsyncSession]
+    ) -> List[Dict[str, Any]]:
+        """Get conversation history for user."""
+        try:
+            if db_session:
+                # Try to get actual conversation history from database
+                threads = await self.thread_service.get_user_threads(user_id, db_session)
+                if threads:
+                    # Get messages from the most recent thread
+                    recent_thread = threads[0]
+                    messages = await self.thread_service.get_thread_messages(recent_thread.id, db_session)
+                    return [self._format_message_for_history(msg) for msg in messages]
+            
+            # Return empty history if no database session or no threads found
+            return []
+            
+        except Exception as e:
+            logger.warning(f"Could not get conversation history from database for user {user_id}: {e}")
+            return []
+
+    async def _get_user_agent_context(
+        self, user_id: str, session_token: str, db_session: Optional[AsyncSession]
+    ) -> Dict[str, Any]:
+        """Get agent context for user session."""
+        try:
+            # Create a basic agent context
+            context = {
+                "session_token": session_token,
+                "user_id": user_id,
+                "conversation_history": await self._get_user_conversation_history(user_id, db_session),
+                "agent_memory": {
+                    "user_preferences": {},
+                    "variables": {},
+                    "workflow_state": {
+                        "current_step": 0,
+                        "total_steps": 1,
+                        "pending_steps": []
+                    }
+                },
+                "tool_call_history": [],
+                "created_at": "2025-01-20T10:00:00Z",
+                "last_activity": "2025-01-20T10:00:00Z"
+            }
+            
+            # Try to get additional context from supervisor if available
+            if hasattr(self.supervisor, 'get_agent_context'):
+                supervisor_context = await self.supervisor.get_agent_context(user_id)
+                if supervisor_context:
+                    context.update(supervisor_context)
+            
+            return context
+            
+        except Exception as e:
+            logger.warning(f"Could not get agent context for user {user_id}: {e}")
+            # Return minimal context on error
+            return {
+                "session_token": session_token,
+                "user_id": user_id,
+                "conversation_history": [],
+                "agent_memory": {"user_preferences": {}, "variables": {}, "workflow_state": {}},
+                "tool_call_history": [],
+                "error": "Context retrieval failed"
+            }
+
+    async def handle_example_message(
+        self,
+        user_id: str,
+        payload: Dict[str, Any],
+        db_session: Optional[AsyncSession]
+    ) -> None:
+        """Handle example_message message type."""
+        try:
+            logger.info(f"Processing example message for user {user_id}")
+            
+            # Import the example message handler with deferred import to avoid circular dependencies
+            try:
+                from app.handlers.example_message_handler import handle_example_message
+            except ImportError as import_error:
+                logger.error(f"Failed to import example message handler: {import_error}")
+                await manager.send_error(user_id, "Example message handler not available")
+                return
+            
+            # Add user_id to payload if not present
+            if "user_id" not in payload:
+                payload["user_id"] = user_id
+                
+            # Process the example message
+            response = await handle_example_message(payload)
+            
+            # Send success response back to user
+            success_message = {
+                "type": "example_message_response",
+                "payload": {
+                    "status": response.status,
+                    "message_id": response.message_id,
+                    "result": response.result,
+                    "processing_time_ms": response.processing_time_ms,
+                    "business_insights": response.business_insights
+                }
+            }
+            
+            await manager.send_message(user_id, success_message)
+            logger.info(f"Successfully processed example message for user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error processing example message for user {user_id}: {e}", exc_info=True)
+            await manager.send_error(user_id, f"Failed to process example message: {str(e)}")
+    
+    def _format_message_for_history(self, message) -> Dict[str, Any]:
+        """Format a database message for conversation history."""
+        return {
+            "id": str(message.id),
+            "role": message.role,
+            "content": message.content,
+            "timestamp": message.created_at.isoformat() if hasattr(message, 'created_at') else "2025-01-20T10:00:00Z"
+        }

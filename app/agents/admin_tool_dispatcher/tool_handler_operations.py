@@ -18,7 +18,7 @@ Business Value: Modular operations for improved maintainability.
 Target Segments: Growth & Enterprise (improved admin operations).
 """
 from typing import Dict, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models_postgres import User
 
@@ -41,7 +41,7 @@ def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, An
 
 
 # Helper functions for corpus operations
-async def _execute_corpus_creation(params: Dict[str, Any], db: Session) -> Any:
+async def _execute_corpus_creation(params: Dict[str, Any], db: AsyncSession) -> Any:
     """Execute corpus creation with service"""
     from app.services import corpus_service
     return await corpus_service.create_corpus(**params, db=db)
@@ -54,7 +54,7 @@ def _create_corpus_response(result: Any) -> Dict[str, Any]:
 
 
 # Helper functions for synthetic operations
-def _create_synthetic_service(db: Session):
+def _create_synthetic_service(db: AsyncSession):
     """Create synthetic data service instance"""
     from app.services.synthetic_data_service import SyntheticDataService
     return SyntheticDataService(db)
@@ -67,7 +67,7 @@ def _create_synthetic_response(result: Any) -> Dict[str, Any]:
 
 
 # Helper functions for user operations
-def _prepare_user_create_params(kwargs: Dict[str, Any], db: Session) -> Dict[str, Any]:
+def _prepare_user_create_params(kwargs: Dict[str, Any], db: AsyncSession) -> Dict[str, Any]:
     """Prepare user creation parameters"""
     from .tool_handler_helpers import build_user_create_params
     params = build_user_create_params(kwargs)
@@ -95,7 +95,7 @@ def _extract_permission_params(kwargs: Dict[str, Any]) -> tuple:
     return user_email, permission
 
 
-async def _grant_user_permission(user_email: str, permission: str, db: Session) -> bool:
+async def _grant_user_permission(user_email: str, permission: str, db: AsyncSession) -> bool:
     """Grant user permission via service"""
     from app.services.permission_service import PermissionService
     return await PermissionService.grant_permission(user_email, permission, db)
@@ -108,7 +108,7 @@ def _create_permission_response(success: bool) -> Dict[str, Any]:
 
 
 # Helper functions for log analysis operations
-async def _execute_debug_analysis(db: Session, user: User) -> dict:
+async def _execute_debug_analysis(db: AsyncSession, user: User) -> dict:
     """Execute debug analysis with service"""
     from app.services.debug_service import DebugService
     from .tool_handler_helpers import build_debug_service_params

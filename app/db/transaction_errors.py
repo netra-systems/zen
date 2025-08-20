@@ -1,7 +1,7 @@
 """Transaction error handling and classification module.
 
 Handles error detection, classification, and retry logic for database transactions.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from sqlalchemy.exc import OperationalError, DisconnectionError

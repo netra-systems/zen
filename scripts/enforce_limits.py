@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Elite Enforcement Script for Netra Apex
-MANDATORY: 300-line file limit, 8-line function limit
+MANDATORY: 450-line file limit, 25-line function limit
 
 Business Value: Prevents $3,500/month context waste regression
 Revenue Impact: Maintains code quality = customer retention

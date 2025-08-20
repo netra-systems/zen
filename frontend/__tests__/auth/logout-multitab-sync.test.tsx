@@ -2,7 +2,7 @@
  * Logout Multi-Tab Sync Tests  
  * Tests multi-tab logout synchronization and browser storage events
  * BUSINESS VALUE: Enterprise security & compliance (session management)
- * Following 300-line limit and 8-line function requirements
+ * Following 450-line limit and 25-line function requirements
  */
 
 import React from 'react';

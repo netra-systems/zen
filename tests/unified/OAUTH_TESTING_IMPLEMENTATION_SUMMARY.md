@@ -10,7 +10,7 @@
 
 ### 🎯 Phase 2 Unified System Testing - OAuth Integration
 
-The OAuth testing implementation follows the mandated 300-line file limit and 8-line function limit through modular design:
+The OAuth testing implementation follows the mandated 450-line file limit and 25-line function limit through modular design:
 
 #### **Core Files Created:**
 
@@ -84,12 +84,12 @@ The OAuth testing implementation follows the mandated 300-line file limit and 8-
 
 ## 🏗️ Architecture Compliance
 
-### **✅ 300-Line File Limit Compliance:**
+### **✅ 450-line File Limit Compliance:**
 - `test_oauth_flow.py`: 246/300 lines ✅
 - `oauth_test_providers.py`: 222/300 lines ✅  
 - `oauth_flow_manager.py`: 216/300 lines ✅
 
-### **✅ 8-Line Function Limit:**
+### **✅ 25-line Function Limit:**
 All functions designed with single responsibility and ≤8 lines each
 
 ### **✅ Modular Design:**

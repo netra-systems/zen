@@ -3,11 +3,11 @@ Auth client caching and circuit breaker functionality.
 Handles token caching and resilience patterns for auth service calls.
 """
 
-import os
 from typing import Dict, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
+from app.config import get_config
 from app.core.circuit_breaker_core import CircuitBreaker
 from app.core.circuit_breaker_types import CircuitConfig
 
@@ -101,26 +101,26 @@ class AuthServiceSettings:
     """Manages auth service configuration settings."""
     
     def __init__(self):
+        config = get_config()
+        
         # Use 127.0.0.1 instead of localhost for Windows compatibility
-        default_url = "http://127.0.0.1:8081"
-        self.base_url = os.getenv("AUTH_SERVICE_URL", default_url)
+        self.base_url = config.auth_service_url
         # If localhost is in the URL, replace with 127.0.0.1 for Windows
         if "localhost" in self.base_url:
             self.base_url = self.base_url.replace("localhost", "127.0.0.1")
         
         # Check environment and test mode for auth service enabling
-        env = os.getenv("ENVIRONMENT", "development").lower()
-        fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
+        fast_test_mode = config.auth_fast_test_mode.lower() == "true"
         
         # Disable auth service in fast test mode or test environment
-        if fast_test_mode or env == "test":
+        if fast_test_mode or config.environment == "test":
             self.enabled = False
         else:
-            self.enabled = os.getenv("AUTH_SERVICE_ENABLED", "true").lower() == "true"
+            self.enabled = config.auth_service_enabled.lower() == "true"
         
-        self.cache_ttl = int(os.getenv("AUTH_CACHE_TTL_SECONDS", "300"))  # 5 min
-        self.service_id = os.getenv("SERVICE_ID", "backend")
-        self.service_secret = os.getenv("SERVICE_SECRET")
+        self.cache_ttl = int(config.auth_cache_ttl_seconds)  # 5 min
+        self.service_id = config.service_id
+        self.service_secret = config.service_secret
     
     def is_service_secret_configured(self) -> bool:
         """Check if service secret is configured."""

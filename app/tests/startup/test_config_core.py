@@ -1,7 +1,7 @@
 """
 Config Validator Tests - Core Components
 Tests for configuration status, validation results, and validation context.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import pytest

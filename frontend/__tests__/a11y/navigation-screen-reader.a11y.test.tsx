@@ -1,7 +1,7 @@
 /**
  * Navigation Screen Reader Accessibility Test Suite
  * Tests live regions, announcements, and screen reader specific features
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise) 

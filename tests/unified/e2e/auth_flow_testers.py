@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Real authentication logic and JWT operations
 - Controlled service mocking for reliability
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 from typing import Dict
 from unittest.mock import AsyncMock, MagicMock

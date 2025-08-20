@@ -2,7 +2,7 @@
 """
 Emergency Boundary Actions System
 Handles critical boundary violations with immediate automated responses.
-Follows CLAUDE.md requirements: 300-line limit, 8-line functions.
+Follows CLAUDE.md requirements: 450-line limit, 25-line functions.
 """
 
 import json

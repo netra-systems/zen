@@ -1,7 +1,7 @@
 """
 Config Validator Tests - Decision Engine and Utilities
 Tests for decision engine, utility functions, and main validation entry point.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import pytest

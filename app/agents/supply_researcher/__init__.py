@@ -2,7 +2,7 @@
 Supply Researcher Agent Module
 
 Autonomous AI supply information research and updates with modular architecture.
-Split into focused components under 300-line limit.
+Split into focused components under 450-line limit.
 """
 
 from .agent import SupplyResearcherAgent

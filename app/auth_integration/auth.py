@@ -26,7 +26,6 @@ from typing import Optional, Annotated, Dict, Any
 from datetime import timedelta
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
 from app.clients.auth_client import auth_client
 from app.db.models_postgres import User
 from app.db.session import get_db_session
@@ -76,7 +75,9 @@ async def get_current_user(
         
         if not user:
             # In development mode, create and persist a dev user
-            if os.getenv("ENVIRONMENT", "development") == "development":
+            from app.config import get_config
+            config = get_config()
+            if config.environment == "development":
                 from app.services.user_service import user_service
                 
                 # Use centralized dev user creation
@@ -93,7 +94,7 @@ async def get_current_user(
 
 async def get_current_user_optional(
     credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_db)
 ) -> Optional[User]:
     """
     Get current user if authenticated, otherwise return None
@@ -172,6 +173,11 @@ def get_password_hash(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """DEPRECATED: Use auth service instead"""
     logger.warning("verify_password is deprecated - use auth service")
+    return False
+
+def _check_password_rehash_needed(hashed_password: str) -> bool:
+    """DEPRECATED: Use auth service instead"""
+    logger.warning("_check_password_rehash_needed is deprecated - use auth service")
     return False
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

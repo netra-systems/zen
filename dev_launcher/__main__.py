@@ -4,12 +4,23 @@ Main entry point for the dev launcher.
 
 This module can be run directly as:
     python -m dev_launcher [options]
+
+Windows Compatibility Features:
+- Enhanced process management with taskkill /F /T for process trees
+- Port cleanup verification using netstat
+- Proper signal handling for Windows console events
+- Frontend Next.js compilation monitoring with Windows-specific paths
+- Clear error messages with Windows-specific troubleshooting steps
 """
 
 import sys
 import os
+import asyncio
 import argparse
+import signal
+import logging
 from pathlib import Path
+from typing import Optional
 
 # Set UTF-8 encoding for Windows and Mac
 if sys.platform in ("win32", "darwin"):
@@ -23,6 +34,52 @@ if sys.platform in ("win32", "darwin"):
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dev_launcher import DevLauncher, LauncherConfig
+
+# Global launcher instance for signal handling
+_launcher_instance: Optional[DevLauncher] = None
+logger = logging.getLogger(__name__)
+
+
+def setup_signal_handlers():
+    """Setup signal handlers for graceful shutdown on all platforms."""
+    def signal_handler(signum, frame):
+        """Handle shutdown signals gracefully."""
+        signal_name = signal.Signals(signum).name if hasattr(signal, 'Signals') else str(signum)
+        print(f"\n🛑 SHUTDOWN | Received {signal_name} signal")
+        if _launcher_instance:
+            try:
+                # Trigger graceful shutdown
+                asyncio.create_task(_launcher_instance.cleanup())
+            except RuntimeError:
+                # If no event loop is running, cleanup synchronously
+                print("⚠️  WARNING | Performing emergency cleanup...")
+                _launcher_instance.emergency_cleanup()
+        sys.exit(0)
+    
+    # Install signal handlers for graceful shutdown
+    if sys.platform == "win32":
+        # Windows-specific signal handling
+        signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
+        signal.signal(signal.SIGTERM, signal_handler)  # Terminate
+        
+        # Try to handle console close events on Windows
+        try:
+            import win32api
+            def console_ctrl_handler(ctrl_type):
+                """Handle Windows console control events."""
+                if ctrl_type in [win32api.CTRL_C_EVENT, win32api.CTRL_BREAK_EVENT, win32api.CTRL_CLOSE_EVENT]:
+                    signal_handler(signal.SIGTERM, None)
+                    return True
+                return False
+            win32api.SetConsoleCtrlHandler(console_ctrl_handler, True)
+        except ImportError:
+            logger.debug("pywin32 not available, using basic Windows signal handling")
+    else:
+        # Unix-like systems
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+        if hasattr(signal, 'SIGHUP'):
+            signal.signal(signal.SIGHUP, signal_handler)
 
 
 def create_parser() -> argparse.ArgumentParser:
@@ -221,7 +278,7 @@ QUICK SHORTCUTS:
         "--watch-boundaries",
         dest="watch_boundaries",
         action="store_true",
-        help="Enable real-time boundary monitoring (300-line/8-line limits)"
+        help="Enable real-time boundary monitoring (450-line/25-line limits)"
     )
     boundary_group.add_argument(
         "--boundary-check-interval",
@@ -362,7 +419,12 @@ def handle_service_configuration(args):
 
 
 def main():
-    """Main entry point."""
+    """Main entry point with enhanced Windows compatibility."""
+    global _launcher_instance
+    
+    # Setup signal handlers for graceful shutdown
+    setup_signal_handlers()
+    
     parser = create_parser()
     args = parser.parse_args()
     
@@ -379,9 +441,69 @@ def main():
     
     # Create and run launcher
     launcher = DevLauncher(config)
-    exit_code = launcher.run()
+    _launcher_instance = launcher  # Store for signal handling
+    
+    # Run the async launcher with enhanced error handling
+    exit_code = 0
+    try:
+        print("🚀 Starting Netra AI Development Environment...")
+        if sys.platform == "win32":
+            print("   → Windows environment detected")
+            print("   → Enhanced process tree management enabled")
+            print("   → Port cleanup verification enabled")
+        
+        exit_code = asyncio.run(launcher.run())
+        
+        if exit_code == 0:
+            print("\n✅ SUCCESS | Development environment started successfully")
+            if sys.platform == "win32":
+                print("   → Press Ctrl+C to gracefully shutdown all services")
+            else:
+                print("   → Press Ctrl+C or send SIGTERM to shutdown")
+        else:
+            print(f"\n❌ FAILURE | Development environment failed to start (exit code: {exit_code})")
+            _print_troubleshooting_info()
+            
+    except KeyboardInterrupt:
+        print("\n🛑 SHUTDOWN | Interrupted by user")
+        exit_code = 0
+        
+    except Exception as e:
+        print(f"\n💥 CRITICAL ERROR | Launcher failed: {e}")
+        logger.error(f"Launcher exception: {e}", exc_info=True)
+        _print_troubleshooting_info()
+        exit_code = 1
+        
+    finally:
+        # Ensure cleanup happens
+        if _launcher_instance:
+            try:
+                _launcher_instance.emergency_cleanup()
+            except Exception as cleanup_error:
+                logger.error(f"Cleanup error: {cleanup_error}")
     
     sys.exit(exit_code)
+
+
+def _print_troubleshooting_info():
+    """Print Windows-specific troubleshooting information."""
+    if sys.platform == "win32":
+        print("\n🔧 TROUBLESHOOTING (Windows):")
+        print("   1. Check if ports are in use: netstat -ano | findstr \":8000 :3000 :8081\"")
+        print("   2. Kill hanging processes: tasklist | findstr \"node python uvicorn\"")
+        print("   3. Force kill if needed: taskkill /F /T /IM \"process_name.exe\"")
+        print("   4. Check Windows Defender/Firewall settings")
+        print("   5. Run as Administrator if permission issues persist")
+    else:
+        print("\n🔧 TROUBLESHOOTING:")
+        print("   1. Check if ports are in use: lsof -i :8000,:3000,:8081")
+        print("   2. Kill hanging processes: pkill -f \"uvicorn|next|node\"")
+        print("   3. Check system resources: ps aux | grep -E \"(uvicorn|next|node)\"")
+        print("   4. Review logs in ./logs/ directory")
+    
+    print("   5. Try running with --verbose for more details")
+    print("   6. Check that all dependencies are installed")
+    print("   7. Ensure .env files are properly configured")
 
 
 if __name__ == "__main__":

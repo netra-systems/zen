@@ -5,7 +5,7 @@ Supply Item Operations - CRUD operations for AI supply items
 import json
 from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import and_, desc
 
 from app.db.models_postgres import AISupplyItem, SupplyUpdateLog
@@ -15,7 +15,7 @@ from app.logging_config import central_logger as logger
 class SupplyItemOperations:
     """Handles CRUD operations for AI supply items"""
     
-    def __init__(self, db: Session):
+    def __init__(self, db: AsyncSession):
         self.db = db
     
     def _build_supply_items_base_query(self):

@@ -2,11 +2,14 @@ import pytest
 import os
 import sys
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import AsyncGenerator, Generator
+from typing import AsyncGenerator, Generator, Optional
 import asyncio
+from pathlib import Path
 
 # Set testing environment variables
 os.environ["TESTING"] = "1"
+os.environ["NETRA_ENV"] = "testing"
+os.environ["ENVIRONMENT"] = "testing"
 os.environ["REDIS_HOST"] = "localhost"
 os.environ["CLICKHOUSE_HOST"] = "localhost"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
@@ -202,3 +205,101 @@ def auth_headers(test_user):
 @pytest.fixture
 def sample_data():
     return {"test": "data"}
+
+
+# Real Service Testing Fixtures
+@pytest.fixture(scope="session")
+async def dev_launcher():
+    """Provides dev_launcher instance for real service testing."""
+    try:
+        from dev_launcher.launcher import DevLauncher
+        from dev_launcher.config import LauncherConfig
+    except ImportError:
+        pytest.skip("Dev launcher not available")
+        return
+    
+    # Check if we should use real services
+    use_real_services = os.environ.get("USE_REAL_SERVICES", "false").lower() == "true"
+    if not use_real_services:
+        pytest.skip("Real services disabled (set USE_REAL_SERVICES=true)")
+        return
+    
+    config = LauncherConfig(
+        dynamic_ports=True,
+        test_mode=True,
+        startup_timeout=30,
+        services=["auth", "backend"]  # Don't start frontend for tests
+    )
+    
+    launcher = DevLauncher(config)
+    
+    try:
+        # Start all services
+        success = await launcher.run()
+        if not success:
+            pytest.fail("Failed to start services via dev_launcher")
+        
+        yield launcher
+        
+    finally:
+        # Cleanup
+        await launcher.shutdown()
+
+
+@pytest.fixture(scope="session")
+async def service_discovery(dev_launcher):
+    """Provides service discovery for real service endpoints."""
+    try:
+        from dev_launcher.discovery import ServiceDiscovery
+    except ImportError:
+        pytest.skip("Service discovery not available")
+        return
+    
+    discovery = ServiceDiscovery()
+    
+    # Wait for services to register
+    await discovery.wait_for_service("auth", timeout=30.0)
+    await discovery.wait_for_service("backend", timeout=30.0)
+    
+    return discovery
+
+
+@pytest.fixture(scope="session") 
+async def real_services(dev_launcher, service_discovery):
+    """Provides real services with typed clients."""
+    try:
+        from tests.unified.clients import TestClientFactory
+    except ImportError:
+        pytest.skip("Test client factory not available")
+        return
+    
+    factory = TestClientFactory(service_discovery)
+    
+    # Create clients
+    auth_client = await factory.create_auth_client()
+    
+    # Create test user and get token
+    test_user_data = await auth_client.create_test_user()
+    token = test_user_data["token"]
+    
+    # Create authenticated clients
+    backend_client = await factory.create_backend_client(token=token)
+    
+    class RealServiceContext:
+        def __init__(self):
+            self.auth_client = auth_client
+            self.backend_client = backend_client
+            self.factory = factory
+            self.test_user = test_user_data
+            
+        async def create_websocket_client(self, token: Optional[str] = None):
+            """Create WebSocket client with optional custom token."""
+            ws_token = token or self.test_user["token"]
+            return await self.factory.create_websocket_client(ws_token)
+    
+    context = RealServiceContext()
+    
+    yield context
+    
+    # Cleanup
+    await factory.cleanup()

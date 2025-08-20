@@ -11,7 +11,7 @@ REQUIREMENTS:
 - User suspension and reactivation
 - Admin authentication and authorization
 - State tracking for operations
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import time
 import uuid

@@ -2,7 +2,7 @@
 """
 Test Modifier Module
 Orchestrates test generation, legacy pattern updates, and performance optimization
-Complies with 300-line limit and 8-line function constraint
+Complies with 450-line limit and 25-line function constraint
 """
 
 from pathlib import Path

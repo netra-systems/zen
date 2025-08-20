@@ -1,7 +1,7 @@
 """Architecture compliance metrics calculator.
 
 Checks compliance with file and function size limits.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 import re
@@ -43,7 +43,7 @@ class ArchitectureComplianceCalculator:
         )
     
     def _check_file_line_limits(self) -> int:
-        """Check files exceeding 300-line limit."""
+        """Check files exceeding 450-line limit."""
         violations = 0
         cmd = ["find", ".", "-name", "*.py", "-o", "-name", "*.ts", "-o", "-name", "*.tsx"]
         result = subprocess.run(cmd, capture_output=True, text=True)
@@ -65,7 +65,7 @@ class ArchitectureComplianceCalculator:
             return False
     
     def _check_function_line_limits(self) -> int:
-        """Check functions exceeding 8-line limit."""
+        """Check functions exceeding 25-line limit."""
         violations = 0
         cmd = ["find", ".", "-name", "*.py"]
         result = subprocess.run(cmd, capture_output=True, text=True)

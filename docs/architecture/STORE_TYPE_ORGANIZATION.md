@@ -89,8 +89,8 @@ frontend/store/slices/types.ts
 
 ## Compliance with Architecture Rules
 
-✅ **300-line module limit** - All files remain under 300 lines
-✅ **8-line function limit** - All functions remain under 8 lines
+✅ **450-line module limit** - All files remain under 300 lines
+✅ **25-line function limit** - All functions remain under 8 lines
 ✅ **Type safety** - Strong typing maintained throughout
 ✅ **Single source of truth** - Each type has one canonical definition
 ✅ **Modular architecture** - Clean separation of concerns

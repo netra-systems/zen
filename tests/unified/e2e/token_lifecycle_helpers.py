@@ -1,6 +1,6 @@
 """
 Token Lifecycle E2E Test Helpers - Modular support functions
-Maintains 300-line limit through focused helper functionality
+Maintains 450-line limit through focused helper functionality
 """
 
 import asyncio
@@ -17,7 +17,7 @@ class TokenLifecycleManager:
     """Manages token lifecycle operations for E2E testing."""
     
     def __init__(self):
-        self.auth_url = "http://localhost:8001"
+        self.auth_url = "http://localhost:8081"  # Updated to match services
         self.backend_url = "http://localhost:8000"
         self.websocket_url = "ws://localhost:8000"
         self.jwt_helper = JWTTestHelper()
@@ -85,7 +85,7 @@ class WebSocketSessionManager:
     async def start_chat_session(self, token: str) -> bool:
         """Start WebSocket chat session with token."""
         config = ClientConfig(timeout=5.0, max_retries=1)
-        self.client = RealWebSocketClient(f"{self.ws_url}/ws?token={token}", config)
+        self.client = RealWebSocketClient(f"{self.ws_url}?token={token}", config)
         return await self.client.connect()
     
     async def send_chat_message(self, message: str, thread_id: str) -> bool:

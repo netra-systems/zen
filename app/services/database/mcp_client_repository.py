@@ -1,7 +1,7 @@
 """MCP Client Repository for database operations.
 
 Handles CRUD operations for MCP external servers, tool executions, and resource access.
-Adheres to repository pattern and 300-line limit.
+Adheres to repository pattern and 450-line limit.
 """
 
 from typing import Optional, List, Dict, Any

@@ -4,7 +4,7 @@ Business Value: $40K MRR - Core chat functionality validation
 Tests: WebSocket → Auth → Agent → Response pipeline
 
 Critical: <5s response time, message ordering, error handling
-Architecture: 300-line limit, 8-line functions (CLAUDE.md compliance)
+Architecture: 450-line limit, 25-line functions (CLAUDE.md compliance)
 """
 
 import asyncio

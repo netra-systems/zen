@@ -372,8 +372,8 @@ The infrastructure provides detailed coverage analysis:
 
 When adding new test infrastructure:
 
-1. **Follow 300-line limit**: Keep modules under 300 lines
-2. **Use 8-line functions**: Keep functions under 8 lines
+1. **Follow 450-line limit**: Keep modules under 300 lines
+2. **Use 25-line functions**: Keep functions under 8 lines
 3. **Add type hints**: All functions should have type hints
 4. **Include docstrings**: Document purpose and usage
 5. **Update README**: Document new utilities
@@ -381,7 +381,7 @@ When adding new test infrastructure:
 
 ## 📝 Notes
 
-- All files follow the 300-line architecture limit
+- All files follow the 450-line architecture limit
 - Functions are kept under 8 lines for maintainability
 - Type safety is enforced throughout
 - Environment isolation prevents test interference

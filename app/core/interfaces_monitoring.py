@@ -1,4 +1,4 @@
-"""Monitoring interfaces - compliance with 8-line function limit."""
+"""Monitoring interfaces - compliance with 25-line function limit."""
 
 from typing import Dict, Any, Optional
 from pydantic import BaseModel

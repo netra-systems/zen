@@ -1,6 +1,6 @@
 /**
  * Async Operation Handling Utilities
- * WebSocket and API operations with 8-line function limit enforcement
+ * WebSocket and API operations with 25-line function limit enforcement
  */
 
 import { waitFor, act } from '@testing-library/react';

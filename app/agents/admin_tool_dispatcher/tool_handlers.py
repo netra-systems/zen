@@ -18,7 +18,7 @@ Business Value: Improves tool execution reliability by 15-20%.
 Target Segments: Growth & Enterprise (improved admin operations).
 """
 from typing import Dict, Any, Optional, Callable
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models_postgres import User
 from app.logging_config import central_logger
@@ -46,7 +46,7 @@ logger = central_logger
 
 
 # Main modern admin tool execution function
-async def execute_admin_tool(tool_name: str, user: User, db: Session, action: str, **kwargs) -> Dict[str, Any]:
+async def execute_admin_tool(tool_name: str, user: User, db: AsyncSession, action: str, **kwargs) -> Dict[str, Any]:
     """Modern admin tool execution with BaseExecutionInterface"""
     handler = create_modern_tool_handler(tool_name)
     context = handler.create_execution_context(
@@ -57,7 +57,7 @@ async def execute_admin_tool(tool_name: str, user: User, db: Session, action: st
 
 
 # Legacy wrapper functions for backward compatibility 
-async def execute_corpus_manager(action: str, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+async def execute_corpus_manager(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
     handler = create_modern_tool_handler('corpus_manager')
     context = _create_handler_context(handler, action, user, db, kwargs, 'corpus')
@@ -65,7 +65,7 @@ async def execute_corpus_manager(action: str, user: User, db: Session, **kwargs)
     return result
 
 
-async def execute_synthetic_generator(action: str, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+async def execute_synthetic_generator(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
     handler = create_modern_tool_handler('synthetic_generator')
     context = handler.create_execution_context(
@@ -75,7 +75,7 @@ async def execute_synthetic_generator(action: str, user: User, db: Session, **kw
     return await handler.execute_core_logic(context)
 
 
-async def execute_user_admin(action: str, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+async def execute_user_admin(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
     handler = create_modern_tool_handler('user_admin')
     context = handler.create_execution_context(
@@ -85,7 +85,7 @@ async def execute_user_admin(action: str, user: User, db: Session, **kwargs) -> 
     return await handler.execute_core_logic(context)
 
 
-async def execute_system_configurator(action: str, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+async def execute_system_configurator(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
     handler = create_modern_tool_handler('system_configurator')
     context = handler.create_execution_context(
@@ -95,7 +95,7 @@ async def execute_system_configurator(action: str, user: User, db: Session, **kw
     return await handler.execute_core_logic(context)
 
 
-async def execute_log_analyzer(action: str, user: User, db: Session, **kwargs) -> Dict[str, Any]:
+async def execute_log_analyzer(action: str, user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy wrapper - use create_modern_tool_handler instead"""
     handler = create_modern_tool_handler('log_analyzer')
     context = handler.create_execution_context(
@@ -117,14 +117,14 @@ def get_corpus_action_handlers() -> Dict[str, Callable]:
 
 
 # Legacy handlers (simplified for backward compatibility)
-async def handle_corpus_create(user: User, db: Session, **kwargs) -> Dict[str, Any]:
+async def handle_corpus_create(user: User, db: AsyncSession, **kwargs) -> Dict[str, Any]:
     """Legacy function"""
     params = extract_corpus_create_params(kwargs, user)
     result = await _execute_corpus_creation(params, db)
     return _create_corpus_response(result)
 
 
-async def handle_corpus_list(db: Session) -> Dict[str, Any]:
+async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
     """Legacy function"""
     from app.services import corpus_service
     from .tool_handler_helpers import create_corpus_list_response
@@ -163,8 +163,8 @@ __all__ = [
 ]
 
 
-# Helper functions for compliance (8-line limit)
-def _create_handler_context(handler, action: str, user: User, db: Session, kwargs: Dict[str, Any], prefix: str):
+# Helper functions for compliance (25-line limit)
+def _create_handler_context(handler, action: str, user: User, db: AsyncSession, kwargs: Dict[str, Any], prefix: str):
     """Create execution context for handler."""
     params = {'action': action, 'user': user, 'db': db, 'kwargs': kwargs}
     return handler.create_execution_context(DeepAgentState(params=params), f"{prefix}_{action}")

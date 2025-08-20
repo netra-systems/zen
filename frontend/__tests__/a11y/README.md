@@ -84,8 +84,8 @@ npx jest __tests__/a11y/components.a11y.test.tsx
 ### Test Patterns
 
 All tests follow the established patterns:
-- **8-line function rule**: Every test function ≤ 8 lines
-- **300-line file rule**: Each test file ≤ 300 lines
+- **25-line function rule**: Every test function ≤ 8 lines
+- **450-line file rule**: Each test file ≤ 300 lines
 - **AAA Pattern**: Arrange, Act, Assert
 - **User-centric approach**: Test user interactions, not implementation details
 

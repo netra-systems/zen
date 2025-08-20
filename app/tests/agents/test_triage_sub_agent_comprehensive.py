@@ -1,6 +1,6 @@
 """
 Comprehensive tests for TriageSubAgent - modular architecture compliant
-Split into focused test modules to comply with 300-line file limit and 8-line function limit
+Split into focused test modules to comply with 450-line file limit and 25-line function limit
 
 This file serves as the main entry point that imports all the split test modules.
 Each module focuses on a specific aspect of testing with functions ≤8 lines.

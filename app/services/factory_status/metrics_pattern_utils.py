@@ -1,7 +1,7 @@
 """Pattern matching utilities for business value metrics.
 
 Provides reusable pattern matching functions.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from typing import List

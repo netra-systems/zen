@@ -6,7 +6,7 @@ from app.logging_config import central_logger
 router = APIRouter()
 logger = central_logger.get_logger(__name__)
 
-# Helper functions for maintaining 8-line function limit
+# Helper functions for maintaining 25-line function limit
 
 def _build_empty_stats_response(llm_config_name: str) -> Dict[str, Any]:
     """Build empty stats response for config with no activity."""

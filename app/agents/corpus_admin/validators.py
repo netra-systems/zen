@@ -2,7 +2,7 @@
 Corpus Approval Validator
 
 Validates corpus operations and determines approval requirements.
-Maintains single responsibility and 8-line function limit.
+Maintains single responsibility and 25-line function limit.
 """
 
 from typing import Dict, Any

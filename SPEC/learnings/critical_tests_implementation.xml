@@ -46,7 +46,7 @@
     <implementation_approach>
         <principle>Business Value First</principle>
         <principle>Real Tests Only - No Stubs</principle>
-        <principle>Modular Architecture (8-line functions)</principle>
+        <principle>Modular Architecture (25-line functions)</principle>
         <principle>Revenue Protection Focus</principle>
         <principle>Enterprise Scalability Priority</principle>
     </implementation_approach>
@@ -102,7 +102,7 @@
         <practice>Document business value for every test</practice>
         <practice>Focus on revenue protection scenarios</practice>
         <practice>Implement real logic, avoid stubs</practice>
-        <practice>Maintain modular design (8-line functions)</practice>
+        <practice>Maintain modular design (25-line functions)</practice>
         <practice>Test both success and failure paths</practice>
         <practice>Use async patterns for modern architecture</practice>
     </best_practices>

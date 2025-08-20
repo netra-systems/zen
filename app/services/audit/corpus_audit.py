@@ -2,7 +2,7 @@
 Corpus Audit Service
 
 Main audit logger for corpus operations with comprehensive tracking.
-Follows 300-line limit and 8-line function rule.
+Follows 450-line limit and 25-line function rule.
 """
 
 from typing import Optional, List, Dict, Any

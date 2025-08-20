@@ -1,7 +1,7 @@
 """
 Critical Integration Test Helpers
 BVJ: Supporting infrastructure for $100K+ MRR protection tests
-Architecture: ≤8 line functions for 300-line compliance
+Architecture: ≤8 line functions for 450-line compliance
 """
 
 import uuid

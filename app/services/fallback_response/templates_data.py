@@ -1,7 +1,7 @@
 """Data Analysis Templates - Templates for data analysis failures and guidance.
 
 This module provides templates for data analysis-related content types and failures
-with 8-line function compliance.
+with 25-line function compliance.
 """
 
 from typing import Dict, List, Tuple

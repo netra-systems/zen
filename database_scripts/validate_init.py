@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Database Initialization Validation Script
 Purpose: Validate that PostgreSQL initialization creates all required tables
-Module: Validation (adheres to 300-line limit)
+Module: Validation (adheres to 450-line limit)
 """
 
 import os

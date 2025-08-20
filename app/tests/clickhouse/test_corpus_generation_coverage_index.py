@@ -1,6 +1,6 @@
 """
 Corpus Generation Coverage Tests - Modular Index
-Redirects to focused test modules following 300-line architecture
+Redirects to focused test modules following 450-line architecture
 COMPLIANCE: Modular split from 524-line monolith
 """
 

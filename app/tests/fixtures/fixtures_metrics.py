@@ -1,7 +1,7 @@
 """
 Realistic Test Fixtures - Metrics and Data
 Metrics, logs, corpus data, and ML models fixtures.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import random

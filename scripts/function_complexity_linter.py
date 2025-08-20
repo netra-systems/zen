@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Function Complexity Linter Core
-Core linting logic for enforcing the 8-line maximum function rule.
+Core linting logic for enforcing the 25-line maximum function rule.
 
 This module contains the main FunctionComplexityLinter class and core analysis logic.
 """

@@ -1,7 +1,7 @@
 """
 Performance Tests - Batching and Message Processing
 Tests for batch processing and WebSocket message batching functionality.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import asyncio

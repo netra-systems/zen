@@ -3,7 +3,7 @@
 Business Value: Provides reliable correlation analysis for mid-tier and enterprise customers.
 Enables data-driven insights that justify AI spend optimization decisions.
 
-Complies with 300-line module and 8-line function limits.
+Complies with 450-line module and 25-line function limits.
 """
 
 import time

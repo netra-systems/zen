@@ -11,8 +11,8 @@ Real Critical User Journey E2E Tests - First-time user experience validation wit
 5. **Growth Engine**: These 10 tests validate the MOST CRITICAL revenue-generating paths
 
 **CRITICAL**: Uses REAL services (not mocks) to catch integration issues that destroy conversions.
-**ARCHITECTURE**: Modular design with separate helpers and fixtures to maintain 300-line limit
-Each test follows 8-line function limit through delegation to specialized helper classes.
+**ARCHITECTURE**: Modular design with separate helpers and fixtures to maintain 450-line limit
+Each test follows 25-line function limit through delegation to specialized helper classes.
 """
 
 import pytest
@@ -167,7 +167,7 @@ class TestRealCriticalUserJourney:
         isolation_result = await ConcurrentTestHelpers.verify_data_isolation(performance_result)
         await ConcurrentTestHelpers.test_load_recovery_mechanisms(isolation_result)
 
-    # Helper methods (each ≤8 lines) - minimal set for 300-line limit
+    # Helper methods (each ≤8 lines) - minimal set for 450-line limit
 
     async def _load_real_metrics_data(self, db_session):
         """Load real metrics data from database"""
@@ -261,4 +261,4 @@ class TestRealCriticalUserJourney:
         """Test service discovery integration"""
         return {"service_registration": True, "load_balancing_active": True, "routing_accuracy": 99.9}
 
-# Complex functionality delegated to real_critical_helpers.py for 300-line architectural compliance
+# Complex functionality delegated to real_critical_helpers.py for 450-line architectural compliance

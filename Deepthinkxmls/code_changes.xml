@@ -1,0 +1,773 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification name="code-changes" version="1.0">
+  <title>Code Changes Checklist</title>
+  <description>
+    CRITICAL: This specification MUST be consulted whenever making code changes to the Netra AI platform.
+    It provides a comprehensive checklist to ensure all necessary updates are made when modifying code.
+  </description>
+  
+  <section name="mandatory-on-all-changes">
+    <title>Mandatory Updates for ALL Code Changes</title>
+    <description>These items MUST be updated regardless of the type or scope of change</description>
+    
+    <checklist-item id="import-tests" critical="true">
+      <title>Update Import Tests</title>
+      <description>
+        Import tests MUST be updated whenever adding new modules, files, or dependencies.
+        These tests are part of the quick smoke test suite and ensure the codebase structure remains valid.
+      </description>
+      <actions>
+        <action type="backend-internal">
+          Update app/tests/test_internal_imports.py with new internal module paths
+        </action>
+        <action type="backend-external">
+          Update app/tests/test_external_imports.py with new external dependencies
+        </action>
+        <action type="frontend-internal">
+          Update frontend/__tests__/imports/internal-imports.test.tsx with new components/modules
+        </action>
+        <action type="frontend-external">
+          Update frontend/__tests__/imports/external-imports.test.tsx with new npm packages
+        </action>
+      </actions>
+      <validation>
+        Run: python test_runner.py --mode quick
+        This will verify all imports are working correctly
+      </validation>
+    </checklist-item>
+    
+    <checklist-item id="type-sync" critical="true">
+      <title>Synchronize Type Definitions</title>
+      <description>
+        Type definitions must remain synchronized between backend and frontend
+      </description>
+      <actions>
+        <action type="backend">
+          Update Pydantic models in app/schemas/ when changing API contracts
+        </action>
+        <action type="frontend">
+          Update TypeScript types in frontend/types/ to match backend changes
+        </action>
+        <action type="shared">
+          Consider using auto-generation tools for type synchronization
+        </action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="test-coverage" critical="true">
+      <title>Maintain Test Coverage</title>
+      <description>
+        Test coverage must meet minimum requirements and work toward 97% goal.
+        Bad test detection system automatically tracks and reports consistently failing tests.
+      </description>
+      <requirements>
+        <requirement type="current-minimum-backend">Minimum 70% coverage</requirement>
+        <requirement type="current-minimum-frontend">Minimum 60% coverage</requirement>
+        <requirement type="target">97% overall coverage (see SPEC/test_update_spec.xml)</requirement>
+        <requirement type="bad-test-detection">Monitor and fix consistently failing tests</requirement>
+      </requirements>
+      <actions>
+        <action>Write unit tests for new functions/methods</action>
+        <action>Write integration tests for new API endpoints</action>
+        <action>Write component tests for new React components</action>
+        <action>Run automated test improvement: python scripts/test_updater.py --execute-spec</action>
+        <action>Review bad test report: python -m test_framework.bad_test_reporter</action>
+        <action>Fix tests with 5+ consecutive failures immediately</action>
+        <action>Delete/rewrite tests with 90%+ failure rate</action>
+      </actions>
+      <validation>
+        Backend: python scripts/test_backend.py --coverage
+        Frontend: python scripts/test_frontend.py --coverage
+        Automated improvement: python scripts/test_updater.py --monitor
+        Bad test detection: python -m test_framework.bad_test_reporter --summary
+      </validation>
+      <automation>
+        For automatic test generation and coverage improvement, use:
+        python scripts/test_updater.py --execute-spec
+        This will generate missing tests, update legacy patterns, and optimize performance
+        
+        Bad test detection runs automatically with all test executions.
+        Disable with: --no-bad-test-detection flag
+      </automation>
+    </checklist-item>
+    
+    <checklist-item id="feature-flag-testing" critical="true">
+      <title>Configure Feature Flag Testing for New Features</title>
+      <description>
+        New features MUST use feature flags to enable TDD workflow while maintaining 100% CI/CD pass rate.
+        Configure feature flags before writing tests to prevent build failures during development.
+      </description>
+      <actions>
+        <action type="configuration">
+          Add feature to test_feature_flags.json with status "in_development"
+        </action>
+        <action type="ownership">
+          Specify owner, target_release, and dependencies in feature configuration
+        </action>
+        <action type="test-decoration">
+          Use @tdd_test decorator for tests written before implementation
+        </action>
+        <action type="feature-decoration">
+          Use @feature_flag decorator for basic feature gating
+        </action>
+        <action type="status-update">
+          Change status to "enabled" only when feature is complete and tests pass
+        </action>
+      </actions>
+      <validation>
+        Feature Flag Status: python -c "from test_framework.feature_flags import get_feature_flag_manager; print(get_feature_flag_manager().get_feature_summary())"
+        Test Execution: python test_runner.py --level unit (verify TDD tests are skipped)
+        Coverage Check: Ensure tests run and pass when feature status changed to "enabled"
+      </validation>
+      <tdd-workflow>
+        <step order="1">Configure feature as "in_development" in test_feature_flags.json</step>
+        <step order="2">Write tests with @tdd_test("feature_name") decorator</step>
+        <step order="3">Tests are skipped, maintaining 100% CI/CD pass rate</step>
+        <step order="4">Implement feature functionality</step>
+        <step order="5">Change feature status to "enabled"</step>
+        <step order="6">Verify all tests pass with new implementation</step>
+      </tdd-workflow>
+      <environment-testing>
+        Override feature status for testing: TEST_FEATURE_<NAME>=enabled
+        Enable experimental features: ENABLE_EXPERIMENTAL_TESTS=true
+        Test different combinations for integration scenarios
+      </environment-testing>
+      <reference>SPEC/testing.xml#feature_flag_testing</reference>
+      <reference>SPEC/conventions.xml#feature-flag-tdd</reference>
+    </checklist-item>
+    
+    <checklist-item id="agent-tracking" critical="true">
+      <title>Add Agent Modification Tracking Headers</title>
+      <description>
+        All files modified by AI coding agents MUST include tracking metadata headers
+        as specified in SPEC/agent_tracking.xml. This provides traceability and accountability
+        for automated code changes.
+      </description>
+      <actions>
+        <action type="header">
+          Add or update agent tracking header at top of modified files
+        </action>
+        <action type="metadata">
+          Include timestamp, agent name, model version, git info, and change summary
+        </action>
+        <action type="history">
+          Maintain modification history for files with multiple agent changes (max 5 entries)
+        </action>
+        <action type="exclusions">
+          Skip headers for config files, generated files, binary files, and lock files
+        </action>
+      </actions>
+      <validation>
+        Verify header format matches language-specific template in SPEC/agent_tracking.xml
+      </validation>
+      <reference>
+        See SPEC/agent_tracking.xml for complete specification and examples
+      </reference>
+    </checklist-item>
+  </section>
+  
+  <section name="backend-specific">
+    <title>Backend-Specific Changes</title>
+    
+    <checklist-item id="new-route">
+      <title>Adding New API Endpoint</title>
+      <actions>
+        <action>Create route handler in app/routes/</action>
+        <action>Define Pydantic schemas in app/schemas/</action>
+        <action>Implement service logic in app/services/</action>
+        <action>Add repository if database access needed in app/services/database/</action>
+        <action>Add route tests in app/tests/routes/</action>
+        <action>Update import tests with new modules</action>
+        <action>Update API documentation/OpenAPI spec</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="new-agent">
+      <title>Adding New Agent or Sub-Agent</title>
+      <actions>
+        <action>Create agent class extending BaseAgent in app/agents/</action>
+        <action>Define agent prompts in app/agents/prompts.py</action>
+        <action>Register agent with supervisor in app/agents/supervisor.py</action>
+        <action>Add agent-specific tools if needed</action>
+        <action>Update tool dispatcher if new tools added</action>
+        <action>Add agent tests in app/tests/agents/</action>
+        <action>Update import tests with new agent modules</action>
+        <action critical="true">If agent stores results in DeepAgentState, add the field to app/agents/state.py</action>
+      </actions>
+      <validation>
+        Verify agent state fields exist before using them:
+        - Check DeepAgentState class definition in app/agents/state.py
+        - Add new Optional[Dict[str, Any]] fields for agent-specific results
+        - Example: synthetic_data_result, custom_agent_result, etc.
+      </validation>
+      <common-errors>
+        <error>
+          <symptom>"DeepAgentState" object has no field "field_name"</symptom>
+          <cause>Agent tries to set a field that doesn't exist in DeepAgentState</cause>
+          <fix>Add the field to DeepAgentState class in app/agents/state.py</fix>
+        </error>
+      </common-errors>
+    </checklist-item>
+    
+    <checklist-item id="database-changes">
+      <title>Database Schema Changes</title>
+      <actions>
+        <action>Create Alembic migration: alembic revision -m "description"</action>
+        <action>Update SQLAlchemy models in app/db/models.py</action>
+        <action>Update repositories in app/services/database/</action>
+        <action>Update Pydantic schemas to reflect changes</action>
+        <action>Add migration tests</action>
+        <action>Update seed data if applicable</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="websocket-events">
+      <title>Adding WebSocket Events</title>
+      <actions>
+        <action>Define event type in app/schemas/WebSocket.py</action>
+        <action>Add handler in app/services/websocket/message_handler.py</action>
+        <action>Update app/routes/websockets.py if needed</action>
+        <action>Add WebSocket tests in app/tests/</action>
+        <action>Update frontend WebSocketProvider to handle new event</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="external-dependencies">
+      <title>Adding External Dependencies</title>
+      <actions>
+        <action>Add to requirements.txt with version pinning</action>
+        <action>Update app/tests/test_external_imports.py</action>
+        <action>Document why the dependency is needed</action>
+        <action>Check for security vulnerabilities</action>
+        <action>Update Docker images if needed</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="dependency-injection" critical="true">
+      <title>Using Dependency Injection</title>
+      <description>
+        CRITICAL: Singleton services MUST be injected correctly to avoid missing configuration/secrets
+      </description>
+      <actions>
+        <action>Use dependency provider functions from app/dependencies.py</action>
+        <action>NEVER use Depends(ServiceClass) for singleton services</action>
+        <action>ALWAYS use Depends(get_service_name) for LLMManager, SecurityService, etc.</action>
+        <action>Verify API keys and configuration are loaded in injected services</action>
+      </actions>
+      <common-errors>
+        <error>
+          <incorrect>llm_manager: LLMManager = Depends(LLMManager)</incorrect>
+          <correct>llm_manager: LLMManager = Depends(get_llm_manager)</correct>
+          <symptom>Missing API keys, "API key for provider 'google' is missing" error</symptom>
+        </error>
+        <error>
+          <incorrect>security_service: SecurityService = Depends(SecurityService)</incorrect>
+          <correct>security_service: SecurityService = Depends(get_security_service)</correct>
+          <symptom>Missing key manager, encryption failures</symptom>
+        </error>
+      </common-errors>
+      <validation>
+        Test that injected services have proper configuration:
+        - Check llm_manager.settings has API keys populated
+        - Verify services are retrieved from app.state, not instantiated
+      </validation>
+    </checklist-item>
+  </section>
+  
+  <section name="frontend-specific">
+    <title>Frontend-Specific Changes</title>
+    
+    <checklist-item id="new-component">
+      <title>Adding New Component</title>
+      <actions>
+        <action>Create component in appropriate directory under frontend/components/</action>
+        <action>Follow existing component patterns and conventions</action>
+        <action>Add component tests in frontend/__tests__/components/</action>
+        <action>Update internal import tests</action>
+        <action>Add Storybook story if applicable</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="new-hook">
+      <title>Adding New React Hook</title>
+      <actions>
+        <action>Create hook in frontend/hooks/</action>
+        <action>Add comprehensive hook tests in frontend/__tests__/hooks/</action>
+        <action>Wrap with appropriate providers in tests</action>
+        <action>Update internal import tests</action>
+        <action>Document hook API and usage</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="state-management" critical="true">
+      <title>State Management Changes</title>
+      <warning>CRITICAL: Incorrect selector patterns cause infinite loops!</warning>
+      <actions>
+        <action>Update Zustand store in frontend/store/</action>
+        <action priority="CRITICAL">Use individual selectors - NEVER object-returning selectors</action>
+        <action priority="CRITICAL">Verify no infinite loops with "getSnapshot" errors</action>
+        <action>Add store tests in frontend/__tests__/store/</action>
+        <action>Update components using the store</action>
+        <action>Ensure state persistence if needed</action>
+      </actions>
+      <reference>SPEC/learnings/frontend.xml#zustand-individual-selectors-pattern</reference>
+    </checklist-item>
+    
+    <checklist-item id="npm-dependencies">
+      <title>Adding NPM Dependencies</title>
+      <actions>
+        <action>Add to package.json with exact version</action>
+        <action>Update package-lock.json</action>
+        <action>Update frontend/__tests__/imports/external-imports.test.tsx</action>
+        <action>Check bundle size impact</action>
+        <action>Audit for security vulnerabilities</action>
+      </actions>
+    </checklist-item>
+  </section>
+  
+  <section name="clickhouse-query-validation">
+    <title>ClickHouse Query Validation Checklist</title>
+    <description>CRITICAL: Follow this checklist when working with ClickHouse queries</description>
+    
+    <checklist-item id="query-generation" critical="true">
+      <title>Query Generation</title>
+      <actions>
+        <action>ALWAYS use query_builder.py methods instead of manual query construction</action>
+        <action>NEVER use metrics.field[index] syntax - use arrayElement(metrics.field, index)</action>
+        <action>Verify all ClickHouse function names use proper casing (arrayFirstIndex not arrayfirstindex)</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="query-validation" critical="true">
+      <title>Query Validation Layers</title>
+      <actions>
+        <action>Ensure ClickHouseQueryInterceptor wraps all clients</action>
+        <action>Check queries pass through query_fix_validator.py</action>
+        <action>Verify LLM detection is enabled for dynamic queries</action>
+      </actions>
+      <files>
+        <file>app/db/clickhouse_query_fixer.py</file>
+        <file>app/agents/data_sub_agent/query_fix_validator.py</file>
+        <file>app/agents/data_sub_agent/llm_query_detector.py</file>
+      </files>
+    </checklist-item>
+    
+    <checklist-item id="query-simplification">
+      <title>Query Simplification</title>
+      <warning>NEVER use .lower() on ClickHouse queries - it breaks function names</warning>
+      <actions>
+        <action>Preserve ClickHouse function casing in all transformations</action>
+        <action>Validate simplified queries still use arrayElement syntax</action>
+        <action>Test recovery paths don't introduce syntax errors</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="llm-query-detection">
+      <title>LLM-Generated Query Detection</title>
+      <description>Detect and fix queries that may be generated by AI/LLM systems</description>
+      <patterns>
+        <pattern>SQL-style array access: array[index]</pattern>
+        <pattern>Lowercased ClickHouse functions</pattern>
+        <pattern>Missing subquery structure in correlations</pattern>
+        <pattern>SQL syntax instead of ClickHouse syntax</pattern>
+      </patterns>
+      <validation>Test with app/tests/unit/test_query_fix_validator.py</validation>
+    </checklist-item>
+  </section>
+  
+  <section name="testing-requirements">
+    <title>Testing Requirements</title>
+    
+    <checklist-item id="pre-commit-tests">
+      <title>Pre-Commit Testing</title>
+      <description>ALWAYS run these tests before committing</description>
+      <commands>
+        <command priority="1">python test_runner.py --mode quick</command>
+        <command priority="2">python scripts/test_backend.py --category unit</command>
+        <command priority="3">python scripts/test_frontend.py --category components</command>
+      </commands>
+    </checklist-item>
+    
+    <checklist-item id="comprehensive-tests">
+      <title>Comprehensive Testing</title>
+      <description>Run for major changes or before PR</description>
+      <commands>
+        <command>python test_runner.py --mode comprehensive</command>
+        <command>python scripts/test_backend.py --coverage</command>
+        <command>python scripts/test_frontend.py --coverage</command>
+      </commands>
+    </checklist-item>
+  </section>
+  
+  <section name="authentication-patterns">
+    <title>Authentication Patterns and Requirements</title>
+    <description>
+      Components that interact with APIs or perform user-specific operations MUST check authentication
+      status before attempting those operations. This prevents 401 Unauthorized errors and improves UX.
+    </description>
+    
+    <checklist-item id="auth-check-on-mount">
+      <title>Check Authentication Before API Calls on Mount</title>
+      <description>
+        Components that fetch data on mount MUST check if the user is authenticated first.
+        This prevents authentication errors in the console and improves user experience.
+      </description>
+      <pattern>
+        <code language="typescript">
+          // Import authentication store
+          import { useAuthStore } from '@/store/authStore';
+          
+          // In component
+          const { isAuthenticated } = useAuthStore();
+          
+          useEffect(() => {
+            // Only load data if authenticated
+            if (isAuthenticated) {
+              loadData();
+            }
+          }, [isAuthenticated]);
+        </code>
+      </pattern>
+      <affected-components>
+        <component>ThreadSidebar - loads threads on mount</component>
+        <component>MessageInput - creates threads when sending messages</component>
+        <component>ExamplePrompts - sends messages via WebSocket</component>
+        <component>Any component making API calls on mount</component>
+      </affected-components>
+    </checklist-item>
+    
+    <checklist-item id="auth-ui-feedback">
+      <title>Provide UI Feedback for Unauthenticated State</title>
+      <description>
+        Components should show appropriate UI when user is not authenticated,
+        rather than failing silently or showing errors in console.
+      </description>
+      <patterns>
+        <pattern type="sidebar">
+          Show "Please sign in to view conversations" message
+        </pattern>
+        <pattern type="input">
+          Disable input fields and show "Please sign in to send messages" placeholder
+        </pattern>
+        <pattern type="buttons">
+          Disable action buttons when not authenticated
+        </pattern>
+      </patterns>
+    </checklist-item>
+    
+    <checklist-item id="auth-action-guards">
+      <title>Guard User Actions with Authentication Checks</title>
+      <description>
+        All user-initiated actions that require authentication should check auth status
+        before attempting the action.
+      </description>
+      <pattern>
+        <code language="typescript">
+          const handleAction = async () => {
+            // Check authentication first
+            if (!isAuthenticated) {
+              console.error('User must be authenticated to perform this action');
+              return;
+            }
+            
+            // Proceed with action
+            await performAction();
+          };
+        </code>
+      </pattern>
+    </checklist-item>
+    
+    <checklist-item id="websocket-auth">
+      <title>WebSocket Connection Authentication</title>
+      <description>
+        WebSocket connections should only be established when user has a valid token.
+        The WebSocketProvider already handles this pattern correctly.
+      </description>
+      <reference>frontend/providers/WebSocketProvider.tsx</reference>
+    </checklist-item>
+  </section>
+  
+  <section name="cors-configuration">
+    <title>CORS Configuration and Cross-Origin Requests</title>
+    <description>
+      CRITICAL: CORS configuration is essential for frontend-backend communication.
+      Improper CORS setup leads to blocked requests and authentication failures.
+    </description>
+    
+    <checklist-item id="cors-development">
+      <title>Development CORS Configuration</title>
+      <description>
+        In development, CORS must allow dynamic ports for the dev launcher.
+        The backend should accept requests from any localhost port.
+      </description>
+      <configuration>
+        <code language="python">
+          # In app/main.py
+          if settings.environment != "production":
+              # Allow all localhost ports and configured origins
+              cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+              configured_origins = cors_origins_env.split(",") if cors_origins_env else []
+              allowed_origins = ["*"]  # Allow all in development
+        </code>
+      </configuration>
+      <validation>
+        Test with dynamic ports: python scripts/dev_launcher.py --dynamic
+      </validation>
+    </checklist-item>
+    
+    <checklist-item id="cors-redirects">
+      <title>Handle CORS for Redirects</title>
+      <description>
+        FastAPI's trailing slash redirects don't include CORS headers by default.
+        This causes CORS errors when frontend requests are redirected.
+      </description>
+      <solution>
+        <action>Add cors_redirect_middleware to handle CORS headers on redirects</action>
+        <action>Disable redirect_slashes on APIRouter for affected routes</action>
+        <code language="python">
+          # Middleware to add CORS headers to redirects
+          @app.middleware("http")
+          async def cors_redirect_middleware(request: Request, call_next):
+              response = await call_next(request)
+              if isinstance(response, RedirectResponse) and settings.environment != "production":
+                  origin = request.headers.get("origin")
+                  if origin:
+                      response.headers["Access-Control-Allow-Origin"] = origin
+                      response.headers["Access-Control-Allow-Credentials"] = "true"
+              return response
+          
+          # Disable automatic trailing slash redirects on routers
+          router = APIRouter(
+              prefix="/api/threads",
+              tags=["threads"],
+              redirect_slashes=False
+          )
+        </code>
+      </solution>
+    </checklist-item>
+    
+    <checklist-item id="cors-configuration-attributes">
+      <title>Configuration Attributes</title>
+      <description>
+        CORS origins should be read from environment variables, not from config objects.
+        The AppConfig schema may not have a cors_origins attribute.
+      </description>
+      <pattern>
+        <code language="python">
+          # CORRECT: Read from environment
+          cors_origins_env = os.environ.get("CORS_ORIGINS", "")
+          
+          # INCORRECT: May cause AttributeError
+          cors_origins = settings.cors_origins  # AppConfig may not have this attribute
+        </code>
+      </pattern>
+    </checklist-item>
+    
+    <checklist-item id="cors-testing">
+      <title>Testing CORS Configuration</title>
+      <description>
+        Test CORS setup with different scenarios to ensure proper functionality
+      </description>
+      <test-scenarios>
+        <scenario>Frontend and backend on different ports (dev launcher)</scenario>
+        <scenario>API requests with and without trailing slashes</scenario>
+        <scenario>Preflight OPTIONS requests</scenario>
+        <scenario>Authenticated requests with credentials</scenario>
+      </test-scenarios>
+      <commands>
+        <command>python scripts/dev_launcher.py --dynamic --no-backend-reload</command>
+        <command>Check browser console for CORS errors</command>
+        <command>Test API endpoints from frontend application</command>
+      </commands>
+    </checklist-item>
+  </section>
+  
+  <section name="common-pitfalls">
+    <title>Common Pitfalls to Avoid</title>
+    
+    <pitfall id="missing-imports">
+      <title>Forgetting Import Test Updates</title>
+      <description>
+        New modules/dependencies added without updating import tests cause smoke test failures
+      </description>
+      <prevention>
+        Always update import tests immediately after adding new files or packages
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="type-mismatch">
+      <title>Frontend/Backend Type Mismatches</title>
+      <description>
+        API contract changes without updating TypeScript types cause runtime errors
+      </description>
+      <prevention>
+        Update both Pydantic schemas and TypeScript types together
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="websocket-provider">
+      <title>Missing WebSocket Provider in Tests</title>
+      <description>
+        Testing useWebSocket hook without WebSocketProvider wrapper causes test failures
+      </description>
+      <prevention>
+        Always wrap WebSocket-dependent components/hooks with WebSocketProvider in tests
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="cors-errors">
+      <title>CORS Configuration Errors</title>
+      <description>
+        Common CORS issues that block frontend-backend communication:
+        - FastAPI trailing slash redirects without CORS headers
+        - Accessing non-existent cors_origins attribute from settings
+        - Not allowing dynamic ports in development
+      </description>
+      <prevention>
+        - Add cors_redirect_middleware to handle redirects
+        - Read CORS origins from environment variables, not config objects
+        - Use redirect_slashes=False on APIRouter for affected routes
+        - Allow all origins ("*") in development environment
+      </prevention>
+      <reference>See cors-configuration section for detailed solutions</reference>
+    </pitfall>
+    
+    <pitfall id="async-mocks">
+      <title>Incorrect Async Mock Implementation</title>
+      <description>
+        Using mockResolvedValueOnce instead of mockImplementationOnce for complex async operations
+      </description>
+      <prevention>
+        Use mockImplementationOnce for reliable async mock behavior
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="env-vars">
+      <title>Missing Test Environment Variables</title>
+      <description>
+        Tests fail due to missing environment configuration
+      </description>
+      <prevention>
+        Ensure TESTING=1 and other test env vars are set
+      </prevention>
+    </pitfall>
+    
+    <pitfall id="database-session-dependency">
+      <title>Incorrect Database Session Dependency Type Hints</title>
+      <description>
+        Missing or incorrect type hints for database session dependencies in FastAPI routes 
+        can cause authentication failures with error: '_AsyncGeneratorContextManager' object has no attribute 'execute'.
+        This happens when the dependency injection system cannot properly resolve the AsyncSession type.
+      </description>
+      <prevention>
+        Always explicitly type database session parameters in dependency functions:
+        - Use: db_session: AsyncSession = Depends(get_db_session)
+        - NOT: db_session = Depends(get_db_session)
+        - Import AsyncSession from sqlalchemy.ext.asyncio
+        - Use get_db_session from app.dependencies (not get_async_db from app.db.postgres directly)
+      </prevention>
+      <example>
+        <code language="python">
+          # CORRECT:
+          from sqlalchemy.ext.asyncio import AsyncSession
+          from app.dependencies import get_db_session
+          
+          async def get_current_user(
+              token: str,
+              db_session: AsyncSession = Depends(get_db_session),  # Explicitly typed
+              security_service: SecurityService = Depends(get_security_service),
+          ) -> Optional[User]:
+              # Function implementation
+              
+          # INCORRECT:
+          async def get_current_user(
+              token: str,
+              db_session = Depends(get_db_session),  # Missing type hint - will cause errors
+              security_service: SecurityService = Depends(get_security_service),
+          ) -> Optional[User]:
+              # Function implementation
+        </code>
+      </example>
+      <affected-files>
+        <file>app/auth/auth_dependencies.py</file>
+        <file>app/routes/* (any route using database sessions)</file>
+      </affected-files>
+    </pitfall>
+  </section>
+  
+  <section name="quick-reference">
+    <title>Quick Reference Commands</title>
+    
+    <command-group name="validation">
+      <title>Validation Commands</title>
+      <command>python test_runner.py --mode quick  # Quick smoke tests including imports</command>
+      <command>python scripts/test_backend.py --fail-fast  # Stop on first failure</command>
+      <command>python scripts/test_frontend.py --lint  # Run ESLint</command>
+    </command-group>
+    
+    <command-group name="specific-tests">
+      <title>Run Specific Test Categories</title>
+      <command>python scripts/test_backend.py --category smoke  # Smoke tests only</command>
+      <command>python scripts/test_backend.py --category unit  # Unit tests only</command>
+      <command>python scripts/test_backend.py --category agent  # Agent tests only</command>
+      <command>python scripts/test_frontend.py --category components  # Component tests only</command>
+    </command-group>
+    
+    <command-group name="coverage">
+      <title>Coverage Reports</title>
+      <command>python test_runner.py --mode comprehensive  # Full coverage</command>
+      <command>python scripts/test_backend.py --coverage  # Backend coverage</command>
+      <command>python scripts/test_frontend.py --coverage  # Frontend coverage</command>
+    </command-group>
+  </section>
+  
+  <section name="automation">
+    <title>Automation and CI/CD</title>
+    
+    <checklist-item id="ci-pipeline">
+      <title>CI/CD Pipeline Updates</title>
+      <description>
+        Ensure CI/CD pipelines are updated when adding new test requirements
+      </description>
+      <actions>
+        <action>Update GitHub Actions workflows if test commands change</action>
+        <action>Ensure new dependencies are installed in CI environment</action>
+        <action>Update Docker images if base requirements change</action>
+      </actions>
+    </checklist-item>
+    
+    <checklist-item id="test-automation">
+      <title>Automated Test Improvement</title>
+      <description>
+        Use the test update specification for continuous test improvement
+      </description>
+      <reference>SPEC/test_update_spec.xml</reference>
+      <actions>
+        <action>Run test updater to achieve 97% coverage: python scripts/test_updater.py --execute-spec</action>
+        <action>Monitor coverage progress: python scripts/test_updater.py --monitor</action>
+        <action>Schedule daily improvements: python scripts/test_updater.py --daily-cycle</action>
+        <action>Perform weekly optimizations: python scripts/test_updater.py --weekly-optimization</action>
+        <action>Conduct monthly audits: python scripts/test_updater.py --monthly-audit</action>
+      </actions>
+      <benefits>
+        <benefit>Automatic test generation for untested code</benefit>
+        <benefit>Legacy test pattern modernization</benefit>
+        <benefit>Test performance optimization</benefit>
+        <benefit>Self-healing test capabilities</benefit>
+        <benefit>Coverage gap analysis and filling</benefit>
+      </benefits>
+    </checklist-item>
+    
+    <checklist-item id="pre-commit-hooks">
+      <title>Pre-Commit Hooks</title>
+      <description>
+        Consider adding pre-commit hooks for automatic validation
+      </description>
+      <suggestions>
+        <suggestion>Run import tests automatically</suggestion>
+        <suggestion>Run linting and formatting</suggestion>
+        <suggestion>Check for uncommitted type changes</suggestion>
+      </suggestions>
+    </checklist-item>
+  </section>
+</specification>

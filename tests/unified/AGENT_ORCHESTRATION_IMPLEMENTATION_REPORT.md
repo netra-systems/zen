@@ -14,8 +14,8 @@ Successfully implemented comprehensive Agent Orchestration Testing for Phase 4 o
 
 ## Architecture Compliance ✅
 
-- **300-line file limit**: All files comply (largest: 282 lines)
-- **8-line function limit**: All functions comply
+- **450-line file limit**: All files comply (largest: 282 lines)
+- **25-line function limit**: All functions comply
 - **Modular design**: Split into focused test modules
 - **Type safety**: Strong typing throughout
 - **Real testing**: Minimal mocking, focuses on system behavior

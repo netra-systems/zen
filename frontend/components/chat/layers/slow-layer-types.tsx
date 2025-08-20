@@ -1,6 +1,6 @@
 /**
  * Type definitions for SlowLayer Enhanced component
- * ULTRA DEEP THINK: Module-based architecture - Types extracted for 300-line compliance
+ * ULTRA DEEP THINK: Module-based architecture - Types extracted for 450-line compliance
  */
 
 export interface ReportData {

@@ -1,7 +1,7 @@
 """Factory Compliance API Routes for SPEC Compliance Scoring.
 
 Provides endpoints for SPEC compliance analysis and scoring.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 from fastapi import APIRouter, Query, Depends

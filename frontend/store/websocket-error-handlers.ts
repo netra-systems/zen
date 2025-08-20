@@ -1,4 +1,4 @@
-// WebSocket error event handlers - Modular 8-line functions
+// WebSocket error event handlers - Modular 25-line functions
 // Handles error events and processing state management
 
 import type { UnifiedWebSocketEvent } from '@/types/websocket-event-types';

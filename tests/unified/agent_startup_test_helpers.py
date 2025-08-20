@@ -2,7 +2,7 @@
 Agent Startup Test Helpers
 
 Helper classes for E2E agent startup testing.
-Separated to maintain 300-line file limit compliance.
+Separated to maintain 450-line file limit compliance.
 
 Business Value Justification (BVJ):
 - Segment: ALL customer tiers

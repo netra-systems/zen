@@ -1,4 +1,4 @@
-"""Base exception classes - compliant with 8-line function limit."""
+"""Base exception classes - compliant with 25-line function limit."""
 
 from typing import Any, Dict, Optional
 from datetime import datetime, timezone

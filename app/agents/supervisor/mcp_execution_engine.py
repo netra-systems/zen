@@ -1,7 +1,7 @@
 """MCP-Enhanced Execution Engine for Supervisor Agent.
 
 Extends base execution engine with MCP tool routing and execution capabilities.
-Follows strict 8-line function design and 300-line limit.
+Follows strict 25-line function design and 450-line limit.
 """
 
 from typing import Dict, List, Optional, Any, TYPE_CHECKING

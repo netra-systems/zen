@@ -4,7 +4,7 @@
  * Example Prompts Component - Modular Test Suite Entry Point
  * BVJ: Free/Early segment - comprehensive testing for user onboarding and conversion
  * 
- * ARCHITECTURE: Modular test organization following 300-line limit
+ * ARCHITECTURE: Modular test organization following 450-line limit
  * - Each module ≤300 lines, functions ≤8 lines
  * - Grouped by functionality and test concerns
  * - Shared utilities for maintainability

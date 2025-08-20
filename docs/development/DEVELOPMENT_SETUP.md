@@ -77,11 +77,7 @@ cat SPEC/conventions.xml  # 300/8 rule
 
 # 3. Run automated setup
 # Windows:
-scripts\setup.bat
-
-# macOS/Linux:
-chmod +x scripts/setup.sh
-./scripts/setup.sh
+python scripts/setup.py
 
 # 4. Start with OPTIMAL configuration
 python scripts/dev_launcher.py --dynamic --no-backend-reload --load-secrets

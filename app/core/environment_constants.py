@@ -1,0 +1,378 @@
+"""Environment Constants Module
+
+Single source of truth for all environment-related constants and utilities.
+Eliminates hardcoded environment strings throughout the codebase.
+
+Business Value: Platform/Internal - Deployment Stability - Prevents deployment
+errors and ensures consistent environment handling across all services.
+"""
+
+import os
+from enum import Enum
+from typing import Dict, Any, Optional, List
+
+
+class Environment(Enum):
+    """Standardized environment types.
+    
+    These are the ONLY valid environment types across the entire system.
+    All services MUST use these constants instead of hardcoded strings.
+    """
+    DEVELOPMENT = "development"
+    STAGING = "staging" 
+    PRODUCTION = "production"
+    TESTING = "testing"
+
+    @classmethod
+    def values(cls) -> List[str]:
+        """Get all environment values as a list."""
+        return [e.value for e in cls]
+
+    @classmethod
+    def is_valid(cls, env: str) -> bool:
+        """Check if environment string is valid."""
+        return env.lower() in cls.values()
+
+
+class EnvironmentVariables:
+    """Standardized environment variable names.
+    
+    Centralized constants for all environment variable names to prevent typos
+    and ensure consistency across the codebase.
+    """
+    # Core environment variables
+    ENVIRONMENT = "ENVIRONMENT"
+    TESTING = "TESTING"
+    PYTEST_CURRENT_TEST = "PYTEST_CURRENT_TEST"
+    
+    # Service mode variables
+    REDIS_MODE = "REDIS_MODE"
+    CLICKHOUSE_MODE = "CLICKHOUSE_MODE"
+    LLM_MODE = "LLM_MODE"
+    AUTH_MODE = "AUTH_MODE"
+    
+    # Cloud platform variables
+    K_SERVICE = "K_SERVICE"  # Google Cloud Run
+    K_REVISION = "K_REVISION"  # Google Cloud Run
+    GAE_ENV = "GAE_ENV"  # Google App Engine
+    GAE_APPLICATION = "GAE_APPLICATION"  # Google App Engine
+    GAE_VERSION = "GAE_VERSION"  # Google App Engine
+    AWS_EXECUTION_ENV = "AWS_EXECUTION_ENV"  # AWS Lambda
+    AWS_LAMBDA_FUNCTION_NAME = "AWS_LAMBDA_FUNCTION_NAME"  # AWS Lambda
+    AWS_ENVIRONMENT = "AWS_ENVIRONMENT"  # AWS Environment tag
+    KUBERNETES_SERVICE_HOST = "KUBERNETES_SERVICE_HOST"  # Kubernetes
+    
+    # Database environment variables
+    DATABASE_URL = "DATABASE_URL"
+    CLICKHOUSE_HOST = "CLICKHOUSE_HOST"
+    CLICKHOUSE_PORT = "CLICKHOUSE_PORT"
+    CLICKHOUSE_USER = "CLICKHOUSE_USER"
+    CLICKHOUSE_PASSWORD = "CLICKHOUSE_PASSWORD"
+    CLICKHOUSE_DB = "CLICKHOUSE_DB"
+    CLICKHOUSE_HTTP_PORT = "CLICKHOUSE_HTTP_PORT"
+    CLICKHOUSE_NATIVE_PORT = "CLICKHOUSE_NATIVE_PORT"
+    REDIS_URL = "REDIS_URL"
+    REDIS_HOST = "REDIS_HOST"
+    REDIS_PORT = "REDIS_PORT"
+    REDIS_PASSWORD = "REDIS_PASSWORD"
+    
+    # Environment-specific password variables (from string literals analysis)
+    CLICKHOUSE_DEVELOPMENT_PASSWORD = "CLICKHOUSE_DEVELOPMENT_PASSWORD"
+    CLICKHOUSE_STAGING_PASSWORD = "CLICKHOUSE_STAGING_PASSWORD"
+    CLICKHOUSE_PRODUCTION_PASSWORD = "CLICKHOUSE_PRODUCTION_PASSWORD"
+    
+    # Project configuration
+    GCP_PROJECT_ID_NUMERICAL_STAGING = "GCP_PROJECT_ID_NUMERICAL_STAGING"
+    SECRET_MANAGER_PROJECT_ID = "SECRET_MANAGER_PROJECT_ID"
+    GOOGLE_CLOUD_PROJECT = "GOOGLE_CLOUD_PROJECT"
+    PR_NUMBER = "PR_NUMBER"  # For PR-based staging environments
+
+
+class EnvironmentDetector:
+    """Centralized environment detection logic.
+    
+    Provides consistent environment detection across all services.
+    """
+    
+    @staticmethod
+    def get_environment() -> str:
+        """Get the current environment using standardized detection logic.
+        
+        Priority order:
+        1. Explicit ENVIRONMENT variable
+        2. Testing environment detection
+        3. Cloud platform detection
+        4. Default to development
+        
+        Returns:
+            str: The detected environment (guaranteed to be a valid Environment value)
+        """
+        # Check explicit environment variable first (highest priority)
+        env_var = os.environ.get(EnvironmentVariables.ENVIRONMENT, "").lower()
+        if Environment.is_valid(env_var):
+            return env_var
+        
+        # Check for testing environment (but respect explicit ENVIRONMENT setting)
+        if EnvironmentDetector.is_testing_context():
+            return Environment.TESTING.value
+            
+        # Check for cloud environments
+        cloud_env = EnvironmentDetector.detect_cloud_environment()
+        if cloud_env:
+            return cloud_env
+            
+        # Default to development
+        return Environment.DEVELOPMENT.value
+    
+    @staticmethod
+    def is_testing_context() -> bool:
+        """Check if running in test context.
+        
+        Returns:
+            bool: True if in testing context
+        """
+        # If ENVIRONMENT is explicitly set to something other than testing, respect that
+        explicit_env = os.environ.get(EnvironmentVariables.ENVIRONMENT, "").lower()
+        if explicit_env and explicit_env != Environment.TESTING.value:
+            return False
+            
+        return (
+            bool(os.environ.get(EnvironmentVariables.TESTING)) or 
+            bool(os.environ.get(EnvironmentVariables.PYTEST_CURRENT_TEST))
+        )
+    
+    @staticmethod
+    def detect_cloud_environment() -> Optional[str]:
+        """Detect cloud platform environment.
+        
+        Returns:
+            Optional[str]: Environment name if cloud platform detected
+        """
+        # Google Cloud Run detection
+        if EnvironmentDetector.is_cloud_run():
+            return EnvironmentDetector.get_cloud_run_environment()
+            
+        # Google App Engine detection
+        if EnvironmentDetector.is_app_engine():
+            return EnvironmentDetector.get_app_engine_environment()
+            
+        # AWS detection
+        if EnvironmentDetector.is_aws():
+            return EnvironmentDetector.get_aws_environment()
+            
+        # Kubernetes detection
+        if EnvironmentDetector.is_kubernetes():
+            return Environment.PRODUCTION.value
+            
+        return None
+    
+    @staticmethod
+    def is_cloud_run() -> bool:
+        """Check if running on Google Cloud Run."""
+        return bool(os.environ.get(EnvironmentVariables.K_SERVICE))
+    
+    @staticmethod
+    def get_cloud_run_environment() -> str:
+        """Get environment for Cloud Run deployment."""
+        service_name = os.environ.get(EnvironmentVariables.K_SERVICE, "")
+        if "prod" in service_name.lower():
+            return Environment.PRODUCTION.value
+        elif "staging" in service_name.lower():
+            return Environment.STAGING.value
+        
+        # Check for PR-based staging
+        if os.environ.get(EnvironmentVariables.PR_NUMBER):
+            return Environment.STAGING.value
+            
+        return Environment.DEVELOPMENT.value
+    
+    @staticmethod
+    def is_app_engine() -> bool:
+        """Check if running on Google App Engine."""
+        return bool(os.environ.get(EnvironmentVariables.GAE_ENV))
+    
+    @staticmethod
+    def get_app_engine_environment() -> str:
+        """Get environment for App Engine deployment."""
+        gae_env = os.environ.get(EnvironmentVariables.GAE_ENV, "")
+        gae_app = os.environ.get(EnvironmentVariables.GAE_APPLICATION, "")
+        gae_version = os.environ.get(EnvironmentVariables.GAE_VERSION, "")
+        
+        if "staging" in gae_app.lower() or "staging" in gae_version.lower():
+            return Environment.STAGING.value
+        elif gae_env == "standard":
+            return Environment.PRODUCTION.value
+            
+        return Environment.STAGING.value
+    
+    @staticmethod
+    def is_aws() -> bool:
+        """Check if running on AWS."""
+        return (
+            bool(os.environ.get(EnvironmentVariables.AWS_EXECUTION_ENV)) or 
+            bool(os.environ.get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME))
+        )
+    
+    @staticmethod
+    def get_aws_environment() -> str:
+        """Get environment for AWS deployment."""
+        # Check for explicit AWS environment tag
+        aws_env = os.environ.get(EnvironmentVariables.AWS_ENVIRONMENT, "").lower()
+        if Environment.is_valid(aws_env):
+            return aws_env
+        
+        # Check Lambda function name for hints
+        function_name = os.environ.get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME, "")
+        if "prod" in function_name.lower():
+            return Environment.PRODUCTION.value
+        elif "staging" in function_name.lower():
+            return Environment.STAGING.value
+            
+        return Environment.DEVELOPMENT.value
+    
+    @staticmethod
+    def is_kubernetes() -> bool:
+        """Check if running on Kubernetes."""
+        return bool(os.environ.get(EnvironmentVariables.KUBERNETES_SERVICE_HOST))
+
+
+class EnvironmentConfig:
+    """Environment-specific configuration settings.
+    
+    Provides consistent configuration defaults across all environments.
+    """
+    
+    @staticmethod
+    def get_environment_defaults(environment: str) -> Dict[str, Any]:
+        """Get environment-specific configuration defaults.
+        
+        Args:
+            environment: The environment name
+            
+        Returns:
+            Dict with environment-specific settings
+        """
+        configs = {
+            Environment.PRODUCTION.value: {
+                "debug": False,
+                "log_level": "INFO",
+                "cache_enabled": True,
+                "hot_reload": False,
+                "ssl_required": True,
+                "secure_cookies": True
+            },
+            Environment.STAGING.value: {
+                "debug": False,
+                "log_level": "DEBUG",
+                "cache_enabled": True,
+                "hot_reload": False,
+                "ssl_required": True,
+                "secure_cookies": True
+            },
+            Environment.DEVELOPMENT.value: {
+                "debug": True,
+                "log_level": "DEBUG",
+                "cache_enabled": False,
+                "hot_reload": True,
+                "ssl_required": False,
+                "secure_cookies": False
+            },
+            Environment.TESTING.value: {
+                "debug": True,
+                "log_level": "DEBUG",
+                "cache_enabled": False,
+                "hot_reload": False,
+                "ssl_required": False,
+                "secure_cookies": False
+            }
+        }
+        
+        return configs.get(environment, configs[Environment.DEVELOPMENT.value])
+    
+    @staticmethod
+    def get_project_id_for_environment(environment: str) -> str:
+        """Get the appropriate GCP project ID for the environment.
+        
+        Args:
+            environment: The environment name
+            
+        Returns:
+            str: The GCP project ID
+        """
+        project_ids = {
+            Environment.STAGING.value: "701982941522",
+            Environment.PRODUCTION.value: "304612253870",
+            Environment.DEVELOPMENT.value: "304612253870",  # Use prod project for dev
+            Environment.TESTING.value: "304612253870"  # Use prod project for testing
+        }
+        
+        return project_ids.get(environment, project_ids[Environment.DEVELOPMENT.value])
+    
+    @staticmethod
+    def get_clickhouse_password_var(environment: str) -> str:
+        """Get the appropriate ClickHouse password environment variable name.
+        
+        Args:
+            environment: The environment name
+            
+        Returns:
+            str: The environment variable name for ClickHouse password
+        """
+        password_vars = {
+            Environment.DEVELOPMENT.value: EnvironmentVariables.CLICKHOUSE_DEVELOPMENT_PASSWORD,
+            Environment.STAGING.value: EnvironmentVariables.CLICKHOUSE_STAGING_PASSWORD,
+            Environment.PRODUCTION.value: EnvironmentVariables.CLICKHOUSE_PRODUCTION_PASSWORD,
+            Environment.TESTING.value: EnvironmentVariables.CLICKHOUSE_DEVELOPMENT_PASSWORD
+        }
+        
+        return password_vars.get(environment, EnvironmentVariables.CLICKHOUSE_DEVELOPMENT_PASSWORD)
+
+
+# Convenience functions for common environment checks
+def get_current_environment() -> str:
+    """Get the current environment using standardized detection."""
+    return EnvironmentDetector.get_environment()
+
+
+def is_production() -> bool:
+    """Check if running in production environment."""
+    return get_current_environment() == Environment.PRODUCTION.value
+
+
+def is_staging() -> bool:
+    """Check if running in staging environment."""
+    return get_current_environment() == Environment.STAGING.value
+
+
+def is_development() -> bool:
+    """Check if running in development environment."""
+    return get_current_environment() == Environment.DEVELOPMENT.value
+
+
+def is_testing() -> bool:
+    """Check if running in testing environment."""
+    return get_current_environment() == Environment.TESTING.value
+
+
+def get_environment_config() -> Dict[str, Any]:
+    """Get configuration defaults for the current environment."""
+    current_env = get_current_environment()
+    return EnvironmentConfig.get_environment_defaults(current_env)
+
+
+def get_current_project_id() -> str:
+    """Get the appropriate GCP project ID for the current environment."""
+    current_env = get_current_environment()
+    
+    # Check for explicit override first
+    explicit_project_id = os.environ.get(EnvironmentVariables.GOOGLE_CLOUD_PROJECT)
+    if explicit_project_id:
+        return explicit_project_id
+    
+    return EnvironmentConfig.get_project_id_for_environment(current_env)
+
+
+def get_clickhouse_password_var_name() -> str:
+    """Get the ClickHouse password environment variable name for current environment."""
+    current_env = get_current_environment()
+    return EnvironmentConfig.get_clickhouse_password_var(current_env)

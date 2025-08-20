@@ -95,7 +95,7 @@ class ErrorRecoveryStrategy:
     ) -> RecoveryResult:
         """Attempt retry with delay."""
         delay = self.get_recovery_delay(error, context.retry_count)
-        logger.info(f"Retrying after {delay:.2f}s (attempt {context.retry_count + 1})")
+        logger.info("Retrying after {:.2f}s (attempt {})", delay, context.retry_count + 1)
         
         await asyncio.sleep(delay)
         
@@ -113,7 +113,7 @@ class ErrorRecoveryStrategy:
         """Execute fallback operation."""
         try:
             result = await fallback_operation()
-            logger.info(f"Fallback operation succeeded for {context.agent_name}")
+            logger.info("Fallback operation succeeded for {}", context.agent_name)
             
             return RecoveryResult(
                 success=True,
@@ -121,7 +121,7 @@ class ErrorRecoveryStrategy:
                 strategy_used="fallback"
             )
         except Exception as fallback_error:
-            logger.error(f"Fallback operation failed: {fallback_error}")
+            logger.error("Fallback operation failed: {}", fallback_error)
             return RecoveryResult(
                 success=False,
                 strategy_used="fallback_failed",

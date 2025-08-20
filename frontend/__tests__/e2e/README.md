@@ -53,7 +53,7 @@ This directory contains comprehensive E2E tests for Netra Apex frontend, impleme
 
 ### Helper Utilities (`utils/e2e-test-helpers.ts`)
 
-Provides reusable functions following 8-line function rule:
+Provides reusable functions following 25-line function rule:
 
 ```typescript
 // Authentication

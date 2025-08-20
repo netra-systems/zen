@@ -1,6 +1,6 @@
 -- Demo Tables
 -- Purpose: Create demo-related tables for enterprise demonstrations
--- Module: Demo (adheres to 300-line limit)
+-- Module: Demo (adheres to 450-line limit)
 
 -- Demo sessions table
 CREATE TABLE IF NOT EXISTS demo_sessions (

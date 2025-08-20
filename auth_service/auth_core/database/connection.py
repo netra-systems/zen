@@ -42,13 +42,15 @@ class AuthDatabase:
             elif database_url.startswith("postgresql://"):
                 # Convert to async PostgreSQL URL
                 database_url = database_url.replace("postgresql://", "postgresql+asyncpg://")
-                # Convert sslmode to ssl for asyncpg
-                database_url = database_url.replace("sslmode=", "ssl=")
+                # Convert sslmode to ssl for asyncpg (unless it's a Unix socket connection)
+                if "sslmode=" in database_url and "/cloudsql/" not in database_url:
+                    database_url = database_url.replace("sslmode=", "ssl=")
             elif database_url.startswith("postgres://"):
                 # Handle Heroku-style URLs
                 database_url = database_url.replace("postgres://", "postgresql+asyncpg://")
-                # Convert sslmode to ssl for asyncpg
-                database_url = database_url.replace("sslmode=", "ssl=")
+                # Convert sslmode to ssl for asyncpg (unless it's a Unix socket connection)
+                if "sslmode=" in database_url and "/cloudsql/" not in database_url:
+                    database_url = database_url.replace("sslmode=", "ssl=")
         
         # Create async engine with optimizations
         connect_args = {}
@@ -56,12 +58,18 @@ class AuthDatabase:
             # SQLite optimizations for testing
             connect_args = {"check_same_thread": False}
         
-        self.engine = create_async_engine(
-            database_url,
-            poolclass=NullPool,  # Disable pooling for serverless
-            echo=os.getenv("SQL_ECHO", "false").lower() == "true",
-            connect_args=connect_args
-        )
+        logger.info(f"Creating async engine with URL pattern: {database_url.split('@')[0]}@...")
+        
+        try:
+            self.engine = create_async_engine(
+                database_url,
+                poolclass=NullPool,  # Disable pooling for serverless
+                echo=os.getenv("SQL_ECHO", "false").lower() == "true",
+                connect_args=connect_args
+            )
+        except Exception as e:
+            logger.error(f"Failed to create async engine: {e}")
+            raise
         
         # Create session factory
         self.async_session_maker = async_sessionmaker(
@@ -99,6 +107,28 @@ class AuthDatabase:
                 raise
             finally:
                 await session.close()
+    
+    async def is_ready(self):
+        """Check if database is ready to accept connections"""
+        if not self._initialized:
+            try:
+                await self.initialize()
+            except Exception as e:
+                logger.warning(f"Database initialization failed during readiness check: {e}")
+                return False
+        
+        if not self.engine:
+            return False
+        
+        try:
+            # Try to execute a simple query
+            from sqlalchemy import text
+            async with self.engine.begin() as conn:
+                await conn.execute(text("SELECT 1"))
+            return True
+        except Exception as e:
+            logger.warning(f"Database readiness check failed: {e}")
+            return False
     
     async def close(self):
         """Close database connection"""

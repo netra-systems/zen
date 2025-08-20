@@ -90,7 +90,7 @@ if (options.suites.length === 0) {
 }
 
 function printHelp() {
-  // console output removed: console.log(`
+  console.log(`
 Frontend Test Suite Runner
 
 Usage: node test-suite-runner.js [options] [suite-names]
@@ -129,12 +129,14 @@ Examples:
 
 // Run test suites
 async function runTestSuites() {
-  // console output removed: console.log('🧪 Test Suite Runner');
-  // console output removed: console.log('=' .repeat(60));
-  // console output removed: console.log(`Suites to run: ${options.suites.join(', ')}`);
-  // console output removed: console.log(`Parallel mode: ${options.parallel}`);
-  // console output removed: console.log(`Max parallel: ${options.maxParallel}`);
-  // console output removed: console.log('=' .repeat(60) + '\n');
+  if (!options.silent) {
+    console.log('🧪 Test Suite Runner');
+    console.log('='.repeat(60));
+    console.log(`Suites to run: ${options.suites.join(', ')}`);
+    console.log(`Parallel mode: ${options.parallel}`);
+    console.log(`Max parallel: ${options.maxParallel}`);
+    console.log('='.repeat(60) + '\n');
+  }
   
   const startTime = Date.now();
   const results = {};
@@ -153,7 +155,9 @@ async function runTestSuites() {
     // Run each priority group
     for (const priority of Object.keys(priorityGroups).sort()) {
       const suites = priorityGroups[priority];
-      // console output removed: console.log(`\n🎯 Running Priority ${priority} suites: ${suites.join(', ')}\n`);
+      if (!options.silent) {
+        console.log(`\n🎯 Running Priority ${priority} suites: ${suites.join(', ')}\n`);
+      }
       
       // Calculate parallel slots based on suite weights
       const chunks = [];
@@ -182,7 +186,9 @@ async function runTestSuites() {
         chunkResults.forEach((result, i) => {
           results[chunk[i]] = result;
           if (options.bail && !result.success) {
-            // console output removed: console.log(`\n❌ Suite ${chunk[i]} failed. Bailing out.`);
+            if (!options.silent) {
+              console.log(`\n❌ Suite ${chunk[i]} failed. Bailing out.`);
+            }
             process.exit(1);
           }
         });
@@ -191,10 +197,14 @@ async function runTestSuites() {
   } else {
     // Sequential execution
     for (const suite of options.suites) {
-      // console output removed: console.log(`\n🎯 Running suite: ${suite}\n`);
+      if (!options.silent) {
+        console.log(`\n🎯 Running suite: ${suite}\n`);
+      }
       results[suite] = await runSuite(suite);
       if (options.bail && !results[suite].success) {
-        // console output removed: console.log(`\n❌ Suite ${suite} failed. Bailing out.`);
+        if (!options.silent) {
+          console.log(`\n❌ Suite ${suite} failed. Bailing out.`);
+        }
         process.exit(1);
       }
     }
@@ -202,27 +212,33 @@ async function runTestSuites() {
   
   // Print summary
   const duration = Date.now() - startTime;
-  // console output removed: console.log('\n' + '='.repeat(60));
-  // console output removed: console.log('📊 FINAL SUMMARY');
-  // console output removed: console.log('='.repeat(60));
+  if (!options.silent) {
+    console.log('\n' + '='.repeat(60));
+    console.log('📊 FINAL SUMMARY');
+    console.log('='.repeat(60));
+  }
   
   let totalPassed = 0;
   let totalFailed = 0;
   
   Object.entries(results).forEach(([suite, result]) => {
     const status = result.success ? '✅' : '❌';
-    // console output removed: console.log(`${status} ${suite}: ${result.duration}ms`);
+    if (!options.silent) {
+      console.log(`${status} ${suite}: ${result.duration}ms`);
+    }
     if (result.success) totalPassed++;
     else totalFailed++;
   });
   
-  // console output removed: console.log('='.repeat(60));
-  // console output removed: console.log(`Total duration: ${(duration / 1000).toFixed(2)}s`);
-  // console output removed: console.log(`Suites passed: ${totalPassed}/${options.suites.length}`);
-  if (totalFailed > 0) {
-    // console output removed: console.log(`Suites failed: ${totalFailed}`);
+  if (!options.silent) {
+    console.log('='.repeat(60));
+    console.log(`Total duration: ${(duration / 1000).toFixed(2)}s`);
+    console.log(`Suites passed: ${totalPassed}/${options.suites.length}`);
+    if (totalFailed > 0) {
+      console.log(`Suites failed: ${totalFailed}`);
+    }
+    console.log('='.repeat(60) + '\n');
   }
-  // console output removed: console.log('='.repeat(60) + '\n');
   
   process.exit(totalFailed > 0 ? 1 : 0);
 }
@@ -251,7 +267,9 @@ function runSuite(suiteName) {
     
     let killed = false;
     const timer = setTimeout(() => {
-      // console output removed: console.log(`\n⏱️ Suite ${suiteName} timed out after ${TEST_SUITES[suiteName].timeout}s`);
+      if (!options.silent) {
+        console.log(`\n⏱️ Suite ${suiteName} timed out after ${TEST_SUITES[suiteName].timeout}s`);
+      }
       killed = true;
       child.kill('SIGTERM');
     }, timeout);
@@ -269,7 +287,9 @@ function runSuite(suiteName) {
     
     child.on('error', (err) => {
       clearTimeout(timer);
-      // console output removed: console.log(`Error running suite ${suiteName}:`, err);
+      if (!options.silent) {
+        console.log(`Error running suite ${suiteName}:`, err);
+      }
       resolve({
         success: false,
         duration: Date.now() - startTime,
@@ -281,6 +301,8 @@ function runSuite(suiteName) {
 
 // Run the test suites
 runTestSuites().catch(err => {
-  // console output removed: console.log('Fatal error:', err);
+  if (!options.silent) {
+    console.log('Fatal error:', err);
+  }
   process.exit(1);
 });

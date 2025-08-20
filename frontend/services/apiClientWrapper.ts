@@ -26,10 +26,10 @@ class ApiClientWrapper {
   private connectionCheckPromise: Promise<boolean> | null = null;
   
   constructor() {
-    // Use secure API configuration to prevent mixed content errors
-    // In browser, use empty string to make relative requests (goes through Next.js proxy)
-    // In server-side contexts, use the full backend URL
-    this.baseURL = typeof window !== 'undefined' ? '' : secureApiConfig.apiUrl;
+    // Use window.location.origin for browser, full backend URL for SSR
+    this.baseURL = typeof window !== 'undefined' 
+      ? window.location.origin 
+      : secureApiConfig.apiUrl;
     this.checkConnection();
   }
 
@@ -59,6 +59,11 @@ class ApiClientWrapper {
       this.isConnected = false;
       return false;
     }
+  }
+
+  private validateUrl(url: string): string {
+    // Remove double slashes except after protocol
+    return url.replace(/([^:]\/)\/+/g, "$1");
   }
 
   private async sleep(ms: number): Promise<void> {
@@ -103,6 +108,8 @@ class ApiClientWrapper {
       });
     }
 
+    const validatedUrl = this.validateUrl(fullUrl.toString());
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...config?.headers,
@@ -139,7 +146,7 @@ class ApiClientWrapper {
         }
       }
 
-      const response = await fetch(fullUrl.toString(), options).catch(async (error) => {
+      const response = await fetch(validatedUrl, options).catch(async (error) => {
         this.isConnected = false;
         await this.checkConnection();
         throw new Error(`Network error: ${error.message || 'Failed to fetch'}`);
@@ -187,7 +194,7 @@ class ApiClientWrapper {
     } catch (error) {
       if (error instanceof Error) {
         logger.error('API Request failed:', {
-          url: fullUrl.toString(),
+          url: validatedUrl,
           method,
           error: error.message
         });

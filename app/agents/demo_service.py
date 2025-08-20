@@ -13,7 +13,7 @@ Demo service backward compatibility module.
 
 DEPRECATED: This file provides backward compatibility imports.
 All classes have been moved to the demo_service/ module directory
-for better organization and compliance with the 300-line limit.
+for better organization and compliance with the 450-line limit.
 
 New imports should use:
 from app.agents.demo_service import DemoService, DemoTriageService, etc.

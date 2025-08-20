@@ -19,23 +19,21 @@ class TestReferenceManagement:
         }
         
         # Mock the created reference with all required fields
-        from datetime import datetime
-        mock_created_reference = MagicMock()
-        mock_created_reference.id = "ref-new"
-        mock_created_reference.name = reference_data["name"]
-        mock_created_reference.friendly_name = reference_data["friendly_name"]
-        mock_created_reference.type = reference_data["type"]
-        mock_created_reference.value = reference_data["value"]
-        mock_created_reference.description = reference_data["description"]
-        mock_created_reference.version = reference_data["version"]
-        mock_created_reference.created_at = datetime.now()
-        mock_created_reference.updated_at = datetime.now()
+        from datetime import datetime, timezone
+        current_time = datetime.now(timezone.utc)
         
         # Setup mock session
         mock_session = AsyncMock()
         mock_session.add = MagicMock()
         mock_session.commit = AsyncMock()
-        mock_session.refresh = AsyncMock(side_effect=lambda ref: setattr(ref, 'id', 'ref-new'))
+        
+        # The refresh method should set the auto-generated fields
+        async def mock_refresh(ref):
+            ref.id = 'ref-new'
+            ref.created_at = current_time
+            ref.updated_at = current_time
+        
+        mock_session.refresh = AsyncMock(side_effect=mock_refresh)
         
         # Create generator for session (not async since TestClient is sync)
         def mock_get_db_session():
@@ -158,6 +156,11 @@ class TestReferenceManagement:
         mock_session = AsyncMock()
         mock_reference = MagicMock()
         mock_reference.id = "ref-123"
+        mock_reference.name = "test_reference"
+        mock_reference.friendly_name = "Original Name"
+        mock_reference.description = "Test description"
+        mock_reference.type = "document"
+        mock_reference.version = "1.0"
         mock_result = MagicMock()
         mock_result.scalar_one_or_none.return_value = mock_reference
         mock_session.execute = AsyncMock(return_value=mock_result)

@@ -2,7 +2,7 @@
  * Logout Flow Core Tests
  * Tests basic logout button click, API calls, and timing requirements
  * BUSINESS VALUE: Security & compliance (Free->Paid conversion via trust)
- * Following 300-line limit and 8-line function requirements
+ * Following 450-line limit and 25-line function requirements
  */
 
 import React from 'react';
@@ -33,7 +33,7 @@ jest.mock('next/navigation', () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
-// Test helpers following 8-line limit
+// Test helpers following 25-line limit
 const createMockAuthConfig = () => ({
   development_mode: false,
   google_client_id: 'test-client-id',

@@ -2,7 +2,7 @@
 
 Core utilities for agent startup end-to-end testing.
 Provides service orchestration and test coordination capabilities.
-Split into focused modules to maintain 300-line architectural limit.
+Split into focused modules to maintain 450-line architectural limit.
 
 Business Value Justification (BVJ):
 - Segment: Growth & Enterprise 

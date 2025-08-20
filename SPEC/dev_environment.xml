@@ -180,10 +180,10 @@
       </setup-steps>
       
       <script-updates>
-        <update file="setup.sh">
+        <update file="setup.py">
           <change>Fixed path to install_dev_env.py: Now uses scripts/install_dev_env.py</change>
         </update>
-        <update file="start_dev.sh">
+        <update file="start_dev.py">
           <change>Added proper script for starting development environment</change>
         </update>
         <update file="run_migrations.py">

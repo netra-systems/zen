@@ -2,7 +2,7 @@
 Startup Checks Module
 
 Comprehensive startup check system split into focused components.
-Each module handles specific check categories under 300-line limit.
+Each module handles specific check categories under 450-line limit.
 """
 
 from .models import StartupCheckResult

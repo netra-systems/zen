@@ -39,7 +39,7 @@ TEST_CATEGORIES = {
         "app/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error",
         "app/tests/core/test_config_manager.py::TestConfigManager::test_initialization",
         "app/tests/services/test_security_service.py::test_encrypt_and_decrypt",
-        "tests/test_system_startup.py::TestSystemStartup::test_configuration_loading"
+        "app/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading"
     ],
 }
 

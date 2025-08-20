@@ -1,6 +1,6 @@
 """WebSocket Performance Monitor Metric Collector.
 
-Optimized metric collection with 8-line function limit compliance.
+Optimized metric collection with 25-line function limit compliance.
 """
 
 import statistics

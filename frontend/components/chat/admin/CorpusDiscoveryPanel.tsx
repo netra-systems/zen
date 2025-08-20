@@ -2,7 +2,7 @@
  * Corpus Discovery Panel Component
  * 
  * Interactive UI for discovering corpus options and configurations.
- * Follows glassmorphic design with 300-line limit and 8-line function limit.
+ * Follows glassmorphic design with 450-line limit and 25-line function limit.
  */
 
 import React, { useState, useCallback, useEffect } from 'react';

@@ -1,6 +1,6 @@
 """Quality configuration helper - Weight and threshold definitions.
 
-Extracted from interfaces_quality.py to maintain 300-line limit.
+Extracted from interfaces_quality.py to maintain 450-line limit.
 Contains all weight mappings and threshold configurations.
 """
 

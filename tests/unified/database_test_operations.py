@@ -1,13 +1,13 @@
 """
 Database Operations for Tests
 Handles CRUD operations across all databases.
-ARCHITECTURE: Under 300 lines, 8-line functions max
+ARCHITECTURE: Under 300 lines, 25-line functions max
 """
 
 import json
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Any
-from database_test_connections import DatabaseConnectionManager
+from .database_test_connections import DatabaseConnectionManager
 
 
 class UserDataOperations:

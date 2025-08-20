@@ -2,7 +2,7 @@
 Schema Synchronizer
 
 Main schema synchronization orchestrator.
-Maintains 8-line function limit and modular design.
+Maintains 25-line function limit and modular design.
 """
 
 import json

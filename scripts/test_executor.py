@@ -2,7 +2,7 @@
 """
 Test Executor Module
 Handles test execution and autonomous review operations
-Complies with 300-line limit and 8-line function constraint
+Complies with 450-line limit and 25-line function constraint
 """
 
 import subprocess

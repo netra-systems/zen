@@ -2,7 +2,7 @@
 Process management tests for the dev launcher.
 
 Tests cover ProcessManager, LogStreamer, and resource management.
-All functions follow 8-line maximum rule per CLAUDE.md.
+All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
 import unittest

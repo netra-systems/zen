@@ -212,7 +212,7 @@ Add to workflow:
 ## Maintenance
 
 ### Adding New Tests
-1. Follow 8-line function limit (Module Architecture Compliance)
+1. Follow 25-line function limit (Module Architecture Compliance)
 2. Use descriptive test names with step-by-step comments
 3. Include both positive and negative test cases
 4. Add performance considerations for large-scale operations

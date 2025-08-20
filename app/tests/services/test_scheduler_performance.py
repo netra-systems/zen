@@ -1,7 +1,7 @@
 """
 Performance tests for Supply Research Scheduler
 Tests memory usage, execution metrics, and resource management
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

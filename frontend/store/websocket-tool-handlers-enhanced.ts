@@ -1,4 +1,4 @@
-// Enhanced tool handlers with lifecycle management - 8-line functions max
+// Enhanced tool handlers with lifecycle management - 25-line functions max
 // Replaces websocket-tool-handlers.ts with proper tool tracking
 
 import { mapEventPayload } from '@/utils/event-payload-mapper';

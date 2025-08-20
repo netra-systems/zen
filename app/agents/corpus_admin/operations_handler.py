@@ -2,7 +2,7 @@
 Corpus Operation Handler - Main Dispatcher
 
 Handles routing of corpus operations to appropriate handlers.
-Maintains 8-line function limit per operation handler.
+Maintains 25-line function limit per operation handler.
 """
 
 from typing import Dict, Any

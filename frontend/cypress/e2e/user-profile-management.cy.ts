@@ -2,7 +2,7 @@ import { WebSocketMessage } from '@/types/chat';
 
 /**
  * User Profile Management E2E Tests
- * Split from user-profile-settings.cy.ts for 300-line compliance
+ * Split from user-profile-settings.cy.ts for 450-line compliance
  * 
  * BVJ: Growth & Enterprise - User retention through profile management
  * Value Impact: Profile functionality drives user engagement

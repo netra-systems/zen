@@ -8,7 +8,7 @@ Frontend → Backend → Agent → Storage → WebSocket Response
 NO MOCKING - Uses real file processing and agent analysis.
 Execution time: < 10 seconds for complete pipeline validation.
 
-Modular architecture following 300-line and 8-line function limits.
+Modular architecture following 450-line and 25-line function limits.
 """
 
 import asyncio

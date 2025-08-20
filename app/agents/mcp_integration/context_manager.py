@@ -1,7 +1,7 @@
 """MCP Context Manager for Agent Integration.
 
 Manages MCP server connections, tool discovery, permissions, and context injection for agents.
-Follows strict 300-line limit and 8-line function design.
+Follows strict 450-line limit and 25-line function design.
 """
 
 from typing import Dict, List, Optional, Any, Set

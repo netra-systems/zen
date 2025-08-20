@@ -11,7 +11,7 @@ REQUIREMENTS:
 - Complete user journey: Registration → Profile Setup → First Optimization → AI Response
 - Real service integration (Auth Service, Backend, Frontend simulation)
 - Must complete in <10 seconds (business requirement for user experience)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 - No mocking of core business logic, only infrastructure
 """
 import pytest

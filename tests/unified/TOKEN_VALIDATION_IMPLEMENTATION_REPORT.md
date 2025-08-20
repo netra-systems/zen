@@ -54,12 +54,12 @@ Successfully implemented comprehensive JWT token validation tests in `tests/unif
 
 ## Architecture Compliance
 
-### ✅ 300-Line Module Limit
+### ✅ 450-line Module Limit
 - **File size**: 273 significant lines (compliant)
 - **Module focus**: Single responsibility (JWT validation)
 - **Code organization**: Clean class-based structure
 
-### ✅ 8-Line Function Limit
+### ✅ 25-line Function Limit
 - **All functions**: ≤ 8 lines each
 - **Helper methods**: Properly decomposed
 - **Test methods**: Focused and concise
@@ -169,7 +169,7 @@ python -m pytest tests/unified/test_token_validation.py --tb=short
 Successfully implemented enterprise-grade JWT token validation testing that:
 - ✅ Covers all 5 required test scenarios
 - ✅ Adds 4 additional enterprise security features
-- ✅ Maintains architectural compliance (300-line modules, 8-line functions)
+- ✅ Maintains architectural compliance (450-line modules, 25-line functions)
 - ✅ Uses real services without test stubs
 - ✅ Provides clear business value justification
 

@@ -7,7 +7,7 @@ import json
 import uuid
 from datetime import datetime, UTC
 from typing import Dict, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from ...db import models_postgres as models
 from ... import schemas
@@ -29,7 +29,7 @@ class CorpusCreationService(BaseCorpusService):
 
     async def create_corpus(
         self,
-        db: Session,
+        db: AsyncSession,
         corpus_data: schemas.CorpusCreate,
         user_id: str,
         content_source: ContentSource = ContentSource.UPLOAD
@@ -79,7 +79,7 @@ class CorpusCreationService(BaseCorpusService):
             "version": 1
         }
     
-    def _persist_corpus_to_db(self, db: Session, db_corpus: models.Corpus, 
+    def _persist_corpus_to_db(self, db: AsyncSession, db_corpus: models.Corpus, 
                              corpus_name: str, user_id: str) -> None:
         """Persist corpus to database with error handling"""
         try:
@@ -98,12 +98,12 @@ class CorpusCreationService(BaseCorpusService):
         )
     
     def _schedule_clickhouse_table_creation(self, corpus_id: str, table_name: str, 
-                                          db: Session) -> None:
+                                          db: AsyncSession) -> None:
         """Schedule ClickHouse table creation asynchronously"""
         task = self.clickhouse_ops.create_corpus_table(corpus_id, table_name, db)
         asyncio.create_task(task)
     
-    def _persist_and_schedule_creation(self, db: Session, db_corpus: models.Corpus,
+    def _persist_and_schedule_creation(self, db: AsyncSession, db_corpus: models.Corpus,
                                      corpus_name: str, user_id: str, corpus_id: str, 
                                      table_name: str) -> None:
         """Persist corpus to database and schedule ClickHouse table creation"""

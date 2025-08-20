@@ -1,7 +1,7 @@
 /**
  * UI Components Accessibility Test Suite
  * Tests Card, Badge, and other UI component accessibility compliance
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)

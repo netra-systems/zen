@@ -2,7 +2,7 @@
 LLM Mock Client for Testing - Intelligent mock responses
 
 Provides realistic mock responses for LLM testing when real clients are unavailable.
-Follows 300-line/8-line limits and provides model-specific response patterns.
+Follows 450-line/25-line limits and provides model-specific response patterns.
 """
 import asyncio
 import random

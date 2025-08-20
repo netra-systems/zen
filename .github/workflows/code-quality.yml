@@ -85,15 +85,15 @@ jobs:
           
           if [[ "${{ env.ACT_MODE }}" == "true" ]]; then
             echo "🧪 ACT: Mock architecture compliance check"
-            echo "- 300-line limit: 2 violations (mock)"
-            echo "- 8-line function limit: 1 violation (mock)"
+            echo "- 450-line limit: 2 violations (mock)"
+            echo "- 25-line function limit: 1 violation (mock)"
             echo "arch_violations=3" >> $GITHUB_OUTPUT
             echo "arch_score=7" >> $GITHUB_OUTPUT
           else
             # Run actual architecture compliance check
             VIOLATIONS=0
             
-            # Check for 300-line files
+            # Check for 450-line files
             echo "Checking for files exceeding 300 lines..."
             LONG_FILES=$(find app/ -name "*.py" -exec wc -l {} + | awk '$1 > 300 {print $2}' | wc -l)
             VIOLATIONS=$((VIOLATIONS + LONG_FILES))

@@ -13,13 +13,13 @@ from fastapi import FastAPI
 
 from app.logging_config import central_logger
 from app.utils.multiprocessing_cleanup import setup_multiprocessing
-from app.config import settings
+from app.config import settings, get_config
 from app.services.key_manager import KeyManager
 from app.services.security_service import SecurityService
 from app.llm.llm_manager import LLMManager
 from app.background import BackgroundTaskManager
 from app.redis_manager import redis_manager
-from app.db.postgres import async_session_factory
+from app.db.postgres import initialize_postgres
 from app.db.migration_utils import (
     get_sync_database_url, get_current_revision, get_head_revision,
     create_alembic_config, needs_migration, execute_migration,
@@ -106,8 +106,9 @@ def _perform_database_validation(logger: logging.Logger) -> None:
 
 def run_database_migrations(logger: logging.Logger) -> None:
     """Run database migrations if not in test mode."""
-    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
-    skip_migrations = os.getenv("SKIP_MIGRATIONS", "false").lower() == "true"
+    config = get_config()
+    fast_startup = config.fast_startup_mode.lower() == "true"
+    skip_migrations = config.skip_migrations.lower() == "true"
     
     if 'pytest' not in sys.modules and not fast_startup and not skip_migrations:
         _execute_migrations(logger)
@@ -158,7 +159,29 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
 
 def setup_database_connections(app: FastAPI) -> None:
     """Setup PostgreSQL connection factory."""
-    app.state.db_session_factory = async_session_factory
+    logger = central_logger.get_logger(__name__)
+    logger.info("Setting up database connections...")
+    try:
+        logger.debug("Calling initialize_postgres()...")
+        async_session_factory = initialize_postgres()
+        logger.debug(f"initialize_postgres() returned: {async_session_factory}")
+        
+        if async_session_factory is None:
+            raise RuntimeError("initialize_postgres() returned None - database initialization failed")
+            
+        app.state.db_session_factory = async_session_factory
+        logger.info("Database session factory successfully set on app.state")
+        
+        # Verify it's accessible
+        if hasattr(app.state, 'db_session_factory') and app.state.db_session_factory is not None:
+            logger.debug("Verified: app.state.db_session_factory is accessible and not None")
+        else:
+            logger.error("ERROR: app.state.db_session_factory is None after setting!")
+            
+    except Exception as e:
+        # Log the error and re-raise to fail startup early
+        logger.critical(f"Failed to setup database connections: {e}")
+        raise RuntimeError(f"Database initialization failed: {e}") from e
 
 
 def initialize_core_services(app: FastAPI, logger: logging.Logger) -> KeyManager:
@@ -181,7 +204,8 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
 
 async def initialize_clickhouse(logger: logging.Logger) -> None:
     """Initialize ClickHouse tables based on service mode."""
-    clickhouse_mode = os.getenv('CLICKHOUSE_MODE', 'shared').lower()
+    config = get_config()
+    clickhouse_mode = config.clickhouse_mode.lower()
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
         await _setup_clickhouse_tables(logger, clickhouse_mode)
     else:
@@ -257,17 +281,22 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     """Run application startup checks."""
-    disable_checks = os.getenv("DISABLE_STARTUP_CHECKS", "false").lower() == "true"
-    fast_startup = os.getenv("FAST_STARTUP_MODE", "false").lower() == "true"
+    config = get_config()
+    disable_checks = config.disable_startup_checks.lower() == "true"
+    fast_startup = config.fast_startup_mode.lower() == "true"
     
     if disable_checks or fast_startup:
         logger.info("Skipping startup health checks (fast startup mode)")
         return
     
+    logger.info("Starting comprehensive startup health checks...")
     from app.startup_checks import run_startup_checks
     try:
-        await run_startup_checks(app)
+        logger.debug("Calling run_startup_checks...")
+        results = await run_startup_checks(app)
+        logger.info(f"Startup checks completed: {results.get('passed', 0)}/{results.get('total_checks', 0)} passed")
     except Exception as e:
+        logger.error(f"Startup health checks failed with exception: {e}")
         await _handle_startup_failure(logger, e)
 
 

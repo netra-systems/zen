@@ -1,7 +1,7 @@
 """
 Core job execution tests for Supply Research Scheduler
 Tests basic job scheduling, execution, and resource cleanup
-COMPLIANCE: 300-line max file, 8-line max functions
+COMPLIANCE: 450-line max file, 25-line max functions
 """
 
 import pytest

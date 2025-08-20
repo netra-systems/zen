@@ -1,6 +1,6 @@
 /**
  * User Password Management E2E Tests
- * Split from user-security-settings.cy.ts for 300-line compliance
+ * Split from user-security-settings.cy.ts for 450-line compliance
  * 
  * BVJ: Enterprise segment - Password security drives enterprise compliance
  * Value Impact: Password controls = security compliance = Enterprise trust

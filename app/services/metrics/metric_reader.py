@@ -1,6 +1,6 @@
 """
 Metric reader module for accessing and filtering metric data.
-Handles data retrieval operations with 8-line function limit.
+Handles data retrieval operations with 25-line function limit.
 """
 
 from datetime import datetime, timedelta

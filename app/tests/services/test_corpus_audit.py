@@ -2,7 +2,7 @@
 Tests for Corpus Audit Service
 
 Comprehensive tests for audit logging, search, filtering, and reporting functionality.
-Follows 300-line limit and async patterns.
+Follows 450-line limit and async patterns.
 """
 
 import pytest

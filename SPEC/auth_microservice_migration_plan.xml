@@ -36,7 +36,7 @@
             <principle>Stateless JWT tokens with Redis session cache</principle>
             <principle>Service-to-service auth via internal tokens</principle>
             <principle>Zero-trust security model</principle>
-            <principle>300-line module limit maintained</principle>
+            <principle>450-line module limit maintained</principle>
         </principles>
         
         <service_boundaries>

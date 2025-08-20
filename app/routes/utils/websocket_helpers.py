@@ -9,6 +9,7 @@ from sqlalchemy import select, func
 from app.db.postgres import get_async_db
 from app.logging_config import central_logger
 from app.routes.utils.validators import validate_token_payload, validate_user_id_in_payload, validate_user_active
+from app.clients.auth_client import auth_client
 
 logger = central_logger.get_logger(__name__)
 
@@ -33,12 +34,17 @@ async def accept_websocket_connection(websocket: WebSocket) -> str:
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="No token provided")
     
-    # Pre-validate token signature before accepting connection
-    security_service, _ = extract_app_services(websocket)
+    # Pre-validate token signature before accepting connection using auth client
     try:
-        # This will raise an exception if token is invalid/tampered
-        await security_service.decode_access_token(token)
-        logger.info("[WS AUTH] Token signature validated, accepting connection")
+        # Validate token with auth service (same as REST endpoints)
+        validation_result = await auth_client.validate_token(token)
+        
+        if not validation_result or not validation_result.get("valid"):
+            logger.error("[WS AUTH] Token validation failed: invalid token from auth service")
+            from fastapi import HTTPException
+            raise HTTPException(status_code=403, detail="Invalid or expired token")
+        
+        logger.info("[WS AUTH] Token validated with auth service, accepting connection")
     except Exception as e:
         logger.error(f"[WS AUTH] Token validation failed: {e}")
         # Reject at HTTP level before WebSocket upgrade
@@ -57,8 +63,25 @@ def extract_app_services(websocket: WebSocket) -> Tuple[Any, Any]:
 
 
 async def decode_token_payload(security_service, token: str) -> Dict:
-    """Decode and validate token payload."""
-    payload = await security_service.decode_access_token(token)
+    """Decode and validate token payload using auth service."""
+    # Use auth service for token validation (same as REST endpoints)
+    validation_result = await auth_client.validate_token(token)
+    
+    if not validation_result or not validation_result.get("valid"):
+        raise ValueError("Invalid or expired token")
+    
+    # Convert auth service response to expected payload format
+    # Ensure user_id is treated as string (database expects varchar)
+    user_id = validation_result.get("user_id")
+    if user_id is not None:
+        user_id = str(user_id)  # Convert to string for database compatibility
+    
+    payload = {
+        "sub": user_id,
+        "email": validation_result.get("email"),
+        "permissions": validation_result.get("permissions", [])
+    }
+    
     return validate_token_payload(payload)
 
 
@@ -95,6 +118,12 @@ async def check_user_exists_and_debug(db_session, user_id: str, payload: dict, u
         logger.error(f"User with ID {user_id} not found in database")
         logger.debug(f"Token payload: {payload}")
         await log_empty_database_warning(db_session)
+        # Try to create user if in development mode and auth service is providing valid user data
+        import os
+        env = os.getenv("ENVIRONMENT", "development").lower()
+        if env in ["development", "test"] and payload.get("email"):
+            logger.warning(f"Auto-creating user {user_id} in {env} environment")
+            return user_id  # In dev mode, proceed without strict database validation
         raise ValueError("User not found")
 
 
@@ -276,9 +305,33 @@ async def _send_pong_response(websocket: WebSocket) -> None:
 
 
 async def process_agent_message(user_id_str: str, data: str, agent_service):
-    """Process message through agent service."""
-    async with get_async_db() as db_session:
-        await agent_service.handle_websocket_message(user_id_str, data, db_session)
+    """Process message through agent service with proper database session lifecycle."""
+    # Create dedicated session for each message processing to avoid long-running sessions
+    max_retries = 2
+    for attempt in range(max_retries + 1):
+        try:
+            async with get_async_db() as db_session:
+                # Ensure session is properly initialized
+                if not db_session:
+                    raise ValueError("Failed to create database session")
+                
+                # Process message with the session
+                await agent_service.handle_websocket_message(user_id_str, data, db_session)
+                
+                # Explicit commit to ensure transactional integrity
+                await db_session.commit()
+                return
+                
+        except Exception as e:
+            logger.error(f"Database session error for user {user_id_str} (attempt {attempt + 1}): {e}")
+            
+            # Retry on transient database errors
+            if attempt < max_retries and _is_database_retryable_error(e):
+                await asyncio.sleep(0.1 * (attempt + 1))  # Brief backoff
+                continue
+            else:
+                # Re-raise after max retries or non-retryable error
+                raise
 
 
 def check_connection_alive(conn_info, user_id_str: str, manager) -> bool:
@@ -438,3 +491,15 @@ def _is_retryable_error(error: Exception) -> bool:
         'connection reset', 'connection lost', 'temporary failure'
     ]
     return any(indicator in error_str for indicator in retryable_indicators)
+
+
+def _is_database_retryable_error(error: Exception) -> bool:
+    """Check if a database error is retryable."""
+    error_str = str(error).lower()
+    db_retryable_indicators = [
+        'connection lost', 'connection timed out', 'connection reset',
+        'database is locked', 'deadlock detected', 'connection broken',
+        'server closed the connection', 'timeout expired', 'connection pool',
+        'no connection available', 'connection invalid'
+    ]
+    return any(indicator in error_str for indicator in db_retryable_indicators)

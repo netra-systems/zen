@@ -1,6 +1,6 @@
 /**
  * WebSocket Stress Testing
- * Extracted from websocket-performance.test.tsx to maintain 300-line limit
+ * Extracted from websocket-performance.test.tsx to maintain 450-line limit
  * Tests stress scenarios, memory management, and rapid operations
  * Focuses on edge cases and resource management
  */

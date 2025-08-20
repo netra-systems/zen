@@ -1,6 +1,6 @@
 /**
  * User Session Revocation E2E Tests
- * Split from user-device-sessions.cy.ts for 300-line compliance
+ * Split from user-device-sessions.cy.ts for 450-line compliance
  * 
  * BVJ: Enterprise segment - Session control drives security compliance
  * Value Impact: Remote session control = security incident response

@@ -32,8 +32,7 @@
                 <name>Remote GCP Staging Deployment</name>
                 <description>Deploy directly to GCP staging environment from local machine</description>
                 <scripts>
-                    <script platform="windows">deploy_staging_remote.ps1</script>
-                    <script platform="unix">deploy_staging_remote.sh</script>
+                    <script platform="all">deploy_staging_remote.py</script>
                 </scripts>
                 <capabilities>
                     <capability>Build Docker images locally</capability>
@@ -48,7 +47,7 @@
                 <name>Local Docker Staging</name>
                 <description>Run staging environment locally using Docker Compose</description>
                 <scripts>
-                    <script platform="all">deploy_staging_local.sh</script>
+                    <script platform="all">deploy_staging_local.py</script>
                 </scripts>
                 <capabilities>
                     <capability>Run full stack locally with Docker Compose</capability>
@@ -149,42 +148,42 @@
             <example id="deploy-new">
                 <name>Deploy New PR Environment</name>
                 <platform>Windows PowerShell</platform>
-                <command>.\deploy_staging_remote.ps1 -Action deploy -PrNumber 123</command>
+                <command>python deploy_staging_remote.py --action deploy --pr-number 123</command>
                 <description>Creates a new staging environment for PR 123</description>
             </example>
             
             <example id="deploy-branch">
                 <name>Deploy Current Branch</name>
                 <platform>Unix/Linux</platform>
-                <command>./deploy_staging_remote.sh deploy</command>
+                <command>python deploy_staging_remote.py deploy</command>
                 <description>Deploys current git branch to staging</description>
             </example>
             
             <example id="check-status">
                 <name>Check Deployment Status</name>
                 <platform>Windows PowerShell</platform>
-                <command>.\deploy_staging_remote.ps1 -Action status -PrNumber 123</command>
+                <command>python deploy_staging_remote.py --action status --pr-number 123</command>
                 <description>Checks the status of PR 123 deployment</description>
             </example>
             
             <example id="restart-services">
                 <name>Restart Services</name>
                 <platform>Unix/Linux</platform>
-                <command>./deploy_staging_remote.sh restart 123</command>
+                <command>python deploy_staging_remote.py restart 123</command>
                 <description>Restarts services for PR 123 environment</description>
             </example>
             
             <example id="destroy-environment">
                 <name>Destroy Environment</name>
                 <platform>Windows PowerShell</platform>
-                <command>.\deploy_staging_remote.ps1 -Action destroy -PrNumber 123</command>
+                <command>python deploy_staging_remote.py --action destroy --pr-number 123</command>
                 <description>Tears down PR 123 staging environment</description>
             </example>
             
             <example id="skip-build">
                 <name>Deploy with Existing Images</name>
                 <platform>Unix/Linux</platform>
-                <command>./deploy_staging_remote.sh deploy 123 main false true</command>
+                <command>python deploy_staging_remote.py deploy 123 main --no-build --use-existing</command>
                 <description>Deploy PR 123 skipping Docker build (uses existing images)</description>
             </example>
         </section>

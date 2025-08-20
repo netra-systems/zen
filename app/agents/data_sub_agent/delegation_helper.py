@@ -1,6 +1,6 @@
 """Delegation Helper for DataSubAgent
 
-Separates delegation logic to maintain 300-line limit.
+Separates delegation logic to maintain 450-line limit.
 Handles method resolution and delegation patterns.
 
 Business Value: Clean delegation patterns for modular architecture.

@@ -7,6 +7,9 @@ Provides secret configuration, categorization, and static defaults.
 import os
 import logging
 from typing import Dict, Set, List, Tuple, Optional
+from app.core.environment_constants import (
+    Environment, EnvironmentVariables, get_current_project_id
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +44,7 @@ class SecretConfig:
     def get_static_defaults() -> Dict[str, Tuple[str, str]]:
         """Get static default values for non-sensitive configs."""
         return {
-            "ENVIRONMENT": ("development", "default"),
+            EnvironmentVariables.ENVIRONMENT: (Environment.DEVELOPMENT.value, "default"),
             "REDIS_HOST": ("localhost", "default"),
             "REDIS_PORT": ("6379", "default"),
             "CLICKHOUSE_HOST": ("localhost", "default"),
@@ -70,9 +73,7 @@ class SecretConfig:
     @staticmethod
     def determine_project_id(project_id: Optional[str] = None) -> str:
         """Determine project ID based on environment."""
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
-        default_project_id = "701982941522" if environment == "staging" else "304612253870"
-        return project_id or os.environ.get('GOOGLE_CLOUD_PROJECT', default_project_id)
+        return project_id or get_current_project_id()
     
     @staticmethod
     def mask_value(value: str) -> str:

@@ -1,7 +1,7 @@
 """Simplified factory status endpoint for testing.
 
 This bypasses git operations entirely and uses mock data.
-Module follows 300-line limit with 8-line function limit.
+Module follows 450-line limit with 25-line function limit.
 """
 
 from datetime import datetime

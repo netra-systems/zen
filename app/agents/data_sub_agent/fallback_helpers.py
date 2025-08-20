@@ -1,6 +1,6 @@
 """Fallback Data Provider Helper Functions
 
-Helper functions for fallback data providers to maintain 300-line limit.
+Helper functions for fallback data providers to maintain 450-line limit.
 Contains utility functions for data analysis and processing.
 
 Business Value: Modular helper functions for reliable fallback operations.

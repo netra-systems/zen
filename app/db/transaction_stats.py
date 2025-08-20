@@ -1,7 +1,7 @@
 """Transaction statistics and monitoring module.
 
 Handles transaction metrics, performance tracking, and statistics calculation.
-Focused module adhering to 8-line function limit and modular architecture.
+Focused module adhering to 25-line function limit and modular architecture.
 """
 
 import time

@@ -1,6 +1,6 @@
 /**
  * Connection Performance Tests
- * Split from connection-management-advanced.test.tsx for 300-line compliance
+ * Split from connection-management-advanced.test.tsx for 450-line compliance
  * Agent 10 Implementation - Performance and load testing
  */
 

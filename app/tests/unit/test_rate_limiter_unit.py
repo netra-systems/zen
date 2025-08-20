@@ -109,7 +109,7 @@ def unlimited_permission_definitions():
     }
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def create_mock_permission_def(per_minute=None, per_hour=None, per_day=None):
     """Create mock permission definition with rate limits."""
     rate_limits = Mock()

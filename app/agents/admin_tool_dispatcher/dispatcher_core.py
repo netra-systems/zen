@@ -11,7 +11,7 @@ Business Value: 100% compliant with modern agent patterns.
 """
 from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas import ToolResult, ToolStatus, ToolInput
 from app.schemas.admin_tool_types import (
@@ -44,7 +44,7 @@ class AdminToolDispatcher(ToolDispatcher, BaseExecutionInterface):
     """
     
     def __init__(self, llm_manager=None, tool_dispatcher=None, tools: List[BaseTool] = None,
-                 db: Optional[Session] = None, user: Optional[User] = None, 
+                 db: Optional[AsyncSession] = None, user: Optional[User] = None, 
                  websocket_manager=None) -> None:
         """Initialize with modern agent architecture components."""
         ToolDispatcher.__init__(self, tools or [])

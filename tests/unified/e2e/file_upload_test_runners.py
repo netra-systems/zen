@@ -1,8 +1,8 @@
 """
 File Upload Test Runners - E2E Testing Helpers
-Business Value: $45K MRR - Enables modular test execution following 8-line limit
+Business Value: $45K MRR - Enables modular test execution following 25-line limit
 
-Breaks down test execution into 8-line functions for architectural compliance.
+Breaks down test execution into 25-line functions for architectural compliance.
 """
 
 import asyncio

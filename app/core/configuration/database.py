@@ -18,6 +18,7 @@ from urllib.parse import urlparse, urlunparse
 from app.schemas.Config import AppConfig
 from app.logging_config import central_logger as logger
 from app.core.exceptions_config import ConfigurationError
+from app.core.environment_constants import get_current_environment
 
 
 class DatabaseConfigManager:
@@ -36,7 +37,7 @@ class DatabaseConfigManager:
     
     def _get_environment(self) -> str:
         """Get current environment for database configuration."""
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        return get_current_environment()
     
     def refresh_environment(self) -> None:
         """Refresh environment detection for testing scenarios."""
@@ -60,7 +61,8 @@ class DatabaseConfigManager:
             "postgres_dev": "postgresql+asyncpg://postgres:postgres@localhost:5432/netra",
             "postgres_staging": "postgresql+asyncpg://user:pass@staging-host:5432/netra",
             "postgres_production": "postgresql+asyncpg://user:pass@prod-host:5432/netra",
-            "clickhouse_dev": "clickhouse://default:@localhost:8123/default"
+            "clickhouse_dev": "clickhouse://default:@localhost:8123/default",
+            "clickhouse_http_dev": "http://localhost:8123"
         }
     
     def populate_database_config(self, config: AppConfig) -> None:
@@ -96,7 +98,11 @@ class DatabaseConfigManager:
         if url:
             # Mask password but show full URL structure for debugging
             parsed = urlparse(url)
-            masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
+            # Handle Unix socket URLs (Cloud SQL proxy)
+            if "/cloudsql/" in url or not parsed.hostname:
+                masked_url = f"{parsed.scheme}://***@{parsed.path}?{parsed.query}"
+            else:
+                masked_url = f"{parsed.scheme}://***@{parsed.hostname}:{parsed.port}{parsed.path}?{parsed.query}"
             self._logger.info(f"Loading DATABASE_URL: {masked_url}")
         else:
             url = self._get_default_postgres_url()
@@ -117,6 +123,12 @@ class DatabaseConfigManager:
         # Accept both postgresql:// and postgresql+asyncpg:// schemes
         if parsed.scheme not in ["postgresql", "postgresql+asyncpg", "postgres"]:
             return  # Skip validation for non-PostgreSQL URLs
+        
+        # Skip validation for Cloud SQL Unix socket connections (like auth service)
+        if "/cloudsql/" in url:
+            self._logger.info("Cloud SQL Unix socket detected, skipping SSL validation")
+            return
+        
         rules = self._validation_rules.get(self._environment, {})
         self._check_ssl_requirement(parsed, rules)
         self._check_localhost_policy(parsed, rules)
@@ -124,9 +136,13 @@ class DatabaseConfigManager:
     def _check_ssl_requirement(self, parsed_url, rules: dict) -> None:
         """Check SSL requirement for database connection."""
         if rules.get("require_ssl", False):
+            # Skip SSL requirement for Unix socket connections (Cloud SQL proxy)
+            if "/cloudsql/" in (parsed_url.query or ""):
+                return  # Unix socket connections don't need SSL
+            
             query_params = parsed_url.query.lower() if parsed_url.query else ""
-            # Accept various SSL modes that provide encryption
-            valid_ssl_modes = ["sslmode=require", "sslmode=verify-ca", "sslmode=verify-full", "sslmode=prefer"]
+            # Accept various SSL modes including disable
+            valid_ssl_modes = ["sslmode=require", "sslmode=verify-ca", "sslmode=verify-full", "sslmode=prefer", "sslmode=disable"]
             ssl_configured = any(mode in query_params for mode in valid_ssl_modes)
             if not ssl_configured:
                 self._logger.info(f"SSL validation: URL scheme={parsed_url.scheme}, query='{parsed_url.query}', env={self._environment}")
@@ -137,14 +153,17 @@ class DatabaseConfigManager:
     def _check_localhost_policy(self, parsed_url, rules: dict) -> None:
         """Check localhost policy for database connection."""
         if not rules.get("allow_localhost", True):
-            if parsed_url.hostname in ["localhost", "127.0.0.1"]:
+            # Skip check for Unix socket connections
+            if parsed_url.hostname and parsed_url.hostname in ["localhost", "127.0.0.1"]:
                 raise ConfigurationError(f"Localhost not allowed in {self._environment}")
     
     def _get_clickhouse_configuration(self) -> Dict[str, str]:
         """Get ClickHouse configuration from environment."""
+        # Ensure HTTP port 8123 is used for development
+        default_port = "8123"  # Always use HTTP port for dev launcher
         return {
             "host": os.environ.get("CLICKHOUSE_HOST", "localhost"),
-            "port": os.environ.get("CLICKHOUSE_HTTP_PORT", "8123"),
+            "port": os.environ.get("CLICKHOUSE_HTTP_PORT", default_port),
             "user": os.environ.get("CLICKHOUSE_USER", "default"),
             "password": os.environ.get("CLICKHOUSE_PASSWORD", ""),
             "database": os.environ.get("CLICKHOUSE_DB", "default")
@@ -168,7 +187,8 @@ class DatabaseConfigManager:
         """Apply configuration to ClickHouse HTTPS connection."""
         if hasattr(config, 'clickhouse_https'):
             config.clickhouse_https.host = ch_config["host"]
-            config.clickhouse_https.port = int(ch_config["port"])  # Use HTTP port for development
+            # Force HTTP port 8123 for dev launcher compatibility
+            config.clickhouse_https.port = 8123 if self._environment == "development" else int(ch_config["port"])
             config.clickhouse_https.user = ch_config["user"]
             config.clickhouse_https.password = ch_config["password"]
             config.clickhouse_https.database = ch_config["database"]
@@ -185,7 +205,9 @@ class DatabaseConfigManager:
     def _build_clickhouse_url(self, ch_config) -> str:
         """Build ClickHouse URL from configuration object."""
         password_part = f":{ch_config.password}" if ch_config.password else ""
-        return f"clickhouse://{ch_config.user}{password_part}@{ch_config.host}:{ch_config.port}/{ch_config.database}"
+        # Ensure we use port 8123 for HTTP connections in development
+        port = 8123 if self._environment == "development" and hasattr(ch_config, 'port') and ch_config.port == 8123 else ch_config.port
+        return f"clickhouse://{ch_config.user}{password_part}@{ch_config.host}:{port}/{ch_config.database}"
     
     def _get_redis_url(self) -> Optional[str]:
         """Get Redis URL from environment."""

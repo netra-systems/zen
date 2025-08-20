@@ -11,8 +11,8 @@ The frontend tests have become brittle and ineffective because they prioritize *
 ## Critical Issues Identified
 
 ### 1. Architecture Violations (113 files)
-- 113 test files exceed 300-line limit (highest: 597 lines)
-- Multiple test functions exceed 8-line limit
+- 113 test files exceed 450-line limit (highest: 597 lines)
+- Multiple test functions exceed 25-line limit
 - Tests don't follow production code quality standards
 
 ### 2. Mock Contamination (2894 occurrences)
@@ -56,7 +56,7 @@ The frontend tests have become brittle and ineffective because they prioritize *
    - Keep WebSocket and API mocks minimal
 
 ### Phase 3: Refactor Test Functions (20 agents)
-**Goal**: Enforce 8-line function limit and improve test quality
+**Goal**: Enforce 25-line function limit and improve test quality
 
 #### Agent Tasks (5 agents)
 1. **Agents 16-20**: Refactor long test functions

@@ -2,7 +2,7 @@
  * Comprehensive Integration Test Suite - Index
  * 
  * This file imports and orchestrates all split comprehensive integration test modules.
- * Each module is focused on specific functionality and maintains the 300-line limit.
+ * Each module is focused on specific functionality and maintains the 450-line limit.
  * 
  * Test Modules:
  * - test-utils.tsx: Shared utilities and mocks
@@ -142,7 +142,7 @@ describe('Comprehensive Integration Test Suite', () => {
  * ✅ Isolated Failures: Issues in one area don't affect other tests
  * ✅ Developer Experience: Easier to find and modify relevant tests
  * ✅ Code Organization: Clear separation of concerns
- * ✅ 300-Line Compliance: Each file stays under the project's line limit
+ * ✅ 450-line Compliance: Each file stays under the project's line limit
  * 
  * Testing Strategy:
  * 

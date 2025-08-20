@@ -9,7 +9,7 @@ BVJ (Business Value Justification):
 4. Revenue Impact: Supports $348-3588/year conversion validation
 
 REQUIREMENTS:
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 - Focused helper classes for limit enforcement testing
 """
 from typing import Dict, Any

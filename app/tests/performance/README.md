@@ -382,7 +382,7 @@ pytest app/tests/performance/test_comprehensive_backend_performance.py::TestComp
 
 When adding new performance tests:
 
-1. Follow 300-line file limit and 8-line function rules
+1. Follow 450-line file limit and 25-line function rules
 2. Include comprehensive type annotations
 3. Use proper async patterns for I/O operations
 4. Add performance targets and assertions

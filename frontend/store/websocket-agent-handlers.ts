@@ -1,4 +1,4 @@
-// Agent-specific WebSocket event handlers - Modular 8-line functions
+// Agent-specific WebSocket event handlers - Modular 25-line functions
 // Handles agent start, complete, thinking events
 
 import { generateUniqueId } from '@/lib/utils';

@@ -3,7 +3,7 @@ Corpus Execution Helper
 
 Provides execution utilities for corpus operations including database
 interactions and tool dispatcher integration.
-Maintains 8-line function limit per method.
+Maintains 25-line function limit per method.
 """
 
 from typing import Dict, Any

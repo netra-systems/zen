@@ -94,6 +94,9 @@ class DatabaseValidator:
         """Check SSL requirement for database connection."""
         rules = self._validation_rules.get(self._environment, {})
         if rules.get("require_ssl", False):
+            # Skip SSL requirement for Unix socket connections (Cloud SQL proxy)
+            if "/cloudsql/" in (parsed_url.query or ""):
+                return []  # Unix socket connections don't need SSL
             if "sslmode" not in (parsed_url.query or ""):
                 return ["SSL connection required for database"]
         return []

@@ -1,7 +1,7 @@
 """Base Repository Pattern Implementation
 
 Provides abstract base class for all repositories with common CRUD operations.
-Refactored into modular components for better maintainability and adherence to 300-line limit.
+Refactored into modular components for better maintainability and adherence to 450-line limit.
 """
 
 from typing import TypeVar, Generic, Optional, List, Dict, Any, Type

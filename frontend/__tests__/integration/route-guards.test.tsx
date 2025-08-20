@@ -2,7 +2,7 @@
  * Route Guards Integration Tests
  * Agent 13: Tests authentication and authorization routing protection
  * Covers protected routes, tier-based access, redirects, and auth flows
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value: Protects revenue by ensuring proper tier-based access control
  * Revenue Impact: Drives Free → Paid conversions through feature gating

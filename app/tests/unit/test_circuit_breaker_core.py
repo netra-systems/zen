@@ -53,7 +53,7 @@ async def circuit_with_health(circuit_config, mock_health_checker):
     circuit.cleanup()
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def create_health_result(status=HealthStatus.HEALTHY, response_time=0.1):
     """Create standardized health check result."""
     return HealthCheckResult(

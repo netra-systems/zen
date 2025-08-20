@@ -1,7 +1,7 @@
 """Agent-MCP Bridge Service.
 
 Bridges Netra agents with MCP client functionality, providing tool discovery,
-execution, and result transformation. Follows strict 8-line function design.
+execution, and result transformation. Follows strict 25-line function design.
 """
 
 from typing import Dict, List, Optional, Any

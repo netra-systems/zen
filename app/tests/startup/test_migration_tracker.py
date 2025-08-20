@@ -1,7 +1,7 @@
 """
 Comprehensive Unit Tests for Migration Tracker
 Tests all critical migration operations, state management, and error handling.
-COMPLIANCE: 300-line max file, 8-line max functions, async test support.
+COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
 import pytest

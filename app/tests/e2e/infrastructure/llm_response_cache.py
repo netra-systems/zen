@@ -2,7 +2,7 @@
 LLM Response Cache - SQLite-based caching with TTL management
 
 Provides persistent caching for LLM responses with TTL management, statistics tracking,
-and cache invalidation methods. Follows 300-line/8-line limits.
+and cache invalidation methods. Follows 450-line/25-line limits.
 """
 import sqlite3
 import json

@@ -12,6 +12,7 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
+import json
 import time
 from typing import Dict, Any, Union, List, Optional, Literal
 from datetime import datetime, timezone
@@ -20,10 +21,9 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 from app.logging_config import central_logger
-from app.schemas.registry import WebSocketMessage
-from app.schemas.websocket_message_types import (
+from app.schemas.registry import WebSocketMessage, ServerMessage
+from app.schemas.websocket_models import (
     WebSocketValidationError,
-    ServerMessage,
     WebSocketStats,
     RateLimitInfo,
     BroadcastResult
@@ -37,55 +37,16 @@ from app.websocket.room_manager import RoomManager
 from .messaging import UnifiedMessagingManager
 from .broadcasting import UnifiedBroadcastingManager
 from .state import UnifiedStateManager
+from .circuit_breaker import CircuitBreaker
+from .telemetry_manager import TelemetryManager
 
 logger = central_logger.get_logger(__name__)
-
-
-class CircuitBreaker:
-    """Simple circuit breaker for WebSocket resilience."""
-    
-    def __init__(self, failure_threshold: int = 5, recovery_timeout: int = 60) -> None:
-        """Initialize circuit breaker with thresholds."""
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.failure_count = 0
-        self.last_failure_time = 0
-        self.state = "CLOSED"  # CLOSED, OPEN, HALF_OPEN
-
-    def can_execute(self) -> bool:
-        """Check if operation can be executed based on circuit state."""
-        if self.state == "CLOSED":
-            return True
-        if self.state == "OPEN":
-            return self._should_attempt_reset()
-        return self.state == "HALF_OPEN"
-
-    def _should_attempt_reset(self) -> bool:
-        """Check if enough time has passed to attempt reset."""
-        if time.time() - self.last_failure_time > self.recovery_timeout:
-            self.state = "HALF_OPEN"
-            return True
-        return False
-
-    def record_success(self) -> None:
-        """Record successful operation and reset if needed."""
-        self.failure_count = 0
-        if self.state == "HALF_OPEN":
-            self.state = "CLOSED"
-
-    def record_failure(self) -> None:
-        """Record failed operation and open circuit if threshold reached."""
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        if self.failure_count >= self.failure_threshold:
-            self.state = "OPEN"
 
 
 class UnifiedWebSocketManager:
     """Unified WebSocket manager with modular architecture and circuit breaker."""
     
     _instance: Optional['UnifiedWebSocketManager'] = None
-    _initialized = False
 
     def __new__(cls) -> 'UnifiedWebSocketManager':
         """Singleton pattern for unified manager."""
@@ -95,7 +56,10 @@ class UnifiedWebSocketManager:
 
     def __init__(self) -> None:
         """Initialize unified WebSocket manager if not already done."""
-        if self._initialized:
+        if getattr(self, '_initialized', False):
+            # Even if initialized, ensure telemetry is valid for tests
+            if not hasattr(self, 'telemetry') or not isinstance(self.telemetry, dict):
+                self._initialize_telemetry()
             return
         self._initialize_core_components()
         self._initialize_unified_modules()
@@ -120,21 +84,20 @@ class UnifiedWebSocketManager:
         """Initialize circuit breaker for resilience."""
         self.circuit_breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=60)
 
-    def _create_telemetry_config(self) -> Dict[str, Union[int, float]]:
-        """Create initial telemetry configuration dictionary."""
-        return {
-            "connections_opened": 0, "connections_closed": 0,
-            "messages_sent": 0, "messages_received": 0,
-            "errors_handled": 0, "circuit_breaks": 0,
-            "start_time": time.time()
-        }
-
     def _initialize_telemetry(self) -> None:
-        """Initialize real-time telemetry tracking."""
-        self.telemetry = self._create_telemetry_config()
+        """Initialize telemetry manager for tracking and transactions."""
+        self.telemetry_manager = TelemetryManager()
+        # For backward compatibility, expose telemetry as a property
+        self.telemetry = self.telemetry_manager.telemetry
+        self.pending_messages = self.telemetry_manager.pending_messages
+        self.sending_messages = self.telemetry_manager.sending_messages
+        self.message_lock = self.telemetry_manager.message_lock
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
         """Establish WebSocket connection with circuit breaker protection."""
+        # Start cleanup task on first connection if not already started
+        await self.telemetry_manager.start_periodic_cleanup()
+            
         if not self.circuit_breaker.can_execute():
             self._record_circuit_break()
             raise ConnectionError("Circuit breaker is open")
@@ -204,11 +167,32 @@ class UnifiedWebSocketManager:
     async def send_message_to_user(self, user_id: str, 
                                   message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]], 
                                   retry: bool = True) -> bool:
-        """Send message to user through unified messaging system."""
-        result = await self.messaging.send_to_user(user_id, message, retry)
-        if result:
-            self.telemetry["messages_sent"] += 1
-        return result
+        """Send message to user through unified messaging system with transactional processing."""
+        # Mark message as sending before attempting to send (transactional pattern)
+        message_id = f"msg_{user_id}_{int(time.time() * 1000)}"
+        
+        try:
+            # Track message as 'sending' before actual send
+            await self.telemetry_manager.mark_message_sending(message_id, user_id, message)
+            
+            # Attempt to send message
+            result = await self.messaging.send_to_user(user_id, message, retry)
+            
+            if result:
+                # Only mark as sent on confirmed success
+                await self.telemetry_manager.mark_message_sent(message_id)
+                self.telemetry["messages_sent"] += 1
+                return True
+            else:
+                # Revert to pending if send failed
+                await self.telemetry_manager.mark_message_pending(message_id, user_id, message)
+                return False
+                
+        except Exception as e:
+            # Revert to pending on exception
+            await self.telemetry_manager.mark_message_pending(message_id, user_id, message)
+            logger.error(f"Transactional message send failed for {user_id}: {e}")
+            raise
 
     async def broadcast_to_job(self, job_id: str, 
                               message: Union[WebSocketMessage, ServerMessage, Dict[str, Any]]) -> bool:
@@ -224,8 +208,56 @@ class UnifiedWebSocketManager:
         return result
 
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
-        """Validate message through unified messaging system."""
-        return self.messaging.validate_message(message)
+        """Validate message through unified messaging system with JSON-first enforcement."""
+        # JSON-first validation: Ensure message is properly structured dict
+        if not isinstance(message, dict):
+            return WebSocketValidationError(
+                error_type="type_error",
+                message="Message must be a JSON object (dict)",
+                field="message",
+                received_data={"type": type(message).__name__, "value": str(message)[:100]}
+            )
+        
+        # Ensure required 'type' field exists
+        if "type" not in message:
+            return WebSocketValidationError(
+                error_type="validation_error", 
+                message="Message must contain 'type' field",
+                field="type",
+                received_data=message
+            )
+        
+        # Validate type field is string
+        if not isinstance(message["type"], str):
+            return WebSocketValidationError(
+                error_type="type_error",
+                message="Message 'type' field must be a string",
+                field="type", 
+                received_data={"type_received": type(message["type"]).__name__, "value": message["type"]}
+            )
+        
+        # Pass to existing validation system through message handler
+        return self.messaging.message_handler.validate_message(message)
+
+    def parse_and_validate_json_message(self, raw_message: str) -> Union[Dict[str, Any], WebSocketValidationError]:
+        """Parse and validate JSON message from WebSocket ensuring JSON-first communication."""
+        try:
+            # Parse JSON
+            message = json.loads(raw_message)
+        except json.JSONDecodeError as e:
+            return WebSocketValidationError(
+                error_type="format_error",
+                message=f"Invalid JSON message: {str(e)}",
+                field="raw_message",
+                received_data={"raw": raw_message[:100]}  # Truncate for logging
+            )
+        
+        # Validate parsed message structure
+        validation_result = self.validate_message(message)
+        if isinstance(validation_result, WebSocketValidationError):
+            return validation_result
+        
+        return message
 
     async def connect_to_job(self, websocket: WebSocket, job_id: str) -> ConnectionInfo:
         """Connect WebSocket to specific job with room management."""
@@ -256,18 +288,9 @@ class UnifiedWebSocketManager:
     def get_unified_stats(self) -> Dict[str, Any]:
         """Get comprehensive unified statistics with telemetry."""
         base_stats = self.state.get_connection_stats()
-        telemetry_stats = self._get_telemetry_stats()
+        telemetry_stats = self.telemetry_manager.get_telemetry_stats()
         circuit_stats = self._get_circuit_breaker_stats()
         return {**base_stats, **telemetry_stats, **circuit_stats}
-
-    def _get_telemetry_stats(self) -> Dict[str, Any]:
-        """Get real-time telemetry statistics."""
-        uptime = time.time() - self.telemetry["start_time"]
-        return {
-            "telemetry": self.telemetry.copy(),
-            "uptime_seconds": uptime,
-            "messages_per_second": self.telemetry["messages_sent"] / max(uptime, 1)
-        }
 
     def _get_circuit_breaker_stats(self) -> Dict[str, Any]:
         """Get circuit breaker health statistics."""
@@ -285,11 +308,20 @@ class UnifiedWebSocketManager:
         await self.error_handler.handle_generic_error(error, context)
 
     async def shutdown(self) -> None:
-        """Gracefully shutdown unified WebSocket manager."""
+        """Gracefully shutdown unified WebSocket manager with memory leak prevention."""
         logger.info("Starting unified WebSocket manager shutdown...")
+        
+        # Shutdown telemetry manager (handles cleanup task and message queues)
+        await self.telemetry_manager.shutdown()
+        
         await self.state.persist_state()
         await self.connection_manager.shutdown()
-        logger.info(f"Unified shutdown complete. Final telemetry: {self.telemetry}")
+        
+        logger.info("Unified shutdown complete with memory cleanup")
+
+    async def get_transactional_stats(self) -> Dict[str, Any]:
+        """Get statistics about transactional message processing."""
+        return await self.telemetry_manager.get_transactional_stats()
 
     # Legacy compatibility methods (delegate to unified modules)
     async def send_error_to_user(self, user_id: str, error_message: str, 
@@ -313,6 +345,14 @@ class UnifiedWebSocketManager:
         if cls._instance is None:
             cls._instance = cls()
         return cls._instance
+    
+    @classmethod
+    def create_test_instance(cls) -> 'UnifiedWebSocketManager':
+        """Create a fresh instance for testing, bypassing singleton."""
+        instance = super(UnifiedWebSocketManager, cls).__new__(cls)
+        instance._initialized = False
+        instance.__init__()
+        return instance
 
 
 # Global unified manager instance for backward compatibility

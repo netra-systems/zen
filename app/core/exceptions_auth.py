@@ -1,4 +1,4 @@
-"""Authentication and authorization exceptions - compliant with 8-line function limit."""
+"""Authentication and authorization exceptions - compliant with 25-line function limit."""
 
 from app.core.exceptions_base import NetraException
 from app.core.error_codes import ErrorCode, ErrorSeverity

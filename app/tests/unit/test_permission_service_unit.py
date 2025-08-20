@@ -97,7 +97,7 @@ def super_admin_user():
     return user
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def assert_user_has_permission(user, permission):
     """Assert user has specific permission."""
     result = PermissionService.has_permission(user, permission)

@@ -1,7 +1,7 @@
 /**
  * Layer Merge Utilities
  * 
- * Extracted from unified-chat.ts to maintain 300-line file limit
+ * Extracted from unified-chat.ts to maintain 450-line file limit
  * Provides specialized merging logic for different layer types
  * 
  * @compliance conventions.xml - Max 8 lines per function, under 300 lines

@@ -12,7 +12,7 @@ from app.schemas import AgentCompleted, AgentResult, AgentState
 from app.schemas.agent_models import DeepAgentState, AgentMetadata
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def create_basic_agent_result():
     """Create a basic AgentResult for testing."""
     return AgentResult(

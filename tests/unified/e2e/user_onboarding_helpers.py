@@ -10,7 +10,7 @@ BVJ (Business Value Justification):
 REQUIREMENTS:
 - Real service integration (no mocking core functionality)
 - Performance validation (<10 seconds total flow)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 - Modular design for reusability
 """
 import time

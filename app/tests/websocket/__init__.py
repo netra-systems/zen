@@ -2,7 +2,7 @@
 WebSocket test module.
 
 This module contains specialized WebSocket tests split into focused modules
-following the 300-line architectural requirement.
+following the 450-line architectural requirement.
 
 Modules:
 - test_concurrent_connections: Connection limits and pool management

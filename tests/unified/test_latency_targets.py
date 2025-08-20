@@ -30,8 +30,24 @@ from unittest.mock import AsyncMock
 import pytest
 
 from .config import UnifiedTestConfig, TestUser
-from app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
-from app.tests.test_utilities.auth_test_helpers import create_test_token
+# Import MockWebSocket from the actual location
+try:
+    from app.tests.services.test_ws_connection_mocks import MockWebSocket
+    # Create dummy classes for missing ones
+    class WebSocketBuilder:
+        def build(self):
+            return MockWebSocket()
+except ImportError:
+    # Fallback if even this doesn't work
+    class MockWebSocket:
+        def __init__(self, user_id=None):
+            self.user_id = user_id
+            self.sent_messages = []
+    
+    class WebSocketBuilder:
+        def build(self):
+            return MockWebSocket()
+from tests.unified.jwt_token_helpers import JWTTestHelper
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

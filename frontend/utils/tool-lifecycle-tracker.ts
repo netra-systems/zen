@@ -1,4 +1,4 @@
-// Tool lifecycle tracking utilities - 8-line functions max
+// Tool lifecycle tracking utilities - 25-line functions max
 // Manages tool start/end times, timeouts, and deduplication
 
 export interface ToolLifecycleEntry {

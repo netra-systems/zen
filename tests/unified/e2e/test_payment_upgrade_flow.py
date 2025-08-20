@@ -14,7 +14,7 @@ REQUIREMENTS:
 - Billing record creation in ClickHouse
 - Premium feature activation validation
 - Performance validation (<30 seconds total)
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 
 This test protects 100% of new revenue generation. Without this test passing,
 we cannot convert free users to paid, which is the entire business model.

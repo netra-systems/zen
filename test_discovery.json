@@ -95,43 +95,43 @@
       "description": "Integration tests for feature validation",
       "priority": "medium",
       "timeout": "5m",
-      "test_count": 60
+      "test_count": 69
     },
     "e2e": {
       "description": "End-to-end user journey tests",
       "priority": "medium",
       "timeout": "10m",
-      "test_count": 158
+      "test_count": 162
     },
     "frontend": {
       "description": "React component and UI tests",
       "priority": "medium",
       "timeout": "5m",
-      "test_count": 407
+      "test_count": 409
     },
     "performance": {
       "description": "Performance and load tests",
       "priority": "low",
       "timeout": "30m",
-      "test_count": 26
+      "test_count": 27
     },
     "security": {
       "description": "Security and authentication tests",
       "priority": "high",
       "timeout": "5m",
-      "test_count": 16
+      "test_count": 17
     },
     "websocket": {
       "description": "WebSocket communication tests",
       "priority": "medium",
       "timeout": "2m",
-      "test_count": 43
+      "test_count": 44
     },
     "database": {
       "description": "Database and data persistence tests",
       "priority": "high",
       "timeout": "5m",
-      "test_count": 18
+      "test_count": 19
     },
     "api": {
       "description": "API endpoint and route tests",
@@ -143,7 +143,7 @@
       "description": "AI agent and workflow tests",
       "priority": "medium",
       "timeout": "10m",
-      "test_count": 92
+      "test_count": 93
     },
     "llm": {
       "description": "LLM integration and prompt tests",
@@ -155,14 +155,14 @@
       "description": "Miscellaneous tests",
       "priority": "low",
       "timeout": "5m",
-      "test_count": 251
+      "test_count": 261
     },
     "real_e2e": {
       "description": "[REAL E2E] Tests with actual LLM calls and services",
       "priority": "critical",
       "timeout": "15m",
       "requires_llm": true,
-      "test_count": 32
+      "test_count": 33
     },
     "real_services": {
       "description": "[REAL] Service integration tests",
@@ -400,6 +400,16 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\startup\\test_startup_status_manager.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_utilities\\test_data_builders.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_utilities\\test_test_data_builders_validation.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_circuit_breakers.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_dev_launcher_startup.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_dev_mode.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_error_propagation.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_harness.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_health_coordination.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_jwt_flow.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_message_pipeline.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_service_recovery.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_thread_management.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\utils\\test_datetime_string_json_utils.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\utils\\test_file_crypto_validation_utils.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\utils\\test_formatting_math_network_utils.py",
@@ -512,6 +522,7 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_agent_service_orchestration_workflows.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_agent_service_thread_operations.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_utilities\\test_agent_fixtures_validation.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_agent_activation.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_analysis_engine.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_analysis.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_data_sub_agent_comprehensive_suite\\test_data_sub_agent_basic.py",
@@ -573,7 +584,8 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\examples\\test_database_fixtures_examples.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_database_basic_transactions.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_database_repository_transactions.py",
-      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_utilities\\test_db_fixtures_validation.py"
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_utilities\\test_db_fixtures_validation.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_database_sync.py"
     ],
     "integration": [
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_mcp_integration.py",
@@ -586,22 +598,27 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supervisor_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_supply_researcher_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\auth_integration\\test_auth_core.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\auth_integration\\test_jwt_secret_consistency.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_async_integration_scenarios.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_fallback_coordinator_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\core\\test_missing_tests_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\critical\\test_auth_integration_core.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\critical\\test_staging_integration_flow.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_thread_agent_integration.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_websocket_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_websocket_thread_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_admin_agent_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_agent_reliability_integration.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_circuit_breaker_cascade.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_compensation_engine_e2e.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_core_features_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_critical_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_critical_missing_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_critical_missing_integration_focused.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_critical_path_integration.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_cross_service_transactions.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_enterprise_features_integration.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_error_recovery.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_first_time_user_comprehensive_critical.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_first_time_user_critical_journey.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_first_time_user_integration.py",
@@ -613,17 +630,21 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_message_flow_performance.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_message_flow_routing.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_multi_agent_collaboration.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_multi_service_health.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_operational_systems_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_reliability_scale_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_revenue_pipeline_integration.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_service_discovery.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_supervisor_observability.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_supply_research_optimization.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_system_component_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_system_resilience.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_unified_auth_service.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_unified_message_flow.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_websocket_agent_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_websocket_end_to_end.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_websocket_reconnection.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\integration\\test_websocket_state_recovery.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_circuit_breaker_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_clickhouse_query_fixer_integration.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_external_api_integration.py",
@@ -661,6 +682,7 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_complete_real_pipeline_e2e.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_example_prompts_real.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_real_agent_orchestration_e2e.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_real_llm_workflow.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\llm\\test_llm_integration_real.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unit\\test_first_time_user_real_critical.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unit\\test_real_auth_service_integration.py",
@@ -697,6 +719,7 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_security_service_authentication.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_security_service_oauth.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_security_service_permissions.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_oauth_flow.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\websocket\\test_compression_auth.py"
     ],
     "websocket": [
@@ -726,6 +749,7 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_utilities\\test_websocket_mocks_validation.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_ws_manager_comprehensive\\test_connection_management.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\test_ws_manager_comprehensive\\test_singleton_pattern.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\unified_system\\test_websocket_state.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\validation\\test_websocket_message_validation.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\websocket\\test_concurrent_connections.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\websocket\\test_memory_monitoring.py",
@@ -754,7 +778,9 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_llm_agent_e2e_flows.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\agents\\test_llm_agent_e2e_performance.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_admin_corpus_generation.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_agent_message_flow.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_agent_orchestration_e2e.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_agent_pipeline.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_agent_scaling_workflows.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_artifact_validation.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_capacity_planning.py",
@@ -781,11 +807,13 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_multi_constraint_priority.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_multi_constraint_system.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_multi_constraint_workflows.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_multi_service.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_rate_limit_analysis.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_resource_exhaustion.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_scaling_edge_cases.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_scaling_integrity.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_scaling_metrics.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_system_startup.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_thread_context.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_thread_error_handling.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\e2e\\test_thread_management.py",
@@ -921,6 +949,7 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\performance\\test_performance_cache.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\performance\\test_performance_monitoring.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\performance\\test_performance_optimizations.py",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\performance\\test_sla_compliance.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_database_transaction_performance.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_redis_manager_performance.py",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\tests\\services\\test_scheduler_performance.py",
@@ -1259,6 +1288,8 @@
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\system\\startup-initialization.test.tsx",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\system\\startup-system.test.tsx",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\system\\startup.test.tsx",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\unified_system\\oauth-flow.test.tsx",
+      "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\unified_system\\websocket-state.test.tsx",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\utils\\layer-visibility-manager.test.tsx",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\visual\\components.visual.test.tsx",
       "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\frontend\\__tests__\\visual\\pages.visual.test.tsx",
@@ -1417,6 +1448,6 @@
   "statistics": {
     "total_levels": 11,
     "total_categories": 13,
-    "total_tests": 1214
+    "total_tests": 1245
   }
 }

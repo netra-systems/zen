@@ -1,7 +1,7 @@
 /**
  * Navigation Focus Management Accessibility Test Suite
  * Tests focus trapping, restoration, and dynamic content focus
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise) 

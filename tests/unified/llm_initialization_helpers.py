@@ -1,6 +1,6 @@
 """LLM Initialization Test Helpers - Supporting classes and utilities
 
-Separated from main test file to comply with 300-line limit
+Separated from main test file to comply with 450-line limit
 All functions ≤8 lines following CLAUDE.md requirements
 """
 

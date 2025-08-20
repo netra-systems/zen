@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StagingValidationPlatformSpec>
+
+  <!-- Overview and Context -->
+  <Overview>
+    <Title>Netra Apex Staging Deployment Monitoring and Testing Platform</Title>
+    <Description>Specification for automated test suite and monitoring platform for Netra Apex staging deployments, integrated with the unified test runner.</Description>
+    <GCPContext>
+      <ProjectID>netra-staging</ProjectID>
+      <Region>us-central1</Region>
+      <Registry>us-central1-docker.pkg.dev/netra-staging/netra-containers</Registry>
+    </GCPContext>
+  </Overview>
+
+  <!-- 1. Local Test Runner Configuration (Replaces GCP Workbench) -->
+  <LocalTestRunnerConfiguration>
+    <Description>Use local test runner with staging endpoints instead of dedicated GCP Workbench for cost efficiency.</Description>
+    
+    <Authentication>
+      <ServiceAccountKey>gcp-staging-sa-key.json</ServiceAccountKey>
+      <ServiceAccountEmail>staging-deployer@netra-staging.iam.gserviceaccount.com</ServiceAccountEmail>
+    </Authentication>
+    
+    <Permissions>
+      <!-- IAM roles required for the service account -->
+      <RoleDescription>Permissions for monitoring and testing staging deployment.</RoleDescription>
+      <Role>roles/logging.logViewer</Role>            <!-- Read Cloud Logs -->
+      <Role>roles/monitoring.viewer</Role>           <!-- Read Cloud Monitoring Metrics -->
+      <Role>roles/errorreporting.viewer</Role>      <!-- Read Cloud Error Reporting -->
+      <Role>roles/cloudbuild.builds.viewer</Role>    <!-- Observe deployment status via Cloud Build -->
+      <Role>roles/secretmanager.secretAccessor</Role> <!-- Access test credentials stored in Secret Manager -->
+      <Role>roles/run.viewer</Role>                  <!-- View Cloud Run services -->
+      <Role>roles/run.invoker</Role>                 <!-- Invoke Cloud Run endpoints -->
+    </Permissions>
+  </LocalTestRunnerConfiguration>
+
+  <!-- 2. Staging Deployment Observation -->
+  <DeploymentObservation>
+    <Description>Configuration for monitoring the status, logs, and errors of the staging environment.</Description>
+    
+    <Sources>
+      <CloudLogging>
+        <Enabled>true</Enabled>
+        <Filters>
+          <!-- Filter for Cloud Run errors in staging -->
+          <Filter name="Staging_CloudRun_Errors">
+            resource.type="cloud_run_revision" AND resource.labels.service_name=("netra-backend-staging" OR "netra-frontend-staging" OR "netra-auth-service") AND severity&gt;=ERROR
+          </Filter>
+          <!-- Filter for WebSocket connection issues -->
+          <Filter name="Staging_WebSocket_Errors">
+            resource.type="cloud_run_revision" AND jsonPayload.message=~"WebSocket.*error" AND severity&gt;=WARNING
+          </Filter>
+          <!-- Filter for Agent execution failures -->
+          <Filter name="Staging_Agent_Failures">
+            resource.type="cloud_run_revision" AND jsonPayload.agent_status="failed" AND severity&gt;=ERROR
+          </Filter>
+        </Filters>
+      </CloudLogging>
+      
+      <CloudErrorReporting>
+        <Enabled>true</Enabled>
+      </CloudErrorReporting>
+    </Sources>
+    
+    <ModuleIntegration>
+      <!-- Integration with Netra test framework -->
+      <Description>Integration with existing Netra test framework and monitoring tools.</Description>
+      <Module>
+        <Name>GCPLogReader</Name>
+        <Reference>test_framework/gcp_log_reader.py</Reference>
+        <Purpose>Read and parse GCP Cloud Logging entries for test validation.</Purpose>
+      </Module>
+      <Module>
+        <Name>StagingHealthMonitor</Name>
+        <Reference>test_framework/staging_health_monitor.py</Reference>
+        <Purpose>Monitor staging service health and availability.</Purpose>
+      </Module>
+      <Module>
+        <Name>DeploymentValidator</Name>
+        <Reference>test_framework/deployment_validator.py</Reference>
+        <Purpose>Validate deployment status and configuration.</Purpose>
+      </Module>
+    </ModuleIntegration>
+  </DeploymentObservation>
+
+  <!-- 3. Staging Test Suite -->
+  <TestSuite>
+    <Name>NetraApexStagingValidation</Name>
+    <Description>Comprehensive test suite integrated with test_runner.py for staging validation.</Description>
+    <Framework>pytest with unified test runner</Framework>
+    
+    <Configuration>
+      <TargetEnvironment>Staging</TargetEnvironment>
+      <Endpoints>
+        <!-- Netra staging endpoints -->
+        <Endpoint name="BACKEND_URL" value="https://netra-backend-staging-nxgsmzqtya-uc.a.run.app"/>
+        <Endpoint name="FRONTEND_URL" value="https://netra-frontend-staging-nxgsmzqtya-uc.a.run.app"/>
+        <Endpoint name="AUTH_SERVICE_URL" value="https://netra-auth-service-nxgsmzqtya-uc.a.run.app"/>
+        <Endpoint name="WEBSOCKET_URL" value="wss://netra-backend-staging-nxgsmzqtya-uc.a.run.app/ws"/>
+      </Endpoints>
+      <Secrets>
+        <!-- Secrets stored in GCP Secret Manager -->
+        <Secret name="JWT_SECRET" ref="projects/netra-staging/secrets/jwt-secret/versions/latest"/>
+        <Secret name="TEST_API_KEY" ref="projects/netra-staging/secrets/test-api-key/versions/latest"/>
+        <Secret name="LLM_API_KEY" ref="projects/netra-staging/secrets/llm-api-key/versions/latest"/>
+      </Secrets>
+      <TestCommand>
+        <!-- Command to run staging tests -->
+        <Command>python test_runner.py --level staging --real-endpoints</Command>
+      </TestCommand>
+    </Configuration>
+    
+    <TestScopes>
+      <Scope name="ServiceHealth">
+        <Description>Validate all Cloud Run services are healthy and responding.</Description>
+        <Tests>
+          <Test>Health endpoint validation for all services</Test>
+          <Test>Service discovery and registration</Test>
+          <Test>Database connectivity verification</Test>
+        </Tests>
+      </Scope>
+      <Scope name="Integration">
+        <Description>Validate service-to-service communication in staging.</Description>
+        <Tests>
+          <Test>Backend to Auth service JWT validation</Test>
+          <Test>Frontend to Backend API calls</Test>
+          <Test>WebSocket connection establishment</Test>
+        </Tests>
+      </Scope>
+      <Scope name="AgentExecution">
+        <Description>Test LLM agent functionality with real providers.</Description>
+        <Tests>
+          <Test>Agent initialization and lifecycle</Test>
+          <Test>LLM provider connectivity (OpenAI, Anthropic)</Test>
+          <Test>Agent task execution and response validation</Test>
+        </Tests>
+      </Scope>
+      <Scope name="EndToEnd">
+        <Description>Complete user workflows in staging environment.</Description>
+        <Tests>
+          <Test>User registration and authentication flow</Test>
+          <Test>Agent creation and configuration</Test>
+          <Test>WebSocket message flow end-to-end</Test>
+          <Test>Data persistence across services</Test>
+        </Tests>
+      </Scope>
+      <Scope name="Performance">
+        <Description>Baseline performance metrics for staging.</Description>
+        <Tests>
+          <Test>API response time validation (&lt;500ms p95)</Test>
+          <Test>WebSocket latency measurement</Test>
+          <Test>Concurrent user load testing (100 users)</Test>
+        </Tests>
+      </Scope>
+      <Scope name="Deployment">
+        <Description>Post-deployment validation checks.</Description>
+        <Tests>
+          <Test>Image version verification</Test>
+          <Test>Environment variable validation</Test>
+          <Test>Database migration status</Test>
+          <Test>Secret availability checks</Test>
+        </Tests>
+      </Scope>
+    </TestScopes>
+  </TestSuite>
+
+  <!-- 4. GCP Log Analysis Integration -->
+  <LogAnalysis>
+    <Description>Integration with GCP logging for test validation and debugging.</Description>
+    <LogQueries>
+      <Query name="RecentErrors">
+        <Filter>severity&gt;=ERROR AND timestamp&gt;="${TEST_START_TIME}"</Filter>
+        <Purpose>Capture errors during test execution</Purpose>
+      </Query>
+      <Query name="WebSocketEvents">
+        <Filter>jsonPayload.event_type="websocket" AND timestamp&gt;="${TEST_START_TIME}"</Filter>
+        <Purpose>Track WebSocket connection events</Purpose>
+      </Query>
+      <Query name="AgentExecutions">
+        <Filter>jsonPayload.agent_id!=null AND timestamp&gt;="${TEST_START_TIME}"</Filter>
+        <Purpose>Monitor agent execution logs</Purpose>
+      </Query>
+    </LogQueries>
+    <Implementation>
+      <Module>test_framework/gcp_log_reader.py</Module>
+      <Functions>
+        <Function>fetch_logs(query, start_time, end_time)</Function>
+        <Function>analyze_errors(logs)</Function>
+        <Function>generate_report(analysis)</Function>
+      </Functions>
+    </Implementation>
+  </LogAnalysis>
+
+  <!-- 5. Test Execution Pipeline -->
+  <ExecutionPipeline>
+    <Stage name="PreDeployment">
+      <Description>Tests run before deploying to staging</Description>
+      <Commands>
+        <Command>python test_runner.py --level integration --no-coverage</Command>
+        <Command>docker-compose up -d && python test_runner.py --level integration --docker-endpoints</Command>
+      </Commands>
+    </Stage>
+    <Stage name="PostDeployment">
+      <Description>Tests run after successful staging deployment</Description>
+      <Commands>
+        <Command>python test_runner.py --level staging --health-check</Command>
+        <Command>python test_runner.py --level staging --real-endpoints</Command>
+        <Command>python test_framework/gcp_log_reader.py --analyze-deployment</Command>
+      </Commands>
+    </Stage>
+    <Stage name="Continuous">
+      <Description>Tests run continuously against staging</Description>
+      <Schedule>Every 30 minutes</Schedule>
+      <Commands>
+        <Command>python test_runner.py --level staging --smoke</Command>
+        <Command>python test_framework/staging_health_monitor.py --alert-on-failure</Command>
+      </Commands>
+    </Stage>
+  </ExecutionPipeline>
+
+</StagingValidationPlatformSpec>

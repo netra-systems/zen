@@ -1,6 +1,6 @@
 """State Recovery Operations Service
 
-This module handles state recovery operations following the 8-line function limit.
+This module handles state recovery operations following the 25-line function limit.
 """
 
 import json

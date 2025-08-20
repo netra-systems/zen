@@ -4,7 +4,7 @@
 
 ## Architecture Overview
 
-This modular test suite replaces the original 458-line `example-prompts-component.cy.ts` file, splitting it into focused modules following the 300-line limit and 8-line function constraints.
+This modular test suite replaces the original 4525-line `example-prompts-component.cy.ts` file, splitting it into focused modules following the 450-line limit and 25-line function constraints.
 
 ## Module Organization
 
@@ -65,8 +65,8 @@ This modular test suite replaces the original 458-line `example-prompts-componen
 
 ## Compliance
 
-✅ **300-Line Limit:** All modules under 300 lines  
-✅ **8-Line Functions:** All functions ≤8 lines  
+✅ **450-line Limit:** All modules under 300 lines  
+✅ **25-line Functions:** All functions ≤8 lines  
 ✅ **Single Responsibility:** Each module has focused purpose  
 ✅ **Modular Design:** Clear interfaces between modules  
 ✅ **Test Coverage:** Comprehensive coverage maintained  

@@ -1,7 +1,7 @@
 """System Templates - Templates for system errors, timeouts, and general failures.
 
 This module provides templates for system-related errors and general fallback
-scenarios with 8-line function compliance.
+scenarios with 25-line function compliance.
 """
 
 from typing import Dict, List, Tuple

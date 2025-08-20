@@ -31,7 +31,7 @@ logger = central_logger.get_logger(__name__)
 
 
 class QualityHooksManager:
-    """Manages quality validation and monitoring hooks with 8-line function limit"""
+    """Manages quality validation and monitoring hooks with 25-line function limit"""
     
     def __init__(self, 
                  quality_gate_service: Optional[QualityGateService],

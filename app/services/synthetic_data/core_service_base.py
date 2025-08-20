@@ -3,7 +3,7 @@
 import uuid
 from typing import Dict, List, Optional, Any
 from datetime import datetime, UTC
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.db import models_postgres as models
 from .enums import GenerationStatus
@@ -77,7 +77,7 @@ class CoreServiceBase(RecoveryMixin):
             table_name=table_name, status="pending", created_by_id=user_id
         )
 
-    def _persist_corpus_model(self, db: Session, db_synthetic_data: models.Corpus) -> str:
+    def _persist_corpus_model(self, db: AsyncSession, db_synthetic_data: models.Corpus) -> str:
         """Persist corpus model to database and return ID"""
         db.add(db_synthetic_data)
         db.commit()

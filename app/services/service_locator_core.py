@@ -1,7 +1,7 @@
 """Core ServiceLocator implementation for dependency injection.
 
 Provides the main ServiceLocator class and related exceptions.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Dict, Type, Any, Optional, TypeVar, Callable

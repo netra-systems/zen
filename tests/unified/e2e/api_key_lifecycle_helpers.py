@@ -11,7 +11,7 @@ REQUIREMENTS:
 - API key generation, usage, and revocation simulation
 - Security validation and scope testing
 - Rate limiting enforcement testing
-- 300-line file limit, 8-line function limit
+- 450-line file limit, 25-line function limit
 """
 import asyncio
 import secrets

@@ -1,6 +1,6 @@
 """
 LLM Model Rebuilder - Resolves forward references after all models are defined.
-Following Netra conventions with 300-line module limit.
+Following Netra conventions with 450-line module limit.
 """
 
 import logging

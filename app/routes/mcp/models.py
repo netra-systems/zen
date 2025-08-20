@@ -2,7 +2,7 @@
 MCP API Request Models
 
 Pydantic models for MCP API requests and responses.
-Maintains type safety and validation under 300-line limit.
+Maintains type safety and validation under 450-line limit.
 """
 
 from typing import Dict, Any, Optional, List

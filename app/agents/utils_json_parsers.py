@@ -2,7 +2,7 @@
 # ================================
 # Timestamp: 2025-08-14T00:00:00.000000+00:00
 # Agent: Claude Sonnet 4.1 claude-sonnet-4-20250514
-# Context: Core JSON parsing functions - split from utils_json_extraction.py (300-line compliance)
+# Context: Core JSON parsing functions - split from utils_json_extraction.py (450-line compliance)
 # Git: anthony-aug-13-2 | clean
 # Change: Refactor | Scope: Component | Risk: Low
 # Session: architecture-compliance | Seq: 1

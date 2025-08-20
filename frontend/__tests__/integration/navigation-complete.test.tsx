@@ -2,7 +2,7 @@
  * Complete Navigation Integration Tests
  * Agent 13: Tests comprehensive navigation and routing for Netra Apex
  * Covers route transitions, performance, concurrent navigation, and cleanup
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value: Ensures reliable navigation for all customer segments
  * Revenue Impact: Prevents user frustration and churn from broken navigation

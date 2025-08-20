@@ -1,7 +1,7 @@
 """Load Testing Utilities - Supporting Module for Load Performance Tests
 
 Utility classes and functions for load testing operations.
-Separated from main test file to maintain 300-line architectural limit.
+Separated from main test file to maintain 450-line architectural limit.
 
 Business Value Justification (BVJ):
 - Segment: Growth & Enterprise (infrastructure scalability)

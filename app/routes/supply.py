@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from app.dependencies import DbDep
 from app.services.supply_catalog_service import SupplyCatalogService
+from app.services import supplier_comparison
 from app import schemas
 
 router = APIRouter()
@@ -15,6 +16,11 @@ class ResearchRequest(BaseModel):
 
 class EnrichRequest(BaseModel):
     supplier_id: str
+
+class ComparisonRequest(BaseModel):
+    supplier_ids: List[str]
+    comparison_criteria: List[str]
+    weight_preferences: Dict[str, float]
 
 @router.post("/supply-catalog/", response_model=schemas.SupplyOption, status_code=status.HTTP_201_CREATED)
 def create_supply_option(
@@ -73,5 +79,14 @@ async def validate_supply_chain(chain_data: Dict[str, Any]) -> Dict[str, Any]:
         "issues": [],
         "score": 0.88
     }
+
+@router.post("/api/supply/compare")
+async def compare_suppliers_endpoint(request: ComparisonRequest) -> Dict[str, Any]:
+    """Compare suppliers based on criteria and weights"""
+    return supplier_comparison.compare_suppliers(
+        supplier_ids=request.supplier_ids,
+        comparison_criteria=request.comparison_criteria,
+        weight_preferences=request.weight_preferences
+    )
 
 

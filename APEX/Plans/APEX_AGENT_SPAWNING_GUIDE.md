@@ -1637,7 +1637,7 @@ python scripts/team_progress.py --all
 
 Each agent should:
 1. Produce code with 100% test coverage
-2. Follow 300-line file / 8-line function limits
+2. Follow 450-line file / 25-line function limits
 3. Include BVJ for every feature
 4. Create integration points as specified
 5. Generate working, deployable code

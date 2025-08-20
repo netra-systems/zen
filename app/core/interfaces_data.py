@@ -2,7 +2,7 @@
 
 Consolidated ClickHouse operations for both simple data fetching
 and complex corpus table management with notifications and status tracking.
-Follows 300-line limit and 8-line functions.
+Follows 450-line limit and 25-line functions.
 """
 
 import json

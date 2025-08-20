@@ -23,7 +23,8 @@ class LogStreamer(threading.Thread):
                  process: subprocess.Popen, 
                  name: str, 
                  color_code: Optional[str] = None,
-                 buffer_size: int = 100):
+                 buffer_size: int = 100,
+                 silent_mode: bool = False):
         """
         Initialize the log streamer.
         
@@ -39,6 +40,7 @@ class LogStreamer(threading.Thread):
         self.color_code = color_code or ""
         self.reset_code = "\033[0m" if color_code else ""
         self.running = True
+        self.silent_mode = silent_mode
         self.lines_buffer = deque(maxlen=buffer_size)
         self.error_keywords = ['error', 'exception', 'traceback', 'failed', 'fatal', 'critical']
         self.warning_keywords = ['warning', 'warn', 'deprecated']
@@ -57,8 +59,9 @@ class LogStreamer(threading.Thread):
                         # Add to buffer for error detection
                         self.lines_buffer.append(decoded_line)
                         
-                        # Print with color and prefix
-                        self._print_line(decoded_line)
+                        # Print with color and prefix (unless in silent mode)
+                        if not self.silent_mode:
+                            self._print_line(decoded_line)
                         
         except Exception as e:
             logger.error(f"[{self.name}] Stream error: {e}")
@@ -114,9 +117,23 @@ class LogStreamer(threading.Thread):
     
     def _print_line(self, line: str):
         """Print a line with appropriate formatting."""
+        if self.silent_mode:
+            return  # Don't print in silent mode
         emoji = self._get_line_emoji(line)
         formatted_line = f"{self.color_code}[{self.name}]{self.reset_code} {emoji}{self._format_content(line)}"
         print(formatted_line)
+    
+    def enable_silent_mode(self) -> None:
+        """Enable silent mode to suppress output."""
+        self.silent_mode = True
+    
+    def disable_silent_mode(self) -> None:
+        """Disable silent mode to resume output."""
+        self.silent_mode = False
+    
+    def is_silent(self) -> bool:
+        """Check if streamer is in silent mode."""
+        return self.silent_mode
     
     def stop(self):
         """Stop streaming."""
@@ -173,7 +190,8 @@ class LogManager:
     def add_streamer(self, 
                      name: str, 
                      process: subprocess.Popen,
-                     color_code: Optional[str] = None) -> LogStreamer:
+                     color_code: Optional[str] = None,
+                     silent_mode: bool = False) -> LogStreamer:
         """
         Add a new log streamer.
         
@@ -185,10 +203,28 @@ class LogManager:
         Returns:
             The created LogStreamer instance
         """
-        streamer = LogStreamer(process, name, color_code)
+        streamer = LogStreamer(process, name, color_code, silent_mode=silent_mode)
         streamer.start()
         self.streamers[name] = streamer
         return streamer
+    
+    def enable_silent_mode(self, name: Optional[str] = None) -> None:
+        """Enable silent mode for specific streamer or all streamers."""
+        if name:
+            if name in self.streamers:
+                self.streamers[name].enable_silent_mode()
+        else:
+            for streamer in self.streamers.values():
+                streamer.enable_silent_mode()
+    
+    def disable_silent_mode(self, name: Optional[str] = None) -> None:
+        """Disable silent mode for specific streamer or all streamers."""
+        if name:
+            if name in self.streamers:
+                self.streamers[name].disable_silent_mode()
+        else:
+            for streamer in self.streamers.values():
+                streamer.disable_silent_mode()
     
     def stop_streamer(self, name: str):
         """Stop a specific streamer."""

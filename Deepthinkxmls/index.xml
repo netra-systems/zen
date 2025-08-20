@@ -1,0 +1,502 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<specification>
+    <metadata>
+        <name>Learnings Index</name>
+        <type>index</type>
+        <version>1.0</version>
+        <last_updated>2025-08-19</last_updated>
+        <description>Index of all learning modules organized by category</description>
+    </metadata>
+    
+    <categories>
+        <category>
+            <name>Authentication/OAuth</name>
+            <file>learnings/auth.xml</file>
+            <path>SPEC/learnings/auth.xml</path>
+            <learning_count>13</learning_count>
+            <learning_ids>
+                <id>oauth-local-staging-mismatch</id>
+                <id>oauth-environment-variables</id>
+                <id>oauth-session-middleware</id>
+                <id>oauth-redirect-uri-mismatch</id>
+                <id>oauth-diagnostic-tool</id>
+                <id>shared-auth-integration-mandatory</id>
+                <id>auth-database-persistence</id>
+                <id>interservice-auth-sync</id>
+                <id>jwt-secret-mismatch</id>
+                <id>secret-manager-integration</id>
+                <id>environment-variable-naming</id>
+                <id>dev-login-token-validation</id>
+                <id>path-traversal-csp-blocking</id>
+            </learning_ids>
+            <important_note>See also SPEC/shared_auth_integration.xml for MANDATORY shared auth service requirements</important_note>
+            <additional_file>learnings/auth_database_persistence.xml</additional_file>
+            <additional_file>learnings/interservice_auth_sync.xml</additional_file>
+            <additional_file>learnings/jwt_secret_configuration.xml</additional_file>
+        </category>
+        <category>
+            <name>Environment Detection</name>
+            <file>learnings/environment_detection.xml</file>
+            <path>SPEC/learnings/environment_detection.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>ENV-001</id>
+                <id>ENV-002</id>
+                <id>ENV-003</id>
+            </learning_ids>
+            <important_note>CRITICAL: Environment defaults must NEVER be "production" - always default to staging for safety</important_note>
+        </category>
+        <category>
+            <name>WebSocket</name>
+            <file>learnings/websocket_message_paradox.xml</file>
+            <path>SPEC/learnings/websocket_message_paradox.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>websocket-frontend-backend-field-mismatch</id>
+                <id>websocket-coroutine-error</id>
+                <id>websocket-coroutine-auth-fix</id>
+                <id>websocket-message-processing-fix</id>
+                <id>websocket-auth-silent-failures</id>
+            </learning_ids>
+            <important_note>CRITICAL: ALL FAILURES MUST RAISE BY DEFAULT! WebSocket auth failures were silently hanging. Frontend sends 'content' field, backend schema expects 'content' but handler was looking for 'text'. Also check for coroutine objects before accessing attributes. Always await async auth methods. Message type validation and error handling must be comprehensive.</important_note>
+            <additional_file>learnings/websocket_coroutine_fix.xml</additional_file>
+            <additional_file>learnings/websocket_coroutine_error.xml</additional_file>
+            <additional_file>learnings/websocket_message_processing_fix.xml</additional_file>
+            <additional_file>learnings/websocket_silent_failures.xml</additional_file>
+        </category>
+        <category>
+            <name>Configuration/Secrets</name>
+            <file>learnings/configuration_secrets.xml</file>
+            <path>SPEC/learnings/configuration_secrets.xml</path>
+            <learning_count>6</learning_count>
+            <learning_ids>
+                <id>staging-env-var-suffix-handling</id>
+                <id>cors-devlauncher-middleware-configuration</id>
+                <id>auth-service-cors-wildcard-handling</id>
+                <id>staging-cors-missing-env-var</id>
+                <id>gemini-api-key-paradox</id>
+                <id>unified-config-direct-env-access</id>
+            </learning_ids>
+            <important_note>CRITICAL: All configuration MUST use unified config system - see unified-config-direct-env-access</important_note>
+        </category>
+        <category>
+            <name>Environment Loading</name>
+            <file>learnings/environment_loading.xml</file>
+            <path>SPEC/learnings/environment_loading.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>simplified-single-source-loading</id>
+                <id>env-file-user-control</id>
+                <id>remote-fallback-optimization</id>
+                <id>observability-in-loading</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Bad Test Detection</name>
+            <file>learnings/bad_test_detection.xml</file>
+            <path>SPEC/learnings/bad_test_detection.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>bad-test-detection-implementation</id>
+                <id>test-failure-patterns</id>
+                <id>test-maintenance-strategy</id>
+                <id>integration-points</id>
+                <id>data-persistence</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Test Runner Enhancements</name>
+            <file>SPEC/test_runner_guide.xml</file>
+            <path>SPEC/test_runner_guide.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>comprehensive-test-levels-added</id>
+                <id>test-pattern-matching-improved</id>
+                <id>claude-testing-prompt-spec-updated</id>
+            </learning_ids>
+            <important_note>Updated 2025-08-19: Added all 20 test levels from test runner usage, organized prompt patterns by category, improved Claude's test execution workflow</important_note>
+            <additional_file>SPEC/claude_testing_prompt_spec.xml</additional_file>
+        </category>
+        <category>
+            <name>GitHub Actions</name>
+            <file>learnings/github_actions.xml</file>
+            <path>SPEC/learnings/github_actions.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>artifact-actions-v4-upgrade</id>
+                <id>cache-action-version-consistency</id>
+                <id>test-exit-code-propagation</id>
+                <id>optimal-test-runner-parameters</id>
+            </learning_ids>
+            <important_note>CRITICAL: Test failures must propagate - see test-exit-code-propagation learning</important_note>
+            <references>
+                <ref>.github/workflows/test-standard-template.yml</ref>
+                <ref>.github/workflows/test-runner-validation.yml</ref>
+                <ref>.github/workflows/WORKFLOW_FIX_SUMMARY.md</ref>
+            </references>
+        </category>
+        <category>
+            <name>Database/AsyncIO</name>
+            <file>learnings/database_asyncio.xml</file>
+            <path>SPEC/learnings/database_asyncio.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>async-context-manager-dependency-injection</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Demo Readiness</name>
+            <file>learnings/demo_readiness.xml</file>
+            <path>SPEC/learnings/demo_readiness.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>demo-preparation-comprehensive</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Dev Launcher/Cross-Platform</name>
+            <file>learnings/dev_launcher_mac_compatibility.xml</file>
+            <path>SPEC/learnings/dev_launcher_mac_compatibility.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>mac-process-handling</id>
+                <id>mac-port-freeing</id>
+                <id>mac-memory-monitoring</id>
+                <id>mac-utf8-encoding</id>
+            </learning_ids>
+            <important_note>Mac requires different process handling, port freeing, and memory monitoring than Linux</important_note>
+            <additional_file>learnings/dev_launcher_health_checks.xml</additional_file>
+        </category>
+        <category>
+            <name>Dev Launcher/Health Checks</name>
+            <file>learnings/dev_launcher_health_checks.xml</file>
+            <path>SPEC/learnings/dev_launcher_health_checks.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>health-check-timeout-1</id>
+                <id>dynamic-port-health-check</id>
+                <id>quick-health-check-attribute</id>
+            </learning_ids>
+            <important_note>Health checks must use dynamic ports and have adequate timeouts for database optimization</important_note>
+        </category>
+        <category>
+            <name>Development/Git</name>
+            <file>learnings/development_git.xml</file>
+            <path>SPEC/learnings/development_git.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>branch-management</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Infrastructure</name>
+            <file>learnings/infrastructure.xml</file>
+            <path>SPEC/learnings/infrastructure.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>staging-project-name</id>
+                <id>github-actions-runner-requirement</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Infrastructure/Cloud Run</name>
+            <file>learnings/infrastructure_cloud_run.xml</file>
+            <path>SPEC/learnings/infrastructure_cloud_run.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>staging-secret-reference-cloud-run</id>
+                <id>cloud-run-deployment-issues</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Infrastructure/Secret Management</name>
+            <file>learnings/infrastructure_secret_management.xml</file>
+            <path>SPEC/learnings/infrastructure_secret_management.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>staging-secrets-loading-configuration</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>GCP Deployment</name>
+            <file>learnings/gcp_deployment.xml</file>
+            <path>SPEC/learnings/gcp_deployment.xml</path>
+            <learning_count>9</learning_count>
+            <learning_ids>
+                <id>gcp-001</id>
+                <id>gcp-002</id>
+                <id>gcp-003</id>
+                <id>gcp-004</id>
+                <id>gcp-005</id>
+                <id>gcp-006</id>
+                <id>gcp-007</id>
+                <id>gcp-008</id>
+                <id>gcp-009</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Domain Mapping</name>
+            <file>learnings/domain_mapping.xml</file>
+            <path>SPEC/learnings/domain_mapping.xml</path>
+            <learning_count>7</learning_count>
+            <learning_ids>
+                <id>domain-001</id>
+                <id>domain-002</id>
+                <id>domain-003</id>
+                <id>domain-004</id>
+                <id>domain-005</id>
+                <id>domain-006</id>
+                <id>domain-007</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Observability</name>
+            <file>learnings/observability.xml</file>
+            <path>SPEC/learnings/observability.xml</path>
+            <learning_count>3</learning_count>
+            <learning_ids>
+                <id>supervisor-observability-implementation</id>
+                <id>modular-observability-architecture</id>
+                <id>correlation-id-tracking</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Architecture/Compliance</name>
+            <file>learnings/compliance_improvements.xml</file>
+            <path>SPEC/learnings/compliance_improvements.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>compliance-reporting-improvements</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Context Optimization</name>
+            <file>learnings/context_optimization.xml</file>
+            <path>SPEC/learnings/context_optimization.xml</path>
+            <learning_count>10</learning_count>
+            <learning_ids>
+                <id>context-bloat-test-files</id>
+                <id>context-bloat-long-functions</id>
+                <id>context-waste-config-sprawl</id>
+                <id>context-waste-auth-modules</id>
+                <id>context-efficiency-monitoring</id>
+                <id>context-optimization-roi</id>
+                <id>context-heavy-imports</id>
+                <id>context-waste-superseded-files</id>
+                <id>context-optimization-emergency</id>
+                <id>context-aware-testing</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Type Safety</name>
+            <file>learnings/type_safety.xml</file>
+            <path>SPEC/learnings/type_safety.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>circuit-breaker-consolidation</id>
+                <id>research-type-circular-import-fix</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Testing</name>
+            <file>learnings/testing.xml</file>
+            <path>SPEC/learnings/testing.xml</path>
+            <learning_count>13</learning_count>
+            <learning_ids>
+                <id>clickhouse-regex-deep-nested-fields</id>
+                <id>clickhouse-function-wrapper-preservation</id>
+                <id>frontend-test-bash-glob-pattern</id>
+                <id>test-runner-easy-commands</id>
+                <id>test-isolation-interceptor-reset</id>
+                <id>frontend-component-test-setup</id>
+                <id>windows-jest-bus-error-fix</id>
+                <id>websocket-mock-server-conflicts</id>
+                <id>frontend-testing-complete-guide</id>
+                <id>test-modularization-450-line-compliance</id>
+                <id>feature-flags-tdd-workflow</id>
+                <id>frontend-test-paradox-report</id>
+                <id>test-compliance-validation-comprehensive</id>
+            </learning_ids>
+            <important_note>CRITICAL: Tests must test REAL functionality not mocks - see frontend-test-paradox-report and test-compliance-validation-comprehensive</important_note>
+            <additional_file>learnings/frontend_test_paradox_report.xml</additional_file>
+        </category>
+        <category>
+            <name>Frontend</name>
+            <file>learnings/frontend.xml</file>
+            <path>SPEC/learnings/frontend.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>zustand-selector-infinite-loop</id>
+                <id>websocket-race-condition-solution</id>
+                <id>websocket-client-handshake-improvements</id>
+                <id>module-default-export-initialization</id>
+                <id>mixed-content-https-enforcement</id>
+            </learning_ids>
+            <important_note>Module initialization, state management patterns, and HTTPS enforcement for staging/production</important_note>
+        </category>
+        <category>
+            <name>Naming Conflicts and Context Binding</name>
+            <file>learnings/naming_conflicts.xml</file>
+            <path>SPEC/learnings/naming_conflicts.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>property-method-naming-conflict</id>
+            </learning_ids>
+            <important_note>CRITICAL: Property-method naming conflicts cause runtime errors. Never use same name for property and method in same class.</important_note>
+        </category>
+        <category>
+            <name>Frontend Comprehensive Checkup</name>
+            <file>learnings/frontend_comprehensive_checkup.xml</file>
+            <path>SPEC/learnings/frontend_comprehensive_checkup.xml</path>
+            <learning_count>25</learning_count>
+            <learning_ids>
+                <id>FC-001</id>
+                <id>FC-002</id>
+                <id>FC-003</id>
+                <id>SP-001</id>
+                <id>SP-002</id>
+                <id>SP-003</id>
+                <id>TS-001</id>
+                <id>TS-002</id>
+                <id>TS-003</id>
+                <id>PO-001</id>
+                <id>PO-002</id>
+                <id>PO-003</id>
+                <id>TF-001</id>
+                <id>TF-002</id>
+                <id>TF-003</id>
+                <id>BA-001</id>
+                <id>BA-002</id>
+                <id>BA-003</id>
+                <id>RS-001</id>
+                <id>RS-002</id>
+                <id>RS-003</id>
+                <id>MR-001</id>
+                <id>MR-002</id>
+                <id>MR-003</id>
+            </learning_ids>
+            <important_note>CRITICAL: 6 files exceed 450-line limit blocking Enterprise sales. Build config bypasses type safety. Comprehensive fixes and patterns documented.</important_note>
+        </category>
+        <category>
+            <name>E2E Testing</name>
+            <file>learnings/e2e_testing.xml</file>
+            <path>SPEC/learnings/e2e_testing.xml</path>
+            <learning_count>7</learning_count>
+            <learning_ids>
+                <id>circuit-breaker-patterns</id>
+                <id>pydantic-validation-flexibility</id>
+                <id>test-discovery-naming</id>
+                <id>import-error-resolution</id>
+                <id>json-parsing-graceful</id>
+                <id>fixture-dependencies</id>
+                <id>hook-integration-testing</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Deployment</name>
+            <file>learnings/deployment.xml</file>
+            <path>SPEC/learnings/deployment.xml</path>
+            <learning_count>6</learning_count>
+            <learning_ids>
+                <id>staging-setup</id>
+                <id>docker-builds</id>
+                <id>terraform-backend</id>
+                <id>cloud-armor-issues</id>
+                <id>iam-restrictions</id>
+                <id>cloud-run-uvicorn-workers</id>
+            </learning_ids>
+            <important_note>CRITICAL: Use gunicorn with uvicorn workers for Cloud Run - see cloud-run-uvicorn-workers</important_note>
+        </category>
+        <category>
+            <name>GitHub Actions</name>
+            <file>learnings/github_actions.xml</file>
+            <path>SPEC/learnings/github_actions.xml</path>
+            <learning_count>2</learning_count>
+            <learning_ids>
+                <id>artifact-actions-v4-upgrade</id>
+                <id>cache-action-version-consistency</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Dev Launcher</name>
+            <file>learnings/dev_launcher.xml</file>
+            <path>SPEC/learnings/dev_launcher.xml</path>
+            <learning_count>4</learning_count>
+            <learning_ids>
+                <id>secret-key-length</id>
+                <id>alembic-helper-files</id>
+                <id>non-critical-service-failures</id>
+                <id>llm-api-keys</id>
+            </learning_ids>
+        </category>
+        <category>
+            <name>Startup</name>
+            <file>learnings/startup.xml</file>
+            <path>SPEC/learnings/startup.xml</path>
+            <learning_count>5</learning_count>
+            <learning_ids>
+                <id>startup-clickhouse-port-configuration</id>
+                <id>startup-secrets-env-var-mapping</id>
+                <id>startup-redis-local-fallback</id>
+                <id>startup-app-state-initialization</id>
+                <id>startup-comprehensive-fix-process</id>
+            </learning_ids>
+            <important_note>CRITICAL: Startup errors often cascade - fix configuration first, then secrets, then connections</important_note>
+        </category>
+        <category>
+            <name>Microservice Independence</name>
+            <file>../independent_services.xml</file>
+            <path>SPEC/independent_services.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>auth-service-independence-refactor</id>
+            </learning_ids>
+            <important_note>CRITICAL: All microservices MUST be 100% independent - NO imports from main app allowed</important_note>
+            <description>
+                Complete guide for creating and maintaining truly independent microservices.
+                Covers directory structure, import rules, Dockerfile best practices, and migration checklist.
+            </description>
+        </category>
+        <category>
+            <name>State Management/Validation</name>
+            <file>learnings/state_validation.xml</file>
+            <path>SPEC/learnings/state_validation.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>deep-agent-state-validation-errors</id>
+            </learning_ids>
+            <important_note>Always provide defaults for Pydantic model fields unless absolutely critical</important_note>
+            <description>
+                Lessons learned from WebSocket validation errors with DeepAgentState.
+                Covers required fields, default values, backward compatibility, and testing strategies.
+            </description>
+        </category>
+        <category>
+            <name>Error Prevention</name>
+            <file>learnings/execution_context_hashable.xml</file>
+            <path>SPEC/learnings/execution_context_hashable.xml</path>
+            <learning_count>1</learning_count>
+            <learning_ids>
+                <id>execution-context-hashable-type-error</id>
+            </learning_ids>
+            <important_note>ExecutionContext is now hashable with __hash__ and __eq__ methods</important_note>
+            <description>
+                Fixed "unhashable type: ExecutionContext" errors by adding __hash__ and __eq__ 
+                methods to the ExecutionContext class. The hash is based on (run_id, agent_name) 
+                tuple for uniqueness. Pattern can be applied to other dataclasses as needed.
+            </description>
+        </category>
+    </categories>
+    
+    <usage>
+        <instruction>Each category file contains related learnings and troubleshooting patterns</instruction>
+        <instruction>Search specific category files for targeted fixes and solutions</instruction>
+        <instruction>Check index.xml for complete category listing and learning IDs</instruction>
+        <instruction>Use learning IDs to quickly find specific fixes across categories</instruction>
+    </usage>
+    
+    <statistics>
+        <total_categories>21</total_categories>
+        <total_learnings>109</total_learnings>
+    </statistics>
+</specification>

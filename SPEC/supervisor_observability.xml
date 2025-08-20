@@ -219,7 +219,7 @@
     <best_practices>
         - Use structured JSON logging for machine parsing
         - Include correlation IDs in all log entries
-        - Maintain 8-line function limit
+        - Maintain 25-line function limit
         - Keep modules under 300 lines
         - Use async/await for all I/O operations
         - Minimize performance impact of logging

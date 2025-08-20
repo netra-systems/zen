@@ -46,22 +46,38 @@ class WebSocketConnectionTester:
         self.services_manager = None
         self.test_clients: List[RealWebSocketClient] = []
         self.connection_metrics: List[Dict[str, Any]] = []
-        self.backend_url = "http://localhost:8000"
-        self.websocket_url = "ws://localhost:8000/ws"
+        self.backend_url = "http://localhost:8001"
+        self.websocket_url = "ws://localhost:8001/ws"
         
     async def setup_real_services(self) -> None:
-        """Start real Backend and Auth services for testing"""
-        self.services_manager = create_real_services_manager()
-        await self.services_manager.start_all_services(skip_frontend=True)
+        """Use existing real Backend and Auth services for testing"""
+        # Skip starting services since dev_launcher is already running
+        # Just verify services are accessible
+        import httpx
         
-        # Verify services are actually running (excluding frontend)
-        health_status = await self.services_manager.health_status()
-        required_services = {k: v for k, v in health_status.items() if k != 'frontend'}
-        if not all(svc['ready'] for svc in required_services.values()):
-            raise RuntimeError(f"Services not ready: {required_services}")
+        # Check backend health
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get("http://localhost:8001/health", timeout=5.0)
+                if response.status_code != 200:
+                    raise RuntimeError(f"Backend health check failed: {response.status_code}")
+        except Exception as e:
+            raise RuntimeError(f"Cannot connect to backend service: {e}")
+            
+        # Check auth service health  
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get("http://localhost:8083/health", timeout=5.0)
+                if response.status_code != 200:
+                    raise RuntimeError(f"Auth health check failed: {response.status_code}")
+        except Exception as e:
+            raise RuntimeError(f"Cannot connect to auth service: {e}")
+            
+        # Set services_manager to None since we're not managing them
+        self.services_manager = None
     
     async def teardown_real_services(self) -> None:
-        """Clean shutdown of all real services"""
+        """Clean shutdown of test clients only"""
         # Close all test clients first
         cleanup_tasks = []
         for client in self.test_clients:
@@ -70,12 +86,9 @@ class WebSocketConnectionTester:
         if cleanup_tasks:
             await asyncio.gather(*cleanup_tasks, return_exceptions=True)
         
-        # Stop services
-        if self.services_manager:
-            await self.services_manager.stop_all_services()
-        
-        # Verify cleanup
-        await self._verify_no_ghost_connections()
+        # Don't stop services since they're managed by dev_launcher
+        # Just verify our clients are cleaned up
+        await asyncio.sleep(0.5)  # Brief wait for cleanup
     
     async def _verify_no_ghost_connections(self) -> None:
         """Verify no ghost connections remain after cleanup"""

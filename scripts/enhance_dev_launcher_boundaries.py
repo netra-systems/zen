@@ -78,7 +78,7 @@ def enhance_launcher_args():
         "--watch-boundaries",
         dest="watch_boundaries",
         action="store_true",
-        help="Enable real-time boundary monitoring (300-line/8-line limits)"
+        help="Enable real-time boundary monitoring (450-line/25-line limits)"
     )
     boundary_group.add_argument(
         "--boundary-check-interval",

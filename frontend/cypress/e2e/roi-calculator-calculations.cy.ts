@@ -4,7 +4,7 @@ import { ROICalculatorHelpers, TestData, Assertions } from '../support/roi-calcu
 
 // ROI Calculator Calculation and Results Tests
 // BVJ: Enterprise segment - validates calculation accuracy for business case creation
-// Modular design following 300-line limit and 8-line function requirements
+// Modular design following 450-line limit and 25-line function requirements
 
 describe('ROI Calculator Calculation and Results Tests', () => {
   beforeEach(() => {

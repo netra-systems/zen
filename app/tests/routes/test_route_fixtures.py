@@ -1,6 +1,6 @@
 """
 Common test fixtures and utilities for route testing.
-Shared components extracted from oversized test file to maintain 300-line architecture limit.
+Shared components extracted from oversized test file to maintain 450-line architecture limit.
 """
 
 import pytest
@@ -32,10 +32,54 @@ class MockDependencyManager:
     @staticmethod
     def setup_core_dependencies(app):
         """Set up core application dependencies for testing."""
-        from app.dependencies import get_llm_manager
-        from app.db.postgres import get_async_db
+        from app.dependencies import get_llm_manager, get_db_dependency
+        from app.db.postgres import get_async_db, initialize_postgres
+        from app.db.session import get_db_session
+        from unittest.mock import AsyncMock, MagicMock
+        from sqlalchemy.ext.asyncio import AsyncSession
         
-        # Mock database dependency
+        # Ensure database is initialized first - but handle session factory properly
+        import app.db.session as session_module
+        import app.db.postgres as postgres_module
+        
+        # Mock the session factory to avoid the RuntimeError
+        if postgres_module.async_session_factory is None:
+            # Create a minimal mock session factory
+            postgres_module.async_session_factory = MagicMock()
+            session_module.async_session_factory = postgres_module.async_session_factory
+            
+            # Also mock the session_manager's get_session method
+            from contextlib import asynccontextmanager
+            @asynccontextmanager  
+            async def mock_manager_get_session():
+                mock_session = AsyncMock(spec=AsyncSession)
+                mock_session.execute = AsyncMock()
+                mock_session.commit = AsyncMock()
+                mock_session.rollback = AsyncMock()
+                mock_session.close = AsyncMock()
+                yield mock_session
+            
+            session_module.session_manager.get_session = mock_manager_get_session
+        
+        # Mock database session that behaves like AsyncSession
+        async def mock_get_db_dependency():
+            mock_session = MagicMock(spec=AsyncSession)
+            yield mock_session
+        
+        # Mock database session for auth dependency that supports context manager
+        from contextlib import asynccontextmanager
+        @asynccontextmanager
+        async def mock_get_db_session():
+            from unittest.mock import AsyncMock
+            mock_session = AsyncMock(spec=AsyncSession)
+            # Mock methods commonly used in auth
+            mock_session.execute = AsyncMock()
+            mock_session.commit = AsyncMock()
+            mock_session.rollback = AsyncMock()
+            mock_session.close = AsyncMock()
+            yield mock_session
+        
+        # Mock database dependency (for backward compatibility)
         def mock_get_async_db():
             return Mock()
         
@@ -43,16 +87,52 @@ class MockDependencyManager:
         def mock_get_llm_manager():
             return Mock()
         
+        app.dependency_overrides[get_db_dependency] = mock_get_db_dependency
+        app.dependency_overrides[get_db_session] = mock_get_db_session
         app.dependency_overrides[get_async_db] = mock_get_async_db
         app.dependency_overrides[get_llm_manager] = mock_get_llm_manager
+    
+    @staticmethod
+    def setup_auth_dependencies(app):
+        """Set up authentication dependencies for testing."""
+        from app.auth_integration.auth import get_current_user, get_current_active_user
+        from app.db.models_postgres import User
+        
+        async def mock_get_current_user():
+            # Create a mock user for testing - bypass all auth logic
+            mock_user = Mock(spec=User)
+            mock_user.id = "test_user_123"
+            mock_user.email = "test@example.com"
+            mock_user.role = "user"
+            mock_user.is_active = True
+            return mock_user
+        
+        async def mock_get_current_active_user():
+            # Create a mock active user for testing - bypass all auth logic
+            mock_user = Mock(spec=User)
+            mock_user.id = "test_user_123"
+            mock_user.email = "test@example.com"
+            mock_user.role = "user"
+            mock_user.is_active = True
+            return mock_user
+        
+        app.dependency_overrides[get_current_user] = mock_get_current_user
+        app.dependency_overrides[get_current_active_user] = mock_get_current_active_user
     
     @staticmethod
     def setup_agent_dependencies(app):
         """Set up agent-specific dependencies for testing."""
         from app.services.agent_service import get_agent_service
+        from app.services.agent_service_core import AgentService
         
-        def mock_get_agent_service():
-            return Mock()
+        def mock_get_agent_service(db_session=None, llm_manager=None):
+            # Return a properly mocked AgentService
+            mock_service = Mock(spec=AgentService)
+            mock_service.process_message = AsyncMock(return_value={
+                "response": "Test response",
+                "status": "success"
+            })
+            return mock_service
         
         app.dependency_overrides[get_agent_service] = mock_get_agent_service
     
@@ -106,6 +186,21 @@ def basic_test_client():
     from app.main import app
     MockAppStateManager.setup_app_state(app)
     return TestClient(app)
+
+
+@pytest.fixture
+def authenticated_test_client(ensure_db_initialized):
+    """FastAPI test client with authentication mocked."""
+    from app.main import app
+    
+    MockDependencyManager.setup_core_dependencies(app)
+    MockDependencyManager.setup_auth_dependencies(app)
+    MockAppStateManager.setup_app_state(app)
+    
+    try:
+        return TestClient(app)
+    finally:
+        MockDependencyManager.clear_overrides(app)
 
 
 @pytest.fixture  

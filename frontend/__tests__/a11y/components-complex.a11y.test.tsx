@@ -1,7 +1,7 @@
 /**
  * Complex Components Accessibility Test Suite
  * Tests component combinations and complex interaction patterns
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  * 
  * Business Value Justification (BVJ):
  * - Segment: All (Free → Enterprise)

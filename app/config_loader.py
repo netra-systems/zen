@@ -1,4 +1,8 @@
-"""Configuration loader utilities - split from config.py for modularity."""
+"""Configuration loader utilities - split from config.py for modularity.
+
+DEPRECATED: This module is deprecated. Use app.core.configuration instead.
+Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
+"""
 
 import os
 from typing import Dict, Any, TYPE_CHECKING

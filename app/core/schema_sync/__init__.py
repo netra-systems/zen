@@ -2,7 +2,7 @@
 Schema Synchronization Module
 
 Enhanced schema synchronization system for maintaining type safety 
-between frontend and backend. Split into focused modules under 300-line limit.
+between frontend and backend. Split into focused modules under 450-line limit.
 """
 
 from .models import SchemaValidationLevel, SchemaChangeInfo, SyncReport

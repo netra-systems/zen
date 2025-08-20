@@ -129,10 +129,15 @@ class StartupValidator:
     def _verify_auth_ready(self, port: int = 8081) -> bool:
         """Verify auth service is ready."""
         from dev_launcher.utils import wait_for_service_with_details
-        auth_url = f"http://localhost:{port}/health"
-        success, details = wait_for_service_with_details(auth_url, timeout=30)
-        if not success and details:
-            logger.debug(f"Auth service check failed: {details}")
+        # Try /health/ready first (new), fall back to /health (legacy)
+        auth_ready_url = f"http://localhost:{port}/health/ready"
+        success, details = wait_for_service_with_details(auth_ready_url, timeout=30)
+        if not success:
+            # Fallback to basic health endpoint
+            auth_url = f"http://localhost:{port}/health"
+            success, details = wait_for_service_with_details(auth_url, timeout=30)
+            if not success and details:
+                logger.debug(f"Auth service check failed: {details}")
         return success
     
     def _verify_backend_ready(self, port: int = 8000) -> bool:

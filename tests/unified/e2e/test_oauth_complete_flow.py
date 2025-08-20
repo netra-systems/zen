@@ -13,7 +13,7 @@ Critical OAuth E2E Test - Login → Dashboard → Chat History
 - Real dashboard load with chat history → <5 second execution
 - NO internal service mocking - only external OAuth provider mocked
 
-**ARCHITECTURE:** 300-line limit, 8-line functions, real service integration
+**ARCHITECTURE:** 450-line limit, 25-line functions, real service integration
 """
 
 import asyncio

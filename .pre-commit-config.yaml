@@ -1,5 +1,5 @@
 # Elite Enforcement Pre-commit Configuration for Netra Apex
-# MANDATORY: 300-line file limit, 8-line function limit
+# MANDATORY: 450-line file limit, 25-line function limit
 repos:
   - repo: local
     hooks:
@@ -8,11 +8,11 @@ repos:
         name: Architecture Compliance Enforcer
         entry: python scripts/enforce_limits.py --mode strict --fail-fast
         language: system
-        files: '^(app|frontend|scripts).*\.(py|ts|tsx)$'
+        files: '^(app|frontend|scripts|tests).*\.(py|ts|tsx)$'
         stages: [commit]
-        description: 'Enforces 300-line file and 8-line function limits'
+        description: 'Enforces 450-line file and 25-line function limits'
         
-      # File Size Enforcement (300-line limit)
+      # File Size Enforcement (450-line limit)
       - id: file-size-limit
         name: File Size Limit (300 lines)
         entry: python scripts/enforce_limits.py --check-files-only --max-lines 300
@@ -21,7 +21,7 @@ repos:
         stages: [commit]
         pass_filenames: true
         
-      # Function Complexity Enforcement (8-line limit)  
+      # Function Complexity Enforcement (25-line limit)  
       - id: function-complexity-limit
         name: Function Complexity Limit (8 lines)
         entry: python scripts/enforce_limits.py --check-functions-only --max-function-lines 8
@@ -45,3 +45,12 @@ repos:
         language: system
         files: '\.py$'
         stages: [commit]
+        
+      # TEST FILES: Enforce same limits as production code (SPEC/testing.xml)
+      - id: test-file-size-enforcement
+        name: Test File Size Enforcement (300 lines)
+        entry: python scripts/compliance/test_size_validator.py --strict --format json
+        language: system
+        files: '(test_.*\.py|.*_test\.py|tests/.*\.py)$'
+        stages: [commit]
+        description: 'Test files MUST follow same 450-line limit as production code (SPEC/testing.xml)'

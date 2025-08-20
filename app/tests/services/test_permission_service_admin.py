@@ -1,7 +1,7 @@
 """
 Comprehensive tests for Permission Service - Admin & Security
 Critical security component - Admin checks and edge cases
-Split from test_permission_service.py to maintain 300-line limit
+Split from test_permission_service.py to maintain 450-line limit
 """
 
 import pytest

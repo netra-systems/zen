@@ -2,7 +2,7 @@
 """
 Test Discovery Module
 Handles test finding, coverage analysis, and untested module identification
-Complies with 300-line limit and 8-line function constraint
+Complies with 450-line limit and 25-line function constraint
 """
 
 import subprocess

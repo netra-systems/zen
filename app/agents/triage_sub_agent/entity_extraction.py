@@ -2,13 +2,13 @@
 # ================================
 # Timestamp: 2025-08-13T00:00:00.000000+00:00
 # Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Refactored from triage_sub_agent_legacy.py - Entity extraction (8-line function limit)
+# Context: Refactored from triage_sub_agent_legacy.py - Entity extraction (25-line function limit)
 # Git: v6 | dirty
 # Change: Refactor | Scope: Component | Risk: Low
 # Session: compliance-fix | Seq: 5
 # Review: Pending | Score: 95
 # ================================
-"""Entity extraction utilities - compliant with 8-line limit."""
+"""Entity extraction utilities - compliant with 25-line limit."""
 
 import re
 from typing import List, Dict, Any

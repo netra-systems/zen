@@ -9,7 +9,7 @@
     <description>Deploy to GCP Staging Environment - 100% Reliable Method</description>
     
     <critical-note>
-      ALWAYS use deploy-staging-reliable.ps1 for deployments.
+      ALWAYS use deploy_staging.py for deployments.
       This script guarantees 100% success by using service account authentication
       with automatic retry logic and self-healing capabilities.
     </critical-note>
@@ -19,31 +19,31 @@
         <!-- One-time setup only -->
         <command>gcloud auth login</command>
         <description>Authenticate yourself first (one-time)</description>
-        <command>.\setup-staging-auth.ps1</command>
+        <command>python setup_staging_auth.py</command>
         <description>Creates service account, downloads key, sets environment variables</description>
       </first-time-setup>
       
       <deploy>
         <!-- Standard deployment - ALWAYS WORKS -->
-        <command>.\deploy-staging-reliable.ps1</command>
+        <command>python deploy_staging.py</command>
         <description>Full deployment with automatic authentication and retry logic</description>
       </deploy>
       
       <deploy-options>
         <!-- Deployment options -->
-        <command>.\deploy-staging-reliable.ps1 -SkipHealthChecks</command>
+        <command>python deploy_staging.py --skip-health-checks</command>
         <description>Skip health checks for faster deployment</description>
         
-        <command>.\deploy-staging-reliable.ps1 -BuildOnly</command>
+        <command>python deploy_staging.py --build-only</command>
         <description>Build Docker images only (no push/deploy)</description>
         
-        <command>.\deploy-staging-reliable.ps1 -DeployOnly</command>
+        <command>python deploy_staging.py --deploy-only</command>
         <description>Deploy pre-built images only (skip build)</description>
       </deploy-options>
       
       <fix-auth>
         <!-- If authentication issues occur -->
-        <command>.\setup-staging-auth.ps1 -ForceNewKey</command>
+        <command>python setup_staging_auth.py --force-new-key</command>
         <description>Regenerate service account key and fix authentication</description>
       </fix-auth>
     </quick-commands>
@@ -88,7 +88,7 @@
     <troubleshooting>
       <issue name="Any Authentication Issue">
         <solution>Run setup script with force flag to regenerate everything</solution>
-        <command>.\setup-staging-auth.ps1 -ForceNewKey</command>
+        <command>python setup_staging_auth.py --force-new-key</command>
       </issue>
       
       <issue name="Docker Push Failed">
@@ -102,12 +102,57 @@
       </issue>
     </troubleshooting>
 
+    <python-scripts>
+      <description>All deployment and setup scripts have been consolidated into Python for consistency</description>
+      
+      <deployment>
+        <script>deploy_staging.py</script>
+        <description>Main deployment script - 100% reliable with retry logic</description>
+        <usage>python deploy_staging.py [--skip-health-checks] [--build-only] [--deploy-only]</usage>
+      </deployment>
+      
+      <setup-auth>
+        <script>setup_staging_auth.py</script>
+        <description>Setup GCP service account authentication</description>
+        <usage>python setup_staging_auth.py [--force-new-key]</usage>
+      </setup-auth>
+      
+      <setup-secrets>
+        <script>setup_staging_secrets.py</script>
+        <description>Setup all required secrets in Google Secret Manager</description>
+        <usage>python setup_staging_secrets.py [--gemini-api-key KEY] [--database-url URL]</usage>
+      </setup-secrets>
+      
+      <setup-gcp>
+        <script>setup_gcp_resources.py</script>
+        <description>Setup GCP resources (artifacts registry, secrets, storage)</description>
+        <usage>python setup_gcp_resources.py</usage>
+      </setup-gcp>
+      
+      <migrations>
+        <script>run_migrations.py</script>
+        <description>Run database migrations against staging</description>
+        <usage>python run_migrations.py [--force-run] [--check-only]</usage>
+      </migrations>
+      
+      <testing>
+        <script>run_unified_tests.py</script>
+        <description>Unified testing environment startup</description>
+        <usage>python run_unified_tests.py [--build] [--cleanup] [--status]</usage>
+      </testing>
+      
+      <critical-tests>
+        <script>run_critical_tests.py</script>
+        <description>Run critical system tests</description>
+        <usage>python run_critical_tests.py</usage>
+      </critical-tests>
+    </python-scripts>
+
     <legacy-scripts-removed>
-      <warning>The following scripts have been removed to avoid confusion:</warning>
-      <removed>deploy-staging-automated.ps1 (unreliable - mixed auth)</removed>
-      <removed>deploy-staging.ps1 (unreliable - user auth)</removed>
-      <removed>deploy-all-staging.ps1 (unreliable - user auth)</removed>
-      <removed>deploy-staging-terraform.ps1 (outdated)</removed>
+      <warning>ALL PowerShell (.ps1) and shell (.sh) scripts have been removed and replaced with Python equivalents</warning>
+      <removed>All .ps1 files (except in node_modules/venv/terraform)</removed>
+      <removed>All .sh files (except in node_modules/.git/terraform)</removed>
+      <benefit>Consistent cross-platform experience with better error handling</benefit>
     </legacy-scripts-removed>
   </gcp-staging>
 
@@ -173,14 +218,14 @@
   <claude-quick-reference>
     <instruction>
       When asked to "deploy to staging" or similar, use ONLY these commands:
-      1. First time only: gcloud auth login && .\setup-staging-auth.ps1
-      2. Deploy (always works): .\deploy-staging-reliable.ps1
-      3. Never use old deploy-staging-automated.ps1 (removed - unreliable)
-      4. For any issues: .\setup-staging-auth.ps1 -ForceNewKey
+      1. First time only: gcloud auth login && python setup_staging_auth.py
+      2. Deploy (always works): python deploy_staging.py
+      3. Never use old PowerShell/shell scripts (removed - unreliable)
+      4. For any issues: python setup_staging_auth.py --force-new-key
     </instruction>
     
     <critical>
-      The deploy-staging-reliable.ps1 script is 100% reliable because it:
+      The deploy_staging.py script is 100% reliable because it:
       - Uses service account authentication (never expires)
       - Includes automatic retry logic for all operations
       - Self-heals authentication issues

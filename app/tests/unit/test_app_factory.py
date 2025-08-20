@@ -47,7 +47,7 @@ def mock_lifespan():
         yield mock
 
 
-# Helper functions for 8-line compliance
+# Helper functions for 25-line compliance
 def assert_exception_handler_added(app, exception_type):
     """Assert exception handler was added for type."""
     app.add_exception_handler.assert_any_call(exception_type, 

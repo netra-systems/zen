@@ -1,7 +1,7 @@
 """Quality validation checks module.
 
 This module contains validation logic separated from the supervisor
-to maintain the 300-line and 8-line function limits per CLAUDE.md.
+to maintain the 450-line and 25-line function limits per CLAUDE.md.
 """
 
 from typing import Dict, Optional, Any

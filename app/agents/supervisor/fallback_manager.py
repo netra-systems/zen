@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 if TYPE_CHECKING:
     from app.agents.supervisor.websocket_notifier import WebSocketNotifier
 
+from app.config import get_config
 from app.logging_config import central_logger
 from app.agents.state import DeepAgentState
 from app.agents.supervisor.execution_context import (
@@ -232,13 +233,13 @@ class FallbackManager:
     
     def _get_circuit_breaker_timeout(self) -> float:
         """Get circuit breaker timeout based on environment."""
-        import os
-        return 0.1 if os.getenv('PYTEST_CURRENT_TEST') else 60.0
+        config = get_config()
+        return 0.1 if config.pytest_current_test else 60.0
     
     def _get_circuit_breaker_threshold(self) -> int:
         """Get circuit breaker threshold based on environment."""
-        import os
-        return 2 if os.getenv('PYTEST_CURRENT_TEST') else 3
+        config = get_config()
+        return 2 if config.pytest_current_test else 3
     
     def _build_circuit_breaker_config(self, agent_name: str, threshold: int, 
                                      timeout: float) -> CircuitBreakerConfig:

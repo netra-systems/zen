@@ -10,7 +10,7 @@ from app.schemas.quality_types import ContentType
 
 
 class TestFallbackHandlerSimple:
-    """Test suite for FallbackHandler with 8-line function limit"""
+    """Test suite for FallbackHandler with 25-line function limit"""
     
     @pytest.fixture
     def handler(self):
@@ -139,7 +139,7 @@ class TestFallbackHandlerSimple:
 
 
 class TestFallbackMetadata:
-    """Test FallbackMetadata with 8-line function limit"""
+    """Test FallbackMetadata with 25-line function limit"""
     
     def test_metadata_creation_minimal(self):
         """Test minimal metadata creation - 3 lines"""

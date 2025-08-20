@@ -2,13 +2,13 @@
 # ================================
 # Timestamp: 2025-08-13T00:00:00.000000+00:00
 # Agent: Claude Opus 4.1 claude-opus-4-1-20250805
-# Context: Refactored from triage_sub_agent_legacy.py - Tool recommendations (8-line function limit)
+# Context: Refactored from triage_sub_agent_legacy.py - Tool recommendations (25-line function limit)
 # Git: v6 | dirty
 # Change: Refactor | Scope: Component | Risk: Low
 # Session: compliance-fix | Seq: 7
 # Review: Pending | Score: 95
 # ================================
-"""Tool recommendation utilities - compliant with 8-line limit."""
+"""Tool recommendation utilities - compliant with 25-line limit."""
 
 from typing import List, Dict
 from app.agents.triage_sub_agent.models import ToolRecommendation, ExtractedEntities

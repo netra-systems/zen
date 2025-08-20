@@ -64,15 +64,15 @@ async def _perform_clickhouse_check() -> None:
     try:
         from app.db.clickhouse import get_clickhouse_client
         async with get_clickhouse_client() as client:
-            client.ping()
+            await client.execute("SELECT 1")
     except Exception as e:
         await _handle_clickhouse_error(e)
 
 async def _handle_clickhouse_error(error: Exception) -> None:
     """Handle ClickHouse connection errors."""
     logger.warning(f"ClickHouse check failed (non-critical): {error}")
-    if settings.environment == "staging":
-        logger.info("Ignoring ClickHouse failure in staging environment")
+    if settings.environment in ["staging", "development"]:
+        logger.info(f"Ignoring ClickHouse failure in {settings.environment} environment")
     else:
         raise
 
@@ -125,7 +125,15 @@ async def database_environment() -> Dict[str, Any]:
 async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
-        return await SchemaValidationService.validate_schema(async_engine)
+        from app.db.postgres import async_engine, initialize_postgres
+        engine = async_engine
+        if engine is None:
+            initialize_postgres()
+            from app.db.postgres import async_engine as refreshed_engine
+            engine = refreshed_engine
+        if engine is None:
+            raise RuntimeError("Database engine not initialized")
+        return await SchemaValidationService.validate_schema(engine)
     except Exception as e:
         logger.error(f"Schema validation check failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))

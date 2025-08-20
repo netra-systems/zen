@@ -410,15 +410,15 @@ export {
             <date>2025-08-18</date>
             <category>Architecture Compliance</category>
             <severity>critical</severity>
-            <title>Frontend Architecture Compliance Violations - 300-Line and 8-Line Limits</title>
+            <title>Frontend Architecture Compliance Violations - 450-line and 25-line Limits</title>
             
             <problem>
                 <description>Multiple critical architecture violations found during comprehensive frontend checkup</description>
                 <violations>
-                    <violation>store/unified-chat.ts: 352 lines (52 over 300-line limit)</violation>
+                    <violation>store/unified-chat.ts: 352 lines (52 over 450-line limit)</violation>
                     <violation>components/chat/MainChat.tsx: 300 lines (at maximum capacity)</violation>
-                    <violation>MainChat.tsx component function: 220+ lines (massive violation of 8-line limit)</violation>
-                    <violation>executeTestRun function: 11 lines (3 over 8-line limit)</violation>
+                    <violation>MainChat.tsx component function: 220+ lines (massive violation of 25-line limit)</violation>
+                    <violation>executeTestRun function: 11 lines (3 over 25-line limit)</violation>
                 </violations>
                 <impact>30% increase in development time, 15-20% more production bugs, blocks enterprise scaling</impact>
             </problem>
@@ -453,8 +453,8 @@ export {
             
             <tags>
                 <tag>architecture</tag>
-                <tag>300-line-limit</tag>
-                <tag>8-line-limit</tag>
+                <tag>450-line-limit</tag>
+                <tag>25-line-limit</tag>
                 <tag>critical</tag>
             </tags>
         </learning>
@@ -856,6 +856,83 @@ const response = await fetch(`${config.apiUrl}/api/data`, {...});
                 <tag>staging</tag>
                 <tag>production</tag>
                 <tag>configuration</tag>
+            </tags>
+        </learning>
+        
+        <learning>
+            <id>frontend-base-url-invalid-construction</id>
+            <date>2025-08-20</date>
+            <category>API Communication</category>
+            <severity>critical</severity>
+            <title>Invalid Base URL Construction in API Client</title>
+            
+            <problem>
+                <description>API client wrapper using empty string as base URL caused "Failed to construct 'URL': Invalid base URL" errors</description>
+                <symptoms>
+                    <symptom>Error: "Failed to construct 'URL': Invalid base URL"</symptom>
+                    <symptom>Failed to load threads: Invalid base URL</symptom>
+                    <symptom>All API calls failing in browser context</symptom>
+                    <symptom>WebSocket connections unable to establish</symptom>
+                    <symptom>Authentication flows completely broken</symptom>
+                </symptoms>
+                <root_causes>
+                    <cause>apiClientWrapper constructor set this.baseURL to empty string ('') in browser contexts</cause>
+                    <cause>JavaScript URL constructor requires valid base URL, empty string is invalid</cause>
+                    <cause>Attempted to use empty string for relative URL support through Next.js proxy</cause>
+                </root_causes>
+                <impact>Complete application failure - no API communication possible</impact>
+            </problem>
+            
+            <solution>
+                <description>Use window.location.origin as base URL in browser contexts</description>
+                <implementation>
+                    <step>Update apiClientWrapper constructor to use window.location.origin for browser</step>
+                    <step>Use full backend URL (secureApiConfig.apiUrl) for SSR contexts</step>
+                    <step>Add validateUrl() method to clean up double slashes</step>
+                    <step>Integrate URL validation into request pipeline</step>
+                </implementation>
+                <code_example>
+// CORRECT - Valid base URL
+constructor() {
+  this.baseURL = typeof window !== 'undefined' 
+    ? window.location.origin  // Valid URL for browser
+    : secureApiConfig.apiUrl;  // Full URL for SSR
+  this.checkConnection();
+}
+
+// URL validation to prevent double slashes
+private validateUrl(url: string): string {
+  return url.replace(/([^:]\/)\/+/g, "$1");
+}
+
+// WRONG - Invalid empty string
+constructor() {
+  this.baseURL = typeof window !== 'undefined' ? '' : secureApiConfig.apiUrl;
+}
+                </code_example>
+            </solution>
+            
+            <prevention>
+                <rule>NEVER use empty string as base URL for URL constructor</rule>
+                <rule>Always use window.location.origin for browser contexts</rule>
+                <rule>Test URL construction with new URL() before deployment</rule>
+                <rule>Add URL validation tests to catch construction errors</rule>
+                <rule>Use centralized getBaseUrl() helper for consistency</rule>
+            </prevention>
+            
+            <affected_files>
+                <file>frontend/services/apiClientWrapper.ts</file>
+                <file>frontend/lib/secure-api-config.ts</file>
+                <file>frontend/services/url-sync/utils.ts</file>
+            </affected_files>
+            
+            <specification>SPEC/frontend_base_url_configuration.xml</specification>
+            
+            <tags>
+                <tag>api</tag>
+                <tag>url-construction</tag>
+                <tag>critical-fix</tag>
+                <tag>base-url</tag>
             </tags>
         </learning>
     </learnings>

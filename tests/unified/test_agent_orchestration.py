@@ -11,7 +11,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Agent reliability enables value-based pricing model (20% of savings)
 
 Architecture Compliance:
-- 300-line file limit enforced through modular design
+- 450-line file limit enforced through modular design
 - Specialized test modules for each orchestration aspect
 - Shared fixtures for consistency and reduced duplication
 - Comprehensive coverage through focused test suites

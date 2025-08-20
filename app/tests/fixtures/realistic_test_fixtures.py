@@ -1,7 +1,7 @@
 """
 Realistic Test Fixtures - Index
 Central index for all realistic test fixtures split across multiple modules.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 import asyncio

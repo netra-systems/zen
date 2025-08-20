@@ -486,7 +486,7 @@ jobs:
 ├── actions/                          # Custom actions
 │   └── comment-updater/
 └── scripts/                          # Support scripts
-    ├── determine-strategy.sh
+    ├── determine-strategy.py
     └── parse-config.py
             </structure>
         </directory_structure>

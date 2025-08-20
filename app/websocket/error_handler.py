@@ -109,7 +109,7 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
         return await self._perform_modern_error_recovery(error, conn_info)
         
     def _store_and_track_error(self, error: WebSocketErrorInfo, conn_info: Optional[ConnectionInfo]) -> None:
-        """Store error and update tracking - split for 8-line limit."""
+        """Store error and update tracking - split for 25-line limit."""
         self.config.error_history[error.error_id] = error
         self.config.update_error_statistics(error.severity)
         self._update_connection_tracking(error, conn_info)
@@ -151,7 +151,7 @@ class ModernWebSocketErrorInterface(BaseExecutionInterface):
 
     def _build_websocket_error_info(self, conn_info: ConnectionInfo, error_message: str,
                                   error_type: str, severity: ErrorSeverity, context: Dict[str, Any]) -> WebSocketErrorInfo:
-        """Build WebSocketErrorInfo object - split for 8-line compliance."""
+        """Build WebSocketErrorInfo object - split for 25-line compliance."""
         return WebSocketErrorInfo(
             connection_id=conn_info.connection_id, user_id=conn_info.user_id,
             error_type=error_type, message=error_message, severity=severity, context=context

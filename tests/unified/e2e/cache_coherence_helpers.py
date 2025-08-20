@@ -9,6 +9,9 @@ Business Value Justification (BVJ):
 Architecture: <300 lines, functions <8 lines per CLAUDE.md requirements
 """
 
+import os
+os.environ["NETRA_ENV"] = "testing"
+
 import json
 import asyncio
 import time

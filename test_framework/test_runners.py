@@ -484,6 +484,12 @@ def _apply_speed_optimizations(cmd: List[str], speed_opts: Dict[str, bool]) -> L
             # Backend runner doesn't show warnings by default
             pass  # No specific flag needed
         
+        if speed_opts.get('no_coverage', False):
+            # Remove any existing --coverage flags and add --no-coverage
+            optimized_cmd = [arg for arg in optimized_cmd if arg != '--coverage' and arg != '--cov']
+            # Backend runner doesn't have --no-coverage flag, so we remove --coverage instead
+            # This effectively disables coverage collection
+        
         # Backend runner doesn't have direct skip slow support
         # Would need to use --markers flag
     elif is_frontend_simple_runner:

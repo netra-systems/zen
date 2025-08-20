@@ -9,7 +9,7 @@
   <critical_findings>
     <finding id="FC-001" severity="CRITICAL">
       <title>Architecture Violations Block Enterprise Sales</title>
-      <description>6 files exceed 300-line limit, with webSocketService.ts at 484 lines</description>
+      <description>6 files exceed 450-line limit, with webSocketService.ts at 484 lines</description>
       <impact>67.2% compliance score vs 95% Enterprise requirement</impact>
       <solution>Mandatory module splitting before Enterprise demos</solution>
       <files_affected>

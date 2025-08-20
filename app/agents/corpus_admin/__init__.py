@@ -2,7 +2,7 @@
 Corpus Admin Sub-Agent Module
 
 Provides corpus management and administration functionality with 
-modular architecture under 300-line limit.
+modular architecture under 450-line limit.
 """
 
 from .agent import CorpusAdminSubAgent

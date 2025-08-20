@@ -2,7 +2,7 @@
 MCP Request Handler Module
 
 Handles JSON-RPC 2.0 request processing for MCP protocol.
-Separated from main service to maintain 300-line module limit.
+Separated from main service to maintain 450-line module limit.
 """
 
 from typing import Dict, Any

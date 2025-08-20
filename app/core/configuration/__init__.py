@@ -26,11 +26,24 @@ from .validator import ConfigurationValidator
 from .secrets import SecretManager
 from .database import DatabaseConfigManager
 from .services import ServiceConfigManager
+from .loader import ConfigurationLoader, get_configuration, reload_configuration
+from .environment import EnvironmentDetector, get_environment, is_production, is_development
+from .unified_secrets import UnifiedSecretManager, load_secrets, get_secret
 
 __all__ = [
     "UnifiedConfigManager",
     "ConfigurationValidator", 
     "SecretManager",
     "DatabaseConfigManager",
-    "ServiceConfigManager"
+    "ServiceConfigManager",
+    "ConfigurationLoader",
+    "EnvironmentDetector",
+    "UnifiedSecretManager",
+    "get_configuration",
+    "reload_configuration",
+    "get_environment",
+    "is_production",
+    "is_development",
+    "load_secrets",
+    "get_secret"
 ]

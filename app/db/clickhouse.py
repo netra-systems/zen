@@ -13,7 +13,7 @@ from contextlib import asynccontextmanager
 from typing import List, Dict, Any, Optional
 from app.db.clickhouse_base import ClickHouseDatabase
 from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from app.config import settings
+from app.core.configuration import get_configuration
 from app.logging_config import central_logger as logger
 
 
@@ -62,12 +62,14 @@ class MockClickHouseDatabase:
 
 def _is_testing_environment() -> bool:
     """Check if running in testing environment."""
-    return settings.environment == "testing"
+    config = get_configuration()
+    return config.environment == "testing"
 
 def _is_development_with_mock() -> bool:
     """Check if development environment with mock enabled."""
-    if settings.environment == "development":
-        return getattr(settings, 'use_mock_clickhouse', False)
+    config = get_configuration()
+    if config.environment == "development":
+        return config.clickhouse_mode == "mock"
     return False
 
 def _should_use_mock_clickhouse() -> bool:
@@ -88,8 +90,7 @@ def use_mock_clickhouse() -> bool:
 
 def _get_unified_config():
     """Get unified configuration instance."""
-    from app.config import get_config
-    return get_config()
+    return get_configuration()
 
 def _extract_https_config(config):
     """Extract appropriate configuration from unified config based on mode."""
@@ -109,7 +110,8 @@ def get_clickhouse_config():
 
 async def _create_mock_client():
     """Create and manage mock ClickHouse client."""
-    logger.info(f"[ClickHouse] Using MOCK client for {settings.environment}")
+    config = get_configuration()
+    logger.info(f"[ClickHouse] Using MOCK client for {config.environment}")
     client = MockClickHouseDatabase()
     try:
         yield client
@@ -139,8 +141,7 @@ async def get_clickhouse_client():
 def _get_connection_config():
     """Get ClickHouse connection configuration."""
     config = get_clickhouse_config()
-    from app.config import get_config
-    app_config = get_config()
+    app_config = get_configuration()
     use_secure = app_config.clickhouse_mode != "local"
     return config, use_secure
 

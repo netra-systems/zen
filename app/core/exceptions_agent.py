@@ -1,4 +1,4 @@
-"""Agent and LLM related exceptions - compliant with 8-line function limit.
+"""Agent and LLM related exceptions - compliant with 25-line function limit.
 
 This module contains exceptions specific to agent operations, LLM interactions,
 and multi-agent system coordination.

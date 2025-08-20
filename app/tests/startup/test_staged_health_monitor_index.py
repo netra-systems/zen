@@ -1,6 +1,6 @@
 """
 Staged Health Monitor Tests - Modular Index
-Redirects to focused test modules following 300-line architecture
+Redirects to focused test modules following 450-line architecture
 COMPLIANCE: Modular split from 514-line monolith
 """
 

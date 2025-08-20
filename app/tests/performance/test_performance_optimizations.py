@@ -1,7 +1,7 @@
 """
 Performance Tests - Index
 Central index for all performance optimization tests split across modules.
-Compliance: <300 lines, 8-line max functions, modular design.
+Compliance: <300 lines, 25-line max functions, modular design.
 """
 
 # Import all performance test modules

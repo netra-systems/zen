@@ -2,7 +2,7 @@
  * Logout Security and Multi-Tab Tests  
  * Tests multi-tab logout sync, browser back prevention, and security measures
  * BUSINESS VALUE: Enterprise security & compliance (data privacy)
- * Following 300-line limit and 8-line function requirements
+ * Following 450-line limit and 25-line function requirements
  */
 
 import React from 'react';
@@ -34,7 +34,7 @@ const mockSessionStorage = {
   length: 0,
 };
 
-// Test data following 8-line limit
+// Test data following 25-line limit
 const createUserData = () => ({
   id: 'user-123',
   email: 'test@example.com',

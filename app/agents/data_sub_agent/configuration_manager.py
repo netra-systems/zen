@@ -1,6 +1,6 @@
 """Configuration Management for DataSubAgent
 
-Separates configuration creation logic to maintain 300-line limit.
+Separates configuration creation logic to maintain 450-line limit.
 Handles reliability, circuit breaker and retry configurations.
 
 Business Value: Modular configuration for maintainability.

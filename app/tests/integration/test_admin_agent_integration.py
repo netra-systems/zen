@@ -2,7 +2,7 @@
 Integration tests for admin agents
 
 Tests the integration between triage, corpus admin, and tool dispatcher agents.
-All functions maintain 8-line limit with single responsibility.
+All functions maintain 25-line limit with single responsibility.
 """
 
 import pytest

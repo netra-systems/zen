@@ -3,7 +3,7 @@ File Upload Test Context - E2E Testing Support
 Business Value: $45K MRR - Enables comprehensive document upload validation
 
 Provides context and utilities for file upload pipeline testing.
-Follows 300-line limit and 8-line function rules.
+Follows 450-line limit and 25-line function rules.
 """
 
 import tempfile

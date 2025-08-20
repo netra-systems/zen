@@ -1,18 +1,36 @@
 """
-E2E Testing Configuration - Real LLM testing fixtures and environment setup
+E2E Testing Configuration - Comprehensive E2E testing fixtures and environment setup
 
-Provides fixtures for real LLM testing with intelligent fallback to mocks.
-Supports model selection, caching, and environment-based configuration.
+BUSINESS VALUE JUSTIFICATION (BVJ):
+- Segment: Platform/Internal
+- Business Goal: Testing infrastructure quality and reliability
+- Value Impact: Prevents production bugs that could cost $30K+ MRR
+- Strategic Impact: Reliable testing enables rapid feature development
+
+Provides fixtures for:
+- Real LLM testing with intelligent fallback to mocks
+- Multi-service integration testing
+- WebSocket communication testing
+- Database state management
+- Service startup validation
+- Authentication and authorization testing
 """
 import os
+import asyncio
 import pytest
-from typing import Dict, Any, Optional, List
+import time
+import httpx
+from pathlib import Path
+from typing import Dict, Any, Optional, List, Tuple
+from unittest.mock import Mock, AsyncMock, patch
 from app.tests.e2e.infrastructure import (
     LLMTestManager,
     LLMTestModel,
     LLMTestConfig,
     LLMResponseCache
 )
+from dev_launcher.launcher import DevLauncher
+from dev_launcher.config import LauncherConfig
 
 
 @pytest.fixture(scope="function")
@@ -300,3 +318,351 @@ async def db_session():
     session.refresh = AsyncMock()
     session.close = AsyncMock()
     return session
+
+
+# =============================================================================
+# SYSTEM STARTUP FIXTURES
+# =============================================================================
+
+@pytest.fixture(scope="function")
+def e2e_launcher_config() -> LauncherConfig:
+    """Create test launcher configuration for system startup tests."""
+    return LauncherConfig(
+        dynamic_ports=True,
+        parallel_startup=True,
+        load_secrets=False,
+        no_browser=True,
+        non_interactive=True,
+        startup_mode="minimal",
+        verbose=False
+    )
+
+
+@pytest.fixture(scope="function")
+async def dev_launcher(e2e_launcher_config):
+    """Create and manage dev launcher for testing."""
+    launcher = DevLauncher(e2e_launcher_config)
+    
+    try:
+        yield launcher
+    finally:
+        # Cleanup
+        if hasattr(launcher, 'shutdown'):
+            await launcher.shutdown()
+
+
+@pytest.fixture(scope="function")
+def service_endpoints() -> Dict[str, str]:
+    """Define service endpoints for multi-service testing."""
+    return {
+        "backend": "http://localhost:8000",
+        "auth_service": "http://localhost:8001", 
+        "frontend": "http://localhost:3000"
+    }
+
+
+@pytest.fixture(scope="function")
+async def wait_for_services(service_endpoints):
+    """Wait for all services to be ready."""
+    timeout = 30
+    
+    for service_name, base_url in service_endpoints.items():
+        health_url = f"{base_url}/health" if service_name != "frontend" else f"{base_url}/api/health"
+        
+        end_time = time.time() + timeout
+        while time.time() < end_time:
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(health_url, timeout=5)
+                    if response.status_code == 200:
+                        break
+            except Exception:
+                pass
+            await asyncio.sleep(1)
+        else:
+            pytest.fail(f"Service {service_name} not ready after {timeout}s")
+
+
+# =============================================================================
+# WEBSOCKET TESTING FIXTURES
+# =============================================================================
+
+class MockWebSocket:
+    """Enhanced WebSocket mock for testing."""
+    
+    def __init__(self):
+        self.messages_sent = []
+        self.messages_received = []
+        self.closed = False
+        self.accepted = False
+        self.connection_id = f"test_conn_{int(time.time() * 1000)}"
+    
+    async def accept(self):
+        self.accepted = True
+    
+    async def send_json(self, data: Dict[str, Any]):
+        self.messages_sent.append(data)
+    
+    async def send_text(self, data: str):
+        self.messages_sent.append(data)
+    
+    async def receive_json(self) -> Dict[str, Any]:
+        if self.messages_received:
+            return self.messages_received.pop(0)
+        await asyncio.sleep(0.1)
+        return {"type": "ping"}
+    
+    async def close(self):
+        self.closed = True
+    
+    def add_received_message(self, message: Dict[str, Any]):
+        """Add message to received queue for testing."""
+        self.messages_received.append(message)
+
+
+@pytest.fixture(scope="function")
+def mock_websocket() -> MockWebSocket:
+    """Create enhanced mock WebSocket for testing."""
+    return MockWebSocket()
+
+
+@pytest.fixture(scope="function")
+def websocket_manager():
+    """Create WebSocket manager for testing."""
+    from app.ws_manager import WebSocketManager
+    return WebSocketManager()
+
+
+@pytest.fixture(scope="function")
+def sample_websocket_message() -> Dict[str, Any]:
+    """Create sample WebSocket message for testing."""
+    return {
+        "type": "agent_request",
+        "content": "Help me optimize my AI infrastructure costs",
+        "user_id": "test_user_123",
+        "thread_id": "test_thread_456",
+        "timestamp": "2025-01-20T10:00:00Z"
+    }
+
+
+# =============================================================================
+# AGENT TESTING FIXTURES
+# =============================================================================
+
+@pytest.fixture(scope="function")
+def agent_service():
+    """Create agent service for testing."""
+    from app.services.agent_service import AgentService
+    return AgentService()
+
+
+@pytest.fixture(scope="function")
+def supervisor_agent():
+    """Create supervisor agent for testing."""
+    from app.agents.supervisor.supervisor_consolidated import SupervisorAgent
+    return SupervisorAgent()
+
+
+class MockLLMResponse:
+    """Mock LLM response for agent testing."""
+    
+    def __init__(self, content: str, tool_calls: Optional[List] = None):
+        self.content = content
+        self.tool_calls = tool_calls or []
+        self.usage = {"tokens": 100, "cost": 0.001}
+        self.model = "test-model"
+
+
+@pytest.fixture(scope="function")
+def mock_llm_response():
+    """Create mock LLM response factory."""
+    def _create_response(content: str, tool_calls: Optional[List] = None) -> MockLLMResponse:
+        return MockLLMResponse(content, tool_calls)
+    return _create_response
+
+
+@pytest.fixture(scope="function")
+def sample_agent_request() -> Dict[str, Any]:
+    """Create sample agent request for testing."""
+    return {
+        "type": "agent_request",
+        "content": "I need to reduce my LLM costs by 30% while maintaining quality",
+        "user_id": "test_user_123",
+        "thread_id": "test_thread_456",
+        "timestamp": "2025-01-20T10:00:00Z"
+    }
+
+
+# =============================================================================
+# MULTI-SERVICE TESTING FIXTURES
+# =============================================================================
+
+@pytest.fixture(scope="function")
+def test_user_data() -> Dict[str, Any]:
+    """Create test user data for multi-service testing."""
+    return {
+        "user_id": "test_user_123",
+        "email": "test@netra.ai",
+        "plan": "free",
+        "permissions": ["read", "write"],
+        "created_at": "2025-01-20T10:00:00Z"
+    }
+
+
+@pytest.fixture(scope="function")
+def test_auth_token() -> str:
+    """Create test authentication token."""
+    return "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test_payload.signature"
+
+
+@pytest.fixture(scope="function")
+async def mock_database_clients():
+    """Create mock database clients for testing."""
+    # Mock PostgreSQL client
+    postgres_mock = AsyncMock()
+    postgres_mock.fetchrow = AsyncMock()
+    postgres_mock.fetch = AsyncMock()
+    postgres_mock.execute = AsyncMock()
+    postgres_mock.begin = AsyncMock()
+    postgres_mock.commit = AsyncMock()
+    postgres_mock.rollback = AsyncMock()
+    
+    # Mock ClickHouse client  
+    clickhouse_mock = AsyncMock()
+    clickhouse_mock.query = AsyncMock()
+    clickhouse_mock.insert = AsyncMock()
+    
+    with patch('app.db.client.get_postgres_client', return_value=postgres_mock), \
+         patch('app.db.client.get_clickhouse_client', return_value=clickhouse_mock):
+        yield {
+            "postgres": postgres_mock,
+            "clickhouse": clickhouse_mock
+        }
+
+
+@pytest.fixture(scope="function")
+def user_service():
+    """Create user service for testing."""
+    from app.services.user_service import UserService
+    return UserService()
+
+
+@pytest.fixture(scope="function")
+def thread_service():
+    """Create thread service for testing."""
+    from app.services.thread_service import ThreadService
+    return ThreadService()
+
+
+# =============================================================================
+# PERFORMANCE TESTING FIXTURES
+# =============================================================================
+
+@pytest.fixture(scope="function")
+def e2e_performance_thresholds() -> Dict[str, Any]:
+    """Define performance thresholds for E2E testing."""
+    return {
+        "startup_time_max": 60,  # seconds
+        "response_time_max": 5,  # seconds
+        "concurrent_requests": 50,
+        "requests_per_second_min": 10,
+        "websocket_message_throughput_min": 50,  # messages/second
+        "database_query_time_max": 1,  # seconds
+    }
+
+
+@pytest.fixture(scope="function")
+async def performance_monitor():
+    """Create performance monitoring context."""
+    metrics = {
+        "start_time": time.time(),
+        "requests_completed": 0,
+        "errors_encountered": 0,
+        "response_times": []
+    }
+    
+    def record_request(response_time: float, error: bool = False):
+        metrics["requests_completed"] += 1
+        metrics["response_times"].append(response_time)
+        if error:
+            metrics["errors_encountered"] += 1
+    
+    def get_metrics() -> Dict[str, Any]:
+        total_time = time.time() - metrics["start_time"]
+        avg_response_time = sum(metrics["response_times"]) / len(metrics["response_times"]) if metrics["response_times"] else 0
+        
+        return {
+            "total_time": total_time,
+            "requests_completed": metrics["requests_completed"],
+            "errors_encountered": metrics["errors_encountered"],
+            "avg_response_time": avg_response_time,
+            "requests_per_second": metrics["requests_completed"] / total_time if total_time > 0 else 0,
+            "error_rate": metrics["errors_encountered"] / metrics["requests_completed"] if metrics["requests_completed"] > 0 else 0
+        }
+    
+    yield {
+        "record_request": record_request,
+        "get_metrics": get_metrics
+    }
+
+
+# =============================================================================
+# ERROR TESTING FIXTURES
+# =============================================================================
+
+@pytest.fixture(scope="function")
+def error_simulation():
+    """Create error simulation utilities."""
+    
+    def simulate_service_failure(service_name: str, failure_type: str = "connection"):
+        """Simulate different types of service failures."""
+        if failure_type == "connection":
+            return Exception(f"{service_name} connection failed")
+        elif failure_type == "timeout":
+            return asyncio.TimeoutError(f"{service_name} request timed out")
+        elif failure_type == "auth":
+            return Exception(f"{service_name} authentication failed")
+        else:
+            return Exception(f"{service_name} unknown error")
+    
+    def simulate_database_failure(db_type: str = "postgres"):
+        """Simulate database failures."""
+        return Exception(f"{db_type} database unavailable")
+    
+    def simulate_llm_failure(failure_type: str = "rate_limit"):
+        """Simulate LLM service failures."""
+        if failure_type == "rate_limit":
+            return Exception("LLM rate limit exceeded")
+        elif failure_type == "timeout":
+            return asyncio.TimeoutError("LLM request timed out")
+        else:
+            return Exception("LLM service unavailable")
+    
+    return {
+        "service_failure": simulate_service_failure,
+        "database_failure": simulate_database_failure,
+        "llm_failure": simulate_llm_failure
+    }
+
+
+# =============================================================================
+# CLEANUP UTILITIES
+# =============================================================================
+
+@pytest.fixture(scope="function", autouse=True)
+async def cleanup_test_environment():
+    """Automatic cleanup for each test."""
+    # Setup
+    cleanup_tasks = []
+    
+    yield cleanup_tasks
+    
+    # Cleanup
+    for task in cleanup_tasks:
+        try:
+            if asyncio.iscoroutinefunction(task):
+                await task()
+            else:
+                task()
+        except Exception:
+            pass  # Ignore cleanup errors

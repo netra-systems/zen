@@ -1,7 +1,7 @@
 """Report Templates - Templates for report generation failures and guidance.
 
 This module provides templates for report-related content types and failures
-with 8-line function compliance.
+with 25-line function compliance.
 """
 
 from typing import Dict, List, Tuple

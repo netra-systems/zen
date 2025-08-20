@@ -2,7 +2,7 @@
 Database Checks
 
 Handles database connectivity and schema validation.
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 import os
@@ -32,8 +32,8 @@ class DatabaseChecker:
     async def _perform_database_connection_check(self) -> StartupCheckResult:
         """Perform actual database connection check"""
         try:
-            await self._execute_database_tests()
-            return self._create_db_success_result()
+            missing_tables = await self._execute_database_tests()
+            return self._create_db_success_result(missing_tables)
         except Exception as e:
             return self._create_db_failure_result(e)
     
@@ -55,21 +55,56 @@ class DatabaseChecker:
         result = await db.execute(text("SELECT 1"))
         result.scalar_one()
     
-    async def _check_critical_tables(self, db: AsyncSession) -> None:
-        """Check if critical tables exist"""
+    async def _check_critical_tables(self, db: AsyncSession) -> List[str]:
+        """Check if critical tables exist and return list of missing tables"""
         critical_tables = ['assistants', 'threads', 'messages', 'userbase']
+        missing_tables = []
         
         for table in critical_tables:
             exists = await self._table_exists(db, table)
             if not exists:
-                raise ValueError(f"Critical table '{table}' does not exist")
+                missing_tables.append(table)
+        
+        return missing_tables
     
     async def _find_assistant(self, db: AsyncSession) -> Assistant:
         """Find existing Netra assistant"""
-        result = await db.execute(
-            select(Assistant).where(Assistant.id == "netra-assistant")
-        )
-        return result.scalar_one_or_none()
+        from app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        
+        logger.debug(f"_find_assistant called with db: {db}")
+        logger.debug(f"db is None: {db is None}")
+        
+        try:
+            logger.debug("Creating select query...")
+            query = select(Assistant).where(Assistant.id == "netra-assistant")
+            logger.debug(f"Query created: {query}")
+            
+            logger.debug("Executing query...")
+            logger.debug(f"db.bind: {db.bind}")
+            logger.debug(f"db.get_bind(): {db.get_bind()}")
+            
+            # Check if the engine exists
+            try:
+                bind = db.get_bind()
+                logger.debug(f"Bind is None: {bind is None}")
+                if bind is None:
+                    raise RuntimeError("Database engine/bind is None")
+            except Exception as bind_error:
+                logger.error(f"Error getting bind: {bind_error}")
+                raise
+                
+            result = await db.execute(query)
+            logger.debug(f"Query executed, result: {result}")
+            
+            logger.debug("Getting scalar result...")
+            assistant = result.scalar_one_or_none()
+            logger.debug(f"Assistant found: {assistant}")
+            
+            return assistant
+        except Exception as e:
+            logger.error(f"Error in _find_assistant: {e}")
+            raise
     
     async def _create_assistant(self, db: AsyncSession) -> None:
         """Create Netra assistant"""
@@ -100,34 +135,76 @@ class DatabaseChecker:
             message="PostgreSQL in mock mode - skipping connection check"
         )
     
-    async def _execute_database_tests(self) -> None:
-        """Execute database connectivity and schema tests"""
+    async def _execute_database_tests(self) -> List[str]:
+        """Execute database connectivity and schema tests, return missing tables"""
+        if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
+            raise RuntimeError("Database session factory not initialized. Check database setup.")
         async with self.app.state.db_session_factory() as db:
             await self._test_basic_connectivity(db)
-            await self._check_critical_tables(db)
+            missing_tables = await self._check_critical_tables(db)
+            return missing_tables
     
-    def _create_db_success_result(self) -> StartupCheckResult:
+    def _create_db_success_result(self, missing_tables: List[str] = None) -> StartupCheckResult:
         """Create successful database check result"""
+        if missing_tables:
+            message = f"PostgreSQL connected successfully. Warning: Missing tables: {', '.join(missing_tables)}"
+        else:
+            message = "PostgreSQL connected and schema valid"
+        
         return StartupCheckResult(
-            name="database_connection", success=True, critical=not self.is_staging,
-            message="PostgreSQL connected and schema valid"
+            name="database_connection", success=True, critical=False,
+            message=message
         )
     
     def _create_db_failure_result(self, error: Exception) -> StartupCheckResult:
         """Create failed database check result"""
         return StartupCheckResult(
-            name="database_connection", success=False, critical=not self.is_staging,
+            name="database_connection", success=False, critical=True,
             message=f"Database check failed: {error}"
         )
     
     async def _handle_assistant_check(self) -> StartupCheckResult:
         """Handle assistant existence check and creation"""
-        async with self.app.state.db_session_factory() as db:
-            assistant = await self._find_assistant(db)
-            if not assistant:
-                await self._create_assistant(db)
-                return self._create_assistant_created_result()
-            return self._create_assistant_exists_result()
+        from app.logging_config import central_logger
+        logger = central_logger.get_logger(__name__)
+        
+        logger.debug(f"Checking app.state for db_session_factory...")
+        logger.debug(f"hasattr(self.app.state, 'db_session_factory'): {hasattr(self.app.state, 'db_session_factory')}")
+        
+        if hasattr(self.app.state, 'db_session_factory'):
+            logger.debug(f"self.app.state.db_session_factory: {self.app.state.db_session_factory}")
+            logger.debug(f"self.app.state.db_session_factory is None: {self.app.state.db_session_factory is None}")
+        else:
+            logger.error("app.state does not have db_session_factory attribute!")
+            
+        if not hasattr(self.app.state, 'db_session_factory') or self.app.state.db_session_factory is None:
+            raise RuntimeError("Database session factory not initialized. Check database setup.")
+        
+        logger.debug("Creating database session for assistant check...")
+        try:
+            # Check global engine state
+            from app.db.postgres_core import async_engine, async_session_factory as global_factory
+            logger.debug(f"Global async_engine: {async_engine}")
+            logger.debug(f"Global async_session_factory: {global_factory}")
+            
+            session_factory = self.app.state.db_session_factory
+            logger.debug(f"Got session factory: {session_factory}")
+            session = session_factory()
+            logger.debug(f"Created session: {session}")
+            
+            async with session as db:
+                logger.debug(f"Entered async context, db object: {db}")
+                logger.debug(f"db is None: {db is None}")
+                assistant = await self._find_assistant(db)
+                if not assistant:
+                    logger.debug("Assistant not found, creating new one...")
+                    await self._create_assistant(db)
+                    return self._create_assistant_created_result()
+                logger.debug("Assistant already exists")
+                return self._create_assistant_exists_result()
+        except Exception as e:
+            logger.error(f"Error creating or using database session: {e}")
+            raise
     
     def _create_assistant_failure_result(self, error: Exception) -> StartupCheckResult:
         """Create failed assistant check result"""

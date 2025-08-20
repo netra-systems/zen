@@ -2,7 +2,7 @@
 MCP Configuration Utilities
 
 Configuration generators for different MCP clients.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 import os

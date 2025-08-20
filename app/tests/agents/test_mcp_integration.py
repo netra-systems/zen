@@ -1,7 +1,7 @@
 """Tests for MCP Integration.
 
 Tests the MCP context manager, intent detector, and agent bridge.
-Follows strict 8-line function design for testability.
+Follows strict 25-line function design for testability.
 """
 
 import pytest

@@ -2,7 +2,7 @@
 Operation Management Helpers for Admin Tool Dispatcher
 
 Helper functions for operation dispatch and audit management.
-Split from dispatcher_core.py to maintain 300-line limit.
+Split from dispatcher_core.py to maintain 450-line limit.
 
 Business Value: Enables secure admin operations with full audit trail.
 """

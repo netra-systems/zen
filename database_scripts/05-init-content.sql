@@ -1,6 +1,6 @@
 -- Content and Corpus Tables
 -- Purpose: Create corpus management, analysis, and content audit tables
--- Module: Content (adheres to 300-line limit)
+-- Module: Content (adheres to 450-line limit)
 
 -- References table
 CREATE TABLE IF NOT EXISTS references (

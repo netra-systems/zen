@@ -78,7 +78,7 @@ python scripts/check_architecture_compliance.py
 ### Code Style
 
 ```python
-# GOOD: 8-line function with clear purpose
+# GOOD: 25-line function with clear purpose
 def calculate_optimization_savings(
     original_cost: float,
     optimized_cost: float
@@ -107,7 +107,7 @@ def process_optimization_request(request):
 - [ ] Check `SPEC/learnings/` for related issues
 - [ ] Verify feature aligns with customer segment strategy
 - [ ] Calculate expected ROI
-- [ ] Plan module boundaries (300-line limit)
+- [ ] Plan module boundaries (450-line limit)
 
 ### 2. Development Workflow
 

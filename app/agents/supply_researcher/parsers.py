@@ -2,7 +2,7 @@
 Supply Request Parser
 
 Parses natural language requests into structured research queries.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 import re

@@ -1,7 +1,7 @@
 /**
  * Visual Regression Tests - Page Layouts
  * Tests all page layout visual consistency and structure
- * Follows 8-line function rule and comprehensive page coverage
+ * Follows 25-line function rule and comprehensive page coverage
  * Business Impact: Ensures consistent page layouts across app
  */
 

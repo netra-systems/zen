@@ -2,7 +2,7 @@
  * Mobile Navigation Test Suite
  * Tests mobile-specific navigation patterns, gestures, and interactions
  * Business Value: Ensures seamless mobile navigation = critical for user retention
- * Follows 8-line function rule and 300-line file limit
+ * Follows 25-line function rule and 450-line file limit
  */
 
 import React from 'react';

@@ -1,7 +1,7 @@
 """Core types and enums for quality metrics.
 
 Defines all quality assessment data structures and enums.
-Follows 300-line limit with 8-line function limit.
+Follows 450-line limit with 25-line function limit.
 """
 
 from dataclasses import dataclass

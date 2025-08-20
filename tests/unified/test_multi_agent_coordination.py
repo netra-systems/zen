@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Value Impact: Ensures agents deliver coordinated optimization recommendations
 - Revenue Impact: Parallel processing enables handling larger workloads = higher tier pricing
 
-Architecture: 300-line compliance through focused coordination testing
+Architecture: 450-line compliance through focused coordination testing
 """
 
 import pytest

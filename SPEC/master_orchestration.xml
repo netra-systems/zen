@@ -123,7 +123,7 @@
             <title>Architecture Compliance and Violation Remediation</title>
             <description>
                 Detect and fix all architecture violations, particularly enforcing
-                the 300-line file limit and 8-line function limit.
+                the 450-line file limit and 25-line function limit.
             </description>
             <orchestration>
                 <agents required="4-6">
@@ -434,7 +434,7 @@
 
     <critical-reminders>
         <reminder priority="CRITICAL">
-            All changes MUST maintain 300-line file and 8-line function limits
+            All changes MUST maintain 450-line file and 25-line function limits
         </reminder>
         <reminder priority="CRITICAL">
             ALWAYS consult learnings.xml before making changes

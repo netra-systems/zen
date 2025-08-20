@@ -17,6 +17,10 @@ from . import supply_tracking
 from . import supply_contract_service
 from . import supply_sustainability_service
 from . import supply_catalog_service
+from . import supplier_comparison
+
+# Thread services
+from . import thread_analytics
 
 # Alias for backward compatibility
 supply_chain_service = supply_catalog_service
@@ -29,5 +33,7 @@ __all__ = [
     "supply_contract_service",
     "supply_sustainability_service",
     "supply_catalog_service",
-    "supply_chain_service"
+    "supply_chain_service",
+    "supplier_comparison",
+    "thread_analytics"
 ]

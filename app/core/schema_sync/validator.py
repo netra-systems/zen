@@ -2,7 +2,7 @@
 Schema Validator
 
 Validates schemas for breaking changes.
-Maintains 8-line function limit and focused responsibility.
+Maintains 25-line function limit and focused responsibility.
 """
 
 from typing import Dict, Any, List, Set

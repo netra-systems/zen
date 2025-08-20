@@ -1,7 +1,7 @@
 """State Serialization and Validation Service
 
 This module handles state serialization, deserialization, and validation
-following the 8-line function limit and modular design principles.
+following the 25-line function limit and modular design principles.
 """
 
 import json

@@ -1,7 +1,7 @@
 """Message Flow Test Helpers
 
 Helper functions for message flow testing operations.
-Extracted to maintain 300-line file limit compliance.
+Extracted to maintain 450-line file limit compliance.
 
 Business Value: Modular helpers enable comprehensive message testing.
 """

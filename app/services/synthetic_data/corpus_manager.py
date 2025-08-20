@@ -6,7 +6,7 @@ import uuid
 import asyncio
 from datetime import datetime, UTC
 from typing import Dict, List, Optional
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 def _check_corpus_cache(corpus_id: str, corpus_cache: Dict) -> Optional[List[Dict]]:
@@ -16,7 +16,7 @@ def _check_corpus_cache(corpus_id: str, corpus_cache: Dict) -> Optional[List[Dic
     return None
 
 
-def _get_corpus_metadata(corpus_id: str, db: Session):
+def _get_corpus_metadata(corpus_id: str, db: AsyncSession):
     """Get corpus metadata from PostgreSQL"""
     from ...db import models_postgres as models
     db_corpus = db.query(models.Corpus).filter(models.Corpus.id == corpus_id).first()
@@ -47,7 +47,7 @@ def _cache_and_return(corpus_id: str, corpus_data: List[Dict], corpus_cache: Dic
     return corpus_data
 
 
-async def load_corpus(corpus_id: str, db: Session, corpus_cache: Dict, 
+async def load_corpus(corpus_id: str, db: AsyncSession, corpus_cache: Dict, 
                      get_clickhouse_client, central_logger) -> Optional[List[Dict]]:
     """Load corpus content from database or ClickHouse"""
     cached_result = _check_corpus_cache(corpus_id, corpus_cache)

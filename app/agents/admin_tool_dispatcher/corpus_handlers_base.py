@@ -1,7 +1,7 @@
 """Base Components for Modernized Corpus Handlers
 
 Shared utilities and base patterns for corpus tool handlers.
-Maintains 8-line function limit and modular architecture.
+Maintains 25-line function limit and modular architecture.
 
 Business Value: Eliminates duplicate patterns across corpus handlers.
 """

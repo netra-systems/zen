@@ -16,7 +16,7 @@ IMPLEMENTATION SUMMARY:
 ✅ Concurrent user testing for scalability validation
 ✅ Business-critical assertions at each step
 ✅ Performance validation (<10s per journey)
-✅ Architecture compliance (300-line limit, 8-line functions)
+✅ Architecture compliance (450-line limit, 25-line functions)
 
 REQUIREMENTS:
 - Controlled Auth service simulation (no external dependencies)
@@ -24,7 +24,7 @@ REQUIREMENTS:
 - Realistic WebSocket flow simulation
 - Complete end-to-end user journey testing
 - Must complete in <10 seconds for business UX requirements  
-- 300-line limit, 8-line function limit per architectural standards
+- 450-line limit, 25-line function limit per architectural standards
 """
 import pytest
 import asyncio

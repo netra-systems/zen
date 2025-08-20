@@ -244,4 +244,136 @@
             </goals>
         </improvement>
     </performance_improvements>
+    
+    <startup_logs>
+        <learning>
+            <id>startup-logs-noise-clarification</id>
+            <category>startup</category>
+            <date>2025-08-19</date>
+            <severity>info</severity>
+            <title>Dev Launcher Startup Logs Are Informational Noise</title>
+            
+            <description>
+                The extensive startup logs from dev_launcher.py are normal informational output
+                and do not indicate issues requiring attention. These logs show successful
+                initialization of all services.
+            </description>
+            
+            <normal_log_patterns>
+                <pattern type="auth_service">
+                    <example>[AUTH] ✅ Auth database initialized successfully</example>
+                    <example>[AUTH] ✅ Main database sync initialized successfully</example>
+                    <example>[AUTH] INFO: Uvicorn running on http://0.0.0.0:8081</example>
+                    <meaning>Auth service started successfully</meaning>
+                </pattern>
+                
+                <pattern type="backend_configuration">
+                    <example>[BACKEND] INFO | Created development configuration</example>
+                    <example>[BACKEND] INFO | Configuration validation passed</example>
+                    <example>[BACKEND] INFO | Populated configuration from all sources</example>
+                    <meaning>Configuration loaded correctly</meaning>
+                </pattern>
+                
+                <pattern type="service_initialization">
+                    <example>[BACKEND] ✅ SyntheticDataService initialized successfully</example>
+                    <example>[BACKEND] INFO | UnifiedToolRegistry initialized</example>
+                    <example>[BACKEND] INFO | Quality Gate Service initialized</example>
+                    <meaning>Core services initialized properly</meaning>
+                </pattern>
+                
+                <pattern type="database_setup">
+                    <example>[BACKEND] INFO | Database is up to date</example>
+                    <example>[BACKEND] ✅ Database session factory successfully set</example>
+                    <example>[BACKEND] INFO | ClickHouse tables initialization complete</example>
+                    <meaning>Database connections established</meaning>
+                </pattern>
+                
+                <pattern type="health_checks">
+                    <example>[BACKEND] ✅ Running startup check: check_environment_variables</example>
+                    <example>[BACKEND] ✅ Running startup check: check_database_connection</example>
+                    <example>[BACKEND] ✅ Redis connected successfully</example>
+                    <meaning>All health checks passing</meaning>
+                </pattern>
+            </normal_log_patterns>
+            
+            <guidance>
+                <guideline>These logs are expected output during normal startup</guideline>
+                <guideline>The ✅ symbols indicate successful initialization steps</guideline>
+                <guideline>INFO level logs are informational and do not require action</guideline>
+                <guideline>Only ERROR or CRITICAL logs require investigation</guideline>
+                <guideline>The verbosity helps with debugging but is not indicative of problems</guideline>
+            </guidance>
+            
+            <when_to_investigate>
+                <scenario>ERROR or CRITICAL log levels appear</scenario>
+                <scenario>Services fail to start (missing ✅ confirmations)</scenario>
+                <scenario>Connection timeouts or authentication failures</scenario>
+                <scenario>Startup process hangs or crashes</scenario>
+            </when_to_investigate>
+        </learning>
+    </startup_logs>
+    
+    <staging_startup_checks>
+        <learning>
+            <id>staging-startup-crash-on-failure</id>
+            <category>startup</category>
+            <date>2025-08-19</date>
+            <severity>critical</severity>
+            <title>Staging Environment Crashes on Any Startup Check Failure</title>
+            
+            <description>
+                In staging environments, the system now crashes immediately on any startup
+                check failure to ensure observability and prevent deployment of broken services.
+                Each error is raised as a fresh individual error for better tracking.
+            </description>
+            
+            <implementation>
+                <file>app/startup_checks/checker.py</file>
+                <changes>
+                    <change line="102-115">Modified _execute_check to raise RuntimeError immediately in staging on any failure</change>
+                    <change line="149-162">Modified _record_check_failure to treat all failures as critical in staging</change>
+                </changes>
+                
+                <file>app/startup_checks/utils.py</file>
+                <changes>
+                    <change line="72-79">Modified _handle_startup_results to treat non-critical failures as critical in staging</change>
+                    <change line="81-92">Enhanced _handle_critical_failures to provide detailed error messages with all failure information</change>
+                    <change line="94-97">Added _is_staging_environment helper function</change>
+                </changes>
+            </implementation>
+            
+            <behavior>
+                <environment name="development">
+                    <description>Allows non-critical failures to proceed</description>
+                    <critical_failures>Crash with RuntimeError</critical_failures>
+                    <non_critical_failures>Log as warnings and continue</non_critical_failures>
+                </environment>
+                
+                <environment name="staging">
+                    <description>Treats ALL failures as critical</description>
+                    <critical_failures>Crash immediately with detailed RuntimeError</critical_failures>
+                    <non_critical_failures>Treated as critical, crash immediately</non_critical_failures>
+                    <detection>
+                        <method>ENVIRONMENT=staging</method>
+                        <method>K_SERVICE environment variable present (Cloud Run)</method>
+                    </detection>
+                </environment>
+            </behavior>
+            
+            <benefits>
+                <benefit>Immediate failure visibility in staging deployments</benefit>
+                <benefit>Prevents broken services from being deployed</benefit>
+                <benefit>Individual error reporting for better observability</benefit>
+                <benefit>Detailed error messages with all failure information</benefit>
+            </benefits>
+            
+            <testing>
+                <test>Verify staging detection via ENVIRONMENT variable</test>
+                <test>Verify staging detection via K_SERVICE (Cloud Run)</test>
+                <test>Verify all failures are critical in staging</test>
+                <test>Verify immediate crash on first failure in staging</test>
+                <test>Verify detailed error messages include all failure info</test>
+            </testing>
+        </learning>
+    </staging_startup_checks>
 </specification>

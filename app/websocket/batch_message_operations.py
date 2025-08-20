@@ -1,7 +1,7 @@
 """
 Batch Message Operations
 
-Extracted from batch_message_core.py to maintain 300-line limit.
+Extracted from batch_message_core.py to maintain 450-line limit.
 Handles batch sending, timer management, and message structure creation.
 """
 

@@ -1,6 +1,6 @@
 # Netra Apex Architecture - Revenue-Driven Design
 
-## 🔴 CRITICAL: 300-Line Module Architecture
+## 🔴 CRITICAL: 450-line Module Architecture
 
 **MANDATORY**: Every file ≤300 lines, every function ≤08 lines. No exceptions.
 
@@ -1037,7 +1037,7 @@ logger.info("Agent execution started", extra={
 
 ## Architecture Compliance Requirements
 
-### CRITICAL: 300-Line Module Limit
+### CRITICAL: 450-line Module Limit
 
 **MANDATORY ENFORCEMENT**: Every file MUST be ≤300 lines. This is strictly enforced:
 
@@ -1052,7 +1052,7 @@ python scripts/check_architecture_compliance.py
 3. **Clear interfaces** - well-defined module boundaries
 4. **Testable units** - each module independently testable
 
-### CRITICAL: 8-Line Function Limit
+### CRITICAL: 25-line Function Limit
 
 **MANDATORY ENFORCEMENT**: ALL functions MUST be ≤8 lines (no exceptions).
 
@@ -1107,8 +1107,8 @@ scripts/compliance/
 ├── reporter_stats.py    # Statistics calculation (61 lines)
 ├── reporter_utils.py    # Utilities & helpers (47 lines)
 ├── cli.py               # CLI argument handling
-├── file_checker.py      # 300-line limit enforcement
-├── function_checker.py  # 8-line limit enforcement
+├── file_checker.py      # 450-line limit enforcement
+├── function_checker.py  # 25-line limit enforcement
 ├── type_checker.py      # Duplicate type detection
 └── stub_checker.py      # Test stub detection
 ```

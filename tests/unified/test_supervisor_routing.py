@@ -10,7 +10,7 @@ Business Value Justification (BVJ):
 - Value Impact: Correct routing ensures optimal agent utilization and response times
 - Revenue Impact: Efficient routing supports SLA guarantees and customer satisfaction
 
-Architecture: 300-line compliance through focused testing scope
+Architecture: 450-line compliance through focused testing scope
 """
 
 import pytest

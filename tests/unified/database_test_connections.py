@@ -1,7 +1,7 @@
 """
 Database Connection Management for Tests
 Handles database connections across PostgreSQL, ClickHouse, and Redis.
-ARCHITECTURE: Under 300 lines, 8-line functions max
+ARCHITECTURE: Under 300 lines, 25-line functions max
 """
 
 import os
@@ -10,11 +10,23 @@ import redis.asyncio as redis
 import clickhouse_connect
 from typing import Optional
 
+# Import test environment config for environment-aware configuration
+try:
+    from .test_environment_config import TestEnvironmentConfig
+except ImportError:
+    TestEnvironmentConfig = None
+
 
 class DatabaseConnectionManager:
     """Manages connections to all database types."""
     
-    def __init__(self):
+    def __init__(self, env_config=None):
+        """Initialize database connection manager.
+        
+        Args:
+            env_config: Optional TestEnvironmentConfig for environment-aware database configuration
+        """
+        self.env_config = env_config
         self.postgres_pool = None
         self.redis_client = None
         self.clickhouse_client = None
@@ -27,7 +39,12 @@ class DatabaseConnectionManager:
         
     async def _init_postgres(self):
         """Initialize PostgreSQL connection pool."""
-        database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        # Use environment config if available
+        if self.env_config:
+            database_url = self.env_config.database.url
+        else:
+            database_url = os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
+        
         try:
             self.postgres_pool = await asyncpg.create_pool(
                 database_url, min_size=1, max_size=5
@@ -38,11 +55,16 @@ class DatabaseConnectionManager:
     async def _init_redis(self):
         """Initialize Redis connection."""
         try:
-            self.redis_client = redis.Redis(
-                host=os.getenv("REDIS_HOST", "localhost"),
-                port=int(os.getenv("REDIS_PORT", "6379")),
-                decode_responses=True
-            )
+            # Use environment config if available
+            if self.env_config:
+                redis_url = os.getenv("REDIS_URL", self.env_config._get_redis_url())
+                self.redis_client = redis.Redis.from_url(redis_url, decode_responses=True)
+            else:
+                self.redis_client = redis.Redis(
+                    host=os.getenv("REDIS_HOST", "localhost"),
+                    port=int(os.getenv("REDIS_PORT", "6379")),
+                    decode_responses=True
+                )
             await self.redis_client.ping()
         except Exception:
             self.redis_client = None
@@ -50,9 +72,28 @@ class DatabaseConnectionManager:
     async def _init_clickhouse(self):
         """Initialize ClickHouse connection."""
         try:
+            # Use environment config if available
+            if self.env_config:
+                clickhouse_url = os.getenv("CLICKHOUSE_URL", self.env_config._get_clickhouse_url())
+                # Parse ClickHouse URL for connection parameters
+                if clickhouse_url.startswith("clickhouse://"):
+                    url_parts = clickhouse_url.replace("clickhouse://", "").split("/")
+                    host_port = url_parts[0].split(":")
+                    host = host_port[0]
+                    port = int(host_port[1]) if len(host_port) > 1 else 8123
+                    database = url_parts[1] if len(url_parts) > 1 else "default"
+                else:
+                    host = "localhost"
+                    port = 8123
+                    database = "default"
+            else:
+                host = os.getenv("CLICKHOUSE_HOST", "localhost")
+                port = int(os.getenv("CLICKHOUSE_PORT", "8443"))
+                database = "default"
+            
             self.clickhouse_client = clickhouse_connect.get_client(
-                host=os.getenv("CLICKHOUSE_HOST", "localhost"),
-                port=int(os.getenv("CLICKHOUSE_PORT", "8443")),
+                host=host,
+                port=port,
                 secure=False
             )
         except Exception:

@@ -1,13 +1,32 @@
 """
 JWT Token Test Helpers - Utility classes for cross-service token testing
 
-Maintains 300-line limit through focused helper functionality
+Supports both test and dev mode configurations with automatic environment detection.
+Maintains 450-line limit through focused helper functionality.
+
 Business Value: Enables comprehensive JWT testing across all services
+
+Environment Support:
+- Test mode: Auth service on port 8083, Backend on 8001 
+- Dev mode: Auth service on port 8081, Backend on 8000
+- Automatic detection from ENVIRONMENT variable
+- Manual override via constructor parameter
+
+Usage:
+    # Auto-detect environment
+    helper = JWTTestHelper()
+    
+    # Force test mode
+    helper = JWTTestHelper(environment="test")
+    
+    # Force dev mode  
+    helper = JWTTestHelper(environment="dev")
 """
 import httpx
 import jwt
 import json
 import pytest
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 import uuid
@@ -17,58 +36,119 @@ import base64
 class JWTTestHelper:
     """Helper class for JWT token operations in tests."""
     
-    def __init__(self):
-        self.auth_url = "http://localhost:8001"
-        self.backend_url = "http://localhost:8000"
-        self.websocket_url = "ws://localhost:8000"
-        self.test_secret = "test-jwt-secret-key-32-chars-min"
+    def __init__(self, environment: Optional[str] = None):
+        """Initialize with configurable environment support.
+        
+        Args:
+            environment: Override environment detection ('test', 'dev', etc.)
+                       If None, will auto-detect from ENVIRONMENT variable
+        """
+        self.environment = self._detect_environment(environment)
+        self._configure_urls()
+        self._configure_secret()
+    
+    def _detect_environment(self, override_env: Optional[str]) -> str:
+        """Detect current environment."""
+        if override_env:
+            return override_env.lower()
+        
+        # Check explicit environment variable
+        env_var = os.environ.get("ENVIRONMENT", "").lower()
+        if env_var in ["test", "testing"]:
+            return "test"
+        elif env_var in ["dev", "development"]:
+            return "dev"
+        
+        # Check for test context
+        if (os.environ.get("TESTING") or 
+            os.environ.get("PYTEST_CURRENT_TEST")):
+            return "test"
+        
+        # Default to test for JWT test helpers
+        return "test"
+    
+    def _configure_urls(self) -> None:
+        """Configure service URLs based on environment."""
+        from app.core.network_constants import ServicePorts, HostConstants, URLConstants
+        
+        if self.environment == "test":
+            # Test mode: Auth on 8083, Backend on 8001
+            auth_port = 8083
+            backend_port = 8001
+        else:
+            # Dev mode: Auth on 8081, Backend on 8001  
+            auth_port = ServicePorts.AUTH_SERVICE_DEFAULT  # 8081
+            backend_port = ServicePorts.BACKEND_DEFAULT   # 8000
+        
+        host = HostConstants.LOCALHOST
+        self.auth_url = URLConstants.build_http_url(host, auth_port)
+        self.backend_url = URLConstants.build_http_url(host, backend_port)
+        self.websocket_url = URLConstants.build_websocket_url(host, backend_port)
+    
+    def _configure_secret(self) -> None:
+        """Configure JWT secret based on environment."""
+        # Try to get from environment first
+        self.test_secret = os.environ.get("JWT_SECRET_KEY")
+        
+        if not self.test_secret:
+            # Use environment-specific defaults
+            if self.environment == "test":
+                self.test_secret = "test-jwt-secret-key-unified-testing-32chars"
+            else:
+                # Dev environment default
+                self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"
     
     def create_valid_payload(self) -> Dict:
         """Create standard valid token payload."""
+        from app.core.auth_constants import JWTConstants
         return {
-            "sub": f"test-user-{uuid.uuid4().hex[:8]}",
-            "email": "test@netra.ai",
-            "permissions": ["read", "write"],
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
-            "token_type": "access",
-            "iss": "netra-auth-service"
+            JWTConstants.SUBJECT: f"test-user-{uuid.uuid4().hex[:8]}",
+            JWTConstants.EMAIL: "test@netra.ai",
+            JWTConstants.PERMISSIONS: ["read", "write"],
+            JWTConstants.ISSUED_AT: datetime.now(timezone.utc),
+            JWTConstants.EXPIRES_AT: datetime.now(timezone.utc) + timedelta(minutes=15),
+            JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
         }
     
     def create_expired_payload(self) -> Dict:
         """Create expired token payload."""
+        from app.core.auth_constants import JWTConstants
         payload = self.create_valid_payload()
-        payload["exp"] = datetime.now(timezone.utc) - timedelta(minutes=1)
+        payload[JWTConstants.EXPIRES_AT] = datetime.now(timezone.utc) - timedelta(minutes=1)
         return payload
     
     def create_refresh_payload(self) -> Dict:
         """Create refresh token payload."""
+        from app.core.auth_constants import JWTConstants
         payload = self.create_valid_payload()
-        payload["token_type"] = "refresh"
-        payload["exp"] = datetime.now(timezone.utc) + timedelta(days=7)
-        del payload["permissions"]
+        payload[JWTConstants.TOKEN_TYPE] = JWTConstants.REFRESH_TOKEN_TYPE
+        payload[JWTConstants.EXPIRES_AT] = datetime.now(timezone.utc) + timedelta(days=7)
+        del payload[JWTConstants.PERMISSIONS]
         return payload
     
     def create_token(self, payload: Dict, secret: str = None) -> str:
         """Create JWT token with specified payload (sync version)."""
+        from app.core.auth_constants import JWTConstants
         secret = secret or self.test_secret
         # Convert datetime objects to timestamps for JWT
-        if isinstance(payload.get("iat"), datetime):
-            payload["iat"] = int(payload["iat"].timestamp())
-        if isinstance(payload.get("exp"), datetime):
-            payload["exp"] = int(payload["exp"].timestamp())
-        return jwt.encode(payload, secret, algorithm="HS256")
+        if isinstance(payload.get(JWTConstants.ISSUED_AT), datetime):
+            payload[JWTConstants.ISSUED_AT] = int(payload[JWTConstants.ISSUED_AT].timestamp())
+        if isinstance(payload.get(JWTConstants.EXPIRES_AT), datetime):
+            payload[JWTConstants.EXPIRES_AT] = int(payload[JWTConstants.EXPIRES_AT].timestamp())
+        return jwt.encode(payload, secret, algorithm=JWTConstants.HS256_ALGORITHM)
     
     def create_access_token(self, user_id: str, email: str, permissions: list = None) -> str:
         """Create access token for user."""
+        from app.core.auth_constants import JWTConstants
         payload = {
-            "sub": user_id,
-            "email": email,
-            "permissions": permissions or ["read", "write"],
-            "iat": datetime.now(timezone.utc),
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
-            "token_type": "access",
-            "iss": "netra-auth-service"
+            JWTConstants.SUBJECT: user_id,
+            JWTConstants.EMAIL: email,
+            JWTConstants.PERMISSIONS: permissions or ["read", "write"],
+            JWTConstants.ISSUED_AT: datetime.now(timezone.utc),
+            JWTConstants.EXPIRES_AT: datetime.now(timezone.utc) + timedelta(minutes=15),
+            JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
         }
         return self.create_token(payload)
     
@@ -100,7 +180,8 @@ class JWTTestHelper:
     async def make_auth_request(self, endpoint: str, token: str) -> Dict:
         """Make authenticated request to auth service."""
         async with httpx.AsyncClient() as client:
-            headers = {"Authorization": f"Bearer {token}"}
+            from app.core.auth_constants import HeaderConstants
+            headers = {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}
             try:
                 response = await client.get(f"{self.auth_url}{endpoint}", headers=headers)
                 return {"status": response.status_code, "data": response.json()}
@@ -110,7 +191,8 @@ class JWTTestHelper:
     async def make_backend_request(self, endpoint: str, token: str) -> Dict:
         """Make authenticated request to backend service."""
         async with httpx.AsyncClient() as client:
-            headers = {"Authorization": f"Bearer {token}"}
+            from app.core.auth_constants import HeaderConstants
+            headers = {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}
             try:
                 response = await client.get(f"{self.backend_url}{endpoint}", headers=headers)
                 return {"status": response.status_code, "data": response.json() if response.content else {}}
@@ -123,7 +205,8 @@ class JWTTestHelper:
             try:
                 response = await client.post(f"{self.auth_url}/auth/dev/login")
                 if response.status_code == 200:
-                    return response.json().get("access_token")
+                    from app.core.auth_constants import JWTConstants
+                    return response.json().get(JWTConstants.ACCESS_TOKEN)
             except Exception:
                 pass
         return None
@@ -144,8 +227,9 @@ class JWTTestHelper:
     def validate_token_structure(self, token: str) -> bool:
         """Validate JWT token has correct structure."""
         try:
+            from app.core.auth_constants import JWTConstants
             payload = jwt.decode(token, options={"verify_signature": False})
-            required_fields = ["sub", "exp", "token_type"]
+            required_fields = [JWTConstants.SUBJECT, JWTConstants.EXPIRES_AT, JWTConstants.TOKEN_TYPE]
             return all(field in payload for field in required_fields)
         except Exception:
             return False
@@ -154,13 +238,23 @@ class JWTTestHelper:
 class JWTTestFixtures:
     """Pytest fixtures for JWT token testing."""
     
-    def __init__(self):
-        self.helper = JWTTestHelper()
+    def __init__(self, environment: Optional[str] = None):
+        """Initialize with configurable environment support.
+        
+        Args:
+            environment: Override environment detection ('test', 'dev', etc.)
+        """
+        self.helper = JWTTestHelper(environment)
     
     @pytest.fixture
     def jwt_helper(self):
         """Provide JWT test helper instance."""
         return JWTTestHelper()
+    
+    @pytest.fixture
+    def jwt_helper_dev(self):
+        """Provide JWT test helper instance configured for dev mode."""
+        return JWTTestHelper(environment="dev")
     
     @pytest.fixture
     def valid_token_payload(self):
@@ -181,19 +275,24 @@ class JWTTestFixtures:
 class JWTSecurityTester:
     """Security-focused JWT testing utilities."""
     
-    def __init__(self):
-        self.helper = JWTTestHelper()
+    def __init__(self, environment: Optional[str] = None):
+        """Initialize with configurable environment support.
+        
+        Args:
+            environment: Override environment detection ('test', 'dev', etc.)
+        """
+        self.helper = JWTTestHelper(environment)
     
     async def test_token_against_all_services(self, token: str) -> Dict[str, int]:
         """Test token against all services and return status codes."""
         results = {}
         
         # Test auth service
-        auth_result = await self.helper.make_auth_request("/auth/validate", token)
+        auth_result = await self.helper.make_auth_request("/auth/verify", token)
         results["auth_service"] = auth_result["status"]
         
         # Test backend service
-        backend_result = await self.helper.make_backend_request("/health", token)
+        backend_result = await self.helper.make_backend_request("/api/users/profile", token)
         results["backend_service"] = backend_result["status"]
         
         # Test WebSocket
@@ -224,5 +323,122 @@ class JWTSecurityTester:
         return True  # No services available to test
 
 
-# Export commonly used classes
-__all__ = ['JWTTestHelper', 'JWTTestFixtures', 'JWTSecurityTester']
+class JWTTokenTestHelper:
+    """Additional JWT token test helper for service-to-service auth testing."""
+    
+    def __init__(self, environment: Optional[str] = None):
+        """Initialize with configurable environment support.
+        
+        Args:
+            environment: Override environment detection ('test', 'dev', etc.)
+        """
+        self.environment = self._detect_environment(environment)
+        self._configure_secret()
+    
+    def _detect_environment(self, override_env: Optional[str]) -> str:
+        """Detect current environment."""
+        if override_env:
+            return override_env.lower()
+        
+        # Check explicit environment variable
+        env_var = os.environ.get("ENVIRONMENT", "").lower()
+        if env_var in ["test", "testing"]:
+            return "test"
+        elif env_var in ["dev", "development"]:
+            return "dev"
+        
+        # Check for test context
+        if (os.environ.get("TESTING") or 
+            os.environ.get("PYTEST_CURRENT_TEST")):
+            return "test"
+        
+        # Default to test for JWT test helpers
+        return "test"
+    
+    def _configure_secret(self) -> None:
+        """Configure JWT secret based on environment."""
+        # Try to get from environment first
+        self.test_secret = os.environ.get("JWT_SECRET_KEY")
+        
+        if not self.test_secret:
+            # Use environment-specific defaults
+            if self.environment == "test":
+                self.test_secret = "test-jwt-secret-key-unified-testing-32chars"
+            else:
+                # Dev environment default
+                self.test_secret = "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"
+    
+    def decode_token_unsafe(self, token: str) -> Optional[Dict]:
+        """Decode JWT token without verification (for testing only)."""
+        try:
+            return jwt.decode(token, options={"verify_signature": False})
+        except Exception:
+            return None
+    
+    def create_expired_service_token(self, service_id: str) -> str:
+        """Create an expired service token for testing."""
+        from app.core.auth_constants import JWTConstants
+        payload = {
+            JWTConstants.SUBJECT: service_id,
+            "service": f"netra-{service_id}",
+            JWTConstants.TOKEN_TYPE: JWTConstants.SERVICE_TOKEN_TYPE,
+            JWTConstants.ISSUED_AT: int((datetime.now(timezone.utc) - timedelta(minutes=10)).timestamp()),
+            JWTConstants.EXPIRES_AT: int((datetime.now(timezone.utc) - timedelta(minutes=5)).timestamp()),
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
+        }
+        return jwt.encode(payload, self.test_secret, algorithm=JWTConstants.HS256_ALGORITHM)
+    
+    def create_test_user_token(self, user_id: str, email: str) -> str:
+        """Create a test user token for comparison."""
+        from app.core.auth_constants import JWTConstants
+        payload = {
+            JWTConstants.SUBJECT: user_id,
+            JWTConstants.EMAIL: email,
+            JWTConstants.PERMISSIONS: ["read", "write"],
+            JWTConstants.TOKEN_TYPE: JWTConstants.ACCESS_TOKEN_TYPE,
+            JWTConstants.ISSUED_AT: int(datetime.now(timezone.utc).timestamp()),
+            JWTConstants.EXPIRES_AT: int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),
+            JWTConstants.ISSUER: JWTConstants.NETRA_AUTH_SERVICE
+        }
+        return jwt.encode(payload, self.test_secret, algorithm=JWTConstants.HS256_ALGORITHM)
+
+
+# Convenience factory functions for common use cases
+def create_test_helper(environment: Optional[str] = None) -> JWTTestHelper:
+    """Create JWT test helper with optional environment override."""
+    return JWTTestHelper(environment)
+
+
+def create_dev_helper() -> JWTTestHelper:
+    """Create JWT test helper configured for dev mode."""
+    return JWTTestHelper(environment="dev")
+
+
+def create_test_mode_helper() -> JWTTestHelper:
+    """Create JWT test helper configured for test mode."""
+    return JWTTestHelper(environment="test")
+
+
+def get_environment_config(environment: Optional[str] = None) -> Dict[str, str]:
+    """Get environment configuration info for debugging."""
+    helper = JWTTestHelper(environment)
+    return {
+        "environment": helper.environment,
+        "auth_url": helper.auth_url,
+        "backend_url": helper.backend_url,
+        "websocket_url": helper.websocket_url,
+        "secret_configured": bool(helper.test_secret)
+    }
+
+
+# Export commonly used classes and functions
+__all__ = [
+    'JWTTestHelper', 
+    'JWTTestFixtures', 
+    'JWTSecurityTester', 
+    'JWTTokenTestHelper',
+    'create_test_helper',
+    'create_dev_helper', 
+    'create_test_mode_helper',
+    'get_environment_config'
+]

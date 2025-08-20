@@ -10,8 +10,8 @@ Successfully implemented comprehensive cross-database consistency testing for Ph
 4. **Revenue Impact**: Prevents $50K+ revenue loss from data corruption incidents
 
 ## Architecture Compliance
-- **300-line file limit**: All modules comply (136, 220, 141 lines respectively)
-- **8-line function limit**: All functions broken down into helper utilities
+- **450-line file limit**: All modules comply (136, 220, 141 lines respectively)
+- **25-line function limit**: All functions broken down into helper utilities
 - **Modular design**: Split into 3 focused modules with clear separation of concerns
 - **Type safety**: Strong typing throughout with proper async patterns
 
@@ -36,7 +36,7 @@ Mock services and validation infrastructure:
 - **Data factory functions**: Standardized test data creation utilities
 
 ### 3. `database_sync_helpers.py` (141 lines)
-Small helper functions maintaining 8-line compliance:
+Small helper functions maintaining 25-line compliance:
 - **Sync helpers**: Functions for user synchronization operations
 - **Validation helpers**: Functions for verifying consistency
 - **Performance helpers**: Functions for measuring and validating performance

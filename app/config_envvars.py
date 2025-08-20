@@ -1,11 +1,14 @@
 """Configuration Environment Variables Module
 
 Handles loading and mapping environment variables to configuration.
+
+DEPRECATED: This module is deprecated. Use app.core.configuration instead.
+Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 """
 
-import os
 from typing import Dict, Any, Optional, Tuple, Callable
 from app.schemas.Config import AppConfig
+from app.config import get_config
 from app.config_loader import (
     load_env_var, set_clickhouse_host, set_clickhouse_port,
     set_clickhouse_password, set_clickhouse_user, set_gemini_api_key,
@@ -45,11 +48,12 @@ class ConfigEnvVarsManager:
         
     def _get_clickhouse_env_vars(self) -> Dict[str, Optional[str]]:
         """Get ClickHouse environment variables."""
+        config = get_config()
         return {
-            "host": os.environ.get("CLICKHOUSE_HOST"),
-            "port": os.environ.get("CLICKHOUSE_PORT"),
-            "password": os.environ.get("CLICKHOUSE_PASSWORD"),
-            "user": os.environ.get("CLICKHOUSE_USER")
+            "host": config.clickhouse_native.host if config.clickhouse_native.host != "clickhouse_host_url_placeholder" else None,
+            "port": str(config.clickhouse_native.port) if config.clickhouse_native.port != 9440 else None,
+            "password": config.clickhouse_native.password if config.clickhouse_native.password else None,
+            "user": config.clickhouse_native.user if config.clickhouse_native.user != "default" else None
         }
         
     def _get_clickhouse_setters(self) -> Dict[str, Callable]:
@@ -74,15 +78,24 @@ class ConfigEnvVarsManager:
     
     def _handle_gemini_var(self, config: AppConfig) -> None:
         """Handle Gemini API key environment variable."""
-        if key := os.environ.get("GEMINI_API_KEY"):
-            set_gemini_api_key(config, key)
+        unified_config = get_config()
+        if unified_config.llm_configs and 'default' in unified_config.llm_configs:
+            if key := unified_config.llm_configs['default'].api_key:
+                set_gemini_api_key(config, key)
     
     def _log_loaded_vars(self) -> None:
         """Log summary of loaded environment variables."""
         all_vars = list(get_critical_vars_mapping().keys())
         all_vars.extend(["CLICKHOUSE_HOST", "CLICKHOUSE_PORT", 
                         "CLICKHOUSE_PASSWORD", "CLICKHOUSE_USER", "GEMINI_API_KEY"])
-        loaded = [v for v in all_vars if os.environ.get(v)]
+        # Use unified config to check which vars are loaded
+        unified_config = get_config()
+        loaded = []
+        # Check if unified config has values (approximation for backward compatibility)
+        if unified_config.clickhouse_native.host != "clickhouse_host_url_placeholder":
+            loaded.extend(["CLICKHOUSE_HOST", "CLICKHOUSE_USER"])
+        if unified_config.llm_configs and 'default' in unified_config.llm_configs and unified_config.llm_configs['default'].api_key:
+            loaded.append("GEMINI_API_KEY")
         if loaded:
             self._logger.info(f"Loaded {len(loaded)} env vars")
     
@@ -94,21 +107,24 @@ class ConfigEnvVarsManager:
             
     def _get_oauth_mappings(self) -> Dict[str, Tuple[str, str]]:
         """Get OAuth environment mappings."""
+        from app.core.auth_constants import CredentialConstants
         return {
-            "GOOGLE_CLIENT_ID": ("oauth_config", "client_id"),
-            "GOOGLE_CLIENT_SECRET": ("oauth_config", "client_secret"),
+            CredentialConstants.GOOGLE_CLIENT_ID: ("oauth_config", "client_id"),
+            CredentialConstants.GOOGLE_CLIENT_SECRET: ("oauth_config", "client_secret"),
         }
         
     def _get_llm_mappings(self) -> Dict[str, Tuple[str, str]]:
         """Get LLM-related mappings."""
-        return {"GEMINI_API_KEY": ("llm_configs.default", "api_key")}
+        from app.core.auth_constants import CredentialConstants
+        return {CredentialConstants.GEMINI_API_KEY: ("llm_configs.default", "api_key")}
         
     def _get_security_mappings(self) -> Dict[str, Tuple[None, str]]:
         """Get security-related mappings."""
+        from app.core.auth_constants import JWTConstants, CredentialConstants
         return {
-            "JWT_SECRET_KEY": (None, "jwt_secret_key"),
-            "FERNET_KEY": (None, "fernet_key"),
-            "DATABASE_URL": (None, "database_url"),
+            JWTConstants.JWT_SECRET_KEY: (None, "jwt_secret_key"),
+            JWTConstants.FERNET_KEY: (None, "fernet_key"),
+            CredentialConstants.DATABASE_URL: (None, "database_url"),
             "LOG_LEVEL": (None, "log_level"),
         }
         
@@ -126,7 +142,8 @@ class ConfigEnvVarsManager:
         
     def _apply_env_var_if_present(self, config: AppConfig, env_var: str, target_path: Optional[str], field: str) -> None:
         """Apply environment variable if present."""
-        value = os.environ.get(env_var)
+        unified_config = get_config()
+        value = self._get_unified_config_value(unified_config, env_var)
         if value:
             self._set_config_value(config, target_path, field, value)
             
@@ -155,3 +172,18 @@ class ConfigEnvVarsManager:
         target_obj = getattr(config, target_path, None)
         if target_obj:
             setattr(target_obj, field, value)
+    
+    def _get_unified_config_value(self, unified_config, env_var: str) -> Optional[str]:
+        """Get value from unified config based on environment variable name."""
+        from app.core.auth_constants import CredentialConstants, JWTConstants
+        mapping = {
+            CredentialConstants.GOOGLE_CLIENT_ID: lambda: unified_config.oauth_config.client_id,
+            CredentialConstants.GOOGLE_CLIENT_SECRET: lambda: unified_config.oauth_config.client_secret,
+            CredentialConstants.GEMINI_API_KEY: lambda: unified_config.llm_configs.get('default', {}).api_key if unified_config.llm_configs else None,
+            JWTConstants.JWT_SECRET_KEY: lambda: unified_config.jwt_secret_key,
+            JWTConstants.FERNET_KEY: lambda: unified_config.fernet_key,
+            CredentialConstants.DATABASE_URL: lambda: unified_config.database_url,
+            "LOG_LEVEL": lambda: unified_config.log_level,
+        }
+        getter = mapping.get(env_var)
+        return getter() if getter else None

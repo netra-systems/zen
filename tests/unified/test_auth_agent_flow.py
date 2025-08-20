@@ -276,6 +276,8 @@ class TestAuthAgentFlow:
         BVJ: $20K MRR protection - Graceful handling when auth service unavailable
         Test: Auth service down → Clear error handling → No security bypass
         """
+        # Mock justification: Simulating auth service downtime to test error handling paths
+        # External auth service cannot be reliably made unavailable in test environment
         with patch.object(auth_client, 'validate_token', side_effect=Exception("Service unavailable")):
             validation_result = await self._handle_auth_service_down()
         assert validation_result.get("valid") is False

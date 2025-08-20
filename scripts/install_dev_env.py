@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Netra AI Platform - Development Environment Installer
-Orchestrates focused installer modules following 300-line/8-function limits.
+Orchestrates focused installer modules following 450-line/8-function limits.
 CRITICAL: All functions MUST be ≤8 lines, file ≤300 lines.
 """
 

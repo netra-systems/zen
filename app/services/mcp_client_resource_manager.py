@@ -2,7 +2,7 @@
 
 Handles resource discovery and fetching from external MCP servers.
 Implements real MCP protocol for production use.
-Modular component extracted to maintain 300-line limit compliance.
+Modular component extracted to maintain 450-line limit compliance.
 """
 
 from typing import Dict, Any, List, Optional

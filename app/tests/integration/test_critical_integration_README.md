@@ -8,7 +8,7 @@ This test suite implements the TOP 30 CRITICAL missing integration tests for Net
 
 ## Architecture Compliance
 
-- **File Size**: 299 lines (under 300-line limit ✅)
+- **File Size**: 299 lines (under 450-line limit ✅)
 - **Function Size**: All functions ≤8 lines (MANDATORY ✅)  
 - **Modular Design**: Uses helper classes for complex logic ✅
 - **Business Value Justified**: Every test tied to MRR protection ✅
@@ -97,8 +97,8 @@ Each test is designed to protect specific revenue streams:
 ## Key Features
 
 ### Architecture Compliant:
-- **300-line file limit**: Achieved through modular helper classes
-- **8-line function limit**: All functions are focused and concise
+- **450-line file limit**: Achieved through modular helper classes
+- **25-line function limit**: All functions are focused and concise
 - **No duplication**: Reuses existing patterns and extends functionality
 - **Type safety**: Full type hints and proper async patterns
 

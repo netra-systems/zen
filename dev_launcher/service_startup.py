@@ -17,6 +17,7 @@ from dev_launcher.frontend_starter import FrontendStarter
 from dev_launcher.auth_starter import AuthStarter
 from dev_launcher.parallel_executor import ParallelExecutor, ParallelTask, TaskType
 from dev_launcher.critical_error_handler import critical_handler, CriticalErrorType
+from dev_launcher.utils import is_port_available, find_available_port, wait_for_service_with_details
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +39,7 @@ class ServiceStartupCoordinator:
         self.log_manager = log_manager
         self.service_discovery = service_discovery
         self.use_emoji = use_emoji
+        self.allocated_ports = {}  # Track allocated ports
         self._setup_starters()
         self._setup_parallel_execution()
     
@@ -81,7 +83,18 @@ class ServiceStartupCoordinator:
         return self.auth_starter.auth_health_info
     
     def start_backend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
-        """Start the backend server."""
+        """Start the backend server with dynamic port allocation."""
+        # Pre-check backend port availability if configured
+        if self.config.backend_port and not is_port_available(self.config.backend_port):
+            error_msg = f"Backend port {self.config.backend_port} is not available"
+            expected_vs_actual = f"Expected: port {self.config.backend_port} free, Actual: port in use"
+            critical_handler.handle_critical_error(
+                CriticalErrorType.DATABASE_CONNECTION,
+                f"{error_msg}. {expected_vs_actual}",
+                {"suggestion": "Check what process is using the port or use dynamic port allocation"}
+            )
+            return None, None
+        
         result = self.backend_starter.start_backend()
         # Check for critical backend failures
         if result[0] is None:
@@ -90,6 +103,10 @@ class ServiceStartupCoordinator:
                 "Backend failed to start - database connection or configuration error",
                 {"suggestion": "Check DATABASE_URL and ensure PostgreSQL is running"}
             )
+        else:
+            # Store allocated port for reference
+            port = self.config.backend_port or 8000
+            self.allocated_ports['backend'] = port
         return result
     
     def start_frontend(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
@@ -97,17 +114,64 @@ class ServiceStartupCoordinator:
         return self.frontend_starter.start_frontend()
     
     def start_auth_service(self) -> Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]:
-        """Start the auth service."""
+        """Start the auth service with enhanced port allocation."""
+        # Pre-allocate auth port with dynamic allocation
+        auth_config = self.services_config.auth_service.get_config()
+        preferred_port = auth_config.get("port", 8081)
+        
+        # Check port availability and allocate dynamically if needed
+        allocated_port = self._allocate_auth_port(preferred_port)
+        if allocated_port != preferred_port:
+            logger.info(f"Auth port changed from {preferred_port} to {allocated_port}")
+        
         result = self.auth_starter.start_auth_service()
         # Check for critical auth failures
         if result[0] is None:
-            port = getattr(self.auth_starter, 'auth_port', 8081)
+            expected_vs_actual = f"Expected: auth service running on port {allocated_port}, Actual: startup failed"
             critical_handler.handle_critical_error(
                 CriticalErrorType.AUTH_SERVICE,
-                f"Auth service failed to start on port {port}",
-                {"suggestion": f"Check if port {port} is available and auth service configuration"}
+                f"Auth service failed to start. {expected_vs_actual}",
+                {"suggestion": f"Check logs for specific error. Port {allocated_port} allocation successful but startup failed"}
             )
+        else:
+            # Store allocated port and update backend configuration
+            self.allocated_ports['auth'] = allocated_port
+            self._update_backend_auth_config(allocated_port)
         return result
+    
+    def start_all_services(self, process_manager, health_monitor, parallel: bool = True) -> bool:
+        """Start all services with unified approach.
+        
+        Args:
+            process_manager: Process manager instance
+            health_monitor: Health monitor instance  
+            parallel: Whether to start services in parallel
+            
+        Returns:
+            True if all services started successfully
+        """
+        try:
+            if parallel:
+                # Start services in parallel
+                services = self.start_services_parallel()
+            else:
+                # Start services sequentially
+                services = {}
+                services["auth"] = self.start_auth_service()
+                services["backend"] = self.start_backend()
+                services["frontend"] = self.start_frontend()
+            
+            # Register processes with process manager
+            for name, (process, streamer) in services.items():
+                if process:
+                    process_manager.add_process(name.capitalize(), process)
+            
+            # Verify all services started
+            return all(process is not None for process, _ in services.values())
+            
+        except Exception as e:
+            logger.error(f"Failed to start services: {e}")
+            return False
     
     def start_services_parallel(self) -> Dict[str, Tuple[Optional[subprocess.Popen], Optional[LogStreamer]]]:
         """Start all services in parallel with progressive readiness."""
@@ -205,6 +269,27 @@ class ServiceStartupCoordinator:
         self.health_check_results.update(health_status)
         return health_status
     
+    def _allocate_auth_port(self, preferred_port: int) -> int:
+        """Allocate auth service port with dynamic fallback."""
+        if is_port_available(preferred_port):
+            return preferred_port
+        
+        # Find alternative port in range
+        allocated_port = find_available_port(preferred_port, (8081, 8090))
+        logger.info(f"Port {preferred_port} unavailable, allocated port {allocated_port}")
+        return allocated_port
+    
+    def _update_backend_auth_config(self, auth_port: int):
+        """Update backend environment with auth service port."""
+        import os
+        os.environ["AUTH_SERVICE_PORT"] = str(auth_port)
+        os.environ["AUTH_SERVICE_URL"] = f"http://localhost:{auth_port}"
+        logger.debug(f"Updated backend config: AUTH_SERVICE_PORT={auth_port}")
+    
+    def get_allocated_ports(self) -> Dict[str, int]:
+        """Get all allocated service ports."""
+        return self.allocated_ports.copy()
+    
     def _check_service_health(self, service: str) -> bool:
         """Check health of individual service."""
         try:
@@ -220,21 +305,31 @@ class ServiceStartupCoordinator:
             return False
     
     def _check_auth_health(self) -> bool:
-        """Check auth service health."""
+        """Check auth service health with dynamic port support.
+        
+        Uses /api/auth/config endpoint per SPEC step 9.
+        """
         try:
             import requests
-            auth_url = f"http://localhost:8081/health"
+            # Use dynamically allocated auth port
+            auth_port = self.allocated_ports.get('auth', 8081)
+            auth_url = f"http://localhost:{auth_port}/api/auth/config"
             response = requests.get(auth_url, timeout=3)
-            return response.status_code == 200
+            return response.status_code in [200, 404]  # 404 is acceptable
         except:
             return False
     
     def _check_backend_health(self) -> bool:
-        """Check backend service health."""
+        """Check backend service health with dynamic port support.
+        
+        Uses /health/ready endpoint per SPEC requirements.
+        """
         try:
             import requests
-            backend_port = self.config.backend_port or 8000
-            backend_url = f"http://localhost:{backend_port}/health"
+            # Use allocated backend port
+            backend_port = self.allocated_ports.get('backend', self.config.backend_port or 8000)
+            # Use /health/ready for readiness checks per SPEC step 8
+            backend_url = f"http://localhost:{backend_port}/health/ready"
             response = requests.get(backend_url, timeout=3)
             return response.status_code == 200
         except:
@@ -252,9 +347,21 @@ class ServiceStartupCoordinator:
             return False
     
     def wait_for_service_readiness(self, service: str, timeout: int = 30) -> bool:
-        """Wait for specific service to be ready with progressive checks."""
+        """Wait for specific service to be ready with enhanced error context.
+        
+        Per SPEC: This uses proper readiness endpoints and grace periods.
+        """
         start_time = time.time()
         check_interval = 1.0
+        
+        # Use service-specific timeouts per SPEC HEALTH-002
+        if service.lower() == "frontend":
+            timeout = 90  # Frontend: 90 second grace period
+        elif service.lower() == "backend":
+            timeout = 30  # Backend: 30 second grace period
+        
+        # Build service URL for detailed error reporting
+        service_url = self._get_service_health_url(service)
         
         while (time.time() - start_time) < timeout:
             try:
@@ -271,8 +378,25 @@ class ServiceStartupCoordinator:
                 logger.warning(f"Service readiness check failed: {e}")
                 time.sleep(check_interval)
         
-        logger.warning(f"{service} service not ready after {timeout}s")
+        # Enhanced error message with expected vs actual context
+        elapsed = time.time() - start_time
+        expected_vs_actual = f"Expected: {service} ready at {service_url}, Actual: timeout after {elapsed:.1f}s"
+        logger.error(f"{service} service not ready. {expected_vs_actual}")
+        logger.error(f"Suggestion: Check {service} service logs and port {self.allocated_ports.get(service, 'unknown')}")
         return False
+    
+    def _get_service_health_url(self, service: str) -> str:
+        """Get health check URL for service."""
+        if service.lower() == "auth":
+            port = self.allocated_ports.get('auth', 8081)
+            return f"http://localhost:{port}/api/auth/config"
+        elif service.lower() == "backend":
+            port = self.allocated_ports.get('backend', 8000)
+            return f"http://localhost:{port}/health/ready"
+        elif service.lower() == "frontend":
+            port = self.config.frontend_port or 3000
+            return f"http://localhost:{port}"
+        return "unknown"
     
     def get_startup_performance(self) -> Dict[str, Any]:
         """Get startup performance metrics."""

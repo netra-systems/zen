@@ -108,13 +108,22 @@ class AuthError(BaseModel):
     details: Optional[Dict[str, Any]] = None
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
+class AuthException(Exception):
+    """Auth service exception"""
+    def __init__(self, error: str, error_code: str, message: str, details: Optional[Dict[str, Any]] = None):
+        self.error = error
+        self.error_code = error_code
+        self.message = message
+        self.details = details
+        super().__init__(message)
+
 class HealthResponse(BaseModel):
     """Health check response"""
     status: str
     service: str = "auth-service"
     version: str = "1.0.0"
     timestamp: datetime = Field(default_factory=lambda: datetime.now(UTC))
-    redis_connected: bool
+    redis_connected: Optional[bool] = Field(description="None when Redis is disabled by design")
     database_connected: bool
 
 class AuditLog(BaseModel):

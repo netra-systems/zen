@@ -1,5 +1,5 @@
 // Tool tracking hook - Initializes and manages tool tracking service
-// Modular hook following 8-line function limits
+// Modular hook following 25-line function limits
 
 import { useEffect, useRef } from 'react';
 import { 

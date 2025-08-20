@@ -1,7 +1,7 @@
 /**
  * IconButton Test Suite
  * Tests icon buttons with various states and accessibility features
- * Follows 8-line function rule and covers all icon button patterns
+ * Follows 25-line function rule and covers all icon button patterns
  */
 
 import React from 'react';

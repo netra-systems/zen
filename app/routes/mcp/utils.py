@@ -2,7 +2,7 @@
 MCP Utility Functions
 
 Utility functions for MCP handlers.
-Maintains 8-line function limit and single responsibility.
+Maintains 25-line function limit and single responsibility.
 """
 
 from typing import Dict, Any
