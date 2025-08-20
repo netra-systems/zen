@@ -225,6 +225,18 @@ class AppConfig(BaseModel):
     agent_reset_timeout: float = Field(default=30.0, description="Agent reset timeout in seconds")
     agent_max_concurrent: int = Field(default=10, description="Agent maximum concurrent operations")
     agent_batch_size: int = Field(default=100, description="Agent batch size")
+    
+    # Environment detection for tests and development
+    pytest_current_test: Optional[str] = Field(default=None, description="Current pytest test indicator")
+    testing: Optional[str] = Field(default=None, description="Testing flag for environment detection")
+    
+    # Auth service configuration
+    auth_service_url: str = Field(default="http://127.0.0.1:8081", description="Auth service URL")
+    auth_service_enabled: str = Field(default="true", description="Auth service enabled flag")
+    auth_fast_test_mode: str = Field(default="false", description="Auth fast test mode flag")
+    auth_cache_ttl_seconds: str = Field(default="300", description="Auth cache TTL in seconds")
+    service_id: str = Field(default="backend", description="Service ID for authentication")
+    service_secret: Optional[str] = Field(default=None, description="Service secret for authentication")
 
     llm_configs: Dict[str, LLMConfig] = {
         "default": LLMConfig(

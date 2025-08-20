@@ -33,6 +33,7 @@ from dev_launcher.startup_optimizer import StartupOptimizer, StartupStep
 from dev_launcher.log_filter import LogFilter, StartupMode, StartupProgressTracker
 from dev_launcher.critical_error_handler import critical_handler, CriticalError
 from dev_launcher.migration_runner import MigrationRunner
+from dev_launcher.database_connector import DatabaseConnector
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +102,7 @@ class DevLauncher:
         self.health_helper = HealthRegistrationHelper(self.health_monitor, self.use_emoji)
         self.startup_validator = StartupValidator(self.use_emoji)
         self.migration_runner = MigrationRunner(self.config.project_root, self.use_emoji)
+        self.database_connector = DatabaseConnector(self.use_emoji)
     
     def _create_secret_loader(self) -> SecretLoader:
         """Create secret loader instance."""
@@ -192,6 +194,10 @@ class DevLauncher:
         # Cleanup optimizers
         if hasattr(self, 'startup_optimizer'):
             self.startup_optimizer.cleanup()
+        
+        # Stop database monitoring and cleanup connections
+        if hasattr(self, 'database_connector'):
+            asyncio.run(self.database_connector.stop_health_monitoring())
         
         # Verify ports are freed
         self._verify_ports_freed()
@@ -285,7 +291,8 @@ class DevLauncher:
         """Register startup optimization steps."""
         steps = [
             StartupStep("environment_check", self._check_environment_step, [], True, 10, True, "env_check"),
-            StartupStep("migration_check", self._check_migrations_step, ["environment_check"], True, 15, True, "migration_check"),
+            StartupStep("database_check", self._check_database_step, ["environment_check"], True, 15, True, "database_check"),
+            StartupStep("migration_check", self._check_migrations_step, ["database_check"], True, 15, True, "migration_check"),
             StartupStep("backend_deps", self._check_backend_deps, [], True, 20, False, "backend_deps"),
             StartupStep("auth_deps", self._check_auth_deps, [], True, 20, False, "auth_deps"),
             StartupStep("frontend_deps", self._check_frontend_deps, ["backend_deps"], True, 30, False, "frontend_deps"),
@@ -321,9 +328,23 @@ class DevLauncher:
         """Environment check step for optimizer."""
         return self.environment_checker.check_environment()
     
+    def _check_database_step(self) -> bool:
+        """Database connectivity check step for optimizer."""
+        # For cache purposes, always return False to force database validation
+        return False
+    
     def _check_migrations_step(self) -> bool:
         """Migration check step for optimizer."""
         return not self.cache_manager.has_migration_files_changed()
+    
+    async def _validate_databases(self) -> bool:
+        """Validate database connections before service startup."""
+        try:
+            return await self.database_connector.validate_all_connections()
+        except Exception as e:
+            logger.error(f"Database validation failed: {e}")
+            self._print("❌", "DATABASE", f"Validation error: {str(e)}")
+            return False
     
     def run_migrations(self, env: Optional[Dict] = None) -> bool:
         """Run database migrations if needed."""
@@ -369,7 +390,7 @@ class DevLauncher:
             self.service_startup.auth_health_info
         )
     
-    def run(self) -> int:
+    async def run(self) -> int:
         """Run the development environment."""
         try:
             if not self.config.silent_mode:
@@ -384,7 +405,7 @@ class DevLauncher:
                 return 1
             
             # Run services
-            return self._run_services()
+            return await self._run_services()
         except CriticalError as e:
             # Handle critical errors
             critical_handler.exit_on_critical(e)
@@ -394,13 +415,13 @@ class DevLauncher:
             return 1
     
     
-    def _run_services(self) -> int:
+    async def _run_services(self) -> int:
         """Run all services following SPEC startup sequence steps 1-13."""
         self._clear_service_discovery()
         
         try:
             # Follow SPEC service_startup_sequence steps 1-13
-            success = self._execute_spec_startup_sequence()
+            success = await self._execute_spec_startup_sequence()
             
             if not success:
                 self._print("❌", "ERROR", "Failed to start services")
@@ -420,7 +441,7 @@ class DevLauncher:
             logger.error(f"Service startup failed: {e}")
             return 1
     
-    def _execute_spec_startup_sequence(self) -> bool:
+    async def _execute_spec_startup_sequence(self) -> bool:
         """Execute SPEC startup sequence steps 1-13.
         
         Per SPEC/dev_launcher.xml service_startup_sequence:
@@ -428,14 +449,19 @@ class DevLauncher:
         Step 13: ONLY NOW start health monitoring
         """
         try:
-            # Steps 1-5: Cache, environment, secrets, migrations
+            # Steps 1-5: Cache, environment, secrets, database validation, migrations
             self._print("🔄", "STEP 1-2", "Checking cache and environment...")
             # (Already done in pre-checks)
             
             self._print("🔄", "STEP 3", "Loading secrets...")
             # (Already done in pre-checks)
             
-            self._print("🔄", "STEP 4-5", "Checking and running migrations...")
+            self._print("🔄", "STEP 4", "Validating database connections...")
+            if not await self._validate_databases():
+                self._print("❌", "ERROR", "Database validation failed")
+                return False
+            
+            self._print("🔄", "STEP 5", "Checking and running migrations...")
             if not self.run_migrations():
                 self._print("❌", "ERROR", "Migration check failed")
                 return False
@@ -488,6 +514,9 @@ class DevLauncher:
             # Step 13: ONLY NOW start health monitoring
             self._print("🔄", "STEP 13", "Starting health monitoring...")
             self._start_health_monitoring_after_readiness()
+            
+            # Start database health monitoring
+            await self.database_connector.start_health_monitoring()
             
             return True
             
