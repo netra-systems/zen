@@ -5,7 +5,7 @@ from typing import Dict, Any, List, Optional, Union
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 from pydantic import ValidationError, BaseModel, Field
-from app.schemas.shared_types import (
+from app.schemas.shared_types import ApiResponse
 from app.websocket.validation import MessageValidator
 from app.schemas.websocket_message_types import WebSocketValidationError
 from app.schemas.registry import WebSocketMessageType

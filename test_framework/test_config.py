@@ -197,6 +197,34 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_both": False,
         "highlight": True,
         "business_critical": True
+    },
+    "staging": {
+        "description": "Staging environment configuration integration tests (10-15 minutes)",
+        "purpose": "Validate staging deployment configuration and GCP resource integration",
+        "backend_args": ["app/tests/integration/staging_config", "-v", "--fail-fast", f"--parallel={min(2, OPTIMAL_WORKERS)}"],
+        "frontend_args": [],
+        "timeout": 900,
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENVIRONMENT=staging", "GOOGLE_APPLICATION_CREDENTIALS"],
+        "supports_real_services": True,
+        "business_critical": True,
+        "highlight": True
+    },
+    "staging-quick": {
+        "description": "Quick staging validation tests (2-3 minutes)",
+        "purpose": "Fast staging health check for deployment verification",
+        "backend_args": [
+            "app/tests/integration/staging_config/test_secret_manager_integration.py",
+            "app/tests/integration/staging_config/test_health_checks.py",
+            "-v", "--fail-fast"
+        ],
+        "frontend_args": [],
+        "timeout": 180,
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENVIRONMENT=staging"],
+        "highlight": True
     }
 }
 
@@ -345,3 +373,34 @@ def configure_dedicated_test_environment():
     # Set test environment flag
     os.environ["TEST_ENVIRONMENT"] = "test_dedicated"
     os.environ["USE_TEST_ISOLATION"] = "true"
+
+def configure_gcp_staging_environment():
+    """Configure environment for GCP staging tests."""
+    # Set staging environment
+    os.environ["ENVIRONMENT"] = "staging"
+    
+    # GCP configuration
+    project_id = os.getenv("GCP_PROJECT_ID", "netra-ai-staging")
+    os.environ["GCP_PROJECT_ID"] = project_id
+    os.environ["GCP_REGION"] = os.getenv("GCP_REGION", "us-central1")
+    
+    # Enable Secret Manager
+    os.environ["USE_SECRET_MANAGER"] = "true"
+    
+    # Cloud SQL configuration
+    os.environ["CLOUD_SQL_CONNECTION_NAME"] = f"{project_id}:us-central1:postgres-staging"
+    
+    # Redis configuration for staging
+    os.environ["REDIS_HOST"] = "redis-staging"
+    
+    # Staging URLs
+    os.environ["STAGING_URL"] = os.getenv("STAGING_URL", "https://staging.netra.ai")
+    
+    # Enable observability
+    os.environ["ENABLE_OBSERVABILITY"] = "true"
+    
+    # Check for GCP credentials
+    if not os.getenv("GOOGLE_APPLICATION_CREDENTIALS"):
+        print("[WARNING] GOOGLE_APPLICATION_CREDENTIALS not set - staging tests may fail")
+    
+    print(f"[INFO] Configured for GCP staging environment (project: {project_id})")

@@ -407,3 +407,17 @@ def add_message_reaction(message_id: str, reaction_type: str, user_id: str) -> d
         "user_id": user_id,
         "added_at": datetime.now().isoformat()
     }
+
+def add_reply_to_message(thread_id: str, parent_message_id: str, reply_data: dict) -> dict:
+    """Add a reply to a message - placeholder implementation"""
+    from datetime import datetime
+    return {
+        "message_id": f"msg_{uuid.uuid4()}",
+        "thread_id": thread_id,
+        "parent_message_id": parent_message_id,
+        "content": reply_data.get("content", ""),
+        "sender": reply_data.get("sender", "user"),
+        "timestamp": datetime.now().isoformat(),
+        "reply_level": 1,
+        "message_type": reply_data.get("message_type", "reply")
+    }

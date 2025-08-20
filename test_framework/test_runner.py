@@ -47,7 +47,7 @@ load_dotenv()
 
 # Import test framework modules
 from .runner import UnifiedTestRunner
-from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_dev_environment, configure_real_llm
+from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_dev_environment, configure_real_llm, configure_gcp_staging_environment
 from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
 
@@ -559,6 +559,12 @@ def print_feature_flag_summary():
 
 def configure_environment_if_requested(args):
     """Configure test environment based on --env parameter and legacy --staging flag"""
+    # Handle test level specific staging configuration
+    if args.level and args.level in ['staging', 'staging-quick']:
+        print("[INFO] Configuring GCP staging environment for staging tests")
+        configure_gcp_staging_environment()
+        return
+    
     # Handle legacy --staging flag for backward compatibility
     if args.staging or args.staging_url or args.staging_api_url:
         staging_url = args.staging_url or os.getenv("STAGING_URL")
@@ -570,11 +576,9 @@ def configure_environment_if_requested(args):
         
     # Handle --env parameter
     if args.env == "staging":
-        staging_url = os.getenv("STAGING_URL")
-        staging_api_url = os.getenv("STAGING_API_URL")
-        validate_staging_configuration(staging_url, staging_api_url)
-        print_staging_configuration(staging_url, staging_api_url)
-        configure_staging_environment(staging_url, staging_api_url)
+        # Use GCP staging configuration for new staging tests
+        print("[INFO] Configuring GCP staging environment")
+        configure_gcp_staging_environment()
     elif args.env == "dev":
         print_dev_configuration()
         configure_dev_environment()
