@@ -11,6 +11,10 @@ from unittest.mock import patch
 from app.core.middleware_setup import get_cors_origins, is_origin_allowed
 from app.core.middleware_setup import get_cors_origins, is_origin_allowed
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def mock_backend_server_url(self):
         """Get backend server URL for testing."""
         return os.getenv("BACKEND_URL", "http://localhost:8000")

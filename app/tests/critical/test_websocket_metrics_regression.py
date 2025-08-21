@@ -160,7 +160,7 @@ class TestWebSocketMetricsRegression:
         """
         from app.websocket.connection_manager import ModernConnectionManager
         
-        manager = ModernConnectionManager()
+        manager = Modernget_connection_manager()
         
         # Test with None result
         mock_result = MagicMock()

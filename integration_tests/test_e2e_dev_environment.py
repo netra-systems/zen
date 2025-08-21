@@ -100,18 +100,25 @@ class DevEnvironmentE2ETests:
             yield ac
     
     def create_test_user(self, tier: PlanTier) -> Dict[str, Any]:
-        """Create test user for specific tier."""
+        """Create test user for specific tier with collision-resistant identifiers."""
+        import os
+        import random
         import time
+        
         user_id = str(uuid.uuid4())
-        timestamp = int(time.time() * 1000)  # Use milliseconds for uniqueness
-        email = f"{tier.value}_user_{user_id[:8]}_{timestamp}@test.com"
+        process_id = os.getpid()
+        random_suffix = random.randint(10000, 99999)
+        timestamp = int(time.time() * 1000000)  # Microseconds for better uniqueness
+        
+        email = f"{tier.value}_user_{user_id}_{process_id}_{random_suffix}_{timestamp}@test.com"
         
         return {
             "id": user_id,
             "email": email,
             "tier": tier,
             "token": self.jwt_helper.create_access_token(user_id, email),
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "_test_marker": True  # For cleanup identification
         }
     
     async def validate_service_health(self, client: TestClient) -> Dict[str, bool]:

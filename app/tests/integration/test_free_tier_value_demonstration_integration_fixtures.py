@@ -17,6 +17,10 @@ from app.db.base import Base
 import tempfile
 from sqlalchemy import select
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def cost_calculator(self):
         """Setup cost calculator service"""
         return CostCalculatorService()

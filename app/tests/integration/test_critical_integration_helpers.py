@@ -19,7 +19,6 @@ from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.services.database.run_repository import RunRepository
 from app.ws_manager import WebSocketManager
-from app.schemas.registry import (
 from app.schemas.Agent import AgentStarted
 from starlette.websockets import WebSocketState
 from app.schemas.registry import UserBase
@@ -30,6 +29,10 @@ import tempfile
 import os
 from app.db.models_postgres import Run
 import time
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def _setup_supervisor_with_database(self, db_setup, infra, test_entities):
         """Setup supervisor agent with database and infrastructure"""
@@ -88,3 +91,4 @@ import time
             "analysis": "GPU optimization needed",
             "priority": "high"
         }
+# )  # Orphaned closing parenthesis

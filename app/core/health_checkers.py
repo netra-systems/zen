@@ -28,20 +28,23 @@ async def check_postgres_health() -> HealthCheckResult:
 
 async def _execute_postgres_query() -> None:
     """Execute test query on PostgreSQL database."""
-    from app.db.postgres import initialize_postgres, async_engine
+    from app.db.postgres import initialize_postgres
+    from app.db.postgres_core import async_engine
     from sqlalchemy import text
     
-    # Ensure database is initialized
+    # Always get fresh reference to engine after ensuring initialization
     if async_engine is None:
         initialize_postgres()
-        from app.db.postgres import async_engine as refreshed_engine
-        if refreshed_engine is None:
-            raise RuntimeError("Database engine not initialized")
-        async with refreshed_engine.begin() as conn:
-            await conn.execute(text("SELECT 1"))
+        # Get fresh reference after initialization
+        from app.db.postgres_core import async_engine as engine_ref
+        if engine_ref is None:
+            raise RuntimeError("Database engine not initialized after initialization")
+        engine = engine_ref
     else:
-        async with async_engine.begin() as conn:
-            await conn.execute(text("SELECT 1"))
+        engine = async_engine
+    
+    async with engine.begin() as conn:
+        await conn.execute(text("SELECT 1"))
 
 
 async def check_clickhouse_health() -> HealthCheckResult:

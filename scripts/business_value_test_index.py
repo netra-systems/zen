@@ -124,6 +124,38 @@ class BusinessValueTestIndexer:
         max_tests = 10000  # Increased limit to catch all tests
         scanned_files = set()  # Track already scanned files
         
+        # Directories to exclude from scanning
+        excluded_dirs = {
+            'site-packages', 'dist-packages', '__pycache__', '.git', 
+            'node_modules', '.venv', 'venv', 'env', '.env',
+            '.tox', '.eggs', 'build', 'dist', '.pytest_cache',
+            'htmlcov', '.coverage', '.mypy_cache', '.ruff_cache',
+            'Lib', 'Scripts', 'Include',  # Windows Python installation dirs
+            '.vscode', '.idea', '.vs',  # IDE directories
+        }
+        
+        def should_skip_file(file_path: Path) -> bool:
+            """Check if file should be skipped based on exclusion rules"""
+            path_str = str(file_path).lower()
+            path_parts = set(p.lower() for p in file_path.parts)
+            
+            # Check if any excluded directory is in the path parts (as a directory, not part of filename)
+            for excluded in excluded_dirs:
+                if excluded.lower() in path_parts:
+                    return True
+                # Also check for patterns in the full path (but not in filenames)
+                path_without_filename = str(file_path.parent).lower().replace('\\', '/')
+                if f'/{excluded.lower()}/' in path_without_filename or path_without_filename.endswith(f'/{excluded.lower()}'):
+                    return True
+            
+            # Skip if outside project root (absolute imports from site-packages)
+            try:
+                file_path.relative_to(self.project_root)
+            except ValueError:
+                return True
+                
+            return False
+        
         # First, prioritize ALL e2e test directories to ensure they're counted
         e2e_dirs = [
             self.project_root / 'tests' / 'unified' / 'e2e',
@@ -133,7 +165,7 @@ class BusinessValueTestIndexer:
         for e2e_dir in e2e_dirs:
             if e2e_dir.exists():
                 for test_file in e2e_dir.glob('**/*.py'):
-                    if test_file.name.startswith('test_'):
+                    if test_file.name.startswith('test_') and not should_skip_file(test_file):
                         if str(test_file) not in scanned_files:
                             self._scan_python_test(test_file)
                             scanned_files.add(str(test_file))
@@ -149,7 +181,7 @@ class BusinessValueTestIndexer:
                 if test_count >= max_tests:
                     break
                 if test_file.name.startswith('test_') or test_file.name.endswith('_test.py'):
-                    if 'node_modules' not in str(test_file) and '.venv' not in str(test_file):
+                    if not should_skip_file(test_file):
                         # Skip if already scanned
                         if str(test_file) not in scanned_files:
                             self._scan_python_test(test_file)
@@ -160,7 +192,7 @@ class BusinessValueTestIndexer:
         frontend_dir = self.project_root / 'frontend'
         if frontend_dir.exists() and test_count < max_tests:
             for test_file in list(frontend_dir.glob('**/*.test.ts*'))[:50]:  # Limit frontend tests
-                if 'node_modules' not in str(test_file):
+                if not should_skip_file(test_file):
                     self._scan_typescript_test(test_file)
                     test_count += 1
 

@@ -25,6 +25,25 @@ from dataclasses import dataclass
 from enum import Enum
 from tests.unified.jwt_token_helpers import JWTTestHelper
 
+
+class FeatureStatus(Enum):
+    """Enum for feature development status."""
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    TESTING = "testing"
+    COMPLETE = "complete"
+
+
+@dataclass
+class FeatureFlag:
+    """Feature flag for TDD workflow testing."""
+    feature_name: str
+    status: FeatureStatus
+    description: str
+    test_file: Optional[str] = None
+    implementation_file: Optional[str] = None
+    created_at: Optional[float] = None
+
     def __post_init__(self):
         if self.created_at is None:
             self.created_at = time.time()
@@ -39,6 +58,10 @@ from tests.unified.jwt_token_helpers import JWTTestHelper
             "implementation_file": self.implementation_file,
             "created_at": self.created_at
         }
+
+
+class TDDWorkflowTester:
+    """Tester for TDD workflow integration."""
 
     def __init__(self):
         """Initialize TDD workflow tester."""

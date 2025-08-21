@@ -18,12 +18,20 @@ from app.agents.supervisor.supervisor_agent import SupervisorAgent
 from app.llm.llm_manager import LLMManager
 from app.config import get_config
 
+
+class AIFactoryWorkflowCore:
+    """AI Factory workflow core for write-review-refine process."""
+
     def __init__(self):
         self.config = get_config()
         self.llm_manager = LLMManager(self.config)
         self.workflow_stages = ["implementation", "review", "refinement", "verification"]
         self.workflow_results = {}
         self.quality_metrics = {}
+
+
+class WorkflowQualityValidator:
+    """Validator for workflow quality standards."""
 
     def __init__(self):
         self.quality_standards = {
@@ -34,10 +42,13 @@ from app.config import get_config
         }
         self.workflow_metrics = {}
 
-    def workflow_core(self):
-        """Initialize AI Factory workflow core."""
-        return AIFactoryWorkflowCore()
 
-    def quality_validator(self):
-        """Initialize workflow quality validator."""
-        return WorkflowQualityValidator()
+@pytest.fixture
+def workflow_core():
+    """Initialize AI Factory workflow core."""
+    return AIFactoryWorkflowCore()
+
+@pytest.fixture
+def quality_validator():
+    """Initialize workflow quality validator."""
+    return WorkflowQualityValidator()

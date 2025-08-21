@@ -24,11 +24,34 @@ from enum import Enum
 from tests.unified.jwt_token_helpers import JWTTestHelper
 from app.schemas.shared_types import ProcessingResult
 
+
+class ToolAtomicityLevel(Enum):
+    """Enum for tool atomicity levels."""
+    ATOMIC = "atomic"
+    COMPLEX = "complex"
+    COMPOUND = "compound"
+    INVALID = "invalid"
+
+
+@dataclass
+class ToolTestResult:
+    """Result of tool atomicity testing."""
+    tool_name: str
+    atomicity_level: ToolAtomicityLevel
+    responsibility_count: int
+    error_count: int
+    violations: List[str]
+    execution_time_ms: float
+
     def is_atomic(self) -> bool:
         """Check if tool result meets atomicity requirements."""
         return (self.atomicity_level == ToolAtomicityLevel.ATOMIC and
                 self.responsibility_count == 1 and
                 self.error_count == 0)
+
+
+class ToolAtomicityTester:
+    """Tester for agent tool atomicity."""
 
     def __init__(self):
         """Initialize tool atomicity tester."""

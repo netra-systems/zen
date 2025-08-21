@@ -21,7 +21,7 @@ from unittest.mock import patch
 
 import redis.asyncio as redis
 from app.redis_manager import RedisManager
-from app.services.cache.cache_helpers import CacheService
+from app.services.cache.cache_helpers import CacheHelpers
 from app.logging_config import central_logger
 from .helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
 

@@ -118,7 +118,7 @@ async def test_grace_period_handling(jwt_generator, audit_logger, near_expiry_to
     await asyncio.sleep(12)  # Token expires in 10 seconds, wait 12
     
     # Verify token is now expired
-    token_validation = jwt_generator.validate_token(near_expiry_token)
+    token_validation = jwt_generator.validate_token_jwt(near_expiry_token)
     assert "error" in token_validation, "Token should be expired"
     assert token_validation["error"] == "expired", "Token should show expired error"
     

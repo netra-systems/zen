@@ -9,7 +9,6 @@ from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from app.schemas.websocket_models import (
 from app.schemas.core_enums import WebSocketMessageType, AgentStatus
 from app.logging_config import central_logger
 from app.tests.services.test_ws_connection_mocks import MockWebSocket
@@ -47,3 +46,4 @@ def mock_agent_service():
     service = AsyncMock() 
     service.handle_websocket_message = AsyncMock()
     return service
+# )  # Orphaned closing parenthesis

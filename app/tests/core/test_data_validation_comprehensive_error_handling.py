@@ -5,7 +5,6 @@ from typing import Dict, Any, List, Optional, Union
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 from pydantic import ValidationError, BaseModel, Field
-from app.schemas.shared_types import (
 from app.websocket.validation import MessageValidator
 from app.schemas.websocket_message_types import WebSocketValidationError
 from app.schemas.registry import WebSocketMessageType
@@ -34,3 +33,4 @@ def test_error_context_data_consistency():
     assert context.trace_id == "123"
     assert context.operation == "test_op"
     assert isinstance(context.timestamp, datetime)
+# )  # Orphaned closing parenthesis

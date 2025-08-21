@@ -9,7 +9,6 @@ from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from app.schemas.websocket_models import (
 from app.schemas.core_enums import WebSocketMessageType, AgentStatus
 from app.logging_config import central_logger
 from app.tests.services.test_ws_connection_mocks import MockWebSocket
@@ -18,6 +17,10 @@ from app.routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect
 import tracemalloc
 from app.agents.supervisor_consolidated import SupervisorAgent
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
 def create_test_token(user_id: str) -> str:
     """Create a valid test token."""
@@ -75,3 +78,4 @@ def create_test_token(user_id: str) -> str:
         def __init__(self, user_id=None):
             self.user_id = user_id
             self.sent_messages = []
+# )  # Orphaned closing parenthesis

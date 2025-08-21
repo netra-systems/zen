@@ -1,7 +1,7 @@
-"""Error Recovery and Retry Logic Testing
+"""Network Failure Simulation and Recovery Testing
 
-This module contains utilities for testing network failure simulation,
-retry mechanisms, and recovery logic with proper backoff patterns.
+This module contains the main NetworkFailureSimulationValidator for testing
+network failures, retry mechanisms, and recovery logic with proper backoff patterns.
 """
 
 import asyncio
@@ -202,50 +202,18 @@ class NetworkFailureSimulationValidator:
         }
 
 
-class RetryPatternTester:
-    """Utility for testing specific retry patterns."""
+class NetworkLatencyTester:
+    """Test network latency and performance characteristics."""
     
     def __init__(self, tester: RealErrorPropagationTester):
         self.tester = tester
     
-    async def test_circuit_breaker_behavior(self, endpoint: str = "/health") -> Dict[str, Any]:
-        """Test circuit breaker pattern behavior."""
-        failure_count = 0
-        success_count = 0
+    async def measure_baseline_latency(self, samples: int = 5) -> Dict[str, Any]:
+        """Measure baseline network latency to the service."""
+        latencies = []
         
-        # Simulate multiple rapid failures
-        for attempt in range(5):
-            try:
-                config = ClientConfig(timeout=0.01, max_retries=0)  # Immediate timeout
-                client = RealHTTPClient(self.tester.orchestrator.get_service_url("backend"), config)
-                
-                try:
-                    await client.get(endpoint)
-                    success_count += 1
-                except Exception:
-                    failure_count += 1
-                finally:
-                    await client.close()
-                    
-            except Exception:
-                failure_count += 1
-            
-            await asyncio.sleep(0.1)  # Brief pause between attempts
-        
-        return {
-            "total_attempts": 5,
-            "failure_count": failure_count,
-            "success_count": success_count,
-            "circuit_breaker_triggered": failure_count >= 3
-        }
-    
-    async def test_progressive_timeout_increase(self) -> Dict[str, Any]:
-        """Test progressive timeout increase pattern."""
-        timeouts = [0.1, 0.2, 0.5, 1.0]
-        results = []
-        
-        for timeout in timeouts:
-            config = ClientConfig(timeout=timeout, max_retries=1)
+        for i in range(samples):
+            config = ClientConfig(timeout=5.0, max_retries=0)
             client = RealHTTPClient(self.tester.orchestrator.get_service_url("backend"), config)
             
             try:
@@ -253,100 +221,80 @@ class RetryPatternTester:
                 await client.get("/health")
                 end_time = time.time()
                 
-                results.append({
-                    "timeout_setting": timeout,
-                    "actual_time": end_time - start_time,
-                    "success": True
-                })
-                break  # Success, no need to try longer timeouts
+                latencies.append(end_time - start_time)
                 
             except Exception as e:
-                results.append({
-                    "timeout_setting": timeout,
-                    "success": False,
-                    "error": str(e)
-                })
+                logger.warning(f"Latency measurement {i+1} failed: {e}")
             finally:
                 await client.close()
+                
+            await asyncio.sleep(0.1)  # Brief pause between measurements
+        
+        if not latencies:
+            return {"error": "no_successful_measurements"}
+        
+        avg_latency = sum(latencies) / len(latencies)
+        min_latency = min(latencies)
+        max_latency = max(latencies)
         
         return {
-            "progressive_timeouts": results,
-            "eventual_success": any(r["success"] for r in results)
+            "samples_taken": len(latencies),
+            "avg_latency": avg_latency,
+            "min_latency": min_latency,
+            "max_latency": max_latency,
+            "latency_variance": max_latency - min_latency,
+            "all_latencies": latencies
         }
-
-
-class RecoveryScenarioTester:
-    """Test various recovery scenarios and patterns."""
     
-    def __init__(self, tester: RealErrorPropagationTester):
-        self.tester = tester
-    
-    async def test_service_degradation_recovery(self) -> Dict[str, Any]:
-        """Test service recovery from degraded state."""
-        # Test health endpoint (should always work)
-        health_result = await self._test_endpoint_availability("/health")
+    async def test_latency_under_load(self, concurrent_requests: int = 3) -> Dict[str, Any]:
+        """Test latency behavior under concurrent load."""
+        # First measure baseline
+        baseline = await self.measure_baseline_latency(3)
         
-        # Test critical endpoint (might be degraded)
-        critical_result = await self._test_endpoint_availability("/auth/me")
+        # Then measure under load
+        start_time = time.time()
+        tasks = []
         
-        # Assess recovery capability
-        recovery_assessment = self._assess_recovery_capability(health_result, critical_result)
+        for i in range(concurrent_requests):
+            task = self._make_latency_request(f"load_test_{i}")
+            tasks.append(task)
+        
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        end_time = time.time()
+        
+        # Analyze results
+        successful_results = [r for r in results if isinstance(r, dict) and r.get("success", False)]
+        
+        if successful_results:
+            load_latencies = [r["latency"] for r in successful_results]
+            avg_load_latency = sum(load_latencies) / len(load_latencies)
+        else:
+            avg_load_latency = 0
+            load_latencies = []
+        
+        baseline_avg = baseline.get("avg_latency", 0)
+        latency_degradation = avg_load_latency / baseline_avg if baseline_avg > 0 else 0
         
         return {
-            "health_endpoint": health_result,
-            "critical_endpoint": critical_result,
-            "recovery_assessment": recovery_assessment
+            "baseline_latency": baseline_avg,
+            "load_test_latency": avg_load_latency,
+            "latency_degradation_ratio": latency_degradation,
+            "concurrent_requests": concurrent_requests,
+            "successful_requests": len(successful_results),
+            "total_test_time": end_time - start_time,
+            "load_latencies": load_latencies
         }
     
-    async def _test_endpoint_availability(self, endpoint: str) -> Dict[str, Any]:
-        """Test specific endpoint availability."""
-        config = ClientConfig(timeout=5.0, max_retries=2)
+    async def _make_latency_request(self, request_id: str) -> Dict[str, Any]:
+        """Make a single latency measurement request."""
+        config = ClientConfig(timeout=5.0, max_retries=0)
         client = RealHTTPClient(self.tester.orchestrator.get_service_url("backend"), config)
         
         try:
             start_time = time.time()
-            response = await client.get(endpoint)
-            end_time = time.time()
-            
-            return {
-                "endpoint": endpoint,
-                "available": True,
-                "response_time": end_time - start_time,
-                "status_code": getattr(response, 'status_code', None)
-            }
-            
+            await client.get("/health")
+            return {"request_id": request_id, "success": True, "latency": time.time() - start_time}
         except Exception as e:
-            return {
-                "endpoint": endpoint,
-                "available": False,
-                "error": str(e),
-                "degraded": self._is_degraded_error(str(e))
-            }
+            return {"request_id": request_id, "success": False, "error": str(e)}
         finally:
             await client.close()
-    
-    def _is_degraded_error(self, error_str: str) -> bool:
-        """Check if error indicates service degradation rather than complete failure."""
-        degradation_indicators = ["timeout", "slow", "degraded", "limited", "temporary"]
-        return any(indicator in error_str.lower() for indicator in degradation_indicators)
-    
-    def _assess_recovery_capability(self, health_result: Dict, critical_result: Dict) -> Dict[str, Any]:
-        """Assess system's recovery capability."""
-        health_available = health_result.get("available", False)
-        critical_available = critical_result.get("available", False)
-        
-        if health_available and critical_available:
-            recovery_state = "fully_operational"
-        elif health_available and not critical_available:
-            recovery_state = "degraded_service"
-        elif not health_available:
-            recovery_state = "service_down"
-        else:
-            recovery_state = "unknown"
-        
-        return {
-            "recovery_state": recovery_state,
-            "health_monitoring_active": health_available,
-            "critical_services_available": critical_available,
-            "graceful_degradation": health_available and not critical_available
-        }

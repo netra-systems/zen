@@ -14,6 +14,10 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 from app.core.network_constants import DatabaseConstants, ServicePorts, HostConstants
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_redis_url_building(self):
         """Test Redis URL building with constants.""" 
         connector = DatabaseConnector(use_emoji=False)

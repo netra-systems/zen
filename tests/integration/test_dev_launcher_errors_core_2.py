@@ -23,6 +23,10 @@ from dev_launcher.process_manager import ProcessManager
 from dev_launcher.cache_manager import CacheManager
 import socket
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def create_test_config(self, **kwargs) -> LauncherConfig:
         """Create test configuration."""
         config = LauncherConfig()

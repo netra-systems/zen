@@ -557,7 +557,7 @@ class TestWebSocketCoroutineAuthRegression:
             return_value={"sub": "test_user", "exp": 9999999999}
         )
         
-        result = await service.validate_token("test_token")
+        result = await service.validate_token_jwt("test_token")
         
         # Verify decode was awaited
         service.decode_access_token.assert_awaited_once_with("test_token")

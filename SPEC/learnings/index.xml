@@ -57,6 +57,12 @@
             <critical-takeaway>Functions marked as async must actually await something (postgres-session-async-function-paradox).</critical-takeaway>
             <critical-takeaway>ClickHouse driver: Use OperationalError instead of NetworkError (which doesn't exist) for network-related exceptions.</critical-takeaway>
         </category>
+        
+        <category name="FastAPI/Dependencies" path="SPEC/learnings/fastapi_dependencies.xml" keywords="FastAPI, Depends, AsyncContextManager, async with, async for">
+            <critical-takeaway>Never use @asynccontextmanager decorated functions directly with FastAPI's Depends() - create wrapper functions.</critical-takeaway>
+            <critical-takeaway>Use 'async with' for @asynccontextmanager functions, NOT 'async for' (context managers != iterators).</critical-takeaway>
+            <critical-takeaway>Context managers implement __aenter__/__aexit__, iterators implement __aiter__/__anext__.</critical-takeaway>
+        </category>
 
         <category name="Database/Migration" path="SPEC/learnings/alembic_asyncpg_greenlet.xml" keywords="Alembic, Migration, AsyncPG, Greenlet, SQLAlchemy">
             <critical-takeaway>Alembic requires synchronous database URL - remove asyncpg driver for migrations.</critical-takeaway>

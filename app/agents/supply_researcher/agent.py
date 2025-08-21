@@ -154,7 +154,7 @@ class SupplyResearcherAgent(BaseSubAgent):
         """Create research session record"""
         research_query = self.research_engine.generate_research_query(parsed_request)
         research_session = self._build_research_session(research_query, state)
-        self._save_research_session(research_session)
+        await self._save_research_session(research_session)
         return research_session
     
     def _build_research_session(self, research_query: str, state: DeepAgentState) -> ResearchSession:
@@ -166,10 +166,10 @@ class SupplyResearcherAgent(BaseSubAgent):
             created_at=datetime.now(UTC)
         )
     
-    def _save_research_session(self, research_session: ResearchSession) -> None:
+    async def _save_research_session(self, research_session: ResearchSession) -> None:
         """Save research session to database."""
-        self.db.add(research_session)
-        self.db.commit()
+        await self.db.add(research_session)
+        await self.db.commit()
     
     async def _send_research_update(
         self,

@@ -33,6 +33,10 @@ from ..jwt_token_helpers import JWTTestHelper
 from .websocket_dev_utilities import WebSocketClientSimulator, ConnectionState
 from .auth_flow_manager import AuthCompleteFlowManager
 
+
+class WebSocketUserJourneyTester:
+    """Test manager for WebSocket user journey testing."""
+
     def __init__(self):
         """Initialize test manager with service endpoints."""
         self.auth_url = "http://localhost:8081"

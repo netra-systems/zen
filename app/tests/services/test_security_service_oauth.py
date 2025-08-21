@@ -80,7 +80,7 @@ class TestSecurityServiceOAuth:
         token_data = _create_oauth_token_data(oauth_user)
         
         token = oauth_security_service.create_access_token(token_data)
-        validation_result = await oauth_security_service.validate_token(token)
+        validation_result = await oauth_security_service.validate_token_jwt(token)
         
         _assert_oauth_token_validation(validation_result, oauth_user)
     
@@ -195,8 +195,8 @@ class TestSecurityServiceConcurrency:
     
     def _create_validate_token_func(self, oauth_security_service, token):
         """Create validate token function for testing"""
-        async def validate_token():
-            return await oauth_security_service.validate_token(token)
+        async def validate_token_jwt():
+            return await oauth_security_service.validate_token_jwt(token)
         return validate_token
     
     async def _run_concurrent_validation(self, validate_token_func):

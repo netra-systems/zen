@@ -127,7 +127,7 @@ class TokenPropagationTestManager:
                 else:
                     mock_validate.return_value = {"valid": False}
                 
-                validation_result = await auth_client.validate_token(token)
+                validation_result = await auth_client.validate_token_jwt(token)
                 
                 return {
                     "service": "backend_main",

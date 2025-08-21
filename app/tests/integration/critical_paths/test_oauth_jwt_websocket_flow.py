@@ -83,7 +83,7 @@ class MockSessionManager:
         """Mock session token validation."""
         try:
             jwt_handler = JWTHandler()
-            payload = jwt_handler.validate_token(token, "access")
+            payload = jwt_handler.validate_token_jwt(token, "access")
             return payload is not None
         except Exception:
             return False
@@ -179,8 +179,8 @@ class OAuthJWTWebSocketTestManager:
             refresh_token = self.jwt_handler.create_refresh_token(user_id)
             
             # Validate tokens immediately
-            access_payload = self.jwt_handler.validate_token(access_token, "access")
-            refresh_payload = self.jwt_handler.validate_token(refresh_token, "refresh")
+            access_payload = self.jwt_handler.validate_token_jwt(access_token, "access")
+            refresh_payload = self.jwt_handler.validate_token_jwt(refresh_token, "refresh")
             
             jwt_time = time.time() - jwt_start
             
@@ -288,7 +288,7 @@ class OAuthJWTWebSocketTestManager:
             validation_results = {}
             
             # JWT Handler validation
-            jwt_payload = self.jwt_handler.validate_token(access_token, "access")
+            jwt_payload = self.jwt_handler.validate_token_jwt(access_token, "access")
             validation_results["jwt_handler"] = jwt_payload is not None
             
             # Session Manager validation  
@@ -347,7 +347,7 @@ class OAuthJWTWebSocketTestManager:
         # Test 2: Malformed JWT token
         try:
             malformed_token = "invalid.jwt.token"
-            payload = self.jwt_handler.validate_token(malformed_token, "access")
+            payload = self.jwt_handler.validate_token_jwt(malformed_token, "access")
             error_tests.append({
                 "test": "malformed_jwt",
                 "success": payload is None,
@@ -526,7 +526,7 @@ async def test_oauth_jwt_websocket_security_validation(oauth_jwt_ws_manager):
     expired_payload = {**access_payload, "exp": datetime.utcnow() - timedelta(hours=1)}
     expired_token = jwt_lib.encode(expired_payload, "test_secret", algorithm="HS256")
     
-    expired_validation = manager.jwt_handler.validate_token(expired_token, "access")
+    expired_validation = manager.jwt_handler.validate_token_jwt(expired_token, "access")
     assert expired_validation is None, "Expired token should be rejected"
     
     # Test cross-service validation consistency

@@ -47,6 +47,8 @@ def validate_user_id_in_payload(payload: Dict) -> str:
 
 def validate_user_active(user: Any) -> str:
     """Validate user is active and return ID string."""
+    if user is None:
+        raise ValueError("User not found")
     if not user.is_active:
         raise ValueError("User not active")
     return str(user.id)

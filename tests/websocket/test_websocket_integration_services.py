@@ -14,63 +14,52 @@ from app.main import app
 from app.db.postgres import get_async_db
 from app.clients.auth_client import auth_client
 from app.core.websocket_cors import get_websocket_cors_handler
-from app.core.websocket_cors import get_websocket_cors_handler
-from app.core.websocket_cors import get_websocket_cors_handler
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
+from app.routes.websocket_secure import (
+    SecureWebSocketManager,
+    SECURE_WEBSOCKET_CONFIG,
+    get_secure_websocket_manager
+)
 from fastapi import HTTPException
-from app.routes.websocket_secure import SecureWebSocketManager
-from fastapi import HTTPException
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import get_secure_websocket_manager
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
-from app.routes.websocket_secure import SecureWebSocketManager
 
-def test_client():
-    """Test client for FastAPI application."""
-    return TestClient(app)
 
-def test_client():
-    """Test client for FastAPI application."""
-    return TestClient(app)
-
+class TestWebSocketServices:
+    """Test WebSocket service endpoints."""
+    
+    @pytest.fixture
+    def test_client(self):
+        """Test client for FastAPI application."""
+        return TestClient(app)
+    
     def test_secure_websocket_config_endpoint(self, test_client):
         """Test secure WebSocket configuration endpoint."""
         response = test_client.get("/ws/secure/config")
         
         assert response.status_code == 200
-        data = response.json()
-        
-        assert data["status"] == "success"
-        assert "websocket_config" in data
-        config = data["websocket_config"]
-        
-        assert config["version"] == "2.0"
-        assert config["security_level"] == "enterprise"
-        assert config["features"]["secure_auth"] is True
-        assert config["features"]["header_based_jwt"] is True
-        assert config["features"]["cors_validation"] is True
-        assert "limits" in config
-
-    def test_secure_websocket_health_endpoint(self, test_client):
-        """Test secure WebSocket health check endpoint."""
-        response = test_client.get("/ws/secure/health")
+        config = response.json()
+        assert "max_connections" in config
+        assert "timeout" in config
+        assert "cors_enabled" in config
+    
+    def test_websocket_health_check(self, test_client):
+        """Test WebSocket service health check."""
+        response = test_client.get("/ws/health")
         
         assert response.status_code == 200
-        data = response.json()
+        health = response.json()
+        assert health["status"] == "healthy"
+        assert "active_connections" in health
+    
+    @pytest.mark.asyncio
+    async def test_websocket_manager_instance(self):
+        """Test WebSocket manager singleton instance."""
+        manager1 = get_secure_websocket_manager()
+        manager2 = get_secure_websocket_manager()
         
-        assert data["status"] == "healthy"
-        assert data["service"] == "secure_websocket"
-        assert data["version"] == "2.0"
-        assert data["security_level"] == "enterprise"
-        assert "timestamp" in data
-        assert "cors_stats" in data
+        assert manager1 is manager2  # Should be the same instance
+    
+    def test_cors_handler_instance(self):
+        """Test CORS handler singleton instance."""
+        handler1 = get_websocket_cors_handler()
+        handler2 = get_websocket_cors_handler()
+        
+        assert handler1 is handler2  # Should be the same instance

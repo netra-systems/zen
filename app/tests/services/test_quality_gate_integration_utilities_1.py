@@ -3,9 +3,12 @@
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from app.services.quality_gate_service import (
 from app.redis_manager import RedisManager
 from app.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def _get_optimization_content(self) -> str:
         """Get optimization test content"""
@@ -141,3 +144,4 @@ from app.tests.helpers.shared_test_types import TestIntegrationScenarios as Shar
         prerequisites = self._get_migration_prerequisites()
         instructions = self._get_migration_instructions()
         return f"Database Migration Action Plan\n\n{requirements}\n\n{prerequisites}\n\n{instructions}"
+# )  # Orphaned closing parenthesis

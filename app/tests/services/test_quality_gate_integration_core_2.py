@@ -3,9 +3,12 @@
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from app.services.quality_gate_service import (
 from app.redis_manager import RedisManager
 from app.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def _get_action_plan_content(self) -> str:
         """Get action plan test content"""
@@ -120,3 +123,4 @@ from app.tests.helpers.shared_test_types import TestIntegrationScenarios as Shar
     def _assert_action_plan_quality(self, result) -> None:
         """Assert action plan quality is high"""
         assert result.retry_suggested == False
+# )  # Orphaned closing parenthesis

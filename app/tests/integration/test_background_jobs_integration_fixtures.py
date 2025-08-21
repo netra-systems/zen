@@ -22,7 +22,6 @@ from typing import Dict, Any, List, Optional, Callable
 from enum import Enum
 from collections import defaultdict
 import pytest
-from app.tests.integration.helpers.critical_integration_helpers import (
 from test_framework.mock_utils import mock_justified
 from app.logging_config import central_logger
 import random
@@ -30,3 +29,4 @@ import random
 def job_metrics():
     """Create background job metrics tracker."""
     return BackgroundJobMetrics()
+# )  # Orphaned closing parenthesis

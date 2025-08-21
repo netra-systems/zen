@@ -18,6 +18,10 @@ from dev_launcher.config import LauncherConfig
 import os
 import os
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_real_cors_with_running_services(self):
         """Test CORS with actual running services."""
         # This test would require actual running backend/frontend services

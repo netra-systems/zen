@@ -18,6 +18,10 @@ from dev_launcher.config import LauncherConfig
 import os
 import os
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def app(self):
         """Create test FastAPI app."""
         app = FastAPI()

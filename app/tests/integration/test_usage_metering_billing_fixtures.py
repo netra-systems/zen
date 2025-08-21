@@ -29,10 +29,27 @@ from app.services.metrics.agent_metrics import AgentMetricsCollector
 from app.schemas.llm_base_types import LLMProvider, TokenUsage
 from app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
 
-    def usage_tracker(self, metering_core):
-        """Initialize real-time usage tracker."""
-        return RealTimeUsageTracker(metering_core.clickhouse_client, metering_core.cost_calculator)
 
-    def billing_engine(self, metering_core):
-        """Initialize billing calculation engine."""
-        return BillingCalculationEngine(metering_core.clickhouse_client)
+class RealTimeUsageTracker:
+    """Mock class for testing."""
+    def __init__(self, clickhouse_client, cost_calculator):
+        self.clickhouse_client = clickhouse_client
+        self.cost_calculator = cost_calculator
+
+
+class BillingCalculationEngine:
+    """Mock class for testing."""
+    def __init__(self, clickhouse_client):
+        self.clickhouse_client = clickhouse_client
+
+
+@pytest.fixture
+def usage_tracker(metering_core):
+    """Initialize real-time usage tracker."""
+    return RealTimeUsageTracker(metering_core.clickhouse_client, metering_core.cost_calculator)
+
+
+@pytest.fixture
+def billing_engine(metering_core):
+    """Initialize billing calculation engine."""
+    return BillingCalculationEngine(metering_core.clickhouse_client)

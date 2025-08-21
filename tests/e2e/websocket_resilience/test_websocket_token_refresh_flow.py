@@ -76,7 +76,7 @@ async def test_token_refresh_prompt_and_flow(jwt_generator, audit_logger, token_
         new_access_token = refresh_result["access_token"]
         
         # Validate new token is functional
-        token_validation = jwt_generator.validate_token(new_access_token)
+        token_validation = jwt_generator.validate_token_jwt(new_access_token)
         assert "error" not in token_validation, "New token should be valid"
         assert token_validation["sub"] == "test_user_123", "User ID should be preserved"
         

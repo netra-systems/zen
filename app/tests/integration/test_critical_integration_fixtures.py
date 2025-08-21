@@ -19,10 +19,9 @@ from app.services.database.thread_repository import ThreadRepository
 from app.services.database.message_repository import MessageRepository
 from app.services.database.run_repository import RunRepository
 from app.ws_manager import WebSocketManager
-from app.schemas.registry import (
+from app.schemas.registry import UserBase
 from app.schemas.Agent import AgentStarted
 from starlette.websockets import WebSocketState
-from app.schemas.registry import UserBase
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from app.db.base import Base
@@ -31,7 +30,9 @@ import os
 from app.db.models_postgres import Run
 import time
 
-    def setup_real_database(self):
+
+@pytest.fixture
+def setup_real_database():
         """Setup a real in-memory SQLite database for integration testing"""
         async def _setup():
             # Create temporary database
@@ -58,7 +59,8 @@ import time
             }
         return _setup
 
-    def setup_integration_infrastructure(self):
+@pytest.fixture
+def setup_integration_infrastructure():
         """Setup integrated infrastructure for testing"""
         # Real WebSocket Manager
         websocket_manager = WebSocketManager()

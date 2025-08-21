@@ -9,21 +9,25 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import Mock, AsyncMock, patch
 from fastapi.testclient import TestClient
 from app.main import app
-from app.websocket.connection_manager import ConnectionManager
+from app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
 from app.websocket.message_handler_core import ModernReliableMessageHandler
 from app.ws_manager import WebSocketManager
-from app.auth_integration.auth import validate_token
+from app.auth_integration.auth import validate_token_jwt
 from app.schemas.websocket_message_types import WebSocketMessage
-from app.routes.websockets import websocket_endpoint
-from app.routes.websockets import websocket_endpoint
+from app.routes.mcp.main import websocket_endpoint
+from app.tests.services.test_ws_connection_mocks import MockWebSocket
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def mock_websocket(self) -> MockWebSocket:
         """Create mock WebSocket for testing."""
         return MockWebSocket()
 
-    def connection_manager(self) -> ConnectionManager:
+    def connection_manager(self) -> ModernConnectionManager:
         """Create connection manager for testing."""
-        return ConnectionManager()
+        return get_connection_manager()
 
     def ws_manager(self) -> WebSocketManager:
         """Create WebSocket manager for testing."""

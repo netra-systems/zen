@@ -14,6 +14,10 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 from app.core.network_constants import DatabaseConstants, ServicePorts, HostConstants
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def setup_method(self):
         """Set up test environment."""
         self.temp_dir = tempfile.mkdtemp()

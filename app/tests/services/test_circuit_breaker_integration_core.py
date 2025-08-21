@@ -21,6 +21,10 @@ from app.routes.circuit_breaker_health import get_circuit_breaker_dashboard
 from app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 from app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_health_summary(self):
         """Test health summary generation."""
         # Simulate some circuit states

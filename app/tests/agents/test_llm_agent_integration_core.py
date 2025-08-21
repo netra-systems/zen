@@ -13,9 +13,17 @@ from app.llm.llm_manager import LLMManager
 from app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.triage_sub_agent import (
+    TriageResult, Priority, Complexity, UserIntent,
+    ExtractedEntities, TriageMetadata
+)
 from app.agents.tool_dispatcher import ToolDispatcher
 import time
 
+
+class LLMAgentIntegrationCoreTests:
+    """Core tests for LLM agent integration."""
+
+    @pytest.fixture
     def mock_llm_manager(self):
         """Create properly mocked LLM manager"""
         llm_manager = Mock(spec=LLMManager)

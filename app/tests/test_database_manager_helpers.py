@@ -36,6 +36,10 @@ from .fixtures.database_test_fixtures import create_mock_user, create_mock_threa
 import subprocess
 import shutil
 
+
+class TestDatabaseManager:
+    """Manager for test database lifecycle and utilities."""
+
     def __init__(self):
         """Initialize test database manager."""
         self._active_databases: Dict[str, Dict] = {}

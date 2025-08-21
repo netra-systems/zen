@@ -23,6 +23,10 @@ from dev_launcher.process_manager import ProcessManager
 from dev_launcher.cache_manager import CacheManager
 import socket
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def __init__(self, error_detector: ErrorDetector):
         super().__init__()
         self.error_detector = error_detector

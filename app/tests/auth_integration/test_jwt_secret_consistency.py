@@ -94,7 +94,7 @@ class TestJWTSecretConsistency:
             token = jwt_handler.create_access_token(user_id, email, ["read", "write"])
             
             # Validate token using auth service
-            auth_payload = jwt_handler.validate_token(token, "access")
+            auth_payload = jwt_handler.validate_token_jwt(token, "access")
             
             assert auth_payload is not None
             assert auth_payload["sub"] == user_id
@@ -212,6 +212,6 @@ class TestJWTSecretIntegration:
                 }
                 
                 # The auth integration should use the same secret context
-                token_result = await auth_client.validate_token("test-token")
+                token_result = await auth_client.validate_token_jwt("test-token")
                 assert token_result["valid"] is True
                 assert token_result["user_id"] == "test-user-123"

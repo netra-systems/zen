@@ -1,17 +1,28 @@
 #!/usr/bin/env python3
 """
-Auto Fix Test Size Violations Script
+Test Size Violations Analysis and Reporting Script
 
-This script automatically fixes test size violations by:
-1. Splitting large test files (>300 lines) into smaller modules
-2. Extracting helper methods from long functions (>8 lines)
-3. Maintaining test functionality and imports
+!!!! CRITICAL WARNING !!!!
+This script is designed ONLY for analysis and reporting of test size violations.
+The auto-fix capabilities are DISABLED by default and should ONLY be used:
+1. In dry-run mode for planning manual refactoring
+2. With explicit human review before any actual changes
+3. After backing up all affected files
+4. With immediate test validation after any changes
+
+NEVER use auto-fix in production code without thorough review!
+
+Capabilities:
+1. ANALYZE test files for size violations (SAFE)
+2. REPORT violations and suggest improvements (SAFE)
+3. DRY-RUN mode to preview potential changes (SAFE)
+4. ACTUAL fixes require explicit opt-in and multiple confirmations (DANGEROUS)
 
 Business Value Justification (BVJ):
 - Segment: Platform/Internal
-- Business Goal: Development Velocity, Code Quality
-- Value Impact: Enables faster test execution and better maintainability
-- Strategic/Revenue Impact: Reduces technical debt and improves developer productivity
+- Business Goal: Code Quality Analysis and Reporting
+- Value Impact: Identifies technical debt for manual remediation
+- Strategic/Revenue Impact: Provides metrics for prioritizing refactoring efforts
 """
 
 import os
@@ -20,10 +31,13 @@ import ast
 import sys
 import shutil
 import logging
+import subprocess
+import json
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any
 from dataclasses import dataclass
 from collections import defaultdict
+from datetime import datetime
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -66,6 +80,7 @@ class TestFileAnalyzer:
     def __init__(self):
         self.file_size_limit = 300
         self.function_size_limit = 8
+        self.analysis_only = True  # SAFETY: Default to analysis only
         
     def find_test_files(self, root_dir: str) -> List[str]:
         """Find all test files in the project"""
@@ -293,14 +308,34 @@ class TestFileAnalyzer:
                 ))
 
 class TestFileSplitter:
-    """Handles splitting large test files into smaller modules"""
+    """DANGEROUS: Handles splitting large test files into smaller modules
+    
+    WARNING: This class can break test dependencies and should only be used
+    for generating suggestions, not automatic fixes.
+    """
     
     def __init__(self, analyzer: TestFileAnalyzer):
         self.analyzer = analyzer
+        self.safety_mode = True  # SAFETY: Prevent actual file modifications by default
     
-    def split_large_file(self, file_path: str, dry_run: bool = True) -> List[str]:
-        """Split a large test file into smaller modules"""
-        logger.info(f"Splitting large file: {file_path}")
+    def split_large_file(self, file_path: str, dry_run: bool = True, force_unsafe: bool = False) -> List[str]:
+        """Split a large test file into smaller modules
+        
+        WARNING: This operation can break test dependencies!
+        
+        Args:
+            file_path: Path to the test file
+            dry_run: If True, only simulate changes (SAFE)
+            force_unsafe: Must be True to allow actual file modifications (DANGEROUS)
+        """
+        if not dry_run and not force_unsafe:
+            raise RuntimeError(
+                "SAFETY: Actual file splitting is disabled by default. "
+                "Use force_unsafe=True if you really want to modify files (NOT RECOMMENDED). "
+                "Consider manual refactoring instead."
+            )
+        
+        logger.warning(f"{'SIMULATING' if dry_run else 'ACTUALLY'} splitting large file: {file_path}")
         
         classes, functions, imports = self.analyzer.analyze_file_structure(file_path)
         
@@ -556,21 +591,38 @@ class TestFileSplitter:
             f.write('\n'.join(lines))
 
 class FunctionRefactor:
-    """Handles refactoring long functions into smaller pieces"""
+    """DANGEROUS: Handles refactoring long functions into smaller pieces
+    
+    WARNING: Automatic function refactoring is highly unreliable and can break test logic.
+    This should ONLY be used for generating refactoring suggestions.
+    """
     
     def __init__(self):
         self.max_lines = 8
+        self.enabled = False  # SAFETY: Disabled by default
     
-    def refactor_long_function(self, file_path: str, function_info: FunctionInfo, dry_run: bool = True) -> str:
-        """Refactor a long function by extracting helper methods"""
-        logger.info(f"Refactoring function {function_info.name} in {file_path}")
+    def refactor_long_function(self, file_path: str, function_info: FunctionInfo, dry_run: bool = True, force_unsafe: bool = False) -> str:
+        """Generate refactoring suggestions for a long function
+        
+        WARNING: Automatic refactoring is NOT RECOMMENDED!
+        """
+        if not self.enabled:
+            return f"Function refactoring is disabled. {function_info.name} has {function_info.line_count} lines and should be manually reviewed."
+        
+        if not dry_run and not force_unsafe:
+            raise RuntimeError(
+                "SAFETY: Automatic function refactoring is disabled. "
+                "This operation is too dangerous for automatic execution. "
+                "Please refactor manually."
+            )
+        
+        logger.warning(f"SUGGESTION: Function {function_info.name} in {file_path} should be refactored manually")
         
         if dry_run:
-            return f"Would refactor {function_info.name} ({function_info.line_count} lines)"
+            return f"SUGGESTION: Refactor {function_info.name} ({function_info.line_count} lines) manually"
         
-        # This is a simplified implementation
-        # Real implementation would need sophisticated AST manipulation
-        return self._extract_setup_and_assertions(function_info)
+        # Should never reach here without force_unsafe
+        raise RuntimeError("Automatic function refactoring is not supported")
     
     def _extract_setup_and_assertions(self, func_info: FunctionInfo) -> str:
         """Extract setup code and assertions into helper methods"""
@@ -617,17 +669,33 @@ class FunctionRefactor:
 {chr(10).join(assertion_lines)}
 """
 
-class TestViolationFixer:
-    """Main class that orchestrates fixing test violations"""
+class TestViolationAnalyzer:
+    """Main class that analyzes and reports test violations
     
-    def __init__(self, root_dir: str = '.'):
+    Primary purpose: Analysis and reporting
+    Secondary purpose: Generate refactoring suggestions (dry-run only)
+    
+    WARNING: Auto-fix capabilities are DANGEROUS and should not be used in production!
+    """
+    
+    def __init__(self, root_dir: str = '.', safe_mode: bool = True):
         self.root_dir = root_dir
+        self.safe_mode = safe_mode  # SAFETY: Enable safe mode by default
         self.analyzer = TestFileAnalyzer()
         self.splitter = TestFileSplitter(self.analyzer)
         self.refactor = FunctionRefactor()
+        self.validation_results = {}  # Track test validation results
+        self.backup_dir = None  # For storing backups if fixes are applied
         
-    def scan_violations(self) -> Dict[str, List[TestViolation]]:
-        """Scan all test files for violations"""
+        if self.safe_mode:
+            logger.info("SAFE MODE ENABLED: Only analysis and dry-run operations allowed")
+        
+    def scan_violations(self, validate_tests: bool = False) -> Dict[str, List[TestViolation]]:
+        """Scan all test files for violations
+        
+        Args:
+            validate_tests: If True, run tests to ensure they pass before suggesting fixes
+        """
         logger.info("Scanning for test violations...")
         
         test_files = self.analyzer.find_test_files(self.root_dir)
@@ -641,14 +709,91 @@ class TestViolationFixer:
             if violations:
                 violations_by_file[file_path] = violations
                 total_violations += len(violations)
+                
+                # Validate test passes if requested
+                if validate_tests:
+                    self._validate_test_file(file_path)
             total_files += 1
         
         logger.info(f"Scanned {total_files} test files, found {total_violations} violations in {len(violations_by_file)} files")
+        
+        if validate_tests and self.validation_results:
+            failing_tests = [f for f, passed in self.validation_results.items() if not passed]
+            if failing_tests:
+                logger.warning(f"WARNING: {len(failing_tests)} test files are already failing!")
+                logger.warning("These files should be fixed manually before attempting any refactoring.")
+        
         return violations_by_file
     
-    def fix_violations(self, violations_by_file: Dict[str, List[TestViolation]], dry_run: bool = True, max_files: int = 20):
-        """Fix violations in test files"""
-        logger.info(f"Fixing violations (dry_run={dry_run}, max_files={max_files})...")
+    def _validate_test_file(self, file_path: str) -> bool:
+        """Validate that a test file passes before suggesting modifications"""
+        try:
+            # Run pytest on the specific file
+            result = subprocess.run(
+                ['python', '-m', 'pytest', file_path, '-xvs', '--tb=short'],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            passed = result.returncode == 0
+            self.validation_results[file_path] = passed
+            
+            if not passed:
+                logger.warning(f"Test file {file_path} is already failing!")
+            
+            return passed
+        except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+            logger.error(f"Could not validate test file {file_path}: {e}")
+            self.validation_results[file_path] = False
+            return False
+    
+    def _create_backup(self, file_path: str) -> Optional[str]:
+        """Create a backup of a file before modification"""
+        if not self.backup_dir:
+            self.backup_dir = Path(self.root_dir) / f".test_backups_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            self.backup_dir.mkdir(exist_ok=True)
+            logger.info(f"Created backup directory: {self.backup_dir}")
+        
+        try:
+            relative_path = Path(file_path).relative_to(self.root_dir)
+            backup_path = self.backup_dir / relative_path
+            backup_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            shutil.copy2(file_path, backup_path)
+            logger.info(f"Backed up {file_path} to {backup_path}")
+            return str(backup_path)
+        except Exception as e:
+            logger.error(f"Failed to backup {file_path}: {e}")
+            return None
+    
+    def analyze_and_suggest_fixes(self, violations_by_file: Dict[str, List[TestViolation]], 
+                                 dry_run: bool = True, max_files: int = 20, 
+                                 force_unsafe: bool = False) -> List[str]:
+        """Analyze violations and suggest fixes
+        
+        Args:
+            violations_by_file: Dictionary of files with violations
+            dry_run: If True, only simulate changes (SAFE, default)
+            max_files: Maximum number of files to analyze
+            force_unsafe: Required to be True for actual modifications (DANGEROUS)
+        
+        Returns:
+            List of suggested or created files
+        """
+        if not dry_run:
+            if self.safe_mode and not force_unsafe:
+                raise RuntimeError(
+                    "SAFETY: Cannot perform actual fixes in safe mode. "
+                    "Use dry_run=True for suggestions or explicitly set safe_mode=False "
+                    "and force_unsafe=True (NOT RECOMMENDED)."
+                )
+            
+            if not force_unsafe:
+                logger.error("Actual fixes require force_unsafe=True. Switching to dry-run mode.")
+                dry_run = True
+        
+        action = "Analyzing and suggesting fixes for" if dry_run else "DANGEROUSLY fixing"
+        logger.info(f"{action} violations (dry_run={dry_run}, max_files={max_files})...")
         
         # Sort files by severity (largest violations first)
         sorted_files = sorted(violations_by_file.items(), 
@@ -664,17 +809,41 @@ class TestViolationFixer:
             file_size_violations = [v for v in violations if v.violation_type == 'file_size']
             function_size_violations = [v for v in violations if v.violation_type == 'function_size']
             
-            # Fix file size violations first
-            if file_size_violations:
-                new_files = self.splitter.split_large_file(file_path, dry_run)
-                fixed_files.extend(new_files)
-                logger.info(f"Split {file_path} into {len(new_files)} files")
+            # Check if test is passing before attempting fixes
+            if not dry_run and file_path in self.validation_results:
+                if not self.validation_results[file_path]:
+                    logger.error(f"Skipping {file_path} - tests are already failing")
+                    continue
             
-            # Fix function size violations
+            # Create backup if doing actual modifications
+            if not dry_run and force_unsafe:
+                backup_path = self._create_backup(file_path)
+                if not backup_path:
+                    logger.error(f"Failed to create backup for {file_path}, skipping")
+                    continue
+            
+            # Suggest file splitting for size violations
+            if file_size_violations:
+                try:
+                    new_files = self.splitter.split_large_file(file_path, dry_run, force_unsafe=force_unsafe)
+                    fixed_files.extend(new_files)
+                    action = "Would split" if dry_run else "DANGEROUSLY split"
+                    logger.info(f"{action} {file_path} into {len(new_files)} files")
+                    
+                    # Validate after modification if not dry-run
+                    if not dry_run and new_files:
+                        for new_file in new_files:
+                            if os.path.exists(new_file):
+                                if not self._validate_test_file(new_file):
+                                    logger.error(f"WARNING: New file {new_file} has failing tests!")
+                except RuntimeError as e:
+                    logger.error(f"Safety check prevented file splitting: {e}")
+            
+            # Suggest function refactoring for function size violations
             elif function_size_violations:
                 for violation in function_size_violations:
-                    # Would need function info to refactor
-                    logger.info(f"Would refactor function in {file_path}: {violation.details}")
+                    logger.info(f"MANUAL ACTION REQUIRED - {file_path}: {violation.details}")
+                    logger.info("  Suggestion: Extract helper methods or split test logic")
         
         return fixed_files
     
@@ -682,6 +851,11 @@ class TestViolationFixer:
         """Generate a report of violations and fixes"""
         report_lines = []
         report_lines.append("# Test Size Violations Report")
+        report_lines.append(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report_lines.append("")
+        report_lines.append("## ⚠️ WARNING")
+        report_lines.append("This report identifies test files that violate size constraints.")
+        report_lines.append("**IMPORTANT:** Manual refactoring is strongly recommended over automatic fixes.")
         report_lines.append("")
         
         total_violations = sum(len(violations) for violations in violations_by_file.values())
@@ -704,9 +878,32 @@ class TestViolationFixer:
         
         for i, (file_path, violations) in enumerate(sorted_files[:20]):
             max_violation = max(violations, key=lambda v: v.current_size)
-            report_lines.append(f"{i+1}. `{file_path}`")
+            test_status = ""
+            if file_path in self.validation_results:
+                test_status = " ✅" if self.validation_results[file_path] else " ❌ (FAILING)"
+            
+            report_lines.append(f"{i+1}. `{file_path}`{test_status}")
             report_lines.append(f"   - Max violation: {max_violation.current_size} {max_violation.violation_type.replace('_', ' ')}")
             report_lines.append(f"   - Total violations: {len(violations)}")
+            
+            # Add refactoring suggestions
+            if max_violation.violation_type == 'file_size':
+                report_lines.append(f"   - **Suggestion:** Split into multiple focused test modules")
+            else:
+                report_lines.append(f"   - **Suggestion:** Extract helper methods or use fixtures")
+            report_lines.append("")
+        
+        # Add validation summary if available
+        if self.validation_results:
+            report_lines.append("## Test Validation Status")
+            passing = sum(1 for passed in self.validation_results.values() if passed)
+            total = len(self.validation_results)
+            report_lines.append(f"- Tests validated: {total}")
+            report_lines.append(f"- Passing: {passing}")
+            report_lines.append(f"- Failing: {total - passing}")
+            if total - passing > 0:
+                report_lines.append("")
+                report_lines.append("**⚠️ WARNING:** Some tests are already failing. Fix these before refactoring!")
             report_lines.append("")
         
         return '\n'.join(report_lines)
@@ -715,34 +912,71 @@ def main():
     """Main entry point"""
     import argparse
     
-    parser = argparse.ArgumentParser(description='Auto-fix test size violations')
+    parser = argparse.ArgumentParser(
+        description='Analyze test size violations and generate improvement suggestions',
+        epilog='WARNING: Auto-fix capabilities are DANGEROUS and disabled by default!'
+    )
     parser.add_argument('--dry-run', action='store_true', default=True,
-                       help='Perform dry run without making changes')
-    parser.add_argument('--fix', action='store_true',
-                       help='Actually perform fixes (overrides dry-run)')
+                       help='Perform dry run without making changes (SAFE, default)')
+    parser.add_argument('--force-unsafe-fix', action='store_true',
+                       help='DANGEROUS: Actually perform fixes (NOT RECOMMENDED)')
+    parser.add_argument('--confirm-unsafe', action='store_true',
+                       help='DANGEROUS: Second confirmation required for unsafe operations')
     parser.add_argument('--max-files', type=int, default=20,
-                       help='Maximum number of files to fix')
+                       help='Maximum number of files to analyze')
     parser.add_argument('--root-dir', default='.',
                        help='Root directory to scan')
-    parser.add_argument('--report-only', action='store_true',
-                       help='Only generate report, no fixes')
+    parser.add_argument('--report-only', action='store_true', default=True,
+                       help='Only generate report, no fixes (SAFE, default)')
+    parser.add_argument('--disable-safe-mode', action='store_true',
+                       help='DANGEROUS: Disable safe mode protections')
+    parser.add_argument('--validate-tests', action='store_true',
+                       help='Run tests to validate they pass before suggesting fixes')
+    parser.add_argument('--backup-dir', type=str,
+                       help='Directory for storing backups (auto-generated if not specified)')
     
     args = parser.parse_args()
     
-    # Override dry-run if --fix is specified
-    dry_run = args.dry_run and not args.fix
+    # Safety checks
+    if args.force_unsafe_fix:
+        if not args.confirm_unsafe:
+            logger.error(
+                "SAFETY: Unsafe operations require --confirm-unsafe flag. "
+                "Please reconsider using manual refactoring instead."
+            )
+            sys.exit(1)
+        
+        logger.warning("!!! DANGEROUS MODE ENABLED !!!")
+        logger.warning("Auto-fix operations can break your tests!")
+        logger.warning("It is STRONGLY recommended to:")
+        logger.warning("1. Back up all files first")
+        logger.warning("2. Use dry-run mode to preview changes")
+        logger.warning("3. Manually refactor instead of using auto-fix")
+        
+        response = input("\nAre you ABSOLUTELY SURE you want to proceed? Type 'YES I UNDERSTAND THE RISKS': ")
+        if response != 'YES I UNDERSTAND THE RISKS':
+            logger.info("Operation cancelled. Good choice!")
+            sys.exit(0)
     
-    fixer = TestViolationFixer(args.root_dir)
+    # Determine operation mode
+    dry_run = not (args.force_unsafe_fix and args.confirm_unsafe)
+    safe_mode = not args.disable_safe_mode
+    
+    if not dry_run and safe_mode:
+        logger.error("SAFETY: Cannot perform actual fixes with safe mode enabled")
+        sys.exit(1)
+    
+    analyzer = TestViolationAnalyzer(args.root_dir, safe_mode=safe_mode)
     
     # Scan for violations
-    violations_by_file = fixer.scan_violations()
+    violations_by_file = analyzer.scan_violations(validate_tests=args.validate_tests)
     
     if not violations_by_file:
         logger.info("No test violations found!")
         return
     
     # Generate report
-    report = fixer.generate_report(violations_by_file)
+    report = analyzer.generate_report(violations_by_file)
     
     # Save report
     report_file = Path(args.root_dir) / 'test_violations_report.md'
@@ -752,14 +986,39 @@ def main():
     logger.info(f"Report saved to: {report_file}")
     print(report)
     
-    if not args.report_only:
-        # Fix violations
-        fixed_files = fixer.fix_violations(violations_by_file, dry_run, args.max_files)
+    if not args.report_only and args.force_unsafe_fix:
+        # Analyze and suggest fixes
+        force_unsafe = args.force_unsafe_fix and args.confirm_unsafe
+        
+        # Set backup directory if specified
+        if args.backup_dir:
+            analyzer.backup_dir = Path(args.backup_dir)
+        
+        suggested_files = analyzer.analyze_and_suggest_fixes(
+            violations_by_file, 
+            dry_run=dry_run, 
+            max_files=args.max_files,
+            force_unsafe=force_unsafe
+        )
         
         if dry_run:
-            logger.info(f"Dry run complete. Would create {len(fixed_files)} new files.")
+            logger.info(f"Analysis complete. Suggested creating {len(suggested_files)} new files.")
+            logger.info("Recommendation: Manually refactor based on these suggestions.")
         else:
-            logger.info(f"Fixed violations, created {len(fixed_files)} new files.")
+            logger.warning(f"DANGEROUS: Created {len(suggested_files)} new files.")
+            logger.warning("CRITICAL: Run all tests immediately to verify nothing is broken!")
+            
+            if analyzer.backup_dir:
+                logger.info(f"Backups stored in: {analyzer.backup_dir}")
+                logger.info("To restore: cp -r {backup_dir}/* {root_dir}/")
+    else:
+        logger.info("Report-only mode. Use --force-unsafe-fix and --confirm-unsafe for actual changes (NOT RECOMMENDED)")
+        logger.info("")
+        logger.info("Recommended approach:")
+        logger.info("1. Review the report above")
+        logger.info("2. Manually refactor files with violations")
+        logger.info("3. Use established patterns like fixtures and helper functions")
+        logger.info("4. Run tests after each refactoring to ensure correctness")
 
 if __name__ == '__main__':
     main()

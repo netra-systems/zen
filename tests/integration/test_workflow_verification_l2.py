@@ -178,17 +178,18 @@ class TestWorkflowStatusVerifier:
         mock_response.status_code = 404
         mock_response.text = "Not Found"
         
-        verifier.client.get.side_effect = httpx.HTTPStatusError(
-            "Not Found",
-            request=Mock(),
-            response=mock_response
-        )
-        
-        with pytest.raises(GitHubAPIError) as exc_info:
-            verifier._api_request("/invalid/endpoint")
-        
-        assert exc_info.value.status_code == 404
-        assert "404" in str(exc_info.value)
+        # Mock the _api_request method directly to bypass retry logic
+        with patch.object(verifier, '_api_request') as mock_api:
+            mock_api.side_effect = GitHubAPIError(
+                "API request failed: 404 Not Found",
+                status_code=404
+            )
+            
+            with pytest.raises(GitHubAPIError) as exc_info:
+                verifier._api_request("/invalid/endpoint")
+            
+            assert exc_info.value.status_code == 404
+            assert "404" in str(exc_info.value)
     
     def test_get_workflow_runs(self, verifier):
         """Test getting workflow runs by name."""

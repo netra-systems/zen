@@ -10,11 +10,13 @@ from uuid import uuid4
 from fastapi import FastAPI, WebSocket
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
-from app.routes.example_messages_enhanced import (
-from app.handlers.example_message_handler_enhanced import (
 from app.logging_config import central_logger
 from app.handlers.example_message_handler_enhanced import ExampleMessageMetadata
 from app.routes.example_messages_enhanced import example_message_websocket_enhanced
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def test_circuit_breaker_integration(self):
         """Test circuit breaker integration across components"""
@@ -81,3 +83,4 @@ from app.routes.example_messages_enhanced import example_message_websocket_enhan
                 assert insights['revenue_impact_category'] == category
                 assert insights['real_agent_execution'] == True
                 assert 'conversion_indicators' in insights
+# )  # Orphaned closing parenthesis

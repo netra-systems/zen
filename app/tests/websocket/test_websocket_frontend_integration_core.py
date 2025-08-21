@@ -8,6 +8,10 @@ from typing import Dict, List, Any
 from unittest.mock import Mock, patch, AsyncMock
 import websockets
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def createContext(default_value=None):
         return Mock()
 

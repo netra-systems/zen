@@ -17,6 +17,10 @@ from app.db.base import Base
 import tempfile
 from sqlalchemy import select
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def _calculate_roi_timeline(self, current_cost, optimized_cost):
         """Calculate ROI timeline in days"""
         monthly_savings = max(0, current_cost - optimized_cost)

@@ -17,6 +17,10 @@ from app.db.base import Base
 import tempfile
 from sqlalchemy import select
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def _calculate_daily_requests(self, config, day):
         """Calculate requests for specific day based on pattern"""
         base_requests = config["daily_requests"]

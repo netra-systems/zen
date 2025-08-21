@@ -56,7 +56,7 @@ class TokenManager:
         
         return token
         
-    def validate_token(self, token: str) -> Dict[str, Any]:
+    def validate_token_jwt(self, token: str) -> Dict[str, Any]:
         """Validate a JWT token and return payload if valid."""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
@@ -74,7 +74,7 @@ class TokenManager:
             
     def is_token_near_expiry(self, token: str, threshold_minutes: int = 5) -> bool:
         """Check if token is approaching expiry within threshold."""
-        validation = self.validate_token(token)
+        validation = self.validate_token_jwt(token)
         if not validation['valid']:
             return True
             
@@ -133,7 +133,7 @@ class TokenRefreshTestClient:
             
         try:
             # Validate current token
-            validation = self.token_manager.validate_token(self.current_token)
+            validation = self.token_manager.validate_token_jwt(self.current_token)
             if not validation['valid']:
                 return {
                     'success': False, 
@@ -188,8 +188,8 @@ class TokenRefreshTestClient:
             await asyncio.sleep(0.1)  # Processing delay
             
             # Update current token
-            old_validation = self.token_manager.validate_token(old_token)
-            new_validation = self.token_manager.validate_token(new_token)
+            old_validation = self.token_manager.validate_token_jwt(old_token)
+            new_validation = self.token_manager.validate_token_jwt(new_token)
             
             if new_validation['valid']:
                 self.current_token = new_token
@@ -234,7 +234,7 @@ class TokenRefreshTestClient:
                     'session_preserved': True,
                     'messages_sent': self.session_data['messages_sent'],
                     'connection_active': self.is_connected,
-                    'current_token_valid': self.token_manager.validate_token(self.current_token)['valid']
+                    'current_token_valid': self.token_manager.validate_token_jwt(self.current_token)['valid']
                 }
             else:
                 return {'session_preserved': False, 'error': test_result['error']}
@@ -334,7 +334,7 @@ async def test_token_refresh_near_expiry():
     assert await client.connect(token_lifetime_minutes=2), "Failed to connect"
     
     # Verify token is initially valid
-    initial_validation = token_manager.validate_token(client.current_token)
+    initial_validation = token_manager.validate_token_jwt(client.current_token)
     assert initial_validation['valid'], "Initial token should be valid"
     
     # Simulate time passing - check if near expiry (within 5 minutes threshold)
@@ -346,7 +346,7 @@ async def test_token_refresh_near_expiry():
     assert refresh_result['success'], "Proactive refresh failed"
     
     # Verify new token has longer lifetime
-    new_validation = token_manager.validate_token(client.current_token)
+    new_validation = token_manager.validate_token_jwt(client.current_token)
     assert new_validation['valid'], "New token should be valid"
     
     # Check new token is not near expiry

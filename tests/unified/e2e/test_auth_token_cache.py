@@ -31,7 +31,7 @@ class MockAuthService:
         """Set mock response for specific token."""
         self.responses[token] = response
     
-    async def validate_token(self, token: str) -> Dict:
+    async def validate_token_jwt(self, token: str) -> Dict:
         """Mock token validation with latency simulation."""
         await asyncio.sleep(self.latency_ms / 1000)  # Simulate network latency
         self.call_count += 1
@@ -93,7 +93,7 @@ class TestAuthTokenCacheE2E:
         
         # First call should hit auth service
         start_time = time.time()
-        result = await auth_client.validate_token(token)
+        result = await auth_client.validate_token_jwt(token)
         end_time = time.time()
         
         # Verify auth service was called
@@ -122,12 +122,12 @@ class TestAuthTokenCacheE2E:
         })
         
         # First call - should hit auth service
-        result1 = await auth_client.validate_token(token)
+        result1 = await auth_client.validate_token_jwt(token)
         initial_call_count = mock_auth_service.call_count
         
         # Second call - should use cache
         start_time = time.time()
-        result = await auth_client.validate_token(token)
+        result = await auth_client.validate_token_jwt(token)
         end_time = time.time()
         
         # Verify auth service was NOT called again
@@ -226,7 +226,7 @@ class TestAuthTokenCacheE2E:
         })
         
         # Pre-cache the token with one call first
-        await auth_client.validate_token(token)
+        await auth_client.validate_token_jwt(token)
         
         # Reset call count after initial cache population
         initial_calls = mock_auth_service.call_count
@@ -234,7 +234,7 @@ class TestAuthTokenCacheE2E:
         # Simulate concurrent requests for same token (should all hit cache)
         tasks = []
         for i in range(10):
-            task = asyncio.create_task(auth_client.validate_token(token))
+            task = asyncio.create_task(auth_client.validate_token_jwt(token))
             tasks.append(task)
         
         # Wait for all requests to complete
@@ -264,12 +264,12 @@ class TestAuthTokenCacheE2E:
         
         # Measure first call (auth service hit)
         start_time = time.time()
-        await auth_client.validate_token(token)
+        await auth_client.validate_token_jwt(token)
         first_call_time = time.time() - start_time
         
         # Measure second call (cache hit)
         start_time = time.time()
-        await auth_client.validate_token(token)
+        await auth_client.validate_token_jwt(token)
         second_call_time = time.time() - start_time
         
         # Cache should be at least 10x faster (handle division by zero)
@@ -301,17 +301,17 @@ class TestAuthTokenCacheE2E:
         })
         
         # First token validation
-        result1 = await auth_client.validate_token(token1)
+        result1 = await auth_client.validate_token_jwt(token1)
         assert mock_auth_service.call_count == 1
         assert result1["user_id"] == "user-1"
         
         # Second token validation (different token, cache miss)
-        result2 = await auth_client.validate_token(token2)
+        result2 = await auth_client.validate_token_jwt(token2)
         assert mock_auth_service.call_count == 2
         assert result2["user_id"] == "user-2"
         
         # Third validation (first token, cache hit)
-        result3 = await auth_client.validate_token(token1)
+        result3 = await auth_client.validate_token_jwt(token1)
         assert mock_auth_service.call_count == 2  # No additional call
         assert result3["user_id"] == "user-1"
     
@@ -325,11 +325,11 @@ class TestAuthTokenCacheE2E:
         })
         
         # First call with invalid token
-        result1 = await auth_client.validate_token(invalid_token)
+        result1 = await auth_client.validate_token_jwt(invalid_token)
         initial_calls = mock_auth_service.call_count
         
         # Second call should also hit auth service (no caching of invalid tokens)
-        result2 = await auth_client.validate_token(invalid_token)
+        result2 = await auth_client.validate_token_jwt(invalid_token)
         
         # Both calls should hit auth service
         assert mock_auth_service.call_count == initial_calls + 1 or mock_auth_service.call_count == initial_calls
@@ -363,13 +363,13 @@ class TestAuthTokenCacheE2E:
         results = []
         # Initial validations (cache misses)
         for token in test_tokens[:3]:
-            results.append(await auth_client.validate_token(token))
+            results.append(await auth_client.validate_token_jwt(token))
         # Repeat validations (cache hits)
         for token in test_tokens[:3]:
-            results.append(await auth_client.validate_token(token))
+            results.append(await auth_client.validate_token_jwt(token))
         # Additional cache hits
-        results.append(await auth_client.validate_token(test_tokens[0]))
-        results.append(await auth_client.validate_token(test_tokens[1]))
+        results.append(await auth_client.validate_token_jwt(test_tokens[0]))
+        results.append(await auth_client.validate_token_jwt(test_tokens[1]))
         return results
     
     def _validate_e2e_results(self, results, mock_auth_service):

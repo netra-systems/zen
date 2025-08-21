@@ -23,7 +23,7 @@ class TestGhostConnectionPrevention:
     def manager(self):
         """Create connection manager with mocked dependencies."""
         with patch('app.websocket.connection_manager.ConnectionExecutionOrchestrator'):
-            manager = ModernConnectionManager()
+            manager = Modernget_connection_manager()
             manager.orchestrator = Mock()
             return manager
     

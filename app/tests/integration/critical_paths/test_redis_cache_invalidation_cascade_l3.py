@@ -21,7 +21,6 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 import redis.asyncio as aioredis
-from testcontainers.redis import RedisContainer
 
 from app.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from app.logging_config import central_logger

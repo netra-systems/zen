@@ -66,4 +66,63 @@ async def ready(db: AsyncSession = Depends(get_db_dependency)):
             <rule>Test health endpoints after any dependency changes</rule>
         </prevention>
     </issue>
+    
+    <issue date="2025-08-20">
+        <description>
+            Startup check failed with error: "'async for' requires an object with __aiter__ method, got _AsyncGeneratorContextManager"
+        </description>
+        
+        <root_cause>
+            Incorrectly using 'async for' with an async context manager (decorated with @asynccontextmanager) 
+            instead of 'async with'. Context managers use __aenter__/__aexit__, not __aiter__/__anext__.
+        </root_cause>
+        
+        <incorrect_pattern>
+            <code><![CDATA[
+# In database_checks.py
+from app.db.postgres import get_async_db  # This is @asynccontextmanager
+
+async def _perform_assistant_check(self):
+    # ERROR: async for with context manager
+    async for db in get_async_db():
+        table_exists = await self._table_exists(db, 'assistants')
+            ]]></code>
+        </incorrect_pattern>
+        
+        <correct_pattern>
+            <code><![CDATA[
+# In database_checks.py
+from app.db.postgres import get_async_db  # This is @asynccontextmanager
+
+async def _perform_assistant_check(self):
+    # CORRECT: async with for context manager
+    async with get_async_db() as db:
+        table_exists = await self._table_exists(db, 'assistants')
+            ]]></code>
+        </correct_pattern>
+        
+        <key_learnings>
+            <learning>
+                Functions decorated with @asynccontextmanager return async context managers,
+                which must be used with 'async with', not 'async for'
+            </learning>
+            <learning>
+                'async for' is only for async iterators/generators that implement __aiter__
+            </learning>
+            <learning>
+                Context managers implement __aenter__/__aexit__ protocol, not iteration protocol
+            </learning>
+        </key_learnings>
+        
+        <affected_areas>
+            <area>Startup checks (database_checks.py)</area>
+            <area>Any code using get_async_db() or similar context managers</area>
+        </affected_areas>
+        
+        <prevention>
+            <rule>Always use 'async with' for @asynccontextmanager decorated functions</rule>
+            <rule>Use 'async for' only with async generators (async def with yield in loop)</rule>
+            <rule>Check function decorators to understand the return type</rule>
+        </prevention>
+    </issue>
 </learnings>

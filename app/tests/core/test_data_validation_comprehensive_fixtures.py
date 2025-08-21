@@ -5,7 +5,6 @@ from typing import Dict, Any, List, Optional, Union
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 from pydantic import ValidationError, BaseModel, Field
-from app.schemas.shared_types import (
 from app.websocket.validation import MessageValidator
 from app.schemas.websocket_message_types import WebSocketValidationError
 from app.schemas.registry import WebSocketMessageType
@@ -32,3 +31,4 @@ def injection_test_data():
         "'; DROP TABLE users; --",
         "{{7*7}}"  # Template injection
     ]
+# )  # Orphaned closing parenthesis

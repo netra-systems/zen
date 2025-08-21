@@ -23,9 +23,9 @@ class TestSupplyResearcherAgentExecution:
         """Create mock database session"""
         db = Mock()
         db.query = Mock()
-        db.add = Mock()
-        db.commit = Mock()
-        db.rollback = Mock()
+        db.add = AsyncMock()
+        db.commit = AsyncMock()
+        db.rollback = AsyncMock()
         return db
     
     @pytest.fixture

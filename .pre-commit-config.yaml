@@ -54,3 +54,13 @@ repos:
         files: '(test_.*\.py|.*_test\.py|tests/.*\.py)$'
         stages: [commit]
         description: 'Test files MUST follow same 450-line limit as production code (SPEC/testing.xml)'
+        
+      # PREVENT NUMBERED FILE NAMES: Enforce semantic naming
+      - id: prevent-numbered-files
+        name: Prevent Numbered File Names
+        entry: python scripts/prevent_numbered_files.py
+        language: system
+        types: [python]
+        pass_filenames: true
+        stages: [commit]
+        description: 'Prevents non-semantic numbered file naming patterns like _1.py, _2.py, _core_1.py'

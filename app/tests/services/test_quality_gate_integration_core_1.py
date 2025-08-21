@@ -3,9 +3,12 @@
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from app.services.quality_gate_service import (
 from app.redis_manager import RedisManager
 from app.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def service(self):
         mock_redis = AsyncMock(spec=RedisManager)
@@ -141,3 +144,4 @@ from app.tests.helpers.shared_test_types import TestIntegrationScenarios as Shar
         """Assert no retry is needed"""
         assert result.retry_suggested == False
         assert result.retry_prompt_adjustments == None
+# )  # Orphaned closing parenthesis

@@ -48,7 +48,7 @@ class TestJWTClaimsExtraction(unittest.TestCase):
             self.test_permissions
         )
         
-        payload = self.jwt_handler.validate_token(token)
+        payload = self.jwt_handler.validate_token_jwt(token)
         assert payload["sub"] == self.test_user_id
         assert payload["email"] == self.test_email
         assert payload["permissions"] == self.test_permissions
@@ -81,7 +81,7 @@ class TestJWTClaimsExtraction(unittest.TestCase):
         )
         
         # Test secure claims extraction
-        payload = self.jwt_handler.validate_token(token, "access")
+        payload = self.jwt_handler.validate_token_jwt(token, "access")
         assert payload is not None
         
         # Validate security-relevant claims
@@ -117,7 +117,7 @@ class TestJWTClaimsExtraction(unittest.TestCase):
         tampered_token = f"{parts[0]}.{tampered_payload}.{parts[2]}"
         
         # Secure validation should detect tampering
-        payload = self.jwt_handler.validate_token(tampered_token, "access")
+        payload = self.jwt_handler.validate_token_jwt(tampered_token, "access")
         assert payload is None
         
         # Unsafe extraction should work but not be trusted
@@ -141,7 +141,7 @@ class TestJWTSignatureVerification(unittest.TestCase):
             self.test_email
         )
         
-        payload = self.jwt_handler.validate_token(token)
+        payload = self.jwt_handler.validate_token_jwt(token)
         assert payload is not None
         assert payload["sub"] == self.test_user_id
     
@@ -172,7 +172,7 @@ class TestJWTSignatureVerification(unittest.TestCase):
         tampered_token = f"{header}.{tampered_payload}.{signature}"
         
         # Verify tampering is detected
-        result = self.jwt_handler.validate_token(tampered_token)
+        result = self.jwt_handler.validate_token_jwt(tampered_token)
         assert result is None
     
     def test_tampered_header_detection(self):
@@ -201,7 +201,7 @@ class TestJWTSignatureVerification(unittest.TestCase):
         tampered_token = f"{tampered_header}.{payload}.{signature}"
         
         # Verify tampering is detected
-        result = self.jwt_handler.validate_token(tampered_token)
+        result = self.jwt_handler.validate_token_jwt(tampered_token)
         assert result is None
     
     def test_none_algorithm_attack_prevention(self):
@@ -222,7 +222,7 @@ class TestJWTSignatureVerification(unittest.TestCase):
         none_token = f"{encoded_header}.{encoded_payload}."
         
         # Verify 'none' algorithm attack is prevented
-        result = self.jwt_handler.validate_token(none_token)
+        result = self.jwt_handler.validate_token_jwt(none_token)
         assert result is None
     
     def test_signature_verification_with_wrong_secret(self):
@@ -241,7 +241,7 @@ class TestJWTSignatureVerification(unittest.TestCase):
         wrong_secret_token = jwt.encode(wrong_payload, wrong_secret, algorithm="HS256")
         
         # Verification should fail with wrong secret
-        result = self.jwt_handler.validate_token(wrong_secret_token)
+        result = self.jwt_handler.validate_token_jwt(wrong_secret_token)
         assert result is None
 
 
@@ -262,7 +262,7 @@ class TestJWTTokenRevocation(unittest.TestCase):
         )
         
         # Verify token is initially valid
-        payload = self.jwt_handler.validate_token(token)
+        payload = self.jwt_handler.validate_token_jwt(token)
         assert payload is not None
         
         # Note: Actual blacklist implementation would be in production
@@ -295,8 +295,8 @@ class TestJWTTokenRevocation(unittest.TestCase):
         token2 = self.jwt_handler.create_access_token(self.test_user_id, self.test_email)
         
         # Both tokens should be valid initially
-        payload1 = self.jwt_handler.validate_token(token1)
-        payload2 = self.jwt_handler.validate_token(token2)
+        payload1 = self.jwt_handler.validate_token_jwt(token1)
+        payload2 = self.jwt_handler.validate_token_jwt(token2)
         
         assert payload1 is not None
         assert payload2 is not None
@@ -309,7 +309,7 @@ class TestJWTTokenRevocation(unittest.TestCase):
         """Test time-based token revocation support"""
         # Create token
         token = self.jwt_handler.create_access_token(self.test_user_id, self.test_email)
-        payload = self.jwt_handler.validate_token(token)
+        payload = self.jwt_handler.validate_token_jwt(token)
         
         # Validate time-based revocation fields are present
         assert "iat" in payload
@@ -344,17 +344,17 @@ class TestJWTSecurityBoundaries(unittest.TestCase):
         service_token = self.jwt_handler.create_service_token("test-service", "test")
         
         # Test that each token type only validates for its intended use
-        assert self.jwt_handler.validate_token(access_token, "access") is not None
-        assert self.jwt_handler.validate_token(access_token, "refresh") is None
-        assert self.jwt_handler.validate_token(access_token, "service") is None
+        assert self.jwt_handler.validate_token_jwt(access_token, "access") is not None
+        assert self.jwt_handler.validate_token_jwt(access_token, "refresh") is None
+        assert self.jwt_handler.validate_token_jwt(access_token, "service") is None
         
-        assert self.jwt_handler.validate_token(refresh_token, "refresh") is not None
-        assert self.jwt_handler.validate_token(refresh_token, "access") is None
-        assert self.jwt_handler.validate_token(refresh_token, "service") is None
+        assert self.jwt_handler.validate_token_jwt(refresh_token, "refresh") is not None
+        assert self.jwt_handler.validate_token_jwt(refresh_token, "access") is None
+        assert self.jwt_handler.validate_token_jwt(refresh_token, "service") is None
         
-        assert self.jwt_handler.validate_token(service_token, "service") is not None
-        assert self.jwt_handler.validate_token(service_token, "access") is None
-        assert self.jwt_handler.validate_token(service_token, "refresh") is None
+        assert self.jwt_handler.validate_token_jwt(service_token, "service") is not None
+        assert self.jwt_handler.validate_token_jwt(service_token, "access") is None
+        assert self.jwt_handler.validate_token_jwt(service_token, "refresh") is None
     
     def test_claims_privilege_boundaries(self):
         """Test privilege boundaries in token claims"""
@@ -366,7 +366,7 @@ class TestJWTSecurityBoundaries(unittest.TestCase):
             limited_permissions
         )
         
-        payload = self.jwt_handler.validate_token(token, "access")
+        payload = self.jwt_handler.validate_token_jwt(token, "access")
         assert payload is not None
         assert payload["permissions"] == limited_permissions
         assert "admin" not in payload["permissions"]
@@ -376,7 +376,7 @@ class TestJWTSecurityBoundaries(unittest.TestCase):
         """Test issuer validation for security"""
         # Create token with correct issuer
         token = self.jwt_handler.create_access_token(self.test_user_id, self.test_email)
-        payload = self.jwt_handler.validate_token(token, "access")
+        payload = self.jwt_handler.validate_token_jwt(token, "access")
         
         assert payload is not None
         assert payload["iss"] == "netra-auth-service"
@@ -401,13 +401,13 @@ class TestJWTSecurityBoundaries(unittest.TestCase):
         for _ in range(10):
             # Time valid token validation
             start = time.time()
-            self.jwt_handler.validate_token(valid_token, "access")
+            self.jwt_handler.validate_token_jwt(valid_token, "access")
             valid_times.append(time.time() - start)
             
             # Time invalid token validation
             for invalid_token in invalid_tokens:
                 start = time.time()
-                self.jwt_handler.validate_token(invalid_token, "access")
+                self.jwt_handler.validate_token_jwt(invalid_token, "access")
                 invalid_times.append(time.time() - start)
         
         # Calculate average times

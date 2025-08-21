@@ -48,7 +48,7 @@ class DatabaseChecker:
         try:
             # First check if assistants table exists
             from app.db.postgres import get_async_db
-            async for db in get_async_db():
+            async with get_async_db() as db:
                 table_exists = await self._table_exists(db, 'assistants')
                 if not table_exists:
                     # Table doesn't exist, skip assistant creation (non-critical)

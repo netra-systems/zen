@@ -8,6 +8,10 @@ from app.netra_mcp.netra_mcp_server import NetraMCPServer
 from app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
 from datetime import timedelta
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_server_initialization(self):
         """Test server initializes correctly"""
         server = NetraMCPServer(name="test", version="1.0.0")

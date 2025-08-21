@@ -34,6 +34,10 @@ from app.db.models_postgres import User
 from app.db.session import get_db_session
 from app.clients.auth_client_core import AuthServiceClient
 
+
+class RealUserSessionHelper:
+    """Helper class for real user session management testing."""
+    
     def __init__(self):
         self.auth_url = "http://localhost:8081"
         self.client = httpx.AsyncClient(timeout=15.0)

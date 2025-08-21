@@ -130,7 +130,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         token = enhanced_security_service.create_access_token(token_data)
         
         # Validate token
-        validation_result = await enhanced_security_service.validate_token(token)
+        validation_result = await enhanced_security_service.validate_token_jwt(token)
         _assert_token_validation_success(validation_result, admin_user)
     
     async def test_expired_token_validation(self, enhanced_security_service, sample_users):
@@ -142,7 +142,7 @@ class TestSecurityServiceAuthenticationEnhanced:
         token = enhanced_security_service.create_access_token(expired_token_data)
         
         # Validate expired token
-        validation_result = await enhanced_security_service.validate_token(token)
+        validation_result = await enhanced_security_service.validate_token_jwt(token)
         _assert_token_validation_failure(validation_result)
     
     async def test_session_caching_functionality(self, enhanced_security_service, sample_users):

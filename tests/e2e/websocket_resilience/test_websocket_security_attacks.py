@@ -71,7 +71,7 @@ async def test_session_hijacking_prevention_with_expired_tokens(jwt_generator, a
     await asyncio.sleep(65)  # Wait for token to expire
     
     # Verify token is expired
-    token_validation = jwt_generator.validate_token(original_token)
+    token_validation = jwt_generator.validate_token_jwt(original_token)
     assert "error" in token_validation, "Token should be expired"
     
     # Simulate attacker capturing expired token

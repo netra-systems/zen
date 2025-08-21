@@ -11,6 +11,10 @@ from app.tests.integration.test_unified_message_flow import MessageFlowTracker
 from app.logging_config import central_logger
 import tracemalloc
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def __init__(self):
         super().__init__()
         self.latency_measurements: List[float] = []

@@ -16,6 +16,10 @@ from app.redis_manager import RedisManager
 from app.schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
+
+class RedisSessionTestHelper:
+    """Helper class for Redis session testing."""
+    
     def _validate_session_structure(self, session: Dict[str, Any]) -> bool:
         """Validate session has required structure."""
         required_fields = ["user_id", "session_id", "created_at"]

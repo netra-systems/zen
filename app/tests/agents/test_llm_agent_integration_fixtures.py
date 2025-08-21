@@ -13,10 +13,15 @@ from app.llm.llm_manager import LLMManager
 from app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.agents.triage_sub_agent import (
+    TriageResult, Priority, Complexity, UserIntent,
+    ExtractedEntities, TriageMetadata
+)
 from app.agents.tool_dispatcher import ToolDispatcher
 import time
 
-    def mock_llm_manager(self):
+
+@pytest.fixture
+def mock_llm_manager():
         """Create properly mocked LLM manager"""
         llm_manager = Mock(spec=LLMManager)
         
@@ -68,37 +73,41 @@ import time
         
         return llm_manager
 
-    def mock_db_session(self):
-        """Create mock database session"""
-        session = AsyncMock(spec=AsyncSession)
-        session.commit = AsyncMock()
-        session.rollback = AsyncMock()
-        session.close = AsyncMock()
-        session.execute = AsyncMock()
-        return session
+@pytest.fixture
+def mock_db_session():
+    """Create mock database session"""
+    session = AsyncMock(spec=AsyncSession)
+    session.commit = AsyncMock()
+    session.rollback = AsyncMock()
+    session.close = AsyncMock()
+    session.execute = AsyncMock()
+    return session
 
-    def mock_websocket_manager(self):
-        """Create mock WebSocket manager"""
-        ws_manager = Mock()
-        ws_manager.send_message = AsyncMock()
-        ws_manager.broadcast = AsyncMock()
-        ws_manager.send_agent_log = AsyncMock()
-        ws_manager.send_error = AsyncMock()
-        ws_manager.send_sub_agent_update = AsyncMock()
-        return ws_manager
+@pytest.fixture
+def mock_websocket_manager():
+    """Create mock WebSocket manager"""
+    ws_manager = Mock()
+    ws_manager.send_message = AsyncMock()
+    ws_manager.broadcast = AsyncMock()
+    ws_manager.send_agent_log = AsyncMock()
+    ws_manager.send_error = AsyncMock()
+    ws_manager.send_sub_agent_update = AsyncMock()
+    return ws_manager
 
-    def mock_tool_dispatcher(self):
-        """Create mock tool dispatcher"""
-        from app.agents.tool_dispatcher import ToolDispatcher
-        dispatcher = Mock(spec=ToolDispatcher)
-        dispatcher.dispatch_tool = AsyncMock(return_value={
-            "status": "success",
-            "result": {"data": "Tool execution successful"}
-        })
-        return dispatcher
+@pytest.fixture
+def mock_tool_dispatcher():
+    """Create mock tool dispatcher"""
+    from app.agents.tool_dispatcher import ToolDispatcher
+    dispatcher = Mock(spec=ToolDispatcher)
+    dispatcher.dispatch_tool = AsyncMock(return_value={
+        "status": "success",
+        "result": {"data": "Tool execution successful"}
+    })
+    return dispatcher
 
-    def supervisor_agent(self, mock_db_session, mock_llm_manager, 
-                              mock_websocket_manager, mock_tool_dispatcher):
+@pytest.fixture
+def supervisor_agent(mock_db_session, mock_llm_manager, 
+                    mock_websocket_manager, mock_tool_dispatcher):
         """Create supervisor agent with all dependencies mocked"""
         # Patch state persistence to avoid hanging
         with patch('app.agents.supervisor_consolidated.state_persistence_service') as mock_persistence:

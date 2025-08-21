@@ -14,6 +14,10 @@ from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 from app.core.network_constants import DatabaseConstants, ServicePorts, HostConstants
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_url_normalization(self):
         """Test PostgreSQL URL normalization for asyncpg."""
         connector = DatabaseConnector(use_emoji=False)

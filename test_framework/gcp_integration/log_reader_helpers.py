@@ -9,6 +9,11 @@ from google.cloud import logging as gcp_logging
 from .base import GCPBaseClient, GCPConfig
 from ..unified.base_interfaces import ILogAnalyzer
 
+
+@dataclass
+class LogEntry:
+    """Log entry data structure"""
+    
     def __post_init__(self):
         if self.labels is None:
             self.labels = {}

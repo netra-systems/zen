@@ -20,10 +20,10 @@ def mock_db():
     """Create mock database session with common methods"""
     db = Mock()
     db.query = Mock()
-    db.add = Mock()
-    db.commit = Mock()
-    db.rollback = Mock()
-    db.flush = Mock()
+    db.add = AsyncMock()
+    db.commit = AsyncMock()
+    db.rollback = AsyncMock()
+    db.flush = AsyncMock()
     return db
 
 

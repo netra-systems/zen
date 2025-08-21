@@ -29,6 +29,10 @@ from app.services.metrics.agent_metrics import AgentMetricsCollector
 from app.schemas.llm_base_types import LLMProvider, TokenUsage
 from app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
 
+
+class MeteringCoreHelper:
+    """Helper class for metering core functionality."""
+    
     def __init__(self):
         self.clickhouse_client = None
         self.cost_calculator = CostCalculatorService()
@@ -37,6 +41,10 @@ from app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
         self.test_org_id = f"test_org_{int(time.time())}"
         self.usage_buffer = []
 
+
+class RealTimeUsageTracker:
+    """Real-time usage tracker helper."""
+    
     def __init__(self, clickhouse_client, cost_calculator: CostCalculatorService):
         self.clickhouse_client = clickhouse_client
         self.cost_calculator = cost_calculator
@@ -64,6 +72,10 @@ from app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
         cost_per_gb = {"free": 15, "pro": 8, "enterprise": 3}[plan_tier.value]
         return int(gb * cost_per_gb)
 
+
+class BillingCalculationEngine:
+    """Billing calculation engine helper."""
+    
     def __init__(self, clickhouse_client):
         self.clickhouse_client = clickhouse_client
 

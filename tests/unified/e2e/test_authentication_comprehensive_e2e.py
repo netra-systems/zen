@@ -58,9 +58,9 @@ class AuthenticationE2ETester:
     
     async def verify_token_propagation(self, token: str) -> bool:
         """Verify token is accepted across all services."""
-        auth_valid = await self.harness.auth_service.validate_token(token)
-        backend_valid = await self.harness.backend_service.validate_token(token)
-        ws_valid = await self.harness.websocket_service.validate_token(token)
+        auth_valid = await self.harness.auth_service.validate_token_jwt(token)
+        backend_valid = await self.harness.backend_service.validate_token_jwt(token)
+        ws_valid = await self.harness.websocket_service.validate_token_jwt(token)
         return all([auth_valid, backend_valid, ws_valid])
 
 
@@ -118,7 +118,7 @@ class TestAuthenticationComprehensiveE2E:
     
     async def _test_initial_token_validation(self, tester, token):
         """Test that initial token is valid."""
-        is_valid = await tester.harness.auth_service.validate_token(token)
+        is_valid = await tester.harness.auth_service.validate_token_jwt(token)
         assert is_valid, "Initial token should be valid"
     
     async def _test_token_refresh(self, tester, old_token):
@@ -130,7 +130,7 @@ class TestAuthenticationComprehensiveE2E:
     async def _test_token_expiry(self, tester, user_id):
         """Test expired token handling."""
         expired_token = tester.jwt_helper.create_expired_token(user_id)
-        is_valid = await tester.harness.auth_service.validate_token(expired_token)
+        is_valid = await tester.harness.auth_service.validate_token_jwt(expired_token)
         assert not is_valid, "Expired token should be invalid"
     
     @pytest.mark.asyncio

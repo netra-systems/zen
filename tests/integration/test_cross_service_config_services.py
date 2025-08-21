@@ -15,6 +15,10 @@ from app.core.middleware_setup import CustomCORSMiddleware
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def create_test_request_with_origin(origin: str, method: str = "GET") -> Mock:
         """Create mock request with specified origin."""
         request = Mock()

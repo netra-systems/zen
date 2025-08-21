@@ -12,6 +12,10 @@ from app.logging_config import central_logger, get_central_logger
 from app.core.logging_context import request_id_context, user_id_context, trace_id_context
 from test_framework.mock_utils import mock_justified
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def temp_log_file(self):
         """Create temporary log file for testing."""
         temp_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.log')

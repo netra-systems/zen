@@ -14,6 +14,10 @@ from app.tests.services.test_ws_connection_mocks import MockWebSocket
 import time
 from app.routes.utils.websocket_helpers import validate_websocket_token
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def __init__(self):
         super().__init__()
         self.auth_attempts: List[Dict[str, Any]] = []

@@ -3,7 +3,7 @@ Error handling tests for SupplyResearcherAgent
 """
 
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, AsyncMock, patch
 
 from app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from app.services.supply_research_service import SupplyResearchService
@@ -19,9 +19,9 @@ class TestSupplyResearcherErrorHandling:
         """Create mock database session"""
         db = Mock()
         db.query = Mock()
-        db.add = Mock()
-        db.commit = Mock()
-        db.rollback = Mock()
+        db.add = AsyncMock()
+        db.commit = AsyncMock()
+        db.rollback = AsyncMock()
         return db
     
     @pytest.fixture

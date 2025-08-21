@@ -20,7 +20,8 @@ import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 from app.websocket.unified.manager import WebSocketManager
-from app.websocket.connection import ConnectionManager, ConnectionInfo
+from app.websocket.connection import ConnectionInfo
+from app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
 from app.schemas.registry import WebSocketMessage, ServerMessage
 from app.schemas.websocket_models import WebSocketStats, BroadcastResult
 from tests.unified.e2e.agent_response_test_utilities import ResponseStreamingVerifier
@@ -38,7 +39,7 @@ class WebSocketStreamingTester:
     async def create_test_websocket_manager(self) -> WebSocketManager:
         """Create WebSocket manager for streaming tests."""
         # Create mock dependencies
-        mock_connection_manager = MagicMock(spec=ConnectionManager)
+        mock_connection_manager = MagicMock(spec=ModernConnectionManager)
         mock_connection_manager.add_connection = AsyncMock()
         mock_connection_manager.remove_connection = AsyncMock()
         mock_connection_manager.get_user_connections = AsyncMock(return_value=[])

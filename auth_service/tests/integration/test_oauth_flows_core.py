@@ -14,6 +14,10 @@ import sys
 from pathlib import Path
 from main import app
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_state_parameter_generation(self):
         """Test secure state parameter generation"""
         state1 = secrets.token_urlsafe(32)

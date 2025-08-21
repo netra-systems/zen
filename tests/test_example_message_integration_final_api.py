@@ -10,11 +10,13 @@ from uuid import uuid4
 from fastapi import FastAPI, WebSocket
 from fastapi.testclient import TestClient
 from starlette.websockets import WebSocketDisconnect
-from app.routes.example_messages_enhanced import (
-from app.handlers.example_message_handler_enhanced import (
 from app.logging_config import central_logger
 from app.handlers.example_message_handler_enhanced import ExampleMessageMetadata
 from app.routes.example_messages_enhanced import example_message_websocket_enhanced
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def client(self, app):
         """Create test client"""
@@ -69,3 +71,4 @@ from app.routes.example_messages_enhanced import example_message_websocket_enhan
                 pending_data = response.json()
                 assert 'pending_count' in pending_data
                 assert 'pending_messages' in pending_data
+# )  # Orphaned closing parenthesis

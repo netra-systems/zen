@@ -7,30 +7,18 @@ import time
 from unittest.mock import AsyncMock
 from datetime import datetime, timezone
 from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.supervisor.execution_context import (
 from app.agents.state import DeepAgentState
 from app.llm.llm_manager import LLMManager
 from app.agents.tool_dispatcher import ToolDispatcher
-from app.tests.helpers.supervisor_test_helpers import (
 from app.agents.admin_tool_dispatcher import AdminToolDispatcher
 
-    def __init__(self, llm_manager, websocket_manager):
-        self.llm_manager = llm_manager
-        self.websocket_manager = websocket_manager
-        self.quality_threshold = 0.7
 
-    def __init__(self, llm_manager, tool_dispatcher):
-        self.llm_manager = llm_manager
-        self.tool_dispatcher = tool_dispatcher
-        self.vector_store = None
-
-    def __init__(self, llm_manager, tool_dispatcher):
-        self.llm_manager = llm_manager
-        self.tool_dispatcher = tool_dispatcher
-        self.data_sources = None
-        self.enrichment_service = None
-
-    def merge_states(self, state1, state2):
+class StateMergeUtil:
+    """Utility class for state merging operations"""
+    
+    @staticmethod
+    def merge_states(state1, state2):
+        """Merge two DeepAgentState instances"""
         # Use the user_request from the first state
         merged = DeepAgentState(user_request=state1.user_request)
         

@@ -18,6 +18,10 @@ from dev_launcher.config import LauncherConfig
 import os
 import os
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def service_discovery(self):
         """Create test service discovery."""
         with tempfile.TemporaryDirectory() as temp_dir:

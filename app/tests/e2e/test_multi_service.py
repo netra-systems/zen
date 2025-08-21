@@ -97,7 +97,7 @@ class TestCrossServiceAuthentication:
             
             # Validate token
             valid_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test_payload"
-            result = await auth_client.validate_token(valid_token)
+            result = await auth_client.validate_token_jwt(valid_token)
             
             # Verify validation succeeded
             assert result is not None
@@ -122,7 +122,7 @@ class TestCrossServiceAuthentication:
                 try:
                     # This would normally be a real HTTP request
                     # For testing, we verify the auth flow logic
-                    user_data = await auth_client.validate_token("valid_token")
+                    user_data = await auth_client.validate_token_jwt("valid_token")
                     user_service = CRUDUser("user_service", User)
                     # Mock a database session for the CRUDUser.get call
                     from unittest.mock import AsyncMock
@@ -147,9 +147,9 @@ class TestCrossServiceAuthentication:
             mock_validate.return_value = test_user_data
             
             # Validate token in multiple contexts
-            backend_validation = await auth_client.validate_token(token)
-            websocket_validation = await auth_client.validate_token(token)
-            api_validation = await auth_client.validate_token(token)
+            backend_validation = await auth_client.validate_token_jwt(token)
+            websocket_validation = await auth_client.validate_token_jwt(token)
+            api_validation = await auth_client.validate_token_jwt(token)
             
             # Verify consistency
             assert backend_validation == websocket_validation == api_validation
@@ -365,7 +365,7 @@ class TestErrorPropagation:
             
             try:
                 # This should fail gracefully, not crash the service
-                result = await auth_client.validate_token("test_token")
+                result = await auth_client.validate_token_jwt("test_token")
                 assert result is None  # Should return None for invalid token
                 
             except Exception:
@@ -446,7 +446,7 @@ class TestMultiServiceIntegration:
             mock_auth.return_value = {"user_id": "journey_user", "email": "journey@test.com"}
             
             user_token = "valid_journey_token"
-            auth_result = await auth_client.validate_token(user_token)
+            auth_result = await auth_client.validate_token_jwt(user_token)
             assert auth_result is not None
             
             # 2. User data retrieval (Backend -> PostgreSQL)
@@ -496,12 +496,12 @@ class TestMultiServiceIntegration:
             
             # First attempt should fail gracefully
             try:
-                result1 = await auth_client.validate_token("test_token")
+                result1 = await auth_client.validate_token_jwt("test_token")
             except Exception:
                 pass  # Expected failure
             
             # Second attempt should succeed (service recovered)
-            result2 = await auth_client.validate_token("test_token")
+            result2 = await auth_client.validate_token_jwt("test_token")
             assert result2 is not None
             assert result2["user_id"] == "ha_user"
         

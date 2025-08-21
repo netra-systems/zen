@@ -1,7 +1,6 @@
-"""Error Validation Components
+"""Authentication Error Validation Components
 
-This module contains validators for specific error types including authentication,
-database, and network failures across service boundaries.
+This module contains validators for authentication error types across service boundaries.
 """
 
 import asyncio
@@ -253,146 +252,84 @@ class AuthServiceFailurePropagationValidator:
         )
 
 
-class DatabaseErrorHandlingValidator:
-    """Validates database errors are handled gracefully with recovery mechanisms."""
+class AuthTokenValidator:
+    """Utility for validating authentication tokens and scenarios."""
     
-    def __init__(self, tester: RealErrorPropagationTester):
-        self.tester = tester
-        self.db_error_scenarios: List[Dict[str, Any]] = []
-    
-    async def test_database_connection_failure_handling(self) -> Dict[str, Any]:
-        """Test database connection failure handling and recovery."""
-        context = self.tester._create_correlation_context("db_connection_failure")
-        context.service_chain.append("database_layer")
+    @staticmethod
+    def validate_token_format(token: str) -> Dict[str, bool]:
+        """Validate token format and structure."""
+        if not token:
+            return {"valid_format": False, "reason": "empty_token"}
         
-        # Test database-dependent endpoint
-        db_test_result = await self._test_database_dependent_operation(context)
+        # Basic JWT format check (header.payload.signature)
+        parts = token.split('.')
         
-        # Test graceful degradation
-        degradation_result = await self._test_graceful_degradation(context)
-        
-        # Test recovery mechanisms
-        recovery_result = await self._test_database_recovery(context)
-        
-        return {
-            "test_type": "database_connection_failure",
-            "request_id": context.request_id,
-            "database_operation": db_test_result,
-            "graceful_degradation": degradation_result,
-            "recovery_mechanisms": recovery_result,
-            "system_stability": self._assess_system_stability(
-                db_test_result, degradation_result, recovery_result
-            )
+        validation_result = {
+            "valid_format": len(parts) == 3,
+            "has_header": len(parts) > 0 and bool(parts[0]),
+            "has_payload": len(parts) > 1 and bool(parts[1]),
+            "has_signature": len(parts) > 2 and bool(parts[2]),
+            "part_count": len(parts)
         }
+        
+        if not validation_result["valid_format"]:
+            validation_result["reason"] = f"invalid_part_count_{len(parts)}"
+        
+        return validation_result
     
-    async def _test_database_dependent_operation(self, context: ErrorCorrelationContext) -> Dict[str, Any]:
-        """Test operation that depends on database."""
-        context.service_chain.append("user_profile_service")
+    @staticmethod
+    def extract_token_info(token: str) -> Dict[str, Any]:
+        """Extract information from token (for testing purposes only)."""
+        if not token:
+            return {"error": "empty_token"}
+        
+        parts = token.split('.')
+        if len(parts) != 3:
+            return {"error": "invalid_format", "part_count": len(parts)}
         
         try:
-            response = await self.tester.http_client.get("/auth/me", token="mock_token_for_db_test")
+            import base64
+            import json
+            
+            # Decode header
+            header_data = base64.b64decode(parts[0] + '==').decode('utf-8')
+            header = json.loads(header_data)
+            
+            # Decode payload
+            payload_data = base64.b64decode(parts[1] + '==').decode('utf-8')
+            payload = json.loads(payload_data)
             
             return {
-                "database_accessible": True,
-                "operation_successful": True,
-                "status_code": getattr(response, 'status_code', None)
+                "header": header,
+                "payload": payload,
+                "algorithm": header.get("alg"),
+                "token_type": header.get("typ"),
+                "expiry": payload.get("exp"),
+                "subject": payload.get("sub"),
+                "issued_at": payload.get("iat")
             }
             
         except Exception as e:
-            return self._analyze_database_error(e, context)
+            return {"error": "decode_failed", "message": str(e)}
     
-    def _analyze_database_error(self, error: Exception, context: ErrorCorrelationContext) -> Dict[str, Any]:
-        """Analyze database error response."""
-        error_str = str(error).lower()
+    @staticmethod
+    def is_token_expired(token: str) -> Dict[str, Any]:
+        """Check if token is expired."""
+        token_info = AuthTokenValidator.extract_token_info(token)
         
-        # Check for database-related error indicators
-        db_indicators = ["database", "connection", "timeout", "unavailable", "service", "502", "503"]
-        db_error_detected = any(indicator in error_str for indicator in db_indicators)
+        if "error" in token_info:
+            return {"error": token_info["error"], "expired": None}
         
-        # Check for graceful error handling
-        graceful_indicators = ["temporarily", "unavailable", "try again", "maintenance", "service"]
-        graceful_handling = any(indicator in error_str for indicator in graceful_indicators)
+        expiry = token_info.get("expiry")
+        if not expiry:
+            return {"expired": None, "reason": "no_expiry_claim"}
         
-        context.error_source = "database"
+        import time
+        current_time = int(time.time())
         
         return {
-            "database_error_detected": db_error_detected,
-            "graceful_handling": graceful_handling,
-            "error_message": str(error),
-            "system_stable": True  # If we can catch and handle it, system is stable
-        }
-    
-    async def _test_graceful_degradation(self, context: ErrorCorrelationContext) -> Dict[str, Any]:
-        """Test system graceful degradation when database is unavailable."""
-        context.service_chain.append("degradation_layer")
-        
-        try:
-            response = await self.tester.http_client.get("/health")
-            
-            return {
-                "health_endpoint_available": True,
-                "graceful_degradation": True,
-                "status_code": getattr(response, 'status_code', None)
-            }
-            
-        except Exception as e:
-            return {
-                "health_endpoint_failed": True,
-                "system_still_responding": True,
-                "error_handled": self._is_graceful_error(str(e))
-            }
-    
-    def _is_graceful_error(self, error_str: str) -> bool:
-        """Check if error indicates graceful handling."""
-        return "health" in error_str.lower() or "service" in error_str.lower()
-    
-    async def _test_database_recovery(self, context: ErrorCorrelationContext) -> Dict[str, Any]:
-        """Test database recovery mechanisms."""
-        context.service_chain.append("recovery_layer")
-        
-        recovery_attempts = []
-        
-        for attempt in range(3):
-            try:
-                response = await self.tester.http_client.get("/health")
-                recovery_attempts.append({
-                    "attempt": attempt + 1,
-                    "successful": True,
-                    "status": getattr(response, 'status_code', None)
-                })
-                break
-                
-            except Exception as e:
-                recovery_attempts.append({
-                    "attempt": attempt + 1,
-                    "successful": False,
-                    "error": str(e)
-                })
-                await asyncio.sleep(1.0)
-        
-        successful_recovery = any(attempt["successful"] for attempt in recovery_attempts)
-        
-        return {
-            "recovery_attempts": recovery_attempts,
-            "successful_recovery": successful_recovery,
-            "retry_mechanism_active": len(recovery_attempts) > 1
-        }
-    
-    def _assess_system_stability(self, *test_results) -> Dict[str, Any]:
-        """Assess overall system stability during database issues."""
-        stability_indicators = []
-        
-        for result in test_results:
-            if isinstance(result, dict):
-                if result.get("system_stable", False):
-                    stability_indicators.append("stable_error_handling")
-                if result.get("graceful_handling", False):
-                    stability_indicators.append("graceful_degradation")
-                if result.get("successful_recovery", False):
-                    stability_indicators.append("recovery_capability")
-        
-        return {
-            "stability_score": len(stability_indicators),
-            "stability_indicators": stability_indicators,
-            "system_resilient": len(stability_indicators) >= 2
+            "expired": current_time > expiry,
+            "expiry_timestamp": expiry,
+            "current_timestamp": current_time,
+            "time_remaining": expiry - current_time if current_time <= expiry else 0
         }

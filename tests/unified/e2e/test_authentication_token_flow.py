@@ -59,7 +59,7 @@ class JWTTokenManager:
         self.tokens[token] = token_data
         return token_data
     
-    def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_token_jwt(self, token: str) -> Optional[Dict[str, Any]]:
         """Validate JWT token and return payload."""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
@@ -85,7 +85,7 @@ class JWTTokenManager:
     
     def refresh_token(self, old_token: str, extends_by: int = 3600) -> Optional[Dict[str, Any]]:
         """Refresh token with new expiry."""
-        payload = self.validate_token(old_token)
+        payload = self.validate_token_jwt(old_token)
         if payload:
             # Revoke old token
             self.revoke_token(old_token)
@@ -133,7 +133,7 @@ class MessagePipelineAuthValidator:
         validation_start = time.time()
         
         # Validate token using JWT manager
-        payload = self.token_manager.validate_token(token)
+        payload = self.token_manager.validate_token_jwt(token)
         
         if payload:
             # Simulate pipeline validation steps
@@ -209,7 +209,7 @@ class MessagePipelineAuthValidator:
             "duration": conversation_duration,
             "messages_sent": message_count,
             "token_refreshes": token_refreshes,
-            "final_token_valid": self.token_manager.validate_token(self.current_token) is not None
+            "final_token_valid": self.token_manager.validate_token_jwt(self.current_token) is not None
         }
     
     async def refresh_expired_token(self) -> Dict[str, Any]:

@@ -18,6 +18,10 @@ from dev_launcher.config import LauncherConfig
 import os
 import os
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def health_monitor(self):
         """Create test health monitor."""
         return HealthMonitor(check_interval=1)

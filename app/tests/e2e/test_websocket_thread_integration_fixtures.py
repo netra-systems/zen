@@ -11,7 +11,6 @@ from app.ws_manager import manager
 from app.services.thread_service import ThreadService
 from app.services.agent_service import AgentService
 from app.schemas.websocket_message_types import WebSocketMessage
-from app.schemas.websocket_server_messages import (
 
 def mock_websocket_manager():
     """Mock WebSocket manager for testing."""
@@ -33,3 +32,4 @@ def mock_thread_service():
     service.create_run = AsyncMock()
     service.get_or_create_thread = AsyncMock()
     return service
+# )  # Orphaned closing parenthesis

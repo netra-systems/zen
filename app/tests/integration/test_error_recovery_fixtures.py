@@ -20,8 +20,6 @@ from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import patch, AsyncMock, Mock
 import pytest
-from app.tests.integration.helpers.critical_integration_helpers import (
-from app.websocket.error_recovery_handler import (
 from app.websocket.connection_info import ConnectionInfo
 from app.core.exceptions_websocket import WebSocketError
 from app.logging_config import central_logger
@@ -29,3 +27,4 @@ from app.logging_config import central_logger
 def error_tracker():
     """Create error recovery tracker."""
     return ErrorRecoveryTracker()
+# )  # Orphaned closing parenthesis

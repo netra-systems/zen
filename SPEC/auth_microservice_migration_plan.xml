@@ -282,7 +282,7 @@
                     def __init__(self):
                         self.cache = TTLCache(maxsize=1000, ttl=300)
                     
-                    async def validate_token(self, token: str) -> bool:
+                    async def validate_token_jwt(self, token: str) -> bool:
                         if token in self.cache:
                             return self.cache[token]
                         

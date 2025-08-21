@@ -7,9 +7,12 @@ import time
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import List, Dict, Any
-from app.routes.websocket_enhanced import (
 from app.websocket.unified.manager import UnifiedWebSocketManager
 from app.core.websocket_cors import WebSocketCORSHandler
+
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
 
     def test_error_logging_production_readiness(self):
         """Test that error logging is appropriate for production monitoring."""

@@ -14,6 +14,10 @@ import sys
 from pathlib import Path
 from main import app
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def test_google_oauth_config(self):
         """Test Google OAuth configuration"""
         response = client.get("/auth/config")

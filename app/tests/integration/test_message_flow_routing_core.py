@@ -13,6 +13,10 @@ from app.schemas.websocket_models import WebSocketMessage, UserMessagePayload
 from app.schemas.core_enums import WebSocketMessageType
 from app.logging_config import central_logger
 
+
+class TestSyntaxFix:
+    """Test class for orphaned methods"""
+
     def __init__(self):
         super().__init__()
         self.routing_decisions: List[Dict[str, Any]] = []
