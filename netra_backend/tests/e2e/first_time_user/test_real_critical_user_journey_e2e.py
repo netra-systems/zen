@@ -25,7 +25,7 @@ import pytest
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
-from netra_backend.tests.real_critical_helpers import (
+from netra_backend.tests.agents.test_helpers import (
 
 # Add project root to path
     OAuthFlowHelpers, AIProviderHelpers, WebSocketHelpers, 

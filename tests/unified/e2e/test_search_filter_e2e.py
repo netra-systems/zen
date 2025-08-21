@@ -29,7 +29,7 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from netra_backend.search_filter_helpers import (
+from netra_backend.app.utils.search_filter import (
     SearchFilterTestCore, SearchOperationSimulator, FilterValidationCore,
     PerformanceValidator, PaginationTester, SearchDataGenerator
 )

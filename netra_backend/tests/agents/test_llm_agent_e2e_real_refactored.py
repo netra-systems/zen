@@ -25,7 +25,7 @@ setup_test_path()
 
 
 # Import all fixtures from modular structure
-from netra_backend.tests.test_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
     mock_llm_manager, 
     mock_db_session, 
     mock_websocket_manager, 

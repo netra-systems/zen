@@ -31,7 +31,7 @@ import pytest
 import pytest_asyncio
 
 from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas.agent_requests import AgentRequest
+from netra_backend.app.schemas.Agent import AgentRequest
 from netra_backend.agent_conversation_helpers import (
     AgentConversationTestCore,
     ConversationFlowValidator,

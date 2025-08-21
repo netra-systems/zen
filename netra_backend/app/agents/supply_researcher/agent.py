@@ -15,14 +15,14 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import ResearchSession
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.services.apex_optimizer_agent.models import ResearchType
-from netra_backend.app.agents.corpus_admin.parsers import SupplyRequestParser
+from netra_backend.app.agents.supply_researcher.models import ResearchType
+from netra_backend.app.agents.supply_researcher.parsers import SupplyRequestParser
 from netra_backend.app.agents.supply_researcher.research_engine import SupplyResearchEngine
 from netra_backend.app.agents.supply_researcher.data_extractor import SupplyDataExtractor
 from netra_backend.app.agents.supply_researcher.database_manager import SupplyDatabaseManager
 
 
-# FIXME: # FIXME: class SupplyResearcherAgent(BaseSubAgent):
+class SupplyResearcherAgent(BaseSubAgent):
     """Agent for researching and updating AI supply information"""
     
     def __init__(
@@ -31,7 +31,7 @@ from netra_backend.app.agents.supply_researcher.database_manager import SupplyDa
         db: AsyncSession,
         supply_service: Optional[SupplyResearchService] = None
     ):
-        # FIXME: # FIXME: super().__init__(llm_manager, name="SupplyResearcherAgent", 
+        super().__init__(llm_manager, name="SupplyResearcherAgent", 
                          description="Researches and updates AI model supply information using Google Deep Research")
         self._init_database_components(db, supply_service)
         self._init_research_components(db)
@@ -70,7 +70,7 @@ from netra_backend.app.agents.supply_researcher.database_manager import SupplyDa
         research_session = await self._create_research_session(parsed_request, state)
         research_result = await self._conduct_research_with_updates(parsed_request, research_session, run_id, stream_updates)
         result = await self._process_and_finalize_results(research_result, parsed_request, research_session, run_id, stream_updates, state)
-        # FIXME: # FIXME: logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
+        logger.info(f"SupplyResearcherAgent completed for run_id: {run_id}")
     
     async def _parse_and_log_request(self, request: str, run_id: str, stream_updates: bool):
         """Parse request and log details."""
@@ -286,7 +286,7 @@ from netra_backend.app.agents.supply_researcher.database_manager import SupplyDa
         stream_updates: bool
     ) -> None:
         """Handle execution errors"""
-        # FIXME: # FIXME: logger.error(f"SupplyResearcherAgent execution failed: {error}")
+        logger.error(f"SupplyResearcherAgent execution failed: {error}")
         await self._update_failed_session_if_exists(error)
         self._store_error_result(error, state)
         await self._send_error_notification(run_id, error, stream_updates)

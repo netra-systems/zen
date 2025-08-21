@@ -29,7 +29,7 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.fixtures.llm_agent_fixtures import (
+from netra_backend.tests.agents.test_fixtures import (
 
 # Add project root to path
     mock_llm_manager, mock_db_session, mock_websocket_manager,

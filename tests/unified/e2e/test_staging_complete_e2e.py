@@ -20,9 +20,9 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 
-from netra_backend.tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
-from netra_backend.tests.unified.real_services_manager import RealServicesManager
+from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from tests.unified.test_environment_config import TestEnvironmentType
+from tests.unified.real_services_manager import RealServicesManager
 
 logger = logging.getLogger(__name__)
 

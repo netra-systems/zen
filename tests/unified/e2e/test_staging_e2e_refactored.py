@@ -34,8 +34,8 @@ import time
 import aiohttp
 from typing import Dict, Any
 
-from netra_backend.tests.unified.e2e.unified_e2e_harness import create_e2e_harness
-from netra_backend.tests.unified.test_environment_config import get_test_environment_config, TestEnvironment
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.unified.test_environment_config import get_test_environment_config, TestEnvironment
 from netra_backend.app.core.auth_constants import HeaderConstants, JWTConstants, AuthConstants
 from netra_backend.app.core.network_constants import URLConstants, ServicePorts
 

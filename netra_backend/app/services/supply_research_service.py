@@ -12,11 +12,11 @@ from netra_backend.app.services.permission_service import PermissionService
 from netra_backend.app.logging_config import central_logger as logger
 
 # Import modular operations
-from netra_backend.app.supply_research.supply_item_operations import SupplyItemOperations
-from netra_backend.app.supply_research.research_session_operations import ResearchSessionOperations
-from netra_backend.app.supply_research.price_analysis_operations import PriceAnalysisOperations
-from netra_backend.app.supply_research.market_operations import MarketOperations
-from netra_backend.app.supply_research.supply_validation import SupplyValidation
+from netra_backend.app.services.supply_research.supply_item_operations import SupplyItemOperations
+from netra_backend.app.services.supply_research.research_session_operations import ResearchSessionOperations
+from netra_backend.app.services.supply_research.price_analysis_operations import PriceAnalysisOperations
+from netra_backend.app.services.supply_research.market_operations import MarketOperations
+from netra_backend.app.services.supply_research.supply_validation import SupplyValidation
 
 
 class SupplyResearchService:

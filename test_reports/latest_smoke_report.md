@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T10:40:50.371528  
+**Generated:** 2025-08-21T12:13:16.360244  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 5.18s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 7.06s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,7 +28,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 5.18s
+- **Total Duration:** 7.06s
 - **Exit Code:** 4
 
 ### Backend Configuration
@@ -60,55 +60,17 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/routes/test_health_route.py netra_backend/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error netra_backend/tests/core/test_config_manager.py::TestConfigManager::test_initialization netra_backend/tests/services/test_security_service.py::test_encrypt_and_decrypt netra_backend/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 4.45s
+[FAIL] TESTS FAILED with exit code 4 after 6.06s
 ================================================================================
 
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
-netra_backend\tests\conftest.py:59: in <module>
-    from netra_backend.app.routes.mcp.main import app
-netra_backend\app\routes\mcp\__init__.py:8: in <module>
-    from netra_backend.app.routes.mcp.main import router
-netra_backend\app\routes\mcp\main.py:13: in <module>
-    from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
-netra_backend\app\auth_integration\__init__.py:87: in <module>
-    from netra_backend.app.services.synthetic_data.validators import (
-netra_backend\app\services\synthetic_data\__init__.py:5: in <module>
-    from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService, synthetic_data_service
-netra_backend\app\services\synthetic_data\core_service.py:9: in <module>
-    from netra_backend.app.services.synthetic_data.synthetic_data_service_main import SyntheticDataService, synthetic_data_service
-netra_backend\app\services\synthetic_data\synthetic_data_service_main.py:7: in <module>
-    from netra_backend.app.services.synthetic_data.generation_coordinator import GenerationCoordinator
-netra_backend\app\services\synthetic_data\generation_coordinator.py:8: in <module>
-    from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
-netra_backend\app\services\synthetic_data\core_service_base.py:13: in <module>
-    from netra_backend.app.services.synthetic_data.job_manager import JobManager
-netra_backend\app\services\synthetic_data\job_manager.py:11: in <module>
-    from netra_backend.app.services.websocket.ws_manager import manager
-netra_backend\app\services\websocket\ws_manager.py:14: in <module>
-    from netra_backend.app.ws_manager import (
-netra_backend\app\ws_manager.py:21: in <module>
-    from netra_backend.app.websocket.connection import ConnectionInfo
-netra_backend\app\websocket\connection.py:14: in <module>
-    from netra_backend.app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
-netra_backend\app\websocket\connection_manager.py:19: in <module>
-    from netra_backend.app.websocket.connection_executor import ConnectionExecutionOrchestrator
-netra_backend\app\websocket\connection_executor.py:13: in <module>
-    from netra_backend.app.agents.base.interface import (
-netra_backend\app\agents\base\__init__.py:15: in <module>
-    from netra_backend.app.agents.base_agent import BaseSubAgent
-netra_backend\app\agents\base_agent.py:9: in <module>
-    from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
-netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
-    from netra_backend.app.routes.unified_tools.router import router
-netra_backend\app\routes\unified_tools\router.py:20: in <module>
-    from netra_backend.app.core.error_handlers import (
-netra_backend\app\core\error_handlers\__init__.py:17: in <module>
-    from netra_backend.app.core.error_handlers.api.api_error_handler import (
-netra_backend\app\core\error_handlers\api\__init__.py:3: in <module>
-    from netra_backend.app.core.error_handlers.api.api_error_handler import ApiErrorHandler
-netra_backend\app\core\error_handlers\api\api_error_handler.py:17: in <module>
-    from netra_backend.app.base_error_handler import BaseErrorHandler
-E   ModuleNotFoundError: No module named 'netra_backend.app.base_error_handler'
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\e2e\conftest.py'.
+netra_backend\tests\e2e\__init__.py:19: in <module>
+    from netra_backend.tests.model_setup_helpers import model_selection_setup
+E   ModuleNotFoundError: No module named 'netra_backend.tests.model_setup_helpers'
 
 ```
 
