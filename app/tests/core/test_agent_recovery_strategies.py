@@ -23,7 +23,7 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, Optional
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from app.core.agent_recovery_strategies import (
     TriageAgentRecoveryStrategy,
@@ -97,7 +97,7 @@ class TestRecoveryContext:
         metadata = {
             "customer_tier": "Enterprise",
             "workload_priority": "HIGH",
-            "recovery_deadline": datetime.now(datetime.timezone.utc) + timedelta(minutes=5)
+            "recovery_deadline": datetime.now(timezone.utc) + timedelta(minutes=5)
         }
         test_error = Exception("Resource exhaustion")
         

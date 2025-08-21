@@ -293,11 +293,11 @@ OAuthConfig(
     client_id="staging_client_id",
     client_secret="staging_secret",
     redirect_uris=[
-        "https://staging.netrasystems.ai/api/auth/callback",
+        "https://app.staging.netrasystems.ai/api/auth/callback",
         "https://app.staging.netrasystems.ai/callback"
     ],
     javascript_origins=[
-        "https://staging.netrasystems.ai",
+        "https://app.staging.netrasystems.ai",
         "https://app.staging.netrasystems.ai"
     ],
     allow_dev_login=False,

@@ -24,7 +24,7 @@ from redis.asyncio import Redis
 
 from app.models.user import User
 from app.models.conversion_event import ConversionEvent
-from app.services.usage_service import UsageService
+from app.services.user_service import UserService as UsageService
 
 from ..test_helpers.user_flow_base import UserFlowTestBase
 from ..fixtures.user_journey_data import UserTestData

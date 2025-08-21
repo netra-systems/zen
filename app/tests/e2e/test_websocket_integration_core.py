@@ -25,6 +25,29 @@ class MockWebSocket:
         self.messages_received = []
         self.closed = False
         self.accepted = False
+        self.connection_id = f"test_conn_{int(asyncio.get_event_loop().time() * 1000)}"
+    
+    async def accept(self):
+        self.accepted = True
+    
+    async def send_json(self, data: Dict[str, Any]):
+        self.messages_sent.append(data)
+    
+    async def send_text(self, data: str):
+        self.messages_sent.append(data)
+    
+    async def receive_json(self) -> Dict[str, Any]:
+        if self.messages_received:
+            return self.messages_received.pop(0)
+        await asyncio.sleep(0.1)
+        return {"type": "ping"}
+    
+    async def close(self):
+        self.closed = True
+    
+    def add_received_message(self, message: Dict[str, Any]):
+        """Add message to received queue for testing."""
+        self.messages_received.append(message)
 
 
 @pytest.fixture

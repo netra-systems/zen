@@ -75,10 +75,12 @@ resource "google_cloud_run_service" "auth" {
           name  = "CORS_ORIGINS"
           value = join(",", [
             "https://netra-frontend-${var.project_id_numerical}.${var.region}.run.app",
-            "https://staging.netrasystems.ai",
             "https://app.staging.netrasystems.ai",
             "https://auth.staging.netrasystems.ai",
+            "https://api.staging.netrasystems.ai",
+            "https://backend.staging.netrasystems.ai",
             "http://localhost:3000",
+            "http://localhost:8000",
             "http://localhost:8080"
           ])
         }
@@ -117,7 +119,7 @@ resource "google_cloud_run_service" "auth" {
         
         env {
           name  = "FRONTEND_URL"
-          value = var.environment == "production" ? "https://netrasystems.ai" : "https://staging.netrasystems.ai"
+          value = var.environment == "production" ? "https://netrasystems.ai" : "https://app.staging.netrasystems.ai"
         }
         
         # Secret Manager Configuration

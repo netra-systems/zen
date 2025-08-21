@@ -30,7 +30,7 @@
 
 - **Incorrect patterns detected**:
   - `staging.netrasystems.ai` (missing subdomain)
-  - `https://staging.netrasystems.ai` (legacy format)
+  - `https://app.staging.netrasystems.ai` (legacy format)
   - `http://staging.netrasystems.ai` (insecure)
   - `netra-staging.herokuapp.com` (old Heroku URLs)
   - `localhost:3000` (dev URLs in staging config)
@@ -108,7 +108,7 @@
 
 ### Current Issue Found
 **File**: `app/clients/auth_client_config.py`, Line 369
-**Current**: `javascript_origins=["https://staging.netrasystems.ai"],`
+**Current**: `javascript_origins=["https://app.staging.netrasystems.ai"],`
 **Expected**: `javascript_origins=["https://app.staging.netrasystems.ai"],`
 **Severity**: High
 **Context**: CORS JavaScript origins configuration

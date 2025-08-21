@@ -72,7 +72,7 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
         # Incorrect patterns that should be replaced
         self.incorrect_patterns = [
             "staging.netrasystems.ai",  # Missing subdomain
-            "https://staging.netrasystems.ai",  # Legacy format
+            "https://app.staging.netrasystems.ai",  # Legacy format
             "http://staging.netrasystems.ai",   # Insecure
             "netra-staging.herokuapp.com",      # Old Heroku URLs
             "localhost:3000",                   # Dev URLs in staging config
@@ -638,7 +638,7 @@ async def test_auth_client_config_fallback_url_l4(oauth_url_consistency_l4_suite
     assert result["exists"] is True, "Critical file app/clients/auth_client_config.py does not exist"
     assert "line_content" in result, "Could not read line content"
     
-    # Specific test for the known issue: line 369 should not contain "https://staging.netrasystems.ai"
+    # Specific test for the known issue: line 369 should not contain "https://app.staging.netrasystems.ai"
     line_content = result.get("line_content", "")
     has_incorrect_url = result.get("has_incorrect_url", False)
     

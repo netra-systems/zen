@@ -17,12 +17,140 @@ import logging
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from app.services.service_discovery import ServiceDiscoveryService
-from app.services.load_balancer import LoadBalancerService
-from app.services.health_check_service import HealthCheckService
-from app.services.registry import ServiceRegistry
+from app.redis_manager import RedisManager
+from app.core.cache.redis_config import RedisConfig
+from app.core.health.health_checkers import HealthCheckerRegistry
+from app.core.health.interface import HealthStatus
+import httpx
+import json
+from unittest.mock import AsyncMock, MagicMock
 
 logger = logging.getLogger(__name__)
+
+
+class MockServiceRegistry:
+    """Mock service registry for testing."""
+    
+    def __init__(self):
+        self.services = {}
+        self.instances = {}
+        
+    async def register_service(self, service_name: str, instance_config: Dict[str, Any]) -> Dict[str, Any]:
+        """Register service instance."""
+        if service_name not in self.services:
+            self.services[service_name] = []
+        
+        instance_id = instance_config.get("instance_id", f"{service_name}_{len(self.services[service_name])}")
+        instance_config["instance_id"] = instance_id
+        
+        self.services[service_name].append(instance_config)
+        self.instances[instance_id] = instance_config
+        
+        return {"success": True, "instance_id": instance_id}
+    
+    async def unregister_service(self, service_name: str, instance_id: str) -> Dict[str, Any]:
+        """Unregister service instance."""
+        if service_name in self.services:
+            self.services[service_name] = [
+                inst for inst in self.services[service_name] 
+                if inst.get("instance_id") != instance_id
+            ]
+        
+        if instance_id in self.instances:
+            del self.instances[instance_id]
+        
+        return {"success": True}
+    
+    async def discover_instances(self, service_name: str) -> List[Dict[str, Any]]:
+        """Discover service instances."""
+        return self.services.get(service_name, [])
+    
+    async def initialize(self):
+        """Initialize registry."""
+        pass
+    
+    async def shutdown(self):
+        """Shutdown registry."""
+        self.services.clear()
+        self.instances.clear()
+
+
+class MockLoadBalancer:
+    """Mock load balancer for testing."""
+    
+    def __init__(self):
+        self.algorithms = ["round_robin", "random", "least_connections"]
+        self.current_index = 0
+        
+    async def select_instance(self, service_name: str, instances: List[Dict[str, Any]], 
+                            algorithm: str = "round_robin") -> Dict[str, Any]:
+        """Select instance using load balancing algorithm."""
+        if not instances:
+            return {"success": False, "error": "No instances available"}
+        
+        if algorithm == "round_robin":
+            selected = instances[self.current_index % len(instances)]
+            self.current_index += 1
+        elif algorithm == "random":
+            import random
+            selected = random.choice(instances)
+        else:  # least_connections
+            selected = instances[0]  # Simplified for testing
+        
+        return {"success": True, "instance": selected}
+    
+    async def initialize(self):
+        """Initialize load balancer."""
+        pass
+    
+    async def shutdown(self):
+        """Shutdown load balancer."""
+        pass
+
+
+class MockHealthService:
+    """Mock health service for testing."""
+    
+    def __init__(self):
+        self.health_status = {}
+        self.registered_services = {}
+        
+    async def register_service_health(self, service_name: str, health_endpoint: str) -> Dict[str, Any]:
+        """Register service for health monitoring."""
+        self.registered_services[service_name] = health_endpoint
+        return {"success": True}
+    
+    async def check_instance_health(self, service_name: str, instance_id: str) -> Dict[str, Any]:
+        """Check health of service instance."""
+        # Simulate mostly healthy instances
+        import random
+        is_healthy = random.random() > 0.1  # 90% healthy
+        
+        status = {
+            "healthy": is_healthy,
+            "status_code": 200 if is_healthy else 503,
+            "response_time": random.uniform(0.01, 0.1)
+        }
+        
+        self.health_status[instance_id] = status
+        return status
+    
+    async def mark_instance_unhealthy(self, service_name: str, instance_id: str):
+        """Mark instance as unhealthy."""
+        self.health_status[instance_id] = {
+            "healthy": False,
+            "status_code": 503,
+            "response_time": 0.0
+        }
+    
+    async def start(self):
+        """Start health service."""
+        pass
+    
+    async def stop(self):
+        """Stop health service."""
+        self.health_status.clear()
+        self.registered_services.clear()
 
 
 class ServiceDiscoveryManager:
@@ -38,17 +166,16 @@ class ServiceDiscoveryManager:
         
     async def initialize_services(self):
         """Initialize service discovery services."""
-        self.discovery_service = ServiceDiscoveryService()
-        await self.discovery_service.initialize()
+        self.service_registry = MockServiceRegistry()
+        await self.service_registry.initialize()
         
-        self.load_balancer = LoadBalancerService()
+        self.discovery_service = self.service_registry  # Use registry as discovery service
+        
+        self.load_balancer = MockLoadBalancer()
         await self.load_balancer.initialize()
         
-        self.health_service = HealthCheckService()
+        self.health_service = MockHealthService()
         await self.health_service.start()
-        
-        self.service_registry = ServiceRegistry()
-        await self.service_registry.initialize()
     
     async def register_service_instance(self, service_name: str, instance_config: Dict[str, Any]) -> Dict[str, Any]:
         """Register service instance with discovery system."""
@@ -60,21 +187,16 @@ class ServiceDiscoveryManager:
                 service_name, instance_config
             )
             
-            # Register with discovery service
-            discovery_result = await self.discovery_service.register_instance(
-                service_name, instance_config
-            )
-            
             # Register health check
             health_result = await self.health_service.register_service_health(
-                service_name, instance_config.get("health_endpoint")
+                service_name, instance_config.get("health_endpoint", "/health")
             )
             
             service_record = {
                 "service_name": service_name,
                 "instance_config": instance_config,
                 "registry_success": registration_result.get("success", False),
-                "discovery_success": discovery_result.get("success", False),
+                "discovery_success": registration_result.get("success", False),  # Same as registry
                 "health_success": health_result.get("success", False),
                 "registration_time": time.time() - registration_start
             }
@@ -96,7 +218,7 @@ class ServiceDiscoveryManager:
         
         try:
             # Discover instances
-            instances = await self.discovery_service.discover_instances(service_name)
+            instances = await self.service_registry.discover_instances(service_name)
             
             # Get health status for each instance
             healthy_instances = []
@@ -152,9 +274,14 @@ class ServiceDiscoveryManager:
         
         for i in range(call_count):
             # Get instance via load balancer
-            selected_instance = await self.load_balancer.select_instance(
+            selected_result = await self.load_balancer.select_instance(
                 service_name, available_instances
             )
+            
+            if not selected_result.get("success"):
+                continue
+                
+            selected_instance = selected_result["instance"]
             
             # Track instance usage
             instance_id = selected_instance.get("instance_id")
@@ -255,14 +382,9 @@ class ServiceDiscoveryManager:
                 await self.service_registry.unregister_service(
                     service["service_name"], service["instance_config"]["instance_id"]
                 )
-                await self.discovery_service.unregister_instance(
-                    service["service_name"], service["instance_config"]["instance_id"]
-                )
             except Exception:
                 pass
         
-        if self.discovery_service:
-            await self.discovery_service.shutdown()
         if self.load_balancer:
             await self.load_balancer.shutdown()
         if self.health_service:

@@ -24,7 +24,7 @@
     }
   },
   "custom_domains": {
-    "frontend": "https://staging.netrasystems.ai",
+    "frontend": "https://app.staging.netrasystems.ai",
     "backend": "https://api.staging.netrasystems.ai"
   }
 }

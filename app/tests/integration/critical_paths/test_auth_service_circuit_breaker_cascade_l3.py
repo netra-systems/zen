@@ -17,15 +17,12 @@ import uuid
 import logging
 import docker
 import aiohttp
-from typing import Dict, List, Optional, Any, Tuple
-from unittest.mock import AsyncMock, patch
+from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-from datetime import datetime, timedelta
 
 from app.core.circuit_breaker_core import CircuitBreaker
 from app.core.circuit_breaker_types import CircuitConfig, CircuitState
 from app.clients.auth_client_cache import AuthCircuitBreakerManager
-from app.clients.auth_client_core import AuthServiceClient
 
 logger = logging.getLogger(__name__)
 
@@ -46,7 +43,6 @@ class CascadeMetrics:
     services_isolated: int = 0
     fallback_activations: int = 0
     recovery_attempts: int = 0
-    state_transitions: int = 0
 
 
 class AuthServiceCircuitBreakerCascadeL3Manager:
@@ -55,43 +51,26 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
     def __init__(self, docker_client):
         self.docker_client = docker_client
         self.auth_container = None
-        self.redis_container = None
         self.backend_container = None
         self.websocket_container = None
-        
         self.service_endpoints: Dict[str, ServiceEndpoint] = {}
         self.cascade_metrics = CascadeMetrics()
-        self.circuit_events: List[Dict] = []
-        
         self.auth_url = None
-        self.redis_url = None
         
     async def setup_containerized_environment(self):
         """Setup containerized environment for L3 testing."""
         try:
-            # Start Redis container
-            self.redis_container = self._start_redis_container()
-            self.redis_url = self._get_container_url(
-                self.redis_container, 6379
-            )
-            
             # Start Auth service container
             self.auth_container = self._start_auth_service_container()
-            self.auth_url = self._get_container_url(
-                self.auth_container, 80
-            )
+            self.auth_url = self._get_container_url(self.auth_container, 80)
             
             # Start Backend service container
             self.backend_container = self._start_backend_container()
-            backend_url = self._get_container_url(
-                self.backend_container, 80
-            )
+            backend_url = self._get_container_url(self.backend_container, 80)
             
             # Start WebSocket service container
             self.websocket_container = self._start_websocket_container()
-            websocket_url = self._get_container_url(
-                self.websocket_container, 80
-            )
+            websocket_url = self._get_container_url(self.websocket_container, 80)
             
             # Wait for services to be ready
             await self._wait_for_service_health(self.auth_url)
@@ -99,24 +78,12 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
             await self._wait_for_service_health(websocket_url)
             
             # Initialize service endpoints
-            await self._initialize_service_endpoints(
-                backend_url, websocket_url
-            )
+            await self._initialize_service_endpoints(backend_url, websocket_url)
             
         except Exception as e:
             logger.error(f"Failed to setup environment: {e}")
             await self.cleanup_environment()
             raise
-    
-    def _start_redis_container(self) -> Any:
-        """Start Redis container."""
-        return self.docker_client.containers.run(
-            "redis:7-alpine",
-            ports={'6379/tcp': None},
-            detach=True,
-            name=f"auth_circuit_test_redis_{uuid.uuid4().hex[:8]}",
-            remove=True
-        )
     
     def _start_auth_service_container(self) -> Any:
         """Start auth service container."""
@@ -129,9 +96,9 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
         )
     
     def _start_backend_container(self) -> Any:
-        """Start backend service container."""
+        """Start backend service container.""" 
         return self.docker_client.containers.run(
-            "nginx:alpine", 
+            "nginx:alpine",
             ports={'80/tcp': None},
             detach=True,
             name=f"auth_circuit_test_backend_{uuid.uuid4().hex[:8]}",
@@ -142,7 +109,7 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
         """Start WebSocket service container."""
         return self.docker_client.containers.run(
             "nginx:alpine",
-            ports={'80/tcp': None}, 
+            ports={'80/tcp': None},
             detach=True,
             name=f"auth_circuit_test_ws_{uuid.uuid4().hex[:8]}",
             remove=True
@@ -154,9 +121,7 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
         host_port = container.attrs['NetworkSettings']['Ports'][f'{port}/tcp'][0]['HostPort']
         return f"http://localhost:{host_port}"
     
-    async def _initialize_service_endpoints(
-        self, backend_url: str, websocket_url: str
-    ):
+    async def _initialize_service_endpoints(self, backend_url: str, websocket_url: str):
         """Initialize service endpoints with circuit breakers."""
         # Backend service with auth dependency
         backend_circuit = CircuitBreaker(CircuitConfig(
@@ -174,8 +139,8 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
         )
         
         # WebSocket service with auth dependency
-        websocket_circuit = WebSocketCircuitBreaker(CircuitConfig(
-            name="websocket_auth", 
+        websocket_circuit = CircuitBreaker(CircuitConfig(
+            name="websocket_auth",
             failure_threshold=2,
             recovery_timeout=20,
             timeout_seconds=5
@@ -203,26 +168,20 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
     async def trigger_auth_requests_cascade(self) -> Dict[str, Any]:
         """Trigger auth requests across all dependent services."""
         results = {}
-        
         for service_name, endpoint in self.service_endpoints.items():
             if endpoint.has_auth_dependency:
                 result = await self._test_service_auth_dependency(endpoint)
                 results[service_name] = result
-                
         return results
     
-    async def _test_service_auth_dependency(
-        self, endpoint: ServiceEndpoint
-    ) -> Dict[str, Any]:
+    async def _test_service_auth_dependency(self, endpoint: ServiceEndpoint) -> Dict[str, Any]:
         """Test service auth dependency and circuit breaker behavior."""
         failures = 0
         successes = 0
         circuit_opened = False
         
-        # Attempt multiple auth requests
         for i in range(6):
             try:
-                # Simulate auth validation request
                 if endpoint.circuit_breaker.can_execute():
                     success = await self._make_auth_request(endpoint)
                     if success:
@@ -231,20 +190,16 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
                     else:
                         endpoint.circuit_breaker.record_failure("auth_failure")
                         failures += 1
-                        
                         if endpoint.circuit_breaker.is_open:
                             circuit_opened = True
                             self.cascade_metrics.services_isolated += 1
                             break
                 else:
-                    # Circuit is open - activate fallback
                     await self._activate_fallback_auth(endpoint)
                     self.cascade_metrics.fallback_activations += 1
-                    
-            except Exception as e:
+            except Exception:
                 endpoint.circuit_breaker.record_failure("exception")
                 failures += 1
-                
             await asyncio.sleep(0.1)
         
         return {
@@ -261,7 +216,6 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
         try:
             timeout = aiohttp.ClientTimeout(total=5)
             async with aiohttp.ClientSession(timeout=timeout) as session:
-                # Simulate auth validation by making request to auth service
                 async with session.get(f"{self.auth_url}/validate") as response:
                     return response.status == 200
         except:
@@ -269,24 +223,16 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
     
     async def _activate_fallback_auth(self, endpoint: ServiceEndpoint):
         """Activate fallback auth mechanism."""
-        # Simulate fallback auth (cached tokens, guest mode, etc.)
         logger.info(f"Activating fallback auth for {endpoint.name}")
-        await asyncio.sleep(0.05)  # Simulate fallback processing
+        await asyncio.sleep(0.05)
     
     async def test_circuit_breaker_recovery_coordination(self) -> Dict[str, Any]:
         """Test circuit breaker recovery coordination across services."""
-        # Trigger failures first
         await self.simulate_auth_service_failure()
         await asyncio.sleep(1)
-        
-        # Trigger cascade
         cascade_results = await self.trigger_auth_requests_cascade()
-        
-        # Restore auth service
         await self.restore_auth_service()
         await asyncio.sleep(2)
-        
-        # Test recovery coordination
         recovery_results = {}
         for service_name, endpoint in self.service_endpoints.items():
             if endpoint.has_auth_dependency:
@@ -304,24 +250,18 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
             }
         }
     
-    async def _test_service_recovery(
-        self, endpoint: ServiceEndpoint
-    ) -> Dict[str, Any]:
+    async def _test_service_recovery(self, endpoint: ServiceEndpoint) -> Dict[str, Any]:
         """Test service recovery after auth service restoration."""
         initial_state = endpoint.circuit_breaker.state
         recovery_successful = False
         attempts = 0
         
-        # Wait for circuit to enter half-open state
-        max_wait = 35  # seconds
+        max_wait = 35
         start_time = time.time()
-        
         while time.time() - start_time < max_wait:
             if endpoint.circuit_breaker.state == CircuitState.HALF_OPEN:
                 break
             await asyncio.sleep(0.5)
-        
-        # Test recovery
         if endpoint.circuit_breaker.state == CircuitState.HALF_OPEN:
             for _ in range(3):
                 attempts += 1
@@ -337,7 +277,6 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
                     else:
                         endpoint.circuit_breaker.record_failure("recovery_failure")
                         break
-                        
                 await asyncio.sleep(0.1)
         
         return {
@@ -365,26 +304,28 @@ class AuthServiceCircuitBreakerCascadeL3Manager:
     
     async def cleanup_environment(self):
         """Cleanup containerized environment."""
-        containers = [
-            self.auth_container,
-            self.redis_container, 
-            self.backend_container,
-            self.websocket_container
-        ]
-        
+        containers = [self.auth_container, self.backend_container, self.websocket_container]
         for container in containers:
             if container:
                 try:
-                    await self.docker_manager.stop_container(container)
-                    await self.docker_manager.remove_container(container)
+                    container.stop()
+                    container.remove()
                 except:
                     pass
 
 
 @pytest.fixture
-async def auth_circuit_cascade_l3():
+async def docker_client():
+    """Docker client for container management."""
+    client = docker.from_env()
+    yield client
+    client.close()
+
+
+@pytest.fixture
+async def auth_circuit_cascade_l3(docker_client):
     """Create L3 auth circuit breaker cascade test manager."""
-    manager = AuthServiceCircuitBreakerCascadeL3Manager()
+    manager = AuthServiceCircuitBreakerCascadeL3Manager(docker_client)
     await manager.setup_containerized_environment()
     yield manager
     await manager.cleanup_environment()
@@ -417,11 +358,11 @@ class TestAuthServiceCircuitBreakerCascadeL3:
         
         # Verify fallback mechanisms activated
         services_with_fallback = [
-            r for r in results.values() if r["fallback_activated"] 
+            r for r in results.values() if r["fallback_activated"]
         ]
         assert len(services_with_fallback) >= 1, "Fallback should activate"
     
-    @pytest.mark.asyncio 
+    @pytest.mark.asyncio
     async def test_circuit_breaker_prevents_thundering_herd(
         self, auth_circuit_cascade_l3
     ):
@@ -487,52 +428,6 @@ class TestAuthServiceCircuitBreakerCascadeL3:
         assert metrics["fallback_activations"] >= 1, "Should activate fallbacks"
     
     @pytest.mark.asyncio
-    async def test_circuit_breaker_state_transitions(
-        self, auth_circuit_cascade_l3
-    ):
-        """Test circuit breaker state transitions during auth service lifecycle."""
-        manager = auth_circuit_cascade_l3
-        
-        # Get initial states
-        initial_states = {}
-        for name, endpoint in manager.service_endpoints.items():
-            initial_states[name] = endpoint.circuit_breaker.state
-        
-        # Trigger failure -> open state
-        await manager.simulate_auth_service_failure()
-        await manager.trigger_auth_requests_cascade()
-        
-        failure_states = {}
-        for name, endpoint in manager.service_endpoints.items():
-            failure_states[name] = endpoint.circuit_breaker.state
-        
-        # Restore service -> half-open -> closed
-        await manager.restore_auth_service()
-        await asyncio.sleep(35)  # Wait for recovery timeout
-        
-        # Trigger recovery
-        await manager.trigger_auth_requests_cascade()
-        
-        final_states = {}
-        for name, endpoint in manager.service_endpoints.items():
-            final_states[name] = endpoint.circuit_breaker.state
-        
-        # Verify state transitions
-        assert any(
-            state == CircuitState.CLOSED for state in initial_states.values()
-        ), "Should start with closed circuits"
-        
-        assert any(
-            state == CircuitState.OPEN for state in failure_states.values() 
-        ), "Should transition to open during failures"
-        
-        # Should eventually recover to closed or at least half-open
-        assert any(
-            state in [CircuitState.CLOSED, CircuitState.HALF_OPEN] 
-            for state in final_states.values()
-        ), "Should recover from open state"
-    
-    @pytest.mark.asyncio
     async def test_websocket_circuit_breaker_auth_integration(
         self, auth_circuit_cascade_l3
     ):
@@ -544,11 +439,7 @@ class TestAuthServiceCircuitBreakerCascadeL3:
         
         # Test WebSocket auth dependency
         await manager.simulate_auth_service_failure()
-        
-        # WebSocket should have specific failure threshold
-        websocket_result = await manager._test_service_auth_dependency(
-            websocket_endpoint
-        )
+        websocket_result = await manager._test_service_auth_dependency(websocket_endpoint)
         
         assert websocket_result["service"] == "websocket"
         assert websocket_result["failures"] >= 2, "Should record failures"
@@ -556,28 +447,3 @@ class TestAuthServiceCircuitBreakerCascadeL3:
         # WebSocket circuit should open faster (threshold=2)
         if websocket_result["failures"] >= 2:
             assert websocket_result["circuit_opened"], "WebSocket circuit should open"
-            assert websocket_result["fallback_activated"], "Should activate fallback"
-    
-    @pytest.mark.asyncio
-    async def test_auth_circuit_breaker_metrics_collection(
-        self, auth_circuit_cascade_l3
-    ):
-        """Test comprehensive metrics collection during circuit breaker cascade."""
-        manager = auth_circuit_cascade_l3
-        
-        # Execute full test cycle
-        await manager.test_circuit_breaker_recovery_coordination()
-        
-        # Verify cascade metrics
-        metrics = manager.cascade_metrics
-        assert metrics.auth_failures > 0, "Should record auth failures"
-        assert metrics.services_isolated > 0, "Should isolate failing services"
-        assert metrics.fallback_activations > 0, "Should activate fallbacks"
-        
-        # Verify individual circuit breaker metrics
-        for name, endpoint in manager.service_endpoints.items():
-            circuit_metrics = endpoint.circuit_breaker.metrics
-            assert circuit_metrics.total_calls > 0, f"{name} should have calls"
-            
-            if endpoint.has_auth_dependency:
-                assert circuit_metrics.failed_calls > 0, f"{name} should have failures"

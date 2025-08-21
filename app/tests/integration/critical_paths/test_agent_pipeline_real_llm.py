@@ -29,11 +29,11 @@ from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.base import BaseSubAgent
 from app.agents.state import DeepAgentState
 from app.services.quality_gate_service import QualityGateService
-from app.services.cost_tracking_service import CostTrackingService
+from app.services.cost_calculator import CostCalculatorService
 from app.ws_manager import WebSocketManager
 from app.auth_integration.auth import get_current_user
 from app.core.exceptions_base import NetraException
-from app.schemas.websocket_types import WSMessage, WSResponse
+from app.schemas.registry import WebSocketMessage as WSMessage, ServerMessage as WSResponse
 from app.schemas.llm_response_types import LLMResponse
 from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
@@ -169,7 +169,7 @@ class AgentPipelineRealLLMTester:
         self.llm_manager: Optional[LLMManager] = None
         self.supervisor_agent: Optional[SupervisorAgent] = None
         self.quality_gate_service: Optional[QualityGateService] = None
-        self.cost_tracking_service: Optional[CostTrackingService] = None
+        self.cost_tracking_service: Optional[CostCalculatorService] = None
         
         # Metrics collection
         self.test_metrics = {
@@ -231,8 +231,7 @@ class AgentPipelineRealLLMTester:
     
     async def _initialize_cost_tracking_service(self):
         """Initialize cost tracking service for accurate cost monitoring."""
-        self.cost_tracking_service = CostTrackingService()
-        await self.cost_tracking_service.initialize()
+        self.cost_tracking_service = CostCalculatorService()
     
     async def _initialize_websocket_client(self):
         """Initialize real WebSocket client for staging environment."""

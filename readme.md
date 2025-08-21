@@ -169,201 +169,35 @@ python scripts/scan_string_literals.py
 ## 🏗 Architecture
 
 ```
-├── app/                      # Backend application
-│   ├── agents/              # Multi-agent system (consolidated modules)
-│   │   ├── supervisor_consolidated.py  # Enhanced supervisor with hooks
-│   │   ├── triage_sub_agent.py
-│   │   ├── optimizations_core_sub_agent.py
-│   │   ├── actions_to_meet_goals_sub_agent.py
-│   │   ├── reporting_sub_agent.py
-│   │   ├── corpus_admin_sub_agent.py
-│   │   ├── supply_researcher_sub_agent.py
-│   │   ├── synthetic_data_sub_agent.py
-│   │   └── tool_dispatcher.py
-│   ├── routes/              # API endpoints
-│   │   ├── auth/           # OAuth and JWT authentication
-│   │   ├── websockets.py   # WebSocket with heartbeat
-│   │   ├── agent_route.py  # Agent execution
-│   │   ├── threads_route.py # Thread management
-│   │   └── health.py       # Health checks
-│   ├── services/            # Business logic
-│   │   ├── agent_service.py
-│   │   ├── apex_optimizer_agent/  # 30+ optimization tools
-│   │   │   ├── tools/      # Individual tool implementations
-│   │   │   └── tool_builder.py
-│   │   ├── database/       # Repository pattern
-│   │   ├── websocket/      # Message handling
-│   │   └── state/          # State persistence
-│   ├── schemas/            # Pydantic models
-│   ├── db/                 # Database models
-│   │   ├── models_postgres.py
-│   │   └── models_clickhouse.py
-│   ├── core/               # Core utilities
-│   │   ├── exceptions.py   # Error handling
-│   │   └── error_context.py # Trace IDs
-│   └── main.py             # App entry with auto-migration
-├── frontend/               # Frontend application
-│   ├── app/               # Next.js 14 app router
-│   │   ├── chat/          # Main chat interface
-│   │   ├── auth/          # OAuth pages
-│   │   └── (other pages)
-│   ├── components/        # React components
-│   │   ├── chat/         # Chat UI components
-│   │   │   ├── MessageItem.tsx
-│   │   │   ├── MessageInput.tsx
-│   │   │   └── ThinkingIndicator.tsx
-│   │   └── ui/           # shadcn/ui components
-│   ├── providers/        # Context providers
-│   │   └── WebSocketProvider.tsx
-│   ├── hooks/            # Custom hooks
-│   │   ├── useWebSocket.ts
-│   │   └── useAgent.ts
-│   ├── store/            # Zustand state stores
-│   │   ├── chat.ts
-│   │   └── authStore.ts
-│   └── types/            # TypeScript definitions
-├── tests/                 # Backend test suite
-│   ├── agents/           # Agent tests
-│   ├── routes/           # API tests
-│   └── services/         # Service tests
-├── app/tests/            # Comprehensive test suite
-│   ├── auth_integration/ # Auth integration tests
-│   ├── config/          # Test configuration
-│   ├── critical/        # Critical path tests
-│   ├── integration/     # Integration tests
-│   └── unit/            # Unit tests
-├── agent_to_agent/       # Agent communication reports
-├── agent_to_agent_status_updates/ # Agent status reports
-│   ├── STARTUP/         # Startup fix reports
-│   └── TESTS/           # Test fix reports
-├── docs/                  # Documentation
+├── app/                    # Backend (FastAPI)
+│   ├── agents/            # Multi-agent system
+│   ├── routes/            # API endpoints  
+│   ├── services/          # Business logic
+│   └── db/                # Database models
+├── frontend/              # Frontend (Next.js 14)
+│   ├── app/              # App router
+│   └── components/       # React components
 ├── SPEC/                  # XML specifications
-│   └── learnings/       # Modular learnings by category
-│       ├── index.xml    # Master learnings index
-│       ├── testing.xml  # Testing-related learnings
-│       ├── startup.xml  # Startup insights
-│       └── *.xml        # Category-specific learnings
+│   └── learnings/        # System learnings
 ├── scripts/              # Utility scripts
-├── config/               # Configuration files
-├── database_scripts/     # Database setup & migrations
-├── deployment_docs/      # Deployment guides
-├── test_scripts/         # Test runners & utilities
-├── test_reports/         # Test results & coverage
-└── marketing_materials/  # Marketing & investor docs
+└── tests/                # Test suites
 ```
 
 
 ## 📚 API Documentation
 
-### REST Endpoints
+### Core Endpoints
 
-#### Authentication
-- `POST /api/auth/login` - User login with email/password
-- `POST /api/auth/logout` - User logout and session cleanup
-- `GET /api/auth/me` - Get current authenticated user
-- `GET /api/auth/google/authorize` - Initiate Google OAuth flow
-- `GET /api/auth/google/callback` - Handle OAuth callback
+**Authentication:** `/api/auth/login`, `/api/auth/google/authorize`  
+**WebSocket:** `ws://localhost:8000/ws?token={jwt_token}`  
+**Threads:** `/api/threads` (CRUD operations)  
+**Metrics:** `/api/metrics/savings/{user_id}`, `/api/metrics/roi`  
+**Health:** `/health/ready`, `/health/dependencies`
 
-#### Agent Operations
-- `WebSocket /ws` - Real-time agent execution via WebSocket
-- `GET /api/agent/status/{run_id}` - Get run status
-- `GET /api/agent/history` - Get execution history
-
-#### Thread Management
-- `POST /api/threads` - Create new conversation thread
-- `GET /api/threads` - List user's threads
-- `DELETE /api/threads/{thread_id}` - Delete thread
-- `PUT /api/threads/{thread_id}/switch` - Switch active thread
-
-#### Supply Catalog
-- `GET /api/supply/catalog` - Get available models/providers
-- `POST /api/supply/estimate` - Estimate optimization costs
-
-#### Content Generation
-- `POST /api/generation/start` - Start content generation
-- `GET /api/generation/status/{job_id}` - Check generation status
-
-#### Business Metrics Integration
-- `GET /api/metrics/savings/{user_id}` - Get user savings analytics
-- `POST /api/metrics/track` - Track optimization events
-- `GET /api/metrics/roi` - Calculate return on investment
-- `GET /api/metrics/tier/{tier}/limits` - Get tier-specific limits
-
-#### Tier-Specific Endpoints
-
-##### Free Tier
-- `GET /api/free/demo` - Demo optimization features
-- `POST /api/free/sample-analysis` - Limited sample analysis
-- `GET /api/free/conversion-triggers` - Conversion opportunities
-
-##### Early/Mid Tier
-- `GET /api/tier/usage` - Current usage vs limits
-- `POST /api/tier/optimize` - Full optimization suite
-- `GET /api/tier/savings-report` - Detailed savings report
-
-##### Enterprise Tier
-- `GET /api/enterprise/custom-integrations` - Custom integration options
-- `POST /api/enterprise/bulk-optimization` - Bulk workload optimization
-- `GET /api/enterprise/sla-compliance` - SLA compliance metrics
-- `GET /api/enterprise/dedicated-support` - Support channel access
-
-#### Health & Monitoring
-- `GET /health` - Basic health check
-- `GET /health/ready` - Readiness with dependency checks
-- `GET /health/dependencies` - Detailed dependency status
-
-### WebSocket Events
-
+### WebSocket Message Types
 ```typescript
-// Connection with JWT authentication
-ws://localhost:8000/ws?token={jwt_token}
-
-// Message Types
-interface WebSocketMessage {
-  type: 'agent_started' | 'sub_agent_update' | 'agent_completed' | 
-        'tool_call' | 'tool_result' | 'agent_log' | 'error' | 
-        'connection_established' | 'heartbeat';
-  data: any;
-  metadata?: {
-    thread_id?: string;
-    run_id?: string;
-    agent_name?: string;
-    timestamp: string;
-  };
-}
-
-// Example: Start agent execution
-{
-  "action": "start_agent",
-  "data": {
-    "message": "Optimize my AI workload costs",
-    "thread_id": "thread-123"
-  }
-}
-
-// Example: Receive sub-agent status
-{
-  "type": "sub_agent_update",
-  "data": {
-    "agent_name": "TriageSubAgent",
-    "status": "thinking",
-    "message": "Analyzing request and determining optimization approach..."
-  },
-  "metadata": {
-    "thread_id": "thread-123",
-    "run_id": "run-456",
-    "timestamp": "2024-01-15T10:30:00Z"
-  }
-}
-
-// Example: Tool execution
-{
-  "type": "tool_call",
-  "data": {
-    "tool_name": "cost_analyzer",
-    "parameters": {...}
-  }
-}
+type MessageType = 'agent_started' | 'sub_agent_update' | 'agent_completed' | 
+                   'tool_call' | 'tool_result' | 'error' | 'heartbeat';
 ```
 
 ## 🧪 Testing

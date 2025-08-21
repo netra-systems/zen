@@ -70,7 +70,7 @@ class StagingTestSuite:
     def __init__(self):
         """Initialize staging test environment configuration."""
         self.env_config = get_test_environment_config(
-            environment=TestEnvironmentType.STAGING
+            environment="staging"
         )
         self.config_manager = UnifiedConfigManager()
         self.services_manager: Optional[RealServicesManager] = None
@@ -89,7 +89,7 @@ class StagingTestSuite:
             timeout=aiohttp.ClientTimeout(total=30)
         )
         self.services_manager = RealServicesManager(env_config=self.env_config)
-        self.harness = UnifiedE2ETestHarness(environment=TestEnvironmentType.STAGING)
+        self.harness = UnifiedE2ETestHarness(environment="staging")
         
         await self.harness.start_test_environment()
         self._validate_staging_prerequisites()

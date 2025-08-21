@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.services.thread_service import ThreadService
 from app.services.agent_service import AgentService
 from app.services.state_persistence import state_persistence_service
-from app.agents.supervisor.supervisor_consolidated import SupervisorAgent
+from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.data_sub_agent.agent import DataSubAgent
 from app.schemas.agent_state import StatePersistenceRequest, CheckpointType, AgentPhase
 from app.db.models_postgres import Thread, Message, Run

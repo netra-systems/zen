@@ -8,7 +8,7 @@
     </metadata>
 
     <problem_statement>
-        OAuth was redirecting to incorrect URL (https://staging.netrasystems.ai/auth/callback) 
+        OAuth was redirecting to incorrect URL (https://app.staging.netrasystems.ai/auth/callback) 
         instead of the dedicated auth service URL.
     </problem_statement>
 

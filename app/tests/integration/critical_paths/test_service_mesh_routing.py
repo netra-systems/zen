@@ -88,7 +88,7 @@ class LoadBalancingL4Tests:
             for i in range(total_requests):
                 # Get next instance using round-robin
                 selected_instance = await manager.load_balancer.select_instance(
-                    service_name, algorithm="round_robin"
+                    service_name, algorithm="round_robin", instances=instances
                 )
                 
                 if selected_instance["success"]:
@@ -142,7 +142,8 @@ class LoadBalancingL4Tests:
             
             for i in range(total_requests):
                 selected_instance = await manager.load_balancer.select_instance(
-                    service_name, algorithm="weighted_round_robin", weights=instance_weights
+                    service_name, algorithm="weighted_round_robin", 
+                    instances=instances, weights=instance_weights
                 )
                 
                 if selected_instance["success"]:
@@ -189,6 +190,7 @@ class LoadBalancingL4Tests:
                 selected_instance = await manager.load_balancer.select_instance(
                     service_name, 
                     algorithm="least_connections",
+                    instances=instances,
                     connection_counts=connection_counts
                 )
                 
@@ -228,7 +230,7 @@ class LoadBalancingL4Tests:
             
             for i in range(total_requests):
                 selected_instance = await manager.load_balancer.select_instance(
-                    service_name, algorithm="random"
+                    service_name, algorithm="random", instances=instances
                 )
                 
                 if selected_instance["success"]:
@@ -279,6 +281,7 @@ class LoadBalancingL4Tests:
                 selected_instance = await manager.load_balancer.select_instance(
                     service_name,
                     algorithm="zone_aware",
+                    instances=instances,
                     preferred_zone=preferred_zone,
                     zones=zones
                 )

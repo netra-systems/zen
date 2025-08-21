@@ -38,7 +38,7 @@ cd terraform/staging
 | Environment | Directory | Infrastructure | Port/URL |
 |------------|-----------|---------------|----------|
 | **Local Dev** | `terraform-dev-postgres/` | Docker containers | localhost:5433 (PG), localhost:6379 (Redis), localhost:9000 (ClickHouse) |
-| **Cloud Staging** | `terraform/staging/` | GCP Cloud Run | https://staging.netrasystems.ai |
+| **Cloud Staging** | `terraform/staging/` | GCP Cloud Run | https://app.staging.netrasystems.ai |
 | **Production** | `terraform-gcp/` | GCP Production | https://app.netrasystems.ai |
 
 ## Environment Variables

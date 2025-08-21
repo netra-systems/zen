@@ -402,7 +402,7 @@
           --image=gcr.io/netra-staging/netra:local-{tag} \
           --region=us-central1
       </commands>
-      <access>https://staging.netrasystems.ai</access>
+      <access>https://app.staging.netrasystems.ai</access>
       <authentication>Development team credentials</authentication>
       <use_cases>
         - Pre-PR validation

@@ -22,7 +22,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 # Real services for L2-L3 testing
 from app.core.circuit_breaker import CircuitBreaker, CircuitBreakerRegistry
 from app.services.redis_service import RedisService
-from app.services.database.connection_manager import DatabaseConnectionManager
+from app.core.database_connection_manager import DatabaseConnectionManager
 from app.core.health_checkers import check_postgres_health, check_redis_health
 from app.services.websocket.connection_manager import WebSocketConnectionManager
 

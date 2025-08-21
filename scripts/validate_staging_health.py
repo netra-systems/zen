@@ -238,7 +238,7 @@ class StagingSecurityValidator:
     def _check_cors_configuration(self) -> Dict:
         """Check CORS configuration."""
         try:
-            headers = {"Origin": "https://staging.netrasystems.ai"}
+            headers = {"Origin": "https://app.staging.netrasystems.ai"}
             response = requests.options(f"{self.base_url}/health", headers=headers, timeout=5)
             cors_header = response.headers.get("Access-Control-Allow-Origin")
             if cors_header:

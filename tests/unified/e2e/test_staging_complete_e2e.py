@@ -306,7 +306,7 @@ class StagingE2ETestSuite:
             
             # Test CORS headers on API endpoints
             backend_url = self.harness.get_service_url("backend")
-            origin = "https://staging.netrasystems.ai"
+            origin = "https://app.staging.netrasystems.ai"
             
             async with self.session.options(
                 f"{backend_url}/api/v1/threads",

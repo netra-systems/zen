@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.message_queue import MessageQueueService
 from app.agents.supervisor_consolidated import SupervisorAgent
-from app.services.database.connection_manager import DatabaseConnectionManager
+from app.core.database_connection_manager import DatabaseConnectionManager
 from app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)

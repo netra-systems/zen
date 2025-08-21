@@ -13,12 +13,13 @@ Coverage: Health check orchestration, dependency mapping, cascading health statu
 import pytest
 import asyncio
 import time
-import logging\nimport json
+import logging
+import json
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.health_check_service import HealthCheckService
-from app.services.database.connection_manager import DatabaseConnectionManager
+from app.core.database_connection_manager import DatabaseConnectionManager
 from app.services.redis_service import RedisService
 from app.services.monitoring.alerting_service import AlertingService
 

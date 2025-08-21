@@ -17,10 +17,10 @@ import logging
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.tools.tool_registry import ToolRegistry
-from app.tools.base_tool import BaseTool
-from app.services.llm_manager import LLMManager
+# Real components for L2-L3 testing\nfrom app.services.redis_service import RedisService
+from app.core.circuit_breaker import CircuitBreaker
+from app.core.database_connection_manager import DatabaseConnectionManager
+from app.services.tool_registry import AgentToolConfigRegistry
 
 logger = logging.getLogger(__name__)
 

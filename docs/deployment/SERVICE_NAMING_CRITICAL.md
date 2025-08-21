@@ -92,7 +92,7 @@ Expected output should show:
 
 ### Environment Variables
 - Backend URL remains: `https://api.staging.netrasystems.ai`
-- Frontend URL remains: `https://staging.netrasystems.ai`
+- Frontend URL remains: `https://app.staging.netrasystems.ai`
 - These map to the correctly named services via domain configuration
 
 ### Docker Images

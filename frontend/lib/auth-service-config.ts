@@ -65,12 +65,12 @@ export function getAuthServiceConfig(): AuthServiceConfig {
     oauth: {
       googleClientId: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       redirectUri: env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' 
-        ? 'https://staging.netrasystems.ai/auth/callback'
+        ? 'https://app.staging.netrasystems.ai/auth/callback'
         : `${typeof window !== 'undefined' ? window.location.origin : baseUrl}/auth/callback`,
       javascriptOrigins: [
         baseUrl,
         typeof window !== 'undefined' ? window.location.origin : '',
-        env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ? 'https://staging.netrasystems.ai' : '',
+        env === 'staging' || process.env.NEXT_PUBLIC_ENVIRONMENT === 'staging' ? 'https://app.staging.netrasystems.ai' : '',
       ].filter(Boolean),
     },
   };

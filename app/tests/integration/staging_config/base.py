@@ -29,7 +29,12 @@ class StagingConfigTestBase(unittest.TestCase):
         """Set up class-level resources."""
         cls.project_id = os.getenv('GCP_PROJECT_ID', 'netra-ai-staging')
         cls.region = os.getenv('GCP_REGION', 'us-central1')
-        cls.staging_url = os.getenv('STAGING_URL', 'https://staging.netra.ai')
+        
+        # Use actual staging URLs
+        cls.staging_url = os.getenv('STAGING_URL', 'https://app.staging.netrasystems.ai')
+        cls.staging_api_url = os.getenv('STAGING_API_URL', 'https://api.staging.netrasystems.ai')
+        cls.staging_auth_url = os.getenv('STAGING_AUTH_URL', 'https://auth.staging.netrasystems.ai')
+        cls.staging_frontend_url = os.getenv('STAGING_FRONTEND_URL', 'https://app.staging.netrasystems.ai')
         
         # Initialize GCP clients if available
         try:

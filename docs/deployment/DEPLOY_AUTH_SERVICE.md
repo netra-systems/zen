@@ -53,7 +53,7 @@ gcloud run deploy netra-auth-service \
   --max-instances 10 \
   --set-secrets="JWT_SECRET=jwt-secret:latest,DATABASE_URL=auth-database-url:latest,REDIS_URL=redis-url:latest" \
   --set-env-vars="ENVIRONMENT=staging,SERVICE_NAME=auth-service,LOG_LEVEL=INFO" \
-  --update-env-vars="CORS_ORIGINS=https://staging.netrasystems.ai"
+  --update-env-vars="CORS_ORIGINS=https://app.staging.netrasystems.ai,https://auth.staging.netrasystems.ai"
 ```
 
 ## Step 3: Alternative - Deploy from Source

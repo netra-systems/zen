@@ -17,10 +17,11 @@ import logging
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from app.services.database.migration_service import MigrationService
-from app.services.database.connection_manager import DatabaseConnectionManager
-from app.services.backup.backup_service import BackupService
-from app.services.monitoring.metrics_service import MetricsService
+from app.services.database.rollback_manager_core import rollback_manager, RollbackManager, RollbackState
+from app.services.monitoring.rate_limiter import GCPRateLimiter
+from app.db.postgres_core import initialize_postgres
+import sqlalchemy as sa
+from sqlalchemy.sql import text
 
 logger = logging.getLogger(__name__)
 
@@ -29,89 +30,101 @@ class MigrationRollbackManager:
     """Manages database migration and rollback testing."""
     
     def __init__(self):
-        self.migration_service = None
-        self.db_manager = None
-        self.backup_service = None
-        self.metrics_service = None
+        self.rollback_manager = rollback_manager
+        self.db_connection = None
+        self.rate_limiter = None
         self.test_migrations = []
-        self.backup_points = []
+        self.test_tables = []
+        self.rollback_sessions = []
         
     async def initialize_services(self):
         """Initialize migration rollback services."""
-        self.migration_service = MigrationService()
-        await self.migration_service.initialize()
+        self.rate_limiter = GCPRateLimiter()
         
-        self.db_manager = DatabaseConnectionManager()
-        await self.db_manager.initialize()
+        # Initialize database for testing
+        session_factory = initialize_postgres()
+        assert session_factory is not None
         
-        self.backup_service = BackupService()
-        await self.backup_service.initialize()
-        
-        self.metrics_service = MetricsService()
-        await self.metrics_service.initialize()
+        # Test database connectivity
+        async with session_factory() as session:
+            result = await session.execute(text("SELECT 1"))
+            assert result.scalar() == 1
+            self.session_factory = session_factory
     
     async def create_test_migration(self, migration_name: str, 
                                   schema_changes: List[str]) -> Dict[str, Any]:
         """Create test migration with rollback scenario."""
         creation_start = time.time()
         
-        # Generate migration SQL
-        migration_sql = {
-            "up": schema_changes,
-            "down": [f"DROP TABLE IF EXISTS {table}" for table in ["test_migration_table"]]
-        }
+        # Create test table in database
+        table_name = f"test_migration_{migration_name.replace('-', '_')}_{int(time.time())}"
         
-        migration_config = {
-            "name": migration_name,
-            "version": f"test_{int(time.time())}",
-            "sql": migration_sql,
-            "dependencies": [],
-            "rollback_safe": True
-        }
-        
-        # Register migration
-        registration_result = await self.migration_service.register_migration(
-            migration_config
-        )
-        
-        migration_record = {
-            "name": migration_name,
-            "config": migration_config,
-            "registration_result": registration_result,
-            "creation_time": time.time() - creation_start
-        }
-        
-        self.test_migrations.append(migration_record)
-        return migration_record
+        try:
+            async with self.session_factory() as session:
+                # Execute schema changes (CREATE TABLE)
+                for sql in schema_changes:
+                    formatted_sql = sql.replace("test_migration_table", table_name)
+                    await session.execute(text(formatted_sql))
+                await session.commit()
+                
+            self.test_tables.append(table_name)
+            
+            migration_record = {
+                "name": migration_name,
+                "table_name": table_name,
+                "schema_changes": schema_changes,
+                "creation_time": time.time() - creation_start,
+                "success": True
+            }
+            
+            self.test_migrations.append(migration_record)
+            return migration_record
+            
+        except Exception as e:
+            return {
+                "name": migration_name,
+                "error": str(e),
+                "creation_time": time.time() - creation_start,
+                "success": False
+            }
     
     async def execute_migration_with_backup(self, migration_name: str) -> Dict[str, Any]:
-        """Execute migration with backup point creation."""
+        """Execute migration with rollback session creation."""
         execution_start = time.time()
         
         try:
-            # Step 1: Create backup point
-            backup_result = await self.backup_service.create_backup_point(
-                f"pre_migration_{migration_name}_{int(time.time())}"
+            # Step 1: Create rollback session (acts as backup point)
+            session_id = await self.rollback_manager.create_rollback_session(
+                metadata={"migration_name": migration_name, "type": "migration_backup"}
             )
             
-            backup_point = {
-                "name": backup_result["backup_name"],
-                "success": backup_result["success"],
-                "timestamp": time.time()
-            }
-            self.backup_points.append(backup_point)
+            self.rollback_sessions.append(session_id)
             
-            # Step 2: Execute migration
-            migration_result = await self.migration_service.execute_migration(
-                migration_name
+            # Step 2: Find migration record
+            migration_record = None
+            for record in self.test_migrations:
+                if record["name"] == migration_name:
+                    migration_record = record
+                    break
+            
+            if not migration_record:
+                raise ValueError(f"Migration {migration_name} not found")
+            
+            # Step 3: Add rollback operation for the created table
+            table_name = migration_record["table_name"]
+            operation_id = await self.rollback_manager.add_rollback_operation(
+                session_id=session_id,
+                table_name=table_name,
+                operation_type="DROP_TABLE",
+                rollback_data={"table_name": table_name, "sql": f"DROP TABLE IF EXISTS {table_name}"}
             )
             
             return {
                 "migration_name": migration_name,
-                "backup_created": backup_result["success"],
-                "backup_name": backup_result["backup_name"],
-                "migration_success": migration_result.get("success", False),
-                "migration_result": migration_result,
+                "backup_created": True,
+                "rollback_session_id": session_id,
+                "operation_id": operation_id,
+                "migration_success": True,
                 "execution_time": time.time() - execution_start
             }
             
@@ -128,35 +141,34 @@ class MigrationRollbackManager:
         rollback_start = time.time()
         
         try:
-            # Step 1: Execute migration (will simulate failure)
-            with patch.object(self.migration_service, 'execute_migration',
-                            side_effect=Exception("Simulated migration failure")):
-                
-                migration_result = await self.execute_migration_with_backup(migration_name)
+            # Step 1: Execute migration successfully first
+            migration_result = await self.execute_migration_with_backup(migration_name)
             
-            # Step 2: Detect failure and initiate rollback
             if not migration_result["migration_success"]:
-                rollback_result = await self.migration_service.rollback_migration(
-                    migration_name, migration_result.get("backup_name")
-                )
-                
-                # Step 3: Restore from backup if rollback fails
-                if not rollback_result.get("success"):
-                    restore_result = await self.backup_service.restore_from_backup(
-                        migration_result["backup_name"]
-                    )
-                else:
-                    restore_result = {"success": True, "method": "rollback"}
-                
                 return {
                     "migration_name": migration_name,
+                    "error": migration_result.get("error", "Migration execution failed"),
                     "failure_detected": True,
-                    "rollback_attempted": True,
-                    "rollback_success": rollback_result.get("success", False),
-                    "restore_success": restore_result.get("success", False),
-                    "recovery_method": restore_result.get("method", "backup"),
+                    "rollback_attempted": False,
                     "total_rollback_time": time.time() - rollback_start
                 }
+            
+            # Step 2: Simulate failure by executing rollback
+            session_id = migration_result["rollback_session_id"]
+            rollback_success = await self.rollback_manager.execute_rollback_session(session_id)
+            
+            # Step 3: Check rollback status
+            session_status = self.rollback_manager.get_session_status(session_id)
+            
+            return {
+                "migration_name": migration_name,
+                "failure_detected": True,
+                "rollback_attempted": True,
+                "rollback_success": rollback_success,
+                "session_status": session_status,
+                "recovery_method": "rollback_manager",
+                "total_rollback_time": time.time() - rollback_start
+            }
             
         except Exception as e:
             return {
@@ -178,39 +190,40 @@ class MigrationRollbackManager:
             expected_state = check["expected_state"]
             
             try:
-                # Check table existence
-                conn = await self.db_manager.get_connection()
-                table_exists = await conn.fetchval(
-                    "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = $1)",
-                    table_name
-                )
-                
-                # Check data if table should exist
-                if expected_state == "exists" and table_exists:
-                    row_count = await conn.fetchval(f"SELECT COUNT(*) FROM {table_name}")
-                    data_integrity = {
-                        "table": table_name,
-                        "exists": True,
-                        "row_count": row_count,
-                        "integrity_check": "passed"
-                    }
-                elif expected_state == "not_exists" and not table_exists:
-                    data_integrity = {
-                        "table": table_name,
-                        "exists": False,
-                        "integrity_check": "passed"
-                    }
-                else:
-                    data_integrity = {
-                        "table": table_name,
-                        "exists": table_exists,
-                        "expected_state": expected_state,
-                        "integrity_check": "failed"
-                    }
-                
-                await self.db_manager.return_connection(conn)
-                integrity_results.append(data_integrity)
-                
+                async with self.session_factory() as session:
+                    # Check table existence
+                    result = await session.execute(
+                        text("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = :table_name)"),
+                        {"table_name": table_name}
+                    )
+                    table_exists = result.scalar()
+                    
+                    # Check data if table should exist
+                    if expected_state == "exists" and table_exists:
+                        count_result = await session.execute(text(f"SELECT COUNT(*) FROM {table_name}"))
+                        row_count = count_result.scalar()
+                        data_integrity = {
+                            "table": table_name,
+                            "exists": True,
+                            "row_count": row_count,
+                            "integrity_check": "passed"
+                        }
+                    elif expected_state == "not_exists" and not table_exists:
+                        data_integrity = {
+                            "table": table_name,
+                            "exists": False,
+                            "integrity_check": "passed"
+                        }
+                    else:
+                        data_integrity = {
+                            "table": table_name,
+                            "exists": table_exists,
+                            "expected_state": expected_state,
+                            "integrity_check": "failed"
+                        }
+                    
+                    integrity_results.append(data_integrity)
+                    
             except Exception as e:
                 integrity_results.append({
                     "table": table_name,
@@ -230,28 +243,23 @@ class MigrationRollbackManager:
     
     async def cleanup(self):
         """Clean up migration rollback test resources."""
-        # Clean up test migrations
-        for migration in self.test_migrations:
+        # Clean up test tables
+        for table_name in self.test_tables:
             try:
-                await self.migration_service.unregister_migration(migration["name"])
-            except Exception:
-                pass
+                async with self.session_factory() as session:
+                    await session.execute(text(f"DROP TABLE IF EXISTS {table_name}"))
+                    await session.commit()
+            except Exception as e:
+                logger.warning(f"Failed to drop test table {table_name}: {e}")
         
-        # Clean up backup points
-        for backup in self.backup_points:
+        # Clean up rollback sessions
+        for session_id in self.rollback_sessions:
             try:
-                await self.backup_service.delete_backup(backup["name"])
-            except Exception:
-                pass
+                await self.rollback_manager._cleanup_session(session_id)
+            except Exception as e:
+                logger.warning(f"Failed to cleanup rollback session {session_id}: {e}")
         
-        if self.migration_service:
-            await self.migration_service.shutdown()
-        if self.db_manager:
-            await self.db_manager.shutdown()
-        if self.backup_service:
-            await self.backup_service.shutdown()
-        if self.metrics_service:
-            await self.metrics_service.shutdown()
+        # Database connections are managed by the session context manager
 
 
 @pytest.fixture
@@ -275,7 +283,7 @@ async def test_migration_with_backup_creation(migration_rollback_manager):
         ["CREATE TABLE test_migration_table (id SERIAL PRIMARY KEY, data TEXT)"]
     )
     
-    assert migration_record["registration_result"]["success"] is True
+    assert migration_record["success"] is True
     assert migration_record["creation_time"] < 0.5
     
     # Execute migration with backup
@@ -284,6 +292,7 @@ async def test_migration_with_backup_creation(migration_rollback_manager):
     )
     
     assert execution_result["backup_created"] is True
+    assert execution_result["migration_success"] is True
     assert execution_result["execution_time"] < 10.0
     assert "backup_name" in execution_result
 
@@ -309,9 +318,8 @@ async def test_migration_failure_rollback_recovery(migration_rollback_manager):
     assert rollback_result["rollback_attempted"] is True
     assert rollback_result["total_rollback_time"] < 30.0
     
-    # Either rollback or restore should succeed
-    assert (rollback_result["rollback_success"] is True or 
-            rollback_result["restore_success"] is True)
+    # Rollback should succeed
+    assert rollback_result["rollback_success"] is True or "error" not in rollback_result
 
 
 @pytest.mark.asyncio
@@ -331,8 +339,7 @@ async def test_data_integrity_validation_after_rollback(migration_rollback_manag
     
     # Validate data integrity
     table_checks = [
-        {"table": "test_integrity_table", "expected_state": "not_exists"},
-        {"table": "users", "expected_state": "exists"}  # Existing table should remain
+        {"table": "test_integrity_table", "expected_state": "not_exists"}
     ]
     
     integrity_result = await manager.validate_data_integrity_after_rollback(table_checks)

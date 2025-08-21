@@ -144,11 +144,13 @@ else:
     # Default CORS origins based on environment
     if env == "staging":
         cors_origins = [
-            "https://staging.netrasystems.ai",
             "https://app.staging.netrasystems.ai",
-            "https://api.staging.netrasystems.ai",
             "https://auth.staging.netrasystems.ai",
-            "http://localhost:3000"
+            "https://api.staging.netrasystems.ai",
+            "https://backend.staging.netrasystems.ai",
+            "http://localhost:3000",
+            "http://localhost:8000",
+            "http://localhost:8080"
         ]
     elif env == "production":
         cors_origins = [

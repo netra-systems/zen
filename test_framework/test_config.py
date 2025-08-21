@@ -68,13 +68,14 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "run_both": True
     },
     "comprehensive": {
-        "description": "Full test suite with coverage (30-45 minutes)",
-        "purpose": "Pre-release validation, full system testing",
+        "description": "Full test suite with coverage including staging tests (30-45 minutes)",
+        "purpose": "Pre-release validation, full system testing including staging environment",
         "backend_args": ["app/tests", "tests", "integration_tests", "--coverage", f"--parallel={min(6, OPTIMAL_WORKERS)}", "--html-output", "--fail-fast"],
         "frontend_args": ["--coverage"],
         "timeout": 2700,  # 45 minutes to handle real LLM tests
         "run_coverage": True,
-        "run_both": True
+        "run_both": True,
+        "includes_staging": True
     },
     "comprehensive-backend": {
         "description": "Comprehensive backend tests only (15-20 minutes)",
@@ -206,10 +207,44 @@ TEST_LEVELS: Dict[str, Dict[str, Any]] = {
         "timeout": 900,
         "run_coverage": False,
         "run_both": False,
-        "requires_env": ["ENVIRONMENT=staging", "GOOGLE_APPLICATION_CREDENTIALS"],
+        "requires_env": ["ENVIRONMENT=staging"],
         "supports_real_services": True,
         "business_critical": True,
-        "highlight": True
+        "highlight": True,
+        "staging_urls": {
+            "app": "https://app.staging.netrasystems.ai",
+            "api": "https://api.staging.netrasystems.ai",
+            "auth": "https://auth.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
+        }
+    },
+    "staging-real": {
+        "description": "Tests against real staging environment at staging.netrasystems.ai (5-10 minutes)",
+        "purpose": "Validate actual staging deployment health and functionality",
+        "backend_args": [
+            "app/tests/integration/staging_config/test_health_checks.py",
+            "app/tests/integration/staging_config/test_cors_configuration.py",
+            "app/tests/integration/staging_config/test_deployment_rollback.py",
+            "app/tests/integration/staging_config/test_llm_integration.py",
+            "app/tests/integration/staging_config/test_observability_pipeline.py",
+            "app/tests/integration/staging_config/test_resource_limits.py",
+            "app/tests/integration/staging_config/test_websocket_load_balancer.py",
+            "-v", "--fail-fast"
+        ],
+        "frontend_args": [],
+        "timeout": 600,
+        "run_coverage": False,
+        "run_both": False,
+        "requires_env": ["ENVIRONMENT=staging"],
+        "supports_real_services": True,
+        "business_critical": True,
+        "highlight": True,
+        "staging_urls": {
+            "app": "https://app.staging.netrasystems.ai",
+            "api": "https://api.staging.netrasystems.ai",
+            "auth": "https://auth.staging.netrasystems.ai",
+            "frontend": "https://app.staging.netrasystems.ai"
+        }
     },
     "staging-quick": {
         "description": "Quick staging validation tests (2-3 minutes)",
@@ -397,7 +432,7 @@ def configure_gcp_staging_environment():
     os.environ["STAGING_URL"] = os.getenv("STAGING_URL", "https://app.staging.netrasystems.ai")
     os.environ["STAGING_API_URL"] = os.getenv("STAGING_API_URL", "https://api.staging.netrasystems.ai")
     os.environ["STAGING_AUTH_URL"] = os.getenv("STAGING_AUTH_URL", "https://auth.staging.netrasystems.ai")
-    os.environ["STAGING_FRONTEND_URL"] = os.getenv("STAGING_FRONTEND_URL", "https://staging.netrasystems.ai")
+    os.environ["STAGING_FRONTEND_URL"] = os.getenv("STAGING_FRONTEND_URL", "https://app.staging.netrasystems.ai")
     
     # Set base URLs for tests
     os.environ["BASE_URL"] = os.environ["STAGING_URL"]

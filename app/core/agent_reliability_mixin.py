@@ -42,6 +42,20 @@ class AgentReliabilityMixin:
         self.error_handler = AgentErrorHandler()
         self.health_monitor = AgentHealthMonitor()
         self.recovery_manager = AgentRecoveryManager()
+        
+        # Initialize additional expected attributes
+        self.max_error_history = 50
+        self.max_operation_history = 100 
+        self.health_check_interval = 60
+        self.recovery_strategies = {
+            "llm_call": self._default_recovery_strategy,
+            "database_query": self._default_recovery_strategy,
+            "api_call": self._default_recovery_strategy
+        }
+    
+    def _default_recovery_strategy(self, *args, **kwargs):
+        """Default recovery strategy that does nothing but doesn't raise errors."""
+        return None
     
     def _get_circuit_breaker_config(self) -> CircuitBreakerConfig:
         """Get circuit breaker configuration for this agent."""

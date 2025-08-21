@@ -32,9 +32,9 @@ from redis.asyncio import Redis
 from app.models.user import User, UserPlan
 from app.models.thread import Thread
 from app.models.message import Message
-from app.services.usage_service import UsageService
-from app.services.websocket_manager import WebSocketManager
-from app.services.agent_dispatcher import AgentDispatcher
+from app.services.user_service import UserService as UsageService
+from app.services.websocket_service import WebSocketService as WebSocketManager
+from app.services.agent_service import AgentService as AgentDispatcher
 
 from ..test_helpers.user_flow_base import (
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance

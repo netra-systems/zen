@@ -130,7 +130,7 @@ class TestStagingAPIEndpoints:
     async def test_cors_headers_staging(self, staging_environment):
         """Test CORS headers are set for staging."""
         allowed_origins = [
-            "https://staging.netrasystems.ai",
+            "https://app.staging.netrasystems.ai",
             "https://api.staging.netrasystems.ai"
         ]
         assert all(origin.startswith("https://") for origin in allowed_origins)

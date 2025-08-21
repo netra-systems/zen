@@ -110,9 +110,9 @@ class AuthServiceDeployer:
     def _get_cors_origins(self) -> str:
         """Get CORS origins based on environment"""
         if self.environment == "production":
-            return "https://netrasystems.ai,https://app.netrasystems.ai"
+            return "https://netrasystems.ai,https://app.netrasystems.ai,https://auth.netrasystems.ai"
         else:
-            return "https://staging.netrasystems.ai,https://app.staging.netrasystems.ai,http://localhost:3000"
+            return "https://app.staging.netrasystems.ai,https://auth.staging.netrasystems.ai,https://api.staging.netrasystems.ai,https://backend.staging.netrasystems.ai,http://localhost:3000,http://localhost:8000,http://localhost:8080"
     
     def update_terraform(self) -> bool:
         """Update Terraform configuration"""

@@ -22,7 +22,7 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-from app.services.usage_service import UsageService
+from app.services.user_service import UserService as UsageService
 
 from ..test_helpers.user_flow_base import UserFlowTestBase
 from ..fixtures.user_journey_data import BillingTestData

@@ -20,7 +20,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.redis_service import RedisService
 from app.services.cache.cache_manager import CacheManager
-from app.services.database.connection_manager import DatabaseConnectionManager
+from app.core.database_connection_manager import DatabaseConnectionManager
 from app.services.notification_service import NotificationService
 
 logger = logging.getLogger(__name__)

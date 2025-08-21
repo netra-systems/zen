@@ -2228,78 +2228,6 @@
   },
   "runs": [
     {
-      "run_id": "run_20250820_160618_78169",
-      "timestamp": "2025-08-20T16:06:28.209691",
-      "total_tests": 214,
-      "passed": 213,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_160638_98887",
-      "timestamp": "2025-08-20T16:08:22.905952",
-      "total_tests": 6,
-      "passed": 4,
-      "failed": 2,
-      "bad_tests_count": 2
-    },
-    {
-      "run_id": "run_20250820_160828_8516",
-      "timestamp": "2025-08-20T16:08:29.115047",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_160833_13317",
-      "timestamp": "2025-08-20T16:09:31.205659",
-      "total_tests": 5,
-      "passed": 1,
-      "failed": 4,
-      "bad_tests_count": 4
-    },
-    {
-      "run_id": "run_20250820_161022_22447",
-      "timestamp": "2025-08-20T16:11:39.117541",
-      "total_tests": 16,
-      "passed": 15,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_161207_27384",
-      "timestamp": "2025-08-20T16:12:15.929304",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_161253_73494",
-      "timestamp": "2025-08-20T16:13:06.510431",
-      "total_tests": 3,
-      "passed": 2,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_161314_94332",
-      "timestamp": "2025-08-20T16:13:31.376828",
-      "total_tests": 0,
-      "passed": -1,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161332_12824",
-      "timestamp": "2025-08-20T16:13:44.814232",
-      "total_tests": 3,
-      "passed": 3,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
       "run_id": "run_20250820_161415_55709",
       "timestamp": "2025-08-20T16:15:01.471794",
       "total_tests": 6,
@@ -3026,10 +2954,82 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173143_3697",
+      "timestamp": "2025-08-20T17:32:09.397755",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173226_46706",
+      "timestamp": "2025-08-20T17:32:50.768865",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173422_62717",
+      "timestamp": "2025-08-20T17:34:35.465571",
+      "total_tests": 14,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173450_90882",
+      "timestamp": "2025-08-20T17:35:02.133225",
+      "total_tests": 14,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173559_59111",
+      "timestamp": "2025-08-20T17:36:10.703381",
+      "total_tests": 53,
+      "passed": 53,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173709_29389",
+      "timestamp": "2025-08-20T17:37:32.905227",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173756_76551",
+      "timestamp": "2025-08-20T17:38:18.310638",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_174021_21467",
+      "timestamp": "2025-08-20T17:40:34.776710",
+      "total_tests": 53,
+      "passed": 53,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_174052_52858",
+      "timestamp": "2025-08-20T17:41:06.390828",
+      "total_tests": 53,
+      "passed": 53,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 280,
-    "last_updated": "2025-08-20T17:28:41.434533"
+    "total_runs": 289,
+    "last_updated": "2025-08-20T17:41:06.390828"
   }
 }

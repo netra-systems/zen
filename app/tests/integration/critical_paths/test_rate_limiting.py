@@ -17,11 +17,73 @@ import logging
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from app.services.rate_limiter import RateLimiterService
-from app.services.redis_service import RedisService
-from app.services.monitoring.metrics_service import MetricsService
+from app.services.monitoring.rate_limiter import GCPRateLimiter
+from app.redis_manager import RedisManager
+from app.core.cache.redis_config import RedisConfig
+import redis.asyncio as redis
+from unittest.mock import MagicMock, AsyncMock
 
 logger = logging.getLogger(__name__)
+
+
+class TokenBucketRateLimiter:
+    """Token bucket rate limiter implementation for testing."""
+    
+    def __init__(self, requests_per_second: int = 10, burst_capacity: int = 20):
+        self.requests_per_second = requests_per_second
+        self.burst_capacity = burst_capacity
+        self.tokens = burst_capacity
+        self.last_refill = time.time()
+        self.token_buckets = {}  # Per-identifier buckets
+        
+    def _refill_tokens(self, identifier: str):
+        """Refill tokens based on elapsed time."""
+        now = time.time()
+        bucket = self.token_buckets.get(identifier, {
+            "tokens": self.burst_capacity,
+            "last_refill": now
+        })
+        
+        elapsed = now - bucket["last_refill"]
+        tokens_to_add = elapsed * self.requests_per_second
+        bucket["tokens"] = min(self.burst_capacity, bucket["tokens"] + tokens_to_add)
+        bucket["last_refill"] = now
+        
+        self.token_buckets[identifier] = bucket
+        return bucket
+    
+    async def check_rate_limit(self, identifier: str) -> Dict[str, Any]:
+        """Check if request is allowed under rate limit."""
+        bucket = self._refill_tokens(identifier)
+        
+        if bucket["tokens"] >= 1:
+            bucket["tokens"] -= 1
+            return {
+                "allowed": True,
+                "remaining_tokens": bucket["tokens"],
+                "reset_time": bucket["last_refill"] + (self.burst_capacity / self.requests_per_second)
+            }
+        else:
+            return {
+                "allowed": False,
+                "remaining_tokens": 0,
+                "reset_time": bucket["last_refill"] + (1 / self.requests_per_second)
+            }
+    
+    async def configure_limit(self, identifier: str, config: Dict[str, Any]) -> Dict[str, Any]:
+        """Configure rate limit for identifier."""
+        self.token_buckets[identifier] = {
+            "tokens": config.get("burst_capacity", self.burst_capacity),
+            "last_refill": time.time(),
+            "requests_per_second": config.get("requests_per_second", self.requests_per_second),
+            "burst_capacity": config.get("burst_capacity", self.burst_capacity)
+        }
+        return {"success": True}
+    
+    async def clear_rate_limit(self, identifier: str):
+        """Clear rate limit for identifier."""
+        if identifier in self.token_buckets:
+            del self.token_buckets[identifier]
 
 
 class RateLimitingManager:
@@ -29,21 +91,22 @@ class RateLimitingManager:
     
     def __init__(self):
         self.rate_limiter = None
-        self.redis_service = None
-        self.metrics_service = None
+        self.redis_manager = None
+        self.gcp_rate_limiter = None
         self.rate_limit_events = []
         self.request_history = []
         
     async def initialize_services(self):
         """Initialize rate limiting services."""
-        self.rate_limiter = RateLimiterService()
-        await self.rate_limiter.initialize()
+        self.rate_limiter = TokenBucketRateLimiter()
         
-        self.redis_service = RedisService()
-        await self.redis_service.connect()
+        # Initialize Redis manager for distributed rate limiting
+        redis_config = RedisConfig()
+        self.redis_manager = RedisManager(redis_config)
+        await self.redis_manager.initialize()
         
-        self.metrics_service = MetricsService()
-        await self.metrics_service.initialize()
+        # Initialize GCP rate limiter for monitoring
+        self.gcp_rate_limiter = GCPRateLimiter()
     
     async def configure_rate_limit(self, identifier: str, requests_per_second: int,
                                  burst_capacity: int) -> Dict[str, Any]:
@@ -208,12 +271,8 @@ class RateLimitingManager:
         for event in self.rate_limit_events:
             await self.rate_limiter.clear_rate_limit(event["identifier"])
         
-        if self.rate_limiter:
-            await self.rate_limiter.shutdown()
-        if self.redis_service:
-            await self.redis_service.disconnect()
-        if self.metrics_service:
-            await self.metrics_service.shutdown()
+        if self.redis_manager:
+            await self.redis_manager.shutdown()
 
 
 @pytest.fixture

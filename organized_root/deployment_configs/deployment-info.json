@@ -13,7 +13,7 @@
       "status": "deployed",
       "service_name": "netra-frontend-staging",
       "url": "https://netra-frontend-staging-701982941522.us-central1.run.app",
-      "custom_domain": "https://staging.netrasystems.ai",
+      "custom_domain": "https://app.staging.netrasystems.ai",
       "revision": "netra-frontend-staging-00007-fqx",
       "image": "us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:staging"
     },

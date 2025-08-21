@@ -18,7 +18,7 @@ def get_env_specific_frontend_url() -> str:
     """Get environment-specific frontend URL."""
     env = auth_client.detect_environment().value
     if env == "staging":
-        return "https://staging.netrasystems.ai"
+        return "https://app.staging.netrasystems.ai"
     elif env == "production":
         return "https://netrasystems.ai"
     return settings.frontend_url.rstrip('/')

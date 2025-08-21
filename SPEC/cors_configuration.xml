@@ -18,6 +18,7 @@
             <cause>Port mismatches in development environment</cause>
             <cause>Preflight request handling issues</cause>
             <cause>Dynamic origin validation failures</cause>
+            <cause priority="CRITICAL">Dynamic ports in development environment not properly handled in CORS configuration</cause>
         </root-causes>
     </problem-statement>
     
@@ -38,6 +39,13 @@
             <name>Environment-Specific Settings</name>
             <description>CORS configuration must adapt to the deployment environment</description>
             <environments>development, testing, staging, production</environments>
+        </principle>
+        
+        <principle id="dynamic-port-support">
+            <name>Dynamic Port Support</name>
+            <description>CORS configuration MUST properly handle dynamic ports in development environments</description>
+            <enforcement>Use port-agnostic pattern matching or extract port from request origin dynamically</enforcement>
+            <critical>True - Root cause of many dev environment CORS failures</critical>
         </principle>
         
         <principle id="preflight-support">
@@ -141,14 +149,15 @@
             <description>Staging environment with dynamic PR deployments</description>
             <main-backend>
                 <allowed_origins>
-                    <pattern>https://*.staging.netrasystems.ai</pattern>
-                    <pattern>https://pr-*.staging.netrasystems.ai</pattern>
-                    <origin>https://staging.netrasystems.ai</origin>
+                    <comment>NOTE: Wildcard subdomains (*.staging) are NOT supported in CORS - must list explicit origins</comment>
                     <origin>https://app.staging.netrasystems.ai</origin>
                     <origin>https://auth.staging.netrasystems.ai</origin>
+                    <origin>https://api.staging.netrasystems.ai</origin>
                     <origin>https://backend.staging.netrasystems.ai</origin>
                     <origin>http://localhost:3000</origin>
                     <origin>http://localhost:3001</origin>
+                    <origin>http://localhost:8000</origin>
+                    <origin>http://localhost:8080</origin>
                 </allowed_origins>
                 <cloud_run_patterns>
                     <pattern>https://netra-frontend-*.us-central1.run.app</pattern>
@@ -165,7 +174,7 @@
                 <allowed_origins>
                     <pattern>https://*.staging.netrasystems.ai</pattern>
                     <pattern>https://pr-*.staging.netrasystems.ai</pattern>
-                    <origin>https://staging.netrasystems.ai</origin>
+                    <origin>https://app.staging.netrasystems.ai</origin>
                     <origin>https://app.staging.netrasystems.ai</origin>
                     <origin>https://auth.staging.netrasystems.ai</origin>
                     <origin>https://backend.staging.netrasystems.ai</origin>
@@ -351,10 +360,14 @@
             <causes>
                 <cause>Auth service running on unexpected port</cause>
                 <cause>Frontend configured with wrong auth service URL</cause>
+                <cause priority="CRITICAL">Dynamic ports not properly extracted from origin header</cause>
+                <cause>CORS configuration hardcoding specific ports instead of pattern matching</cause>
             </causes>
             <solutions>
                 <solution>Standardize ports: Backend=8000, Auth=8081, Frontend=3000/3001</solution>
                 <solution>Use environment variables for service URLs</solution>
+                <solution priority="CRITICAL">Extract port dynamically from request origin header</solution>
+                <solution>Implement hostname-based matching ignoring port numbers for localhost/127.0.0.1</solution>
             </solutions>
         </issue>
     </common-issues-and-solutions>
@@ -392,6 +405,58 @@ class DynamicCORSMiddleware(BaseHTTPMiddleware):
             response.headers["Access-Control-Expose-Headers"] = "X-Trace-ID, X-Request-ID, Content-Length, Content-Type"
         
         return response
+                ]]>
+            </code-template>
+        </pattern>
+        
+        <pattern id="dynamic-port-handling">
+            <name>Dynamic Port Handling Pattern</name>
+            <description>Properly handle dynamic ports in development CORS configuration</description>
+            <code-template>
+                <![CDATA[
+class DynamicPortCORSMiddleware(BaseHTTPMiddleware):
+    """Middleware that handles CORS with dynamic ports in development"""
+    
+    def is_development_origin(self, origin: str) -> bool:
+        """Check if origin is from a development host regardless of port"""
+        if not origin:
+            return False
+        
+        # Parse the origin URL
+        from urllib.parse import urlparse
+        parsed = urlparse(origin)
+        
+        # Accept any localhost or 127.0.0.1 origin regardless of port
+        development_hosts = ['localhost', '127.0.0.1', '0.0.0.0']
+        return parsed.hostname in development_hosts
+    
+    async def dispatch(self, request, call_next):
+        origin = request.headers.get("origin")
+        
+        # In development, accept any localhost origin with any port
+        if self.is_development_origin(origin):
+            # Handle preflight
+            if request.method == "OPTIONS":
+                response = Response(status_code=200)
+                response.headers["Access-Control-Allow-Origin"] = origin
+                response.headers["Access-Control-Allow-Credentials"] = "true"
+                response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
+                response.headers["Access-Control-Allow-Headers"] = "*"
+                response.headers["Access-Control-Max-Age"] = "3600"
+                return response
+            
+            # Process request
+            response = await call_next(request)
+            
+            # Add CORS headers to response
+            response.headers["Access-Control-Allow-Origin"] = origin
+            response.headers["Access-Control-Allow-Credentials"] = "true"
+            response.headers["Access-Control-Expose-Headers"] = "*"
+            
+            return response
+        
+        # Fallback for non-development origins
+        return await call_next(request)
                 ]]>
             </code-template>
         </pattern>
