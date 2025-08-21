@@ -13,7 +13,7 @@ Coverage: Message queue integration, async processing, database consistency, err
 import pytest
 import asyncio
 import time
-import logging\nimport json
+import logging
 import json
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock

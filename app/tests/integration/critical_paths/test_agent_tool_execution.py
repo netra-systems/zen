@@ -17,7 +17,8 @@ import logging
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
-# Real components for L2-L3 testing\nfrom app.services.redis_service import RedisService
+# Real components for L2-L3 testing
+from app.services.redis_service import RedisService
 from app.core.circuit_breaker import CircuitBreaker
 from app.core.database_connection_manager import DatabaseConnectionManager
 from app.services.tool_registry import AgentToolConfigRegistry
