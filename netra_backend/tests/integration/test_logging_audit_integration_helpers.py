@@ -14,13 +14,6 @@ from datetime import datetime, UTC
 from logging_config import central_logger, get_central_logger
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.core.logging_context import request_id_context, user_id_context, trace_id_context
 from test_framework.mock_utils import mock_justified

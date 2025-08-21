@@ -11,13 +11,6 @@ COMPLIANCE: Modular split from 524-line monolith
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-
 from netra_backend.tests.test_corpus_lifecycle import TestCorpusLifecycle, TestWorkloadTypesCoverage
 from netra_backend.tests.test_corpus_content_ops import TestContentGeneration, TestBatchProcessing
 from netra_backend.tests.test_corpus_validation import TestValidationAndSafety, TestCorpusCloning

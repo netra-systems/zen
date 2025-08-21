@@ -20,7 +20,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: +$5K MRR recovered
 """
 
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 from enum import Enum
@@ -117,17 +117,19 @@ class LoginRequest(BaseModel):
     provider: AuthProvider = AuthProvider.LOCAL
     oauth_token: Optional[str] = None
     
-    @validator('password')
-    def validate_password_required(cls, v, values):
+    @model_validator(mode='after')
+    @classmethod
+    def validate_password_required(cls, values):
         """Validate password with graceful degradation for local auth.
         
         Applies "Default to Resilience" principle - warns instead of failing
         when password is missing for local auth, allowing fallback behaviors.
         """
-        provider = values.get('provider', AuthProvider.LOCAL)
+        provider = values.provider
+        password = values.password
         
         # For local auth, prefer password but allow fallback
-        if provider == AuthProvider.LOCAL and not v:
+        if provider == AuthProvider.LOCAL and not password:
             warnings.warn(
                 "Password missing for local auth. Consider enabling fallback auth methods.",
                 UserWarning,
@@ -136,7 +138,7 @@ class LoginRequest(BaseModel):
             # Allow the request to proceed - auth service can handle fallback logic
         
         # For non-local providers, password is optional by design
-        return v
+        return values
 
 
 class LoginResponse(BaseModel):
@@ -200,7 +202,8 @@ class AuthConfig(BaseModel):
     rate_limit_requests: int = 10
     rate_limit_window_seconds: int = 60
     
-    @validator('jwt_secret')
+    @field_validator('jwt_secret')
+    @classmethod
     def validate_jwt_secret_with_warning(cls, v):
         """Validate JWT secret with graceful degradation.
         

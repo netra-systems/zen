@@ -11,13 +11,6 @@ import json
 from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.websocket.unified.message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 from netra_backend.app.websocket.unified.types import WebSocketValidationError

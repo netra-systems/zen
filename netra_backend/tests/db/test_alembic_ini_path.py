@@ -8,13 +8,6 @@ from pathlib import Path
 from unittest.mock import patch, MagicMock
 from netra_backend.app.db.migration_utils import (
 
-# Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
     _get_alembic_ini_path,
     create_alembic_config
 )

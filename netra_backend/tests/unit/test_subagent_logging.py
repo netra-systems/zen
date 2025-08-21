@@ -7,13 +7,6 @@ import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState

@@ -13,13 +13,6 @@ from unittest.mock import MagicMock, patch, call, AsyncMock
 from langchain_core.tools import BaseTool
 
 # Add project root to path
-import sys
-from pathlib import Path
-PROJECT_ROOT = Path(__file__).parent.parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-# Add project root to path
 
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.tests.test_tool_registry_registration_core import MockTool
