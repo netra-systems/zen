@@ -33,9 +33,9 @@
           <step>Added comprehensive state checking with hasattr for safety</step>
         </implementation>
         <code_changes>
-          <file>app/websocket/connection.py</file>
+          <file>netra_backend/app/websocket/connection.py</file>
           <change>Added state checks in _close_websocket_safely method</change>
-          <file>app/routes/websockets.py</file>
+          <file>netra_backend/app/routes/websockets.py</file>
           <change>Added WebSocketState.CONNECTED check before disconnect_user call</change>
         </code_changes>
       </solution>
@@ -53,7 +53,7 @@ if (hasattr(websocket, 'application_state') and
         </pattern>
       </prevention>
       <testing>
-        <test_file>app/tests/unit/test_websocket_error_handling.py</test_file>
+        <test_file>netra_backend/app/tests/unit/test_websocket_error_handling.py</test_file>
         <test_cases>
           <test>test_close_websocket_safely_with_unconnected_socket</test>
           <test>test_close_websocket_safely_with_connected_socket</test>
@@ -62,8 +62,8 @@ if (hasattr(websocket, 'application_state') and
         </test_cases>
       </testing>
       <affected_files>
-        <file>app/websocket/connection.py</file>
-        <file>app/routes/websockets.py</file>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/routes/websockets.py</file>
       </affected_files>
       <related_patterns>
         <pattern>WebSocket lifecycle management</pattern>
@@ -123,10 +123,10 @@ if (hasattr(websocket, 'application_state') and
           <step>Updated error handling to treat send-after-close as DEBUG not ERROR</step>
         </implementation>
         <code_changes>
-          <file>app/websocket/connection.py</file>
+          <file>netra_backend/app/websocket/connection.py</file>
           <change>Added is_closing flag to ConnectionInfo</change>
           <change>Set is_closing in _execute_disconnection</change>
-          <file>app/websocket/broadcast_core.py</file>
+          <file>netra_backend/app/websocket/broadcast_core.py</file>
           <change>Check is_closing flag in _is_connection_ready</change>
           <change>Check both client_state and application_state</change>
           <change>Mark connections as closing during cleanup</change>
@@ -147,7 +147,7 @@ if (not conn_info.is_closing and
         </pattern>
       </prevention>
       <testing>
-        <test_file>app/tests/unit/websocket/test_websocket_closing_state.py</test_file>
+        <test_file>netra_backend/app/tests/unit/websocket/test_websocket_closing_state.py</test_file>
         <test_cases>
           <test>test_is_closing_flag_prevents_send</test>
           <test>test_disconnect_sets_is_closing_flag</test>
@@ -157,8 +157,8 @@ if (not conn_info.is_closing and
         </test_cases>
       </testing>
       <affected_files>
-        <file>app/websocket/connection.py</file>
-        <file>app/websocket/broadcast_core.py</file>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/websocket/broadcast_core.py</file>
       </affected_files>
       <related_patterns>
         <pattern>Race condition prevention</pattern>
@@ -198,7 +198,7 @@ if (not conn_info.is_closing and
           <step>Updated _collect_single_websocket_metrics_cycle to await the gather method</step>
         </implementation>
         <code_changes>
-          <file>app/monitoring/metrics_collector.py</file>
+          <file>netra_backend/app/monitoring/metrics_collector.py</file>
           <change>Changed _gather_websocket_metrics to async method</change>
           <change>Added await for connection_manager.get_stats() call</change>
           <change>Added await when calling _gather_websocket_metrics</change>
@@ -213,14 +213,14 @@ if (not conn_info.is_closing and
           <code>
 async def _gather_websocket_metrics(self) -&gt; WebSocketMetrics:
     """Gather WebSocket metrics from connection manager."""
-    from app.websocket.connection import connection_manager
+    from netra_backend.app.websocket.connection import connection_manager
     conn_stats = await connection_manager.get_stats()  # Note the await!
     return self._build_websocket_metrics(conn_stats)
                     </code>
         </pattern>
       </prevention>
       <testing>
-        <test_file>app/tests/unit/monitoring/test_metrics_collector.py</test_file>
+        <test_file>netra_backend/app/tests/unit/monitoring/test_metrics_collector.py</test_file>
         <test_cases>
           <test>test_websocket_metrics_collection_async</test>
           <test>test_gather_websocket_metrics_awaits_stats</test>
@@ -228,9 +228,9 @@ async def _gather_websocket_metrics(self) -&gt; WebSocketMetrics:
         </test_cases>
       </testing>
       <affected_files>
-        <file>app/monitoring/metrics_collector.py</file>
-        <file>app/websocket/connection.py</file>
-        <file>app/websocket/connection_manager.py</file>
+        <file>netra_backend/app/monitoring/metrics_collector.py</file>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/websocket/connection_manager.py</file>
       </affected_files>
       <related_patterns>
         <pattern>Async/await patterns in monitoring</pattern>
@@ -269,13 +269,13 @@ async def _gather_websocket_metrics(self) -&gt; WebSocketMetrics:
           <step>Made _get_websocket_stats_and_score async to properly await async calls</step>
         </implementation>
         <code_changes>
-          <file>app/monitoring/metrics_collector.py</file>
+          <file>netra_backend/app/monitoring/metrics_collector.py</file>
           <change>Import get_connection_manager instead of connection_manager</change>
           <change>Call get_connection_manager() to get initialized instance</change>
-          <file>app/core/health_checkers.py</file>
+          <file>netra_backend/app/core/health_checkers.py</file>
           <change>Changed to use get_connection_manager() for lazy initialization</change>
           <change>Made _get_websocket_stats_and_score async and await its calls</change>
-          <file>app/websocket/connection.py</file>
+          <file>netra_backend/app/websocket/connection.py</file>
           <change>Initialize connection_manager using get_connection_manager()</change>
         </code_changes>
       </solution>
@@ -286,7 +286,7 @@ async def _gather_websocket_metrics(self) -&gt; WebSocketMetrics:
         <pattern>
           <name>Safe Connection Manager Access Pattern</name>
           <code>
-from app.websocket.connection_manager import get_connection_manager
+from netra_backend.app.websocket.connection_manager import get_connection_manager
 
 async def use_connection_manager():
     conn_manager = get_connection_manager()  # Ensures initialization
@@ -303,10 +303,10 @@ async def use_connection_manager():
         </test_cases>
       </testing>
       <affected_files>
-        <file>app/monitoring/metrics_collector.py</file>
-        <file>app/core/health_checkers.py</file>
-        <file>app/websocket/connection.py</file>
-        <file>app/websocket/connection_manager.py</file>
+        <file>netra_backend/app/monitoring/metrics_collector.py</file>
+        <file>netra_backend/app/core/health_checkers.py</file>
+        <file>netra_backend/app/websocket/connection.py</file>
+        <file>netra_backend/app/websocket/connection_manager.py</file>
       </affected_files>
       <related_patterns>
         <pattern>Singleton pattern with lazy initialization</pattern>
@@ -344,7 +344,7 @@ async def use_connection_manager():
           <step>Updated exports to include the lazy getter function</step>
         </implementation>
         <code_changes>
-          <file>app/websocket/connection.py</file>
+          <file>netra_backend/app/websocket/connection.py</file>
           <change>Line 17: Changed from immediate get_connection_manager() to None</change>
           <change>Lines 19-24: Added get_connection_manager_instance() lazy getter</change>
           <change>Line 112: Added get_connection_manager_instance to __all__ exports</change>
@@ -370,7 +370,7 @@ def get_connection_manager_instance():
         </pattern>
       </prevention>
       <testing>
-        <test_file>app/tests/critical/test_websocket_circular_import_regression.py</test_file>
+        <test_file>netra_backend/app/tests/critical/test_websocket_circular_import_regression.py</test_file>
         <test_class>TestConnectionModuleCircularImportPrevention</test_class>
         <tests>
           <test>test_connection_manager_lazy_initialization - Verifies lazy init behavior</test>

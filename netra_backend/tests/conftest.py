@@ -60,7 +60,7 @@ from netra_backend.app.main import app
 from fastapi.testclient import TestClient
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.config import settings
-from netra_backend.app.tests.conftest_helpers import (
+from netra_backend.tests.conftest_helpers import (
     _setup_basic_llm_mocks, _setup_performance_llm_mocks,
     _setup_websocket_interface_compatibility, _setup_websocket_test_mocks,
     _create_real_tool_dispatcher, _create_mock_tool_dispatcher,

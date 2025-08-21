@@ -1,4 +1,4 @@
-from netra_backend.app.base import EnhancedCRUDService
+from netra_backend.app.db.base import EnhancedCRUDService
 from netra_backend.app..db.models_postgres import User
 from netra_backend.app..schemas.User import UserCreate, UserUpdate
 from sqlalchemy.ext.asyncio import AsyncSession

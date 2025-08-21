@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app...db import models_postgres as models
-from netra_backend.app.base import CorpusNotFoundError
+from netra_backend.app.db.base import CorpusNotFoundError
 from netra_backend.app.base_service import BaseCorpusService
 
 

@@ -15,13 +15,13 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 
 # Import all models to ensure they are registered with Base
-from app.db.base import Base
-from app.db.models_user import User, Secret, ToolUsageLog
-from app.db.models_postgres import *
-from app.db.models_content import *
-from app.db.models_agent_state import *
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
+from netra_backend.app.db.models_postgres import *
+from netra_backend.app.db.models_content import *
+from netra_backend.app.db.models_agent_state import *
 
-from app.config import settings
+from netra_backend.app.config import settings
 
 @pytest.fixture(scope="function")
 async def test_engine():

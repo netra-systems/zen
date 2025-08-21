@@ -19,7 +19,7 @@ from sqlalchemy import (
     Column, Integer, String, DateTime, Boolean, ForeignKey, JSON
 )
 from sqlalchemy.orm import relationship
-from netra_backend.app.base import Base
+from netra_backend.app.db.base import Base
 import uuid
 from datetime import datetime, timezone
 

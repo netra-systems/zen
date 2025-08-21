@@ -8,7 +8,7 @@ import json
 from typing import Any, Dict, List, Optional, Set
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.cache_config import (
+from netra_backend.app.db.cache_config import (
     CacheEntry, CacheMetrics, QueryCacheConfig, CacheKeyGenerator,
     QueryPatternAnalyzer, CacheabilityChecker, AdaptiveTTLCalculator
 )

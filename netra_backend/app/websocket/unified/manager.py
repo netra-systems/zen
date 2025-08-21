@@ -34,11 +34,11 @@ from netra_backend.app.websocket.error_handler import WebSocketErrorHandler
 from netra_backend.app.websocket.room_manager import RoomManager
 
 # Import unified modules
-from netra_backend.app.messaging import UnifiedMessagingManager
-from netra_backend.app.broadcasting import UnifiedBroadcastingManager
-from netra_backend.app.state import UnifiedStateManager
-from netra_backend.app.circuit_breaker import CircuitBreaker
-from netra_backend.app.telemetry_manager import TelemetryManager
+from .messaging import UnifiedMessagingManager
+from .broadcasting import UnifiedBroadcastingManager
+from .state import UnifiedStateManager
+from .circuit_breaker import CircuitBreaker
+from .telemetry_manager import TelemetryManager
 from netra_backend.app.lifecycle_integration import get_lifecycle_integrator
 
 logger = central_logger.get_logger(__name__)

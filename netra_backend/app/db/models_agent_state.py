@@ -7,7 +7,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import uuid
-from netra_backend.app.base import Base
+from netra_backend.app.db.base import Base
 
 
 class AgentStateSnapshot(Base):

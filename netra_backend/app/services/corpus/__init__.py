@@ -11,7 +11,7 @@ split across logical components:
 - Validation and preprocessing
 """
 
-from netra_backend.app.base import CorpusStatus, ContentSource
+from netra_backend.app.db.base import CorpusStatus, ContentSource
 from netra_backend.app.core_unified import CorpusService
 from netra_backend.app.document_manager import DocumentManager
 from netra_backend.app.search_operations import SearchOperations

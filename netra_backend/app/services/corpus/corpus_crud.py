@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app...db import models_postgres as models
 from netra_backend.app... import schemas
-from netra_backend.app.base import CorpusStatus, CorpusNotFoundError, ClickHouseOperationError
+from netra_backend.app.db.base import CorpusStatus, CorpusNotFoundError, ClickHouseOperationError
 from netra_backend.app.base_service import BaseCorpusService
 from netra_backend.app.logging_config import central_logger
 

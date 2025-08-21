@@ -6,8 +6,8 @@ This module has been refactored into focused sub-modules for maintainability.
 """
 
 # Import all components from the refactored modules
-from netra_backend.app.cache_retrieval import CacheRetrieval, CacheInvalidation
-from netra_backend.app.cache_storage import CacheStorage, CacheMetricsBuilder
+from netra_backend.app.db.cache_retrieval import CacheRetrieval, CacheInvalidation
+from netra_backend.app.db.cache_storage import CacheStorage, CacheMetricsBuilder
 
 # Maintain backward compatibility exports
 __all__ = [

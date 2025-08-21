@@ -32,7 +32,7 @@
       <solution>
         <description>Use correct port environment variables for different connection types</description>
         <implementation>
-          <file>app/core/configuration/database.py</file>
+          <file>netra_backend/app/core/configuration/database.py</file>
           <changes>
             <change line="134">Use CLICKHOUSE_HTTP_PORT for HTTP connections (8123)</change>
             <change line="149">Use CLICKHOUSE_NATIVE_PORT for native connections (9000)</change>
@@ -67,7 +67,7 @@
       <solution>
         <description>Fix environment variable name mappings in secrets configuration</description>
         <implementation>
-          <file>app/core/configuration/secrets.py</file>
+          <file>netra_backend/app/core/configuration/secrets.py</file>
           <changes>
             <change line="244">Map "clickhouse-default-password" to "CLICKHOUSE_PASSWORD"</change>
           </changes>
@@ -206,9 +206,9 @@
     </learning>
   </learnings>
   <references>
-    <reference>app/core/configuration/database.py</reference>
-    <reference>app/core/configuration/secrets.py</reference>
-    <reference>app/db/clickhouse.py</reference>
+    <reference>netra_backend/app/core/configuration/database.py</reference>
+    <reference>netra_backend/app/core/configuration/secrets.py</reference>
+    <reference>netra_backend/app/db/clickhouse.py</reference>
     <reference>.env.development.local</reference>
     <reference>scripts/dev_launcher.py</reference>
     <reference>SPEC/dev_launcher_performance.xml</reference>
@@ -299,12 +299,12 @@
                 Each error is raised as a fresh individual error for better tracking.
             </description>
       <implementation>
-        <file>app/startup_checks/checker.py</file>
+        <file>netra_backend/app/startup_checks/checker.py</file>
         <changes>
           <change line="102-115">Modified _execute_check to raise RuntimeError immediately in staging on any failure</change>
           <change line="149-162">Modified _record_check_failure to treat all failures as critical in staging</change>
         </changes>
-        <file>app/startup_checks/utils.py</file>
+        <file>netra_backend/app/startup_checks/utils.py</file>
         <changes>
           <change line="72-79">Modified _handle_startup_results to treat non-critical failures as critical in staging</change>
           <change line="81-92">Enhanced _handle_critical_failures to provide detailed error messages with all failure information</change>

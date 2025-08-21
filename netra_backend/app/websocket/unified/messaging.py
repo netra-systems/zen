@@ -20,8 +20,8 @@ from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.websocket.large_message_handler import get_large_message_handler, CompressionAlgorithm
-from netra_backend.app.message_queue import MessageQueue
-from netra_backend.app.message_handlers import MessageHandler, MessageBuilder, MessageProcessor
+from .message_queue import MessageQueue
+from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
 logger = central_logger.get_logger(__name__)
 
@@ -250,8 +250,8 @@ class UnifiedMessagingManager:
 
 
 # Re-export classes for backward compatibility
-from netra_backend.app.message_queue import MessageQueue
-from netra_backend.app.message_handlers import MessageHandler, MessageBuilder, MessageProcessor
+from .message_queue import MessageQueue
+from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
 __all__ = [
     "UnifiedMessagingManager", "MessageQueue", "MessageHandler", 

@@ -30,7 +30,7 @@
       <pattern>
                 if async_engine is None:
                     initialize_postgres()
-                    from app.db.postgres import async_engine as refreshed_engine
+                    from netra_backend.app.db.postgres import async_engine as refreshed_engine
             </pattern>
     </implementation>
   </learning>
@@ -159,7 +159,7 @@
         </problem>
     <root-cause>
             Python caches module-level imports. When health_checkers.py imported async_engine from
-            app.db.postgres at module load time (before database initialization), it cached the
+            netra_backend.app.db.postgres at module load time (before database initialization), it cached the
             None value. Even after database initialization in postgres_core.py set async_engine
             to a valid engine, the cached import reference in health_checkers.py remained None,
             causing "Database engine not initialized" errors.
@@ -167,7 +167,7 @@
     <solution>
             Modified health check functions to use dynamic imports that get fresh references
             after database initialization:
-            1. Import directly from app.db.postgres_core where engine is defined
+            1. Import directly from netra_backend.app.db.postgres_core where engine is defined
             2. Check if engine is None and initialize if needed
             3. Re-import after initialization to get fresh reference
             4. Use the fresh reference for database operations
@@ -175,12 +175,12 @@
     <implementation>
       <file>netra_backend/app/core/health_checkers.py</file>
       <pattern>
-                from app.db.postgres import initialize_postgres
-                from app.db.postgres_core import async_engine
+                from netra_backend.app.db.postgres import initialize_postgres
+                from netra_backend.app.db.postgres_core import async_engine
                 
                 if async_engine is None:
                     initialize_postgres()
-                    from app.db.postgres_core import async_engine as engine_ref
+                    from netra_backend.app.db.postgres_core import async_engine as engine_ref
                     engine = engine_ref
                 else:
                     engine = async_engine

@@ -10,7 +10,7 @@ import os
 from sqlalchemy import (
     Column, String, DateTime, Boolean, Text, JSON, Integer
 )
-from netra_backend.app.base import Base
+from netra_backend.app.db.base import Base
 from datetime import datetime, timezone
 
 

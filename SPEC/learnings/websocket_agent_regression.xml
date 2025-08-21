@@ -16,14 +16,14 @@
   <root_cause>
     <issue>Circular import between agent executor and WebSocket connection modules</issue>
     <import_chain>
-            app.agents.base.executor.BaseExecutionEngine
-            → app.agents.base.reliability.ReliabilityManager  
-            → app.agents.base.rate_limiter (imports websocket.rate_limiter)
-            → app.websocket.__init__ (imports connection)
-            → app.websocket.connection (calls get_connection_manager)
-            → app.websocket.connection_manager.ModernConnectionManager
-            → app.websocket.connection_executor.ConnectionExecutor
-            → attempts to import app.agents.base.executor.BaseExecutionEngine (CIRCULAR!)
+            netra_backend.app.agents.base.executor.BaseExecutionEngine
+            → netra_backend.app.agents.base.reliability.ReliabilityManager  
+            → netra_backend.app.agents.base.rate_limiter (imports websocket.rate_limiter)
+            → netra_backend.app.websocket.__init__ (imports connection)
+            → netra_backend.app.websocket.connection (calls get_connection_manager)
+            → netra_backend.app.websocket.connection_manager.ModernConnectionManager
+            → netra_backend.app.websocket.connection_executor.ConnectionExecutor
+            → attempts to import netra_backend.app.agents.base.executor.BaseExecutionEngine (CIRCULAR!)
         </import_chain>
     <symptoms>
             - ImportError on startup
@@ -46,7 +46,7 @@
   <fix_strategy>
     <step priority="1">
       <action>Remove BaseExecutionEngine import from connection_executor.py</action>
-      <location>app/websocket/connection_executor.py:45</location>
+      <location>netra_backend/app/websocket/connection_executor.py:45</location>
       <replacement>Use local execution pattern or interface</replacement>
     </step>
     <step priority="2">

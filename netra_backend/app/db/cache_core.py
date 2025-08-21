@@ -8,10 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.cache_config import QueryCacheConfig, CacheMetrics
-from netra_backend.app.cache_strategies import CacheTaskManager, EvictionStrategyFactory, QueryPatternTracker
-from netra_backend.app.cache_retrieval import CacheRetrieval, CacheInvalidation
-from netra_backend.app.cache_storage import CacheStorage, CacheMetricsBuilder
+from netra_backend.app.db.cache_config import QueryCacheConfig, CacheMetrics
+from netra_backend.app.db.cache_strategies import CacheTaskManager, EvictionStrategyFactory, QueryPatternTracker
+from netra_backend.app.db.cache_retrieval import CacheRetrieval, CacheInvalidation
+from netra_backend.app.db.cache_storage import CacheStorage, CacheMetricsBuilder
 
 logger = central_logger.get_logger(__name__)
 

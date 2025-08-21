@@ -12,7 +12,7 @@
   <root_cause>
     <issue type="timing">
       Configuration loading happens at module import time, not runtime.
-      app/config.py line 59 executes "settings = get_config()" immediately on import.
+      netra_backend/app/config.py line 59 executes "settings = get_config()" immediately on import.
       This happens BEFORE subprocess environment is fully available.
     </issue>
     <issue type="logging">
@@ -21,17 +21,17 @@
     </issue>
   </root_cause>
   <solution>
-    <fix file="app/config.py">
+    <fix file="netra_backend/app/config.py">
       Changed from eager loading (settings = get_config()) to lazy loading.
       Used __getattr__ to load settings only on first access.
       This allows environment variables to be fully set before configuration loads.
     </fix>
-    <fix file="app/core/unified_logging.py">
+    <fix file="netra_backend/app/core/unified_logging.py">
       Added frame inspection to capture actual caller location.
       Used logger.opt(depth=3) to skip wrapper frames.
       Added caller_module, caller_function, caller_line to context.
     </fix>
-    <fix file="app/core/logging_formatters.py">
+    <fix file="netra_backend/app/core/logging_formatters.py">
       Updated console format to use caller info from context.
       Changed from {name}:{function}:{line} to {extra[caller_module]}:{extra[caller_function]}:{extra[caller_line]}.
     </fix>

@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 from pydantic import BaseModel, Field, ConfigDict
 
 from loguru import logger
-from netra_backend.app.logging_context import (
+from netra_backend.app.core.logging_context import (
     request_id_context,
     user_id_context,
     trace_id_context

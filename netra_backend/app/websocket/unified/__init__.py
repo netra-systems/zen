@@ -9,10 +9,10 @@ Consolidates all WebSocket functionality into a modular, scalable system:
 Business Value: Eliminates $8K MRR loss from poor real-time experience
 """
 
-from netra_backend.app.manager import UnifiedWebSocketManager, get_unified_manager
-from netra_backend.app.messaging import UnifiedMessagingManager, MessageQueue
-from netra_backend.app.broadcasting import UnifiedBroadcastingManager, BroadcastMetrics
-from netra_backend.app.state import UnifiedStateManager, TelemetryCollector, JobQueueManager
+from .manager import UnifiedWebSocketManager, get_unified_manager
+from .messaging import UnifiedMessagingManager, MessageQueue
+from .broadcasting import UnifiedBroadcastingManager, BroadcastMetrics
+from .state import UnifiedStateManager, TelemetryCollector, JobQueueManager
 
 __all__ = [
     # Main manager

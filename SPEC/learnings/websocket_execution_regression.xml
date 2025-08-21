@@ -17,11 +17,11 @@
             left WebSocket components without execution capability.
         </root_cause>
     <affected_files>
-      <file>app/websocket/message_handler_core.py</file>
-      <file>app/websocket/message_router.py</file>
-      <file>app/websocket/websocket_broadcast_executor.py</file>
-      <file>app/websocket/connection_executor.py</file>
-      <file>app/monitoring/metrics_collector.py</file>
+      <file>netra_backend/app/websocket/message_handler_core.py</file>
+      <file>netra_backend/app/websocket/message_router.py</file>
+      <file>netra_backend/app/websocket/websocket_broadcast_executor.py</file>
+      <file>netra_backend/app/websocket/connection_executor.py</file>
+      <file>netra_backend/app/monitoring/metrics_collector.py</file>
     </affected_files>
     <error_pattern>
             AttributeError: 'NoneType' object has no attribute 'execute'
@@ -43,7 +43,7 @@
             </explanation>
       <example>
 # WRONG - Causes circular import at module level:
-from app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 class WebSocketHandler:
     def __init__(self):
@@ -52,7 +52,7 @@ class WebSocketHandler:
 # CORRECT - Import inside method avoids circular dependency:
 class WebSocketHandler:
     def _initialize_modern_components(self):
-        from app.agents.base.executor import BaseExecutionEngine
+        from netra_backend.app.agents.base.executor import BaseExecutionEngine
         self.execution_engine = BaseExecutionEngine()
             </example>
     </circular_import_prevention>

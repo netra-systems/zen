@@ -49,7 +49,7 @@
       <problem>Alembic fails: "Could not determine revision id from filename"</problem>
       <cause>Helper files in alembic/versions directory</cause>
       <solution>
-        1. Create app/alembic/migrations_helpers/ directory
+        1. Create netra_backend/app/alembic/migrations_helpers/ directory
         2. Move all helper files (*_tables.py, migration_metadata.py) there
         3. Only keep proper migration files in versions/
       </solution>
@@ -85,7 +85,7 @@
         - Fix parameter mismatches (query_count → total_queries)
         - Add required timestamp parameter
       </solution>
-      <files_affected>app/db/observability_metrics.py, app/monitoring/metrics_collector.py</files_affected>
+      <files_affected>netra_backend/app/db/observability_metrics.py, netra_backend/app/monitoring/metrics_collector.py</files_affected>
     </learning>
   </section>
   <section name="HealthChecks">

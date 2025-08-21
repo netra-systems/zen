@@ -56,17 +56,17 @@
     <step num="10">**MISSING: Never calls agent_service.handle_websocket_message()**</step>
   </message_flow>
   <fix>
-    <file>app/routes/websockets.py</file>
+    <file>netra_backend/app/routes/websockets.py</file>
     <change>
       CRITICAL: Fixed inverted logic in _handle_validated_message:
       OLD: if not await validate_and_handle_message(): return True (EXIT!)
       NEW: Always call process_valid_message for non-system messages
     </change>
-    <file>app/websocket/unified/message_handlers.py</file>
+    <file>netra_backend/app/websocket/unified/message_handlers.py</file>
     <change>
       Added _forward_to_agent_service method that:
       1. Extracts user_id from connection metadata
-      2. Gets agent_service from app.state
+      2. Gets agent_service from netra_backend.app.state
       3. Creates database session
       4. Calls agent_service.handle_websocket_message(user_id, message_str, db_session)
     </change>
@@ -76,7 +76,7 @@
     <change>
       Added comprehensive logging to track message flow
     </change>
-    <file>app/services/message_handlers.py</file>
+    <file>netra_backend/app/services/message_handlers.py</file>
     <change>
       Fixed field extraction to accept both 'content' and 'text' fields
     </change>
@@ -90,7 +90,7 @@
     <step>Check for "[CRITICAL]" logs to see forwarding attempts</step>
     <step>Check for "[CRITICAL ERROR]" logs to see failures</step>
     <step>Verify user_id exists in connection metadata</step>
-    <step>Verify agent_service exists in app.state</step>
+    <step>Verify agent_service exists in netra_backend.app.state</step>
     <step>Verify database connection is available</step>
   </debugging_steps>
   <potential_remaining_issues>
@@ -100,7 +100,7 @@
     </issue>
     <issue>
       <problem>App state might not have agent_service</problem>
-      <solution>Ensure startup_module properly initializes agent_service in app.state</solution>
+      <solution>Ensure startup_module properly initializes agent_service in netra_backend.app.state</solution>
     </issue>
     <issue>
       <problem>Message processor might not be called at all</problem>
@@ -159,12 +159,12 @@
     <command>grep -r "agent_service.handle_websocket_message" logs/</command>
   </verification_commands>
   <related_files>
-    <file>app/websocket/unified/message_handlers.py - Message processor</file>
-    <file>app/websocket/unified/messaging.py - Messaging manager</file>
-    <file>app/websocket/unified/manager.py - Unified manager</file>
-    <file>app/ws_manager.py - Main WebSocket manager</file>
-    <file>app/services/agent_service_core.py - Agent service</file>
-    <file>app/services/message_handlers.py - Message handlers</file>
-    <file>app/routes/websockets.py - WebSocket endpoint</file>
+    <file>netra_backend/app/websocket/unified/message_handlers.py - Message processor</file>
+    <file>netra_backend/app/websocket/unified/messaging.py - Messaging manager</file>
+    <file>netra_backend/app/websocket/unified/manager.py - Unified manager</file>
+    <file>netra_backend/app/ws_manager.py - Main WebSocket manager</file>
+    <file>netra_backend/app/services/agent_service_core.py - Agent service</file>
+    <file>netra_backend/app/services/message_handlers.py - Message handlers</file>
+    <file>netra_backend/app/routes/websockets.py - WebSocket endpoint</file>
   </related_files>
 </learning>

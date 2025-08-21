@@ -5,17 +5,17 @@ Maintains backward compatibility while adhering to modular architecture.
 """
 
 # Import Base class for SQLAlchemy models
-from netra_backend.app.base import Base
+from netra_backend.app.db.base import Base
 
 # Import user and authentication models
-from netra_backend.app.models_user import (
+from netra_backend.app.db.models_user import (
     User,
     Secret,
     ToolUsageLog
 )
 
 # Import supply and research models
-from netra_backend.app.models_supply import (
+from netra_backend.app.db.models_supply import (
     Supply,
     SupplyOption,
     AvailabilityStatus,
@@ -26,7 +26,7 @@ from netra_backend.app.models_supply import (
 )
 
 # Import agent and assistant models
-from netra_backend.app.models_agent import (
+from netra_backend.app.db.models_agent import (
     Assistant,
     Thread,
     Message,
@@ -37,7 +37,7 @@ from netra_backend.app.models_agent import (
 )
 
 # Import content and corpus models
-from netra_backend.app.models_content import (
+from netra_backend.app.db.models_content import (
     CorpusAuditLog,
     Analysis,
     AnalysisResult,
@@ -46,7 +46,7 @@ from netra_backend.app.models_content import (
 )
 
 # Import MCP client models
-from netra_backend.app.models_mcp_client import (
+from netra_backend.app.db.models_mcp_client import (
     MCPExternalServer,
     MCPToolExecution,
     MCPResourceAccess

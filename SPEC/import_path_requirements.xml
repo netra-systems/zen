@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <metadata>
+    <title>Import Path Requirements - Canonical Import Patterns</title>
+    <category>architecture</category>
+    <subcategory>imports</subcategory>
+    <priority>CRITICAL</priority>
+    <created>2025-08-21</created>
+    <enforcement>MANDATORY</enforcement>
+  </metadata>
+
+  <overview>
+    This specification defines the ONLY acceptable import patterns following the canonical project structure.
+    All code MUST follow these patterns. The structure is fixed - fix imports, not the structure.
+  </overview>
+
+  <import_patterns>
+    <pattern>
+      <name>Backend Application Imports</name>
+      <scope>Within netra_backend/app/</scope>
+      <rules>
+        <rule>
+          <description>Importing from same module hierarchy</description>
+          <example>
+            <!-- From netra_backend/app/agents/base.py -->
+            from netra_backend.app.agents.interfaces import AgentInterface
+            from netra_backend.app.core.exceptions import NetraError
+          </example>
+        </rule>
+        <rule>
+          <description>Importing from core modules</description>
+          <example>
+            from netra_backend.app.core.config import settings
+            from netra_backend.app.core.logging_config import logger
+          </example>
+        </rule>
+        <rule>
+          <description>Importing from services</description>
+          <example>
+            from netra_backend.app.services.agent_service import AgentService
+            from netra_backend.app.services.user_service import UserService
+          </example>
+        </rule>
+      </rules>
+    </pattern>
+
+    <pattern>
+      <name>Backend Test Imports</name>
+      <scope>Within netra_backend/tests/</scope>
+      <rules>
+        <rule>
+          <description>Importing application code for testing</description>
+          <example>
+            from netra_backend.app.agents.base import BaseAgent
+            from netra_backend.app.core.exceptions import NetraError
+          </example>
+        </rule>
+        <rule>
+          <description>Importing test utilities</description>
+          <example>
+            from netra_backend.tests.conftest import test_client, test_db
+            from netra_backend.tests.fixtures import create_test_user
+          </example>
+        </rule>
+      </rules>
+    </pattern>
+
+    <pattern>
+      <name>Test Framework Imports</name>
+      <scope>Within test_framework/</scope>
+      <rules>
+        <rule>
+          <description>Importing test runner components</description>
+          <example>
+            from test_framework.test_config import TEST_LEVELS
+            from test_framework.test_runner import TestRunner
+          </example>
+        </rule>
+      </rules>
+    </pattern>
+
+    <pattern>
+      <name>Dev Launcher Imports</name>
+      <scope>Within dev_launcher/</scope>
+      <rules>
+        <rule>
+          <description>Importing launcher components</description>
+          <example>
+            from dev_launcher.config import LauncherConfig
+            from dev_launcher.backend_starter import BackendStarter
+          </example>
+        </rule>
+      </rules>
+    </pattern>
+  </import_patterns>
+
+  <forbidden_patterns>
+    <pattern>
+      <description>Old app-relative imports</description>
+      <forbidden>from app.agents.base import BaseAgent</forbidden>
+      <correct>from netra_backend.app.agents.base import BaseAgent</correct>
+      <severity>CRITICAL</severity>
+    </pattern>
+    
+    <pattern>
+      <description>Direct cross-service imports</description>
+      <forbidden>from auth_service.models import User  # in netra_backend</forbidden>
+      <correct>Use API clients: from netra_backend.app.clients.auth_client import AuthClient</correct>
+      <severity>CRITICAL</severity>
+    </pattern>
+    
+    <pattern>
+      <description>Implicit relative imports</description>
+      <forbidden>from agents.base import BaseAgent</forbidden>
+      <correct>from netra_backend.app.agents.base import BaseAgent</correct>
+      <severity>CRITICAL</severity>
+    </pattern>
+    
+    <pattern>
+      <description>sys.path manipulation</description>
+      <forbidden>sys.path.append('../app')</forbidden>
+      <correct>Use proper PYTHONPATH configuration</correct>
+      <severity>HIGH</severity>
+    </pattern>
+  </forbidden_patterns>
+
+  <pythonpath_configuration>
+    <environment>
+      <name>Development</name>
+      <pythonpath>.:netra_backend</pythonpath>
+      <explanation>Allows resolution of both root-level and netra_backend imports</explanation>
+    </environment>
+    
+    <environment>
+      <name>Testing</name>
+      <pythonpath>.:netra_backend</pythonpath>
+      <configuration_file>pytest.ini</configuration_file>
+    </environment>
+    
+    <environment>
+      <name>Production</name>
+      <pythonpath>/app:/app/netra_backend</pythonpath>
+      <configuration_file>Dockerfile.backend</configuration_file>
+    </environment>
+  </pythonpath_configuration>
+
+  <import_resolution_order>
+    <step>1. Python standard library</step>
+    <step>2. Third-party packages (from requirements.txt)</step>
+    <step>3. netra_backend.app.* (application code)</step>
+    <step>4. netra_backend.tests.* (test code, only in tests)</step>
+    <step>5. test_framework.* (test infrastructure)</step>
+    <step>6. dev_launcher.* (development tools)</step>
+  </import_resolution_order>
+
+  <validation_commands>
+    <command>
+      <name>Check Import Compliance</name>
+      <cli>python scripts/check_architecture_compliance.py --imports</cli>
+      <description>Validates all imports follow canonical patterns</description>
+    </command>
+    
+    <command>
+      <name>Fix Imports Automatically</name>
+      <cli>python scripts/fix_imports.py --fix</cli>
+      <description>Automatically updates imports to canonical form</description>
+    </command>
+    
+    <command>
+      <name>Pre-commit Hook</name>
+      <cli>pre-commit run check-imports --all-files</cli>
+      <description>Prevents non-compliant imports from being committed</description>
+    </command>
+  </validation_commands>
+
+  <common_fixes>
+    <fix>
+      <problem>ModuleNotFoundError: No module named 'app'</problem>
+      <solution>
+        <step>Replace 'from app.' with 'from netra_backend.app.'</step>
+        <step>Ensure PYTHONPATH includes project root</step>
+      </solution>
+    </fix>
+    
+    <fix>
+      <problem>ImportError in tests</problem>
+      <solution>
+        <step>Use 'from netra_backend.app.' for application imports</step>
+        <step>Use 'from netra_backend.tests.' for test utility imports</step>
+        <step>Check pytest.ini has correct pythonpath setting</step>
+      </solution>
+    </fix>
+    
+    <fix>
+      <problem>Circular import detected</problem>
+      <solution>
+        <step>Review module dependencies</step>
+        <step>Move shared interfaces to core.interfaces</step>
+        <step>Use TYPE_CHECKING for type hints only</step>
+      </solution>
+    </fix>
+  </common_fixes>
+
+  <type_checking_imports>
+    <description>For type hints that would cause circular imports</description>
+    <pattern>
+      from typing import TYPE_CHECKING
+      
+      if TYPE_CHECKING:
+          from netra_backend.app.services.user_service import UserService
+      
+      # Use 'UserService' in quotes for type hints
+      def process(service: 'UserService') -> None:
+          pass
+    </pattern>
+  </type_checking_imports>
+
+  <enforcement>
+    <rule>All new code MUST follow these patterns</rule>
+    <rule>Existing code MUST be updated when modified</rule>
+    <rule>CI/CD MUST fail on non-compliant imports</rule>
+    <rule>Code reviews MUST check import compliance</rule>
+  </enforcement>
+</spec>

@@ -15,8 +15,8 @@ from typing import Optional, Dict, Any
 from loguru import logger
 
 # Import the modular components
-from netra_backend.app.logging_formatters import SensitiveDataFilter, LogHandlerConfig
-from netra_backend.app.logging_context import (
+from netra_backend.app.core.logging_formatters import SensitiveDataFilter, LogHandlerConfig
+from netra_backend.app.core.logging_context import (
     request_id_context,
     user_id_context, 
     trace_id_context,

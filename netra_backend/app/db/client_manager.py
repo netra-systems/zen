@@ -7,8 +7,8 @@ from contextlib import asynccontextmanager
 from typing import Any, Dict, AsyncGenerator
 
 from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.client_postgres import ResilientDatabaseClient
-from netra_backend.app.client_clickhouse import ClickHouseDatabaseClient
+from netra_backend.app.db.client_postgres import ResilientDatabaseClient
+from netra_backend.app.db.client_clickhouse import ClickHouseDatabaseClient
 
 
 class DatabaseClientManager:

@@ -6,25 +6,26 @@
         <systems>testing, imports, auth</systems>
     </metadata>
 
-    <learning id="test-imports-no-app-prefix">
-        <title>Test imports must not use app. prefix</title>
+    <learning id="test-imports-netra-backend-namespace">
+        <title>Test imports must use netra_backend namespace</title>
         <problem>
-            Tests failing with ModuleNotFoundError: No module named 'app.core.auth'
-            when imports use "from app.module import ..." pattern
+            Tests failing with ModuleNotFoundError when using old import patterns
+            that don't include the netra_backend namespace prefix
         </problem>
         <root_cause>
-            When pytest runs from within the app directory, the app package
-            is not in the Python path as a parent package. Tests run with
-            app as the root directory.
+            Project structure changed to use netra_backend namespace. All imports
+            must now use absolute imports with the netra_backend prefix.
         </root_cause>
         <solution>
-            Remove "app." prefix from all test imports:
-            - Change: from app.db.models_postgres import User
-            - To: from db.models_postgres import User
+            Use netra_backend namespace for all imports:
+            - Change: from db.models_postgres import User
+            - To: from netra_backend.app.db.models_postgres import User
+            - Change: from app.core.auth import validate_token
+            - To: from netra_backend.app.core.auth import validate_token
         </solution>
         <prevention>
-            Always run tests from app directory and use absolute imports
-            without the app prefix
+            Always use absolute imports with netra_backend namespace.
+            All imports must start with netra_backend.app.* or netra_backend.tests.*
         </prevention>
     </learning>
 
@@ -103,7 +104,7 @@
         </root_cause>
         <solution>
             Set PYTHONPATH explicitly when running tests:
-            set PYTHONPATH=C:\path\to\netra-core-generation-1\app
+            set PYTHONPATH=C:\path\to\netra-core-generation-1
         </solution>
         <prevention>
             Use pytest.ini or setup.cfg to configure test paths consistently
@@ -149,15 +150,40 @@
         </prevention>
     </learning>
 
+    <learning id="test-imports-structure">
+        <title>Tests must use netra_backend.tests namespace not netra_backend.app.tests</title>
+        <problem>
+            Incorrect import patterns using netra_backend.app.tests.* when tests
+            are actually located at netra_backend.tests.*
+        </problem>
+        <root_cause>
+            Tests directory is at netra_backend/tests/ not netra_backend/app/tests/.
+            The app directory contains application code only, tests are separate.
+        </root_cause>
+        <solution>
+            WRONG: from netra_backend.app.tests.conftest_helpers import ...
+            RIGHT: from netra_backend.tests.conftest_helpers import ...
+            
+            All test-related imports must use netra_backend.tests.* pattern
+        </solution>
+        <prevention>
+            Remember the structure:
+            - Application code: netra_backend.app.*
+            - Test code: netra_backend.tests.*
+            Never mix these namespaces. Tests are NOT under app.
+        </prevention>
+    </learning>
+
     <summary>
         Key testing fixes required:
-        1. Remove app. prefix from all test imports
+        1. Use netra_backend namespace for all test imports
         2. Use correct auth service endpoints (/auth not /api/v1/auth)
         3. Use dev login for testing instead of registration
-        4. Use absolute imports with service namespace pattern
-        5. Ensure database initialization for auth service
-        6. Set proper PYTHONPATH for test execution
-        7. Handle pydantic installation issues on Windows
-        8. Update tests to use current API endpoints
+        4. Use absolute imports with netra_backend.app.* for application code
+        5. Use absolute imports with netra_backend.tests.* for test code (NOT netra_backend.app.tests.*)
+        6. Ensure database initialization for auth service
+        7. Set proper PYTHONPATH for test execution (project root, not app directory)
+        8. Handle pydantic installation issues on Windows
+        9. Update tests to use current API endpoints
     </summary>
 </learnings>

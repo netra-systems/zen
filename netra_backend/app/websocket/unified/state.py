@@ -17,8 +17,8 @@ from typing import Dict, Any
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
-from netra_backend.app.job_queue import JobQueueManager
+from .telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
+from .job_queue import JobQueueManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -175,8 +175,8 @@ class UnifiedStateManager:
 
 
 # Re-export classes for backward compatibility
-from netra_backend.app.telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
-from netra_backend.app.job_queue import JobQueueManager
+from .telemetry import TelemetryCollector, ConnectionMetrics, JobMetrics
+from .job_queue import JobQueueManager
 
 __all__ = [
     "UnifiedStateManager", "TelemetryCollector", "ConnectionMetrics", 
