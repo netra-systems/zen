@@ -14,11 +14,11 @@ from typing import Any, Callable, Dict, List, Optional, TypeVar
 from dataclasses import dataclass
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.circuit_breaker import UnifiedCircuitBreaker, CircuitBreakerOpenError
-from netra_backend.app.retry_manager import UnifiedRetryManager, RetryExhaustedException
-from netra_backend.app.fallback import UnifiedFallbackChain, fallback_manager
-from netra_backend.app.monitor import resilience_monitor, HealthStatus
-from netra_backend.app.policy import policy_manager, ResiliencePolicy, EnvironmentType
+from netra_backend.app.core.resilience.circuit_breaker import UnifiedCircuitBreaker, CircuitBreakerOpenError
+from netra_backend.app.core.resilience.retry_manager import UnifiedRetryManager, RetryExhaustedException
+from netra_backend.app.core.resilience.fallback import UnifiedFallbackChain, fallback_manager
+from netra_backend.app.core.resilience.monitor import resilience_monitor, HealthStatus
+from netra_backend.app.core.resilience.policy import policy_manager, ResiliencePolicy, EnvironmentType
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T')

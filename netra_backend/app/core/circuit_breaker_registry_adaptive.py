@@ -7,8 +7,8 @@ All functions ≤8 lines.
 from typing import Any, Callable, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.shared_health_types import HealthChecker
-from netra_backend.app.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
+from netra_backend.app.core.shared_health_types import HealthChecker
+from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.schemas.core_models import CircuitBreakerConfig
 
 logger = central_logger.get_logger(__name__)

@@ -25,7 +25,7 @@ Usage:
 """
 
 # Core resilience components
-from netra_backend.app.circuit_breaker import (
+from netra_backend.app.core.resilience.circuit_breaker import (
     UnifiedCircuitBreaker,
     CircuitConfig,
     CircuitState,
@@ -33,7 +33,7 @@ from netra_backend.app.circuit_breaker import (
     CircuitBreakerOpenError
 )
 
-from netra_backend.app.retry_manager import (
+from netra_backend.app.core.resilience.retry_manager import (
     UnifiedRetryManager,
     RetryConfig,
     BackoffStrategy,
@@ -42,7 +42,7 @@ from netra_backend.app.retry_manager import (
     RetryExhaustedException
 )
 
-from netra_backend.app.fallback import (
+from netra_backend.app.core.resilience.fallback import (
     UnifiedFallbackChain,
     FallbackHandler,
     StaticResponseFallback,
@@ -55,7 +55,7 @@ from netra_backend.app.fallback import (
     fallback_manager
 )
 
-from netra_backend.app.monitor import (
+from netra_backend.app.core.resilience.monitor import (
     UnifiedResilienceMonitor,
     AlertSeverity,
     HealthStatus,
@@ -66,7 +66,7 @@ from netra_backend.app.monitor import (
     resilience_monitor
 )
 
-from netra_backend.app.policy import (
+from netra_backend.app.core.resilience.policy import (
     ResiliencePolicy,
     PolicyTemplate,
     ServiceTier,
@@ -78,7 +78,7 @@ from netra_backend.app.policy import (
     create_llm_service_policy
 )
 
-from netra_backend.app.registry import (
+from netra_backend.app.core.resilience.registry import (
     UnifiedResilienceRegistry,
     ServiceResilienceComponents,
     resilience_registry,

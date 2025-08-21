@@ -14,11 +14,11 @@ from pydantic import BaseModel
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.reliability import CircuitBreaker, CircuitBreakerConfig
-from netra_backend.app.fallback_strategies import CircuitFallbackStrategy, RetryExecutionStrategy, RetryExecutor
-from netra_backend.app.error_classification import ErrorClassificationChain, FailureType
-from netra_backend.app.fallback_config import FallbackConfig, RetryHistoryManager
-from netra_backend.app.fallback_responses import FallbackResponseFactory, StructuredFallbackBuilder
-from netra_backend.app.retry_helpers import (
+from netra_backend.app.llm.fallback_strategies import CircuitFallbackStrategy, RetryExecutionStrategy, RetryExecutor
+from netra_backend.app.llm.error_classification import ErrorClassificationChain, FailureType
+from netra_backend.app.llm.fallback_config import FallbackConfig, RetryHistoryManager
+from netra_backend.app.llm.fallback_responses import FallbackResponseFactory, StructuredFallbackBuilder
+from netra_backend.app.llm.retry_helpers import (
     execute_retry_template, create_health_status_base, 
     add_circuit_breaker_status, add_failure_type_breakdown
 )

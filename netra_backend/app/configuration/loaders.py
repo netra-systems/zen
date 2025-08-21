@@ -6,7 +6,7 @@ Includes specialized functions for different config types.
 
 import os
 from typing import Dict, Any, Optional, Tuple, Callable
-from netra_backend.app.config.schemas import AppConfig
+from netra_backend.app.configuration.schemas import AppConfig
 from netra_backend.app.logging_config import central_logger as logger
 
 

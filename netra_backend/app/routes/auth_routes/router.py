@@ -10,11 +10,11 @@ from netra_backend.app.auth_dependencies import get_db_session, get_security_ser
 from netra_backend.app.schemas.auth_types import AuthConfigResponse, DevLoginRequest
 from netra_backend.app.services.security_service import SecurityService
 
-from netra_backend.app.config_handler import build_auth_config_response
-from netra_backend.app.login_flow import handle_login_request
-from netra_backend.app.callback_processor import handle_callback_request
-from netra_backend.app.dev_login import handle_dev_login
-from netra_backend.app.token_management import validate_user_auth, create_token_response
+from netra_backend.app.routes.auth_routes.config_handler import build_auth_config_response
+from netra_backend.app.routes.auth_routes.login_flow import handle_login_request
+from netra_backend.app.routes.auth_routes.callback_processor import handle_callback_request
+from netra_backend.app.routes.auth_routes.dev_login import handle_dev_login
+from netra_backend.app.routes.auth_routes.token_management import validate_user_auth, create_token_response
 from netra_backend.app.auth_integration.auth import get_current_user
 
 router = APIRouter()

@@ -10,8 +10,8 @@ from typing import Dict, Any, Optional, Callable, Awaitable, List
 from datetime import datetime, timedelta, UTC
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.circuit_breaker import CircuitBreaker, CircuitConfig as CircuitBreakerConfig, CircuitState as CircuitBreakerState, CircuitMetrics as ReliabilityMetrics
-from netra_backend.app.reliability_retry import RetryHandler, RetryConfig
+from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig as CircuitBreakerConfig, CircuitState as CircuitBreakerState, CircuitMetrics as ReliabilityMetrics
+from netra_backend.app.core.reliability_retry import RetryHandler, RetryConfig
 
 logger = central_logger.get_logger(__name__)
 

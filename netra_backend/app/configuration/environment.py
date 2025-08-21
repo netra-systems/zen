@@ -6,7 +6,7 @@ Separated from the main configuration for clarity.
 
 import os
 from typing import Dict, Type
-from netra_backend.app.config.schemas import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
+from netra_backend.app.configuration.schemas import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
 from netra_backend.app.logging_config import central_logger as logger
 
 

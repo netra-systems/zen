@@ -16,18 +16,18 @@ from both legacy and unified implementations.
 """
 
 # Legacy circuit breaker exports for backwards compatibility
-from netra_backend.app.circuit_breaker_types import (
+from netra_backend.app.core.circuit_breaker_types import (
     CircuitState,
     CircuitConfig,
     CircuitMetrics,
     CircuitBreakerOpenError
 )
 
-from netra_backend.app.circuit_breaker_core import (
+from netra_backend.app.core.circuit_breaker_core import (
     CircuitBreaker
 )
 
-from netra_backend.app.circuit_breaker_registry_adaptive import (
+from netra_backend.app.core.circuit_breaker_registry_adaptive import (
     CircuitBreakerRegistry,
     circuit_breaker_registry as circuit_registry,
     get_circuit_breaker,
@@ -35,7 +35,7 @@ from netra_backend.app.circuit_breaker_registry_adaptive import (
 )
 
 # NEW: Unified Resilience Framework exports
-from netra_backend.app.resilience import (
+from netra_backend.app.core.resilience import (
     UnifiedCircuitBreaker,
     UnifiedRetryManager,
     UnifiedFallbackChain,
