@@ -34,6 +34,11 @@
             <critical-takeaway>All configuration MUST utilize the unified config system. Direct `os.environ.get()` is forbidden outside the config module.</critical-takeaway>
         </category>
 
+        <category name="CORS/Dynamic Ports" path="SPEC/learnings/cors_dynamic_ports.xml" keywords="CORS, Dynamic Ports, Localhost, Development">
+            <critical-takeaway>CRITICAL: CORS configuration MUST support dynamic ports in development. Pattern matching for localhost with ANY port must be checked FIRST.</critical-takeaway>
+            <critical-takeaway>Use DynamicCORSMiddleware when CORS_ORIGINS=* to handle credentials properly (RFC 6454).</critical-takeaway>
+        </category>
+
         <category name="Testing" path="SPEC/learnings/testing.xml" keywords="TDD, Feature Flags, Pytest, Jest">
             <critical-takeaway>Adhere to the Feature Flag TDD workflow (feature-flags-tdd-workflow).</critical-takeaway>
             <critical-takeaway>Tests must validate REAL functionality, not mocks (frontend-test-paradox-report).</critical-takeaway>

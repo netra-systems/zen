@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<learning>
+    <metadata>
+        <name>CORS Dynamic Port Support</name>
+        <type>cors_dynamic_ports</type>
+        <version>1.0</version>
+        <created>2025-08-20</created>
+        <description>Learning about CORS issues with dynamic ports in development environments</description>
+        <priority>CRITICAL</priority>
+    </metadata>
+    
+    <problem-statement>
+        <issue>CORS errors occur when services run on non-standard dynamic ports in development</issue>
+        <root-cause>Hardcoded port lists in CORS configuration don't support truly dynamic port allocation</root-cause>
+        <impact>Breaks development environments with docker-compose, multiple developers, or CI/CD pipelines</impact>
+        <example>Frontend on port 3002, 4000, or 5173 gets CORS errors when backend expects only 3000/3001</example>
+        <critical-learning>CORS origin matching requires exact port matching - localhost:3000 and localhost:3001 are different origins</critical-learning>
+    </problem-statement>
+    
+    <solution>
+        <approach>Multi-layered dynamic port support</approach>
+        <implementation>
+            <layer id="1">
+                <name>Pattern Matching</name>
+                <description>Use regex patterns to match any localhost origin with any port</description>
+                <pattern>^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$</pattern>
+                <location>app/core/middleware_setup.py::_check_localhost_pattern</location>
+            </layer>
+            
+            <layer id="2">
+                <name>Extended Static List</name>
+                <description>Expanded hardcoded list includes common development ports</description>
+                <ports>
+                    <frontend>3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174</frontend>
+                    <backend>8000, 8001, 8002, 8080, 8081, 8082, 5000, 5001</backend>
+                </ports>
+                <location>app/core/middleware_setup.py::_get_localhost_origins</location>
+            </layer>
+            
+            <layer id="3">
+                <name>Dynamic Middleware</name>
+                <description>CustomCORSMiddleware with localhost detection for any port</description>
+                <features>
+                    <feature>Checks pattern matching FIRST before static lists</feature>
+                    <feature>Special handling for development environment</feature>
+                    <feature>Service discovery integration for registered services</feature>
+                </features>
+                <location>app/core/middleware_setup.py::CustomCORSMiddleware</location>
+            </layer>
+            
+            <layer id="4">
+                <name>Auth Service Dynamic Support</name>
+                <description>DynamicCORSMiddleware in auth service validates localhost origins</description>
+                <location>auth_service/main.py::DynamicCORSMiddleware</location>
+            </layer>
+        </implementation>
+    </solution>
+    
+    <key-changes>
+        <change id="1">
+            <file>app/core/middleware_setup.py</file>
+            <modification>Pattern matching checks moved FIRST in _perform_origin_checks</modification>
+            <reason>Ensures dynamic ports are accepted before checking static lists</reason>
+        </change>
+        
+        <change id="2">
+            <file>app/core/middleware_setup.py</file>
+            <modification>_check_localhost_pattern accepts IPv6 and 0.0.0.0</modification>
+            <pattern>^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$</pattern>
+        </change>
+        
+        <change id="3">
+            <file>app/core/middleware_setup.py</file>
+            <modification>CustomCORSMiddleware._is_localhost_origin method added</modification>
+            <reason>Dedicated check for localhost origins with any port in development</reason>
+        </change>
+        
+        <change id="4">
+            <file>auth_service/main.py</file>
+            <modification>DynamicCORSMiddleware.is_allowed_origin validates localhost patterns</modification>
+            <reason>Auth service needs same dynamic port support as main backend</reason>
+        </change>
+        
+        <change id="5">
+            <file>app/core/network_constants.py</file>
+            <modification>URLConstants.get_cors_origins expanded for development</modification>
+            <reason>Central configuration needs to support dynamic ports</reason>
+        </change>
+    </key-changes>
+    
+    <testing>
+        <test-file>tests/e2e/test_cors_dynamic_ports.py</test-file>
+        <test-categories>
+            <category>Dynamic Frontend Ports (3002, 4000, 5173, random)</category>
+            <category>Dynamic Backend Ports (8002, 8082, random)</category>
+            <category>Dynamic Auth Service Ports</category>
+            <category>Cross-service communication with all dynamic ports</category>
+            <category>Credentials with dynamic origins (RFC 6454 compliance)</category>
+        </test-categories>
+    </testing>
+    
+    <best-practices>
+        <practice>Always use pattern matching for localhost origins in development</practice>
+        <practice>Check patterns BEFORE static lists to maximize flexibility</practice>
+        <practice>Include common framework ports (React 3000, Vite 5173, Angular 4200)</practice>
+        <practice>Test with truly random ports to ensure robustness</practice>
+        <practice>Use DynamicCORSMiddleware when CORS_ORIGINS=* in development</practice>
+        <practice>Remember that CORS treats different ports as different origins - localhost:3000 != localhost:3001</practice>
+        <practice>Ensure CORS configuration explicitly includes ALL ports where services may run</practice>
+    </best-practices>
+    
+    <references>
+        <reference>SPEC/cors_configuration.xml - Main CORS configuration specification</reference>
+        <reference>RFC 6454 - The Web Origin Concept (CORS standards)</reference>
+        <reference>MDN CORS Documentation - Browser CORS implementation details</reference>
+    </references>
+</learning>

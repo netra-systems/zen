@@ -21,6 +21,32 @@
     </critical_reference>
   </overview>
 
+  <authentication_implementation status="completed">
+    <security_update version="2.0" date="2025-08-21">
+      <title>WebSocket Authentication Security Alignment</title>
+      <description>Frontend and backend now use secure authentication methods, eliminating query parameter vulnerabilities</description>
+      <implementation>
+        <backend>
+          <method>JWT via Sec-WebSocket-Protocol headers or Authorization headers</method>
+          <endpoint>/ws/secure</endpoint>
+          <rejection>Query parameter tokens are rejected (security violation)</rejection>
+        </backend>
+        <frontend>
+          <method>Subprotocol authentication using jwt.{token} format</method>
+          <token_refresh>Automatic refresh every 50 minutes</token_refresh>
+          <fallback>Graceful handling when no token available</fallback>
+        </frontend>
+      </implementation>
+      <files_updated>
+        <file>frontend/services/webSocketService.ts - Added createSecureWebSocket method</file>
+        <file>frontend/providers/WebSocketProvider.tsx - Uses secure URL building</file>
+        <file>frontend/providers/EnhancedWebSocketProvider.tsx - Subprotocol auth</file>
+        <file>frontend/lib/auth-interceptor.ts - Centralized auth handling</file>
+        <file>frontend/lib/unified-auth-service.ts - Unified auth interface</file>
+      </files_updated>
+    </security_update>
+  </authentication_implementation>
+  
   <current_issues>
     <issue priority="critical">
       <title>Event Structure Mismatch</title>
