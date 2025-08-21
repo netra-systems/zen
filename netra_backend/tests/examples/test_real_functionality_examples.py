@@ -20,6 +20,9 @@ Examples include:
 All examples follow CLAUDE.md requirements: ≤8 lines per function, ≤300 lines per file.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -28,8 +31,6 @@ from unittest.mock import patch, AsyncMock
 from typing import Dict, Any, List, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real imports - not mocked unless external API

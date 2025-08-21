@@ -5,6 +5,9 @@ Components: WebSocket → Thread Service → Database → Supervisor
 Critical: Thread context required for all agent interactions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -17,8 +20,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 
@@ -219,7 +220,7 @@ class TestFirstMessageThreadInit:
     
     async def test_websocket_notification_on_thread_creation(self, thread_data):
         """Test WebSocket notification sent when thread created."""
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         ws_manager.send_message = AsyncMock()

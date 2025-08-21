@@ -10,6 +10,9 @@ Critical Path: Multiple results -> Conflict detection -> Resolution -> Merging -
 Coverage: Real result aggregators, conflict resolution, merging strategies, formatting
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from enum import Enum
 import hashlib
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

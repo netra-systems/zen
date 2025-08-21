@@ -3,6 +3,10 @@
 Tests metrics collection, Prometheus endpoints, OpenTelemetry tracing, and observability.
 Focuses on real component interactions with minimal mocking.
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -11,8 +15,6 @@ from typing import Dict, Any, List
 from datetime import datetime, UTC
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector

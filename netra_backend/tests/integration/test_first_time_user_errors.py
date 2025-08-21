@@ -8,6 +8,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Maintains user confidence and platform reliability
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import uuid
 from typing import Dict, Any

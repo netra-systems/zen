@@ -13,6 +13,9 @@ Examples show:
 4. Keeping functions under 8 lines
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch
 

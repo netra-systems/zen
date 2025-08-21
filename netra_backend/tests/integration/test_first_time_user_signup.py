@@ -8,6 +8,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Prevents signup funnel failures that block revenue
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import httpx
 from fastapi import status
@@ -15,8 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.models.user import User
 from netra_backend.tests.first_time_user_fixtures import (

@@ -3,6 +3,9 @@ Context generation utilities for Example Prompts E2E Tests
 Generates synthetic contexts for different test scenarios
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from datetime import datetime, timedelta
 from typing import Dict, Any
 import random

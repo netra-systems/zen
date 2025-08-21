@@ -10,6 +10,9 @@ Critical Path: Tool request -> Tool loading -> Execution -> Result processing ->
 Coverage: Real tool execution, mocked LLM responses, error handling, performance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -18,8 +21,6 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2-L3 testing

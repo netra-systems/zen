@@ -1,5 +1,8 @@
 """Tests for the standardized error handling system."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
@@ -9,8 +12,6 @@ from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.exc import IntegrityError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions import (
 

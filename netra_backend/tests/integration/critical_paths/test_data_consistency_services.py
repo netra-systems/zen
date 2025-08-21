@@ -10,6 +10,9 @@ Critical Path: Transaction initiation -> Service coordination -> Consistency che
 Coverage: Distributed transactions, eventual consistency, conflict resolution, data reconciliation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,8 +24,6 @@ from datetime import datetime
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.data.transaction_coordinator import TransactionCoordinator
 from netra_backend.app.services.data.consistency_manager import ConsistencyManager

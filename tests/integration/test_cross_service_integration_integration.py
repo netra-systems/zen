@@ -16,7 +16,6 @@ from dev_launcher.launcher import DevLauncher
 from datetime import datetime
 from dev_launcher.config import LauncherConfig
 import os
-import os
 
 
 class TestSyntaxFix:

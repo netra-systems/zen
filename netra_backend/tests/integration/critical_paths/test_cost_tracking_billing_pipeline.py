@@ -13,6 +13,9 @@ Invoice generation -> Payment processing -> Usage analytics
 Coverage: LLM usage tracking, cost calculation accuracy, billing pipeline integrity, quota enforcement
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -24,8 +27,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from netra_backend.app.services.billing.cost_calculator import CostCalculator

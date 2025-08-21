@@ -3,14 +3,15 @@ Tests for global instances, threadpool, and shutdown functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
 from unittest.mock import Mock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_resource_manager import (
 

@@ -11,6 +11,9 @@ Coverage: High cardinality detection, label sanitization, metric dropping, cost 
 L3 Realism: Tests with real Prometheus instances and actual cardinality limits
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,9 +28,15 @@ from dataclasses import dataclass, asdict
 from collections import defaultdict
 
 from monitoring.metrics_collector import MetricsCollector
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 from netra_backend.app.core.alert_manager import HealthAlertManager

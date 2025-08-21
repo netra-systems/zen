@@ -40,7 +40,6 @@ class AgentContextAccumulationTester:
 
     async def create_test_supervisor_with_context(self, thread_id: str) -> ModernSupervisorAgent:
         """Create supervisor agent with context tracking enabled."""
-        from unittest.mock import MagicMock
         mock_db = MagicMock()
         mock_websocket = MagicMock()
         mock_tool_dispatcher = MagicMock()

@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T12:03:38.023382  
+**Generated:** 2025-08-21T12:23:40.111896  
 **Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
 
 ## 1. Test Summary
@@ -8,18 +8,18 @@
 [FAILED] **OVERALL STATUS**
 
 ### Test Counts (Extracted from pytest output)
-- **Total Tests:** 1
+- **Total Tests:** 0
 - **Passed:** 0 
 - **Failed:** 0
 - **Skipped:** 0
-- **Errors:** 1
+- **Errors:** 0
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 1 | 0 | 0 | 0 | 1 | 20.12s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.56s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 6.80s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.39s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Development validation, component testing
 - **Timeout:** 120s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 20.69s
+- **Total Duration:** 7.19s
 - **Exit Code:** 255
 
 ### Backend Configuration
@@ -59,64 +59,53 @@ Test Configuration:
 Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/services netra_backend/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'langsmith': '0.4.10', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.5.3, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, langsmith-0.4.10, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-created: 4/4 workers
-
 ================================================================================
-BAD TEST DETECTION REPORT
-================================================================================
-
-Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 118
-
-================================================================================
-
-
-=================================== ERRORS ====================================
-[31m[1m_ ERROR collecting netra_backend/tests/services/test_agent_message_processing.py _[0m
-ImportError while importing test module 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\services\test_agent_message_processing.py'.
-Hint: make sure your test modules/packages have valid Python names.
-Traceback:
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\python.py:498: in importtestmodule
-    mod = import_path(
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\pathlib.py:587: in import_path
-    importlib.import_module(module_name)
-..\..\..\..\miniconda3\Lib\importlib\__init__.py:90: in import_module
-    return _bootstrap._gcd_import(name[level:], package, level)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-<frozen importlib._bootstrap>:1387: in _gcd_import
-    ???
-<frozen importlib._bootstrap>:1360: in _find_and_load
-    ???
-<frozen importlib._bootstrap>:1331: in _find_and_load_unlocked
-    ???
-<frozen importlib._bootstrap>:935: in _load_unlocked
-    ???
-..\..\..\..\AppData\Roaming\Python\Python312\site-packages\_pytest\assertion\rewrite.py:186: in exec_module
-    exec(co, module.__dict__)
-netra_backend\tests\services\test_agent_message_processing.py:8: in <module>
-    from schemas import AgentMessage, WebSocketMessage
-E   ModuleNotFoundError: No module named 'schemas'
-[36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m netra_backend/tests/services/test_agent_message_processing.py
-[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
-!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m1 error[0m[31m in 11.04s[0m[31m ==============================[0m
-================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 18.70s
+[FAIL] TESTS FAILED with exit code 4 after 5.76s
 ================================================================================
 
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
   warnings.warn(
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
   warnings.warn(
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
+netra_backend\tests\conftest.py:59: in <module>
+    import pytest
+netra_backend\app\main.py:91: in <module>
+    from netra_backend.app.core.app_factory import create_app
+netra_backend\app\core\app_factory.py:9: in <module>
+    from netra_backend.app.core.lifespan_manager import lifespan
+netra_backend\app\core\lifespan_manager.py:9: in <module>
+    from netra_backend.app.shutdown import run_complete_shutdown
+netra_backend\app\shutdown.py:12: in <module>
+    from netra_backend.app.services.websocket.ws_manager import manager as websocket_manager
+netra_backend\app\services\websocket\ws_manager.py:47: in __getattr__
+    mgr, _, _, _ = _lazy_import()
+                   ^^^^^^^^^^^^^^
+netra_backend\app\services\websocket\ws_manager.py:29: in _lazy_import
+    from netra_backend.app.ws_manager import (
+netra_backend\app\ws_manager.py:245: in <module>
+    manager = get_manager()
+              ^^^^^^^^^^^^^
+netra_backend\app\ws_manager.py:241: in get_manager
+    _manager = WebSocketManager()
+               ^^^^^^^^^^^^^^^^^^
+netra_backend\app\ws_manager.py:38: in __new__
+    cls._instance._initialize_unified_delegation()
+netra_backend\app\ws_manager.py:45: in _initialize_unified_delegation
+    self._unified_manager = get_unified_manager()
+                            ^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\websocket\unified\manager.py:410: in get_unified_manager
+    _unified_manager = UnifiedWebSocketManager()
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\websocket\unified\manager.py:65: in __init__
+    self._initialize_core_components()
+netra_backend\app\websocket\unified\manager.py:73: in _initialize_core_components
+    self.connection_manager = ConnectionManager()
+                              ^^^^^^^^^^^^^^^^^^^
+netra_backend\app\websocket\connection.py:56: in __init__
+    self._modern_manager = Modernget_connection_manager()
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   NameError: name 'Modernget_connection_manager' is not defined
 
 ```
 
@@ -142,14 +131,6 @@ Cleaning up test processes...
 operable program or batch file.
 
 ```
-
-## 5. Error Details
-
-### Backend Errors
-- =================================== ERRORS ====================================
-- [31m[1m_ ERROR collecting netra_backend/tests/services/test_agent_message_processing.py _[0m
-- [31mERROR[0m netra_backend/tests/services/test_agent_message_processing.py
-- [FAIL] TESTS FAILED with exit code 2 after 18.70s
 
 ---
 *Generated by Netra AI Unified Test Runner v3.0*  

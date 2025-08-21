@@ -184,12 +184,10 @@ class DatabaseBackupManager:
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        import os
         return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
-        import os
         return ClickHouseDatabase(
             host=os.getenv("CLICKHOUSE_HOST", "localhost"),
             port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
@@ -200,7 +198,6 @@ class DatabaseBackupManager:
     
     def _get_safe_env_vars(self) -> Dict[str, str]:
         """Get safe environment variables (no secrets)."""
-        import os
         safe_vars = {}
         for key, value in os.environ.items():
             if not any(secret in key.lower() for secret in ['password', 'secret', 'key', 'token']):
@@ -209,7 +206,6 @@ class DatabaseBackupManager:
     
     def _get_service_ports(self) -> Dict[str, int]:
         """Get service port configurations."""
-        import os
         return {
             'backend': int(os.getenv("PORT", "8000")),
             'auth': int(os.getenv("AUTH_PORT", "8001")),
@@ -221,7 +217,6 @@ class DatabaseBackupManager:
     
     def _get_masked_db_urls(self) -> Dict[str, str]:
         """Get masked database URLs for backup."""
-        import os
         urls = {}
         for key in ["DATABASE_URL", "AUTH_DATABASE_URL"]:
             url = os.getenv(key, "")
@@ -401,17 +396,14 @@ class DisasterSimulator:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL URL."""
-        import os
         return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        import os
         return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
-        import os
         return ClickHouseDatabase(
             host=os.getenv("CLICKHOUSE_HOST", "localhost"),
             port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
@@ -579,17 +571,14 @@ class RestoreManager:
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL URL."""
-        import os
         return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        import os
         return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
-        import os
         return ClickHouseDatabase(
             host=os.getenv("CLICKHOUSE_HOST", "localhost"),
             port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),
@@ -724,24 +713,20 @@ class DataIntegrityValidator:
                 count = await ch_client.execute(f"SELECT count(*) FROM {table_name}")
                 checksum_data += f"{table_name}:{count[0][0] if count else 0}"
             
-            import hashlib
             return hashlib.md5(checksum_data.encode()).hexdigest()
         except Exception:
             return "error"
     
     def _get_postgres_url(self) -> str:
         """Get PostgreSQL URL."""
-        import os
         return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_auth_db_url(self) -> str:
         """Get Auth database URL."""
-        import os
         return os.getenv("AUTH_DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_auth_test")
     
     def _get_clickhouse_client(self) -> ClickHouseDatabase:
         """Get ClickHouse client."""
-        import os
         return ClickHouseDatabase(
             host=os.getenv("CLICKHOUSE_HOST", "localhost"),
             port=int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123")),

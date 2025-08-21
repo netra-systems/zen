@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL via Testcontainers to create actual deadlock scena
 and validate detection/resolution mechanisms work correctly.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ from sqlalchemy.exc import OperationalError, IntegrityError
 from testcontainers.postgres import PostgresContainer
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.postgres_core import Database

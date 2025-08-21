@@ -6,6 +6,9 @@ Follows 450-line limit and 25-line function requirements.
 Targets 95% coverage of corpus generation functionality.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -13,8 +16,6 @@ from typing import Dict
 from unittest.mock import AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.admin_corpus_messages import (
 

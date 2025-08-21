@@ -13,16 +13,17 @@ Business Value Justification (BVJ):
 
 import pytest
 import asyncio
+import json
 import logging
 import time
 import statistics
 from typing import Dict, Any, List
 
-from ..fixtures.resource_monitoring import (
+from tests.e2e.fixtures.resource_monitoring import (
     isolation_test_config, resource_limits, tenant_isolation_context
 )
-from ..test_helpers.agent_isolation_base import AgentIsolationBase, assert_isolation_quality
-from ..resource_isolation.test_suite import resource_isolation_suite, tenant_agents
+from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase, assert_isolation_quality
+from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents
 
 logger = logging.getLogger(__name__)
 
@@ -412,4 +413,3 @@ async def test_resource_quota_enforcement_at_scale(resource_isolation_suite, ten
     
     logger.info(f"Resource quota test: {len(quota_violations)} violations across {len(tenant_agents)} tenants")
 
-import json  # Add missing import

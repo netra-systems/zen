@@ -444,6 +444,5 @@ async def run_health_cascade_test():
 
 
 if __name__ == "__main__":
-    import asyncio
     result = asyncio.run(run_health_cascade_test())
     print(f"Health cascade test results: {result}")

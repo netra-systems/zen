@@ -3,12 +3,21 @@ Advanced features tests for Quality Gate Service
 Tests caching, batch processing, statistics, and system behavior
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import hashlib
 from unittest.mock import patch
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
 from netra_backend.tests.helpers.quality_gate_fixtures import (

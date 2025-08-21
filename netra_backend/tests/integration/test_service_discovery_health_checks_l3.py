@@ -7,6 +7,9 @@ Service discovery enables dynamic scaling and automatic failover.
 Tests service discovery with real health checks using Docker containers.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import docker

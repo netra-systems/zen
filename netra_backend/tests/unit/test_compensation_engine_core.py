@@ -14,6 +14,9 @@ Target Coverage:
 - Memory cleanup and resource management
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import asyncio
@@ -22,8 +25,6 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.compensation_engine_core import CompensationEngine
 from netra_backend.app.services.compensation_models import (

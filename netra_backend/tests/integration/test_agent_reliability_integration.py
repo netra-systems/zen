@@ -1,5 +1,8 @@
 """Integration tests for agent reliability across system components."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -8,8 +11,6 @@ from typing import Dict, Any, List
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import components for integration testing

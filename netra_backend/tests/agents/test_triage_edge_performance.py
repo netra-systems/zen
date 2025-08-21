@@ -3,12 +3,13 @@ Tests for TriageSubAgent edge cases, performance, and Pydantic model validation
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent import (
 

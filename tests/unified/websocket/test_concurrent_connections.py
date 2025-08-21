@@ -36,9 +36,9 @@ import httpx
 from typing import Dict, List, Any, Optional, Set
 import pytest
 
-from ..jwt_token_helpers import JWTTestHelper
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig, ConnectionState
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig, ConnectionState
 
 
 class ConcurrentConnectionManager:

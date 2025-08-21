@@ -7,6 +7,9 @@ Business Value: Ensures precise usage metrics collection for billing,
 preventing revenue loss and customer disputes.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, timedelta
@@ -14,8 +17,6 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from collections import defaultdict, deque
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.monitoring.metrics_collector import (
 

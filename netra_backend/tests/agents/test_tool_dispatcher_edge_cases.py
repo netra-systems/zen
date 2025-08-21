@@ -1,10 +1,11 @@
 """Unit tests for ToolDispatcher edge cases and error scenarios."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from schemas import ToolResult

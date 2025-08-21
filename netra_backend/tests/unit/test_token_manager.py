@@ -54,5 +54,5 @@ TEST CATEGORIES:
 - Private helper methods: 4 tests (covers _decode_token_payload and _check_revocation_in_redis)
 """
 
-# This file serves as documentation only.
-# Run the individual split test files to execute the actual tests.
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()

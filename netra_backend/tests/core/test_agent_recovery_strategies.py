@@ -19,6 +19,9 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, Optional
@@ -26,8 +29,6 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.agent_recovery_strategies import (
 

@@ -20,6 +20,9 @@ ARCHITECTURE COMPLIANCE:
 - Type safety: Full typing with service models
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import sys
 import json
@@ -34,8 +37,6 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Dev launcher imports

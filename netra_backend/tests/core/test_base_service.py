@@ -1,12 +1,13 @@
 """Tests for BaseService functionality."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime
 from unittest.mock import patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.service_interfaces import BaseService, ServiceHealth
 from netra_backend.app.core.exceptions_service import ServiceError

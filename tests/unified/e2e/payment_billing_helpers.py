@@ -25,7 +25,7 @@ from enum import Enum
 
 from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
 from netra_backend.app.services.cost_calculator import CostCalculatorService
-from .clickhouse_billing_helper import ClickHouseBillingHelper
+from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 
 
 class StripeWebhookType(str, Enum):

@@ -173,7 +173,6 @@ class AgentOrchestrationTestRunner:
                 pytest_args.append(str(path))
         
         # Run tests
-        import time
         start_time = time.time()
         exit_code = pytest.main(pytest_args)
         self.results["execution_time"] = time.time() - start_time
@@ -212,7 +211,6 @@ class AgentOrchestrationTestRunner:
                 pytest_args.append(str(path))
         
         # Run tests
-        import time
         start_time = time.time()
         exit_code = pytest.main(pytest_args)
         self.results["execution_time"] = time.time() - start_time
@@ -249,7 +247,6 @@ class AgentOrchestrationTestRunner:
                 pytest_args.append(str(path))
         
         # Run tests
-        import time
         start_time = time.time()
         exit_code = pytest.main(pytest_args)
         self.results["execution_time"] = time.time() - start_time

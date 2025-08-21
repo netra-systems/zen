@@ -10,6 +10,9 @@ Critical Path: Request processing -> Failure detection -> Circuit state manageme
 Coverage: Per-endpoint circuit breakers, failure thresholds, recovery mechanisms, fallback strategies
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from dataclasses import dataclass
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.api_gateway.circuit_breaker import ApiCircuitBreaker
 from netra_backend.app.services.api_gateway.circuit_breaker_manager import CircuitBreakerManager

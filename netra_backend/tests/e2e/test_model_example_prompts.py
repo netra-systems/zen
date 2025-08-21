@@ -4,12 +4,13 @@ Tests specific example prompts EP-005, EP-008, EP-009 with real LLM validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from typing import Dict, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel

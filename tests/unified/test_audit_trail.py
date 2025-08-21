@@ -24,7 +24,7 @@ import json
 import hashlib
 
 from netra_backend.app.services.audit_service import get_recent_logs, log_admin_action
-from .audit_trail_factories import AuditTestDataFactory
+from tests.unified.audit_trail_factories import AuditTestDataFactory
 
 
 class TestCompleteAuditTrail:

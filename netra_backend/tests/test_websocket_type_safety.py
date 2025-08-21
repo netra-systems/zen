@@ -4,11 +4,12 @@ Entry point for WebSocket message type safety testing suite.
 Imports and orchestrates tests from focused modules.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import from the focused modules

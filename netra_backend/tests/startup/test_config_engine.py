@@ -4,6 +4,9 @@ Tests for decision engine, utility functions, and main validation entry point.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from pathlib import Path

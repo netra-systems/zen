@@ -11,6 +11,9 @@ Comprehensive test for webhook delivery reliability:
 8. Circuit breaker for failing endpoints
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import hashlib
 import hmac

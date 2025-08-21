@@ -4,13 +4,14 @@ Split from test_token_manager.py to meet 450-line architecture limit.
 Tests for token lifecycle operations and module-level convenience functions.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
 from netra_backend.app.core.exceptions_auth import AuthenticationError

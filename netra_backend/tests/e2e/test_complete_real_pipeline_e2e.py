@@ -5,15 +5,17 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 # Add project root to path
-from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
+
 from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
 from typing import Dict, List
 import asyncio
 import os
 import pytest
 import uuid
 
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas import SubAgentLifecycle

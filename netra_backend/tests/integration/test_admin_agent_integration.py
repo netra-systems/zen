@@ -5,20 +5,21 @@ Tests the integration between triage, corpus admin, and tool dispatcher agents.
 All functions maintain 25-line limit with single responsibility.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

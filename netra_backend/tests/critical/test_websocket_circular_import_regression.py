@@ -16,6 +16,9 @@ REGRESSION HISTORY:
 - Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import importlib
 import sys
@@ -23,9 +26,6 @@ from typing import List, Set
 import ast
 import os
 
-# Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

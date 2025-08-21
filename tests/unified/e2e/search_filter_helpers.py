@@ -23,9 +23,9 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from ..config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from .websocket_resilience_core import WebSocketResilienceTestCore
-from ..real_websocket_client import RealWebSocketClient
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.unified.real_websocket_client import RealWebSocketClient
 from netra_backend.app.schemas.UserPlan import PlanTier
 
 

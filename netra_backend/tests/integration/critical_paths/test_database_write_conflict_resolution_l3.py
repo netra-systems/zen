@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL container to validate optimistic locking, write co
 detection, resolution strategies, and data consistency under concurrent operations.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

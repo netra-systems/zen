@@ -10,6 +10,9 @@ This simplified version focuses on compliance audit trail logic validation
 without requiring full staging environment connectivity.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

@@ -26,8 +26,8 @@ from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timezone
 from contextlib import asynccontextmanager
 
-from ..test_harness import UnifiedTestHarness
-from .rate_limiting_core import RedisManager, MessageSender, UserManager
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager
 
 
 class ComprehensiveRateLimitTester:

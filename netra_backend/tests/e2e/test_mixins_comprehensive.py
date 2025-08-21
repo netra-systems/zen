@@ -12,6 +12,9 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import pytest
@@ -20,8 +23,6 @@ from typing import Dict, Any
 from unittest.mock import Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentHealthStatus

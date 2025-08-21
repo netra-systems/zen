@@ -15,14 +15,15 @@ REQUIREMENTS:
 - Aggregation processing within 2 seconds
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
 from datetime import datetime, timezone, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.shared_fixtures import (

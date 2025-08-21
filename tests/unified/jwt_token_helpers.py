@@ -113,14 +113,12 @@ class JWTTestHelper:
     
     def create_expired_payload(self) -> Dict:
         """Create expired token payload."""
-        from netra_backend.app.core.auth_constants import JWTConstants
         payload = self.create_valid_payload()
         payload[JWTConstants.EXPIRES_AT] = datetime.now(timezone.utc) - timedelta(minutes=1)
         return payload
     
     def create_refresh_payload(self) -> Dict:
         """Create refresh token payload."""
-        from netra_backend.app.core.auth_constants import JWTConstants
         payload = self.create_valid_payload()
         payload[JWTConstants.TOKEN_TYPE] = JWTConstants.REFRESH_TOKEN_TYPE
         payload[JWTConstants.EXPIRES_AT] = datetime.now(timezone.utc) + timedelta(days=7)
@@ -129,7 +127,6 @@ class JWTTestHelper:
     
     def create_token(self, payload: Dict, secret: str = None) -> str:
         """Create JWT token with specified payload (sync version)."""
-        from netra_backend.app.core.auth_constants import JWTConstants
         secret = secret or self.test_secret
         # Convert datetime objects to timestamps for JWT
         if isinstance(payload.get(JWTConstants.ISSUED_AT), datetime):
@@ -140,7 +137,6 @@ class JWTTestHelper:
     
     def create_access_token(self, user_id: str, email: str, permissions: list = None) -> str:
         """Create access token for user."""
-        from netra_backend.app.core.auth_constants import JWTConstants
         payload = {
             JWTConstants.SUBJECT: user_id,
             JWTConstants.EMAIL: email,
@@ -191,7 +187,6 @@ class JWTTestHelper:
     async def make_backend_request(self, endpoint: str, token: str) -> Dict:
         """Make authenticated request to backend service."""
         async with httpx.AsyncClient() as client:
-            from netra_backend.app.core.auth_constants import HeaderConstants
             headers = {HeaderConstants.AUTHORIZATION: f"{HeaderConstants.BEARER_PREFIX}{token}"}
             try:
                 response = await client.get(f"{self.backend_url}{endpoint}", headers=headers)
@@ -205,7 +200,6 @@ class JWTTestHelper:
             try:
                 response = await client.post(f"{self.auth_url}/auth/dev/login")
                 if response.status_code == 200:
-                    from netra_backend.app.core.auth_constants import JWTConstants
                     return response.json().get(JWTConstants.ACCESS_TOKEN)
             except Exception:
                 pass
@@ -227,7 +221,6 @@ class JWTTestHelper:
     def validate_token_structure(self, token: str) -> bool:
         """Validate JWT token has correct structure."""
         try:
-            from netra_backend.app.core.auth_constants import JWTConstants
             payload = jwt.decode(token, options={"verify_signature": False})
             required_fields = [JWTConstants.SUBJECT, JWTConstants.EXPIRES_AT, JWTConstants.TOKEN_TYPE]
             return all(field in payload for field in required_fields)
@@ -377,7 +370,6 @@ class JWTTokenTestHelper:
     
     def create_expired_service_token(self, service_id: str) -> str:
         """Create an expired service token for testing."""
-        from netra_backend.app.core.auth_constants import JWTConstants
         payload = {
             JWTConstants.SUBJECT: service_id,
             "service": f"netra-{service_id}",
@@ -390,7 +382,6 @@ class JWTTokenTestHelper:
     
     def create_test_user_token(self, user_id: str, email: str) -> str:
         """Create a test user token for comparison."""
-        from netra_backend.app.core.auth_constants import JWTConstants
         payload = {
             JWTConstants.SUBJECT: user_id,
             JWTConstants.EMAIL: email,

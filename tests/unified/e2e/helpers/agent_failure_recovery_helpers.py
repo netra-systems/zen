@@ -15,8 +15,8 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 from enum import Enum
 
-from ..config import TEST_USERS, TEST_ENDPOINTS
-from ..real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.config import TEST_USERS, TEST_ENDPOINTS
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

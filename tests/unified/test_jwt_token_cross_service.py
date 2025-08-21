@@ -13,8 +13,8 @@ import websockets
 import jwt
 import time
 
-from .test_harness import UnifiedTestHarness
-from .jwt_token_helpers import JWTTestHelper, JWTTestFixtures, JWTSecurityTester
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.jwt_token_helpers import JWTTestHelper, JWTTestFixtures, JWTSecurityTester
 
 
 class TestRealTokenGeneration(JWTTestFixtures):

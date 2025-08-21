@@ -23,6 +23,9 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -38,8 +41,6 @@ from urllib.parse import urlparse, parse_qs
 import jwt as jwt_lib
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

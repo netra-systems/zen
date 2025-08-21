@@ -10,6 +10,9 @@ Critical Path: Config change detection -> Validation -> Rollback preparation -> 
 Coverage: Runtime configuration updates, validation mechanisms, rollback capabilities, service coordination, zero-downtime operations
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from pathlib import Path
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import TaskPriority

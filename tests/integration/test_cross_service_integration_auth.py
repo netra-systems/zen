@@ -16,7 +16,6 @@ from dev_launcher.launcher import DevLauncher
 from datetime import datetime
 from dev_launcher.config import LauncherConfig
 import os
-import os
 
 
 class TestSyntaxFix:
@@ -58,7 +57,6 @@ class TestSyntaxFix:
 
     def test_cross_service_auth_token_setup(self, launcher_config):
         """Test cross-service auth token is set up during launcher initialization."""
-        import os
         
         # Clear existing token to test generation
         original_token = os.environ.get('CROSS_SERVICE_AUTH_TOKEN')

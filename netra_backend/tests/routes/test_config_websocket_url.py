@@ -1,4 +1,8 @@
 """Test WebSocket URL configuration endpoint regression test."""
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock

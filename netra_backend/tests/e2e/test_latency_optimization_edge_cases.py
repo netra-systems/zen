@@ -4,11 +4,12 @@ Tests edge cases and integration scenarios for latency optimization workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.e2e.latency_optimization_helpers import (
 

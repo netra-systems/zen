@@ -655,5 +655,4 @@ async def test_rate_limiting_unified_real():
 
 if __name__ == "__main__":
     # Allow direct execution for debugging
-    import sys
     sys.exit(pytest.main([__file__, "-v", "-s"]))

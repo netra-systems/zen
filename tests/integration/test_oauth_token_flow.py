@@ -116,8 +116,6 @@ async def test_frontend_token_storage():
 @pytest.mark.asyncio
 async def test_token_validation_after_storage():
     """Test that stored tokens can be validated by auth service"""
-    from auth_service.auth_core.routes.auth_routes import router
-    from fastapi import FastAPI
     
     app = FastAPI()
     app.include_router(router)
@@ -147,8 +145,6 @@ async def test_token_validation_after_storage():
 @pytest.mark.asyncio
 async def test_oauth_error_handling():
     """Test error handling when OAuth token exchange fails"""
-    from auth_service.auth_core.routes.auth_routes import router
-    from fastapi import FastAPI
     
     app = FastAPI()
     app.include_router(router)

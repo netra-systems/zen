@@ -13,13 +13,14 @@ Tests 21-30 from original missing tests covering:
 - Threads route conversation management
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

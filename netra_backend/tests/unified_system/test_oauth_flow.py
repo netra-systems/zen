@@ -2,6 +2,10 @@
 OAuth Flow End-to-End Tests
 Business Value: $25K MRR - Critical authentication path validation
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import httpx
 import json
@@ -13,8 +17,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Dict, Any, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import main app with error handling

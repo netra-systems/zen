@@ -5,6 +5,9 @@ Test 11: Rate Limiting First User Protection - $7K MRR
 Test 12: Error Propagation to Frontend - $8K MRR
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -14,8 +17,6 @@ from datetime import datetime
 import time
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 
@@ -143,7 +144,7 @@ class TestErrorPropagation:
     
     async def test_backend_error_to_websocket(self):
         """Test backend errors propagate to WebSocket."""
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         ws_manager.send_error = AsyncMock()

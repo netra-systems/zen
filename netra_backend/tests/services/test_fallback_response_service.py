@@ -3,14 +3,15 @@ Unit tests for Fallback Response Service
 Tests context-aware fallback response generation for various failure scenarios
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch
 import json
 import re
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.fallback_response_service import FallbackResponseService
 from netra_backend.app.services.fallback_response.models import (

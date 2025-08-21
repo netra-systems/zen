@@ -9,6 +9,9 @@ failures caused by attempting to import development-only modules in production
 environments.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import sys
 import pytest
@@ -17,13 +20,9 @@ from typing import Any, Dict
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-# Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.environment_constants import Environment, EnvironmentVariables
 
-# Add project root to path
 
 
 class TestStagingEnvironmentImports:

@@ -4,14 +4,15 @@ Critical security component - Admin checks and edge cases
 Split from test_permission_service.py to maintain 450-line limit
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import os
 from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.orm import Session
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import the module under test

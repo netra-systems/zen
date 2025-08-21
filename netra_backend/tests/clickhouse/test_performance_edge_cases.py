@@ -3,6 +3,9 @@ Test Suite 2: Performance and Edge Cases Tests
 Tests query performance characteristics and edge case handling
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import json
@@ -10,9 +13,15 @@ import asyncio
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 import numpy as np
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder

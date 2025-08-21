@@ -3,11 +3,12 @@ Realistic ClickHouse Operations Tests - Main Index Module
 Re-exports all test classes from focused modules for backwards compatibility
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import all test classes from focused modules

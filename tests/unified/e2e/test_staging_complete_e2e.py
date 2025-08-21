@@ -20,9 +20,9 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 
-from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.unified.test_environment_config import TestEnvironmentType
-from tests.unified.real_services_manager import RealServicesManager
+from netra_backend.tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
 
 logger = logging.getLogger(__name__)
 
@@ -514,8 +514,6 @@ class TestStagingE2E:
         assert results["success_rate"] >= 0.8, f"Success rate too low: {results['success_rate']}"
         
         # Save results to file for reporting
-        import json
-        from pathlib import Path
         
         results_dir = Path("test_reports/staging_e2e")
         results_dir.mkdir(parents=True, exist_ok=True)

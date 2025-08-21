@@ -4,12 +4,13 @@ Tests complex multi-objective optimization scenarios.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from typing import Dict, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
 

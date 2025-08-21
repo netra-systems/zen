@@ -25,10 +25,10 @@ import uuid
 import redis.asyncio as redis
 from typing import Dict, Any, Optional
 
-from ..service_manager import ServiceManager
-from ..test_harness import UnifiedTestHarness
-from .rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
-from .rate_limiting_advanced import (
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
+from tests.unified.e2e.rate_limiting_advanced import APIRateLimitTester, WebSocketRateLimitTester, AgentThrottleTester, TierBasedRateLimitTester, DistributedRateLimitValidator, ResponseHeaderValidator
     APIRateLimitTester, WebSocketRateLimitTester, AgentThrottleTester,
     TierBasedRateLimitTester, DistributedRateLimitValidator, ResponseHeaderValidator
 )
@@ -412,5 +412,4 @@ async def test_comprehensive_rate_limiting_system(unified_test_harness):
 if __name__ == "__main__":
     # Allow direct execution for debugging
     import sys
-    import pytest
     sys.exit(pytest.main([__file__, "-v", "-s"]))

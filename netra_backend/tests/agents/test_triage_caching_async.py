@@ -3,6 +3,9 @@ Tests for TriageSubAgent caching mechanisms and async operations
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import asyncio
@@ -10,8 +13,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.state import DeepAgentState

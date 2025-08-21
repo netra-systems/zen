@@ -3,6 +3,9 @@ Comprehensive tests for Supply Research Scheduler job execution and retry logic
 Tests scheduling, execution, background tasks, retry mechanisms, and error handling
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -11,8 +14,6 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, List, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.supply_research_scheduler import (
 

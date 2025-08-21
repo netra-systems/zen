@@ -18,6 +18,10 @@ Key validations:
 - Graceful degradation modes
 - Service recovery validation
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 from typing import Dict, Any, Optional
@@ -25,8 +29,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.schemas.core_enums import CircuitBreakerState

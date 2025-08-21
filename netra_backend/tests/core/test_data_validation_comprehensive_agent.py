@@ -1,13 +1,22 @@
 """Agent Tests - Email validation tests for agent data processing"""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from typing import Dict, Any, List, Optional, Union
 from datetime import datetime, timezone
 from unittest.mock import Mock, patch
 from pydantic import ValidationError, BaseModel, Field, EmailStr
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.websocket.validation import MessageValidator
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError

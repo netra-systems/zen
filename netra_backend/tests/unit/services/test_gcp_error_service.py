@@ -14,6 +14,9 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Edge case and error scenario coverage
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 from datetime import datetime, timezone, timedelta
@@ -21,8 +24,6 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, List, Any, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
 from netra_backend.app.schemas.monitoring_schemas import (

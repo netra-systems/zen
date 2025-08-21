@@ -19,8 +19,8 @@ import time
 import asyncio
 from contextlib import asynccontextmanager
 
-from .onboarding_flow_executor import OnboardingFlowExecutor
-from ..test_harness import UnifiedTestHarness
+from tests.unified.e2e.onboarding_flow_executor import OnboardingFlowExecutor
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class OnboardingTestManager:

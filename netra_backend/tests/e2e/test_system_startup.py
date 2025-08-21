@@ -20,6 +20,9 @@ COVERAGE:
 - Error handling and recovery
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import os
 import time
@@ -36,8 +39,6 @@ from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.health_monitor import HealthMonitor
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

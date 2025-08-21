@@ -3,6 +3,9 @@ Common test fixtures and utilities for route testing.
 Shared components extracted from oversized test file to maintain 450-line architecture limit.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, MagicMock
 from fastapi.testclient import TestClient
@@ -11,8 +14,6 @@ from datetime import datetime
 from typing import Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager  

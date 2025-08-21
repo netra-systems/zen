@@ -11,6 +11,9 @@ L3 Realism: Real Redis clusters with Testcontainers, actual cache invalidation s
 Performance Requirements: Invalidation cascade < 100ms, 99.9% propagation success, zero stale data tolerance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from dataclasses import dataclass
 import redis.asyncio as aioredis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger

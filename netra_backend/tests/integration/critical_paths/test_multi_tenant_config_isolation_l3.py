@@ -11,6 +11,9 @@ Coverage: Real configuration namespaces, database row-level security, Redis cach
 L3 Realism: Tests against actual database constraints, Redis namespaces, configuration hot reload systems
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from dataclasses import dataclass
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.user_service import user_service as UserService

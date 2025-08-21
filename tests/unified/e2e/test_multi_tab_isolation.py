@@ -21,9 +21,9 @@ from dataclasses import dataclass, field
 import pytest
 
 # Test infrastructure
-from ..jwt_token_helpers import JWTTestHelper
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig, ConnectionState
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig, ConnectionState
 
 
 @dataclass

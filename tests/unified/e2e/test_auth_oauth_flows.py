@@ -28,9 +28,9 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import patch, AsyncMock, Mock
 from contextlib import asynccontextmanager
 
-from ..oauth_test_providers import GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory
-from ..real_services_manager import create_real_services_manager
-from ..real_http_client import RealHTTPClient
+from tests.unified.oauth_test_providers import GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory
+from tests.unified.real_services_manager import create_real_services_manager
+from tests.unified.real_http_client import RealHTTPClient
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

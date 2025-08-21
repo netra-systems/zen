@@ -10,6 +10,9 @@ Critical Path: WebSocket connection → Database session creation → Message pe
 Coverage: Real PostgreSQL, Redis, WebSocket server with minimal mocking (L3 Realism)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -24,11 +27,9 @@ from sqlalchemy import text, create_engine
 import redis.asyncio as redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.postgres import get_postgres_session
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from logging_config import central_logger
 
 # Add project root to path

@@ -11,6 +11,9 @@ L3 Realism: Real Redis distributed locks, actual contention simulation, lock per
 Performance Requirements: Lock acquisition < 50ms under contention, deadlock detection < 100ms, throughput > 1000 locks/s
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ import statistics
 from collections import defaultdict
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger

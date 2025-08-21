@@ -10,6 +10,9 @@ Critical Path: Auth failure detection -> Circuit breaker activation -> Fallback 
 Coverage: Multi-service circuit breaker coordination, auth service failure scenarios, fallback auth mechanisms, state synchronization
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,8 +24,6 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState

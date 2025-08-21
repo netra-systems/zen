@@ -13,6 +13,9 @@ Comprehensive test to verify production deployment readiness:
 This test ensures the complete production environment is deployment-ready.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os
@@ -209,7 +212,7 @@ class ProductionDeploymentTester:
         # Test Redis
         print("  Testing Redis...")
         try:
-            import aioredis
+            aioredis
             redis = await aioredis.from_url(REDIS_URL)
             await redis.ping()
             await redis.close()

@@ -24,8 +24,8 @@ ARCHITECTURAL COMPLIANCE:
 import pytest
 import asyncio
 import time
-from .concurrent_user_simulators import ConcurrentUserSimulator, ConcurrentWebSocketManager
-from .concurrent_user_models import IsolationValidator
+from tests.unified.e2e.concurrent_user_simulators import ConcurrentUserSimulator, ConcurrentWebSocketManager
+from tests.unified.e2e.concurrent_user_models import IsolationValidator
 
 
 @pytest.mark.asyncio

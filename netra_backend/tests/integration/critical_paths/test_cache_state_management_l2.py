@@ -4,6 +4,9 @@ Tests for Redis cache, state synchronization, and memory management.
 Total MRR Protection: $60K
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

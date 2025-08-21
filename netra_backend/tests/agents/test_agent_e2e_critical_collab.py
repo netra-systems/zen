@@ -3,6 +3,9 @@ Collaboration and authentication critical end-to-end tests.
 Tests 7-8: Authentication/authorization, multi-agent collaboration.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -10,8 +13,6 @@ from unittest.mock import AsyncMock
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase

@@ -5,6 +5,9 @@ Tests for agent interaction, content generation, and configuration endpoints.
 Core AI functionality validation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch

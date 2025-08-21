@@ -6,6 +6,9 @@ Validates all critical functionality for reliable data insights.
 Business Value: Ensures 15-30% cost savings identification works reliably.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
@@ -13,8 +16,6 @@ from typing import Dict, Any, List
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient

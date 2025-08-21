@@ -6,6 +6,9 @@ especially when connection stats are missing or malformed.
 Business Value: Prevents metrics collection failures from impacting monitoring.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -13,9 +16,15 @@ from typing import Dict, Any
 
 from monitoring.metrics_collector import MetricsCollector
 from monitoring import WebSocketMetrics
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.agents.base.interface import ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus

@@ -9,6 +9,9 @@ Business Value Justification (BVJ):
 L3 Test: Uses real local services to validate context isolation between agents.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from testcontainers.redis import RedisContainer
 from testcontainers.postgres import PostgresContainer
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent

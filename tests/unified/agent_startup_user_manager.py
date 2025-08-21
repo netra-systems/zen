@@ -22,7 +22,7 @@ import logging
 from typing import List, Optional
 from dataclasses import dataclass, field
 
-from .jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 logger = logging.getLogger(__name__)
 

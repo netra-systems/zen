@@ -3,14 +3,15 @@ Business Value Core Tests (Tests 1-5) - Essential Business Functionality
 Tests fundamental business value scenarios for cost optimization and performance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from unittest.mock import AsyncMock, patch
 from typing import Dict, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 

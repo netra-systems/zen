@@ -12,8 +12,8 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
-from .real_websocket_client import RealWebSocketClient
-from .reconnection_test_helpers import create_test_token
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.reconnection_test_helpers import create_test_token
 
 
 class AgentStateReconnectionManager:

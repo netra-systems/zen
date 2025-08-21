@@ -11,14 +11,15 @@ Critical Missing E2E Tests - Highest revenue impact first-time user flows
 These tests validate the missing critical paths that cause the highest revenue loss.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, Mock
 import uuid
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers

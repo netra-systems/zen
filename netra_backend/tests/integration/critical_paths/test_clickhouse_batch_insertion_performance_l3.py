@@ -11,6 +11,9 @@ L3 Test: Uses real ClickHouse via Testcontainers to validate batch insertion per
 memory usage, and data consistency under load.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ import asyncio_clickhouse
 from testcontainers.clickhouse import ClickHouseContainer
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase

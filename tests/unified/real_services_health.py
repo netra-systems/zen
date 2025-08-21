@@ -9,7 +9,7 @@ from typing import Optional, TYPE_CHECKING
 from pathlib import Path
 
 if TYPE_CHECKING:
-    from .real_services_manager import RealServicesManager, ServiceProcess
+    from tests.unified.real_services_manager import RealServicesManager, ServiceProcess
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,7 @@ class RealServicesContext:
     
     def __init__(self, project_root=None):
         """Initialize context manager."""
-        from .real_services_manager import RealServicesManager
+        from tests.unified.real_services_manager import RealServicesManager
         self.manager = RealServicesManager(project_root)
         self.monitor = ServiceHealthMonitor(self.manager)
     

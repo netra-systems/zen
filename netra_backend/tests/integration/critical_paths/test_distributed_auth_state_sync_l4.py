@@ -20,6 +20,9 @@ Mock-Real Spectrum: L4 (Multi-instance production topology)
 - Real network latency simulation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -32,8 +35,6 @@ import httpx
 from unittest.mock import patch, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

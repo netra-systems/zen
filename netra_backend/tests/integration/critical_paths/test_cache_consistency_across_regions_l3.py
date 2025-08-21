@@ -11,6 +11,9 @@ L3 Realism: Real Redis instances simulating different regions, actual sync mecha
 Performance Requirements: Sync latency < 200ms, consistency accuracy 99.9%, conflict resolution < 500ms
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,8 +28,6 @@ import redis.asyncio as aioredis
 import statistics
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger

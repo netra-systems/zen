@@ -3,6 +3,9 @@ Tests 11-20: Core Infrastructure & Error Handling
 Tests for the missing core infrastructure components identified in the top 100 missing tests.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import logging
@@ -12,8 +15,6 @@ from datetime import datetime
 from cryptography.fernet import Fernet
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Test 11: config_validator_schema_validation

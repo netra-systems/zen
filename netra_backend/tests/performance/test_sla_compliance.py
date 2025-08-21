@@ -16,6 +16,9 @@ This test validates critical performance SLAs:
 NO MOCKS - Uses real services and measures actual performance.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

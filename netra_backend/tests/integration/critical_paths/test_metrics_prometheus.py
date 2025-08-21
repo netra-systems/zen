@@ -10,6 +10,9 @@ Critical Path: Metrics generation -> Collection -> Prometheus export -> Query va
 Coverage: Metrics collection, Prometheus integration, time series data, alerting foundation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -19,8 +22,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 import requests
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 from netra_backend.app.services.monitoring.prometheus_exporter import PrometheusExporter

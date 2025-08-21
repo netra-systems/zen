@@ -9,13 +9,14 @@ Business Value Justification (BVJ):
 - Revenue Impact: Core revenue driver - agent performance affects customer retention
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.routes.test_route_fixtures import (
 

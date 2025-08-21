@@ -3,6 +3,9 @@ Tests for transaction performance under various load conditions.
 All functions ≤8 lines per requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -11,8 +14,6 @@ from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.database_transaction_test_mocks import MockRepository
 

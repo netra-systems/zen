@@ -10,6 +10,9 @@ Critical Path: Response generation -> Compression evaluation -> Compression appl
 Coverage: Gzip compression, content negotiation, compression thresholds, performance optimization
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

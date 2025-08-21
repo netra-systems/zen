@@ -4,6 +4,9 @@ Tests for configuration status, validation results, and validation context.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import aiohttp

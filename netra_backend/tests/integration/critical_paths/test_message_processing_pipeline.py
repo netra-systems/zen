@@ -10,6 +10,9 @@ Critical Path: WebSocket message -> Authentication -> Routing -> Agent processin
 Coverage: End-to-end message flow, error handling, performance validation, state consistency
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,10 +24,8 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 
 # Add project root to path

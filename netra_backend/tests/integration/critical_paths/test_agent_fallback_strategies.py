@@ -10,6 +10,9 @@ Critical Path: Primary failure -> Strategy selection -> Fallback execution -> Re
 Coverage: Real fallback managers, strategy selection, recovery handlers, monitoring
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from enum import Enum
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

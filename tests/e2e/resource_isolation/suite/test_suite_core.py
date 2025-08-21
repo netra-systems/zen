@@ -12,12 +12,12 @@ from typing import Dict, Any, List
 import pytest
 import httpx
 
-from ..test_infrastructure import (
+from tests.e2e.resource_isolation.test_infrastructure import ResourceMonitor, TenantAgent, ResourceLeakDetector, PerformanceIsolationValidator, QuotaEnforcer
     ResourceMonitor, TenantAgent, ResourceLeakDetector, 
     PerformanceIsolationValidator, QuotaEnforcer
 )
-from .agent_manager import TenantAgentManager
-from .workload_generator import WorkloadGenerator
+from tests.e2e.resource_isolation.suite.agent_manager import TenantAgentManager
+from tests.e2e.resource_isolation.suite.workload_generator import WorkloadGenerator
 
 logger = logging.getLogger(__name__)
 

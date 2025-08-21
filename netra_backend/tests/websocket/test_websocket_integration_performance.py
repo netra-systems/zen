@@ -3,6 +3,9 @@
 Integration tests of all performance improvements working together.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 from datetime import datetime, timezone
@@ -10,8 +13,6 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.memory_manager import WebSocketMemoryManager
 from netra_backend.app.websocket.message_batcher import WebSocketMessageBatcher

@@ -4,14 +4,15 @@ BVJ: Resource scaling and health monitoring enable enterprise performance guaran
 Revenue Impact: Justifies premium pricing for enterprise tier with guaranteed performance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from datetime import datetime
 from unittest.mock import AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.deployment_config_fixtures import enterprise_deployment_infrastructure
 

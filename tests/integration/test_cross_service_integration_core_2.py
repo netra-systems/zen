@@ -16,7 +16,6 @@ from dev_launcher.launcher import DevLauncher
 from datetime import datetime
 from dev_launcher.config import LauncherConfig
 import os
-import os
 
 
 class TestSyntaxFix:
@@ -105,7 +104,6 @@ class TestSyntaxFix:
 
     def test_health_status_cross_service_updates(self):
         """Test health status cross-service status updates."""
-        from datetime import datetime
         
         status = HealthStatus(
             is_healthy=True,
@@ -123,7 +121,6 @@ class TestSyntaxFix:
 
     def launcher_config(self):
         """Create test launcher config."""
-        from dev_launcher.config import LauncherConfig
         
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create required directory structure for LauncherConfig validation
@@ -145,7 +142,6 @@ class TestSyntaxFix:
 
     def test_cors_environment_variable_setup(self, launcher_config):
         """Test CORS environment variables are set correctly."""
-        import os
         
         # Clear CORS_ORIGINS first to test default setting
         original_cors = os.environ.get('CORS_ORIGINS')
@@ -170,7 +166,6 @@ class TestSyntaxFix:
 
     def test_cross_service_auth_token_setup(self, launcher_config):
         """Test cross-service auth token is set up during launcher initialization."""
-        import os
         
         # Clear existing token to test generation
         original_token = os.environ.get('CROSS_SERVICE_AUTH_TOKEN')

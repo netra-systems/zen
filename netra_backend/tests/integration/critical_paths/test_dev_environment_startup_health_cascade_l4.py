@@ -16,6 +16,9 @@ BVJ:
 - Strategic Impact: Reduces developer friction and debugging time
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os
@@ -140,7 +143,7 @@ class DevEnvironmentStartupTester:
                             self.log_startup_event(service, "UNHEALTHY", f"Status: {response.status}")
                             
                 elif endpoint["type"] == "redis":
-                    import aioredis
+                    aioredis
                     redis = await aioredis.create_redis_pool(endpoint["url"])
                     pong = await redis.ping()
                     redis.close()

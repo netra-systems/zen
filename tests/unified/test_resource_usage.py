@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from .config import TEST_CONFIG, TestDatabaseManager
+from tests.unified.config import TEST_CONFIG, TestDatabaseManager
 
 
 @dataclass

@@ -10,6 +10,9 @@ Critical Path: Request identification -> Rate limit check -> Quota validation ->
 Coverage: Rate limiting algorithms, quota enforcement, backpressure mechanisms, tier-based limits
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,8 +24,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 from netra_backend.app.services.quota.quota_manager import QuotaManager

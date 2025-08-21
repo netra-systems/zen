@@ -309,7 +309,6 @@ class ConcurrentTestOrchestrator:
     
     def _generate_test_jwt(self, user_id: str) -> str:
         """Generate test JWT token for user."""
-        import jwt
         payload = {
             "sub": user_id,
             "iat": int(time.time()),

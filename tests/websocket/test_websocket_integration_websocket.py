@@ -14,26 +14,10 @@ from netra_backend.app.main import app
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
-from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
-from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
 from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
 from fastapi import HTTPException
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from fastapi import HTTPException
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
 from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
 from netra_backend.app.routes.websocket_secure import get_secure_websocket_manager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
 
 def test_client():
     """Test client for FastAPI application."""

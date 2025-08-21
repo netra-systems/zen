@@ -3,12 +3,13 @@ WebSocket Message Queue Integration Tests
 Tests for integration with message queue system.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.message_queue import QueuedMessage, MessagePriority
 

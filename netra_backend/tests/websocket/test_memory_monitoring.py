@@ -3,6 +3,9 @@ WebSocket memory monitoring and performance testing module.
 Tests memory leaks, long-running connections, and resource management.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

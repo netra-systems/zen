@@ -25,7 +25,7 @@ import websockets
 import httpx
 
 # Import required classes
-from .utils.rapid_message_sender import RapidMessageSender
+from tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 class AgentStateMonitor:
     """Monitors agent state consistency during rapid messaging."""

@@ -10,6 +10,9 @@ Comprehensive test to verify the complete agent lifecycle flow:
 This test runs against the actual dev environment to ensure agent system works end-to-end.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os

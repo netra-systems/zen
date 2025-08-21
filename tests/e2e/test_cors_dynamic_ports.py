@@ -292,7 +292,6 @@ class TestCORSDynamicBackendPorts:
         """
         for config in dynamic_backend_configs:
             with mock_service_discovery(config):
-                from dev_launcher.service_discovery import ServiceDiscovery
                 
                 discovery = ServiceDiscovery()
                 backend_info = discovery.read_backend_info()
@@ -304,7 +303,6 @@ class TestCORSDynamicBackendPorts:
                 )
                 
                 # But CORS integration will fail
-                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 mock_app = MagicMock()
                 middleware = CustomCORSMiddleware(app=mock_app, service_discovery=discovery)
                 
@@ -452,7 +450,6 @@ class TestCORSDynamicAuthServicePorts:
         """
         for config in dynamic_auth_configs:
             with mock_service_discovery(config):
-                from dev_launcher.service_discovery import ServiceDiscovery
                 
                 discovery = ServiceDiscovery()
                 auth_info = discovery.read_auth_info()
@@ -463,7 +460,6 @@ class TestCORSDynamicAuthServicePorts:
                 )
                 
                 # Test CORS integration
-                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 mock_app = MagicMock()
                 middleware = CustomCORSMiddleware(app=mock_app, service_discovery=discovery)
                 

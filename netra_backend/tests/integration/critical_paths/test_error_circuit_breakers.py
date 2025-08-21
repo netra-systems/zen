@@ -10,6 +10,9 @@ Critical Path: Error detection -> Circuit state management -> Fallback activatio
 Coverage: Circuit breaker patterns, failure isolation, graceful degradation, automatic recovery
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -20,8 +23,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.circuit_breaker.circuit_breaker_service import CircuitBreakerService
 from netra_backend.app.services.circuit_breaker.circuit_state import CircuitState, CircuitBreaker

@@ -3,6 +3,9 @@ Tests for basic database repository transaction management
 Tests basic transaction handling, rollback scenarios, and error handling
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, UTC
@@ -12,8 +15,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.services.shared.transaction_test_helpers import (
 

@@ -20,6 +20,9 @@ Mock-Real Spectrum: L3 (Real JWT with time manipulation)
 - Simulated time progression
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -31,8 +34,6 @@ from unittest.mock import patch, MagicMock
 import freezegun
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

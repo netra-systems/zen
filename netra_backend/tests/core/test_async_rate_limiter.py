@@ -3,13 +3,14 @@ Tests for AsyncRateLimiter - rate limiting functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import time
 from unittest.mock import patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from netra_backend.tests.helpers.async_utils_helpers import (

@@ -8,9 +8,9 @@ from typing import Optional
 import logging
 import os
 
-from auth_service.app..config import AuthConfig
-from auth_service.app..services.auth_service import AuthService
-from auth_service.app..models.auth_models import (
+from auth_service.auth_core.config import AuthConfig
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.models.auth_models import (
     LoginRequest, LoginResponse,
     TokenRequest, TokenResponse,
     RefreshRequest, ServiceTokenRequest,

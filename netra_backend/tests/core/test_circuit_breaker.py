@@ -8,6 +8,9 @@ This module tests the circuit breaker functionality including:
 - Error handling and edge cases
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -15,8 +18,6 @@ from unittest.mock import AsyncMock, MagicMock
 from typing import Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.circuit_breaker import (
 

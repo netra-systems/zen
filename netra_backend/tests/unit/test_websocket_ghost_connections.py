@@ -7,14 +7,15 @@ Business Value: Ensures connection limits work properly, preventing
 resource exhaustion that could impact all users ($50K+ MRR protection).
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone, timedelta
 from fastapi import WebSocket
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.connection_manager import ModernConnectionManager
 from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState

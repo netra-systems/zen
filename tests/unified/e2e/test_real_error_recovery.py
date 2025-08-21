@@ -41,11 +41,11 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from .service_orchestrator import E2EServiceOrchestrator
-from .error_cascade_core import ServiceFailureSimulator
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
-from ..config import TEST_USERS
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.e2e.error_cascade_core import ServiceFailureSimulator
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.config import TEST_USERS
 
 logger = logging.getLogger(__name__)
 

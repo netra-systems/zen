@@ -21,6 +21,9 @@ Mock-Real Spectrum: L3 (Real auth service with simulated load)
 - Simulated concurrent users
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -33,8 +36,6 @@ import random
 import statistics
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

@@ -11,6 +11,9 @@ Coverage: Load balancing algorithms, traffic distribution, zone affinity
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -19,8 +22,6 @@ import random
 from typing import Dict, List, Optional, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.service_mesh_fixtures import service_mesh_l4, calculate_backoff_accuracy
 

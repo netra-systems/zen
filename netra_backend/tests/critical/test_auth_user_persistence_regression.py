@@ -5,13 +5,23 @@ Ensures auth service creates real database users, not just tokens.
 CRITICAL: These tests prevent regression of the WebSocket auth failure
 where tokens were created but users didn't exist in the database.
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.security_service import SecurityService

@@ -7,6 +7,9 @@ Tests 13, 16, 17, 20 from original missing tests covering:
 - Startup checks async validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch
@@ -14,8 +17,6 @@ from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

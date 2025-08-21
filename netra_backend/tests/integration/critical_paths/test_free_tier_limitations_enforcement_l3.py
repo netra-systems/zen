@@ -13,6 +13,9 @@ Comprehensive test for free tier limitations enforcement:
 This test ensures free tier users are properly limited while maintaining good UX.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os

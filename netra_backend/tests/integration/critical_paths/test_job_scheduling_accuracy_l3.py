@@ -16,6 +16,9 @@ L3 Integration Test Level:
 - Tests scheduling under various load conditions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
 from redis_manager import redis_manager

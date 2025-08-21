@@ -4,14 +4,15 @@ Tests for MCP Service
 Test MCP service integration with Netra platform.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
 from netra_backend.app.core.exceptions_base import NetraException

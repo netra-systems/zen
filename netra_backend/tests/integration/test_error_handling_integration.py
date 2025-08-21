@@ -8,6 +8,9 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for enterprise SLAs and customer retention
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import uuid
@@ -15,8 +18,6 @@ from typing import Dict, Any, List
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.critical_integration_helpers import (
 

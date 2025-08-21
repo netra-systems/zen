@@ -10,6 +10,9 @@ L3 Test: Real Redis-backed session synchronization across multiple devices.
 Tests cross-device state consistency and conflict resolution.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -22,8 +25,6 @@ from unittest.mock import patch, AsyncMock
 import redis.asyncio as redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 # JWT service replaced with auth_integration
 from auth_integration import create_access_token, validate_token_jwt

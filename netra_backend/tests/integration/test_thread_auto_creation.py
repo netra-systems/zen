@@ -4,6 +4,9 @@ Components: ThreadService → Database → Message Association → State Persist
 Critical: Seamless thread creation for new users without friction
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -15,8 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.message_handlers import MessageHandlerService

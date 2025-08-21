@@ -24,6 +24,9 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -35,11 +38,9 @@ from unittest.mock import AsyncMock, patch
 import redis.asyncio as aioredis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from logging_config import central_logger
 
 # Add project root to path

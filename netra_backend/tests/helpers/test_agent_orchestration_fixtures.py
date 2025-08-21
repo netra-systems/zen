@@ -5,6 +5,9 @@ Provides reusable test fixtures for agent service orchestration testing,
 including mock agents, orchestrators, and service configurations.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 from datetime import datetime, UTC
 from typing import Dict, List, Any, Optional
@@ -12,8 +15,6 @@ from unittest.mock import AsyncMock, MagicMock
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.thread_service import ThreadService

@@ -3,6 +3,9 @@ Critical agent collaboration and workflow integration tests.
 Business Value: Ensures $20K MRR from multi-agent optimization workflows.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import time
@@ -10,8 +13,6 @@ from datetime import datetime
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent

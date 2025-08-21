@@ -29,7 +29,7 @@ from typing import Dict, List, Any, Tuple
 from unittest.mock import AsyncMock
 import pytest
 
-from .config import UnifiedTestConfig, TestUser
+from tests.unified.config import UnifiedTestConfig, TestUser
 # Import MockWebSocket from the actual location
 try:
     from netra_backend.app.tests.services.test_ws_connection_mocks import MockWebSocket

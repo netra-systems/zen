@@ -20,9 +20,9 @@ import pytest
 import time
 from typing import Dict, Any
 
-from .password_reset_complete_flow_tester import PasswordResetCompleteFlowTester
-from .password_reset_security_flow_tester import PasswordResetSecurityFlowTester
-from .auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.password_reset_complete_flow_tester import PasswordResetCompleteFlowTester
+from tests.unified.e2e.password_reset_security_flow_tester import PasswordResetSecurityFlowTester
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 
 # Pytest Test Implementations

@@ -17,11 +17,12 @@ MODULES:
 - test_llm_agent_advanced_integration.py: Integration tests with ≤8 line functions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import all fixtures from modular structure

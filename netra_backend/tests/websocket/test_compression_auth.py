@@ -3,6 +3,9 @@ WebSocket compression and authentication testing module.
 Tests compression algorithms, authentication expiry handling, and security features.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json

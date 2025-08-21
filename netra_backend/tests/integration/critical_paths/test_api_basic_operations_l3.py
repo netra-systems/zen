@@ -5,6 +5,9 @@ Tests fundamental API operations including CRUD, filtering, sorting,
 and error handling across different endpoints.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest

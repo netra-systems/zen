@@ -5,13 +5,14 @@ Previous tests for OAuth and CSRF utilities have been moved to test_pr_router_st
 or removed as the functionality no longer exists in the current implementation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch
 from fastapi import HTTPException
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.auth_integration.auth import (
 

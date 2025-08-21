@@ -4,6 +4,9 @@ L3 Integration Test: Password Reset Flow
 Tests complete password reset flow including request, validation, and completion.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -14,11 +17,17 @@ import uuid
 import hashlib
 
 from test_framework.test_patterns import L3IntegrationTest
-# Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
-from netra_backend.app.core.redis_client import RedisManager
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
+
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.auth_integration.auth import JWTTokenManager
 
 # Add project root to path

@@ -5,12 +5,13 @@ Tests WebSocket message handling for thread operations including
 history, creation, switching, deletion, and listing.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import agent_service, mock_supervisor
 from netra_backend.tests.helpers.test_agent_orchestration_assertions import (

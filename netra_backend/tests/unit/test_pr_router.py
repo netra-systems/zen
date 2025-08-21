@@ -27,4 +27,8 @@ Coverage verified: All 22 functions from pr_router.py are tested.
 
 # This file serves as documentation for the test suite structure
 # Individual test files should be run separately to avoid fixture scope issues
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 pass

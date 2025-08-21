@@ -10,6 +10,9 @@ Critical Path: Usage tracking -> Cost calculation -> Budget monitoring -> Alerts
 Coverage: Real cost tracking, budget management, usage analytics, cost optimization
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from enum import Enum
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

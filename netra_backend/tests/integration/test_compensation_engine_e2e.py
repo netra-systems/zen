@@ -12,6 +12,9 @@ Tests the complete compensation engine workflow from cost tracking to fee captur
 Critical for revenue generation and customer trust.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -22,8 +25,6 @@ from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.factory_status.business_core import (
 

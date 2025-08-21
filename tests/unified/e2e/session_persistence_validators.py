@@ -10,7 +10,7 @@ import uuid
 from typing import Dict, Any
 from datetime import datetime, timezone
 
-from .session_persistence_core import SessionPersistenceManager
+from tests.unified.e2e.session_persistence_core import SessionPersistenceManager
 
 
 class SessionPersistenceTestValidator(SessionPersistenceManager):

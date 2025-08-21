@@ -10,6 +10,9 @@ Critical Path: Event capture -> Enrichment -> Storage -> Indexing -> Query
 Coverage: Real audit logging, compliance tracking, forensic analysis
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from enum import Enum
 from uuid import uuid4
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

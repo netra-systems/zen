@@ -3,6 +3,9 @@ Price calculation tests for SupplyResearchService
 Tests price change calculations, provider comparisons, and anomaly detection
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, UTC, timedelta
 from decimal import Decimal
@@ -11,8 +14,6 @@ from unittest.mock import MagicMock, patch
 import asyncio
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog

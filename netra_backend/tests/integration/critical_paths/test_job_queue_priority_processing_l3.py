@@ -16,6 +16,9 @@ L3 Integration Test Level:
 - Measures actual performance under load
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
 from netra_backend.app.websocket.unified.job_queue import JobQueueManager

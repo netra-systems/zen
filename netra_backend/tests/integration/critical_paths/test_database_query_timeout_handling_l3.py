@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate query timeou
 enforcement, graceful degradation, and system recovery from timeout scenarios.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

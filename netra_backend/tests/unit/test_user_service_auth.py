@@ -29,6 +29,9 @@ CRITICAL SECURITY SCENARIOS TESTED:
 Architecture: 450-line module limit, 25-line function limit enforced
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import time
@@ -43,8 +46,6 @@ from sqlalchemy import select
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.auth_integration.auth import (
 

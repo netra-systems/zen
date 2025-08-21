@@ -15,8 +15,8 @@ import asyncio
 
 import pytest
 
-from .unified_e2e_harness import create_e2e_harness
-from .file_upload_test_runners import (
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.unified.e2e.file_upload_test_runners import (
     execute_single_user_pipeline_test,
     execute_performance_test_workflow,
     execute_error_handling_workflow,

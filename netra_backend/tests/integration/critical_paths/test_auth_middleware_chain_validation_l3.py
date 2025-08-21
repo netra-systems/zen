@@ -20,6 +20,9 @@ Mock-Real Spectrum: L3 (Real middleware with controlled requests)
 - Simulated HTTP requests
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -32,8 +35,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

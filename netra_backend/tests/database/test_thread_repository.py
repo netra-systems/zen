@@ -4,14 +4,15 @@ Tests thread CRUD operations and soft delete functionality
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from sqlalchemy import Column, String, DateTime, JSON

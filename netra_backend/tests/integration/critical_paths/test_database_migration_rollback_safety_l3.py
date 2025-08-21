@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate migration ro
 safety, data preservation, and recovery mechanisms under various failure scenarios.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

@@ -7,6 +7,9 @@ bypassing the centralized auth service. All OAuth operations MUST go through
 the auth service unless explicitly marked with justification.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import ast
 import os

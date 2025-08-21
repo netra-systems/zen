@@ -10,6 +10,9 @@ Critical Path: Cost calculation -> Real-time tracking -> Budget monitoring -> Al
 Coverage: Cost calculation accuracy, budget enforcement, real-time tracking, cost attribution, usage forecasting, alert systems
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from enum import Enum
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import TaskPriority

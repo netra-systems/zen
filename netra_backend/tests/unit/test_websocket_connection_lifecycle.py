@@ -7,6 +7,9 @@ Business Value: Ensures reliable WebSocket connection lifecycle preventing
 user frustration and churn from connection failures.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, timezone
@@ -14,8 +17,6 @@ from unittest.mock import Mock, AsyncMock, patch
 from fastapi import WebSocket
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.connection_manager import ModernConnectionManager
 from netra_backend.app.websocket.connection_info import ConnectionInfo

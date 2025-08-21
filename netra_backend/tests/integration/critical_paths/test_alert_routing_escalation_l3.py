@@ -11,6 +11,9 @@ Coverage: Alert routing accuracy, escalation timing, notification reliability, i
 L3 Realism: Tests with real notification services and actual escalation workflows
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.alert_manager import HealthAlertManager
 from netra_backend.app.core.shared_health_types import SystemAlert, AlertSeverity

@@ -1,5 +1,8 @@
 """Thread-Agent Integration Fixtures and Tests"""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -7,9 +10,15 @@ import uuid
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.agent_service import AgentService

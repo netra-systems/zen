@@ -23,6 +23,9 @@ Performance Targets:
 - Recovery scenarios: < 5s each
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch, MagicMock
@@ -31,8 +34,6 @@ import uuid
 from typing import Dict, Any, List, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.reliability import AgentReliabilityWrapper
 from netra_backend.app.core.reliability_circuit_breaker import CircuitBreakerConfig, CircuitBreakerState

@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate connection p
 initialization, configuration limits, concurrent access, and failure handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -29,8 +32,6 @@ from testcontainers.postgres import PostgresContainer
 from testcontainers.clickhouse import ClickHouseContainer
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.postgres_core import Database
 from netra_backend.app.db.postgres_pool import get_pool_status, close_async_db

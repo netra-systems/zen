@@ -14,11 +14,11 @@ Tests cover:
 7. Memory leak detection for long connections
 """
 
-import pytest
-
-# Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
+
+import pytest
+
 
 
 # Import all test functions from specialized modules

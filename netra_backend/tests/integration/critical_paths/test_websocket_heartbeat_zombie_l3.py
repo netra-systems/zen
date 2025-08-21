@@ -10,6 +10,9 @@ Critical Path: Connection establishment -> Heartbeat monitoring -> Zombie detect
 Coverage: Heartbeat intervals, zombie detection <60s, connection pruning, resource reclamation, reconnection scenarios
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -22,10 +25,16 @@ from datetime import datetime, timezone, timedelta
 from enum import Enum
 import uuid
 
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.core.cache.redis_manager import RedisManager
 from schemas import UserInDB

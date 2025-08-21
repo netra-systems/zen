@@ -4,11 +4,12 @@ Re-exports all test classes from focused modules for backwards compatibility.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import all test classes and fixtures from focused modules

@@ -10,6 +10,9 @@ Business Value Justification (BVJ):
 Performance and SLA compliance tests for agent response pipeline.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -19,8 +22,6 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Set testing environment

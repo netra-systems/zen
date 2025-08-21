@@ -15,6 +15,9 @@ These L3 integration tests validate:
 - Proper rate limiting and backpressure handling
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -31,8 +34,6 @@ from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.enhanced_rate_limiter import DistributedRateLimiter, BackpressureManager, RateLimitConfig
 from netra_backend.app.websocket.high_performance_broadcast import HighPerformanceBroadcaster, BroadcastPerformanceConfig

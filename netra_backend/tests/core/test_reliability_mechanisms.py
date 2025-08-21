@@ -3,6 +3,9 @@ Comprehensive reliability mechanism test suite for Netra agents.
 Tests circuit breakers, retry logic, timeouts, and system resilience.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -10,8 +13,6 @@ from unittest.mock import AsyncMock, Mock
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.reliability import AgentReliabilityWrapper, get_reliability_wrapper
 from netra_backend.app.core.reliability_circuit_breaker import (

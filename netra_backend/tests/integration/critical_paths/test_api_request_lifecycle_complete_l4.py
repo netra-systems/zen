@@ -3,6 +3,9 @@ L4 Integration Test: API Request Lifecycle Complete
 Tests complete API request lifecycle from ingress to response
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -13,8 +16,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.api_gateway import APIGateway
 from netra_backend.app.services.rate_limiter import RateLimiter

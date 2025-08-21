@@ -12,6 +12,9 @@ User request -> Supervisor Agent -> Sub-agent delegation -> State persistence ->
 Coverage: Real LLM calls, agent lifecycle management, cross-agent state persistence, staging environment validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -21,8 +24,6 @@ from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # # from agents.supervisor_agent_modern import ModernSupervisorAgent

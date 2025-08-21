@@ -5,6 +5,9 @@ This file contains placeholder tests for DataSubAgent.
 The actual comprehensive tests are in other test files in this directory.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 

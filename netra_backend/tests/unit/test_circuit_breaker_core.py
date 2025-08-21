@@ -7,14 +7,15 @@ Tests critical paths including state transitions, adaptive thresholds,
 health monitoring, and failure recovery mechanisms.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
@@ -226,18 +227,67 @@ class TestAdaptiveThreshold:
     """Test adaptive threshold functionality."""
 
     def test_adaptive_threshold_decreases_on_slow_calls(self, circuit_breaker):
-        """Adaptive threshold decreases with slow response times."""
-        circuit_breaker.recent_response_times = [6.0, 7.0, 8.0]  # Slow times
+        """Adaptive threshold decreases with slow response times.
+        
+        BUSINESS LOGIC: When response times are consistently slow, the circuit becomes
+        more sensitive to failures by lowering the threshold. This prevents cascading
+        failures in degraded systems, protecting customer AI workloads.
+        """
+        # Set up slow response times scenario
+        slow_response_times = [6.0, 7.0, 8.0, 9.0, 10.0]  # Consistently slow
+        circuit_breaker.recent_response_times = slow_response_times
+        circuit_breaker.slow_requests = len(slow_response_times)
+        
+        # Capture baseline state
         original_threshold = circuit_breaker.adaptive_failure_threshold
+        original_slow_count = circuit_breaker.slow_requests
+        
+        # Execute threshold adaptation
         circuit_breaker._adapt_failure_threshold()
-        assert circuit_breaker.adaptive_failure_threshold <= original_threshold
+        
+        # Verify threshold decreased meaningfully (at least 10% reduction)
+        new_threshold = circuit_breaker.adaptive_failure_threshold
+        assert new_threshold < original_threshold, "Threshold should decrease with slow calls"
+        assert new_threshold < (original_threshold * 0.9), f"Expected >10% decrease, got {(original_threshold - new_threshold) / original_threshold * 100:.1f}%"
+        
+        # Verify slow request tracking is maintained
+        assert circuit_breaker.slow_requests >= original_slow_count
+        
+        # Boundary condition: Ensure threshold doesn't go below minimum (1)
+        assert new_threshold >= 1, "Threshold should never go below 1"
 
     def test_adaptive_threshold_increases_on_fast_calls(self, circuit_breaker):
-        """Adaptive threshold increases with fast response times.""" 
-        circuit_breaker.recent_response_times = [0.1, 0.2, 0.3]  # Fast times
+        """Adaptive threshold increases with fast response times.
+        
+        BUSINESS LOGIC: When response times are consistently fast, the circuit becomes
+        more tolerant of occasional failures by raising the threshold. This maximizes
+        system utilization while maintaining reliability for high-performing services.
+        """
+        # Set up fast response times scenario with varied but consistently low times
+        fast_response_times = [0.05, 0.08, 0.12, 0.09, 0.06]
+        circuit_breaker.recent_response_times = fast_response_times
+        circuit_breaker.successful_calls = len(fast_response_times)
+        
+        # Capture baseline metrics
         original_threshold = circuit_breaker.adaptive_failure_threshold
+        original_success_count = circuit_breaker.successful_calls
+        baseline_avg = sum(fast_response_times) / len(fast_response_times)
+        
+        # Execute threshold adaptation
         circuit_breaker._adapt_failure_threshold()
-        assert circuit_breaker.adaptive_failure_threshold >= original_threshold
+        
+        # Verify threshold increased meaningfully (at least 10% increase)
+        new_threshold = circuit_breaker.adaptive_failure_threshold
+        assert new_threshold > original_threshold, "Threshold should increase with fast calls"
+        assert new_threshold > (original_threshold * 1.1), f"Expected >10% increase, got {(new_threshold - original_threshold) / original_threshold * 100:.1f}%"
+        
+        # Verify success tracking reflects fast operations
+        assert circuit_breaker.successful_calls >= original_success_count
+        assert baseline_avg < 0.2, f"Test setup validation: average response time {baseline_avg:.3f}s should be fast (<0.2s)"
+        
+        # Boundary condition: Ensure threshold doesn't exceed maximum reasonable limit
+        max_reasonable_threshold = circuit_breaker.config.failure_threshold * 3
+        assert new_threshold <= max_reasonable_threshold, f"Threshold {new_threshold} should not exceed 3x base threshold {max_reasonable_threshold}"
 
     @pytest.mark.asyncio
     async def test_adaptive_threshold_with_health_degraded(self, circuit_with_health):

@@ -4,14 +4,15 @@ Tests retry mechanisms, exponential backoff, and circuit breaker patterns
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.supply_research_scheduler import (
 

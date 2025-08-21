@@ -4,6 +4,10 @@ Unified Tools API Schemas
 from pydantic import BaseModel
 from typing import List, Dict, Any, Optional
 
+# Import agent-related types from their canonical locations
+from netra_backend.app.schemas.registry import AgentResult, AgentState
+from netra_backend.app.schemas.Agent import AgentCompleted, SubAgentLifecycle
+
 
 class ToolExecutionRequest(BaseModel):
     """Request to execute a tool"""

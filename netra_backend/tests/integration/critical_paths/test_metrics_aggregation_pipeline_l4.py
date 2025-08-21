@@ -12,6 +12,9 @@ Raw metrics ingestion -> Time-series aggregation -> Rollup computations -> Reten
 Coverage: Real ClickHouse time-series, Prometheus aggregation, retention policies, rollup accuracy, staging validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ import random
 import math
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite

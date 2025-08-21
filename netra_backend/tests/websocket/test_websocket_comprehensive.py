@@ -18,6 +18,9 @@ Tests cover:
 15. Token expiry and refresh
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -29,8 +32,6 @@ from fastapi.testclient import TestClient
 import websockets
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.routes.mcp.main import app
 from netra_backend.app.routes.websocket_enhanced import (

@@ -10,6 +10,9 @@ Critical Path: Tenant identification -> Data access control -> Resource isolatio
 Coverage: Data segregation, permission boundaries, resource quotas, security audit trails
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,8 +24,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.database.tenant_service import TenantService
 

@@ -4,13 +4,14 @@ Tests metadata tracking throughout corpus lifecycle and error recovery mechanism
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus, ContentSource
 from schemas import CorpusCreate, CorpusUpdate

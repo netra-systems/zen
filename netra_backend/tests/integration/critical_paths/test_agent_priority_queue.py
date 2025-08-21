@@ -10,6 +10,9 @@ Critical Path: Priority assignment -> Queue management -> Scheduling -> Executio
 Coverage: Real priority queues, scheduling algorithms, starvation prevention, monitoring
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from enum import Enum
 import statistics
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

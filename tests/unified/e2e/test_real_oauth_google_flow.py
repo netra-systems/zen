@@ -37,9 +37,9 @@ import websockets
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
 
-from ..service_manager import ServiceManager
-from ..test_harness import UnifiedTestHarness
-from ..oauth_test_providers import GoogleOAuthProvider, get_enterprise_config
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.oauth_test_providers import GoogleOAuthProvider, get_enterprise_config
 
 
 class RealOAuthFlowTester:

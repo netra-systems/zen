@@ -3,14 +3,15 @@ Business Value Advanced Tests (Tests 6-10) - Complex Business Scenarios
 Tests advanced business value scenarios for cache, resilience, reporting, and workflows
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from unittest.mock import AsyncMock, patch
 from typing import Dict, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.test_business_value_fixtures import BusinessValueFixtures
 

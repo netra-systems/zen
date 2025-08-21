@@ -3,6 +3,10 @@
 Tests end-to-end flow logging during supervisor execution with inter-agent communication.
 Each test must be concise and focused as per architecture requirements.
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -10,8 +14,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLogger, FlowState, TodoState
 from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine

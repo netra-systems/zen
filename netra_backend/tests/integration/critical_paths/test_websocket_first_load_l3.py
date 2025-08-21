@@ -11,6 +11,9 @@ L3 Test: Uses real WebSocket server, Redis pub/sub, and authentication service.
 Performance target: WebSocket connection establishment < 2 seconds with 50+ concurrent connections.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -28,9 +31,15 @@ from ws_manager import WebSocketManager
 from schemas import UserInDB
 from clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.tests..helpers.redis_l3_helpers import (
 

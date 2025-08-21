@@ -835,5 +835,4 @@ if __name__ == "__main__":
         finally:
             await tester.cleanup_session()
     
-    import asyncio
     asyncio.run(run_tests())

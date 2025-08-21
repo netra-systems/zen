@@ -11,8 +11,8 @@ import time
 import logging
 from typing import Dict, Any
 
-from .test_suite import resource_isolation_suite, tenant_agents
-from .test_infrastructure import RESOURCE_LIMITS
+from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents
+from tests.e2e.resource_isolation.test_infrastructure import RESOURCE_LIMITS
 
 logger = logging.getLogger(__name__)
 

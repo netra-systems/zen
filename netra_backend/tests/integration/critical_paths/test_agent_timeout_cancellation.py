@@ -10,6 +10,9 @@ Critical Path: Timeout detection -> Cancellation signal -> Graceful shutdown -> 
 Coverage: Real timeout managers, cancellation handlers, cleanup coordination
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from enum import Enum
 import signal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

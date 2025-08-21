@@ -4,14 +4,15 @@ Tests for monitoring coverage and partial failure scenarios.
 Verifies 100% monitoring coverage despite individual check failures.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.performance_monitor_core import PerformanceMonitor
 from netra_backend.app.websocket.performance_monitor_types import PerformanceThresholds

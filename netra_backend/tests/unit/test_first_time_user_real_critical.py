@@ -14,6 +14,9 @@ first-time user paths that determine whether a free user converts to paid.
 Each test failure = potential lost customer = lost $99-999/month recurring revenue.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import json
@@ -29,8 +32,6 @@ from argon2 import PasswordHasher
 import jwt
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import REAL implementations

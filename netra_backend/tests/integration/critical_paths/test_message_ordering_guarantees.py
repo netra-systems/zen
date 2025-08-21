@@ -11,6 +11,9 @@ L2 Test: Real internal message ordering components with mocked external services
 Performance target: <50ms ordering latency, 99.9% ordering accuracy.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -22,7 +25,7 @@ from uuid import uuid4
 from collections import deque, defaultdict
 from dataclasses import dataclass, field
 
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

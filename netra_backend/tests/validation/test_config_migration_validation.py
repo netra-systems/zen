@@ -6,6 +6,9 @@ Business Value: Ensures unified configuration system works correctly
 and no regressions were introduced during the migration.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import sys
 import os
 from pathlib import Path
@@ -14,8 +17,6 @@ from unittest.mock import patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 class TestConfigurationMigrationValidation:

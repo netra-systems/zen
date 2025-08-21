@@ -63,8 +63,6 @@ class TestL4CriticalAuthIntegration:
     @pytest.mark.asyncio
     async def test_02_expired_token_reuse_vulnerability(self):
         """Test: Attempt to reuse expired tokens"""
-        from netra_backend.app.auth_integration.auth_client import AuthServiceClient
-        from netra_backend.app.core.config import settings
         
         auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
         
@@ -92,8 +90,6 @@ class TestL4CriticalAuthIntegration:
     @pytest.mark.asyncio
     async def test_03_password_reset_token_hijacking(self):
         """Test: Password reset token security"""
-        from netra_backend.app.auth_integration.auth_client import AuthServiceClient
-        from netra_backend.app.core.config import settings
         
         auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
         
@@ -125,8 +121,6 @@ class TestL4CriticalAuthIntegration:
     @pytest.mark.asyncio
     async def test_04_session_fixation_attack(self):
         """Test: Session fixation vulnerability"""
-        from netra_backend.app.auth_integration.auth_client import AuthServiceClient
-        from netra_backend.app.core.config import settings
         
         auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
         
@@ -152,8 +146,6 @@ class TestL4CriticalAuthIntegration:
     @pytest.mark.asyncio
     async def test_05_brute_force_without_rate_limiting(self):
         """Test: Brute force attack detection"""
-        from netra_backend.app.auth_integration.auth_client import AuthServiceClient
-        from netra_backend.app.core.config import settings
         
         auth_client = AuthServiceClient(settings.AUTH_SERVICE_URL)
         
@@ -223,7 +215,6 @@ class TestL4CriticalWebSocketIntegration:
     @pytest.mark.asyncio  
     async def test_07_websocket_message_injection(self):
         """Test: WebSocket message injection/spoofing"""
-        from netra_backend.app.services.websocket_service import WebSocketService
         
         ws_service = WebSocketService()
         
@@ -256,7 +247,6 @@ class TestL4CriticalWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_08_websocket_reconnection_state_corruption(self):
         """Test: WebSocket reconnection with corrupted state"""
-        from netra_backend.app.services.websocket_service import WebSocketService
         
         ws_service = WebSocketService()
         
@@ -299,7 +289,6 @@ class TestL4CriticalWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_09_websocket_memory_leak_via_large_messages(self):
         """Test: Memory exhaustion via large WebSocket messages"""
-        from netra_backend.app.services.websocket_service import WebSocketService
         
         ws_service = WebSocketService()
         
@@ -335,7 +324,6 @@ class TestL4CriticalWebSocketIntegration:
     @pytest.mark.asyncio
     async def test_10_websocket_protocol_confusion(self):
         """Test: WebSocket protocol confusion attacks"""
-        from netra_backend.app.services.websocket_service import WebSocketService
         
         ws_service = WebSocketService()
         
@@ -374,7 +362,6 @@ class TestL4CriticalAPIIntegration:
     @pytest.mark.asyncio
     async def test_11_api_pagination_boundary_errors(self):
         """Test: API pagination edge cases"""
-        from netra_backend.app.core.config import settings
         
         api_url = f"http://localhost:{settings.BACKEND_PORT}"
         
@@ -408,7 +395,6 @@ class TestL4CriticalAPIIntegration:
     @pytest.mark.asyncio
     async def test_12_api_header_injection(self):
         """Test: HTTP header injection vulnerabilities"""
-        from netra_backend.app.core.config import settings
         
         api_url = f"http://localhost:{settings.BACKEND_PORT}"
         
@@ -437,7 +423,6 @@ class TestL4CriticalAPIIntegration:
     @pytest.mark.asyncio
     async def test_13_api_method_override_attacks(self):
         """Test: HTTP method override vulnerabilities"""
-        from netra_backend.app.core.config import settings
         
         api_url = f"http://localhost:{settings.BACKEND_PORT}"
         
@@ -474,7 +459,6 @@ class TestL4CriticalAPIIntegration:
     @pytest.mark.asyncio
     async def test_14_api_content_type_confusion(self):
         """Test: Content-Type confusion attacks"""
-        from netra_backend.app.core.config import settings
         
         api_url = f"http://localhost:{settings.BACKEND_PORT}"
         
@@ -507,7 +491,6 @@ class TestL4CriticalAPIIntegration:
     @pytest.mark.asyncio
     async def test_15_api_race_condition_in_transactions(self):
         """Test: Race conditions in API transactions"""
-        from netra_backend.app.core.config import settings
         
         api_url = f"http://localhost:{settings.BACKEND_PORT}"
         
@@ -578,7 +561,6 @@ class TestL4CriticalDatabaseIntegration:
     @pytest.mark.asyncio
     async def test_17_transaction_isolation_violations(self):
         """Test: Transaction isolation level issues"""
-        from netra_backend.app.db.session import get_db_connection
         
         async def transaction1():
             conn = await get_db_connection()
@@ -643,7 +625,6 @@ class TestL4CriticalDatabaseIntegration:
     @pytest.mark.asyncio
     async def test_19_redis_memory_pressure(self):
         """Test: Redis memory pressure handling"""
-        from netra_backend.app.core.config import settings
         
         try:
             redis_client = await redis.from_url(settings.REDIS_URL, decode_responses=True)
@@ -673,7 +654,6 @@ class TestL4CriticalDatabaseIntegration:
     @pytest.mark.asyncio
     async def test_20_database_deadlock_scenarios(self):
         """Test: Database deadlock detection and recovery"""
-        from netra_backend.app.db.session import get_db_connection
         
         async def lock_order_1():
             conn = await get_db_connection()

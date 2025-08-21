@@ -10,6 +10,9 @@ Business Value Justification (BVJ):
 - Revenue Impact: 100% - no startup means no service, no revenue
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import pytest
 import asyncio
@@ -20,8 +23,6 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Set test environment before imports

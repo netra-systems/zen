@@ -28,9 +28,9 @@ import httpx
 import websockets
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 
-from ..jwt_token_helpers import JWTTestHelper, JWTSecurityTester
-from ..config import TEST_ENDPOINTS, TEST_USERS, TEST_SECRETS
-from ..real_services_manager import RealServicesManager
+from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS, TEST_SECRETS
+from tests.unified.real_services_manager import RealServicesManager
 
 
 class AuthTestConfig:

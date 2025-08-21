@@ -15,9 +15,9 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from ...real_client_types import ClientConfig
-from ...real_http_client import RealHTTPClient
-from .error_generators import RealErrorPropagationTester
+from tests.unified.e2e.real_client_types import ClientConfig
+from tests.unified.e2e.real_http_client import RealHTTPClient
+from tests.unified.e2e.helpers.error_propagation.error_generators import RealErrorPropagationTester
 
 logger = logging.getLogger(__name__)
 

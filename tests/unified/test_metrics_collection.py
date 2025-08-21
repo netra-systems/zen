@@ -36,8 +36,8 @@ from contextlib import asynccontextmanager
 import pytest
 import json
 
-from .config import UnifiedTestConfig, TestUser
-from .service_manager import ServiceManager
+from tests.unified.config import UnifiedTestConfig, TestUser
+from tests.unified.service_manager import ServiceManager
 
 # Conditional imports to avoid configuration issues in testing
 try:

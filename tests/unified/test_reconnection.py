@@ -22,9 +22,9 @@ import asyncio
 from typing import Dict, Any
 import pytest
 
-from .reconnection_test_fixtures import reconnection_fixture
-from .reconnection_test_helpers import ReconnectionTestHelpers
-from .reconnection_test_methods import TokenExpiryTestMethods, StabilityTestMethods, MessageIntegrityTestMethods
+from tests.unified.reconnection_test_fixtures import reconnection_fixture
+from tests.unified.reconnection_test_helpers import ReconnectionTestHelpers
+from tests.unified.reconnection_test_methods import TokenExpiryTestMethods, StabilityTestMethods, MessageIntegrityTestMethods
 
 # Import utilities with fallbacks
 try:

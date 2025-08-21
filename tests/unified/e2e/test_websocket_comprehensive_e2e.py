@@ -26,9 +26,9 @@ import uuid
 from typing import Dict, List, Optional
 from datetime import datetime
 import websockets
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.database_sync_fixtures import create_test_user_data
-from tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.database_sync_fixtures import create_test_user_data
+from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
 
 
 class WebSocketE2ETester:

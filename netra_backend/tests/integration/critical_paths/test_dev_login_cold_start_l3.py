@@ -10,6 +10,9 @@ Business Value Justification (BVJ):
 - Revenue Impact: Development velocity directly impacts feature delivery
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import pytest
 import asyncio
@@ -22,8 +25,6 @@ from httpx import AsyncClient, ASGITransport
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Set test environment before imports

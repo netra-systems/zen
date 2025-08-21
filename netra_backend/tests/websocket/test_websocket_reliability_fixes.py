@@ -13,6 +13,9 @@ This test suite validates production-ready fixes addressing the
 identified WebSocket reliability concerns.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -22,8 +25,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.routes.websocket_enhanced import (
 

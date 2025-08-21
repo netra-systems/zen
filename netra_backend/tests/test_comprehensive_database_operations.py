@@ -4,6 +4,9 @@ Testing database operations with mocked connections for reliability.
 Each function ≤8 lines per requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

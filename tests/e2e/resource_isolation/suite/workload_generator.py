@@ -12,7 +12,7 @@ from typing import Dict, Any
 
 import websockets
 
-from ..test_infrastructure import TenantAgent
+from tests.e2e.resource_isolation.test_infrastructure import TenantAgent
 
 logger = logging.getLogger(__name__)
 

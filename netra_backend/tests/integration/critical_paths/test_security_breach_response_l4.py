@@ -13,6 +13,9 @@ Coverage: Intrusion detection, threat response, access control validation, rate 
 security event logging, incident response orchestration, multi-stage attack simulation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -28,8 +31,6 @@ from datetime import datetime, timedelta
 from urllib.parse import quote
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from netra_backend.app.services.security_service import SecurityService

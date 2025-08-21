@@ -3,14 +3,15 @@ Tests for Redis Manager performance characteristics
 Tests high throughput, memory usage, latency, and concurrent safety
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
 import tracemalloc
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.helpers.redis_test_fixtures import performance_redis_manager, RedisConnectionPool
 from netra_backend.tests.helpers.redis_test_helpers import (

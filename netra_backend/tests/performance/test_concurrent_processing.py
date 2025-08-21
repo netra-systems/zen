@@ -5,6 +5,9 @@ Tests for concurrent generation requests, resource sharing, and thread efficienc
 Validates system behavior under concurrent load conditions.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -14,8 +17,6 @@ from unittest.mock import MagicMock, patch
 from concurrent.futures import ThreadPoolExecutor
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.generation_service import run_content_generation_job
 from netra_backend.app.schemas.Generation import ContentGenParams

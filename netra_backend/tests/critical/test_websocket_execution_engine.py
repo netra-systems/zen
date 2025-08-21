@@ -7,14 +7,15 @@ execution engines and can process messages end-to-end.
 Business Value: Prevents $8K MRR loss from WebSocket failures.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.message_handler_core import ModernReliableMessageHandler
 from netra_backend.app.websocket.message_router import ModernMessageTypeRouter

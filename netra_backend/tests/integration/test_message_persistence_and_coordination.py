@@ -5,6 +5,9 @@ Test 5: Multi-Agent Coordination First Response - $15K MRR
 Test 6: Session State Cross-Service Sync - $10K MRR
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -17,8 +20,6 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 
@@ -225,7 +226,7 @@ class TestSessionStateSync:
     
     async def test_websocket_state_synchronization(self):
         """Test WebSocket connection state syncs across services."""
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         ws_manager.sync_connection_state = AsyncMock()

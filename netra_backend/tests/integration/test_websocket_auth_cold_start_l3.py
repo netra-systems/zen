@@ -16,6 +16,9 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real agent initialization
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import json
@@ -28,8 +31,6 @@ from unittest.mock import patch, MagicMock, AsyncMock
 import os
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Set test environment

@@ -5,15 +5,17 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 # Add project root to path
-from netra_backend.app.core.websocket.manager import ConnectionManager as WebSocketManager
+
 from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
+from netra_backend.app.core.websocket.manager import ConnectionManager as WebSocketManager
 from typing import Dict, List
 from unittest.mock import AsyncMock
 import asyncio
 import pytest
 import uuid
 
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent

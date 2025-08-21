@@ -11,6 +11,9 @@ Coverage: SLI accuracy, SLO calculations, error budget tracking, trend analysis,
 L3 Realism: Tests with real SLO definitions and actual service metrics
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

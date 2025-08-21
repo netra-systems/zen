@@ -7,14 +7,15 @@ Issue ID: websocket-manager-attribute-paradox
 Reference: SPEC/learnings.xml
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.websocket.connection import ConnectionInfo

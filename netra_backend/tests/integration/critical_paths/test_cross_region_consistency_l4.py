@@ -16,6 +16,9 @@ Coverage: Cross-region data replication, eventual consistency validation, confli
          network partition scenarios, region failover, read/write routing optimization.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -30,8 +33,6 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 

@@ -1,11 +1,12 @@
 """Unit tests for ProductionTool specific operations."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, patch, Mock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.production_tool import ProductionTool
 from netra_backend.tests.helpers.tool_dispatcher_assertions import (

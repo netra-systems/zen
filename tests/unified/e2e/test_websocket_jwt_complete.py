@@ -31,8 +31,8 @@ import pytest
 import websockets
 from websockets.exceptions import InvalidStatusCode, ConnectionClosedError
 
-from ..jwt_token_helpers import JWTTestHelper
-from ..clients import TestClientFactory
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.clients import TestClientFactory
 
 
 # Enable real services for this test module
@@ -553,7 +553,6 @@ async def test_websocket_jwt_concurrent_connections(real_services):
 
 
 # Import os for environment variables
-import os
 
 
 # Business Impact Summary

@@ -3,13 +3,22 @@ Tests for basic Redis Manager operations
 Tests Redis GET, SET, DELETE operations and connection management
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import patch
 
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.tests.helpers.redis_test_fixtures import mock_redis_client, redis_manager
 from netra_backend.tests.helpers.redis_test_helpers import (

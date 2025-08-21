@@ -10,6 +10,9 @@ Critical Path: Workflow definition -> Agent coordination -> State management -> 
 Coverage: Real workflow engine, agent orchestration, conditional routing, parallel execution
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -19,8 +22,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

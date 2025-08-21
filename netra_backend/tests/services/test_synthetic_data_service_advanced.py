@@ -3,6 +3,9 @@ Advanced Features Test Suite for Synthetic Data Service
 Testing advanced and specialized features
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -10,8 +13,6 @@ from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.services.synthetic_data.generation_patterns import generate_with_anomalies

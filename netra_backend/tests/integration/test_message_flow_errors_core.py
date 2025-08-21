@@ -1,5 +1,8 @@
 """Core Tests - Split from test_message_flow_errors.py"""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 from typing import Dict, Any, List, Optional, Tuple
@@ -7,9 +10,15 @@ from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
 from starlette.websockets import WebSocketDisconnect
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 from netra_backend.tests.test_utilities.websocket_mocks import MockWebSocket

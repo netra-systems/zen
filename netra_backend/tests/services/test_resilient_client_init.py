@@ -1,10 +1,19 @@
 """Tests for ResilientHTTPClient initialization and configuration."""
 
-import pytest
-from aiohttp import ClientTimeout
-# Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
+
+import pytest
+from aiohttp import ClientTimeout
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
 
@@ -50,37 +59,21 @@ class TestResilientHTTPClientInit:
         assert client.default_headers == {}
         assert client.timeout.total == 10.0
     
-    def test_select_config_google(self, client):
-        """Test config selection for Google APIs."""
-        config = client._select_config("google_api")
-        assert config.name == "google_api"
+    @pytest.mark.parametrize("service_name,mapped_service,expected_config", [
+        ("google_api", "oauth_service", "google_api"),
+        ("openai_api", "gpt_service", "openai_api"), 
+        ("anthropic_api", "claude_service", "anthropic_api"),
+        ("health_check", "ping_service", "fast_api"),
+    ])
+    def test_select_config_by_service(self, client, service_name, mapped_service, expected_config):
+        """Test config selection for different service types."""
+        # Test direct service name mapping
+        config = client._select_config(service_name)
+        assert config.name == expected_config
         
-        config = client._select_config("oauth_service")
-        assert config.name == "google_api"
-    
-    def test_select_config_openai(self, client):
-        """Test config selection for OpenAI APIs."""
-        config = client._select_config("openai_api")
-        assert config.name == "openai_api"
-        
-        config = client._select_config("gpt_service")
-        assert config.name == "openai_api"
-    
-    def test_select_config_anthropic(self, client):
-        """Test config selection for Anthropic APIs."""
-        config = client._select_config("anthropic_api")
-        assert config.name == "anthropic_api"
-        
-        config = client._select_config("claude_service")
-        assert config.name == "anthropic_api"
-    
-    def test_select_config_health(self, client):
-        """Test config selection for health APIs."""
-        config = client._select_config("health_check")
-        assert config.name == "fast_api"
-        
-        config = client._select_config("ping_service")
-        assert config.name == "fast_api"
+        # Test mapped service name mapping
+        config = client._select_config(mapped_service)
+        assert config.name == expected_config
     
     def test_select_config_generic(self, client):
         """Test config selection for generic APIs."""

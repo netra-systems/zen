@@ -16,7 +16,7 @@ REQUIREMENTS:
 import time
 from typing import Dict, Any
 
-from .password_reset_test_helpers import PasswordResetE2ETester
+from tests.unified.e2e.password_reset_test_helpers import PasswordResetE2ETester
 
 
 class PasswordResetCompleteFlowTester:

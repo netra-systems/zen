@@ -11,14 +11,23 @@ REVENUE PROTECTION:
 - Concurrent conversion attempt protection
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import Mock, AsyncMock
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.db.models_user import User, ToolUsageLog
 from netra_backend.app.schemas.UserPlan import PlanTier

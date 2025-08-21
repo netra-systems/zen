@@ -4,12 +4,11 @@ Tests agent initialization, request validation, entity extraction, and intent de
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
-import pytest
-from unittest.mock import Mock, AsyncMock
-
-# Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
+
+import pytest
+from unittest.mock import Mock, AsyncMock
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.triage_sub_agent import ExtractedEntities, UserIntent
@@ -17,8 +16,6 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from redis_manager import RedisManager
-
-# Add project root to path
 
 
 @pytest.fixture

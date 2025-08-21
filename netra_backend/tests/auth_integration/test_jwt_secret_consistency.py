@@ -3,6 +3,9 @@ Test JWT secret consistency between auth service and backend service.
 Ensures both services use the same JWT secret for token validation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import os
 import sys

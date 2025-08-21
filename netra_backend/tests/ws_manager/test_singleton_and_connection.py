@@ -2,6 +2,9 @@
 Tests for WebSocketManager singleton pattern and connection management
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import threading
@@ -10,8 +13,6 @@ from unittest.mock import Mock, AsyncMock, patch
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo, manager, ws_manager
 from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket

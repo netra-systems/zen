@@ -11,6 +11,9 @@ Coverage: Real Prometheus/Grafana integration, custom metrics accuracy, cardinal
 L4 Realism: Tests against staging infrastructure with real monitoring stack
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from datetime import datetime, timedelta
 import httpx
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.observability.metrics_collector import MetricsCollector
 from netra_backend.app.services.observability.prometheus_exporter import PrometheusExporter

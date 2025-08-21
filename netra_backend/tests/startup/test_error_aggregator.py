@@ -4,6 +4,9 @@ Tests error recording, pattern detection, trend analysis, and database operation
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import aiosqlite
@@ -13,8 +16,6 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional, Tuple
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.startup.error_aggregator import ErrorAggregator
 from netra_backend.app.schemas.startup_types import (

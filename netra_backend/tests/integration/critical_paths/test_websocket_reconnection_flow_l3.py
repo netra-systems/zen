@@ -12,6 +12,9 @@ Comprehensive test to verify WebSocket reconnection and recovery:
 This test ensures WebSocket connections are resilient and recover gracefully.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import sys

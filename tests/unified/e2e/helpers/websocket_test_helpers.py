@@ -15,8 +15,8 @@ from datetime import datetime, timezone
 from dataclasses import dataclass, field
 from enum import Enum
 
-from ..config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -11,12 +11,13 @@ Onboarding & Demo E2E Tests - First-time user onboarding journey
 These tests validate Tests 1, 2, and 5 from the critical conversion paths.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers

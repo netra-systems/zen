@@ -10,6 +10,9 @@ Critical Path: Load spike detection -> Circuit activation <5s -> Graceful degrad
 Coverage: Agent pipeline overload scenarios, circuit breaker coordination, load shedding strategies, cascade prevention
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState

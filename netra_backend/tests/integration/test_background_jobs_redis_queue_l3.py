@@ -7,6 +7,9 @@ handling long-running LLM operations and maintaining system responsiveness.
 Tests background job processing with real Redis containers and job queues.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import docker

@@ -4,6 +4,9 @@ Tests validate artifacts at agent boundaries with real state transitions.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -11,8 +14,6 @@ from typing import Dict, Any
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.app.agents.triage_sub_agent.models import (

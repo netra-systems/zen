@@ -10,9 +10,9 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
-from .service_orchestrator import E2EServiceOrchestrator
-from .user_journey_executor import UserJourneyExecutor, TestUser
-from ..test_environment_config import (
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.e2e.user_journey_executor import UserJourneyExecutor, TestUser
+from tests.unified.test_environment_config import (
     get_test_environment_config,
     TestEnvironmentConfig,
     TestEnvironmentType

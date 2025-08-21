@@ -3,13 +3,14 @@ Tests for async timeout and retry functionality
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_retry_logic import async_timeout, with_timeout, with_retry
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError

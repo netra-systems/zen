@@ -17,9 +17,9 @@ REQUIREMENTS:
 import pytest
 import time
 
-from .auth_flow_manager import AuthCompleteFlowManager
-from .new_user_flow_tester import CompleteNewUserFlowTester
-from .session_security_tester import SessionSecurityLogoutTester
+from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.new_user_flow_tester import CompleteNewUserFlowTester
+from tests.unified.e2e.session_security_tester import SessionSecurityLogoutTester
 
 
 # Pytest Test Implementations

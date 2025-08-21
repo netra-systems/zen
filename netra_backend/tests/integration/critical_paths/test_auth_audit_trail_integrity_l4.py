@@ -20,6 +20,9 @@ Mock-Real Spectrum: L4 (Production audit infrastructure)
 - Real retention policies
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -35,8 +38,6 @@ from cryptography.hazmat.primitives import serialization
 import uuid
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.schemas.auth_types import (

@@ -20,6 +20,9 @@ Mock-Real Spectrum: L3 (Real auth with simulated users)
 - Simulated concurrent users
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -32,8 +35,6 @@ import random
 import hashlib
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

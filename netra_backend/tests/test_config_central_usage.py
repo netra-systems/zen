@@ -10,6 +10,9 @@ This test suite validates that all modules properly use the central
 configuration system and don't bypass it with direct imports.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import ast
 import os
 import pytest

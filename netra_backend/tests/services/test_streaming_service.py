@@ -1,14 +1,15 @@
 # app/tests/services/test_streaming_service.py
 """Test streaming service functionality."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from typing import AsyncGenerator
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.streaming_service import (
 

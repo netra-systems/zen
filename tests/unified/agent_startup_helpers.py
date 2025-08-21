@@ -21,14 +21,14 @@ from typing import Dict, Any, Optional, List
 import httpx
 import websockets
 
-from .config import TestTier, get_test_user
-from .harness_complete import (
+from tests.unified.config import TestTier, get_test_user
+from tests.unified.harness_complete import get_auth_service_url, get_backend_service_url
     get_auth_service_url, get_backend_service_url
 )
-from .database_test_operations import (
+from tests.unified.database_test_operations import UserDataOperations, ChatMessageOperations
     UserDataOperations, ChatMessageOperations
 )
-from .database_test_connections import DatabaseConnectionManager
+from tests.unified.database_test_connections import DatabaseConnectionManager
 
 
 class ContextTestManager:

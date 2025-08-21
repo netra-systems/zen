@@ -2,6 +2,10 @@
 Test case for WebSocket JWT validation failure scenario.
 Reproduces the authentication failure when auth service rejects the JWT token.
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
@@ -11,8 +15,6 @@ import websockets
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

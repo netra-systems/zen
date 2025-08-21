@@ -8,7 +8,7 @@ import time
 import logging
 import psutil
 
-from .data_models import ResourceViolation
+from tests.e2e.resource_isolation.infrastructure.data_models import ResourceViolation
 
 logger = logging.getLogger(__name__)
 

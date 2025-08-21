@@ -13,6 +13,9 @@ Coverage: Real user service, subscription management, feature flags, usage meter
 WebSocket notifications, payment gateway (mocked), database transactions, audit logging
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.user_service import user_service
 from netra_backend.app.schemas.UserPlan import (

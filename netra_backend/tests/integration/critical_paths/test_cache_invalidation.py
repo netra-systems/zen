@@ -10,6 +10,9 @@ Critical Path: Data update -> Cache invalidation -> Cross-service notification -
 Coverage: Redis cache management, service coordination, consistency validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -19,8 +22,6 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.cache.cache_manager import CacheManager

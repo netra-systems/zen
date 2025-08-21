@@ -24,6 +24,9 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -39,11 +42,9 @@ from sqlalchemy import text, event
 from sqlalchemy.exc import DatabaseError, IntegrityError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.postgres import get_postgres_session
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from logging_config import central_logger
 
 # Add project root to path

@@ -5,6 +5,9 @@ Test 14: Tool Dispatcher Initialization - $10K MRR
 Test 15: Quality Gate First Response Validation - $12K MRR
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from typing import Dict, Any, List
@@ -13,8 +16,6 @@ from datetime import datetime
 import time
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

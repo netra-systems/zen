@@ -3,6 +3,9 @@ Critical message handling and health monitoring integration tests.
 Business Value: Maintains $30K MRR through system reliability monitoring and message handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import time
@@ -10,8 +13,6 @@ from datetime import datetime
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.test_fixtures_common import test_database, mock_infrastructure
 

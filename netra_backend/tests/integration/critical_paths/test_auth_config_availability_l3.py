@@ -10,6 +10,9 @@ L3 Test: Real local services with containers for auth service config endpoint te
 Tests config availability, response time, structure validation, and resilience.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -22,9 +25,15 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 
 from logging_config import central_logger
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer
 

@@ -4,14 +4,15 @@ BVJ: Custom domain configuration enables enterprise branding requirements
 Revenue Impact: Removes friction for enterprise deals requiring branded domains
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.deployment_config_fixtures import enterprise_deployment_infrastructure
 

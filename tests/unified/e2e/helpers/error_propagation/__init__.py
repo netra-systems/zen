@@ -16,7 +16,7 @@ Re-exports all public interfaces for backward compatibility.
 # Import all public classes and functions from the refactored modules
 
 # Error Generation and Testing Infrastructure
-from .error_generators import (
+from tests.unified.e2e.helpers.error_generators import ErrorCorrelationContext, ErrorPropagationMetrics, RealErrorPropagationTester, MockTokenGenerator, ErrorInjectionHelper, run_real_error_propagation_validation
     ErrorCorrelationContext,
     ErrorPropagationMetrics,
     RealErrorPropagationTester,
@@ -26,25 +26,25 @@ from .error_generators import (
 )
 
 # Error Validation Components  
-from .error_validators import (
+from tests.unified.e2e.helpers.error_validators import AuthServiceFailurePropagationValidator, AuthTokenValidator
     AuthServiceFailurePropagationValidator,
     AuthTokenValidator
 )
 
 # Database Error Handling
-from .database_error_helpers import (
+from tests.unified.e2e.helpers.database_error_helpers import DatabaseErrorHandlingValidator, DatabaseConnectionTester
     DatabaseErrorHandlingValidator,
     DatabaseConnectionTester
 )
 
 # Recovery and Retry Testing
-from .error_recovery_helpers import (
+from tests.unified.e2e.helpers.error_recovery_helpers import NetworkFailureSimulationValidator, NetworkLatencyTester
     NetworkFailureSimulationValidator,
     NetworkLatencyTester
 )
 
 # Network Retry and Pattern Testing
-from .network_retry_helpers import (
+from tests.unified.e2e.helpers.network_retry_helpers import RetryPatternTester, RecoveryScenarioTester, NetworkResilienceTester, TimeoutPatternAnalyzer
     RetryPatternTester,
     RecoveryScenarioTester,
     NetworkResilienceTester,
@@ -52,20 +52,20 @@ from .network_retry_helpers import (
 )
 
 # Correlation Testing
-from .error_correlation_helpers import (
+from tests.unified.e2e.helpers.error_correlation_helpers import ErrorCorrelationValidator, CorrelationTestHelper
     ErrorCorrelationValidator,
     CorrelationTestHelper
 )
 
 # User Message and Cross-Service Testing
-from .user_message_helpers import (
+from tests.unified.e2e.helpers.user_message_helpers import UserFriendlyMessageValidator, CrossServiceTrackingValidator, MessageQualityAnalyzer
     UserFriendlyMessageValidator,
     CrossServiceTrackingValidator,
     MessageQualityAnalyzer
 )
 
 # Main test class for pytest integration
-from .test_suite import TestRealErrorPropagation, create_real_error_propagation_test_suite
+from tests.unified.e2e.helpers.test_suite import TestRealErrorPropagation, create_real_error_propagation_test_suite
 
 
 # Export all public symbols

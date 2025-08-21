@@ -5,6 +5,9 @@ through FastAPI dependencies and that async context managers
 are correctly handled.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from contextlib import asynccontextmanager
@@ -13,8 +16,6 @@ from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.dependencies import DbDep, get_db_dependency
 from netra_backend.app.services.database.thread_repository import ThreadRepository

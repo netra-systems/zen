@@ -14,6 +14,9 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Console output formatting verification
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import sys

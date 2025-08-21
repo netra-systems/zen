@@ -8,6 +8,9 @@ Tests critical paths including resource cleanup, task concurrency limits,
 background task handling, and shutdown procedures.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import time
@@ -15,8 +18,6 @@ from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_resource_manager import (
 

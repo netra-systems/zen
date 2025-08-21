@@ -11,6 +11,9 @@ L3 Test: Uses real authorization service with role-based access control.
 Security target: Zero unauthorized tool access with comprehensive audit trail.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent

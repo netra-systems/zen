@@ -17,6 +17,9 @@ Features:
 Each function ≤8 lines, file ≤300 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import os
 import uuid
@@ -30,9 +33,15 @@ from sqlalchemy import text, create_engine
 import asyncpg
 import clickhouse_connect
 from logging_config import central_logger
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.core.database_types import DatabaseType, DatabaseConfig
 from netra_backend.app.core.exceptions_config import DatabaseError

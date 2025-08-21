@@ -11,6 +11,9 @@ Tests PostgreSQL, ClickHouse, and Redis connection handling, pooling, failover,
 migration execution, and recovery mechanisms in staging environment.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import time
@@ -20,8 +23,6 @@ from sqlalchemy.exc import DisconnectionError, OperationalError, TimeoutError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Individual test methods will use @pytest.mark.asyncio decorator

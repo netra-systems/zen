@@ -3,6 +3,9 @@ L4 Integration Test: Database Transaction Integrity
 Tests database transaction atomicity, consistency, isolation, and durability
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -13,8 +16,6 @@ from decimal import Decimal
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.database_service import DatabaseService
 from netra_backend.app.services.transaction_manager import TransactionManager

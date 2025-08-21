@@ -9,7 +9,6 @@ import json
 from typing import Dict, Any, Optional
 from unittest.mock import patch
 from netra_backend.app.core.middleware_setup import get_cors_origins, is_origin_allowed
-from netra_backend.app.core.middleware_setup import get_cors_origins, is_origin_allowed
 
 
 class TestSyntaxFix:

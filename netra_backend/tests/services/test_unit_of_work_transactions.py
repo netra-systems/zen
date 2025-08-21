@@ -4,14 +4,15 @@ Tests UoW transaction management, rollback behavior, and external session handli
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.database.unit_of_work import UnitOfWork
 

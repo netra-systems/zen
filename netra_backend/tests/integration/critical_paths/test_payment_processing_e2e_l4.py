@@ -20,6 +20,9 @@ Test Coverage:
 - Payment state transitions and error recovery
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -32,12 +35,10 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.test_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from tests.unified.e2e.payment_flow_manager import PaymentFlowManager, MockPaymentProvider
-from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
+from netra_backend.tests.unified.e2e.payment_flow_manager import PaymentFlowManager, MockPaymentProvider
+from netra_backend.tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from netra_backend.app.schemas.UserPlan import PlanTier
 
 # Add project root to path

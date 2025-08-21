@@ -7,13 +7,14 @@ Business Value: Ensures accurate connection tracking and monitoring
 for operational insights and user experience optimization.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from fastapi import WebSocket
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.connection_manager import ModernConnectionManager
 from netra_backend.app.websocket.connection_info import ConnectionInfo

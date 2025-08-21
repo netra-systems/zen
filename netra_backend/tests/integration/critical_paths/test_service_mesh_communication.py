@@ -10,6 +10,9 @@ Critical Path: Service discovery -> Authentication -> Authorization -> Routing -
 Coverage: Inter-service auth, request routing, load balancing, circuit breaking
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -19,8 +22,6 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.mesh.service_mesh import ServiceMesh
 from netra_backend.app.services.mesh.service_discovery import ServiceDiscovery

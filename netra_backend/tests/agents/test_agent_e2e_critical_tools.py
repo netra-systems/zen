@@ -3,14 +3,15 @@ Critical end-to-end tests for tool integration, state persistence, and error han
 Tests 4-6: Tool dispatcher integration, state persistence/recovery, error handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
 from unittest.mock import patch, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service

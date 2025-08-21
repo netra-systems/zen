@@ -17,7 +17,7 @@ import pytest_asyncio
 
 from netra_backend.tests.unified.config import TEST_USERS
 from netra_backend.tests.unified.test_harness import UnifiedTestHarness
-from .helpers.thread_management_helpers import (
+from tests.unified.e2e.helpers.thread_management_helpers import ThreadWebSocketManager, ThreadStateValidator, create_thread_test_data, create_message_test_data, measure_thread_operation_timing, validate_thread_websocket_flow
     ThreadWebSocketManager,
     ThreadStateValidator,
     create_thread_test_data,

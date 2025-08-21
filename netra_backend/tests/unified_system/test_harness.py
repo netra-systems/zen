@@ -8,6 +8,9 @@ This module provides the core test harness for running multi-service unified tes
 Supports Auth Service, Backend, and Frontend together with real communication.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import subprocess
 import time

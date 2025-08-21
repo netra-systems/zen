@@ -95,7 +95,6 @@ class RealLoginHelper:
                 }
             
             # Verify token structure and content
-            import jwt
             try:
                 # Decode without verification to check structure
                 token_payload = jwt.decode(access_token, options={"verify_signature": False})

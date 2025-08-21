@@ -1,13 +1,14 @@
 """Tests for the configuration management system."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import os
 from unittest.mock import patch, MagicMock
 from pydantic import ValidationError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
 from netra_backend.app.core.config_validator import ConfigValidator, ConfigurationValidationError

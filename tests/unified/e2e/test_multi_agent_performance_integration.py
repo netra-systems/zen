@@ -22,7 +22,7 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.supervisor.supervisor_agent import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
-from .agent_response_test_utilities import AgentResponseSimulator, ResponseTestType
+from tests.unified.e2e.agent_response_test_utilities import AgentResponseSimulator, ResponseTestType
 
 
 class MultiAgentPerformanceBenchmarkCore:

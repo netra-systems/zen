@@ -3,6 +3,9 @@ Performance and concurrency critical end-to-end tests.
 Tests 9-10: Concurrent request handling, performance and timeout handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -10,8 +13,6 @@ from unittest.mock import patch, AsyncMock
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.tests.agents.test_agent_e2e_critical_setup import AgentE2ETestBase

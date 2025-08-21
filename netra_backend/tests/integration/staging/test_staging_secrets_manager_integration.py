@@ -11,6 +11,9 @@ Tests Google Secret Manager integration, fallback mechanisms, and secret rotatio
 without disruption in staging environment.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import pytest
 from unittest.mock import patch, Mock, AsyncMock

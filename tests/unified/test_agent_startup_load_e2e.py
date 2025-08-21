@@ -26,6 +26,9 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from tests.config import TEST_CONFIG, TestTier, get_test_user
 from tests.harness_complete import (
+    UnifiedTestHarnessComplete, TestHarnessContext,
+    get_auth_service_url, get_backend_service_url
+)
 from typing import Dict, Any, List, Optional
 import asyncio
 import gc
@@ -35,18 +38,11 @@ import pytest
 import statistics
 import time
 
-    UnifiedTestHarnessComplete, TestHarnessContext,
-
-    get_auth_service_url, get_backend_service_url
-
-)
-from .real_client_factory import create_real_client_factory
-from .load_test_utilities import (
-
+from tests.unified.real_client_factory import create_real_client_factory
+from tests.unified.load_test_utilities import (
     LoadMetrics, SystemResourceMonitor, LoadTestSimulator
-
 )
-from .real_services_manager import RealServicesManager
+from tests.unified.real_services_manager import RealServicesManager
 
 # HTTP and WebSocket clients
 import httpx

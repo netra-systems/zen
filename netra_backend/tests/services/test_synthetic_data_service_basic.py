@@ -3,6 +3,9 @@ Basic Test Suite for Synthetic Data Generation Service
 Testing corpus management and basic functionality
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -10,8 +13,6 @@ from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.corpus_service import CorpusStatus
 from netra_backend.app import schemas

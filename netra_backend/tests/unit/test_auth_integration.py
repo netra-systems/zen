@@ -13,6 +13,9 @@ Target Coverage:
 - Error scenarios: 401 Unauthorized, 404 User Not Found, service failures
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from datetime import datetime, timedelta
@@ -25,8 +28,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.auth_integration.auth import (
 

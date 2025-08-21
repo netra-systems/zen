@@ -22,8 +22,8 @@ from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from ..service_manager import ServiceManager
-from ..test_harness import UnifiedTestHarness
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
 from netra_backend.app.schemas.rate_limit_types import RateLimitResult, RateLimitStatus
 from netra_backend.app.schemas.UserPlan import PlanTier
 
@@ -382,5 +382,4 @@ async def test_rate_limiter_configuration_validation():
 if __name__ == "__main__":
     # Allow direct execution for debugging
     import sys
-    import pytest
     sys.exit(pytest.main([__file__, "-v", "-s"]))

@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate cross-databa
 transaction consistency, rollback scenarios, and data synchronization patterns.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -28,8 +31,6 @@ from testcontainers.postgres import PostgresContainer
 from testcontainers.clickhouse import ClickHouseContainer
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.clickhouse import get_clickhouse_client

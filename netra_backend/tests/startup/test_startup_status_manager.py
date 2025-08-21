@@ -4,6 +4,9 @@ Tests all critical paths, edge cases, and error conditions with strong typing.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import asyncio
@@ -13,8 +16,6 @@ from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.startup.status_manager import StartupStatusManager
 from netra_backend.app.schemas.startup_types import (

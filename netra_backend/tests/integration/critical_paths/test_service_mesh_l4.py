@@ -11,6 +11,9 @@ Coverage: Real service mesh patterns, load balancing algorithms, timeout/retry p
 L4 Realism: Tests against staging service mesh infrastructure with real microservices
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,8 +28,6 @@ import httpx
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.service_mesh.discovery_service import ServiceDiscoveryService
 from netra_backend.app.services.service_mesh.load_balancer import LoadBalancerService

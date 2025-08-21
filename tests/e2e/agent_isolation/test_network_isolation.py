@@ -18,9 +18,9 @@ import time
 import json
 from typing import Dict, Any, List
 
-from ..fixtures.resource_monitoring import isolation_test_config, resource_limits
-from ..test_helpers.agent_isolation_base import AgentIsolationBase, simulate_workload_burst
-from ..resource_isolation.test_suite import resource_isolation_suite, tenant_agents
+from tests.e2e.fixtures.resource_monitoring import isolation_test_config, resource_limits
+from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase, simulate_workload_burst
+from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents
 
 logger = logging.getLogger(__name__)
 

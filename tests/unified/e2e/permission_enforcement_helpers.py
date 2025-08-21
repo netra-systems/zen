@@ -20,7 +20,7 @@ import time
 from typing import Dict, Any, List
 from datetime import datetime, timezone
 
-from .auth_flow_testers import AuthFlowE2ETester
+from tests.unified.e2e.auth_flow_testers import AuthFlowE2ETester
 
 
 class PermissionEnforcementTester:

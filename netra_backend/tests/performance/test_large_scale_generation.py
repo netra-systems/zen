@@ -5,6 +5,9 @@ Tests for corpus generation at scale (100k+ records) with resource monitoring.
 Focuses on memory efficiency and system resource utilization.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -14,8 +17,6 @@ from typing import Dict, List, Any
 from unittest.mock import patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.generation_service import run_content_generation_job
 from netra_backend.app.schemas.Generation import ContentGenParams, ContentCorpusGenParams

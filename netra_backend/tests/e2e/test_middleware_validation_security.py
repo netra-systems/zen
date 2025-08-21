@@ -12,6 +12,9 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from typing import Dict, Any, Optional
@@ -19,8 +22,6 @@ from unittest.mock import Mock, AsyncMock, patch
 from fastapi import Request, Response, HTTPException
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.middleware.security_middleware import SecurityMiddleware, SecurityConfig, RateLimitTracker
 from netra_backend.app.core.exceptions_auth import NetraSecurityException

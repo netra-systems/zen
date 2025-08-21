@@ -3,6 +3,9 @@ Common fixtures and utilities for integration tests.
 Extracted from oversized test_critical_missing_integration.py
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -13,14 +16,12 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.models_postgres import User, Thread, Message, Run
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 
 # Add project root to path

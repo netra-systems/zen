@@ -280,5 +280,4 @@ class TestStressConcurrency:
     
     def _should_use_real_llm(self) -> bool:
         """Check if real LLM testing is enabled."""
-        import os
         return os.getenv("TEST_USE_REAL_LLM", "false").lower() == "true"

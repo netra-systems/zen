@@ -9,6 +9,9 @@ BVJ (Business Value Justification):
 4. Revenue Impact: Catches issues before they affect real users
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import sys

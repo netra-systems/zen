@@ -8,6 +8,9 @@ Tests the entire staging deployment pipeline from config to health checks.
 Each function ≤8 lines, file ≤300 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import pytest
 import asyncio
@@ -16,9 +19,15 @@ from unittest.mock import patch, MagicMock, AsyncMock
 import aiohttp
 
 from main import create_app
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.startup_checks.checker import StartupChecker

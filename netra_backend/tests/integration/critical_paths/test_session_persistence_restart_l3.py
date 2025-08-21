@@ -10,6 +10,9 @@ L3 Test: Real session persistence across service restarts with Redis/PostgreSQL.
 Tests session recovery, WebSocket reconnection, and state continuity.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -25,8 +28,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # JWT service replaced with auth_integration

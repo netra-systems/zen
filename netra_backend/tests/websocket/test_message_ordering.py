@@ -3,6 +3,9 @@ WebSocket message ordering and protocol testing module.
 Tests message sequencing, protocol version handling, and binary data transmission.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json

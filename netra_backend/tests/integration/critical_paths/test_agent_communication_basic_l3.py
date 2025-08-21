@@ -19,7 +19,7 @@ from datetime import datetime
 import uuid
 
 from test_framework.test_patterns import L3IntegrationTest
-from netra_backend.app.core.redis_client import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.base import BaseSubAgent
 
 

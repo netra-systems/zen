@@ -209,7 +209,6 @@ async def get_staging_suite() -> StagingTestSuite:
 
 
 # Pytest fixture for automatic staging suite management
-import pytest
 
 @pytest.fixture
 async def staging_suite():

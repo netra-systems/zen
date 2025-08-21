@@ -5,6 +5,9 @@ Tests performance, scalability, and resource usage of corpus generation.
 All functions maintain 25-line limit with single responsibility.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -13,8 +16,6 @@ from typing import Dict, List, Any
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService

@@ -13,6 +13,9 @@ Test Level: L3 (Real Local Services)
 - Real rollback mechanisms
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
 from netra_backend.app.db.clickhouse import get_clickhouse_client

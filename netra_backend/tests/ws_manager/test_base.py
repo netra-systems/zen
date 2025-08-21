@@ -2,6 +2,9 @@
 Base fixtures and utilities for WebSocketManager tests
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, timezone
@@ -9,8 +12,6 @@ from unittest.mock import AsyncMock
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
 

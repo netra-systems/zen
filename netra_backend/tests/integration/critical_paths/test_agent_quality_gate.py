@@ -10,6 +10,9 @@ Critical Path: Quality metrics -> Threshold checks -> Gate decisions -> Feedback
 Coverage: Real quality assessment, automated gates, performance monitoring
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,8 +28,6 @@ import statistics
 import hashlib
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

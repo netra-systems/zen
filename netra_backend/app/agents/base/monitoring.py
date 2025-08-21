@@ -308,6 +308,16 @@ class ExecutionMonitor:
     def _log_execution_error(self, context: ExecutionContext, error: Exception) -> None:
         """Log execution error details."""
         logger.error(f"Execution error in {context.agent_name}: {error}")
+    
+    async def start_monitoring(self) -> None:
+        """Start the execution monitoring system.
+        
+        This method initializes monitoring tasks and prepares the system for tracking.
+        Currently a no-op as monitoring is passive and event-driven.
+        """
+        logger.info("Execution monitoring started")
+        # Monitoring is event-driven and doesn't require background tasks
+        # This method exists for compatibility with startup expectations
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED

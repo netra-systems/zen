@@ -7,12 +7,13 @@ Business Value: Ensures reliable health monitoring preventing SLA violations
 that could result in enterprise contract penalties and customer churn.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.health_checkers import (
 

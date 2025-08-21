@@ -10,6 +10,9 @@ L2 Test: Uses real internal components within same process but mocks external LL
 Validates agent communication patterns, tool execution, state management, and error propagation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
@@ -31,7 +32,7 @@ from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.schemas.registry import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from redis_manager import RedisManager
 from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, AgentCompleted
 from netra_backend.app.schemas.registry import AgentResult

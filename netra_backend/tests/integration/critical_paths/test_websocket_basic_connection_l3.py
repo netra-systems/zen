@@ -5,6 +5,9 @@ Tests fundamental WebSocket connection establishment, authentication,
 and basic message exchange from different angles.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -15,12 +18,18 @@ from datetime import datetime
 import uuid
 
 from test_framework.test_patterns import L3IntegrationTest
-# Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
-from netra_backend.app.core.redis_client import RedisManager
-from netra_backend.app.websocket.manager import WebSocketManager
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
+
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

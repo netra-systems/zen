@@ -5,6 +5,9 @@ This module runs import tests for all critical modules to ensure
 no import errors exist in the codebase.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import sys
 from pathlib import Path

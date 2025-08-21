@@ -14,13 +14,14 @@ REQUIREMENTS:
 - Provider failover handling
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.shared_fixtures import mock_llm_manager, mock_llm_provider
 

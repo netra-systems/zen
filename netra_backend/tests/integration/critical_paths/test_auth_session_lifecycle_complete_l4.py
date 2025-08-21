@@ -3,6 +3,9 @@ L4 Integration Test: Complete Auth Session Lifecycle
 Tests the entire auth session from creation to expiry including edge cases
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -14,8 +17,6 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.session_service import SessionService

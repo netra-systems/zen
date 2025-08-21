@@ -10,6 +10,9 @@ Critical Path: WebSocket auth -> Supervisor initialization -> SubAgent routing -
 Coverage: Full pipeline validation with real LLM providers, staging environment configuration, quality gates
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,18 +26,24 @@ from unittest.mock import patch
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-from config import settings
-from netra_backend.app.llm.llm_manager import LLMManager
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from netra_backend.app.core.config import settings
+from netra_backend.app.llm.llm_manager import LLMManager
+
+# Add project root to path for tests
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.cost_calculator import CostCalculatorService
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from auth_integration.auth import get_current_user
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage, ServerMessage as WSResponse
@@ -371,9 +380,27 @@ class AgentPipelineRealLLMTester:
     
     async def _initialize_supervisor_agent(self, test_id: str):
         """Initialize supervisor agent for test session."""
-        # Implementation would initialize real supervisor agent
-        # This is a simplified version for the test
-        pass
+        # Create mock dependencies for supervisor agent
+        from unittest.mock import MagicMock, AsyncMock
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
+        # Create mock database session
+        mock_db_session = MagicMock(spec=AsyncSession)
+        mock_db_session.execute = AsyncMock()
+        mock_db_session.commit = AsyncMock()
+        mock_db_session.rollback = AsyncMock()
+        
+        # Create mock tool dispatcher
+        mock_tool_dispatcher = MagicMock()
+        mock_tool_dispatcher.dispatch = AsyncMock()
+        
+        # Initialize supervisor agent with all required parameters
+        self.supervisor_agent = SupervisorAgent(
+            db_session=mock_db_session,
+            llm_manager=self.llm_manager,
+            websocket_manager=self.websocket_client,  # Use the WebSocket client as manager
+            tool_dispatcher=mock_tool_dispatcher
+        )
     
     async def _collect_pipeline_responses(self, test_id: str, 
                                         timeout: float = 60.0) -> List[Dict[str, Any]]:

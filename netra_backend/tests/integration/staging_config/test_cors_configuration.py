@@ -5,12 +5,21 @@ Validates Cross-Origin Resource Sharing configuration
 with staging URLs.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import httpx
 import asyncio
 from typing import List, Dict
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.tests.base import StagingConfigTestBase
 

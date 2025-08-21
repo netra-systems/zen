@@ -5,14 +5,15 @@ Tests core AgentService functionality including initialization,
 execution, and WebSocket message handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import (

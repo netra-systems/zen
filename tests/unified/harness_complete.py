@@ -9,13 +9,47 @@ import os
 import sys
 import asyncio
 import logging
+import uuid
 from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 # Import components
-from .test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 
 logger = logging.getLogger(__name__)
+
+
+class TestAuthService:
+    """Simple test auth service for harness compatibility."""
+    
+    def __init__(self):
+        self.users = {}
+        self.logger = logging.getLogger(f"{__name__}.TestAuthService")
+    
+    async def create_user(self, user_data: Dict[str, Any]) -> str:
+        """Create test user and return user ID."""
+        user_id = user_data.get('id', str(uuid.uuid4()))
+        self.users[user_id] = user_data.copy()
+        self.logger.debug(f"Created test user: {user_id}")
+        return user_id
+    
+    async def get_user(self, user_id: str) -> Optional[Dict[str, Any]]:
+        """Get user by ID."""
+        return self.users.get(user_id)
+    
+    async def update_user(self, user_id: str, updates: Dict[str, Any]) -> bool:
+        """Update user data."""
+        if user_id in self.users:
+            self.users[user_id].update(updates)
+            return True
+        return False
+    
+    async def delete_user(self, user_id: str) -> bool:
+        """Delete user."""
+        if user_id in self.users:
+            del self.users[user_id]
+            return True
+        return False
 
 
 class DatabaseManager:
@@ -42,19 +76,16 @@ class DatabaseManager:
     
     def _setup_sqlite_database(self) -> None:
         """Setup in-memory SQLite database for testing."""
-        import os
         os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
         self.logger.debug("SQLite in-memory database configured")
     
     def _setup_redis_connection(self) -> None:
         """Setup Redis connection for testing."""
-        import os
         os.environ["REDIS_URL"] = "redis://localhost:6379/1"  # Use DB 1 for tests
         self.logger.debug("Redis test database configured")
     
     def _setup_clickhouse_connection(self) -> None:
         """Setup ClickHouse connection for testing."""
-        import os
         os.environ["CLICKHOUSE_URL"] = "clickhouse://localhost:8123/test"
         self.logger.debug("ClickHouse test database configured")
     
@@ -71,7 +102,7 @@ class ServiceManager:
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.ServiceManager")
         # Import the real service manager
-        from .service_manager import ServiceManager as RealServiceManager
+        from tests.unified.service_manager import ServiceManager as RealServiceManager
         self._real_manager = RealServiceManager(harness)
     
     async def start_auth_service(self) -> None:
@@ -116,7 +147,7 @@ class HealthMonitor:
         self.harness = harness
         self.logger = logging.getLogger(f"{__name__}.HealthMonitor")
         # Import the real health monitor
-        from .service_manager import HealthMonitor as RealHealthMonitor
+        from tests.unified.service_manager import HealthMonitor as RealHealthMonitor
         self._real_monitor = RealHealthMonitor(harness)
     
     async def wait_for_all_ready(self) -> None:
@@ -162,6 +193,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
         self.service_manager = ServiceManager(self)
         self.data_seeder = TestDataSeeder(self)
         self.health_monitor = HealthMonitor(self)
+        self.auth_service = TestAuthService()
     
     async def _setup_databases(self) -> None:
         """Setup all test databases using database manager."""
@@ -256,7 +288,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     def _initialize_service_configs(self) -> None:
         """Initialize service configurations with proper settings."""
-        from .test_harness import ServiceConfig
+        from tests.unified.test_harness import ServiceConfig
         
         self.state.services = {
             "auth_service": ServiceConfig(
@@ -277,7 +309,7 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     async def _setup_test_environment(self) -> None:
         """Setup test environment variables and configuration."""
-        from .config import setup_test_environment
+        from tests.unified.config import setup_test_environment
         setup_test_environment()
         self.logger.info("Test environment configured")
     
@@ -298,6 +330,14 @@ class UnifiedTestHarnessComplete(UnifiedTestHarness):
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
+        await self.stop_all_services()
+    
+    async def setup(self) -> None:
+        """Setup the test harness - alias for start_services for compatibility."""
+        await self.start_services()
+    
+    async def teardown(self) -> None:
+        """Teardown the test harness - alias for stop_all_services for compatibility."""
         await self.stop_all_services()
 
 

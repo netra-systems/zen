@@ -5,6 +5,9 @@ Provides reusable assertion functions to verify agent service behavior,
 orchestration metrics, and test outcomes with ≤8 lines per function.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock, MagicMock
 

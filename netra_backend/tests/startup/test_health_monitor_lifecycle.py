@@ -4,6 +4,9 @@ Tests service registration, monitoring lifecycle management
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch, AsyncMock
 

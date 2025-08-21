@@ -11,6 +11,9 @@ L2 Test: Real internal shutdown components with mocked external services.
 Performance target: <30s graceful shutdown, 100% message preservation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -24,7 +27,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 from collections import defaultdict, deque
 
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

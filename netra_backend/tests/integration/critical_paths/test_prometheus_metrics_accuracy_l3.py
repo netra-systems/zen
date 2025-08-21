@@ -11,6 +11,9 @@ Coverage: Prometheus metric accuracy, cardinality management, timestamp precisio
 L3 Realism: Tests with actual Prometheus instances and real metric collection
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,9 +25,15 @@ from unittest.mock import patch, AsyncMock
 from dataclasses import dataclass
 
 from monitoring.metrics_collector import MetricsCollector
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 from netra_backend.app.core.alert_manager import HealthAlertManager

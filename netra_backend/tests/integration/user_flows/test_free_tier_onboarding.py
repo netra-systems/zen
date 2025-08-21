@@ -16,6 +16,9 @@ Test Coverage:
 - Usage tracking fundamentals
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import time
@@ -30,8 +33,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.models.user import User, UserPlan
 from netra_backend.app.models.thread import Thread

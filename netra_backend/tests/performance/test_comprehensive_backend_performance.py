@@ -11,6 +11,9 @@ Business Value Justification (BVJ):
 - Revenue Impact: Prevents churn from performance issues (+$25K MRR)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.postgres import Database as PostgresDatabase

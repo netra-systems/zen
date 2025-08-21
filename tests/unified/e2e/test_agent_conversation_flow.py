@@ -24,7 +24,7 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from .agent_conversation_helpers import (
+from tests.unified.e2e.agent_conversation_helpers import (
     AgentConversationTestCore, ConversationFlowSimulator, ConversationFlowValidator,
     AgentConversationTestUtils, RealTimeUpdateValidator
 )

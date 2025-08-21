@@ -1,5 +1,8 @@
 """Metrics collection and analysis tests for Quality Monitoring Service"""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -7,8 +10,6 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.helpers.quality_monitoring_fixtures import (
 

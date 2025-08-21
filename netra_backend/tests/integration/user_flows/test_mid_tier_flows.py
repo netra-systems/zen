@@ -9,6 +9,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Ensures proper value delivery for team plans
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import uuid
@@ -22,8 +25,6 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.models.team import Team
 from netra_backend.app.services.user_service import UserService as UsageService

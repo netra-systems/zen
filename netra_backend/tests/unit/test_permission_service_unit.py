@@ -12,13 +12,14 @@ role hierarchy, developer auto-detection, and permission grants/revokes.
 Critical for protecting revenue through proper tier enforcement.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from datetime import datetime, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
 from netra_backend.app.db.models_postgres import User

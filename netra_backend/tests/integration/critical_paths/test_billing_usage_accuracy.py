@@ -10,6 +10,9 @@ Critical Path: Usage event capture -> Metering aggregation -> Billing calculatio
 Coverage: Usage tracking accuracy, billing calculations, invoice generation, payment reconciliation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,8 +24,6 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.billing.billing_engine import BillingEngine

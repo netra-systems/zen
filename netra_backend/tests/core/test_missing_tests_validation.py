@@ -6,14 +6,15 @@ Tests 11, 12, 14 from original missing tests covering:
 - Custom exception types and validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock
 from cryptography.fernet import Fernet
 from pydantic import ValidationError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

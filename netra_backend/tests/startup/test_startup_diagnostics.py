@@ -4,6 +4,9 @@ Tests system error collection, automatic fixes, and CLI interface.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import sys
@@ -16,8 +19,6 @@ from typing import List, Dict, Optional
 from scripts.startup_diagnostics import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
     StartupDiagnostics, collect_system_errors, check_port_conflicts,
     check_database_connection, check_dependencies, check_environment_variables,

@@ -3,6 +3,9 @@ L4 Integration Test: Concurrent Session Management
 Tests concurrent user sessions, resource contention, and consistency
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -14,8 +17,6 @@ from collections import defaultdict
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.auth_service import AuthService

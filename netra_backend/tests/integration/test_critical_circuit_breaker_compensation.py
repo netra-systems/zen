@@ -3,14 +3,15 @@ Critical circuit breaker and compensation integration tests.
 Business Value: Maintains $25K MRR through graceful degradation and fault tolerance.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.test_fixtures_common import test_database, mock_infrastructure, setup_circuit_breakers_for_chain
 

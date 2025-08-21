@@ -3,14 +3,16 @@
 Tests agent registration, discovery, lifecycle management, and recovery scenarios.
 Focuses on real component interactions with minimal mocking.
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base import BaseSubAgent

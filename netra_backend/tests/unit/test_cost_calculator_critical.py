@@ -6,13 +6,14 @@ Prevents $100K+ ARR loss from pricing errors. Direct impact on conversions.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, List, Tuple
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.cost_calculator import (
 

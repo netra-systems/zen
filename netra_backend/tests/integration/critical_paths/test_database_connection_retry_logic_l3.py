@@ -11,6 +11,9 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers with controlled network
 disruption to validate connection retry logic, backoff strategies, and recovery.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

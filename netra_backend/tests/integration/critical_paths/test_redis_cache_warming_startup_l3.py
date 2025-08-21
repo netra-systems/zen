@@ -11,6 +11,9 @@ L3 Realism: Real Redis container with actual cache warming on startup, source da
 Performance Requirements: Warming completion < 30s, critical keys pre-loaded, cache hit rate > 80% after warming
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -27,8 +30,6 @@ from collections import defaultdict
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger

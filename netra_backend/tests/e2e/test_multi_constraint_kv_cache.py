@@ -4,14 +4,15 @@ Tests KV caching audit and optimization workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
 from typing import Dict, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
 

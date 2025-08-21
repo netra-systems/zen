@@ -21,6 +21,9 @@ Mock-Real Spectrum: L4 (Production-like environment)
 - Real cross-service auth
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -33,8 +36,6 @@ import httpx
 import jwt
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

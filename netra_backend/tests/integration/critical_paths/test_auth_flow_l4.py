@@ -12,6 +12,9 @@ OAuth initiation -> JWT generation -> WebSocket authentication -> Token refresh 
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, token refresh, cross-service session validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import jwt
@@ -26,8 +29,6 @@ from datetime import datetime, timedelta
 from urllib.parse import urlencode, parse_qs, urlparse
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # OAuth service replaced with mock

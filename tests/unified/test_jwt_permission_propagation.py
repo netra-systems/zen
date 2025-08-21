@@ -16,10 +16,10 @@ import json
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch
 
-from .clients.auth_client import AuthTestClient
-from .clients.backend_client import BackendTestClient
-from .clients.websocket_client import WebSocketTestClient
-from .config import UnifiedTestConfig
+from tests.unified.clients.auth_client import AuthTestClient
+from tests.unified.clients.backend_client import BackendTestClient
+from tests.unified.clients.websocket_client import WebSocketTestClient
+from tests.unified.config import UnifiedTestConfig
 
 
 class JWTPermissionPropagationTester:

@@ -13,6 +13,9 @@ Test Level: L3 (Real SUT with Real Local Services - Out-of-Process)
 - Tests failure recovery and compensating transactions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -25,8 +28,6 @@ from contextlib import asynccontextmanager
 from unittest.mock import patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Docker container management

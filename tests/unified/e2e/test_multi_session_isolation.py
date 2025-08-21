@@ -35,8 +35,8 @@ from datetime import datetime, timezone
 import pytest
 import logging
 
-from ..clients import TestClientFactory
-from ..jwt_token_helpers import JWTTestHelper
+from tests.unified.clients import TestClientFactory
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 logger = logging.getLogger(__name__)
 

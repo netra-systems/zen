@@ -3,12 +3,13 @@ Tests for AsyncLock and AsyncCircuitBreaker - advanced async patterns
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_retry_logic import AsyncLock, AsyncCircuitBreaker
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError, ServiceError

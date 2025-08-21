@@ -3,6 +3,9 @@ Comprehensive repository tests (76-85) from top 100 missing tests.
 Tests database operations, queries, and repository patterns.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, timedelta, timezone
@@ -13,8 +16,6 @@ import hashlib
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Test 76: Thread repository operations

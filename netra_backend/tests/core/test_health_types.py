@@ -1,12 +1,13 @@
 """Tests for health monitoring types and enums."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, UTC
 from dataclasses import asdict
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.health_types import (
 

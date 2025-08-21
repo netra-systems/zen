@@ -6,6 +6,9 @@ as hashable types (dict keys, set members, etc).
 Business Value: Prevents runtime crashes from type errors.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from dataclasses import dataclass, asdict
 from typing import Dict, Any
@@ -13,8 +16,6 @@ from datetime import datetime
 from unittest.mock import Mock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus

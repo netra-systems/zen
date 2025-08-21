@@ -1,3 +1,6 @@
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from fastapi.testclient import TestClient
 import asyncio
@@ -8,8 +11,6 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from config import settings
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 @pytest.mark.parametrize("prompt", [
     "I need to reduce costs but keep quality the same. For feature X, I can accept a latency of 500ms. For feature Y, I need to maintain the current latency of 200ms.",

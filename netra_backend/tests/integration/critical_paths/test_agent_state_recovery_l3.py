@@ -11,6 +11,9 @@ L3 Test: Uses real state persistence with recovery mechanisms.
 Recovery target: <30 seconds recovery time with full context preservation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ import os
 import tempfile
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent

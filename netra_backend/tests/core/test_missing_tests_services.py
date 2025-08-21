@@ -6,6 +6,9 @@ Tests 15, 18, 19 from original missing tests covering:
 - Unified logging aggregation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import logging
@@ -15,8 +18,6 @@ from unittest.mock import Mock, patch
 from cryptography.fernet import Fernet
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

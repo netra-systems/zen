@@ -13,6 +13,9 @@ Load spike simulation -> Fair resource allocation -> System recovery validation
 Coverage: API rate limiting, per-user quotas, burst protection, graceful degradation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import aiohttp
@@ -24,8 +27,6 @@ from datetime import datetime, timedelta
 import statistics
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 

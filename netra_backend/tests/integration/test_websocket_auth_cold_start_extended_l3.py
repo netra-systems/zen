@@ -16,6 +16,9 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real agent initialization under stress
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import json
@@ -37,8 +40,6 @@ import socket
 import struct
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Set test environment

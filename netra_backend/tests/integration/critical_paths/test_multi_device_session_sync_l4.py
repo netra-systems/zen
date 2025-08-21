@@ -12,6 +12,9 @@ Device login -> Session sync -> Real-time updates -> Preferences sync -> Activit
 Coverage: Multi-device session state sync, real-time propagation, preference sync, activity tracking, auth state consistency
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -24,8 +27,6 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite

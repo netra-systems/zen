@@ -10,6 +10,9 @@ Critical Path: Agent creation -> State initialization -> Task execution -> State
 Coverage: Full agent lifecycle, state preservation, error recovery, resource management
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -20,8 +23,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent

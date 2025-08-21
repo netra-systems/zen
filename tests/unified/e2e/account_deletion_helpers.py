@@ -16,7 +16,7 @@ import time
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from ..jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class AccountDeletionE2ETester:

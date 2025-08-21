@@ -8,6 +8,9 @@ Comprehensive tests covering error flow from system components to user-facing
 error messages, including recovery mechanisms and notification channels.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import json
@@ -19,8 +22,6 @@ import websockets
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.error_recovery_handler import (

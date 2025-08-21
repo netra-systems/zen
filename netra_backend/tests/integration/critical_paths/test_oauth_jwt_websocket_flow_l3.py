@@ -10,6 +10,9 @@ L3 Test: Real OAuth → JWT → WebSocket flow with PostgreSQL, Redis containers
 Tests complete authentication chain with real database persistence.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -24,8 +27,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # OAuth service replaced with mock

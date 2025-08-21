@@ -3,6 +3,9 @@ E2E Test Fixtures - Modular and Composable
 All fixtures broken into ≤8 line functions for architectural compliance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import uuid
@@ -10,8 +13,6 @@ from unittest.mock import Mock, AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager

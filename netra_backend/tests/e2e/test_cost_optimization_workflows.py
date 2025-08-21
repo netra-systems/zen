@@ -4,6 +4,9 @@ Tests real LLM agents with complete data flow validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -12,8 +15,6 @@ from decimal import Decimal
 from typing import Dict, List, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent

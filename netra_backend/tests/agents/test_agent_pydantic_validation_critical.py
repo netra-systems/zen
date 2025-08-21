@@ -3,6 +3,9 @@
 This addresses CRITICAL validation errors where LLM returns strings instead of dicts.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 from typing import Dict, Any, List
@@ -10,8 +13,6 @@ from pydantic import ValidationError
 from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent.models import (
 

@@ -3,6 +3,9 @@ Critical Integration Tests - Audit-driven failing tests for basic functions
 Tests designed to fail initially to expose integration gaps per testing.xml L3 requirements
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -164,7 +167,7 @@ class TestWebSocketIntegration:
     async def test_websocket_reconnection_with_message_replay(self):
         """Test WebSocket reconnection preserves message order"""
         # Will fail - no message replay on reconnect
-        from netra_backend.app.websocket.manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         manager = WebSocketManager()
         client_id = "test_client"
@@ -185,7 +188,7 @@ class TestWebSocketIntegration:
     async def test_websocket_broadcast_atomicity(self):
         """Test atomic broadcast to multiple WebSocket clients"""
         # Will fail - broadcasts are not atomic
-        from netra_backend.app.websocket.manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         manager = WebSocketManager()
         clients = [f"client_{i}" for i in range(100)]
@@ -207,7 +210,7 @@ class TestWebSocketIntegration:
     async def test_websocket_rate_limiting_per_client(self):
         """Test per-client WebSocket rate limiting"""
         # Will fail - no rate limiting implemented
-        from netra_backend.app.websocket.manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         manager = WebSocketManager()
         client_id = "rate_test_client"
@@ -424,7 +427,7 @@ class TestPerformanceIntegration:
     async def test_memory_pressure_graceful_degradation(self):
         """Test system degrades gracefully under memory pressure"""
         # Will fail - no memory pressure handling
-        import resource
+        resource
         from netra_backend.app.monitoring.memory_manager import MemoryManager
         
         # Limit memory to 100MB

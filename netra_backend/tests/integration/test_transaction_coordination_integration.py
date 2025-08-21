@@ -17,6 +17,9 @@ ARCHITECTURAL COMPLIANCE:
 - Focus on transaction integrity and failure recovery
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import json
@@ -28,8 +31,6 @@ from dataclasses import dataclass
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.critical_integration_helpers import (
 

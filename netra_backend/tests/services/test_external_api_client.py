@@ -5,9 +5,12 @@ This module imports all modularized test classes to maintain compatibility
 while ensuring each module is ≤300 lines and each function is ≤8 lines.
 """
 
-# Import all test classes from modularized test modules
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
+
+import sys
+from pathlib import Path
+
 
 from netra_backend.tests.services.test_external_api_config import TestExternalAPIConfig
 from netra_backend.tests.services.test_http_error import TestHTTPError
@@ -21,7 +24,6 @@ from netra_backend.tests.services.test_resilient_client_health import TestResili
 from netra_backend.tests.services.test_retryable_client import TestRetryableHTTPClient
 from netra_backend.tests.services.test_http_client_manager import (
 
-# Add project root to path
     TestHTTPClientManager,
     TestGetHTTPClient,
     TestGlobalClientManager

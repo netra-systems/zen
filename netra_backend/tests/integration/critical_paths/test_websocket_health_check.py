@@ -11,6 +11,9 @@ L2 Test: Real internal health check components with mocked external monitoring.
 Performance target: <10s health check cycles, 99.5% uptime detection accuracy.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -21,7 +24,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 from enum import Enum
 
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

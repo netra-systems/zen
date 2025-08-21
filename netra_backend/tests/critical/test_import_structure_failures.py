@@ -6,6 +6,9 @@ These tests validate that imports are correctly structured
 and that modules are in expected locations.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import sys
 from pathlib import Path
@@ -18,9 +21,9 @@ class TestImportStructureFailures:
     
     def test_startup_checker_import_from_app_checker_fails(self):
         """
-        Test that importing StartupChecker from app.checker fails.
+        Test that importing StartupChecker from netra_backend.app.checker fails.
         This test exposes the issue where StartupChecker is incorrectly 
-        referenced from app.checker instead of app.startup_checks.checker.
+        referenced from netra_backend.app.checker instead of app.startup_checks.checker.
         """
         with pytest.raises(ImportError) as exc_info:
             from netra_backend.app.checker import StartupChecker

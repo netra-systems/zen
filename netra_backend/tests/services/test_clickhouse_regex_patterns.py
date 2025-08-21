@@ -4,6 +4,9 @@ Tests comprehensive regex patterns, performance, and edge cases
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import time
 import logging
@@ -11,8 +14,6 @@ from typing import List, Tuple
 from unittest.mock import patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
 

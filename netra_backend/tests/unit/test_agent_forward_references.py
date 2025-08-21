@@ -4,11 +4,12 @@ This test ensures that AgentCompleted and related models can be properly
 instantiated with all their forward references resolved.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Import all required types

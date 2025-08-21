@@ -3,6 +3,9 @@
 Tests focused on connection resilience, error recovery, and network instability scenarios.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import time
@@ -10,8 +13,6 @@ from typing import Dict, List, Any
 from unittest.mock import Mock, patch, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.routes.websocket_enhanced import (
 

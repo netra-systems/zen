@@ -12,6 +12,9 @@ Service health monitoring -> Failure threshold detection -> Circuit breaker acti
 Coverage: Real service failures, circuit breaker state transitions, cascade prevention, staging environment validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from datetime import datetime, timedelta
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import CircuitBreakerManager
 from netra_backend.app.services.circuit_breaker.service_health_monitor import ServiceHealthMonitor

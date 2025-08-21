@@ -13,6 +13,9 @@ Follows SPEC/websockets.xml and SPEC/learnings/websocket_message_paradox.xml
 Business Value: Ensures WebSocket infrastructure supports real-time AI optimization
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -23,8 +26,6 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.app.routes.websocket_enhanced import connection_manager

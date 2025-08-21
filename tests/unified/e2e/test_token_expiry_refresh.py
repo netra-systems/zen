@@ -20,7 +20,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
-from .token_lifecycle_helpers import (
+from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, TokenValidationHelper, PerformanceBenchmark
     TokenLifecycleManager, WebSocketSessionManager, 
     TokenValidationHelper, PerformanceBenchmark
 )
@@ -48,7 +48,6 @@ class TestTokenExpiryRefreshE2E:
     @pytest.fixture
     def test_thread_id(self):
         """Provide unique test thread ID."""
-        import uuid
         return f"thread-{uuid.uuid4().hex[:8]}"
 
     @pytest.mark.asyncio

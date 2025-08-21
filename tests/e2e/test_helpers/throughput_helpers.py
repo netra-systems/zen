@@ -14,13 +14,13 @@ import os
 from typing import Dict, List, Optional, Any
 
 # Import metrics and data structures
-from ..fixtures.throughput_metrics import (
+from tests.e2e.fixtures.throughput_metrics import ThroughputMetrics, LatencyMeasurement, LoadTestResults, ThroughputAnalyzer, HIGH_VOLUME_CONFIG
     ThroughputMetrics, LatencyMeasurement, LoadTestResults,
     ThroughputAnalyzer, HIGH_VOLUME_CONFIG
 )
 
 # Import server infrastructure
-from .high_volume_server import HighVolumeWebSocketServer, HighVolumeThroughputClient
+from tests.e2e.test_helpers.high_volume_server import HighVolumeWebSocketServer, HighVolumeThroughputClient
 
 logger = logging.getLogger(__name__)
 

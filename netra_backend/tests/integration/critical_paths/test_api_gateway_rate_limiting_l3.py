@@ -10,6 +10,9 @@ Critical Path: Request identification -> Rate limit check -> Gateway enforcement
 Coverage: API gateway rate limiting, per-endpoint limits, burst handling, tier-based enforcement
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from dataclasses import dataclass
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
 from netra_backend.app.services.api_gateway.gateway_manager import ApiGatewayManager

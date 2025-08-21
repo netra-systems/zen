@@ -3,6 +3,9 @@ Setup fixtures and base test class for critical end-to-end agent tests.
 Provides shared infrastructure and mocks for agent testing.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import uuid
@@ -10,8 +13,6 @@ from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.base import BaseSubAgent

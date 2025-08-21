@@ -33,8 +33,8 @@ import time
 from typing import Dict, Any, List, Optional, Union, Set
 import pytest
 
-from ..config import TEST_USERS, TEST_ENDPOINTS
-from ..real_websocket_client import RealWebSocketClient
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @pytest.mark.asyncio
@@ -378,7 +378,7 @@ class TestWebSocketMessageStructure:
 
     async def _establish_connection(self, user_id: str) -> RealWebSocketClient:
         """Establish WebSocket connection for testing."""
-        from ..config import TestDataFactory
+        from tests.unified.config import TestDataFactory
         
         client = RealWebSocketClient(TEST_ENDPOINTS.ws_url)
         headers = TestDataFactory.create_websocket_auth(f"test-token-{user_id}")

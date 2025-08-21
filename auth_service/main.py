@@ -3,7 +3,12 @@ Auth Service Main Application
 Standalone microservice for authentication
 """
 import os
+import sys
 from pathlib import Path
+
+# Add parent directory to Python path for auth_service imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
@@ -26,6 +31,7 @@ else:
     print("Loaded environment from current directory or system")
 
 from auth_service.auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.config import AuthConfig
 
 # Configure logging
 logging.basicConfig(

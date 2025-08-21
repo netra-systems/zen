@@ -4,6 +4,9 @@ Tests AsyncResourceManager, AsyncTaskPool, and AsyncConnectionPool functionality
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import pytest
@@ -14,8 +17,6 @@ from typing import List, Any
 from concurrent.futures import ThreadPoolExecutor
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_utils import (
 

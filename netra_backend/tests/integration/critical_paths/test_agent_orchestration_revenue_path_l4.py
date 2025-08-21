@@ -11,6 +11,9 @@ Coverage: Real LLM integration, actual agent coordination, production billing ev
 L4 Realism: Tests against real staging services, actual LLM providers, production-like agent workflows
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from dataclasses import dataclass
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.llm_cache_service import LLMCacheService

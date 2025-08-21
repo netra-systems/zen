@@ -3,13 +3,14 @@ WebSocket Broadcast Mechanisms Tests
 Tests for broadcast mechanisms and subscription management.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from typing import Dict, Any, List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.websocket.broadcast_manager import BroadcastManager
 

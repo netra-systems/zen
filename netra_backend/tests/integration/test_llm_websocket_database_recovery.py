@@ -5,6 +5,9 @@ Test 8: WebSocket Reconnect State Recovery - $10K MRR
 Test 9: Database Transaction Rollback Safety - $15K MRR
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -14,8 +17,6 @@ from datetime import datetime
 import uuid
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 
@@ -85,7 +86,7 @@ class TestWebSocketRecovery:
     
     async def test_state_preservation_on_disconnect(self):
         """Test state is preserved when WebSocket disconnects."""
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         

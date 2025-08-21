@@ -22,10 +22,10 @@ import time
 from typing import Dict, Any, List
 import pytest
 
-from ..config import TEST_USERS
-from .websocket_resilience_core import WebSocketResilienceTestCore
-from ..network_failure_simulator import NetworkFailureSimulator
-from ..real_websocket_client import RealWebSocketClient
+from tests.unified.config import TEST_USERS
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.unified.network_failure_simulator import NetworkFailureSimulator
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class NetworkFailureMessageQueue:

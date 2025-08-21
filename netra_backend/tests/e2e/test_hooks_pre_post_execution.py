@@ -10,6 +10,9 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from datetime import datetime, UTC
@@ -17,8 +20,6 @@ from typing import Dict, Any, Optional
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.quality_hooks import QualityHooksManager
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext

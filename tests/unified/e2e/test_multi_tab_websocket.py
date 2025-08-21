@@ -15,8 +15,8 @@ from typing import Dict, List, Any, Optional
 import pytest
 
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from .real_websocket_client import RealWebSocketClient
-from .real_client_types import ClientConfig, ConnectionState
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
 
 
 class MultiTabWebSocketManager:
@@ -150,7 +150,6 @@ class TestMultiTabWebSocket:
             try:
                 await self._test_offline_logic(tab_manager, message_validator, state_manager)
             except Exception as fallback_error:
-                import pytest
                 pytest.skip(f"WebSocket server unavailable and fallback failed: {fallback_error}")
         else:
             raise

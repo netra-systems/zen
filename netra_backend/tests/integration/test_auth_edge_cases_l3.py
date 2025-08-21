@@ -20,6 +20,9 @@ Test Coverage:
 - Resource exhaustion
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -37,8 +40,6 @@ import string
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Set test environment

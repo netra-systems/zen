@@ -11,6 +11,9 @@ Coverage: Real tier limits, actual billing events, cross-service enforcement, up
 L3 Realism: Tests against real database constraints, Redis rate limiting, ClickHouse analytics
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from decimal import Decimal
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
 from netra_backend.app.services.user_service import user_service as UserService

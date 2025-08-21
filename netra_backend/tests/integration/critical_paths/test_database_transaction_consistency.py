@@ -16,6 +16,9 @@ L4 Realism: Tests against real staging PostgreSQL and ClickHouse clusters with p
            configuration, data volumes, and transaction patterns.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -27,8 +30,6 @@ from datetime import datetime
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.postgres_core import async_engine, async_session_factory

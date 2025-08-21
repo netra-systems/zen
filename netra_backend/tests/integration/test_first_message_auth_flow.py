@@ -4,6 +4,9 @@ Components: AuthService → JWT Validation → WebSocket Middleware → Message 
 Critical: First user message must seamlessly authenticate and process
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -17,11 +20,9 @@ from starlette.websockets import WebSocketState
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.auth_service import AuthService
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from schemas import UserInDB

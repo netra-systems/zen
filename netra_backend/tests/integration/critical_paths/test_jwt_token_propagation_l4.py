@@ -20,6 +20,9 @@ Critical Security Requirements:
 - Protection against token replay attacks
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -34,8 +37,6 @@ import jwt as jwt_lib
 from urllib.parse import urlencode, parse_qs, urlparse
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 

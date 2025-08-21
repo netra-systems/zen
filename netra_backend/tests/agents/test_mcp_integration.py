@@ -4,13 +4,14 @@ Tests the MCP context manager, intent detector, and agent bridge.
 Follows strict 25-line function design for testability.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.mcp_integration.context_manager import (
 

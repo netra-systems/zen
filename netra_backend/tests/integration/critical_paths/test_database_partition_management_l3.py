@@ -11,6 +11,9 @@ L3 Test: Uses real ClickHouse container to validate partition creation, rotation
 pruning, and query performance across partitioned data.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

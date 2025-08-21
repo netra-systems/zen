@@ -13,6 +13,9 @@ Comprehensive test for multi-tenant data isolation:
 This test validates complete data isolation in a multi-tenant environment.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import uuid

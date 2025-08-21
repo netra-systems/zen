@@ -10,6 +10,9 @@ Critical Path: State capture -> Serialization -> Storage -> Recovery -> Validati
 Coverage: Real state serialization, Redis/DB persistence, migration, versioning
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -21,8 +24,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass, asdict
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

@@ -21,8 +21,8 @@ import websockets
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
 
-from .service_manager import ServiceManager
-from .test_harness import UnifiedTestHarness
+from tests.unified.service_manager import ServiceManager
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class RealUserFlowTester:

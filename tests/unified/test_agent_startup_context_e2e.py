@@ -16,16 +16,14 @@ Compliance: <300 lines, <8 lines per function, NO MOCKS, Real services only
 
 # Test infrastructure - modular imports
 from tests.agent_startup_helpers import (
+    ContextTestManager, MultiAgentTestManager, AgentInitializationValidator
+)
 from tests.config import TestTier, get_test_user
 from tests.harness_complete import TestHarnessContext
 from typing import Dict, Any
 import asyncio
 import pytest
 import time
-
-    ContextTestManager, MultiAgentTestManager, AgentInitializationValidator
-
-)
 
 
 @pytest.mark.asyncio

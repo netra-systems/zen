@@ -3,6 +3,9 @@ Business Value Test Fixtures - Mock Setup and Data Generation
 Provides all fixtures and mock configurations for business value critical tests
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import uuid
@@ -12,8 +15,6 @@ from typing import Dict, List, Any
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.llm.llm_manager import LLMManager

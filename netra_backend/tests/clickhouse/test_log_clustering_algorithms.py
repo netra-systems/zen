@@ -3,10 +3,19 @@ Log Clustering Algorithms Tests
 Test log clustering and pattern mining
 """
 
-import pytest
-# Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
+
+import pytest
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 

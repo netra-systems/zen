@@ -10,6 +10,9 @@ Critical Path: Message ingestion -> Processing attempt -> Retry mechanisms -> DL
 Coverage: Message reliability patterns, error handling, retry strategies, poison message detection, DLQ monitoring
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from enum import Enum
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import AgentMessage, TaskPriority

@@ -5,6 +5,9 @@ Tests the most critical paths of agent service orchestration including
 initialization, execution, error handling, and supervisor integration.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -12,8 +15,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.schemas.Request import StartAgentPayload

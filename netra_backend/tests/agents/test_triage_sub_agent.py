@@ -3,14 +3,15 @@ Comprehensive tests for the enhanced TriageSubAgent.
 Tests all major functionality including categorization, caching, fallback, and error handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 from unittest.mock import AsyncMock, Mock, MagicMock, patch
 from typing import Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.triage_sub_agent import (

@@ -24,7 +24,7 @@ import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
 
 from netra_backend.app.logging_config import central_logger
-from .websocket_recovery_fixtures import (
+from tests.e2e.websocket_resilience.websocket_recovery_fixtures import SecureJWTGenerator, SecurityAuditLogger, SecureWebSocketTestClient, TokenRefreshService, jwt_generator, audit_logger, token_refresh_service, expired_token, valid_token, near_expiry_token
     SecureJWTGenerator, SecurityAuditLogger, SecureWebSocketTestClient,
     TokenRefreshService, jwt_generator, audit_logger, token_refresh_service,
     expired_token, valid_token, near_expiry_token

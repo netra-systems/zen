@@ -11,6 +11,9 @@ Coverage: Sampling rate accuracy, statistical validity, performance impact, cost
 L3 Realism: Tests with real tracing infrastructure and actual sampling algorithms
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

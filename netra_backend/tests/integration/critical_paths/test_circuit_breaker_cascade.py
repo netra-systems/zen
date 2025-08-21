@@ -11,6 +11,9 @@ Coverage: Real circuit breaker states, cascade protection, auto-recovery, failur
 Level: L2-L3 (Real SUT with Real Internal Dependencies + Real Local Services)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -20,8 +23,6 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real services for L2-L3 testing

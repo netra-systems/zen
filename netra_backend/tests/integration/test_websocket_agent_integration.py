@@ -6,6 +6,9 @@ These tests ensure the message routing fix is working end-to-end.
 ROOT CAUSE ADDRESSED: Messages were being validated but never forwarded to agent service.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -15,8 +18,6 @@ from typing import Dict, Any
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 logger = central_logger.get_logger(__name__)

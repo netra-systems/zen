@@ -3,12 +3,13 @@ Tests for Redis Manager connection pooling functionality
 Tests connection pool creation, management, and concurrent usage
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.helpers.redis_test_fixtures import (
 

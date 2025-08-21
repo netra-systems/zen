@@ -1,12 +1,13 @@
 """Test integration between different system components."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.json_parsing_utils import comprehensive_json_fix

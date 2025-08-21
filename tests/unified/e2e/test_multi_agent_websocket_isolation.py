@@ -24,10 +24,10 @@ from datetime import datetime
 import pytest
 
 # Test infrastructure  
-from ..config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from ..real_client_factory import create_real_client_factory
-from ..real_websocket_client import RealWebSocketClient
-from .websocket_resilience_core import WebSocketResilienceTestCore
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.real_client_factory import create_real_client_factory
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 
 
 @dataclass

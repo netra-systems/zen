@@ -3,6 +3,9 @@ Test runner logic for Example Prompts E2E Tests
 Handles test execution and result validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import uuid
@@ -10,8 +13,6 @@ from datetime import datetime
 from typing import Dict, Any, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.state import DeepAgentState

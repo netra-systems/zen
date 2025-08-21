@@ -1,10 +1,11 @@
 """Tests for service model classes."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from datetime import datetime, UTC
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.service_interfaces import ServiceHealth, ServiceMetrics
 

@@ -3,6 +3,9 @@ Tool Registry Validation Tests
 Tests tool validation functionality
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import sys
 from typing import Dict, List, Any, Optional
@@ -10,9 +13,15 @@ from unittest.mock import MagicMock, patch, call, AsyncMock
 from datetime import datetime, UTC
 
 from langchain_core.tools import BaseTool
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.app.core.exceptions_base import NetraException

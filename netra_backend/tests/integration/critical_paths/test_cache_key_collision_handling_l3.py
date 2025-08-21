@@ -11,6 +11,9 @@ L3 Realism: Real Redis with hash collision simulation, actual collision scenario
 Performance Requirements: Collision detection < 10ms, resolution success > 99%, data integrity 100%
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -27,8 +30,6 @@ import statistics
 from collections import defaultdict
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger

@@ -3,6 +3,9 @@ CRUD tests for SupplyResearchService - create, update, and delete operations
 Tests supply item creation, updates, and update log operations
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, UTC
 from decimal import Decimal
@@ -10,8 +13,6 @@ from typing import Dict, Any, List
 from unittest.mock import MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog

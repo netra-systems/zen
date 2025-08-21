@@ -241,7 +241,6 @@ class TestDegradedModeActivation:
     @pytest.mark.asyncio
     async def test_automatic_recovery_from_degraded(self, degradation_manager):
         """Test automatic recovery when conditions improve"""
-        from netra_backend.app.core.degradation_types import DegradationPolicy, ServiceTier
         
         policy = DegradationPolicy(tier=ServiceTier.STANDARD, max_degradation=DegradationLevel.MINIMAL)
         mock_strategy = AsyncMock()

@@ -3,6 +3,9 @@ Comprehensive tests for Apex Optimizer tool selection - Part 3: Tool Chaining Te
 Tests tool chaining mechanisms, orchestration, and complex workflows
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -12,8 +15,6 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
 from netra_backend.app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata

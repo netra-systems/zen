@@ -4,6 +4,9 @@ Suite 1: Authentication Error Propagation
 Ensures all auth failures are loud and properly propagated.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -14,8 +17,6 @@ from starlette.websockets import WebSocketState
 from routes.utils.websocket_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
     authenticate_websocket_user,
     decode_token_payload,

@@ -9,6 +9,9 @@ Tests health check functionality:
 - Health aggregation across services
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
@@ -20,8 +23,6 @@ from startup_checks import StartupChecker
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

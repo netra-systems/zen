@@ -11,6 +11,9 @@ L3 Test: Uses real quality gate service with multi-dimensional validation.
 Quality target: ≥0.6 quality score threshold with real-time monitoring.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from datetime import datetime, timezone
 from unittest.mock import patch, AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent

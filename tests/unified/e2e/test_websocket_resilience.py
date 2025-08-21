@@ -22,8 +22,8 @@ import time
 from typing import Dict, Any
 import pytest
 
-from ..config import TEST_USERS
-from .websocket_resilience_core import (
+from tests.unified.config import TEST_USERS
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore, WebSocketStateRecoveryManager, MessageContinuityValidator, AgentErrorSimulator
     WebSocketResilienceTestCore,
     WebSocketStateRecoveryManager,
     MessageContinuityValidator,

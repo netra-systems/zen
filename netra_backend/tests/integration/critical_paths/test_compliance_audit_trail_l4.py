@@ -21,6 +21,9 @@ This test validates end-to-end compliance audit trail functionality in staging e
 ensuring enterprise customers maintain regulatory compliance.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -31,8 +34,6 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType

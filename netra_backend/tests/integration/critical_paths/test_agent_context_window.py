@@ -10,6 +10,9 @@ Critical Path: Context tracking -> Window management -> Compression -> Retrieval
 Coverage: Real context handling, memory optimization, conversation continuity
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from enum import Enum
 from abc import ABC, abstractmethod
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

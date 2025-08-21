@@ -13,6 +13,9 @@ Comprehensive test to verify production deployment readiness:
 This test validates the complete production deployment lifecycle.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os

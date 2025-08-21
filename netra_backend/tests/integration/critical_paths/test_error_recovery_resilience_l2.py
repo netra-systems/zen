@@ -13,6 +13,9 @@ Test Level: L2 (Real Internal Dependencies)
 - Mock external service failures
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,8 +28,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.resilience.circuit_breaker import CircuitBreaker, CircuitState
 from netra_backend.app.services.resilience.retry_manager import RetryManager, RetryStrategy

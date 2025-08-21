@@ -1,13 +1,14 @@
 """Test corpus service for managing document and content collections."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime
 from typing import List, Dict, Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.corpus_service import CorpusStatus
 from schemas import Corpus, CorpusCreate

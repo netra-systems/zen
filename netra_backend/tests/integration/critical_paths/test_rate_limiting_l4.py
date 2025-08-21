@@ -11,6 +11,9 @@ Coverage: Production-scale rate limiting, real traffic patterns, tier-based fair
 L4 Realism: Tests against real staging infrastructure, real Redis, real rate limiting algorithms, real traffic patterns
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from datetime import datetime, timedelta
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 from netra_backend.app.services.quota.quota_manager import QuotaManager

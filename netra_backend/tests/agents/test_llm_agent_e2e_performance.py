@@ -10,6 +10,9 @@ BVJ:
 4. Revenue Impact: Maintains customer satisfaction and prevents performance-related churn
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -20,8 +23,6 @@ from datetime import datetime
 import time
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState

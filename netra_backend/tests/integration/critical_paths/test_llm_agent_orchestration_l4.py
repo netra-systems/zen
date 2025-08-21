@@ -15,6 +15,9 @@ This test validates real-world LLM agent orchestration including:
 - Context management across agents
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,8 +28,6 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 

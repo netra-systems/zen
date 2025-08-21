@@ -4,9 +4,11 @@ This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from typing import Any, Dict, List, Optional
-
 
 class TestStagingAuthServiceIntegrationHelpers:
     """Test class for staging_auth_service_integration_helpers"""
@@ -24,12 +26,6 @@ class TestStagingAuthServiceIntegrationHelpers:
         # TODO: Implement actual tests
         pass
 
-
 # Additional test functions can be added below
-def test_module_import():
-    """Test that this module can be imported without errors"""
-    assert True
-
-
 if __name__ == "__main__":
     pytest.main([__file__])

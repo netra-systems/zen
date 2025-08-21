@@ -1,5 +1,8 @@
 """Utilities Tests - Split from test_critical_integration.py"""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -9,9 +12,15 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime, timedelta
 import uuid
 from typing import Dict, Any
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.base import BaseSubAgent
@@ -22,7 +31,7 @@ from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.services.database.run_repository import RunRepository
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.schemas.Agent import AgentStarted
 from starlette.websockets import WebSocketState
 from netra_backend.app.schemas.registry import UserBase

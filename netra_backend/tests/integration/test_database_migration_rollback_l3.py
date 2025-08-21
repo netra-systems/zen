@@ -7,6 +7,9 @@ critical for maintaining data integrity during deployments.
 Tests database migration and rollback with real PostgreSQL containers.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import docker

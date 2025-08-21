@@ -10,6 +10,9 @@ Critical Path: Migration validation -> Backup creation -> Schema changes -> Data
 Coverage: Schema migration safety, data integrity, rollback mechanisms, multi-database coordination
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ import tempfile
 import os
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.database.migration_service import MigrationService
 from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager

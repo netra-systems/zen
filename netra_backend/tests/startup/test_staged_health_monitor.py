@@ -4,6 +4,9 @@ Tests progressive health monitoring, adaptive rules, and stage-based checks.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

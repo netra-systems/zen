@@ -10,6 +10,9 @@ Critical Path: Error capture -> Enrichment -> Propagation -> Aggregation -> Repo
 Coverage: Real error collectors, enrichment pipeline, routing logic, aggregation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -23,8 +26,6 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

@@ -11,6 +11,9 @@ L3 Test: Uses real Redis for rate limiting state and enforcement.
 Rate limiting target: 100 msgs/min per client with 99.9% accuracy.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -25,9 +28,15 @@ from ws_manager import WebSocketManager
 from redis_manager import RedisManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.tests..helpers.redis_l3_helpers import (
 

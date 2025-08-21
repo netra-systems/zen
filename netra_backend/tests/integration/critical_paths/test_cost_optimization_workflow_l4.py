@@ -12,6 +12,9 @@ Usage tracking -> Cost calculation -> Resource allocation -> Budget monitoring -
 Coverage: Real billing accuracy, usage metering, budget enforcement, cost alerts, optimization algorithms, staging validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ from decimal import Decimal
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite

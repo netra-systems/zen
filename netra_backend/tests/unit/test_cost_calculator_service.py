@@ -11,13 +11,14 @@ Tests ALL cost calculation scenarios for business-critical accuracy.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from decimal import Decimal, ROUND_HALF_UP
 from unittest.mock import Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.cost_calculator import (
 

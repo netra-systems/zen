@@ -36,8 +36,8 @@ from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor
 
 # Test infrastructure imports
-from .unified_e2e_harness import create_e2e_harness
-from netra_backend.tests.unified.database_test_operations import (
+from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from tests.unified.database_test_operations import (
     UserDataOperations, 
     SessionCacheOperations
 )

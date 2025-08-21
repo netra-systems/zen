@@ -4,6 +4,9 @@ BVJ: Protects $100K-$200K MRR from Stripe/billing flow failures
 Tests: Payment Processing, Subscriptions, Webhooks, Refunds, Payment Methods
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 import time

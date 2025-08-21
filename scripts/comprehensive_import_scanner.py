@@ -157,6 +157,78 @@ class ComprehensiveImportScanner:
             'db': ['postgres_core', 'clickhouse_init', 'database_connectivity_master']
         }
         
+    def _pre_validate_imports(self, content: str, file_path: Path, result: ImportScanResult) -> bool:
+        """Pre-validate import statements before AST parsing to catch syntax errors early"""
+        lines = content.split('\n')
+        has_errors = False
+        
+        for line_num, line in enumerate(lines, 1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith('#'):
+                continue
+            
+            # Check for import statements
+            if 'import' in stripped or 'from' in stripped:
+                # Pattern 1: Double dots not at the start (invalid module path)
+                if re.search(r'[a-zA-Z_]\.\.[a-zA-Z_]', stripped):
+                    result.issues.append(ImportIssue(
+                        file_path=str(file_path),
+                        line_number=line_num,
+                        module="",
+                        imported_names=[],
+                        issue_type="syntax",
+                        error_message=f"Invalid double dots in import path: {stripped}",
+                        severity="error",
+                        suggested_fix="Remove extra dots from the module path"
+                    ))
+                    has_errors = True
+                
+                # Pattern 2: Trailing dots before import/as/end
+                if re.search(r'\.\s+(import|as|$)', stripped):
+                    result.issues.append(ImportIssue(
+                        file_path=str(file_path),
+                        line_number=line_num,
+                        module="",
+                        imported_names=[],
+                        issue_type="syntax",
+                        error_message=f"Trailing dot in import statement: {stripped}",
+                        severity="error",
+                        suggested_fix="Remove trailing dots"
+                    ))
+                    has_errors = True
+                
+                # Pattern 3: More than 3 dots for relative imports
+                if re.match(r'^from\s+\.{4,}', stripped):
+                    result.issues.append(ImportIssue(
+                        file_path=str(file_path),
+                        line_number=line_num,
+                        module="",
+                        imported_names=[],
+                        issue_type="syntax",
+                        error_message=f"Too many dots in relative import: {stripped}",
+                        severity="error",
+                        suggested_fix="Use at most 3 dots for relative imports"
+                    ))
+                    has_errors = True
+                
+                # Pattern 4: Empty segments (module..config) but not relative imports
+                if '..' in stripped and not re.match(r'^from\s+\.{1,3}[a-zA-Z_]', stripped):
+                    # Not a valid relative import, check for empty segments
+                    if re.search(r'[a-zA-Z_]\.\.', stripped) or re.search(r'\.\.[a-zA-Z_]', stripped):
+                        result.issues.append(ImportIssue(
+                            file_path=str(file_path),
+                            line_number=line_num,
+                            module="",
+                            imported_names=[],
+                            issue_type="syntax",
+                            error_message=f"Empty segment in module path (consecutive dots): {stripped}",
+                            severity="error",
+                            suggested_fix="Fix the module path by removing extra dots"
+                        ))
+                        has_errors = True
+        
+        return has_errors
+    
     def scan_file(self, file_path: Path) -> ImportScanResult:
         """Scan a single Python file for import issues"""
         result = ImportScanResult(file_path=str(file_path))
@@ -166,7 +238,21 @@ class ComprehensiveImportScanner:
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
             
-            tree = ast.parse(content, filename=str(file_path))
+            # Pre-validate imports before AST parsing
+            pre_validation_errors = self._pre_validate_imports(content, file_path, result)
+            
+            # If we found syntax errors in pre-validation, skip AST parsing
+            # but still try to parse to get additional context if possible
+            if not pre_validation_errors:
+                tree = ast.parse(content, filename=str(file_path))
+            else:
+                # Try AST anyway to catch additional issues
+                try:
+                    tree = ast.parse(content, filename=str(file_path))
+                except SyntaxError:
+                    # Expected, we already caught the errors
+                    result.scan_time = time.time() - start_time
+                    return result
             
             # Analyze imports
             for node in ast.walk(tree):

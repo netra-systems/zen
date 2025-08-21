@@ -11,6 +11,9 @@ L2 Test: Real internal components with mocked external services.
 Performance target: <2s upload time for 5MB files, <5% corruption rate.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -22,7 +25,7 @@ from datetime import datetime, timezone
 from unittest.mock import patch, AsyncMock
 from uuid import uuid4
 
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

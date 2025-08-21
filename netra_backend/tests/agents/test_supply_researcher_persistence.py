@@ -3,13 +3,14 @@ Database and persistence tests for SupplyResearcherAgent
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.supply_research_service import SupplyResearchService

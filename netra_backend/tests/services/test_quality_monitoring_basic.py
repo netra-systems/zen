@@ -1,12 +1,13 @@
 """Basic tests for Quality Monitoring Service"""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import sys
 from unittest.mock import MagicMock, Mock, patch
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Mock ClickHouseManager before importing the service

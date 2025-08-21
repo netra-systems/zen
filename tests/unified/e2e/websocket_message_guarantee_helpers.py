@@ -16,19 +16,19 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 # Import all components for message delivery guarantee testing
-from .websocket_delivery_core import (
+from tests.unified.e2e.websocket_delivery_core import MessageDeliveryGuaranteeCore, ConcurrentMessageSender, OrderingValidator, MessageTrackingData
     MessageDeliveryGuaranteeCore,
     ConcurrentMessageSender,
     OrderingValidator,
     MessageTrackingData
 )
 
-from .websocket_interruption_simulator import (
+from tests.unified.e2e.websocket_interruption_simulator import NetworkInterruptionSimulator, MessageLossDetector
     NetworkInterruptionSimulator,
     MessageLossDetector
 )
 
-from .websocket_acknowledgment_tracker import (
+from tests.unified.e2e.websocket_acknowledgment_tracker import AcknowledmentTracker
     AcknowledmentTracker
 )
 

@@ -10,6 +10,9 @@ Critical Path: Trace creation -> Span propagation -> Context injection -> Collec
 Coverage: OpenTelemetry integration, trace propagation, distributed context, trace analysis
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.tracing.otel_service import OpenTelemetryService
 from netra_backend.app.services.tracing.span_manager import SpanManager

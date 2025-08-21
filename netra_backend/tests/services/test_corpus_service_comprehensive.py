@@ -1,5 +1,8 @@
 """Comprehensive test suite for corpus service - document indexing pipeline and search relevance."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timedelta
 from typing import List, Dict, Any
@@ -8,8 +11,6 @@ import json
 import hashlib
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
 from schemas import Corpus, CorpusCreate, CorpusUpdate

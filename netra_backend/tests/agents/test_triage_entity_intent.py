@@ -3,11 +3,12 @@ Tests for TriageSubAgent entity extraction and intent determination
 Refactored to comply with 25-line function limit and 450-line file limit
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.triage_sub_agent import ExtractedEntities

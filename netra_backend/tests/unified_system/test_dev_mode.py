@@ -19,6 +19,9 @@ CRITICAL: These tests validate developer experience optimizations
 that directly impact time-to-market and feature delivery velocity.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import os
@@ -28,8 +31,6 @@ from datetime import datetime, timedelta
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.routes.mcp.main import app
 from netra_backend.app.auth_integration.auth import get_current_user

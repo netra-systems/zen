@@ -9,13 +9,14 @@ Business Value Justification (BVJ):
 - Revenue Impact: Improved agent accuracy drives customer satisfaction and retention
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import patch, MagicMock
 from contextlib import asynccontextmanager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager

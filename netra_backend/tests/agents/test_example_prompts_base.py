@@ -3,6 +3,9 @@ Base infrastructure and utilities for Example Prompts E2E Tests
 Provides shared fixtures and helper methods for test execution
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -15,8 +18,6 @@ import random
 from unittest.mock import Mock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.state import DeepAgentState

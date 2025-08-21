@@ -10,6 +10,9 @@ Tests database pool functionality:
 - Connection leak detection and cleanup
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch

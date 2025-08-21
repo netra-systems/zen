@@ -12,6 +12,9 @@ token refresh mechanisms, user state synchronization, and auth cache invalidatio
 in staging environment.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os
@@ -24,8 +27,6 @@ import aiohttp
 import jwt
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.cross_service_auth import (
 

@@ -30,7 +30,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["LOG_LEVEL"] = "INFO"
 os.environ["ENABLE_JSON_LOGGING"] = "true"
 
-from .config import create_unified_config, TestDataFactory
+from tests.unified.config import create_unified_config, TestDataFactory
 
 
 class ObservabilityTestHarness:

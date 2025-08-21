@@ -13,6 +13,9 @@ Comprehensive test for database failover and recovery flow:
 This test validates database high availability and disaster recovery.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import os

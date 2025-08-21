@@ -11,6 +11,9 @@ os.environ calls outside of the central configuration system,
 unless explicitly @marked with justification.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import ast
 import os
 import pytest

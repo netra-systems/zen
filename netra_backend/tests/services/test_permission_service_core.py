@@ -3,13 +3,22 @@ Permission Service Core Tests - Constants, Detection, Role Updates, Permissions
 Split from test_permission_service.py to maintain 450-line limit
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import os
 from unittest.mock import Mock, patch
 from sqlalchemy.orm import Session
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.permission_service import PermissionService, ROLE_HIERARCHY, ROLE_PERMISSIONS
 from netra_backend.app.db.models_postgres import User

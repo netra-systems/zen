@@ -112,7 +112,7 @@ class AgentConversationTestCore:
     
     async def setup_test_environment(self):
         """Set up test environment."""
-        from .websocket_resilience_core import WebSocketResilienceTestCore
+        from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
         self.websocket_core = WebSocketResilienceTestCore()
         self.test_env = {
             "initialized": True,
@@ -127,7 +127,7 @@ class AgentConversationTestCore:
     
     async def establish_conversation_session(self, plan_tier) -> Dict[str, Any]:
         """Establish authenticated conversation session."""
-        from ..config import TEST_USERS
+        from tests.unified.config import TEST_USERS
         from netra_backend.app.schemas.UserPlan import PlanTier
         
         # Map plan tier to test user

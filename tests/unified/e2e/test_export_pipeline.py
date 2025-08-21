@@ -35,13 +35,13 @@ from typing import Dict, Any, List
 from pathlib import Path
 import pytest
 
-from .export_pipeline_helpers import (
+from tests.unified.e2e.export_pipeline_helpers import LargeDatasetGenerator, ExportRequestManager, ExportFileValidator, PerformanceTracker
     LargeDatasetGenerator,
     ExportRequestManager, 
     ExportFileValidator,
     PerformanceTracker
 )
-from ..test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class ExportPipelineCore:

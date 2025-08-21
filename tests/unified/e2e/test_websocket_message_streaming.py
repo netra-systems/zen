@@ -19,7 +19,7 @@ from typing import Dict, Any, List, Optional
 import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.websocket.unified.manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
 from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage

@@ -13,7 +13,7 @@ import aiosqlite
 from typing import Dict, Any, Optional
 
 from netra_backend.app.clients.auth_client import auth_client
-from ..database_test_connections import DatabaseTestConnections
+from tests.unified.database_test_connections import DatabaseTestConnections
 from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 
 

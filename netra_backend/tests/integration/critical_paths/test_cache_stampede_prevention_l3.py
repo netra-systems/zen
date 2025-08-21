@@ -11,6 +11,9 @@ L3 Realism: Real Redis with distributed locks, actual concurrent load simulation
 Performance Requirements: Lock acquisition < 10ms, computation efficiency > 95%, stampede prevention 100%
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ import statistics
 import random
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.helpers.redis_l3_helpers import RedisContainer as NetraRedisContainer
 from logging_config import central_logger

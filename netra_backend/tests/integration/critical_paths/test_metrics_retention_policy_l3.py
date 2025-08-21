@@ -11,6 +11,9 @@ Coverage: Retention rule enforcement, automated cleanup, cost impact analysis, c
 L3 Realism: Tests with real storage systems and actual retention policies
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

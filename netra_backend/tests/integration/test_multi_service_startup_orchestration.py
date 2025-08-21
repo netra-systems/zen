@@ -11,6 +11,9 @@ This test validates service startup orchestration using real Docker containers (
 to ensure proper dependency resolution and graceful failure handling.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

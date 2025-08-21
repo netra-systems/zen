@@ -12,6 +12,9 @@ Tests comprehensive WebSocket state management, reconnection flows, and Redis-ba
 persistence for maintaining user session continuity across connection interruptions.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -23,8 +26,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
 from netra_backend.app.websocket.reconnection_handler import get_reconnection_handler, ReconnectionContext

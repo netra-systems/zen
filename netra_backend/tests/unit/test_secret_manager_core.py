@@ -7,13 +7,14 @@ Business Value: Ensures secure secret management core features preventing
 security breaches and enabling secure secret rotation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.secret_manager_core import EnhancedSecretManager
 from netra_backend.app.core.secret_manager_types import SecretAccessLevel, SecretMetadata

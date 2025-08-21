@@ -502,7 +502,6 @@ if __name__ == "__main__":
     sys.path.insert(0, str(project_root))
     
     # Re-import with correct paths
-    from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
     
     # Run tests directly for development
     async def run_real_session_persistence_tests():

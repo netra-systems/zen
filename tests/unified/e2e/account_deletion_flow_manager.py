@@ -19,8 +19,8 @@ from contextlib import asynccontextmanager
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from ..test_harness import UnifiedTestHarness
-from .account_deletion_helpers import AccountDeletionE2ETester
+from tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.e2e.account_deletion_helpers import AccountDeletionE2ETester
 
 
 class AccountDeletionFlowManager:

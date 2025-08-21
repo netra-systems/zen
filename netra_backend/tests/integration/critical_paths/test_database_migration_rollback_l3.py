@@ -13,6 +13,9 @@ Comprehensive test to verify database migration and rollback:
 This test ensures database migrations are safe and reversible.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import sys

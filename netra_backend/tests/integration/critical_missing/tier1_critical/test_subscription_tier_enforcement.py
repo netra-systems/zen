@@ -10,13 +10,14 @@ Business Value Justification:
 - Strategic Impact: Essential for subscription business model integrity
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from typing import Dict, Any
 from datetime import datetime, timezone, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
 from netra_backend.app.services.tool_permissions.tool_permission_service_main import ToolPermissionService

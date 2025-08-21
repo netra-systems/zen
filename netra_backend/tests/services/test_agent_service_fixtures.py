@@ -17,13 +17,14 @@ COMPLIANCE:
 - No duplication across test files
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.thread_service import ThreadService

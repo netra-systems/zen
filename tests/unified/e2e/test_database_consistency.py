@@ -36,7 +36,7 @@ def create_test_user_data(identifier: str):
         "full_name": f"Test User {identifier}",
         "plan_tier": "free"
     }
-from .database_consistency_fixtures import (
+from tests.unified.e2e.database_consistency_fixtures import DatabaseConsistencyTester, execute_single_transaction, execute_concurrent_transactions, create_multiple_test_users
     DatabaseConsistencyTester,
     execute_single_transaction,
     execute_concurrent_transactions,

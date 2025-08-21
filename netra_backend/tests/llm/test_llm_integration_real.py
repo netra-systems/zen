@@ -6,6 +6,9 @@ fallback mechanisms, retry logic, and model switching.
 Maximum 300 lines, functions ≤8 lines per architecture requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import time
@@ -18,8 +21,6 @@ from netra_backend.app.llm.llm_manager import LLMManager
 from llm.llm_response_processing import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
     attempt_json_fallback_parse, parse_nested_json_recursive,
     extract_response_content, create_llm_response

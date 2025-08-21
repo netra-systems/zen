@@ -1,5 +1,8 @@
 """Test database connection pooling and session management."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -8,8 +11,6 @@ from sqlalchemy.pool import NullPool, QueuePool
 from sqlalchemy.exc import OperationalError, TimeoutError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.db.postgres import async_engine, async_session_factory, get_async_db, Database

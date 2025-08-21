@@ -4,6 +4,9 @@ Tests for load handling, throughput, and resource management.
 Total MRR Protection: $80K
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

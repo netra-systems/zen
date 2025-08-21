@@ -8,6 +8,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Critical for user activation and retention
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import uuid
@@ -20,8 +23,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message

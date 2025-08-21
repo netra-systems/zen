@@ -14,6 +14,9 @@ Validates:
 All functions ≤8 lines per CLAUDE.md requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 from typing import Dict, Any, List
 from datetime import datetime, UTC

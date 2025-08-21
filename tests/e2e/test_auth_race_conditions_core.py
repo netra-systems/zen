@@ -693,7 +693,6 @@ class TestJWTTokenCollisionDetection:
         for token in all_tokens:
             try:
                 # Decode without verification to check structure
-                import jwt as jwt_lib
                 payload = jwt_lib.decode(token, options={"verify_signature": False})
                 
                 # Verify required fields

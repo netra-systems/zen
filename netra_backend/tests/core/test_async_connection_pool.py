@@ -3,13 +3,14 @@ Tests for AsyncConnectionPool - connection management
 Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 lines per function)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import Mock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from netra_backend.app.core.exceptions_service import ServiceError

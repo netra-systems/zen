@@ -11,6 +11,9 @@ integrity across PostgreSQL, ClickHouse, and Redis with 100K+ records.
 Tests migration, rollback, performance, and zero data loss guarantees.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -27,8 +30,6 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
 

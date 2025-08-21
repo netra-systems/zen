@@ -13,6 +13,9 @@ Critical Path: First request -> Rate limit check -> Redis tracking -> Burst hand
 Coverage: First request always allowed, rate limit enforcement, burst capacity, per-user tracking, headers, tier limits, recovery
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -25,8 +28,6 @@ import redis.asyncio as redis
 from datetime import datetime, timezone, timedelta
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from redis_manager import RedisManager

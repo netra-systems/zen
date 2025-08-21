@@ -30,9 +30,9 @@ from unittest.mock import patch, AsyncMock
 from contextlib import asynccontextmanager
 
 try:
-    from ..oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-    from ..real_services_manager import create_real_services_manager
-    from ..real_http_client import RealHTTPClient
+    from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
+    from tests.unified.real_services_manager import create_real_services_manager
+    from tests.unified.real_http_client import RealHTTPClient
 except ImportError:
     # Standalone execution - add parent directories to path
     import sys

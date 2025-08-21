@@ -3,6 +3,9 @@ L4 Integration Test: Token Validation Chain Complete
 Tests entire token validation chain including JWT, refresh tokens, and service tokens
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -14,8 +17,6 @@ import hashlib
 import secrets
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.token_service import TokenService
 from netra_backend.app.services.auth_service import AuthService

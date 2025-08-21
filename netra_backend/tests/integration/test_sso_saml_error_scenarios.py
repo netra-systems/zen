@@ -10,6 +10,9 @@ Business Value Justification (BVJ):
 Architecture Requirements: File ≤300 lines, Functions ≤8 lines
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import base64
@@ -19,8 +22,6 @@ from datetime import datetime, timezone
 from typing import Dict
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.helpers.sso_saml_components import (
 

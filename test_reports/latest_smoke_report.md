@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T12:13:16.360244  
+**Generated:** 2025-08-21T12:24:22.895553  
 **Test Level:** smoke - Quick smoke tests for basic functionality (< 30 seconds)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.06s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 10.74s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,7 +28,7 @@
 - **Purpose:** Pre-commit validation, basic health checks
 - **Timeout:** 30s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 7.06s
+- **Total Duration:** 10.74s
 - **Exit Code:** 4
 
 ### Backend Configuration
@@ -60,7 +60,7 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/routes/test_health_route.py netra_backend/tests/core/test_error_handling.py::TestNetraExceptions::test_configuration_error netra_backend/tests/core/test_config_manager.py::TestConfigManager::test_initialization netra_backend/tests/services/test_security_service.py::test_encrypt_and_decrypt netra_backend/tests/e2e/test_system_startup.py::TestSystemStartup::test_configuration_loading -v -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.06s
+[FAIL] TESTS FAILED with exit code 4 after 9.11s
 ================================================================================
 
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
@@ -68,9 +68,11 @@ C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: U
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
   warnings.warn(
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\e2e\conftest.py'.
-netra_backend\tests\e2e\__init__.py:19: in <module>
-    from netra_backend.tests.model_setup_helpers import model_selection_setup
-E   ModuleNotFoundError: No module named 'netra_backend.tests.model_setup_helpers'
+netra_backend\tests\e2e\conftest.py:26: in <module>
+    from netra_backend.tests.e2e.infrastructure import (
+netra_backend\tests\e2e\infrastructure\__init__.py:7: in <module>
+    from netra_backend.tests.llm_test_manager import (
+E   ModuleNotFoundError: No module named 'netra_backend.tests.llm_test_manager'
 
 ```
 

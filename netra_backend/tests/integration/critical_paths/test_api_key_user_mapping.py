@@ -24,6 +24,9 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -37,8 +40,6 @@ import hashlib
 import logging
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.auth_types import (
 

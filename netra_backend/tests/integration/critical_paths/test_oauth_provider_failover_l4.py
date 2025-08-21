@@ -18,6 +18,9 @@ Coverage: OAuth failover, fallback mechanisms, user notification, recovery handl
 session preservation during provider issues
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -29,8 +32,6 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import patch, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
 from netra_backend.app.logging_config import central_logger

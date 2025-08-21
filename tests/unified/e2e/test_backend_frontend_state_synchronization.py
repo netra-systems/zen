@@ -29,9 +29,9 @@ from typing import Dict, List, Optional, Any, Tuple
 from datetime import datetime, timezone
 import pytest
 
-from ..clients.factory import TestClientFactory
-from ..websocket.state_helpers import StateValidator, StateDiffTracker
-from .cache_coherence_helpers import CacheCoherenceValidator
+from tests.unified.clients.factory import TestClientFactory
+from tests.unified.websocket.state_helpers import StateValidator, StateDiffTracker
+from tests.unified.e2e.cache_coherence_helpers import CacheCoherenceValidator
 
 
 # Enable real services for this test module
@@ -715,7 +715,6 @@ async def test_state_performance_benchmarks(real_services):
 
 
 # Import os for environment variables
-import os
 
 
 # Business Impact Summary

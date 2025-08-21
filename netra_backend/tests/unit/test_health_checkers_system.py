@@ -7,12 +7,13 @@ Business Value: Ensures system resource monitoring for capacity planning
 and performance optimization to maintain service quality.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.health_checkers import check_system_resources
 from netra_backend.app.schemas.core_models import HealthCheckResult

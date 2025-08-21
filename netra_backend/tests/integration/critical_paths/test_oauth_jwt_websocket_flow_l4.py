@@ -15,6 +15,9 @@ OAuth initiation → User authorization → Token exchange → JWT validation �
 Coverage: Complete OAuth flow, JWT lifecycle, WebSocket authentication, session persistence, token refresh, cross-service validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -29,8 +32,6 @@ from typing import Dict, Any, Optional
 from urllib.parse import urlencode, parse_qs, urlparse
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
 

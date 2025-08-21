@@ -4,6 +4,9 @@ Components: StreamProcessor → WebSocket → UI Updates → Response Assembly
 Critical: Streaming responses provide immediate feedback for better UX
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -12,11 +15,9 @@ from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.streaming_service import TextStreamProcessor
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.services.agent_service_core import AgentService
 from schemas import UserInDB, StreamingResponse
 from test_framework.mock_utils import mock_justified

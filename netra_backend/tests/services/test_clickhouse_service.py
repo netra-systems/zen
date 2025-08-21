@@ -1,5 +1,8 @@
 """Test ClickHouse service for time-series data and analytics with real API."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import pytest_asyncio
@@ -11,8 +14,6 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import List, Dict, Any, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.clickhouse_service import list_corpus_tables
 from netra_backend.app.db.clickhouse import get_clickhouse_client

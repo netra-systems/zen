@@ -10,6 +10,9 @@ Critical Path: Preflight request -> CORS validation -> Policy enforcement -> Hea
 Coverage: CORS policies, preflight handling, origin validation, header management, security compliance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

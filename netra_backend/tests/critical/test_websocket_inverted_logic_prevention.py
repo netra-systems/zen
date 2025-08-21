@@ -4,6 +4,9 @@ This is a placeholder test file. The actual WebSocket message handling tests
 are in other test files in the WebSocket test directories.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
 

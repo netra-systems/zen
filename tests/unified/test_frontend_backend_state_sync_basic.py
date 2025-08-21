@@ -16,8 +16,8 @@ import pytest
 # Fallback mode for environments without test infrastructure
 TEST_MODE_AVAILABLE = False
 try:
-    from ..clients.factory import TestClientFactory
-    from ..websocket.state_helpers import StateValidator
+    from tests.clients.factory import TestClientFactory
+    from tests.websocket.state_helpers import StateValidator
     TEST_MODE_AVAILABLE = True
 except ImportError:
     class TestClientFactory:

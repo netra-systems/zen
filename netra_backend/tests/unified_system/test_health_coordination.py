@@ -17,6 +17,10 @@ Key validations:
 - Dependency health inclusion
 - Cross-service consistency
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 from typing import Dict, Any, List
@@ -25,8 +29,6 @@ import httpx
 from unittest.mock import AsyncMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.health import HealthInterface, HealthLevel
 from netra_backend.app.core.health.checks import UnifiedDatabaseHealthChecker, DependencyHealthChecker

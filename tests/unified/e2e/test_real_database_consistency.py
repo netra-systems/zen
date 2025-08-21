@@ -108,42 +108,34 @@ class RealDatabaseConsistencyManager:
     
     def _get_backend_database_url(self) -> str:
         """Get Backend service database URL."""
-        import os
         return os.getenv("DATABASE_URL", "postgresql://postgres:password@localhost:5432/netra_test")
     
     def _get_redis_host(self) -> str:
         """Get Redis host configuration."""
-        import os
         return os.getenv("REDIS_HOST", "localhost")
     
     def _get_redis_port(self) -> int:
         """Get Redis port configuration."""
-        import os
         return int(os.getenv("REDIS_PORT", "6379"))
     
     def _get_clickhouse_host(self) -> str:
         """Get ClickHouse host configuration."""
-        import os
         return os.getenv("CLICKHOUSE_HOST", "localhost")
     
     def _get_clickhouse_port(self) -> int:
         """Get ClickHouse port configuration."""
-        import os
         return int(os.getenv("CLICKHOUSE_HTTP_PORT", "8123"))
     
     def _get_clickhouse_database(self) -> str:
         """Get ClickHouse database name."""
-        import os
         return os.getenv("CLICKHOUSE_DB", "default")
     
     def _get_clickhouse_user(self) -> str:
         """Get ClickHouse user."""
-        import os
         return os.getenv("CLICKHOUSE_USER", "default")
     
     def _get_clickhouse_password(self) -> str:
         """Get ClickHouse password."""
-        import os
         return os.getenv("CLICKHOUSE_PASSWORD", "")
     
     async def _verify_all_connections(self) -> None:

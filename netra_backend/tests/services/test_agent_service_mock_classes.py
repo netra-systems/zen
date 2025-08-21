@@ -16,14 +16,15 @@ COMPLIANCE:
 - Single responsibility focus
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 from datetime import datetime, UTC
 from typing import Dict, Any
 from enum import Enum
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions_base import NetraException
 

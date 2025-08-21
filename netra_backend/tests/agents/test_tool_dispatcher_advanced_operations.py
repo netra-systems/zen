@@ -1,11 +1,12 @@
 """Unit tests for ToolDispatcher advanced operations."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import AsyncMock, Mock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.tests.helpers.tool_dispatcher_helpers import (

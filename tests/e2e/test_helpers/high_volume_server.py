@@ -14,7 +14,7 @@ import psutil
 import websockets
 from typing import Dict, List, Set
 
-from ..fixtures.throughput_metrics import HIGH_VOLUME_CONFIG
+from tests.e2e.fixtures.throughput_metrics import HIGH_VOLUME_CONFIG
 
 
 logger = logging.getLogger(__name__)

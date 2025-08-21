@@ -248,7 +248,6 @@ class TestCORSProductionStrictValidation:
     async def test_production_strict_origin_enforcement(self):
         """Test production environment strict origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "production", "CORS_ORIGINS": ""}):
-            from netra_backend.app.core.middleware_setup import is_origin_allowed, get_cors_origins
             
             origins = get_cors_origins()
             
@@ -307,7 +306,6 @@ class TestCORSDynamicPortValidation:
     async def test_dynamic_localhost_ports_allowed(self, dynamic_ports):
         """Test that dynamic localhost ports are allowed in development."""
         with patch.dict(os.environ, {"ENVIRONMENT": "development", "CORS_ORIGINS": "*"}):
-            from netra_backend.app.core.middleware_setup import is_origin_allowed
             
             origins = ["*"]
             

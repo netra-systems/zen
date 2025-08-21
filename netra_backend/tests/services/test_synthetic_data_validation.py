@@ -3,14 +3,15 @@ Validation Tests for Synthetic Data Generation Spec v3
 Tests to validate that the implementation matches the specification
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import os
 import xml.etree.ElementTree as ET
 from typing import List, Dict, Any
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 

@@ -15,6 +15,9 @@ Tests comprehensive validation including:
 - Deployment validation
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import os

@@ -3,14 +3,15 @@ Tests for AgentErrorHandler core functionality.
 All functions ≤8 lines per requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.error_handler import (
 

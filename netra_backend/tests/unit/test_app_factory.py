@@ -8,14 +8,15 @@ Tests critical paths including middleware setup, route registration,
 error handling, and security configurations.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.app_factory import (
 

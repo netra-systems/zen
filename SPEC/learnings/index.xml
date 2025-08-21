@@ -247,6 +247,15 @@
             <critical-takeaway>Verify database credentials match actual Cloud SQL users and passwords</critical-takeaway>
         </category>
         
+        <category name="FIXME Audit Resolution" path="SPEC/learnings/fixme_audit_resolution.xml" keywords="FIXME, Import Management, Automated Tooling, Dependency Resolution, 5 Whys, Root Cause Analysis">
+            <critical-takeaway>Automated import fixing scripts must verify target classes exist before commenting out imports</critical-takeaway>
+            <critical-takeaway>Large refactoring must maintain working intermediate states - never comment out entire classes</critical-takeaway>
+            <critical-takeaway>Double FIXME patterns (# FIXME: # FIXME:) indicate scripts running multiple times - make scripts idempotent</critical-takeaway>
+            <critical-takeaway>Import validation needs retry mechanisms for transient failures during development</critical-takeaway>
+            <critical-takeaway>Build dependency graphs before refactoring to understand impact radius</critical-takeaway>
+            <critical-takeaway>Automated changes must pass tests before being committed</critical-takeaway>
+        </category>
+        
         <category name="Pragmatic Rigor/Resilience" path="SPEC/learnings/pragmatic_rigor.xml" keywords="Pragmatic, Rigor, Resilience, Postel, Duck Typing, Validation, Fallback, Progressive">
             <critical-takeaway>Focus on minimum constraints necessary for correctness, not maximum constraints for purity (pragmatic-rigor-over-rigid-purity).</critical-takeaway>
             <critical-takeaway>Default to resilience with relaxed configuration - systems should default to functional, permissive states (default-to-resilience).</critical-takeaway>

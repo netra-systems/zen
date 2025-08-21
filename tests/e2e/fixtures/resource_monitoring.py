@@ -18,8 +18,8 @@ import time
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
 
-from ..test_helpers.resource_monitoring import ResourceMonitor, MemoryLeakDetector, resource_monitoring_context
-from ..test_helpers.agent_isolation_base import AgentIsolationBase
+from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor, MemoryLeakDetector, resource_monitoring_context
+from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase
 
 logger = logging.getLogger(__name__)
 

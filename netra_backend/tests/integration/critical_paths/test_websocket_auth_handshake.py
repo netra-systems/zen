@@ -11,6 +11,9 @@ L2 Test: Real internal auth handshake components with mocked external auth servi
 Performance target: <200ms handshake completion, 99.9% auth accuracy.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -22,7 +25,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from uuid import uuid4
 from enum import Enum
 
-from ws_manager import WebSocketManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

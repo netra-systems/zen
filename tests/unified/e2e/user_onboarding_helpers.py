@@ -18,7 +18,7 @@ import uuid
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from ..jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class OnboardingFlowManager:
@@ -244,5 +244,4 @@ class OptimizationRequestHelper:
     async def _send_websocket_response(self, response: Dict) -> None:
         """Send response through WebSocket."""
         await self.flow_manager.mock_services["websocket"].send_message(response)
-
 

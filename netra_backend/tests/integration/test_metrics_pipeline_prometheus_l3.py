@@ -7,6 +7,9 @@ exposed and scraped by Prometheus for alerting and performance monitoring.
 Tests metrics pipeline with real Prometheus container scraping metrics.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import aiohttp

@@ -10,6 +10,9 @@ Critical Path: Configuration ingestion -> Schema validation -> Dependency checki
 Coverage: Multi-environment config validation, schema compliance, dependency resolution, breaking change detection, rollback mechanisms
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json

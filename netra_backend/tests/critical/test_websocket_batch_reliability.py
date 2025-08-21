@@ -4,6 +4,9 @@ Tests the mandatory patterns from SPEC/websocket_reliability.xml to ensure
 zero message loss under all failure scenarios.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -11,8 +14,6 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import List
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.websocket.batch_message_core import MessageBatcher
 from netra_backend.app.websocket.batch_message_types import (

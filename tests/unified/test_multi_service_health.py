@@ -192,7 +192,6 @@ class MultiServiceHealthChecker:
         start_time = time.time()
         
         try:
-            import os
             if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() == 'true':
                 return HealthCheckResult(
                     service="clickhouse",

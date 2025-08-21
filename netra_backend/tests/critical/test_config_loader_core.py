@@ -8,6 +8,9 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum config loading relia
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import os
 from unittest.mock import Mock, patch

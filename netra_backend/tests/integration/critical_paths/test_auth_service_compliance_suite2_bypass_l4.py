@@ -7,6 +7,9 @@ for authentication and authorization operations. All auth operations
 MUST use the centralized auth service.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import ast
 import os

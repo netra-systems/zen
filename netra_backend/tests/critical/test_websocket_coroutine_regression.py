@@ -4,6 +4,9 @@ Business Value: Prevents WebSocket failures that disconnect users, protecting $8
 Tests ensure proper async/await usage and coroutine handling in WebSocket message processing.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import json
 import pytest
@@ -13,8 +16,6 @@ from fastapi import WebSocket
 from routes.utils.websocket_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
     parse_json_message,
     _handle_ping_message,

@@ -25,7 +25,7 @@ from typing import Dict, Any, List, Optional
 from pathlib import Path
 from datetime import datetime, timedelta
 
-from ..test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class LargeDatasetGenerator:

@@ -8,6 +8,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Core revenue protection and expansion mechanism
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import uuid
 from datetime import datetime, timedelta
@@ -20,8 +23,6 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.first_time_user_fixtures import (
 

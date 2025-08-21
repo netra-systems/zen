@@ -12,6 +12,9 @@ Coverage: Complete OAuth URL consistency across Python, TypeScript, configuratio
 L4 Realism Level: Tests against actual staging configuration and real service endpoints
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import httpx
@@ -24,8 +27,6 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite

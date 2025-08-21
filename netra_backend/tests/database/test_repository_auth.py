@@ -4,14 +4,15 @@ Tests user authentication, optimization storage, and metric aggregation
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.db.repositories.user_repository import UserRepository
 from netra_backend.app.db.models_postgres import User

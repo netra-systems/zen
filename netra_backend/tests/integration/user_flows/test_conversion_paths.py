@@ -9,6 +9,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Optimizes revenue funnel and reduces churn
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import time
 import uuid
@@ -23,8 +26,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.models.user import User
 from netra_backend.app.models.conversion_event import ConversionEvent

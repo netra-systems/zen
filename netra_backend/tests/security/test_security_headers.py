@@ -3,13 +3,14 @@ Security Headers Tests
 Tests security headers middleware
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock
 from fastapi import Response
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
 

@@ -7,6 +7,10 @@ Tests complete JWT flow: Creation → Validation → Cross-service → Expiry
 CRITICAL: Real JWT libraries (PyJWT) with actual cross-service communication
 Maximum 300 lines enforced - focuses on core JWT flows only
 """
+
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import jwt
 import httpx
@@ -17,8 +21,6 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.test_harness import UnifiedTestHarness
 

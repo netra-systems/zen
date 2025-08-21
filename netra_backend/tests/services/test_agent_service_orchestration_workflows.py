@@ -17,14 +17,15 @@ PERFORMANCE REQUIREMENTS:
 - Circuit breaker: Fast-fail responses
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, UTC
 from unittest.mock import MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.test_agent_service_fixtures import (

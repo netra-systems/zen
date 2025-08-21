@@ -7,14 +7,15 @@ Business Value: Provides billing analytics and usage pattern insights
 for customer optimization and revenue forecasting.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timedelta
 from unittest.mock import Mock
 from collections import deque
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.monitoring.models import MetricsCollector, PerformanceMetric
 

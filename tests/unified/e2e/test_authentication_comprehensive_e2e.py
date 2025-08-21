@@ -25,9 +25,9 @@ import jwt
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.database_sync_fixtures import create_test_user_data
-from tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.database_sync_fixtures import create_test_user_data
+from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
 
 
 class AuthenticationE2ETester:

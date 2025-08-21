@@ -2,12 +2,13 @@
 Error handling tests for SupplyResearcherAgent
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, AsyncMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from netra_backend.app.services.supply_research_service import SupplyResearchService

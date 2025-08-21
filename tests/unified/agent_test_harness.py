@@ -19,8 +19,8 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from dataclasses import dataclass
 
-from .service_manager import ServiceManager, TestDataSeeder, HealthMonitor
-from .test_harness import UnifiedTestHarness, ServiceConfig
+from tests.unified.service_manager import ServiceManager, TestDataSeeder, HealthMonitor
+from tests.unified.test_harness import UnifiedTestHarness, ServiceConfig
 
 
 logger = logging.getLogger(__name__)

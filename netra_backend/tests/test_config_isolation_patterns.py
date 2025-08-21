@@ -11,6 +11,9 @@ ensuring proper boundaries between services and preventing
 configuration leakage across service boundaries.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import ast
 import os
 import pytest

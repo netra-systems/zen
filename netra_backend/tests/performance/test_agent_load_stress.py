@@ -5,6 +5,9 @@ Comprehensive testing for agent system under load conditions.
 Tests concurrent agent requests, resource isolation, and performance degradation.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -16,8 +19,6 @@ from concurrent.futures import ThreadPoolExecutor
 import statistics
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

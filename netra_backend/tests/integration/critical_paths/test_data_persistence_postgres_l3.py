@@ -3,13 +3,22 @@ L3 Integration Test: PostgreSQL Data Persistence
 Tests PostgreSQL data persistence and integrity
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import asyncpg
 from unittest.mock import patch, AsyncMock
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.services.postgres_service import PostgresService
 from netra_backend.app.config import settings

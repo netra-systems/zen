@@ -10,6 +10,9 @@ Critical Path: Service registration -> Discovery -> Health monitoring -> Load ba
 Coverage: Service registry, discovery mechanisms, health integration, load balancing
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -18,9 +21,15 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from redis_manager import RedisManager
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.core.health.interface import HealthStatus

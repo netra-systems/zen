@@ -5,6 +5,9 @@ particularly datetime serialization and message type validation.
 Maximum 300 lines, functions ≤8 lines each.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 import uuid
@@ -14,8 +17,6 @@ from typing import Dict, Any, List
 from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.schemas.registry import (
 

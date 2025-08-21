@@ -30,11 +30,11 @@ import pytest
 # Configure pytest-asyncio
 pytestmark = pytest.mark.asyncio
 
-from ..config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from ..real_websocket_client import RealWebSocketClient
-from .agent_conversation_helpers import AgentConversationTestCore
-from .websocket_resilience_core import WebSocketResilienceTestCore
-from ..real_services_manager import RealServicesManager
+from tests.unified.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.agent_conversation_helpers import AgentConversationTestCore
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+from tests.unified.real_services_manager import RealServicesManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

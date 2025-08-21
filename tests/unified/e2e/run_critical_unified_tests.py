@@ -151,7 +151,6 @@ class CriticalTestRunner:
     async def _check_existing_services(self) -> bool:
         """Check if required services are already running."""
         try:
-            from netra_backend.tests.unified.real_services_health import check_service_health
             auth_healthy = await check_service_health("http://localhost:8081/health", timeout=2)
             backend_healthy = await check_service_health("http://localhost:8000/health/", timeout=2)
             
@@ -177,7 +176,6 @@ class CriticalTestRunner:
         healthy_services = []
         for service_name, url in health_checks:
             try:
-                from netra_backend.tests.unified.real_services_health import check_service_health
                 if await check_service_health(url, timeout=3):
                     healthy_services.append(service_name)
                     logger.info(f"✓ {service_name} service healthy")

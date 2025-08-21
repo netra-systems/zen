@@ -22,7 +22,7 @@ import time
 import pytest
 from typing import Dict, Any
 
-from .auth_test_fixtures import (
+from tests.unified.e2e.auth_test_fixtures import WebSocketAuthTester, TokenExpiryTester, AuthTestConfig, skip_if_services_unavailable, assert_auth_performance, assert_token_rejection
     WebSocketAuthTester, 
     TokenExpiryTester,
     AuthTestConfig,

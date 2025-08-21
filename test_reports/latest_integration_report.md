@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T12:15:13.441118  
+**Generated:** 2025-08-21T12:26:44.332145  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -8,18 +8,18 @@
 [FAILED] **OVERALL STATUS**
 
 ### Test Counts (Extracted from pytest output)
-- **Total Tests:** 73
+- **Total Tests:** 69
 - **Passed:** 10 
 - **Failed:** 59
 - **Skipped:** 0
-- **Errors:** 4
+- **Errors:** 0
 
 ### Component Breakdown
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 4 | 0 | 0 | 0 | 4 | 16.04s | [FAILED] |
-| Frontend  | 69 | 10 | 59 | 0 | 0 | 57.83s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 8.57s | [FAILED] |
+| Frontend  | 69 | 10 | 59 | 0 | 0 | 58.76s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 73.87s
-- **Exit Code:** 2
+- **Total Duration:** 67.33s
+- **Exit Code:** 15
 
 ### Backend Configuration
 ```
@@ -59,51 +59,39 @@ Test Configuration:
 Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/integration netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
-[1m============================= test session starts =============================[0m
-platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'langsmith': '0.4.10', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
-rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
-configfile: pytest.ini
-plugins: anyio-4.9.0, Faker-37.5.3, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, langsmith-0.4.10, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
-asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
-created: 4/4 workers
-
 ================================================================================
-BAD TEST DETECTION REPORT
-================================================================================
-
-Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 129
-
-================================================================================
-
-
-=================================== ERRORS ====================================
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 4 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
-!!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================== [31m[1m4 errors[0m[31m in 8.87s[0m[31m ==============================[0m
-================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 15.17s
+[FAIL] TESTS FAILED with exit code 4 after 7.32s
 ================================================================================
 
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
   warnings.warn(
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
   warnings.warn(
+ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
+netra_backend\tests\conftest.py:75: in <module>
+    from app.db.models_user import User, Secret, ToolUsageLog
+netra_backend\app\db\models_user.py:27: in <module>
+    class User(Base):
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\orm\decl_api.py:198: in __init__
+    _as_declarative(reg, cls, dict_)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\orm\decl_base.py:245: in _as_declarative
+    return _MapperConfig.setup_mapping(registry, cls, dict_, None, {})
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\orm\decl_base.py:326: in setup_mapping
+    return _ClassScanMapperConfig(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\orm\decl_base.py:577: in __init__
+    self._setup_table(table)
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\orm\decl_base.py:1762: in _setup_table
+    table_cls(
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\util\deprecations.py:281: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\sql\schema.py:429: in __new__
+    return cls._new(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^
+..\..\..\..\AppData\Roaming\Python\Python312\site-packages\sqlalchemy\sql\schema.py:461: in _new
+    raise exc.InvalidRequestError(
+E   sqlalchemy.exc.InvalidRequestError: Table 'users' is already defined for this MetaData instance.  Specify 'extend_existing=True' to redefine options and columns on an existing Table object.
 
 ```
 
@@ -113,23 +101,8 @@ C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: U
 > netra-frontend-apex-v1@0.1.0 test
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
 
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
 
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 1
-================================================================================
-
-Cleaning up test processes...
-
-FAIL __tests__/integration/websocket-complete-refactored.test.tsx (55.924 s)
+FAIL __tests__/integration/websocket-complete-refactored.test.tsx (56.257 s)
   ● WebSocket Connection Lifecycle Tests › Connection Establishment › should track real connection state transitions with history
 
     Connection timeout
@@ -324,27 +297,28 @@ FAIL __tests__/integration/websocket-complete-refactored.test.tsx (55.924 s)
 
       at checkConnection (__tests__/helpers/websocket-test-manager.ts:172:18)
       at invokeTheCallbackFunction (node_modules/jsdom/lib/jsdom/living/generated/Function.js:19:26)
-      at node_modules/jsdom/lib/jsdom/...(truncated)
+      at node_modules/jsdom/lib/jsdom/browser/Window.js:613:9
+
+  ● WebSocket Connection Lifecycle Tests › Reconnection Scenarios › should test real WebSocket reconnection strategies
+
+    Connection timeout
+
+    [0m [90m 170 |[39m           resolve()[33m;[39m
+     [90m 171 |[39m         } [36melse[39m [36mif[39m ([33mDate[39m[33m.[39mnow() [33m-[39m startTime [33m>[39m timeoutMs) {
+    [31m[1m>[22m[39m[90m 172 |[39m           reject([36mnew[39m [33mError[39m([32m'Connection timeout'[39m))[33m;[39m
+     [90m     |[39m                  [31m[1m^[22m[39m
+     [90m 173 |[39m         } [36melse[39m {
+     [90m 174 |[39m           [90m// Use queueMicrotask for better React synchronization[39m
+     [90m 175 |[39m           queueMicrotask(checkConnection)[33m;[39m[0m
+
+      at checkConnection (__t...(truncated)
 ```
 
 ## 5. Error Details
 
-### Backend Errors
-- =================================== ERRORS ====================================
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [FAIL] TESTS FAILED with exit code 2 after 15.17s
-
 ### Frontend Errors
-- [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (55.924 s)
-- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (55.924 s)
+- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (56.257 s)
+- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (56.257 s)
 
 ---
 *Generated by Netra AI Unified Test Runner v3.0*  

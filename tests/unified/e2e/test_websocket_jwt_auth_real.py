@@ -31,8 +31,8 @@ import httpx
 import websockets
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 
-from ..jwt_token_helpers import JWTTestHelper
-from ..clients import TestClientFactory
+from tests.unified.jwt_token_helpers import JWTTestHelper
+from tests.unified.clients import TestClientFactory
 
 
 # Enable real services for this test module

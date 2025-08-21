@@ -7,6 +7,9 @@ logic locally. All auth functionality must be delegated to the centralized
 auth service to maintain architectural integrity and security.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import ast
 import os

@@ -3,14 +3,15 @@ Infrastructure tests for SupplyResearcherAgent - Error recovery, audit, metrics
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import json
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.tests.supply_researcher_fixtures import (

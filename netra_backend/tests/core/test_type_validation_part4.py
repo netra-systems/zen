@@ -1,5 +1,8 @@
 """Part 4: Edge cases, error handling, and module-level functions."""
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import json
 import pytest
 import tempfile
@@ -8,8 +11,6 @@ from typing import Dict, Any
 from unittest.mock import patch, mock_open, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.type_validation import (
 

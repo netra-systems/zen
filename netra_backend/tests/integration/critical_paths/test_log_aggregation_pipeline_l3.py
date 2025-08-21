@@ -11,6 +11,9 @@ Coverage: Log collection accuracy, aggregation performance, structured logging, 
 L3 Realism: Tests with real log aggregation services and actual log volumes
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time

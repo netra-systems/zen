@@ -10,6 +10,9 @@ Critical Path: Supervisor spawns sub-agents → Shared Redis state → Context p
 Coverage: Real Agent Registry, Redis state management, PostgreSQL metadata, real message passing (L3 Realism)
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -20,8 +23,6 @@ from unittest.mock import AsyncMock, patch
 from contextlib import asynccontextmanager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base import BaseSubAgent

@@ -14,7 +14,7 @@ import jwt
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch, AsyncMock, MagicMock
 
-from .test_harness import UnifiedTestHarness
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class TestTokenValidationFlow:

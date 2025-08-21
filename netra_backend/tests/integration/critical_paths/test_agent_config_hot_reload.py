@@ -10,6 +10,9 @@ Critical Path: Config change -> Validation -> Hot reload -> Propagation -> Verif
 Coverage: Real configuration management, file watching, graceful updates
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -27,8 +30,6 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # Real components for L2 testing

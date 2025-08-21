@@ -13,6 +13,9 @@ to convert from free to paid. Any failure in these flows directly impacts revenu
 CRITICAL: Every test protects revenue by ensuring new user flows work perfectly.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -24,8 +27,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash
 from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog

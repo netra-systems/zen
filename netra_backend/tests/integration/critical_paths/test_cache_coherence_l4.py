@@ -11,6 +11,9 @@ L4 Realism: Real Redis cluster, real cache operations, real service interactions
 Performance Requirements: Cache hit rate > 90%, invalidation propagation < 50ms, TTL accuracy 99.9%
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -24,8 +27,6 @@ import statistics
 import redis.asyncio as aioredis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out

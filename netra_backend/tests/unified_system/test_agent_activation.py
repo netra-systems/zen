@@ -10,6 +10,9 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical for delivering accurate AI optimization recommendations
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -18,8 +21,6 @@ from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent

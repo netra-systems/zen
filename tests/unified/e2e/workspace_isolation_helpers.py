@@ -21,7 +21,7 @@ import uuid
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch
 
-from ..jwt_token_helpers import JWTTestHelper
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WorkspaceIsolationTestCore:

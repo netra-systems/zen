@@ -5,6 +5,9 @@ Components: Auth Service → Backend → WebSocket Manager
 Critical: Users can't interact without successful auth→WS flow
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import json
@@ -14,9 +17,15 @@ import jwt
 from datetime import datetime, timedelta
 
 from schemas import UserInDB
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.config import settings
 
@@ -51,7 +60,7 @@ class TestAuthToWebSocketFlow:
     async def test_successful_auth_to_websocket(self, auth_token, mock_user):
         """Test successful auth flow leading to WS connection."""
         from netra_backend.app.services.auth_service import AuthService
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         # Setup mocks
         auth_service = Mock(spec=AuthService)
@@ -85,7 +94,7 @@ class TestAuthToWebSocketFlow:
     async def test_invalid_token_blocks_websocket(self):
         """Test invalid token prevents WS connection."""
         from netra_backend.app.services.auth_service import AuthService
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         auth_service = Mock(spec=AuthService)
         auth_service.validate_token = AsyncMock(side_effect=ValueError("Invalid token"))
@@ -153,7 +162,7 @@ class TestAuthToWebSocketFlow:
     async def test_concurrent_auth_requests(self, auth_token, mock_user):
         """Test system handles concurrent auth requests."""
         from netra_backend.app.services.auth_service import AuthService
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         auth_service = Mock(spec=AuthService)
         auth_service.validate_token = AsyncMock(return_value=mock_user)
@@ -202,7 +211,7 @@ class TestAuthToWebSocketFlow:
     
     async def test_websocket_auth_header_validation(self, auth_token):
         """Test WebSocket connection validates auth headers."""
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket_manager import WebSocketManager
         
         ws_manager = WebSocketManager()
         mock_websocket = Mock()

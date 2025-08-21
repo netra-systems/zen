@@ -10,6 +10,9 @@ Business Value Justification:
 - Strategic Impact: Foundation reliability for all customer operations
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import pytest
 import time
@@ -17,8 +20,6 @@ from typing import Dict, Any, List
 from contextlib import asynccontextmanager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
 from netra_backend.app.db.models_agent import Thread, Message, Run

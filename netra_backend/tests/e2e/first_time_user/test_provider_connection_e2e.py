@@ -11,12 +11,13 @@ AI Provider Connection & Optimization E2E Tests
 These tests validate Tests 3, 4, and 6 from the critical conversion paths.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from datetime import datetime, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.e2e.conftest import *
 from netra_backend.tests.helpers import FirstTimeUserTestHelpers

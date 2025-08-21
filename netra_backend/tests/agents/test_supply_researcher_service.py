@@ -2,14 +2,15 @@
 Tests for SupplyResearchService functionality
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 from unittest.mock import Mock, patch
 from datetime import datetime, UTC
 from decimal import Decimal
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 

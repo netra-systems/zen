@@ -12,6 +12,9 @@ and error handling to catch issues like worker exits with code 3.
 L3 Realism Level: Real staging configuration, containerized services, production-like errors
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -26,8 +29,6 @@ import httpx
 from unittest.mock import patch, MagicMock, AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.configuration.base import get_unified_config
 from loguru import logger

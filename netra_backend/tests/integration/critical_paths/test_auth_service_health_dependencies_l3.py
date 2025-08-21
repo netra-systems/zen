@@ -12,6 +12,9 @@ to validate auth service health check endpoints, dependency management,
 circuit breaker behavior, and graceful degradation patterns.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -28,9 +31,15 @@ from testcontainers.redis import RedisContainer
 from testcontainers.generic import GenericContainer
 
 from logging_config import central_logger
+
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Add project root to path
 
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig, CircuitState
 from netra_backend.app.core.health_checkers import (

@@ -148,7 +148,7 @@ async def validate_e2e_environment():
 @pytest.fixture
 async def e2e_test_context(validate_e2e_environment):
     """Provide E2E test context with validated environment."""
-    from .test_real_services_e2e import RealServiceE2ETestSuite
+    from tests.e2e.test_real_services_e2e import RealServiceE2ETestSuite
     
     suite = RealServiceE2ETestSuite()
     
@@ -178,7 +178,7 @@ async def e2e_test_context(validate_e2e_environment):
 @pytest.fixture
 def performance_monitor():
     """Monitor test performance and validate against requirements."""
-    from . import PERFORMANCE_REQUIREMENTS
+    from tests.e2e import PERFORMANCE_REQUIREMENTS
     
     class PerformanceMonitor:
         def __init__(self):
@@ -279,7 +279,7 @@ def requires_llm_performance(max_seconds: float = 10.0):
 @pytest.fixture
 async def high_volume_server():
     """High-volume WebSocket server fixture for throughput testing."""
-    from .test_helpers.high_volume_server import HighVolumeWebSocketServer
+    from tests.e2e.test_helpers.high_volume_server import HighVolumeWebSocketServer
     
     # Skip if not in mock test mode
     if os.getenv("HIGH_VOLUME_TEST_MODE", "mock") != "mock":
@@ -300,7 +300,6 @@ async def high_volume_server():
 async def test_user_token():
     """Create test user and return auth token for throughput testing."""
     import uuid
-    import httpx
     
     if os.getenv("HIGH_VOLUME_TEST_MODE", "mock") == "real":
         # Use real authentication service
@@ -333,7 +332,7 @@ async def test_user_token():
 @pytest.fixture
 async def throughput_client(test_user_token, high_volume_server):
     """High-volume throughput client fixture."""
-    from .test_helpers.high_volume_server import HighVolumeThroughputClient
+    from tests.e2e.test_helpers.high_volume_server import HighVolumeThroughputClient
     
     websocket_uri = os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8765")
     client = HighVolumeThroughputClient(websocket_uri, test_user_token["token"], "primary-client")

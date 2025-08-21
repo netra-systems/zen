@@ -15,6 +15,9 @@ This test validates the complete staging deployment pipeline including:
 L4 Realism Level: Full staging environment with real GCP services, Cloud SQL, multi-region
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -31,8 +34,6 @@ import websockets
 from concurrent.futures import ThreadPoolExecutor
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.configuration.base import get_unified_config
 from loguru import logger

@@ -21,7 +21,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 from dataclasses import dataclass
 
-from .config import UnifiedTestConfig
+from tests.unified.config import UnifiedTestConfig
 from netra_backend.app.schemas.registry import MessageType
 
 

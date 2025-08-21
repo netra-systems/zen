@@ -14,7 +14,7 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from .error_generators import ErrorCorrelationContext, RealErrorPropagationTester, ErrorInjectionHelper
+from tests.unified.e2e.helpers.error_propagation.error_generators import ErrorCorrelationContext, RealErrorPropagationTester, ErrorInjectionHelper
 
 logger = logging.getLogger(__name__)
 

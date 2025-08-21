@@ -4,13 +4,14 @@ This file demonstrates how environment variables can override feature flags
 for different testing scenarios and CI/CD environments.
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import os
 import pytest
 from test_framework.decorators import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
     feature_flag,
     tdd_test,

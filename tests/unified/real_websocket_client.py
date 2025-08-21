@@ -16,7 +16,7 @@ import ssl
 from typing import Dict, Any, Optional, Union
 import websockets
 from websockets.exceptions import ConnectionClosedError
-from .real_client_types import ConnectionMetrics, ClientConfig, ConnectionState
+from tests.unified.real_client_types import ConnectionMetrics, ClientConfig, ConnectionState
 
 
 class RealWebSocketClient:

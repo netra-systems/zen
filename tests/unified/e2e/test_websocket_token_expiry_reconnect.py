@@ -36,10 +36,10 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 from unittest.mock import AsyncMock, patch
 
-from ..config import TEST_USERS, TEST_ENDPOINTS
-from ..real_websocket_client import RealWebSocketClient
-from ..real_client_types import ClientConfig
-from .token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, PerformanceBenchmark
+from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, PerformanceBenchmark
 
 
 class TokenExpiryReconnectionTester:

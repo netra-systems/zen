@@ -4,6 +4,9 @@ Split from large test file for architecture compliance
 Test classes: TestBusinessRequirements, TestRateLimiting, TestRecordToolUsage
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from datetime import datetime, timedelta, UTC
@@ -11,8 +14,6 @@ from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from typing import Dict, List, Any, Set
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.app.schemas.ToolPermission import (

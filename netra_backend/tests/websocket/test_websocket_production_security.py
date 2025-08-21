@@ -9,13 +9,14 @@ Tests production-specific security measures including:
 - Threat pattern detection
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import re
 from unittest.mock import patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.websocket_cors import (
 

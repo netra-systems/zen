@@ -3,6 +3,9 @@ Real-time Ingestion Test Suite for Synthetic Data Service
 Testing real-time data ingestion to ClickHouse
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import uuid
@@ -10,8 +13,6 @@ from datetime import datetime, UTC
 from unittest.mock import AsyncMock, MagicMock, patch
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.tests.test_synthetic_data_service_basic import IngestionMetrics

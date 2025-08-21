@@ -8,6 +8,9 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Foundation for premium feature adoption
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import asyncio
 import uuid
 from typing import Dict, Any
@@ -19,8 +22,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.first_time_user_fixtures import (
 

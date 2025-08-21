@@ -11,6 +11,9 @@ Coverage: Real tenant isolation in staging, production-level security testing, c
 L4 Realism: Tests against real staging database, real multi-tenant setup, real security controls
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 
 # from netra_backend.app.services.database.tenant_service import TenantService

@@ -3,14 +3,15 @@ Integration and performance tests for Data Sub Agent
 Focuses on integration with other components and performance
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent

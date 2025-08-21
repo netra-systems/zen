@@ -12,11 +12,11 @@ import uuid
 from typing import List, Dict, Any, Optional
 from pathlib import Path
 
-from .service_orchestrator import E2EServiceOrchestrator
-from ..real_websocket_client import RealWebSocketClient
-from ..real_http_client import RealHTTPClient
-from ..real_client_types import ClientConfig
-from ..database_test_connections import DatabaseConnectionManager
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.real_websocket_client import RealWebSocketClient
+from tests.unified.real_http_client import RealHTTPClient
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.database_test_connections import DatabaseConnectionManager
 
 
 class ConcurrentUserSession:
@@ -295,5 +295,4 @@ async def _handle_agent_response(user: ConcurrentUserSession, metrics: Concurren
         metrics.successful_agent_responses += 1
         return True
     return False
-
 

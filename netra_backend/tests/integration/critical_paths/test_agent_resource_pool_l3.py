@@ -10,6 +10,9 @@ Critical Path: Resource allocation -> Pool sizing -> Utilization monitoring -> F
 Coverage: Resource pool strategies, allocation algorithms, utilization optimization, leak detection, scaling policies
 """
 
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 import pytest
 import asyncio
 import time
@@ -22,8 +25,6 @@ from enum import Enum
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import TaskPriority

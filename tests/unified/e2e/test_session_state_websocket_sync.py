@@ -21,7 +21,7 @@ from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 from netra_backend.app.schemas.websocket_message_types import WebSocketConnectionState
 from netra_backend.app.db.models_postgres import User
-from .config import TEST_CONFIG
+from tests.unified.e2e.config import TEST_CONFIG
 
 
 class SessionStateManager:
