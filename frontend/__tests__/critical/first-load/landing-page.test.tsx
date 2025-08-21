@@ -204,7 +204,7 @@ describe('Landing Page - First-Time User Experience', () => {
     it('should redirect authenticated users to enterprise demo', async () => {
       const mockUser = {
         id: 'user-123',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         name: 'Test User',
       };
 
@@ -224,7 +224,7 @@ describe('Landing Page - First-Time User Experience', () => {
     it('should not show loading for authenticated users with quick redirect', async () => {
       const mockUser = {
         id: 'user-456',
-        email: 'premium@netra.ai',
+        email: 'premium@netrasystems.ai',
         name: 'Premium User',
       };
 

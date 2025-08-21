@@ -31,7 +31,7 @@ class TokenLifecycleManager:
         """Build token payload with specified TTL."""
         return {
             "sub": user_id,
-            "email": "test-token-refresh@netra.ai",
+            "email": "test-token-refresh@netrasystems.ai",
             "permissions": ["read", "write"],
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(seconds=ttl_seconds),

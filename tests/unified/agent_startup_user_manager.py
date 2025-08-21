@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class TestUser:
     """Test user data container."""
     user_id: str = field(default_factory=lambda: f"test_user_{uuid.uuid4().hex[:8]}")
-    email: str = field(default_factory=lambda: f"test_{uuid.uuid4().hex[:8]}@netra.ai")
+    email: str = field(default_factory=lambda: f"test_{uuid.uuid4().hex[:8]}@netrasystems.ai")
     access_token: Optional[str] = None
     websocket_url: Optional[str] = None
 

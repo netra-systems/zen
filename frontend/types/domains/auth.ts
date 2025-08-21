@@ -166,7 +166,7 @@ export function hasValidToken(user: User): boolean {
 export function createGuestUser(): Partial<User> {
   return {
     id: 'guest',
-    email: 'guest@netra.ai',
+    email: 'guest@netrasystems.ai',
     is_active: false
   };
 }

@@ -228,7 +228,7 @@ describe('Message Formatting Core Functionality', () => {
 
   describe('Links and Mentions', () => {
     test('renders external links with proper attributes', async () => {
-      const linkMessage = createLinkMessage('https://netra.ai', 'Netra AI Platform');
+      const linkMessage = createLinkMessage('https://netrasystems.ai', 'Netra AI Platform');
       
       render(
         <TestProviders>
@@ -237,7 +237,7 @@ describe('Message Formatting Core Functionality', () => {
       );
 
       await waitFor(() => {
-        expectLinkRendered('https://netra.ai');
+        expectLinkRendered('https://netrasystems.ai');
         const link = screen.getByRole('link', { name: /netra ai platform/i });
         expect(link).toHaveAttribute('target', '_blank');
         expect(link).toHaveAttribute('rel', 'noopener noreferrer');

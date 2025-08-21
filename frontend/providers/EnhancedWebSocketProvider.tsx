@@ -430,7 +430,11 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
       // Step 3: Create WebSocket connection with JWT subprotocol for secure auth
       // Ensure token has Bearer prefix for proper authentication
       const bearerToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      const protocols = [`jwt.${bearerToken}`];
+      // Encode the JWT token to make it safe for subprotocol use
+      const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
+      // Base64URL encode the token to ensure it's safe for subprotocol
+      const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+      const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
       const ws = new WebSocket(wsUrl, protocols);
       wsRef.current = ws;
 

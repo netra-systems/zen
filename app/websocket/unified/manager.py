@@ -39,6 +39,7 @@ from .broadcasting import UnifiedBroadcastingManager
 from .state import UnifiedStateManager
 from .circuit_breaker import CircuitBreaker
 from .telemetry_manager import TelemetryManager
+from ..lifecycle_integration import get_lifecycle_integrator
 
 logger = central_logger.get_logger(__name__)
 
@@ -92,9 +93,12 @@ class UnifiedWebSocketManager:
         self.pending_messages = self.telemetry_manager.pending_messages
         self.sending_messages = self.telemetry_manager.sending_messages
         self.message_lock = self.telemetry_manager.message_lock
+        
+        # Initialize enhanced lifecycle management
+        self.lifecycle_integrator = get_lifecycle_integrator()
 
     async def connect_user(self, user_id: str, websocket: WebSocket) -> ConnectionInfo:
-        """Establish WebSocket connection with circuit breaker protection."""
+        """Establish WebSocket connection with enhanced lifecycle and circuit breaker protection."""
         # Start cleanup task on first connection if not already started
         await self.telemetry_manager.start_periodic_cleanup()
             
@@ -102,14 +106,22 @@ class UnifiedWebSocketManager:
             self._record_circuit_break()
             raise ConnectionError("Circuit breaker is open")
         
-        conn_info = await self._execute_protected_connect(user_id, websocket)
-        
-        # Handle state synchronization for new connection
-        await self.messaging.message_handler.handle_new_connection_state_sync(
-            user_id, conn_info.connection_id, websocket
-        )
-        
-        return conn_info
+        # Use enhanced lifecycle integration for connection
+        try:
+            conn_info = await self.lifecycle_integrator.integrate_connection(user_id, websocket)
+            self.circuit_breaker.record_success()
+            self.telemetry["connections_opened"] += 1
+            
+            # Handle state synchronization for new connection
+            await self.messaging.message_handler.handle_new_connection_state_sync(
+                user_id, conn_info.connection_id, websocket
+            )
+            
+            return conn_info
+            
+        except Exception as e:
+            self.circuit_breaker.record_failure()
+            raise e
 
     def _record_circuit_break(self) -> None:
         """Record circuit breaker activation."""
@@ -129,7 +141,7 @@ class UnifiedWebSocketManager:
 
     async def disconnect_user(self, user_id: str, websocket: WebSocket, 
                        code: int = 1000, reason: str = "Normal closure") -> None:
-        """Safely disconnect user with comprehensive cleanup."""
+        """Safely disconnect user with enhanced lifecycle cleanup."""
         try:
             # Find connection info before disconnecting
             conn_info = await self.connection_manager.find_connection(user_id, websocket)
@@ -138,7 +150,8 @@ class UnifiedWebSocketManager:
                     user_id, conn_info.connection_id
                 )
             
-            await self.connection_manager.disconnect(user_id, websocket, code, reason)
+            # Use enhanced lifecycle integration for disconnection
+            await self.lifecycle_integrator.integrate_disconnection(user_id, websocket, code, reason)
             self.telemetry["connections_closed"] += 1
             
             # Additional cleanup for abnormal disconnects
@@ -201,7 +214,17 @@ class UnifiedWebSocketManager:
 
     async def handle_message(self, user_id: str, websocket: WebSocket, 
                            message: Dict[str, Any]) -> bool:
-        """Handle incoming message through unified messaging system."""
+        """Handle incoming message with enhanced lifecycle integration."""
+        # First try enhanced lifecycle handling (ping/pong/heartbeat)
+        lifecycle_handled = await self.lifecycle_integrator.handle_websocket_message(
+            user_id, websocket, message
+        )
+        
+        if lifecycle_handled:
+            self.telemetry["messages_received"] += 1
+            return True
+        
+        # Fall back to unified messaging system
         result = await self.messaging.handle_incoming_message(user_id, websocket, message)
         if result:
             self.telemetry["messages_received"] += 1
@@ -286,11 +309,13 @@ class UnifiedWebSocketManager:
         return await self.broadcasting.broadcast_to_all(message)
 
     def get_unified_stats(self) -> Dict[str, Any]:
-        """Get comprehensive unified statistics with telemetry."""
+        """Get comprehensive unified statistics with enhanced lifecycle data."""
         base_stats = self.state.get_connection_stats()
         telemetry_stats = self.telemetry_manager.get_telemetry_stats()
         circuit_stats = self._get_circuit_breaker_stats()
-        return {**base_stats, **telemetry_stats, **circuit_stats}
+        lifecycle_stats = self.lifecycle_integrator.get_comprehensive_stats()
+        
+        return {**base_stats, **telemetry_stats, **circuit_stats, **lifecycle_stats}
 
     def _get_circuit_breaker_stats(self) -> Dict[str, Any]:
         """Get circuit breaker health statistics."""
@@ -308,8 +333,11 @@ class UnifiedWebSocketManager:
         await self.error_handler.handle_generic_error(error, context)
 
     async def shutdown(self) -> None:
-        """Gracefully shutdown unified WebSocket manager with memory leak prevention."""
-        logger.info("Starting unified WebSocket manager shutdown...")
+        """Gracefully shutdown unified WebSocket manager with enhanced lifecycle cleanup."""
+        logger.info("Starting enhanced unified WebSocket manager shutdown...")
+        
+        # Perform graceful shutdown via enhanced lifecycle
+        shutdown_result = await self.lifecycle_integrator.perform_graceful_shutdown()
         
         # Shutdown telemetry manager (handles cleanup task and message queues)
         await self.telemetry_manager.shutdown()
@@ -317,7 +345,7 @@ class UnifiedWebSocketManager:
         await self.state.persist_state()
         await self.connection_manager.shutdown()
         
-        logger.info("Unified shutdown complete with memory cleanup")
+        logger.info(f"Enhanced shutdown complete: {shutdown_result.get('success', False)}")
 
     async def get_transactional_stats(self) -> Dict[str, Any]:
         """Get statistics about transactional message processing."""
@@ -337,6 +365,23 @@ class UnifiedWebSocketManager:
     def get_queue_size(self, job_id: str) -> int:
         """Get queue size from unified state manager."""
         return self.state.get_queue_size(job_id)
+    
+    # Enhanced lifecycle management methods
+    async def cleanup_zombie_connections(self) -> Dict[str, Any]:
+        """Clean up detected zombie connections."""
+        return await self.lifecycle_integrator.cleanup_zombie_connections()
+    
+    def get_connection_health_status(self, connection_id: str) -> Optional[Dict[str, Any]]:
+        """Get health status for specific connection."""
+        return self.lifecycle_integrator.get_connection_health_status(connection_id)
+    
+    def get_pool_status(self) -> Dict[str, Any]:
+        """Get connection pool status."""
+        return self.lifecycle_integrator.get_pool_status()
+    
+    async def validate_connection_health(self) -> Dict[str, Any]:
+        """Validate health of all tracked connections."""
+        return await self.lifecycle_integrator.validate_connection_health()
 
     # Global unified instance
     @classmethod

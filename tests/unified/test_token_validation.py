@@ -33,7 +33,7 @@ class TestTokenValidationFlow:
         """Get valid token payload."""
         return {
             "sub": "test-user-123",
-            "email": "test@netra.ai",
+            "email": "test@netrasystems.ai",
             "permissions": ["read", "write"],
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=15),

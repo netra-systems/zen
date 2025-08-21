@@ -397,15 +397,15 @@ class TestCORSSecurityHardening:
     def test_production_https_requirement(self):
         """Test that production environment requires HTTPS origins."""
         handler = WebSocketCORSHandler(
-            allowed_origins=["https://netra.ai"], 
+            allowed_origins=["https://netrasystems.ai"], 
             environment="production"
         )
         
         # HTTPS should be allowed
-        assert handler.is_origin_allowed("https://netra.ai") is True
+        assert handler.is_origin_allowed("https://netrasystems.ai") is True
         
         # HTTP should be blocked in production
-        assert handler.is_origin_allowed("http://netra.ai") is False
+        assert handler.is_origin_allowed("http://netrasystems.ai") is False
     
     def test_suspicious_origin_blocking(self):
         """Test that suspicious origins are blocked."""
@@ -453,7 +453,7 @@ class TestCORSSecurityHardening:
         """Test that security headers are added in production."""
         handler = WebSocketCORSHandler(environment="production")
         
-        headers = handler.get_cors_headers("https://netra.ai")
+        headers = handler.get_cors_headers("https://netrasystems.ai")
         
         # Should include security headers
         assert "Strict-Transport-Security" in headers

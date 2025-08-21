@@ -638,7 +638,7 @@ class PeakLoadAutoScalingL4Test(L4StagingCriticalPathTestBase):
                     
                     # Update service discovery
                     new_instances = [
-                        {"host": f"api-{i}.staging.netra.ai", "port": 8000}
+                        {"host": f"api-{i}.staging.netrasystems.ai", "port": 8000}
                         for i in range(1, target_instances + 1)
                     ]
                     discovery_result = await self.auto_scaler.update_service_discovery(

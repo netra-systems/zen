@@ -94,7 +94,7 @@ describe('Store Configuration - Infrastructure Tests', () => {
 
       const user = {
         id: 'test-user',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         full_name: 'Test User',
         is_active: true,
         is_superuser: false
@@ -257,7 +257,7 @@ describe('Store Configuration - Infrastructure Tests', () => {
 
       const user = {
         id: 'test',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         full_name: 'Test User',
         is_active: true,
         is_superuser: false

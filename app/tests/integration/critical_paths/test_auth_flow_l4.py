@@ -269,17 +269,17 @@ class AuthFlowL4TestSuite:
             # Simulate user credentials based on scenario
             user_credentials = {
                 "enterprise_user": {
-                    "username": "test_enterprise@netra.ai",
+                    "username": "test_enterprise@netrasystems.ai",
                     "password": "test_enterprise_pass_123",
                     "user_tier": "enterprise"
                 },
                 "free_tier_user": {
-                    "username": "test_free@netra.ai", 
+                    "username": "test_free@netrasystems.ai", 
                     "password": "test_free_pass_123",
                     "user_tier": "free"
                 },
                 "api_user": {
-                    "username": "test_api@netra.ai",
+                    "username": "test_api@netrasystems.ai",
                     "password": "test_api_pass_123",
                     "user_tier": "api"
                 }

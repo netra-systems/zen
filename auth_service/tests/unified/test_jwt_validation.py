@@ -39,7 +39,7 @@ class TestJWTSignatureValidation:
         """Standard valid user payload."""
         return {
             "sub": "test-user-123",
-            "email": "test@netra.ai", 
+            "email": "test@netrasystems.ai", 
             "permissions": ["read", "write"],
             "token_type": "access",
             "iss": "netra-auth-service"
@@ -124,7 +124,7 @@ class TestJWTClaimsValidation:
         """
         # Test with all required claims
         user_id = "test-user-456"
-        email = "claims@netra.ai"
+        email = "claims@netrasystems.ai"
         permissions = ["read", "write", "admin"]
         
         token = jwt_handler.create_access_token(user_id, email, permissions)
@@ -212,7 +212,7 @@ class TestJWTRevocation:
         Add token to blacklist → Revoked token rejected → Check across services
         """
         # Create valid token
-        token = jwt_handler.create_access_token("test-user", "revoke@netra.ai")
+        token = jwt_handler.create_access_token("test-user", "revoke@netrasystems.ai")
         
         # Token should be valid initially
         decoded = jwt_handler.validate_token_jwt(token)
@@ -236,7 +236,7 @@ class TestJWTRevocation:
         user_id = "user-to-revoke"
         
         # Create multiple tokens for user
-        token1 = jwt_handler.create_access_token(user_id, "user@netra.ai") 
+        token1 = jwt_handler.create_access_token(user_id, "user@netrasystems.ai") 
         token2 = jwt_handler.create_refresh_token(user_id)
         
         # Both should be valid
@@ -300,7 +300,7 @@ class TestJWTIntegrationScenarios:
         """Test complete token flow from creation to validation."""
         # Create user token
         user_id = "e2e-user"
-        email = "e2e@netra.ai"
+        email = "e2e@netrasystems.ai"
         permissions = ["read", "write"]
         
         access_token = jwt_handler.create_access_token(user_id, email, permissions)
@@ -326,7 +326,7 @@ class TestJWTIntegrationScenarios:
     
     def test_user_id_extraction(self, jwt_handler):
         """Test safe user ID extraction from tokens."""
-        token = jwt_handler.create_access_token("extract-user", "extract@netra.ai")
+        token = jwt_handler.create_access_token("extract-user", "extract@netrasystems.ai")
         
         # Should extract user ID safely
         user_id = jwt_handler.extract_user_id(token)

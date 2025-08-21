@@ -74,7 +74,7 @@ class WebSocketJWTReconnectionTester:
     async def setup_authenticated_session(self, user_id: str) -> JWTSessionState:
         """Setup authenticated WebSocket session with state tracking."""
         access_token = self.jwt_helper.create_access_token(
-            user_id=user_id, email=f"{user_id}@enterprise.netra.ai", 
+            user_id=user_id, email=f"{user_id}@enterprise.netrasystems.ai", 
             permissions=["read", "write", "agent_execute"]
         )
         

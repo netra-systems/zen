@@ -24,7 +24,7 @@ async def test_websocket_jwt_validation_failure():
     from app.main import app
     
     # Mock the auth client to return validation failure
-    with patch('app.core.auth_client.auth_client') as mock_auth_client:
+    with patch('app.clients.auth_client.auth_client') as mock_auth_client:
         # Configure auth client to return invalid token response
         mock_validate = AsyncMock(return_value={"valid": False})
         mock_auth_client.validate_token = mock_validate
@@ -72,7 +72,7 @@ async def test_websocket_auth_service_401_response():
     from httpx import Response
     
     # Mock httpx client to simulate 401 from auth service
-    with patch('app.core.auth_client.httpx.AsyncClient') as mock_client_class:
+    with patch('app.clients.auth_client_core.httpx.AsyncClient') as mock_client_class:
         mock_client = AsyncMock()
         mock_client_class.return_value.__aenter__.return_value = mock_client
         
@@ -148,7 +148,7 @@ async def test_websocket_auth_token_validation_flow():
     
     # Capture logs to verify proper error logging
     with patch('app.routes.websocket_secure.logger') as mock_logger:
-        with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # Auth validation returns invalid
             mock_validate.return_value = {"valid": False}
             
@@ -186,7 +186,7 @@ async def test_websocket_successful_auth_dev_environment():
     
     # Set development environment
     with patch.dict(os.environ, {"ENVIRONMENT": "development", "DEV_MODE": "true"}):
-        with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             # In dev mode, auth might be bypassed or always return valid
             mock_validate.return_value = {"valid": True, "user_id": "dev_user", "role": "developer"}
             

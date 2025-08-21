@@ -61,7 +61,7 @@ class PermissionService:
     def _check_netra_domain(user: User) -> bool:
         """Check if user has Netra domain email"""
         if user.email and "@netrasystems.ai" in user.email.lower():
-            logger.info(f"Netra.ai domain detected - granting developer access to {user.email}")
+            logger.info(f"netrasystems.ai domain detected - granting developer access to {user.email}")
             return True
         return False
     

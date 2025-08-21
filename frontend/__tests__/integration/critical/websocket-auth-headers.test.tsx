@@ -1,12 +1,12 @@
 /**
  * Critical WebSocket Authentication Headers Test
  * 
- * This test EXPOSES the misalignment between frontend and backend WebSocket authentication.
+ * This test VERIFIES that the frontend now uses proper secure authentication methods.
  * 
- * CURRENT ISSUE: Frontend sends JWT tokens via query parameters (SECURITY VULNERABILITY)
- * CORRECT BEHAVIOR: Backend expects JWT tokens via Authorization headers or subprotocols
+ * FIXED BEHAVIOR: Frontend now sends JWT tokens via Sec-WebSocket-Protocol (secure)
+ * SECURITY: Query parameter authentication is rejected by backend (as it should be)
  * 
- * This test will FAIL initially, proving the frontend is not using proper auth methods.
+ * This test verifies that the authentication security fixes are working correctly.
  */
 
 import React from 'react';
@@ -53,7 +53,7 @@ const mockAuthContext = {
   isLoading: false,
 };
 
-describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
+describe('WebSocket Authentication Headers (SECURITY VERIFICATION)', () => {
   let server: WS;
   let mockWebSocket: any;
   
@@ -75,7 +75,7 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
       return mockWebSocket;
     }) as any;
     
-    // Set up mock server for the CORRECT endpoint
+    // Set up mock server for the secure endpoint
     server = new WS('ws://localhost:8000/ws/secure');
     
     jest.clearAllMocks();
@@ -89,9 +89,9 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
     jest.restoreAllMocks();
   });
 
-  describe('Authorization Header Authentication (CORRECT METHOD)', () => {
-    it('should use Authorization header with Bearer token for WebSocket connection', async () => {
-      // THIS TEST WILL FAIL because frontend uses query params, not headers
+  describe('Subprotocol Authentication (SECURE METHOD)', () => {
+    it('should use Sec-WebSocket-Protocol with Bearer token for WebSocket connection', async () => {
+      // This test PASSES because frontend now uses secure subprotocol authentication
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -108,26 +108,24 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
         expect(global.WebSocket).toHaveBeenCalled();
       });
 
-      // CRITICAL ASSERTION: Check that WebSocket was created with proper headers
-      // This should fail because frontend doesn't support header-based auth
+      // SECURITY VERIFICATION: Check that WebSocket was created with proper authentication
       const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
       const url = websocketCall[0];
       const protocols = websocketCall[1];
 
-      // The frontend should NOT be using query parameters for token (security issue)
+      // Security check: Token should NOT be in URL (security vulnerability)
       expect(url).not.toContain('token=');
       expect(url).not.toContain('test-jwt-token-123');
       
-      // The frontend SHOULD be using Authorization header (currently not implemented)
-      // Since WebSocket constructor doesn't support headers directly, it should use subprotocols
-      expect(protocols).toContain('jwt.test-jwt-token-123');
+      // Secure authentication: Should use subprotocol with Bearer token
+      expect(protocols).toContain('jwt.Bearer test-jwt-token-123');
       
-      // Or it should be setting up the connection to the secure endpoint
+      // Should connect to secure endpoint
       expect(url).toContain('/ws/secure');
     });
 
-    it('should NOT send JWT token via query parameters (security vulnerability)', async () => {
-      // THIS TEST WILL FAIL because frontend currently uses query params
+    it('should NOT send JWT token via query parameters (security verified)', async () => {
+      // This test PASSES because frontend has been fixed to avoid query param vulnerabilities
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -146,19 +144,21 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
       const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
       const url = websocketCall[0];
 
-      // SECURITY CHECK: Token should NOT be in URL (current implementation does this)
+      // SECURITY VERIFICATION: Token should NOT be in URL
       expect(url).not.toContain('?token=');
       expect(url).not.toContain('token=test-jwt-token-123');
       
       // The URL should not expose sensitive tokens in query string
       const urlObj = new URL(url, 'ws://localhost');
       expect(urlObj.searchParams.get('token')).toBeNull();
+      expect(urlObj.searchParams.get('auth')).toBeNull();
+      expect(urlObj.searchParams.get('jwt')).toBeNull();
     });
   });
 
-  describe('WebSocket Subprotocol Authentication (FALLBACK METHOD)', () => {
+  describe('WebSocket Subprotocol Authentication (PRIMARY METHOD)', () => {
     it('should use Sec-WebSocket-Protocol header for JWT authentication', async () => {
-      // THIS TEST WILL FAIL because frontend doesn't implement subprotocol auth
+      // This test PASSES because frontend now implements secure subprotocol auth
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -177,13 +177,13 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
       const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
       const protocols = websocketCall[1];
 
-      // Frontend should support subprotocol authentication as fallback
+      // Frontend now supports secure subprotocol authentication
       expect(protocols).toBeDefined();
-      expect(Array.isArray(protocols) ? protocols : [protocols]).toContain('jwt.test-jwt-token-123');
+      expect(Array.isArray(protocols) ? protocols : [protocols]).toContain('jwt.Bearer test-jwt-token-123');
     });
 
-    it('should handle multiple authentication protocols', async () => {
-      // THIS TEST WILL FAIL because frontend doesn't support protocol negotiation
+    it('should handle authentication protocol correctly', async () => {
+      // This test PASSES because frontend implements proper protocol handling
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -202,16 +202,16 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
       const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
       const protocols = websocketCall[1];
 
-      // Should support multiple protocols for negotiation
+      // Should use proper authentication protocol
       const protocolArray = Array.isArray(protocols) ? protocols : [protocols];
-      expect(protocolArray).toContain('jwt.test-jwt-token-123');
+      expect(protocolArray).toContain('jwt.Bearer test-jwt-token-123');
       expect(protocolArray.length).toBeGreaterThan(0);
     });
   });
 
   describe('Secure Connection Endpoint', () => {
     it('should connect to the secure WebSocket endpoint', async () => {
-      // THIS TEST WILL FAIL because frontend connects to insecure endpoint
+      // This test PASSES because frontend now connects to secure endpoint
       
       const TestApp = () => (
         <AuthContext.Provider value={mockAuthContext}>
@@ -230,9 +230,10 @@ describe('WebSocket Authentication Headers (CRITICAL SECURITY)', () => {
       const websocketCall = (global.WebSocket as jest.Mock).mock.calls[0];
       const url = websocketCall[0];
 
-      // Should connect to secure endpoint that requires proper authentication
+      // Should connect to secure endpoint with proper authentication
       expect(url).toContain('/ws/secure');
-      expect(url).not.toContain('/ws?token='); // Old insecure endpoint pattern
+      expect(url).not.toContain('/ws?token='); // Insecure patterns rejected
+      expect(url).not.toContain('token='); // No query parameters
     });
 
     it('should handle authentication errors from secure endpoint', async () => {

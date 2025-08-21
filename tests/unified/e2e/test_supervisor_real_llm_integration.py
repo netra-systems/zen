@@ -11,7 +11,7 @@ from unittest.mock import Mock, AsyncMock
 from app.agents.supervisor_agent_modern import ModernSupervisorAgent
 from app.agents.state import DeepAgentState
 from app.llm.llm_manager import LLMManager
-from app.config import Config
+from app.config import get_config
 
 
 @pytest.mark.real_llm
@@ -22,7 +22,7 @@ class TestSupervisorE2EWithRealLLM:
     @pytest.fixture
     def config(self):
         """Test configuration."""
-        config = Config()
+        config = get_config()
         config.OPENAI_API_KEY = "test-key"  # Will use mock in tests
         return config
     

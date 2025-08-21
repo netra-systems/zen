@@ -34,12 +34,12 @@ class TestStagingStartup(StagingConfigTestBase):
             
             # Import app modules
             from app.main import app
-            from app.config import Config
-            from app.database import get_db
+            from app.config import get_config
+            from app.db.session import get_db
             from app.ws_manager import WebSocketManager
             
             # Initialize configuration
-            config = Config()
+            config = get_config()
             
             # Validate configuration loaded correctly
             self.assertEqual(config.environment, 'staging',

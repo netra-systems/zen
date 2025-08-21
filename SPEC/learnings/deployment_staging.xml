@@ -6,8 +6,6 @@
     <created>2025-08-18</created>
     <cross_references>
       <ref>CLAUDE.md#gcp-staging-deployment</ref>
-      <ref>deployment.xml</ref>
-      <ref>learnings/gcp_deployment.xml</ref>
     </cross_references>
   </meta>
 

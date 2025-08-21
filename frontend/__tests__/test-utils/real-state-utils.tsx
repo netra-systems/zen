@@ -157,7 +157,7 @@ export class RealChatStoreTestManager {
 export const createRealTestUser = (overrides: Partial<User> = {}): User => {
   return {
     id: `test-user-${Date.now()}`,
-    email: 'test@netra.ai',
+    email: 'test@netrasystems.ai',
     full_name: 'Test User',
     name: 'Test User',
     ...overrides

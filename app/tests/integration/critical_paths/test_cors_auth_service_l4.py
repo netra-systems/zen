@@ -53,8 +53,8 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
         self.test_origins = [
             "http://localhost:3001",  # Frontend dev
             "http://127.0.0.1:3001",  # Frontend alt
-            "https://app.netra.ai",   # Production frontend
-            "https://staging.netra.ai" # Staging frontend
+            "https://app.netrasystems.ai",   # Production frontend
+            "https://staging.netrasystems.ai" # Staging frontend
         ]
         self.cors_results: List[CorsTestResult] = []
     
@@ -94,7 +94,7 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
                         "ENVIRONMENT": "staging",
                         "DATABASE_URL": "postgresql://test:test@postgres:5432/netra_test",
                         "JWT_SECRET_KEY": "test-jwt-secret-key-32-characters-minimum",
-                        "CORS_ORIGINS": "http://localhost:3001,http://127.0.0.1:3001,https://app.netra.ai"
+                        "CORS_ORIGINS": "http://localhost:3001,http://127.0.0.1:3001,https://app.netrasystems.ai"
                     },
                     "depends_on": ["postgres"],
                     "healthcheck": {
@@ -297,14 +297,14 @@ class CorsAuthServiceL4Test(L4StagingCriticalPathTestBase):
         allowed_origins = [
             "http://localhost:3001",
             "http://127.0.0.1:3001",
-            "https://app.netra.ai"
+            "https://app.netrasystems.ai"
         ]
         
         # Test blocked origins
         blocked_origins = [
             "https://malicious.com",
             "http://evil.example.com",
-            "https://not-allowed.netra.ai"
+            "https://not-allowed.netrasystems.ai"
         ]
         
         for origin in allowed_origins:

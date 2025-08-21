@@ -72,7 +72,7 @@ class FrontendInitialAuthFlowL4Test(L4StagingCriticalPathTestBase):
         self.page = None
         self.auth_metrics = FrontendAuthMetrics()
         self.auth_flow_steps: List[AuthFlowStep] = []
-        self.test_user_email = f"test_frontend_auth_{uuid.uuid4().hex[:8]}@staging.netra.ai"
+        self.test_user_email = f"test_frontend_auth_{uuid.uuid4().hex[:8]}@staging.netrasystems.ai"
         self.network_requests: List[Dict[str, Any]] = []
         self.websocket_messages: List[Dict[str, Any]] = []
 

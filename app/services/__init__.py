@@ -22,6 +22,12 @@ from . import supplier_comparison
 # Thread services
 from . import thread_analytics
 
+# New service modules
+from . import llm_manager
+from . import api_gateway
+from . import redis
+from . import billing
+
 # Alias for backward compatibility
 supply_chain_service = supply_catalog_service
 
@@ -35,5 +41,9 @@ __all__ = [
     "supply_catalog_service",
     "supply_chain_service",
     "supplier_comparison",
-    "thread_analytics"
+    "thread_analytics",
+    "llm_manager",
+    "api_gateway",
+    "redis",
+    "billing"
 ]

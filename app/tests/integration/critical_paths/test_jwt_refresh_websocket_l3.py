@@ -261,12 +261,28 @@ class JWTRefreshManager:
     
     async def cleanup(self):
         """Clean up all active sessions."""
+        cleanup_errors = []
         for user_id, session_data in self.active_sessions.items():
             try:
-                await self.websocket_manager.disconnect_user(user_id, session_data["websocket"])
-                await self.session_manager.invalidate_session(session_data["session_id"])
+                # Cleanup WebSocket connection
+                if "websocket" in session_data:
+                    try:
+                        await self.websocket_manager.disconnect_user(user_id, session_data["websocket"])
+                    except Exception as e:
+                        cleanup_errors.append(f"WebSocket cleanup for {user_id}: {e}")
+                
+                # Cleanup session
+                if "session_id" in session_data:
+                    try:
+                        await self.session_manager.invalidate_session(session_data["session_id"])
+                    except Exception as e:
+                        cleanup_errors.append(f"Session cleanup for {user_id}: {e}")
+                        
             except Exception as e:
-                logger.warning(f"Cleanup error for user {user_id}: {e}")
+                cleanup_errors.append(f"General cleanup error for user {user_id}: {e}")
+        
+        if cleanup_errors:
+            logger.warning(f"Cleanup completed with {len(cleanup_errors)} errors: {cleanup_errors}")
         
         self.active_sessions.clear()
 
@@ -290,7 +306,10 @@ class TestJWTRefreshWebSocketL3:
         _, redis_url = redis_container
         client = redis.Redis.from_url(redis_url, decode_responses=True)
         yield client
-        await client.close()
+        try:
+            await client.aclose()  # Use aclose() instead of close()
+        except Exception as e:
+            logger.warning(f"Redis client cleanup error: {e}")
     
     @pytest.fixture
     async def jwt_validator(self):

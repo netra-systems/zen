@@ -266,7 +266,7 @@ async def test_service_discovery_instance_registration(service_mesh_l4):
     # Test registration of a new instance
     test_service_name = "test_service"
     test_instance = {
-        "host": "test-instance.staging.netra.ai",
+        "host": "test-instance.staging.netrasystems.ai",
         "port": 9999,
         "zone": "us-central1-test"
     }

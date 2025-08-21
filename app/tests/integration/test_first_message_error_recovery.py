@@ -57,7 +57,7 @@ class TestFirstMessageErrorRecovery:
         """Create test user for error recovery testing."""
         return UserInDB(
             id="error_recovery_user_001",
-            email="recovery@test.netra.ai",
+            email="recovery@test.netrasystems.ai",
             username="recoveryuser",
             is_active=True,
             created_at=datetime.now(timezone.utc)

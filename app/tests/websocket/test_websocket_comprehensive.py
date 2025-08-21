@@ -498,7 +498,7 @@ class TestWebSocketCORS:
         with patch.dict('os.environ', {'ENVIRONMENT': 'production'}):
             origins = get_environment_origins()
             # Should include production origins but not localhost
-            assert any("netra.ai" in origin for origin in origins)
+            assert any("netrasystems.ai" in origin for origin in origins)
             
     async def test_websocket_cors_validation(self):
         """Test WebSocket CORS validation in route."""

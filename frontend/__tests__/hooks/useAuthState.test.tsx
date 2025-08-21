@@ -44,7 +44,7 @@ describe('useAuthState Hook - Revenue Critical Auth Management', () => {
   // Test user fixtures for different tiers (≤8 lines)
   const createTestUser = (role: string, additionalProps = {}): User => ({
     id: `user_${role}`,
-    email: `${role}@netra.ai`,
+    email: `${role}@netrasystems.ai`,
     full_name: `Test ${role} User`,
     is_active: true,
     is_superuser: role === 'super_admin',

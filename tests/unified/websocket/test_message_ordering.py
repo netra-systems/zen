@@ -271,7 +271,7 @@ class TestWebSocketMessageOrdering:
         # Get WebSocket URL and auth token
         self.ws_url = await self.services.get_websocket_url()
         jwt_helper = JWTTestHelper()
-        self.auth_token = jwt_helper.create_access_token("test-user-ordering", "test@netra.ai")
+        self.auth_token = jwt_helper.create_access_token("test-user-ordering", "test@netrasystems.ai")
         
         # Create tester instance
         self.tester = WebSocketOrderingTester(self.ws_url, self.auth_token)

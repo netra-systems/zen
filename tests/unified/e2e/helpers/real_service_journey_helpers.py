@@ -25,7 +25,7 @@ class RealSignupHelper:
         signup_start = time.time()
         
         # Generate unique test user data
-        user_email = f"journey-{uuid.uuid4().hex[:8]}@netra.ai"
+        user_email = f"journey-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         user_id = f"user-{uuid.uuid4().hex[:8]}"
         
         try:
@@ -260,7 +260,7 @@ def validate_real_signup(signup_data: Dict[str, Any]) -> None:
     """Validate real signup completion meets requirements."""
     assert signup_data["success"], f"Real signup failed: {signup_data.get('error')}"
     assert "email" in signup_data, "Signup must provide email"
-    assert signup_data["email"].endswith("@netra.ai"), "Must use test domain"
+    assert signup_data["email"].endswith("@netrasystems.ai"), "Must use test domain"
     assert "user_id" in signup_data, "Signup must provide user ID"
     assert signup_data["signup_time"] < 5.0, f"Signup too slow: {signup_data['signup_time']:.2f}s"
 

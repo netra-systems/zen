@@ -89,7 +89,7 @@ class MCPToolsTestHelper:
                 "version": tool_config["version"],
                 "status": "available",
                 "capabilities": ["analysis", "optimization"],
-                "mcp_endpoint": f"mcp://tools.netra.ai/{tool_name}"
+                "mcp_endpoint": f"mcp://tools.netrasystems.ai/{tool_name}"
             }
         
         discovery_result = {

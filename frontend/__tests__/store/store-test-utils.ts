@@ -54,7 +54,7 @@ export namespace AuthStoreTestUtils {
   ): User & { role: string; permissions: string[] } => {
     return {
       id: `user-${role}`,
-      email: `${role}@netra.ai`,
+      email: `${role}@netrasystems.ai`,
       full_name: `${role} User`,
       is_active: true,
       is_superuser: role === 'super_admin',

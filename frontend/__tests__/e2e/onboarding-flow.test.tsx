@@ -119,7 +119,7 @@ interface OnboardingTestData {
 // Test fixtures
 const onboardingData: OnboardingTestData = {
   userId: 'user-test-123',
-  userEmail: 'newuser@netra.ai', 
+  userEmail: 'newuser@netrasystems.ai', 
   firstMessage: 'Hello, I need help optimizing my AI workload costs',
   expectedThreadId: 'thread-new-123'
 };

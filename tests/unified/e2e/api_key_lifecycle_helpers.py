@@ -27,7 +27,7 @@ async def create_test_user_session(auth_tester) -> Dict:
     
     # Create JWT payload with test user
     payload = auth_tester.jwt_helper.create_valid_payload()
-    payload["email"] = f"api-test-{uuid.uuid4().hex[:8]}@netra.ai"
+    payload["email"] = f"api-test-{uuid.uuid4().hex[:8]}@netrasystems.ai"
     
     # Generate JWT tokens
     access_token = await auth_tester.jwt_helper.create_jwt_token(payload)

@@ -26,10 +26,10 @@ DEFAULT_WEBSOCKET_ORIGINS = [
 
 # Production origins (should be configured via environment variables)
 PRODUCTION_ORIGINS = [
-    "https://netra.ai",
-    "https://www.netra.ai", 
-    "https://app.netra.ai",
-    "https://staging.netra.ai"
+    "https://netrasystems.ai",
+    "https://www.netrasystems.ai", 
+    "https://app.netrasystems.ai",
+    "https://staging.netrasystems.ai"
 ]
 
 # Security configuration constants

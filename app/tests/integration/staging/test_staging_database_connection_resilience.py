@@ -117,7 +117,7 @@ class TestStagingDatabaseConnectionResilience:
         """Test ClickHouse connection handling with staging-specific port configuration."""
         # Test HTTP connection on port 8123
         http_config = {
-            "host": "staging-clickhouse.netra.ai",
+            "host": "staging-clickhouse.netrasystems.ai",
             "port": 8123,
             "protocol": "http",
             "user": "staging_user",
@@ -126,7 +126,7 @@ class TestStagingDatabaseConnectionResilience:
         
         # Test native connection on port 9000
         native_config = {
-            "host": "staging-clickhouse.netra.ai", 
+            "host": "staging-clickhouse.netrasystems.ai", 
             "port": 9000,
             "protocol": "native",
             "user": "staging_user",
@@ -135,7 +135,7 @@ class TestStagingDatabaseConnectionResilience:
         
         # Test HTTPS connection on port 8443
         https_config = {
-            "host": "staging-clickhouse.netra.ai",
+            "host": "staging-clickhouse.netrasystems.ai",
             "port": 8443,
             "protocol": "https",
             "user": "staging_user",
@@ -165,9 +165,9 @@ class TestStagingDatabaseConnectionResilience:
         
         # Test cluster node failover simulation
         cluster_nodes = [
-            {"host": "redis-node-1.staging.netra.ai", "port": 6379},
-            {"host": "redis-node-2.staging.netra.ai", "port": 6379},
-            {"host": "redis-node-3.staging.netra.ai", "port": 6379}
+            {"host": "redis-node-1.staging.netrasystems.ai", "port": 6379},
+            {"host": "redis-node-2.staging.netrasystems.ai", "port": 6379},
+            {"host": "redis-node-3.staging.netrasystems.ai", "port": 6379}
         ]
         
         # Simulate primary node failure and failover

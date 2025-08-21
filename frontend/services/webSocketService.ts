@@ -4,6 +4,14 @@ import { config } from '@/config';
 import { logger } from '@/lib/logger';
 import { logger as debugLogger } from '@/utils/debug-logger';
 
+interface JWTPayload {
+  exp: number;
+  iat: number;
+  user_id: string;
+  email?: string;
+  permissions?: string[];
+}
+
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
@@ -46,6 +54,9 @@ class WebSocketService {
   private messageTimestamps: number[] = [];
   private currentToken: string | null = null;
   private tokenRefreshTimer: NodeJS.Timeout | null = null;
+  private tokenExpiryCheckTimer: NodeJS.Timeout | null = null;
+  private isRefreshingToken: boolean = false;
+  private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
 
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
@@ -165,8 +176,82 @@ class WebSocketService {
       this.handleInvalidMessage(rawMessage, options);
       return;
     }
+
+    // Handle lifecycle messages first
+    if (this.handleLifecycleMessage(validatedMessage)) {
+      return;
+    }
+
     this.onMessage?.(validatedMessage);
     options.onMessage?.(validatedMessage);
+  }
+
+  private handleLifecycleMessage(message: WebSocketMessage | UnifiedWebSocketEvent): boolean {
+    const messageType = message.type;
+
+    switch (messageType) {
+      case 'ping':
+        this.handleServerPing(message);
+        return true;
+      case 'pong':
+        this.handleServerPong(message);
+        return true;
+      case 'server_shutdown':
+        this.handleServerShutdown(message);
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleServerPing(message: any): void {
+    // Respond to server ping with pong
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      const pongResponse = {
+        type: 'pong',
+        timestamp: Date.now(),
+        original_timestamp: message.timestamp,
+        connection_id: this.getConnectionId()
+      };
+      
+      this.send(pongResponse as PongMessage);
+      logger.debug('Responded to server ping with pong');
+    }
+  }
+
+  private handleServerPong(message: any): void {
+    // Server responded to our ping
+    logger.debug('Received pong from server', undefined, {
+      component: 'WebSocketService',
+      action: 'pong_received',
+      metadata: { 
+        latency: message.timestamp ? Date.now() - message.original_timestamp : undefined
+      }
+    });
+  }
+
+  private handleServerShutdown(message: any): void {
+    // Server is shutting down gracefully
+    logger.info('Server shutdown notification received', undefined, {
+      component: 'WebSocketService',
+      action: 'server_shutdown',
+      metadata: { 
+        drain_timeout: message.drain_timeout,
+        server_message: message.message
+      }
+    });
+
+    // Stop heartbeat to allow graceful shutdown
+    this.stopHeartbeat();
+    
+    // Notify application of shutdown
+    this.options.onError?.({
+      code: 1001,
+      message: message.message || 'Server is shutting down',
+      timestamp: Date.now(),
+      type: 'connection',
+      recoverable: true
+    });
   }
 
   private handleInvalidMessage(rawMessage: any, options: WebSocketOptions): void {
@@ -373,10 +458,24 @@ class WebSocketService {
             metadata: { code: event.code, reason: event.reason }
           });
           
-          this.handleAuthError({
-            code: event.code,
-            reason: event.reason || 'Authentication failed'
-          });
+          // Check if this is a token expiry issue
+          const isTokenExpired = event.reason && (
+            event.reason.includes('Token expired') ||
+            event.reason.includes('token has expired') ||
+            event.reason.includes('JWT expired')
+          );
+          
+          if (isTokenExpired && !this.isRefreshingToken) {
+            logger.debug('WebSocket closed due to token expiry, attempting refresh');
+            this.performTokenRefresh().catch(error => {
+              logger.error('Token refresh after auth error failed', error as Error);
+            });
+          } else {
+            this.handleAuthError({
+              code: event.code,
+              reason: event.reason || 'Authentication failed'
+            });
+          }
         }
         
         options.onClose?.();
@@ -430,9 +529,18 @@ class WebSocketService {
     this.stopHeartbeat();
     this.heartbeatTimer = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.send({ type: 'ping', timestamp: Date.now() } as PingMessage);
+        this.send({ 
+          type: 'ping', 
+          timestamp: Date.now(),
+          connection_id: this.getConnectionId()
+        } as PingMessage);
       }
     }, interval);
+  }
+
+  private getConnectionId(): string | undefined {
+    // Extract connection ID from WebSocket if available
+    return (this.ws as any)?._connectionId;
   }
   
   private stopHeartbeat() {
@@ -474,6 +582,12 @@ class WebSocketService {
       this.messageTimestamps.push(now);
     }
     
+    // If refreshing token, queue message as pending
+    if (this.isRefreshingToken) {
+      this.pendingMessages.push(message);
+      return;
+    }
+    
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
@@ -496,10 +610,7 @@ class WebSocketService {
       this.reconnectTimer = null;
     }
     
-    if (this.tokenRefreshTimer) {
-      clearTimeout(this.tokenRefreshTimer);
-      this.tokenRefreshTimer = null;
-    }
+    this.clearTokenRefreshTimers();
     
     this.stopHeartbeat();
     
@@ -510,6 +621,8 @@ class WebSocketService {
     this.state = 'disconnected';
     this.messageQueue = [];
     this.currentToken = null;
+    this.isRefreshingToken = false;
+    this.pendingMessages = [];
   }
 
   /**
@@ -529,10 +642,62 @@ class WebSocketService {
     
     // Use subprotocol for secure authentication (browser-compatible)
     // Note: Browser WebSocket API doesn't support custom headers directly
-    const protocols = [`jwt.${bearerToken}`];
-    logger.debug('Creating secure WebSocket with subprotocol authentication');
+    // Encode the JWT token to make it safe for subprotocol use
+    // Remove "Bearer " prefix and encode for safe transmission
+    const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
+    // Base64URL encode the token to ensure it's safe for subprotocol
+    const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
+    logger.debug('Creating secure WebSocket with encoded JWT subprotocol authentication');
     
     return new WebSocket(url, protocols);
+  }
+
+  /**
+   * Parse JWT token to extract payload information
+   */
+  private parseJWTToken(token: string): JWTPayload | null {
+    try {
+      // Remove Bearer prefix if present
+      const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+      
+      // JWT structure: header.payload.signature
+      const parts = cleanToken.split('.');
+      if (parts.length !== 3) {
+        logger.warn('Invalid JWT token format');
+        return null;
+      }
+      
+      // Decode the payload (base64url decode)
+      const payload = parts[1];
+      // Add padding if needed for base64 decoding
+      const paddedPayload = payload.padEnd(payload.length + (4 - payload.length % 4) % 4, '=');
+      const decodedPayload = atob(paddedPayload.replace(/-/g, '+').replace(/_/g, '/'));
+      
+      return JSON.parse(decodedPayload) as JWTPayload;
+    } catch (error) {
+      logger.error('Failed to parse JWT token', error as Error, {
+        component: 'WebSocketService',
+        action: 'parse_jwt_token'
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Check if token is expiring soon (within 5 minutes)
+   */
+  private isTokenExpiringSoon(token: string): boolean {
+    const payload = this.parseJWTToken(token);
+    if (!payload || !payload.exp) {
+      return false;
+    }
+    
+    const now = Math.floor(Date.now() / 1000);
+    const timeUntilExpiry = payload.exp - now;
+    const fiveMinutes = 5 * 60; // 5 minutes in seconds
+    
+    return timeUntilExpiry <= fiveMinutes;
   }
 
   /**
@@ -543,27 +708,145 @@ class WebSocketService {
       return;
     }
 
-    // Refresh token every 50 minutes (assuming 1-hour token expiry)
-    const refreshInterval = 50 * 60 * 1000; // 50 minutes in milliseconds
+    // Clear existing timers
+    this.clearTokenRefreshTimers();
+
+    // Parse token to get expiry time
+    const payload = this.parseJWTToken(this.currentToken);
+    if (!payload || !payload.exp) {
+      logger.warn('Cannot setup token refresh - invalid token payload');
+      return;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const timeUntilExpiry = payload.exp - now;
     
-    this.tokenRefreshTimer = setInterval(async () => {
-      try {
-        const newToken = await this.options.refreshToken!();
-        if (newToken && newToken !== this.currentToken) {
-          logger.debug('Token refreshed, reconnecting WebSocket with new token');
-          this.currentToken = newToken;
+    // Set up proactive refresh 5 minutes before expiry
+    const refreshTime = Math.max(timeUntilExpiry - 300, 60); // At least 1 minute, but prefer 5 minutes before expiry
+    const refreshTimeMs = refreshTime * 1000;
+
+    logger.debug('Setting up token refresh', {
+      component: 'WebSocketService',
+      action: 'setup_token_refresh',
+      metadata: {
+        currentTime: now,
+        tokenExpiry: payload.exp,
+        timeUntilExpiry,
+        refreshInSeconds: refreshTime
+      }
+    });
+    
+    this.tokenRefreshTimer = setTimeout(async () => {
+      await this.performTokenRefresh();
+    }, refreshTimeMs);
+
+    // Also set up a periodic check for token expiry (every 30 seconds)
+    this.tokenExpiryCheckTimer = setInterval(async () => {
+      if (this.currentToken && this.isTokenExpiringSoon(this.currentToken) && !this.isRefreshingToken) {
+        logger.debug('Token expiring soon, triggering refresh');
+        await this.performTokenRefresh();
+      }
+    }, 30000); // Check every 30 seconds
+
+    logger.debug('Token refresh timers setup for WebSocket connection');
+  }
+
+  /**
+   * Clear token refresh timers
+   */
+  private clearTokenRefreshTimers(): void {
+    if (this.tokenRefreshTimer) {
+      clearTimeout(this.tokenRefreshTimer);
+      this.tokenRefreshTimer = null;
+    }
+    if (this.tokenExpiryCheckTimer) {
+      clearInterval(this.tokenExpiryCheckTimer);
+      this.tokenExpiryCheckTimer = null;
+    }
+  }
+
+  /**
+   * Perform token refresh with error handling and queuing
+   */
+  private async performTokenRefresh(): Promise<void> {
+    if (this.isRefreshingToken) {
+      logger.debug('Token refresh already in progress, skipping');
+      return;
+    }
+
+    this.isRefreshingToken = true;
+    
+    try {
+      logger.debug('Starting token refresh process');
+      
+      // Move queued messages to pending during refresh
+      this.pendingMessages.push(...this.messageQueue);
+      this.messageQueue = [];
+      
+      const newToken = await this.options.refreshToken!();
+      
+      if (newToken && newToken !== this.currentToken) {
+        logger.debug('Token refreshed successfully, updating WebSocket connection');
+        
+        const oldToken = this.currentToken;
+        this.currentToken = newToken;
+        this.options.token = newToken;
+        
+        // If connected, reconnect with new token
+        if (this.state === 'connected') {
           await this.reconnectWithNewToken(newToken);
         }
-      } catch (error) {
-        logger.error('Failed to refresh WebSocket token', error as Error, {
+        
+        // Setup new refresh timer for the new token
+        this.setupTokenRefresh();
+        
+        logger.debug('Token refresh completed successfully', {
           component: 'WebSocketService',
-          action: 'token_refresh_failed'
+          action: 'token_refresh_success',
+          metadata: {
+            oldTokenPrefix: oldToken?.substring(0, 10) + '...',
+            newTokenPrefix: newToken.substring(0, 10) + '...'
+          }
         });
-        // Continue with existing connection, let it fail naturally if token expires
+      } else {
+        logger.warn('Token refresh did not return a new token');
       }
-    }, refreshInterval);
+    } catch (error) {
+      logger.error('Failed to refresh WebSocket token', error as Error, {
+        component: 'WebSocketService',
+        action: 'token_refresh_failed'
+      });
+      
+      // On refresh failure, continue with existing connection but clear timers
+      this.clearTokenRefreshTimers();
+    } finally {
+      this.isRefreshingToken = false;
+      
+      // Process any pending messages after refresh
+      this.processPendingMessages();
+    }
+  }
 
-    logger.debug('Token refresh timer setup for WebSocket connection');
+  /**
+   * Process pending messages after token refresh
+   */
+  private processPendingMessages(): void {
+    if (this.pendingMessages.length > 0) {
+      logger.debug(`Processing ${this.pendingMessages.length} pending messages after token refresh`);
+      
+      // Move pending messages back to queue if not connected, or send if connected
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        // Send pending messages directly
+        this.pendingMessages.forEach(msg => {
+          this.send(msg);
+        });
+      } else {
+        // Move back to message queue for sending when connected
+        this.messageQueue.unshift(...this.pendingMessages);
+      }
+      
+      this.pendingMessages = [];
+    }
   }
 
   /**
@@ -685,6 +968,9 @@ class WebSocketService {
     if (this.state === 'connected') {
       await this.reconnectWithNewToken(newToken);
     }
+    
+    // Setup new refresh timer for the new token
+    this.setupTokenRefresh();
   }
 
   /**

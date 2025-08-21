@@ -20,7 +20,7 @@ class ControlledSignupHelper:
     async def execute_controlled_signup() -> Dict[str, Any]:
         """Execute controlled signup with real database operations."""
         user_id = str(uuid.uuid4())
-        user_email = f"e2e-unified-{uuid.uuid4().hex[:8]}@netra.ai"
+        user_email = f"e2e-unified-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         
         # Simulate user creation in database (real database operation)
         await ControlledSignupHelper._create_user_in_database(user_id, user_email)
@@ -156,7 +156,7 @@ def validate_signup_integration(signup_data: Dict[str, Any]) -> None:
     """Validate signup integration meets business requirements."""
     assert "user_id" in signup_data, "Signup must provide user ID"
     assert "email" in signup_data, "Signup must provide email"
-    assert signup_data["email"].endswith("@netra.ai"), "Must use test domain"
+    assert signup_data["email"].endswith("@netrasystems.ai"), "Must use test domain"
     assert len(signup_data["user_id"]) > 0, "User ID must be valid"
 
 

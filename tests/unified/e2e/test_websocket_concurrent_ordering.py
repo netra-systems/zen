@@ -103,7 +103,7 @@ class ConcurrentWebSocketManager:
             user_id = f"test-user-{i:03d}-{uuid.uuid4().hex[:8]}"
             payload = self.jwt_helper.create_valid_payload()
             payload["sub"] = user_id
-            payload["email"] = f"user{i}@netra.ai"
+            payload["email"] = f"user{i}@netrasystems.ai"
             token = self.jwt_helper.create_token(payload)
             
             user = UserConnection(user_id=user_id, token=token)
@@ -299,7 +299,7 @@ class BurstMessageTester:
         user_id = f"burst-user-{uuid.uuid4().hex[:8]}"
         payload = self.manager.jwt_helper.create_valid_payload()
         payload["sub"] = user_id
-        payload["email"] = f"burst@netra.ai"
+        payload["email"] = f"burst@netrasystems.ai"
         token = self.manager.jwt_helper.create_token(payload)
         
         self.burst_user = UserConnection(user_id=user_id, token=token)

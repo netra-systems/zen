@@ -105,8 +105,8 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
       // Simulate CORS validation logic
       const allowedOrigins = [
         'http://localhost:3000',
-        'https://app.netra.ai',
-        'https://staging.netra.ai'
+        'https://app.netrasystems.ai',
+        'https://staging.netrasystems.ai'
       ];
       
       const corsBlocked = !allowedOrigins.includes(currentOrigin);
@@ -300,7 +300,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
       Object.defineProperty(window, 'location', {
         value: {
           ...window.location,
-          origin: 'https://app.netra.ai'
+          origin: 'https://app.netrasystems.ai'
         },
         writable: true
       });
@@ -323,7 +323,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
       expect(corsBlocked).toBe(false);
 
       // Production origin should be allowed
-      expect(screen.getByTestId('origin')).toHaveTextContent('https://app.netra.ai');
+      expect(screen.getByTestId('origin')).toHaveTextContent('https://app.netrasystems.ai');
     });
 
     it('should handle subdomain restrictions properly', async () => {
@@ -333,7 +333,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
       Object.defineProperty(window, 'location', {
         value: {
           ...window.location,
-          origin: 'https://malicious.netra.ai'
+          origin: 'https://malicious.netrasystems.ai'
         },
         writable: true
       });
@@ -469,7 +469,7 @@ describe('WebSocket CORS Validation (CRITICAL SECURITY)', () => {
       // THIS TEST WILL FAIL because frontend doesn't check CSP directives
       
       // Mock CSP header
-      const mockCSP = "connect-src 'self' ws://localhost:8000 wss://api.netra.ai";
+      const mockCSP = "connect-src 'self' ws://localhost:8000 wss://api.netrasystems.ai";
       Object.defineProperty(document, 'querySelector', {
         value: jest.fn((selector) => {
           if (selector === 'meta[http-equiv="Content-Security-Policy"]') {

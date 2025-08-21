@@ -111,7 +111,7 @@ class OAuthJWTWebSocketFlowL4Test(L4StagingCriticalPathTestBase):
             raise Exception(f"OAuth authorization failed: {auth_response.status_code}")
         
         authorization_data = {
-            "username": "test_enterprise@staging.netra.ai",
+            "username": "test_enterprise@staging.netrasystems.ai",
             "password": "test_staging_pass_l4_oauth_123",
             "state": auth_params["state"],
             "approve": "true",

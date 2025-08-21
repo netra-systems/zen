@@ -19,6 +19,7 @@ export const useWebSocketContext = () => {
 };
 
 import { AuthContext } from '@/auth/context';
+import { unifiedAuthService } from '@/lib/unified-auth-service';
 
 export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const { token } = useContext(AuthContext)!;
@@ -26,6 +27,7 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
   const [messages, setMessages] = useState<WebSocketMessage[]>([]);
   const isConnectingRef = useRef(false);
   const cleanupRef = useRef<() => void>();
+  const previousTokenRef = useRef<string | null>(null);
 
   // Memoized message handler with reconciliation integration
   const handleMessage = useCallback((newMessage: WebSocketMessage) => {
@@ -98,15 +100,23 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
           webSocketService.connect(wsUrl, {
             token,
             refreshToken: async () => {
-              // In a real app, this would call your auth service to refresh the token
-              // For now, return the current token (no-op)
               try {
-                // TODO: Implement actual token refresh logic
-                // const refreshedToken = await authService.refreshToken();
-                // return refreshedToken;
-                return token; // Temporary: return current token
+                // Use the unified auth service for token refresh
+                const authConfig = unifiedAuthService.getWebSocketAuthConfig();
+                const refreshedToken = await authConfig.refreshToken();
+                
+                if (refreshedToken) {
+                  logger.debug('WebSocket token refreshed successfully via unified auth service');
+                  return refreshedToken;
+                }
+                
+                logger.warn('Token refresh returned null - may indicate auth failure');
+                return null;
               } catch (error) {
-                logger.error('Token refresh failed in WebSocketProvider', error as Error);
+                logger.error('Token refresh failed in WebSocketProvider', error as Error, {
+                  component: 'WebSocketProvider',
+                  action: 'token_refresh_failed'
+                });
                 return null;
               }
             },
@@ -182,6 +192,30 @@ export const WebSocketProvider = ({ children }: WebSocketProviderProps) => {
       isConnectingRef.current = false;
     };
   }, [token, handleMessage, handleStatusChange]);
+
+  // Token synchronization effect - update WebSocket when token changes
+  useEffect(() => {
+    if (token && previousTokenRef.current && token !== previousTokenRef.current) {
+      logger.debug('Auth token changed, updating WebSocket connection', {
+        component: 'WebSocketProvider',
+        action: 'token_sync',
+        metadata: {
+          hadPreviousToken: !!previousTokenRef.current,
+          hasNewToken: !!token
+        }
+      });
+      
+      // Update the WebSocket service with the new token
+      webSocketService.updateToken(token).catch(error => {
+        logger.error('Failed to update WebSocket token', error as Error, {
+          component: 'WebSocketProvider',
+          action: 'token_sync_failed'
+        });
+      });
+    }
+    
+    previousTokenRef.current = token;
+  }, [token]);
 
   const sendMessage = useCallback((message: WebSocketMessage) => {
     webSocketService.sendMessage(message);

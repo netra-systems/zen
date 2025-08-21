@@ -255,9 +255,9 @@ services:
       PYTEST_ARGS: --tb=short --no-header
       
       # Credentials for Test User Creation
-      TEST_USER_EMAIL: test@netra.ai
+      TEST_USER_EMAIL: test@netrasystems.ai
       TEST_USER_PASSWORD: test_password_123
-      TEST_ADMIN_EMAIL: admin@netra.ai
+      TEST_ADMIN_EMAIL: admin@netrasystems.ai
       TEST_ADMIN_PASSWORD: admin_password_123
     depends_on:
       frontend-service:

@@ -234,14 +234,14 @@ class L4ComplianceAuditTrailSimpleTest:
         return {
             "user_profiles": [
                 {
-                    "email": "compliance.test1@staging-test.netra.ai",
+                    "email": "compliance.test1@staging-test.netrasystems.ai",
                     "phone": "+1-555-0123",
                     "ssn": "123-45-6789",
                     "credit_card": "4111-1111-1111-1111",
                     "ip_address": "192.168.1.100"
                 },
                 {
-                    "email": "compliance.test2@staging-test.netra.ai", 
+                    "email": "compliance.test2@staging-test.netrasystems.ai", 
                     "phone": "+1-555-0456",
                     "ssn": "987-65-4321",
                     "credit_card": "5555-5555-5555-4444",

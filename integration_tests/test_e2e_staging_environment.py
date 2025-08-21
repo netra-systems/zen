@@ -60,15 +60,15 @@ STAGING_CONFIG = {
 # Staging test credentials (should be in environment variables)
 STAGING_TEST_USERS = {
     "free": {
-        "email": os.getenv("STAGING_FREE_USER_EMAIL", "staging_free@test.netra.ai"),
+        "email": os.getenv("STAGING_FREE_USER_EMAIL", "staging_free@test.netrasystems.ai"),
         "password": os.getenv("STAGING_FREE_USER_PASSWORD", "TestPass123!")
     },
     "pro": {
-        "email": os.getenv("STAGING_PRO_USER_EMAIL", "staging_pro@test.netra.ai"),
+        "email": os.getenv("STAGING_PRO_USER_EMAIL", "staging_pro@test.netrasystems.ai"),
         "password": os.getenv("STAGING_PRO_USER_PASSWORD", "TestPass123!")
     },
     "enterprise": {
-        "email": os.getenv("STAGING_ENTERPRISE_USER_EMAIL", "staging_enterprise@test.netra.ai"),
+        "email": os.getenv("STAGING_ENTERPRISE_USER_EMAIL", "staging_enterprise@test.netrasystems.ai"),
         "password": os.getenv("STAGING_ENTERPRISE_USER_PASSWORD", "TestPass123!")
     }
 }

@@ -64,9 +64,9 @@ class WorkspaceIsolationTestCore:
     def _get_user_role_configs(self) -> List[Dict[str, Any]]:
         """Get user role configurations for testing."""
         return [
-            {"role": "admin", "email": f"admin-{uuid.uuid4().hex[:8]}@netra.ai"},
-            {"role": "user", "email": f"user-{uuid.uuid4().hex[:8]}@netra.ai"},
-            {"role": "viewer", "email": f"viewer-{uuid.uuid4().hex[:8]}@netra.ai"}
+            {"role": "admin", "email": f"admin-{uuid.uuid4().hex[:8]}@netrasystems.ai"},
+            {"role": "user", "email": f"user-{uuid.uuid4().hex[:8]}@netrasystems.ai"},
+            {"role": "viewer", "email": f"viewer-{uuid.uuid4().hex[:8]}@netrasystems.ai"}
         ]
     
     def _get_workspace_configs(self) -> List[Dict[str, Any]]:

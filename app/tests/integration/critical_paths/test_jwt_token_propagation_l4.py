@@ -253,7 +253,7 @@ class JWTTokenPropagationL4Suite(L4StagingCriticalPathTestBase):
             if token_response.status_code != 200:
                 # Try alternative test endpoint for staging
                 test_user_data = {
-                    "email": f"test_user_{uuid.uuid4().hex[:8]}@staging-test.netra.ai",
+                    "email": f"test_user_{uuid.uuid4().hex[:8]}@staging-test.netrasystems.ai",
                     "name": "L4 Test User",
                     "provider": "google",
                     "test_mode": True

@@ -21,18 +21,28 @@ import { logger } from '@/lib/logger';
 
 const MCP_API_BASE = '/api/mcp';
 
-// Headers are now handled by auth interceptor
-// This function is kept for backward compatibility
-const createHeaders = (): HeadersInit => {
-  return {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json'
-  };
-};
+// All API calls now use auth interceptor for consistent header management
 
-const handleApiResponse = async <T>(response: Response): Promise<T> => {
+const handleApiResponse = async <T>(response: Response | any): Promise<T> => {
   if (!response.ok) {
-    const errorText = await response.text();
+    let errorText = '';
+    try {
+      // Handle both real Response objects and jest-fetch-mock objects
+      if (typeof response.text === 'function') {
+        errorText = await response.text();
+      } else if (response._bodyText) {
+        // jest-fetch-mock stores body as _bodyText
+        errorText = response._bodyText;
+      } else if (response.body) {
+        // Fallback for other mock implementations
+        errorText = typeof response.body === 'string' ? response.body : JSON.stringify(response.body);
+      } else {
+        errorText = `HTTP ${response.status}`;
+      }
+    } catch {
+      errorText = `HTTP ${response.status}`;
+    }
+
     let errorMessage: string;
     try {
       const parsed = JSON.parse(errorText);
@@ -42,7 +52,28 @@ const handleApiResponse = async <T>(response: Response): Promise<T> => {
     }
     throw new Error(errorMessage);
   }
-  return response.json();
+
+  // Handle both real Response objects and jest-fetch-mock objects for success responses
+  try {
+    if (typeof response.json === 'function') {
+      return await response.json();
+    } else if (response._bodyText) {
+      // jest-fetch-mock stores body as _bodyText
+      return JSON.parse(response._bodyText);
+    } else if (response.body) {
+      // Fallback for other mock implementations
+      return typeof response.body === 'string' ? JSON.parse(response.body) : response.body;
+    } else {
+      // Last resort - assume response itself is the data
+      return response as T;
+    }
+  } catch (error) {
+    logger.error('Failed to parse API response', error as Error, {
+      component: 'MCPClientService',
+      action: 'handleApiResponse'
+    });
+    throw new Error('Failed to parse API response: ' + (error as Error).message);
+  }
 };
 
 // ============================================
@@ -161,10 +192,7 @@ export const getToolSchema = async (
   serverName: string,
   toolName: string
 ): Promise<Record<string, any>> => {
-  const response = await fetch(`${MCP_API_BASE}/tools/${serverName}/${toolName}/schema`, {
-    method: 'GET',
-    headers: createHeaders()
-  });
+  const response = await authInterceptor.get(`${MCP_API_BASE}/tools/${serverName}/${toolName}/schema`);
   return handleApiResponse<Record<string, any>>(response);
 };
 
@@ -173,10 +201,7 @@ export const getToolSchema = async (
 // ============================================
 
 export const listResources = async (serverName: string): Promise<MCPResource[]> => {
-  const response = await fetch(`${MCP_API_BASE}/resources?server=${serverName}`, {
-    method: 'GET',
-    headers: createHeaders()
-  });
+  const response = await authInterceptor.get(`${MCP_API_BASE}/resources?server=${serverName}`);
   const result = await handleApiResponse<MCPApiResponse<MCPResource[]>>(response);
   return result.data || [];
 };
@@ -185,10 +210,9 @@ export const fetchResource = async (
   serverName: string,
   uri: string
 ): Promise<MCPResource | null> => {
-  const response = await fetch(`${MCP_API_BASE}/resources/fetch`, {
-    method: 'POST',
-    headers: createHeaders(),
-    body: JSON.stringify({ server_name: serverName, uri })
+  const response = await authInterceptor.post(`${MCP_API_BASE}/resources/fetch`, {
+    server_name: serverName, 
+    uri
   });
   const result = await handleApiResponse<MCPApiResponse<MCPResource>>(response);
   return result.data || null;
@@ -202,10 +226,9 @@ export const clearCache = async (
   serverName?: string,
   cacheType?: string
 ): Promise<boolean> => {
-  const response = await fetch(`${MCP_API_BASE}/cache/clear`, {
-    method: 'POST',
-    headers: createHeaders(),
-    body: JSON.stringify({ server_name: serverName, cache_type: cacheType })
+  const response = await authInterceptor.post(`${MCP_API_BASE}/cache/clear`, {
+    server_name: serverName, 
+    cache_type: cacheType
   });
   const result = await handleApiResponse<MCPApiResponse>(response);
   return result.success;
@@ -217,10 +240,7 @@ export const clearCache = async (
 
 export const healthCheck = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${MCP_API_BASE}/health`, {
-      method: 'GET',
-      headers: createHeaders()
-    });
+    const response = await authInterceptor.get(`${MCP_API_BASE}/health`);
     return response.ok;
   } catch {
     return false;
@@ -229,10 +249,7 @@ export const healthCheck = async (): Promise<boolean> => {
 
 export const serverHealthCheck = async (serverName: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${MCP_API_BASE}/servers/${serverName}/health`, {
-      method: 'GET',
-      headers: createHeaders()
-    });
+    const response = await authInterceptor.get(`${MCP_API_BASE}/servers/${serverName}/health`);
     return response.ok;
   } catch {
     return false;
@@ -244,19 +261,13 @@ export const serverHealthCheck = async (serverName: string): Promise<boolean> =>
 // ============================================
 
 export const getServerConnections = async (): Promise<MCPServerInfo[]> => {
-  const response = await fetch(`${MCP_API_BASE}/connections`, {
-    method: 'GET',
-    headers: createHeaders()
-  });
+  const response = await authInterceptor.get(`${MCP_API_BASE}/connections`);
   const result = await handleApiResponse<ServerStatusResponse>(response);
   return result.data || [];
 };
 
 export const refreshAllConnections = async (): Promise<boolean> => {
-  const response = await fetch(`${MCP_API_BASE}/connections/refresh`, {
-    method: 'POST',
-    headers: createHeaders()
-  });
+  const response = await authInterceptor.post(`${MCP_API_BASE}/connections/refresh`);
   const result = await handleApiResponse<MCPApiResponse>(response);
   return result.success;
 };

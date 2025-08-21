@@ -71,7 +71,7 @@ class TestDevUserCreation:
         with patch('dev_launcher.auth_starter.AuthStarter.create_dev_user') as mock_create_user:
             mock_create_user.return_value = {
                 "user_id": "dev-user-123",
-                "email": "dev@netra.ai",
+                "email": "dev@netrasystems.ai",
                 "token": "dev-token-auto-created",
                 "permissions": ["read", "write", "admin"],
                 "created_at": datetime.utcnow().isoformat()
@@ -85,7 +85,7 @@ class TestDevUserCreation:
 
                 # Verify: Dev user created automatically
                 mock_create_user.assert_called_once_with(
-                    email="dev@netra.ai",
+                    email="dev@netrasystems.ai",
                     permissions=["read", "write", "admin"]
                 )
                 
@@ -97,7 +97,7 @@ class TestDevUserCreation:
                 
                 # Verify: User creation successful
                 assert result["status"] == "success"
-                assert result["user"]["email"] == "dev@netra.ai"
+                assert result["user"]["email"] == "dev@netrasystems.ai"
                 assert result["user"]["token"] == "dev-token-auto-created"
 
     async def test_dev_environment_reset(self, mock_dev_launcher):

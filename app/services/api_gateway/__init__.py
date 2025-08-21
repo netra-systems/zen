@@ -9,10 +9,14 @@ from .router import ApiGatewayRouter
 from .rate_limiter import ApiGatewayRateLimiter
 from .cache_manager import ApiCacheManager
 from .circuit_breaker import ApiCircuitBreaker
+from .cache_strategies import CacheStrategy
+from .transformation_engine import TransformationEngine
 
 __all__ = [
     'ApiGatewayRouter',
     'ApiGatewayRateLimiter', 
     'ApiCacheManager',
-    'ApiCircuitBreaker'
+    'ApiCircuitBreaker',
+    'CacheStrategy',
+    'TransformationEngine'
 ]

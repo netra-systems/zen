@@ -50,7 +50,7 @@ class StagingStartupTester:
         if self.simulate:
             print("  [SIMULATE] Checking initialization order...")
             for service in expected_order:
-                print(f"    ✓ {service}")
+                print(f"    [OK] {service}")
             return True
             
         # Real validation
@@ -67,7 +67,7 @@ class StagingStartupTester:
                 self.errors.append("Secrets failed to load")
                 return False
                 
-            print("  ✓ Service initialization order correct")
+            print("  [OK] Service initialization order correct")
             return True
             
         except Exception as e:
@@ -88,7 +88,7 @@ class StagingStartupTester:
         if self.simulate:
             print("  [SIMULATE] Checking dependencies...")
             for service, deps in dependencies.items():
-                print(f"    ✓ {service} -> {', '.join(deps)}")
+                print(f"    [OK] {service} -> {', '.join(deps)}")
             return True
             
         # Real validation
@@ -100,7 +100,7 @@ class StagingStartupTester:
                     all_resolved = False
                     
         if all_resolved:
-            print("  ✓ All dependencies resolved")
+            print("  [OK] All dependencies resolved")
         return all_resolved
         
     def test_configuration_loading(self) -> bool:
@@ -118,7 +118,7 @@ class StagingStartupTester:
         if self.simulate:
             print("  [SIMULATE] Checking configuration...")
             for config in required_configs:
-                print(f"    ✓ {config}")
+                print(f"    [OK] {config}")
             return True
             
         # Real validation
@@ -131,7 +131,7 @@ class StagingStartupTester:
             self.errors.append(f"Missing configs: {', '.join(missing)}")
             return False
             
-        print("  ✓ All required configuration loaded")
+        print("  [OK] All required configuration loaded")
         return True
         
     def test_secret_access(self) -> bool:
@@ -148,7 +148,7 @@ class StagingStartupTester:
         if self.simulate:
             print("  [SIMULATE] Checking secrets...")
             for secret in required_secrets:
-                print(f"    ✓ {secret}")
+                print(f"    [OK] {secret}")
             return True
             
         # Real validation  
@@ -165,7 +165,7 @@ class StagingStartupTester:
                 self.errors.append(f"Missing secret mappings: {', '.join(missing)}")
                 return False
                 
-            print("  ✓ All secrets accessible")
+            print("  [OK] All secrets accessible")
             return True
             
         except Exception as e:
@@ -185,11 +185,11 @@ class StagingStartupTester:
         if self.simulate:
             print("  [SIMULATE] Checking health endpoints...")
             for endpoint in endpoints:
-                print(f"    ✓ {endpoint}")
+                print(f"    [OK] {endpoint}")
             return True
             
         # Real validation would check actual endpoints
-        print("  ✓ Health endpoints configured")
+        print("  [OK] Health endpoints configured")
         return True
         
     def test_startup_timing(self) -> bool:
@@ -207,7 +207,7 @@ class StagingStartupTester:
             self.errors.append(f"Startup took {elapsed:.1f}s (limit: {max_startup_time}s)")
             return False
             
-        print(f"  ✓ Startup completed in {elapsed:.1f}s")
+        print(f"  [OK] Startup completed in {elapsed:.1f}s")
         return True
         
     def _check_dependency_available(self, dependency: str) -> bool:
@@ -248,14 +248,14 @@ class StagingStartupTester:
             try:
                 if test_func():
                     passed += 1
-                    self.results.append(f"✓ {test_name}")
+                    self.results.append(f"[PASS] {test_name}")
                 else:
                     failed += 1
-                    self.results.append(f"✗ {test_name}")
+                    self.results.append(f"[FAIL] {test_name}")
             except Exception as e:
                 failed += 1
                 self.errors.append(f"{test_name} exception: {e}")
-                self.results.append(f"✗ {test_name} (exception)")
+                self.results.append(f"[FAIL] {test_name} (exception)")
                 
         # Summary
         print("\n" + "="*50)
@@ -273,9 +273,9 @@ class StagingStartupTester:
         
         success = failed == 0
         if success:
-            print("\n✅ STAGING STARTUP TESTS PASSED")
+            print("\n[SUCCESS] STAGING STARTUP TESTS PASSED")
         else:
-            print("\n❌ STAGING STARTUP TESTS FAILED")
+            print("\n[FAILED] STAGING STARTUP TESTS FAILED")
             
         return success, self.errors
 

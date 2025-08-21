@@ -82,11 +82,11 @@ STAGING_API_TIMEOUT=30
 STAGING_MAX_RETRIES=3
 
 # Test user credentials
-STAGING_FREE_USER_EMAIL=staging_free@test.netra.ai
+STAGING_FREE_USER_EMAIL=staging_free@test.netrasystems.ai
 STAGING_FREE_USER_PASSWORD=TestPass123!
-STAGING_PRO_USER_EMAIL=staging_pro@test.netra.ai
+STAGING_PRO_USER_EMAIL=staging_pro@test.netrasystems.ai
 STAGING_PRO_USER_PASSWORD=TestPass123!
-STAGING_ENTERPRISE_USER_EMAIL=staging_enterprise@test.netra.ai
+STAGING_ENTERPRISE_USER_EMAIL=staging_enterprise@test.netrasystems.ai
 STAGING_ENTERPRISE_USER_PASSWORD=TestPass123!
 ```
 

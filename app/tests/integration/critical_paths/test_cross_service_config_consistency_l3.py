@@ -22,7 +22,7 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from datetime import datetime, timezone, timedelta
 from enum import Enum
 
-from app.config import Config
+from app.config import get_config
 from app.core.cache.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
@@ -133,9 +133,9 @@ class CrossServiceConfigConsistencyManager:
                 "output": "stdout"
             },
             "auth_endpoints": {
-                "token_url": "https://auth.netra.ai/token",
-                "validate_url": "https://auth.netra.ai/validate",
-                "refresh_url": "https://auth.netra.ai/refresh"
+                "token_url": "https://auth.netrasystems.ai/token",
+                "validate_url": "https://auth.netrasystems.ai/validate",
+                "refresh_url": "https://auth.netrasystems.ai/refresh"
             }
         }
     
@@ -503,7 +503,7 @@ class TestCrossServiceConfigConsistencyL3:
         
         api_config = {
             "rate_limits": {"requests_per_minute": 1000},
-            "cors_config": {"origins": ["https://app.netra.ai"]},
+            "cors_config": {"origins": ["https://app.netrasystems.ai"]},
             "auth_endpoints": consistency_manager.shared_config_values["auth_endpoints"],
             "redis_config": consistency_manager.shared_config_values["redis_config"]
         }

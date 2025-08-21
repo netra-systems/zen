@@ -1,1387 +1,748 @@
 """Agent Configuration Hot Reload L2 Integration Tests
 
 Business Value Justification (BVJ):
-- Segment: All tiers (operational agility and dynamic configuration)
-- Business Goal: Dynamic configuration updates without service disruption
-- Value Impact: $5K MRR - Enables dynamic config worth operational agility and rapid iteration
-- Strategic Impact: Hot reloading reduces downtime and enables rapid configuration changes
+- Segment: Mid/Enterprise (operational continuity)
+- Business Goal: Zero-downtime configuration updates
+- Value Impact: Protects $5K MRR from restart-related downtime
+- Strategic Impact: Enables real-time optimization and tuning
 
-Critical Path: Config change detection -> Validation -> Hot reload -> Notification -> Verification
-Coverage: Config watching, validation, hot reload mechanisms, notification systems, rollback safety
+Critical Path: Config change -> Validation -> Hot reload -> Propagation -> Verification
+Coverage: Real configuration management, file watching, graceful updates
 """
 
 import pytest
 import asyncio
-import logging
+import time
 import json
-import tempfile
+import logging
 import os
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
-from enum import Enum
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+import tempfile
 import yaml
+from typing import Dict, List, Optional, Any, Callable, Tuple
+from unittest.mock import AsyncMock, patch, MagicMock
+from datetime import datetime, timedelta
+from dataclasses import dataclass, asdict, field
+from pathlib import Path
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-from app.core.exceptions_base import NetraException
+# Real components for L2 testing
+from app.services.redis_service import RedisService
+from app.core.circuit_breaker import CircuitBreaker
+from app.core.database_connection_manager import DatabaseConnectionManager
+from app.agents.base import BaseSubAgent
+from app.core.config import get_settings
+from app.core.events import EventBus
 
 logger = logging.getLogger(__name__)
 
 
-class ConfigChangeType(Enum):
-    """Types of configuration changes."""
-    ADDED = "added"
-    MODIFIED = "modified"
-    DELETED = "deleted"
-    RENAMED = "renamed"
-
-
-class ConfigValidationLevel(Enum):
-    """Configuration validation levels."""
-    SYNTAX = "syntax"
-    SEMANTIC = "semantic"
-    DEPENDENCY = "dependency"
-    RUNTIME = "runtime"
-
-
 @dataclass
-class ConfigChange:
-    """Configuration change detection result."""
-    change_id: str
-    change_type: ConfigChangeType
-    config_key: str
-    old_value: Optional[Any] = None
-    new_value: Optional[Any] = None
-    timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
-    source_file: Optional[str] = None
-    validation_required: bool = True
-
-
-@dataclass
-class ValidationResult:
-    """Configuration validation result."""
-    is_valid: bool
-    validation_level: ConfigValidationLevel
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
-    dependency_issues: List[str] = field(default_factory=list)
-
-
-@dataclass
-class ReloadMetrics:
-    """Hot reload performance and success metrics."""
-    total_reloads: int = 0
-    successful_reloads: int = 0
-    failed_reloads: int = 0
-    average_reload_time: float = 0.0
-    config_changes_detected: int = 0
-    validation_failures: int = 0
-    rollback_count: int = 0
+class AgentConfig:
+    """Agent configuration structure."""
+    agent_id: str
+    agent_type: str
+    model_settings: Dict[str, Any] = field(default_factory=dict)
+    rate_limits: Dict[str, int] = field(default_factory=dict)
+    feature_flags: Dict[str, bool] = field(default_factory=dict)
+    retry_config: Dict[str, Any] = field(default_factory=dict)
+    timeout_config: Dict[str, int] = field(default_factory=dict)
+    version: str = "1.0.0"
+    updated_at: datetime = field(default_factory=datetime.now)
     
-    @property
-    def success_rate(self) -> float:
-        """Calculate reload success rate."""
-        if self.total_reloads == 0:
-            return 100.0
-        return (self.successful_reloads / self.total_reloads) * 100
-
-
-class ConfigWatcher:
-    """Configuration file change detection and monitoring."""
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary."""
+        data = asdict(self)
+        data["updated_at"] = self.updated_at.isoformat()
+        return data
     
-    def __init__(self, config_directories: List[str]):
-        self.config_directories = config_directories
-        self.watched_files: Dict[str, float] = {}  # file_path -> last_modified
-        self.change_callbacks: List[Callable] = []
-        self.is_watching = False
-        self.watch_interval = 1.0  # seconds
-        self._watch_task: Optional[asyncio.Task] = None
-    
-    async def start_watching(self):
-        """Start watching configuration files for changes."""
-        if self.is_watching:
-            return
-        
-        self.is_watching = True
-        self._initialize_file_tracking()
-        self._watch_task = asyncio.create_task(self._watch_loop())
-    
-    async def stop_watching(self):
-        """Stop watching configuration files."""
-        self.is_watching = False
-        if self._watch_task:
-            self._watch_task.cancel()
-            try:
-                await self._watch_task
-            except asyncio.CancelledError:
-                pass
-    
-    def _initialize_file_tracking(self):
-        """Initialize tracking of all configuration files."""
-        for config_dir in self.config_directories:
-            if os.path.exists(config_dir):
-                for root, _, files in os.walk(config_dir):
-                    for file in files:
-                        if file.endswith(('.json', '.yaml', '.yml', '.toml', '.ini')):
-                            file_path = os.path.join(root, file)
-                            self.watched_files[file_path] = os.path.getmtime(file_path)
-    
-    async def _watch_loop(self):
-        """Main watching loop for configuration changes."""
-        while self.is_watching:
-            try:
-                changes = await self._detect_changes()
-                
-                for change in changes:
-                    await self._notify_change(change)
-                
-                await asyncio.sleep(self.watch_interval)
-            
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                logger.error(f"Error in config watch loop: {e}")
-                await asyncio.sleep(self.watch_interval)
-    
-    async def _detect_changes(self) -> List[ConfigChange]:
-        """Detect configuration file changes."""
-        changes = []
-        current_files = {}
-        
-        # Scan for current files
-        for config_dir in self.config_directories:
-            if os.path.exists(config_dir):
-                for root, _, files in os.walk(config_dir):
-                    for file in files:
-                        if file.endswith(('.json', '.yaml', '.yml', '.toml', '.ini')):
-                            file_path = os.path.join(root, file)
-                            current_files[file_path] = os.path.getmtime(file_path)
-        
-        # Check for modified or new files
-        for file_path, current_mtime in current_files.items():
-            if file_path in self.watched_files:
-                if current_mtime > self.watched_files[file_path]:
-                    # File modified
-                    change = ConfigChange(
-                        change_id=f"change_{len(changes) + 1}",
-                        change_type=ConfigChangeType.MODIFIED,
-                        config_key=os.path.basename(file_path),
-                        source_file=file_path
-                    )
-                    changes.append(change)
-                    self.watched_files[file_path] = current_mtime
-            else:
-                # New file
-                change = ConfigChange(
-                    change_id=f"change_{len(changes) + 1}",
-                    change_type=ConfigChangeType.ADDED,
-                    config_key=os.path.basename(file_path),
-                    source_file=file_path
-                )
-                changes.append(change)
-                self.watched_files[file_path] = current_mtime
-        
-        # Check for deleted files
-        for file_path in list(self.watched_files.keys()):
-            if file_path not in current_files:
-                change = ConfigChange(
-                    change_id=f"change_{len(changes) + 1}",
-                    change_type=ConfigChangeType.DELETED,
-                    config_key=os.path.basename(file_path),
-                    source_file=file_path
-                )
-                changes.append(change)
-                del self.watched_files[file_path]
-        
-        return changes
-    
-    async def _notify_change(self, change: ConfigChange):
-        """Notify registered callbacks of configuration changes."""
-        for callback in self.change_callbacks:
-            try:
-                if asyncio.iscoroutinefunction(callback):
-                    await callback(change)
-                else:
-                    callback(change)
-            except Exception as e:
-                logger.error(f"Error in change callback: {e}")
-    
-    def register_change_callback(self, callback: Callable):
-        """Register callback for configuration changes."""
-        self.change_callbacks.append(callback)
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "AgentConfig":
+        """Create from dictionary."""
+        data["updated_at"] = datetime.fromisoformat(data["updated_at"])
+        return cls(**data)
 
 
 class ConfigValidator:
-    """Configuration validation and verification system."""
+    """Validates agent configuration."""
     
     def __init__(self):
-        self.validation_rules: Dict[str, Dict] = {}
-        self.dependency_graph: Dict[str, List[str]] = {}
-        self.validation_cache: Dict[str, ValidationResult] = {}
+        self.validation_rules = {
+            "agent_id": self._validate_agent_id,
+            "agent_type": self._validate_agent_type,
+            "model_settings": self._validate_model_settings,
+            "rate_limits": self._validate_rate_limits,
+            "timeout_config": self._validate_timeout_config
+        }
     
-    def register_validation_rules(self, config_key: str, rules: Dict[str, Any]):
-        """Register validation rules for a configuration key."""
-        self.validation_rules[config_key] = rules
-    
-    def register_dependency(self, config_key: str, depends_on: List[str]):
-        """Register configuration dependencies."""
-        self.dependency_graph[config_key] = depends_on
-    
-    async def validate_config_change(self, change: ConfigChange, 
-                                   full_config: Dict[str, Any]) -> ValidationResult:
-        """Validate a configuration change comprehensively."""
-        cache_key = f"{change.config_key}:{change.change_id}"
-        
-        if cache_key in self.validation_cache:
-            return self.validation_cache[cache_key]
-        
-        # Perform multi-level validation
-        validation_results = []
-        
-        # Syntax validation
-        syntax_result = await self._validate_syntax(change, full_config)
-        validation_results.append(syntax_result)
-        
-        # Semantic validation
-        semantic_result = await self._validate_semantics(change, full_config)
-        validation_results.append(semantic_result)
-        
-        # Dependency validation
-        dependency_result = await self._validate_dependencies(change, full_config)
-        validation_results.append(dependency_result)
-        
-        # Runtime validation
-        runtime_result = await self._validate_runtime_impact(change, full_config)
-        validation_results.append(runtime_result)
-        
-        # Combine results
-        combined_result = self._combine_validation_results(validation_results)
-        
-        # Cache result
-        self.validation_cache[cache_key] = combined_result
-        
-        return combined_result
-    
-    async def _validate_syntax(self, change: ConfigChange, 
-                             full_config: Dict[str, Any]) -> ValidationResult:
-        """Validate configuration syntax."""
+    def validate_config(self, config: AgentConfig) -> Tuple[bool, List[str]]:
+        """Validate complete configuration."""
         errors = []
-        warnings = []
         
-        try:
-            # Check if new value has valid syntax
-            if change.new_value is not None:
-                # Type checking
-                if change.config_key in self.validation_rules:
-                    rules = self.validation_rules[change.config_key]
-                    expected_type = rules.get("type")
-                    
-                    if expected_type and not isinstance(change.new_value, expected_type):
-                        errors.append(f"Type mismatch: expected {expected_type.__name__}, got {type(change.new_value).__name__}")
-                    
-                    # Range checking for numeric values
-                    if expected_type in [int, float]:
-                        min_val = rules.get("min")
-                        max_val = rules.get("max")
-                        
-                        if min_val is not None and change.new_value < min_val:
-                            errors.append(f"Value {change.new_value} below minimum {min_val}")
-                        
-                        if max_val is not None and change.new_value > max_val:
-                            errors.append(f"Value {change.new_value} above maximum {max_val}")
-                    
-                    # Required fields check
-                    if rules.get("required", False) and change.new_value is None:
-                        errors.append(f"Required field {change.config_key} cannot be null")
+        for field_name, validator in self.validation_rules.items():
+            try:
+                field_value = getattr(config, field_name)
+                field_errors = validator(field_value)
+                errors.extend(field_errors)
+            except Exception as e:
+                errors.append(f"Validation error for {field_name}: {e}")
         
-        except Exception as e:
-            errors.append(f"Syntax validation error: {e}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            validation_level=ConfigValidationLevel.SYNTAX,
-            errors=errors,
-            warnings=warnings
-        )
+        return len(errors) == 0, errors
     
-    async def _validate_semantics(self, change: ConfigChange,
-                                full_config: Dict[str, Any]) -> ValidationResult:
-        """Validate configuration semantics and business logic."""
+    def _validate_agent_id(self, agent_id: str) -> List[str]:
+        """Validate agent ID."""
         errors = []
-        warnings = []
-        
-        try:
-            # Business logic validation
-            if change.config_key == "max_concurrent_agents":
-                if change.new_value and change.new_value < 1:
-                    errors.append("max_concurrent_agents must be at least 1")
-                elif change.new_value and change.new_value > 1000:
-                    warnings.append("max_concurrent_agents > 1000 may impact performance")
-            
-            elif change.config_key == "agent_timeout":
-                if change.new_value and change.new_value < 1.0:
-                    errors.append("agent_timeout must be at least 1 second")
-                elif change.new_value and change.new_value > 3600.0:
-                    warnings.append("agent_timeout > 1 hour may cause resource issues")
-            
-            elif change.config_key == "redis_url":
-                if change.new_value and not change.new_value.startswith(("redis://", "rediss://")):
-                    errors.append("redis_url must start with redis:// or rediss://")
-        
-        except Exception as e:
-            errors.append(f"Semantic validation error: {e}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            validation_level=ConfigValidationLevel.SEMANTIC,
-            errors=errors,
-            warnings=warnings
-        )
+        if not agent_id or not isinstance(agent_id, str):
+            errors.append("Agent ID must be a non-empty string")
+        if len(agent_id) > 100:
+            errors.append("Agent ID must be less than 100 characters")
+        return errors
     
-    async def _validate_dependencies(self, change: ConfigChange,
-                                   full_config: Dict[str, Any]) -> ValidationResult:
-        """Validate configuration dependencies."""
+    def _validate_agent_type(self, agent_type: str) -> List[str]:
+        """Validate agent type."""
         errors = []
-        warnings = []
-        dependency_issues = []
-        
-        try:
-            # Check if dependencies are satisfied
-            if change.config_key in self.dependency_graph:
-                dependencies = self.dependency_graph[change.config_key]
-                
-                for dep_key in dependencies:
-                    if dep_key not in full_config:
-                        dependency_issues.append(f"Missing dependency: {dep_key}")
-                    elif full_config[dep_key] is None:
-                        dependency_issues.append(f"Dependency {dep_key} is null")
-            
-            # Check for circular dependencies
-            circular_deps = self._detect_circular_dependencies(change.config_key)
-            if circular_deps:
-                dependency_issues.extend([f"Circular dependency: {dep}" for dep in circular_deps])
-        
-        except Exception as e:
-            errors.append(f"Dependency validation error: {e}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0 and len(dependency_issues) == 0,
-            validation_level=ConfigValidationLevel.DEPENDENCY,
-            errors=errors,
-            warnings=warnings,
-            dependency_issues=dependency_issues
-        )
+        valid_types = ["supervisor", "worker", "analyzer", "router"]
+        if agent_type not in valid_types:
+            errors.append(f"Agent type must be one of {valid_types}")
+        return errors
     
-    async def _validate_runtime_impact(self, change: ConfigChange,
-                                     full_config: Dict[str, Any]) -> ValidationResult:
-        """Validate runtime impact of configuration changes."""
+    def _validate_model_settings(self, settings: Dict[str, Any]) -> List[str]:
+        """Validate model settings."""
         errors = []
-        warnings = []
-        
-        try:
-            # Check for runtime compatibility
-            critical_configs = ["database_url", "redis_url", "llm_api_key"]
-            
-            if change.config_key in critical_configs:
-                if change.change_type == ConfigChangeType.DELETED:
-                    errors.append(f"Critical config {change.config_key} cannot be deleted during runtime")
-                elif change.new_value is None or change.new_value == "":
-                    errors.append(f"Critical config {change.config_key} cannot be empty")
-            
-            # Performance impact warnings
-            performance_configs = ["max_concurrent_agents", "worker_pool_size", "cache_size"]
-            
-            if change.config_key in performance_configs:
-                if change.old_value and change.new_value:
-                    change_ratio = abs(change.new_value - change.old_value) / change.old_value
-                    if change_ratio > 0.5:  # 50% change
-                        warnings.append(f"Large change in {change.config_key} may impact performance")
-        
-        except Exception as e:
-            errors.append(f"Runtime validation error: {e}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            validation_level=ConfigValidationLevel.RUNTIME,
-            errors=errors,
-            warnings=warnings
-        )
+        if "max_tokens" in settings:
+            if not isinstance(settings["max_tokens"], int) or settings["max_tokens"] <= 0:
+                errors.append("max_tokens must be a positive integer")
+        if "temperature" in settings:
+            if not isinstance(settings["temperature"], (int, float)) or not 0 <= settings["temperature"] <= 2:
+                errors.append("temperature must be between 0 and 2")
+        return errors
     
-    def _detect_circular_dependencies(self, config_key: str) -> List[str]:
-        """Detect circular dependencies in configuration."""
-        visited = set()
-        path = []
-        
-        def dfs(key):
-            if key in path:
-                # Found cycle
-                cycle_start = path.index(key)
-                return path[cycle_start:]
-            
-            if key in visited:
-                return []
-            
-            visited.add(key)
-            path.append(key)
-            
-            for dep in self.dependency_graph.get(key, []):
-                cycle = dfs(dep)
-                if cycle:
-                    return cycle
-            
-            path.pop()
-            return []
-        
-        return dfs(config_key)
+    def _validate_rate_limits(self, limits: Dict[str, int]) -> List[str]:
+        """Validate rate limits."""
+        errors = []
+        for key, value in limits.items():
+            if not isinstance(value, int) or value <= 0:
+                errors.append(f"Rate limit {key} must be a positive integer")
+        return errors
     
-    def _combine_validation_results(self, results: List[ValidationResult]) -> ValidationResult:
-        """Combine multiple validation results into one."""
-        all_errors = []
-        all_warnings = []
-        all_dependency_issues = []
-        is_valid = True
-        
-        for result in results:
-            all_errors.extend(result.errors)
-            all_warnings.extend(result.warnings)
-            all_dependency_issues.extend(result.dependency_issues)
-            
-            if not result.is_valid:
-                is_valid = False
-        
-        return ValidationResult(
-            is_valid=is_valid,
-            validation_level=ConfigValidationLevel.RUNTIME,  # Highest level completed
-            errors=all_errors,
-            warnings=all_warnings,
-            dependency_issues=all_dependency_issues
-        )
+    def _validate_timeout_config(self, timeouts: Dict[str, int]) -> List[str]:
+        """Validate timeout configuration."""
+        errors = []
+        for key, value in timeouts.items():
+            if not isinstance(value, int) or value <= 0:
+                errors.append(f"Timeout {key} must be a positive integer")
+        return errors
 
 
-class HotReloader:
-    """Configuration hot reload execution engine."""
+class ConfigFileWatcher(FileSystemEventHandler):
+    """Watches configuration files for changes."""
     
-    def __init__(self):
-        self.current_config: Dict[str, Any] = {}
-        self.config_history: List[Dict[str, Any]] = []
-        self.reload_callbacks: Dict[str, List[Callable]] = {}
-        self.rollback_snapshots: List[Dict[str, Any]] = []
-        self.max_snapshots = 10
+    def __init__(self, config_manager):
+        self.config_manager = config_manager
+        self.last_modified = {}
+        
+    def on_modified(self, event):
+        """Handle file modification events."""
+        if event.is_directory:
+            return
+            
+        file_path = event.src_path
+        
+        # Debounce rapid file changes
+        current_time = time.time()
+        if file_path in self.last_modified:
+            if current_time - self.last_modified[file_path] < 1.0:  # 1 second debounce
+                return
+        
+        self.last_modified[file_path] = current_time
+        
+        # Trigger config reload
+        asyncio.create_task(self.config_manager.handle_file_change(file_path))
+
+
+class ConfigManager:
+    """Manages agent configuration with hot reload capabilities."""
     
-    def register_reload_callback(self, config_key: str, callback: Callable):
-        """Register callback for specific configuration changes."""
-        if config_key not in self.reload_callbacks:
-            self.reload_callbacks[config_key] = []
-        self.reload_callbacks[config_key].append(callback)
-    
-    async def execute_hot_reload(self, validated_change: ConfigChange,
-                               validation_result: ValidationResult) -> Dict[str, Any]:
-        """Execute hot reload of configuration change."""
-        if not validation_result.is_valid:
-            return {
-                "reload_successful": False,
-                "reason": "validation_failed",
-                "validation_errors": validation_result.errors
-            }
+    def __init__(self, redis_service: RedisService, event_bus: EventBus):
+        self.redis_service = redis_service
+        self.event_bus = event_bus
+        self.validator = ConfigValidator()
+        self.active_configs = {}
+        self.file_watchers = {}
+        self.config_observers = {}
+        self.reload_callbacks = {}
         
-        # Create rollback snapshot
-        self._create_rollback_snapshot()
-        
-        start_time = datetime.now(timezone.utc)
-        
+    async def load_config(self, config_path: str) -> Optional[AgentConfig]:
+        """Load configuration from file."""
         try:
-            # Apply configuration change
-            await self._apply_config_change(validated_change)
+            with open(config_path, 'r') as f:
+                if config_path.endswith('.yaml') or config_path.endswith('.yml'):
+                    data = yaml.safe_load(f)
+                else:
+                    data = json.load(f)
             
-            # Execute reload callbacks
-            reload_results = await self._execute_reload_callbacks(validated_change)
+            config = AgentConfig.from_dict(data)
             
-            # Verify reload success
-            verification_result = await self._verify_reload_success(validated_change)
+            # Validate configuration
+            is_valid, errors = self.validator.validate_config(config)
+            if not is_valid:
+                logger.error(f"Invalid configuration: {errors}")
+                return None
             
-            end_time = datetime.now(timezone.utc)
-            reload_duration = (end_time - start_time).total_seconds()
+            return config
             
-            if verification_result["verification_successful"]:
-                return {
-                    "reload_successful": True,
-                    "change_id": validated_change.change_id,
-                    "reload_duration": reload_duration,
-                    "callbacks_executed": len(reload_results),
-                    "verification_result": verification_result,
-                    "warnings": validation_result.warnings
-                }
-            else:
-                # Verification failed, rollback
-                await self._execute_rollback()
-                return {
-                    "reload_successful": False,
-                    "reason": "verification_failed",
-                    "verification_result": verification_result,
-                    "rollback_executed": True
-                }
-        
         except Exception as e:
-            # Reload failed, rollback
-            await self._execute_rollback()
-            return {
-                "reload_successful": False,
-                "reason": f"reload_error: {e}",
-                "rollback_executed": True
-            }
+            logger.error(f"Failed to load config from {config_path}: {e}")
+            return None
     
-    def _create_rollback_snapshot(self):
-        """Create snapshot for potential rollback."""
-        snapshot = {
-            "timestamp": datetime.now(timezone.utc),
-            "config": self.current_config.copy()
-        }
-        
-        self.rollback_snapshots.append(snapshot)
-        
-        # Limit snapshot history
-        if len(self.rollback_snapshots) > self.max_snapshots:
-            self.rollback_snapshots.pop(0)
-    
-    async def _apply_config_change(self, change: ConfigChange):
-        """Apply configuration change to current config."""
-        if change.change_type == ConfigChangeType.ADDED or change.change_type == ConfigChangeType.MODIFIED:
-            self.current_config[change.config_key] = change.new_value
-        elif change.change_type == ConfigChangeType.DELETED:
-            if change.config_key in self.current_config:
-                del self.current_config[change.config_key]
-        
-        # Record in history
-        self.config_history.append({
-            "change": change,
-            "timestamp": datetime.now(timezone.utc),
-            "config_snapshot": self.current_config.copy()
-        })
-    
-    async def _execute_reload_callbacks(self, change: ConfigChange) -> List[Dict[str, Any]]:
-        """Execute registered reload callbacks."""
-        results = []
-        
-        # Execute specific callbacks for this config key
-        if change.config_key in self.reload_callbacks:
-            for callback in self.reload_callbacks[change.config_key]:
-                try:
-                    if asyncio.iscoroutinefunction(callback):
-                        result = await callback(change, self.current_config)
-                    else:
-                        result = callback(change, self.current_config)
-                    
-                    results.append({
-                        "callback": callback.__name__ if hasattr(callback, '__name__') else 'anonymous',
-                        "success": True,
-                        "result": result
-                    })
-                
-                except Exception as e:
-                    results.append({
-                        "callback": callback.__name__ if hasattr(callback, '__name__') else 'anonymous',
-                        "success": False,
-                        "error": str(e)
-                    })
-        
-        # Execute global callbacks (wildcard)
-        if "*" in self.reload_callbacks:
-            for callback in self.reload_callbacks["*"]:
-                try:
-                    if asyncio.iscoroutinefunction(callback):
-                        result = await callback(change, self.current_config)
-                    else:
-                        result = callback(change, self.current_config)
-                    
-                    results.append({
-                        "callback": f"global_{callback.__name__}" if hasattr(callback, '__name__') else 'global_anonymous',
-                        "success": True,
-                        "result": result
-                    })
-                
-                except Exception as e:
-                    results.append({
-                        "callback": f"global_{callback.__name__}" if hasattr(callback, '__name__') else 'global_anonymous',
-                        "success": False,
-                        "error": str(e)
-                    })
-        
-        return results
-    
-    async def _verify_reload_success(self, change: ConfigChange) -> Dict[str, Any]:
-        """Verify that reload was successful."""
-        verification_checks = []
-        
-        # Check if config value was actually applied
-        if change.change_type != ConfigChangeType.DELETED:
-            actual_value = self.current_config.get(change.config_key)
-            expected_value = change.new_value
-            
-            value_check = {
-                "check": "config_value_applied",
-                "passed": actual_value == expected_value,
-                "expected": expected_value,
-                "actual": actual_value
-            }
-            verification_checks.append(value_check)
-        
-        # Check if config is internally consistent
-        consistency_check = {
-            "check": "config_consistency",
-            "passed": self._check_config_consistency(),
-            "issues": []
-        }
-        verification_checks.append(consistency_check)
-        
-        # Check if system is still functional
-        functionality_check = {
-            "check": "system_functionality",
-            "passed": await self._check_system_functionality(),
-            "details": "Basic system checks passed"
-        }
-        verification_checks.append(functionality_check)
-        
-        all_checks_passed = all(check["passed"] for check in verification_checks)
-        
-        return {
-            "verification_successful": all_checks_passed,
-            "verification_checks": verification_checks,
-            "timestamp": datetime.now(timezone.utc)
-        }
-    
-    def _check_config_consistency(self) -> bool:
-        """Check internal consistency of configuration."""
-        # Basic consistency checks
+    async def save_config(self, config: AgentConfig, config_path: str) -> bool:
+        """Save configuration to file."""
         try:
-            # Check for required dependencies
-            if "database_url" in self.current_config and "redis_url" in self.current_config:
-                # Both critical services should be configured
-                db_url = self.current_config["database_url"]
-                redis_url = self.current_config["redis_url"]
-                
-                if not db_url or not redis_url:
-                    return False
+            config_data = config.to_dict()
             
-            # Check numeric constraints
-            max_agents = self.current_config.get("max_concurrent_agents")
-            if max_agents and max_agents < 1:
+            with open(config_path, 'w') as f:
+                if config_path.endswith('.yaml') or config_path.endswith('.yml'):
+                    yaml.dump(config_data, f, default_flow_style=False)
+                else:
+                    json.dump(config_data, f, indent=2)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to save config to {config_path}: {e}")
+            return False
+    
+    async def register_config(self, agent_id: str, config_path: str) -> bool:
+        """Register configuration for hot reload."""
+        try:
+            # Load initial configuration
+            config = await self.load_config(config_path)
+            if not config:
                 return False
             
-            return True
-        
-        except Exception:
-            return False
-    
-    async def _check_system_functionality(self) -> bool:
-        """Check basic system functionality after reload."""
-        # Simulate basic functionality checks
-        try:
-            # Check if critical services would still work
-            await asyncio.sleep(0.01)  # Simulate check
-            return True
-        except Exception:
-            return False
-    
-    async def _execute_rollback(self) -> bool:
-        """Execute rollback to previous configuration state."""
-        if not self.rollback_snapshots:
-            return False
-        
-        try:
-            # Get latest snapshot
-            latest_snapshot = self.rollback_snapshots[-1]
-            
-            # Restore configuration
-            self.current_config = latest_snapshot["config"].copy()
-            
-            # Remove used snapshot
-            self.rollback_snapshots.pop()
-            
-            return True
-        
-        except Exception:
-            return False
-
-
-class ConfigNotifier:
-    """Configuration change notification system."""
-    
-    def __init__(self):
-        self.notification_channels: List[Callable] = []
-        self.notification_history: List[Dict[str, Any]] = []
-    
-    def register_notification_channel(self, channel: Callable):
-        """Register notification channel for config changes."""
-        self.notification_channels.append(channel)
-    
-    async def notify_config_change(self, change: ConfigChange, 
-                                 reload_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Send notifications about configuration changes."""
-        notification = {
-            "notification_id": f"notif_{len(self.notification_history) + 1}",
-            "change_id": change.change_id,
-            "config_key": change.config_key,
-            "change_type": change.change_type.value,
-            "reload_successful": reload_result.get("reload_successful", False),
-            "timestamp": datetime.now(timezone.utc),
-            "details": {
-                "old_value": change.old_value,
-                "new_value": change.new_value,
-                "reload_duration": reload_result.get("reload_duration"),
-                "warnings": reload_result.get("warnings", [])
-            }
-        }
-        
-        # Send to all notification channels
-        notification_results = []
-        
-        for channel in self.notification_channels:
-            try:
-                if asyncio.iscoroutinefunction(channel):
-                    result = await channel(notification)
-                else:
-                    result = channel(notification)
-                
-                notification_results.append({
-                    "channel": channel.__name__ if hasattr(channel, '__name__') else 'anonymous',
-                    "success": True,
-                    "result": result
-                })
-            
-            except Exception as e:
-                notification_results.append({
-                    "channel": channel.__name__ if hasattr(channel, '__name__') else 'anonymous',
-                    "success": False,
-                    "error": str(e)
-                })
-        
-        # Record notification
-        self.notification_history.append(notification)
-        
-        return {
-            "notification_sent": True,
-            "notification_id": notification["notification_id"],
-            "channels_notified": len(notification_results),
-            "notification_results": notification_results
-        }
-
-
-class AgentConfigHotReloadManager:
-    """Comprehensive agent configuration hot reload system."""
-    
-    def __init__(self, config_directories: List[str]):
-        self.config_watcher = ConfigWatcher(config_directories)
-        self.config_validator = ConfigValidator()
-        self.hot_reloader = HotReloader()
-        self.config_notifier = ConfigNotifier()
-        self.metrics = ReloadMetrics()
-        
-        # Register change detection callback
-        self.config_watcher.register_change_callback(self._handle_config_change)
-        
-        # Initialize validation rules
-        self._initialize_validation_rules()
-    
-    def _initialize_validation_rules(self):
-        """Initialize configuration validation rules."""
-        validation_rules = {
-            "max_concurrent_agents": {
-                "type": int,
-                "min": 1,
-                "max": 1000,
-                "required": False
-            },
-            "agent_timeout": {
-                "type": float,
-                "min": 1.0,
-                "max": 3600.0,
-                "required": False
-            },
-            "database_url": {
-                "type": str,
-                "required": True
-            },
-            "redis_url": {
-                "type": str,
-                "required": True
-            }
-        }
-        
-        for config_key, rules in validation_rules.items():
-            self.config_validator.register_validation_rules(config_key, rules)
-        
-        # Register dependencies
-        self.config_validator.register_dependency("agent_timeout", ["max_concurrent_agents"])
-    
-    async def start_hot_reload_system(self):
-        """Start the hot reload system."""
-        await self.config_watcher.start_watching()
-    
-    async def stop_hot_reload_system(self):
-        """Stop the hot reload system."""
-        await self.config_watcher.stop_watching()
-    
-    async def _handle_config_change(self, change: ConfigChange):
-        """Handle detected configuration change."""
-        start_time = datetime.now(timezone.utc)
-        
-        try:
-            self.metrics.config_changes_detected += 1
-            
-            # Validate the change
-            validation_result = await self.config_validator.validate_config_change(
-                change, self.hot_reloader.current_config
+            # Store in Redis for fast access
+            config_key = f"agent_config:{agent_id}"
+            await self.redis_service.client.setex(
+                config_key, 
+                3600,  # 1 hour TTL
+                json.dumps(config.to_dict())
             )
             
-            if not validation_result.is_valid:
-                self.metrics.validation_failures += 1
+            # Store active config
+            self.active_configs[agent_id] = config
+            
+            # Set up file watcher
+            self.setup_file_watcher(agent_id, config_path)
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to register config for {agent_id}: {e}")
+            return False
+    
+    def setup_file_watcher(self, agent_id: str, config_path: str):
+        """Set up file watcher for configuration."""
+        try:
+            config_dir = os.path.dirname(config_path)
+            
+            if agent_id not in self.config_observers:
+                event_handler = ConfigFileWatcher(self)
+                observer = Observer()
+                observer.schedule(event_handler, config_dir, recursive=False)
+                observer.start()
+                
+                self.config_observers[agent_id] = observer
+                self.file_watchers[agent_id] = config_path
+                
+        except Exception as e:
+            logger.error(f"Failed to set up file watcher for {agent_id}: {e}")
+    
+    async def handle_file_change(self, file_path: str):
+        """Handle configuration file changes."""
+        try:
+            # Find agent ID for this file
+            agent_id = None
+            for aid, path in self.file_watchers.items():
+                if path == file_path:
+                    agent_id = aid
+                    break
+            
+            if not agent_id:
                 return
             
-            # Execute hot reload
-            reload_result = await self.hot_reloader.execute_hot_reload(change, validation_result)
+            logger.info(f"Configuration file changed for agent {agent_id}: {file_path}")
             
-            self.metrics.total_reloads += 1
+            # Reload configuration
+            await self.reload_config(agent_id, file_path)
             
-            if reload_result["reload_successful"]:
-                self.metrics.successful_reloads += 1
-            else:
-                self.metrics.failed_reloads += 1
-                
-                if reload_result.get("rollback_executed"):
-                    self.metrics.rollback_count += 1
-            
-            # Update average reload time
-            end_time = datetime.now(timezone.utc)
-            reload_duration = (end_time - start_time).total_seconds()
-            
-            total_time = self.metrics.average_reload_time * (self.metrics.total_reloads - 1)
-            self.metrics.average_reload_time = (total_time + reload_duration) / self.metrics.total_reloads
-            
-            # Send notifications
-            await self.config_notifier.notify_config_change(change, reload_result)
-        
         except Exception as e:
-            logger.error(f"Error handling config change: {e}")
-            self.metrics.failed_reloads += 1
+            logger.error(f"Failed to handle file change: {e}")
     
-    async def trigger_manual_reload(self, config_key: str, new_value: Any) -> Dict[str, Any]:
-        """Manually trigger configuration reload."""
-        # Create manual change
-        manual_change = ConfigChange(
-            change_id=f"manual_{datetime.now(timezone.utc).timestamp()}",
-            change_type=ConfigChangeType.MODIFIED,
-            config_key=config_key,
-            old_value=self.hot_reloader.current_config.get(config_key),
-            new_value=new_value
-        )
-        
-        # Handle the change
-        await self._handle_config_change(manual_change)
-        
-        return {
-            "manual_reload_triggered": True,
-            "change_id": manual_change.change_id,
-            "config_key": config_key,
-            "new_value": new_value
-        }
-    
-    async def test_hot_reload_performance(self, test_scenarios: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Test hot reload performance with various scenarios."""
-        performance_results = []
-        
-        for i, scenario in enumerate(test_scenarios):
-            scenario_start = datetime.now(timezone.utc)
+    async def reload_config(self, agent_id: str, config_path: str = None) -> bool:
+        """Reload configuration for an agent."""
+        try:
+            if not config_path:
+                config_path = self.file_watchers.get(agent_id)
+                if not config_path:
+                    return False
             
-            # Trigger reload
-            reload_result = await self.trigger_manual_reload(
-                scenario["config_key"], 
-                scenario["new_value"]
+            # Load new configuration
+            new_config = await self.load_config(config_path)
+            if not new_config:
+                logger.error(f"Failed to load new configuration for {agent_id}")
+                return False
+            
+            # Compare with current config
+            old_config = self.active_configs.get(agent_id)
+            if old_config and self.configs_equal(old_config, new_config):
+                logger.info(f"No changes detected in configuration for {agent_id}")
+                return True
+            
+            # Update active config
+            self.active_configs[agent_id] = new_config
+            
+            # Update Redis cache
+            config_key = f"agent_config:{agent_id}"
+            await self.redis_service.client.setex(
+                config_key,
+                3600,
+                json.dumps(new_config.to_dict())
             )
             
-            scenario_end = datetime.now(timezone.utc)
-            scenario_duration = (scenario_end - scenario_start).total_seconds()
+            # Trigger callbacks
+            await self.notify_config_change(agent_id, old_config, new_config)
             
-            performance_results.append({
-                "scenario_id": i,
-                "config_key": scenario["config_key"],
-                "reload_duration": scenario_duration,
-                "reload_successful": True  # Simplified for testing
+            # Publish event
+            await self.event_bus.publish("config_reloaded", {
+                "agent_id": agent_id,
+                "timestamp": datetime.now().isoformat(),
+                "config_version": new_config.version
             })
-        
-        # Calculate performance metrics
-        total_duration = sum(r["reload_duration"] for r in performance_results)
-        average_duration = total_duration / len(performance_results) if performance_results else 0
-        
-        return {
-            "total_scenarios": len(test_scenarios),
-            "total_duration": total_duration,
-            "average_reload_duration": average_duration,
-            "performance_results": performance_results,
-            "performance_acceptable": average_duration < 1.0  # < 1 second target
-        }
+            
+            logger.info(f"Configuration reloaded successfully for {agent_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to reload configuration for {agent_id}: {e}")
+            return False
     
-    def get_hot_reload_metrics(self) -> Dict[str, Any]:
-        """Get comprehensive hot reload metrics."""
-        return {
-            "reload_performance": {
-                "total_reloads": self.metrics.total_reloads,
-                "successful_reloads": self.metrics.successful_reloads,
-                "failed_reloads": self.metrics.failed_reloads,
-                "success_rate": self.metrics.success_rate,
-                "average_reload_time": self.metrics.average_reload_time
+    def configs_equal(self, config1: AgentConfig, config2: AgentConfig) -> bool:
+        """Check if two configurations are equal."""
+        # Compare all fields except updated_at
+        return (
+            config1.agent_id == config2.agent_id and
+            config1.agent_type == config2.agent_type and
+            config1.model_settings == config2.model_settings and
+            config1.rate_limits == config2.rate_limits and
+            config1.feature_flags == config2.feature_flags and
+            config1.retry_config == config2.retry_config and
+            config1.timeout_config == config2.timeout_config and
+            config1.version == config2.version
+        )
+    
+    async def get_config(self, agent_id: str) -> Optional[AgentConfig]:
+        """Get current configuration for an agent."""
+        try:
+            # Try active configs first
+            if agent_id in self.active_configs:
+                return self.active_configs[agent_id]
+            
+            # Fallback to Redis
+            config_key = f"agent_config:{agent_id}"
+            cached_data = await self.redis_service.client.get(config_key)
+            
+            if cached_data:
+                data = json.loads(cached_data)
+                config = AgentConfig.from_dict(data)
+                self.active_configs[agent_id] = config
+                return config
+            
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get configuration for {agent_id}: {e}")
+            return None
+    
+    def register_reload_callback(self, agent_id: str, callback: Callable):
+        """Register callback for configuration reloads."""
+        if agent_id not in self.reload_callbacks:
+            self.reload_callbacks[agent_id] = []
+        self.reload_callbacks[agent_id].append(callback)
+    
+    async def notify_config_change(self, agent_id: str, old_config: AgentConfig, new_config: AgentConfig):
+        """Notify registered callbacks of configuration changes."""
+        if agent_id in self.reload_callbacks:
+            for callback in self.reload_callbacks[agent_id]:
+                try:
+                    if asyncio.iscoroutinefunction(callback):
+                        await callback(old_config, new_config)
+                    else:
+                        callback(old_config, new_config)
+                except Exception as e:
+                    logger.error(f"Config reload callback failed: {e}")
+    
+    async def cleanup(self):
+        """Clean up resources."""
+        # Stop file observers
+        for observer in self.config_observers.values():
+            observer.stop()
+            observer.join()
+
+
+class MockAgent:
+    """Mock agent for testing configuration hot reload."""
+    
+    def __init__(self, agent_id: str, config_manager: ConfigManager):
+        self.agent_id = agent_id
+        self.config_manager = config_manager
+        self.current_config = None
+        self.config_changes = []
+        self.is_running = False
+        
+        # Register for config changes
+        self.config_manager.register_reload_callback(
+            agent_id, self.handle_config_change
+        )
+    
+    async def start(self):
+        """Start the mock agent."""
+        self.current_config = await self.config_manager.get_config(self.agent_id)
+        self.is_running = True
+    
+    async def handle_config_change(self, old_config: AgentConfig, new_config: AgentConfig):
+        """Handle configuration changes."""
+        self.config_changes.append({
+            "timestamp": datetime.now(),
+            "old_config": old_config,
+            "new_config": new_config
+        })
+        self.current_config = new_config
+        logger.info(f"Agent {self.agent_id} received config update")
+
+
+class ConfigHotReloadManager:
+    """Manages configuration hot reload testing."""
+    
+    def __init__(self):
+        self.redis_service = None
+        self.event_bus = None
+        self.config_manager = None
+        self.temp_dir = None
+        
+    async def initialize_services(self):
+        """Initialize required services."""
+        self.redis_service = RedisService()
+        await self.redis_service.initialize()
+        
+        self.event_bus = EventBus()
+        self.config_manager = ConfigManager(self.redis_service, self.event_bus)
+        
+        # Create temporary directory for test configs
+        self.temp_dir = tempfile.mkdtemp()
+        
+    def create_test_config(self, agent_id: str) -> AgentConfig:
+        """Create a test configuration."""
+        return AgentConfig(
+            agent_id=agent_id,
+            agent_type="worker",
+            model_settings={
+                "max_tokens": 2000,
+                "temperature": 0.7,
+                "model": "gpt-4"
             },
-            "change_detection": {
-                "config_changes_detected": self.metrics.config_changes_detected,
-                "watched_files": len(self.config_watcher.watched_files),
-                "is_watching": self.config_watcher.is_watching
+            rate_limits={
+                "requests_per_minute": 60,
+                "tokens_per_hour": 100000
             },
-            "validation": {
-                "validation_failures": self.metrics.validation_failures,
-                "validation_rules": len(self.config_validator.validation_rules),
-                "cache_size": len(self.config_validator.validation_cache)
+            feature_flags={
+                "enhanced_memory": True,
+                "debug_mode": False
             },
-            "rollback": {
-                "rollback_count": self.metrics.rollback_count,
-                "available_snapshots": len(self.hot_reloader.rollback_snapshots)
+            retry_config={
+                "max_retries": 3,
+                "backoff_factor": 2
             },
-            "notifications": {
-                "notification_channels": len(self.config_notifier.notification_channels),
-                "notifications_sent": len(self.config_notifier.notification_history)
+            timeout_config={
+                "request_timeout": 30,
+                "total_timeout": 300
             }
-        }
+        )
+    
+    async def cleanup(self):
+        """Clean up resources."""
+        if self.config_manager:
+            await self.config_manager.cleanup()
+        if self.redis_service:
+            await self.redis_service.shutdown()
+        if self.temp_dir:
+            import shutil
+            shutil.rmtree(self.temp_dir, ignore_errors=True)
 
 
 @pytest.fixture
 async def hot_reload_manager():
     """Create hot reload manager for testing."""
-    with tempfile.TemporaryDirectory() as temp_dir:
-        manager = AgentConfigHotReloadManager([temp_dir])
-        yield manager
-        await manager.stop_hot_reload_system()
+    manager = ConfigHotReloadManager()
+    await manager.initialize_services()
+    yield manager
+    await manager.cleanup()
 
 
 @pytest.mark.asyncio
-@pytest.mark.integration
-@pytest.mark.l2
-class TestAgentConfigHotReloadL2:
-    """L2 integration tests for agent configuration hot reload."""
+@pytest.mark.l2_integration
+async def test_config_loading_and_validation(hot_reload_manager):
+    """Test configuration loading and validation."""
+    manager = hot_reload_manager
     
-    async def test_config_change_detection_accuracy(self, hot_reload_manager):
-        """Test accurate configuration change detection."""
-        manager = hot_reload_manager
-        
-        # Start watching
-        await manager.start_hot_reload_system()
-        
-        # Create test configuration file
-        test_config_dir = manager.config_watcher.config_directories[0]
-        config_file = os.path.join(test_config_dir, "test_config.json")
-        
-        # Initial config
-        initial_config = {
-            "max_concurrent_agents": 10,
-            "agent_timeout": 30.0,
-            "test_setting": "initial_value"
-        }
-        
-        with open(config_file, 'w') as f:
-            json.dump(initial_config, f)
-        
-        # Wait for initial detection
-        await asyncio.sleep(1.5)
-        
-        # Modify config
-        modified_config = initial_config.copy()
-        modified_config["max_concurrent_agents"] = 20
-        modified_config["test_setting"] = "modified_value"
-        
-        with open(config_file, 'w') as f:
-            json.dump(modified_config, f)
-        
-        # Wait for change detection
-        await asyncio.sleep(1.5)
-        
-        # Add new config
-        new_config = modified_config.copy()
-        new_config["new_setting"] = "new_value"
-        
-        with open(config_file, 'w') as f:
-            json.dump(new_config, f)
-        
-        # Wait for change detection
-        await asyncio.sleep(1.5)
-        
-        # Verify change detection
-        metrics = manager.get_hot_reload_metrics()
-        
-        assert metrics["change_detection"]["config_changes_detected"] >= 2, \
-            "Should detect multiple configuration changes"
-        
-        assert metrics["change_detection"]["is_watching"], \
-            "Config watcher should be active"
-        
-        assert len(manager.config_watcher.watched_files) >= 1, \
-            "Should track configuration files"
+    # Create test config
+    test_config = manager.create_test_config("test_agent_1")
+    config_path = os.path.join(manager.temp_dir, "test_config.json")
     
-    async def test_validation_pipeline_comprehensive(self, hot_reload_manager):
-        """Test comprehensive configuration validation pipeline."""
-        manager = hot_reload_manager
-        
-        # Test valid configuration change
-        valid_change = ConfigChange(
-            change_id="test_valid",
-            change_type=ConfigChangeType.MODIFIED,
-            config_key="max_concurrent_agents",
-            old_value=10,
-            new_value=20
-        )
-        
-        validation_result = await manager.config_validator.validate_config_change(
-            valid_change, {"max_concurrent_agents": 10}
-        )
-        
-        assert validation_result.is_valid, \
-            f"Valid config change should pass validation: {validation_result.errors}"
-        
-        # Test invalid configuration change
-        invalid_change = ConfigChange(
-            change_id="test_invalid",
-            change_type=ConfigChangeType.MODIFIED,
-            config_key="max_concurrent_agents",
-            old_value=10,
-            new_value=-5  # Invalid negative value
-        )
-        
-        invalid_validation = await manager.config_validator.validate_config_change(
-            invalid_change, {"max_concurrent_agents": 10}
-        )
-        
-        assert not invalid_validation.is_valid, \
-            "Invalid config change should fail validation"
-        
-        assert len(invalid_validation.errors) > 0, \
-            "Invalid config should have validation errors"
-        
-        # Test dependency validation
-        dependency_change = ConfigChange(
-            change_id="test_dependency",
-            change_type=ConfigChangeType.MODIFIED,
-            config_key="agent_timeout",
-            old_value=30.0,
-            new_value=60.0
-        )
-        
-        # Missing dependency
-        dependency_validation = await manager.config_validator.validate_config_change(
-            dependency_change, {}  # Missing max_concurrent_agents dependency
-        )
-        
-        # Should still be valid but may have dependency warnings
-        assert len(dependency_validation.dependency_issues) >= 0, \
-            "Dependency validation should check for missing dependencies"
+    # Save config to file
+    save_result = await manager.config_manager.save_config(test_config, config_path)
+    assert save_result is True
     
-    async def test_hot_reload_execution_performance(self, hot_reload_manager):
-        """Test hot reload execution performance and timing."""
-        manager = hot_reload_manager
-        
-        # Register reload callbacks
-        callback_results = []
-        
-        async def test_callback(change, config):
-            callback_results.append({
-                "change_id": change.change_id,
-                "config_key": change.config_key,
-                "timestamp": datetime.now(timezone.utc)
-            })
-            return "callback_executed"
-        
-        manager.hot_reloader.register_reload_callback("max_concurrent_agents", test_callback)
-        
-        # Test performance scenarios
-        performance_scenarios = [
-            {"config_key": "max_concurrent_agents", "new_value": 15},
-            {"config_key": "agent_timeout", "new_value": 45.0},
-            {"config_key": "max_concurrent_agents", "new_value": 25},
-            {"config_key": "agent_timeout", "new_value": 60.0}
-        ]
-        
-        performance_test = await manager.test_hot_reload_performance(performance_scenarios)
-        
-        # Verify performance requirements
-        assert performance_test["performance_acceptable"], \
-            f"Hot reload performance should be <1s, got {performance_test['average_reload_duration']:.3f}s"
-        
-        assert performance_test["total_scenarios"] == len(performance_scenarios), \
-            "All scenarios should be tested"
-        
-        # Verify callbacks were executed
-        assert len(callback_results) >= 2, \
-            "Reload callbacks should be executed for relevant changes"
-        
-        # Verify metrics tracking
-        metrics = manager.get_hot_reload_metrics()
-        assert metrics["reload_performance"]["total_reloads"] >= 4, \
-            "All reloads should be tracked in metrics"
+    # Load config from file
+    loaded_config = await manager.config_manager.load_config(config_path)
+    assert loaded_config is not None
+    assert loaded_config.agent_id == "test_agent_1"
+    assert loaded_config.model_settings["max_tokens"] == 2000
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_config_registration_and_caching(hot_reload_manager):
+    """Test configuration registration and Redis caching."""
+    manager = hot_reload_manager
     
-    async def test_rollback_safety_mechanisms(self, hot_reload_manager):
-        """Test configuration rollback and safety mechanisms."""
-        manager = hot_reload_manager
-        
-        # Set initial configuration
-        initial_config = {
-            "max_concurrent_agents": 10,
-            "agent_timeout": 30.0,
-            "database_url": "postgresql://localhost/test"
-        }
-        
-        manager.hot_reloader.current_config = initial_config.copy()
-        
-        # Test successful reload with snapshot creation
-        valid_change = ConfigChange(
-            change_id="rollback_test_1",
-            change_type=ConfigChangeType.MODIFIED,
-            config_key="max_concurrent_agents",
-            old_value=10,
-            new_value=20
-        )
-        
-        validation_result = await manager.config_validator.validate_config_change(
-            valid_change, initial_config
-        )
-        
-        reload_result = await manager.hot_reloader.execute_hot_reload(
-            valid_change, validation_result
-        )
-        
-        assert reload_result["reload_successful"], \
-            "Valid reload should succeed"
-        
-        # Verify snapshot was created
-        assert len(manager.hot_reloader.rollback_snapshots) >= 1, \
-            "Rollback snapshot should be created"
-        
-        # Verify configuration was updated
-        assert manager.hot_reloader.current_config["max_concurrent_agents"] == 20, \
-            "Configuration should be updated after successful reload"
-        
-        # Test rollback capability
-        rollback_success = await manager.hot_reloader._execute_rollback()
-        
-        assert rollback_success, \
-            "Rollback should succeed when snapshots are available"
-        
-        assert manager.hot_reloader.current_config["max_concurrent_agents"] == 10, \
-            "Configuration should be restored after rollback"
+    # Create and save test config
+    test_config = manager.create_test_config("cache_test_agent")
+    config_path = os.path.join(manager.temp_dir, "cache_test.json")
+    await manager.config_manager.save_config(test_config, config_path)
     
-    async def test_notification_system_integration(self, hot_reload_manager):
-        """Test configuration change notification system."""
-        manager = hot_reload_manager
-        
-        # Register notification channels
-        notification_results = []
-        
-        async def email_notifier(notification):
-            notification_results.append({
-                "channel": "email",
-                "notification_id": notification["notification_id"],
-                "config_key": notification["config_key"]
-            })
-            return "email_sent"
-        
-        def slack_notifier(notification):
-            notification_results.append({
-                "channel": "slack", 
-                "notification_id": notification["notification_id"],
-                "config_key": notification["config_key"]
-            })
-            return "slack_message_sent"
-        
-        manager.config_notifier.register_notification_channel(email_notifier)
-        manager.config_notifier.register_notification_channel(slack_notifier)
-        
-        # Trigger configuration change
-        reload_result = await manager.trigger_manual_reload("max_concurrent_agents", 30)
-        
-        # Wait for notifications
-        await asyncio.sleep(0.1)
-        
-        # Verify notifications were sent
-        assert len(notification_results) >= 2, \
-            "Notifications should be sent to all registered channels"
-        
-        # Verify notification content
-        email_notifications = [n for n in notification_results if n["channel"] == "email"]
-        slack_notifications = [n for n in notification_results if n["channel"] == "slack"]
-        
-        assert len(email_notifications) >= 1, \
-            "Email notifications should be sent"
-        
-        assert len(slack_notifications) >= 1, \
-            "Slack notifications should be sent"
-        
-        # Verify notification tracking
-        metrics = manager.get_hot_reload_metrics()
-        assert metrics["notifications"]["notifications_sent"] >= 1, \
-            "Notification history should be tracked"
+    # Register configuration
+    register_result = await manager.config_manager.register_config("cache_test_agent", config_path)
+    assert register_result is True
     
-    async def test_concurrent_config_changes(self, hot_reload_manager):
-        """Test handling of concurrent configuration changes."""
-        manager = hot_reload_manager
-        
-        # Start hot reload system
-        await manager.start_hot_reload_system()
-        
-        # Create concurrent configuration changes
-        async def concurrent_config_change(change_id: int):
-            config_key = ["max_concurrent_agents", "agent_timeout"][change_id % 2]
-            new_value = [15, 45.0][change_id % 2]
-            
-            return await manager.trigger_manual_reload(config_key, new_value)
-        
-        # Execute concurrent changes
-        concurrent_tasks = [concurrent_config_change(i) for i in range(8)]
-        results = await asyncio.gather(*concurrent_tasks, return_exceptions=True)
-        
-        # Verify concurrent handling
-        successful_changes = [r for r in results if not isinstance(r, Exception)]
-        
-        assert len(successful_changes) == 8, \
-            f"All concurrent changes should be handled, got {len(successful_changes)}"
-        
-        # Verify system stability
-        metrics = manager.get_hot_reload_metrics()
-        
-        assert metrics["reload_performance"]["total_reloads"] >= 8, \
-            "All concurrent reloads should be tracked"
-        
-        # Success rate should be reasonable for concurrent operations
-        assert metrics["reload_performance"]["success_rate"] >= 75.0, \
-            f"Success rate {metrics['reload_performance']['success_rate']:.1f}% should be ≥75% for concurrent ops"
+    # Retrieve from cache
+    cached_config = await manager.config_manager.get_config("cache_test_agent")
+    assert cached_config is not None
+    assert cached_config.agent_id == "cache_test_agent"
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_config_file_watching(hot_reload_manager):
+    """Test configuration file watching and hot reload."""
+    manager = hot_reload_manager
     
-    async def test_config_dependency_validation(self, hot_reload_manager):
-        """Test configuration dependency validation and ordering."""
-        manager = hot_reload_manager
-        
-        # Set up complex dependency scenario
-        complex_config = {
-            "max_concurrent_agents": 10,
-            "agent_timeout": 30.0,
-            "worker_pool_size": 5,
-            "database_url": "postgresql://localhost/test",
-            "redis_url": "redis://localhost/redis"
-        }
-        
-        manager.hot_reloader.current_config = complex_config.copy()
-        
-        # Register additional dependencies
-        manager.config_validator.register_dependency("worker_pool_size", ["max_concurrent_agents"])
-        manager.config_validator.register_dependency("agent_timeout", ["max_concurrent_agents", "worker_pool_size"])
-        
-        # Test dependency satisfaction
-        dependent_change = ConfigChange(
-            change_id="dependency_test",
-            change_type=ConfigChangeType.MODIFIED,
-            config_key="agent_timeout",
-            old_value=30.0,
-            new_value=60.0
-        )
-        
-        validation_result = await manager.config_validator.validate_config_change(
-            dependent_change, complex_config
-        )
-        
-        # Should be valid when dependencies are satisfied
-        assert validation_result.is_valid, \
-            f"Configuration with satisfied dependencies should be valid: {validation_result.errors}"
-        
-        # Test missing dependency
-        incomplete_config = {"agent_timeout": 30.0}  # Missing dependencies
-        
-        missing_dep_validation = await manager.config_validator.validate_config_change(
-            dependent_change, incomplete_config
-        )
-        
-        # Should detect dependency issues
-        assert len(missing_dep_validation.dependency_issues) > 0, \
-            "Missing dependencies should be detected"
-        
-        # Test circular dependency detection
-        # Create circular dependency: A -> B -> A
-        manager.config_validator.register_dependency("test_config_a", ["test_config_b"])
-        manager.config_validator.register_dependency("test_config_b", ["test_config_a"])
-        
-        circular_deps = manager.config_validator._detect_circular_dependencies("test_config_a")
-        
-        assert len(circular_deps) > 0, \
-            "Circular dependencies should be detected"
+    # Create initial config
+    test_config = manager.create_test_config("watch_test_agent")
+    config_path = os.path.join(manager.temp_dir, "watch_test.json")
+    await manager.config_manager.save_config(test_config, config_path)
     
-    async def test_comprehensive_hot_reload_workflow(self, hot_reload_manager):
-        """Test complete hot reload workflow with all components."""
-        manager = hot_reload_manager
+    # Register configuration with file watching
+    await manager.config_manager.register_config("watch_test_agent", config_path)
+    
+    # Give file watcher time to set up
+    await asyncio.sleep(0.5)
+    
+    # Modify configuration
+    test_config.model_settings["max_tokens"] = 4000
+    test_config.updated_at = datetime.now()
+    await manager.config_manager.save_config(test_config, config_path)
+    
+    # Wait for file watcher to detect change
+    await asyncio.sleep(2.0)
+    
+    # Verify configuration was reloaded
+    updated_config = await manager.config_manager.get_config("watch_test_agent")
+    assert updated_config.model_settings["max_tokens"] == 4000
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_config_validation_rules(hot_reload_manager):
+    """Test configuration validation rules."""
+    manager = hot_reload_manager
+    
+    validator = manager.config_manager.validator
+    
+    # Test valid configuration
+    valid_config = manager.create_test_config("valid_agent")
+    is_valid, errors = validator.validate_config(valid_config)
+    assert is_valid is True
+    assert len(errors) == 0
+    
+    # Test invalid agent ID
+    invalid_config = manager.create_test_config("")
+    is_valid, errors = validator.validate_config(invalid_config)
+    assert is_valid is False
+    assert any("Agent ID" in error for error in errors)
+    
+    # Test invalid temperature
+    invalid_config = manager.create_test_config("temp_test")
+    invalid_config.model_settings["temperature"] = 5.0  # Out of range
+    is_valid, errors = validator.validate_config(invalid_config)
+    assert is_valid is False
+    assert any("temperature" in error for error in errors)
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_agent_config_callbacks(hot_reload_manager):
+    """Test agent configuration change callbacks."""
+    manager = hot_reload_manager
+    
+    # Create mock agent
+    agent_id = "callback_test_agent"
+    test_config = manager.create_test_config(agent_id)
+    config_path = os.path.join(manager.temp_dir, "callback_test.json")
+    await manager.config_manager.save_config(test_config, config_path)
+    
+    # Register configuration
+    await manager.config_manager.register_config(agent_id, config_path)
+    
+    # Create mock agent
+    mock_agent = MockAgent(agent_id, manager.config_manager)
+    await mock_agent.start()
+    
+    # Trigger configuration reload
+    test_config.rate_limits["requests_per_minute"] = 120
+    await manager.config_manager.save_config(test_config, config_path)
+    await manager.config_manager.reload_config(agent_id, config_path)
+    
+    # Wait for callback processing
+    await asyncio.sleep(0.1)
+    
+    # Verify callback was triggered
+    assert len(mock_agent.config_changes) == 1
+    assert mock_agent.current_config.rate_limits["requests_per_minute"] == 120
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_concurrent_config_operations(hot_reload_manager):
+    """Test concurrent configuration operations."""
+    manager = hot_reload_manager
+    
+    # Create multiple configurations
+    agent_ids = [f"concurrent_agent_{i}" for i in range(10)]
+    configs = [manager.create_test_config(aid) for aid in agent_ids]
+    config_paths = [
+        os.path.join(manager.temp_dir, f"concurrent_{i}.json") 
+        for i in range(10)
+    ]
+    
+    # Save configs concurrently
+    save_tasks = [
+        manager.config_manager.save_config(config, path)
+        for config, path in zip(configs, config_paths)
+    ]
+    save_results = await asyncio.gather(*save_tasks)
+    assert all(save_results)
+    
+    # Register configs concurrently
+    register_tasks = [
+        manager.config_manager.register_config(agent_id, path)
+        for agent_id, path in zip(agent_ids, config_paths)
+    ]
+    register_results = await asyncio.gather(*register_tasks)
+    assert all(register_results)
+    
+    # Retrieve configs concurrently
+    get_tasks = [
+        manager.config_manager.get_config(agent_id)
+        for agent_id in agent_ids
+    ]
+    retrieved_configs = await asyncio.gather(*get_tasks)
+    
+    assert len(retrieved_configs) == 10
+    assert all(config is not None for config in retrieved_configs)
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_config_reload_performance(hot_reload_manager):
+    """Benchmark configuration reload performance."""
+    manager = hot_reload_manager
+    
+    # Create test configuration
+    test_config = manager.create_test_config("perf_test_agent")
+    config_path = os.path.join(manager.temp_dir, "perf_test.json")
+    await manager.config_manager.save_config(test_config, config_path)
+    await manager.config_manager.register_config("perf_test_agent", config_path)
+    
+    # Benchmark reload operations
+    start_time = time.time()
+    
+    reload_tasks = []
+    for i in range(50):
+        # Modify config slightly
+        test_config.model_settings["max_tokens"] = 2000 + i
+        await manager.config_manager.save_config(test_config, config_path)
         
-        # Phase 1: Initialize system
-        await manager.start_hot_reload_system()
-        
-        # Phase 2: Set up comprehensive monitoring
-        notification_log = []
-        
-        async def comprehensive_notifier(notification):
-            notification_log.append(notification)
-            return "comprehensive_notification_sent"
-        
-        manager.config_notifier.register_notification_channel(comprehensive_notifier)
-        
-        # Phase 3: Execute complex configuration workflow
-        workflow_changes = [
-            {"config_key": "max_concurrent_agents", "new_value": 15},
-            {"config_key": "agent_timeout", "new_value": 45.0},
-            {"config_key": "max_concurrent_agents", "new_value": 25},  # Second change to same key
-            {"config_key": "worker_pool_size", "new_value": 8},
-        ]
-        
-        workflow_results = []
-        for change in workflow_changes:
-            result = await manager.trigger_manual_reload(
-                change["config_key"], change["new_value"]
-            )
-            workflow_results.append(result)
-            
-            # Small delay between changes
-            await asyncio.sleep(0.1)
-        
-        # Phase 4: Verify comprehensive workflow
-        final_metrics = manager.get_hot_reload_metrics()
-        
-        # Verify all changes were processed
-        assert len(workflow_results) == len(workflow_changes), \
-            "All workflow changes should be processed"
-        
-        assert final_metrics["reload_performance"]["total_reloads"] >= len(workflow_changes), \
-            "All reloads should be tracked"
-        
-        # Verify notifications were sent
-        assert len(notification_log) >= len(workflow_changes), \
-            "Notifications should be sent for all changes"
-        
-        # Verify system performance
-        assert final_metrics["reload_performance"]["average_reload_time"] < 2.0, \
-            f"Average reload time {final_metrics['reload_performance']['average_reload_time']:.3f}s should be <2s"
-        
-        # Verify system stability (high success rate)
-        assert final_metrics["reload_performance"]["success_rate"] >= 80.0, \
-            f"Success rate {final_metrics['reload_performance']['success_rate']:.1f}% should be ≥80%"
-        
-        # Phase 5: Verify configuration state consistency
-        current_config = manager.hot_reloader.current_config
-        
-        # Should have the latest values
-        assert current_config.get("max_concurrent_agents") == 25, \
-            "Final configuration should have latest value"
-        
-        assert current_config.get("agent_timeout") == 45.0, \
-            "Configuration should maintain all applied changes"
-        
-        # Verify rollback capability is preserved
-        assert len(manager.hot_reloader.rollback_snapshots) >= 1, \
-            "Rollback snapshots should be maintained"
+        task = manager.config_manager.reload_config("perf_test_agent", config_path)
+        reload_tasks.append(task)
+    
+    reload_results = await asyncio.gather(*reload_tasks)
+    reload_time = time.time() - start_time
+    
+    assert all(reload_results)
+    
+    # Performance assertions
+    assert reload_time < 3.0  # 50 reloads in under 3 seconds
+    avg_reload_time = reload_time / 50
+    assert avg_reload_time < 0.06  # Average reload under 60ms
+    
+    logger.info(f"Performance: {avg_reload_time*1000:.1f}ms per config reload")
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_yaml_config_support(hot_reload_manager):
+    """Test YAML configuration file support."""
+    manager = hot_reload_manager
+    
+    # Create test config
+    test_config = manager.create_test_config("yaml_test_agent")
+    config_path = os.path.join(manager.temp_dir, "yaml_test.yaml")
+    
+    # Save as YAML
+    save_result = await manager.config_manager.save_config(test_config, config_path)
+    assert save_result is True
+    
+    # Load from YAML
+    loaded_config = await manager.config_manager.load_config(config_path)
+    assert loaded_config is not None
+    assert loaded_config.agent_id == "yaml_test_agent"
+    assert loaded_config.model_settings["temperature"] == 0.7
+
+
+@pytest.mark.asyncio
+@pytest.mark.l2_integration
+async def test_config_error_handling(hot_reload_manager):
+    """Test configuration error handling."""
+    manager = hot_reload_manager
+    
+    # Test loading non-existent file
+    non_existent_config = await manager.config_manager.load_config("non_existent.json")
+    assert non_existent_config is None
+    
+    # Test loading invalid JSON
+    invalid_path = os.path.join(manager.temp_dir, "invalid.json")
+    with open(invalid_path, 'w') as f:
+        f.write("invalid json content")
+    
+    invalid_config = await manager.config_manager.load_config(invalid_path)
+    assert invalid_config is None
+    
+    # Test registering invalid configuration
+    invalid_config_obj = manager.create_test_config("invalid_agent")
+    invalid_config_obj.agent_type = "invalid_type"  # Invalid type
+    
+    invalid_config_path = os.path.join(manager.temp_dir, "invalid_config.json")
+    await manager.config_manager.save_config(invalid_config_obj, invalid_config_path)
+    
+    register_result = await manager.config_manager.register_config("invalid_agent", invalid_config_path)
+    assert register_result is False

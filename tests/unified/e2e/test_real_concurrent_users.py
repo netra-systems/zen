@@ -115,7 +115,7 @@ class RealConcurrentUserManager:
         auth_tasks = []
         for i in range(user_count):
             user_id = f"real_concurrent_user_{i}_{uuid.uuid4().hex[:6]}"
-            email = f"{user_id}@enterprise.netra.ai"
+            email = f"{user_id}@enterprise.netrasystems.ai"
             task = asyncio.create_task(self._authenticate_user(user_id, email))
             auth_tasks.append(task)
         
@@ -553,4 +553,4 @@ class TestRealConcurrentUsers:
 def create_test_jwt_token(user_id: str) -> str:
     """Helper function to create test JWT tokens"""
     helper = JWTTestHelper()
-    return helper.create_access_token(user_id, f"{user_id}@test.netra.ai")
+    return helper.create_access_token(user_id, f"{user_id}@test.netrasystems.ai")

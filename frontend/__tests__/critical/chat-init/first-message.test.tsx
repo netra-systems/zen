@@ -95,7 +95,7 @@ const createStreamingResponse = (content: string, delay: number = 50) => {
 const setupAuthenticatedUser = () => {
   mockUseAuthStore.mockReturnValue({
     isAuthenticated: true,
-    user: { id: 'user-123', email: 'test@netra.ai' },
+    user: { id: 'user-123', email: 'test@netrasystems.ai' },
     token: 'valid-token'
   });
 };

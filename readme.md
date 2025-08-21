@@ -48,31 +48,40 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 - **AI-Augmented Development:** Leverage specialized agents as force multipliers
 - **String Literal Index:** 35,000+ indexed constants to prevent hallucination
 
-## 📊 System Status
+## 📊 System Health & Compliance
 
+### Architecture Compliance
 ```bash
-# Check compliance
+# Check 500-line module and 25-line function limits
 python scripts/check_architecture_compliance.py
 
-# Update status report
+# Generate comprehensive WIP status report
 python scripts/generate_wip_report.py
 
-# Validate string literals
-python scripts/query_string_literals.py validate
+# Validate string literals (prevent hallucination)
+python scripts/query_string_literals.py validate "your_string"
+
+# Update string literals index after changes
+python scripts/scan_string_literals.py
 ```
 
-**Key Reports:**
-- [MASTER_WIP_STATUS.md](MASTER_WIP_STATUS.md) - System health
-- [SPEC/learnings/index.xml](SPEC/learnings/index.xml) - All learnings
-- [SPEC/string_literals_index.xml](SPEC/string_literals_index.xml) - Platform constants
+### Critical Specifications
+| Spec | Purpose | When to Check |
+|------|---------|---------------|
+| [`type_safety.xml`](SPEC/type_safety.xml) | Single source of truth, no duplication | Before any code |
+| [`conventions.xml`](SPEC/conventions.xml) | Code standards and patterns | Before implementation |
+| [`learnings/index.xml`](SPEC/learnings/index.xml) | System learnings and insights | Before starting work |
+| [`string_literals_index.xml`](SPEC/string_literals_index.xml) | Platform constants index | Before using literals |
+| [`staging_deployment_testing.xml`](SPEC/staging_deployment_testing.xml) | Staging validation | Before deployment |
 
 ## 🏃 Quick Start
 
 ### Prerequisites
-- Python 3.9+ (3.11+ recommended)
-- Node.js 18+
-- PostgreSQL 14+ (optional, can use SQLite for development)
-- Redis 7+ (optional, for caching)
+- **Python:** 3.9+ (3.11+ recommended for performance)
+- **Node.js:** 18+ (for frontend)
+- **PostgreSQL:** 14+ (optional, SQLite for dev)
+- **Redis:** 7+ (optional, for caching)
+- **ClickHouse:** 23+ (optional, for analytics)
 
 ### Installation
 
@@ -134,205 +143,432 @@ powershell -ExecutionPolicy Bypass -File quick-start.ps1  # Windows
 # Dev launcher will auto-create SQLite database
 ```
 
-### 🧪 Testing Quick Start
+### 🧪 Unified Test Runner
+
+The test runner provides a linear progression from fastest to slowest tests:
 
 ```bash
-# Run default test suite (fast feedback)
-python -m test_framework.test_runner
-
-# With specific options
+# DEFAULT: Integration tests with fast feedback (3-5min)
 python -m test_framework.test_runner --level integration --no-coverage --fast-fail
 
-# Test specific areas
-python -m test_framework.test_runner --level agents        # Agent tests
-python -m test_framework.test_runner --level websocket     # WebSocket tests
-python -m test_framework.test_runner --level auth          # Auth tests
+# Test Levels (from fastest to slowest):
+python -m test_framework.test_runner --level smoke         # <30s: Pre-commit validation
+python -m test_framework.test_runner --level unit          # 1-2min: Component tests
+python -m test_framework.test_runner --level critical      # 1-2min: Business-critical paths
+python -m test_framework.test_runner --level agents        # 2-3min: Agent system tests
+python -m test_framework.test_runner --level integration   # 3-5min: Feature validation
+python -m test_framework.test_runner --level performance   # 3-5min: SLA compliance
+python -m test_framework.test_runner --level real_e2e      # 20-30min: Full E2E with real services
 
-# With real LLM (for agent testing)
-python -m test_framework.test_runner --level agents --real-llm
-
-# Before production release (comprehensive)
-python -m test_framework.test_runner --level integration --real-llm --env staging
+# Specialized Testing
+python -m test_framework.test_runner --level agents --real-llm    # Test with real LLM
+python -m test_framework.test_runner --level staging --env staging # Staging validation
+python -m test_framework.test_runner --parallel --workers 4       # Parallel execution
 ```
 
-**Test Runner Features:**
-- 🎯 Smart test discovery and categorization
-- ⚡ Parallel execution with optimal sharding
-- 📊 Coverage reporting (target: 97%)
-- 🔄 Automatic retry for flaky tests
-- 📈 Performance baselines
-- 🎭 Mock/Real LLM switching
+**Advanced Features:**
+- 🎯 **Bad Test Detection:** Automatically tracks and reports flaky tests
+- ⚡ **Smart Sharding:** Optimal test distribution across workers
+- 📊 **Coverage Tracking:** Target 97% with detailed reports
+- 🔄 **Auto-Retry:** Configurable retry for transient failures
+- 📈 **Performance Baselines:** Track regression in response times
+- 🎭 **Mock/Real Toggle:** Switch between mocked and real services
 
 ### System Components
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        Frontend (Next.js)                    │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────┐    │
-│  │    Auth     │  │   Chat UI    │  │  WebSocket      │    │
-│  │   Context   │  │  Components  │  │   Provider      │    │
-│  └─────────────┘  └──────────────┘  └─────────────────┘    │
-└────────────────────────────┬────────────────────────────────┘
-                             │ WebSocket + REST API
-┌────────────────────────────┴────────────────────────────────┐
-│                      Backend (FastAPI)                       │
-│  ┌─────────────────────────────────────────────────────┐    │
-│  │               Multi-Agent System                     │    │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────────┐      │    │
-│  │  │Supervisor│──▶│  Triage  │──▶│Data Analysis│      │    │
-│  │  │  Agent   │  │  Agent   │  │    Agent     │      │    │
-│  │  └──────────┘  └──────────┘  └──────────────┘      │    │
-│  │       │                                              │    │
-│  │       ▼                                              │    │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────────┐      │    │
-│  │  │Optimize  │──▶│ Actions  │──▶│  Reporting   │      │    │
-│  │  │  Agent   │  │  Agent   │  │    Agent     │      │    │
-│  │  └──────────┘  └──────────┘  └──────────────┘      │    │
-│  └─────────────────────────────────────────────────────┘    │
-│                                                              │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      │
-│  │   Services   │  │    Routes    │  │   Schemas    │      │
-│  └──────────────┘  └──────────────┘  └──────────────┘      │
-└────────────────────────────┬────────────────────────────────┘
-                             │
-        ┌────────────────────┴────────────────────┐
-        │              Databases                   │
-        │  ┌──────────────┐  ┌──────────────┐    │
-        │  │  PostgreSQL  │  │  ClickHouse  │    │
-        │  └──────────────┘  └──────────────┘    │
-        └──────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                     Frontend (Next.js 14 + React 18)            │
+│  ┌──────────────┐  ┌──────────────┐  ┌────────────────────┐    │
+│  │  Auth Guard  │  │   Chat UI    │  │  Enhanced WebSocket │    │
+│  │  & Context   │  │  Components  │  │     Provider       │    │
+│  └──────────────┘  └──────────────┘  └────────────────────┘    │
+│  ┌──────────────────────────────────────────────────────────┐   │
+│  │            Zustand State Management + API Client         │   │
+│  └──────────────────────────────────────────────────────────┘   │
+└─────────────────────────────┬───────────────────────────────────┘
+                              │ WebSocket + REST API
+┌─────────────────────────────┴───────────────────────────────────┐
+│                        Backend (FastAPI + SQLAlchemy)            │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │              Multi-Agent Optimization System             │    │
+│  │  ┌────────────────┐     ┌─────────────────────────┐    │    │
+│  │  │ Apex Optimizer │────▶│ 40+ Specialized Tools   │    │    │
+│  │  │     Agent      │     │ (Cost, Perf, KV Cache) │    │    │
+│  │  └────────────────┘     └─────────────────────────┘    │    │
+│  │  ┌──────────┐  ┌──────────┐  ┌──────────────┐         │    │
+│  │  │Supervisor│──▶│  Triage  │──▶│Data Analysis│         │    │
+│  │  │  Agent   │  │  Agent   │  │    Agent     │         │    │
+│  │  └──────────┘  └──────────┘  └──────────────┘         │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                  │
+│  ┌───────────────────────────────────────────────────────────┐  │
+│  │          Core Services & Infrastructure                   │  │
+│  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐   │  │
+│  │  │  Auth/JWT    │  │  WebSocket   │  │  Rate Limit  │   │  │
+│  │  │  Service     │  │   Manager    │  │   Service    │   │  │
+│  │  └──────────────┘  └──────────────┘  └──────────────┘   │  │
+│  └───────────────────────────────────────────────────────────┘  │
+└──────────────────────────────┬──────────────────────────────────┘
+                               │
+┌──────────────────────────────┴──────────────────────────────────┐
+│                    Data Layer & External Services                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────────────┐  │
+│  │  PostgreSQL  │  │  ClickHouse  │  │    Redis Cache      │  │
+│  │  (Primary)   │  │  (Analytics) │  │   (Sessions/Data)   │  │
+│  └──────────────┘  └──────────────┘  └──────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │         External LLM Providers (OpenAI, Anthropic)       │  │
+│  └──────────────────────────────────────────────────────────┘  │
+└──────────────────────────────────────────────────────────────────┘
 ```
 
 ### Tech Stack
 
-- **Backend**: FastAPI, SQLAlchemy, Pydantic, Alembic
-- **Frontend**: Next.js 14, React 18, TypeScript, Zustand, TailwindCSS
-- **Databases**: PostgreSQL (primary), ClickHouse (analytics)
-- **Communication**: WebSockets, REST API
-- **Authentication**: OAuth 2.0, JWT
-- **Testing**: Pytest, Jest, Cypress
-- **Infrastructure**: Docker, Kubernetes-ready
+**Backend Technologies:**
+- **Framework:** FastAPI (async Python web framework)
+- **ORM:** SQLAlchemy 2.0 with async support
+- **Validation:** Pydantic V2 for data validation
+- **Migration:** Alembic for database migrations
+- **Task Queue:** Celery with Redis broker (optional)
 
-## 🔤 String Literals Index
+**Frontend Technologies:**
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript 5.x
+- **State:** Zustand for global state management
+- **Styling:** TailwindCSS + Shadcn/ui components
+- **WebSocket:** Custom enhanced provider with auto-reconnect
 
-**Prevents LLM hallucination with 35,000+ indexed platform constants**
+**Data Layer:**
+- **Primary DB:** PostgreSQL 14+ (users, sessions, threads)
+- **Analytics DB:** ClickHouse 23+ (metrics, logs, events)
+- **Cache:** Redis 7+ (sessions, rate limiting, temporary data)
+- **Vector DB:** Planned - for semantic search
+
+**Infrastructure & DevOps:**
+- **Containerization:** Docker + Docker Compose
+- **Orchestration:** Kubernetes-ready with Helm charts
+- **CI/CD:** GitHub Actions with matrix testing
+- **Monitoring:** Prometheus + Grafana + OpenTelemetry
+- **Logging:** Structured JSON logging with correlation IDs
+
+## 🔤 String Literals Index System
+
+**Critical system preventing LLM hallucination - 35,000+ indexed platform constants**
 
 ```bash
-# Validate before use
-python scripts/query_string_literals.py validate "your_string"
+# ALWAYS validate strings before use
+python scripts/query_string_literals.py validate "redis_url"
 
-# Update index after changes
+# Search for existing strings
+python scripts/query_string_literals.py search "websocket"
+
+# Update index after adding new constants
 python scripts/scan_string_literals.py
+
+# Query specific categories
+python scripts/query_string_literals.py list --category configuration
 ```
 
-**Categories:** configuration, paths, identifiers, database, events, metrics, environment, states
-**Reference:** [SPEC/string_literals_index.xml](SPEC/string_literals_index.xml)
+**Indexed Categories:**
+- `configuration`: Config keys, settings (e.g., "redis_url", "max_retries")
+- `paths`: API endpoints, file paths (e.g., "/api/v1/threads", "/websocket")
+- `identifiers`: Service names, agent types (e.g., "supervisor_agent")
+- `database`: Table/column names (e.g., "threads", "created_at")
+- `events`: Event names, message types (e.g., "thread_created")
+- `metrics`: Metric names and labels
+- `environment`: Environment variables (e.g., "NETRA_API_KEY")
+- `states`: Status values, conditions (e.g., "pending", "active")
 
 
-## 🏗 Architecture
+## 🏗 Project Structure
 
 ```
-├── app/                    # Backend (FastAPI)
-│   ├── agents/            # Multi-agent system
-│   ├── routes/            # API endpoints  
-│   ├── services/          # Business logic
-│   └── db/                # Database models
-├── frontend/              # Frontend (Next.js 14)
-│   ├── app/              # App router
-│   └── components/       # React components
-├── SPEC/                  # XML specifications
-│   └── learnings/        # System learnings
-├── scripts/              # Utility scripts
-└── tests/                # Test suites
+netra-core-generation-1/
+├── app/                        # Main Backend Service (FastAPI)
+│   ├── agents/                # Multi-agent system implementations
+│   ├── auth_integration/      # MANDATORY shared auth module
+│   ├── core/                  # Core utilities and base classes
+│   ├── db/                    # Database models and connections
+│   ├── routes/                # API endpoints and WebSocket
+│   ├── schemas/               # Pydantic models and types
+│   ├── services/              # Business logic and services
+│   │   └── apex_optimizer_agent/  # 40+ optimization tools
+│   └── websocket/             # WebSocket infrastructure
+│
+├── auth_service/              # Independent Auth Microservice
+│   └── main.py               # OAuth/JWT service
+│
+├── frontend/                  # Frontend Application (Next.js 14)
+│   ├── app/                  # App router pages
+│   ├── components/           # React components
+│   ├── providers/            # Context providers
+│   ├── services/             # API clients and services
+│   └── __tests__/            # Frontend test suites
+│
+├── SPEC/                      # Living Documentation (XML)
+│   ├── learnings/            # System insights and patterns
+│   ├── generated/            # Auto-generated indexes
+│   └── *.xml                 # Specification files
+│
+├── test_framework/            # Unified Testing Infrastructure
+│   ├── test_runner.py        # Main test orchestrator
+│   ├── bad_test_detector.py  # Flaky test detection
+│   └── coverage_analyzer.py  # Coverage reporting
+│
+├── scripts/                   # Development & Operations
+│   ├── dev_launcher.py       # Development environment starter
+│   ├── compliance/           # Architecture compliance checking
+│   └── query_string_literals.py  # String validation tool
+│
+├── tests/                     # Legacy test directory
+│   └── e2e/                  # End-to-end test suites
+│
+└── organized_root/            # Deployment configurations
+    └── deployment_configs/    # Staging/production deploy scripts
 ```
 
 
 ## 📚 API Documentation
 
-### Core Endpoints
+### REST API Endpoints
 
-**Authentication:** `/api/auth/login`, `/api/auth/google/authorize`  
-**WebSocket:** `ws://localhost:8000/ws?token={jwt_token}`  
-**Threads:** `/api/threads` (CRUD operations)  
-**Metrics:** `/api/metrics/savings/{user_id}`, `/api/metrics/roi`  
-**Health:** `/health/ready`, `/health/dependencies`
+**Authentication & Authorization:**
+- `POST /api/auth/login` - Email/password login
+- `GET /api/auth/google/authorize` - Google OAuth flow
+- `POST /api/auth/refresh` - Refresh JWT token
+- `POST /api/auth/logout` - Invalidate session
 
-### WebSocket Message Types
+**Thread Management:**
+- `GET /api/threads` - List user threads
+- `POST /api/threads` - Create new thread
+- `GET /api/threads/{thread_id}` - Get thread details
+- `DELETE /api/threads/{thread_id}` - Delete thread
+- `PUT /api/threads/{thread_id}` - Update thread
+
+**Optimization & Analysis:**
+- `POST /api/optimize/analyze` - Start optimization analysis
+- `GET /api/optimize/status/{job_id}` - Check job status
+- `GET /api/optimize/results/{job_id}` - Get optimization results
+
+**Metrics & Reporting:**
+- `GET /api/metrics/savings/{user_id}` - Cost savings metrics
+- `GET /api/metrics/roi` - ROI calculations
+- `GET /api/metrics/usage` - Usage analytics
+- `POST /api/reports/generate` - Generate custom report
+
+**Health & Monitoring:**
+- `GET /health/ready` - Readiness probe
+- `GET /health/live` - Liveness probe
+- `GET /health/dependencies` - Service dependencies status
+
+### WebSocket Protocol
+
+**Connection:**
+```javascript
+ws://localhost:8000/ws?token={jwt_token}
+```
+
+**Message Types:**
 ```typescript
-type MessageType = 'agent_started' | 'sub_agent_update' | 'agent_completed' | 
-                   'tool_call' | 'tool_result' | 'error' | 'heartbeat';
+interface WSMessage {
+  type: 'agent_started' | 'sub_agent_update' | 'agent_completed' | 
+        'tool_call' | 'tool_result' | 'error' | 'heartbeat';
+  data: any;
+  timestamp: string;
+  correlation_id?: string;
+}
 ```
 
-## 🧪 Testing
+**Event Flow:**
+1. Client connects with JWT token
+2. Server validates and establishes session
+3. Client sends optimization request
+4. Server streams real-time updates
+5. Final results delivered
+6. Connection maintained for follow-up
 
+## 🧪 Testing Strategy
+
+### Test Coverage Requirements
+- **Target Coverage:** 97% (enforced in CI/CD)
+- **Critical Paths:** 100% coverage required
+- **Agent Systems:** Real LLM testing mandatory
+
+### Bad Test Detection System
 ```bash
-# Default (before commits)
-python -m test_framework.test_runner --level integration --no-coverage --fast-fail
+# View flaky test report
+python -m test_framework.bad_test_reporter
 
-# Agent changes
-python -m test_framework.test_runner --level agents --real-llm
+# View specific test history
+python -m test_framework.bad_test_reporter --test "test_name"
 
-# Before releases (includes staging)
-python -m test_framework.test_runner --level integration --real-llm --env staging
+# Reset bad test tracking
+python -m test_framework.bad_test_reporter --reset
 ```
 
-**Target:** 97% coverage
-**Guide:** [SPEC/test_runner_guide.xml](SPEC/test_runner_guide.xml)
+### Testing Best Practices
+1. **Before Commits:** Run integration tests with fast-fail
+2. **After Agent Changes:** Test with real LLM providers
+3. **Before Deployment:** Full staging validation suite
+4. **Performance Changes:** Run performance baseline tests
+
+**Reference:** [SPEC/test_runner_guide.xml](SPEC/test_runner_guide.xml)
 
 ## 🚀 Deployment
 
-### GCP Staging
+### Staging Environment (GCP)
+
 ```bash
+# Pre-deployment validation
+python -m test_framework.test_runner --level staging --env staging
+
+# Deploy to staging
 python organized_root/deployment_configs/deploy_staging.py
 
-# Auth issues
-python organized_root/deployment_configs/setup_staging_auth.py --force-new-key
+# Verify deployment
+python scripts/test_staging_startup.py
+
+# Rollback if needed
+python organized_root/deployment_configs/rollback_staging.py --version previous
 ```
 
-### Production
+### Production Deployment
+
 ```bash
+# Build production images
+docker build -t netra-backend:prod -f Dockerfile.prod .
+docker build -t netra-frontend:prod -f frontend/Dockerfile.prod .
+
+# Run with Docker Compose
 docker-compose -f docker-compose.prod.yml up -d
+
+# Kubernetes deployment
+kubectl apply -f k8s/production/
 ```
 
-**Guides:**
+### Environment Variables
+Required for production:
+- `DATABASE_URL`: PostgreSQL connection string
+- `REDIS_URL`: Redis connection string
+- `CLICKHOUSE_URL`: ClickHouse connection
+- `JWT_SECRET`: JWT signing key
+- `OPENAI_API_KEY`: OpenAI API key
+- `ANTHROPIC_API_KEY`: Anthropic API key
+
+**Deployment Guides:**
+- [SPEC/staging_deployment_testing.xml](SPEC/staging_deployment_testing.xml)
 - [SPEC/learnings/deployment_staging.xml](SPEC/learnings/deployment_staging.xml)
-- [docs/deployment/PRODUCTION_DEPLOYMENT.md](docs/deployment/PRODUCTION_DEPLOYMENT.md)
 
 
-## 📊 Performance Monitoring
+## 📊 Performance Monitoring & SLAs
 
-### SLOs
-| Metric | Target |
-|--------|--------|
-| API Latency (p99) | < 2000ms |
-| WebSocket Connection | < 500ms |
-| Agent Response | < 30s |
-| Availability | 99.9% |
+### Service Level Objectives (SLOs)
 
-**Stack:** Prometheus, Grafana, OpenTelemetry
-**Guide:** [docs/operations/MONITORING_GUIDE.md](docs/operations/MONITORING_GUIDE.md)
+| Metric | Target | Alert Threshold | Business Impact |
+|--------|--------|-----------------|-----------------|
+| **API Latency (p99)** | < 2000ms | > 3000ms | User experience degradation |
+| **WebSocket Connection** | < 500ms | > 1000ms | Real-time features fail |
+| **Agent Response** | < 30s | > 45s | Customer frustration |
+| **Availability** | 99.9% | < 99.5% | Revenue loss |
+| **Error Rate** | < 0.1% | > 0.5% | Data integrity risk |
+
+### Monitoring Stack
+
+**Metrics Collection:**
+- **Prometheus:** Time-series metrics database
+- **Grafana:** Visualization and dashboards
+- **OpenTelemetry:** Distributed tracing
+
+**Key Dashboards:**
+1. **Business Metrics:** ROI, cost savings, usage
+2. **System Health:** CPU, memory, disk, network
+3. **Application Performance:** Response times, throughput
+4. **Agent Performance:** Tool usage, completion rates
+5. **WebSocket Health:** Connection pool, message rates
+
+### Alerting Rules
+
+```yaml
+# Critical alerts (PagerDuty)
+- API down for > 2 minutes
+- Database connection pool exhausted
+- Agent system failure rate > 10%
+
+# Warning alerts (Slack)
+- Memory usage > 80%
+- Response time degradation > 20%
+- WebSocket disconnection rate > 5%
+```
 
 
+
+## 🔐 Security & Compliance
+
+### Security Features
+- **Authentication:** OAuth 2.0 + JWT with refresh tokens
+- **Authorization:** Role-based access control (RBAC)
+- **Encryption:** TLS 1.3 for transit, AES-256 for rest
+- **Secret Management:** HashiCorp Vault integration
+- **Audit Logging:** Complete audit trail for compliance
+
+### Compliance
+- **SOC 2 Type II:** In progress
+- **GDPR:** Data privacy controls implemented
+- **HIPAA:** Healthcare data isolation available
+- **ISO 27001:** Security management system
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**WebSocket Connection Failures:**
+```bash
+# Check WebSocket health
+curl http://localhost:8000/health/websocket
+
+# View connection logs
+tail -f logs/websocket.log | grep ERROR
+```
+
+**Agent System Issues:**
+```bash
+# Test agent connectivity
+python scripts/test_agent_system.py
+
+# Check LLM provider status
+python scripts/check_llm_providers.py
+```
+
+**Database Connection Issues:**
+```bash
+# Test database connectivity
+python scripts/test_db_connection.py
+
+# Reset connection pool
+python scripts/reset_db_pool.py
+```
 
 ## 🔗 Key Resources
 
-### Development
-- [CLAUDE.md](CLAUDE.md) - Engineering principles
-- [LLM_MASTER_INDEX.md](LLM_MASTER_INDEX.md) - Navigation index
-- [MASTER_WIP_STATUS.md](MASTER_WIP_STATUS.md) - System health
-- [SPEC/learnings/index.xml](SPEC/learnings/index.xml) - All learnings
+### Essential Documentation
+- **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy
+- **[LLM_MASTER_INDEX.md](LLM_MASTER_INDEX.md)** - Complete file navigation
+- **[SPEC/learnings/index.xml](SPEC/learnings/index.xml)** - System learnings
 
-### Specifications
-- [SPEC/type_safety.xml](SPEC/type_safety.xml) - Type safety rules
-- [SPEC/conventions.xml](SPEC/conventions.xml) - Code standards
-- [SPEC/string_literals_index.xml](SPEC/string_literals_index.xml) - Platform constants
-- [SPEC/test_runner_guide.xml](SPEC/test_runner_guide.xml) - Testing guide
+### Critical Specifications
+- **[SPEC/type_safety.xml](SPEC/type_safety.xml)** - Type safety enforcement
+- **[SPEC/conventions.xml](SPEC/conventions.xml)** - Code standards
+- **[SPEC/string_literals_index.xml](SPEC/string_literals_index.xml)** - Constant validation
+- **[SPEC/test_runner_guide.xml](SPEC/test_runner_guide.xml)** - Testing strategy
+- **[SPEC/independent_services.xml](SPEC/independent_services.xml)** - Service boundaries
 
-### Documentation
-- [docs/deployment/PRODUCTION_DEPLOYMENT.md](docs/deployment/PRODUCTION_DEPLOYMENT.md) - Production guide
-- [docs/operations/MONITORING_GUIDE.md](docs/operations/MONITORING_GUIDE.md) - Monitoring
-- [GitHub Issues](https://github.com/netrasystems/netra-core/issues)
+### Support & Community
+- **GitHub Issues:** [github.com/netra-systems/netra-core/issues](https://github.com/netra-systems/netra-core/issues)
+- **Documentation:** [docs.netrasystems.ai](https://docs.netrasystems.ai)
+- **Status Page:** [status.netrasystems.ai](https://status.netrasystems.ai)
 
 ---
 
-© 2024 Netra Systems - Proprietary Software
+**© 2025 Netra Systems** - Enterprise AI Optimization Platform
+*Delivering measurable ROI through intelligent workload analysis*

@@ -80,7 +80,7 @@
             <critical-takeaway>Extended timeouts required: Backend/Auth 30s, Frontend 60s, Overall 120s.</critical-takeaway>
         </category>
 
-        <category name="Deployment" path="SPEC/learnings/deployment.xml" keywords="GCP, Cloud Run, Docker">
+        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run (cloud-run-uvicorn-workers).</critical-takeaway>
         </category>
 

@@ -62,7 +62,7 @@ class SignupFlowHelper:
     @staticmethod
     async def execute_real_signup_flow(db_connections: DatabaseTestConnections, sqlite_db: aiosqlite.Connection) -> Dict[str, Any]:
         """Execute complete signup flow with email using real auth service."""
-        user_email = f"newuser-{uuid.uuid4().hex[:8]}@netra.ai"
+        user_email = f"newuser-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         user_password = "SecureNewUser123!"
         user_id = str(uuid.uuid4())
         
@@ -412,7 +412,7 @@ def validate_signup_completion(signup_data: Dict[str, Any]) -> None:
     """Validate signup completion meets requirements."""
     assert "user_id" in signup_data, "Signup must provide user ID"
     assert "email" in signup_data, "Signup must provide email"
-    assert signup_data["email"].endswith("@netra.ai"), "Must use test domain"
+    assert signup_data["email"].endswith("@netrasystems.ai"), "Must use test domain"
     assert signup_data["password_hashed"], "Password must be hashed"
 
 

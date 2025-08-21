@@ -164,7 +164,7 @@ export const verifyStateRestoration = async (mockStore: any, mockUser: any, mock
 export const performOnboardingLogin = async (mockStore: any) => {
   const onboardingUser = {
     id: 'onboarding-user-123',
-    email: 'newuser@netra.ai',
+    email: 'newuser@netrasystems.ai',
     name: 'New User',
     tier: 'free'
   };
@@ -193,7 +193,7 @@ export const simulateFirstThreadCreation = (mockChatStore: any) => {
 export const expectOnboardingFlowComplete = (mockStore: any) => {
   const authStore = mockStore();
   expect(authStore.isAuthenticated).toBe(true);
-  expect(authStore.user?.email).toBe('newuser@netra.ai');
+  expect(authStore.user?.email).toBe('newuser@netrasystems.ai');
 };
 
 export const simulateSessionTimeout = (mockStore: any) => {
