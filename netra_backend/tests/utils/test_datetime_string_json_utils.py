@@ -11,10 +11,10 @@ from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.tests.helpers.datetime_string_test_helpers import (
+from netra_backend.tests.helpers.datetime_string_test_helpers import (
     DatetimeTestHelpers, StringTestHelpers
 )
-from netra_backend.app.tests.helpers.json_file_crypto_test_helpers import JsonTestHelpers
+from netra_backend.tests.helpers.json_file_crypto_test_helpers import JsonTestHelpers
 
 
 # Test 86: Datetime utils timezone

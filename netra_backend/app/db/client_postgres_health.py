@@ -6,8 +6,8 @@ Health monitoring and circuit breaker status for PostgreSQL client.
 from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.client_config import CircuitBreakerManager, HealthAssessment
-from netra_backend.app.client_postgres_executors import QueryExecutor
+from netra_backend.app.db.client_config import CircuitBreakerManager, HealthAssessment
+from netra_backend.app.db.client_postgres_executors import QueryExecutor
 
 logger = central_logger.get_logger(__name__)
 

@@ -32,8 +32,8 @@ from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from netra_backend.app.tests.unified.e2e.payment_flow_manager import PaymentFlowManager, MockPaymentProvider
-from netra_backend.app.tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
+from netra_backend.tests.unified.e2e.payment_flow_manager import PaymentFlowManager, MockPaymentProvider
+from netra_backend.tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from netra_backend.app.schemas.UserPlan import PlanTier
 
 

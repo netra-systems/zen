@@ -21,7 +21,7 @@ Architecture:
 All files ≤300 lines, all functions ≤8 lines.
 """
 
-from netra_backend.app.base import UnifiedConfigManager
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
 from netra_backend.app.validator import ConfigurationValidator
 from netra_backend.app.secrets import SecretManager
 from netra_backend.app.database import DatabaseConfigManager

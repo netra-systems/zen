@@ -10,7 +10,7 @@ from typing import Dict, List, Any, Optional
 from pathlib import Path
 import json
 
-from netra_backend.app.tests.fixtures.small_datasets import get_all_small_datasets
+from netra_backend.tests.fixtures.small_datasets import get_all_small_datasets
 from netra_backend.app.core.exceptions import NetraException
 
 

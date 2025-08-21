@@ -28,7 +28,7 @@ import base64
 from typing import Dict, Any, Optional
 from urllib.parse import urlencode, parse_qs, urlparse
 
-from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
 # OAuth service replaced with mock
 from unittest.mock import AsyncMock
 OAuthService = AsyncMock

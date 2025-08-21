@@ -73,5 +73,5 @@ class TestResilientHTTPClientCircuit:
     
     def _verify_circuit_open_result(self, result, mock_logger):
         """Verify circuit open behavior."""
-        from netra_backend.app.tests.services.external_api_client_utils import verify_circuit_open_behavior
+        from netra_backend.tests.services.external_api_client_utils import verify_circuit_open_behavior
         verify_circuit_open_behavior(result, mock_logger)

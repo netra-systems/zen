@@ -10,8 +10,8 @@ from datetime import datetime
 from decimal import Decimal
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.tests.helpers.validation_formatting_test_helpers import FormattingTestHelpers
-from netra_backend.app.tests.helpers.network_pagination_test_helpers import NetworkTestHelpers
+from netra_backend.tests.helpers.validation_formatting_test_helpers import FormattingTestHelpers
+from netra_backend.tests.helpers.network_pagination_test_helpers import NetworkTestHelpers
 
 
 # Test 92: Formatting utils display

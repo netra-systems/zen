@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, Mock, patch
 from fastapi import HTTPException
 from netra_backend.app.routes.threads_route import get_thread_messages
-from netra_backend.app.tests.helpers.thread_test_helpers import (
+from netra_backend.tests.helpers.thread_test_helpers import (
     create_mock_thread,
     create_mock_message,
     setup_thread_repo_mock,

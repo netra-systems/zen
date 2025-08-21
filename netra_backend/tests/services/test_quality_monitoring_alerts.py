@@ -95,7 +95,7 @@ class TestRealTimeMonitoring:
         
         dashboard_data = await real_quality_monitoring_service.get_dashboard_data()
         
-        from netra_backend.app.tests.helpers.quality_monitoring_helpers import assert_dashboard_data_structure
+        from netra_backend.tests.helpers.quality_monitoring_helpers import assert_dashboard_data_structure
         assert_dashboard_data_structure(dashboard_data)
 
 

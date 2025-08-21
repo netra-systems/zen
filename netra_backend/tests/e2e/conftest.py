@@ -23,7 +23,7 @@ import httpx
 from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from unittest.mock import Mock, AsyncMock, patch
-from netra_backend.app.tests.e2e.infrastructure import (
+from netra_backend.tests.e2e.infrastructure import (
     LLMTestManager,
     LLMTestModel,
     LLMTestConfig,

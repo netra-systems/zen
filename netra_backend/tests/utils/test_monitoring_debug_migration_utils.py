@@ -9,8 +9,8 @@ import time
 from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.tests.helpers.rate_retry_monitoring_test_helpers import MonitoringTestHelpers
-from netra_backend.app.tests.helpers.debug_migration_test_helpers import (
+from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import MonitoringTestHelpers
+from netra_backend.tests.helpers.debug_migration_test_helpers import (
     DebugTestHelpers, MigrationTestHelpers
 )
 

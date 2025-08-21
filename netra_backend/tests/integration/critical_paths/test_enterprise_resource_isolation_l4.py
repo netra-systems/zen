@@ -32,7 +32,7 @@ import redis.asyncio as redis
 import asyncpg
 import httpx
 from unittest.mock import AsyncMock
-from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )

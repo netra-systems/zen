@@ -15,7 +15,7 @@ import pytest
 import time
 from typing import Dict, Any
 
-from netra_backend.app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
+from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.db.models_agent import Run, Step

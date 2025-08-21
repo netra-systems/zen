@@ -27,7 +27,7 @@ from datetime import datetime
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
 
 
 @dataclass

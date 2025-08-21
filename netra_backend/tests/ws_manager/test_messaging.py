@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, patch, call
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.ws_manager import WebSocketManager
-from netra_backend.app.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
+from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
 
 
 class TestMessageSending(WebSocketTestBase):

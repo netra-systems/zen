@@ -24,7 +24,7 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase, CriticalPathMetrics
 )
 # # # from agents.supervisor_agent_modern import ModernSupervisorAgent

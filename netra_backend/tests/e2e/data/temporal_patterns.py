@@ -15,7 +15,7 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Composable pattern generators
 
 Usage:
-    from netra_backend.app.tests.e2e.data.temporal_patterns import (
+    from netra_backend.tests.e2e.data.temporal_patterns import (
         TemporalPatternGenerator,
         SeasonalPatternGenerator,
         BurstPatternGenerator

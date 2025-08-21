@@ -21,7 +21,7 @@ from dataclasses import dataclass
 from testcontainers.compose import DockerCompose
 from pathlib import Path
 
-from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )

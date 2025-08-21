@@ -95,7 +95,7 @@ def _create_reference_mock(**kwargs):
 @pytest.fixture
 def unit_of_work(mock_session, mock_models):
     """Create a test unit of work instance with mocked repositories."""
-    from netra_backend.app.tests.helpers.database_repository_helpers import (
+    from netra_backend.tests.helpers.database_repository_helpers import (
         setup_thread_mock_behavior, setup_message_mock_behavior,
         setup_run_mock_behavior, setup_reference_mock_behavior
     )

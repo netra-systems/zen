@@ -16,7 +16,7 @@ import time
 from typing import Dict, Any, List
 from contextlib import asynccontextmanager
 
-from netra_backend.app.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
+from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
 from netra_backend.app.db.models_agent import Thread, Message, Run
 from netra_backend.app.db.models_user import User, ToolUsageLog
 from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy

@@ -13,13 +13,13 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design: Individual step creators
 
 Usage:
-    from netra_backend.app.tests.e2e.data.plan_step_placeholders import (
+    from netra_backend.tests.e2e.data.plan_step_placeholders import (
         _create_cap_step_4, _create_cap_step_5, ...
     )
 """
 
 from typing import List
-from netra_backend.app.tests.e2e.data.default_plans import PlanStep, PlanStepType, PlanPriority, ValidationCriteria
+from netra_backend.tests.e2e.data.default_plans import PlanStep, PlanStepType, PlanPriority, ValidationCriteria
 
 
 def _create_validation_criteria(threshold: float, unit: str, method: str, timeout: int = 24) -> ValidationCriteria:

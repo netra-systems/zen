@@ -8,7 +8,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock
 
-from netra_backend.app.tests.test_utilities.agent_fixtures import (
+from netra_backend.tests.test_utilities.agent_fixtures import (
     create_mock_supervisor,
     create_mock_triage_agent,
     create_agent_state,

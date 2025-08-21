@@ -13,7 +13,7 @@ from netra_backend.app.services.quality_gate_service import (
     ValidationResult
 )
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.tests.helpers.quality_gate_helpers import create_redis_mock, create_quality_service
+from netra_backend.tests.helpers.quality_gate_helpers import create_redis_mock, create_quality_service
 
 
 @pytest.fixture

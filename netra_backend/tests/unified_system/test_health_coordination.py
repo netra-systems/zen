@@ -28,7 +28,7 @@ from netra_backend.app.core.health import HealthInterface, HealthLevel
 from netra_backend.app.core.health.checks import UnifiedDatabaseHealthChecker, DependencyHealthChecker
 from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.tests.unified_system.mock_services import (
+from netra_backend.tests.unified_system.mock_services import (
     setup_unified_mock_services, ServiceRegistry, MockHTTPService
 )
 
@@ -465,7 +465,7 @@ async def test_mock_websocket_service():
     - Message handling functions
     - Health endpoint available
     """
-    from netra_backend.app.tests.unified_system.mock_services import create_mock_websocket_service
+    from netra_backend.tests.unified_system.mock_services import create_mock_websocket_service
     import websockets
     
     ws_service = create_mock_websocket_service()

@@ -47,7 +47,7 @@ class TestResilientHTTPClientHealth:
     
     def _setup_successful_connectivity_test(self):
         """Setup mock for successful connectivity test."""
-        from netra_backend.app.tests.services.external_api_client_utils import MockAsyncContextManager
+        from netra_backend.tests.services.external_api_client_utils import MockAsyncContextManager
         
         class MockResponse:
             def __init__(self, status):

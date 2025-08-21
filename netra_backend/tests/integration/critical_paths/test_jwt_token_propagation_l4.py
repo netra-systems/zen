@@ -33,7 +33,7 @@ from dataclasses import dataclass
 import jwt as jwt_lib
 from urllib.parse import urlencode, parse_qs, urlparse
 
-from netra_backend.app.tests.integration.critical_paths.l4_staging_critical_base import (
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
     L4StagingCriticalPathTestBase, 
     CriticalPathMetrics
 )

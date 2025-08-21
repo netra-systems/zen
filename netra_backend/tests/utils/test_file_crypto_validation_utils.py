@@ -9,10 +9,10 @@ import os
 import tempfile
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.tests.helpers.json_file_crypto_test_helpers import (
+from netra_backend.tests.helpers.json_file_crypto_test_helpers import (
     FileTestHelpers, CryptoTestHelpers
 )
-from netra_backend.app.tests.helpers.validation_formatting_test_helpers import ValidationTestHelpers
+from netra_backend.tests.helpers.validation_formatting_test_helpers import ValidationTestHelpers
 
 
 # Test 89: File utils operations

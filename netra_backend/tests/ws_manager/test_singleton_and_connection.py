@@ -10,7 +10,7 @@ from unittest.mock import Mock, AsyncMock, patch
 from starlette.websockets import WebSocketState
 
 from netra_backend.app.ws_manager import WebSocketManager, ConnectionInfo, manager, ws_manager
-from netra_backend.app.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
+from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
 
 
 class TestSingletonPattern(WebSocketTestBase):

@@ -546,7 +546,7 @@ class TestWebSocketCoroutineAuthRegression:
     @pytest.mark.asyncio
     async def test_security_service_validate_token_awaits_decode(self):
         """Test EnhancedSecurityService validate_token properly awaits decode."""
-        from netra_backend.app.tests.services.security_service_test_mocks import EnhancedSecurityService
+        from netra_backend.tests.services.security_service_test_mocks import EnhancedSecurityService
         from netra_backend.app.services.key_manager import KeyManager
         
         mock_key_manager = Mock(spec=KeyManager)

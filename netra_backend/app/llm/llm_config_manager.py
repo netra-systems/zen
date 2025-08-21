@@ -80,7 +80,7 @@ class LLMConfigManager:
     def _create_mock_llm(self) -> Any:
         """Create mock LLM for development environment."""
         try:
-            from netra_backend.app.tests.helpers.llm_mocks import MockLLM
+            from netra_backend.tests.helpers.llm_mocks import MockLLM
             return MockLLM("mock-dev-model")
         except ImportError:
             logger.warning("MockLLM not available - using None")

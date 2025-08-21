@@ -13,7 +13,7 @@ from netra_backend.app.services.synthetic_data_service import SyntheticDataServi
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.ws_manager import manager as ws_manager
 from netra_backend.app import schemas
-from netra_backend.app.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
+from netra_backend.tests.helpers.shared_test_types import TestIntegration as SharedTestIntegration
 from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig, ClickHouseService
 
 

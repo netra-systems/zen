@@ -9,8 +9,8 @@ from sqlalchemy import text
 
 from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.client_config import CircuitBreakerManager
-from netra_backend.app.client_postgres_session import TransactionHandler
+from netra_backend.app.db.client_config import CircuitBreakerManager
+from netra_backend.app.db.client_postgres_session import TransactionHandler
 
 logger = central_logger.get_logger(__name__)
 

@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from datetime import datetime, UTC
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.app.tests.helpers.tool_permission_helpers import (
+from netra_backend.tests.helpers.tool_permission_helpers import (
     MockRedisClient,
     create_sample_context,
     setup_redis_usage,

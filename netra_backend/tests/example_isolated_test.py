@@ -17,7 +17,7 @@ import asyncio
 from datetime import datetime, UTC
 from sqlalchemy import text
 
-from netra_backend.app.tests.isolated_test_config import (
+from netra_backend.tests.isolated_test_config import (
     isolated_test_config, isolated_postgres, isolated_clickhouse,
     isolated_full_stack, with_isolated_postgres, with_database_snapshots
 )

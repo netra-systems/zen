@@ -10,24 +10,24 @@ from typing import Dict, List, Any
 import pytest
 
 # Import all fixture modules
-from netra_backend.app.tests.fixtures.fixtures_core import CoreTestFixtures
-from netra_backend.app.tests.fixtures.fixtures_workloads import WorkloadFixtures
-from netra_backend.app.tests.fixtures.fixtures_metrics import MetricsFixtures
+from netra_backend.tests.fixtures.fixtures_core import CoreTestFixtures
+from netra_backend.tests.fixtures.fixtures_workloads import WorkloadFixtures
+from netra_backend.tests.fixtures.fixtures_metrics import MetricsFixtures
 
 # Import all fixture functions
-from netra_backend.app.tests.fixtures.fixtures_core import (
+from netra_backend.tests.fixtures.fixtures_core import (
     core_fixtures,
     small_core_data,
     medium_core_data,
     large_core_data
 )
-from netra_backend.app.tests.fixtures.fixtures_workloads import (
+from netra_backend.tests.fixtures.fixtures_workloads import (
     workload_fixtures,
     training_jobs,
     inference_endpoints,
     batch_jobs
 )
-from netra_backend.app.tests.fixtures.fixtures_metrics import (
+from netra_backend.tests.fixtures.fixtures_metrics import (
     metrics_fixtures,
     error_cascade_logs,
     memory_leak_logs,

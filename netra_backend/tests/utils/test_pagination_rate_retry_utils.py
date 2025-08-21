@@ -8,8 +8,8 @@ import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
-from netra_backend.app.tests.helpers.network_pagination_test_helpers import PaginationTestHelpers
-from netra_backend.app.tests.helpers.rate_retry_monitoring_test_helpers import (
+from netra_backend.tests.helpers.network_pagination_test_helpers import PaginationTestHelpers
+from netra_backend.tests.helpers.rate_retry_monitoring_test_helpers import (
     RateLimiterTestHelpers, RetryTestHelpers
 )
 
