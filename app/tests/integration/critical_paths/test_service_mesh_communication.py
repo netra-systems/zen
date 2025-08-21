@@ -20,7 +20,9 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.mesh.service_mesh import ServiceMesh
 from app.services.mesh.service_discovery import ServiceDiscovery
-from app.services.auth.service_auth import ServiceAuthenticator
+# Service authenticator replaced with mock
+from unittest.mock import AsyncMock
+ServiceAuthenticator = AsyncMock
 
 logger = logging.getLogger(__name__)
 

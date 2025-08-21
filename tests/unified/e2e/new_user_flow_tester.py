@@ -23,7 +23,7 @@ class CompleteNewUserFlowTester:
     
     def __init__(self, auth_tester):
         self.auth_tester = auth_tester
-        self.user_email = f"e2e-new-{uuid.uuid4().hex[:8]}@netra.ai"
+        self.user_email = f"e2e-new-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         self.test_results: Dict[str, Any] = {}
         self.user_data = {}
     

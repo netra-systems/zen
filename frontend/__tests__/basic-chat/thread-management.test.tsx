@@ -39,7 +39,7 @@ const mockThreadStore = {
 
 const mockAuthStore = {
   isAuthenticated: true,
-  user: { id: 'test-user', email: 'test@netra.ai', name: 'Test User' },
+  user: { id: 'test-user', email: 'test@netrasystems.ai', name: 'Test User' },
   token: 'test-token'
 };
 

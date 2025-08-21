@@ -71,7 +71,7 @@ class ApiCorsManager:
                 max_age=3600
             ),
             "/api/v1/auth": CorsPolicy(
-                allowed_origins=["https://app.netra.ai", "https://staging.netra.ai"],
+                allowed_origins=["https://app.netrasystems.ai", "https://staging.netrasystems.ai"],
                 allowed_methods=["GET", "POST", "OPTIONS"],
                 allowed_headers=["Content-Type", "Authorization"],
                 exposed_headers=["X-Auth-Token"],
@@ -79,7 +79,7 @@ class ApiCorsManager:
                 max_age=1800
             ),
             "/api/v1/admin": CorsPolicy(
-                allowed_origins=["https://admin.netra.ai"],
+                allowed_origins=["https://admin.netrasystems.ai"],
                 allowed_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                 allowed_headers=["Content-Type", "Authorization", "X-Admin-Key"],
                 exposed_headers=["X-Operation-Status"],
@@ -618,12 +618,12 @@ async def test_auth_api_restricted_origins(cors_manager):
     """Test auth API with restricted origin policy."""
     test_scenarios = [
         {
-            "origin": "https://app.netra.ai",
+            "origin": "https://app.netrasystems.ai",
             "method": "POST",
             "expected_allowed": True
         },
         {
-            "origin": "https://staging.netra.ai",
+            "origin": "https://staging.netrasystems.ai",
             "method": "GET",
             "expected_allowed": True
         },
@@ -633,7 +633,7 @@ async def test_auth_api_restricted_origins(cors_manager):
             "expected_allowed": False
         },
         {
-            "origin": "http://app.netra.ai",  # Wrong protocol
+            "origin": "http://app.netrasystems.ai",  # Wrong protocol
             "method": "GET",
             "expected_allowed": False
         }
@@ -703,17 +703,17 @@ async def test_admin_api_strict_policy(cors_manager):
     """Test admin API with strict CORS policy."""
     test_scenarios = [
         {
-            "origin": "https://admin.netra.ai",
+            "origin": "https://admin.netrasystems.ai",
             "method": "DELETE",
             "expected_allowed": True
         },
         {
-            "origin": "https://app.netra.ai",  # Wrong origin for admin
+            "origin": "https://app.netrasystems.ai",  # Wrong origin for admin
             "method": "GET",
             "expected_allowed": False
         },
         {
-            "origin": "https://admin.netra.ai",
+            "origin": "https://admin.netrasystems.ai",
             "method": "PATCH",  # Method not in allowed list
             "expected_allowed": False
         }
@@ -727,7 +727,7 @@ async def test_admin_api_strict_policy(cors_manager):
     
     # Check successful admin request
     admin_results = [r for r in compliance_result["results"] 
-                    if r["scenario"]["origin"] == "https://admin.netra.ai" 
+                    if r["scenario"]["origin"] == "https://admin.netrasystems.ai" 
                     and r["scenario"]["method"] == "DELETE"]
     
     if admin_results:
@@ -807,7 +807,7 @@ async def test_complex_preflight_scenarios(cors_manager):
     complex_preflight = await cors_manager.make_cors_request(
         "/api/v1/auth",
         method="POST",
-        origin="https://app.netra.ai",
+        origin="https://app.netrasystems.ai",
         headers={
             "Access-Control-Request-Headers": "Content-Type,Authorization,X-Custom-Header"
         },
@@ -835,7 +835,7 @@ async def test_cors_policy_violation_tracking(cors_manager):
     violation_scenarios = [
         ("/api/v1/auth", "https://malicious.com", "GET"),
         ("/api/v1/admin", "https://wrong-admin.com", "POST"),
-        ("/api/v1/auth", "https://app.netra.ai", "PATCH")  # Wrong method
+        ("/api/v1/auth", "https://app.netrasystems.ai", "PATCH")  # Wrong method
     ]
     
     for endpoint, origin, method in violation_scenarios:
@@ -903,8 +903,8 @@ async def test_cors_metrics_accuracy(cors_manager):
     # Generate test traffic
     test_requests = [
         ("/api/v1/public", "https://example.com", "GET"),
-        ("/api/v1/auth", "https://app.netra.ai", "POST"),
-        ("/api/v1/admin", "https://admin.netra.ai", "DELETE"),
+        ("/api/v1/auth", "https://app.netrasystems.ai", "POST"),
+        ("/api/v1/admin", "https://admin.netrasystems.ai", "DELETE"),
         ("/api/v1/embed", "https://customer.com", "GET"),
     ]
     
@@ -922,7 +922,7 @@ async def test_cors_metrics_accuracy(cors_manager):
     # Check origin breakdown
     origin_breakdown = metrics["origin_breakdown"]
     assert "https://example.com" in origin_breakdown
-    assert "https://app.netra.ai" in origin_breakdown
+    assert "https://app.netrasystems.ai" in origin_breakdown
     
     # Check pattern breakdown
     pattern_breakdown = metrics["pattern_breakdown"]

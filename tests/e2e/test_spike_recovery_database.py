@@ -26,6 +26,9 @@ import httpx
 import sys
 import os
 
+# Import required classes from test_spike_recovery_core
+from .test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
+
 class TestDatabaseConnectionPoolStress:
     """Test Case 5: Database Connection Pool Stress Testing"""
     

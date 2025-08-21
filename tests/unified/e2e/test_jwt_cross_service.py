@@ -148,7 +148,7 @@ class CrossServiceJWTValidator:
         start_time = self.performance.start_timer()
         
         # Create valid token
-        valid_token = await self.jwt_helper.create_access_token(user_id, "test@netra.ai")
+        valid_token = await self.jwt_helper.create_access_token(user_id, "test@netrasystems.ai")
         
         # Verify token works initially
         initial_auth = await self.jwt_helper.make_auth_request("/auth/validate", valid_token)

@@ -36,7 +36,7 @@ class TestWebSocketAuthTokenRefresh:
         """Create test user."""
         return UserInDB(
             id="refresh_user_001",
-            email="refresh@test.netra.ai",
+            email="refresh@test.netrasystems.ai",
             username="refreshuser",
             is_active=True,
             created_at=datetime.now(timezone.utc)

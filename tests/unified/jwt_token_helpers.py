@@ -103,7 +103,7 @@ class JWTTestHelper:
         from app.core.auth_constants import JWTConstants
         return {
             JWTConstants.SUBJECT: f"test-user-{uuid.uuid4().hex[:8]}",
-            JWTConstants.EMAIL: "test@netra.ai",
+            JWTConstants.EMAIL: "test@netrasystems.ai",
             JWTConstants.PERMISSIONS: ["read", "write"],
             JWTConstants.ISSUED_AT: datetime.now(timezone.utc),
             JWTConstants.EXPIRES_AT: datetime.now(timezone.utc) + timedelta(minutes=15),

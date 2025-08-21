@@ -32,7 +32,7 @@ class JWTTestHelper:
         """Create standard valid token payload."""
         return {
             "sub": f"test-user-{uuid.uuid4().hex[:8]}",
-            "email": "test@netra.ai",
+            "email": "test@netrasystems.ai",
             "permissions": ["read", "write"],
             "iat": datetime.now(timezone.utc),
             "exp": datetime.now(timezone.utc) + timedelta(minutes=15),
@@ -139,7 +139,7 @@ class TestJWTCreationAndSigning:
         """
         # Create JWT with user claims
         user_id = f"test-user-{uuid.uuid4().hex[:8]}"
-        email = "test@netra.ai"
+        email = "test@netrasystems.ai"
         roles = ["read", "write"]
         
         payload = {
@@ -373,7 +373,7 @@ class TestTokenExpirationHandling:
         # Create token expired 1 hour ago
         expired_payload = {
             "sub": "test-user",
-            "email": "test@netra.ai",
+            "email": "test@netrasystems.ai",
             "permissions": ["read"],
             "iat": int((datetime.now(timezone.utc) - timedelta(hours=2)).timestamp()),
             "exp": int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp()),

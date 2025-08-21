@@ -66,11 +66,11 @@ def is_optional_secret(secret_name: str) -> bool:
 def print_secret_status(secret_name: str, is_set: bool):
     """Print the status of a GitHub secret."""
     if is_set:
-        print(f"{Fore.GREEN}✓ {secret_name}: Configured{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}[OK] {secret_name}: Configured{Style.RESET_ALL}")
     elif is_optional_secret(secret_name):
-        print(f"{Fore.YELLOW}⚠ {secret_name}: Not set (optional){Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}[WARN] {secret_name}: Not set (optional){Style.RESET_ALL}")
     else:
-        print(f"{Fore.RED}✗ {secret_name}: Not configured{Style.RESET_ALL}")
+        print(f"{Fore.RED}[FAIL] {secret_name}: Not configured{Style.RESET_ALL}")
 
 def check_single_github_secret(secret_name: str, secrets: Dict[str, bool]):
     """Check and update status for a single GitHub secret."""
@@ -137,7 +137,7 @@ def test_db_connection(conn) -> str:
     cursor.execute("SELECT version()")
     version = cursor.fetchone()[0]
     cursor.close()
-    print(f"{Fore.GREEN}✓ PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
+    print(f"{Fore.GREEN}[OK] PostgreSQL connected: {version[:50]}...{Style.RESET_ALL}")
     return version
 
 def query_database_tables(conn) -> List[Tuple]:
@@ -158,7 +158,7 @@ def print_table_results(tables: List[Tuple]):
         for table in tables[:5]:
             print(f"    - {table[0]}")
     else:
-        print(f"{Fore.YELLOW}  ⚠ No tables found (run migrations){Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}  [WARN] No tables found (run migrations){Style.RESET_ALL}")
 
 def check_database_tables(conn) -> bool:
     """Check for existing tables in database."""
@@ -170,7 +170,7 @@ def validate_database_url() -> str:
     """Validate DATABASE_URL environment variable."""
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
-        print(f"{Fore.RED}✗ DATABASE_URL not set{Style.RESET_ALL}")
+        print(f"{Fore.RED}[FAIL] DATABASE_URL not set{Style.RESET_ALL}")
         return ""
     return db_url
 
@@ -184,7 +184,7 @@ def perform_database_connection_test(db_url: str) -> bool:
         conn.close()
         return True
     except Exception as e:
-        print(f"{Fore.RED}✗ PostgreSQL connection failed: {e}{Style.RESET_ALL}")
+        print(f"{Fore.RED}[FAIL] PostgreSQL connection failed: {e}{Style.RESET_ALL}")
         return False
 
 def check_database_connection() -> bool:
@@ -210,7 +210,7 @@ def check_redis_connection() -> bool:
             redis_url = f"redis://{redis_host}:{redis_port}/{redis_db}"
             print(f"  Constructed Redis URL from components")
         else:
-            print(f"{Fore.RED}✗ Redis configuration not found{Style.RESET_ALL}")
+            print(f"{Fore.RED}[FAIL] Redis configuration not found{Style.RESET_ALL}")
             return False
     
     try:
@@ -234,7 +234,7 @@ def check_redis_connection() -> bool:
         
         # Get info
         info = r.info()
-        print(f"{Fore.GREEN}✓ Redis connected: v{info.get('redis_version', 'unknown')}{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}[OK] Redis connected: v{info.get('redis_version', 'unknown')}{Style.RESET_ALL}")
         print(f"  Memory used: {info.get('used_memory_human', 'unknown')}")
         print(f"  Connected clients: {info.get('connected_clients', 'unknown')}")
         
@@ -243,12 +243,12 @@ def check_redis_connection() -> bool:
         r.set(test_key, "test_value", ex=60)
         value = r.get(test_key)
         if value == b"test_value":
-            print(f"  ✓ Read/write test passed")
+            print(f"  [OK] Read/write test passed")
         
         return True
         
     except Exception as e:
-        print(f"{Fore.RED}✗ Redis connection failed: {e}{Style.RESET_ALL}")
+        print(f"{Fore.RED}[FAIL] Redis connection failed: {e}{Style.RESET_ALL}")
         return False
 
 def check_clickhouse_connection() -> bool:
@@ -267,7 +267,7 @@ def check_clickhouse_connection() -> bool:
     print(f"  Secure: {ch_secure}")
     
     if not ch_password:
-        print(f"{Fore.RED}✗ CLICKHOUSE_PASSWORD not set{Style.RESET_ALL}")
+        print(f"{Fore.RED}[FAIL] CLICKHOUSE_PASSWORD not set{Style.RESET_ALL}")
         return False
     
     try:
@@ -285,7 +285,7 @@ def check_clickhouse_connection() -> bool:
         # Test query
         result = client.query("SELECT version()")
         version = result.result_rows[0][0] if result.result_rows else "unknown"
-        print(f"{Fore.GREEN}✓ ClickHouse connected: v{version}{Style.RESET_ALL}")
+        print(f"{Fore.GREEN}[OK] ClickHouse connected: v{version}{Style.RESET_ALL}")
         
         # Check tables
         tables = client.query("SHOW TABLES").result_rows
@@ -300,7 +300,7 @@ def check_clickhouse_connection() -> bool:
         return True
         
     except Exception as e:
-        print(f"{Fore.RED}✗ ClickHouse connection failed: {e}{Style.RESET_ALL}")
+        print(f"{Fore.RED}[FAIL] ClickHouse connection failed: {e}{Style.RESET_ALL}")
         print(f"  Ensure CLICKHOUSE_PASSWORD is set correctly")
         return False
 
@@ -328,11 +328,11 @@ def check_environment_variables() -> Dict[str, bool]:
         
         if success:
             if value == "NOT SET (optional)":
-                print(f"{Fore.YELLOW}⚠ {var}: {value}{Style.RESET_ALL}")
+                print(f"{Fore.YELLOW}[WARN] {var}: {value}{Style.RESET_ALL}")
             else:
-                print(f"{Fore.GREEN}✓ {var}: {value}{Style.RESET_ALL}")
+                print(f"{Fore.GREEN}[OK] {var}: {value}{Style.RESET_ALL}")
         else:
-            print(f"{Fore.RED}✗ {var}: {value}{Style.RESET_ALL}")
+            print(f"{Fore.RED}[FAIL] {var}: {value}{Style.RESET_ALL}")
         
         results[var] = success
     
@@ -353,9 +353,9 @@ def check_gcp_configuration() -> bool:
         
         if result.returncode == 0:
             project = result.stdout.strip()
-            print(f"{Fore.GREEN}✓ GCP Project: {project}{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}[OK] GCP Project: {project}{Style.RESET_ALL}")
         else:
-            print(f"{Fore.YELLOW}⚠ gcloud not configured{Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}[WARN] gcloud not configured{Style.RESET_ALL}")
             return False
         
         # Check Cloud SQL proxy
@@ -367,21 +367,21 @@ def check_gcp_configuration() -> bool:
         )
         
         if result.returncode == 0:
-            print(f"{Fore.GREEN}✓ Cloud SQL Proxy installed{Style.RESET_ALL}")
+            print(f"{Fore.GREEN}[OK] Cloud SQL Proxy installed{Style.RESET_ALL}")
         else:
-            print(f"{Fore.YELLOW}⚠ Cloud SQL Proxy not found (needed for migrations){Style.RESET_ALL}")
+            print(f"{Fore.YELLOW}[WARN] Cloud SQL Proxy not found (needed for migrations){Style.RESET_ALL}")
         
         return True
         
     except Exception as e:
-        print(f"{Fore.YELLOW}⚠ GCP check skipped: {e}{Style.RESET_ALL}")
+        print(f"{Fore.YELLOW}[WARN] GCP check skipped: {e}{Style.RESET_ALL}")
         return False
 
 def print_validator_header():
     """Print the main validator header."""
-    print(f"{Fore.MAGENTA}╔{'═' * 58}╗")
-    print(f"║{'Staging Environment Configuration Validator':^58}║")
-    print(f"╚{'═' * 58}╝{Style.RESET_ALL}")
+    print(f"{Fore.MAGENTA}+{'-' * 58}+")
+    print(f"|{'Staging Environment Configuration Validator':^58}|")
+    print(f"+{'-' * 58}+{Style.RESET_ALL}")
 
 def initialize_results_tracking() -> Dict[str, bool]:
     """Initialize the results tracking dictionary."""
@@ -421,19 +421,19 @@ def print_validation_results(results: Dict[str, bool]):
     """Print the validation results summary."""
     print_section("Validation Summary")
     for check, check_passed in results.items():
-        status = f"{Fore.GREEN}✓ PASS" if check_passed else f"{Fore.RED}✗ FAIL"
+        status = f"{Fore.GREEN}[PASS]" if check_passed else f"{Fore.RED}[FAIL]"
         print(f"  {check.replace('_', ' ').title():30} {status}{Style.RESET_ALL}")
 
 def determine_final_result(results: Dict[str, bool]) -> int:
     """Determine and print the final result."""
     total = len(results)
     passed = sum(1 for v in results.values() if v)
-    print(f"\n{Fore.CYAN}{'─' * 60}{Style.RESET_ALL}")
+    print(f"\n{Fore.CYAN}{'-' * 60}{Style.RESET_ALL}")
     if passed == total:
-        print(f"{Fore.GREEN}✓ All checks passed! ({passed}/{total}){Style.RESET_ALL}")
+        print(f"{Fore.GREEN}[OK] All checks passed! ({passed}/{total}){Style.RESET_ALL}")
         print(f"{Fore.GREEN}Your staging environment is properly configured.{Style.RESET_ALL}")
         return 0
-    print(f"{Fore.YELLOW}⚠ Some checks failed ({passed}/{total}){Style.RESET_ALL}")
+    print(f"{Fore.YELLOW}[WARN] Some checks failed ({passed}/{total}){Style.RESET_ALL}")
     print(f"{Fore.YELLOW}Please review the errors above and update your configuration.{Style.RESET_ALL}")
     print(f"\nRefer to docs/STAGING_SECRETS_GUIDE.md for setup instructions.")
     return 1

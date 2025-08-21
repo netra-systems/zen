@@ -426,9 +426,9 @@ def run_health_checks(backend_url: str, frontend_url: str):
             if response.getcode() == 200:
                 print_colored("  [OK] Backend is healthy", Colors.GREEN)
             else:
-                print_colored(f"  ⚠ Backend returned status code {response.getcode()}", Colors.YELLOW)
+                print_colored(f"  [WARN] Backend returned status code {response.getcode()}", Colors.YELLOW)
         except Exception as e:
-            print_colored(f"  ⚠ Backend health check failed (service may still be starting): {e}", Colors.YELLOW)
+            print_colored(f"  [WARN] Backend health check failed (service may still be starting): {e}", Colors.YELLOW)
     
     if frontend_url:
         try:
@@ -437,9 +437,9 @@ def run_health_checks(backend_url: str, frontend_url: str):
             if response.getcode() == 200:
                 print_colored("  [OK] Frontend is accessible", Colors.GREEN)
             else:
-                print_colored(f"  ⚠ Frontend returned status code {response.getcode()}", Colors.YELLOW)
+                print_colored(f"  [WARN] Frontend returned status code {response.getcode()}", Colors.YELLOW)
         except Exception as e:
-            print_colored(f"  ⚠ Frontend check failed (service may still be starting): {e}", Colors.YELLOW)
+            print_colored(f"  [WARN] Frontend check failed (service may still be starting): {e}", Colors.YELLOW)
 
 
 def run_error_monitoring(skip_error_monitoring: bool = False):
@@ -480,7 +480,7 @@ def run_error_monitoring(skip_error_monitoring: bool = False):
                 if result.returncode == 0:
                     print_colored("  [OK] No critical deployment errors detected", Colors.GREEN)
                 elif result.returncode == 1:
-                    print_colored("  ❌ Critical deployment errors detected!", Colors.RED)
+                    print_colored("  [ERROR] Critical deployment errors detected!", Colors.RED)
                     print_colored("  Consider rolling back the deployment.", Colors.YELLOW)
                     
                     # Check if the session is interactive
@@ -494,13 +494,13 @@ def run_error_monitoring(skip_error_monitoring: bool = False):
                         print_colored("Deployment failed automatically due to critical errors detected in non-interactive mode.", Colors.RED)
                         sys.exit(1)
                 else:
-                    print_colored(f"  ⚠ Error monitoring script failed unexpectedly (Exit Code: {result.returncode})", Colors.YELLOW)
+                    print_colored(f"  [WARN] Error monitoring script failed unexpectedly (Exit Code: {result.returncode})", Colors.YELLOW)
             except Exception as e:
-                print_colored(f"  ⚠ Failed to run error monitoring: {e}", Colors.YELLOW)
+                print_colored(f"  [WARN] Failed to run error monitoring: {e}", Colors.YELLOW)
         else:
-            print_colored("  ⚠ Python executable (python or python3) not found. Cannot run error monitoring.", Colors.YELLOW)
+            print_colored("  [WARN] Python executable (python or python3) not found. Cannot run error monitoring.", Colors.YELLOW)
     else:
-        print_colored(f"  ⚠ Error monitoring script not found at {error_monitor_path}", Colors.YELLOW)
+        print_colored(f"  [WARN] Error monitoring script not found at {error_monitor_path}", Colors.YELLOW)
 
 
 def save_deployment_info(frontend_url: str, backend_url: str, auth_url: str):
@@ -524,6 +524,73 @@ def save_deployment_info(frontend_url: str, backend_url: str, auth_url: str):
         print_colored("Warning: Failed to save deployment-info.json", Colors.YELLOW)
 
 
+def run_pre_deployment_tests(skip_tests: bool = False) -> bool:
+    """Run pre-deployment validation tests."""
+    if skip_tests:
+        print_colored("[PRE-DEPLOY] Skipping pre-deployment tests (--skip-tests flag)", Colors.YELLOW)
+        return True
+    
+    print_colored("[PRE-DEPLOY] Running pre-deployment validation...", Colors.GREEN)
+    
+    # Step 1: Run critical path tests
+    print_colored("  Running critical path tests...", Colors.CYAN)
+    try:
+        result = run_command([
+            "python", "-m", "test_framework.test_runner",
+            "--level", "critical",
+            "--fast-fail",
+            "--no-coverage"
+        ], check=False, capture_output=True)
+        
+        if result.returncode != 0:
+            print_colored("  [FAIL] Critical path tests failed", Colors.RED)
+            print_colored("  Output:", Colors.RED)
+            print(result.stdout)
+            if result.stderr:
+                print(result.stderr)
+            return False
+        print_colored("  [OK] Critical path tests passed", Colors.GREEN)
+    except Exception as e:
+        print_colored(f"  [FAIL] Failed to run critical tests: {e}", Colors.RED)
+        return False
+    
+    # Step 2: Validate staging configuration
+    print_colored("  Validating staging configuration...", Colors.CYAN)
+    try:
+        script_path = Path(__file__).parent.parent.parent / "scripts" / "validate_staging_config.py"
+        if script_path.exists():
+            result = run_command(["python", str(script_path)], check=False, capture_output=True)
+            if result.returncode != 0:
+                print_colored("  [FAIL] Configuration validation failed", Colors.RED)
+                print_colored("  Run 'python scripts/validate_staging_config.py' for details", Colors.YELLOW)
+                return False
+            print_colored("  [OK] Configuration validation passed", Colors.GREEN)
+        else:
+            print_colored("  [WARN] Configuration validator not found, skipping", Colors.YELLOW)
+    except Exception as e:
+        print_colored(f"  [WARN] Configuration validation skipped: {e}", Colors.YELLOW)
+    
+    # Step 3: Test startup sequence
+    print_colored("  Testing startup sequence simulation...", Colors.CYAN)
+    try:
+        script_path = Path(__file__).parent.parent.parent / "scripts" / "test_staging_startup.py"
+        if script_path.exists():
+            result = run_command([
+                "python", str(script_path), "--simulate"
+            ], check=False, capture_output=True)
+            if result.returncode != 0:
+                print_colored("  [FAIL] Startup sequence test failed", Colors.RED)
+                return False
+            print_colored("  [OK] Startup sequence test passed", Colors.GREEN)
+        else:
+            print_colored("  [WARN] Startup tester not found, skipping", Colors.YELLOW)
+    except Exception as e:
+        print_colored(f"  [WARN] Startup test skipped: {e}", Colors.YELLOW)
+    
+    print_colored("  [OK] Pre-deployment validation passed", Colors.GREEN)
+    return True
+
+
 def main():
     """Main function to orchestrate the deployment."""
     parser = argparse.ArgumentParser(description="Netra Reliable Staging Deployment")
@@ -533,6 +600,7 @@ def main():
     parser.add_argument("--deploy-only", action="store_true", help="Deploy only, don't build")
     parser.add_argument("--skip-error-monitoring", action="store_true", help="Skip error monitoring after deployment")
     parser.add_argument("--skip-migrations", action="store_true", help="Skip database migrations")
+    parser.add_argument("--skip-tests", action="store_true", help="Skip pre-deployment tests (NOT RECOMMENDED)")
     
     args = parser.parse_args()
     
@@ -547,6 +615,14 @@ def main():
     
     # Pre-Step: Check Prerequisites
     check_prerequisites()
+    
+    # Pre-Deployment Validation
+    if not args.deploy_only:
+        if not run_pre_deployment_tests(args.skip_tests):
+            print_colored("\n[FAILED] PRE-DEPLOYMENT TESTS FAILED", Colors.RED)
+            print_colored("Deployment aborted to prevent pushing broken code to staging.", Colors.RED)
+            print_colored("Fix the issues and try again, or use --skip-tests to bypass (NOT RECOMMENDED).", Colors.YELLOW)
+            sys.exit(1)
     
     # Step 1: Authentication
     print_colored("[1/5] Setting up authentication...", Colors.GREEN)

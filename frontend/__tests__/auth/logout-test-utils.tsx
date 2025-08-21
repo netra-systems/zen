@@ -20,7 +20,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { jest } from '@jest/globals';
 import { TestProviders } from '../setup/test-providers';
-import { useAuthStore } from '@/store/authStore';
 
 // Type definitions for test data (≤8 lines)
 export interface TestUser {
@@ -78,77 +77,18 @@ export const createBrowserMocks = () => ({
 
 // Auth store mock setup (≤8 lines)
 export const setupMockAuthStore = () => {
-  const mockStore = {
-    isAuthenticated: false,
-    user: null,
-    token: null,
-    loading: false,
-    error: null,
-    login: jest.fn().mockImplementation((user, token) => {
-      mockStore.isAuthenticated = true;
-      mockStore.user = user;
-      mockStore.token = token;
-      mockStore.error = null;
-      // Simulate localStorage storage like real store
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('jwt_token', token);
-      }
-    }),
-    logout: jest.fn().mockImplementation(() => {
-      mockStore.isAuthenticated = false;
-      mockStore.user = null;
-      mockStore.token = null;
-      mockStore.error = null;
-      // Simulate localStorage removal like real store
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('jwt_token');
-      }
-    }),
-    reset: jest.fn().mockImplementation(() => {
-      mockStore.isAuthenticated = false;
-      mockStore.user = null;
-      mockStore.token = null;
-      mockStore.loading = false;
-      mockStore.error = null;
-      // Simulate localStorage removal like real store
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('jwt_token');
-      }
-    }),
-    setLoading: jest.fn().mockImplementation((loading) => {
-      mockStore.loading = loading;
-    }),
-    setError: jest.fn().mockImplementation((error) => {
-      mockStore.error = error;
-    }),
-    updateUser: jest.fn().mockImplementation((userUpdate) => {
-      if (mockStore.user) {
-        mockStore.user = { ...mockStore.user, ...userUpdate };
-      }
-    }),
-    hasPermission: jest.fn().mockImplementation((permission) => {
-      if (!mockStore.user) return false;
-      return mockStore.user.permissions?.includes(permission) || false;
-    }),
-    hasAnyPermission: jest.fn().mockImplementation((permissions) => {
-      if (!mockStore.user) return false;
-      return permissions.some(p => mockStore.user?.permissions?.includes(p)) || false;
-    }),
-    hasAllPermissions: jest.fn().mockImplementation((permissions) => {
-      if (!mockStore.user) return false;
-      return permissions.every(p => mockStore.user?.permissions?.includes(p)) || false;
-    }),
-    isAdminOrHigher: jest.fn().mockImplementation(() => {
-      if (!mockStore.user) return false;
-      return ['admin', 'super_admin'].includes(mockStore.user.role || '') || mockStore.user.is_superuser || false;
-    }),
-    isDeveloperOrHigher: jest.fn().mockImplementation(() => {
-      if (!mockStore.user) return false;
-      return ['developer', 'admin', 'super_admin'].includes(mockStore.user.role || '') || 
-             mockStore.user.is_developer || mockStore.user.is_superuser || false;
-    }),
-  };
-  (useAuthStore as jest.Mock).mockReturnValue(mockStore);
+  // Get the mocked store from the jest.mock at module level
+  const { useAuthStore } = require('@/store/authStore');
+  const mockStore = useAuthStore();
+  
+  // Reset mock implementations for logout tests
+  mockStore.logout.mockImplementation(() => {
+    mockStore.isAuthenticated = false;
+    mockStore.user = null;
+    mockStore.token = null;
+    mockStore.error = null;
+  });
+  
   return mockStore;
 };
 
@@ -197,9 +137,11 @@ export const measureLogoutPerformance = async (logoutFunction: () => Promise<voi
 
 // Basic logout test component (≤8 lines)
 export const LogoutTestComponent: React.FC = () => {
+  // Use require to ensure we get the mocked version
+  const { useAuthStore } = require('@/store/authStore');
   const { logout, isAuthenticated, user, token } = useAuthStore();
   return (
-    <div>
+    <div data-testid="logout-test-container">
       <div data-testid="auth-status">{isAuthenticated ? 'authenticated' : 'unauthenticated'}</div>
       <div data-testid="user-data">{user ? JSON.stringify(user) : 'no-user'}</div>
       <div data-testid="token-status">{token ? 'has-token' : 'no-token'}</div>
@@ -240,10 +182,11 @@ const setupStorageEventHandler = (mockStore: any) => {
 // Complete test environment setup (≤8 lines)
 export const setupLogoutTestEnvironment = () => {
   jest.clearAllMocks();
-  const mockStore = setupMockAuthStore();
   const browserMocks = setupBrowserEnvironment();
   const webSocketMock = setupWebSocketEnvironment();
+  const mockStore = setupMockAuthStore();
   const cleanupStorage = setupStorageEventHandler(mockStore);
+  setupTestCookies(); // Ensure cookies are set for testing
   return { mockStore, browserMocks, webSocketMock, cleanupStorage };
 };
 

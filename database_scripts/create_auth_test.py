@@ -69,7 +69,7 @@ class TestStagingCrossServiceAuthPropagation:
         \"\"\"Test user credentials for multi-service authentication.\"\"\"
         return {
             "user_id": "cross_service_user_456",
-            "email": "crossservice@staging.netra.ai",
+            "email": "crossservice@staging.netrasystems.ai",
             "roles": ["user", "mid_tier"],
             "scopes": ["read", "write", "analytics", "cross_service"],
             "permissions": {

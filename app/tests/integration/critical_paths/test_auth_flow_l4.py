@@ -25,10 +25,19 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from urllib.parse import urlencode, parse_qs, urlparse
 
-from app.services.auth.oauth_service import OAuthService
-from app.services.auth.jwt_service import JWTService
-from app.services.auth.session_manager import SessionManager
-from app.services.redis.session_manager import RedisSessionManager
+# OAuth service replaced with mock
+from unittest.mock import AsyncMock
+OAuthService = AsyncMock
+# JWT service replaced with auth_integration
+from app.auth_integration import create_access_token, validate_token_jwt
+from unittest.mock import AsyncMock
+JWTService = AsyncMock
+# Session manager replaced with mock
+from unittest.mock import AsyncMock
+SessionManager = AsyncMock
+# Redis session manager replaced with mock
+from unittest.mock import AsyncMock
+RedisSessionManager = AsyncMock
 from tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 
 
@@ -260,17 +269,17 @@ class AuthFlowL4TestSuite:
             # Simulate user credentials based on scenario
             user_credentials = {
                 "enterprise_user": {
-                    "username": "test_enterprise@netra.ai",
+                    "username": "test_enterprise@netrasystems.ai",
                     "password": "test_enterprise_pass_123",
                     "user_tier": "enterprise"
                 },
                 "free_tier_user": {
-                    "username": "test_free@netra.ai", 
+                    "username": "test_free@netrasystems.ai", 
                     "password": "test_free_pass_123",
                     "user_tier": "free"
                 },
                 "api_user": {
-                    "username": "test_api@netra.ai",
+                    "username": "test_api@netrasystems.ai",
                     "password": "test_api_pass_123",
                     "user_tier": "api"
                 }

@@ -1,4 +1,6 @@
 import { API_BASE_URL } from './apiConfig'
+import { authInterceptor } from '@/lib/auth-interceptor'
+import { logger } from '@/lib/logger'
 
 export interface DemoChatRequest {
   message: string
@@ -71,25 +73,42 @@ class DemoService {
   }
 
   private async fetchWithAuth(url: string, options: RequestInit = {}) {
-    const token = localStorage.getItem('token')
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(token && { 'Authorization': `Bearer ${token}` }),
-      ...options.headers,
+    // Use centralized auth interceptor instead of manual token handling
+    const fullUrl = `${this.baseUrl}${url}`;
+    
+    try {
+      const response = await authInterceptor.authenticatedFetch(fullUrl, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        }
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        let errorMessage: string;
+        try {
+          const parsed = JSON.parse(errorData);
+          errorMessage = parsed.detail || parsed.message || parsed.error || `Request failed with status ${response.status}`;
+        } catch {
+          errorMessage = errorData || `Request failed with status ${response.status}`;
+        }
+        
+        const error = new Error(errorMessage);
+        (error as any).status = response.status;
+        throw error;
+      }
+      
+      return response;
+    } catch (error) {
+      logger.error('Demo service request failed', error as Error, {
+        component: 'DemoService',
+        url: fullUrl,
+        method: options.method || 'GET'
+      });
+      throw error;
     }
-
-    const response = await fetch(`${this.baseUrl}${url}`, {
-      ...options,
-      headers,
-    })
-
-    if (!response.ok && response.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/auth/login'
-      throw new Error('Unauthorized')
-    }
-
-    return response
   }
 
   async sendChatMessage(request: DemoChatRequest): Promise<DemoChatResponse> {

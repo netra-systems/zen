@@ -51,7 +51,7 @@ class TestAuthWebSocketHandshakeIntegration:
         # Create valid token
         user_id = "test-user-valid-structure"
         token = self.auth_tester.jwt_helper.create_access_token(
-            user_id, "test@netra.ai", ["read", "write"]
+            user_id, "test@netrasystems.ai", ["read", "write"]
         )
         
         # Validate token structure
@@ -61,7 +61,7 @@ class TestAuthWebSocketHandshakeIntegration:
         import jwt
         payload = jwt.decode(token, options={"verify_signature": False})
         assert payload["sub"] == user_id, "Token should contain correct user ID"
-        assert payload["email"] == "test@netra.ai", "Token should contain correct email"
+        assert payload["email"] == "test@netrasystems.ai", "Token should contain correct email"
         assert "permissions" in payload, "Token should contain permissions"
         assert payload["token_type"] == "access", "Token should be access token type"
     
@@ -86,7 +86,7 @@ class TestAuthWebSocketHandshakeIntegration:
         # Create valid token
         user_id = "test-user-websocket-valid"
         token = self.auth_tester.jwt_helper.create_access_token(
-            user_id, "websocket@netra.ai", ["read", "write"]
+            user_id, "websocket@netrasystems.ai", ["read", "write"]
         )
         
         # Test WebSocket connection
@@ -200,7 +200,7 @@ class TestAuthWebSocketHandshakeIntegration:
         # Create valid token
         user_id = "test-user-cross-service"
         token = self.auth_tester.jwt_helper.create_access_token(
-            user_id, "crossservice@netra.ai", ["read", "write"]
+            user_id, "crossservice@netrasystems.ai", ["read", "write"]
         )
         
         # Test auth service validation
@@ -247,7 +247,7 @@ class TestAuthWebSocketHandshakeIntegration:
         for i in range(3):
             user_id = f"concurrent-user-{i}"
             token = self.auth_tester.jwt_helper.create_access_token(
-                user_id, f"concurrent{i}@netra.ai", ["read", "write"]
+                user_id, f"concurrent{i}@netrasystems.ai", ["read", "write"]
             )
             tokens.append(token)
         

@@ -55,7 +55,7 @@ class TestStagingAuthServiceSync:
         """Test user data for authentication tests."""
         return {
             "user_id": "test_user_123",
-            "email": "test@staging.netra.ai",
+            "email": "test@staging.netrasystems.ai",
             "roles": ["user", "early_tier"],
             "scopes": ["read", "write", "analytics"]
         }

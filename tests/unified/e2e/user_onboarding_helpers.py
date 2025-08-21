@@ -85,7 +85,7 @@ class UserRegistrationHelper:
     
     def _generate_test_email(self) -> str:
         """Generate unique test email."""
-        return f"e2e-onboard-{uuid.uuid4().hex[:8]}@netra.ai"
+        return f"e2e-onboard-{uuid.uuid4().hex[:8]}@netrasystems.ai"
     
     def _create_user_payload(self, email: str) -> Dict[str, Any]:
         """Create user payload with required fields."""

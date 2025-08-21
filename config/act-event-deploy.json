@@ -1,8 +1,0 @@
-{
-  "inputs": {
-    "environment_name": "test-env",
-    "pr_number": "123",
-    "branch_name": "test-branch",
-    "commit_sha": "abc123def456"
-  }
-}

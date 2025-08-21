@@ -118,7 +118,7 @@ describe('ThreadService Revenue-Critical Tests', () => {
 
       const result = await ThreadService.createThread('New Chat');
 
-      expectCreateCall(mockApiClient, { name: 'New Chat', title: 'New Chat', metadata: undefined });
+      expectCreateCall(mockApiClient, { title: 'New Chat', metadata: undefined });
       expect(result).toEqual(mockThread);
     });
 
@@ -129,7 +129,6 @@ describe('ThreadService Revenue-Critical Tests', () => {
       const result = await ThreadService.createThread('Priority Chat', TEST_METADATA);
 
       expectCreateCall(mockApiClient, { 
-        name: 'Priority Chat', 
         title: 'Priority Chat', 
         metadata: TEST_METADATA 
       });
@@ -142,7 +141,7 @@ describe('ThreadService Revenue-Critical Tests', () => {
 
       const result = await ThreadService.createThread();
 
-      expectCreateCall(mockApiClient, { name: undefined, title: undefined, metadata: undefined });
+      expectCreateCall(mockApiClient, { title: undefined, metadata: undefined });
       expect(result).toEqual(mockThread);
     });
 
@@ -161,7 +160,6 @@ describe('ThreadService Revenue-Critical Tests', () => {
       const result = await ThreadService.updateThread('thread-1', 'Updated Title');
 
       expectUpdateCall(mockApiClient, 'thread-1', { 
-        name: 'Updated Title', 
         title: 'Updated Title', 
         metadata: undefined 
       });
@@ -176,7 +174,6 @@ describe('ThreadService Revenue-Critical Tests', () => {
       const result = await ThreadService.updateThread('thread-1', undefined, metadata);
 
       expectUpdateCall(mockApiClient, 'thread-1', { 
-        name: undefined, 
         title: undefined, 
         metadata 
       });
@@ -190,7 +187,6 @@ describe('ThreadService Revenue-Critical Tests', () => {
       const result = await ThreadService.updateThread('thread-1', 'Urgent Task', URGENT_METADATA);
 
       expectUpdateCall(mockApiClient, 'thread-1', { 
-        name: 'Urgent Task', 
         title: 'Urgent Task', 
         metadata: URGENT_METADATA 
       });

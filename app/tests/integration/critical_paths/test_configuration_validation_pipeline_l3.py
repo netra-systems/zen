@@ -24,7 +24,7 @@ from unittest.mock import patch, AsyncMock
 from pathlib import Path
 from datetime import datetime, timezone
 
-from app.config import Config
+from app.config import get_config
 from app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 

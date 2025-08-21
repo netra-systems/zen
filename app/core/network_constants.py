@@ -220,18 +220,28 @@ class URLConstants:
     
     @classmethod
     def get_cors_origins(cls, environment: str = "development") -> list[str]:
-        """Get CORS origins based on environment."""
+        """Get CORS origins based on environment - supports dynamic ports in development."""
         if environment == "production":
             return [cls.PRODUCTION_FRONTEND, cls.PRODUCTION_APP]
         elif environment == "staging":
             return [cls.STAGING_FRONTEND, cls.STAGING_APP,
                    cls.build_http_url(port=ServicePorts.FRONTEND_DEFAULT)]
         else:
-            # Development environment
-            return [
-                cls.build_http_url(port=ServicePorts.FRONTEND_DEFAULT),
-                cls.build_http_url(port=ServicePorts.BACKEND_DEFAULT)
-            ]
+            # Development environment - support dynamic ports
+            # Include common development ports and patterns
+            dev_origins = []
+            
+            # Common frontend ports
+            for port in [3000, 3001, 3002]:
+                dev_origins.append(cls.build_http_url(port=port))
+                dev_origins.append(cls.build_http_url(host=HostConstants.LOCALHOST_IP, port=port))
+            
+            # Common backend ports
+            for port in [8000, 8001, 8002, 8080, 8081, 8082]:
+                dev_origins.append(cls.build_http_url(port=port))
+                dev_origins.append(cls.build_http_url(host=HostConstants.LOCALHOST_IP, port=port))
+            
+            return dev_origins
 
 
 class ServiceEndpoints:

@@ -279,6 +279,17 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
     app.state.agent_service = AgentService(supervisor)
 
 
+async def initialize_websocket_components(logger: logging.Logger) -> None:
+    """Initialize WebSocket components that require async context."""
+    try:
+        from app.websocket.large_message_handler import get_large_message_handler
+        handler = get_large_message_handler()
+        await handler.initialize()
+        logger.info("WebSocket components initialized")
+    except Exception as e:
+        logger.error(f"Failed to initialize WebSocket components: {e}")
+
+
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     """Run application startup checks."""
     config = get_config()
@@ -407,6 +418,7 @@ async def _run_startup_phase_three(app: FastAPI, logger: logging.Logger) -> None
     await startup_health_checks(app, logger)
     await validate_schema(logger)
     register_websocket_handlers(app)
+    await initialize_websocket_components(logger)
     _create_agent_supervisor(app)
     await start_monitoring(app, logger)
 

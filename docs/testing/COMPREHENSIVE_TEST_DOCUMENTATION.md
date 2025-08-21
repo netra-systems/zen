@@ -742,7 +742,7 @@ python test_runner.py --level integration --real-llm --fast-fail
 python test_runner.py --level integration --staging
 
 # Override staging URLs
-python test_runner.py --staging --staging-url https://staging.netra.ai --staging-api-url https://api.staging.netra.ai
+python test_runner.py --staging --staging-url https://staging.netrasystems.ai --staging-api-url https://api.staging.netrasystems.ai
 ```
 
 ### Test Data Management

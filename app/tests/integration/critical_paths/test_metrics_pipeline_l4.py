@@ -26,7 +26,7 @@ import httpx
 from app.services.observability.metrics_collector import MetricsCollector
 from app.services.observability.prometheus_exporter import PrometheusExporter
 from app.services.observability.alert_manager import AlertManager
-from app.config import Config
+from app.config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -66,11 +66,11 @@ class MetricsPipelineL4Manager:
             # Get staging monitoring URLs from config
             self.staging_prometheus_url = os.getenv(
                 "STAGING_PROMETHEUS_URL", 
-                "http://prometheus.staging.netra.ai:9090"
+                "http://prometheus.staging.netrasystems.ai:9090"
             )
             self.staging_grafana_url = os.getenv(
                 "STAGING_GRAFANA_URL",
-                "http://grafana.staging.netra.ai:3000"
+                "http://grafana.staging.netrasystems.ai:3000"
             )
             
             # Initialize real metrics services
@@ -397,7 +397,7 @@ class MetricsPipelineL4Manager:
             # Query AlertManager API (assuming it's available)
             alertmanager_url = os.getenv(
                 "STAGING_ALERTMANAGER_URL",
-                "http://alertmanager.staging.netra.ai:9093"
+                "http://alertmanager.staging.netrasystems.ai:9093"
             )
             
             async with httpx.AsyncClient(timeout=30.0) as client:

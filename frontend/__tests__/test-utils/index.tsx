@@ -126,7 +126,7 @@ export const simulateAsyncDelay = (ms: number = 100): Promise<void> => {
 export const createMockUser = (overrides: Partial<TestUser> = {}): TestUser => {
   return {
     id: `user-${Date.now()}`,
-    email: 'test@netra.ai',
+    email: 'test@netrasystems.ai',
     name: 'Test User',
     role: 'early',
     ...overrides

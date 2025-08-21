@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 from app.main import app
 
 
+@pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")
 def test_websocket_connection():
     """Test basic WebSocket connection to demo endpoint."""
     client = TestClient(app)

@@ -63,7 +63,7 @@ import { setupTestEnvironment, resetTestState } from '../test-utils/integration-
 const userTiers = {
   free: {
     id: 'free-user',
-    email: 'free@netra.ai',
+    email: 'free@netrasystems.ai',
     name: 'Free User',
     tier: 'free',
     role: 'standard_user',
@@ -72,7 +72,7 @@ const userTiers = {
   },
   early: {
     id: 'early-user',
-    email: 'early@netra.ai',
+    email: 'early@netrasystems.ai',
     name: 'Early User',
     tier: 'early',
     role: 'power_user',
@@ -81,7 +81,7 @@ const userTiers = {
   },
   mid: {
     id: 'mid-user',
-    email: 'mid@netra.ai',
+    email: 'mid@netrasystems.ai',
     name: 'Mid User',
     tier: 'mid',
     role: 'power_user',
@@ -90,7 +90,7 @@ const userTiers = {
   },
   enterprise: {
     id: 'enterprise-user',
-    email: 'enterprise@netra.ai',
+    email: 'enterprise@netrasystems.ai',
     name: 'Enterprise User',
     tier: 'enterprise',
     role: 'admin',

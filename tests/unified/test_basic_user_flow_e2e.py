@@ -60,7 +60,7 @@ class BasicUserFlowE2ETester:
         """Initialize with unified test harness."""
         self.harness = harness
         self.test_client = TestClient(harness)
-        self.test_user_email = f"test-user-{uuid.uuid4().hex[:8]}@netra.ai"
+        self.test_user_email = f"test-user-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         self.test_user_id: Optional[str] = None
         self.jwt_token: Optional[str] = None
         self.websocket_connection: Optional[websockets.WebSocketServerProtocol] = None

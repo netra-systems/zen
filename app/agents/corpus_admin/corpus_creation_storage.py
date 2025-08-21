@@ -89,7 +89,7 @@ def sample4():
     """Sample 4."""
     return make_entry(
         "Where can I find documentation?",
-        "Documentation is available at https://docs.netra.ai/getting-started",
+        "Documentation is available at https://docs.netrasystems.ai/getting-started",
         "tool_use")
 
 def sample5():

@@ -263,6 +263,14 @@ class MCPToolExecutionStatus(str, Enum):
     TIMEOUT = "timeout"
 
 
+class TaskPriority(str, Enum):
+    """Task priority levels for agent execution."""
+    LOW = "low"
+    NORMAL = "normal"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
 class ExecutionStatus(str, Enum):
     """Agent execution status enumeration - moved from base.interface to break circular imports."""
     PENDING = "pending"
@@ -289,6 +297,7 @@ __all__ = [
     "MCPServerStatus",
     "MCPAuthType",
     "MCPToolExecutionStatus",
+    "TaskPriority",
     "ExecutionStatus",
     "MessageTypeLiteral"
 ]

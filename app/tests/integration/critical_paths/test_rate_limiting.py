@@ -19,7 +19,6 @@ from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.services.monitoring.rate_limiter import GCPRateLimiter
 from app.redis_manager import RedisManager
-from app.core.cache.redis_config import RedisConfig
 import redis.asyncio as redis
 from unittest.mock import MagicMock, AsyncMock
 
@@ -101,8 +100,7 @@ class RateLimitingManager:
         self.rate_limiter = TokenBucketRateLimiter()
         
         # Initialize Redis manager for distributed rate limiting
-        redis_config = RedisConfig()
-        self.redis_manager = RedisManager(redis_config)
+        self.redis_manager = RedisManager()
         await self.redis_manager.initialize()
         
         # Initialize GCP rate limiter for monitoring

@@ -69,6 +69,7 @@ def client(mock_agent_service, mock_security_service, mock_demo_service):
             yield c
         app.dependency_overrides = {}
 
+@pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")
 def test_websocket_sends_message_to_agent_service(client, mock_demo_service):
     """Test that WebSocket messages are sent to agent service"""
     user_id = str(uuid.uuid4())
@@ -91,6 +92,7 @@ def test_websocket_sends_message_to_agent_service(client, mock_demo_service):
         assert response["type"] == "pong"
 
 
+@pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")
 def test_websocket_receives_message_from_server(client, mock_demo_service):
     """Test that WebSocket can receive messages from server"""
     user_id = str(uuid.uuid4())

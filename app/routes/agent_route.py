@@ -22,7 +22,6 @@ from app.routes.agent_route_processors import (
     process_multimodal_message, process_with_context, 
     process_with_fallback, execute_message_processing
 )
-from app.routes.agent_route_websocket import handle_websocket_exceptions
 
 router = APIRouter()
 
@@ -113,7 +112,3 @@ async def stream_response(
     return create_streaming_response(request_model, agent_service)
 
 
-@router.websocket("/ws/agent")
-async def agent_websocket_endpoint(websocket: WebSocket):
-    """WebSocket endpoint for agent communication."""
-    await handle_websocket_exceptions(websocket)

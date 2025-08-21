@@ -45,7 +45,7 @@ class TestDevModeAuthentication:
         config.ENVIRONMENT = "development"
         config.AUTH_SERVICE_URL = "http://localhost:8001"
         config.SKIP_AUTH_IN_DEV = True
-        config.DEV_USER_EMAIL = "dev@netra.ai"
+        config.DEV_USER_EMAIL = "dev@netrasystems.ai"
         config.DEV_USER_ID = "dev-user-123"
         return config
 
@@ -54,7 +54,7 @@ class TestDevModeAuthentication:
         """Mock development user"""
         return User(
             id="dev-user-123",
-            email="dev@netra.ai",
+            email="dev@netrasystems.ai",
             full_name="Dev User",
             is_active=True,
             is_superuser=True,  # Dev users get full access
@@ -85,7 +85,7 @@ class TestDevModeAuthentication:
                     "user_id": "dev-user-123",
                     "user": {
                         "id": "dev-user-123",
-                        "email": "dev@netra.ai",
+                        "email": "dev@netrasystems.ai",
                         "full_name": "Dev User",
                         "subscription_tier": "enterprise"
                     },
@@ -101,7 +101,7 @@ class TestDevModeAuthentication:
                 # Mock database user
                 mock_db_user = DBUser(
                     id="dev-user-123",
-                    email="dev@netra.ai",
+                    email="dev@netrasystems.ai",
                     full_name="Dev User",
                     is_active=True
                 )
@@ -129,7 +129,7 @@ class TestDevModeAuthentication:
 
                 # Verify: Dev user authenticated instantly
                 assert user is not None
-                assert user.email == "dev@netra.ai"
+                assert user.email == "dev@netrasystems.ai"
                 assert user.full_name == "Dev User"
                 assert user.is_active is True
                 
@@ -154,13 +154,13 @@ class TestDevModeAuthentication:
                     "token": "dev-token-instant",
                     "user": {
                         "id": "dev-user-123",
-                        "email": "dev@netra.ai"
+                        "email": "dev@netrasystems.ai"
                     }
                 }
 
                 # Execute: Dev login endpoint (bypasses OAuth)
                 response = client_with_dev_mode.post("/auth/dev-login", json={
-                    "email": "dev@netra.ai"
+                    "email": "dev@netrasystems.ai"
                 })
 
                 # Verify: Instant dev authentication
@@ -168,7 +168,7 @@ class TestDevModeAuthentication:
                 data = response.json()
                 assert "token" in data
                 assert data["token"] == "dev-token-instant"
-                assert data["user"]["email"] == "dev@netra.ai"
+                assert data["user"]["email"] == "dev@netrasystems.ai"
 
     async def test_immediate_chat_availability(self, client_with_dev_mode):
         """Test instant chat access in dev
@@ -181,7 +181,7 @@ class TestDevModeAuthentication:
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
-                "user": {"id": "dev-user-123", "email": "dev@netra.ai"},
+                "user": {"id": "dev-user-123", "email": "dev@netrasystems.ai"},
                 "permissions": ["read", "write"]
             }
 
@@ -217,7 +217,7 @@ class TestDevModeAuthentication:
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
-                "user": {"id": "dev-user-123", "email": "dev@netra.ai"},
+                "user": {"id": "dev-user-123", "email": "dev@netrasystems.ai"},
                 "permissions": ["read", "write"]
             }
 
@@ -282,7 +282,7 @@ class TestDevModeAuthentication:
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
-                "user": {"id": "dev-user-123", "email": "dev@netra.ai"},
+                "user": {"id": "dev-user-123", "email": "dev@netrasystems.ai"},
                 "permissions": ["read", "write"]
             }
 
@@ -397,7 +397,7 @@ class TestDevModeAuthentication:
         with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = {
                 "valid": True,
-                "user": {"id": "dev-user-123", "email": "dev@netra.ai"},
+                "user": {"id": "dev-user-123", "email": "dev@netrasystems.ai"},
                 "permissions": ["read", "write"]
             }
 
@@ -454,7 +454,7 @@ class TestDevModeIntegration:
             with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
                 mock_auth.return_value = {
                     "valid": True,
-                    "user": {"id": "dev-user-123", "email": "dev@netra.ai"}
+                    "user": {"id": "dev-user-123", "email": "dev@netrasystems.ai"}
                 }
 
                 # Test: WebSocket integration

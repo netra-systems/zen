@@ -77,7 +77,7 @@ describe('LocalStorage Persistence Tests', () => {
 
       const user = {
         id: 'test-user',
-        email: 'test@netra.ai',
+        email: 'test@netrasystems.ai',
         full_name: 'Test User',
         is_active: true,
         is_superuser: false

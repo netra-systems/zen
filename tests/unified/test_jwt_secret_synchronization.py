@@ -208,7 +208,7 @@ class JWTSecretSynchronizationTester:
         """Create standard test JWT payload."""
         now = datetime.now(timezone.utc)
         return {
-            "sub": user_id, "email": f"{user_id}@test.netra.ai", "permissions": ["read", "write"],
+            "sub": user_id, "email": f"{user_id}@test.netrasystems.ai", "permissions": ["read", "write"],
             "iat": int(now.timestamp()), "exp": int((now + timedelta(minutes=15)).timestamp()),
             "token_type": "access", "iss": "netra-auth-service"
         }

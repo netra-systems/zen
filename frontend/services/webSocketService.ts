@@ -4,6 +4,14 @@ import { config } from '@/config';
 import { logger } from '@/lib/logger';
 import { logger as debugLogger } from '@/utils/debug-logger';
 
+interface JWTPayload {
+  exp: number;
+  iat: number;
+  user_id: string;
+  email?: string;
+  permissions?: string[];
+}
+
 export type WebSocketStatus = 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED';
 export type WebSocketState = 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
 
@@ -28,8 +36,13 @@ interface WebSocketOptions {
   onReconnect?: () => void;
   onBinaryMessage?: (data: ArrayBuffer) => void;
   onRateLimit?: () => void;
+  onLargeMessage?: (progress: { chunks_received: number; total_chunks: number; progress_percent: number }) => void;
+  onChunkedMessage?: (data: any) => void;
   heartbeatInterval?: number;
   rateLimit?: RateLimitConfig;
+  token?: string;
+  refreshToken?: () => Promise<string | null>;
+  compression?: string[];  // Supported compression algorithms
 }
 
 class WebSocketService {
@@ -42,6 +55,25 @@ class WebSocketService {
   private heartbeatTimer: NodeJS.Timeout | null = null;
   private url: string = '';
   private messageTimestamps: number[] = [];
+  private currentToken: string | null = null;
+  private tokenRefreshTimer: NodeJS.Timeout | null = null;
+  private tokenExpiryCheckTimer: NodeJS.Timeout | null = null;
+  private isRefreshingToken: boolean = false;
+  private pendingMessages: (WebSocketMessage | UnifiedWebSocketEvent | AuthMessage | PingMessage | PongMessage)[] = [];
+  
+  // Large message handling
+  private messageAssemblies: Map<string, {
+    messageId: string;
+    totalChunks: number;
+    receivedChunks: Map<number, any>;
+    metadata: any;
+    startedAt: number;
+    isCompressed: boolean;
+    compression: string;
+  }> = new Map();
+  private supportedCompression: string[] = ['gzip', 'deflate', 'lz4'];
+  private maxMessageSize: number = 10 * 1024 * 1024; // 10MB
+  private chunkSize: number = 64 * 1024; // 64KB
 
   public onStatusChange: ((status: WebSocketStatus) => void) | null = null;
   public onMessage: ((message: WebSocketMessage) => void) | null = null;
@@ -129,9 +161,9 @@ class WebSocketService {
   }
 
   private sendAuthToken(): void {
-    // Token is already sent in query params during connection
-    // No need to send again in auth message
-    logger.debug('Token authentication already handled via query params');
+    // Token authentication is handled securely via subprotocol during connection
+    // No additional auth message needed - security vulnerability prevented
+    logger.debug('Token authentication handled via secure subprotocol method');
   }
 
   private processQueuedMessages(): void {
@@ -156,13 +188,93 @@ class WebSocketService {
   }
 
   private processTextMessage(rawMessage: any, options: WebSocketOptions): void {
+    // Check if this is a large message
+    if (this.isLargeMessage(rawMessage)) {
+      this.handleLargeMessage(rawMessage, options);
+      return;
+    }
+
     const validatedMessage = this.validateWebSocketMessage(rawMessage);
     if (!validatedMessage) {
       this.handleInvalidMessage(rawMessage, options);
       return;
     }
+
+    // Handle lifecycle messages first
+    if (this.handleLifecycleMessage(validatedMessage)) {
+      return;
+    }
+
     this.onMessage?.(validatedMessage);
     options.onMessage?.(validatedMessage);
+  }
+
+  private handleLifecycleMessage(message: WebSocketMessage | UnifiedWebSocketEvent): boolean {
+    const messageType = message.type;
+
+    switch (messageType) {
+      case 'ping':
+        this.handleServerPing(message);
+        return true;
+      case 'pong':
+        this.handleServerPong(message);
+        return true;
+      case 'server_shutdown':
+        this.handleServerShutdown(message);
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  private handleServerPing(message: any): void {
+    // Respond to server ping with pong
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      const pongResponse = {
+        type: 'pong',
+        timestamp: Date.now(),
+        original_timestamp: message.timestamp,
+        connection_id: this.getConnectionId()
+      };
+      
+      this.send(pongResponse as PongMessage);
+      logger.debug('Responded to server ping with pong');
+    }
+  }
+
+  private handleServerPong(message: any): void {
+    // Server responded to our ping
+    logger.debug('Received pong from server', undefined, {
+      component: 'WebSocketService',
+      action: 'pong_received',
+      metadata: { 
+        latency: message.timestamp ? Date.now() - message.original_timestamp : undefined
+      }
+    });
+  }
+
+  private handleServerShutdown(message: any): void {
+    // Server is shutting down gracefully
+    logger.info('Server shutdown notification received', undefined, {
+      component: 'WebSocketService',
+      action: 'server_shutdown',
+      metadata: { 
+        drain_timeout: message.drain_timeout,
+        server_message: message.message
+      }
+    });
+
+    // Stop heartbeat to allow graceful shutdown
+    this.stopHeartbeat();
+    
+    // Notify application of shutdown
+    this.options.onError?.({
+      code: 1001,
+      message: message.message || 'Server is shutting down',
+      timestamp: Date.now(),
+      type: 'connection',
+      recoverable: true
+    });
   }
 
   private handleInvalidMessage(rawMessage: any, options: WebSocketOptions): void {
@@ -267,9 +379,281 @@ class WebSocketService {
     }
   }
 
+  // Large message handling methods
+  private isLargeMessage(message: any): boolean {
+    const messageType = message?.message_type;
+    return messageType && [
+      'chunked_start', 'chunked_data', 'chunked_end',
+      'binary', 'compressed', 'upload_progress'
+    ].includes(messageType);
+  }
+
+  private handleLargeMessage(message: any, options: WebSocketOptions): void {
+    const messageType = message.message_type;
+
+    switch (messageType) {
+      case 'chunked_start':
+        this.handleChunkedStart(message, options);
+        break;
+      case 'chunked_data':
+        this.handleChunkedData(message, options);
+        break;
+      case 'chunked_end':
+        this.handleChunkedEnd(message, options);
+        break;
+      case 'binary':
+      case 'compressed':
+        this.handleBinaryCompressed(message, options);
+        break;
+      case 'upload_progress':
+        this.handleUploadProgress(message, options);
+        break;
+      default:
+        logger.warn('Unknown large message type:', messageType);
+    }
+  }
+
+  private handleChunkedStart(message: any, options: WebSocketOptions): void {
+    const { message_id, total_chunks, compression = 'none', is_binary = false } = message;
+    
+    this.messageAssemblies.set(message_id, {
+      messageId: message_id,
+      totalChunks: total_chunks,
+      receivedChunks: new Map(),
+      metadata: message,
+      startedAt: Date.now(),
+      isCompressed: compression !== 'none',
+      compression
+    });
+
+    logger.debug(`Started chunked message assembly: ${message_id} (${total_chunks} chunks)`);
+  }
+
+  private handleChunkedData(message: any, options: WebSocketOptions): void {
+    const { metadata, data } = message;
+    const { message_id, chunk_index } = metadata;
+
+    const assembly = this.messageAssemblies.get(message_id);
+    if (!assembly) {
+      logger.warn(`Received chunk for unknown message: ${message_id}`);
+      return;
+    }
+
+    // Decode chunk data
+    try {
+      const chunkData = atob(data); // Base64 decode
+      assembly.receivedChunks.set(chunk_index, chunkData);
+
+      // Update progress
+      const progress = {
+        chunks_received: assembly.receivedChunks.size,
+        total_chunks: assembly.totalChunks,
+        progress_percent: (assembly.receivedChunks.size / assembly.totalChunks) * 100
+      };
+
+      options.onLargeMessage?.(progress);
+      logger.debug(`Received chunk ${chunk_index + 1}/${assembly.totalChunks} for message ${message_id}`);
+    } catch (error) {
+      logger.error('Failed to decode chunk data:', error);
+    }
+  }
+
+  private handleChunkedEnd(message: any, options: WebSocketOptions): void {
+    const { message_id } = message;
+    const assembly = this.messageAssemblies.get(message_id);
+    
+    if (!assembly) {
+      logger.warn(`Received end for unknown message: ${message_id}`);
+      return;
+    }
+
+    // Check if all chunks received
+    if (assembly.receivedChunks.size !== assembly.totalChunks) {
+      logger.error(`Missing chunks for message ${message_id}`);
+      this.messageAssemblies.delete(message_id);
+      return;
+    }
+
+    try {
+      // Assemble message
+      let assembledData = '';
+      for (let i = 0; i < assembly.totalChunks; i++) {
+        assembledData += assembly.receivedChunks.get(i) || '';
+      }
+
+      // Decompress if needed
+      if (assembly.isCompressed) {
+        assembledData = this.decompressData(assembledData, assembly.compression);
+      }
+
+      // Parse assembled message
+      let finalMessage;
+      try {
+        finalMessage = JSON.parse(assembledData);
+      } catch {
+        finalMessage = { data: assembledData };
+      }
+
+      logger.info(`Successfully assembled message: ${message_id} (${assembledData.length} chars)`);
+      
+      // Clean up
+      this.messageAssemblies.delete(message_id);
+
+      // Process assembled message
+      options.onChunkedMessage?.(finalMessage);
+      this.onMessage?.(finalMessage);
+      options.onMessage?.(finalMessage);
+
+    } catch (error) {
+      logger.error(`Failed to assemble message ${message_id}:`, error);
+      this.messageAssemblies.delete(message_id);
+    }
+  }
+
+  private handleBinaryCompressed(message: any, options: WebSocketOptions): void {
+    const { data, compression = 'none', encoding = 'base64' } = message;
+    
+    try {
+      // Decode data
+      let decodedData = encoding === 'base64' ? atob(data) : data;
+
+      // Decompress if needed
+      if (compression !== 'none') {
+        decodedData = this.decompressData(decodedData, compression);
+      }
+
+      // Try to parse as JSON, otherwise treat as binary
+      let finalData;
+      try {
+        finalData = JSON.parse(decodedData);
+      } catch {
+        finalData = { data: decodedData, type: 'binary' };
+      }
+
+      this.onMessage?.(finalData);
+      options.onMessage?.(finalData);
+
+    } catch (error) {
+      logger.error('Failed to process binary/compressed message:', error);
+    }
+  }
+
+  private handleUploadProgress(message: any, options: WebSocketOptions): void {
+    const { chunks_received, total_chunks, progress_percent } = message;
+    
+    const progress = {
+      chunks_received,
+      total_chunks,
+      progress_percent
+    };
+
+    options.onLargeMessage?.(progress);
+    logger.debug(`Upload progress: ${progress_percent.toFixed(1)}% (${chunks_received}/${total_chunks})`);
+  }
+
+  private decompressData(data: string, algorithm: string): string {
+    // Note: Browser-based decompression would require additional libraries
+    // For now, we'll assume data is already decompressed on the server side
+    // or implement client-side decompression with libraries like pako
+    logger.debug(`Decompression requested for algorithm: ${algorithm}`);
+    return data;
+  }
+
+  // Large message sending support
+  public async sendLargeMessage(message: any, compression: string = 'gzip'): Promise<boolean> {
+    const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+    
+    if (messageStr.length <= this.chunkSize) {
+      // Send as regular message
+      this.send(message);
+      return true;
+    }
+
+    // Prepare chunked message
+    const messageId = this.generateMessageId();
+    const chunks = this.createMessageChunks(messageStr, messageId);
+
+    try {
+      // Send all chunks
+      for (const chunk of chunks) {
+        this.send(chunk);
+        // Small delay between chunks to avoid overwhelming
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      return true;
+    } catch (error) {
+      logger.error('Failed to send large message:', error);
+      return false;
+    }
+  }
+
+  private generateMessageId(): string {
+    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
+
+  private createMessageChunks(data: string, messageId: string): any[] {
+    const chunks = [];
+    const totalChunks = Math.ceil(data.length / this.chunkSize);
+
+    // Start message
+    chunks.push({
+      message_type: 'chunked_start',
+      message_id: messageId,
+      total_chunks: totalChunks,
+      total_size: data.length,
+      compression: 'none',
+      is_binary: false,
+      timestamp: Date.now()
+    });
+
+    // Data chunks
+    for (let i = 0; i < data.length; i += this.chunkSize) {
+      const chunk = data.slice(i, i + this.chunkSize);
+      const chunkIndex = Math.floor(i / this.chunkSize);
+      
+      chunks.push({
+        message_type: 'chunked_data',
+        metadata: {
+          chunk_id: this.generateMessageId(),
+          message_id: messageId,
+          chunk_index: chunkIndex,
+          total_chunks: totalChunks,
+          chunk_size: chunk.length,
+          chunk_hash: this.hashString(chunk),
+          compression: 'none',
+          timestamp: Date.now(),
+          is_final: chunkIndex === totalChunks - 1
+        },
+        data: btoa(chunk), // Base64 encode
+        encoding: 'base64'
+      });
+    }
+
+    // End message
+    chunks.push({
+      message_type: 'chunked_end',
+      message_id: messageId,
+      total_chunks: totalChunks,
+      timestamp: Date.now()
+    });
+
+    return chunks;
+  }
+
+  private hashString(str: string): string {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash; // Convert to 32-bit integer
+    }
+    return hash.toString(16);
+  }
+
   public connect(url: string, options: WebSocketOptions = {}) {
     this.url = url;
     this.options = options;
+    this.currentToken = options.token || null;
     
     if (this.state === 'connected' || this.state === 'connecting') {
       return;
@@ -280,7 +664,7 @@ class WebSocketService {
     this.onStatusChange?.(this.status);
 
     try {
-      this.ws = new WebSocket(url);
+      this.ws = this.createSecureWebSocket(url, options);
 
       this.ws.onopen = () => {
         debugLogger.debug('[WebSocketService] Connection opened to:', url);
@@ -288,9 +672,9 @@ class WebSocketService {
         this.status = 'OPEN';
         this.onStatusChange?.(this.status);
         
-        // Token is already sent in query params during connection
-        // No need to send again in auth message
-        logger.debug('WebSocket connected, token authentication handled via query params');
+        // Token authentication handled securely via subprotocol
+        // No additional auth message needed
+        logger.debug('WebSocket connected, secure authentication completed');
         
         // Send queued messages
         while (this.messageQueue.length > 0) {
@@ -302,6 +686,9 @@ class WebSocketService {
         if (options.heartbeatInterval) {
           this.startHeartbeat(options.heartbeatInterval);
         }
+
+        // Setup token refresh
+        this.setupTokenRefresh();
         
         options.onOpen?.();
       };
@@ -351,15 +738,44 @@ class WebSocketService {
         }
       };
 
-      this.ws.onclose = () => {
+      this.ws.onclose = (event) => {
         this.state = 'disconnected';
         this.status = 'CLOSED';
         this.onStatusChange?.(this.status);
         this.stopHeartbeat();
+        
+        // Handle authentication errors specifically
+        if (event.code === 1008) {
+          logger.error('WebSocket authentication failed', undefined, {
+            component: 'WebSocketService',
+            action: 'auth_rejection',
+            metadata: { code: event.code, reason: event.reason }
+          });
+          
+          // Check if this is a token expiry issue
+          const isTokenExpired = event.reason && (
+            event.reason.includes('Token expired') ||
+            event.reason.includes('token has expired') ||
+            event.reason.includes('JWT expired')
+          );
+          
+          if (isTokenExpired && !this.isRefreshingToken) {
+            logger.debug('WebSocket closed due to token expiry, attempting refresh');
+            this.performTokenRefresh().catch(error => {
+              logger.error('Token refresh after auth error failed', error as Error);
+            });
+          } else {
+            this.handleAuthError({
+              code: event.code,
+              reason: event.reason || 'Authentication failed'
+            });
+          }
+        }
+        
         options.onClose?.();
         
-        // Attempt reconnection
-        if (this.options.onReconnect) {
+        // Only attempt reconnection for non-auth errors
+        if (this.options.onReconnect && event.code !== 1008) {
           this.scheduleReconnect();
         }
       };
@@ -373,12 +789,16 @@ class WebSocketService {
         this.status = 'CLOSED';
         this.state = 'disconnected';
         this.onStatusChange?.(this.status);
+        
+        // Determine error type based on readyState and context
+        const errorType = this.currentToken ? 'auth' : 'connection';
+        
         options.onError?.({
           code: 1006,
-          message: 'WebSocket connection error',
+          message: errorType === 'auth' ? 'Authentication error' : 'WebSocket connection error',
           timestamp: Date.now(),
-          type: 'connection',
-          recoverable: true
+          type: errorType,
+          recoverable: errorType !== 'auth'
         });
       };
     } catch (error) {
@@ -403,9 +823,18 @@ class WebSocketService {
     this.stopHeartbeat();
     this.heartbeatTimer = setInterval(() => {
       if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-        this.send({ type: 'ping', timestamp: Date.now() } as PingMessage);
+        this.send({ 
+          type: 'ping', 
+          timestamp: Date.now(),
+          connection_id: this.getConnectionId()
+        } as PingMessage);
       }
     }, interval);
+  }
+
+  private getConnectionId(): string | undefined {
+    // Extract connection ID from WebSocket if available
+    return (this.ws as any)?._connectionId;
   }
   
   private stopHeartbeat() {
@@ -447,6 +876,12 @@ class WebSocketService {
       this.messageTimestamps.push(now);
     }
     
+    // If refreshing token, queue message as pending
+    if (this.isRefreshingToken) {
+      this.pendingMessages.push(message);
+      return;
+    }
+    
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message));
     } else {
@@ -469,6 +904,8 @@ class WebSocketService {
       this.reconnectTimer = null;
     }
     
+    this.clearTokenRefreshTimers();
+    
     this.stopHeartbeat();
     
     if (this.ws && this.ws.readyState !== WebSocket.CLOSED) {
@@ -477,6 +914,418 @@ class WebSocketService {
     
     this.state = 'disconnected';
     this.messageQueue = [];
+    this.currentToken = null;
+    this.isRefreshingToken = false;
+    this.pendingMessages = [];
+    
+    // Clean up large message assemblies
+    this.messageAssemblies.clear();
+  }
+
+  // Get statistics about large message handling
+  public getLargeMessageStats(): {
+    activeAssemblies: number;
+    assemblyDetails: any[];
+    supportedCompression: string[];
+    maxMessageSize: number;
+    chunkSize: number;
+  } {
+    const assemblyDetails = Array.from(this.messageAssemblies.values()).map(assembly => ({
+      messageId: assembly.messageId,
+      totalChunks: assembly.totalChunks,
+      receivedChunks: assembly.receivedChunks.size,
+      progress: (assembly.receivedChunks.size / assembly.totalChunks) * 100,
+      isCompressed: assembly.isCompressed,
+      compression: assembly.compression,
+      startedAt: assembly.startedAt,
+      ageSeconds: (Date.now() - assembly.startedAt) / 1000
+    }));
+
+    return {
+      activeAssemblies: this.messageAssemblies.size,
+      assemblyDetails,
+      supportedCompression: this.supportedCompression,
+      maxMessageSize: this.maxMessageSize,
+      chunkSize: this.chunkSize
+    };
+  }
+
+  /**
+   * Creates a secure WebSocket connection using proper authentication methods.
+   * Uses subprotocol for JWT authentication (browser-compatible method)
+   */
+  private createSecureWebSocket(url: string, options: WebSocketOptions): WebSocket {
+    const token = options.token;
+    
+    if (!token) {
+      logger.debug('Creating WebSocket without authentication');
+      return new WebSocket(url);
+    }
+
+    // Ensure the token has Bearer prefix for secure subprotocol auth
+    const bearerToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+    
+    // Use subprotocol for secure authentication (browser-compatible)
+    // Note: Browser WebSocket API doesn't support custom headers directly
+    // Encode the JWT token to make it safe for subprotocol use
+    // Remove "Bearer " prefix and encode for safe transmission
+    const cleanToken = bearerToken.startsWith('Bearer ') ? bearerToken.substring(7) : bearerToken;
+    // Base64URL encode the token to ensure it's safe for subprotocol
+    const encodedToken = btoa(cleanToken).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    
+    // Build protocols array with auth and compression support
+    const protocols = [`jwt-auth`, `jwt.${encodedToken}`];
+    
+    // Add compression protocols if supported
+    if (options.compression) {
+      const compressionProtocols = options.compression
+        .filter(alg => this.supportedCompression.includes(alg))
+        .map(alg => `compression-${alg}`);
+      protocols.push(...compressionProtocols);
+    }
+    
+    logger.debug('Creating secure WebSocket with authentication and compression support', {
+      protocols: protocols.map(p => p.startsWith('jwt.') ? 'jwt.[token]' : p)
+    });
+    
+    return new WebSocket(url, protocols);
+  }
+
+  /**
+   * Parse JWT token to extract payload information
+   */
+  private parseJWTToken(token: string): JWTPayload | null {
+    try {
+      // Remove Bearer prefix if present
+      const cleanToken = token.startsWith('Bearer ') ? token.substring(7) : token;
+      
+      // JWT structure: header.payload.signature
+      const parts = cleanToken.split('.');
+      if (parts.length !== 3) {
+        logger.warn('Invalid JWT token format');
+        return null;
+      }
+      
+      // Decode the payload (base64url decode)
+      const payload = parts[1];
+      // Add padding if needed for base64 decoding
+      const paddedPayload = payload.padEnd(payload.length + (4 - payload.length % 4) % 4, '=');
+      const decodedPayload = atob(paddedPayload.replace(/-/g, '+').replace(/_/g, '/'));
+      
+      return JSON.parse(decodedPayload) as JWTPayload;
+    } catch (error) {
+      logger.error('Failed to parse JWT token', error as Error, {
+        component: 'WebSocketService',
+        action: 'parse_jwt_token'
+      });
+      return null;
+    }
+  }
+
+  /**
+   * Check if token is expiring soon (within 5 minutes)
+   */
+  private isTokenExpiringSoon(token: string): boolean {
+    const payload = this.parseJWTToken(token);
+    if (!payload || !payload.exp) {
+      return false;
+    }
+    
+    const now = Math.floor(Date.now() / 1000);
+    const timeUntilExpiry = payload.exp - now;
+    const fiveMinutes = 5 * 60; // 5 minutes in seconds
+    
+    return timeUntilExpiry <= fiveMinutes;
+  }
+
+  /**
+   * Setup token refresh mechanism to handle token expiry during long-lived connections
+   */
+  private setupTokenRefresh(): void {
+    if (!this.options.refreshToken || !this.currentToken) {
+      return;
+    }
+
+    // Clear existing timers
+    this.clearTokenRefreshTimers();
+
+    // Parse token to get expiry time
+    const payload = this.parseJWTToken(this.currentToken);
+    if (!payload || !payload.exp) {
+      logger.warn('Cannot setup token refresh - invalid token payload');
+      return;
+    }
+
+    const now = Math.floor(Date.now() / 1000);
+    const timeUntilExpiry = payload.exp - now;
+    
+    // Set up proactive refresh 5 minutes before expiry
+    const refreshTime = Math.max(timeUntilExpiry - 300, 60); // At least 1 minute, but prefer 5 minutes before expiry
+    const refreshTimeMs = refreshTime * 1000;
+
+    logger.debug('Setting up token refresh', {
+      component: 'WebSocketService',
+      action: 'setup_token_refresh',
+      metadata: {
+        currentTime: now,
+        tokenExpiry: payload.exp,
+        timeUntilExpiry,
+        refreshInSeconds: refreshTime
+      }
+    });
+    
+    this.tokenRefreshTimer = setTimeout(async () => {
+      await this.performTokenRefresh();
+    }, refreshTimeMs);
+
+    // Also set up a periodic check for token expiry (every 30 seconds)
+    this.tokenExpiryCheckTimer = setInterval(async () => {
+      if (this.currentToken && this.isTokenExpiringSoon(this.currentToken) && !this.isRefreshingToken) {
+        logger.debug('Token expiring soon, triggering refresh');
+        await this.performTokenRefresh();
+      }
+    }, 30000); // Check every 30 seconds
+
+    logger.debug('Token refresh timers setup for WebSocket connection');
+  }
+
+  /**
+   * Clear token refresh timers
+   */
+  private clearTokenRefreshTimers(): void {
+    if (this.tokenRefreshTimer) {
+      clearTimeout(this.tokenRefreshTimer);
+      this.tokenRefreshTimer = null;
+    }
+    if (this.tokenExpiryCheckTimer) {
+      clearInterval(this.tokenExpiryCheckTimer);
+      this.tokenExpiryCheckTimer = null;
+    }
+  }
+
+  /**
+   * Perform token refresh with error handling and queuing
+   */
+  private async performTokenRefresh(): Promise<void> {
+    if (this.isRefreshingToken) {
+      logger.debug('Token refresh already in progress, skipping');
+      return;
+    }
+
+    this.isRefreshingToken = true;
+    
+    try {
+      logger.debug('Starting token refresh process');
+      
+      // Move queued messages to pending during refresh
+      this.pendingMessages.push(...this.messageQueue);
+      this.messageQueue = [];
+      
+      const newToken = await this.options.refreshToken!();
+      
+      if (newToken && newToken !== this.currentToken) {
+        logger.debug('Token refreshed successfully, updating WebSocket connection');
+        
+        const oldToken = this.currentToken;
+        this.currentToken = newToken;
+        this.options.token = newToken;
+        
+        // If connected, reconnect with new token
+        if (this.state === 'connected') {
+          await this.reconnectWithNewToken(newToken);
+        }
+        
+        // Setup new refresh timer for the new token
+        this.setupTokenRefresh();
+        
+        logger.debug('Token refresh completed successfully', {
+          component: 'WebSocketService',
+          action: 'token_refresh_success',
+          metadata: {
+            oldTokenPrefix: oldToken?.substring(0, 10) + '...',
+            newTokenPrefix: newToken.substring(0, 10) + '...'
+          }
+        });
+      } else {
+        logger.warn('Token refresh did not return a new token');
+      }
+    } catch (error) {
+      logger.error('Failed to refresh WebSocket token', error as Error, {
+        component: 'WebSocketService',
+        action: 'token_refresh_failed'
+      });
+      
+      // On refresh failure, continue with existing connection but clear timers
+      this.clearTokenRefreshTimers();
+    } finally {
+      this.isRefreshingToken = false;
+      
+      // Process any pending messages after refresh
+      this.processPendingMessages();
+    }
+  }
+
+  /**
+   * Process pending messages after token refresh
+   */
+  private processPendingMessages(): void {
+    if (this.pendingMessages.length > 0) {
+      logger.debug(`Processing ${this.pendingMessages.length} pending messages after token refresh`);
+      
+      // Move pending messages back to queue if not connected, or send if connected
+      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        // Send pending messages directly
+        this.pendingMessages.forEach(msg => {
+          this.send(msg);
+        });
+      } else {
+        // Move back to message queue for sending when connected
+        this.messageQueue.unshift(...this.pendingMessages);
+      }
+      
+      this.pendingMessages = [];
+    }
+  }
+
+  /**
+   * Reconnect with a new token while preserving connection state
+   */
+  private async reconnectWithNewToken(newToken: string): Promise<void> {
+    if (this.state !== 'connected') {
+      return;
+    }
+
+    const wasConnected = this.state === 'connected';
+    const currentUrl = this.url;
+    const currentOptions = { ...this.options, token: newToken };
+
+    // Close current connection
+    if (this.ws) {
+      this.ws.close(1000, 'Token refresh');
+    }
+
+    // Small delay to ensure clean closure
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Reconnect with new token
+    if (wasConnected) {
+      this.connect(currentUrl, currentOptions);
+    }
+  }
+
+  /**
+   * Handle authentication errors from the server
+   */
+  private handleAuthError(error: any): void {
+    logger.error('WebSocket authentication failed', undefined, {
+      component: 'WebSocketService',
+      action: 'auth_error',
+      metadata: { 
+        error: error.reason || error.message || 'Unknown auth error',
+        code: error.code
+      }
+    });
+
+    // Determine if this is a security violation (query param auth)
+    const isSecurityViolation = error.reason && (
+      error.reason.includes('Use Authorization header') ||
+      error.reason.includes('Sec-WebSocket-Protocol') ||
+      error.reason.includes('Query parameters not allowed')
+    );
+
+    this.options.onError?.({
+      code: error.code || 1008,
+      message: isSecurityViolation 
+        ? 'Security violation: Use proper authentication headers'
+        : 'Authentication failed: Invalid or expired token',
+      timestamp: Date.now(),
+      type: 'auth',
+      recoverable: !isSecurityViolation
+    });
+
+    // Only attempt refresh for token expiry, not security violations
+    if (!isSecurityViolation && this.options.refreshToken) {
+      this.attemptTokenRefreshAndReconnect();
+    }
+  }
+
+  /**
+   * Attempt to refresh token and reconnect on auth failure
+   */
+  private async attemptTokenRefreshAndReconnect(): Promise<void> {
+    try {
+      const newToken = await this.options.refreshToken!();
+      if (newToken) {
+        logger.debug('Auth error recovery: refreshed token, attempting reconnection');
+        this.currentToken = newToken;
+        const newOptions = { ...this.options, token: newToken };
+        
+        // Wait a bit before reconnecting
+        setTimeout(() => {
+          this.connect(this.url, newOptions);
+        }, 1000);
+      }
+    } catch (error) {
+      logger.error('Failed to refresh token for auth error recovery', error as Error);
+    }
+  }
+
+  /**
+   * Get the secure WebSocket URL without exposing tokens
+   * Ensures no tokens are leaked in URLs
+   */
+  public getSecureUrl(baseUrl: string): string {
+    // Ensure the URL never contains tokens in query parameters
+    const urlObj = new URL(baseUrl, window.location.origin);
+    
+    // Remove any existing token parameters (security cleanup)
+    urlObj.searchParams.delete('token');
+    urlObj.searchParams.delete('auth');
+    urlObj.searchParams.delete('jwt');
+    
+    // Use secure WebSocket endpoint
+    if (urlObj.pathname === '/ws' || urlObj.pathname.endsWith('/ws')) {
+      urlObj.pathname = urlObj.pathname.replace(/\/ws$/, '/ws/secure');
+    }
+    
+    return urlObj.toString();
+  }
+
+  /**
+   * Update token for an existing connection
+   */
+  public async updateToken(newToken: string): Promise<void> {
+    if (this.currentToken === newToken) {
+      return; // No change needed
+    }
+
+    this.currentToken = newToken;
+    this.options.token = newToken;
+
+    // If connected, reconnect with new token
+    if (this.state === 'connected') {
+      await this.reconnectWithNewToken(newToken);
+    }
+    
+    // Setup new refresh timer for the new token
+    this.setupTokenRefresh();
+  }
+
+  /**
+   * Get current connection security status
+   */
+  public getSecurityStatus(): {
+    isSecure: boolean;
+    authMethod: string;
+    hasToken: boolean;
+    tokenRefreshEnabled: boolean;
+  } {
+    return {
+      isSecure: !!this.currentToken,
+      authMethod: this.currentToken ? 'subprotocol' : 'none',
+      hasToken: !!this.currentToken,
+      tokenRefreshEnabled: !!this.options.refreshToken
+    };
   }
 }
 

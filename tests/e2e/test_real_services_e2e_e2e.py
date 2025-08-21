@@ -478,7 +478,7 @@ class RealServiceE2ETestSuite:
     # Supporting Helper Methods
     async def _execute_real_user_signup(self) -> Dict[str, Any]:
         """Execute real user signup via Auth Service."""
-        user_email = f"e2e-test-{self.test_session_id}-{uuid.uuid4().hex[:8]}@netra.ai"
+        user_email = f"e2e-test-{self.test_session_id}-{uuid.uuid4().hex[:8]}@netrasystems.ai"
         user_password = f"E2ETest{uuid.uuid4().hex[:8]}!"
         
         async with httpx.AsyncClient() as client:

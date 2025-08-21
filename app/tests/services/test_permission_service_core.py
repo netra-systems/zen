@@ -70,7 +70,7 @@ class TestDetectDeveloperStatus:
         result = PermissionService.detect_developer_status(user)
         assert result == True
         
-        user.email = "Developer@NETRA.AI"
+        user.email = "Developer@netrasystems.ai"
         result = PermissionService.detect_developer_status(user)
         assert result == True
         

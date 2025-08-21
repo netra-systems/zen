@@ -34,7 +34,7 @@ class ResultValidationHelper:
         assert result.get("success"), "Registration must succeed"
         assert "access_token" in result, "Must provide access token"
         assert result.get("token_type") == "Bearer", "Must use Bearer token"
-        assert result["user"]["email"].endswith("@netra.ai"), "Must use test email"
+        assert result["user"]["email"].endswith("@netrasystems.ai"), "Must use test email"
     
     def validate_profile_result(self, result: Dict[str, Any]) -> None:
         """Validate profile setup result."""

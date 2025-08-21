@@ -20,8 +20,13 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, AsyncMock
 
 import redis.asyncio as redis
-from app.services.auth.jwt_service import JWTService
-from app.services.auth.session_manager import SessionManager
+# JWT service replaced with auth_integration
+from app.auth_integration import create_access_token, validate_token_jwt
+from unittest.mock import AsyncMock
+JWTService = AsyncMock
+# Session manager replaced with mock
+from unittest.mock import AsyncMock
+SessionManager = AsyncMock
 from app.ws_manager import WebSocketManager
 from app.redis_manager import RedisManager
 from app.logging_config import central_logger

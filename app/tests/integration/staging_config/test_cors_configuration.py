@@ -19,8 +19,8 @@ class TestCORSConfiguration(StagingConfigTestBase):
         self.skip_if_not_staging()
         
         origins = [
-            'https://staging.netra.ai',
-            'https://app-staging.netra.ai',
+            'https://staging.netrasystems.ai',
+            'https://app-staging.netrasystems.ai',
             'http://localhost:3000'
         ]
         
@@ -55,7 +55,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
             response = await client.get(
                 f"{self.staging_url}/health",
                 headers={
-                    'Origin': 'https://staging.netra.ai'
+                    'Origin': 'https://staging.netrasystems.ai'
                 }
             )
             
@@ -94,7 +94,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
             response = await client.options(
                 f"{self.staging_url}/api/threads",
                 headers={
-                    'Origin': 'https://staging.netra.ai',
+                    'Origin': 'https://staging.netrasystems.ai',
                     'Access-Control-Request-Method': 'DELETE'
                 }
             )
@@ -122,7 +122,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
             response = await client.options(
                 f"{self.staging_url}/api/threads",
                 headers={
-                    'Origin': 'https://staging.netra.ai',
+                    'Origin': 'https://staging.netrasystems.ai',
                     'Access-Control-Request-Headers': ', '.join(custom_headers)
                 }
             )
@@ -142,7 +142,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
             response = await client.options(
                 f"{self.staging_url}/api/threads",
                 headers={
-                    'Origin': 'https://staging.netra.ai',
+                    'Origin': 'https://staging.netrasystems.ai',
                     'Access-Control-Request-Method': 'POST'
                 }
             )
@@ -164,7 +164,7 @@ class TestCORSConfiguration(StagingConfigTestBase):
             response = await client.options(
                 f"{self.staging_url}/ws",
                 headers={
-                    'Origin': 'https://staging.netra.ai',
+                    'Origin': 'https://staging.netrasystems.ai',
                     'Access-Control-Request-Method': 'GET',
                     'Access-Control-Request-Headers': 'Upgrade, Connection'
                 }

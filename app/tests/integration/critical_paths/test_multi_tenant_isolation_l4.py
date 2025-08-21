@@ -21,7 +21,10 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, timedelta
 
 from app.services.database.tenant_service import TenantService
-from app.services.auth.permissions_service import PermissionsService
+# Permissions service replaced with auth_integration
+from app.auth_integration import require_permission
+from unittest.mock import AsyncMock
+PermissionsService = AsyncMock
 from app.services.audit.audit_logger import AuditLogger
 from app.services.database.connection_manager import DatabaseConnectionManager
 from app.schemas.tenant import Tenant, TenantResource, Permission

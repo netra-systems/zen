@@ -24,7 +24,8 @@ from enum import Enum
 
 from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState, AgentStateManager
+from app.agents.state import DeepAgentState, 
+from app.agents.supervisor.state_manager import AgentStateManager
 from app.redis_manager import RedisManager
 from app.schemas import UserInDB
 from app.core.exceptions_base import NetraException, AuthorizationException

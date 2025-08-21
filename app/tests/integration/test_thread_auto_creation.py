@@ -53,7 +53,7 @@ class TestThreadAutoCreation:
         """Create test user for thread operations."""
         return UserInDB(
             id="thread_test_user_001",
-            email="thread@test.netra.ai",
+            email="thread@test.netrasystems.ai",
             username="threaduser",
             is_active=True,
             created_at=datetime.now(timezone.utc)

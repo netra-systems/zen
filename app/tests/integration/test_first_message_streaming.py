@@ -48,7 +48,7 @@ class TestFirstMessageStreaming:
         """Create test user for streaming."""
         return UserInDB(
             id="stream_user_001",
-            email="stream@test.netra.ai",
+            email="stream@test.netrasystems.ai",
             username="streamuser",
             is_active=True,
             created_at=datetime.now(timezone.utc)

@@ -55,7 +55,7 @@ class MultiServiceWebSocketAuthTester:
         try:
             # Generate unique email if not provided
             if not email:
-                email = f"test-user-{uuid.uuid4().hex[:8]}@netra.ai"
+                email = f"test-user-{uuid.uuid4().hex[:8]}@netrasystems.ai"
             
             # Create user via Auth service
             user_data = await self.auth_client.create_test_user(

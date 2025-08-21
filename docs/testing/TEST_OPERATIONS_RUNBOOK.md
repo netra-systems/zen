@@ -302,7 +302,7 @@ crontab -e
 ### Notification Channels
 
 - **Slack**: #test-alerts (automated notifications)
-- **Email**: engineering-team@netra.ai (critical failures)
+- **Email**: engineering-team@netrasystems.ai (critical failures)
 - **Dashboard**: Internal test metrics dashboard
 - **GitHub Issues**: Automated ticket creation for persistent issues
 

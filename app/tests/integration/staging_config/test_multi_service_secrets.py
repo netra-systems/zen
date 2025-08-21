@@ -147,8 +147,8 @@ class TestMultiServiceSecrets(StagingConfigTestBase):
                 
             # Verify staging URLs are included
             expected_origins = [
-                'https://staging.netra.ai',
-                'https://app-staging.netra.ai',
+                'https://staging.netrasystems.ai',
+                'https://app-staging.netrasystems.ai',
                 'http://localhost:3000'  # For local development
             ]
             

@@ -149,7 +149,7 @@ class SecurityBreachResponseL4Test(L4StagingCriticalPathTestBase):
                 name="credential_brute_force",
                 attack_type="brute_force",
                 payload={
-                    "username": "admin@netra.ai",
+                    "username": "admin@netrasystems.ai",
                     "passwords": ["password", "123456", "admin", "netra123", "password123"]
                 },
                 expected_response="blocked",

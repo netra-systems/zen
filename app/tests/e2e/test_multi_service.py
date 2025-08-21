@@ -67,7 +67,7 @@ class TestCrossServiceAuthentication:
         """Test user data for authentication tests."""
         return {
             "user_id": "test_user_123",
-            "email": "test@netra.ai",
+            "email": "test@netrasystems.ai",
             "plan": "free",
             "permissions": ["read", "write"]
         }
@@ -170,7 +170,7 @@ class TestDatabaseConsistency:
             mock_postgres_client = AsyncMock()
             mock_postgres_client.fetchrow.return_value = {
                 "user_id": "user_123",
-                "email": "test@netra.ai",
+                "email": "test@netrasystems.ai",
                 "created_at": "2025-01-20T10:00:00Z"
             }
             mock_postgres.return_value = mock_postgres_client
@@ -210,7 +210,7 @@ class TestDatabaseConsistency:
             
             user_data = {
                 "user_id": "new_user_123", 
-                "email": "newuser@netra.ai",
+                "email": "newuser@netrasystems.ai",
                 "plan": "free"
             }
             

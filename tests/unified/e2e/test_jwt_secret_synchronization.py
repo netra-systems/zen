@@ -75,7 +75,7 @@ class JWTSecretSynchronizationValidator:
         """Create JWT token with specific secret."""
         payload = {
             "sub": user_id,
-            "email": "test@netra.ai",
+            "email": "test@netrasystems.ai",
             "permissions": ["read", "write"],
             "iat": int(datetime.now(timezone.utc).timestamp()),
             "exp": int((datetime.now(timezone.utc) + timedelta(minutes=15)).timestamp()),

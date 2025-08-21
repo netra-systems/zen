@@ -347,7 +347,7 @@ class TestJWTGeneration:
         - Permission and scope validation
         """
         # Generate token with specific email
-        test_email = "validation-test@netra.ai"
+        test_email = "validation-test@netrasystems.ai"
         token_set = await jwt_manager.generate_token_via_auth_service(test_email)
         
         # Extract and validate token information
@@ -386,9 +386,9 @@ class TestJWTGeneration:
         """
         # Generate tokens for multiple users
         user_emails = [
-            "user1@netra.ai",
-            "user2@netra.ai", 
-            "user3@netra.ai"
+            "user1@netrasystems.ai",
+            "user2@netrasystems.ai", 
+            "user3@netrasystems.ai"
         ]
         
         token_sets = []

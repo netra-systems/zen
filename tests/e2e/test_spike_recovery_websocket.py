@@ -26,6 +26,9 @@ import httpx
 import sys
 import os
 
+# Import required classes from test_spike_recovery_core
+from .test_spike_recovery_core import SpikeLoadGenerator, SpikeLoadMetrics
+
 class TestWebSocketConnectionAvalanche:
     """Test Case 2: WebSocket Connection Avalanche"""
     

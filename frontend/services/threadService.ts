@@ -24,6 +24,9 @@ export class ThreadService {
     const response = await apiClient.get<Thread[]>('/api/threads', {
       params: { limit, offset }
     });
+    if (!response.data || !Array.isArray(response.data)) {
+      throw new Error('Invalid response format from server');
+    }
     return response.data;
   }
 
@@ -34,8 +37,7 @@ export class ThreadService {
 
   static async createThread(title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.post<Thread>('/api/threads', {
-      name: title,
-      title: title, // Support both patterns in unified interface
+      title: title,
       metadata
     });
     return response.data;
@@ -43,8 +45,7 @@ export class ThreadService {
 
   static async updateThread(threadId: string, title?: string, metadata?: ThreadMetadata): Promise<Thread> {
     const response = await apiClient.put<Thread>(`/api/threads/${threadId}`, {
-      name: title,
-      title: title, // Support both patterns in unified interface
+      title: title,
       metadata
     });
     return response.data;

@@ -113,6 +113,11 @@ python scripts/test_backend.py --no-bad-test-detection
 - **Dev Launcher**: `/scripts/dev_launcher.py` - Development server starter
 - **Test Runner**: `/test_framework/test_runner.py` - Test execution entry (run with `python -m test_framework.test_runner`)
 
+### Deployment Entry Points
+- **Enhanced Deploy**: `/organized_root/deployment_configs/deploy_staging_enhanced.py` - Modular deployment orchestrator
+- **Standard Deploy**: `/organized_root/deployment_configs/deploy_staging.py` - Standard deployment script
+- **Setup Auth**: `/organized_root/deployment_configs/setup_staging_auth.py` - GCP authentication setup
+
 ### Frontend Entry Points
 - **Next.js App**: `/frontend/app/page.tsx` - Main page component
 - **Layout**: `/frontend/app/layout.tsx` - App layout wrapper
@@ -157,6 +162,19 @@ python scripts/test_backend.py --no-bad-test-detection
 | `interfaces_agent.py` | Agent interfaces | AgentInterface |
 | `system_health_monitor.py` | System monitoring | HealthMonitor class |
 | `fallback_coordinator.py` | Fallback handling | FallbackCoordinator |
+
+### GCP Deployment Modules (`/organized_root/deployment_configs/`)
+| Module | Location | Purpose | Key Components |
+|--------|----------|---------|----------------|
+| **Core Modules** | `/core/` | Deployment orchestration | |
+| `deployment_orchestrator.py` | `/core/` | Main deployment coordinator | DeploymentOrchestrator, DeploymentConfig |
+| `docker_image_manager.py` | `/core/` | Docker build & push | DockerImageManager, DockerImage |
+| `cloud_run_deployer.py` | `/core/` | Cloud Run deployments | CloudRunDeployer, CloudRunService |
+| `health_checker.py` | `/core/` | Service health validation | HealthChecker, HealthStatus |
+| **Monitoring Modules** | `/monitoring/` | Real-time monitoring | |
+| `real_time_monitor.py` | `/monitoring/` | Live log streaming | RealTimeMonitor, DeploymentMetrics |
+| `error_analyzer.py` | `/monitoring/` | Error categorization | ErrorAnalyzer, ErrorCategory |
+| `log_correlator.py` | `/monitoring/` | Cross-service correlation | LogCorrelator, CorrelatedEvent |
 | `memory_recovery_strategies.py` | Memory management | Recovery strategies |
 
 ### Scripts (`/scripts/`)
@@ -215,7 +233,7 @@ python scripts/test_backend.py --no-bad-test-detection
 | **Testing** | `testing.xml`, `e2e_testing.xml`, `bad_test_detection.xml` | TDD workflows, real vs mock |
 | **Database** | `database_asyncio.xml`, `database_*.xml` | Async patterns, connections |
 | **Frontend** | `frontend.xml`, `react-content-handling.xml` | Zustand patterns, React |
-| **Deployment** | `deployment_staging.xml`, `gcp_deployment.xml` | Cloud Run, staging |
+| **Deployment** | `deployment_staging.xml` | Cloud Run, staging |
 | **Startup** | `startup.xml`, `startup_optimization.xml` | Initialization order |
 | **Compliance** | `architectural_compliance.xml`, `compliance_improvements.xml` | 300/8 enforcement |
 
@@ -227,7 +245,6 @@ python scripts/test_backend.py --no-bad-test-detection
 | **`independent_services.xml`** | Microservice independence | 100% isolation requirement |
 | **`growth_control.xml`** | Healthy growth patterns | Composition over monoliths |
 | **`directory_structure.xml`** | File organization | Standard layout |
-| **`deployment_naming_standards.xml`** | Naming conventions | Service naming rules |
 
 ### 🔧 Core Infrastructure
 | Domain | Specs | Purpose |

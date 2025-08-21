@@ -240,7 +240,7 @@ class L4StagingCriticalPathTestBase(ABC):
             timestamp = int(time.time() * 1000000)  # Microseconds
             
             user_id = f"test_user_{tier}_{full_uuid}_{process_id}_{random_suffix}_{timestamp}"
-            email = f"{user_id}@staging-test.netra.ai"
+            email = f"{user_id}@staging-test.netrasystems.ai"
             
             # Create user in auth service
             user_creation_data = {

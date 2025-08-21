@@ -502,7 +502,7 @@ def test_user_data() -> Dict[str, Any]:
     """Create test user data for multi-service testing."""
     return {
         "user_id": "test_user_123",
-        "email": "test@netra.ai",
+        "email": "test@netrasystems.ai",
         "plan": "free",
         "permissions": ["read", "write"],
         "created_at": "2025-01-20T10:00:00Z"

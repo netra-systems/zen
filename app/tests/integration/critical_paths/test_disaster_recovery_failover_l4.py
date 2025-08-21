@@ -361,7 +361,7 @@ class L4DisasterRecoveryFailoverTest(L4StagingCriticalPathTestBase):
             for tier, count, balance in test_users:
                 for i in range(count):
                     user_id = str(uuid.uuid4())
-                    email = f"dr_test_{tier}_{i}@staging-test.netra.ai"
+                    email = f"dr_test_{tier}_{i}@staging-test.netrasystems.ai"
                     
                     await conn.execute("""
                         INSERT INTO critical_user_data 

@@ -372,7 +372,7 @@ describe('Authentication Flow Integration', () => {
   async function performOnboardingLogin() {
     const onboardingUser = {
       id: 'onboarding-user-123',
-      email: 'newuser@netra.ai',
+      email: 'newuser@netrasystems.ai',
       name: 'New User',
       tier: 'free'
     };
@@ -402,7 +402,7 @@ describe('Authentication Flow Integration', () => {
   function expectOnboardingFlowComplete() {
     const authStore = useAuthStore();
     expect(authStore.isAuthenticated).toBe(true);
-    expect(authStore.user?.email).toBe('newuser@netra.ai');
+    expect(authStore.user?.email).toBe('newuser@netrasystems.ai');
   }
 
   async function simulateSessionTimeout() {

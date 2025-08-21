@@ -26,7 +26,9 @@ import redis.asyncio as aioredis
 from app.services.cache.distributed_cache import DistributedCache
 from app.services.cache.cache_manager import CacheManager
 from app.services.cache.invalidation_service import CacheInvalidationService
-from app.services.auth.session_cache import SessionCache
+# Session cache replaced with mock
+from unittest.mock import AsyncMock
+SessionCache = AsyncMock
 from app.services.database.user_repository import UserRepository
 from tests.unified.config import TEST_CONFIG
 

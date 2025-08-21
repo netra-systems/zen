@@ -217,7 +217,7 @@ def _validate_registration_step(registration_data: dict) -> None:
     assert registration_data.get("success"), "Registration must succeed"
     assert "access_token" in registration_data, "Must provide access token"
     assert registration_data.get("token_type") == "Bearer", "Must use Bearer token"
-    assert registration_data["user"]["email"].endswith("@netra.ai"), "Must use test domain"
+    assert registration_data["user"]["email"].endswith("@netrasystems.ai"), "Must use test domain"
     assert len(registration_data["access_token"]) > 50, "Token must be substantial"
 
 

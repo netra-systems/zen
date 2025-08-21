@@ -14,7 +14,6 @@ from app.routes.demo_handlers import (
     handle_synthetic_metrics, handle_export_report, handle_session_status,
     handle_session_feedback, handle_demo_analytics
 )
-from app.routes.demo_websocket import handle_demo_websocket
 
 router = APIRouter(prefix="/api/demo", tags=["demo"])
 
@@ -122,11 +121,3 @@ async def get_demo_analytics(
     """Get demo analytics summary."""
     return await handle_demo_analytics(days, demo_service, current_user)
 
-
-@router.websocket("/ws")
-async def demo_websocket_endpoint(websocket: WebSocket) -> None:
-    """WebSocket endpoint for real-time demos."""
-    # Manually create demo service instance for WebSocket endpoint
-    # FastAPI Depends() doesn't work properly with WebSocket endpoints
-    demo_service = get_demo_service()
-    await handle_demo_websocket(websocket, demo_service)

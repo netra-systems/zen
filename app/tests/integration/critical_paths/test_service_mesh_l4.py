@@ -28,7 +28,7 @@ from app.services.service_mesh.discovery_service import ServiceDiscoveryService
 from app.services.service_mesh.load_balancer import LoadBalancerService
 from app.services.service_mesh.circuit_breaker import CircuitBreakerService
 from app.services.service_mesh.retry_policy import RetryPolicyService
-from app.config import Config
+from app.config import get_config
 
 logger = logging.getLogger(__name__)
 
@@ -99,34 +99,34 @@ class ServiceMeshL4Manager:
             staging_service_endpoints = {
                 "api_service": {
                     "instances": [
-                        {"host": "api-1.staging.netra.ai", "port": 8000, "zone": "us-central1-a"},
-                        {"host": "api-2.staging.netra.ai", "port": 8000, "zone": "us-central1-b"},
-                        {"host": "api-3.staging.netra.ai", "port": 8000, "zone": "us-central1-c"}
+                        {"host": "api-1.staging.netrasystems.ai", "port": 8000, "zone": "us-central1-a"},
+                        {"host": "api-2.staging.netrasystems.ai", "port": 8000, "zone": "us-central1-b"},
+                        {"host": "api-3.staging.netrasystems.ai", "port": 8000, "zone": "us-central1-c"}
                     ],
                     "health_endpoint": "/health",
                     "service_type": "http"
                 },
                 "auth_service": {
                     "instances": [
-                        {"host": "auth-1.staging.netra.ai", "port": 8001, "zone": "us-central1-a"},
-                        {"host": "auth-2.staging.netra.ai", "port": 8001, "zone": "us-central1-b"}
+                        {"host": "auth-1.staging.netrasystems.ai", "port": 8001, "zone": "us-central1-a"},
+                        {"host": "auth-2.staging.netrasystems.ai", "port": 8001, "zone": "us-central1-b"}
                     ],
                     "health_endpoint": "/health",
                     "service_type": "http"
                 },
                 "websocket_service": {
                     "instances": [
-                        {"host": "ws-1.staging.netra.ai", "port": 8002, "zone": "us-central1-a"},
-                        {"host": "ws-2.staging.netra.ai", "port": 8002, "zone": "us-central1-b"}
+                        {"host": "ws-1.staging.netrasystems.ai", "port": 8002, "zone": "us-central1-a"},
+                        {"host": "ws-2.staging.netrasystems.ai", "port": 8002, "zone": "us-central1-b"}
                     ],
                     "health_endpoint": "/health",
                     "service_type": "websocket"
                 },
                 "llm_service": {
                     "instances": [
-                        {"host": "llm-1.staging.netra.ai", "port": 8003, "zone": "us-central1-a"},
-                        {"host": "llm-2.staging.netra.ai", "port": 8003, "zone": "us-central1-b"},
-                        {"host": "llm-3.staging.netra.ai", "port": 8003, "zone": "us-central1-c"}
+                        {"host": "llm-1.staging.netrasystems.ai", "port": 8003, "zone": "us-central1-a"},
+                        {"host": "llm-2.staging.netrasystems.ai", "port": 8003, "zone": "us-central1-b"},
+                        {"host": "llm-3.staging.netrasystems.ai", "port": 8003, "zone": "us-central1-c"}
                     ],
                     "health_endpoint": "/health",
                     "service_type": "http"

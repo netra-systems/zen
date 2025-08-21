@@ -63,7 +63,7 @@ class MultiSessionManager:
         # Fallback to creating test token
         return self.jwt_helper.create_access_token(
             self.user_id, 
-            "test@netra.ai", 
+            "test@netrasystems.ai", 
             ["read", "write"]
         )
     

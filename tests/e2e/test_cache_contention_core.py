@@ -25,6 +25,20 @@ from contextlib import asynccontextmanager
 import statistics
 import asyncio
 import os
+from app.core.network_constants import NetworkEnvironmentHelper
+
+# Get Redis URL from environment helper
+REDIS_URL = NetworkEnvironmentHelper.get_database_urls_for_environment()["redis"]
+
+logger = logging.getLogger(__name__)
+
+# Test configuration
+TEST_DATA_CONFIG = {
+    "num_cache_keys": 100,
+    "num_operations": 1000,
+    "num_threads": 10,
+    "test_timeout": 60
+}
 
 class CacheContentionMetrics:
     """Collects and analyzes cache contention performance metrics."""

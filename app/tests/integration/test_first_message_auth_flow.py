@@ -34,7 +34,7 @@ class TestFirstMessageAuthenticationFlow:
         """Create test user for authentication testing."""
         return UserInDB(
             id="auth_test_user_001",
-            email="firstmsg@test.netra.ai",
+            email="firstmsg@test.netrasystems.ai",
             username="firstuser",
             is_active=True,
             created_at=datetime.now(timezone.utc)

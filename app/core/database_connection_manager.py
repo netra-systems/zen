@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from app.logging_config import central_logger
 from .database_types import DatabaseType, DatabaseConfig, PoolMetrics, PoolHealth
-from .database_health_monitoring import DatabaseHealthChecker
+from .database_health_monitoring import CoreDatabaseHealthChecker as DatabaseHealthChecker
 from .database_recovery_core import (
     DatabaseRecoveryStrategy, ConnectionPoolRefreshStrategy, 
     ConnectionPoolRecreateStrategy

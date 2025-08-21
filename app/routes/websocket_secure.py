@@ -126,9 +126,28 @@ class SecureWebSocketManager:
             for protocol in protocols:
                 protocol = protocol.strip()
                 if protocol.startswith("jwt."):
-                    token = protocol[4:]  # Remove "jwt." prefix
-                    auth_method = "subprotocol"
-                    logger.info("WebSocket auth via Sec-WebSocket-Protocol")
+                    # Extract token from subprotocol (jwt.encodedToken)
+                    encoded_token = protocol[4:]  # Remove "jwt." prefix
+                    
+                    # Decode base64URL-encoded token
+                    try:
+                        import base64
+                        # Convert base64URL to standard base64 and decode
+                        padded_token = encoded_token + '=' * (4 - len(encoded_token) % 4)
+                        standard_b64 = padded_token.replace('-', '+').replace('_', '/')
+                        decoded_token = base64.b64decode(standard_b64).decode('utf-8')
+                        
+                        # Ensure Bearer prefix
+                        if decoded_token.startswith("Bearer "):
+                            token = decoded_token
+                        else:
+                            token = f"Bearer {decoded_token}"
+                        
+                        auth_method = "subprotocol"
+                        logger.info("WebSocket auth via Sec-WebSocket-Protocol (base64URL decoded)")
+                    except Exception as e:
+                        logger.warning(f"Failed to decode JWT subprotocol: {e}")
+                        continue
                     break
         
         if not token:
@@ -141,7 +160,9 @@ class SecureWebSocketManager:
         
         # Validate token with auth service
         try:
-            validation_result = await auth_client.validate_token(token)
+            # Send only the token part (without Bearer prefix) to auth service
+            clean_token = token.replace("Bearer ", "") if token.startswith("Bearer ") else token
+            validation_result = await auth_client.validate_token(clean_token)
             
             if not validation_result or not validation_result.get("valid"):
                 self._stats["security_violations"] += 1
@@ -569,7 +590,7 @@ async def secure_websocket_endpoint(websocket: WebSocket):
                 selected_protocol = None
                 for protocol in protocols:
                     protocol = protocol.strip()
-                    if protocol.startswith("jwt."):
+                    if protocol == "jwt-auth" or protocol.startswith("jwt."):
                         selected_protocol = "jwt-auth"
                         break
                 

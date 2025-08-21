@@ -113,6 +113,11 @@ class WebSocketManager:
         """CONSOLIDATED: Access to unified connection manager."""
         return self._connection_manager
     
+    @property
+    def active_connections(self):
+        """CONSOLIDATED: Access to active connections via unified system."""
+        return self._connection_manager.active_connections
+    
     # CONSOLIDATED: Convenience methods delegating to unified system
     async def send_error_to_user(self, user_id: str, error_message: str, sub_agent_name: str = "System") -> bool:
         """CONSOLIDATED: Delegate to unified error messaging."""

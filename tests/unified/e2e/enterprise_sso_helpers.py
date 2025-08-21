@@ -25,7 +25,7 @@ class MockSAMLIdP:
     
     def __init__(self):
         self.issuer = "https://enterprise-idp.example.com"
-        self.destination = "https://app.netra.ai/auth/saml/callback"
+        self.destination = "https://app.netrasystems.ai/auth/saml/callback"
         self.certificate = self._generate_mock_certificate()
     
     def create_saml_assertion(self, user_email: str, permissions: List[str] = None) -> str:

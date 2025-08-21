@@ -30,7 +30,7 @@ class TestProductionCORSSecurity:
             origins = get_environment_origins()
             
             # Should include production origins
-            assert any('netra.ai' in origin for origin in origins)
+            assert any('netrasystems.ai' in origin for origin in origins)
             # Should not include development localhost origins
             assert not any('localhost' in origin for origin in origins)
     
@@ -40,7 +40,7 @@ class TestProductionCORSSecurity:
             origins = get_environment_origins()
             
             # Should include staging origins
-            assert any('staging.netra.ai' in origin for origin in origins)
+            assert any('staging.netrasystems.ai' in origin for origin in origins)
             # Should also include development origins for testing
             assert any('localhost' in origin for origin in origins)
     
@@ -62,19 +62,19 @@ class TestProductionCORSSecurity:
     def test_origin_deduplication(self):
         """Test that duplicate origins are removed while preserving order."""
         # Create scenario with duplicates
-        with patch('app.core.websocket_cors.PRODUCTION_ORIGINS', ['https://netra.ai', 'https://app.netra.ai']):
+        with patch('app.core.websocket_cors.PRODUCTION_ORIGINS', ['https://netrasystems.ai', 'https://app.netrasystems.ai']):
             with patch('os.getenv') as mock_getenv:
                 mock_getenv.side_effect = lambda key, default=None: {
                     'ENVIRONMENT': 'production',
-                    'WEBSOCKET_ALLOWED_ORIGINS': 'https://netra.ai,https://custom.com'
+                    'WEBSOCKET_ALLOWED_ORIGINS': 'https://netrasystems.ai,https://custom.com'
                 }.get(key, default)
                 
                 origins = get_environment_origins()
                 
                 # Should not have duplicates
-                assert origins.count('https://netra.ai') == 1
+                assert origins.count('https://netrasystems.ai') == 1
                 # Should include both production and custom
-                assert 'https://app.netra.ai' in origins
+                assert 'https://app.netrasystems.ai' in origins
                 assert 'https://custom.com' in origins
 
 
@@ -170,7 +170,7 @@ class TestThreatPatternDetection:
         
         # Test performance with multiple checks
         test_origins = [
-            "https://netra.ai",
+            "https://netrasystems.ai",
             "http://192.168.1.1", 
             "chrome-extension://test",
             "https://legitimate-site.com"
@@ -279,7 +279,7 @@ class TestSecurityHeaderInjection:
         """Test that all required security headers are included in production."""
         handler = WebSocketCORSHandler(environment="production")
         
-        headers = handler.get_cors_headers("https://netra.ai")
+        headers = handler.get_cors_headers("https://netrasystems.ai")
         
         required_security_headers = {
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
@@ -311,7 +311,7 @@ class TestSecurityHeaderInjection:
         """Test that basic CORS headers are always included."""
         handler = WebSocketCORSHandler(environment="production")
         
-        headers = handler.get_cors_headers("https://netra.ai")
+        headers = handler.get_cors_headers("https://netrasystems.ai")
         
         basic_cors_headers = [
             "Access-Control-Allow-Origin",
@@ -324,7 +324,7 @@ class TestSecurityHeaderInjection:
         for header in basic_cors_headers:
             assert header in headers
         
-        assert headers["Access-Control-Allow-Origin"] == "https://netra.ai"
+        assert headers["Access-Control-Allow-Origin"] == "https://netrasystems.ai"
         assert headers["Access-Control-Allow-Credentials"] == "true"
         assert headers["Access-Control-Allow-Methods"] == "GET"
         assert headers["Vary"] == "Origin"
