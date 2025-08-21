@@ -207,7 +207,7 @@ def run_backend_tests(args: List[str], timeout: int = 300, real_llm_config: Opti
 
 
 def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, Any] = None, speed_opts: Optional[Dict[str, bool]] = None, test_level: str = None) -> Tuple[int, str]:
-    """Run frontend tests with specified arguments."""
+    """Run frontend tests with specified arguments and improved error handling."""
     global _active_processes
     
     print(f"\n{'='*60}")
@@ -219,6 +219,12 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
     start_time = time.time()
     if results:
         results["frontend"]["status"] = "running"
+        results["frontend"]["test_metrics"] = {
+            "total_test_files": 0,
+            "test_categories": {},
+            "import_errors": [],
+            "execution_errors": []
+        }
     
     # Determine if we should use simple frontend runner (for smoke tests or when no args)
     use_simple_runner = (len(args) == 0 or ("--category" in args and "smoke" in str(args)))
@@ -290,6 +296,40 @@ def run_frontend_tests(args: List[str], timeout: int = 300, results: Dict[str, A
             coverage = parse_coverage(output)
             if coverage is not None:
                 results["frontend"]["coverage"] = coverage
+            
+            # Parse frontend-specific metrics
+            if "test_metrics" in results["frontend"]:
+                metrics = results["frontend"]["test_metrics"]
+                
+                # Count test files from output
+                test_files = [line for line in output.split('\n') if line.strip().endswith(('.test.tsx', '.test.ts'))]
+                metrics["total_test_files"] = len(set(test_files))
+                
+                # Parse test categories from file paths
+                categories = {}
+                for file_path in test_files:
+                    if "__tests__" in file_path:
+                        parts = file_path.split("__tests__")[1].split("\\")
+                        if len(parts) > 1:
+                            category = parts[1] if parts[1] else "root"
+                            categories[category] = categories.get(category, 0) + 1
+                metrics["test_categories"] = categories
+                
+                # Check for import errors
+                if "Cannot find module" in output:
+                    import_errors = []
+                    for line in output.split('\n'):
+                        if "Cannot find module" in line:
+                            import_errors.append(line.strip())
+                    metrics["import_errors"] = import_errors[:10]  # Limit to first 10
+                
+                # Check for execution errors
+                if "Test suite failed to run" in output:
+                    execution_errors = []
+                    for line in output.split('\n'):
+                        if "Test suite failed to run" in line or "ERROR" in line:
+                            execution_errors.append(line.strip())
+                    metrics["execution_errors"] = execution_errors[:10]  # Limit to first 10
         
         # Print output with proper encoding handling
         print_output(stdout, stderr)

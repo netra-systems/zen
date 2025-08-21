@@ -59,7 +59,17 @@ def parse_test_counts(output: str, component: str) -> Dict:
             (r"Tests:\s+(\d+) failed", "failed"),
             (r"Tests:\s+(\d+) skipped", "skipped"),
             (r"Tests:\s+(\d+) total", "total"),
+            # Additional Jest patterns
+            (r"Test Suites:\s+(\d+) passed", "suites_passed"),
+            (r"Test Suites:\s+(\d+) failed", "suites_failed"),
+            (r"Test Suites:\s+(\d+) total", "suites_total"),
         ])
+        
+        # Check for specific frontend test errors
+        if "Cannot find module" in output:
+            counts["import_errors"] = output.count("Cannot find module")
+        if "Test suite failed to run" in output:
+            counts["suite_errors"] = output.count("Test suite failed to run")
     
     for pattern, key in patterns:
         match = re.search(pattern, output, re.IGNORECASE)

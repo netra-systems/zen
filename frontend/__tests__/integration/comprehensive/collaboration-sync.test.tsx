@@ -15,7 +15,7 @@ import {
   createMockWebSocketServer,
   TEST_TIMEOUTS,
   WS
-} from './test-utils';
+} from '../../test-utils';
 
 import {
   PERFORMANCE_THRESHOLDS,
