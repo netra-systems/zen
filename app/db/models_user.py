@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 
 
 class User(Base):
-    __tablename__ = "userbase"
+    __tablename__ = "users"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     email = Column(String, unique=True, index=True, nullable=False)
     full_name = Column(String, index=True)
@@ -59,7 +59,7 @@ class User(Base):
 class Secret(Base):
     __tablename__ = "secrets"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("userbase.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
     key = Column(String, nullable=False)
     encrypted_value = Column(String, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
@@ -70,7 +70,7 @@ class Secret(Base):
 class ToolUsageLog(Base):
     __tablename__ = "tool_usage_logs"
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
-    user_id = Column(String, ForeignKey("userbase.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
     tool_name = Column(String, nullable=False, index=True)
     category = Column(String, index=True)
     execution_time_ms = Column(Integer, default=0)

@@ -1,6 +1,8 @@
 """Database and service health checkers.
 
 Individual health check implementations for system components.
+Implements "Default to Resilience" principle with service priority levels
+and graceful degradation instead of hard failures.
 """
 
 import asyncio
@@ -8,6 +10,7 @@ import time
 import psutil
 from typing import Dict, Any, Optional
 from datetime import datetime
+from enum import Enum
 
 from app.logging_config import central_logger
 from .health_types import HealthCheckResult
@@ -15,8 +18,26 @@ from .health_types import HealthCheckResult
 logger = central_logger.get_logger(__name__)
 
 
+class ServicePriority(Enum):
+    """Service priority levels for graceful degradation."""
+    CRITICAL = "critical"      # System cannot function without this
+    IMPORTANT = "important"    # Degraded functionality when unavailable
+    OPTIONAL = "optional"      # System continues normally when unavailable
+
+
+# Service priority mapping - critical services cause system failure,
+# important services cause degraded status, optional services are ignored
+SERVICE_PRIORITIES = {
+    "postgres": ServicePriority.CRITICAL,
+    "redis": ServicePriority.IMPORTANT,
+    "clickhouse": ServicePriority.OPTIONAL,  # Often disabled in dev
+    "websocket": ServicePriority.IMPORTANT,
+    "system_resources": ServicePriority.IMPORTANT,
+}
+
+
 async def check_postgres_health() -> HealthCheckResult:
-    """Check PostgreSQL database connectivity and health."""
+    """Check PostgreSQL database connectivity and health with resilient handling."""
     start_time = time.time()
     try:
         await _execute_postgres_query()
@@ -24,7 +45,7 @@ async def check_postgres_health() -> HealthCheckResult:
         return _create_success_result("postgres", response_time)
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
-        return _create_failed_result("postgres", str(e), response_time)
+        return _handle_service_failure("postgres", str(e), response_time)
 
 async def _execute_postgres_query() -> None:
     """Execute test query on PostgreSQL database."""
@@ -86,7 +107,7 @@ def _handle_clickhouse_error(error: Exception, response_time: float) -> HealthCh
 
 
 async def check_redis_health() -> HealthCheckResult:
-    """Check Redis connectivity and health."""
+    """Check Redis connectivity and health with graceful degradation."""
     start_time = time.time()
     try:
         await _execute_redis_ping()
@@ -94,7 +115,7 @@ async def check_redis_health() -> HealthCheckResult:
         return _create_success_result("redis", response_time)
     except Exception as e:
         response_time = (time.time() - start_time) * 1000
-        return _create_failed_result("redis", str(e), response_time)
+        return _handle_service_failure("redis", str(e), response_time)
 
 async def _execute_redis_ping() -> None:
     """Execute Redis ping operation."""
@@ -264,6 +285,66 @@ def _build_disabled_details(component: str, reason: str) -> Dict[str, Any]:
     }
 
 
+def _handle_service_failure(component: str, error: str, response_time: float = 0.0) -> HealthCheckResult:
+    """Handle service failure based on priority level.
+    
+    Applies "Default to Resilience" principle:
+    - Critical services: Return unhealthy (system failure)
+    - Important services: Return degraded (reduced functionality)
+    - Optional services: Return healthy with warning (system continues)
+    """
+    priority = SERVICE_PRIORITIES.get(component, ServicePriority.IMPORTANT)
+    
+    if priority == ServicePriority.CRITICAL:
+        return _create_failed_result(component, error, response_time)
+    elif priority == ServicePriority.IMPORTANT:
+        return _create_degraded_result(component, error, response_time)
+    else:  # OPTIONAL
+        return _create_optional_failure_result(component, error, response_time)
+
+
+def _create_degraded_result(component: str, error: str, response_time: float = 0.0) -> HealthCheckResult:
+    """Create a degraded health check result for important services."""
+    details = _build_degraded_details(component, error)
+    return HealthCheckResult(
+        status="degraded",
+        response_time=response_time / 1000,
+        details=details
+    )
+
+def _build_degraded_details(component: str, error: str) -> Dict[str, Any]:
+    """Build details dictionary for degraded service health check."""
+    return {
+        "component_name": component,
+        "success": False,
+        "health_score": 0.5,  # Partial functionality
+        "status": "degraded",
+        "error_message": error,
+        "impact": "Reduced functionality - system continues with limitations"
+    }
+
+
+def _create_optional_failure_result(component: str, error: str, response_time: float = 0.0) -> HealthCheckResult:
+    """Create a healthy result for optional service failures."""
+    details = _build_optional_failure_details(component, error)
+    return HealthCheckResult(
+        status="healthy",
+        response_time=response_time / 1000,
+        details=details
+    )
+
+def _build_optional_failure_details(component: str, error: str) -> Dict[str, Any]:
+    """Build details dictionary for optional service failure."""
+    return {
+        "component_name": component,
+        "success": False,
+        "health_score": 1.0,  # System health unaffected
+        "status": "optional_unavailable",
+        "error_message": error,
+        "impact": "No impact - optional service unavailable"
+    }
+
+
 def _calculate_overall_system_health(resource_metrics: Dict[str, Any]) -> float:
     """Calculate overall system health score from resource metrics."""
     health_scores = _calculate_resource_health_scores(resource_metrics)
@@ -308,3 +389,150 @@ def _is_clickhouse_disabled() -> bool:
     clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
     skip_clickhouse = os.environ.get("SKIP_CLICKHOUSE_INIT", "false").lower()
     return clickhouse_mode == "disabled" or skip_clickhouse == "true"
+
+
+class HealthChecker:
+    """Comprehensive health checker for all system components."""
+    
+    def __init__(self):
+        self.checkers = {
+            "postgres": check_postgres_health,
+            "clickhouse": check_clickhouse_health,
+            "redis": check_redis_health,
+            "websocket": check_websocket_health,
+            "system_resources": check_system_resources
+        }
+    
+    async def check_all(self) -> Dict[str, HealthCheckResult]:
+        """Run all health checks and return results."""
+        results = {}
+        for name, checker in self.checkers.items():
+            try:
+                if name == "system_resources":
+                    # System resources check is synchronous
+                    results[name] = checker()
+                else:
+                    results[name] = await checker()
+            except Exception as e:
+                logger.error(f"Health check failed for {name}: {e}")
+                results[name] = _create_failed_result(name, str(e))
+        return results
+    
+    async def check_component(self, component: str) -> HealthCheckResult:
+        """Run health check for a specific component."""
+        if component not in self.checkers:
+            return _create_failed_result(component, f"Unknown component: {component}")
+        
+        try:
+            checker = self.checkers[component]
+            if component == "system_resources":
+                return checker()
+            else:
+                return await checker()
+        except Exception as e:
+            logger.error(f"Health check failed for {component}: {e}")
+            return _create_failed_result(component, str(e))
+    
+    async def get_overall_health(self) -> Dict[str, Any]:
+        """Get overall system health summary with priority-based assessment.
+        
+        Applies "Default to Resilience" - system status based on critical services,
+        with degraded status when important services fail.
+        """
+        results = await self.check_all()
+        return _calculate_priority_based_health(results)
+
+
+def _calculate_priority_based_health(results: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
+    """Calculate system health based on service priorities."""
+    critical_services = _get_services_by_priority(results, ServicePriority.CRITICAL)
+    important_services = _get_services_by_priority(results, ServicePriority.IMPORTANT)
+    
+    # System is unhealthy if any critical service fails
+    if _any_service_unhealthy(critical_services):
+        return _create_system_health_summary("unhealthy", results, critical_services)
+    
+    # System is degraded if any important service fails or is degraded
+    if _any_service_degraded_or_unhealthy(important_services):
+        return _create_system_health_summary("degraded", results, important_services)
+    
+    # System is healthy if all critical and important services are operational
+    return _create_system_health_summary("healthy", results, {})
+
+
+def _get_services_by_priority(results: Dict[str, HealthCheckResult], priority: ServicePriority) -> Dict[str, HealthCheckResult]:
+    """Get services filtered by priority level."""
+    return {
+        name: result for name, result in results.items()
+        if SERVICE_PRIORITIES.get(name, ServicePriority.IMPORTANT) == priority
+    }
+
+
+def _any_service_unhealthy(services: Dict[str, HealthCheckResult]) -> bool:
+    """Check if any service in the set is unhealthy."""
+    return any(service.status == "unhealthy" for service in services.values())
+
+
+def _any_service_degraded_or_unhealthy(services: Dict[str, HealthCheckResult]) -> bool:
+    """Check if any service in the set is degraded or unhealthy."""
+    return any(service.status in ["degraded", "unhealthy"] for service in services.values())
+
+
+def _create_system_health_summary(status: str, all_results: Dict[str, HealthCheckResult], 
+                                 problem_services: Dict[str, HealthCheckResult]) -> Dict[str, Any]:
+    """Create system health summary with priority context."""
+    total_components = len(all_results)
+    healthy_components = sum(1 for result in all_results.values() if result.status == "healthy")
+    
+    return {
+        "status": status,
+        "health_score": _calculate_weighted_health_score(all_results),
+        "healthy_components": healthy_components,
+        "total_components": total_components,
+        "component_results": {name: result.status for name, result in all_results.items()},
+        "priority_assessment": {
+            "critical_services_healthy": not _any_service_unhealthy(
+                _get_services_by_priority(all_results, ServicePriority.CRITICAL)
+            ),
+            "important_services_healthy": not _any_service_degraded_or_unhealthy(
+                _get_services_by_priority(all_results, ServicePriority.IMPORTANT)
+            ),
+            "problem_services": list(problem_services.keys()) if problem_services else []
+        }
+    }
+
+
+def _calculate_weighted_health_score(results: Dict[str, HealthCheckResult]) -> float:
+    """Calculate health score weighted by service priority."""
+    if not results:
+        return 0.0
+    
+    total_weight = 0.0
+    weighted_score = 0.0
+    
+    for name, result in results.items():
+        priority = SERVICE_PRIORITIES.get(name, ServicePriority.IMPORTANT)
+        weight = _get_priority_weight(priority)
+        service_score = _get_service_health_score(result)
+        
+        total_weight += weight
+        weighted_score += (service_score * weight)
+    
+    return weighted_score / total_weight if total_weight > 0 else 0.0
+
+
+def _get_priority_weight(priority: ServicePriority) -> float:
+    """Get weight factor for priority level."""
+    weights = {
+        ServicePriority.CRITICAL: 3.0,
+        ServicePriority.IMPORTANT: 2.0,
+        ServicePriority.OPTIONAL: 1.0
+    }
+    return weights.get(priority, 2.0)
+
+
+def _get_service_health_score(result: HealthCheckResult) -> float:
+    """Extract health score from service result."""
+    if hasattr(result, 'details') and result.details:
+        return result.details.get('health_score', 0.0)
+    return 1.0 if result.status == "healthy" else 0.0

@@ -1,12 +1,14 @@
 """PostgreSQL session management and validation module.
 
 Handles session validation, error handling, and async session context management.
+Now enhanced with resilience patterns for pragmatic rigor and degraded operation.
 Focused module adhering to 25-line function limit and modular architecture.
 """
 
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator, Any
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.exc import OperationalError, DatabaseError, DisconnectionError
 from app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -85,8 +87,18 @@ def _validate_async_session(session):
 
 
 async def _handle_async_transaction_error(session: AsyncSession, e: Exception):
-    """Handle async transaction error with rollback and logging."""
+    """Handle async transaction error with rollback and resilience tracking."""
     await session.rollback()
+    
+    # Track connection health for resilience manager
+    if isinstance(e, (OperationalError, DatabaseError, DisconnectionError)):
+        try:
+            from .postgres_resilience import postgres_resilience
+            postgres_resilience.set_connection_health(False)
+            logger.warning(f"PostgreSQL connection marked unhealthy due to: {e}")
+        except ImportError:
+            pass  # Resilience module not available
+    
     logger.error(f"Async DB session error: {e}", exc_info=True)
     raise
 
@@ -124,11 +136,24 @@ async def _execute_session_transaction(session: AsyncSession):
 
 @asynccontextmanager
 async def get_async_db() -> AsyncGenerator[AsyncSession, None]:
-    """Dependency to get async database session with proper transaction handling."""
+    """Dependency to get async database session with resilient transaction handling."""
     session_factory = _setup_session_for_transaction()
     async with session_factory as session:
-        async for result in _execute_session_transaction(session):
-            yield result
+        try:
+            async for result in _execute_session_transaction(session):
+                yield result
+            # Mark connection as healthy on successful completion
+            try:
+                from .postgres_resilience import postgres_resilience
+                postgres_resilience.set_connection_health(True)
+            except ImportError:
+                pass  # Resilience module not available
+        except (OperationalError, DatabaseError, DisconnectionError) as e:
+            logger.warning(f"PostgreSQL session failed with database error: {e}")
+            raise
+        except Exception as e:
+            logger.error(f"PostgreSQL session failed with unexpected error: {e}")
+            raise
 
 
 @asynccontextmanager

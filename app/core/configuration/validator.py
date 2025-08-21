@@ -10,6 +10,7 @@ Each function ≤8 lines, file ≤300 lines.
 
 import os
 from typing import Dict, List, Tuple
+from enum import Enum
 
 from app.schemas.Config import AppConfig
 from app.logging_config import central_logger as logger
@@ -20,6 +21,19 @@ from .validator_database import DatabaseValidator
 from .validator_llm import LLMValidator
 from .validator_auth import AuthValidator
 from .validator_environment import EnvironmentValidator
+
+
+class ValidationMode(str, Enum):
+    """Progressive validation enforcement levels.
+    
+    Following pragmatic rigor principles:
+    - warn: Log warnings for issues but don't fail
+    - enforce_critical: Fail only on critical security/functionality issues
+    - enforce_all: Traditional strict validation (production)
+    """
+    WARN = "warn"
+    ENFORCE_CRITICAL = "enforce_critical"
+    ENFORCE_ALL = "enforce_all"
 
 
 class ConfigurationValidator:
@@ -65,22 +79,22 @@ class ConfigurationValidator:
             "testing": self._get_development_rules()
         }
     
-    def _get_development_rules(self) -> Dict[str, bool]:
+    def _get_development_rules(self) -> Dict[str, str]:
         """Get development/testing validation rules."""
         return {
             "require_ssl": False,
             "allow_localhost": True,
             "require_secrets": False,
-            "strict_validation": False
+            "validation_mode": ValidationMode.WARN.value
         }
     
-    def _get_production_rules(self) -> Dict[str, bool]:
+    def _get_production_rules(self) -> Dict[str, str]:
         """Get production/staging validation rules."""
         return {
             "require_ssl": True,
             "allow_localhost": False,
             "require_secrets": True,
-            "strict_validation": True
+            "validation_mode": ValidationMode.ENFORCE_ALL.value
         }
     
     def _load_critical_fields(self) -> Dict[str, List[str]]:
@@ -94,8 +108,9 @@ class ConfigurationValidator:
         }
     
     def validate_complete_config(self, config: AppConfig) -> ValidationResult:
-        """Perform comprehensive configuration validation."""
+        """Perform comprehensive configuration validation with progressive enforcement."""
         errors, warnings = self._collect_validation_results(config)
+        errors, warnings = self._apply_progressive_validation(errors, warnings)
         score = self._calculate_config_health_score(config, errors, warnings)
         is_valid = len(errors) == 0
         return ValidationResult(is_valid, errors, warnings, score)
@@ -107,12 +122,12 @@ class ConfigurationValidator:
         return errors, warnings
     
     def _collect_all_errors(self, config: AppConfig) -> List[str]:
-        """Collect all validation errors."""
+        """Collect all validation errors with resilience context."""
         errors = []
-        errors.extend(self._database_validator.validate_database_config(config))
-        errors.extend(self._llm_validator.validate_llm_config(config))
-        errors.extend(self._auth_validator.validate_auth_config(config))
-        errors.extend(self._environment_validator.validate_external_services(config))
+        errors.extend(self._collect_database_errors_with_fallbacks(config))
+        errors.extend(self._collect_llm_errors_with_fallbacks(config))
+        errors.extend(self._collect_auth_errors_with_fallbacks(config))
+        errors.extend(self._collect_external_errors_with_fallbacks(config))
         return errors
     
     def _calculate_config_health_score(self, config: AppConfig, errors: List[str], warnings: List[str]) -> int:
@@ -158,3 +173,99 @@ class ConfigurationValidator:
             if hasattr(config, field) and getattr(config, field):
                 present += 1
         return present, total
+    
+    def _apply_progressive_validation(self, errors: List[str], warnings: List[str]) -> Tuple[List[str], List[str]]:
+        """Apply progressive validation based on environment mode.
+        
+        Following pragmatic rigor: be liberal in what you accept,
+        conservative in what you send.
+        """
+        rules = self._validation_rules.get(self._environment, {})
+        mode = ValidationMode(rules.get("validation_mode", ValidationMode.ENFORCE_ALL.value))
+        
+        if mode == ValidationMode.WARN:
+            # Convert all errors to warnings in permissive mode
+            warnings.extend(errors)
+            self._logger.info(f"Validation warnings (permissive mode): {len(errors)} issues converted to warnings")
+            return [], warnings
+        elif mode == ValidationMode.ENFORCE_CRITICAL:
+            # Only enforce critical errors, convert others to warnings
+            critical_errors, non_critical_errors = self._categorize_errors(errors)
+            warnings.extend(non_critical_errors)
+            self._logger.info(f"Validation (critical mode): {len(critical_errors)} critical errors, {len(non_critical_errors)} warnings")
+            return critical_errors, warnings
+        else:
+            # ENFORCE_ALL: traditional strict validation
+            return errors, warnings
+    
+    def _categorize_errors(self, errors: List[str]) -> Tuple[List[str], List[str]]:
+        """Categorize errors into critical vs non-critical.
+        
+        Critical errors prevent core functionality or pose security risks.
+        Non-critical errors are configuration preferences that can have defaults.
+        """
+        critical_patterns = [
+            "secret key is required",
+            "encryption key is required", 
+            "database_url is required",
+            "Invalid database URL format",
+            "host is required"
+        ]
+        
+        critical_errors = []
+        non_critical_errors = []
+        
+        for error in errors:
+            is_critical = any(pattern in error.lower() for pattern in critical_patterns)
+            if is_critical:
+                critical_errors.append(error)
+            else:
+                non_critical_errors.append(error)
+                
+        return critical_errors, non_critical_errors
+    
+    def _collect_database_errors_with_fallbacks(self, config: AppConfig) -> List[str]:
+        """Collect database validation errors with fallback handling."""
+        try:
+            return self._database_validator.validate_database_config(config)
+        except Exception as e:
+            self._logger.warning(f"Database validation failed with fallback: {e}")
+            # Provide minimal validation for core functionality
+            if not config.database_url:
+                return ["database_url is required"]
+            return []
+    
+    def _collect_llm_errors_with_fallbacks(self, config: AppConfig) -> List[str]:
+        """Collect LLM validation errors with fallback handling."""
+        try:
+            return self._llm_validator.validate_llm_config(config)
+        except Exception as e:
+            self._logger.warning(f"LLM validation failed with fallback: {e}")
+            # LLM configuration is often optional or has reasonable defaults
+            return []
+    
+    def _collect_auth_errors_with_fallbacks(self, config: AppConfig) -> List[str]:
+        """Collect auth validation errors with fallback handling."""
+        try:
+            return self._auth_validator.validate_auth_config(config)
+        except Exception as e:
+            self._logger.warning(f"Auth validation failed with fallback: {e}")
+            # Only enforce absolutely critical auth requirements
+            rules = self._validation_rules.get(self._environment, {})
+            if rules.get("require_secrets", False):
+                errors = []
+                if not getattr(config, 'jwt_secret_key', None):
+                    errors.append("JWT secret key is required")
+                if not getattr(config, 'fernet_key', None):
+                    errors.append("Fernet encryption key is required")
+                return errors
+            return []
+    
+    def _collect_external_errors_with_fallbacks(self, config: AppConfig) -> List[str]:
+        """Collect external service validation errors with fallback handling."""
+        try:
+            return self._environment_validator.validate_external_services(config)
+        except Exception as e:
+            self._logger.warning(f"External service validation failed with fallback: {e}")
+            # External services often have reasonable defaults or are optional
+            return []

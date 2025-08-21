@@ -18,7 +18,7 @@ class AgentStateSnapshot(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     run_id = Column(String, nullable=False, index=True)
     thread_id = Column(String, nullable=False, index=True)
-    user_id = Column(String, ForeignKey("userbase.id"), nullable=False, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False, index=True)
     
     # State versioning
     version = Column(String, nullable=False, default="1.0")

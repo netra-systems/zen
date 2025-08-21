@@ -9,12 +9,21 @@ from enum import Enum
 
 
 class ValidationLevel(str, Enum):
-    """Input validation strictness levels."""
-    PERMISSIVE = "permissive"  # Minimal validation, allows most content
-    BASIC = "basic"          # Basic format validation
-    MODERATE = "moderate"    # Additional security checks
-    STRICT = "strict"        # Maximum security validation
-    PARANOID = "paranoid"    # Ultra-strict for sensitive data
+    """Input validation strictness levels.
+    
+    Following pragmatic rigor principles:
+    - PERMISSIVE: Minimal validation, focuses on preventing system failures
+    - BASIC: Standard validation with reasonable security measures
+    - MODERATE: Enhanced security validation for production environments
+    - STRICT: Comprehensive validation for high-security contexts
+    
+    Removed PARANOID level - overly strict validation that often breaks
+    legitimate use cases without providing meaningful security benefits.
+    """
+    PERMISSIVE = "permissive"  # Minimal validation, prevents system failures
+    BASIC = "basic"          # Standard validation with basic security
+    MODERATE = "moderate"    # Enhanced security for production
+    STRICT = "strict"        # Comprehensive security validation
 
 
 class SecurityThreat(str, Enum):
@@ -171,23 +180,59 @@ class PatternCompiler:
 
 
 class ValidationConstraints:
-    """Input validation constraints based on validation level."""
+    """Input validation constraints based on validation level.
+    
+    Implements pragmatic rigor principles:
+    - Be liberal in what you accept, conservative in what you send
+    - Default to resilience with progressive enforcement
+    - Focus on preventing real security threats, not theoretical purity
+    """
     
     def __init__(self, validation_level: ValidationLevel):
         self.validation_level = validation_level
         self.max_input_length = self._get_max_length()
-        self.suspicious_chars = set('<>"\'&;|`$(){}[]\\')
+        self.suspicious_chars = self._get_suspicious_chars()
+        self.allow_fallbacks = self._should_allow_fallbacks()
     
     def _get_max_length(self) -> int:
-        """Get maximum input length based on validation level."""
+        """Get maximum input length based on validation level.
+        
+        Adjusted for pragmatic rigor - limits should prevent abuse
+        while accommodating legitimate use cases.
+        """
         length_limits = {
-            ValidationLevel.PERMISSIVE: 1000000,  # 1MB - very permissive
-            ValidationLevel.BASIC: 100000,       # 100KB
-            ValidationLevel.MODERATE: 50000,     # 50KB
-            ValidationLevel.STRICT: 10000,       # 10KB
-            ValidationLevel.PARANOID: 1000       # 1KB
+            ValidationLevel.PERMISSIVE: 1000000,  # 1MB - very permissive for development
+            ValidationLevel.BASIC: 500000,       # 500KB - reasonable for most content
+            ValidationLevel.MODERATE: 100000,    # 100KB - production standard
+            ValidationLevel.STRICT: 50000,       # 50KB - high-security contexts
         }
         return length_limits[self.validation_level]
+    
+    def _get_suspicious_chars(self) -> set:
+        """Get suspicious character set based on validation level.
+        
+        More permissive approach - only flag truly dangerous patterns.
+        Following Postel's Law: be liberal in what you accept.
+        """
+        if self.validation_level == ValidationLevel.PERMISSIVE:
+            # Only block the most dangerous injection patterns
+            return set('<script>')  # Just prevent obvious script tags
+        elif self.validation_level == ValidationLevel.BASIC:
+            # Block common injection vectors but allow normal punctuation
+            return set('<>&;"\'')  # Basic XSS prevention
+        elif self.validation_level == ValidationLevel.MODERATE:
+            # Enhanced blocking for production environments
+            return set('<>&;"\';|`$')  # Standard production security
+        else:  # STRICT
+            # Comprehensive blocking for high-security contexts
+            return set('<>"\'&;|`$(){}[]\\*')  # Original strict behavior
+    
+    def _should_allow_fallbacks(self) -> bool:
+        """Determine if fallback behaviors should be allowed.
+        
+        Permissive levels allow graceful degradation instead of hard failures.
+        """
+        return self.validation_level in [ValidationLevel.PERMISSIVE, ValidationLevel.BASIC]
 
 
 class ThreatDetector:

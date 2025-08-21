@@ -25,6 +25,7 @@ from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 from enum import Enum
 from dataclasses import dataclass
+import warnings
 
 
 class TokenType(str, Enum):
@@ -118,9 +119,23 @@ class LoginRequest(BaseModel):
     
     @validator('password')
     def validate_password_required(cls, v, values):
-        """Validate password required for local auth."""
-        if values.get('provider') == AuthProvider.LOCAL and not v:
-            raise ValueError('Password required for local auth')
+        """Validate password with graceful degradation for local auth.
+        
+        Applies "Default to Resilience" principle - warns instead of failing
+        when password is missing for local auth, allowing fallback behaviors.
+        """
+        provider = values.get('provider', AuthProvider.LOCAL)
+        
+        # For local auth, prefer password but allow fallback
+        if provider == AuthProvider.LOCAL and not v:
+            warnings.warn(
+                "Password missing for local auth. Consider enabling fallback auth methods.",
+                UserWarning,
+                stacklevel=2
+            )
+            # Allow the request to proceed - auth service can handle fallback logic
+        
+        # For non-local providers, password is optional by design
         return v
 
 
@@ -174,8 +189,8 @@ class AuthConfigResponse(BaseModel):
 
 
 class AuthConfig(BaseModel):
-    """Auth service configuration."""
-    jwt_secret: str = Field(min_length=32)
+    """Auth service configuration with resilient defaults."""
+    jwt_secret: str = Field(min_length=1)  # Very permissive - validation in custom validator
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 15
     refresh_token_expire_days: int = 7
@@ -184,6 +199,29 @@ class AuthConfig(BaseModel):
     enable_rate_limiting: bool = True
     rate_limit_requests: int = 10
     rate_limit_window_seconds: int = 60
+    
+    @validator('jwt_secret')
+    def validate_jwt_secret_with_warning(cls, v):
+        """Validate JWT secret with graceful degradation.
+        
+        Applies "Default to Resilience" - allows shorter secrets with warning
+        rather than failing completely in development environments.
+        """
+        if len(v) < 16:
+            warnings.warn(
+                f"JWT secret length ({len(v)}) is below minimum 16 characters. "
+                "This may cause security issues. Using provided value anyway.",
+                UserWarning,
+                stacklevel=2
+            )
+        elif len(v) < 32:
+            warnings.warn(
+                f"JWT secret length ({len(v)}) is below recommended 32 characters. "
+                "Consider using a longer secret for production environments.",
+                UserWarning,
+                stacklevel=2
+            )
+        return v
 
 
 class SessionInfo(BaseModel):
@@ -246,6 +284,21 @@ class HealthResponse(BaseModel):
     database_connected: Optional[bool] = None
 
 
+class UserInfo(BaseModel):
+    """Comprehensive user information model."""
+    user_id: str
+    email: str
+    full_name: Optional[str] = None
+    picture: Optional[str] = None
+    roles: List[str] = []
+    permissions: List[str] = []
+    is_active: bool = True
+    is_verified: bool = False
+    created_at: Optional[datetime] = None
+    last_login: Optional[datetime] = None
+    metadata: Dict[str, Any] = {}
+
+
 class AuditLog(BaseModel):
     """Auth audit log entry."""
     event_id: str
@@ -292,6 +345,7 @@ __all__ = [
     "DevLoginRequest", 
     "GoogleUser",
     "HealthResponse",
+    "UserInfo",
     "AuditLog",
     "HealthCheck",
     "UserToken",

@@ -7,45 +7,71 @@ from app.core.circuit_breaker import CircuitConfig
 
 
 class DatabaseClientConfig:
-    """Configuration for database circuit breakers."""
+    """Configuration for database circuit breakers with pragmatic rigor.
     
-    # PostgreSQL circuit breaker config
+    Circuit breakers are configured to be resilient and permissive,
+    defaulting to functional operation rather than strict failure modes.
+    """
+    
+    # PostgreSQL circuit breaker config - more lenient for resilience
     POSTGRES_CONFIG = CircuitConfig(
         name="postgres",
-        failure_threshold=5,
-        recovery_timeout=30.0,
-        timeout_seconds=15.0,
-        half_open_max_calls=2
+        failure_threshold=8,  # Increased from 5 for more tolerance
+        recovery_timeout=20.0,  # Reduced from 30 for faster recovery
+        timeout_seconds=25.0,  # Increased from 15 for more patience
+        half_open_max_calls=5  # Increased from 2 for better testing
     )
     
-    # ClickHouse circuit breaker config
+    # ClickHouse circuit breaker config - less aggressive
     CLICKHOUSE_CONFIG = CircuitConfig(
         name="clickhouse",
-        failure_threshold=3,
-        recovery_timeout=45.0,
-        timeout_seconds=20.0,
-        half_open_max_calls=1
+        failure_threshold=6,  # Increased from 3 for tolerance
+        recovery_timeout=30.0,  # Reduced from 45 for faster recovery
+        timeout_seconds=30.0,  # Increased from 20 for more patience
+        half_open_max_calls=3  # Increased from 1 for better recovery
     )
     
-    # Read-only operations (more lenient)
+    # Read-only operations (very lenient for resilience)
     READ_CONFIG = CircuitConfig(
         name="db_read",
-        failure_threshold=7,
-        recovery_timeout=20.0,
-        timeout_seconds=10.0
+        failure_threshold=10,  # Increased from 7 for more tolerance
+        recovery_timeout=15.0,  # Reduced from 20 for faster recovery
+        timeout_seconds=12.0,  # Slightly increased for patience
+        half_open_max_calls=5  # More calls for testing recovery
     )
     
-    # Write operations (stricter)
+    # Write operations (more tolerant but careful)
     WRITE_CONFIG = CircuitConfig(
         name="db_write",
-        failure_threshold=3,
-        recovery_timeout=60.0,
-        timeout_seconds=15.0
+        failure_threshold=5,  # Increased from 3 for tolerance
+        recovery_timeout=45.0,  # Reduced from 60 for faster recovery
+        timeout_seconds=20.0,  # Increased from 15 for patience
+        half_open_max_calls=3  # More calls for testing recovery
     )
+    
+    # Retry configuration for exponential backoff
+    RETRY_CONFIG = {
+        "max_retries": 3,
+        "base_delay": 1.0,
+        "max_delay": 10.0,
+        "exponential_base": 2.0,
+        "jitter": True
+    }
+    
+    # Cache configuration for fallback responses
+    CACHE_CONFIG = {
+        "query_cache_ttl": 300,  # 5 minutes
+        "health_cache_ttl": 60,   # 1 minute
+        "max_cache_size": 1000
+    }
 
 
 class CircuitBreakerManager:
-    """Manage circuit breaker instances for database operations."""
+    """Manage circuit breaker instances for database operations.
+    
+    Provides resilient circuit breakers configured for pragmatic operation,
+    with fallback mechanisms and degraded service capabilities.
+    """
     
     @staticmethod
     async def get_postgres_circuit():

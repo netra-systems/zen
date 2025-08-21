@@ -26,20 +26,29 @@ class Database:
         return NullPool if "sqlite" in db_url else QueuePool
     
     def _get_pool_size(self, pool_class) -> int:
-        """Get pool size based on pool class."""
-        return DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0
+        """Get pool size based on pool class with resilient defaults."""
+        # Increase pool size for better resilience
+        base_size = DatabaseConfig.POOL_SIZE if pool_class == QueuePool else 0
+        return max(base_size, 10) if pool_class == QueuePool else 0
 
     def _get_max_overflow(self, pool_class) -> int:
-        """Get max overflow based on pool class."""
-        return DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0
+        """Get max overflow based on pool class with resilient defaults."""
+        # Increase overflow for better resilience
+        base_overflow = DatabaseConfig.MAX_OVERFLOW if pool_class == QueuePool else 0
+        return max(base_overflow, 20) if pool_class == QueuePool else 0
 
     def _create_engine(self, db_url: str, pool_class):
-        """Create database engine with optimized pooling configuration."""
+        """Create database engine with resilient pooling configuration."""
         return create_engine(
             db_url, echo=DatabaseConfig.ECHO, echo_pool=DatabaseConfig.ECHO_POOL,
             poolclass=pool_class, pool_size=self._get_pool_size(pool_class),
-            max_overflow=self._get_max_overflow(pool_class), pool_timeout=DatabaseConfig.POOL_TIMEOUT,
-            pool_recycle=DatabaseConfig.POOL_RECYCLE, pool_pre_ping=DatabaseConfig.POOL_PRE_PING
+            max_overflow=self._get_max_overflow(pool_class), 
+            pool_timeout=max(DatabaseConfig.POOL_TIMEOUT, 60),  # Increased timeout for resilience
+            pool_recycle=DatabaseConfig.POOL_RECYCLE, 
+            pool_pre_ping=True,  # Always enable pre-ping for resilience
+            # Additional resilience settings
+            pool_reset_on_return='rollback',  # Reset connections safely
+            connect_args={"options": "-c default_transaction_isolation=read_committed"}
         )
     
     def _create_session_factory(self):
@@ -63,12 +72,22 @@ class Database:
             logger.info("Database connection test successful")
     
     def connect(self):
-        """Test database connectivity with proper error handling."""
-        try:
-            self._execute_connection_test()
-        except Exception as e:
-            logger.error(f"Database connection test failed: {e}")
-            raise
+        """Test database connectivity with resilient error handling."""
+        max_attempts = 3
+        for attempt in range(max_attempts):
+            try:
+                self._execute_connection_test()
+                if attempt > 0:
+                    logger.info(f"Database connection successful on attempt {attempt + 1}")
+                return
+            except Exception as e:
+                if attempt == max_attempts - 1:
+                    logger.error(f"Database connection test failed after {max_attempts} attempts: {e}")
+                    raise
+                else:
+                    logger.warning(f"Database connection attempt {attempt + 1} failed: {e}, retrying...")
+                    import time
+                    time.sleep(1 * (attempt + 1))  # Progressive delay
 
     def _handle_transaction_error(self, db: Session, e: Exception):
         """Handle database transaction error with rollback and logging."""
@@ -194,18 +213,19 @@ def _get_base_engine_args(pool_class):
     }
 
 def _get_pool_sizing_args():
-    """Get pool sizing arguments."""
+    """Get pool sizing arguments with resilient defaults."""
     return {
-        "pool_size": DatabaseConfig.POOL_SIZE,
-        "max_overflow": DatabaseConfig.MAX_OVERFLOW,
+        "pool_size": max(DatabaseConfig.POOL_SIZE, 10),  # Minimum 10 for resilience
+        "max_overflow": max(DatabaseConfig.MAX_OVERFLOW, 20),  # Minimum 20 for resilience
     }
 
 def _get_pool_timing_args():
-    """Get pool timing arguments."""
+    """Get pool timing arguments with resilient defaults."""
     return {
-        "pool_timeout": DatabaseConfig.POOL_TIMEOUT,
+        "pool_timeout": max(DatabaseConfig.POOL_TIMEOUT, 60),  # Minimum 60s for resilience
         "pool_recycle": DatabaseConfig.POOL_RECYCLE,
-        "pool_pre_ping": DatabaseConfig.POOL_PRE_PING,
+        "pool_pre_ping": True,  # Always enable for resilience
+        "pool_reset_on_return": "rollback",  # Safe connection reset
     }
 
 def _get_pool_specific_args():
@@ -253,15 +273,37 @@ def _setup_global_engine_objects(engine):
     setup_async_engine_events(async_engine)
 
 def _handle_engine_creation_error(e):
-    """Handle engine creation error with proper logging and re-raise."""
+    """Handle engine creation error with resilient logging and graceful degradation."""
     logger.error(f"Failed to create PostgreSQL async engine: {e}")
+    
+    # Try to set up resilience manager in degraded state
+    try:
+        from .postgres_resilience import postgres_resilience
+        postgres_resilience.set_connection_health(False)
+        logger.warning("PostgreSQL resilience manager set to degraded state")
+    except ImportError:
+        pass  # Resilience module not available
+    
     raise RuntimeError(f"Database engine creation failed: {e}") from e
 
 def _create_and_setup_engine(async_db_url: str, engine_args: dict):
-    """Create engine and setup global objects."""
+    """Create engine and setup global objects with resilient configuration."""
+    # Add resilient connection arguments
+    if "connect_args" not in engine_args:
+        engine_args["connect_args"] = {}
+    
+    engine_args["connect_args"].update({
+        "server_settings": {
+            "application_name": "netra_core",
+            "tcp_keepalives_idle": "600",  # 10 minutes
+            "tcp_keepalives_interval": "30",  # 30 seconds
+            "tcp_keepalives_count": "3",  # 3 probes
+        }
+    })
+    
     engine = create_async_engine(async_db_url, **engine_args)
     _setup_global_engine_objects(engine)
-    logger.info("PostgreSQL async engine created with AsyncAdaptedQueuePool connection pooling")
+    logger.info("PostgreSQL async engine created with resilient AsyncAdaptedQueuePool connection pooling")
 
 def _initialize_engine_with_url(db_url: str):
     """Initialize engine with validated URL."""

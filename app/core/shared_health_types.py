@@ -25,6 +25,15 @@ class HealthStatus(Enum):
     CRITICAL = "critical"
 
 
+class AlertSeverity(Enum):
+    """Alert severity levels."""
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+    URGENT = "urgent"
+
+
 class HealthChecker(ABC):
     """Abstract base for health check implementations."""
     

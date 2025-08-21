@@ -28,7 +28,7 @@ class CorpusAuditLog(Base):
     
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     timestamp = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), index=True)
-    user_id = Column(String, ForeignKey("userbase.id"), nullable=True, index=True)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True, index=True)
     action = Column(String, nullable=False, index=True)  # create, update, delete, etc.
     status = Column(String, nullable=False, index=True)  # success, failure, partial, etc.
     corpus_id = Column(String, nullable=True, index=True)
@@ -57,7 +57,7 @@ class Analysis(Base):
     name = Column(String, index=True, nullable=False)
     description = Column(String)
     status = Column(String, default="pending")  # e.g., pending, running, completed, failed
-    created_by_id = Column(String, ForeignKey("userbase.id"))
+    created_by_id = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
@@ -97,7 +97,7 @@ class Corpus(Base):
     status = Column(String, default="pending")  # e.g., pending, running, completed, failed
     domain = Column(String, nullable=True, default="general")  # Domain for the corpus
     metadata_ = Column(JSON, nullable=True)  # Metadata for the corpus
-    created_by_id = Column(String, ForeignKey("userbase.id"))
+    created_by_id = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     created_by = relationship("User")

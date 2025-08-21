@@ -1,35 +1,8 @@
 {
-  "deployment_timestamp": "2025-08-19T19:50:00Z",
-  "services": {
-    "backend": {
-      "status": "deployed",
-      "service_name": "netra-backend-staging",
-      "url": "https://netra-backend-staging-701982941522.us-central1.run.app",
-      "custom_domain": "https://api.staging.netrasystems.ai",
-      "revision": "netra-backend-staging-00010-2x4",
-      "image": "us-central1-docker.pkg.dev/netra-staging/netra-containers/backend:staging"
-    },
-    "frontend": {
-      "status": "deployed",
-      "service_name": "netra-frontend-staging",
-      "url": "https://netra-frontend-staging-701982941522.us-central1.run.app",
-      "custom_domain": "https://app.staging.netrasystems.ai",
-      "revision": "netra-frontend-staging-00007-fqx",
-      "image": "us-central1-docker.pkg.dev/netra-staging/netra-containers/frontend:staging"
-    },
-    "auth": {
-      "status": "failed",
-      "service_name": "netra-auth-service",
-      "error": "Container failed to start on port 8080",
-      "image": "us-central1-docker.pkg.dev/netra-staging/netra-containers/auth:staging",
-      "note": "Auth service needs port configuration fix"
-    }
-  },
-  "project": "netra-staging",
+  "frontend_url": "https://netra-frontend-staging-pnovr5vsba-uc.a.run.app",
+  "backend_url": "https://netra-backend-staging-pnovr5vsba-uc.a.run.app",
+  "auth_url": "",
+  "project_id": "netra-staging",
   "region": "us-central1",
-  "notes": [
-    "Backend and Frontend deployed successfully",
-    "Auth service failed due to port configuration issue",
-    "Backend may show 'Service Unavailable' initially while starting up"
-  ]
+  "timestamp": "2025-08-20 20:14:40"
 }

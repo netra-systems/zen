@@ -55,7 +55,75 @@ async def _get_backup_path(backup_id: str) -> Path:
     backup_dir.mkdir(exist_ok=True)
     return backup_dir / f"{backup_id}.json"
 
+
+class ConfigService:
+    """Configuration service for managing application configuration."""
+    
+    def __init__(self):
+        self.config = None
+        self.initialized = False
+    
+    async def initialize(self):
+        """Initialize the configuration service."""
+        if not self.initialized:
+            self.config = get_config()
+            self.initialized = True
+            logger.info("ConfigService initialized")
+    
+    async def get_config(self) -> Dict[str, Any]:
+        """Get current configuration."""
+        if not self.initialized:
+            await self.initialize()
+        return self.config.model_dump() if self.config else {}
+    
+    async def update_config(self, config_data: Dict[str, Any]) -> bool:
+        """Update configuration with new data."""
+        try:
+            if not self.initialized:
+                await self.initialize()
+            
+            # In a real implementation, this would validate and apply the new config
+            logger.info("Configuration update simulated")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update configuration: {e}")
+            return False
+    
+    async def validate_config(self, config_data: Dict[str, Any]) -> bool:
+        """Validate configuration data."""
+        try:
+            # Basic validation - in a real implementation, this would be more comprehensive
+            required_fields = ["environment", "database_url"]
+            for field in required_fields:
+                if field not in config_data:
+                    logger.error(f"Missing required field: {field}")
+                    return False
+            return True
+        except Exception as e:
+            logger.error(f"Configuration validation failed: {e}")
+            return False
+    
+    async def reload_config(self) -> bool:
+        """Reload configuration from source."""
+        try:
+            self.config = get_config()
+            logger.info("Configuration reloaded successfully")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to reload configuration: {e}")
+            return False
+    
+    async def get_config_value(self, key: str, default: Any = None) -> Any:
+        """Get a specific configuration value."""
+        if not self.initialized:
+            await self.initialize()
+        
+        config_dict = self.config.model_dump() if self.config else {}
+        return config_dict.get(key, default)
+
+
 __all__ = [
     "create_backup",
-    "restore_from_backup"
+    "restore_from_backup",
+    "ConfigService"
 ]

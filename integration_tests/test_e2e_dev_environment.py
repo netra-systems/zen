@@ -157,15 +157,18 @@ class TestAuthenticationE2E(DevEnvironmentE2ETests):
         assert config_response.status_code == 200
         config_data = config_response.json()
         
-        # 2. Skip auth health endpoint - not implemented yet
-        # TODO: Add auth health endpoint when implemented
-        # health_response = client.get("/api/auth/health")
-        # assert health_response.status_code == 200
+        # Verify config structure - the actual response has different field names
+        assert "endpoints" in config_data
+        assert "development_mode" in config_data
+        assert "authorized_redirect_uris" in config_data
+        assert "authorized_javascript_origins" in config_data
         
-        # 3. Skip auth config validation endpoint - not implemented yet  
-        # TODO: Add auth config validation endpoint when implemented
-        # validate_response = client.get("/api/auth/config/validate")
-        # assert validate_response.status_code in [200, 400]  # 400 is acceptable for missing credentials
+        # In test environment, dev login should be disabled
+        assert config_data["development_mode"] == False
+        
+        # 2. Test that dev login returns appropriate error
+        dev_login_response = client.post("/api/auth/dev_login", json={"email": "test@example.com"})
+        assert dev_login_response.status_code == 403, "Dev login should be forbidden in test environment"
         
         # For test environment, this validates that auth system is running 
         # even if specific login methods are disabled
@@ -609,23 +612,28 @@ class TestEndToEndUserJourney(DevEnvironmentE2ETests):
     @pytest.mark.slow
     async def test_complete_optimization_journey(self, async_client, client):
         """Test complete user journey from dev login to optimization results."""
-        # 1. Development Login (appropriate for dev environment)
-        dev_login_data = {
-            "email": f"journey_{uuid.uuid4().hex[:8]}@test.com"
-        }
+        # 1. Check environment and auth configuration first
+        auth_config_response = await async_client.get("/api/auth/config")
+        assert auth_config_response.status_code == 200
+        auth_config = auth_config_response.json()
         
-        dev_login_response = await async_client.post("/api/auth/dev_login", json=dev_login_data)
-        
-        # For dev environment, accept various auth states
-        if dev_login_response.status_code in [200, 201]:
-            # Successfully logged in
-            tokens = dev_login_response.json()
-            headers = {"Authorization": f"Bearer {tokens['access_token']}"}
-        elif dev_login_response.status_code == 403:
-            # Dev login not available (OAuth not configured) - create mock auth for test
-            headers = {"Authorization": "Bearer mock_token_for_dev_test"}
+        # 2. Attempt appropriate authentication based on environment
+        if auth_config.get("development_mode", False):
+            # Dev login is enabled - use it
+            dev_login_data = {
+                "email": f"journey_{uuid.uuid4().hex[:8]}@test.com"
+            }
+            dev_login_response = await async_client.post("/api/auth/dev_login", json=dev_login_data)
+            
+            if dev_login_response.status_code in [200, 201]:
+                tokens = dev_login_response.json()
+                headers = {"Authorization": f"Bearer {tokens['access_token']}"}
+            else:
+                # Fallback to mock token
+                headers = {"Authorization": "Bearer mock_token_for_dev_test"}
         else:
-            # Other error - still continue test to validate other endpoints
+            # Dev login not available - use mock token for testing
+            # This is expected in test environment
             headers = {"Authorization": "Bearer mock_token_for_dev_test"}
         
         # 2. Test auth config endpoint (should always be available)
