@@ -20,8 +20,8 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 from concurrent.futures import as_completed
 
-from tests.unified.config import TestTier, TEST_USERS, create_unified_config
-from tests.unified.agent_orchestration_fixtures import (
+from netra_backend.tests.unified.config import TestTier, TEST_USERS, create_unified_config
+from netra_backend.tests.unified.agent_orchestration_fixtures import (
     mock_supervisor_agent, mock_sub_agents, websocket_mock
 )
 

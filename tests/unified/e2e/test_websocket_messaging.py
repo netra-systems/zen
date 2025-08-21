@@ -20,8 +20,8 @@ import websockets
 import uuid
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketMessagingTester:

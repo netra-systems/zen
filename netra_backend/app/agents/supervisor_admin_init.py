@@ -17,9 +17,10 @@ with admin tool support using the unified supervisor architecture.
 from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import User
-# FIXME: SupervisorAgent not exported from supervisor
-# from netra_backend.app.agents.supervisor import SupervisorAgent, SupervisorMode, SupervisorConfig, create_supervisor
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from enum import Enum
+from dataclasses import dataclass
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.permission_service import PermissionService
@@ -28,6 +29,23 @@ from langchain_core.tools import BaseTool
 from typing import List
 
 logger = central_logger
+
+
+class SupervisorMode(Enum):
+    """Supervisor operation modes."""
+    BASIC = "basic"
+    QUALITY_ENHANCED = "quality_enhanced" 
+    ADMIN_ENABLED = "admin_enabled"
+
+
+@dataclass
+class SupervisorConfig:
+    """Configuration for supervisor agent."""
+    mode: SupervisorMode
+    enable_quality_gates: bool = False
+    enable_admin_tools: bool = False
+    enable_circuit_breaker: bool = True
+
 
 def _determine_admin_access(db: Optional[AsyncSession], user: Optional[User]) -> bool:
     """Determine if user has admin access."""

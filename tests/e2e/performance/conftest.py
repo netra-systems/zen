@@ -7,8 +7,8 @@ Shared fixtures for all performance tests.
 import pytest
 import asyncio
 import os
-from tests.e2e.test_helpers.performance_base import HighVolumeWebSocketServer, HighVolumeThroughputClient
-from tests.e2e.fixtures.high_volume_data import test_user_token
+from netra_backend.tests.e2e.test_helpers.performance_base import HighVolumeWebSocketServer, HighVolumeThroughputClient
+from netra_backend.tests.e2e.fixtures.high_volume_data import test_user_token
 
 # Environment configuration
 E2E_TEST_CONFIG = {

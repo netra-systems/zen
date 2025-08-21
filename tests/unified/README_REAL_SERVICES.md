@@ -14,7 +14,7 @@ The Real Services Manager provides infrastructure for E2E testing with actual ru
 
 ### Basic Usage
 ```python
-from tests.unified.real_services_manager import create_real_services_manager
+from netra_backend.tests.unified.real_services_manager import create_real_services_manager
 
 # Create manager
 manager = create_real_services_manager()
@@ -36,7 +36,7 @@ await manager.stop_all_services()
 
 ### Context Manager (Recommended)
 ```python
-from tests.unified.real_services_health import RealServicesContext
+from netra_backend.tests.unified.real_services_health import RealServicesContext
 
 async with RealServicesContext() as manager:
     # Services are automatically started and monitored
@@ -49,7 +49,7 @@ async with RealServicesContext() as manager:
 
 ### Advanced Monitoring
 ```python
-from tests.unified.real_services_health import ServiceHealthMonitor
+from netra_backend.tests.unified.real_services_health import ServiceHealthMonitor
 
 manager = create_real_services_manager()
 monitor = ServiceHealthMonitor(manager)

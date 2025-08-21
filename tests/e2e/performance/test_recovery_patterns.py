@@ -17,7 +17,7 @@ import random
 import gc
 import psutil
 import logging
-from tests.e2e.test_helpers.performance_base import (
+from netra_backend.tests.e2e.test_helpers.performance_base import (
     LoadTestResults, HighVolumeThroughputClient, HIGH_VOLUME_CONFIG
 )
 

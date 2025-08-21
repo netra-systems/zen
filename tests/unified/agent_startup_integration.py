@@ -26,7 +26,7 @@ from typing import Dict, Any, Optional
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from tests.unified.run_agent_startup_tests import (
+from netra_backend.tests.unified.run_agent_startup_tests import (
     run_agent_startup_test_suite,
     print_startup_test_summary
 )

@@ -87,7 +87,7 @@
       <description>Test imports MUST use netra_backend.tests.* prefix when importing test utilities</description>
       <example>
         <correct>from netra_backend.tests.conftest import test_client</correct>
-        <incorrect>from tests.conftest import test_client</incorrect>
+        <incorrect>from netra_backend.tests.conftest import test_client</incorrect>
       </example>
     </rule>
     

@@ -5,6 +5,11 @@ Business Value: Validates complete staging deployment functionality.
 Ensures all services work correctly in staging before production deployment.
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import os
 import asyncio
 import aiohttp
@@ -15,9 +20,9 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 
-from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
-from tests.unified.test_environment_config import TestEnvironmentType
-from tests.unified.real_services_manager import RealServicesManager
+from netra_backend.tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
+from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
 
 logger = logging.getLogger(__name__)
 

@@ -30,8 +30,8 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.health_service_checker import ServiceHealthChecker
-from tests.unified.health_check_core import (
+from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
+from netra_backend.tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
     create_service_error_result, create_healthy_result
 )

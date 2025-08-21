@@ -9,7 +9,7 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime, timezone
 
-from tests.unified.config import TestTier
+from netra_backend.tests.unified.config import TestTier
 
 
 @pytest.fixture

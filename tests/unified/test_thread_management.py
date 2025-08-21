@@ -24,8 +24,8 @@ from unittest.mock import patch, Mock, AsyncMock
 import pytest
 from datetime import datetime, timezone
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 from netra_backend.app.schemas.registry import Thread, ThreadMetadata, Message
 from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
 from netra_backend.app.logging_config import central_logger

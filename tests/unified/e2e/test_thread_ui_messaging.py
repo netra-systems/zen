@@ -15,7 +15,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 from unittest.mock import MagicMock
 
-from tests.unified.e2e.thread_test_fixtures_core import (
+from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
     ThreadTestDataFactory, unified_harness, test_users
 )
 

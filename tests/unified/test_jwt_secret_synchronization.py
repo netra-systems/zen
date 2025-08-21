@@ -15,8 +15,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 
 
 class JWTSecretSynchronizationTester:

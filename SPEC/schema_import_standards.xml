@@ -95,7 +95,7 @@
             </pattern>
             
             <pattern>
-                <example>from tests.fixtures.schemas import TestSchema</example>
+                <example>from netra_backend.tests.fixtures.schemas import TestSchema</example>
                 <reason>Test schemas should use fixtures or canonical locations</reason>
                 <fix>Use test fixtures or move to canonical location</fix>
             </pattern>

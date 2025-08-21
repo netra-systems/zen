@@ -139,14 +139,14 @@ class E2EImportChecker:
                 ('import app.', 'import netra_backend.app.'),
                 
                 # Fix test utilities
-                ('from tests.', 'from netra_backend.tests.'),
+                ('from netra_backend.tests.', 'from netra_backend.tests.'),
                 ('from test_utils', 'from netra_backend.tests.test_utils'),
                 
                 # Fix auth service imports
                 ('from auth_core.', 'from auth_service.auth_core.'),
                 
                 # Fix frontend test imports
-                ('from frontend.', 'from tests.frontend.'),
+                ('from frontend.', 'from netra_backend.tests.frontend.'),
             ]
             
             for old, new in replacements:

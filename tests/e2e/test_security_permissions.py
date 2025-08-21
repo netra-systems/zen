@@ -32,9 +32,9 @@ from sqlalchemy.orm import Session
 from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
 from netra_backend.app.services.permission_service import PermissionService
 from netra_backend.app.agents.admin_tool_permissions import AdminToolPermissionManager
-from tests.unified.clients.auth_client import AuthTestClient
-from tests.unified.clients.backend_client import BackendTestClient
-from tests.unified.clients.websocket_client import WebSocketTestClient
+from netra_backend.tests.unified.clients.auth_client import AuthTestClient
+from netra_backend.tests.unified.clients.backend_client import BackendTestClient
+from netra_backend.tests.unified.clients.websocket_client import WebSocketTestClient
 
 
 class TestTenantIsolation:

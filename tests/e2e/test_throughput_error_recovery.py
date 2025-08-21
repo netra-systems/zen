@@ -18,8 +18,8 @@ import random
 import json
 from typing import Dict, Any, List
 
-from tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
-from tests.e2e.test_helpers.websocket_helpers import websocket_test_context
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from netra_backend.tests.e2e.test_helpers.websocket_helpers import websocket_test_context
 
 logger = logging.getLogger(__name__)
 
@@ -256,7 +256,7 @@ class TestErrorRecoveryAndResilience:
     
     async def _resource_pressure_simulation(self, duration: int):
         """Simulate resource pressure"""
-        from tests.e2e.test_helpers.resource_monitoring import stress_system_resources
+        from netra_backend.tests.e2e.test_helpers.resource_monitoring import stress_system_resources
         
         # Apply moderate resource stress
         await stress_system_resources(

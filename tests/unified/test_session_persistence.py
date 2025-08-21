@@ -17,7 +17,7 @@ from typing import Dict, List, Any, Optional, Tuple
 import pytest
 from datetime import datetime, timedelta
 
-from tests.unified.config import TEST_USERS
+from netra_backend.tests.unified.config import TEST_USERS
 from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
 from netra_backend.app.logging_config import central_logger
 

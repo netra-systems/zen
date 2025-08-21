@@ -17,10 +17,10 @@ import logging
 import json
 from typing import Dict, Any, List
 
-from tests.e2e.test_helpers.throughput_helpers import (
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
     LoadTestResults, E2E_TEST_CONFIG, create_test_message
 )
-from tests.e2e.test_helpers.websocket_helpers import validate_message_ordering
+from netra_backend.tests.e2e.test_helpers.websocket_helpers import validate_message_ordering
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +151,7 @@ class TestMessageOrderingPreservation:
     
     async def _execute_concurrent_ordering_test(self) -> Dict[str, Any]:
         """Execute concurrent client ordering test"""
-        from tests.e2e.test_helpers.websocket_helpers import websocket_test_context
+        from netra_backend.tests.e2e.test_helpers.websocket_helpers import websocket_test_context
         
         concurrent_clients = ORDERING_CONFIG["concurrent_clients"]
         messages_per_client = ORDERING_CONFIG["messages_per_client"]

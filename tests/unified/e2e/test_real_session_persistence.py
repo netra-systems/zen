@@ -30,7 +30,7 @@ import json
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone, timedelta
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Import Redis directly to avoid configuration issues
 import redis.asyncio as redis
@@ -502,7 +502,7 @@ if __name__ == "__main__":
     sys.path.insert(0, str(project_root))
     
     # Re-import with correct paths
-    from tests.unified.jwt_token_helpers import JWTTestHelper
+    from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
     
     # Run tests directly for development
     async def run_real_session_persistence_tests():

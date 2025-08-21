@@ -23,7 +23,7 @@ from unittest.mock import patch, Mock
 import pytest
 from datetime import datetime, timezone
 
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 # Import MockWebSocket from the actual location
 try:
     from netra_backend.app.tests.services.test_ws_connection_mocks import MockWebSocket

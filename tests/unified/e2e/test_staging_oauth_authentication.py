@@ -19,8 +19,8 @@ import uuid
 import json
 from unittest.mock import AsyncMock, patch
 
-from tests.unified.e2e.unified_e2e_harness import create_e2e_harness
-from tests.unified.test_environment_config import TestEnvironmentType
+from netra_backend.tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.auth_constants import (
     OAuthConstants, HeaderConstants, JWTConstants, 

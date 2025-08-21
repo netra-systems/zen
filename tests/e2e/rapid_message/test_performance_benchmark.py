@@ -15,10 +15,10 @@ import time
 import statistics
 from datetime import datetime, timezone
 
-from tests.e2e.fixtures.rapid_message_fixtures import (
+from netra_backend.tests.e2e.fixtures.rapid_message_fixtures import (
     user_token, message_validator, test_config
 )
-from tests.e2e.utils.rapid_message_sender import RapidMessageSender
+from netra_backend.tests.e2e.utils.rapid_message_sender import RapidMessageSender
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

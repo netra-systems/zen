@@ -17,9 +17,9 @@ import logging
 import json
 from typing import Dict, List
 
-from tests.e2e.test_helpers.websocket_helpers import stress_test_connections
-from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
-from tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from netra_backend.tests.e2e.test_helpers.websocket_helpers import stress_test_connections
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +137,7 @@ class TestConcurrentConnectionScalability:
     
     async def _single_connection_test(self, connection_id: int) -> Dict[str, any]:
         """Single connection test for burst testing"""
-        from tests.e2e.test_helpers.websocket_helpers import websocket_test_context
+        from netra_backend.tests.e2e.test_helpers.websocket_helpers import websocket_test_context
         
         try:
             async with websocket_test_context(E2E_TEST_CONFIG["websocket_url"], timeout=10.0) as websocket:

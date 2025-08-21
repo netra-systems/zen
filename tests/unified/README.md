@@ -65,7 +65,7 @@ Database configuration:
 
 ### Basic Configuration Access
 ```python
-from tests.unified.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS
+from netra_backend.tests.unified.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS
 
 # Access WebSocket URL
 ws_url = TEST_ENDPOINTS.ws_url  # ws://localhost:8000/ws
@@ -76,7 +76,7 @@ free_user = TEST_USERS["free"]  # test-free@unified-test.com
 
 ### Tier-Based Testing
 ```python
-from tests.unified.config import get_test_user, TestTier
+from netra_backend.tests.unified.config import get_test_user, TestTier
 
 # Get specific tier user
 enterprise_user = get_test_user("enterprise")
@@ -89,7 +89,7 @@ for tier in TestTier:
 
 ### Test Data Generation
 ```python
-from tests.unified.config import TestDataFactory, TestTokenManager
+from netra_backend.tests.unified.config import TestDataFactory, TestTokenManager
 
 # Create test message
 message = TestDataFactory.create_message_data(user_id, "Hello!")
@@ -130,7 +130,7 @@ Each tier has a dedicated test user:
 ### With Existing Tests
 ```python
 # Import in your test files
-from tests.unified.config import TEST_USERS, get_test_user
+from netra_backend.tests.unified.config import TEST_USERS, get_test_user
 
 def test_free_tier_limits():
     free_user = get_test_user("free")

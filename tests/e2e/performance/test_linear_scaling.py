@@ -15,7 +15,7 @@ import asyncio
 import time
 import statistics
 import logging
-from tests.e2e.test_helpers.performance_base import (
+from netra_backend.tests.e2e.test_helpers.performance_base import (
     LoadTestResults, ThroughputAnalyzer, HIGH_VOLUME_CONFIG
 )
 
@@ -166,8 +166,8 @@ class TestLinearThroughputScaling:
     
     async def _create_multiple_clients(self, count: int) -> list:
         """Create multiple client connections."""
-        from tests.e2e.test_helpers.performance_base import HighVolumeThroughputClient
-        from tests.e2e.fixtures.high_volume_data import MockAuthenticator
+        from netra_backend.tests.e2e.test_helpers.performance_base import HighVolumeThroughputClient
+        from netra_backend.tests.e2e.fixtures.high_volume_data import MockAuthenticator
         
         clients = []
         for i in range(count):

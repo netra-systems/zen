@@ -16,7 +16,7 @@ import time
 import logging
 from typing import Dict, Any, List
 
-from tests.e2e.test_helpers.resource_monitoring import (
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
     ResourceMonitor, ResourceSnapshot, resource_monitoring_context
 )
 

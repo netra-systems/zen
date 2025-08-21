@@ -23,14 +23,14 @@ import time
 import logging
 from typing import Dict, Any, List
 
-from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
-from tests.e2e.test_helpers.concurrency_base import (
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from netra_backend.tests.e2e.test_helpers.concurrency_base import (
     ConcurrencyTestBase, ConcurrencyTestConfig, StressTestGenerator, PerformanceAnalyzer
 )
-from tests.e2e.fixtures.concurrency_scenarios import (
+from netra_backend.tests.e2e.fixtures.concurrency_scenarios import (
     ConcurrencyScenarioRunner, get_load_levels_for_scaling
 )
-from tests.e2e.test_helpers.performance_testing import (
+from netra_backend.tests.e2e.test_helpers.performance_testing import (
     PerformanceTestOrchestrator, StressTestOrchestrator, ResourceMonitoringHelper,
     TestResultValidator, create_session_result_converter
 )

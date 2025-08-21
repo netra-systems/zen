@@ -10,7 +10,7 @@ import asyncio
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from tests.deployment.test_oauth_staging_flow import OAuthStagingTester
+from netra_backend.tests.deployment.test_oauth_staging_flow import OAuthStagingTester
 
 
 async def main():

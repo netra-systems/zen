@@ -24,9 +24,9 @@ import pytest
 from typing import Dict, Any, Optional, Union
 from datetime import datetime, timezone
 
-from tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import create_test_config
+from netra_backend.tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.real_client_types import create_test_config
 
 
 class ErrorHandlingTester:
@@ -42,7 +42,7 @@ class ErrorHandlingTester:
         """Create test JWT token for authentication."""
         try:
             # Ensure test environment is set up
-            from tests.unified.config import setup_test_environment
+            from netra_backend.tests.unified.config import setup_test_environment
             setup_test_environment()
             
             from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token

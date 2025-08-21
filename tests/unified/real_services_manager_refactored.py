@@ -19,7 +19,7 @@ from pathlib import Path
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
 from dev_launcher.discovery import ServiceDiscovery, ServiceInfo
-from tests.unified.clients import TestClientFactory
+from netra_backend.tests.unified.clients import TestClientFactory
 
 logger = logging.getLogger(__name__)
 

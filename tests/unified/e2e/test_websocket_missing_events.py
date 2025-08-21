@@ -19,9 +19,9 @@ import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
 
-from tests.unified.clients.backend_client import BackendTestClient
-from tests.unified.clients.websocket_client import WebSocketTestClient
-from tests.unified.config import UnifiedTestConfig
+from netra_backend.tests.unified.clients.backend_client import BackendTestClient
+from netra_backend.tests.unified.clients.websocket_client import WebSocketTestClient
+from netra_backend.tests.unified.config import UnifiedTestConfig
 
 
 class TestWebSocketMissingEvents:

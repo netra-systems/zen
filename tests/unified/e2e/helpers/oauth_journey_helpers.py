@@ -15,7 +15,7 @@ from typing import Dict, Any, Optional
 from unittest.mock import patch, AsyncMock
 from urllib.parse import urlparse, parse_qs
 
-from tests.unified.oauth_test_providers import GoogleOAuthProvider
+from netra_backend.tests.unified.oauth_test_providers import GoogleOAuthProvider
 
 
 class OAuthFlowHelper:

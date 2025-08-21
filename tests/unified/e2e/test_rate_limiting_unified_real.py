@@ -39,9 +39,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from tests.unified.service_manager import ServiceManager
-from tests.unified.test_harness import UnifiedTestHarness
-from tests.unified.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
+from netra_backend.tests.unified.service_manager import ServiceManager
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager, RateLimitFlowValidator
 
 
 class UnifiedRateLimitTester:

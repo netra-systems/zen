@@ -14,8 +14,8 @@ import time
 import statistics
 from typing import Dict, Any, List, Callable
 
-from tests.unified.config import TEST_USERS
-from tests.unified.e2e.thread_test_fixtures_core import (
+from netra_backend.tests.unified.config import TEST_USERS
+from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
     ThreadWebSocketFixtures, ThreadContextManager, ThreadPerformanceUtils,
     unified_harness, ws_thread_fixtures, thread_context_manager, performance_utils
 )

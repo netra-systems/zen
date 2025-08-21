@@ -15,7 +15,7 @@ import asyncio
 import time
 import json
 import logging
-from tests.e2e.test_helpers.performance_base import (
+from netra_backend.tests.e2e.test_helpers.performance_base import (
     LoadTestResults, ThroughputAnalyzer, HIGH_VOLUME_CONFIG
 )
 

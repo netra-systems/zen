@@ -13,12 +13,12 @@ import asyncio
 import uuid
 from datetime import datetime, timezone
 
-from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
+from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
     network_condition, stream_buffer, test_user_id, response_configs,
     ConnectionState, ResponseType
 )
-from tests.e2e.websocket_resilience.utils.network_simulator import NetworkSimulator
-from tests.e2e.websocket_resilience.utils.streaming_response_generator import StreamingResponseGenerator
+from netra_backend.tests.e2e.websocket_resilience.utils.network_simulator import NetworkSimulator
+from netra_backend.tests.e2e.websocket_resilience.utils.streaming_response_generator import StreamingResponseGenerator
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

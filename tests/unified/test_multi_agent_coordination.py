@@ -15,7 +15,7 @@ Architecture: 450-line compliance through focused coordination testing
 
 import pytest
 import asyncio
-from tests.unified.agent_orchestration_fixtures import (
+from netra_backend.tests.unified.agent_orchestration_fixtures import (
     mock_supervisor_agent, mock_sub_agents, coordination_test_data
 )
 

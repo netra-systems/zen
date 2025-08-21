@@ -18,10 +18,10 @@ import random
 import json
 from typing import Dict, Any, List, Set
 
-from tests.e2e.test_helpers.throughput_helpers import (
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
     LoadTestResults, E2E_TEST_CONFIG, create_test_message
 )
-from tests.e2e.test_helpers.websocket_helpers import websocket_test_context
+from netra_backend.tests.e2e.test_helpers.websocket_helpers import websocket_test_context
 
 logger = logging.getLogger(__name__)
 

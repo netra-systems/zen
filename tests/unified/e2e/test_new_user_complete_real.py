@@ -34,7 +34,7 @@ os.environ["AUTH_FAST_TEST_MODE"] = "true"
 
 from ..database_test_connections import DatabaseTestConnections
 import aiosqlite
-from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 from helpers.new_user_journey_helpers import (
     DatabaseSetupHelper,
     SignupFlowHelper,

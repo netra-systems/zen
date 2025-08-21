@@ -32,7 +32,7 @@ from auth_service.auth_core.core.session_manager import SessionManager
 from auth_service.auth_core.models.auth_models import (
     LoginRequest, LoginResponse, AuthProvider, TokenResponse
 )
-from tests.factories.user_factory import UserFactory
+from netra_backend.tests.factories.user_factory import UserFactory
 import jwt as jwt_lib
 
 class TestDatabaseTransactionIsolation:

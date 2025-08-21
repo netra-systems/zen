@@ -13,10 +13,10 @@ Business Value Justification (BVJ):
 import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock, MagicMock
-from tests.unified.real_client_factory import create_real_client_factory, RealClientFactory
-from tests.unified.real_client_types import create_test_config, ClientConfig
-from tests.unified.real_http_client import RealHTTPClient
-from tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.real_client_factory import create_real_client_factory, RealClientFactory
+from netra_backend.tests.unified.real_client_types import create_test_config, ClientConfig
+from netra_backend.tests.unified.real_http_client import RealHTTPClient
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class TestRealClientFactory:

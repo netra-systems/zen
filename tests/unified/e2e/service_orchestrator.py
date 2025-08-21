@@ -13,9 +13,9 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.database_test_connections import DatabaseConnectionManager
-from tests.unified.test_environment_config import TestEnvironmentConfig
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
+from netra_backend.tests.unified.database_test_connections import DatabaseConnectionManager
+from netra_backend.tests.unified.test_environment_config import TestEnvironmentConfig
 
 logger = logging.getLogger(__name__)
 

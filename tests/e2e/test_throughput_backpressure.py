@@ -16,10 +16,10 @@ import time
 import logging
 from typing import Dict, Any
 
-from tests.e2e.test_helpers.throughput_helpers import (
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
     LoadTestResults, E2E_TEST_CONFIG, measure_system_resources
 )
-from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
 
 logger = logging.getLogger(__name__)
 

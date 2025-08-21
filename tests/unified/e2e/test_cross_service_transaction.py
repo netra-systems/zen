@@ -12,9 +12,9 @@ import asyncio
 import uuid
 from typing import List
 
-from tests.unified.real_services_manager import RealServicesManager
-from tests.unified.database_test_connections import DatabaseTestConnections
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.real_services_manager import RealServicesManager
+from netra_backend.tests.unified.database_test_connections import DatabaseTestConnections
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from .cross_service_transaction_core import (
     CrossServiceTransactionError, 
     TransactionOperation,

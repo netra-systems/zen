@@ -26,7 +26,7 @@ import websockets
 from websockets.exceptions import ConnectionClosed
 
 from netra_backend.app.logging_config import central_logger
-from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 
 logger = central_logger.get_logger(__name__)
 

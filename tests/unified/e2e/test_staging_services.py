@@ -23,7 +23,7 @@ import aiohttp
 import json
 from typing import Dict, Any
 
-from tests.unified.e2e.staging_test_helpers import (
+from netra_backend.tests.unified.e2e.staging_test_helpers import (
     StagingTestSuite,
     get_staging_suite,
     ServiceHealthStatus

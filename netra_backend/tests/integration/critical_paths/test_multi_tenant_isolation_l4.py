@@ -42,7 +42,7 @@ PermissionsService = AsyncMock
 # from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
 # from netra_backend.app.schemas.tenant import Tenant, TenantResource, Permission
 # from netra_backend.app.core.security import SecurityContext
-# from tests.integration.staging_config.base import StagingConfigTestBase
+# from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
 AuditLogger = AsyncMock
 DatabaseConnectionManager = AsyncMock
 Tenant = dict

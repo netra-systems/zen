@@ -28,7 +28,7 @@ except ImportError:
 # Test categories for organized testing
 TEST_CATEGORIES = {
     "unit": ["netra_backend/tests/services", "netra_backend/tests/core"],
-    "integration": ["integration_tests", "netra_backend/tests/routes"],
+    "integration": ["netra_backend/tests/integration", "netra_backend/tests/routes"],
     "agent": ["netra_backend/tests/agents", "netra_backend/tests/services/agents", "netra_backend/tests/services/apex_optimizer_agent"],
     "websocket": ["netra_backend/tests/test_websocket.py", "netra_backend/tests/routes/test_websocket_*.py"],
     "auth": ["netra_backend/tests/test_auth*.py", "netra_backend/tests/routes/test_*auth*.py"],

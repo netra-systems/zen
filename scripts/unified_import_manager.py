@@ -259,7 +259,7 @@ class UnifiedImportManager:
                     if 'from app.' in content and 'from netra_backend.app.' not in content:
                         issues_found += 1
                         
-                    if 'from tests.' in content and 'from netra_backend.tests.' not in content:
+                    if 'from netra_backend.tests.' in content and 'from netra_backend.tests.' not in content:
                         issues_found += 1
                         
                     if 'from .. import' in content or 'from . import' in content:

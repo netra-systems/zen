@@ -32,8 +32,8 @@ from enum import Enum
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.config import setup_test_environment
-from tests.unified.health_check_core import SERVICE_ENDPOINTS, HEALTH_STATUS
+from netra_backend.tests.unified.config import setup_test_environment
+from netra_backend.tests.unified.health_check_core import SERVICE_ENDPOINTS, HEALTH_STATUS
 
 logger = logging.getLogger(__name__)
 

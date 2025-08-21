@@ -26,8 +26,8 @@ import pytest
 from datetime import datetime, timezone
 from test_framework.mock_utils import mock_justified
 
-from tests.unified.config import TEST_USERS, TestDataFactory
-from tests.unified.test_harness import UnifiedTestHarness
+from netra_backend.tests.unified.config import TEST_USERS, TestDataFactory
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service

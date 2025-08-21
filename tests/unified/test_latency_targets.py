@@ -47,7 +47,7 @@ except ImportError:
     class WebSocketBuilder:
         def build(self):
             return MockWebSocket()
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

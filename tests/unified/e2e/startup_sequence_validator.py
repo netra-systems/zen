@@ -13,7 +13,7 @@ import sys
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.mock_services_manager import (
+from netra_backend.tests.unified.e2e.mock_services_manager import (
     MockE2EServiceOrchestrator, MockDatabaseConnections, MockHttpClient
 )
 

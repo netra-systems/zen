@@ -22,8 +22,7 @@ from netra_backend.app.agents.config import agent_config
 # Core analysis components
 from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
-# FIXME: # FIXME: # FIXME: # FIXME: # FIXME: DataSubAgentClickHouseOperations not available
-# FIXME: # FIXME: # FIXME: # FIXME: # from netra_backend.app.services.corpus.clickhouse_operations import ClickHouseOperations as DataSubAgentClickHouseOperations
+from netra_backend.app.agents.data_sub_agent.clickhouse_operations import DataSubAgentClickHouseOperations
 from netra_backend.app.agents.data_sub_agent.extended_operations import ExtendedOperations
 from netra_backend.app.agents.data_sub_agent.delegation import AgentDelegation
 
@@ -43,7 +42,7 @@ class DataSubAgentCore:
         """Initialize core analysis components."""
         self.query_builder = QueryBuilder()
         self.analysis_engine = AnalysisEngine()
-        # FIXME: # FIXME: # FIXME: # FIXME: self.clickhouse_ops = DataSubAgentClickHouseOperations()
+        self.clickhouse_ops = DataSubAgentClickHouseOperations()
         self.cache_ttl = agent_config.cache.default_ttl
         
     def _init_redis_connection(self) -> None:

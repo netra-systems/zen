@@ -36,20 +36,20 @@ import pytest
 
 try:
     # Try relative imports first (for pytest execution)
-    from tests.unified.real_websocket_client import RealWebSocketClient
-    from tests.unified.real_client_types import ClientConfig, ConnectionState
-    from tests.unified.real_services_manager import RealServicesManager
-    from tests.unified.jwt_token_helpers import JWTTestHelper
+    from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+    from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
+    from netra_backend.tests.unified.real_services_manager import RealServicesManager
+    from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 except ImportError:
     # Fallback for standalone execution
     import sys
     import os
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     sys.path.insert(0, project_root)
-    from tests.unified.real_websocket_client import RealWebSocketClient
-    from tests.unified.real_client_types import ClientConfig, ConnectionState
-    from tests.unified.real_services_manager import RealServicesManager
-    from tests.unified.jwt_token_helpers import JWTTestHelper
+    from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+    from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
+    from netra_backend.tests.unified.real_services_manager import RealServicesManager
+    from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 from netra_backend.app.schemas.websocket_models import WebSocketMessage, BaseWebSocketPayload
 from netra_backend.app.schemas.core_enums import WebSocketMessageType

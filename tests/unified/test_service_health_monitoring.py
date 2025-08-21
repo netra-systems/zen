@@ -24,12 +24,12 @@ import pytest
 from typing import Dict, Any, List
 from datetime import datetime, UTC
 
-from tests.unified.health_check_core import (
+from netra_backend.tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
     create_healthy_result, create_service_error_result,
     calculate_overall_health_score, get_critical_services
 )
-from tests.unified.health_service_checker import ServiceHealthChecker
+from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -20,7 +20,7 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
-from tests.unified.e2e.agent_response_test_utilities import QualityMetricValidator
+from netra_backend.tests.unified.e2e.agent_response_test_utilities import QualityMetricValidator
 
 
 @pytest.mark.integration

@@ -30,9 +30,9 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.services.agent_service import AgentService
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.postgres_service import PostgresService
-from security.context_isolation import ContextIsolationManager
+from netra_backend.app.security.context_isolation import ContextIsolationManager
 from test_framework.testcontainers_utils import TestcontainerHelper
 
 # Add project root to path

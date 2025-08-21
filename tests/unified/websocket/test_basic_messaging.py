@@ -25,9 +25,9 @@ import pytest_asyncio
 from typing import Dict, Any, Optional
 from datetime import datetime, timezone
 
-from tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS, TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import create_test_config
+from netra_backend.tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS, TestDataFactory
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.real_client_types import create_test_config
 
 
 class BasicMessagingTester:

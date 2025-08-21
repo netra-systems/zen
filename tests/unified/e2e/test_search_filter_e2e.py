@@ -17,6 +17,11 @@ ARCHITECTURAL COMPLIANCE:
 - Tests all data types: conversations, messages, costs, agents
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import asyncio
 import time
 from typing import Dict, Any, List
@@ -24,7 +29,7 @@ from unittest.mock import patch
 import pytest
 import pytest_asyncio
 
-from .search_filter_helpers import (
+from netra_backend.search_filter_helpers import (
     SearchFilterTestCore, SearchOperationSimulator, FilterValidationCore,
     PerformanceValidator, PaginationTester, SearchDataGenerator
 )

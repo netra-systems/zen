@@ -21,7 +21,7 @@ python test_runner.py --mode e2e --benchmark baseline
 ### 2. Test Data Generation
 ```python
 # Example: Generate synthetic workload data
-from tests.e2e.data_generator import SyntheticWorkloadGenerator
+from netra_backend.tests.e2e.data_generator import SyntheticWorkloadGenerator
 
 generator = SyntheticWorkloadGenerator(
     distribution="production-mirror",

@@ -27,13 +27,13 @@ import time
 from datetime import datetime, timezone
 from typing import Dict, Any, List, Optional
 
-from tests.unified.database_sync_fixtures import (
+from netra_backend.tests.unified.database_sync_fixtures import (
     DatabaseSyncValidator, 
     create_test_user_data,
     create_performance_user_data,
     create_eventual_consistency_user
 )
-from tests.unified.database_sync_helpers import (
+from netra_backend.tests.unified.database_sync_helpers import (
     sync_user_to_backend,
     verify_sync_consistency,
     create_sync_task,
@@ -41,7 +41,7 @@ from tests.unified.database_sync_helpers import (
     verify_backend_user_exists,
     measure_performance_duration
 )
-from tests.unified.database_test_connections import DatabaseTestConnections
+from netra_backend.tests.unified.database_test_connections import DatabaseTestConnections
 
 
 @pytest_asyncio.fixture

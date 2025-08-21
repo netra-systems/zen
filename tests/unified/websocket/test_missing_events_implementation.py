@@ -33,10 +33,10 @@ from typing import Dict, Any, Optional, List, Set
 import pytest
 import pytest_asyncio
 
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import ClientConfig, ConnectionState
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.clients.websocket_client import WebSocketTestClient
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.clients.websocket_client import WebSocketTestClient
 
 
 class MissingEventsTracker:

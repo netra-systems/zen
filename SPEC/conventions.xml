@@ -71,7 +71,7 @@ const b = useStore(state =&gt; state.b);
         <before description="VIOLATION: Old import pattern or relative imports">
 
 from netra_backend.app.core.config import Settings
-from tests.conftest import TestClient
+from netra_backend.tests.conftest import TestClient
 from .config import Settings  # FORBIDDEN: relative import
 from ..core.config import Settings  # FORBIDDEN: relative import
 

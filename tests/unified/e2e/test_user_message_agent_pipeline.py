@@ -26,7 +26,7 @@ from netra_backend.app.config import get_config
 from netra_backend.app.websocket.unified.manager import WebSocketManager
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
-from tests.unified.e2e.agent_response_test_utilities import (
+from netra_backend.tests.unified.e2e.agent_response_test_utilities import (
     AgentResponseSimulator, QualityMetricValidator
 )
 

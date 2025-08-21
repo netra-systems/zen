@@ -15,7 +15,7 @@ import hashlib
 from typing import AsyncGenerator, Dict, Any, Optional
 from datetime import datetime, timezone
 
-from tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import ResponseType
+from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import ResponseType
 
 class StreamingResponseGenerator:
     """Generates streaming responses for testing."""

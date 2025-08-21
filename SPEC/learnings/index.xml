@@ -262,5 +262,13 @@
             <critical-takeaway>Always verify startup scripts check correct paths relative to actual project structure.</critical-takeaway>
             <critical-takeaway>Test startup scripts with --help flag to ensure basic initialization works.</critical-takeaway>
         </category>
+
+        <category name="Import Structure" path="SPEC/learnings/import_structure.xml" keywords="Import, Module, StartupChecker, Refactoring, Import Errors">
+            <critical-takeaway>StartupChecker lives in netra_backend.app.startup_checks.checker, NOT app.checker (startup-checker-import-path).</critical-takeaway>
+            <critical-takeaway>All startup check modules are in app.startup_checks directory - import from there consistently.</critical-takeaway>
+            <critical-takeaway>When refactoring module structure, grep for ALL imports globally and update systematically.</critical-takeaway>
+            <critical-takeaway>Avoid similar class names in different modules (SystemChecker vs StartupChecker confusion).</critical-takeaway>
+            <critical-takeaway>Create comprehensive import tests that validate module locations and catch import errors early.</critical-takeaway>
+        </category>
     </categories>
 </specification>

@@ -12,7 +12,7 @@ from typing import Dict, Any
 
 from netra_backend.app.schemas.registry import User, UserCreate
 from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Helper function for backward compatibility
 jwt_helper = JWTTestHelper()

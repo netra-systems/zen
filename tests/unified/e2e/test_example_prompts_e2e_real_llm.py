@@ -17,6 +17,11 @@ ARCHITECTURAL COMPLIANCE:
 - Complete workflow testing from triage to reporting
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import asyncio
 import os
 import time
@@ -27,7 +32,7 @@ import pytest_asyncio
 
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.schemas.agent_requests import AgentRequest
-from .agent_conversation_helpers import (
+from netra_backend.agent_conversation_helpers import (
     AgentConversationTestCore,
     ConversationFlowValidator,
     AgentConversationTestUtils

@@ -21,7 +21,7 @@ import json
 from typing import Dict, Any, List, Tuple, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
-from tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.app.schemas.shared_types import ProcessingResult
 
 
