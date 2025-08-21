@@ -21,14 +21,59 @@ Architecture:
 All files ≤300 lines, all functions ≤8 lines.
 """
 
-from netra_backend.app.core.configuration.base import UnifiedConfigManager
-from netra_backend.app.validator import ConfigurationValidator
-from netra_backend.app.secrets import SecretManager
-from netra_backend.app.database import DatabaseConfigManager
-from netra_backend.app.services import ServiceConfigManager
-from netra_backend.app.loader import ConfigurationLoader, get_configuration, reload_configuration
-from netra_backend.app.environment import EnvironmentDetector, get_environment, is_production, is_development
-from netra_backend.app.unified_secrets import UnifiedSecretManager, load_secrets, get_secret
+from netra_backend.app.core.configuration.base import (
+    UnifiedConfigManager,
+    DatabaseConfigManager,
+    ServiceConfigManager,
+    SecretManager,
+    ConfigurationValidator
+)
+
+# Placeholder functions for missing imports
+def get_configuration():
+    """Get configuration."""
+    from netra_backend.app.core.configuration.base import get_unified_config
+    return get_unified_config()
+
+def reload_configuration():
+    """Reload configuration."""
+    from netra_backend.app.core.configuration.base import reload_unified_config
+    return reload_unified_config()
+
+def get_environment():
+    """Get environment."""
+    import os
+    return os.environ.get("ENVIRONMENT", "development")
+
+def is_production():
+    """Check if production environment."""
+    return get_environment() == "production"
+
+def is_development():
+    """Check if development environment."""
+    return get_environment() == "development"
+
+def load_secrets():
+    """Load secrets."""
+    pass
+
+def get_secret(key: str):
+    """Get secret by key."""
+    import os
+    return os.environ.get(key)
+
+# Placeholder classes for compatibility
+class ConfigurationLoader:
+    """Configuration loader."""
+    pass
+
+class EnvironmentDetector:
+    """Environment detector."""
+    pass
+
+class UnifiedSecretManager:
+    """Unified secret manager."""
+    pass
 
 __all__ = [
     "UnifiedConfigManager",

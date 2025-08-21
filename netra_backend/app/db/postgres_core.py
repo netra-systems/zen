@@ -10,10 +10,15 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncEngine, create_async_engine, async_sessionmaker
 from sqlalchemy.pool import QueuePool, NullPool, AsyncAdaptedQueuePool
-from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.db.postgres_config import DatabaseConfig
 from netra_backend.app.db.postgres_events import setup_async_engine_events, setup_sync_engine_events
+
+# Import settings lazily to avoid circular dependency
+def get_settings():
+    """Get settings lazily to avoid circular import."""
+    from netra_backend.app.config import settings
+    return settings
 
 logger = central_logger.get_logger(__name__)
 
@@ -268,6 +273,7 @@ def _create_async_session_factory(engine: AsyncEngine):
 
 def _validate_database_url():
     """Validate database URL configuration."""
+    settings = get_settings()
     db_url = settings.database_url
     if not db_url:
         logger.warning("Database URL not configured")

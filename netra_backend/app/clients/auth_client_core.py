@@ -7,8 +7,8 @@ import httpx
 import logging
 from typing import Optional, Dict
 
-from netra_backend.app.auth_client_cache import AuthTokenCache, AuthCircuitBreakerManager, AuthServiceSettings
-from netra_backend.app.auth_client_config import EnvironmentDetector, OAuthConfigGenerator, OAuthConfig
+from netra_backend.app.clients.auth_client_cache import AuthTokenCache, AuthCircuitBreakerManager, AuthServiceSettings
+from netra_backend.app.clients.auth_client_config import EnvironmentDetector, OAuthConfigGenerator, OAuthConfig
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +39,10 @@ class AuthServiceClient:
         return self._client
     
     async def _check_auth_service_enabled(self, token: str) -> Optional[Dict]:
-        """Check if auth service is enabled, return local validation if not."""
+        """Check if auth service is enabled."""
         if not self.settings.enabled:
-            return await self._local_validate(token)
+            logger.error("Auth service is required for token validation")
+            return {"valid": False}
         return None
     
     async def _try_cached_token(self, token: str) -> Optional[Dict]:
@@ -257,9 +258,8 @@ class AuthServiceClient:
     async def hash_password(self, password: str) -> Optional[Dict]:
         """Hash password through auth service."""
         if not self.settings.enabled:
-            # Fallback for development
-            logger.warning("Auth service disabled, using fallback hash")
-            return {"hashed_password": f"dev_hash_{password}"}
+            logger.error("Auth service is required for password hashing")
+            return None
         
         try:
             client = await self._get_client()
@@ -274,9 +274,8 @@ class AuthServiceClient:
     async def verify_password(self, plain_password: str, hashed_password: str) -> Optional[Dict]:
         """Verify password through auth service."""
         if not self.settings.enabled:
-            # Fallback for development
-            logger.warning("Auth service disabled, using fallback verification")
-            return {"valid": plain_password in hashed_password}
+            logger.error("Auth service is required for password verification")
+            return None
         
         try:
             client = await self._get_client()
@@ -294,10 +293,8 @@ class AuthServiceClient:
     async def create_token(self, token_data: Dict) -> Optional[Dict]:
         """Create access token through auth service."""
         if not self.settings.enabled:
-            # Fallback for development
-            logger.warning("Auth service disabled, using fallback token")
-            from netra_backend.app.core.auth_constants import JWTConstants
-            return {JWTConstants.ACCESS_TOKEN: f"dev_token_{token_data.get('user_id')}"}
+            logger.error("Auth service is required for token creation")
+            return None
         
         try:
             client = await self._get_client()
@@ -310,27 +307,8 @@ class AuthServiceClient:
             return None
     
     async def _local_validate(self, token: str) -> Optional[Dict]:
-        """Local token validation fallback with enhanced dev support."""
-        import os
-        env = os.getenv("ENVIRONMENT", "development").lower()
-        fast_test_mode = os.getenv("AUTH_FAST_TEST_MODE", "false").lower() == "true"
-        
-        # Enhanced development/test mode bypass
-        if env in ["development", "test"] or fast_test_mode:
-            logger.warning(f"Auth service unavailable, using {env} bypass")
-            # Accept any token in development/test mode for testing
-            return {
-                "valid": True,
-                "user_id": "dev-user-1",  # Use string ID as the User table expects varchar
-                "email": "dev@example.com",
-                "permissions": ["admin", "developer"],
-                "is_admin": True,
-                "is_developer": True,
-                "role": "admin"
-            }
-        
-        # In staging/production, this should always fail if auth service is down
-        logger.warning("Auth service unavailable, rejecting token")
+        """NO LOCAL VALIDATION - Auth service required."""
+        logger.error("Auth service is required for token validation")
         return {"valid": False}
     
     async def close(self):

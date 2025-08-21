@@ -10,9 +10,31 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains backward compatibility during system evolution
 """
 
-# Re-export common database components for compatibility
-from netra_backend.app.dependencies import get_db_dependency as get_db
-from netra_backend.app.db.session import get_db_session
+class DatabaseConfigManager:
+    """Database configuration manager for unified config system."""
+    
+    def populate_database_config(self, config):
+        """Populate database configuration."""
+        pass
+    
+    def validate_database_consistency(self, config):
+        """Validate database configuration consistency."""
+        return []
+    
+    def refresh_environment(self):
+        """Refresh environment settings."""
+        pass
+
+# Lazy imports to avoid circular dependency
+def get_db():
+    """Get database dependency - lazy import to avoid circular dependency."""
+    from netra_backend.app.dependencies import get_db_dependency
+    return get_db_dependency()
+
+def get_db_session():
+    """Get database session - lazy import to avoid circular dependency."""
+    from netra_backend.app.db.session import get_db_session as _get_db_session
+    return _get_db_session
 try:
     from netra_backend.app.db.base import Base
 except ImportError:

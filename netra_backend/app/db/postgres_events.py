@@ -8,9 +8,14 @@ from sqlalchemy import event
 from sqlalchemy.engine import Connection
 from sqlalchemy.pool import ConnectionPoolEntry, _ConnectionFairy
 from sqlalchemy.ext.asyncio import AsyncEngine
-from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.postgres_config import DatabaseConfig
+from netra_backend.app.db.postgres_config import DatabaseConfig
+
+# Import settings lazily to avoid circular dependency
+def get_settings():
+    """Get settings lazily to avoid circular import."""
+    from netra_backend.app.config import settings
+    return settings
 
 logger = central_logger.get_logger(__name__)
 
