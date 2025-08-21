@@ -22,7 +22,7 @@ from decimal import Decimal
 from dataclasses import dataclass
 
 from app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
-from app.services.user_service import UserService
+from app.services.user_service import user_service as UserService
 from app.services.audit_service import AuditService
 from app.redis_manager import RedisManager
 from app.services.database.session_manager import SessionManager

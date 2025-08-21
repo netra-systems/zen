@@ -25,7 +25,7 @@ from app.services.redis_service import RedisService
 from app.core.circuit_breaker import CircuitBreaker
 from app.core.database_connection_manager import DatabaseConnectionManager
 from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState, 
+from app.agents.state import DeepAgentState
 from app.agents.supervisor.state_manager import AgentStateManager
 
 logger = logging.getLogger(__name__)

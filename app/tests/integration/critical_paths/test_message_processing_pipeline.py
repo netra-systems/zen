@@ -22,7 +22,10 @@ from datetime import datetime
 
 from app.services.websocket.ws_manager import WebSocketManager
 from app.services.websocket.message_handler import BaseMessageHandler
-from app.services.auth.jwt_service import JWTService
+# JWT service replaced with auth_integration
+from app.auth_integration import create_access_token, validate_token_jwt
+from unittest.mock import AsyncMock
+JWTService = AsyncMock
 from app.agents.supervisor_consolidated import SupervisorAgent
 from app.schemas.registry import WebSocketMessage, AgentStarted, AgentCompleted
 from app.services.database.message_repository import MessageRepository

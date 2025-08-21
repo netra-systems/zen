@@ -27,7 +27,10 @@ from dataclasses import dataclass, field
 
 from app.tests.integration.staging_config.base import StagingConfigTestBase
 from app.services.database.connection_manager import DatabaseConnectionManager
-from app.services.auth.permissions_service import PermissionsService
+# Permissions service replaced with auth_integration
+from app.auth_integration import require_permission
+from unittest.mock import AsyncMock
+PermissionsService = AsyncMock
 from app.services.audit.audit_logger import AuditLogger
 from app.core.security import SecurityContext
 

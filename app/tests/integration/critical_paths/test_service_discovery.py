@@ -18,8 +18,7 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from app.redis_manager import RedisManager
-from app.core.cache.redis_config import RedisConfig
-from app.core.health.health_checkers import HealthCheckerRegistry
+from app.core.health_checkers import HealthChecker
 from app.core.health.interface import HealthStatus
 import httpx
 import json

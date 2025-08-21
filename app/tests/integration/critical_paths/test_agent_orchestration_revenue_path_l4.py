@@ -24,7 +24,7 @@ import json
 
 from app.services.agent_service import AgentService
 from app.services.llm_cache_service import LLMCacheService
-from app.services.user_service import UserService
+from app.services.user_service import user_service as UserService
 from app.services.metrics.billing_metrics import BillingMetricsCollector
 from app.services.audit_service import AuditService
 from app.schemas.UserPlan import PlanTier

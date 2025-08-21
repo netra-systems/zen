@@ -19,7 +19,6 @@ import random
 
 from app.config import Config
 from app.redis_manager import RedisManager
-from app.core.cache.redis_config import RedisConfig
 from unittest.mock import AsyncMock, MagicMock
 
 logger = logging.getLogger(__name__)

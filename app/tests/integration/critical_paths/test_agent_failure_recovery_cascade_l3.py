@@ -23,7 +23,8 @@ from testcontainers.postgres import PostgresContainer
 
 from app.agents.supervisor_consolidated import SupervisorAgent
 from app.agents.base import BaseSubAgent
-from app.agents.state import DeepAgentState, AgentStateManager
+from app.agents.state import DeepAgentState, 
+from app.agents.supervisor.state_manager import AgentStateManager
 from app.services.agent_service import AgentService
 from app.redis_manager import RedisManager
 from app.services.database.postgres_service import PostgresService

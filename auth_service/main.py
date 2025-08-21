@@ -160,11 +160,26 @@ else:
             "https://auth.netrasystems.ai"
         ]
     else:
+        # Development environment - support common dynamic ports
         cors_origins = [
             "http://localhost:3000",
+            "http://localhost:3001",
+            "http://localhost:3002",
             "http://localhost:8000",
+            "http://localhost:8001",
+            "http://localhost:8002",
             "http://localhost:8080",
-            "http://localhost:8081"
+            "http://localhost:8081",
+            "http://localhost:8082",
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:3001",
+            "http://127.0.0.1:3002",
+            "http://127.0.0.1:8000",
+            "http://127.0.0.1:8001",
+            "http://127.0.0.1:8002",
+            "http://127.0.0.1:8080",
+            "http://127.0.0.1:8081",
+            "http://127.0.0.1:8082"
         ]
 
 # When using wildcard with credentials, we need custom handling
@@ -175,13 +190,32 @@ if cors_origins == ["*"]:
     from starlette.responses import Response
     
     class DynamicCORSMiddleware(BaseHTTPMiddleware):
+        def is_allowed_origin(self, origin: str) -> bool:
+            """Check if origin is allowed - supports dynamic ports for localhost."""
+            if not origin:
+                return False
+            
+            # In development, accept any localhost/127.0.0.1 origin with any port
+            import re
+            localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]):\d+$'
+            if re.match(localhost_pattern, origin):
+                return True
+            
+            # Also accept standard ports without explicit port numbers
+            standard_localhost = r'^https?://(localhost|127\.0\.0\.1)$'
+            if re.match(standard_localhost, origin):
+                return True
+            
+            # In non-development, could add additional checks here
+            return True  # For wildcard mode, accept all origins
+        
         async def dispatch(self, request, call_next):
             origin = request.headers.get("origin")
             
             # Handle preflight
             if request.method == "OPTIONS":
                 response = Response(status_code=200)
-                if origin:
+                if origin and self.is_allowed_origin(origin):
                     response.headers["Access-Control-Allow-Origin"] = origin
                     response.headers["Access-Control-Allow-Credentials"] = "true"
                     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"
@@ -193,7 +227,7 @@ if cors_origins == ["*"]:
             response = await call_next(request)
             
             # Add CORS headers to response
-            if origin:
+            if origin and self.is_allowed_origin(origin):
                 response.headers["Access-Control-Allow-Origin"] = origin
                 response.headers["Access-Control-Allow-Credentials"] = "true"
                 response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD"

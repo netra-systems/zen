@@ -12,6 +12,9 @@ from starlette.responses import RedirectResponse, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.core.configuration import get_configuration
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def get_cors_origins() -> list[str]:
@@ -65,8 +68,21 @@ def _get_cloud_run_origins() -> list[str]:
     ]
 
 def _get_localhost_origins() -> list[str]:
-    """Get localhost origins."""
-    return ["http://localhost:3000", "http://localhost:3001"]
+    """Get localhost origins - now supports dynamic ports."""
+    # Extended list to support more dynamic ports
+    # Pattern matching in CustomCORSMiddleware handles truly dynamic ports
+    origins = []
+    hosts = ["http://localhost", "http://127.0.0.1"]
+    # Common frontend ports (React, Vue, Vite, Angular, etc.)
+    frontend_ports = [3000, 3001, 3002, 3003, 4000, 4001, 4200, 5173, 5174]
+    # Common backend/service ports
+    backend_ports = [8000, 8001, 8002, 8080, 8081, 8082, 5000, 5001]
+    
+    for host in hosts:
+        for port in frontend_ports + backend_ports:
+            origins.append(f"{host}:{port}")
+    
+    return origins
 
 
 def _get_development_cors_origins() -> list[str]:
@@ -86,8 +102,11 @@ def _handle_dev_env_origins(cors_origins: any) -> list[str]:
     return cors_origins.split(",") if isinstance(cors_origins, str) else ["*"]
 
 def _get_default_dev_origins() -> list[str]:
-    """Get default development origins."""
-    return ["http://localhost:3000", "http://localhost:8000", "*"]
+    """Get default development origins - includes common dynamic ports and wildcard."""
+    # Include common ports plus wildcard for maximum flexibility in development
+    origins = _get_localhost_origins()  # Get all the common localhost ports
+    origins.append("*")  # Add wildcard for complete flexibility
+    return origins
 
 
 def setup_cors_middleware(app: FastAPI) -> None:
@@ -100,11 +119,18 @@ def setup_cors_middleware(app: FastAPI) -> None:
 
 def _setup_custom_cors_middleware(app: FastAPI) -> None:
     """Setup custom CORS middleware for staging/development with service discovery integration."""
-    from dev_launcher.service_discovery import ServiceDiscovery
-    from pathlib import Path
-    
-    # Initialize service discovery for CORS integration
-    service_discovery = ServiceDiscovery(Path.cwd())
+    # Only use ServiceDiscovery in local development, not in staging
+    config = get_configuration()
+    service_discovery = None
+    if config.environment == "development":
+        try:
+            from dev_launcher.service_discovery import ServiceDiscovery
+            from pathlib import Path
+            # Initialize service discovery for CORS integration
+            service_discovery = ServiceDiscovery(Path.cwd())
+        except ImportError:
+            # dev_launcher is not available (expected in non-dev environments)
+            pass
     
     app.add_middleware(
         CustomCORSMiddleware,
@@ -169,11 +195,15 @@ def is_origin_allowed(origin: str, allowed_origins: List[str]) -> bool:
 
 def _perform_origin_checks(origin: str, allowed_origins: List[str]) -> bool:
     """Perform all origin validation checks."""
+    # Check pattern matches FIRST for development localhost origins
+    # This allows any localhost port to be accepted in development
+    if _check_pattern_matches(origin):
+        return True
     if _check_direct_origin_match(origin, allowed_origins):
         return True
     if _check_wildcard_match(allowed_origins):
         return True
-    return _check_pattern_matches(origin)
+    return False
 
 
 def _check_direct_origin_match(origin: str, allowed_origins: List[str]) -> bool:
@@ -198,9 +228,15 @@ def _evaluate_wildcard_environment() -> bool:
 def _check_pattern_matches(origin: str) -> bool:
     """Check if origin matches environment-specific patterns."""
     config = get_configuration()
-    if config.environment not in ["staging", "development"]:
-        return False
-    return _evaluate_pattern_matches(origin)
+    # In development, always check localhost patterns
+    if config.environment == "development":
+        # Check localhost pattern first - this accepts ANY port
+        if _check_localhost_pattern(origin):
+            return True
+    # For staging, check staging patterns
+    if config.environment in ["staging", "development"]:
+        return _evaluate_pattern_matches(origin)
+    return False
 
 def _evaluate_pattern_matches(origin: str) -> bool:
     """Evaluate all pattern matches for origin."""
@@ -232,8 +268,9 @@ def _get_cloud_run_patterns() -> list[str]:
 
 
 def _check_localhost_pattern(origin: str) -> bool:
-    """Check if origin matches localhost pattern."""
-    localhost_pattern = r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$'
+    """Check if origin matches localhost pattern with any port."""
+    # Accept any localhost or 127.0.0.1 origin with any port in development
+    localhost_pattern = r'^https?://(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\])(:\d+)?$'
     return bool(re.match(localhost_pattern, origin))
 
 
@@ -318,6 +355,11 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
     
     def _is_origin_allowed_with_discovery(self, origin: str) -> bool:
         """Check if origin is allowed with service discovery integration."""
+        # In development, always allow localhost with any port
+        config = get_configuration()
+        if config.environment == "development" and self._is_localhost_origin(origin):
+            return True
+        
         allowed_origins = get_cors_origins()
         
         # Basic origin check
@@ -329,6 +371,13 @@ class CustomCORSMiddleware(BaseHTTPMiddleware):
             return self._check_service_discovery_origins(origin)
         
         return False
+    
+    def _is_localhost_origin(self, origin: str) -> bool:
+        """Check if origin is from localhost with any port."""
+        if not origin:
+            return False
+        # Use the improved localhost pattern check
+        return _check_localhost_pattern(origin)
     
     def _check_service_discovery_origins(self, origin: str) -> bool:
         """Check origins from service discovery registry."""

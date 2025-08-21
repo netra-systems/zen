@@ -2224,153 +2224,77 @@
       ],
       "marked_as_bad": false,
       "bad_reason": null
+    },
+    "tests/e2e/test_cors_dynamic_ports.py::TestCORSDynamicFrontendPorts::test_cors_hardcoded_localhost_origins_limitation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T17:50:14.838650",
+      "last_failure": "2025-08-20T17:55:09.549901",
+      "last_pass": null,
+      "total_failures": 5,
+      "total_passes": 0,
+      "consecutive_failures": 5,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_175013_13891",
+          "timestamp": "2025-08-20T17:50:14.838650",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 3002 NOT in hardcoded list. Origin: http://localhost:3002, Hardcoded localhost origins: ['http://localhost:3000', 'http://localhost:3001']. This shows the fundamental limitation: hardcoded ports 3000/3001 only.\nassert False"
+        },
+        {
+          "run_id": "run_20250820_175337_17260",
+          "timestamp": "2025-08-20T17:53:37.631512",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 3002 NOT in hardcoded list. Origin: http://localhost:3002, Hardcoded localhost origins: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8000', 'http://localhost:8001', 'http://localhost:8080', 'http://localhost:8081', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'http://127.0.0.1:8080', 'http://127.0.0.1:8081']. This shows the fundamental limitation: hardcoded ports 3000/3001 only.\na"
+        },
+        {
+          "run_id": "run_20250820_175413_53543",
+          "timestamp": "2025-08-20T17:54:14.130520",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 3002 NOT in hardcoded list. Origin: http://localhost:3002, Hardcoded localhost origins: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8000', 'http://localhost:8001', 'http://localhost:8080', 'http://localhost:8081', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:8000', 'http://127.0.0.1:8001', 'http://127.0.0.1:8080', 'http://127.0.0.1:8081']. This shows the fundamental limitation: hardcoded ports 3000/3001 only.\na"
+        },
+        {
+          "run_id": "run_20250820_175443_83108",
+          "timestamp": "2025-08-20T17:54:43.556819",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 5173 NOT in hardcoded list. Origin: http://localhost:5173, Hardcoded localhost origins: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:4000', 'http://localhost:4001', 'http://localhost:8000', 'http://localhost:8001', 'http://localhost:8002', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://127.0.0.1:3002'"
+        },
+        {
+          "run_id": "run_20250820_175509_9075",
+          "timestamp": "2025-08-20T17:55:09.549901",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 3333 NOT in hardcoded list. Origin: http://localhost:3333, Hardcoded localhost origins: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:4000', 'http://localhost:4001', 'http://localhost:4200', 'http://localhost:5173', 'http://localhost:5174', 'http://localhost:8000', 'http://localhost:8001', 'http://localhost:8002', 'http://localhost:8080', 'http://localhost:8081', 'http://localhost:8082'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/e2e/test_cors_dynamic_ports.py::TestCORSComprehensiveDynamicPortFailures::test_credentials_with_dynamic_origins_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-20T17:50:29.552259",
+      "last_failure": "2025-08-20T17:55:21.240573",
+      "last_pass": null,
+      "total_failures": 2,
+      "total_passes": 0,
+      "consecutive_failures": 2,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_175029_29120",
+          "timestamp": "2025-08-20T17:50:29.552259",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 4000 at http://localhost:4000 is not explicitly listed in CORS origins: ['http://localhost:3000', 'http://localhost:8000', '*']. This breaks credentialed requests because RFC 6454 prohibits wildcard origins with credentials. Dynamic ports must be explicitly allowed, but the current implementation only hardcodes ports 3000/3001.\nassert False"
+        },
+        {
+          "run_id": "run_20250820_175520_20797",
+          "timestamp": "2025-08-20T17:55:21.240573",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Dynamic frontend port 4000 at http://localhost:4000 is not explicitly listed in CORS origins: ['http://localhost:3000', 'http://localhost:8000', '*']. This breaks credentialed requests because RFC 6454 prohibits wildcard origins with credentials. Dynamic ports must be explicitly allowed, but the current implementation only hardcodes ports 3000/3001.\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
     }
   },
   "runs": [
-    {
-      "run_id": "run_20250820_161415_55709",
-      "timestamp": "2025-08-20T16:15:01.471794",
-      "total_tests": 6,
-      "passed": 0,
-      "failed": 3,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161509_9537",
-      "timestamp": "2025-08-20T16:15:55.033837",
-      "total_tests": 177,
-      "passed": 171,
-      "failed": 3,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161600_60489",
-      "timestamp": "2025-08-20T16:16:39.440337",
-      "total_tests": 172,
-      "passed": 167,
-      "failed": 2,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161645_5421",
-      "timestamp": "2025-08-20T16:17:29.040930",
-      "total_tests": 172,
-      "passed": 167,
-      "failed": 2,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161909_49000",
-      "timestamp": "2025-08-20T16:19:09.216146",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161922_62625",
-      "timestamp": "2025-08-20T16:19:22.895962",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_161936_76735",
-      "timestamp": "2025-08-20T16:19:37.793237",
-      "total_tests": 4,
-      "passed": 3,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_161956_96834",
-      "timestamp": "2025-08-20T16:19:57.052355",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162009_9704",
-      "timestamp": "2025-08-20T16:20:23.456502",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_162024_24453",
-      "timestamp": "2025-08-20T16:20:25.185500",
-      "total_tests": 4,
-      "passed": 4,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162028_28599",
-      "timestamp": "2025-08-20T16:20:29.009531",
-      "total_tests": 5,
-      "passed": 5,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162037_37256",
-      "timestamp": "2025-08-20T16:20:37.572422",
-      "total_tests": 5,
-      "passed": 5,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162040_40774",
-      "timestamp": "2025-08-20T16:20:42.052336",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162052_52203",
-      "timestamp": "2025-08-20T16:21:00.550918",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162111_71060",
-      "timestamp": "2025-08-20T16:21:11.293176",
-      "total_tests": 6,
-      "passed": 6,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162119_79779",
-      "timestamp": "2025-08-20T16:22:01.629060",
-      "total_tests": 7,
-      "passed": 0,
-      "failed": 2,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162212_32747",
-      "timestamp": "2025-08-20T16:22:23.329500",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_162231_51675",
-      "timestamp": "2025-08-20T16:23:26.152764",
-      "total_tests": 8,
-      "passed": 0,
-      "failed": 3,
-      "bad_tests_count": 0
-    },
     {
       "run_id": "run_20250820_162332_12695",
       "timestamp": "2025-08-20T16:24:30.531427",
@@ -3026,10 +2950,154 @@
       "passed": 53,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_175013_13891",
+      "timestamp": "2025-08-20T17:50:14.845181",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_175029_29120",
+      "timestamp": "2025-08-20T17:50:29.559258",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_175337_17260",
+      "timestamp": "2025-08-20T17:53:37.636244",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_175413_53543",
+      "timestamp": "2025-08-20T17:54:14.134929",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_175443_83108",
+      "timestamp": "2025-08-20T17:54:43.561058",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_175509_9075",
+      "timestamp": "2025-08-20T17:55:09.553421",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_175520_20797",
+      "timestamp": "2025-08-20T17:55:21.244532",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_184800_80935",
+      "timestamp": "2025-08-20T18:48:00.960870",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_184826_6862",
+      "timestamp": "2025-08-20T18:48:30.887499",
+      "total_tests": 306,
+      "passed": 283,
+      "failed": 23,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_185214_34212",
+      "timestamp": "2025-08-20T18:52:14.793841",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_185229_49880",
+      "timestamp": "2025-08-20T18:52:29.904525",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_185353_33460",
+      "timestamp": "2025-08-20T18:54:45.198807",
+      "total_tests": 13,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_185727_47006",
+      "timestamp": "2025-08-20T18:59:54.118064",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_190056_56240",
+      "timestamp": "2025-08-20T19:00:59.090955",
+      "total_tests": 370,
+      "passed": 369,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_190118_78264",
+      "timestamp": "2025-08-20T19:01:18.765472",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_190136_96894",
+      "timestamp": "2025-08-20T19:01:39.278110",
+      "total_tests": 376,
+      "passed": 376,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_190152_12195",
+      "timestamp": "2025-08-20T19:01:52.630486",
+      "total_tests": 7,
+      "passed": 6,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_190204_24951",
+      "timestamp": "2025-08-20T19:02:05.910903",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 289,
-    "last_updated": "2025-08-20T17:41:06.390828"
+    "total_runs": 307,
+    "last_updated": "2025-08-20T19:02:05.910903"
   }
 }

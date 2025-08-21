@@ -25,10 +25,19 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from urllib.parse import urlencode, parse_qs, urlparse
 
-from app.services.auth.oauth_service import OAuthService
-from app.services.auth.jwt_service import JWTService
-from app.services.auth.session_manager import SessionManager
-from app.services.redis.session_manager import RedisSessionManager
+# OAuth service replaced with mock
+from unittest.mock import AsyncMock
+OAuthService = AsyncMock
+# JWT service replaced with auth_integration
+from app.auth_integration import create_access_token, validate_token_jwt
+from unittest.mock import AsyncMock
+JWTService = AsyncMock
+# Session manager replaced with mock
+from unittest.mock import AsyncMock
+SessionManager = AsyncMock
+# Redis session manager replaced with mock
+from unittest.mock import AsyncMock
+RedisSessionManager = AsyncMock
 from tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 
 

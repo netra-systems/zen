@@ -31,7 +31,7 @@ from datetime import datetime
 # Import all enums from the dedicated module
 from app.schemas.core_enums import (
     MessageType, AgentStatus, WebSocketMessageType, WebSocketConnectionState,
-    CorpusAuditAction, CorpusAuditStatus, MessageTypeLiteral
+    CorpusAuditAction, CorpusAuditStatus, TaskPriority, MessageTypeLiteral
 )
 
 # Import all core models from the dedicated module
@@ -84,7 +84,7 @@ from app.schemas.websocket_payloads import (
 __all__ = [
     # Enums
     "MessageType", "AgentStatus", "WebSocketMessageType", "WebSocketConnectionState",
-    "CorpusAuditAction", "CorpusAuditStatus", "MessageTypeLiteral",
+    "CorpusAuditAction", "CorpusAuditStatus", "TaskPriority", "MessageTypeLiteral",
     
     # Core models  
     "UserBase", "UserCreate", "UserCreateOAuth", "User", "Message", "Thread", 
@@ -175,6 +175,7 @@ TYPE_REGISTRY = {
     "MessageTypeLiteral": MessageTypeLiteral,
     "CorpusAuditAction": CorpusAuditAction,
     "CorpusAuditStatus": CorpusAuditStatus,
+    "TaskPriority": TaskPriority,
     
     # Audit models
     "CorpusAuditRecord": CorpusAuditRecord,
