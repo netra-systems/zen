@@ -520,6 +520,10 @@ class EnhancedLifecycleManager:
         """Get detected zombie connections."""
         return self.heartbeat_manager.get_zombie_connections()
 
+    def get_pool_status(self) -> Dict[str, Any]:
+        """Get connection pool status."""
+        return self.connection_pool.get_pool_status()
+
     async def cleanup_zombie_connections(self) -> List[str]:
         """Clean up detected zombie connections."""
         zombie_connections = self.get_zombie_connections()

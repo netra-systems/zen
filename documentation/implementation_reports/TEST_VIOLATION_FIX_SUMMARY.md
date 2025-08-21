@@ -110,7 +110,6 @@ python scripts/auto_fix_test_violations.py --fix --max-files 10
 - `scripts/auto_fix_test_violations.py` - Main automation script (672 lines)
 
 ### Backup Directory
-- `tests_backup/` - Contains original files before splitting
 
 ### Reports
 - `test_violations_report.md` - Detailed violation analysis

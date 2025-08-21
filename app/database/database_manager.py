@@ -12,6 +12,7 @@ This module provides compatibility for database manager imports.
 import logging
 from typing import Optional, Any, Dict
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from app.db.session import SessionLocal, get_db
 from app.db.postgres_core import PostgresCore
@@ -49,6 +50,8 @@ class DatabaseManager:
     
     async def health_check(self) -> Dict[str, Any]:
         """Perform database health check."""
+        current_timestamp = datetime.now(timezone.utc).isoformat()
+        
         try:
             session = await get_db()
             result = await session.execute("SELECT 1")
@@ -57,14 +60,14 @@ class DatabaseManager:
             return {
                 "status": "healthy",
                 "database": "connected",
-                "timestamp": "2024-01-01T00:00:00Z"
+                "timestamp": current_timestamp
             }
         except Exception as e:
             logger.error(f"Database health check failed: {e}")
             return {
                 "status": "unhealthy", 
                 "error": str(e),
-                "timestamp": "2024-01-01T00:00:00Z"
+                "timestamp": current_timestamp
             }
 
 
