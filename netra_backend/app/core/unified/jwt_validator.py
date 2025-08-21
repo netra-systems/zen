@@ -1,25 +1,24 @@
 """
-Unified JWT Validation Module
+Unified JWT Validation Module - Delegates to Auth Service
 
-Single Source of Truth for all JWT token operations across the Netra platform.
-Consolidates duplicate JWT validation logic from 50+ files into one robust implementation.
+ALL JWT operations MUST go through the external auth service.
+This module provides a unified interface but delegates to auth service.
 
 Business Value Justification (BVJ):
 - Segment: ALL (Free → Enterprise)
-- Business Goal: Security consistency and development velocity
-- Value Impact: Eliminates JWT-related security bugs, reduces development time by 40%
-- Strategic Impact: +$5K MRR from improved security posture and faster development
+- Business Goal: Security consistency via centralized auth service
+- Value Impact: Eliminates JWT-related security bugs, ensures single auth source
+- Strategic Impact: Improved security posture and compliance
 """
 
 import os
-import jwt
-import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional, Any, List, Union
 from dataclasses import dataclass
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.clients.auth_client import auth_client
 
 logger = central_logger.get_logger(__name__)
 
@@ -50,7 +49,6 @@ class TokenValidationResult:
     valid: bool
     payload: Optional[TokenPayload] = None
     error: Optional[str] = None
-    error_code: Optional[str] = None
     user_id: Optional[str] = None
     email: Optional[str] = None
     permissions: Optional[List[str]] = None
@@ -58,250 +56,227 @@ class TokenValidationResult:
 
 class UnifiedJWTValidator:
     """
-    Unified JWT validator implementing Single Source of Truth pattern.
+    Unified JWT Validator - ALL operations go through auth service.
     
-    Replaces all duplicate JWT validation implementations across the codebase.
-    Provides consistent, secure, and performant token operations.
+    CRITICAL: This class does NOT implement JWT operations directly.
+    All JWT operations are delegated to the external auth service.
     """
     
-    def __init__(self):
-        """Initialize JWT validator with secure configuration."""
-        self.secret = self._get_jwt_secret()
-        self.algorithm = os.getenv("JWT_ALGORITHM", "HS256")
-        self.issuer = "netra-auth-service"
-        self._validate_configuration()
-    
-    def _get_jwt_secret(self) -> str:
-        """Get JWT secret with production safety checks."""
-        secret = os.getenv("JWT_SECRET")
-        env = os.getenv("ENVIRONMENT", "development").lower()
+    def __init__(
+        self,
+        secret: Optional[str] = None,
+        algorithm: str = "HS256",
+        issuer: str = "netra-auth-service",
+        access_token_expire_minutes: int = 30,
+        refresh_token_expire_days: int = 7
+    ):
+        """Initialize validator - configuration only, no JWT operations."""
+        self.algorithm = algorithm
+        self.issuer = issuer
+        self.access_token_expire_minutes = access_token_expire_minutes
+        self.refresh_token_expire_days = refresh_token_expire_days
         
-        if not secret:
-            if env in ["staging", "production"]:
-                raise ValueError("JWT_SECRET must be set in production/staging")
-            logger.warning("Using development JWT secret")
-            return "zZyIqeCZia66c1NxEgNowZFWbwMGROFg"
-        
-        if len(secret) < 32 and env in ["staging", "production"]:
-            raise ValueError("JWT_SECRET must be at least 32 characters in production")
-        
-        return secret
+        # Log warning if direct secret is provided
+        if secret:
+            logger.warning("Direct JWT secret provided but will be ignored - auth service handles all JWT operations")
     
-    def _validate_configuration(self) -> None:
-        """Validate JWT configuration on initialization."""
-        if not self.secret:
-            raise ValueError("JWT secret is required")
-        
-        if self.algorithm not in ["HS256", "HS384", "HS512", "RS256"]:
-            raise ValueError(f"Unsupported JWT algorithm: {self.algorithm}")
-    
-    def create_access_token(self, user_id: str, email: str, 
-                           permissions: List[str] = None, 
-                           expires_minutes: int = 15) -> str:
-        """Create access token for user authentication."""
-        payload = TokenPayload(
-            sub=user_id,
-            email=email,
-            permissions=permissions or [],
-            token_type=TokenType.ACCESS,
-            exp=self._get_expiry_timestamp(expires_minutes),
-            iat=datetime.now(timezone.utc).timestamp()
-        )
-        return self._encode_token(payload)
-    
-    def create_refresh_token(self, user_id: str, 
-                            expires_days: int = 7) -> str:
-        """Create refresh token for token renewal."""
-        payload = TokenPayload(
-            sub=user_id,
-            token_type=TokenType.REFRESH,
-            exp=self._get_expiry_timestamp(expires_days * 24 * 60),
-            iat=datetime.now(timezone.utc).timestamp()
-        )
-        return self._encode_token(payload)
-    
-    def create_service_token(self, service_id: str, service_name: str,
-                            expires_minutes: int = 5) -> str:
-        """Create service-to-service authentication token."""
-        payload = TokenPayload(
-            sub=service_id,
-            service=service_name,
-            token_type=TokenType.SERVICE,
-            exp=self._get_expiry_timestamp(expires_minutes),
-            iat=datetime.now(timezone.utc).timestamp()
-        )
-        return self._encode_token(payload)
-    
-    def validate_token(self, token: str, 
-                      expected_type: TokenType = TokenType.ACCESS) -> TokenValidationResult:
+    async def validate_token(
+        self,
+        token: str,
+        token_type: Optional[TokenType] = None,
+        verify_exp: bool = True
+    ) -> TokenValidationResult:
         """
-        Validate JWT token with comprehensive security checks.
+        Validate JWT token via auth service.
         
-        Returns detailed validation result including payload and error information.
+        ALL validation goes through the external auth service.
         """
-        if not token or not isinstance(token, str):
-            return TokenValidationResult(
-                valid=False, 
-                error="Token is empty or invalid format",
-                error_code="INVALID_FORMAT"
-            )
-        
         try:
-            payload_dict = jwt.decode(
-                token, 
-                self.secret, 
-                algorithms=[self.algorithm],
-                issuer=self.issuer
-            )
+            # Validate through auth service
+            result = await auth_client.validate_token(token)
             
-            payload = self._dict_to_payload(payload_dict)
-            validation_error = self._validate_payload(payload, expected_type)
-            
-            if validation_error:
+            if not result:
                 return TokenValidationResult(
                     valid=False,
-                    error=validation_error,
-                    error_code="VALIDATION_FAILED"
+                    error="Auth service validation failed"
                 )
             
+            # Map auth service response to our result structure
             return TokenValidationResult(
-                valid=True,
-                payload=payload,
-                user_id=payload.sub,
-                email=payload.email,
-                permissions=payload.permissions
+                valid=result.get("valid", False),
+                user_id=result.get("user_id"),
+                email=result.get("email"),
+                permissions=result.get("permissions", []),
+                error=result.get("error")
             )
             
-        except jwt.ExpiredSignatureError:
-            return TokenValidationResult(
-                valid=False,
-                error="Token has expired",
-                error_code="TOKEN_EXPIRED"
-            )
-        except jwt.InvalidIssuerError:
-            return TokenValidationResult(
-                valid=False,
-                error="Invalid token issuer",
-                error_code="INVALID_ISSUER"
-            )
-        except jwt.InvalidTokenError as e:
-            return TokenValidationResult(
-                valid=False,
-                error=f"Invalid token: {str(e)}",
-                error_code="INVALID_TOKEN"
-            )
         except Exception as e:
-            logger.error(f"Unexpected error validating token: {e}")
+            logger.error(f"Token validation error: {e}")
             return TokenValidationResult(
                 valid=False,
-                error="Token validation failed",
-                error_code="VALIDATION_ERROR"
+                error=str(e)
             )
     
-    async def validate_token_async(self, token: str, 
-                                  expected_type: TokenType = TokenType.ACCESS) -> TokenValidationResult:
-        """Async wrapper for token validation to support async contexts."""
-        return await asyncio.get_event_loop().run_in_executor(
-            None, self.validate_token, token, expected_type
+    def validate_token_sync(
+        self,
+        token: str,
+        token_type: Optional[TokenType] = None,
+        verify_exp: bool = True
+    ) -> TokenValidationResult:
+        """
+        Synchronous token validation - NOT SUPPORTED.
+        
+        Auth service requires async operations.
+        """
+        logger.error("Synchronous token validation not supported - use async validate_token")
+        return TokenValidationResult(
+            valid=False,
+            error="Synchronous validation not supported - use async method"
         )
     
     def decode_token_unsafe(self, token: str) -> Optional[Dict[str, Any]]:
         """
-        Decode token without signature verification (for testing/debugging only).
+        Decode token without validation - NOT SUPPORTED.
         
-        WARNING: This method bypasses security checks and should only be used
-        in test environments or for token inspection purposes.
+        ALL token operations must go through auth service.
         """
-        try:
-            return jwt.decode(token, options={"verify_signature": False})
-        except Exception as e:
-            logger.debug(f"Failed to decode token unsafely: {e}")
-            return None
-    
-    def extract_user_id(self, token: str) -> Optional[str]:
-        """Extract user ID from token without full validation."""
-        payload = self.decode_token_unsafe(token)
-        return payload.get("sub") if payload else None
-    
-    def is_token_expired(self, token: str) -> bool:
-        """Check if token is expired without full validation."""
-        payload = self.decode_token_unsafe(token)
-        if not payload or "exp" not in payload:
-            return True
-        
-        try:
-            exp_timestamp = float(payload["exp"])
-            return datetime.now(timezone.utc).timestamp() > exp_timestamp
-        except (ValueError, TypeError):
-            return True
-    
-    def validate_token_structure(self, token: str) -> bool:
-        """Validate JWT token has correct structure."""
-        if not token or not isinstance(token, str):
-            return False
-        
-        parts = token.split('.')
-        if len(parts) != 3:
-            return False
-        
-        payload = self.decode_token_unsafe(token)
-        if not payload:
-            return False
-        
-        required_fields = ["sub", "exp", "token_type"]
-        return all(field in payload for field in required_fields)
-    
-    def _encode_token(self, payload: TokenPayload) -> str:
-        """Encode payload into JWT token."""
-        payload_dict = {
-            "sub": payload.sub,
-            "exp": payload.exp,
-            "iat": payload.iat,
-            "token_type": payload.token_type.value,
-            "iss": payload.iss
-        }
-        
-        if payload.email:
-            payload_dict["email"] = payload.email
-        if payload.permissions:
-            payload_dict["permissions"] = payload.permissions
-        if payload.service:
-            payload_dict["service"] = payload.service
-        
-        return jwt.encode(payload_dict, self.secret, algorithm=self.algorithm)
-    
-    def _dict_to_payload(self, payload_dict: Dict[str, Any]) -> TokenPayload:
-        """Convert dictionary to TokenPayload object."""
-        return TokenPayload(
-            sub=payload_dict["sub"],
-            exp=float(payload_dict["exp"]),
-            iat=float(payload_dict.get("iat", 0)),
-            token_type=TokenType(payload_dict["token_type"]),
-            iss=payload_dict.get("iss", ""),
-            email=payload_dict.get("email"),
-            permissions=payload_dict.get("permissions"),
-            service=payload_dict.get("service")
-        )
-    
-    def _validate_payload(self, payload: TokenPayload, 
-                         expected_type: TokenType) -> Optional[str]:
-        """Validate token payload contents."""
-        if payload.token_type != expected_type:
-            return f"Invalid token type: expected {expected_type.value}, got {payload.token_type.value}"
-        
-        if not payload.sub:
-            return "Token missing subject (sub) field"
-        
-        if payload.iss != self.issuer:
-            return f"Invalid issuer: expected {self.issuer}, got {payload.iss}"
-        
+        logger.error("Unsafe token decoding not supported - use auth service")
         return None
     
-    def _get_expiry_timestamp(self, minutes: int) -> float:
-        """Get expiry timestamp for given minutes from now."""
-        expiry = datetime.now(timezone.utc) + timedelta(minutes=minutes)
-        return expiry.timestamp()
+    async def create_access_token(
+        self,
+        user_id: str,
+        email: Optional[str] = None,
+        permissions: Optional[List[str]] = None,
+        expire_minutes: Optional[int] = None
+    ) -> str:
+        """
+        Create access token via auth service.
+        
+        ALL token creation goes through the external auth service.
+        """
+        try:
+            token_data = {
+                "user_id": user_id,
+                "email": email,
+                "permissions": permissions or [],
+                "expire_minutes": expire_minutes or self.access_token_expire_minutes
+            }
+            
+            result = await auth_client.create_token(token_data)
+            
+            if not result:
+                raise ValueError("Auth service token creation failed")
+            
+            return result.get("access_token", "")
+            
+        except Exception as e:
+            logger.error(f"Token creation error: {e}")
+            raise
+    
+    async def create_refresh_token(
+        self,
+        user_id: str,
+        expire_days: Optional[int] = None
+    ) -> str:
+        """
+        Create refresh token via auth service.
+        
+        ALL token creation goes through the external auth service.
+        """
+        try:
+            token_data = {
+                "user_id": user_id,
+                "token_type": "refresh",
+                "expire_days": expire_days or self.refresh_token_expire_days
+            }
+            
+            result = await auth_client.create_token(token_data)
+            
+            if not result:
+                raise ValueError("Auth service refresh token creation failed")
+            
+            return result.get("refresh_token", "")
+            
+        except Exception as e:
+            logger.error(f"Refresh token creation error: {e}")
+            raise
+    
+    async def create_service_token(
+        self,
+        service_id: str,
+        permissions: Optional[List[str]] = None,
+        expire_hours: int = 1
+    ) -> str:
+        """
+        Create service-to-service token via auth service.
+        
+        ALL token creation goes through the external auth service.
+        """
+        try:
+            # Use auth service's dedicated service token endpoint
+            token = await auth_client.create_service_token()
+            
+            if not token:
+                raise ValueError("Auth service service token creation failed")
+            
+            return token
+            
+        except Exception as e:
+            logger.error(f"Service token creation error: {e}")
+            raise
+    
+    def encode_token(self, payload: Dict[str, Any]) -> str:
+        """
+        Encode JWT token - NOT SUPPORTED.
+        
+        ALL token operations must go through auth service.
+        """
+        raise NotImplementedError("Direct JWT encoding not supported - use auth service")
+    
+    async def refresh_access_token(self, refresh_token: str) -> Optional[str]:
+        """
+        Refresh access token via auth service.
+        
+        ALL token operations go through the external auth service.
+        """
+        try:
+            result = await auth_client.refresh_token(refresh_token)
+            
+            if not result:
+                return None
+            
+            return result.get("access_token")
+            
+        except Exception as e:
+            logger.error(f"Token refresh error: {e}")
+            return None
+    
+    def is_token_expired(self, exp: float) -> bool:
+        """Check if token expiration timestamp has passed."""
+        return datetime.now(timezone.utc).timestamp() > exp
+    
+    def get_token_remaining_time(self, exp: float) -> timedelta:
+        """Get remaining time before token expires."""
+        expiry = datetime.fromtimestamp(exp, tz=timezone.utc)
+        now = datetime.now(timezone.utc)
+        return max(expiry - now, timedelta(0))
 
 
-# Global instance for application-wide use
+# Global validator instance - uses auth service for all operations
 jwt_validator = UnifiedJWTValidator()
+
+
+# Compatibility exports
+async def validate_jwt(token: str) -> TokenValidationResult:
+    """Validate JWT token via auth service."""
+    return await jwt_validator.validate_token(token)
+
+
+async def create_jwt(
+    user_id: str,
+    email: Optional[str] = None,
+    permissions: Optional[List[str]] = None
+) -> str:
+    """Create JWT token via auth service."""
+    return await jwt_validator.create_access_token(user_id, email, permissions)
