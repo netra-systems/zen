@@ -2877,13 +2877,13 @@ class TestWebSocketAuthColdStartExtendedL3:
         test_cases = [
             {
                 "Authorization": f"Bearer {token}",
-                "Origin": "https://app.netra.ai",
+                "Origin": "https://app.netrasystems.ai",
                 "Sec-WebSocket-Version": "13",
                 "Sec-WebSocket-Key": base64.b64encode(os.urandom(16)).decode()
             },
             {
                 "Authorization": f"Bearer {token}",
-                "Origin": "https://app.netra.ai",
+                "Origin": "https://app.netrasystems.ai",
                 "Sec-WebSocket-Version": "8",  # Old version
                 "Sec-WebSocket-Key": base64.b64encode(os.urandom(16)).decode()
             }
@@ -2924,8 +2924,8 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         # Test origins that might be dynamically configured
         test_origins = [
-            ("https://app.netra.ai", True),  # Production
-            ("https://staging.netra.ai", True),  # Staging
+            ("https://app.netrasystems.ai", True),  # Production
+            ("https://staging.netrasystems.ai", True),  # Staging
             ("http://localhost:3000", True),  # Local development
             ("https://partner.example.com", False),  # Partner domain (might be allowed)
             ("https://malicious.com", False),  # Should never be allowed
@@ -2969,13 +2969,13 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         # Test various subdomain patterns
         subdomain_tests = [
-            ("https://app.netra.ai", True),
-            ("https://api.netra.ai", True),
-            ("https://staging.netra.ai", True),
-            ("https://evil.netra.ai.attacker.com", False),  # Subdomain attack
-            ("https://netra.ai", True),  # Root domain
-            ("https://sub.sub.netra.ai", False),  # Deep subdomain
-            ("https://xn--netra.ai", False),  # IDN homograph
+            ("https://app.netrasystems.ai", True),
+            ("https://api.netrasystems.ai", True),
+            ("https://staging.netrasystems.ai", True),
+            ("https://evil.netrasystems.ai.attacker.com", False),  # Subdomain attack
+            ("https://netrasystems.ai", True),  # Root domain
+            ("https://sub.sub.netrasystems.ai", False),  # Deep subdomain
+            ("https://xn--netrasystems.ai", False),  # IDN homograph
         ]
         
         for origin, expected_allow in subdomain_tests:
@@ -3019,10 +3019,10 @@ class TestWebSocketAuthColdStartExtendedL3:
         
         # Test connecting to ws:// with https:// origin and vice versa
         test_cases = [
-            ("ws://localhost:8000/websocket", "https://app.netra.ai"),  # WS with HTTPS origin
-            ("wss://localhost:8443/websocket", "http://app.netra.ai"),  # WSS with HTTP origin
-            ("ws://localhost:8000/websocket", "http://app.netra.ai"),  # WS with HTTP origin (match)
-            ("wss://localhost:8443/websocket", "https://app.netra.ai"),  # WSS with HTTPS origin (match)
+            ("ws://localhost:8000/websocket", "https://app.netrasystems.ai"),  # WS with HTTPS origin
+            ("wss://localhost:8443/websocket", "http://app.netrasystems.ai"),  # WSS with HTTP origin
+            ("ws://localhost:8000/websocket", "http://app.netrasystems.ai"),  # WS with HTTP origin (match)
+            ("wss://localhost:8443/websocket", "https://app.netrasystems.ai"),  # WSS with HTTPS origin (match)
         ]
         
         for ws_url, origin in test_cases:

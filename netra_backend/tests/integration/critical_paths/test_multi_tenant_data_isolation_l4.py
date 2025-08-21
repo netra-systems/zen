@@ -100,7 +100,7 @@ class MultiTenantIsolationTester:
         try:
             # Login as admin
             admin_data = {
-                "email": "admin@netra.ai",
+                "email": "admin@netrasystems.ai",
                 "password": "admin_password"
             }
             

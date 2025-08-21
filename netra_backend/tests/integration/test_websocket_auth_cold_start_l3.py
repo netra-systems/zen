@@ -493,7 +493,7 @@ class TestWebSocketAuthColdStartL3:
         # Test allowed origin
         headers = {
             "Authorization": f"Bearer {test_jwt_token}",
-            "Origin": "https://app.netra.ai"
+            "Origin": "https://app.netrasystems.ai"
         }
         
         async with websockets.connect(ws_url, extra_headers=headers) as ws:

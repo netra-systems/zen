@@ -52,7 +52,7 @@ LDAP_URL = "ldap://localhost:389"
 # Test enterprise configurations
 ENTERPRISE_CONFIG = {
     "saml": {
-        "entity_id": "https://netra.ai/saml",
+        "entity_id": "https://netrasystems.ai/saml",
         "sso_url": f"{SAML_IDP_URL}/sso",
         "slo_url": f"{SAML_IDP_URL}/slo",
         "x509_cert": "MIID...="  # Placeholder
@@ -286,7 +286,7 @@ class EnterpriseAuthTester:
         try:
             # Step 1: Initial authentication
             auth_data = {
-                "email": "mfa_user@netra.ai",
+                "email": "mfa_user@netrasystems.ai",
                 "password": "secure_password"
             }
             
@@ -543,7 +543,7 @@ class EnterpriseAuthTester:
         try:
             # Login to get tokens
             auth_data = {
-                "email": "refresh_test@netra.ai",
+                "email": "refresh_test@netrasystems.ai",
                 "password": "test_password"
             }
             

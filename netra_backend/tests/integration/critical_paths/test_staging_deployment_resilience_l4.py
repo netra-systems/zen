@@ -110,7 +110,7 @@ class StagingDeploymentValidator:
     """Validates complete staging deployment pipeline."""
     
     def __init__(self, staging_url: str = None):
-        self.staging_url = staging_url or os.getenv("STAGING_URL", "https://staging.netra.ai")
+        self.staging_url = staging_url or os.getenv("STAGING_URL", "https://staging.netrasystems.ai")
         self.metrics = DeploymentMetrics(
             deployment_id=f"deploy-{int(time.time())}",
             start_time=time.time()
@@ -880,13 +880,14 @@ async def test_staging_production_parity():
         "DATABASE_URL": "postgresql://user@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres",
         "REDIS_URL": "redis://10.0.0.1:6379",
         "CLICKHOUSE_HOST": "clickhouse.staging.internal",
-        "AUTH_SERVICE_URL": "https://auth.staging.netra.ai",
+        "AUTH_SERVICE_URL": "https://auth.staging.netrasystems.ai",
         "WORKERS": "4",
         "PORT": "8080",
         "NETRA_API_KEY": os.getenv("STAGING_API_KEY", "test-key")
     }
     
-    with pytest.mock.patch.dict(os.environ, prod_config):
+    from unittest.mock import patch
+    with patch.dict(os.environ, prod_config):
         metrics = await validator.validate_full_deployment()
         
         # Verify production-like behavior

@@ -42,7 +42,7 @@ class TestDynamicPortHealthChecks(unittest.TestCase):
             result = self.validator._verify_auth_ready(8082)
             
             mock_wait.assert_called_once_with(
-                "http://localhost:8082/health", 
+                "http://localhost:8082/health/ready", 
                 timeout=30
             )
             self.assertTrue(result)

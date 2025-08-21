@@ -39,11 +39,11 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Production Configuration
-PROD_BACKEND_URL = os.getenv("PROD_BACKEND_URL", "https://api.netra.ai")
-PROD_FRONTEND_URL = os.getenv("PROD_FRONTEND_URL", "https://app.netra.ai")
-PROD_WEBSOCKET_URL = os.getenv("PROD_WEBSOCKET_URL", "wss://api.netra.ai/websocket")
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "https://auth.netra.ai")
-MONITORING_URL = os.getenv("MONITORING_URL", "https://metrics.netra.ai")
+PROD_BACKEND_URL = os.getenv("PROD_BACKEND_URL", "https://api.netrasystems.ai")
+PROD_FRONTEND_URL = os.getenv("PROD_FRONTEND_URL", "https://app.netrasystems.ai")
+PROD_WEBSOCKET_URL = os.getenv("PROD_WEBSOCKET_URL", "wss://api.netrasystems.ai/websocket")
+AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "https://auth.netrasystems.ai")
+MONITORING_URL = os.getenv("MONITORING_URL", "https://metrics.netrasystems.ai")
 
 # Production databases
 POSTGRES_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@localhost/netra")
@@ -51,7 +51,7 @@ CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL", "http://localhost:8123")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
 # Test credentials
-TEST_ADMIN_EMAIL = "admin@netra.ai"
+TEST_ADMIN_EMAIL = "admin@netrasystems.ai"
 TEST_ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "secure_admin_pass")
 
 
@@ -132,7 +132,7 @@ class ProductionDeploymentTester:
     async def _check_dns(self) -> bool:
         """Check DNS resolution."""
         try:
-            socket.gethostbyname("api.netra.ai")
+            socket.gethostbyname("api.netrasystems.ai")
             return True
         except:
             return False

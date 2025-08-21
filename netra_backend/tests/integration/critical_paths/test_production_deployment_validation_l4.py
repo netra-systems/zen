@@ -38,14 +38,14 @@ project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Configuration for production-like environment
-PROD_BACKEND_URL = os.getenv("PROD_BACKEND_URL", "https://api.netra.ai")
-PROD_FRONTEND_URL = os.getenv("PROD_FRONTEND_URL", "https://app.netra.ai")
-PROD_WEBSOCKET_URL = os.getenv("PROD_WEBSOCKET_URL", "wss://api.netra.ai/websocket")
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "https://auth.netra.ai")
-METRICS_URL = os.getenv("METRICS_URL", "https://metrics.netra.ai")
-CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL", "https://clickhouse.netra.ai")
-POSTGRES_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@postgres.netra.ai/netra")
-REDIS_URL = os.getenv("REDIS_URL", "redis://redis.netra.ai:6379")
+PROD_BACKEND_URL = os.getenv("PROD_BACKEND_URL", "https://api.netrasystems.ai")
+PROD_FRONTEND_URL = os.getenv("PROD_FRONTEND_URL", "https://app.netrasystems.ai")
+PROD_WEBSOCKET_URL = os.getenv("PROD_WEBSOCKET_URL", "wss://api.netrasystems.ai/websocket")
+AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "https://auth.netrasystems.ai")
+METRICS_URL = os.getenv("METRICS_URL", "https://metrics.netrasystems.ai")
+CLICKHOUSE_URL = os.getenv("CLICKHOUSE_URL", "https://clickhouse.netrasystems.ai")
+POSTGRES_URL = os.getenv("DATABASE_URL", "postgresql://user:pass@postgres.netrasystems.ai/netra")
+REDIS_URL = os.getenv("REDIS_URL", "redis://redis.netrasystems.ai:6379")
 
 # Deployment configuration
 DEPLOYMENT_CONFIG = {

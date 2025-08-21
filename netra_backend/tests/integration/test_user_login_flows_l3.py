@@ -599,7 +599,7 @@ class TestUserLoginFlowsL3:
         )
         
         # Mock login from allowed origin
-        allowed_origin = "https://app.netra.ai"
+        allowed_origin = "https://app.netrasystems.ai"
         response = await login_suite.perform_login(user, device_id="allowed_device")
         assert response is not None
         
@@ -608,8 +608,8 @@ class TestUserLoginFlowsL3:
         disallowed_origin = "https://malicious.site"
         
         # Mock CORS validation
-        cors_allowed = allowed_origin in ["https://app.netra.ai", "http://localhost:3000"]
-        cors_blocked = disallowed_origin not in ["https://app.netra.ai", "http://localhost:3000"]
+        cors_allowed = allowed_origin in ["https://app.netrasystems.ai", "http://localhost:3000"]
+        cors_blocked = disallowed_origin not in ["https://app.netrasystems.ai", "http://localhost:3000"]
         
         assert cors_allowed is True
         assert cors_blocked is True

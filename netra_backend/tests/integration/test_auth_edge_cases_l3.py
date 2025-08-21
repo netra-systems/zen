@@ -597,10 +597,10 @@ class TestAuthEdgeCasesL3:
     @pytest.mark.asyncio
     async def test_subdomain_takeover_prevention(self, edge_suite):
         """Test 25: Prevent authentication bypass via subdomain takeover."""
-        allowed_domains = ["app.netra.ai", "api.netra.ai"]
+        allowed_domains = ["app.netrasystems.ai", "api.netrasystems.ai"]
         
         # Attempt from hijacked subdomain
-        malicious_domain = "evil.netra.ai"
+        malicious_domain = "evil.netrasystems.ai"
         
         # Should validate domain whitelist
         assert malicious_domain not in allowed_domains
