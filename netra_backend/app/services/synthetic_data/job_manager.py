@@ -12,7 +12,7 @@ from netra_backend.app.services.websocket.ws_manager import manager
 from netra_backend.app.logging_config import central_logger
 
 from netra_backend.app.services.synthetic_data.enums import GenerationStatus
-from netra_backend.app.services.quality_monitoring.metrics import calculate_generation_rate
+from netra_backend.app.services.synthetic_data.metrics import calculate_generation_rate
 
 
 class JobManager:

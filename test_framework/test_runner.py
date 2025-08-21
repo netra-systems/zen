@@ -48,6 +48,8 @@ load_dotenv()
 # Import test framework modules
 from .runner import UnifiedTestRunner
 from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_dev_environment, configure_real_llm, configure_gcp_staging_environment
+from .test_validation import TestValidation
+from .circular_import_detector import CircularImportDetector
 from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
 from .import_tester import ImportTester
@@ -710,6 +712,11 @@ def run_level_based_tests(args, runner, speed_opts):
     """Run tests based on specified level"""
     config = TEST_LEVELS[args.level].copy()  # Copy to avoid modifying original
     level = args.level
+    
+    # Handle custom validation for code-quality checks
+    if 'custom_validation' in config:
+        return run_custom_validation(config['custom_validation'], level)
+    
     # Handle exclusive mode (no superset inclusion)
     if hasattr(args, 'exclusive') and args.exclusive:
         print(f"[EXCLUSIVE] Running ONLY {level} level tests (no superset)")
@@ -718,6 +725,55 @@ def run_level_based_tests(args, runner, speed_opts):
     real_llm_config = configure_real_llm_if_requested(args, level, config)
     exit_code = execute_test_suite(args, config, runner, real_llm_config, speed_opts, level)
     return finalize_test_run(runner, level, config, "", exit_code)
+
+def run_custom_validation(validations, level):
+    """Run custom validation checks for code quality"""
+    print(f"\nRunning code quality validation: {level}")
+    print("=" * 60)
+    
+    all_passed = True
+    results = {}
+    
+    for validation in validations:
+        if validation == "circular_imports":
+            print("\nChecking for circular imports...")
+            project_root = PROJECT_ROOT / "netra_backend"
+            detector = CircularImportDetector(str(project_root))
+            report = detector.get_report()
+            
+            if report['circular_imports_found'] > 0:
+                print(f"[ERROR] Found {report['circular_imports_found']} circular import(s):")
+                for cycle in report['cycles']:
+                    print(f"\n  Cycle:")
+                    for module in cycle['modules']:
+                        print(f"    - {module}")
+                all_passed = False
+                results['circular_imports'] = {
+                    'passed': False,
+                    'count': report['circular_imports_found'],
+                    'cycles': report['cycles']
+                }
+            else:
+                print(f"[SUCCESS] No circular imports detected ({report['total_modules']} modules analyzed)")
+                results['circular_imports'] = {
+                    'passed': True,
+                    'total_modules': report['total_modules']
+                }
+    
+    print("\n" + "=" * 60)
+    print("CODE QUALITY VALIDATION SUMMARY")
+    print("=" * 60)
+    
+    for validation, result in results.items():
+        status = "[PASS]" if result['passed'] else "[FAIL]"
+        print(f"{status} {validation}")
+    
+    if all_passed:
+        print("\n[SUCCESS] All code quality checks passed!")
+        return 0
+    else:
+        print("\n[ERROR] Some code quality checks failed. Please fix the issues above.")
+        return 1
 
 def apply_shard_filtering(args, config):
     """Apply shard or component filtering if specified"""
