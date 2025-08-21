@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
 from netra_backend.app.services.schema_validation_service import SchemaValidationService
-from netra_backend.app.config import settings
+from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.dependencies import get_db_dependency
 
 # Unified Health System imports
@@ -52,16 +52,17 @@ async def live() -> Dict[str, Any]:
 
 async def _check_postgres_connection(db: AsyncSession) -> None:
     """Check Postgres database connection."""
-    import os
-    database_url = os.getenv("DATABASE_URL", "")
+    config = unified_config_manager.get_config()
+    database_url = getattr(config, 'database_url', '')
     if "mock" not in database_url.lower():
         result = await db.execute(text("SELECT 1"))
         result.scalar_one_or_none()
 
 async def _check_clickhouse_connection() -> None:
     """Check ClickHouse database connection."""
-    import os
-    if os.getenv('SKIP_CLICKHOUSE_INIT', 'false').lower() != 'true':
+    config = unified_config_manager.get_config()
+    skip_clickhouse = getattr(config, 'skip_clickhouse_init', False)
+    if not skip_clickhouse:
         await _perform_clickhouse_check()
 
 async def _perform_clickhouse_check() -> None:
@@ -76,8 +77,9 @@ async def _perform_clickhouse_check() -> None:
 async def _handle_clickhouse_error(error: Exception) -> None:
     """Handle ClickHouse connection errors."""
     logger.warning(f"ClickHouse check failed (non-critical): {error}")
-    if settings.environment in ["staging", "development"]:
-        logger.info(f"Ignoring ClickHouse failure in {settings.environment} environment")
+    config = unified_config_manager.get_config()
+    if config.environment in ["staging", "development"]:
+        logger.info(f"Ignoring ClickHouse failure in {config.environment} environment")
     else:
         raise
 

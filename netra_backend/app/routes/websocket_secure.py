@@ -209,8 +209,9 @@ class SecureWebSocketManager:
             user = await security_service.get_user_by_id(self.db_session, user_id)
             if not user:
                 # In development, allow auto-creation
-                import os
-                env = os.getenv("ENVIRONMENT", "development").lower()
+                from netra_backend.app.core.configuration import unified_config_manager
+                config = unified_config_manager.get_config()
+                env = config.environment.lower()
                 if env in ["development", "test"]:
                     logger.warning(f"User {user_id} not found, allowing in {env} environment")
                     return True

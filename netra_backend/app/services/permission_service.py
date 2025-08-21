@@ -52,7 +52,9 @@ class PermissionService:
     @staticmethod
     def _check_dev_mode_enabled(user: User) -> bool:
         """Check if dev mode is globally enabled"""
-        if os.getenv("DEV_MODE", "").lower() == "true":
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        if getattr(config, 'dev_mode', False):
             logger.info(f"Developer mode enabled globally - granting developer access to {user.email}")
             return True
         return False
@@ -68,7 +70,9 @@ class PermissionService:
     @staticmethod
     def _check_dev_environment(user: User) -> bool:
         """Check if running in development environment"""
-        if os.getenv("ENVIRONMENT", "").lower() in ["development", "dev", "local"]:
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        if getattr(config, 'environment', '').lower() in ["development", "dev", "local"]:
             logger.info(f"Development environment detected - granting developer access to {user.email}")
             return True
         return False

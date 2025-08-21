@@ -33,26 +33,40 @@ class UnifiedLogger:
     
     def __init__(self):
         self._initialized = False
-        self._config = self._load_config()
+        self._config = None  # Will be lazy-loaded
         self._filter = SensitiveDataFilter()
         self._context = LoggingContext()
         self._performance = PerformanceTracker(self)
         self._decorator = ExecutionTimeDecorator(self._performance)
-        self._setup_logging()
+        # Don't setup logging during init to avoid circular imports
     
     def _load_config(self) -> Dict[str, Any]:
-        """Load logging configuration from environment."""
-        return {
-            'log_level': os.environ.get("LOG_LEVEL", "INFO").upper(),
-            'enable_file_logging': os.environ.get("ENABLE_FILE_LOGGING", "false").lower() == "true",
-            'enable_json_logging': os.environ.get("ENABLE_JSON_LOGGING", "false").lower() == "true",
-            'log_file_path': os.environ.get("LOG_FILE_PATH", "logs/netra.log")
-        }
+        """Load logging configuration from unified config."""
+        try:
+            from netra_backend.app.core.configuration import unified_config_manager
+            config = unified_config_manager.get_config()
+            return {
+                'log_level': getattr(config, 'log_level', 'INFO').upper(),
+                'enable_file_logging': getattr(config, 'enable_file_logging', False),
+                'enable_json_logging': getattr(config, 'enable_json_logging', False),
+                'log_file_path': getattr(config, 'log_file_path', 'logs/netra.log')
+            }
+        except ImportError:
+            # Fallback configuration if config module not available
+            return {
+                'log_level': os.getenv('LOG_LEVEL', 'INFO').upper(),
+                'enable_file_logging': False,
+                'enable_json_logging': False,
+                'log_file_path': 'logs/netra.log'
+            }
     
     def _setup_logging(self):
         """Initialize the logging system."""
         if self._initialized:
             return
+        # Load config if not already loaded
+        if self._config is None:
+            self._config = self._load_config()
         self._configure_handlers()
         setup_stdlib_interception()
         self._initialized = True
@@ -73,6 +87,9 @@ class UnifiedLogger:
     
     def get_logger(self, name: Optional[str] = None):
         """Get a logger instance with the given name."""
+        # Ensure logging is setup when logger is requested
+        if not self._initialized:
+            self._setup_logging()
         return logger.bind(name=name) if name else logger
     
     def debug(self, message: str, **kwargs):

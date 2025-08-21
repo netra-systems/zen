@@ -276,12 +276,13 @@ def validate_websocket_origin(websocket: WebSocket, cors_handler: WebSocketCORSH
 
 def get_environment_origins() -> List[str]:
     """Get allowed origins based on environment configuration."""
-    import os
+    from netra_backend.app.core.configuration import unified_config_manager
+    config = unified_config_manager.get_config()
     
-    env = os.getenv("ENVIRONMENT", "development").lower()
+    env = getattr(config, 'environment', 'development').lower()
     
-    # Get custom origins from environment
-    custom_origins = os.getenv("WEBSOCKET_ALLOWED_ORIGINS", "")
+    # Get custom origins from unified config
+    custom_origins = getattr(config, 'websocket_allowed_origins', '')
     if custom_origins:
         custom_list = [origin.strip() for origin in custom_origins.split(",") if origin.strip()]
     else:
@@ -381,8 +382,9 @@ def get_websocket_cors_handler() -> WebSocketCORSHandler:
     global _global_cors_handler
     
     if _global_cors_handler is None:
-        import os
-        environment = os.getenv("ENVIRONMENT", "development").lower()
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        environment = getattr(config, 'environment', 'development').lower()
         _global_cors_handler = WebSocketCORSHandler(
             get_environment_origins(), 
             environment=environment

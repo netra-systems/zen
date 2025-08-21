@@ -10,16 +10,19 @@ class RedisManager:
 
     def _is_redis_disabled_by_flag(self) -> bool:
         """Check if Redis is disabled by operational flag."""
-        import os
-        if os.environ.get("DISABLE_REDIS", "").lower() == "true":
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        disabled = getattr(config, 'disable_redis', False)
+        if disabled:
             logger.info("Redis is disabled by configuration")
             return True
         return False
 
     def _get_redis_mode(self) -> str:
         """Get Redis mode from environment."""
-        import os
-        return os.environ.get("REDIS_MODE", "shared").lower()
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return getattr(config, 'redis_mode', 'shared').lower()
 
     def _handle_redis_mode(self, redis_mode: str):
         """Handle Redis mode logic."""

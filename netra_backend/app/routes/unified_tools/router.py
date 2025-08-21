@@ -9,7 +9,7 @@ from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.services.unified_tool_registry import UnifiedToolRegistry
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 import redis
-import os
+from netra_backend.app.core.configuration import unified_config_manager
 
 from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
 from netra_backend.app.routes.unified_tools.tool_listing import gather_tool_data, build_tool_availability_response
@@ -27,7 +27,9 @@ router = APIRouter()
 # Initialize services (in production, these would be dependency injected)
 redis_client = None
 try:
-    redis_client = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://localhost:6379"))
+    config = unified_config_manager.get_config()
+    redis_url = getattr(config, 'redis_url', 'redis://localhost:6379')
+    redis_client = redis.Redis.from_url(redis_url)
 except Exception:
     pass
 

@@ -15,7 +15,6 @@ Usage:
     database_url = f"postgresql://user:pass@{HostConstants.LOCALHOST}:{ServicePorts.POSTGRES_DEFAULT}/db"
 """
 
-import os
 from typing import Final, Dict, Optional
 
 
@@ -286,19 +285,23 @@ class NetworkEnvironmentHelper:
     @classmethod
     def is_test_environment(cls) -> bool:
         """Check if running in test environment."""
-        return bool(os.environ.get("PYTEST_CURRENT_TEST") or 
-                   os.environ.get("TESTING") == "true")
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return getattr(config, 'testing', False) or getattr(config, 'environment', '') == 'testing'
     
     @classmethod
     def get_environment(cls) -> str:
         """Get current environment (development, staging, production)."""
-        return os.environ.get("ENVIRONMENT", "development").lower()
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return getattr(config, 'environment', 'development').lower()
     
     @classmethod
     def is_cloud_environment(cls) -> bool:
         """Check if running in cloud environment."""
-        return bool(os.environ.get("K_SERVICE") or 
-                   os.environ.get("CLOUD_RUN_SERVICE"))
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return getattr(config, 'cloud_environment', False)
     
     @classmethod
     def get_database_urls_for_environment(cls) -> Dict[str, str]:
@@ -307,11 +310,13 @@ class NetworkEnvironmentHelper:
         env = cls.get_environment()
         
         if env == "production" or env == "staging":
-            # Use environment variables for production/staging
+            # Use unified config for production/staging
+            from netra_backend.app.core.configuration import unified_config_manager
+            config = unified_config_manager.get_config()
             return {
-                "postgres": os.environ.get("DATABASE_URL", ""),
-                "redis": os.environ.get("REDIS_URL", ""),
-                "clickhouse": os.environ.get("CLICKHOUSE_URL", "")
+                "postgres": getattr(config, 'database_url', ''),
+                "redis": getattr(config, 'redis_url', ''),
+                "clickhouse": getattr(config, 'clickhouse_url', '')
             }
         else:
             # Generate local URLs for development
@@ -341,16 +346,20 @@ class NetworkEnvironmentHelper:
         env = cls.get_environment()
         
         if env == "production":
+            from netra_backend.app.core.configuration import unified_config_manager
+            config = unified_config_manager.get_config()
             return {
                 "frontend": URLConstants.PRODUCTION_FRONTEND,
-                "backend": os.environ.get("BACKEND_SERVICE_URL", URLConstants.PRODUCTION_APP),
-                "auth_service": os.environ.get("AUTH_SERVICE_URL", "")
+                "backend": getattr(config, 'backend_service_url', URLConstants.PRODUCTION_APP),
+                "auth_service": getattr(config, 'auth_service_url', '')
             }
         elif env == "staging":
+            from netra_backend.app.core.configuration import unified_config_manager
+            config = unified_config_manager.get_config()
             return {
                 "frontend": URLConstants.STAGING_FRONTEND,
-                "backend": os.environ.get("BACKEND_SERVICE_URL", URLConstants.STAGING_APP),
-                "auth_service": os.environ.get("AUTH_SERVICE_URL", "")
+                "backend": getattr(config, 'backend_service_url', URLConstants.STAGING_APP),
+                "auth_service": getattr(config, 'auth_service_url', '')
             }
         else:
             # Development URLs

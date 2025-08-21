@@ -13,7 +13,10 @@ class ClaudeCLIRunner:
     
     def __init__(self, enabled: bool = False):
         """Initialize Claude CLI runner."""
-        self.enabled = enabled and os.getenv("ENVIRONMENT", "staging") != "production"  # Default to staging for safety
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        env = getattr(config, 'environment', 'staging')  # Default to staging for safety
+        self.enabled = enabled and env != "production"
     
     async def run_compliance_review(self, module_path: Path) -> Optional[Dict[str, Any]]:
         """Run Claude CLI compliance review."""

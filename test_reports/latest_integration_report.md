@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T10:18:11.441752  
+**Generated:** 2025-08-21T10:22:05.416463  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.76s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 1.23s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 7.39s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.90s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 8.99s
-- **Exit Code:** 15
+- **Total Duration:** 8.29s
+- **Exit Code:** 5
 
 ### Backend Configuration
 ```
@@ -77,17 +77,17 @@ BAD TEST DETECTION REPORT
 ================================================================================
 
 Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 14
+Total Test Runs Analyzed: 18
 
 ================================================================================
 
 
-[33m============================ [33mno tests ran[0m[33m in 4.12s[0m[33m ============================[0m
+[33m============================ [33mno tests ran[0m[33m in 3.89s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 5 after 7.00s
+[FAIL] TESTS FAILED with exit code 5 after 6.76s
 ================================================================================
 
-2025-08-21 10:18:04.944 | WARNING  | netra_backend.app.core.unified_logging:_emit_log:117 | Failed to load GCP secrets: 'SecretManager' object has no attribute 'load_all_secrets'
+2025-08-21 10:21:59.652 | WARNING  | netra_backend.app.core.unified_logging:_emit_log:117 | Failed to load GCP secrets: 'SecretManager' object has no attribute 'load_all_secrets'
 
 ```
 
@@ -97,6 +97,21 @@ Total Test Runs Analyzed: 14
 > netra-frontend-apex-v1@0.1.0 test
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
 
+================================================================================
+NETRA AI PLATFORM - FRONTEND TEST RUNNER
+================================================================================
+
+================================================================================
+Running Jest Tests
+--------------------------------------------------------------------------------
+Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
+--------------------------------------------------------------------------------
+
+================================================================================
+[FAIL] CHECKS FAILED with exit code 1
+================================================================================
+
+Cleaning up test processes...
 
 Error: Can't find a root directory while resolving a config file path.
 Provided path to resolve: jest.config.simple.cjs

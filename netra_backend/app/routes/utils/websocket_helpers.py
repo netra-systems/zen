@@ -10,6 +10,7 @@ from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.utils.validators import validate_token_payload, validate_user_id_in_payload, validate_user_active
 from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.core.configuration import unified_config_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -119,8 +120,8 @@ async def check_user_exists_and_debug(db_session, user_id: str, payload: dict, u
         logger.debug(f"Token payload: {payload}")
         await log_empty_database_warning(db_session)
         # Try to create user if in development mode and auth service is providing valid user data
-        import os
-        env = os.getenv("ENVIRONMENT", "development").lower()
+        config = unified_config_manager.get_config()
+        env = config.environment.lower()
         if env in ["development", "test"] and payload.get("email"):
             logger.warning(f"Auto-creating user {user_id} in {env} environment")
             return user_id  # In dev mode, proceed without strict database validation

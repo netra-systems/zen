@@ -222,8 +222,9 @@ class ToolPermissionMiddleware:
     
     def _get_environment(self) -> str:
         """Get current environment"""
-        import os
-        return os.getenv("ENVIRONMENT", "staging")  # Default to staging for safety
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return getattr(config, 'environment', 'staging')  # Default to staging for safety
     
     def _permission_denied_response(
         self, 

@@ -5,14 +5,15 @@ Configuration generators for different MCP clients.
 Maintains 25-line function limit and single responsibility.
 """
 
-import os
 from typing import Dict, Any, Optional
 from netra_backend.app.routes.unified_tools.schemas import UserInDB
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 def get_mcp_config(user: Optional[UserInDB]) -> Dict[str, Any]:
     """Get MCP configuration for clients"""
-    base_url = os.getenv("MCP_BASE_URL", "http://localhost:8000")
+    config = unified_config_manager.get_config()
+    base_url = getattr(config, 'mcp_base_url', 'http://localhost:8000')
     return _build_all_configs(base_url)
 
 

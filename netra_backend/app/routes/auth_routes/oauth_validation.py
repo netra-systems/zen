@@ -1,7 +1,6 @@
 """
 OAuth Validation Logic
 """
-import os
 import urllib.parse
 from typing import Optional
 from fastapi import Request
@@ -9,6 +8,7 @@ from fastapi.responses import RedirectResponse
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.auth_routes.utils import get_frontend_url_for_environment
+from netra_backend.app.core.configuration import unified_config_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -25,7 +25,8 @@ def validate_oauth_credentials(oauth_config) -> Optional[RedirectResponse]:
 
 def build_proxy_url(oauth_config, request: Request) -> str:
     """Build proxy URL for PR environment OAuth."""
-    pr_number = os.getenv("PR_NUMBER")
+    config = unified_config_manager.get_config()
+    pr_number = getattr(config, 'pr_number', None)
     return_url = str(request.base_url).rstrip('/')
     proxy_url = f"{oauth_config.proxy_url}/initiate?pr_number={pr_number}&return_url={urllib.parse.quote(return_url)}"
     logger.info(f"PR #{pr_number} OAuth login via proxy: {proxy_url}")

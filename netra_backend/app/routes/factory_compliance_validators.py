@@ -1,6 +1,6 @@
 """Factory compliance validators."""
 from fastapi import HTTPException
-import os
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 def validate_claude_cli_access(use_claude_cli: bool) -> None:
@@ -17,5 +17,6 @@ def validate_dev_environment() -> None:
 
 def is_dev_environment() -> bool:
     """Check if running in development environment."""
-    env = os.getenv("ENVIRONMENT", "staging")  # Default to staging for safety
+    config = unified_config_manager.get_config()
+    env = getattr(config, 'environment', 'staging')  # Default to staging for safety
     return env in ["development", "dev", "local"]

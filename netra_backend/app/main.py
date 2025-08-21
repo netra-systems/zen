@@ -61,8 +61,16 @@ def _load_all_env_files(root_path: Path) -> None:
 def _setup_environment_files() -> None:
     """Load environment files ONLY if not already loaded by dev launcher."""
     # Skip loading if running under dev launcher (it already loaded secrets)
-    if os.environ.get('DEV_LAUNCHER_ACTIVE'):
-        return
+    from netra_backend.app.core.configuration import unified_config_manager
+    config = unified_config_manager.get_config()
+    
+    # Check for dev launcher active flag through unified config
+    try:
+        dev_launcher_active = getattr(config, 'dev_launcher_active', False)
+        if dev_launcher_active:
+            return
+    except AttributeError:
+        pass
     
     # Only load for direct uvicorn runs
     try:

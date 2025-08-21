@@ -150,6 +150,7 @@ class FactoryStatusReporter:
 
     def _is_dev_environment(self) -> bool:
         """Check if running in development environment."""
-        import os
-        env = os.getenv("ENVIRONMENT", "staging")  # Default to staging for safety
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        env = getattr(config, 'environment', 'staging')  # Default to staging for safety
         return env in ["development", "dev", "local"]

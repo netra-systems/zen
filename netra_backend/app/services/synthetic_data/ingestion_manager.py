@@ -83,9 +83,11 @@ class IngestionManager:
 
     def _is_testing_mode(self) -> bool:
         """Check if running in testing mode"""
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
         return (
-            os.environ.get("TESTING") == "1" or
-            os.environ.get("ENVIRONMENT") == "testing"
+            getattr(config, 'testing', False) or
+            getattr(config, 'environment', '') == "testing"
         )
 
     def _build_test_mode_response(self, table_name: str, batch: List[Dict]) -> Dict:

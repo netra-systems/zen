@@ -13,12 +13,15 @@ logger = central_logger.get_logger(__name__)
 
 def _determine_callback_auth_service_url(environment) -> str:
     """Determine auth service URL for callback."""
-    import os
+    from netra_backend.app.core.configuration import unified_config_manager
+    
     if environment.value == 'staging':
         return 'https://auth.staging.netrasystems.ai'
     elif environment.value == 'production':
         return 'https://auth.netrasystems.ai'
-    return os.getenv('AUTH_SERVICE_URL', 'http://localhost:8081')
+    
+    config = unified_config_manager.get_config()
+    return getattr(config, 'auth_service_url', 'http://localhost:8081')
 
 def _build_callback_url_with_params(auth_service_url: str, query_string: str) -> str:
     """Build callback URL with query parameters."""

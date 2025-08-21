@@ -27,17 +27,23 @@ def setup_cloud_run_environment():
 
 def get_port():
     """Get port from environment or default."""
-    return int(os.environ.get("PORT", 8080))
+    from netra_backend.app.core.configuration import unified_config_manager
+    config = unified_config_manager.get_config()
+    return int(getattr(config, 'port', 8080))
 
 
 def get_workers():
     """Get worker count from environment or default."""
-    return int(os.environ.get("WORKERS", 1))
+    from netra_backend.app.core.configuration import unified_config_manager
+    config = unified_config_manager.get_config()
+    return int(getattr(config, 'workers', 1))
 
 
 def get_timeout():
     """Get timeout from environment or default."""
-    return int(os.environ.get("TIMEOUT", 120))
+    from netra_backend.app.core.configuration import unified_config_manager
+    config = unified_config_manager.get_config()
+    return int(getattr(config, 'timeout', 120))
 
 
 def run_server():

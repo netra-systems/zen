@@ -113,10 +113,66 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102009_9739",
+      "timestamp": "2025-08-21T10:20:17.300004",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102038_38025",
+      "timestamp": "2025-08-21T10:20:48.123422",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102101_61661",
+      "timestamp": "2025-08-21T10:21:03.156491",
+      "total_tests": 353,
+      "passed": 348,
+      "failed": 5,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102157_17131",
+      "timestamp": "2025-08-21T10:22:04.505559",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102646_6048",
+      "timestamp": "2025-08-21T10:26:46.079267",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102700_20835",
+      "timestamp": "2025-08-21T10:27:08.535613",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_102816_96616",
+      "timestamp": "2025-08-21T10:28:17.946110",
+      "total_tests": 353,
+      "passed": 348,
+      "failed": 5,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 14,
-    "last_updated": "2025-08-21T10:18:10.198142"
+    "total_runs": 21,
+    "last_updated": "2025-08-21T10:28:17.946110"
   }
 }

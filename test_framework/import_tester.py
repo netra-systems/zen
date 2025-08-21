@@ -161,7 +161,7 @@ class ImportTester:
             )
             
             if self.verbose:
-                print(f"✓ {module_path} ({import_time:.3f}s)")
+                print(f"[OK] {module_path} ({import_time:.3f}s)")
                 
         except ModuleNotFoundError as e:
             import_time = time.time() - start_time
@@ -178,7 +178,7 @@ class ImportTester:
             )
             
             if self.verbose:
-                print(f"✗ {module_path}: ModuleNotFoundError - {e}")
+                print(f"[X] {module_path}: ModuleNotFoundError - {e}")
                 
         except ImportError as e:
             import_time = time.time() - start_time
@@ -193,7 +193,7 @@ class ImportTester:
             )
             
             if self.verbose:
-                print(f"✗ {module_path}: ImportError - {e}")
+                print(f"[X] {module_path}: ImportError - {e}")
                 
         except SyntaxError as e:
             import_time = time.time() - start_time
@@ -208,7 +208,7 @@ class ImportTester:
             )
             
             if self.verbose:
-                print(f"✗ {module_path}: SyntaxError at line {e.lineno}")
+                print(f"[X] {module_path}: SyntaxError at line {e.lineno}")
                 
         except Exception as e:
             import_time = time.time() - start_time
@@ -223,7 +223,7 @@ class ImportTester:
             )
             
             if self.verbose:
-                print(f"✗ {module_path}: {type(e).__name__} - {e}")
+                print(f"[X] {module_path}: {type(e).__name__} - {e}")
         
         finally:
             self._import_stack.pop()
@@ -379,7 +379,7 @@ class ImportTester:
         for module_path in critical_modules:
             result = self.test_module(module_path)
             if not result.success:
-                print(f"\n❌ IMPORT FAILURE - Fast Fail Triggered!\n")
+                print(f"\n[X] IMPORT FAILURE - Fast Fail Triggered!\n")
                 print(f"Module: {result.module_path}")
                 print(f"Error Type: {result.error_type}")
                 print(f"Error: {result.error_message}")
@@ -389,7 +389,7 @@ class ImportTester:
                     print(f"\nTraceback:\n{result.traceback}")
                 return False
         
-        print("\n✅ All critical imports successful!")
+        print("\n[OK] All critical imports successful!")
         return True
 
 
