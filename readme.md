@@ -40,6 +40,7 @@ Netra Apex creates and captures value proportional to customer AI/LLM/Agent spen
 📖 **[CLAUDE.md](CLAUDE.md)** - Principal engineering philosophy and AI factory patterns
 📚 **[LLM_MASTER_INDEX.md](LLM_MASTER_INDEX.md)** - Complete file navigation index
 🔍 **[SPEC/](SPEC/)** - Living source of truth (XML specifications)
+🏭 **[AI Native Meta Process](SPEC/ai_native_meta_process.md)** - AI factory methodology for 99.99% correctness
 
 **Core Development Principles:**
 - **Business Value Justification (BVJ):** Every feature must demonstrate ROI
