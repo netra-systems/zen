@@ -29,7 +29,7 @@ from dataclasses import dataclass
 from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
 from netra_backend.app.services.user_service import user_service as UserService
 from netra_backend.app.services.audit_service import AuditService
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.core.rate_limiting.tier_enforcer import TierEnforcementService
 from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector

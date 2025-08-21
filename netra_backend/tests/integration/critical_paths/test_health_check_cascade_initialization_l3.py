@@ -36,7 +36,7 @@ from netra_backend.app.core.health_checkers import (
 )
 from netra_backend.app.core.health_types import HealthCheckResult
 from routes.health import health_interface
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = logging.getLogger(__name__)
 

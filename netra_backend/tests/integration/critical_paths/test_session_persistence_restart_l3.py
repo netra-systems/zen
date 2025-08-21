@@ -38,9 +38,9 @@ JWTService = AsyncMock
 from unittest.mock import AsyncMock
 SessionManager = AsyncMock
 from ws_manager import WebSocketManager
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from database.models import User, Session
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 logger = central_logger.get_logger(__name__)

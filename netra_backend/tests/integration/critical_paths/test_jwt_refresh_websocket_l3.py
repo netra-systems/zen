@@ -35,8 +35,8 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
 from ws_manager import WebSocketManager
-from redis_manager import RedisManager
-from logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
 from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 # Add project root to path

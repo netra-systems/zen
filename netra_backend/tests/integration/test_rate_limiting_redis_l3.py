@@ -35,7 +35,7 @@ if str(PROJECT_ROOT) not in sys.path:
 # Add project root to path
 
 from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from logging_config import central_logger
 from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
 

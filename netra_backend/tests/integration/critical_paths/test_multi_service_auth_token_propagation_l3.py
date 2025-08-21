@@ -25,7 +25,7 @@ import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 import sys

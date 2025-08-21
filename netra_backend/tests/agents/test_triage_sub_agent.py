@@ -28,7 +28,7 @@ from netra_backend.app.agents.triage_sub_agent import (
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from schemas import SubAgentLifecycle
 
 

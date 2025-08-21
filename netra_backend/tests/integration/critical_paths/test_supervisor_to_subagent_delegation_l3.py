@@ -31,7 +31,7 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.llm.llm_manager import LLMManager
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.schemas.registry import AgentStarted, AgentCompleted, SubAgentUpdate
 from test_framework.testcontainers_utils import TestcontainerHelper

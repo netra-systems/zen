@@ -40,7 +40,7 @@ from netra_backend.app.websocket.high_performance_broadcast import HighPerforman
 from netra_backend.app.websocket.load_balanced_connection_manager import LoadBalancedConnectionManager, LoadBalancingStrategy
 from netra_backend.app.websocket.memory_efficient_manager import MemoryEfficientWebSocketManager
 from netra_backend.app.websocket.optimized_message_processor import OptimizedMessageProcessor, MessagePriority
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

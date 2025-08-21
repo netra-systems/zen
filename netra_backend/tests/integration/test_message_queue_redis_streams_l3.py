@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from unittest.mock import patch
 
 import redis.asyncio as redis
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from logging_config import central_logger
 
 # Add project root to path

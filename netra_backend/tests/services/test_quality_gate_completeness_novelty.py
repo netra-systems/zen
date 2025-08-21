@@ -23,7 +23,7 @@ from netra_backend.app.services.quality_gate_service import (
     ContentType,
     QualityMetrics
 )
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
     setup_completeness_report_content,
     setup_completeness_general_content,

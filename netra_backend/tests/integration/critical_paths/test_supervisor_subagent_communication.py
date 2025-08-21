@@ -33,7 +33,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.schemas.registry import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, AgentCompleted
 from netra_backend.app.schemas.registry import AgentResult
 from netra_backend.app.core.exceptions_base import NetraException

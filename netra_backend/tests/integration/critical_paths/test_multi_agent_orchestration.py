@@ -27,9 +27,9 @@ from contextlib import asynccontextmanager
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.services.state.state_manager import StateManager, StateStorage
-from redis_manager import redis_manager
+from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.db.postgres import get_postgres_session
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

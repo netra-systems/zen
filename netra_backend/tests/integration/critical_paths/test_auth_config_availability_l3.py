@@ -24,7 +24,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
 from unittest.mock import patch
 
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 import sys

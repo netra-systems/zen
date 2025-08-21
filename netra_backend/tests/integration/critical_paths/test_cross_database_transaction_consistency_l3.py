@@ -34,7 +34,7 @@ from testcontainers.clickhouse import ClickHouseContainer
 
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.db.clickhouse import get_clickhouse_client
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

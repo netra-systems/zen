@@ -23,7 +23,7 @@ from netra_backend.app.services.quality_gate_service import (
     QualityMetrics,
     ValidationResult
 )
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 
 class TestNoveltyCalculation:

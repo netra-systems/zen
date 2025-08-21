@@ -30,7 +30,7 @@ export class TestWebSocket implements WebSocketLike {
   
   private listeners: Map<string, EventListener[]> = new Map();
   private messageQueue: string[] = [];
-  private connectionDelay: number = 10;
+  private connectionDelay: number = 50;
   private isClosing: boolean = false;
   
   constructor(url: string, protocols?: string | string[]) {
@@ -80,20 +80,28 @@ export class TestWebSocket implements WebSocketLike {
     const messageData = typeof data === 'string' ? data : JSON.stringify(data);
     const event = new MessageEvent('message', { data: messageData });
     
-    this.triggerEvent('message', event);
-    if (this.onmessage) {
-      this.onmessage(event);
-    }
+    // Use setTimeout to ensure proper event timing
+    setTimeout(() => {
+      this.triggerEvent('message', event);
+      if (this.onmessage) {
+        this.onmessage(event);
+      }
+    }, 0);
   }
   
   simulateError(error?: any): void {
+    if (this.readyState === 3) return; // Already closed
+    
     const event = new ErrorEvent('error', { error });
     this.readyState = 3; // CLOSED
     
-    this.triggerEvent('error', event);
-    if (this.onerror) {
-      this.onerror(event);
-    }
+    // Use setTimeout to ensure proper event timing
+    setTimeout(() => {
+      this.triggerEvent('error', event);
+      if (this.onerror) {
+        this.onerror(event);
+      }
+    }, 0);
   }
   
   simulateReconnect(): void {
@@ -140,7 +148,7 @@ export class TestWebSocket implements WebSocketLike {
   private scheduleOpenEvent(): void {
     // Use proper timing for React synchronization
     setTimeout(() => {
-      if (!this.isClosing) {
+      if (!this.isClosing && this.readyState === 0) {
         this.simulateOpen();
       }
     }, this.connectionDelay);

@@ -30,7 +30,7 @@ from datetime import datetime, timedelta
 
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.configuration.base import get_unified_config
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

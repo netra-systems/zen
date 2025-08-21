@@ -23,7 +23,7 @@ from unittest.mock import AsyncMock, patch, MagicMock
 # Add project root to path
 
 from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 import redis.asyncio as redis
 from unittest.mock import MagicMock, AsyncMock
 

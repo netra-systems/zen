@@ -32,8 +32,8 @@ from enum import Enum
 # Add project root to path
 
 from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
-from redis_manager import redis_manager
-from logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

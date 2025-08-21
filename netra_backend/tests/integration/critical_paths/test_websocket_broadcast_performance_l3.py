@@ -27,7 +27,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import redis.asyncio as redis
 from ws_manager import WebSocketManager
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 

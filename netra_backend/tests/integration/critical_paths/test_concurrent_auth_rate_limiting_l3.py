@@ -33,7 +33,7 @@ if str(PROJECT_ROOT) not in sys.path:
 # Add project root to path
 
 from netra_backend.app.schemas.rate_limit_types import RateLimitConfig, RateLimitResult, TokenBucket
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer
 
 # Add project root to path

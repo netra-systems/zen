@@ -6,7 +6,7 @@ setup_test_path()
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
 import sys

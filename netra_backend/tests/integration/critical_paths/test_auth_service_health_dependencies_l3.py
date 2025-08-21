@@ -30,7 +30,7 @@ from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
 from testcontainers.generic import GenericContainer
 
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 import sys

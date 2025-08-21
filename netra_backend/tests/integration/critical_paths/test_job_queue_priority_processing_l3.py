@@ -32,8 +32,8 @@ from datetime import datetime, timedelta
 
 from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
 from netra_backend.app.websocket.unified.job_queue import JobQueueManager
-from redis_manager import redis_manager
-from logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

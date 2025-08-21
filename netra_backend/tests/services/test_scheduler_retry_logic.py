@@ -24,7 +24,7 @@ from netra_backend.app.services.supply_research_scheduler import (
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 from background import BackgroundTaskManager
 from netra_backend.app.llm.llm_manager import LLMManager
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.core.exceptions_base import NetraException
 
 

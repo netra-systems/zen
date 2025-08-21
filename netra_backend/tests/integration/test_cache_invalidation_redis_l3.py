@@ -23,7 +23,7 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import patch
 
 import redis.asyncio as redis
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
 import sys

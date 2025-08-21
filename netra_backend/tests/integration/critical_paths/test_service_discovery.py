@@ -20,7 +20,7 @@ import logging
 from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
-from redis_manager import RedisManager
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
 import sys

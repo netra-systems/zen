@@ -36,7 +36,7 @@ from testcontainers.clickhouse import ClickHouseContainer
 from netra_backend.app.db.postgres_core import Database
 from netra_backend.app.db.postgres_pool import get_pool_status, close_async_db
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
-from logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 
