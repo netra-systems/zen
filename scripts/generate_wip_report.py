@@ -108,6 +108,11 @@ class WIPReportGenerator:
                 print(f"Note: Found {actual_e2e_files} e2e test files but coverage report shows {e2e_count}")
                 e2e_count = actual_e2e_files
         
+        # Scan the integration test directory
+        integration_dir = self.project_root / 'tests' / 'integration'
+        if integration_dir.exists():
+            integration_count += len(list(integration_dir.glob('test_*.py')))
+        
         # Calculate test pyramid score based on testing.xml spec
         # Target ratios from testing.xml: 15% E2E, 60% Integration, 20% Unit, 5% Production
         if total_tests > 0:
