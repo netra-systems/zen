@@ -97,7 +97,7 @@ class TestAgentOrchestrationIntegration:
     async def test_supervisor_subagent_deadlock_detection(self):
         """Test deadlock detection in supervisor-subagent communication"""
         # Will fail - no deadlock detection mechanism
-        from netra_backend.app.agents.supervisor.agent import SupervisorAgent
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         
         supervisor = SupervisorAgent()
         
@@ -137,7 +137,7 @@ class TestAgentOrchestrationIntegration:
         """Test for memory leaks during sustained agent operations"""
         # Will fail - memory leaks exist in agent lifecycle
         import tracemalloc
-        from netra_backend.app.agents.supervisor.agent import SupervisorAgent
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         
         tracemalloc.start()
         supervisor = SupervisorAgent()

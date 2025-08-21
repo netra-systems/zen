@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-08-21T12:08:38.734793",
+  "timestamp": "2025-08-21T12:09:47.034461",
   "summary": {
     "total_files": 42,
     "successful": 13,
@@ -71,8 +71,8 @@
       "netra_backend\\tests\\e2e\\first_time_user\\test_provider_connection_e2e.py": "Import error: No module named 'netra_backend.tests.model_setup_helpers'",
       "netra_backend\\tests\\e2e\\first_time_user\\test_real_critical_user_journey_e2e.py": "Import error: No module named 'netra_backend.tests.real_critical_helpers'",
       "netra_backend\\tests\\e2e\\first_time_user\\test_recovery_support_e2e.py": "Import error: No module named 'netra_backend.tests.model_setup_helpers'",
-      "netra_backend\\tests\\e2e\\test_agent_orchestration_e2e.py": "Import error: cannot import name 'WebSocketManager' from 'ws_manager' (unknown location)",
-      "netra_backend\\tests\\e2e\\test_complete_real_pipeline_e2e.py": "Import error: No module named 'schemas'",
+      "netra_backend\\tests\\e2e\\test_agent_orchestration_e2e.py": "Import error: cannot import name 'ConnectionManager' from 'netra_backend.app.websocket.connection_manager' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\websocket\\connection_manager.py)",
+      "netra_backend\\tests\\e2e\\test_complete_real_pipeline_e2e.py": "Syntax error: invalid syntax (<unknown>, line 378)",
       "netra_backend\\tests\\e2e\\test_real_agent_orchestration_e2e.py": "Import error: No module named 'schemas'",
       "netra_backend\\tests\\integration\\critical_paths\\test_payment_processing_e2e_l4.py": "Import error: No module named 'netra_backend.tests.l4_staging_critical_base'",
       "netra_backend\\tests\\integration\\test_compensation_engine_e2e.py": "Import error: cannot import name 'ResearchType' from 'netra_backend.app.services.apex_optimizer_agent.models' (C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\app\\services\\apex_optimizer_agent\\models.py)",

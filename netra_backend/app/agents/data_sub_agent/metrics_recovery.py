@@ -5,8 +5,7 @@ Handles metrics calculation failures with simplified algorithms and approximatio
 
 from typing import Any, Dict, Optional, List
 from netra_backend.app.logging_config import central_logger
-# FIXME: MetricsCalculationError not available in error_types
-# from netra_backend.app.core.error_types import MetricsCalculationError
+from netra_backend.app.agents.data_sub_agent.error_types import MetricsCalculationError
 from netra_backend.app.agents.error_handler import ErrorContext
 
 logger = central_logger.get_logger(__name__)

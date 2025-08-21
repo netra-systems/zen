@@ -1,6 +1,6 @@
 # E2E Test Import Report
 
-Generated: 2025-08-21T12:08:38.734793
+Generated: 2025-08-21T12:09:47.034461
 
 ## Summary
 
@@ -93,12 +93,12 @@ Import error: No module named 'netra_backend.tests.model_setup_helpers'
 
 ### netra_backend\tests\e2e\test_agent_orchestration_e2e.py
 ```
-Import error: cannot import name 'WebSocketManager' from 'ws_manager' (unknown location)
+Import error: cannot import name 'ConnectionManager' from 'netra_backend.app.websocket.connection_manager' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\websocket\connection_manager.py)
 ```
 
 ### netra_backend\tests\e2e\test_complete_real_pipeline_e2e.py
 ```
-Import error: No module named 'schemas'
+Syntax error: invalid syntax (<unknown>, line 378)
 ```
 
 ### netra_backend\tests\e2e\test_real_agent_orchestration_e2e.py

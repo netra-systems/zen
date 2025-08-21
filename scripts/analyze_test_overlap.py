@@ -348,7 +348,7 @@ class TestOverlapAnalyzer:
                 'total_test_files': len(set(t.file_path for t in self.tests)),
                 'total_test_functions': len(self.tests),
                 'total_similarity_pairs': len(self.similarity_results),
-                'duplicates': 0,
+                'duplicate': 0,
                 'highly_similar': 0,
                 'similar': 0,
                 'related': 0
@@ -439,9 +439,9 @@ class TestOverlapAnalyzer:
         recommendations = []
         
         # Check for duplicates
-        if report['summary']['duplicates'] > 0:
+        if report['summary']['duplicate'] > 0:
             recommendations.append(
-                f"CRITICAL: Found {report['summary']['duplicates']} exact duplicate test pairs. "
+                f"CRITICAL: Found {report['summary']['duplicate']} exact duplicate test pairs. "
                 "These should be immediately reviewed and consolidated."
             )
         
@@ -526,7 +526,7 @@ class TestOverlapAnalyzer:
             "",
             "### Similarity Breakdown",
             "",
-            f"- **Exact Duplicates**: {report['summary']['duplicates']} ⚠️" if report['summary']['duplicates'] > 0 else f"- **Exact Duplicates**: 0 ✅",
+            f"- **Exact Duplicates**: {report['summary']['duplicate']} ⚠️" if report['summary']['duplicate'] > 0 else f"- **Exact Duplicates**: 0 ✅",
             f"- **Highly Similar**: {report['summary']['highly_similar']}",
             f"- **Similar**: {report['summary']['similar']}",
             f"- **Related**: {report['summary']['related']}",
@@ -654,7 +654,7 @@ def main():
     print("TEST OVERLAP ANALYSIS COMPLETE")
     print("="*60)
     print(f"Total Tests Analyzed: {report['summary']['total_test_functions']}")
-    print(f"Duplicates Found: {report['summary']['duplicates']}")
+    print(f"Duplicates Found: {report['summary']['duplicate']}")
     print(f"Highly Similar: {report['summary']['highly_similar']}")
     print(f"Similar: {report['summary']['similar']}")
     print("\nRecommendations:")

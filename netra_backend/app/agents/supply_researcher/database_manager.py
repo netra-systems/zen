@@ -217,7 +217,7 @@ class SupplyDatabaseManager:
             "supply_item_id": existing.id,
             "research_session_id": research_session_id,
             "update_reason": "Research update",
-            # FIXME: "updated_by": "SupplyResearcherAgent",
+            # FIXME: # FIXME: "updated_by": "SupplyResearcherAgent",
             "updated_at": datetime.now(UTC)
         }
     
