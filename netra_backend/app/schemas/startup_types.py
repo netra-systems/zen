@@ -14,10 +14,11 @@ Usage:
     from netra_backend.app.schemas.startup_types import StartupStatus, LastStartup, MigrationStatus
 """
 
-from typing import Dict, List, Optional, Union, Any
 from datetime import datetime
-from pydantic import BaseModel, Field, field_validator
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class ServiceType(str, Enum):

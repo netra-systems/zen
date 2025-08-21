@@ -8,6 +8,7 @@ import subprocess
 from pathlib import Path
 from typing import Tuple
 
+
 class CodeReviewAnalysis:
     """Handles git analysis, spec alignment, performance and security checks"""
     

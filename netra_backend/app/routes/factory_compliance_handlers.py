@@ -1,11 +1,16 @@
 """Factory compliance handlers."""
-from fastapi import HTTPException, Query, Depends
-from typing import Dict, Any, List, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.services.factory_status.factory_status_integration import ComplianceAPIHandler
-from netra_backend.app.core.exceptions_base import ValidationError as ValidationException
+from fastapi import Depends, HTTPException, Query
+
 from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.core.exceptions_base import (
+    ValidationError as ValidationException,
+)
+from netra_backend.app.services.factory_status.factory_status_integration import (
+    ComplianceAPIHandler,
+)
 
 
 async def handle_compliance_scores(handler: ComplianceAPIHandler) -> Dict[str, Any]:

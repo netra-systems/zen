@@ -5,7 +5,7 @@ trend analysis, and intelligent alerting.
 """
 
 import hashlib
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum

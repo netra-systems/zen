@@ -5,8 +5,8 @@ Simple launcher script to test basic functionality.
 This bypasses complex dependencies and tests core launcher functionality.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add the project root to Python path
@@ -30,8 +30,8 @@ def test_imports():
 def test_basic_launcher():
     """Test basic launcher functionality."""
     try:
-        from dev_launcher.launcher import DevLauncher
         from dev_launcher.config import LauncherConfig
+        from dev_launcher.launcher import DevLauncher
         
         print("[OK] Launcher module imported successfully")
         

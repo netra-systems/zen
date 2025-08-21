@@ -14,20 +14,25 @@ ARCHITECTURAL COMPLIANCE:
 - Tests REAL rate limiting with actual API calls and proper error handling
 """
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import httpx
-import websockets
-import json
-import redis.asyncio as redis
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
+import pytest
+import redis.asyncio as redis
+import websockets
+
+from tests.unified.e2e.rate_limiting_core import (
+    MessageSender,
+    RedisManager,
+    UserManager,
+)
 from tests.unified.test_harness import UnifiedTestHarness
-from tests.unified.e2e.rate_limiting_core import RedisManager, MessageSender, UserManager
 
 
 class ComprehensiveRateLimitTester:

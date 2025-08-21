@@ -12,18 +12,33 @@ Shows patterns for reliable, fast, isolated testing.
 Each function ≤8 lines, file ≤300 lines.
 """
 
-import pytest
 import asyncio
-from datetime import datetime, UTC
+
+# Add project root to path
+import sys
+from datetime import UTC, datetime
+from pathlib import Path
+
+import pytest
 from sqlalchemy import text
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 from netra_backend.tests.isolated_test_config import (
-    isolated_test_config, isolated_postgres, isolated_clickhouse,
-    isolated_full_stack, with_isolated_postgres, with_database_snapshots
+    isolated_clickhouse,
+    isolated_full_stack,
+    isolated_postgres,
+    isolated_test_config,
+    with_database_snapshots,
+    with_isolated_postgres,
 )
 
 

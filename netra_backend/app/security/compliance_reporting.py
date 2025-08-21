@@ -1,9 +1,13 @@
 """Security compliance reporting and analysis utilities."""
 
-from typing import Dict, List, Any
 from datetime import datetime, timezone
+from typing import Any, Dict, List
 
-from netra_backend.app.compliance_types import ComplianceCheck, ComplianceStandard, ComplianceStatus
+from netra_backend.app.compliance_types import (
+    ComplianceCheck,
+    ComplianceStandard,
+    ComplianceStatus,
+)
 
 
 class ComplianceReporting:

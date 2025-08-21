@@ -23,11 +23,14 @@ Module follows CLAUDE.md constraints:
 - Single responsibility
 """
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from netra_backend.app.llm.observability import (
-    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
-    log_agent_input, log_agent_output
+    generate_llm_correlation_id,
+    log_agent_input,
+    log_agent_output,
+    start_llm_heartbeat,
+    stop_llm_heartbeat,
 )
 from netra_backend.app.logging_config import central_logger
 

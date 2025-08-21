@@ -6,23 +6,24 @@ This module discovers, executes, and validates all agent test suites with compre
 Maximum 300 lines, 8 lines per function as per SPEC/conventions.xml.
 """
 
-import asyncio
 import ast
+import asyncio
 import json
-import time
 import subprocess
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+import time
 from dataclasses import dataclass
 from datetime import datetime
-import pytest
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import coverage
+import pytest
 
 # Import existing test framework components
 sys.path.append(str(Path(__file__).parent.parent))
-from test_framework.test_discovery import TestDiscovery
 from test_framework.runner import UnifiedTestRunner
+from test_framework.test_discovery import TestDiscovery
 
 PROJECT_ROOT = Path(__file__).parent.parent
 

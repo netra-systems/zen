@@ -11,17 +11,26 @@ L3 Test: Uses real ClickHouse container to validate partition creation, rotation
 pruning, and query performance across partitioned data.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import uuid
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
 from calendar import monthrange
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
+import pytest
 from testcontainers.clickhouse import ClickHouseContainer
 
 from netra_backend.app.logging_config import central_logger

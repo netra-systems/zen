@@ -1,7 +1,9 @@
 """Simple WebSocket tests that work with the actual demo endpoint."""
-import pytest
 import json
+
+import pytest
 from fastapi.testclient import TestClient
+
 from netra_backend.app.main import app
 
 

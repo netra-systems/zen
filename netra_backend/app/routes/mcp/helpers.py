@@ -6,12 +6,14 @@ Maintains 25-line function limit and single responsibility.
 """
 
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.db.models_postgres import User as UserInDB
-from netra_backend.app.services.mcp_service import MCPService, MCPToolExecution
 from netra_backend.app.logging_config import CentralLogger
+from netra_backend.app.services.mcp_service import MCPService, MCPToolExecution
 
 logger = CentralLogger()
 

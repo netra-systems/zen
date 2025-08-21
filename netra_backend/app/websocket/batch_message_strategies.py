@@ -6,7 +6,11 @@ Batching strategy implementations with micro-functions.
 import time
 from typing import List
 
-from netra_backend.app.batch_message_types import BatchConfig, BatchingStrategy, PendingMessage
+from netra_backend.app.batch_message_types import (
+    BatchConfig,
+    BatchingStrategy,
+    PendingMessage,
+)
 
 
 class BatchingStrategyManager:

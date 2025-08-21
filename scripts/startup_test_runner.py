@@ -4,18 +4,23 @@ System Startup Test Runner - Main Orchestrator
 Modular test runner for system startup and E2E tests
 """
 
-import sys
 import argparse
+import sys
 from pathlib import Path
 from typing import List, Optional
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from startup_environment import StartupEnvironment, DependencyChecker, ProcessManager
-from startup_test_executor import BackendTestExecutor, FrontendTestExecutor, E2ETestExecutor, TestResult
+from startup_environment import DependencyChecker, ProcessManager, StartupEnvironment
 from startup_performance import PerformanceTestExecutor
 from startup_reporter import StartupReporter
+from startup_test_executor import (
+    BackendTestExecutor,
+    E2ETestExecutor,
+    FrontendTestExecutor,
+    TestResult,
+)
 
 
 class SystemStartupTestRunner:

@@ -8,16 +8,16 @@ modules under 300 lines each.
 
 # Import from modular implementation
 from netra_backend.app.core.schema_sync import (
-    SchemaValidationLevel,
     SchemaChangeInfo,
-    SyncReport,
     SchemaExtractor,
-    TypeScriptGenerator,
-    SchemaValidator,
     SchemaSynchronizer,
-    validate_schema,
+    SchemaValidationLevel,
+    SchemaValidator,
+    SyncReport,
+    TypeScriptGenerator,
+    create_sync_command,
     is_migration_safe,
-    create_sync_command
+    validate_schema,
 )
 
 # Maintain backward compatibility - all legacy code removed

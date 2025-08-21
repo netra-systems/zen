@@ -11,9 +11,9 @@ In a production environment, you would install the actual asyncio_clickhouse pac
 """
 
 import asyncio
-from typing import Dict, List, Optional, Any, Union, Tuple
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 
 class ClickHouseError(Exception):

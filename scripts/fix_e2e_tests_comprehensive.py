@@ -15,13 +15,13 @@ This script systematically identifies and fixes common e2e test issues:
 4. Syntax issues
 """
 
-import os
 import ast
+import os
 import re
 import sys
-from pathlib import Path
-from typing import List, Dict, Set, Tuple, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 
 @dataclass

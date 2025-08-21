@@ -6,7 +6,7 @@ Supports various event types with proper metadata and tracking.
 
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from auth_service.auth_core.database.models import AuthAuditLog
 

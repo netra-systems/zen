@@ -5,24 +5,32 @@ Tests comprehensive WebSocket message handling including different message types
 formats, ordering, and error scenarios.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import json
-import pytest
-from typing import Dict, Any, List
-import websockets
-import aiohttp
-from datetime import datetime
-import uuid
 import base64
+import json
+import uuid
+from datetime import datetime
+from typing import Any, Dict, List
 
-from test_framework.test_patterns import L3IntegrationTest
+import aiohttp
+import pytest
+import websockets
 
 # Add project root to path
-
 from netra_backend.app.redis_manager import RedisManager
+from test_framework.test_patterns import L3IntegrationTest
 
 # Add project root to path
 

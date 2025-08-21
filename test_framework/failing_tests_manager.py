@@ -1,12 +1,13 @@
 """Failing tests management utilities."""
 
 import json
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Optional
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from .test_parser import extract_failing_tests
+
 
 def _read_failing_tests_file(failing_tests_path: Path) -> Optional[Dict]:
     """Read failing tests from JSON file."""

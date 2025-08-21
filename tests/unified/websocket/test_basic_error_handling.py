@@ -20,13 +20,14 @@ Test Requirements:
 
 import asyncio
 import json
-import pytest
-from typing import Dict, Any, Optional, Union
 from datetime import datetime, timezone
+from typing import Any, Dict, Optional, Union
+
+import pytest
 
 from netra_backend.tests.unified.config import TEST_CONFIG, TEST_ENDPOINTS
-from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 from netra_backend.tests.unified.real_client_types import create_test_config
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class ErrorHandlingTester:
@@ -45,7 +46,9 @@ class ErrorHandlingTester:
             from netra_backend.tests.unified.config import setup_test_environment
             setup_test_environment()
             
-            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+                create_test_token,
+            )
             return create_test_token("error_handling_user")
         except ImportError:
             return "mock-token-error_handling_user"
@@ -64,9 +67,10 @@ class ErrorHandlingTester:
     async def _ensure_test_user_exists(self) -> None:
         """Ensure test user exists in database."""
         try:
-            from netra_backend.app.db.postgres import get_async_db
-            from netra_backend.app.db.models_postgres import User
             from sqlalchemy import select
+
+            from netra_backend.app.db.models_postgres import User
+            from netra_backend.app.db.postgres import get_async_db
             
             async with get_async_db() as db:
                 # Check if user exists

@@ -6,8 +6,9 @@ Handles content upload, insertion, and batch processing
 import asyncio
 import json
 import uuid
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Dict, List, Optional
+
 
 # Import that can be patched by tests
 def get_clickhouse_client():
@@ -15,10 +16,13 @@ def get_clickhouse_client():
     # Import here to avoid circular imports while allowing test patching
     import netra_backend.app.services.corpus_service as corpus_service_module
     return corpus_service_module.get_clickhouse_client()
-from netra_backend.app.ws_manager import manager
-from netra_backend.app.services.corpus.base import CorpusNotAvailableError, ClickHouseOperationError
-from netra_backend.app.services.corpus.validation import ValidationManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.corpus.base import (
+    ClickHouseOperationError,
+    CorpusNotAvailableError,
+)
+from netra_backend.app.services.corpus.validation import ValidationManager
+from netra_backend.app.ws_manager import manager
 
 
 class DocumentManager:

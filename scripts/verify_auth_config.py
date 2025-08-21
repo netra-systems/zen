@@ -6,8 +6,10 @@ Checks that auth service URLs are properly configured for each environment
 
 import os
 import sys
-import requests
 from typing import Dict, List, Tuple
+
+import requests
+
 
 def check_auth_service_endpoints(env: str) -> Tuple[str, List[str], List[str]]:
     """Check auth service endpoints for an environment."""

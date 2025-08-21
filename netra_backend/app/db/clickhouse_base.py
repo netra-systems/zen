@@ -1,8 +1,10 @@
 import asyncio
 import json
+from typing import Any, Dict, Iterable, List
+
 import clickhouse_connect
 from clickhouse_connect.driver.client import Client
-from typing import List, Dict, Any, Iterable
+
 
 class ClickHouseDatabase:
     """

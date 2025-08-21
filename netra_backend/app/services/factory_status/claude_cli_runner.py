@@ -1,11 +1,11 @@
 """Claude CLI runner for deep compliance review."""
 
+import asyncio
 import os
 import re
-import asyncio
 import subprocess
 from pathlib import Path
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
 
 class ClaudeCLIRunner:

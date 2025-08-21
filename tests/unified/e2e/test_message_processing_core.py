@@ -6,17 +6,18 @@ routing, and state transitions. Uses real handlers without mocks.
 Business Value: Ensures reliable core message processing
 """
 
-import pytest
 import asyncio
 from datetime import datetime, timezone
 from uuid import uuid4
 
+import pytest
+
 from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
 from netra_backend.tests.unified.e2e.example_message_test_helpers import (
-    create_example_message_request,
+    BASIC_COST_OPTIMIZATION,
     assert_completed_response,
     assert_error_response,
-    BASIC_COST_OPTIMIZATION
+    create_example_message_request,
 )
 
 

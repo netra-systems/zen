@@ -14,20 +14,22 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real components, No mock i
 
 import asyncio
 import time
-from typing import Dict, Any, List, Optional
-import pytest
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
+import pytest
+
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState  
+from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
-from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.tests.unified.e2e.agent_response_test_utilities import (
-    AgentResponseSimulator, QualityMetricValidator
+    AgentResponseSimulator,
+    QualityMetricValidator,
 )
 
 

@@ -4,25 +4,39 @@ Split from large test file for architecture compliance
 Test classes: TestServiceInitialization, TestGetUserPlan, TestGetUserPermissions, TestToolRequiredPermissions, TestHasPermission
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, timedelta, UTC
-from unittest.mock import Mock, MagicMock, AsyncMock, patch
-from typing import Dict, List, Any, Set
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Set
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.app.schemas.ToolPermission import (
+    BusinessRequirement,
+    PermissionCheckResult,
+    PermissionLevel,
+    RateLimit,
+    ToolAvailability,
+    ToolExecutionContext,
+    # Add project root to path
+    ToolPermission,
+)
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
 
 # Add project root to path
-    ToolPermission, ToolExecutionContext, PermissionCheckResult,
-    ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit
-)
-from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
 
 
 class MockRedisClient:

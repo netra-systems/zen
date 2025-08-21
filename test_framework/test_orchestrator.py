@@ -5,15 +5,20 @@ Coordinates test discovery, execution, and reporting
 """
 
 import json
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from .test_profile_models import TestProfile, TestSuite, TestProfileManager, TestPriority
+from .failure_patterns import FailurePatternAnalyzer
 from .test_discovery import TestDiscovery
 from .test_execution_engine import execute_test_suite
-from .failure_patterns import FailurePatternAnalyzer
 from .test_insights import TestInsightGenerator
+from .test_profile_models import (
+    TestPriority,
+    TestProfile,
+    TestProfileManager,
+    TestSuite,
+)
 
 
 class TestOrchestrator:

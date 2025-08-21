@@ -21,31 +21,51 @@ This test validates end-to-end compliance audit trail functionality in staging e
 ensuring enterprise customers maintain regulatory compliance.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 
-# Add project root to path
+import pytest
 
-from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
+from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType
 from netra_backend.app.schemas.registry import (
+    CorpusAuditAction,
+    CorpusAuditMetadata,
+    # Add project root to path
+    CorpusAuditRecord,
+    CorpusAuditReport,
+    CorpusAuditSearchFilter,
+    CorpusAuditStatus,
+)
+from netra_backend.app.services.audit.corpus_audit import CorpusAuditLogger
+from netra_backend.app.services.audit_service import (
+    get_audit_summary,
+    get_recent_logs,
+    log_admin_action,
+)
 
 # Add project root to path
-    CorpusAuditRecord, CorpusAuditAction, CorpusAuditStatus, 
-    CorpusAuditMetadata, CorpusAuditSearchFilter, CorpusAuditReport
+from netra_backend.tests.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    L4StagingCriticalPathTestBase,
 )
-from netra_backend.app.services.audit_service import get_recent_logs, log_admin_action, get_audit_summary
-from netra_backend.app.services.audit.corpus_audit import CorpusAuditLogger
-from netra_backend.app.core.exceptions_base import NetraException
 
 
 @dataclass

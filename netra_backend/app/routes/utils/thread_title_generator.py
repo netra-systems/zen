@@ -1,12 +1,14 @@
 """Thread title generation utilities."""
+import time
 from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.services.database.message_repository import MessageRepository
+
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.websocket.ws_manager import ws_manager
 from netra_backend.app.logging_config import central_logger
-import time
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.websocket.ws_manager import ws_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -77,8 +79,8 @@ async def send_thread_rename_notification(user_id: int, thread_id: str, title: s
 
 async def create_final_thread_response(db: AsyncSession, thread, title: str):
     """Create final ThreadResponse with message count."""
-    from netra_backend.app.services.database.message_repository import MessageRepository
     from netra_backend.app.routes.utils.thread_builders import build_thread_response
+    from netra_backend.app.services.database.message_repository import MessageRepository
     message_repo = MessageRepository()
     message_count = await message_repo.count_by_thread(db, thread.id)
     return await build_thread_response(thread, message_count, title)

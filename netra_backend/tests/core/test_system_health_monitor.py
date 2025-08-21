@@ -1,18 +1,31 @@
 """Tests for system health monitor."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.core.shared_health_types import ComponentHealth, HealthStatus
 
 # Add project root to path
-
-from netra_backend.app.core.system_health_monitor import SystemHealthMonitor, system_health_monitor
-from netra_backend.app.core.shared_health_types import HealthStatus, ComponentHealth
+from netra_backend.app.core.system_health_monitor import (
+    SystemHealthMonitor,
+    system_health_monitor,
+)
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 # Add project root to path

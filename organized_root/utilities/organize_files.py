@@ -5,6 +5,7 @@ import os
 import shutil
 from pathlib import Path
 
+
 def organize_files():
     """Move files from root directory to organized folders."""
     

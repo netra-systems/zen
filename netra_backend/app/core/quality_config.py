@@ -5,6 +5,7 @@ Contains all weight mappings and threshold configurations.
 """
 
 from typing import Dict
+
 from netra_backend.app.core.quality_types import ContentType
 
 

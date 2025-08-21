@@ -1,40 +1,52 @@
 """Utilities Tests - Split from test_critical_integration.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import pytest_asyncio
 import asyncio
 import json
-import jwt
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
+import os
+import tempfile
+import time
 import uuid
-from typing import Dict, Any
+from datetime import datetime, timedelta
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-from netra_backend.app.services.state_persistence import StatePersistenceService
-from netra_backend.app.services.database.thread_repository import ThreadRepository
-from netra_backend.app.services.database.message_repository import MessageRepository
-from netra_backend.app.services.database.run_repository import RunRepository
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.schemas.Agent import AgentStarted
-from starlette.websockets import WebSocketState
-from netra_backend.app.schemas.registry import UserBase
+import jwt
+import pytest
+import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+from starlette.websockets import WebSocketState
+
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+
+# Add project root to path
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
 from netra_backend.app.db.base import Base
-import tempfile
-import os
 from netra_backend.app.db.models_postgres import Run
-import time
+from netra_backend.app.schemas.Agent import AgentStarted
+from netra_backend.app.schemas.registry import UserBase
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.database.message_repository import MessageRepository
+from netra_backend.app.services.database.run_repository import RunRepository
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

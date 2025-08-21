@@ -3,9 +3,9 @@
 Business Value: Enables intelligent error handling and recovery strategies.
 """
 
-from typing import Dict, Type, Optional
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Dict, Optional, Type
 
 from netra_backend.app.core.error_codes import ErrorSeverity
 
@@ -43,7 +43,7 @@ class ErrorClassifier:
     
     def _initialize_error_classifiers(self) -> Dict[Type[Exception], ErrorClassification]:
         """Initialize error classification mapping."""
-        from .agent_errors import ValidationError, ExternalServiceError, DatabaseError
+        from .agent_errors import DatabaseError, ExternalServiceError, ValidationError
         return self._build_error_classifier_mapping(ValidationError, ExternalServiceError, DatabaseError)
     
     def _build_error_classifier_mapping(self, ValidationError: Type[Exception], 

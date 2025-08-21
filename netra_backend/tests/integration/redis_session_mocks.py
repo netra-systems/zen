@@ -11,12 +11,12 @@ Mock utilities for Redis session state synchronization testing.
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock
 
 
 class MockRedisConnection:

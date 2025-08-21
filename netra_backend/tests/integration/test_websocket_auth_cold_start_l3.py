@@ -16,19 +16,29 @@ Mock-Real Spectrum: L3 (Real SUT with Real Local Services)
 - Real agent initialization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import time
 import json
+import os
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import jwt
 import pytest
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
 import websockets
-from unittest.mock import patch, MagicMock, AsyncMock
-import os
 
 # Add project root to path
 
@@ -39,8 +49,9 @@ os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 # Test infrastructure
-from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
 from clients.auth_client import auth_client
+
+from netra_backend.app.core.exceptions_websocket import WebSocketAuthenticationError
 
 
 @pytest.fixture

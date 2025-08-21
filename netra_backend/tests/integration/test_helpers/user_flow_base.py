@@ -14,26 +14,28 @@ import json
 import time
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 import httpx
+import pytest
 from fastapi import status
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.schemas.registry import User
-from netra_backend.app.schemas.UserPlan import UserPlan
-from netra_backend.app.schemas.registry import Thread
-from netra_backend.app.schemas.registry import Message
 from netra_backend.app.auth_integration.auth import get_current_user as AuthService
-from netra_backend.app.services.user_service import user_service as UserService
-from netra_backend.app.services.websocket_service import WebSocketService as WebSocketManager
-from netra_backend.app.services.user_service import user_service as UsageService
-from netra_backend.app.services.cost_calculator import CostCalculatorService as BillingService
-from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 from netra_backend.app.config import settings
+from netra_backend.app.schemas.registry import Message, Thread, User
+from netra_backend.app.schemas.UserPlan import UserPlan
+from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
+from netra_backend.app.services.cost_calculator import (
+    CostCalculatorService as BillingService,
+)
+from netra_backend.app.services.user_service import user_service as UsageService
+from netra_backend.app.services.user_service import user_service as UserService
+from netra_backend.app.services.websocket_service import (
+    WebSocketService as WebSocketManager,
+)
 
 
 class UserFlowTestBase:

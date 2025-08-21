@@ -1,11 +1,11 @@
 """Compliance Analyzer - Checks architecture compliance status."""
 
-import asyncio
 import ast
+import asyncio
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class ComplianceAnalyzer:

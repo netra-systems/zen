@@ -11,9 +11,9 @@ Usage:
     python scripts/validate_network_constants.py --environment production
 """
 
-import sys
-import os
 import argparse
+import os
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -22,8 +22,12 @@ sys.path.insert(0, str(project_root))
 
 try:
     from netra_backend.app.core.network_constants import (
-        ServicePorts, HostConstants, DatabaseConstants, 
-        URLConstants, ServiceEndpoints, NetworkEnvironmentHelper
+        DatabaseConstants,
+        HostConstants,
+        NetworkEnvironmentHelper,
+        ServiceEndpoints,
+        ServicePorts,
+        URLConstants,
     )
     print("[OK] Successfully imported network constants module")
 except ImportError as e:

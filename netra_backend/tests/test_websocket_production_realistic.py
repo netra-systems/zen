@@ -14,33 +14,38 @@ Tests cover:
 7. Memory leak detection for long connections
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-
+from netra_backend.tests.websocket.test_compression_auth import (
+    test_authentication_expiry_during_connection,
+    test_websocket_compression,
+)
 
 # Import all test functions from specialized modules
 from netra_backend.tests.websocket.test_concurrent_connections import (
     test_concurrent_connection_limit_1000_users,
+    test_connection_pool_exhaustion_recovery,
     test_rapid_connect_disconnect_cycles,
-    test_connection_pool_exhaustion_recovery
 )
-
-from netra_backend.tests.websocket.test_message_ordering import (
-    test_message_ordering_under_load,
-    test_binary_data_transmission,
-    test_protocol_version_mismatch
-)
-
-from netra_backend.tests.websocket.test_compression_auth import (
-    test_websocket_compression,
-    test_authentication_expiry_during_connection
-)
-
 from netra_backend.tests.websocket.test_memory_monitoring import (
-    test_memory_leak_detection_long_connections
+    test_memory_leak_detection_long_connections,
+)
+from netra_backend.tests.websocket.test_message_ordering import (
+    test_binary_data_transmission,
+    test_message_ordering_under_load,
+    test_protocol_version_mismatch,
 )
 
 # Re-export all test functions for backward compatibility

@@ -11,27 +11,39 @@ Coverage: Real Prometheus/Grafana integration, custom metrics accuracy, cardinal
 L4 Realism: Tests against staging infrastructure with real monitoring stack
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
+import os
 import time
 import uuid
-import logging
-import json
-import os
-from typing import Dict, List, Optional, Any
-from unittest.mock import patch
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import patch
+
 import httpx
+import pytest
+
+from config import get_config
+from netra_backend.app.services.observability.alert_manager import AlertManager
 
 # Add project root to path
-
 from netra_backend.app.services.observability.metrics_collector import MetricsCollector
-from netra_backend.app.services.observability.prometheus_exporter import PrometheusExporter
-from netra_backend.app.services.observability.alert_manager import AlertManager
-from config import get_config
+from netra_backend.app.services.observability.prometheus_exporter import (
+    PrometheusExporter,
+)
 
 # Add project root to path
 

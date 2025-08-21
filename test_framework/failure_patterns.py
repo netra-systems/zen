@@ -5,10 +5,10 @@ Provides pattern matching and basic failure analysis
 """
 
 import re
-from pathlib import Path
-from typing import Dict, List, Any
-from datetime import datetime
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class FailurePatternAnalyzer:

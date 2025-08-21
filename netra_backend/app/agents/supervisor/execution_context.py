@@ -1,11 +1,11 @@
 """Execution context and result types for supervisor agent."""
 
-from typing import Any, Dict, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from netra_backend.app.agents.state import DeepAgentState
+from typing import Any, Dict, Optional
 
+from netra_backend.app.agents.state import DeepAgentState
 
 # Import ExecutionStrategy from the authoritative source for compatibility
 from netra_backend.app.core.interfaces_execution import ExecutionStrategy

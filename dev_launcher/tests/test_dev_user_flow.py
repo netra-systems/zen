@@ -18,20 +18,21 @@ CRITICAL: These tests ensure reliable dev environment provisioning
 that directly impacts developer productivity and feature velocity.
 """
 
-import pytest
 import asyncio
-import os
-import tempfile
 import json
-from unittest.mock import AsyncMock, MagicMock, patch, call
+import os
+import subprocess
+import tempfile
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-import subprocess
-import time
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
-from dev_launcher.launcher import DevLauncher
+import pytest
+
 from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.launcher import DevLauncher
 from dev_launcher.process_manager import ProcessManager
 
 

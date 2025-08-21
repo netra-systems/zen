@@ -17,7 +17,7 @@ import logging
 import time
 from typing import List
 
-from tests.e2e.fixtures.resource_monitoring import resource_monitor, isolation_test_config, resource_limits
+from tests.e2e.fixtures.resource_monitoring import (
     resource_monitor, isolation_test_config, resource_limits
 )
 from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase, assert_isolation_quality

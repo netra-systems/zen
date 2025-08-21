@@ -6,12 +6,13 @@ Extracted from test_complete_oauth_chat_journey.py for modularity.
 """
 
 import asyncio
-import uuid
-import time
 import json
-import websockets
+import time
+import uuid
+from typing import Any, Dict, Optional
+
 import httpx
-from typing import Dict, Any, Optional
+import websockets
 
 
 class WebSocketConnectionHelper:

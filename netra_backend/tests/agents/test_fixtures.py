@@ -3,17 +3,26 @@ E2E Test Fixtures - Modular and Composable
 All fixtures broken into ≤8 line functions for architectural compliance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
 import uuid
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 
@@ -73,7 +82,9 @@ def _create_triage_metadata():
 def _create_triage_result():
     """Create complete triage result"""
     from netra_backend.app.agents.triage_sub_agent import (
-        TriageResult, Priority, Complexity
+        Complexity,
+        Priority,
+        TriageResult,
     )
     return TriageResult(
         category="AI Optimization",

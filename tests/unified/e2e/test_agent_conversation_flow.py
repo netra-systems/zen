@@ -19,16 +19,20 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import patch
+
 import pytest
 import pytest_asyncio
 
-from tests.unified.e2e.agent_conversation_helpers import (
-    AgentConversationTestCore, ConversationFlowSimulator, ConversationFlowValidator,
-    AgentConversationTestUtils, RealTimeUpdateValidator
-)
 from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.unified.e2e.agent_conversation_helpers import (
+    AgentConversationTestCore,
+    AgentConversationTestUtils,
+    ConversationFlowSimulator,
+    ConversationFlowValidator,
+    RealTimeUpdateValidator,
+)
 
 
 @pytest.mark.asyncio

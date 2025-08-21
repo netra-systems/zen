@@ -1,28 +1,37 @@
 """Utilities Tests - Split from test_unified_message_flow.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
 import time
+import tracemalloc
 import uuid
-from typing import Dict, List, Any, Optional, Tuple
-from unittest.mock import AsyncMock, patch, Mock
-import pytest
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
-
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from netra_backend.app.schemas.core_enums import WebSocketMessageType, AgentStatus
+import pytest
 from logging_config import central_logger
-from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
-import asyncio
 from routes.utils.websocket_helpers import decode_token_payload
 from starlette.websockets import WebSocketDisconnect
-import tracemalloc
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.schemas.core_enums import AgentStatus, WebSocketMessageType
+from netra_backend.tests.services.test_ws_connection_mocks import MockWebSocket
+
+# Add project root to path
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Add project root to path
 

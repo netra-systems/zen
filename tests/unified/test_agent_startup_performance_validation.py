@@ -17,19 +17,23 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-import time
 import json
 import statistics
-import psutil
-from pathlib import Path
-from typing import Dict, Any, List, Optional
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import psutil
 import pytest
 
 # Test infrastructure
 from tests.unified.config import TEST_CONFIG, TestTier, get_test_user
-from tests.unified.harness_complete import UnifiedTestHarnessComplete, TestHarnessContext
+from tests.unified.harness_complete import (
+    TestHarnessContext,
+    UnifiedTestHarnessComplete,
+)
 
 
 @dataclass

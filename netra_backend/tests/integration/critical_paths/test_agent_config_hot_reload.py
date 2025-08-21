@@ -10,35 +10,44 @@ Critical Path: Config change -> Validation -> Hot reload -> Propagation -> Verif
 Coverage: Real configuration management, file watching, graceful updates
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
 import logging
 import os
 import tempfile
-import yaml
-from typing import Dict, List, Optional, Any, Callable, Tuple
-from unittest.mock import AsyncMock, patch, MagicMock
+import time
+from dataclasses import asdict, dataclass, field
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict, field
 from pathlib import Path
-from watchdog.observers import Observer
+from typing import Any, Callable, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+import yaml
 from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+from netra_backend.app.core.events import EventBus
 
 # Add project root to path
-
-
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.core.events import EventBus
 
 logger = logging.getLogger(__name__)
 

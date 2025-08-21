@@ -3,7 +3,8 @@
 Decomposes large functions into 25-line focused helpers.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas

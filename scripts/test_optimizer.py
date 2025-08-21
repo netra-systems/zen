@@ -5,11 +5,12 @@ Handles test performance optimization and legacy pattern updates
 Complies with 450-line limit and 25-line function constraint
 """
 
-import subprocess
 import re
+import subprocess
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List
+
 
 class TestPerformanceOptimizer:
     """Optimizes test execution performance"""

@@ -9,21 +9,22 @@ Business Value Justification (BVJ):
 - Strategic Impact: Differentiator for enterprise customers requiring real-time insights
 """
 
-import os
-import pytest
 import asyncio
 import json
-import uuid
+import os
 import time
-from typing import Dict, Any, List, Optional
+import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import pytest
 import websockets
 from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from netra_backend.app.main import app
-from netra_backend.app.schemas.websocket_models import WebSocketMessage
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessageType
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 
 class TestWebSocketRealTimeL3:

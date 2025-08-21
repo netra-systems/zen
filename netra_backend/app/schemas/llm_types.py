@@ -3,16 +3,24 @@ Strong type definitions for LLM operations following Netra conventions.
 Main types module that aggregates and extends base types.
 """
 
-from typing import Dict, Any, Optional, List, Union, TypeVar, Generic
-from datetime import datetime, UTC
-from abc import ABC, abstractmethod
-from pydantic import BaseModel, Field
 import uuid
+from abc import ABC, abstractmethod
+from datetime import UTC, datetime
+from typing import Any, Dict, Generic, List, Optional, TypeVar, Union
+
+from pydantic import BaseModel, Field
 
 # Import base types (no circular dependencies)
 from netra_backend.app.schemas.llm_base_types import (
-    LLMProvider, LLMModel, LLMRole, TokenUsage, LLMMessage, 
-    LLMError, LLMHealthCheck, LLMConfigInfo, LLMManagerStats
+    LLMConfigInfo,
+    LLMError,
+    LLMHealthCheck,
+    LLMManagerStats,
+    LLMMessage,
+    LLMModel,
+    LLMProvider,
+    LLMRole,
+    TokenUsage,
 )
 
 T = TypeVar('T', bound=BaseModel)

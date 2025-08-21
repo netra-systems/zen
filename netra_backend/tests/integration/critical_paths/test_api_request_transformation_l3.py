@@ -10,26 +10,38 @@ Critical Path: Request ingress -> Schema validation -> Transformation rules -> D
 Coverage: Request/response transformation, data mapping, schema evolution, legacy support
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
 import time
 import uuid
-import logging
-import json
-import aiohttp
-from typing import Dict, List, Optional, Any, Union
-from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
+
+from netra_backend.app.services.api_gateway.data_converter import DataConverter
+from netra_backend.app.services.api_gateway.schema_mapper import SchemaMapper
 
 # Add project root to path
-
-from netra_backend.app.services.api_gateway.transformation_engine import TransformationEngine
-from netra_backend.app.services.api_gateway.schema_mapper import SchemaMapper
-from netra_backend.app.services.api_gateway.data_converter import DataConverter
+from netra_backend.app.services.api_gateway.transformation_engine import (
+    TransformationEngine,
+)
 from netra_backend.app.services.validation.schema_validator import SchemaValidator
 
 # Add project root to path

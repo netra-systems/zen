@@ -2,12 +2,13 @@
 Test to ensure auth service uses only ONE database connection
 Prevents regression of duplicate database connection issue
 """
-import pytest
-import sys
-import os
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 import importlib
+import os
+import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pytest
 
 # Add auth_service to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -39,8 +40,8 @@ async def test_single_database_initialization():
             os.environ['ENVIRONMENT'] = 'staging'
             
             # Import main module
-            from main import lifespan
             from fastapi import FastAPI
+            from main import lifespan
             
             app = FastAPI()
             

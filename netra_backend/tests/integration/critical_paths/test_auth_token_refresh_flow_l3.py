@@ -4,24 +4,32 @@ L3 Integration Test: Token Refresh Flow
 Tests JWT token refresh mechanisms including edge cases and error scenarios.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
-import pytest
 import time
-from typing import Dict, Any
-import aiohttp
 from datetime import datetime, timedelta
-import jwt
+from typing import Any, Dict
 
-from test_framework.test_patterns import L3IntegrationTest
+import aiohttp
+import jwt
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.core.auth import TokenManager
 from netra_backend.app.redis_manager import RedisManager
+from test_framework.test_patterns import L3IntegrationTest
 
 # Add project root to path
 

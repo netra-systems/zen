@@ -4,15 +4,17 @@ Automated cleanup script for staging environments.
 Identifies and removes stale staging environments based on various criteria.
 """
 
-import os
-import sys
-import json
 import argparse
+import json
+import os
 import subprocess
+import sys
 from datetime import datetime, timedelta
-from typing import List, Dict, Optional, Tuple
-import requests
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
+import requests
+
 
 class StagingEnvironmentCleaner:
     """Manages cleanup of staging environments"""

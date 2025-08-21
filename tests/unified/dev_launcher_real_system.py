@@ -12,16 +12,17 @@ CRITICAL REQUIREMENTS:
 """
 
 import asyncio
-import time
+import logging
+import os
+import signal
+import subprocess
 import sys
 import threading
-import subprocess
+import time
 from pathlib import Path
-from typing import Dict, Optional, Any, List
-import logging
+from typing import Any, Dict, List, Optional
+
 import requests
-import signal
-import os
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent

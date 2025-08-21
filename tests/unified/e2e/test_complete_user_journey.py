@@ -19,11 +19,12 @@ Test Coverage:
 ✅ Real service interaction testing
 """
 
-import pytest
 import asyncio
-import time
 import os
-from typing import Dict, Any, List
+import time
+from typing import Any, Dict, List
+
+import pytest
 
 # Test environment setup
 os.environ["TESTING"] = "1"
@@ -31,21 +32,17 @@ os.environ["CORS_ORIGINS"] = "*"
 os.environ["ENVIRONMENT"] = "development"
 
 from helpers.user_journey_helpers import (
-    UserJourneyConfig,
+    ErrorRecoveryHelper,
+    LoginFlowHelper,
+    MessageFlowHelper,
+    PerformanceMonitoringHelper,
+    ServiceCoordinationHelper,
+    ServiceHealthHelper,
     TestUser,
     UserCreationHelper,
-    LoginFlowHelper,
+    UserJourneyConfig,
     WebSocketSimulationHelper,
-    MessageFlowHelper,
-    ServiceCoordinationHelper,
-    ErrorRecoveryHelper,
-    PerformanceMonitoringHelper,
-    ServiceHealthHelper
 )
-
-
-
-
 
 
 class TestCompleteUserJourney:

@@ -4,16 +4,24 @@ Tests to prevent circular imports, agent registration failures, and message flow
 These tests ensure the WebSocket-Agent integration remains functional.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
 
 from netra_backend.app.logging_config import central_logger
-
 
 logger = central_logger.get_logger(__name__)
 
@@ -29,8 +37,12 @@ class TestCircularImportPrevention:
     def test_websocket_modules_import_independently(self):
         """Ensure WebSocket modules can be imported without circular dependency."""
         from netra_backend.app.websocket.connection_executor import ConnectionExecutor
-        from netra_backend.app.websocket.message_handler_core import ReliableMessageHandler
-        from netra_backend.app.websocket.websocket_broadcast_executor import BroadcastExecutor
+        from netra_backend.app.websocket.message_handler_core import (
+            ReliableMessageHandler,
+        )
+        from netra_backend.app.websocket.websocket_broadcast_executor import (
+            BroadcastExecutor,
+        )
         assert ConnectionExecutor is not None
         assert ReliableMessageHandler is not None
         assert BroadcastExecutor is not None
@@ -58,8 +70,8 @@ class TestAgentRegistration:
     @pytest.fixture
     def real_components(self):
         """Create real components for testing."""
-        from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
         
         llm_manager = LLMManager()
@@ -152,7 +164,9 @@ class TestWebSocketMessageFlow:
     
     async def test_websocket_connection_lifecycle(self):
         """Test WebSocket connection establishment and message handling."""
-        from netra_backend.app.routes.utils.websocket_helpers import process_agent_message
+        from netra_backend.app.routes.utils.websocket_helpers import (
+            process_agent_message,
+        )
         
         mock_agent_service = AsyncMock()
         mock_agent_service.handle_websocket_message = AsyncMock()
@@ -173,7 +187,9 @@ class TestAgentExecutionPipeline:
     
     def test_pipeline_executor_initialization(self):
         """Test pipeline executor can be initialized."""
-        from netra_backend.app.agents.supervisor.pipeline_executor import PipelineExecutor
+        from netra_backend.app.agents.supervisor.pipeline_executor import (
+            PipelineExecutor,
+        )
         
         mock_engine = Mock()
         mock_ws_manager = Mock()
@@ -195,7 +211,9 @@ class TestAgentExecutionPipeline:
     @pytest.mark.asyncio
     async def test_agent_execution_core(self):
         """Test agent execution core functionality."""
-        from netra_backend.app.agents.supervisor.agent_execution_core import AgentExecutionCore
+        from netra_backend.app.agents.supervisor.agent_execution_core import (
+            AgentExecutionCore,
+        )
         
         mock_registry = Mock()
         mock_agent = AsyncMock()

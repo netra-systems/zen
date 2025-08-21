@@ -14,6 +14,7 @@ This test validates the complete multi-agent AI factory pattern.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
@@ -22,13 +23,14 @@ import os
 import sys
 import time
 import uuid
-from pathlib import Path
-from typing import Optional, Dict, Any, List, Set
-import aiohttp
-import websockets
-import pytest
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+import aiohttp
+import pytest
+import websockets
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

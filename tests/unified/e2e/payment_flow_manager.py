@@ -16,10 +16,15 @@ REQUIREMENTS:
 """
 import time
 import uuid
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS, UserPlan, PlanFeatures
+from netra_backend.app.schemas.UserPlan import (
+    PLAN_DEFINITIONS,
+    PlanFeatures,
+    PlanTier,
+    UserPlan,
+)
 from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 
 

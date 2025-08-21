@@ -6,24 +6,27 @@ Maintains clean API structure under 450-line limit.
 """
 
 from typing import Optional
+
 from fastapi import APIRouter, Depends, WebSocket
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.dependencies import DbDep
-from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
+from netra_backend.app.auth_integration.auth import (
+    get_current_user,
+    get_current_user_optional,
+)
 from netra_backend.app.db.models_postgres import User as UserInDB
-from netra_backend.app.services.mcp_models import MCPClient
-
+from netra_backend.app.dependencies import DbDep
+from netra_backend.app.routes.mcp.handlers import MCPHandlers
 from netra_backend.app.routes.mcp.models import (
     MCPClientCreateRequest,
+    MCPPromptGetRequest,
+    MCPResourceReadRequest,
     MCPSessionCreateRequest,
     MCPToolCallRequest,
-    MCPResourceReadRequest,
-    MCPPromptGetRequest
 )
-from netra_backend.app.services.service_factory import get_mcp_service
-from netra_backend.app.routes.mcp.handlers import MCPHandlers
 from netra_backend.app.routes.mcp.websocket_handler import MCPWebSocketHandler
+from netra_backend.app.services.mcp_models import MCPClient
+from netra_backend.app.services.service_factory import get_mcp_service
 
 router = APIRouter(tags=["MCP"])
 
@@ -174,8 +177,9 @@ async def handle_mcp_message(
     mcp_service = Depends(get_mcp_service)
 ):
     """Handle MCP JSON-RPC message"""
-    from netra_backend.app.services.mcp_request_handler import handle_request
     from fastapi import HTTPException
+
+    from netra_backend.app.services.mcp_request_handler import handle_request
     
     result = await handle_request(request)
     

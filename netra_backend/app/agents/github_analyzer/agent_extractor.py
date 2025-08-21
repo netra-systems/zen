@@ -4,7 +4,7 @@ Specialized module for extracting and processing agent information from patterns
 Handles agent detection, pattern processing, and information formatting.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class AgentExtractor:

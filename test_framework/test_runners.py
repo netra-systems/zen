@@ -4,19 +4,25 @@ Test Runners - Core test execution functions for different test types
 Handles backend, frontend, E2E, and simple test runners
 """
 
-import sys
-import os
-import subprocess
-import time
 import atexit
+import os
 import signal
+import subprocess
+import sys
+import time
 from pathlib import Path
-from typing import Tuple, List, Dict, Optional, Any
+from typing import Any, Dict, List, Optional, Tuple
+
 from dotenv import load_dotenv
 
-from .test_config import RUNNERS
-from .test_parser import parse_test_counts, parse_coverage, parse_cypress_counts, extract_test_details
 from .bad_test_detector import BadTestDetector
+from .test_config import RUNNERS
+from .test_parser import (
+    extract_test_details,
+    parse_coverage,
+    parse_cypress_counts,
+    parse_test_counts,
+)
 
 # Load environment variables
 load_dotenv()

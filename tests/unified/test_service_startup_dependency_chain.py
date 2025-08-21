@@ -19,21 +19,25 @@ CRITICAL: Real services, comprehensive validation, functions <25 lines, max 300 
 """
 
 import asyncio
-import time
-import pytest
-import httpx
 import logging
 import sys
-from typing import Dict, Any, List, Optional, Set
-from pathlib import Path
+import time
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+import httpx
+import pytest
 
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from netra_backend.tests.unified.config import setup_test_environment
-from netra_backend.tests.unified.health_check_core import SERVICE_ENDPOINTS, HEALTH_STATUS
+from netra_backend.tests.unified.health_check_core import (
+    HEALTH_STATUS,
+    SERVICE_ENDPOINTS,
+)
 
 logger = logging.getLogger(__name__)
 

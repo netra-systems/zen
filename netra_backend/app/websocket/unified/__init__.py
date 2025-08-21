@@ -9,10 +9,10 @@ Consolidates all WebSocket functionality into a modular, scalable system:
 Business Value: Eliminates $8K MRR loss from poor real-time experience
 """
 
+from .broadcasting import BroadcastMetrics, UnifiedBroadcastingManager
 from .manager import UnifiedWebSocketManager, get_unified_manager
-from .messaging import UnifiedMessagingManager, MessageQueue
-from .broadcasting import UnifiedBroadcastingManager, BroadcastMetrics
-from .state import UnifiedStateManager, TelemetryCollector, JobQueueManager
+from .messaging import MessageQueue, UnifiedMessagingManager
+from .state import JobQueueManager, TelemetryCollector, UnifiedStateManager
 
 __all__ = [
     # Main manager

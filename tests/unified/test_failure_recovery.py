@@ -13,15 +13,19 @@ Business Value Justification (BVJ):
 Architecture: 450-line compliance with 25-line function limit enforced
 """
 
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, List
-from unittest.mock import AsyncMock, MagicMock
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.core.resilience.circuit_breaker import UnifiedCircuitBreaker, EnterpriseCircuitConfig
+import pytest
+
+from netra_backend.app.core.resilience.circuit_breaker import (
+    EnterpriseCircuitConfig,
+    UnifiedCircuitBreaker,
+)
 from netra_backend.tests.unified.config import TEST_CONFIG, TEST_USERS, get_test_user
 
 

@@ -6,18 +6,24 @@ operations. No mocks used for database or message handlers.
 Business Value: Ensures reliable data persistence for user conversations
 """
 
-import pytest
 from datetime import datetime, timezone
 from uuid import uuid4
 
+import pytest
+
+from netra_backend.app.db.repositories.agent_repository import (
+    MessageRepository,
+    ThreadRepository,
+)
 from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
-from netra_backend.app.db.repositories.agent_repository import ThreadRepository, MessageRepository
-from netra_backend.tests.unified.e2e.database_consistency_fixtures import database_test_session
+from netra_backend.tests.unified.e2e.database_consistency_fixtures import (
+    database_test_session,
+)
 from netra_backend.tests.unified.e2e.example_message_test_helpers import (
-    create_thread_data,
-    create_message_data,
+    BASIC_COST_OPTIMIZATION,
     create_example_message_request,
-    BASIC_COST_OPTIMIZATION
+    create_message_data,
+    create_thread_data,
 )
 
 

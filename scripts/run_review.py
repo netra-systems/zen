@@ -7,7 +7,7 @@ This script has been refactored into focused modules under scripts/review/
 to comply with the 450-line file limit and 25-line function limit.
 """
 
-from review import CodeReviewer, CLIHandler
+from review import CLIHandler, CodeReviewer
 
 
 def main() -> None:

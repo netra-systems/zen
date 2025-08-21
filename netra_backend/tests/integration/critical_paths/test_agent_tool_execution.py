@@ -10,23 +10,32 @@ Critical Path: Tool request -> Tool loading -> Execution -> Result processing ->
 Coverage: Real tool execution, mocked LLM responses, error handling, performance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import time
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
-
-# Real components for L2-L3 testing
-from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
+
+# Add project root to path
+# Real components for L2-L3 testing
+from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.tool_registry import AgentToolConfigRegistry
 
 logger = logging.getLogger(__name__)

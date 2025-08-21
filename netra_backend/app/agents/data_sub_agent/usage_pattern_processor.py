@@ -7,17 +7,19 @@ Business Value: Critical for customer usage optimization insights.
 BVJ: Growth & Enterprise | Usage Analytics | +20% optimization value capture
 """
 
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.core.exceptions import ProcessingError
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class UsagePatternProcessor(BaseExecutionInterface):

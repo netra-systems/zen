@@ -5,10 +5,10 @@ Strongly typed interfaces for status report generation system.
 All types follow type_safety.xml specification.
 """
 
-from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass

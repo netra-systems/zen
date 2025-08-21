@@ -4,7 +4,7 @@ Provides spec-compliant data structure builders for TODO and flow events.
 Each function must be ≤8 lines as per architecture requirements.
 """
 import time
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 def build_spec_todo_data(action: str, task_id: str, description: str,

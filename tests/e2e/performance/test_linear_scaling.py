@@ -10,13 +10,17 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for enterprise SLAs and capacity planning
 """
 
-import pytest
 import asyncio
-import time
-import statistics
 import logging
+import statistics
+import time
+
+import pytest
+
 from netra_backend.tests.e2e.test_helpers.performance_base import (
-    LoadTestResults, ThroughputAnalyzer, HIGH_VOLUME_CONFIG
+    HIGH_VOLUME_CONFIG,
+    LoadTestResults,
+    ThroughputAnalyzer,
 )
 
 logger = logging.getLogger(__name__)
@@ -166,8 +170,10 @@ class TestLinearThroughputScaling:
     
     async def _create_multiple_clients(self, count: int) -> list:
         """Create multiple client connections."""
-        from netra_backend.tests.e2e.test_helpers.performance_base import HighVolumeThroughputClient
         from netra_backend.tests.e2e.fixtures.high_volume_data import MockAuthenticator
+        from netra_backend.tests.e2e.test_helpers.performance_base import (
+            HighVolumeThroughputClient,
+        )
         
         clients = []
         for i in range(count):

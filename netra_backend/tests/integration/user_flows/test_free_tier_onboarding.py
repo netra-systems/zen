@@ -17,6 +17,14 @@ Test Coverage:
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
@@ -41,12 +49,12 @@ from netra_backend.app.services.user_service import UserService as UsageService
 from netra_backend.app.services.websocket_service import WebSocketService as WebSocketManager
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 
-from netra_backend.tests..test_helpers.user_flow_base import (
+from netra_backend.tests.test_helpers.user_flow_base import (
 
 # Add project root to path
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance
 )
-from netra_backend.tests..fixtures.user_journey_data import UserTestData, UserJourneyScenarios
+from netra_backend.tests.fixtures.user_journey_data import UserTestData, UserJourneyScenarios
 
 
 @pytest.mark.integration

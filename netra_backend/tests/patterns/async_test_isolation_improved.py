@@ -5,12 +5,13 @@ Maximum 300 lines, functions ≤8 lines
 """
 
 import asyncio
-import pytest
-from contextlib import asynccontextmanager
-from typing import Dict, List, Optional, Any, AsyncGenerator
-from unittest.mock import AsyncMock, patch
-import weakref
 import gc
+import weakref
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 
 class AsyncTestIsolationManager:

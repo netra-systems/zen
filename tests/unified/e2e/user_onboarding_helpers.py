@@ -15,7 +15,7 @@ REQUIREMENTS:
 """
 import time
 import uuid
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 from tests.unified.jwt_token_helpers import JWTTestHelper

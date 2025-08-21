@@ -3,10 +3,13 @@ Metric aggregator module for calculating and updating metrics.
 Handles aggregation operations with 25-line function limit.
 """
 
-from typing import Dict, Any
-from collections import deque, defaultdict
+from collections import defaultdict, deque
+from typing import Any, Dict
 
-from netra_backend.app.services.metrics.agent_metrics_models import AgentMetrics, AgentOperationRecord
+from netra_backend.app.services.metrics.agent_metrics_models import (
+    AgentMetrics,
+    AgentOperationRecord,
+)
 
 
 class MetricAggregator:

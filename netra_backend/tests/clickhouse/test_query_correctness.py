@@ -3,27 +3,38 @@ Test Suite 1: Query Correctness Tests
 Tests the correctness of ClickHouse queries and their results
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import uuid
 import json
+import uuid
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 from netra_backend.app.db.models_clickhouse import (
-
-# Add project root to path
+    WORKLOAD_EVENTS_TABLE_SCHEMA,
+    # Add project root to path
     get_content_corpus_schema,
     get_llm_events_table_schema,
-    WORKLOAD_EVENTS_TABLE_SCHEMA
 )
-from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+
+# Add project root to path
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.tests.helpers.shared_test_types import (
+    TestErrorHandling as SharedTestErrorHandling,
+)
 
 
 class TestCorpusQueries:
@@ -316,7 +327,9 @@ class TestGenerationServiceQueries:
     """Test generation service queries"""
     async def test_get_corpus_from_clickhouse_query(self):
         """Test 14: Verify corpus loading query from generation service"""
-        from netra_backend.app.services.generation_service import get_corpus_from_clickhouse
+        from netra_backend.app.services.generation_service import (
+            get_corpus_from_clickhouse,
+        )
         
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             mock_instance = AsyncMock()
@@ -336,7 +349,9 @@ class TestGenerationServiceQueries:
             }
     async def test_save_corpus_to_clickhouse_batch_insert(self):
         """Test 15: Verify batch insert for corpus saving"""
-        from netra_backend.app.services.generation_service import save_corpus_to_clickhouse
+        from netra_backend.app.services.generation_service import (
+            save_corpus_to_clickhouse,
+        )
         
         with patch('app.services.generation_service.ClickHouseDatabase') as mock_db:
             mock_instance = AsyncMock()

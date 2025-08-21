@@ -26,31 +26,33 @@ REQUIREMENTS:
 - Must complete in <10 seconds for business UX requirements  
 - 450-line limit, 25-line function limit per architectural standards
 """
-import pytest
 import asyncio
-import time
-import httpx
 import os
-from typing import Dict, Any, Optional
+import time
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
 from unittest.mock import MagicMock
+
+import httpx
+import pytest
 
 # Set test environment for controlled execution
 os.environ["TESTING"] = "1"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from tests.unified.test_harness import UnifiedTestHarness
-from tests.unified.database_test_connections import DatabaseConnectionManager
 from helpers.unified_flow_helpers import (
-    ControlledSignupHelper,
-    ControlledLoginHelper,
-    WebSocketSimulationHelper,
     ChatFlowSimulationHelper,
     ConcurrentJourneyHelper,
-    validate_signup_integration,
+    ControlledLoginHelper,
+    ControlledSignupHelper,
+    WebSocketSimulationHelper,
+    validate_chat_integration,
     validate_login_integration,
-    validate_chat_integration
+    validate_signup_integration,
 )
+
+from tests.unified.database_test_connections import DatabaseConnectionManager
+from tests.unified.test_harness import UnifiedTestHarness
 
 
 class RealUnifiedFlowTester:

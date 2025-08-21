@@ -1,20 +1,24 @@
+import asyncio
+from typing import Any, Dict
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
-from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
-from netra_backend.app.services.schema_validation_service import SchemaValidationService
+
 from netra_backend.app.core.configuration import unified_config_manager
-from netra_backend.app.dependencies import get_db_dependency
 
 # Unified Health System imports
 from netra_backend.app.core.health import (
-    HealthInterface, HealthLevel, DatabaseHealthChecker, 
-    DependencyHealthChecker, HealthResponseBuilder
+    DatabaseHealthChecker,
+    DependencyHealthChecker,
+    HealthInterface,
+    HealthLevel,
+    HealthResponseBuilder,
 )
-
-import asyncio
-from typing import Dict, Any
+from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database_env_service import DatabaseEnvironmentValidator
+from netra_backend.app.services.schema_validation_service import SchemaValidationService
 
 router = APIRouter()
 logger = central_logger.get_logger(__name__)
@@ -132,9 +136,11 @@ async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
         # Initialize postgres through service pattern
-        from netra_backend.app.services.database_operations_service import database_operations_service
         from netra_backend.app.db.postgres import initialize_postgres
         from netra_backend.app.db.postgres_core import async_engine
+        from netra_backend.app.services.database_operations_service import (
+            database_operations_service,
+        )
         
         # Always get fresh reference to engine after ensuring initialization
         if async_engine is None:

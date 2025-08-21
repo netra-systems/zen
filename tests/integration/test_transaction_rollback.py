@@ -1,10 +1,11 @@
-from netra_backend.app.agents.supervisor import SupervisorAgent
-import pytest
 from unittest.mock import patch
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import text, Column, Integer, String
-from sqlalchemy.orm import declarative_base
+
+import pytest
+from sqlalchemy import Column, Integer, String, text
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from netra_backend.app.agents.supervisor import SupervisorAgent
 
 # Define a simple model for the test
 Base = declarative_base()

@@ -3,13 +3,14 @@ Auth-Agent Flow Test - Complete authentication to personalized agent response
 BVJ: All paid tiers | Security foundation | $50K+ MRR protection | 20% performance fees
 File ≤300 lines, functions ≤8 lines per architectural requirements.
 """
-import pytest
 import asyncio
-import uuid
-import time
 import os
-from typing import Dict, Any, Optional
+import time
+import uuid
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Set test environment before any imports
 os.environ["TESTING"] = "1"

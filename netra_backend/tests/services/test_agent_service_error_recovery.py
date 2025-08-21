@@ -19,17 +19,25 @@ PERFORMANCE REQUIREMENTS:
 - Circuit breaker tests: < 1s for full cycle
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 from unittest.mock import MagicMock
 
+import pytest
+
 # Add project root to path
-
 from netra_backend.app.core.exceptions_base import NetraException
-
 from netra_backend.tests.test_agent_service_fixtures import resilient_orchestrator
 from netra_backend.tests.test_agent_service_mock_classes import AgentState
 

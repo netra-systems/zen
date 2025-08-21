@@ -3,11 +3,11 @@
 Core data structures for message batching system.
 """
 
-import time
 import json
+import time
 from dataclasses import dataclass, field
-from typing import Dict, Any, Union
 from enum import Enum
+from typing import Any, Dict, Union
 
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 

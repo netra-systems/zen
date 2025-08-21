@@ -1,5 +1,5 @@
-import os
 import ast
+import os
 import sys
 
 CRITICAL_PATHS = [

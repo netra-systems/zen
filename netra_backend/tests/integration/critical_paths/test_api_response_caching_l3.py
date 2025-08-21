@@ -10,27 +10,36 @@ Critical Path: Request analysis -> Cache lookup -> Cache hit/miss -> Response ge
 Coverage: Cache strategies, TTL management, cache invalidation, cache warming, performance optimization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import hashlib
+import logging
 import time
 import uuid
-import logging
-import hashlib
-import aiohttp
-from typing import Dict, List, Optional, Any, Union
-from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.services.api_gateway.cache_manager import ApiCacheManager
 from netra_backend.app.services.api_gateway.cache_strategies import CacheStrategy
-from netra_backend.app.services.redis.redis_cache import RedisCache
 from netra_backend.app.services.metrics.cache_metrics import CacheMetricsService
+from netra_backend.app.services.redis.redis_cache import RedisCache
 
 # Add project root to path
 

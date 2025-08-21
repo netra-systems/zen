@@ -2,10 +2,11 @@
 Corpus management for synthetic data generation
 """
 
-import uuid
 import asyncio
-from datetime import datetime, UTC
+import uuid
+from datetime import UTC, datetime
 from typing import Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

@@ -17,14 +17,15 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
 from tests.unified.config import TEST_ENDPOINTS, TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.network_failure_simulator import NetworkFailureSimulator
 from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class WebSocketResilienceTestCore:

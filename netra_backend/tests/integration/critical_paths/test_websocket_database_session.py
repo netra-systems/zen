@@ -24,28 +24,37 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import threading
 import time
 import uuid
-import threading
-from datetime import datetime
-from typing import Dict, Any, Optional, List, AsyncContextManager
 from contextlib import asynccontextmanager
+from datetime import datetime
+from typing import Any, AsyncContextManager, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
+
+import pytest
 import sqlalchemy
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy import text, event
+from sqlalchemy import event, text
 from sqlalchemy.exc import DatabaseError, IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 # Add project root to path
-
 from netra_backend.app.db.postgres import get_postgres_session
-from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

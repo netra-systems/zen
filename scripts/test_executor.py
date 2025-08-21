@@ -5,11 +5,12 @@ Handles test execution and autonomous review operations
 Complies with 450-line limit and 25-line function constraint
 """
 
-import subprocess
 import re
+import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List
-from dataclasses import dataclass
+
 
 @dataclass
 class TestExecutionResult:

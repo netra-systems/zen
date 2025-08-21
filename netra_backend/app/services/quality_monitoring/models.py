@@ -1,13 +1,11 @@
 """Data models for quality monitoring"""
 
-from typing import Dict, List, Optional, Any
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.health_types import AlertSeverity
-
-
 
 
 class MetricType(Enum):

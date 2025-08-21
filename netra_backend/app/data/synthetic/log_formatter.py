@@ -1,7 +1,8 @@
 # Log Entry Formatting Module for Synthetic Data Generation
-import uuid
 import time
-from typing import Dict, Any, Optional, Union
+import uuid
+from typing import Any, Dict, Optional, Union
+
 import pandas as pd
 
 

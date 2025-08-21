@@ -5,7 +5,6 @@ This module contains prompt templates for the triage sub-agent.
 
 from langchain_core.prompts import PromptTemplate
 
-
 # Triage Sub-Agent Prompt
 triage_prompt_template = PromptTemplate(
     input_variables=["user_request"],

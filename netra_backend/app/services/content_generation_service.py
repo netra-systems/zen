@@ -4,22 +4,25 @@ Provides parallel content generation using LLM APIs with proper
 job management, progress tracking, and result persistence.
 """
 
-import os
 import asyncio
+import os
 from multiprocessing import Pool, cpu_count
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.config import settings
 from netra_backend.app.data.synthetic.content_generator import META_PROMPTS
-from netra_backend.app.services.generation_worker import init_worker, generate_content_for_worker
-from netra_backend.app.services.generation_job_manager import (
-    update_job_status,
-    save_corpus_to_clickhouse,
-    validate_job_params,
-    create_output_directory,
-    save_job_result_to_file
-)
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.generation_job_manager import (
+    create_output_directory,
+    save_corpus_to_clickhouse,
+    save_job_result_to_file,
+    update_job_status,
+    validate_job_params,
+)
+from netra_backend.app.services.generation_worker import (
+    generate_content_for_worker,
+    init_worker,
+)
 
 logger = central_logger.get_logger(__name__)
 

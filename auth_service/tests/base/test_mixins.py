@@ -5,13 +5,18 @@ Each mixin provides focused functionality following single responsibility.
 """
 
 import asyncio
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
-from sqlalchemy.ext.asyncio import AsyncSession
-import aioredis
 
-from auth_service.auth_core.database.models import AuthUser, AuthSession
-from auth_service.tests.factories import AuthUserFactory, AuthSessionFactory, AuditLogFactory
+import aioredis
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from auth_service.auth_core.database.models import AuthSession, AuthUser
+from auth_service.tests.factories import (
+    AuditLogFactory,
+    AuthSessionFactory,
+    AuthUserFactory,
+)
 
 
 class DatabaseTestMixin:
@@ -59,7 +64,7 @@ class DatabaseTestMixin:
     
     async def count_users_in_database(self, db_session: AsyncSession) -> int:
         """Count total users in database"""
-        from sqlalchemy import select, func
+        from sqlalchemy import func, select
         result = await db_session.execute(
             select(func.count(AuthUser.id))
         )
@@ -67,7 +72,7 @@ class DatabaseTestMixin:
     
     async def count_sessions_in_database(self, db_session: AsyncSession) -> int:
         """Count total sessions in database"""
-        from sqlalchemy import select, func
+        from sqlalchemy import func, select
         result = await db_session.execute(
             select(func.count(AuthSession.id))
         )

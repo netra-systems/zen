@@ -4,31 +4,39 @@ Tests error context integration, weak reference behavior, and concurrency edge c
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import time
-import pytest
-import threading
-import weakref
 import gc
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import List, Any
+import threading
+import time
+import weakref
+from typing import Any, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.core.async_utils import (
-
-# Add project root to path
+    AsyncCircuitBreaker,
+    AsyncRateLimiter,
+    # Add project root to path
     AsyncResourceManager,
     AsyncTaskPool,
-    AsyncRateLimiter,
-    AsyncCircuitBreaker,
-    shutdown_async_utils
+    shutdown_async_utils,
 )
-from netra_backend.app.core.exceptions_service import ServiceTimeoutError, ServiceError
 from netra_backend.app.core.error_context import ErrorContext
+from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
 
 class TestErrorContextIntegration:
@@ -338,8 +346,9 @@ class TestConcurrencyEdgeCases:
         assert started_count > 0
     async def test_memory_cleanup_under_load(self):
         """Test memory cleanup under sustained load."""
-        import psutil
         import os
+
+        import psutil
         
         process = psutil.Process(os.getpid())
         initial_memory = process.memory_info().rss

@@ -10,27 +10,37 @@ Business Value Justification (BVJ):
 This test validates first chat session and profile setup flows.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
-from sqlalchemy.ext.asyncio import AsyncSession
+import pytest
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.tests.integration.helpers.user_flow_helpers import (
-
-# Add project root to path
-    generate_test_user_data, generate_test_thread_data,
-    MockAuthService, MockWebSocketManager
+    MockAuthService,
+    MockWebSocketManager,
+    generate_test_thread_data,
+    # Add project root to path
+    generate_test_user_data,
 )
+
 
 class TestUserOnboardingFlow:
     """Test user onboarding and first session flow"""

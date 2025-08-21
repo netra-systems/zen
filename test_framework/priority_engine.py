@@ -5,11 +5,12 @@ ULTRA OPTIMIZED: 100x faster test failure detection
 """
 
 import math
-from typing import List, Dict, Optional, Set
-from dataclasses import dataclass
-from pathlib import Path
-from datetime import datetime
 from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set
+
 
 @dataclass
 class TestScore:

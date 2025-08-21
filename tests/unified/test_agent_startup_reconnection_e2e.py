@@ -17,12 +17,15 @@ Architecture: 450-line compliance through focused reconnection and isolation tes
 
 # Test infrastructure
 
+import asyncio
+import time
+
+import pytest
+
 from tests.agent_reconnection_state_manager import AgentStateReconnectionManager
 from tests.concurrent_user_isolation_manager import ConcurrentUserIsolationManager
 from tests.real_client_factory import create_real_client_factory
-import asyncio
-import pytest
-import time
+
 
 @pytest.mark.asyncio
 

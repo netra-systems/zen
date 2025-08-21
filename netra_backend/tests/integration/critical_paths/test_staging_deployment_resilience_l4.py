@@ -15,33 +15,43 @@ This test validates the complete staging deployment pipeline including:
 L4 Realism Level: Full staging environment with real GCP services, Cloud SQL, multi-region
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
 import logging
 import os
 import subprocess
-from typing import Dict, Any, List, Optional, Tuple, Set
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
-import httpx
-import websockets
+import time
 from concurrent.futures import ThreadPoolExecutor
-
-# Add project root to path
-
-from netra_backend.app.core.configuration.base import get_unified_config
-from loguru import logger
-from netra_backend.app.services.health_check_service import HealthCheckService
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Add project root to path
 # from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
+
+import httpx
+import pytest
+import websockets
+from loguru import logger
+
+# Add project root to path
+from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.services.health_check_service import HealthCheckService
+
 RedisSessionManager = AsyncMock
 from netra_backend.app.services.database.postgres_service import PostgresService
 

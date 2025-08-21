@@ -4,22 +4,35 @@ Tests complex multi-objective optimization scenarios.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from typing import Dict, List
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
-
-# Add project root to path
-    create_agent_instances, build_multi_constraint_setup,
-    execute_multi_constraint_workflow, create_triple_constraint_state,
-    create_quality_cost_latency_state, validate_basic_workflow_execution,
-    validate_constraint_conflict_identification, validate_multi_objective_analysis,
-    validate_compromise_recommendations, validate_completed_or_fallback_states
+    build_multi_constraint_setup,
+    # Add project root to path
+    create_agent_instances,
+    create_quality_cost_latency_state,
+    create_triple_constraint_state,
+    execute_multi_constraint_workflow,
+    validate_basic_workflow_execution,
+    validate_completed_or_fallback_states,
+    validate_compromise_recommendations,
+    validate_constraint_conflict_identification,
+    validate_multi_objective_analysis,
 )
 
 

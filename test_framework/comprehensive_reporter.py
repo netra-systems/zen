@@ -6,13 +6,13 @@ No legacy reports, no confusion, just clarity.
 
 import json
 import shutil
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from typing import Dict
 
+from test_framework.report_generators import generate_markdown_report
 from test_framework.reporter_base import ReporterConstants
 from test_framework.reporter_updater import TestResultsUpdater
-from test_framework.report_generators import generate_markdown_report
 
 
 class ComprehensiveTestReporter:

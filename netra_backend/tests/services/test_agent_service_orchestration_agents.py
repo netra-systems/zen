@@ -19,24 +19,32 @@ PERFORMANCE REQUIREMENTS:
 - Memory: Efficient agent pool management
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, UTC
-from typing import Dict, Any
+from datetime import UTC, datetime
+from typing import Any, Dict
 from unittest.mock import MagicMock
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.test_agent_service_fixtures import (
-
-# Add project root to path
+    AgentOrchestrator,
+    # Add project root to path
     AgentState,
-    MockSupervisorAgent, 
-    AgentOrchestrator
+    MockSupervisorAgent,
 )
 
 

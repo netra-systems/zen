@@ -3,17 +3,23 @@ Standalone runner for auth service compliance tests.
 This runs the tests without needing the full test infrastructure.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 # Import and run tests directly
-from netra_backend.tests.integration.critical_paths.test_auth_service_compliance_suite1_oauth_l4 import TestDirectOAuthImplementationDetection
-from netra_backend.tests.integration.critical_paths.test_auth_service_compliance_suite2_bypass_l4 import TestAuthServiceBypassDetection
-from netra_backend.tests.integration.critical_paths.test_auth_service_compliance_suite3_reimplementation_l4 import TestLocalAuthReimplementationDetection
+from netra_backend.tests.integration.critical_paths.test_auth_service_compliance_suite1_oauth_l4 import (
+    TestDirectOAuthImplementationDetection,
+)
+from netra_backend.tests.integration.critical_paths.test_auth_service_compliance_suite2_bypass_l4 import (
+    TestAuthServiceBypassDetection,
+)
+from netra_backend.tests.integration.critical_paths.test_auth_service_compliance_suite3_reimplementation_l4 import (
+    TestLocalAuthReimplementationDetection,
+)
 
 
 def run_test_suite(test_class, suite_name):

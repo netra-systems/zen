@@ -11,45 +11,52 @@ Coverage: Full pipeline validation with real LLM providers, staging environment 
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from decimal import Decimal
-from datetime import datetime, timezone
-from unittest.mock import patch
-import websockets
-from websockets.exceptions import ConnectionClosedError
 
 # Add project root to path
 import sys
+import time
+import uuid
+from datetime import datetime, timezone
+from decimal import Decimal
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import patch
+
+import pytest
+import websockets
+from websockets.exceptions import ConnectionClosedError
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from netra_backend.app.core.config import settings
-from netra_backend.app.llm.llm_manager import LLMManager
+from auth_integration.auth import get_current_user
 
-# Add project root to path for tests
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.services.cost_calculator import CostCalculatorService
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from auth_integration.auth import get_current_user
+
+# Add project root to path for tests
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.core.config import settings
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage, ServerMessage as WSResponse
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.llm_response_types import LLMResponse
+from netra_backend.app.schemas.registry import ServerMessage as WSResponse
+from netra_backend.app.schemas.registry import WebSocketMessage as WSMessage
+from netra_backend.app.services.cost_calculator import CostCalculatorService
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.websocket_manager import WebSocketManager
+from netra_backend.tests.unified.e2e.real_client_types import (
+    ClientConfig,
+    ConnectionState,
+)
 from netra_backend.tests.unified.e2e.real_websocket_client import RealWebSocketClient
-from netra_backend.tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
 
 # Add project root to path
 
@@ -381,7 +388,8 @@ class AgentPipelineRealLLMTester:
     async def _initialize_supervisor_agent(self, test_id: str):
         """Initialize supervisor agent for test session."""
         # Create mock dependencies for supervisor agent
-        from unittest.mock import MagicMock, AsyncMock
+        from unittest.mock import AsyncMock, MagicMock
+
         from sqlalchemy.ext.asyncio import AsyncSession
         
         # Create mock database session

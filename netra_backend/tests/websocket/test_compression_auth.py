@@ -3,18 +3,30 @@ WebSocket compression and authentication testing module.
 Tests compression algorithms, authentication expiry handling, and security features.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
+import random
 import time
 import uuid
 import zlib
-import random
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock
+
+import pytest
+
+
 def _create_compressible_test_data() -> str:
     """Create test data that compresses well"""
     return json.dumps({

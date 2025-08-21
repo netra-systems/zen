@@ -1,10 +1,11 @@
 """Path traversal protection middleware."""
-from fastapi import Request, HTTPException
-from fastapi.responses import JSONResponse
+import logging
 import os
 import re
 from typing import List
-import logging
+
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 

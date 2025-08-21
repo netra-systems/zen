@@ -14,8 +14,8 @@ Architectural Compliance:
 - Single responsibility: Performance data processing and trend analysis
 """
 
-from typing import Dict, List
 from datetime import datetime
+from typing import Dict, List
 
 
 class AgentPerformanceDataProcessor:

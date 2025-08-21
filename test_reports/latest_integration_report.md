@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T13:00:03.601958  
+**Generated:** 2025-08-21T15:29:13.692454  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 4 | 0 | 0 | 0 | 4 | 17.53s | [FAILED] |
-| Frontend  | 1 | 0 | 1 | 0 | 0 | 2.98s | [FAILED] |
+| Backend   | 4 | 0 | 0 | 0 | 4 | 18.18s | [FAILED] |
+| Frontend  | 1 | 0 | 1 | 0 | 0 | 2.91s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 20.50s
+- **Total Duration:** 21.09s
 - **Exit Code:** 2
 
 ### Backend Configuration
@@ -69,37 +69,43 @@ plugins: anyio-4.9.0, Faker-37.5.3, langsmith-0.4.15, asyncio-1.1.0, cov-6.2.1, 
 asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
 created: 4/4 workers
 
-================================================================================
-BAD TEST DETECTION REPORT
-================================================================================
-
-Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 157
-
-================================================================================
-
-
 =================================== ERRORS ====================================
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
-[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-'l3' not found in `markers` configuration option
+[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+'l4' not found in `markers` configuration option
+[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+'l4' not found in `markers` configuration option
+[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+'l4' not found in `markers` configuration option
+[31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+'l4' not found in `markers` configuration option
 [36m[1m=========================== short test summary info ===========================[0m
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
+[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+[31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
 [31m!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 4 failures !!!!!!!!!!!!!!!!!!!!!!!!!![0m
 !!!!!!!!!!!! xdist.dsession.Interrupted: stopping after 1 failures !!!!!!!!!!!!
-[31m============================= [31m[1m4 errors[0m[31m in 10.21s[0m[31m ==============================[0m
+[31m============================= [31m[1m4 errors[0m[31m in 10.03s[0m[31m ==============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 2 after 16.47s
+[FAIL] TESTS FAILED with exit code 2 after 16.97s
 ================================================================================
 
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
+  class TestAgentCommunicationBasic(L3IntegrationTest):
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
+  class TestAgentCommunicationBasic(L3IntegrationTest):
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
+  class TestcontainerHelper:
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
+  class TestcontainerHelper:
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
+  class TestAgentCommunicationBasic(L3IntegrationTest):
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\integration\critical_paths\test_agent_communication_basic_l3.py:35: PytestCollectionWarning: cannot collect test class 'TestAgentCommunicationBasic' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_communication_basic_l3.py)
+  class TestAgentCommunicationBasic(L3IntegrationTest):
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
+  class TestcontainerHelper:
+C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\test_framework\testcontainers_utils.py:19: PytestCollectionWarning: cannot collect test class 'TestcontainerHelper' because it has a __init__ constructor (from: netra_backend/tests/integration/critical_paths/test_agent_context_isolation_boundaries_l3.py)
+  class TestcontainerHelper:
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
   warnings.warn(
 C:\Users\antho\AppData\Roaming\Python\Python312\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
@@ -134,165 +140,165 @@ FAIL __tests__/integration/logout-websocket.test.tsx
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket Disconnection › should verify WebSocket is disconnected
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket Disconnection › should clear WebSocket message queue
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket Disconnection › should handle WebSocket disconnection errors
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket State Cleanup › should ensure WebSocket connection is terminated
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket State Cleanup › should prevent new WebSocket messages after logout
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket State Cleanup › should clear any pending WebSocket operations
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket State Cleanup › should ensure clean WebSocket state for next session
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket Timing Requirements › should complete WebSocket disconnect within 25ms
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket Timing Requirements › should not block logout process if WebSocket fails
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
-      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:72:21)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
+      at Object.setupAuthStore (__tests__/integration/logout-websocket.test.tsx:74:21)
 
   ● Logout WebSocket Disconnection Tests › WebSocket Timing Requirements › should handle WebSocket timeout gracefully
 
     TypeError: _authStore.useAuthStore.mockReturnValue is not a function
 
-    [0m [90m 38 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
-     [90m 39 |[39m   }[33m;[39m
-    [31m[1m>[22m[39m[90m 40 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
+    [0m [90m 40 |[39m     setError[33m:[39m jest[33m.[39mfn()[33m,[39m
+     [90m 41 |[39m   }[33m;[39m
+    [31m[1m>[22m[39m[90m 42 |[39m   (useAuthStore [36mas[39m jest[33m.[39m[33mMock[39m)[33m.[39mmockReturnValue(mockStore)[33m;[39m
      [90m    |[39m                               [31m[1m^[22m[39m
-     [90m 41 |[39m   [36mreturn[39m mockStore[33m;[39m
-     [90m 42 |[39m }[33m;[39m
-     [90m 43 |[39m[0m
+     [90m 43 |[39m   [36mreturn[39m mockStore[33m;[39m
+     [90m 44 |[39m }[33m;[39m
+     [90m 45 |[39m[0m
 
-      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:40:31)
+      at mockReturnValue (__tests__/integration/logout-websocket.test.tsx:42:31)
       at Object.setupAuthStore (__tests__/integration/...(truncated)
 ```
 
@@ -300,15 +306,15 @@ FAIL __tests__/integration/logout-websocket.test.tsx
 
 ### Backend Errors
 - =================================== ERRORS ====================================
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py _[0m
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_collaboration_workflow_l3.py - Failed: 'l3' not found in `markers` configuration option
-- [FAIL] TESTS FAILED with exit code 2 after 16.47s
+- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+- [31m[1m_ ERROR collecting netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py _[0m
+- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+- [31mERROR[0m netra_backend/tests/integration/critical_paths/test_agent_failover_recovery_l4.py - Failed: 'l4' not found in `markers` configuration option
+- [FAIL] TESTS FAILED with exit code 2 after 16.97s
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1

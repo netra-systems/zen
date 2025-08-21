@@ -4,10 +4,14 @@ Provides focused validation for DeepAgentState transitions and artifacts.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from typing import Optional, Type, Any, Dict
+from typing import Any, Dict, Optional, Type
+
+from netra_backend.app.agents.data_sub_agent.models import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
 
 
 class StateTransitionValidator:
@@ -235,7 +239,7 @@ class StateValidationReporter:
     
     def _get_current_timestamp(self) -> str:
         """Get current timestamp for reporting."""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return datetime.now(UTC).isoformat()
     
     def get_summary_report(self) -> Dict[str, Any]:

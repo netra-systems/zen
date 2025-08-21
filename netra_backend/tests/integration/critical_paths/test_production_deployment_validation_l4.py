@@ -14,22 +14,24 @@ This test validates the complete production deployment lifecycle.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
+import hashlib
 import json
 import os
+import subprocess
 import sys
 import time
-import subprocess
-from pathlib import Path
-from typing import Optional, Dict, Any, List
-import aiohttp
-import websockets
-import pytest
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import pytest
+import websockets
 import yaml
-import hashlib
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

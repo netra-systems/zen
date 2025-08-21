@@ -17,11 +17,11 @@ This module contains all prompt templates for various agents in the Netra platfo
 
 # Import all prompts from the modular structure for backward compatibility
 from netra_backend.app.agents.prompts import (
-    triage_prompt_template,
+    actions_to_meet_goals_prompt_template,
     data_prompt_template,
     optimizations_core_prompt_template,
-    actions_to_meet_goals_prompt_template,
-    reporting_prompt_template
+    reporting_prompt_template,
+    triage_prompt_template,
 )
 
 # Export all prompts for backward compatibility

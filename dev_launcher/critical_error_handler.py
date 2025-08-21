@@ -4,10 +4,10 @@ Critical error handling for startup process.
 Defines and handles critical errors that should stop the entire startup process.
 """
 
-import sys
 import logging
-from typing import Optional, Dict, Any
+import sys
 from enum import Enum
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

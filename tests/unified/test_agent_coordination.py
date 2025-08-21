@@ -10,11 +10,16 @@ Architecture: 450-line compliance with focused agent coordination testing
 Real agent interactions only - no mocked placeholders
 """
 
-import pytest
 import asyncio
 from datetime import datetime
+
+import pytest
+
 from netra_backend.tests.unified.agent_orchestration_fixtures import (
-    mock_supervisor_agent, mock_sub_agents, sample_agent_state, coordination_test_data
+    coordination_test_data,
+    mock_sub_agents,
+    mock_supervisor_agent,
+    sample_agent_state,
 )
 
 

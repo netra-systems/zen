@@ -9,8 +9,8 @@ from typing import Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.error_types import WebSocketErrorInfo
 from netra_backend.app.websocket.error_handler_config import ErrorHandlerConfig
+from netra_backend.app.websocket.error_types import WebSocketErrorInfo
 
 logger = central_logger.get_logger(__name__)
 

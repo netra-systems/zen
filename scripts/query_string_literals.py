@@ -6,9 +6,10 @@ Allows querying and validation of string literals from the index.
 
 import json
 import sys
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from difflib import get_close_matches
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 
 class StringLiteralQuery:
     """Query interface for string literals index."""

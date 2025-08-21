@@ -2,18 +2,20 @@
 Unit tests for OAuth models and validation
 Tests Pydantic models used in OAuth flows
 """
+from datetime import UTC, datetime
+
 import pytest
 from pydantic import ValidationError
-from datetime import datetime, UTC
 
 from auth_service.auth_core.models.auth_models import (
+    AuthConfigResponse,
+    AuthEndpoints,
     AuthProvider,
     LoginRequest,
     LoginResponse,
     TokenResponse,
-    AuthConfigResponse,
-    AuthEndpoints
 )
+
 
 class TestAuthProvider:
     """Test AuthProvider enum"""

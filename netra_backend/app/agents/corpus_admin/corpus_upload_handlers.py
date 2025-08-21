@@ -6,8 +6,8 @@ Provides specialized handlers for document upload failures with recovery strateg
 import os
 from typing import Any, Dict, List, Optional
 
-from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
 from netra_backend.app.agents.corpus_admin.corpus_error_types import DocumentUploadError
+from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

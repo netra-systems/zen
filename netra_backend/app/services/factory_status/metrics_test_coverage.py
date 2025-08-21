@@ -7,8 +7,14 @@ Follows 450-line limit with 25-line function limit.
 import subprocess
 from pathlib import Path
 from typing import List
-from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitType
-from netra_backend.app.services.factory_status.metrics_quality_types import TestCoverageMetrics
+
+from netra_backend.app.services.factory_status.git_commit_parser import (
+    CommitType,
+    GitCommitParser,
+)
+from netra_backend.app.services.factory_status.metrics_quality_types import (
+    TestCoverageMetrics,
+)
 
 
 class TestCoverageCalculator:

@@ -17,17 +17,18 @@ Critical OAuth E2E Test - Login → Dashboard → Chat History
 """
 
 import asyncio
-import uuid
-import pytest
 import time
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
-from unittest.mock import patch, AsyncMock
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, patch
 
+import pytest
+
+from netra_backend.app.logging_config import central_logger
 from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
 from tests.unified.real_http_client import RealHTTPClient
 from tests.unified.real_services_manager import create_real_services_manager
-from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

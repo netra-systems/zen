@@ -11,22 +11,31 @@ L3 Test: Uses multiple PostgreSQL containers to simulate primary-replica setup
 and validate read routing, load balancing, and failover mechanisms.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import random
 import time
 import uuid
-import random
-from typing import List, Dict, Any, Optional
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 import asyncpg
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+import pytest
 from sqlalchemy.exc import OperationalError
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
 
 from netra_backend.app.logging_config import central_logger

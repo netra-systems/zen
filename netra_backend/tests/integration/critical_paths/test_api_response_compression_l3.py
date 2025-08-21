@@ -10,18 +10,28 @@ Critical Path: Response generation -> Compression evaluation -> Compression appl
 Coverage: Gzip compression, content negotiation, compression thresholds, performance optimization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import logging
-import aiohttp
 import gzip
 import json
-from typing import Dict, List, Optional, Any
+import logging
+import time
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import pytest
 
 logger = logging.getLogger(__name__)
 

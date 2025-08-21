@@ -21,13 +21,14 @@ ISSUE: FastAPI Depends() doesn't work properly in WebSocket endpoints for databa
 IMPACT: Database connection failures in production WebSockets causing '_AsyncGeneratorContextManager' errors
 """
 
-import asyncio
-import time
-import json
-import inspect
 import ast
-from typing import Dict, Optional, List, Tuple, Any
-from unittest.mock import Mock, AsyncMock, patch
+import asyncio
+import inspect
+import json
+import time
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 
 # Note: Config imports are for full test framework - not needed for simplified validation
@@ -70,7 +71,7 @@ class WebSocketDatabaseSessionTester:
         
         try:
             # Import the routes to check for WebSocket endpoints
-            from netra_backend.app.routes import websockets, demo
+            from netra_backend.app.routes import demo, websockets
             from netra_backend.app.routes.mcp import main as mcp_main
             
             # Check main websocket routes
@@ -167,8 +168,8 @@ class WebSocketDatabaseSessionTester:
         violations = []
         
         try:
-            import os
             import glob
+            import os
             
             # Search for Python files in routes directory
             base_path = "C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\app\\routes"
@@ -444,7 +445,9 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         
         # Test 2: Check for correct patterns in websocket helpers
         try:
-            from netra_backend.app.routes.utils.websocket_helpers import authenticate_websocket_user
+            from netra_backend.app.routes.utils.websocket_helpers import (
+                authenticate_websocket_user,
+            )
             
             source = inspect.getsource(authenticate_websocket_user)
             if "async with get_async_db()" in source:
@@ -475,6 +478,7 @@ async def run_simplified_websocket_validation() -> Dict[str, Any]:
         depends_issue_demo = {}
         try:
             from fastapi import Depends
+
             from netra_backend.app.db.postgres import get_async_db
         except ImportError:
             # Mock for standalone execution

@@ -4,9 +4,10 @@ Fast Auth Service Test Runner
 Optimizes auth service startup for E2E testing by setting appropriate environment variables.
 """
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def set_fast_auth_environment():
     """Set environment variables for fast auth service testing"""

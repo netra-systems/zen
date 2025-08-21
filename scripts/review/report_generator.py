@@ -4,9 +4,9 @@ Report generator for code review system.
 Generates comprehensive markdown reports from review data.
 """
 
-from typing import List
 from datetime import datetime
 from pathlib import Path
+from typing import List
 
 from .core import ReviewConfig, ReviewData
 

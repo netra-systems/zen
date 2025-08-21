@@ -2,13 +2,17 @@
 Pytest fixtures for WebSocketManager tests
 """
 
-import pytest
 import asyncio
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
+
+import pytest
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
+from netra_backend.app.services.websocket.ws_manager import (
+    ConnectionInfo,
+    WebSocketManager,
+)
 
 
 class MockWebSocket:

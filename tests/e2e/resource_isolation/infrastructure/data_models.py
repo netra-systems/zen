@@ -5,8 +5,9 @@ Contains dataclasses and configuration for resource isolation tests.
 """
 
 import os
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
 import websockets
 
 # Performance Requirements

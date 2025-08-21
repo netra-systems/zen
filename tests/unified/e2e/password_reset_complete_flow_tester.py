@@ -14,7 +14,7 @@ REQUIREMENTS:
 - 450-line file limit, 25-line function limit
 """
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
 from tests.unified.e2e.password_reset_test_helpers import PasswordResetE2ETester
 

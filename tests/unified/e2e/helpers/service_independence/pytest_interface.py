@@ -8,9 +8,14 @@ This module provides the pytest test functions for service independence validati
 Maintains compatibility with existing test runners and CI/CD pipelines.
 """
 
-import pytest
 import asyncio
-from tests.unified.e2e.helpers.service_independence import ServiceIndependenceValidator, TEST_TIMEOUT
+
+import pytest
+
+from tests.unified.e2e.helpers.service_independence import (
+    TEST_TIMEOUT,
+    ServiceIndependenceValidator,
+)
 
 
 @pytest.mark.critical

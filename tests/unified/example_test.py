@@ -5,11 +5,12 @@ Demonstrates how to use the unified testing infrastructure
 This shows the REAL service testing approach per SPEC/unified_system_testing.xml
 """
 
-import pytest
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
 
-from tests.unified import UnifiedTestHarness, TestHarnessContext, TestClient
+import pytest
+
+from tests.unified import TestClient, TestHarnessContext, UnifiedTestHarness
 
 
 @pytest.mark.asyncio

@@ -13,31 +13,44 @@ Target Coverage:
 - Error scenarios: 401 Unauthorized, 404 User Not Found, service failures
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import uuid
 from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
 from fastapi import HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.auth_integration.auth import (
-
-# Add project root to path
-    get_current_user, get_current_user_optional, require_admin, 
-    require_developer, require_permission, get_password_hash,
-    verify_password, create_access_token, validate_token_jwt
+    create_access_token,
+    # Add project root to path
+    get_current_user,
+    get_current_user_optional,
+    get_password_hash,
+    require_admin,
+    require_developer,
+    require_permission,
+    validate_token_jwt,
+    verify_password,
 )
-from netra_backend.app.db.models_postgres import User
 from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.db.models_postgres import User
 
 
 class TestAuthIntegration:

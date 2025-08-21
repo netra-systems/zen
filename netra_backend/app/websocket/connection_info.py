@@ -6,11 +6,11 @@ Split from monolithic connection.py for better modularity.
 Business Value: Enables better connection tracking and monitoring.
 """
 
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
 from enum import Enum
-import time
+from typing import Any, Dict, Optional
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState

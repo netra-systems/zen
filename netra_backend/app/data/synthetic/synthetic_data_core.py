@@ -3,18 +3,24 @@ Main orchestration and CLI functionality for synthetic data generation.
 Coordinates the entire data generation pipeline and handles command-line interface.
 """
 
-import json
-import random
-import time
 import argparse
 import asyncio
+import json
+import random
 import sys
+import time
 from multiprocessing import cpu_count
+
 from rich.console import Console
 
-from netra_backend.app.synthetic_data_loader import ConfigurationManager, ContentCorpusManager
 from netra_backend.app.agents.synthetic_data_generator import (
-    ParallelProcessor, MultiTurnGenerator, TraceDistributionCalculator
+    MultiTurnGenerator,
+    ParallelProcessor,
+    TraceDistributionCalculator,
+)
+from netra_backend.app.synthetic_data_loader import (
+    ConfigurationManager,
+    ContentCorpusManager,
 )
 
 console = Console()

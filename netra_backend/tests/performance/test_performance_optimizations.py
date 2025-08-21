@@ -8,23 +8,31 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 # Add project root to path
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-from netra_backend.tests.performance.test_performance_cache import (
-
-# Add project root to path
-    TestMemoryCache,
-    TestQueryOptimizer
-)
 from netra_backend.tests.performance.test_performance_batching import (
     TestBatchProcessor,
-    TestMessageBatcher
+    TestMessageBatcher,
+)
+from netra_backend.tests.performance.test_performance_cache import (
+    # Add project root to path
+    TestMemoryCache,
+    TestQueryOptimizer,
 )
 from netra_backend.tests.performance.test_performance_monitoring import (
-    TestPerformanceMonitoring,
     TestDatabaseIndexOptimization,
-    TestPerformanceOptimizationIntegration
+    TestPerformanceMonitoring,
+    TestPerformanceOptimizationIntegration,
 )
 
 # Re-export all test classes for pytest discovery

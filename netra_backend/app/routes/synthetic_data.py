@@ -3,27 +3,37 @@ Synthetic Data Generation API Routes
 Provides endpoints for generating and managing synthetic AI workload data
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
-from typing import List, Optional, Dict, Tuple
-from pydantic import BaseModel, Field
+import logging
 from datetime import datetime
+from typing import Dict, List, Optional, Tuple
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
 
 from netra_backend.app import schemas
-from netra_backend.app.services.synthetic_data_service import synthetic_data_service, SyntheticDataService
-from netra_backend.app.dependencies import get_db_session, get_db_dependency, DbDep
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.schemas.shared_types import BaseAgentConfig
-from netra_backend.app.services.user_auth_service import user_auth_service
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.routes.utils.synthetic_data_helpers import (
-    build_generation_config, execute_generation_safely, extract_result_fields,
-    fetch_and_validate_job_status, extract_status_fields, cancel_job_safely,
-    build_cancel_response, get_preview_samples_safely, calculate_characteristics,
-    generate_test_user_data
-)
+from netra_backend.app.dependencies import DbDep, get_db_dependency, get_db_session
 from netra_backend.app.routes.utils.error_handlers import handle_service_error
-import logging
+from netra_backend.app.routes.utils.synthetic_data_helpers import (
+    build_cancel_response,
+    build_generation_config,
+    calculate_characteristics,
+    cancel_job_safely,
+    execute_generation_safely,
+    extract_result_fields,
+    extract_status_fields,
+    fetch_and_validate_job_status,
+    generate_test_user_data,
+    get_preview_samples_safely,
+)
+from netra_backend.app.schemas.shared_types import BaseAgentConfig
+from netra_backend.app.services.synthetic_data_service import (
+    SyntheticDataService,
+    synthetic_data_service,
+)
+from netra_backend.app.services.user_auth_service import user_auth_service
 
 logger = logging.getLogger(__name__)
 

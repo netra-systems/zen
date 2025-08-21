@@ -26,11 +26,15 @@ SUCCESS CRITERIA:
 - No data leakage or orphaned records
 - Proper audit trail maintained
 """
-import pytest
 import time
 
+import pytest
+
 from tests.unified.e2e.account_deletion_flow_manager import AccountDeletionFlowManager
-from tests.unified.e2e.account_deletion_helpers import AccountDeletionFlowTester, GDPRComplianceValidator
+from tests.unified.e2e.account_deletion_helpers import (
+    AccountDeletionFlowTester,
+    GDPRComplianceValidator,
+)
 
 
 @pytest.mark.asyncio

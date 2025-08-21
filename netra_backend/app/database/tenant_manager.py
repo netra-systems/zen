@@ -4,12 +4,14 @@ Re-exports from the actual tenant service for backward compatibility.
 """
 
 from netra_backend.app.services.database.tenant_service import (
-    TenantService,
-    TenantManager as ActualTenantManager,
+    Permission,
     Tenant,
     TenantResource,
-    Permission,
-    TenantServiceError
+    TenantService,
+    TenantServiceError,
+)
+from netra_backend.app.services.database.tenant_service import (
+    TenantManager as ActualTenantManager,
 )
 
 # Create alias for compatibility

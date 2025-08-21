@@ -24,20 +24,24 @@ IMPLEMENTATION:
 ✅ Error handling for production-level reliability
 """
 
-import pytest
 import asyncio
-import time
-import uuid
-import httpx
-import websockets
 import json
 import os
-from typing import Dict, Any, Optional
+import time
+import uuid
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
+
+import httpx
+import pytest
+import websockets
 
 # Use absolute imports or handle missing dependencies gracefully
 try:
-    from netra_backend.tests.unified.harness_complete import TestHarnessContext, TestClient
+    from netra_backend.tests.unified.harness_complete import (
+        TestClient,
+        TestHarnessContext,
+    )
 except ImportError:
     # Create mock classes if dependencies not available
     class TestHarnessContext:

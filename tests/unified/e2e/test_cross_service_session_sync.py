@@ -24,16 +24,16 @@ COMPLIANCE: Real services (NO MOCKS), Redis validation, <10 second execution
 """
 
 import asyncio
-import pytest
+import json
 import time
 import uuid
-import json
-import jwt
-import httpx
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
+import jwt
+import pytest
 import redis.asyncio as redis
 import websockets
 from websockets.exceptions import ConnectionClosedError, ConnectionClosedOK

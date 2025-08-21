@@ -3,18 +3,28 @@ WebSocket Message Handler Routing Tests
 Tests for WebSocket message handler registration, routing, and middleware processing.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, UTC
-from typing import Dict, Any
+from datetime import UTC, datetime
+from typing import Any, Dict
+
+import pytest
+
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-
 from netra_backend.app.services.websocket.message_handler import MessageRouter
-from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.websocket_test_utilities import MockMessageHandler
 
 # Add project root to path

@@ -14,19 +14,21 @@ Architectural Compliance:
 - Modular design for different test types
 """
 
-import time
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
-from typing import Dict, Optional, List
+from typing import Dict, List, Optional
 
 
 def execute_test_suite(args, config: Dict, runner, real_llm_config: Optional[Dict], speed_opts: Optional[Dict], test_level: str) -> int:
     """Route test execution based on configuration and test level."""
     # Special handling for agent startup E2E tests
     if test_level == "agent-startup":
-        from .agent_startup_handler import execute_agent_startup_tests as handler_execute
+        from .agent_startup_handler import (
+            execute_agent_startup_tests as handler_execute,
+        )
         return handler_execute(args, config, runner, real_llm_config, speed_opts)
     elif args.backend_only:
         return execute_backend_only_tests(config, runner, real_llm_config, speed_opts)
@@ -90,11 +92,12 @@ def configure_real_llm_if_requested(args, level: str, config: Dict):
     
     print("[INFO] Configuring real LLM testing environment...")
     
-    from .test_config import configure_real_llm
-    from .test_environment_setup import TestEnvironmentValidator, get_test_orchestrator
-    from .real_llm_config import get_real_llm_manager, configure_real_llm_testing
     import asyncio
     import os
+
+    from .real_llm_config import configure_real_llm_testing, get_real_llm_manager
+    from .test_config import configure_real_llm
+    from .test_environment_setup import TestEnvironmentValidator, get_test_orchestrator
     
     # Initialize environment validator
     validator = TestEnvironmentValidator()

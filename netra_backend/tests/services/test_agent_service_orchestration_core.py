@@ -17,32 +17,40 @@ PERFORMANCE REQUIREMENTS:
 - Concurrent tests: < 1s for multiple parallel operations
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from starlette.websockets import WebSocketDisconnect
 
-# Add project root to path
-
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app import schemas
-
-from netra_backend.tests.test_agent_service_fixtures import (
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-    mock_supervisor,
-    mock_thread_service, 
-    mock_message_handler,
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.tests.test_agent_service_fixtures import (
     agent_service,
-    create_mock_request_model,
     create_concurrent_request_models,
+    create_mock_request_model,
     create_websocket_message,
-    verify_agent_execution_result
+    mock_message_handler,
+    # Add project root to path
+    mock_supervisor,
+    mock_thread_service,
+    verify_agent_execution_result,
 )
 
 
@@ -251,7 +259,13 @@ class TestAgentServiceBasic:
     
     def _create_full_request_model(self):
         """Create full RequestModel with all required fields."""
-        from netra_backend.app.schemas.unified_tools import Settings, Workload, DataSource, TimeRange, RequestModel
+        from netra_backend.app.schemas.unified_tools import (
+            DataSource,
+            RequestModel,
+            Settings,
+            TimeRange,
+            Workload,
+        )
         
         settings = Settings(debug_mode=True)
         workload = Workload(

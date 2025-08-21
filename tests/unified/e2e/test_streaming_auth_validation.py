@@ -21,22 +21,24 @@ Architecture: ~400 lines, focused on streaming + auth integration scenarios
 
 import asyncio
 import json
-import jwt
-import pytest
-import time
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, MagicMock, patch
-from contextlib import asynccontextmanager
 
 # Test environment setup
 import os
+import time
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import jwt
+import pytest
+
 os.environ["TESTING"] = "1" 
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
+from netra_backend.tests.unified.config import TEST_CONFIG, setup_test_environment
 from netra_backend.tests.unified.test_harness import UnifiedTestHarness
-from netra_backend.tests.unified.config import setup_test_environment, TEST_CONFIG
 
 
 class StreamingAuthManager:

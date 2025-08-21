@@ -5,7 +5,8 @@ This module generates realistic workload patterns with seasonality and business 
 
 import random
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 import numpy as np
 
 

@@ -12,15 +12,21 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Dict, List, Any, Set
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Dict, List, Set
+
 import pytest
 
 pytestmark = pytest.mark.asyncio
 
 try:
-    from tests.unified.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+    from tests.unified.config import (
+        TEST_CONFIG,
+        TEST_ENDPOINTS,
+        TEST_USERS,
+        TestDataFactory,
+    )
 except ImportError:
     # Fallback if config not available
     TEST_CONFIG = {}
@@ -33,7 +39,9 @@ try:
     from tests.unified.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Use clients factory if available
-    from tests.unified.clients.websocket_client import WebSocketTestClient as RealWebSocketClient
+    from tests.unified.clients.websocket_client import (
+        WebSocketTestClient as RealWebSocketClient,
+    )
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

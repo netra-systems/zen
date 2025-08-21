@@ -3,10 +3,10 @@ Port Availability Validation Module
 Checks availability of required ports for development services.
 """
 
-import socket
 import asyncio
-from typing import Dict, List, Any, Tuple
+import socket
 from contextlib import asynccontextmanager
+from typing import Any, Dict, List, Tuple
 
 
 class PortValidator:

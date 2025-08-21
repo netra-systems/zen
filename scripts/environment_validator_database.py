@@ -3,13 +3,14 @@ Database Connection Validation Module
 Tests REAL database connections for PostgreSQL and ClickHouse.
 """
 
-import os
 import asyncio
-from typing import Dict, List, Any, Optional
+import os
 from datetime import datetime
-from dotenv import load_dotenv
+from typing import Any, Dict, List, Optional
+
 import asyncpg
 import clickhouse_connect
+from dotenv import load_dotenv
 
 
 class DatabaseValidator:

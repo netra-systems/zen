@@ -4,29 +4,38 @@ Components: AuthService → JWT Validation → WebSocket Middleware → Message 
 Critical: First user message must seamlessly authenticate and process
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-import jwt
-from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
+import jwt
+import pytest
 from fastapi import WebSocket
-from starlette.websockets import WebSocketState
+from schemas import UserInDB
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.websockets import WebSocketState
+
+from netra_backend.app.db.models_postgres import Message, Thread, User
+from netra_backend.app.services.agent_service_core import AgentService
 
 # Add project root to path
-
 from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from schemas import UserInDB
-from netra_backend.app.db.models_postgres import User, Thread, Message
+from netra_backend.app.services.websocket_manager import WebSocketManager
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

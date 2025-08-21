@@ -18,21 +18,22 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-import time
 import json
-from typing import Dict, Any, List, Optional
-from unittest.mock import patch, AsyncMock
+import time
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import pytest_asyncio
 
-from tests.unified.config import TEST_USERS, TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_services_manager import RealServicesManager
-from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas import WebSocketMessage, SubAgentLifecycle
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.schemas import SubAgentLifecycle, WebSocketMessage
+from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.unified.config import TEST_USERS, TestDataFactory
+from tests.unified.real_services_manager import RealServicesManager
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @pytest.mark.asyncio

@@ -11,7 +11,8 @@
 """Entity extraction utilities - compliant with 25-line limit."""
 
 import re
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from netra_backend.app.agents.triage_sub_agent.models import ExtractedEntities
 
 

@@ -3,9 +3,12 @@
 Manages rooms/groups of WebSocket connections for targeted broadcasting.
 """
 
-from typing import Dict, Set, Any
+from typing import Any, Dict, Set
+
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.connection_manager import ModernConnectionManager as ConnectionManager
+from netra_backend.app.websocket.connection_manager import (
+    ModernConnectionManager as ConnectionManager,
+)
 
 logger = central_logger.get_logger(__name__)
 

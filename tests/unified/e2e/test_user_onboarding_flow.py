@@ -14,10 +14,11 @@ REQUIREMENTS:
 - 450-line file limit, 25-line function limit
 - No mocking of core business logic, only infrastructure
 """
-import pytest
-import time
 import asyncio
+import time
 from contextlib import asynccontextmanager
+
+import pytest
 
 from tests.unified.e2e.onboarding_flow_executor import OnboardingFlowExecutor
 from tests.unified.test_harness import UnifiedTestHarness

@@ -4,17 +4,23 @@ Main scheduler service using modular components
 """
 
 import asyncio
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app.background import BackgroundTaskManager
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.supply_research.research_executor import (
+    ResearchExecutor,
+)
+from netra_backend.app.services.supply_research.result_manager import ResultManager
+from netra_backend.app.services.supply_research.schedule_manager import ScheduleManager
 
 # Import modular components
-from netra_backend.app.services.supply_research.scheduler_models import ScheduleFrequency, ResearchSchedule
-from netra_backend.app.services.supply_research.schedule_manager import ScheduleManager
-from netra_backend.app.services.supply_research.research_executor import ResearchExecutor
-from netra_backend.app.services.supply_research.result_manager import ResultManager
+from netra_backend.app.services.supply_research.scheduler_models import (
+    ResearchSchedule,
+    ScheduleFrequency,
+)
 
 # Mock Database class removed - was test stub in production code
 
@@ -268,7 +274,7 @@ class SupplyResearchScheduler:
     
     def _get_current_time(self):
         """Get current UTC time"""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return datetime.now(UTC)
     
     async def _execute_job_timed(self, schedule: ResearchSchedule, start_time) -> bool:
@@ -279,7 +285,7 @@ class SupplyResearchScheduler:
     
     async def _handle_metrics_recording(self, schedule: ResearchSchedule, start_time, result: bool):
         """Handle metrics recording for job execution"""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         end_time = datetime.now(UTC)
         execution_time = end_time - start_time
         await self._record_job_metrics(schedule.name, execution_time, result)
@@ -305,7 +311,7 @@ class SupplyResearchScheduler:
     
     def _get_current_timestamp(self) -> str:
         """Get current UTC timestamp as ISO string"""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return datetime.now(UTC).isoformat()
     
     def _build_base_dict(self, job_name: str, success: bool, timestamp: str) -> dict:

@@ -17,7 +17,8 @@ ARCHITECTURAL COMPLIANCE:
 
 import time
 import uuid
-from typing import Dict, Any
+from typing import Any, Dict
+
 from tests.unified.config import TestDataFactory
 from tests.unified.real_websocket_client import RealWebSocketClient
 

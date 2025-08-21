@@ -8,18 +8,28 @@ This module provides the core test harness for running multi-service unified tes
 Supports Auth Service, Backend, and Frontend together with real communication.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
+import logging
+import platform
+import shutil
 import subprocess
 import time
-import httpx
-import shutil
-import platform
-from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
-import logging
+from typing import Dict, List, Optional, Tuple
+
+import httpx
 
 logger = logging.getLogger(__name__)
 

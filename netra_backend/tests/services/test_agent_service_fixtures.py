@@ -17,24 +17,33 @@ COMPLIANCE:
 - No duplication across test files
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app import schemas
 
+# Add project root to path
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.tests.services.test_agent_service_mock_classes import (
+    AgentOrchestrator,
     AgentState,
     MockSupervisorAgent,
-    AgentOrchestrator
 )
 
 

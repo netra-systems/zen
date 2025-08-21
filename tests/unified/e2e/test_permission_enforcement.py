@@ -17,12 +17,13 @@ REQUIREMENTS:
 - Complete in <30 seconds
 - 450-line file limit, 25-line function limit
 """
-import pytest
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
-from tests.unified.e2e.permission_enforcement_helpers import PermissionEnforcementTester
+import pytest
+
 from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.permission_enforcement_helpers import PermissionEnforcementTester
 
 
 @pytest.mark.asyncio

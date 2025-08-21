@@ -5,12 +5,16 @@ Manages file processing, batching, and result aggregation.
 """
 
 import asyncio
-from typing import Dict, List, Any, Optional, Set
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
+from netra_backend.app.agents.github_analyzer.ai_pattern_definitions import (
+    AIPatternDefinitions,
+)
+from netra_backend.app.agents.github_analyzer.pattern_matcher import (
+    GitHubAnalyzerPatternMatcher,
+)
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.agents.github_analyzer.ai_pattern_definitions import AIPatternDefinitions
-from netra_backend.app.agents.github_analyzer.pattern_matcher import GitHubAnalyzerPatternMatcher
 
 
 class PatternScanner:

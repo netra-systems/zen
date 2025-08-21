@@ -23,12 +23,13 @@ Compliance: Realistic simulation, <300 lines, <8 lines per function, <10s execut
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, List, Any, Optional, Set
-import pytest
+from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from tests.unified.jwt_token_helpers import JWTTestHelper
 

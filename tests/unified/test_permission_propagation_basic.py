@@ -4,11 +4,12 @@ Test Suite 7: Permission Propagation - Basic Implementation
 BVJ: $40K+ MRR protection through permission consistency across Auth, Backend, WebSocket.
 Performance target: < 500ms propagation. File < 300 lines, functions < 25 lines.
 """
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from tests.unified.clients.auth_client import AuthTestClient
 from tests.unified.clients.backend_client import BackendTestClient

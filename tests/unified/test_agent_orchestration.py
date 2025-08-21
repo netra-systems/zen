@@ -24,44 +24,40 @@ Test Modules:
 """
 
 # Import all modular agent orchestration tests
-from netra_backend.tests.unified.test_supervisor_routing import (
-    TestSupervisorRouting,
-    TestRoutingValidation, 
-    TestRoutingPerformance
+# Import shared fixtures
+from netra_backend.tests.unified.agent_orchestration_fixtures import (
+    coordination_test_data,
+    failure_recovery_data,
+    health_monitoring_data,
+    mock_sub_agents,
+    mock_supervisor_agent,
+    performance_metrics_data,
+    routing_test_data,
+    sample_agent_state,
+    streaming_test_data,
+    websocket_mock,
 )
-
-from netra_backend.tests.unified.test_multi_agent_coordination import (
-    TestMultiAgentCoordination,
-    TestAgentSynchronization,
-    TestDataFlowOrchestration
-)
-
 from netra_backend.tests.unified.test_agent_failure_recovery import (
     TestAgentFailureRecovery,
     TestFailureDetection,
     TestFailureRecoveryStrategies,
-    TestRecoveryValidation
+    TestRecoveryValidation,
 )
-
 from netra_backend.tests.unified.test_agent_response_streaming import (
     TestAgentResponseStreaming,
-    TestStreamingReliability,
+    TestStreamingIntegration,
     TestStreamingPerformance,
-    TestStreamingIntegration
+    TestStreamingReliability,
 )
-
-# Import shared fixtures
-from netra_backend.tests.unified.agent_orchestration_fixtures import (
-    mock_supervisor_agent,
-    mock_sub_agents,
-    sample_agent_state,
-    websocket_mock,
-    routing_test_data,
-    coordination_test_data,
-    failure_recovery_data,
-    streaming_test_data,
-    health_monitoring_data,
-    performance_metrics_data
+from netra_backend.tests.unified.test_multi_agent_coordination import (
+    TestAgentSynchronization,
+    TestDataFlowOrchestration,
+    TestMultiAgentCoordination,
+)
+from netra_backend.tests.unified.test_supervisor_routing import (
+    TestRoutingPerformance,
+    TestRoutingValidation,
+    TestSupervisorRouting,
 )
 
 # Re-export test classes for pytest discovery

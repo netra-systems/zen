@@ -2,9 +2,10 @@
 
 import os
 import sys
-import pytest
 import uuid
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add the project root directory to Python path for imports
@@ -12,16 +13,19 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.app.core.config import get_config
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.services.corpus_service import CorpusService
 import json
+
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.config import get_config
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 
 def _setup_database_mock() -> AsyncMock:
@@ -130,8 +134,9 @@ def mock_dependencies():
 @pytest.fixture
 def agent(mock_dependencies):
     """Create DataSubAgent instance with mocked dependencies for test compatibility"""
-    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     from unittest.mock import patch
+
+    from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
     
     llm_manager, tool_dispatcher = mock_dependencies
     with patch('app.agents.data_sub_agent.data_sub_agent_core.RedisManager') as mock_redis_class:

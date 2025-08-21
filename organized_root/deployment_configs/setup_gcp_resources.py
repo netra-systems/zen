@@ -13,8 +13,7 @@ import subprocess
 import sys
 import uuid
 from pathlib import Path
-from typing import List, Dict, Optional
-
+from typing import Dict, List, Optional
 
 # Configuration
 PROJECT_ID = "netra-staging"

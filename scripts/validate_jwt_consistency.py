@@ -9,10 +9,11 @@ Usage:
     python scripts/validate_jwt_consistency.py
 """
 
+import json
 import os
 import sys
-import json
 from datetime import datetime
+
 from dotenv import load_dotenv
 
 # Add paths for imports
@@ -30,8 +31,8 @@ else:
     print(f"Warning: No .env file found at {env_file}")
 
 try:
-    from auth_service.auth_core.secret_loader import AuthSecretLoader
     from auth_service.auth_core.core.jwt_handler import JWTHandler
+    from auth_service.auth_core.secret_loader import AuthSecretLoader
     from netra_backend.app.core.configuration.secrets import SecretManager
     from netra_backend.app.schemas.Config import AppConfig
 except ImportError as e:

@@ -4,8 +4,9 @@ Fix common test issues in the Netra codebase.
 """
 
 import os
-import sys
 import subprocess
+import sys
+
 
 def fix_async_tests():
     """Fix pytest-asyncio configuration."""

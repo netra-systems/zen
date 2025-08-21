@@ -8,19 +8,19 @@ import asyncio
 import json
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from netra_backend.app.services.realistic_test_data_service import (
-    RealisticTestDataService,
-    RealisticDataPatterns
-)
-from netra_backend.app.db import models_postgres as models
 from netra_backend.app import schemas
+from netra_backend.app.db import models_postgres as models
+from netra_backend.app.services.realistic_test_data_service import (
+    RealisticDataPatterns,
+    RealisticTestDataService,
+)
 
 
 class CoreTestFixtures:

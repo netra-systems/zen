@@ -10,26 +10,38 @@ Critical Path: Request ingress -> Route evaluation -> Service discovery -> Load 
 Coverage: Complex routing rules, path matching, header-based routing, version routing, load balancing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-import aiohttp
-from typing import Dict, List, Optional, Any, Tuple
-from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
+
+from netra_backend.app.services.api_gateway.load_balancer import LoadBalancer
+from netra_backend.app.services.api_gateway.route_manager import RouteManager
 
 # Add project root to path
-
 from netra_backend.app.services.api_gateway.router import ApiGatewayRouter
-from netra_backend.app.services.api_gateway.route_manager import RouteManager
-from netra_backend.app.services.api_gateway.load_balancer import LoadBalancer
-from netra_backend.app.services.service_discovery.discovery_service import ServiceDiscoveryService
+from netra_backend.app.services.service_discovery.discovery_service import (
+    ServiceDiscoveryService,
+)
 
 # Add project root to path
 

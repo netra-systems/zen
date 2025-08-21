@@ -16,17 +16,25 @@ REGRESSION HISTORY:
 - Fix: Made connection_manager lazy-loaded with get_connection_manager_instance()
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import ast
 import importlib
+import os
 import sys
 from typing import List, Set
-import ast
-import os
 
-
+import pytest
 
 
 class TestCircularImportRegression:
@@ -102,9 +110,9 @@ class TestCircularImportRegression:
     def test_agent_registry_accessible_after_imports(self):
         """Verify agent registry is accessible after all imports."""
         # Import in problematic order
-        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
-        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+        from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+        from netra_backend.app.websocket.connection_executor import ConnectionExecutor
         
         # Verify classes are accessible
         assert ConnectionExecutor is not None
@@ -124,7 +132,9 @@ class TestCircularImportRegression:
     
     def test_websocket_handler_without_execution_engine(self):
         """Test WebSocket handlers work without BaseExecutionEngine."""
-        from netra_backend.app.websocket.message_handler_core import ReliableMessageHandler
+        from netra_backend.app.websocket.message_handler_core import (
+            ReliableMessageHandler,
+        )
         
         # Create handler
         handler = ReliableMessageHandler()
@@ -136,7 +146,9 @@ class TestCircularImportRegression:
     
     def test_broadcast_executor_without_execution_engine(self):
         """Test broadcast executor works without BaseExecutionEngine."""
-        from netra_backend.app.websocket.websocket_broadcast_executor import BroadcastExecutor
+        from netra_backend.app.websocket.websocket_broadcast_executor import (
+            BroadcastExecutor,
+        )
         
         # Mock dependencies
         mock_conn_manager = type('MockConnManager', (), {})()
@@ -158,8 +170,9 @@ class TestCircularImportRegression:
     @pytest.mark.asyncio
     async def test_message_flow_without_circular_dependency(self):
         """Test message flow works after circular dependency fix."""
-        from netra_backend.app.services.agent_service_core import AgentService
         from unittest.mock import AsyncMock, Mock, patch
+
+        from netra_backend.app.services.agent_service_core import AgentService
         
         # Create mock supervisor
         mock_supervisor = AsyncMock()
@@ -207,7 +220,10 @@ class TestConnectionModuleCircularImportPrevention:
                 del sys.modules[module]
         
         # Import connection module
-        from netra_backend.app.websocket.connection import connection_manager, get_connection_manager_instance
+        from netra_backend.app.websocket.connection import (
+            connection_manager,
+            get_connection_manager_instance,
+        )
         
         # Verify lazy initialization
         assert connection_manager is None, \
@@ -401,8 +417,8 @@ class TestIndirectCircularImportPrevention:
         
         try:
             # Import in the problematic order
-            from netra_backend.app.services.websocket import ws_manager
             from netra_backend.app.services import synthetic_data_service
+            from netra_backend.app.services.websocket import ws_manager
             
             # If we get here, no circular import was detected
             assert True, "No circular import detected"

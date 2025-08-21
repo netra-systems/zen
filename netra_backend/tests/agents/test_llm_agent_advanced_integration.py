@@ -3,28 +3,51 @@ Advanced LLM Agent Integration Tests
 Complex integration tests with ≤8 line functions for architectural compliance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import uuid
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.tests.test_fixtures import mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher
+from netra_backend.tests.test_fixtures import (
+    mock_db_session,
+    mock_llm_manager,
+    mock_tool_dispatcher,
+    mock_websocket_manager,
+)
 from netra_backend.tests.test_helpers import (
-
-# Add project root to path
-    create_mock_infrastructure, create_mock_persistence, create_multiple_supervisors,
-    create_concurrent_tasks, verify_concurrent_results, setup_mock_llm_with_retry,
-    create_tool_execution_mocks, create_llm_response_with_tools, execute_tool_calls,
-    verify_tool_execution, setup_llm_responses, setup_websocket_manager,
-    create_supervisor_with_mocks, execute_optimization_flow, verify_optimization_flow
+    create_concurrent_tasks,
+    create_llm_response_with_tools,
+    # Add project root to path
+    create_mock_infrastructure,
+    create_mock_persistence,
+    create_multiple_supervisors,
+    create_supervisor_with_mocks,
+    create_tool_execution_mocks,
+    execute_optimization_flow,
+    execute_tool_calls,
+    setup_llm_responses,
+    setup_mock_llm_with_retry,
+    setup_websocket_manager,
+    verify_concurrent_results,
+    verify_optimization_flow,
+    verify_tool_execution,
 )
 
 

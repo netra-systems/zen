@@ -15,33 +15,57 @@ These L3 integration tests validate:
 - Proper rate limiting and backpressure handling
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import gc
 import json
 import time
-import gc
-import psutil
-from typing import Dict, Any, List, Set, Optional
-from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock
-from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Set
+from unittest.mock import AsyncMock, patch
+from uuid import uuid4
 
+import psutil
+import pytest
 from fastapi import WebSocket
+from schemas import UserInDB
 from starlette.websockets import WebSocketState
 
-# Add project root to path
-
-from netra_backend.app.websocket.enhanced_rate_limiter import DistributedRateLimiter, BackpressureManager, RateLimitConfig
-from netra_backend.app.websocket.high_performance_broadcast import HighPerformanceBroadcaster, BroadcastPerformanceConfig
-from netra_backend.app.websocket.load_balanced_connection_manager import LoadBalancedConnectionManager, LoadBalancingStrategy
-from netra_backend.app.websocket.memory_efficient_manager import MemoryEfficientWebSocketManager
-from netra_backend.app.websocket.optimized_message_processor import OptimizedMessageProcessor, MessagePriority
 from netra_backend.app.redis_manager import RedisManager
-from schemas import UserInDB
+
+# Add project root to path
+from netra_backend.app.websocket.enhanced_rate_limiter import (
+    BackpressureManager,
+    DistributedRateLimiter,
+    RateLimitConfig,
+)
+from netra_backend.app.websocket.high_performance_broadcast import (
+    BroadcastPerformanceConfig,
+    HighPerformanceBroadcaster,
+)
+from netra_backend.app.websocket.load_balanced_connection_manager import (
+    LoadBalancedConnectionManager,
+    LoadBalancingStrategy,
+)
+from netra_backend.app.websocket.memory_efficient_manager import (
+    MemoryEfficientWebSocketManager,
+)
+from netra_backend.app.websocket.optimized_message_processor import (
+    MessagePriority,
+    OptimizedMessageProcessor,
+)
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

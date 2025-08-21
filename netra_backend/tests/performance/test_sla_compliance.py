@@ -16,23 +16,33 @@ This test validates critical performance SLAs:
 NO MOCKS - Uses real services and measures actual performance.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import statistics
-import psutil
 import json
-import uuid
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, field
-from contextlib import asynccontextmanager
-import httpx
-import websockets
+import statistics
 import threading
+import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
+import psutil
+import pytest
+import websockets
 
 from config import settings
 

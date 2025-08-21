@@ -1,17 +1,19 @@
 # app/services/security_service.py
 
-from typing import Optional, Dict
+from datetime import datetime, timedelta
+from typing import Dict, Optional
+
+from cryptography.fernet import Fernet
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from datetime import datetime, timedelta
-from cryptography.fernet import Fernet
 
-from netra_backend.app.db import models_postgres
 from netra_backend.app import schemas
-from netra_backend.app.services.key_manager import KeyManager
-from netra_backend.app.config import settings
-from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.config import settings
+from netra_backend.app.db import models_postgres
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.services.key_manager import KeyManager
+
 
 class SecurityService:
     def __init__(self, key_manager: Optional[KeyManager] = None):

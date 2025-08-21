@@ -4,7 +4,7 @@ Provides FastAPI-specific exception handlers that integrate with the
 consolidated error handling system.
 """
 
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 from starlette.status import (
@@ -12,8 +12,11 @@ from starlette.status import (
     HTTP_500_INTERNAL_SERVER_ERROR,
 )
 
-from netra_backend.app.core.exceptions import NetraException, ErrorCode
-from netra_backend.app.core.error_handlers.api.api_error_handler import handle_exception, get_http_status_code
+from netra_backend.app.core.error_handlers.api.api_error_handler import (
+    get_http_status_code,
+    handle_exception,
+)
+from netra_backend.app.core.exceptions import ErrorCode, NetraException
 
 
 async def netra_exception_handler(request: Request, exc: NetraException) -> JSONResponse:

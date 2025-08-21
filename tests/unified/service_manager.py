@@ -6,19 +6,24 @@ Continues from test_harness.py due to 450-line limit requirement.
 All functions ≤8 lines as per SPEC/conventions.xml
 """
 
-import os
-import sys
 import asyncio
-import subprocess
-import time
 import logging
+import os
 import socket
-import httpx
-from typing import Dict, List, Optional, Any, Tuple
+import subprocess
+import sys
+import time
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
 
 # Import from part 1
-from tests.unified.test_harness import UnifiedTestHarness, ServiceConfig, DatabaseManager
+from tests.unified.test_harness import (
+    DatabaseManager,
+    ServiceConfig,
+    UnifiedTestHarness,
+)
 
 logger = logging.getLogger(__name__)
 

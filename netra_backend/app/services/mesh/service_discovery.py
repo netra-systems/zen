@@ -1,8 +1,8 @@
 """Service Discovery implementation"""
 
-from typing import Dict, Any, List, Optional, Set
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional, Set
 
 
 class ServiceDiscovery:

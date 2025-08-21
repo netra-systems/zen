@@ -2,13 +2,13 @@
 """
 Quick test failure scanner - identifies failing tests efficiently
 """
+import json
+import re
 import subprocess
 import sys
-import json
-from pathlib import Path
-from datetime import datetime
-import re
 from collections import defaultdict
+from datetime import datetime
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))

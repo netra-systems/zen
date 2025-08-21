@@ -4,6 +4,7 @@ All functions ≤8 lines per requirements.
 """
 
 import os
+
 import pytest
 from pydantic import BaseModel
 

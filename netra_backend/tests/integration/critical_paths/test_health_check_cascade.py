@@ -10,23 +10,33 @@ Critical Path: Service health check -> Dependency validation -> Health propagati
 Coverage: Health check orchestration, dependency mapping, cascading health status, alerting
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import logging
 import json
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import logging
+import time
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
 # Add project root to path
-
 from netra_backend.app.services.health_check_service import HealthCheckService
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.monitoring.alerting_service import AlertingService
+from netra_backend.app.services.redis_service import RedisService
 
 # Add project root to path
 

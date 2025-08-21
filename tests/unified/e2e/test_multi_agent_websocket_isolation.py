@@ -15,19 +15,20 @@ Architecture: <300 lines per module, real concurrent execution, deterministic te
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import pytest
 
 # Test infrastructure  
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
+from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.unified.real_client_factory import create_real_client_factory
 from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 
 
 @dataclass

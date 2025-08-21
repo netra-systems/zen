@@ -5,32 +5,49 @@ particularly datetime serialization and message type validation.
 Maximum 300 lines, functions ≤8 lines each.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import asyncio
 import json
 import uuid
-import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.schemas.registry import (
-
-# Add project root to path
-    WebSocketMessage, WebSocketMessageType, MessageType,
-    User, Message, Thread, DeepAgentState
+    DeepAgentState,
+    Message,
+    MessageType,
+    Thread,
+    User,
+    # Add project root to path
+    WebSocketMessage,
+    WebSocketMessageType,
 )
 from netra_backend.app.schemas.websocket_message_types import (
-    StartAgentMessage, UserMessage, AgentStartedMessage,
-    AgentCompletedMessage, ConnectionInfo, BroadcastResult
+    AgentCompletedMessage,
+    AgentStartedMessage,
+    BroadcastResult,
+    ConnectionInfo,
+    StartAgentMessage,
+    UserMessage,
 )
 from netra_backend.app.services.state_persistence import DateTimeEncoder
-from netra_backend.app.websocket.validation import MessageValidator
 from netra_backend.app.websocket.broadcast import BroadcastManager
+from netra_backend.app.websocket.validation import MessageValidator
 
 
 class TestWebSocketSerializationCritical:

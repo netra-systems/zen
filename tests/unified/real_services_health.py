@@ -5,8 +5,8 @@ Part of the real services testing infrastructure.
 
 import asyncio
 import logging
-from typing import Optional, TYPE_CHECKING
 from pathlib import Path
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
     from tests.unified.real_services_manager import RealServicesManager, ServiceProcess

@@ -3,14 +3,14 @@ Circular Import Detection for Netra AI Platform
 This module detects circular import dependencies in the codebase
 """
 
+import ast
+import json
 import os
 import sys
-import ast
-from pathlib import Path
-from typing import Dict, Set, List, Tuple, Optional
-from collections import defaultdict
-import json
 import time
+from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 
 class CircularImportDetector:

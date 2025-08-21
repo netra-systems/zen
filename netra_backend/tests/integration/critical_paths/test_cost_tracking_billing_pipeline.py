@@ -13,25 +13,38 @@ Invoice generation -> Payment processing -> Usage analytics
 Coverage: LLM usage tracking, cost calculation accuracy, billing pipeline integrity, quota enforcement
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-from decimal import Decimal
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any, Dict, List, Optional
+
+import pytest
+
+from netra_backend.app.services.billing.cost_calculator import CostCalculator
+from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
+from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
 # Add project root to path
-
-from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from netra_backend.app.services.billing.cost_calculator import CostCalculator
-from netra_backend.app.services.billing.usage_tracker import UsageTracker
-from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
+from netra_backend.tests.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    L4StagingCriticalPathTestBase,
+)
 
 # Add project root to path
 

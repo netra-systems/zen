@@ -6,13 +6,13 @@ with real message submission and processing. No mocks used.
 Business Value: Validates model selection guidance for users
 """
 
-import pytest
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 from uuid import uuid4
 
-from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
+import pytest
 
+from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
 
 # Model selection prompts from SPEC/exampleNetraPrompts.xml
 MODEL_SELECTION_PROMPTS = [

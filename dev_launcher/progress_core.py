@@ -5,9 +5,9 @@ Phase and animation classes for progress indicators.
 """
 
 import time
-from typing import Optional
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 
 class PhaseStatus(Enum):

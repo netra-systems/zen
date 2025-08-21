@@ -4,9 +4,10 @@ Tests for startup validator module.
 This module tests the service startup and readiness validation functionality.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
 import time
+import unittest
+from unittest.mock import MagicMock, Mock, patch
+
 from dev_launcher.startup_validator import StartupValidator
 
 

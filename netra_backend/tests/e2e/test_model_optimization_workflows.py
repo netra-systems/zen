@@ -4,17 +4,26 @@ Tests real-time chat optimization, data flow, edge cases, and workflow integrity
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 from typing import Dict, List
 
-# Add project root to path
-
-from netra_backend.app.agents.state import DeepAgentState
+import pytest
 from schemas import SubAgentLifecycle
+
+# Add project root to path
+from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.core.exceptions import NetraException
 
 # Add project root to path
@@ -56,7 +65,9 @@ def _create_latency_cost_tradeoff_state() -> DeepAgentState:
 
 async def _execute_model_selection_workflow(setup: Dict, state: DeepAgentState) -> List[Dict]:
     """Execute complete model selection workflow with all 5 agents."""
-    from netra_backend.tests.e2e.test_model_effectiveness_workflows import _execute_model_selection_workflow as execute_workflow
+    from netra_backend.tests.e2e.test_model_effectiveness_workflows import (
+        _execute_model_selection_workflow as execute_workflow,
+    )
     return await execute_workflow(setup, state)
 
 
@@ -114,13 +125,17 @@ class TestModelSelectionDataFlow:
 
 def _create_model_effectiveness_state() -> DeepAgentState:
     """Create state for model effectiveness analysis."""
-    from netra_backend.tests.e2e.test_model_effectiveness_workflows import _create_model_effectiveness_state as create_state
+    from netra_backend.tests.e2e.test_model_effectiveness_workflows import (
+        _create_model_effectiveness_state as create_state,
+    )
     return create_state()
 
 
 def _create_gpt5_tool_selection_state() -> DeepAgentState:
     """Create state for GPT-5 tool selection."""
-    from netra_backend.tests.e2e.test_model_effectiveness_workflows import _create_gpt5_tool_selection_state as create_state
+    from netra_backend.tests.e2e.test_model_effectiveness_workflows import (
+        _create_gpt5_tool_selection_state as create_state,
+    )
     return create_state()
 
 

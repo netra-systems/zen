@@ -9,10 +9,10 @@ Business Value Justification (BVJ):
 Module Architecture: <300 lines, <8 lines per function
 """
 
-import uuid
 import json
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 
 class CrossServiceTransactionError(Exception):

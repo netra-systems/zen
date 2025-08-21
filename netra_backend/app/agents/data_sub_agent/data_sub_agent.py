@@ -7,29 +7,34 @@ Business Value: Critical for identifying 15-30% cost savings opportunities.
 BVJ: Enterprise | Performance Fee Capture | $10K+ monthly revenue per customer
 """
 
-from typing import Dict, Optional, Any, List
-import time
 import asyncio
+import time
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.schemas.strict_types import TypedAgentResult
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.type_validators import agent_type_safe
 
 # Import focused helper modules
 from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
-from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
-from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
-from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
+from netra_backend.app.agents.data_sub_agent.performance_analyzer import (
+    PerformanceAnalyzer,
+)
+from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.core.type_validators import agent_type_safe
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 
 
 class DataSubAgent(BaseSubAgent, BaseExecutionInterface):

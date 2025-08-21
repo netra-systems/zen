@@ -1,12 +1,12 @@
 """Database error handling utilities."""
 
-from typing import Optional
 from datetime import datetime, timezone
+from typing import Optional
 
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
-from netra_backend.app.core.exceptions import ErrorCode
 from netra_backend.app.core.error_response import ErrorResponse
+from netra_backend.app.core.exceptions import ErrorCode
 
 
 class DatabaseErrorHandler:

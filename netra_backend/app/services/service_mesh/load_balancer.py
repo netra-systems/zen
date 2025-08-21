@@ -1,10 +1,10 @@
 """Load Balancer Service for service mesh"""
 
-from typing import Dict, Any, List, Optional
 import asyncio
 import random
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class LoadBalancingStrategy(Enum):

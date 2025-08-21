@@ -6,12 +6,12 @@ and alerting for circuit breaker state changes across the platform.
 
 import asyncio
 import time
-from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
-from netra_backend.app.core.circuit_breaker import circuit_registry, CircuitState
+from netra_backend.app.core.circuit_breaker import CircuitState, circuit_registry
 from netra_backend.app.core.resilience.monitor import AlertSeverity
 from netra_backend.app.logging_config import central_logger
 
@@ -176,7 +176,10 @@ class CircuitBreakerMonitor:
     
     async def _check_rejection_rate_alert(self, circuit_name: str, metrics_data: Dict[str, Any]) -> None:
         """Check and create high rejection rate alert if needed."""
-        from .circuit_breaker_helpers import calculate_rejection_rate, should_alert_high_rejection_rate
+        from .circuit_breaker_helpers import (
+            calculate_rejection_rate,
+            should_alert_high_rejection_rate,
+        )
         rejection_rate = calculate_rejection_rate(metrics_data["rejected_calls"], metrics_data["total_calls"])
         if should_alert_high_rejection_rate(rejection_rate, metrics_data["rejected_calls"]):
             await self._create_alert(circuit_name, AlertSeverity.HIGH, f"High rejection rate: {rejection_rate:.2%}", metrics_data["state"], {"rejected_calls": metrics_data["rejected_calls"]})
@@ -235,7 +238,10 @@ class CircuitBreakerMonitor:
     
     def get_health_summary(self) -> Dict[str, Any]:
         """Get health summary of all circuits."""
-        from .circuit_breaker_helpers import build_health_summary_base, populate_health_summary
+        from .circuit_breaker_helpers import (
+            build_health_summary_base,
+            populate_health_summary,
+        )
         summary = build_health_summary_base()
         recent_events_count = len(self.get_recent_events(10))
         recent_alerts_count = len(self.get_recent_alerts(10))
@@ -265,7 +271,10 @@ class CircuitBreakerMetricsCollector:
     
     def _store_metrics(self, circuit_name: str, metrics: Dict[str, Any]) -> None:
         """Store metrics with history trimming."""
-        from .circuit_breaker_helpers import initialize_circuit_history, trim_metrics_history
+        from .circuit_breaker_helpers import (
+            initialize_circuit_history,
+            trim_metrics_history,
+        )
         initialize_circuit_history(self._metrics_history, circuit_name)
         self._metrics_history[circuit_name].append(metrics)
         self._metrics_history[circuit_name] = trim_metrics_history(self._metrics_history[circuit_name])
@@ -293,7 +302,10 @@ class CircuitBreakerMetricsCollector:
         if not history:
             return {}
         
-        from .circuit_breaker_helpers import calculate_aggregated_totals, build_aggregated_metrics
+        from .circuit_breaker_helpers import (
+            build_aggregated_metrics,
+            calculate_aggregated_totals,
+        )
         total_calls, success_rates = calculate_aggregated_totals(history)
         return build_aggregated_metrics(total_calls, success_rates, history)
 
@@ -317,7 +329,7 @@ circuit_monitor.add_alert_handler(default_alert_handler)
 
 async def get_circuit_health_dashboard() -> Dict[str, Any]:
     """Get comprehensive circuit breaker health dashboard."""
-    from .circuit_breaker_helpers import build_event_data, build_alert_data
+    from .circuit_breaker_helpers import build_alert_data, build_event_data
     health_summary = circuit_monitor.get_health_summary()
     recent_events = circuit_monitor.get_recent_events(20)
     recent_alerts = circuit_monitor.get_recent_alerts(10)
@@ -327,7 +339,7 @@ async def get_circuit_health_dashboard() -> Dict[str, Any]:
 
 def _build_dashboard_response(health_summary, recent_events, recent_alerts, aggregated_metrics) -> Dict[str, Any]:
     """Build dashboard response dictionary."""
-    from .circuit_breaker_helpers import build_event_data, build_alert_data
+    from .circuit_breaker_helpers import build_alert_data, build_event_data
     event_data = build_event_data(recent_events)
     alert_data = build_alert_data(recent_alerts)
     return _create_dashboard_dict(health_summary, event_data, alert_data, aggregated_metrics)

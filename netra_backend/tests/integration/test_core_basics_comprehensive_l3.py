@@ -4,23 +4,25 @@ Designed to reveal system flaws in auth, login, websockets, and core operations
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
+import os
+import sys
 import time
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-import jwt
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import aiohttp
-from unittest.mock import AsyncMock, patch, MagicMock, Mock
+import jwt
+import pytest
 import redis.asyncio as redis
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-import os
-import sys
 
 # Add app to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

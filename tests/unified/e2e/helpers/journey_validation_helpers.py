@@ -5,7 +5,7 @@ Validation functions for OAuth and chat journey test steps.
 Extracted from test_complete_oauth_chat_journey.py for modularity.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def validate_oauth_authentication(oauth_data: Dict[str, Any]) -> None:

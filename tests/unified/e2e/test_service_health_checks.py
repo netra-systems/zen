@@ -7,15 +7,15 @@ validates graceful degradation, and verifies health check reliability.
 Follows 450-line file limit and 25-line function limit constraints.
 """
 
+import asyncio
 import os
 import sys
 import time
-import asyncio
-import aiohttp
-from typing import Dict, List, Optional, Tuple, Any
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
+import aiohttp
 import pytest
 
 # Add project root to path

@@ -9,16 +9,17 @@ First-Time User E2E Test Helpers - Shared fixtures and utilities
 5. **Growth Engine**: First experience determines 95% of conversion probability
 """
 
-import pytest
 import uuid
-from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.services.demo_service import DemoService
-from netra_backend.app.services.cost_calculator import CostCalculatorService
+import pytest
+
 from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.services.cost_calculator import CostCalculatorService
+from netra_backend.app.services.demo_service import DemoService
 
 
 @dataclass

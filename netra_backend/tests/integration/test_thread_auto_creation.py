@@ -4,25 +4,34 @@ Components: ThreadService → Database → Message Association → State Persist
 Critical: Seamless thread creation for new users without friction
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import uuid
-from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+from schemas import ThreadCreate, UserInDB
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Add project root to path
-
-from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.db.models_postgres import Message, Run, Thread, User
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.db.models_postgres import Thread, Message, Run, User
-from schemas import UserInDB, ThreadCreate
+
+# Add project root to path
+from netra_backend.app.services.thread_service import ThreadService
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

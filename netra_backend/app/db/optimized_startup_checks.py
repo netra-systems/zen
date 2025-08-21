@@ -16,10 +16,10 @@ Business Value Justification (BVJ):
 
 import asyncio
 import time
-from typing import Dict, Any, List, Optional, Callable, NamedTuple
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from enum import Enum
-from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Callable, Dict, List, NamedTuple, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.startup_checks.models import StartupCheckResult
@@ -313,7 +313,9 @@ class OptimizedStartupChecker:
         """Quick PostgreSQL connectivity check."""
         try:
             # Use fast startup connection manager if available
-            from netra_backend.app.db.fast_startup_connection_manager import connection_registry
+            from netra_backend.app.db.fast_startup_connection_manager import (
+                connection_registry,
+            )
             manager = connection_registry.get_manager("postgres")
             
             if manager and manager.is_available():
@@ -343,7 +345,9 @@ class OptimizedStartupChecker:
     async def _quick_clickhouse_check(self, app, check_name: str) -> StartupCheckResult:
         """Quick ClickHouse connectivity check."""
         try:
-            from netra_backend.app.db.clickhouse_reliable_manager import reliable_clickhouse_service
+            from netra_backend.app.db.clickhouse_reliable_manager import (
+                reliable_clickhouse_service,
+            )
             
             async with reliable_clickhouse_service.get_client() as client:
                 await client.execute("SELECT 1")
@@ -392,7 +396,9 @@ class OptimizedStartupChecker:
     async def _background_clickhouse_tables(self, app, check_name: str) -> StartupCheckResult:
         """Background ClickHouse table verification."""
         try:
-            from netra_backend.app.db.clickhouse_reliable_manager import reliable_clickhouse_service
+            from netra_backend.app.db.clickhouse_reliable_manager import (
+                reliable_clickhouse_service,
+            )
             
             async with reliable_clickhouse_service.get_client() as client:
                 # Check if in mock mode

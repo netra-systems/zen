@@ -4,6 +4,7 @@
 import re
 from pathlib import Path
 
+
 def fix_auth_test(filepath):
     """Fix auth tests to use dev login."""
     with open(filepath, 'r', encoding='utf-8') as f:

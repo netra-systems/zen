@@ -170,8 +170,8 @@ class StagingDeployer:
     
     def _temporary_env_file(self, env_vars: Dict[str, str]):
         """Context manager for temporary env file."""
-        import tempfile
         import contextlib
+        import tempfile
         
         @contextlib.contextmanager
         def _temp_env():

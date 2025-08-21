@@ -8,10 +8,10 @@ Usage:
     python scripts/test_staging.py --full    # Run comprehensive staging tests
 """
 
-import os
-import sys
-import subprocess
 import argparse
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 # Add project root to path

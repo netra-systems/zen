@@ -17,7 +17,10 @@ __version__ = "1.0.0"
 
 # Re-export key test utilities for easy access
 try:
-    from netra_backend.tests.helpers.model_setup_helpers import create_test_user, create_test_thread
+    from netra_backend.tests.helpers.model_setup_helpers import (
+        create_test_thread,
+        create_test_user,
+    )
     model_selection_setup = lambda: {"user": create_test_user(), "thread": create_test_thread()}
 except ImportError:
     # Fallback if helpers not available

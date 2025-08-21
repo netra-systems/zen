@@ -13,31 +13,44 @@ Coverage: Intrusion detection, threat response, access control validation, rate 
 security event logging, incident response orchestration, multi-stage attack simulation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
-import httpx
-import websockets
+import hashlib
 import json
 import random
-import hashlib
-from typing import Dict, Any, List, Optional, Tuple
+import time
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import quote
 
-# Add project root to path
+import httpx
+import pytest
+import websockets
+from monitoring.metrics_collector import MetricsCollector
 
-from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.websocket.rate_limiter import RateLimiter
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.services.redis_service import RedisService
-from monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.websocket.rate_limiter import RateLimiter
+
+# Add project root to path
+from netra_backend.tests.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    L4StagingCriticalPathTestBase,
+)
 
 # Add project root to path
 

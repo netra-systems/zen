@@ -20,35 +20,47 @@ ARCHITECTURE COMPLIANCE:
 - Type safety: Full typing with service models
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import os
-import sys
-import json
-import time
 import asyncio
-import pytest
+import json
+import os
 import signal
 import subprocess
+import sys
 import threading
+import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from unittest.mock import Mock, patch
 
-# Add project root to path
+import pytest
 
-
-# Dev launcher imports
-from dev_launcher.launcher import DevLauncher  
 from dev_launcher.config import LauncherConfig
-from dev_launcher.service_discovery import ServiceDiscovery
-from dev_launcher.startup_validator import StartupValidator
-from dev_launcher.process_manager import ProcessManager
 from dev_launcher.health_monitor import HealthMonitor
 
+# Add project root to path
+# Dev launcher imports
+from dev_launcher.launcher import DevLauncher
+from dev_launcher.process_manager import ProcessManager
+from dev_launcher.service_discovery import ServiceDiscovery
+from dev_launcher.startup_validator import StartupValidator
+
 # Test utilities
-from netra_backend.tests.helpers.startup_check_helpers import StartupTestHelper, RealServiceTestValidator
+from netra_backend.tests.helpers.startup_check_helpers import (
+    RealServiceTestValidator,
+    StartupTestHelper,
+)
 
 
 class TestDevLauncherStartup:

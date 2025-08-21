@@ -9,20 +9,21 @@ Business Value Justification (BVJ):
 - Strategic Impact: Enterprise trust - critical for $347K+ MRR protection
 """
 
-import os
-import pytest
 import asyncio
 import json
-import uuid
+import os
 import random
-from typing import Dict, Any, List, Optional
+import uuid
 from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
-import aiohttp
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.main import app
+import aiohttp
+import pytest
+from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.main import app
 
 
 class TestErrorRecoveryResilienceL3:

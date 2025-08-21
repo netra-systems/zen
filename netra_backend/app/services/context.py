@@ -1,12 +1,16 @@
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.core.logging_formatters import LogEntry as Log
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
+from netra_backend.app.core.logging_formatters import LogEntry as Log
 from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 
 if TYPE_CHECKING:
-    from netra_backend.app.services.apex_optimizer_agent.tools.cost_estimator import CostEstimator
+    from netra_backend.app.services.apex_optimizer_agent.tools.cost_estimator import (
+        CostEstimator,
+    )
 
 class ToolContext:
     def __init__(

@@ -4,8 +4,8 @@ Performance issue checker for code review system.
 Detects potential performance problems and bottlenecks.
 """
 
-from .core import ReviewConfig, ReviewData
 from .command_runner import CommandRunner
+from .core import ReviewConfig, ReviewData
 
 
 class PerformanceChecker:

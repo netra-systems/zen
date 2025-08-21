@@ -1,10 +1,10 @@
 """Extended operations for DataSubAgent - maintaining 450-line limit compliance."""
 
-from typing import Dict, Any, List, Optional, AsyncGenerator
 import asyncio
 import json
 import time
 from datetime import datetime, timezone
+from typing import Any, AsyncGenerator, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger as logger
 
@@ -164,7 +164,7 @@ class ExtendedOperations:
     
     def _generate_timestamp(self):
         """Generate current timestamp."""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return datetime.now(UTC)
     
     def _generate_persistence_id(self, timestamp) -> str:

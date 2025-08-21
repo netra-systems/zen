@@ -20,38 +20,56 @@ ARCHITECTURE COMPLIANCE:
 - Type safety: Full typing with recovery models
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import os
-import sys
-import json
-import time
 import asyncio
-import pytest
+import json
+import os
 import signal
 import subprocess
+import sys
 import threading
+import time
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from unittest.mock import Mock, patch, AsyncMock
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+from dev_launcher.crash_detector import CrashDetector
 
 # Add project root to path
-
-
 # Dev launcher recovery imports
 from dev_launcher.crash_recovery import CrashRecoveryManager
 from dev_launcher.crash_recovery_models import (
-    CrashReport, CrashSeverity, DetectionResult, RecoveryAttempt,
-    RecoveryStage, MonitoringConfig, ServiceConfig, DetectionMethod
+    CrashReport,
+    CrashSeverity,
+    DetectionMethod,
+    DetectionResult,
+    MonitoringConfig,
+    RecoveryAttempt,
+    RecoveryStage,
+    ServiceConfig,
 )
-from dev_launcher.crash_detector import CrashDetector
-from dev_launcher.recovery_manager import RecoveryManager
-from dev_launcher.process_manager import ProcessManager
 from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.process_manager import ProcessManager
+from dev_launcher.recovery_manager import RecoveryManager
 
 # Test utilities
-from netra_backend.tests.helpers.startup_check_helpers import StartupTestHelper, RealServiceTestValidator
+from netra_backend.tests.helpers.startup_check_helpers import (
+    RealServiceTestValidator,
+    StartupTestHelper,
+)
 
 
 class TestServiceRecoveryBase:

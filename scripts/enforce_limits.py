@@ -7,13 +7,13 @@ Business Value: Prevents $3,500/month context waste regression
 Revenue Impact: Maintains code quality = customer retention
 """
 
-import sys
-import ast
 import argparse
-from pathlib import Path
-from typing import List, Dict, Optional, Tuple, Any
-from dataclasses import dataclass
+import ast
 import json
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass

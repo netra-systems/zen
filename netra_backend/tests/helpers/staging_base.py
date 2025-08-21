@@ -3,6 +3,7 @@
 import os
 from typing import Optional
 
+
 def get_staging_url() -> str:
     """Get staging URL."""
     return os.getenv("STAGING_URL", "https://staging.netra.ai")

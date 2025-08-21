@@ -3,14 +3,14 @@ Configuration for performance tests.
 Sets up fixtures and test environment for corpus generation performance testing.
 """
 
-import pytest
 import asyncio
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.config import settings
+import pytest
 
+from netra_backend.app.config import settings
 
 # Removed session-scoped event_loop fixture to prevent conflicts with pytest-asyncio
 # pytest-asyncio automatically manages event loops for async tests

@@ -4,25 +4,34 @@ Tests atomic transactions across Auth Service and Backend
 BVJ: Protects $40K MRR from data inconsistency
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import uuid
-from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
-from contextlib import asynccontextmanager
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import tempfile
 import time
+import uuid
+from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 # Add project root to path
-
 from netra_backend.app.db.base import Base
-from netra_backend.app.db.models_postgres import User, Thread, Message
+from netra_backend.app.db.models_postgres import Message, Thread, User
 
 # Add project root to path
 

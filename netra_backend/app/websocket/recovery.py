@@ -4,17 +4,18 @@ Provides recovery mechanisms for WebSocket connections with state persistence
 and automatic reconnection handling.
 """
 
-from typing import Dict, Any, Optional, List, Callable, Awaitable
 import asyncio
 import time
-from enum import Enum
 from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.error_types import ErrorSeverity
+from netra_backend.app.core.error_types import WebSocketErrorInfo as WebSocketError
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.websocket.connection_info import ConnectionInfo
-from netra_backend.app.core.error_types import WebSocketErrorInfo as WebSocketError, ErrorSeverity
 
 logger = central_logger.get_logger(__name__)
 

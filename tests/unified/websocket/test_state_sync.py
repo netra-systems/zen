@@ -29,10 +29,11 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timezone, timedelta
-from dataclasses import dataclass, asdict
-from unittest.mock import patch, AsyncMock
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import pytest_asyncio
 
@@ -869,8 +870,8 @@ class TestWebSocketStateSyncIntegration:
 
 if __name__ == "__main__":
     """Run state synchronization tests standalone."""
-    import sys
     import subprocess
+    import sys
     
     # Run specific test scenarios
     test_scenarios = [

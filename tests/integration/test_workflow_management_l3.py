@@ -8,10 +8,11 @@ import json
 import os
 import sys
 import tempfile
-import yaml
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, mock_open
+from unittest.mock import MagicMock, Mock, mock_open, patch
+
 import pytest
+import yaml
 
 # Add scripts directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))

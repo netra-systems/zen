@@ -12,34 +12,46 @@ BVJ: ALL segments | Customer Experience | +25% reduction in triage failures
 """
 
 import time
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager  
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.schemas.registry import DeepAgentState
-from netra_backend.app.agents.config import agent_config
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.reliability import get_reliability_wrapper, CircuitBreakerConfig, RetryConfig
-from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.agents.base.circuit_breaker import (
+    CircuitBreakerConfig as ModernCircuitConfig,
+)
+from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
 
 # Modern Base Components
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
 )
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
-from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryConfig
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig as ModernCircuitConfig
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
+from netra_backend.app.agents.config import agent_config
+from netra_backend.app.agents.input_validation import validate_agent_input
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.triage_sub_agent.core import TriageCore
 
 # Import from modular structure  
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-from netra_backend.app.agents.triage_sub_agent.core import TriageCore
-from netra_backend.app.agents.triage_sub_agent.processing import TriageProcessor, WebSocketHandler
+from netra_backend.app.agents.triage_sub_agent.processing import (
+    TriageProcessor,
+    WebSocketHandler,
+)
+from netra_backend.app.core.reliability import (
+    CircuitBreakerConfig,
+    RetryConfig,
+    get_reliability_wrapper,
+)
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.schemas.registry import DeepAgentState
+from netra_backend.app.schemas.shared_types import RetryConfig as ModernRetryConfig
 
 logger = central_logger.get_logger(__name__)
 

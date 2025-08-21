@@ -8,9 +8,10 @@ This module validates that services communicate only via HTTP/API calls.
 Tests API endpoints and ensures proper service communication patterns.
 """
 
-import httpx
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
+import httpx
 
 
 class ApiIsolationValidator:

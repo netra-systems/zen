@@ -1,8 +1,10 @@
 """
 Factory Status Dashboard Routes
 """
-from typing import Dict, Any
+from typing import Any, Dict
+
 from fastapi import Depends
+
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.routes.factory_status.business_logic import ensure_latest_report
 

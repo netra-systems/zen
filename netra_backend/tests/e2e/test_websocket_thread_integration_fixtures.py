@@ -1,22 +1,32 @@
 """Fixtures Tests - Split from test_websocket_thread_integration.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
-from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, Mock, patch, call
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, call, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 from ws_manager import manager
 
-# Add project root to path
-
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
+from netra_backend.app.services.agent_service import AgentService
+
+# Add project root to path
+from netra_backend.app.services.thread_service import ThreadService
 
 # Add project root to path
 

@@ -6,11 +6,11 @@ The actual implementation has been split into multiple modules in the quality_ga
 
 # Import from the new modular structure for backward compatibility
 from netra_backend.app.services.quality_gate import (
+    ContentType,
     QualityGateService,
     QualityLevel,
-    ContentType,
     QualityMetrics,
-    ValidationResult
+    ValidationResult,
 )
 
 # Maintain metadata for tracking

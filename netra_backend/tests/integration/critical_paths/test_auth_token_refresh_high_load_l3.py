@@ -21,33 +21,47 @@ Mock-Real Spectrum: L3 (Real auth service with simulated load)
 - Simulated concurrent users
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import jwt
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, MagicMock, patch
 import random
 import statistics
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    Token, TokenData, LoginRequest, LoginResponse,
-    SessionInfo, RefreshRequest, RefreshResponse
-)
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.db.redis_manager import get_redis_manager
+import jwt
+import pytest
 from clients.auth_client import auth_client
-from netra_backend.app.core.monitoring import metrics_collector
+
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.db.redis_manager import get_redis_manager
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    LoginRequest,
+    LoginResponse,
+    RefreshRequest,
+    RefreshResponse,
+    SessionInfo,
+    # Add project root to path
+    Token,
+    TokenData,
+)
 
 
 @dataclass

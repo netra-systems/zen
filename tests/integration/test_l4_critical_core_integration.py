@@ -6,18 +6,19 @@ Focus: Auth, Login, WebSockets, Core APIs - testing from different angles
 to reveal edge cases and integration issues.
 """
 
-import pytest
 import asyncio
 import json
 import time
-import jwt
 import uuid
-from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import aiohttp
-from aiohttp import ClientSession, ClientTimeout
+import jwt
+import pytest
 import redis.asyncio as redis
+from aiohttp import ClientSession, ClientTimeout
 
 
 class TestL4CriticalAuthIntegration:

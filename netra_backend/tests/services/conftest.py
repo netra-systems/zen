@@ -12,8 +12,8 @@ COMPLIANCE:
 
 # Import all fixtures to make them available to pytest
 from netra_backend.tests.services.test_agent_service_fixtures import (
+    agent_service,
+    mock_message_handler,
     mock_supervisor,
     mock_thread_service,
-    mock_message_handler,
-    agent_service
 )

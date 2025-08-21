@@ -1,16 +1,20 @@
 """Factory Status Reporter for SPEC Compliance Scoring."""
 
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
+from netra_backend.app.core.exceptions_base import (
+    ValidationError as ValidationException,
+)
+from netra_backend.app.services.factory_status.report_analyzer import ReportAnalyzer
 from netra_backend.app.services.factory_status.spec_compliance_scorer import (
     ComplianceScore,
-    SpecViolation
+    SpecViolation,
 )
-from netra_backend.app.services.factory_status.violation_analyzer import ViolationAnalyzer
-from netra_backend.app.services.factory_status.report_analyzer import ReportAnalyzer
-from netra_backend.app.core.exceptions_base import ValidationError as ValidationException
+from netra_backend.app.services.factory_status.violation_analyzer import (
+    ViolationAnalyzer,
+)
 
 
 class FactoryStatusReporter:
@@ -36,7 +40,9 @@ class FactoryStatusReporter:
     
     def _create_scorer(self):
         """Create spec compliance scorer."""
-        from netra_backend.app.services.factory_status.spec_compliance_scorer import SpecComplianceScorer
+        from netra_backend.app.services.factory_status.spec_compliance_scorer import (
+            SpecComplianceScorer,
+        )
         return SpecComplianceScorer(self.spec_dir)
 
     async def generate_compliance_report(self) -> Dict[str, Any]:

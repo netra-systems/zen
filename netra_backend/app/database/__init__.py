@@ -46,7 +46,9 @@ except ImportError:
 
 # Re-export database management components
 try:
-    from netra_backend.app.services.database_env_service import DatabaseEnvService as DatabaseManager
+    from netra_backend.app.services.database_env_service import (
+        DatabaseEnvService as DatabaseManager,
+    )
     
     def get_database_session():
         """Compatibility function for getting database session."""

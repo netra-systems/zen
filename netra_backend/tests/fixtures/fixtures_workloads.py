@@ -6,11 +6,13 @@ Compliance: <300 lines, 25-line max functions, modular design.
 
 import random
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 import pytest
 
-from netra_backend.app.services.realistic_test_data_service import RealisticTestDataService
+from netra_backend.app.services.realistic_test_data_service import (
+    RealisticTestDataService,
+)
 
 
 class WorkloadFixtures:

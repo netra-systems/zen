@@ -4,10 +4,11 @@ HTTP test client with authentication helpers for testing auth endpoints.
 Provides convenient methods for auth operations and request handling.
 """
 
-import httpx
-from typing import Dict, Any, Optional, Union
-from fastapi.testclient import TestClient
+from typing import Any, Dict, Optional, Union
 from unittest.mock import MagicMock
+
+import httpx
+from fastapi.testclient import TestClient
 
 from auth_service.tests.factories import TokenFactory
 

@@ -7,11 +7,14 @@ recognition, spike detection, and predictive analytics.
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.error_aggregation_utils import (
-    ErrorPattern, ErrorTrend, ErrorPatternMatcher, 
-    TimeWindowCalculator, TrendCalculationHelper
+    ErrorPattern,
+    ErrorPatternMatcher,
+    ErrorTrend,
+    TimeWindowCalculator,
+    TrendCalculationHelper,
 )
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

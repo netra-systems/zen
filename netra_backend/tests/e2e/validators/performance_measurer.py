@@ -5,10 +5,16 @@ Maximum 300 lines, functions ≤8 lines.
 """
 
 import time
-import psutil
-from typing import List, Tuple
 from statistics import median, quantiles
-from netra_backend.tests.performance_metrics import LatencyMetrics, ThroughputMetrics, ResourceMetrics
+from typing import List, Tuple
+
+import psutil
+
+from netra_backend.tests.performance_metrics import (
+    LatencyMetrics,
+    ResourceMetrics,
+    ThroughputMetrics,
+)
 
 
 class LatencyMeasurer:

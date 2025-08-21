@@ -21,16 +21,21 @@ The original file was refactored into focused test modules:
 - test_throughput_error_recovery.py - Error recovery and resilience
 """
 
-import pytest
 import asyncio
-import time
 import logging
 import os
-from typing import Dict, Any
+import time
+from typing import Any, Dict
+
+import pytest
 
 from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
-    ThroughputMetrics, LoadTestResults, E2E_TEST_CONFIG,
-    HighVolumeWebSocketServer, HighVolumeThroughputClient, ThroughputAnalyzer
+    E2E_TEST_CONFIG,
+    HighVolumeThroughputClient,
+    HighVolumeWebSocketServer,
+    LoadTestResults,
+    ThroughputAnalyzer,
+    ThroughputMetrics,
 )
 
 logger = logging.getLogger(__name__)

@@ -6,11 +6,10 @@ throughput testing of the Netra Apex AI platform.
 """
 
 import os
-import time
 import statistics
-from typing import Dict, List, Optional, Any, NamedTuple
+import time
 from dataclasses import dataclass, field
-
+from typing import Any, Dict, List, NamedTuple, Optional
 
 # High-volume test configuration
 HIGH_VOLUME_CONFIG = {

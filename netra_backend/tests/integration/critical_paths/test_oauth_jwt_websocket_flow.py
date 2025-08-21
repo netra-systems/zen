@@ -23,37 +23,50 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
 import time
 import uuid
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+from urllib.parse import parse_qs, urlparse
+
 import httpx
-import json
+import jwt as jwt_lib
+import pytest
 import redis.asyncio as aioredis
 import websockets
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
-from urllib.parse import urlparse, parse_qs
-import jwt as jwt_lib
-
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    LoginRequest, LoginResponse, TokenData, 
-    AuthProvider, HealthResponse, SessionInfo
-)
-from auth_service.auth_core.core.jwt_handler import JWTHandler
-from netra_backend.app.services.database.session_manager import SessionManager
 from ws_manager import get_manager
+
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    AuthProvider,
+    HealthResponse,
+    # Add project root to path
+    LoginRequest,
+    LoginResponse,
+    SessionInfo,
+    TokenData,
+)
+from netra_backend.app.services.database.session_manager import SessionManager
 from netra_backend.app.websocket.unified import get_unified_manager
 
-import logging
 logger = logging.getLogger(__name__)
 
 

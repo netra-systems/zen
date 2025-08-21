@@ -18,7 +18,7 @@ Architecture:
 
 import asyncio
 import logging
-from typing import Dict, Any, Optional, Callable
+from typing import Any, Callable, Dict, Optional
 
 from tests.unified.agent_startup_user_manager import TestUser
 

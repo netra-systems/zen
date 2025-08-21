@@ -14,8 +14,9 @@ REQUIREMENTS:
 - 450-line file limit, 25-line function limit
 - Multi-device session security validation
 """
-import pytest
 import time
+
+import pytest
 
 from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 from tests.unified.e2e.new_user_flow_tester import CompleteNewUserFlowTester

@@ -3,23 +3,35 @@ Tests for global error handler and decorator functionality.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.agents.error_handler import (
-
-# Add project root to path
+    # Add project root to path
     AgentErrorHandler as ErrorHandler,
+)
+from netra_backend.app.agents.error_handler import (
     AgentValidationError as ValidationError,
+)
+from netra_backend.app.agents.error_handler import (
     NetworkError,
     global_error_handler,
-    handle_agent_error
+    handle_agent_error,
 )
 
 
@@ -33,7 +45,9 @@ class TestGlobalErrorHandler:
     
     def test_global_error_handler_singleton(self):
         """Test global error handler is singleton."""
-        from netra_backend.app.agents.error_handler import global_error_handler as global_handler_2
+        from netra_backend.app.agents.error_handler import (
+            global_error_handler as global_handler_2,
+        )
         assert global_error_handler is global_handler_2
     
     def test_global_error_handler_shared_state(self):

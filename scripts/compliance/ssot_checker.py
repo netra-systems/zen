@@ -6,11 +6,11 @@ Enforces CLAUDE.md SSOT principles - no duplicate implementations.
 
 import ast
 import glob
-from pathlib import Path
-from typing import List, Dict, Set
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Set
 
-from .core import Violation, ComplianceConfig
+from .core import ComplianceConfig, Violation
 
 
 class SSOTChecker:

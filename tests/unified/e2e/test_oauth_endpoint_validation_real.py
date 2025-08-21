@@ -20,32 +20,41 @@ OAuth Service Endpoint Validation Test - Real Services Integration
 """
 
 import asyncio
-import pytest
-import pytest_asyncio
+import json
+import os
+import sys
 import time
 import uuid
-import json
-import jwt
-import websockets
-import sys
-import os
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import jwt
+import pytest
+import pytest_asyncio
+import websockets
 
 # Add parent directories to sys.path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from netra_backend.tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-from netra_backend.tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
-from netra_backend.tests.unified.real_http_client import RealHTTPClient
-from netra_backend.tests.unified.real_client_types import create_auth_config, create_backend_config
-
 from netra_backend.app.logging_config import central_logger
+from netra_backend.tests.unified.oauth_test_providers import (
+    GoogleOAuthProvider,
+    OAuthUserFactory,
+    get_enterprise_config,
+)
+from netra_backend.tests.unified.real_client_types import (
+    create_auth_config,
+    create_backend_config,
+)
+from netra_backend.tests.unified.real_http_client import RealHTTPClient
+from netra_backend.tests.unified.real_services_manager import (
+    RealServicesManager as create_real_services_manager,
+)
 
 logger = central_logger.get_logger(__name__)
 

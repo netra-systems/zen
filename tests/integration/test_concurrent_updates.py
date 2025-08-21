@@ -1,6 +1,7 @@
-import pytest
-import httpx
 import asyncio
+
+import httpx
+import pytest
 
 # NOTE: Assuming the following constants. These may need to be updated.
 BACKEND_URL = "http://localhost:8000"

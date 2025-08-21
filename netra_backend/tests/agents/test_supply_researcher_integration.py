@@ -2,30 +2,39 @@
 Integration tests for SupplyResearcherAgent
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+from background import BackgroundTaskManager
+
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-
 from netra_backend.app.agents.supply_researcher_sub_agent import (
-
-# Add project root to path
+    ResearchType,
+    # Add project root to path
     SupplyResearcherAgent,
-    ResearchType
+)
+from netra_backend.app.db.models_postgres import AISupplyItem, User
+from netra_backend.app.services.supply_research_scheduler import (
+    ResearchSchedule,
+    ScheduleFrequency,
+    SupplyResearchScheduler,
 )
 from netra_backend.app.services.supply_research_service import SupplyResearchService
-from netra_backend.app.services.supply_research_scheduler import (
-    SupplyResearchScheduler,
-    ResearchSchedule,
-    ScheduleFrequency
-)
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.db.models_postgres import AISupplyItem, User
-from background import BackgroundTaskManager
 
 
 class TestSupplyResearcherIntegration:

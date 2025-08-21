@@ -1,15 +1,16 @@
 """Helper functions for Quality Gate Service tests"""
 
 import hashlib
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
+
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.quality_gate_service import (
+    ContentType,
     QualityGateService,
     QualityLevel,
-    ContentType,
     QualityMetrics,
-    ValidationResult
+    ValidationResult,
 )
-from netra_backend.app.redis_manager import RedisManager
 
 
 def create_redis_mock():

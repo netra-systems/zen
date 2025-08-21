@@ -4,25 +4,34 @@ Tests content generation workflows and batch processing capabilities
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-# Add project root to path
+import pytest
+from schemas import ContentGenParams
 
+from netra_backend.app.services.corpus_service import CorpusService
+
+# Add project root to path
 from netra_backend.app.services.generation_service import (
-
-# Add project root to path
+    get_corpus_from_clickhouse,
+    # Add project root to path
     run_content_generation_job,
     run_synthetic_data_generation_job,
     save_corpus_to_clickhouse,
-    get_corpus_from_clickhouse
 )
-from netra_backend.app.services.corpus_service import CorpusService
-from schemas import ContentGenParams
 
 
 class TestContentGeneration:

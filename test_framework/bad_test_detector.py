@@ -6,10 +6,10 @@ failing tests that may need to be fixed or removed.
 
 import json
 import time
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
 from collections import defaultdict
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 class BadTestDetector:

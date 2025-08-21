@@ -1,11 +1,11 @@
 """Service discovery module for dynamic port allocation in tests."""
 
-import json
 import asyncio
-from pathlib import Path
-from typing import Dict, Optional, Any
-from dataclasses import dataclass
+import json
 import logging
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 

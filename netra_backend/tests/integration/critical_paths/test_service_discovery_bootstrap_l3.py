@@ -13,24 +13,34 @@ This L3 test uses real Redis as service registry with multiple service instances
 testing actual registration/discovery flow during system bootstrap.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import logging
 import json
+import logging
+import time
 import uuid
-from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.logging_config import central_logger
+
+# Add project root to path
+from netra_backend.app.services.redis_service import RedisService
 
 # Add project root to path
 

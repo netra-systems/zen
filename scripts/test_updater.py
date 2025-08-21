@@ -6,12 +6,12 @@ Complies with 450-line limit and 25-line function constraint
 """
 
 import argparse
+import asyncio
 import subprocess
 import sys
-import asyncio
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from test_discovery import TestDiscovery, TestMetrics
 from test_modifier import TestModifier
 from test_validator import TestValidator
+
 
 class TestUpdateMode(Enum):
     """Test update execution modes"""

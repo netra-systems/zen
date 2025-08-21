@@ -1,10 +1,10 @@
 """Resource Monitor for tracking and alerting on resource usage"""
 
-from typing import Dict, Any, List, Optional, Callable
 import asyncio
-from datetime import datetime, UTC, timedelta
 from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 
 class AlertLevel(Enum):

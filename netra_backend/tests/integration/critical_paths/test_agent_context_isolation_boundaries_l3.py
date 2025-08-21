@@ -9,31 +9,41 @@ Business Value Justification (BVJ):
 L3 Test: Uses real local services to validate context isolation between agents.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
+import hashlib
 import json
 import logging
-import hashlib
-from typing import Dict, Any, List, Optional, Set
+import time
+import uuid
 from datetime import datetime, timezone
-from testcontainers.redis import RedisContainer
+from typing import Any, Dict, List, Optional, Set
+
+import pytest
 from testcontainers.postgres import PostgresContainer
+from testcontainers.redis import RedisContainer
 
-# Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
-from netra_backend.app.services.agent_service import AgentService
+
+# Add project root to path
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.security.context_isolation import ContextIsolationManager
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.database.postgres_service import PostgresService
 from test_framework.testcontainers_utils import TestcontainerHelper
 
 # Add project root to path

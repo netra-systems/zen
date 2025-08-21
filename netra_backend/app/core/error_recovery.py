@@ -8,9 +8,9 @@ import asyncio
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional, Set, Union
-from datetime import datetime, timedelta
 
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.core.exceptions_base import NetraException
@@ -167,8 +167,11 @@ class RetryStrategy:
 
 
 # Import CircuitBreaker from canonical location - CONSOLIDATED
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker as CoreCircuitBreaker
+from netra_backend.app.core.circuit_breaker_core import (
+    CircuitBreaker as CoreCircuitBreaker,
+)
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
+
 
 class ErrorRecoveryCircuitBreaker(CoreCircuitBreaker):
     """Specialized circuit breaker for error recovery operations."""

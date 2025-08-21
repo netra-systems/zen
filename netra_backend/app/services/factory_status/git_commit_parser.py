@@ -4,15 +4,18 @@ Extracts and parses git commit history with semantic analysis.
 Module follows 450-line limit with 25-line function limit.
 """
 
-import re
-import subprocess
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
-from enum import Enum
 import asyncio
 import json
-from netra_backend.app.services.factory_status.mock_data_generator import MockDataGenerator
+import re
+import subprocess
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Dict, List, Optional, Tuple
+
+from netra_backend.app.services.factory_status.mock_data_generator import (
+    MockDataGenerator,
+)
 
 
 class CommitType(Enum):

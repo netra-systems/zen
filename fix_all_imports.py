@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Validate all auth service imports across the netra_backend codebase."""
 
-import os
 import ast
+import os
 import sys
-from pathlib import Path
-from typing import List, Dict, Set
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Set
+
 
 class AuthImportValidator:
     def __init__(self, root_path: str):

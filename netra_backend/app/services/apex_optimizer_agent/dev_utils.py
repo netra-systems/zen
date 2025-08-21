@@ -1,8 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.services.user_service import user_service
 
 from netra_backend.app.config import settings
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.user_service import user_service
 
 DEV_USER_EMAIL = settings.dev_user_email
 

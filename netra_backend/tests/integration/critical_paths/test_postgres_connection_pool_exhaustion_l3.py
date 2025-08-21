@@ -11,28 +11,36 @@ L3 Test: Uses real PostgreSQL via Testcontainers to validate connection pool beh
 Tests pool exhaustion, recovery mechanisms, and connection lifecycle management.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import uuid
-from typing import List, Dict, Any
 from contextlib import asynccontextmanager
 from datetime import datetime
+from typing import Any, Dict, List
 
 import asyncpg
 import psycopg2
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from testcontainers.postgres import PostgresContainer
 
 # Add project root to path
-
 from netra_backend.app.db.postgres import get_async_db, get_postgres_session
 from netra_backend.app.db.postgres_core import Database, async_engine
-from netra_backend.app.db.postgres_pool import get_pool_status, close_async_db
+from netra_backend.app.db.postgres_pool import close_async_db, get_pool_status
 from netra_backend.app.logging_config import central_logger
 
 # Add project root to path

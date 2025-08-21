@@ -7,24 +7,28 @@ Business Value: Core data analysis engine for customer insights generation.
 BVJ: Growth & Enterprise | Data Intelligence Core | +20% performance capture
 """
 
-from typing import Dict, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.config import agent_config
+from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
+from netra_backend.app.agents.data_sub_agent.clickhouse_operations import (
+    DataSubAgentClickHouseOperations,
+)
+from netra_backend.app.agents.data_sub_agent.delegation import AgentDelegation
+from netra_backend.app.agents.data_sub_agent.extended_operations import (
+    ExtendedOperations,
+)
 
 # Core analysis components
 from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
-from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
-from netra_backend.app.agents.data_sub_agent.clickhouse_operations import DataSubAgentClickHouseOperations
-from netra_backend.app.agents.data_sub_agent.extended_operations import ExtendedOperations
-from netra_backend.app.agents.data_sub_agent.delegation import AgentDelegation
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 
 class DataSubAgentCore:

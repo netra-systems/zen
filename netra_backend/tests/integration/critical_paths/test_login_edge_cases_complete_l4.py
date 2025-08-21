@@ -3,34 +3,43 @@ L4 Integration Test: Login Edge Cases Complete
 Tests all edge cases in login flow including rate limiting, account states, and errors
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import hashlib
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
-import hashlib
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.services.user_service import UserService
-from netra_backend.app.services.rate_limit_service import RateLimitService
-from netra_backend.app.services.session_service import SessionService
-from netra_backend.app.models.user import User, UserStatus
 from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
-
-# Add project root to path
+    AccountLocked,
+    AccountSuspended,
+    # Add project root to path
     AuthenticationError,
     RateLimitExceeded,
-    AccountLocked,
-    AccountSuspended
 )
+from netra_backend.app.models.user import User, UserStatus
+
+# Add project root to path
+from netra_backend.app.services.auth_service import AuthService
+from netra_backend.app.services.rate_limit_service import RateLimitService
+from netra_backend.app.services.session_service import SessionService
+from netra_backend.app.services.user_service import UserService
 
 
 class TestLoginEdgeCasesCompleteL4:

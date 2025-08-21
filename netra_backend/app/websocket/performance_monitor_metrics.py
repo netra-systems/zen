@@ -5,9 +5,9 @@ Handles metrics calculation and summary generation.
 
 import statistics
 import time
+from collections import defaultdict, deque
 from datetime import datetime, timezone
-from typing import Dict, List, Any
-from collections import deque, defaultdict
+from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.performance_monitor_collector import MetricCollector

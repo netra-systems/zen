@@ -6,18 +6,23 @@ Complies with 450-line and 25-line function limits.
 """
 
 from typing import Dict, List, Tuple
+
 try:
-    from .status_types import StatusReportData, PatternMatch
     from .status_section_renderers import (
-        ComponentDetailsRenderer, IntegrationRenderer, 
-        TestingSectionRenderer, RecommendationsRenderer
+        ComponentDetailsRenderer,
+        IntegrationRenderer,
+        RecommendationsRenderer,
+        TestingSectionRenderer,
     )
+    from .status_types import PatternMatch, StatusReportData
 except ImportError:
-    from status_types import StatusReportData, PatternMatch
     from status_section_renderers import (
-        ComponentDetailsRenderer, IntegrationRenderer, 
-        TestingSectionRenderer, RecommendationsRenderer
+        ComponentDetailsRenderer,
+        IntegrationRenderer,
+        RecommendationsRenderer,
+        TestingSectionRenderer,
     )
+    from status_types import PatternMatch, StatusReportData
 
 
 class StatusReportRenderer:

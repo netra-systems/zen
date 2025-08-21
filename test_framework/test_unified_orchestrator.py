@@ -5,17 +5,19 @@ Test Unified Orchestrator Components
 Simple validation tests for the unified orchestrator functionality.
 """
 
-import pytest
 import asyncio
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 from .unified_orchestrator import (
-    ServiceManager, 
-    TestExecutor,
     ResultAggregator,
-    UnifiedOrchestrator
+    ServiceManager,
+    TestExecutor,
+    UnifiedOrchestrator,
 )
+
 
 class TestServiceManager:
     """Test ServiceManager functionality"""

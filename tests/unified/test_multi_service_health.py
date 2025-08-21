@@ -18,25 +18,27 @@ Tests all critical service health endpoints and dependencies:
 CRITICAL: Maximum 300 lines, real health endpoint calls, comprehensive timeout handling
 """
 
-import os
 import asyncio
-import pytest
-import httpx
+import os
 import time
-from typing import Dict, Any, List, Tuple, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
+import pytest
 
 # Set testing environment before any imports
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.config import settings
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.db.postgres import get_async_db, async_engine
-from netra_backend.app.redis_manager import RedisManager
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.config import settings
+from netra_backend.app.db.postgres import async_engine, get_async_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
 
 logger = central_logger.get_logger(__name__)
 

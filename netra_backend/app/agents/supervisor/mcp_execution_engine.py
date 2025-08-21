@@ -4,18 +4,23 @@ Extends base execution engine with MCP tool routing and execution capabilities.
 Follows strict 25-line function design and 450-line limit.
 """
 
-from typing import Dict, List, Optional, Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
-    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext, AgentExecutionResult
-from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
 from netra_backend.app.agents.mcp_integration.context_manager import MCPContextManager
-from netra_backend.app.agents.mcp_integration.mcp_intent_detector import MCPIntentDetector
+from netra_backend.app.agents.mcp_integration.mcp_intent_detector import (
+    MCPIntentDetector,
+)
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import (
+    AgentExecutionContext,
+    AgentExecutionResult,
+)
+from netra_backend.app.agents.supervisor.execution_engine import ExecutionEngine
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_mcp_bridge import AgentMCPBridge
 
 logger = central_logger.get_logger(__name__)

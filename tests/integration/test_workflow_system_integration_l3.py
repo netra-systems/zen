@@ -8,18 +8,19 @@ import json
 import os
 import sys
 import tempfile
-import yaml
 from datetime import datetime, timedelta
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock, call
-import pytest
+from unittest.mock import MagicMock, Mock, call, patch
+
 import httpx
+import pytest
+import yaml
 
 # Add scripts directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))
 
-from verify_workflow_status import WorkflowStatusVerifier, VerificationConfig
 from manage_workflows import WorkflowManager
+from verify_workflow_status import VerificationConfig, WorkflowStatusVerifier
 from workflow_introspection import WorkflowIntrospector, WorkflowRun
 
 

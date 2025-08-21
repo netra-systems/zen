@@ -5,8 +5,9 @@ Contains all dataclasses and type definitions used across modules.
 """
 
 import time
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional, Union
+from dataclasses import asdict, dataclass
+from typing import Dict, List, Optional, Union
+
 
 @dataclass
 class BoundaryViolation:

@@ -11,15 +11,16 @@ ARCHITECTURAL COMPLIANCE: <300 lines, <8 lines per function
 """
 
 import asyncio
-import uuid
 import time
-from typing import Dict, List, Any, Optional, Tuple
-import pytest
+import uuid
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.tests.unified.config import TEST_USERS
-from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
+import pytest
+
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.tests.test_utilities.websocket_mocks import WebSocketBuilder
+from netra_backend.tests.unified.config import TEST_USERS
 
 logger = central_logger.get_logger(__name__)
 

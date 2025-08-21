@@ -6,12 +6,13 @@ Extracted from test_complete_user_journey.py for modularity.
 """
 
 import asyncio
-import httpx
 import time
 import uuid
-from typing import Dict, Any, List
-from dataclasses import dataclass, field
 from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
+
+import httpx
 
 
 @dataclass

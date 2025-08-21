@@ -13,13 +13,14 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real quality gate testing
 
 import asyncio
 import time
-from typing import Dict, Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
 import pytest
 
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.quality.quality_gate_service import QualityGateService
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.quality.quality_gate_service import QualityGateService
 
 
 class ResponseQualityTester:

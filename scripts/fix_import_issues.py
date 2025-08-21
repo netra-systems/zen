@@ -8,10 +8,11 @@ This script fixes common import issues found in the codebase:
 3. ConnectionManager -> ModernConnectionManager (where applicable)
 """
 
+import glob
 import os
 import re
-import glob
 from pathlib import Path
+
 
 def fix_validate_token_imports(file_path: str) -> bool:
     """Fix validate_token imports to use validate_token_jwt."""

@@ -1,10 +1,10 @@
 """Agent Configuration Module - Centralized configuration for all agents."""
 
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 from pydantic import BaseModel, Field
 
-from netra_backend.app.schemas.shared_types import RetryConfig, BaseAgentConfig
-from netra_backend.app.core.config import get_config
+from netra_backend.app.schemas.shared_types import BaseAgentConfig, RetryConfig
 
 
 class AgentCacheConfig(BaseModel):
@@ -16,6 +16,7 @@ class AgentCacheConfig(BaseModel):
     @classmethod
     def from_unified_config(cls) -> 'AgentCacheConfig':
         """Create config from unified configuration system."""
+        from netra_backend.app.core.config import get_config
         config = get_config()
         return cls(
             default_ttl=getattr(config, 'agent_cache_ttl', 300),
@@ -36,6 +37,7 @@ class TimeoutConfig(BaseModel):
     @classmethod
     def from_unified_config(cls) -> 'TimeoutConfig':
         """Create config from unified configuration system."""
+        from netra_backend.app.core.config import get_config
         config = get_config()
         return cls(
             default_timeout=getattr(config, 'agent_default_timeout', 30.0),
@@ -52,6 +54,7 @@ class UserConfig(BaseModel):
     @classmethod
     def from_unified_config(cls) -> 'UserConfig':
         """Create config from unified configuration system."""
+        from netra_backend.app.core.config import get_config
         config = get_config()
         return cls(
             default_user_id=getattr(config, 'agent_default_user_id', 'default_user'),
@@ -68,6 +71,7 @@ class AgentConfig(BaseAgentConfig):
     @classmethod
     def from_unified_config(cls) -> 'AgentConfig':
         """Create complete config from unified configuration system."""
+        from netra_backend.app.core.config import get_config
         config = get_config()
         return cls(
             cache=AgentCacheConfig.from_unified_config(),
@@ -86,5 +90,19 @@ class AgentConfig(BaseAgentConfig):
         )
 
 
-# Global configuration instance
-agent_config = AgentConfig.from_unified_config()
+# Global configuration instance - lazy initialization to avoid circular imports
+_agent_config = None
+
+def get_agent_config() -> AgentConfig:
+    """Get or create the global agent configuration."""
+    global _agent_config
+    if _agent_config is None:
+        _agent_config = AgentConfig.from_unified_config()
+    return _agent_config
+
+# Create a proxy object for backward compatibility
+class _AgentConfigProxy:
+    def __getattr__(self, name):
+        return getattr(get_agent_config(), name)
+
+agent_config = _AgentConfigProxy()

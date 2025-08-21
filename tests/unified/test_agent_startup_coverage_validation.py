@@ -17,19 +17,21 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
+import importlib.util
 import json
 import time
-from pathlib import Path
-from typing import Dict, Any, List, Optional, Set, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 import pytest
-import importlib.util
+
+from tests.unified.agent_startup_validators import AgentStartupValidatorSuite
 
 # Test infrastructure
 from tests.unified.config import TEST_CONFIG, TestTier
-from tests.unified.agent_startup_validators import AgentStartupValidatorSuite
 
 
 class CoverageLevel(str, Enum):

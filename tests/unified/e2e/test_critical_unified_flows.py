@@ -9,12 +9,13 @@ These tests validate REAL integration - no mocking of internal services.
 """
 
 import asyncio
-import pytest
-import aiohttp
 import json
 import time
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import pytest
 
 # Mark all tests as requiring real services
 pytestmark = [

@@ -3,14 +3,14 @@
 import asyncio
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
-from team_updates_git_analyzer import GitAnalyzer
-from team_updates_test_analyzer import TestReportAnalyzer
 from team_updates_compliance_analyzer import ComplianceAnalyzer
 from team_updates_documentation_analyzer import DocumentationAnalyzer
 from team_updates_formatter import HumanFormatter
+from team_updates_git_analyzer import GitAnalyzer
+from team_updates_test_analyzer import TestReportAnalyzer
 
 
 class TeamUpdatesOrchestrator:

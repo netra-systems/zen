@@ -4,29 +4,32 @@ MCP Service
 Main service layer for MCP server integration with Netra platform using FastMCP 2.
 """
 
-from typing import Dict, Any, List, Optional
-from datetime import datetime, UTC
+import asyncio
 import json
 import uuid
-import asyncio
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel, Field
 from fastmcp import FastMCP
+from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.logging_config import CentralLogger
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.services.service_interfaces import IMCPService
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
-from netra_backend.app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
 from netra_backend.app.db.models_postgres import User as UserInDB
+from netra_backend.app.logging_config import CentralLogger
 from netra_backend.app.netra_mcp.netra_mcp_server import NetraMCPServer
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.database.mcp_repository import (
+    MCPClientRepository,
+    MCPToolExecutionRepository,
+)
 from netra_backend.app.services.mcp_models import MCPClient, MCPToolExecution
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.service_interfaces import IMCPService
+from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.thread_service import ThreadService
 
 logger = CentralLogger()
 

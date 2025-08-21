@@ -1,5 +1,6 @@
-import re
 import ast
+import re
+
 
 class LogParser:
     """

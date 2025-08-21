@@ -4,8 +4,10 @@ This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
 """
 
-import pytest
 from typing import Any, Dict, List, Optional
+
+import pytest
+
 
 class TestAgentToolAtomicityIntegrationHelpers:
     """Test class for agent_tool_atomicity_integration_helpers"""

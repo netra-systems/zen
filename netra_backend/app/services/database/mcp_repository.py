@@ -3,14 +3,16 @@
 Provides database operations for MCP clients and tool executions.
 """
 
-from typing import Optional, List, Dict, Any
-from datetime import datetime, UTC
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, update, and_
-from netra_backend.app.services.database.base_repository import BaseRepository
-from netra_backend.app.logging_config import central_logger
 import hashlib
 import json
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+
+from sqlalchemy import and_, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database.base_repository import BaseRepository
 
 logger = central_logger.get_logger(__name__)
 
@@ -284,6 +286,7 @@ class MCPToolExecutionRepository(BaseRepository[MCPToolExecutionModel]):
         try:
             # Query database for session executions
             from sqlalchemy import select
+
             from netra_backend.app.db.models_mcp import MCPToolExecution
             result = await db.execute(
                 select(MCPToolExecution).where(
@@ -306,6 +309,7 @@ class MCPToolExecutionRepository(BaseRepository[MCPToolExecutionModel]):
         try:
             # Query database for client executions
             from sqlalchemy import select
+
             from netra_backend.app.db.models_mcp import MCPToolExecution
             result = await db.execute(
                 select(MCPToolExecution).where(

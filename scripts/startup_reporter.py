@@ -4,10 +4,11 @@ Startup Test Reporter
 Handles report generation for startup tests
 """
 
-import sys
 import json
+import sys
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from startup_test_executor import TestResult
 
 

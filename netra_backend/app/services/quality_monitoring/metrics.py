@@ -1,22 +1,24 @@
 """Metrics collection and storage for quality monitoring"""
 
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta, UTC
-from collections import defaultdict, deque
 import json
+from collections import defaultdict, deque
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
 logger = central_logger.get_logger(__name__)
 
 
 # Import MetricsCollector from canonical location - CONSOLIDATED
 from netra_backend.app.monitoring.models import MetricsCollector as CoreMetricsCollector
+
 
 class QualityMetricsCollector:
     """Collects and stores quality metrics"""

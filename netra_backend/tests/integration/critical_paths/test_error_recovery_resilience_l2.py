@@ -13,30 +13,49 @@ Test Level: L2 (Real Internal Dependencies)
 - Mock external service failures
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any, Tuple, Callable
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from unittest.mock import AsyncMock, patch, MagicMock
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.core.exceptions_base import (
+    NetraException,
+    ServiceUnavailableException,
+)
+from netra_backend.app.core.logging_config import get_logger
+from netra_backend.app.services.observability.error_tracker import ErrorTracker
 
 # Add project root to path
-
-from netra_backend.app.services.resilience.circuit_breaker import CircuitBreaker, CircuitState
-from netra_backend.app.services.resilience.retry_manager import RetryManager, RetryStrategy
+from netra_backend.app.services.resilience.circuit_breaker import (
+    CircuitBreaker,
+    CircuitState,
+)
 from netra_backend.app.services.resilience.error_aggregator import ErrorAggregator
 from netra_backend.app.services.resilience.health_checker import HealthChecker
+from netra_backend.app.services.resilience.retry_manager import (
+    RetryManager,
+    RetryStrategy,
+)
 from netra_backend.app.services.resilience.timeout_manager import TimeoutManager
-from netra_backend.app.services.observability.error_tracker import ErrorTracker
-from netra_backend.app.core.exceptions_base import NetraException, ServiceUnavailableException
-from netra_backend.app.core.logging_config import get_logger
 
 # Add project root to path
 

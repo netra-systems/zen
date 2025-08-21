@@ -19,33 +19,35 @@ Business Value Justification (BVJ):
 Module Architecture Compliance: Under 300 lines, functions under 8 lines
 """
 
-import pytest
 import asyncio
 from datetime import datetime
+
+import pytest
+
 from netra_backend.tests.unified.database_sync_fixtures import (
     DatabaseSyncValidator,
+    create_eventual_consistency_user,
     create_test_user_data,
-    create_eventual_consistency_user
 )
 from netra_backend.tests.unified.database_sync_helpers import (
-    sync_user_to_backend,
-    insert_user_creation_event,
-    verify_sync_consistency,
-    verify_metrics_consistency,
-    create_sync_task,
     create_migration_users,
+    create_sync_task,
     execute_migration,
-    verify_migration_integrity,
+    insert_user_creation_event,
     measure_performance_duration,
+    setup_cache_test,
+    sync_user_to_backend,
+    update_user_and_invalidate_cache,
     validate_performance_results,
     verify_auth_backend_consistency,
     verify_backend_user_exists,
+    verify_cache_invalidation,
     verify_clickhouse_metrics,
     verify_event_types,
-    setup_cache_test,
     verify_initial_cache,
-    update_user_and_invalidate_cache,
-    verify_cache_invalidation
+    verify_metrics_consistency,
+    verify_migration_integrity,
+    verify_sync_consistency,
 )
 
 

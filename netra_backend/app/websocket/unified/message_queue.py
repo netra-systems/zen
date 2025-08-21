@@ -5,8 +5,8 @@ for reliable WebSocket message delivery.
 """
 
 import time
-from typing import Dict, Any, Optional, Deque
 from collections import deque
+from typing import Any, Deque, Dict, Optional
 
 
 class MessageQueue:

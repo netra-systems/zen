@@ -12,10 +12,10 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design with focused responsibilities
 """
 
-import uuid
 import time
-from typing import Dict, List, Any, Optional
+import uuid
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
 
 
 @dataclass

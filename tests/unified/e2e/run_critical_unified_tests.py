@@ -24,6 +24,7 @@ Critical Unified Tests Runner - Real Services Integration
 """
 
 import asyncio
+import json
 import logging
 import os
 import platform
@@ -31,11 +32,11 @@ import signal
 import subprocess
 import sys
 import time
-import json
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Optional, Tuple
+
 import pytest
 
 # Add project root to Python path
@@ -43,8 +44,10 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 try:
-    from netra_backend.tests.unified.real_services_manager import create_real_services_manager
     from netra_backend.tests.unified.real_services_health import check_service_health
+    from netra_backend.tests.unified.real_services_manager import (
+        create_real_services_manager,
+    )
 except ImportError as e:
     logging.warning(f"Import error (will use fallback): {e}")
 

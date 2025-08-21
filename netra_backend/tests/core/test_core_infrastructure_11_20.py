@@ -3,15 +3,25 @@ Tests 11-20: Core Infrastructure & Error Handling
 Tests for the missing core infrastructure components identified in the top 100 missing tests.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
 import logging
 import os
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 from cryptography.fernet import Fernet
 
 # Add project root to path
@@ -109,8 +119,9 @@ class TestErrorHandlers:
         assert response.trace_id == "trace-123"
     async def test_http_exception_handler(self):
         """Test HTTP exception handling."""
-        from netra_backend.app.core.error_handlers import http_exception_handler
         from fastapi import HTTPException
+
+        from netra_backend.app.core.error_handlers import http_exception_handler
         
         request = Mock()
         request.state = Mock()
@@ -132,8 +143,8 @@ class TestCustomExceptions:
     
     def test_netra_exception_structure(self):
         """Test NetraException structure and properties."""
-        from netra_backend.app.core.exceptions_base import NetraException
         from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+        from netra_backend.app.core.exceptions_base import NetraException
         
         exc = NetraException(
             message="Test error",
@@ -147,8 +158,8 @@ class TestCustomExceptions:
     
     def test_authentication_error(self):
         """Test authentication-specific exceptions."""
-        from netra_backend.app.core.exceptions_auth import AuthenticationError
         from netra_backend.app.core.error_codes import ErrorCode
+        from netra_backend.app.core.exceptions_auth import AuthenticationError
         
         exc = AuthenticationError("Invalid token")
         assert "Invalid token" in str(exc)
@@ -161,7 +172,11 @@ class TestLoggingManager:
     
     def test_logging_configuration(self):
         """Test basic logging configuration."""
-        from netra_backend.app.core.logging_manager import configure_logging, get_logger, LogLevel
+        from netra_backend.app.core.logging_manager import (
+            LogLevel,
+            configure_logging,
+            get_logger,
+        )
         
         configure_logging(level=LogLevel.DEBUG)
         logger = get_logger(__name__)
@@ -250,7 +265,7 @@ class TestSecretManager:
     
     def test_secret_encryption(self):
         """Test basic secret encryption/decryption."""
-        from netra_backend.app.core.secret_manager import encrypt_secret, decrypt_secret
+        from netra_backend.app.core.secret_manager import decrypt_secret, encrypt_secret
         
         key = Fernet.generate_key()
         secret = "my_secret_password"

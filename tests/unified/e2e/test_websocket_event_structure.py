@@ -8,12 +8,12 @@ BVJ: Enterprise/Mid - Platform Stability - Event structure standardization
 prevents costly debugging cycles and ensures reliable real-time features.
 """
 
-import pytest
 import asyncio
 import json
-from typing import Dict, Any
 from datetime import datetime, timezone
+from typing import Any, Dict
 
+import pytest
 from pydantic import ValidationError
 
 from netra_backend.tests.unified.clients.factory import TestClientFactory

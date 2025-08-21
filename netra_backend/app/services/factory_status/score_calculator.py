@@ -1,7 +1,7 @@
 """Score calculator for compliance metrics."""
 
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.services.factory_status.spec_analyzer_core import ComplianceScore
 

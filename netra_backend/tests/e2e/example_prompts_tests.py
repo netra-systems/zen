@@ -3,14 +3,19 @@ Example Prompts and Quality Validation Tests
 Tests for specific example prompts (EP-005, EP-008, EP-009) with real LLM validation
 """
 
-import pytest
 from typing import Dict, List
 
+import pytest
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    QualityLevel,
+)
 from netra_backend.tests.model_effectiveness_tests import (
-    _execute_model_selection_workflow, 
-    _validate_model_effectiveness_results
+    _execute_model_selection_workflow,
+    _validate_model_effectiveness_results,
 )
 
 

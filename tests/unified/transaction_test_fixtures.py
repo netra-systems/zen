@@ -13,10 +13,10 @@ Architecture: 450-line limit, 25-line functions, modular design
 """
 
 import uuid
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class TransactionState(Enum):

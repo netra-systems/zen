@@ -13,25 +13,34 @@ Critical Path: First request -> Rate limit check -> Redis tracking -> Burst hand
 Coverage: First request always allowed, rate limit enforcement, burst capacity, per-user tracking, headers, tier limits, recovery
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, patch
+
+import pytest
 import redis.asyncio as redis
-from datetime import datetime, timezone, timedelta
 
 # Add project root to path
-
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
-from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.tests.unified.config import TestTier
 
 # Add project root to path

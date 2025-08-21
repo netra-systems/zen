@@ -5,21 +5,31 @@ Tests the most critical paths of agent service orchestration including
 initialization, execution, error handling, and supervisor integration.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, Any
+
+import pytest
+from starlette.websockets import WebSocketDisconnect
+
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.schemas.Request import StartAgentPayload
 
 # Add project root to path
-
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.schemas.Request import StartAgentPayload
-from netra_backend.app.core.exceptions import NetraException
-from starlette.websockets import WebSocketDisconnect
 
 # Add project root to path
 

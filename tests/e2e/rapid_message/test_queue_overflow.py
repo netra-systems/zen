@@ -8,15 +8,19 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Maintains service availability under load
 """
 
-import pytest
 import asyncio
 import uuid
 from datetime import datetime, timezone
 
+import pytest
+
 from netra_backend.tests.e2e.fixtures.rapid_message_fixtures import (
-    user_token, message_validator, test_config
+    message_validator,
+    test_config,
+    user_token,
 )
 from netra_backend.tests.e2e.utils.rapid_message_sender import RapidMessageSender
+
 
 @pytest.mark.asyncio
 @pytest.mark.e2e  

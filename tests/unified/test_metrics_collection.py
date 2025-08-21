@@ -26,22 +26,26 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
+import json
 import time
 import uuid
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime, timezone, timedelta
-from dataclasses import dataclass, field
-from unittest.mock import AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
-import pytest
-import json
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from tests.unified.config import UnifiedTestConfig, TestUser
+import pytest
+
+from tests.unified.config import TestUser, UnifiedTestConfig
 from tests.unified.service_manager import ServiceManager
 
 # Conditional imports to avoid configuration issues in testing
 try:
-    from netra_backend.app.db.clickhouse import get_clickhouse_client, use_mock_clickhouse
+    from netra_backend.app.db.clickhouse import (
+        get_clickhouse_client,
+        use_mock_clickhouse,
+    )
     CLICKHOUSE_AVAILABLE = True
 except ImportError:
     CLICKHOUSE_AVAILABLE = False

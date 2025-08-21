@@ -3,7 +3,7 @@ Mock classes for ClickHouse Query Fixer tests.
 All functions ≤8 lines per requirements.
 """
 
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 class MockClickHouseClient:

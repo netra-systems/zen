@@ -10,7 +10,7 @@ Ensures microservices maintain separate dependency trees and data access pattern
 
 import json
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class DependencyIsolationValidator:

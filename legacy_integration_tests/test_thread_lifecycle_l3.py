@@ -9,19 +9,20 @@ Business Value Justification (BVJ):
 - Strategic Impact: Core feature for $347K+ MRR - thread management is essential
 """
 
-import os
-import pytest
 import asyncio
 import json
+import os
 import uuid
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.main import app
+import pytest
+from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+
 # Thread-related services and schemas not available in current codebase
 from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.main import app
 
 
 class TestThreadLifecycleL3:

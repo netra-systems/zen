@@ -21,32 +21,42 @@ COMPLIANCE:
 - Strong typing with Pydantic ✓
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import httpx
 import os
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
+import httpx
+import pytest
 from fastapi import HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.auth_integration.auth import (
-
-# Add project root to path
-    get_current_user, get_current_user_optional, require_admin, 
-    require_developer, require_permission
+    # Add project root to path
+    get_current_user,
+    get_current_user_optional,
+    require_admin,
+    require_developer,
+    require_permission,
 )
+from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
-from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 
 class RealAuthServiceTestFixture:

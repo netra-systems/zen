@@ -25,13 +25,14 @@ COMPLIANCE:
 """
 
 import asyncio
+import os
 import subprocess
 import sys
-import os
 import time
-import httpx
-from typing import List, Dict, Any
 from pathlib import Path
+from typing import Any, Dict, List
+
+import httpx
 
 
 class RealAuthTestRunner:

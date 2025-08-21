@@ -6,22 +6,31 @@ CRITICAL: These tests prevent regression of the WebSocket auth failure
 where tokens were created but users didn't exist in the database.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import uuid
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import jwt
+import pytest
+from routes.utils.websocket_helpers import authenticate_websocket_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.security_service import SecurityService
-from routes.utils.websocket_helpers import authenticate_websocket_user
-import uuid
-import jwt
-from datetime import datetime, timedelta, timezone
 
 # Add project root to path
 
@@ -78,8 +87,9 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_oauth_creates_real_database_user(self):
         """Test that OAuth flow creates users in the database."""
-        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
+
+        from netra_backend.app.db.postgres import get_async_db
         
         # Simulate OAuth user info
         oauth_user_info = {
@@ -125,11 +135,12 @@ class TestAuthUserPersistenceRegression:
     @pytest.mark.asyncio
     async def test_token_user_id_matches_database_user_id(self):
         """Test that JWT token user_id matches the database user.id."""
-        from netra_backend.app.services.security_service import SecurityService
-        from netra_backend.app.services.key_manager import KeyManager
+        from sqlalchemy import select
+
         from netra_backend.app.config import settings
         from netra_backend.app.db.postgres import get_async_db
-        from sqlalchemy import select
+        from netra_backend.app.services.key_manager import KeyManager
+        from netra_backend.app.services.security_service import SecurityService
         
         # Setup security service
         key_manager = KeyManager.load_from_settings(settings)
@@ -196,6 +207,7 @@ class TestAuthUserPersistenceRegression:
     async def test_auth_service_database_sync(self):
         """Test that auth service syncs users to main database."""
         from sqlalchemy import select
+
         from netra_backend.app.db.postgres import get_async_db
         
         # Test user data
@@ -250,8 +262,9 @@ class TestAuthUserPersistenceRegression:
             }
         ]
         
-        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
+
+        from netra_backend.app.db.postgres import get_async_db
         
         async with get_async_db() as db:
             for test_case in test_cases:
@@ -290,6 +303,7 @@ class TestAuthServiceIntegration:
     async def test_auth_service_main_db_connection(self):
         """Test that auth service can connect to main database."""
         import os
+
         from sqlalchemy.ext.asyncio import create_async_engine
         
         # Get database URL as auth service would
@@ -309,8 +323,9 @@ class TestAuthServiceIntegration:
     @pytest.mark.asyncio 
     async def test_user_persistence_across_services(self):
         """Test that users persist across auth service and main app."""
-        from netra_backend.app.db.postgres import get_async_db
         from sqlalchemy import select
+
+        from netra_backend.app.db.postgres import get_async_db
         
         # User created by auth service
         auth_user = {
@@ -341,9 +356,9 @@ class TestAuthServiceIntegration:
             assert app_user.email == auth_user["email"]
             
             # Verify WebSocket auth would find this user
-            from netra_backend.app.services.security_service import SecurityService
-            from netra_backend.app.services.key_manager import KeyManager
             from netra_backend.app.config import settings
+            from netra_backend.app.services.key_manager import KeyManager
+            from netra_backend.app.services.security_service import SecurityService
             
             key_manager = KeyManager.load_from_settings(settings)
             security_service = SecurityService(key_manager)

@@ -5,7 +5,8 @@ This module simulates performance patterns including cascading failures and bott
 
 import random
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 import numpy as np
 
 

@@ -2,25 +2,33 @@
 Auth Service API Routes
 FastAPI endpoints for authentication operations
 """
-from fastapi import APIRouter, Request, Header, HTTPException, Depends
-from fastapi.responses import JSONResponse
-from typing import Optional
 import logging
 import os
+import secrets
+from typing import Optional
+
+import httpx
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi.responses import JSONResponse
 
 from auth_service.auth_core.config import AuthConfig
-from auth_service.auth_core.services.auth_service import AuthService
 from auth_service.auth_core.models.auth_models import (
-    LoginRequest, LoginResponse,
-    TokenRequest, TokenResponse,
-    RefreshRequest, ServiceTokenRequest,
-    ServiceTokenResponse, HealthResponse,
-    AuthEndpoints, AuthConfigResponse,
-    PasswordResetRequest, PasswordResetResponse,
-    PasswordResetConfirm, PasswordResetConfirmResponse
+    AuthConfigResponse,
+    AuthEndpoints,
+    HealthResponse,
+    LoginRequest,
+    LoginResponse,
+    PasswordResetConfirm,
+    PasswordResetConfirmResponse,
+    PasswordResetRequest,
+    PasswordResetResponse,
+    RefreshRequest,
+    ServiceTokenRequest,
+    ServiceTokenResponse,
+    TokenRequest,
+    TokenResponse,
 )
-import httpx
-import secrets
+from auth_service.auth_core.services.auth_service import AuthService
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -267,9 +275,10 @@ async def dev_login(
     if env != "development":
         raise HTTPException(status_code=403, detail="Dev login only available in development mode")
     
+    import uuid
+
     from ..database.connection import auth_db
     from ..database.repository import AuthUserRepository
-    import uuid
     
     try:
         # Sync to main database first to get/create the user
@@ -386,10 +395,12 @@ async def oauth_callback(
     return_url: Optional[str] = None
 ):
     """Handle OAuth callback from Google"""
+    import uuid
+
     from fastapi.responses import RedirectResponse
+
     from ..database.connection import auth_db
     from ..database.repository import AuthUserRepository
-    import uuid
     
     logger.info(f"OAuth callback received - code: {code[:10]}..., state: {state[:10]}...")
     

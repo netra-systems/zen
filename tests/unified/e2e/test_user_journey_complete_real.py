@@ -17,29 +17,31 @@ REQUIREMENTS:
 - Real service discovery and connection
 """
 
-import pytest
 import asyncio
-import time
 import os
-from typing import Dict, Any, Optional
+import time
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
+
+import pytest
 
 # Set test environment
 os.environ["TESTING"] = "1"
 os.environ["USE_REAL_SERVICES"] = "true"
 
+from helpers.real_service_journey_helpers import (
+    RealChatHelper,
+    RealLoginHelper,
+    RealSignupHelper,
+    RealWebSocketHelper,
+    validate_real_chat,
+    validate_real_login,
+    validate_real_signup,
+    validate_real_websocket,
+)
+
 from dev_launcher.discovery import ServiceDiscovery
 from netra_backend.tests.unified.clients.factory import TestClientFactory
-from helpers.real_service_journey_helpers import (
-    RealSignupHelper,
-    RealLoginHelper,
-    RealWebSocketHelper,
-    RealChatHelper,
-    validate_real_signup,
-    validate_real_login,
-    validate_real_websocket,
-    validate_real_chat
-)
 
 
 class CompleteUserJourneyRealTester:

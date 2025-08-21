@@ -10,26 +10,38 @@ Critical Path: Service discovery -> Health checks -> Database readiness -> Agent
 Coverage: Microservice startup orchestration, dependency resolution, graceful degradation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
+import json
 import logging
+import time
 from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, patch
+
 import aiohttp
-import json
+import pytest
 
-# Add project root to path
-
-from netra_backend.app.services.health_check_service import HealthCheckService  
-from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
-from netra_backend.app.services.websocket_manager import WebSocketManager
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.core.config import Settings
+from netra_backend.app.services.database.connection_manager import (
+    DatabaseConnectionManager,
+)
+
+# Add project root to path
+from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

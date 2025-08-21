@@ -4,26 +4,46 @@ Tests validate artifacts at agent boundaries with real state transitions.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import uuid
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any, Dict
+
+import pytest
+
+from netra_backend.app.agents.artifact_validator import (
+    ArtifactValidationError,
+    ArtifactValidator,
+    ValidationContext,
+    artifact_validator,
+)
+from netra_backend.app.agents.data_sub_agent.models import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
 
 # Add project root to path
-
 from netra_backend.app.agents.state import DeepAgentState, OptimizationsResult
 from netra_backend.app.agents.triage_sub_agent.models import (
-
-# Add project root to path
-    TriageResult, Priority, Complexity, KeyParameters, UserIntent, SuggestedWorkflow
-)
-from netra_backend.app.agents.data_sub_agent.models import DataAnalysisResponse, AnomalyDetectionResponse
-from netra_backend.app.agents.artifact_validator import (
-    ArtifactValidator, ValidationContext, ArtifactValidationError, artifact_validator
+    Complexity,
+    KeyParameters,
+    Priority,
+    SuggestedWorkflow,
+    # Add project root to path
+    TriageResult,
+    UserIntent,
 )
 
 

@@ -9,14 +9,17 @@ Strategic Impact: Prevents workflow disruption and user frustration from thread 
 """
 
 import asyncio
-import pytest
 import time
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock
 
+import pytest
+
 from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
-    ThreadTestDataFactory, unified_harness, test_users
+    ThreadTestDataFactory,
+    test_users,
+    unified_harness,
 )
 
 

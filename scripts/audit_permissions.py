@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Audit backend route permissions."""
 
-import re
 import os
+import re
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
 
 def analyze_route_file(filepath: Path) -> Dict[str, List[str]]:
     """Analyze a single route file for permissions."""

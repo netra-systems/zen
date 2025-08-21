@@ -3,19 +3,32 @@
 Main pytest test class for comprehensive error propagation testing.
 """
 
-import pytest
 import asyncio
 import json
-import time
 import logging
-from typing import Dict, Any
+import time
+from typing import Any, Dict
 
-from tests.unified.e2e.helpers.error_propagation.error_generators import RealErrorPropagationTester
-from tests.unified.e2e.helpers.error_propagation.error_validators import AuthServiceFailurePropagationValidator
-from tests.unified.e2e.helpers.error_propagation.database_error_helpers import DatabaseErrorHandlingValidator
-from tests.unified.e2e.helpers.error_propagation.error_recovery_helpers import NetworkFailureSimulationValidator
-from tests.unified.e2e.helpers.error_propagation.error_correlation_helpers import ErrorCorrelationValidator
-from tests.unified.e2e.helpers.error_propagation.user_message_helpers import UserFriendlyMessageValidator
+import pytest
+
+from tests.unified.e2e.helpers.error_propagation.database_error_helpers import (
+    DatabaseErrorHandlingValidator,
+)
+from tests.unified.e2e.helpers.error_propagation.error_correlation_helpers import (
+    ErrorCorrelationValidator,
+)
+from tests.unified.e2e.helpers.error_propagation.error_generators import (
+    RealErrorPropagationTester,
+)
+from tests.unified.e2e.helpers.error_propagation.error_recovery_helpers import (
+    NetworkFailureSimulationValidator,
+)
+from tests.unified.e2e.helpers.error_propagation.error_validators import (
+    AuthServiceFailurePropagationValidator,
+)
+from tests.unified.e2e.helpers.error_propagation.user_message_helpers import (
+    UserFriendlyMessageValidator,
+)
 
 logger = logging.getLogger(__name__)
 

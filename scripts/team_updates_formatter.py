@@ -1,7 +1,7 @@
 """Human Formatter - Formats updates for human readability."""
 
 from datetime import datetime
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 class HumanFormatter:

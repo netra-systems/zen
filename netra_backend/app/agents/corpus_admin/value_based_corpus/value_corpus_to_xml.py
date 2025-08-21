@@ -4,9 +4,10 @@
 import json
 import os
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
-from typing import List, Dict, Any, Optional
 from collections import defaultdict
+from typing import Any, Dict, List, Optional
+from xml.dom import minidom
+
 
 def parse_json_corpus(file_path: str) -> Optional[List[Dict[str, Any]]]:
     """Reads and validates corpus data from JSON file."""

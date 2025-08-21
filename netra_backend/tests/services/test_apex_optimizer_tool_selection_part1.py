@@ -3,25 +3,40 @@ Comprehensive tests for Apex Optimizer tool selection - Part 1: Helper Classes a
 Tests tool selection logic, helper classes, and basic optimization routing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from datetime import UTC, datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, call, patch
+
+import pytest
+from schemas import AppConfig, RequestModel
+
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.services.apex_optimizer_agent.models import AgentState
+from netra_backend.app.services.apex_optimizer_agent.tools.base import (
+    BaseTool,
+    ToolMetadata,
+)
 
 # Add project root to path
-
-from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
-from netra_backend.app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
-from netra_backend.app.services.apex_optimizer_agent.models import AgentState
+from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
+    ApexToolSelector,
+)
 from netra_backend.app.services.context import ToolContext
-from schemas import AppConfig, RequestModel
-from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
 
@@ -205,7 +220,11 @@ class TestApexOptimizerToolSelection:
     @pytest.fixture
     def sample_agent_state(self):
         """Create sample agent state"""
-        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import (
+            DataSource,
+            TimeRange,
+            Workload,
+        )
         from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",

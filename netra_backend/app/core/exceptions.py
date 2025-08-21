@@ -22,27 +22,52 @@ focused modules under 300 lines each, meeting architectural requirements.
 
 # Import all exception classes from their focused modules for backward compatibility
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_agent import (
+    AgentConfigurationError,
+    AgentCoordinationError,
+    AgentError,
+    AgentExecutionError,
+    AgentTimeoutError,
+    LLMError,
+    LLMRateLimitError,
+    LLMRequestError,
+)
+from netra_backend.app.core.exceptions_auth import (
+    AuthenticationError,
+    AuthorizationError,
+    NetraSecurityException,
+    TokenExpiredError,
+    TokenInvalidError,
+)
 from netra_backend.app.core.exceptions_base import ErrorDetails, NetraException
 from netra_backend.app.core.exceptions_config import ConfigurationError, ValidationError
-from netra_backend.app.core.exceptions_auth import (
-    AuthenticationError, AuthorizationError, TokenExpiredError, TokenInvalidError, NetraSecurityException
+from netra_backend.app.core.exceptions_database import (
+    DatabaseConnectionError,
+    DatabaseError,
+    RecordAlreadyExistsError,
+    RecordNotFoundError,
 )
 from netra_backend.app.core.exceptions_database import (
-    DatabaseError, DatabaseConnectionError, RecordNotFoundError, 
-    RecordAlreadyExistsError, DatabaseConstraintError as ConstraintViolationError
-)
-from netra_backend.app.core.exceptions_service import (
-    ServiceError, ServiceTimeoutError, ExternalServiceError, ProcessingError
-)
-from netra_backend.app.core.exceptions_agent import (
-    AgentError, AgentExecutionError, AgentTimeoutError, LLMError,
-    LLMRequestError, LLMRateLimitError, AgentCoordinationError, AgentConfigurationError
-)
-from netra_backend.app.core.exceptions_websocket import (
-    WebSocketError, WebSocketConnectionError, WebSocketMessageError, WebSocketAuthenticationError
+    DatabaseConstraintError as ConstraintViolationError,
 )
 from netra_backend.app.core.exceptions_file import (
-    FileError, FileNotFoundError, FileAccessDeniedError, DataParsingError, DataValidationError
+    DataParsingError,
+    DataValidationError,
+    FileAccessDeniedError,
+    FileError,
+    FileNotFoundError,
+)
+from netra_backend.app.core.exceptions_service import (
+    ExternalServiceError,
+    ProcessingError,
+    ServiceError,
+    ServiceTimeoutError,
+)
+from netra_backend.app.core.exceptions_websocket import (
+    WebSocketAuthenticationError,
+    WebSocketConnectionError,
+    WebSocketError,
+    WebSocketMessageError,
 )
 
 # Maintain compatibility with the old interface

@@ -10,24 +10,33 @@ Critical Path: Auth failure detection -> Circuit breaker activation -> Fallback 
 Coverage: Multi-service circuit breaker coordination, auth service failure scenarios, fallback auth mechanisms, state synchronization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-import docker
-import aiohttp
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import docker
+import pytest
+from clients.auth_client_cache import AuthCircuitBreakerManager
 
 # Add project root to path
-
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
-from clients.auth_client_cache import AuthCircuitBreakerManager
 
 # Add project root to path
 

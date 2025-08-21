@@ -3,20 +3,30 @@ Unit tests for User Service
 Tests user CRUD operations including password hashing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock, patch
-from sqlalchemy.ext.asyncio import AsyncSession
 import uuid
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
+import pytest
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.user_service import CRUDUser, user_service, pwd_context
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.schemas.registry import UserCreate
 from netra_backend.app.schemas.User import UserUpdate
+
+# Add project root to path
+from netra_backend.app.services.user_service import CRUDUser, pwd_context, user_service
 
 # Add project root to path
 

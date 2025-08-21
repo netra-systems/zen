@@ -7,7 +7,9 @@ This module imports from the canonical TechnicalDebtCalculator implementation.
 """
 
 # Import from canonical source
-from netra_backend.app.services.factory_status.technical_debt_calculator import TechnicalDebtCalculator
+from netra_backend.app.services.factory_status.technical_debt_calculator import (
+    TechnicalDebtCalculator,
+)
 
 # Re-export for backwards compatibility
 __all__ = ['TechnicalDebtCalculator']

@@ -6,14 +6,16 @@ with all dependencies and configurations.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
+import asyncio
 import os
 import sys
-import asyncio
 import time
 from typing import Dict, List, Optional
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from netra_backend.tests.base import StagingConfigTestBase
 
 # Add app to path for imports
@@ -36,9 +38,9 @@ class TestStagingStartup(StagingConfigTestBase):
             os.environ.update(env_vars)
             
             # Import app modules
-            from netra_backend.app.routes.mcp.main import app
             from netra_backend.app.core.config import get_config
             from netra_backend.app.db.session import get_db
+            from netra_backend.app.routes.mcp.main import app
             from netra_backend.app.services.websocket_manager import WebSocketManager
             
             # Initialize configuration

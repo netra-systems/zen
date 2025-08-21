@@ -10,10 +10,11 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import time
 import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, Optional
+
 import httpx
 import redis.asyncio as redis
-from typing import Dict, Any, Optional
-from datetime import datetime, timezone
 
 
 class RedisManager:

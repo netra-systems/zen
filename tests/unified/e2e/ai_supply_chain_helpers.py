@@ -7,13 +7,13 @@ Architecture: Functions ≤8 lines, modular provider simulation utilities.
 
 import asyncio
 import time
-from typing import Dict, Any, Optional, List, Callable, Awaitable
-from unittest.mock import AsyncMock, Mock
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Awaitable, Callable, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.llm.fallback_handler import LLMFallbackHandler
 from netra_backend.app.llm.fallback_config import FallbackConfig
+from netra_backend.app.llm.fallback_handler import LLMFallbackHandler
 from netra_backend.app.schemas.llm_base_types import LLMProvider
 
 

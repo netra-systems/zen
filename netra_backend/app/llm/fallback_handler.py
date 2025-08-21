@@ -9,19 +9,32 @@ This module provides robust fallback mechanisms for LLM failures including:
 """
 
 import asyncio
-from typing import Optional, Dict, Any, TypeVar, Type
+from typing import Any, Dict, Optional, Type, TypeVar
+
 from pydantic import BaseModel
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.reliability import CircuitBreaker, CircuitBreakerConfig
-from netra_backend.app.llm.fallback_strategies import CircuitFallbackStrategy, RetryExecutionStrategy, RetryExecutor
-from netra_backend.app.llm.error_classification import ErrorClassificationChain, FailureType
-from netra_backend.app.llm.fallback_config import FallbackConfig, RetryHistoryManager
-from netra_backend.app.llm.fallback_responses import FallbackResponseFactory, StructuredFallbackBuilder
-from netra_backend.app.llm.retry_helpers import (
-    execute_retry_template, create_health_status_base, 
-    add_circuit_breaker_status, add_failure_type_breakdown
+from netra_backend.app.llm.error_classification import (
+    ErrorClassificationChain,
+    FailureType,
 )
+from netra_backend.app.llm.fallback_config import FallbackConfig, RetryHistoryManager
+from netra_backend.app.llm.fallback_responses import (
+    FallbackResponseFactory,
+    StructuredFallbackBuilder,
+)
+from netra_backend.app.llm.fallback_strategies import (
+    CircuitFallbackStrategy,
+    RetryExecutionStrategy,
+    RetryExecutor,
+)
+from netra_backend.app.llm.retry_helpers import (
+    add_circuit_breaker_status,
+    add_failure_type_breakdown,
+    create_health_status_base,
+    execute_retry_template,
+)
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

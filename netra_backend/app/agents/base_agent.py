@@ -4,20 +4,21 @@ Main base agent class that composes functionality from focused modular component
 """
 
 from abc import ABC
-from typing import Optional, Dict
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas.Agent import SubAgentLifecycle
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.interfaces import BaseAgentProtocol
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.llm.observability import generate_llm_correlation_id
-from netra_backend.app.core.config import get_config
+from typing import Dict, Optional
+
+from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
 
 # Import modular components
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.agents.agent_communication import AgentCommunicationMixin
-from netra_backend.app.agents.agent_state import AgentStateMixin
 from netra_backend.app.agents.agent_observability import AgentObservabilityMixin
+from netra_backend.app.agents.agent_state import AgentStateMixin
+from netra_backend.app.agents.interfaces import BaseAgentProtocol
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.config import get_config
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.observability import generate_llm_correlation_id
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.Agent import SubAgentLifecycle
 
 
 class BaseSubAgent(

@@ -6,9 +6,11 @@ This module generates realistic log data with specific patterns and behaviors.
 import random
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from netra_backend.app.services.apex_optimizer_agent.models import RealisticTestDataConfigManager
+from netra_backend.app.services.apex_optimizer_agent.models import (
+    RealisticTestDataConfigManager,
+)
 
 
 class LogGenerator:

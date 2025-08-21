@@ -15,23 +15,32 @@ Tests comprehensive validation including:
 - Metrics ingestion
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import time
-import os
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
 import json
+import os
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
-import asyncpg
-from redis import Redis
 import aiohttp
+import asyncpg
+import pytest
 from clickhouse_driver import Client as ClickHouseClient
-from unittest.mock import patch, AsyncMock, MagicMock
+from redis import Redis
 
 from test_framework.mock_utils import mock_justified
 

@@ -15,13 +15,14 @@ Critical tests:
 Each function ≤8 lines, file ≤300 lines.
 """
 
-import os
-import pytest
 import asyncio
+import os
 import uuid
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, AsyncMock, patch
 from contextlib import asynccontextmanager
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Set required environment variables for testing
 os.environ["TESTING"] = "1"
@@ -33,10 +34,10 @@ os.environ["clickhouse-default-password"] = "test-clickhouse-password"
 
 # Mock complex imports to avoid configuration issues
 try:
-    from netra_backend.app.tests.isolated_test_config import isolated_full_stack
     from netra_backend.app.agents.state import AgentMetadata
-    from netra_backend.app.core.error_types import NetraException, ErrorCode
+    from netra_backend.app.core.error_types import ErrorCode, NetraException
     from netra_backend.app.logging_config import central_logger
+    from netra_backend.app.tests.isolated_test_config import isolated_full_stack
     logger = central_logger.get_logger(__name__)
     IMPORTS_AVAILABLE = True
 except ImportError:

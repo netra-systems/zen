@@ -3,21 +3,31 @@ Common test fixtures and utilities for route testing.
 Shared components extracted from oversized test file to maintain 450-line architecture limit.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import Mock, AsyncMock, MagicMock
-from fastapi.testclient import TestClient
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import Optional
+from unittest.mock import AsyncMock, MagicMock, Mock
+
+import pytest
+from fastapi.testclient import TestClient
+
+from netra_backend.app.config import settings
+from netra_backend.app.services.key_manager import KeyManager
 
 # Add project root to path
-
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.services.key_manager import KeyManager  
-from netra_backend.app.config import settings
 
 # Add project root to path
 
@@ -40,15 +50,17 @@ class MockDependencyManager:
     @staticmethod
     def setup_core_dependencies(app):
         """Set up core application dependencies for testing."""
-        from netra_backend.app.dependencies import get_llm_manager, get_db_dependency
-        from netra_backend.app.db.postgres import get_async_db, initialize_postgres
-        from netra_backend.app.db.session import get_db_session
         from unittest.mock import AsyncMock, MagicMock
+
         from sqlalchemy.ext.asyncio import AsyncSession
-        
+
+        import netra_backend.app.db.postgres as postgres_module
+
         # Ensure database is initialized first - but handle session factory properly
         import netra_backend.app.db.session as session_module
-        import netra_backend.app.db.postgres as postgres_module
+        from netra_backend.app.db.postgres import get_async_db, initialize_postgres
+        from netra_backend.app.db.session import get_db_session
+        from netra_backend.app.dependencies import get_db_dependency, get_llm_manager
         
         # Mock the session factory to avoid the RuntimeError
         if postgres_module.async_session_factory is None:
@@ -103,7 +115,10 @@ class MockDependencyManager:
     @staticmethod
     def setup_auth_dependencies(app):
         """Set up authentication dependencies for testing."""
-        from netra_backend.app.auth_integration.auth import get_current_user, get_current_active_user
+        from netra_backend.app.auth_integration.auth import (
+            get_current_active_user,
+            get_current_user,
+        )
         from netra_backend.app.db.models_postgres import User
         
         async def mock_get_current_user():

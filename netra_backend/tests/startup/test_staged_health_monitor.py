@@ -4,19 +4,35 @@ Tests progressive health monitoring, adaptive rules, and stage-based checks.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from typing import Dict, List, Optional, Callable
+from typing import Callable, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 from dev_launcher.staged_health_monitor import (
-    StagedHealthMonitor, HealthStage, ServiceConfig, HealthCheckResult,
-    StageConfig, ServiceState, create_process_health_check, create_url_health_check
+    HealthCheckResult,
+    HealthStage,
+    ServiceConfig,
+    ServiceState,
+    StageConfig,
+    StagedHealthMonitor,
+    create_process_health_check,
+    create_url_health_check,
 )
 
 

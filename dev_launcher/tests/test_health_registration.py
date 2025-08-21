@@ -6,7 +6,8 @@ for backend and frontend services.
 """
 
 import unittest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
+
 from dev_launcher.health_registration import HealthRegistrationHelper
 
 

@@ -6,8 +6,8 @@ Detects potential security vulnerabilities and misconfigurations.
 
 from typing import List, Tuple
 
-from .core import ReviewConfig, ReviewData
 from .command_runner import CommandRunner
+from .core import ReviewConfig, ReviewData
 
 
 class SecurityChecker:

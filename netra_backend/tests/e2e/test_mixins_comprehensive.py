@@ -12,21 +12,30 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import time
-import pytest
-from datetime import datetime, UTC, timedelta
-from typing import Dict, Any
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict
 from unittest.mock import Mock, patch
 
-# Add project root to path
+import pytest
+from logging_config import central_logger
 
+# Add project root to path
 from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
 from netra_backend.app.core.agent_reliability_types import AgentHealthStatus
-from logging_config import central_logger
 
 # Add project root to path
 

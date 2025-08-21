@@ -6,17 +6,22 @@ while maintaining all existing API contracts for seamless migration.
 Business Value: Zero-disruption migration to modern reliability patterns.
 """
 
-from typing import Dict, List, Any, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.schemas.websocket_message_types import ServerMessage, BroadcastResult
+from netra_backend.app.schemas.websocket_message_types import (
+    BroadcastResult,
+    ServerMessage,
+)
+from netra_backend.app.websocket import broadcast_utils as utils
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.websocket.room_manager import RoomManager
 from netra_backend.app.websocket.websocket_broadcast_executor import (
-    WebSocketBroadcastExecutor, BroadcastContext, BroadcastOperation
+    BroadcastContext,
+    BroadcastOperation,
+    WebSocketBroadcastExecutor,
 )
-from netra_backend.app.websocket import broadcast_utils as utils
 
 logger = central_logger.get_logger(__name__)
 

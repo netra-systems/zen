@@ -10,15 +10,16 @@ This script checks:
 5. Environment variables
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
-from typing import Dict, List, Tuple, Optional
+import sys
+from typing import Dict, List, Optional, Tuple
+
+import clickhouse_connect
 import psycopg2
 import redis
-import clickhouse_connect
-from colorama import init, Fore, Style
+from colorama import Fore, Style, init
 
 init(autoreset=True)
 

@@ -5,18 +5,25 @@ Handles operation tracking and error classification.
 
 import asyncio
 import time
-from typing import Dict, Any, Optional, Callable
-from functools import wraps
-from datetime import datetime, UTC
 import traceback
+from datetime import UTC, datetime
+from functools import wraps
+from typing import Any, Callable, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.metrics.agent_metrics_compact import AgentMetricsCollector
-from netra_backend.app.services.metrics.agent_metrics_models import FailureType
 from netra_backend.app.middleware.metrics_helpers import (
-    AgentNameExtractor, OperationTypeDetector, FailureClassifier,
-    PerformanceUtils, ErrorHandler, OperationMetadataBuilder, TimeoutHandler
+    AgentNameExtractor,
+    ErrorHandler,
+    FailureClassifier,
+    OperationMetadataBuilder,
+    OperationTypeDetector,
+    PerformanceUtils,
+    TimeoutHandler,
 )
+from netra_backend.app.services.metrics.agent_metrics_compact import (
+    AgentMetricsCollector,
+)
+from netra_backend.app.services.metrics.agent_metrics_models import FailureType
 
 logger = central_logger.get_logger(__name__)
 

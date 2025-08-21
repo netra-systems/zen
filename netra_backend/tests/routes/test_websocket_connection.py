@@ -1,16 +1,27 @@
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import json
 import asyncio
-from unittest.mock import AsyncMock, patch, MagicMock
+import json
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 from fastapi import WebSocket
 from routes.utils.websocket_helpers import (
-    authenticate_websocket_user, 
+    accept_websocket_connection,
+    authenticate_websocket_user,
     extract_app_services,
-    accept_websocket_connection
 )
+
 
 class TestWebSocketConnection:
     

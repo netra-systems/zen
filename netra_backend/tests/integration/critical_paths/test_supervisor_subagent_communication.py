@@ -10,36 +10,44 @@ L2 Test: Uses real internal components within same process but mocks external LL
 Validates agent communication patterns, tool execution, state management, and error propagation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+import time
+import uuid
 from datetime import datetime, timezone
-from unittest.mock import AsyncMock, MagicMock, patch
 from decimal import Decimal
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from schemas import AgentCompleted, AgentStarted, SubAgentLifecycle, WebSocketMessage
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.agents.base import BaseSubAgent
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.schemas.registry import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.redis_manager import RedisManager
-from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, AgentCompleted
-from netra_backend.app.schemas.registry import AgentResult
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.schemas.registry import AgentResult, DeepAgentState
 from netra_backend.app.services.state_persistence import state_persistence_service
-from sqlalchemy.ext.asyncio import AsyncSession
-from unittest.mock import AsyncMock
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

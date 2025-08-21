@@ -4,7 +4,7 @@ Shows how the tests detect violations in sample code.
 """
 
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 
 class AuthComplianceDemo:

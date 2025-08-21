@@ -5,26 +5,36 @@ Enables Claude to diagnose and fix startup issues automatically
 MAX 300 lines, functions MAX 8 lines - MANDATORY architectural constraint
 """
 
-import json
-import sys
-import os
-import asyncio
 import argparse
-from pathlib import Path
-from typing import List, Dict, Optional
+import asyncio
+import json
+import os
+import sys
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from netra_backend.app.schemas.diagnostic_types import (
-    DiagnosticResult, DiagnosticError, DiagnosticSeverity, FixResult
+    DiagnosticError,
+    DiagnosticResult,
+    DiagnosticSeverity,
+    FixResult,
 )
 from scripts.diagnostic_helpers import (
-    is_port_in_use, create_port_error, create_db_error, create_dependency_error,
-    create_env_error, create_migration_error, get_system_state, get_configuration,
-    create_fix_result, run_command_async
+    create_db_error,
+    create_dependency_error,
+    create_env_error,
+    create_fix_result,
+    create_migration_error,
+    create_port_error,
+    get_configuration,
+    get_system_state,
+    is_port_in_use,
+    run_command_async,
 )
 
 

@@ -8,7 +8,7 @@ import ast
 import re
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Any, Set
+from typing import Any, Dict, List, Set
 
 
 class UltraThinkingAnalyzer:

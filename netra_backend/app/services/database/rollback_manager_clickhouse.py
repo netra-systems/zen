@@ -9,7 +9,10 @@ from typing import Dict
 
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.database.rollback_manager_core import RollbackOperation, RollbackState
+from netra_backend.app.services.database.rollback_manager_core import (
+    RollbackOperation,
+    RollbackState,
+)
 
 logger = central_logger.get_logger(__name__)
 

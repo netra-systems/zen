@@ -6,10 +6,10 @@ Extracted from test_real_unified_signup_login_chat.py for modularity.
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock
 
 

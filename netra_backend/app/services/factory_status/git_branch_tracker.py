@@ -5,10 +5,10 @@ Module follows 450-line limit with 25-line function limit.
 """
 
 import subprocess
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Set, Tuple
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 class BranchType(Enum):

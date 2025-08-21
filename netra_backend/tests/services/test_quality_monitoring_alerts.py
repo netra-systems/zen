@@ -1,40 +1,49 @@
 """Alerting and real-time functionality tests for Quality Monitoring Service"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
+
 import pytest
 
-# Add project root to path
+from netra_backend.app.services.quality_gate_service import ContentType
 
+# Add project root to path
 from netra_backend.app.services.quality_monitoring_service import (
-
-# Add project root to path
-    QualityMonitoringService,
     AlertSeverity,
-    MetricType
+    MetricType,
+    # Add project root to path
+    QualityMonitoringService,
 )
 from netra_backend.tests.helpers.quality_monitoring_fixtures import (
+    poor_quality_metrics,
     real_quality_monitoring_service,
-    sample_quality_metrics,
     sample_quality_alert,
-    poor_quality_metrics
+    sample_quality_metrics,
 )
-from netra_backend.app.services.quality_gate_service import ContentType
 from netra_backend.tests.helpers.quality_monitoring_helpers import (
-    record_test_quality_event,
     assert_event_in_buffer,
     assert_event_properties,
-    create_test_alert,
+    assert_monitoring_methods_called,
     assert_quality_alert_properties,
-    assert_quality_alert_values,
     assert_quality_alert_status,
+    assert_quality_alert_values,
+    create_test_alert,
+    record_test_quality_event,
     setup_monitoring_mocks,
     start_and_stop_monitoring,
-    assert_monitoring_methods_called
 )
 
 
@@ -102,7 +111,9 @@ class TestRealTimeMonitoring:
         
         dashboard_data = await real_quality_monitoring_service.get_dashboard_data()
         
-        from netra_backend.tests.helpers.quality_monitoring_helpers import assert_dashboard_data_structure
+        from netra_backend.tests.helpers.quality_monitoring_helpers import (
+            assert_dashboard_data_structure,
+        )
         assert_dashboard_data_structure(dashboard_data)
 
 
@@ -217,8 +228,10 @@ class TestDataClasses:
         
     def test_agent_quality_profile_creation(self):
         """Test AgentQualityProfile dataclass"""
-        from netra_backend.app.services.quality_monitoring_service import AgentQualityProfile
         from netra_backend.app.services.quality_gate_service import QualityLevel
+        from netra_backend.app.services.quality_monitoring_service import (
+            AgentQualityProfile,
+        )
         
         profile = AgentQualityProfile(
             agent_name="test_agent",

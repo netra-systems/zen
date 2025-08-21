@@ -4,18 +4,26 @@ Manages MCP server connections, tool discovery, permissions, and context injecti
 Follows strict 450-line limit and 25-line function design.
 """
 
-from typing import Dict, List, Optional, Any, Set
+import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import asyncio
+from typing import Any, Dict, List, Optional, Set
 
-from netra_backend.app.mcp_client.models import MCPTool, MCPConnection
-from netra_backend.app.services.mcp_client_service import MCPClientService
-from netra_backend.app.schemas.core_enums import MCPServerStatus, MCPToolExecutionStatus, ExecutionStatus
+from netra_backend.app.agents.base import (
+    BaseExecutionInterface,
+    ExecutionErrorHandler,
+    ExecutionMonitor,
+)
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.base import BaseExecutionInterface, ExecutionMonitor, ExecutionErrorHandler
-from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.mcp_client.models import MCPConnection, MCPTool
+from netra_backend.app.schemas.core_enums import (
+    ExecutionStatus,
+    MCPServerStatus,
+    MCPToolExecutionStatus,
+)
+from netra_backend.app.services.mcp_client_service import MCPClientService
 
 logger = central_logger.get_logger(__name__)
 

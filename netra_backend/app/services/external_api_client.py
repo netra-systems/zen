@@ -7,15 +7,19 @@ retry logic, and comprehensive error handling for external API calls.
 import asyncio
 import json
 from contextlib import asynccontextmanager
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, List, Optional, Union
 from urllib.parse import urljoin
-import aiohttp
-from aiohttp import ClientSession, ClientTimeout, ClientError
 
-from netra_backend.app.core.circuit_breaker import (
-    CircuitBreaker, CircuitConfig, CircuitBreakerOpenError, circuit_registry
-)
+import aiohttp
+from aiohttp import ClientError, ClientSession, ClientTimeout
+
 from netra_backend.app.core.async_retry_logic import with_retry
+from netra_backend.app.core.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    circuit_registry,
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

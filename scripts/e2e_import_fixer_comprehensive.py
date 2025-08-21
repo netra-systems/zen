@@ -4,18 +4,18 @@ Comprehensive E2E Import Fixer for Netra Backend
 Discovers and fixes all import issues in E2E tests to ensure they can load and run.
 """
 
-import sys
-import os
 import ast
-import re
-import json
-import traceback
 import importlib.util
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional
-from dataclasses import dataclass, asdict
-from datetime import datetime
+import json
+import os
+import re
 import subprocess
+import sys
+import traceback
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

@@ -28,7 +28,16 @@ Coverage verified: All 22 functions from pr_router.py are tested.
 # This file serves as documentation for the test suite structure
 # Individual test files should be run separately to avoid fixture scope issues
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 pass

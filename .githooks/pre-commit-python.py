@@ -17,7 +17,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Tuple, Set, Dict, Any
+from typing import Any, Dict, List, Set, Tuple
 
 # Load configuration
 CONFIG_FILE = Path(__file__).parent / "config.json"

@@ -20,34 +20,46 @@ Mock-Real Spectrum: L3 (Real middleware with controlled requests)
 - Simulated HTTP requests
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import jwt
 import json
-from typing import Dict, Any, List, Optional, Callable
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Callable, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
+import jwt
+import pytest
 
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    Token, TokenData, AuthError,
-    MiddlewareContext, RequestContext
-)
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.middleware.auth_middleware import AuthMiddleware
-from netra_backend.app.middleware.rate_limit_middleware import RateLimitMiddleware
-from netra_backend.app.middleware.audit_middleware import AuditMiddleware
-from netra_backend.app.middleware.cors_middleware import CORSMiddleware
 from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.middleware.audit_middleware import AuditMiddleware
+from netra_backend.app.middleware.auth_middleware import AuthMiddleware
+from netra_backend.app.middleware.cors_middleware import CORSMiddleware
+from netra_backend.app.middleware.rate_limit_middleware import RateLimitMiddleware
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    AuthError,
+    MiddlewareContext,
+    RequestContext,
+    # Add project root to path
+    Token,
+    TokenData,
+)
 
 
 @dataclass

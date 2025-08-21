@@ -10,36 +10,44 @@ Business Value Justification (BVJ):
 L3 Test: Uses real Redis containers via Docker for WebSocket pub/sub validation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-import time
 import subprocess
-from typing import Dict, Any
+import time
 from datetime import datetime, timezone
+from typing import Any, Dict
 from unittest.mock import patch
 
+import pytest
 import redis.asyncio as redis
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.redis_manager import RedisManager
 from schemas import UserInDB
-from test_framework.mock_utils import mock_justified
+
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
-
 from netra_backend.tests.helpers.redis_l3_helpers import (
-
-# Add project root to path
-    RedisContainer, 
-    MockWebSocketForRedis, 
+    MockWebSocketForRedis,
+    # Add project root to path
+    RedisContainer,
     create_test_message,
-    verify_redis_connection,
     setup_pubsub_channels,
-    wait_for_message
+    verify_redis_connection,
+    wait_for_message,
 )
+from test_framework.mock_utils import mock_justified
 
 
 @pytest.mark.L3

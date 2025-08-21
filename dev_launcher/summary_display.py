@@ -3,6 +3,7 @@ Summary display functionality for development launcher.
 """
 
 import logging
+
 from dev_launcher.utils import print_with_emoji
 
 logger = logging.getLogger(__name__)

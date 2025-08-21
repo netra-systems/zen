@@ -2,10 +2,11 @@
 Auth Service Database Models
 SQLAlchemy models for auth service database persistence
 """
-from sqlalchemy import Column, String, DateTime, Boolean, JSON, Integer
-from sqlalchemy.ext.declarative import declarative_base
-from datetime import datetime, timezone
 import uuid
+from datetime import datetime, timezone
+
+from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 

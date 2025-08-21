@@ -3,12 +3,16 @@
 Centralized error handling for database repository operations.
 """
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from netra_backend.app.logging_config import central_logger
+
 from netra_backend.app.core.exceptions import (
-    DatabaseError, RecordNotFoundError, ConstraintViolationError
+    ConstraintViolationError,
+    DatabaseError,
+    RecordNotFoundError,
 )
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

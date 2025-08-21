@@ -2,8 +2,8 @@
 """
 Script to create a test user in the database
 """
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -12,13 +12,16 @@ project_root = script_dir.parent
 sys.path.insert(0, str(project_root))
 
 import asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.config import settings
-from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.services.key_manager import KeyManager
 import uuid
+
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+from netra_backend.app.config import settings
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.services.key_manager import KeyManager
+from netra_backend.app.services.security_service import SecurityService
+
 
 async def create_test_user():
     # Create async engine

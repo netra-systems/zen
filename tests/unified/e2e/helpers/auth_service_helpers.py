@@ -14,17 +14,18 @@ This test MUST verify that the auth service has NO "from netra_backend.app." imp
 
 Failure blocks enterprise sales and SOC2 compliance certification.
 """
-import pytest
 import asyncio
-import subprocess
 import os
-import sys
-import time
-import httpx
-import tempfile
 import shutil
+import subprocess
+import sys
+import tempfile
+import time
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
+import httpx
+import pytest
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent

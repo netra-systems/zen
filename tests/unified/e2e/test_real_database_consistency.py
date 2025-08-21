@@ -24,18 +24,19 @@ SUCCESS CRITERIA:
 Module Architecture Compliance: Under 500 lines, functions under 8 lines
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
-import uuid
 import json
 import time
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 import asyncpg
-import redis.asyncio as redis
 import clickhouse_connect
+import pytest
+import pytest_asyncio
+import redis.asyncio as redis
+
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 

@@ -24,23 +24,25 @@ CRITICAL REQUIREMENTS:
 
 import asyncio
 import json
-import time
-import pytest
 import logging
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone
-from pathlib import Path
 
 # Add project root to path for imports
 import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import pytest
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS
 from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ClientConfig, ConnectionState
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
 from tests.unified.real_http_client import RealHTTPClient
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +123,9 @@ class AuthErrorPropagationValidator:
         """Test that expired token errors provide actionable messages."""
         # Create expired token (if test infrastructure supports it)
         try:
-            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_expired_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+                create_expired_test_token,
+            )
             expired_token = create_expired_test_token("test_user")
         except ImportError:
             # Fallback: use obviously expired token format
@@ -298,7 +302,9 @@ class WebSocketErrorRecoveryValidator:
         
         try:
             # Create test token for authentication
-            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+                create_test_token,
+            )
             test_token = create_test_token("error_recovery_user")
         except ImportError:
             test_token = "mock-token-error_recovery_user"

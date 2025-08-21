@@ -5,7 +5,7 @@ Tracks memory usage per connection with buffer limits.
 
 import sys
 import weakref
-from typing import Dict, Set, List, Any
+from typing import Any, Dict, List, Set
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.connection import ConnectionInfo

@@ -5,21 +5,26 @@ This module contains validators for authentication error types across service bo
 
 import asyncio
 import json
-import time
 import logging
-from typing import Dict, Any, List
-from datetime import datetime, timezone
-from pathlib import Path
 
 # Add project root to path for imports
 import sys
+import time
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List
+
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
+from tests.unified.e2e.helpers.error_propagation.error_generators import (
+    ErrorCorrelationContext,
+    MockTokenGenerator,
+    RealErrorPropagationTester,
+)
 from tests.unified.e2e.real_client_types import ClientConfig
 from tests.unified.e2e.real_http_client import RealHTTPClient
-from tests.unified.e2e.helpers.error_propagation.error_generators import ErrorCorrelationContext, RealErrorPropagationTester, MockTokenGenerator
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

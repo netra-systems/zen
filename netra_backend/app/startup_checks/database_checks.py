@@ -7,11 +7,13 @@ Maintains 25-line function limit and focused responsibility.
 
 import time
 from typing import List
-from sqlalchemy import text, select
+
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.db.models_postgres import Assistant
 from netra_backend.app.startup_checks.models import StartupCheckResult
-from netra_backend.app.core.configuration import unified_config_manager
 
 
 class DatabaseChecker:
@@ -204,7 +206,10 @@ class DatabaseChecker:
         logger.debug("Creating database session for assistant check...")
         try:
             # Check global engine state
-            from netra_backend.app.db.postgres_core import async_engine, async_session_factory as global_factory
+            from netra_backend.app.db.postgres_core import async_engine
+            from netra_backend.app.db.postgres_core import (
+                async_session_factory as global_factory,
+            )
             logger.debug(f"Global async_engine: {async_engine}")
             logger.debug(f"Global async_session_factory: {global_factory}")
             

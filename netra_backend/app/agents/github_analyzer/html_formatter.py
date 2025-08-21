@@ -4,7 +4,7 @@ Formats AI operations maps into HTML output.
 Handles HTML template generation and metrics formatting.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger as logger
 

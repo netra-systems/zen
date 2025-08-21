@@ -21,11 +21,16 @@ ARCHITECTURAL COMPLIANCE:
 - Modular design with focused responsibilities
 """
 
-import pytest
 import asyncio
 import time
-from tests.unified.e2e.concurrent_user_simulators import ConcurrentUserSimulator, ConcurrentWebSocketManager
+
+import pytest
+
 from tests.unified.e2e.concurrent_user_models import IsolationValidator
+from tests.unified.e2e.concurrent_user_simulators import (
+    ConcurrentUserSimulator,
+    ConcurrentWebSocketManager,
+)
 
 
 @pytest.mark.asyncio

@@ -2,12 +2,12 @@
 Data ingestion methods for synthetic data
 """
 
+import asyncio
 import json
 import uuid
-import asyncio
-from datetime import datetime, UTC
-from typing import Dict, List, Optional
 from collections import namedtuple
+from datetime import UTC, datetime
+from typing import Dict, List, Optional
 
 
 def _build_table_schema(table_name: str) -> str:

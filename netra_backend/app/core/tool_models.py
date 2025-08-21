@@ -4,7 +4,7 @@ Contains core tool model classes extracted from interfaces_tools.py
 to maintain the 450-line limit per CLAUDE.md requirements.
 """
 
-from typing import Dict, Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Dict, Optional
 
 if TYPE_CHECKING:
     from netra_backend.app.schemas.ToolPermission import PermissionCheckResult

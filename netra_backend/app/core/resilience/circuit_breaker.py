@@ -8,16 +8,19 @@ This module provides enterprise circuit breaker functionality with:
 All functions are ≤8 lines per MANDATORY requirements.
 """
 
-from typing import Any, Callable, Dict, Optional, TypeVar
 from dataclasses import dataclass
+from typing import Any, Callable, Dict, Optional, TypeVar
 
 # Import canonical circuit breaker implementation
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import (
-    CircuitState, CircuitConfig, CircuitMetrics, CircuitBreakerOpenError
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    CircuitMetrics,
+    CircuitState,
 )
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.exceptions_service import ServiceError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T')

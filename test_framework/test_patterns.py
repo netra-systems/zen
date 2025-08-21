@@ -7,12 +7,13 @@ patterns and utilities that L3 and L4 tests need.
 
 import asyncio
 import json
+import os
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 import pytest
-from typing import Dict, Any, Optional, List
-from datetime import datetime
-import os
 
 
 class BaseIntegrationTest:
@@ -57,6 +58,7 @@ class BaseIntegrationTest:
         # In real implementation, this would call auth service
         # For now, return a mock JWT-like token
         import time
+
         import jwt
         
         payload = {

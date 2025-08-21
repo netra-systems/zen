@@ -14,15 +14,21 @@ Usage:
     from netra_backend.app.schemas.websocket_models import WebSocketMessage, BaseWebSocketPayload
 """
 
-from typing import Dict, List, Optional, Union, Any, TypedDict, Literal
-from datetime import datetime, timezone
-from pydantic import BaseModel, Field, ConfigDict
 import uuid
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Literal, Optional, TypedDict, Union
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from netra_backend.app.schemas.agent_models import AgentResult
 
 # Import enums and other dependencies from the dedicated modules
-from netra_backend.app.schemas.core_enums import WebSocketMessageType, MessageType, AgentStatus
-from netra_backend.app.schemas.core_models import ThreadMetadata, Message
-from netra_backend.app.schemas.agent_models import AgentResult
+from netra_backend.app.schemas.core_enums import (
+    AgentStatus,
+    MessageType,
+    WebSocketMessageType,
+)
+from netra_backend.app.schemas.core_models import Message, ThreadMetadata
 
 
 class BaseWebSocketPayload(BaseModel):

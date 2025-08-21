@@ -4,11 +4,10 @@ Defines error severity levels and error data structures for WebSocket operations
 """
 
 import time
-from typing import Dict, Any, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-
+from typing import Any, Dict, Optional
 
 # Import ErrorSeverity from single source of truth
 from netra_backend.app.core.error_codes import ErrorSeverity

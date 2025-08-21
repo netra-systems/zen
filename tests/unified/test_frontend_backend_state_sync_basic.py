@@ -10,7 +10,8 @@ Performance: <500ms sync, <200ms API, <100ms WebSocket events
 import asyncio
 import time
 import uuid
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pytest
 
 # Fallback mode for environments without test infrastructure

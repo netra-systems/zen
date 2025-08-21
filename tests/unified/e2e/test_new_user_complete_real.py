@@ -20,34 +20,36 @@ REQUIREMENTS:
 - Architecture compliance: 450-line limit, 25-line functions
 """
 
-import pytest
 import asyncio
-import time
-import httpx
 import os
-from typing import Dict, Any, Optional
+import time
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
+
+import httpx
+import pytest
 
 # Set test environment
 os.environ["TESTING"] = "1"
 os.environ["AUTH_FAST_TEST_MODE"] = "true"
 
-from tests.unified.database_test_connections import DatabaseTestConnections
 import aiosqlite
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 from helpers.new_user_journey_helpers import (
-    DatabaseSetupHelper,
-    SignupFlowHelper,
-    LoginFlowHelper,
     ChatFlowHelper,
-    ProfileSetupHelper,
+    DatabaseSetupHelper,
     DatabaseValidationHelper,
-    validate_signup_completion,
-    validate_login_completion,
+    LoginFlowHelper,
+    ProfileSetupHelper,
+    SignupFlowHelper,
     validate_chat_completion,
+    validate_database_completion,
+    validate_login_completion,
     validate_profile_completion,
-    validate_database_completion
+    validate_signup_completion,
 )
+
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.database_test_connections import DatabaseTestConnections
 
 
 class CompleteNewUserJourneyTester:

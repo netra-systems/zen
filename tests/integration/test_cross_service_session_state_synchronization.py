@@ -15,13 +15,14 @@ CRITICAL: Tests real cross-service communication and state persistence.
 
 import asyncio
 import json
-import pytest
 import time
-import redis
-from typing import Dict, Optional, Any, List, Set
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from unittest.mock import patch, AsyncMock, MagicMock
+from typing import Any, Dict, List, Optional, Set
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+import redis
 
 from test_framework.base_integration_test import BaseIntegrationTest
 from test_framework.mock_utils import mock_justified

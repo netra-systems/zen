@@ -22,6 +22,14 @@ Mock-Real Spectrum: L4 (Production-like environment)
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
@@ -197,21 +205,21 @@ class TestAuthRoleBasedAccessFlow:
         events = []
         
         # async def record_event(event: AuditEvent):  # Class may not exist, commented out
-            events.append(event)
-            
-            # Store in database for persistence
-            async with get_async_db() as db:
-                await db.execute(
-                    """
-                    INSERT INTO audit_log (timestamp, user_id, action, resource, result, metadata)
-                    VALUES ($1, $2, $3, $4, $5, $6)
-                    """,
-                    event.timestamp, event.user_id, event.action,
-                    event.resource, event.result, json.dumps(event.metadata)
-                )
-                await db.commit()
+        #     events.append(event)
+        #     
+        #     # Store in database for persistence
+        #     async with get_async_db() as db:
+        #         await db.execute(
+        #             """
+        #             INSERT INTO audit_log (timestamp, user_id, action, resource, result, metadata)
+        #             VALUES ($1, $2, $3, $4, $5, $6)
+        #             """,
+        #             event.timestamp, event.user_id, event.action,
+        #             event.resource, event.result, json.dumps(event.metadata)
+        #         )
+        #         await db.commit()
         
-        return {"record": record_event, "events": events}
+        return {"events": events}
     
     @pytest.mark.asyncio
     @pytest.mark.timeout(120)
@@ -264,17 +272,17 @@ class TestAuthRoleBasedAccessFlow:
                     assert auth_result.authorized == test_case.expected_result, \
                         f"Failed: {test_case.reason}"
                     
-                    # Record audit event
-                    await audit_tracker["record"](
-                        # AuditEvent(  # Class may not exist, commented out
-                            timestamp=datetime.utcnow(),
-                            user_id=login_response.user_id,
-                            action=test_case.action,
-                            resource=test_case.resource,
-                            result="allowed" if auth_result.authorized else "denied",
-                            metadata={"role": user["role"], "reason": test_case.reason}
-                        )
-                    )
+                    # Record audit event - commented out due to missing AuditEvent class
+                    # await audit_tracker["record"](
+                    #     AuditEvent(
+                    #         timestamp=datetime.utcnow(),
+                    #         user_id=login_response.user_id,
+                    #         action=test_case.action,
+                    #         resource=test_case.resource,
+                    #         result="allowed" if auth_result.authorized else "denied",
+                    #         metadata={"role": user["role"], "reason": test_case.reason}
+                    #     )
+                    # )
             
             results[user["role"]] = {
                 "login_success": True,
@@ -477,17 +485,17 @@ class TestAuthRoleBasedAccessFlow:
         assert token_data["role"] == "developer"
         assert token_data["impersonated_by"] == admin_session.user_id
         
-        # Record audit event
-        await audit_tracker["record"](
-            # AuditEvent(  # Class may not exist, commented out
-                timestamp=datetime.utcnow(),
-                user_id=admin_session.user_id,
-                action="impersonate",
-                resource=f"user:{dev_session.user_id}",
-                result="success",
-                metadata={"target_role": "developer", "duration": 5}
-            )
-        )
+        # Record audit event - commented out due to missing AuditEvent class
+        # await audit_tracker["record"](
+        #     AuditEvent(
+        #         timestamp=datetime.utcnow(),
+        #         user_id=admin_session.user_id,
+        #         action="impersonate",
+        #         resource=f"user:{dev_session.user_id}",
+        #         result="success",
+        #         metadata={"target_role": "developer", "duration": 5}
+        #     )
+        # )
         
         # Developer should NOT be able to impersonate
         with pytest.raises(Exception) as exc_info:
@@ -530,28 +538,30 @@ class TestAuthRoleBasedAccessFlow:
                 else:
                     await op_func(session)
                 
-                # Record audit event
-                await audit_tracker["record"](
-                    # AuditEvent(  # Class may not exist, commented out
-                        timestamp=datetime.utcnow(),
-                        user_id=session.user_id if session else "unknown",
-                        action=op_name,
-                        resource="auth_system",
-                        result="success",
-                        metadata={"role": test_user["role"]}
-                    )
-                )
+                # Record audit event - commented out due to missing AuditEvent class
+                # await audit_tracker["record"](
+                #     AuditEvent(
+                #         timestamp=datetime.utcnow(),
+                #         user_id=session.user_id if session else "unknown",
+                #         action=op_name,
+                #         resource="auth_system",
+                #         result="success",
+                #         metadata={"role": test_user["role"]}
+                #     )
+                # )
             except Exception as e:
-                await audit_tracker["record"](
-                    # AuditEvent(  # Class may not exist, commented out
-                        timestamp=datetime.utcnow(),
-                        user_id=session.user_id if session else "unknown",
-                        action=op_name,
-                        resource="auth_system",
-                        result="failure",
-                        metadata={"error": str(e), "role": test_user["role"]}
-                    )
-                )
+                # Record audit event - commented out due to missing AuditEvent class
+                # await audit_tracker["record"](
+                #     AuditEvent(
+                #         timestamp=datetime.utcnow(),
+                #         user_id=session.user_id if session else "unknown",
+                #         action=op_name,
+                #         resource="auth_system",
+                #         result="failure",
+                #         metadata={"error": str(e), "role": test_user["role"]}
+                #     )
+                # )
+                pass
         
         # Verify audit trail
         assert len(audit_tracker["events"]) >= len(operations)

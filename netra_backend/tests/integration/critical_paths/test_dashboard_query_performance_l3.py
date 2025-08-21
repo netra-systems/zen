@@ -11,21 +11,31 @@ Coverage: Query optimization, caching strategies, data aggregation performance, 
 L3 Realism: Tests with real dashboard services and actual query workloads
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
+import random
+import statistics
 import time
 import uuid
-import logging
-import statistics
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
-from dataclasses import dataclass, asdict
 from concurrent.futures import ThreadPoolExecutor
-import random
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 logger = logging.getLogger(__name__)
 

@@ -10,17 +10,22 @@ Business Value Justification (BVJ):
 This test validates that message ordering is preserved under high load.
 """
 
-import pytest
 import asyncio
-import time
-import logging
 import json
-from typing import Dict, Any, List
+import logging
+import time
+from typing import Any, Dict, List
+
+import pytest
 
 from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
-    LoadTestResults, E2E_TEST_CONFIG, create_test_message
+    E2E_TEST_CONFIG,
+    LoadTestResults,
+    create_test_message,
 )
-from netra_backend.tests.e2e.test_helpers.websocket_helpers import validate_message_ordering
+from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+    validate_message_ordering,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -151,7 +156,9 @@ class TestMessageOrderingPreservation:
     
     async def _execute_concurrent_ordering_test(self) -> Dict[str, Any]:
         """Execute concurrent client ordering test"""
-        from netra_backend.tests.e2e.test_helpers.websocket_helpers import websocket_test_context
+        from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+            websocket_test_context,
+        )
         
         concurrent_clients = ORDERING_CONFIG["concurrent_clients"]
         messages_per_client = ORDERING_CONFIG["messages_per_client"]

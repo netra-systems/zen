@@ -9,18 +9,20 @@ Business Value Justification (BVJ):
 - Strategic Impact: Reduces support tickets and improves user retention
 """
 
-import os
-import pytest
 import asyncio
 import json
+import os
 import uuid
-import redis.asyncio as redis
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+import pytest
+import redis.asyncio as redis
 from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from netra_backend.app.main import app
+
 # Session and cache services not available in current codebase
 
 

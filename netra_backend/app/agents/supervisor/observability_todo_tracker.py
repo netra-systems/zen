@@ -5,7 +5,7 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class TodoTracker:

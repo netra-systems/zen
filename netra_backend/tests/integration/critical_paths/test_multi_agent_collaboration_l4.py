@@ -12,41 +12,56 @@ User request -> Supervisor Agent -> Sub-agent delegation -> State persistence ->
 Coverage: Real LLM calls, agent lifecycle management, cross-agent state persistence, staging environment validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, Optional
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional
 
 # Add project root to path
-
-
 # # from agents.supervisor_agent_modern import ModernSupervisorAgent
 from unittest.mock import AsyncMock
+
+import pytest
+
 ModernSupervisorAgent = AsyncMock
 from unittest.mock import AsyncMock
+
 ModernSupervisorAgent = AsyncMock
 # from agents.sub_agents.optimization_agent import OptimizationAgent
 from unittest.mock import AsyncMock
+
 OptimizationAgent = AsyncMock
 # from agents.sub_agents.analysis_agent import AnalysisAgent
 from unittest.mock import AsyncMock
+
 AnalysisAgent = AsyncMock
 # from agents.state import DeepAgentState
 from unittest.mock import AsyncMock
+
 DeepAgentState = AsyncMock
 # from netra_backend.app.llm.llm_manager import LLMManager
 LLMManager = AsyncMock
 from netra_backend.app.services.database.postgres_service import PostgresService
+
 # from netra_backend.app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
 # from ws_manager import WebSocketManager
 from unittest.mock import AsyncMock
+
 WebSocketManager = AsyncMock
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 StagingTestSuite = AsyncMock

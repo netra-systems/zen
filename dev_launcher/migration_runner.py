@@ -3,12 +3,13 @@ Database migration runner for dev launcher.
 Handles automatic migration checks and execution during startup.
 """
 
-import os
-import sys
-import subprocess
 import logging
+import os
+import subprocess
+import sys
 from pathlib import Path
-from typing import Optional, Tuple, Dict
+from typing import Dict, Optional, Tuple
+
 from dev_launcher.utils import print_with_emoji
 
 logger = logging.getLogger(__name__)
@@ -228,8 +229,8 @@ class MigrationRunner:
             # Try to import and use the app's table creation logic
             sys.path.insert(0, str(self.project_root))
             
-            from netra_backend.app.db.postgres import initialize_postgres
             from netra_backend.app.config import settings
+            from netra_backend.app.db.postgres import initialize_postgres
             
             # Override database URL if provided in env
             if env and "DATABASE_URL" in env:

@@ -5,19 +5,21 @@ BUSINESS VALUE: $500K+ annual savings through optimized testing
 """
 
 import asyncio
+import concurrent.futures
 import json
+import subprocess
 import time
+from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime
-import concurrent.futures
-import subprocess
+
 import psutil
 
+from .comprehensive_reporter import ComprehensiveTestReporter
+from .memory_optimized_executor import MemoryMonitor, MemoryOptimizedExecutor
 from .priority_engine import PriorityEngine
 from .smart_cache import SmartCache
-from .memory_optimized_executor import MemoryOptimizedExecutor, MemoryMonitor
-from .comprehensive_reporter import ComprehensiveTestReporter
+
 
 class TestProfileBuilder:
     """Build test profiles from discovered tests"""

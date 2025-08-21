@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test runner for refactored components."""
 
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 import pytest
 
 # Setup paths

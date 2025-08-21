@@ -2,17 +2,19 @@
 OAuth Flow Tests for Auth Service (Synchronous)
 Basic testing of OAuth endpoints with TestClient
 """
-import pytest
-from unittest.mock import patch, Mock
 import secrets
-from fastapi.testclient import TestClient
-
 import sys
 from pathlib import Path
+from unittest.mock import Mock, patch
+
+import pytest
+from fastapi.testclient import TestClient
+
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(auth_service_dir))
 from main import app
+
 from auth_service.auth_core.models.auth_models import AuthProvider
 
 # Test client

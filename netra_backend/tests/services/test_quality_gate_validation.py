@@ -4,29 +4,40 @@ This module tests input validation, data class initialization, error handling,
 and caching mechanisms for the Quality Gate Service.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
-
 from netra_backend.app.services.quality_gate_service import (
-
-# Add project root to path
+    ContentType,
+    # Add project root to path
     QualityGateService,
     QualityLevel,
-    ContentType,
     QualityMetrics,
-    ValidationResult
+    ValidationResult,
 )
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.tests.helpers.shared_test_types import (
+    TestErrorHandling as SharedTestErrorHandling,
+)
 
 
 class TestQualityMetricsDataclass:

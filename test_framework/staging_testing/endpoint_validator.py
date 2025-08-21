@@ -4,25 +4,26 @@ Staging endpoint validation implementation.
 Validates Cloud Run staging endpoints and API contracts.
 """
 
-import aiohttp
 import asyncio
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass
-from datetime import datetime
 import json
 import time
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import aiohttp
 import yaml
 
+from ..gcp_integration.base import CloudRunService, GCPConfig
 from ..unified.base_interfaces import (
-    IDeploymentValidator,
     BaseTestComponent,
+    HealthCheckResult,
+    IDeploymentValidator,
     ServiceConfig,
     ServiceStatus,
     TestEnvironment,
-    HealthCheckResult
 )
-from ..gcp_integration.base import GCPConfig, CloudRunService
 
 
 @dataclass
@@ -554,6 +555,7 @@ class StagingEndpointValidator(BaseTestComponent, IDeploymentValidator):
     async def _check_ssl_certificate(self, url: str) -> Dict[str, Any]:
         """Check SSL certificate for a URL."""
         import ssl
+
         import certifi
         
         ssl_context = ssl.create_default_context(cafile=certifi.where())

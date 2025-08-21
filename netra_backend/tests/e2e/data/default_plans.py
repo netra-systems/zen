@@ -22,10 +22,10 @@ Usage:
     )
 """
 
-from typing import Dict, List, Optional, Union, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 
 class PlanStepType(Enum):
@@ -131,7 +131,9 @@ def get_capacity_planning_plan() -> OptimizationPlan:
 
 def _create_cost_optimization_steps() -> List[PlanStep]:
     """Create cost optimization plan steps."""
-    from netra_backend.tests.e2e.data.plan_step_definitions import create_remaining_cost_steps
+    from netra_backend.tests.e2e.data.plan_step_definitions import (
+        create_remaining_cost_steps,
+    )
     base_steps = [
         _create_cost_step_1(), _create_cost_step_2(), _create_cost_step_3(),
         _create_cost_step_4(), _create_cost_step_5()
@@ -141,13 +143,17 @@ def _create_cost_optimization_steps() -> List[PlanStep]:
 
 def _create_performance_tuning_steps() -> List[PlanStep]:
     """Create performance tuning plan steps.""" 
-    from netra_backend.tests.e2e.data.plan_step_definitions import create_all_performance_steps
+    from netra_backend.tests.e2e.data.plan_step_definitions import (
+        create_all_performance_steps,
+    )
     return create_all_performance_steps()
 
 
 def _create_capacity_planning_steps() -> List[PlanStep]:
     """Create capacity planning plan steps."""
-    from netra_backend.tests.e2e.data.plan_step_definitions import create_all_capacity_steps
+    from netra_backend.tests.e2e.data.plan_step_definitions import (
+        create_all_capacity_steps,
+    )
     return create_all_capacity_steps()
 
 

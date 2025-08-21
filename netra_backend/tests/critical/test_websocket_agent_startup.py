@@ -3,21 +3,31 @@
 Tests ensure agents actually start when users send their first message.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
-from unittest.mock import AsyncMock, Mock, patch, MagicMock
+import uuid
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.db.models_postgres import Run, Thread
 
 # Add project root to path
-
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.db.models_postgres import Thread, Run
-import uuid
-from datetime import datetime
 
 # Add project root to path
 

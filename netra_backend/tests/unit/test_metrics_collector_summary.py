@@ -7,16 +7,25 @@ Business Value: Provides billing analytics and usage pattern insights
 for customer optimization and revenue forecasting.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+from collections import deque
 from datetime import datetime, timedelta
 from unittest.mock import Mock
-from collections import deque
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.monitoring.models import MetricsCollector, PerformanceMetric
 
 # Add project root to path

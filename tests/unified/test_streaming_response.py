@@ -13,11 +13,11 @@ Architecture: 450-line compliance, 25-line function limit, real WebSocket testin
 """
 
 import asyncio
-import time
 import json
 import os
+import time
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
@@ -27,8 +27,11 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness, WebSocketTestHelper
 from netra_backend.tests.unified.config import setup_test_environment
+from netra_backend.tests.unified.test_harness import (
+    UnifiedTestHarness,
+    WebSocketTestHelper,
+)
 
 
 class StreamingTestData:

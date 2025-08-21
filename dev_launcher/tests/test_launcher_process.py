@@ -5,20 +5,20 @@ Tests cover ProcessManager, LogStreamer, and resource management.
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
+import signal
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
 import threading
 import time
-import signal
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from dev_launcher.log_streamer import LogManager, LogStreamer
 from dev_launcher.process_manager import ProcessManager
-from dev_launcher.log_streamer import LogStreamer, LogManager
 
 
 class TestProcessManager(unittest.TestCase):

@@ -3,36 +3,57 @@ Base infrastructure and utilities for Example Prompts E2E Tests
 Provides shared fixtures and helper methods for test execution
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+import asyncio
+import json
+import os
+import random
+import uuid
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock
 
 import pytest
 import pytest_asyncio
-import asyncio
-import json
-import uuid
-import os
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-import random
-from unittest.mock import Mock, AsyncMock
+from schemas import SubAgentState
+from sqlalchemy.ext.asyncio import AsyncSession
+from ws_manager import WebSocketManager
+
+from config import get_config
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.agents.state import DeepAgentState
-from schemas import SubAgentState
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService, WorkloadCategory
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
+from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import (
+    ApexToolSelector,
+)
 from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher import ApexToolSelector
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    QualityLevel,
+)
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from ws_manager import WebSocketManager
-from config import get_config
-from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.services.synthetic_data_service import (
+    SyntheticDataService,
+    WorkloadCategory,
+)
 
 # Add project root to path
 

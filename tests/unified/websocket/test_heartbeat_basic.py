@@ -18,16 +18,18 @@ ARCHITECTURE COMPLIANCE:
 
 import asyncio
 import json
-import time
-import uuid
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timezone
-from dataclasses import dataclass
-from unittest.mock import MagicMock, AsyncMock
-import pytest
 
 # Simplified test-only imports to avoid configuration issues
 import logging
+import time
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
 logger = logging.getLogger(__name__)
 
 

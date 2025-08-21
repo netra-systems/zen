@@ -6,16 +6,23 @@ Handles dependency injection and service lifecycle.
 """
 
 from typing import Optional
+
 from fastapi import Depends
-from netra_backend.app.dependencies import get_agent_service, get_thread_service, get_corpus_service, get_security_service
-from netra_backend.app.services.mcp_service import MCPService
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.services.security_service import SecurityService
+
+from netra_backend.app.dependencies import (
+    get_agent_service,
+    get_corpus_service,
+    get_security_service,
+    get_thread_service,
+)
 from netra_backend.app.logging_config import CentralLogger
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.corpus_service import CorpusService
+from netra_backend.app.services.mcp_service import MCPService
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.app.services.thread_service import ThreadService
 
 logger = CentralLogger()
 
@@ -121,7 +128,12 @@ def _create_service_params(agent_service, thread_service, corpus_service, securi
 
 async def create_mcp_service_for_websocket() -> MCPService:
     """Create MCP service instance for WebSocket endpoints without FastAPI Depends."""
-    from netra_backend.app.dependencies import get_agent_service, get_thread_service, get_corpus_service, get_security_service
+    from netra_backend.app.dependencies import (
+        get_agent_service,
+        get_corpus_service,
+        get_security_service,
+        get_thread_service,
+    )
     
     # Manually create service dependencies for WebSocket
     agent_service = get_agent_service()

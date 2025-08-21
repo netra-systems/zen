@@ -3,19 +3,26 @@ ClickHouse Basic Connection Tests
 Tests for basic ClickHouse connectivity and database operations
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 from logging_config import central_logger as logger
 
 # Add project root to path
-
 from netra_backend.tests.test_clickhouse_permissions import (
-
-# Add project root to path
+    _check_system_metrics_permission,
+    # Add project root to path
     real_clickhouse_client,
-    _check_system_metrics_permission
 )
 
 
@@ -81,8 +88,8 @@ class TestClickHouseIntegration:
     
     async def test_full_initialization_flow(self):
         """Test the full ClickHouse initialization flow"""
-        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         from netra_backend.app.db.clickhouse import get_clickhouse_client
+        from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables
         
         # Run initialization
         await initialize_clickhouse_tables()

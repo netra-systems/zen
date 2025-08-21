@@ -20,31 +20,40 @@ Critical Security Requirements:
 - Protection against token replay attacks
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-import httpx
-import websockets
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from urllib.parse import parse_qs, urlencode, urlparse
+
+import httpx
 import jwt as jwt_lib
-from urllib.parse import urlencode, parse_qs, urlparse
+import pytest
+import websockets
 
-# Add project root to path
-
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
-# Add project root to path
-    L4StagingCriticalPathTestBase, 
-    CriticalPathMetrics
-)
 from netra_backend.app.logging_config import central_logger
+
+# Add project root to path
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    # Add project root to path
+    L4StagingCriticalPathTestBase,
+)
 
 logger = central_logger.get_logger(__name__)
 

@@ -10,18 +10,28 @@ Critical Path: Preflight request -> CORS validation -> Policy enforcement -> Hea
 Coverage: CORS policies, preflight handling, origin validation, header management, security compliance
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-import aiohttp
-from typing import Dict, List, Optional, Any, Union
-from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +120,8 @@ class ApiCorsManager:
     async def start_cors_enabled_server(self):
         """Start test server with CORS middleware."""
         from aiohttp import web
-        from aiohttp_cors import setup as cors_setup, ResourceOptions
+        from aiohttp_cors import ResourceOptions
+        from aiohttp_cors import setup as cors_setup
         
         async def cors_middleware(request, handler):
             """Custom CORS middleware for testing."""

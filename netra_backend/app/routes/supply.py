@@ -1,11 +1,12 @@
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
-from netra_backend.app.dependencies import DbDep
-from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
-from netra_backend.app.services import supplier_comparison
 from netra_backend.app import schemas
+from netra_backend.app.dependencies import DbDep
+from netra_backend.app.services import supplier_comparison
+from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 
 router = APIRouter()
 catalog_service = SupplyCatalogService()

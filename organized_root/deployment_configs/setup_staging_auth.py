@@ -14,7 +14,6 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
-
 # Configuration
 PROJECT_ID = "netra-staging"
 SERVICE_ACCOUNT_NAME = "netra-staging-deploy"

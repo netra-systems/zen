@@ -10,9 +10,9 @@ Ensures microservice independence through static analysis of import statements.
 
 import asyncio
 import time
-from pathlib import Path
-from typing import Dict, List, Any, Set
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Set
 
 
 @dataclass

@@ -13,23 +13,36 @@ Automatic reconnection -> State recovery -> Session continuity validation
 Coverage: WebSocket resilience, state persistence, automatic recovery, cross-service coordination
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import websockets
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import pytest
+import websockets
+
+from netra_backend.app.services.redis.session_manager import RedisSessionManager
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
-
-from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.services.redis.session_manager import RedisSessionManager
+from netra_backend.tests.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    L4StagingCriticalPathTestBase,
+)
 
 # Add project root to path
 

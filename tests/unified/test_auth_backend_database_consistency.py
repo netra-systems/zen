@@ -21,14 +21,15 @@ SUCCESS CRITERIA:
 Module Architecture Compliance: Functions under 8 lines, test-focused structure
 """
 
-import pytest
 import asyncio
 import time
 import uuid
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
-from dataclasses import dataclass
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 
 @dataclass

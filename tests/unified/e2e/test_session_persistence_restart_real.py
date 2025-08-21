@@ -21,24 +21,27 @@ Test validates enterprise deployment scenarios with real service interruption.
 """
 
 import asyncio
-import pytest
+import json
+import sys
 import time
 import uuid
-import json
-import httpx
-import websockets
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import sys
+from typing import Any, Dict, List, Optional
+
+import httpx
+import pytest
+import websockets
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import test helpers and real services manager
-from netra_backend.tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.real_services_manager import (
+    RealServicesManager as create_real_services_manager,
+)
 
 
 class RealServiceRestartManager:

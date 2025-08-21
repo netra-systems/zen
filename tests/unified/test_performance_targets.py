@@ -23,17 +23,18 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-import time
-import statistics
 import gc
-import psutil
-from typing import List, Dict, Any, Optional
-from datetime import datetime, timezone
+import statistics
+import time
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
+
+import psutil
 import pytest
 
-from tests.unified.config import UnifiedTestConfig, TestUser
+from tests.unified.config import TestUser, UnifiedTestConfig
 from tests.unified.service_manager import ServiceManager
 
 

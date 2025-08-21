@@ -5,12 +5,12 @@ NOTE: This test file is temporarily disabled due to references to non-existent m
 The launcher structure has been refactored and these tests need to be updated.
 """
 
-import unittest
 import sys
-from pathlib import Path
-from unittest.mock import patch, MagicMock, call
 import threading
 import time
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, call, patch
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

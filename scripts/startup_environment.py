@@ -4,12 +4,13 @@ Startup Environment Manager
 Handles environment setup and dependency validation
 """
 
-import sys
 import os
 import subprocess
-import psutil
+import sys
 from datetime import datetime
-from typing import List, Tuple, Dict, Any
+from typing import Any, Dict, List, Tuple
+
+import psutil
 
 
 class StartupEnvironment:

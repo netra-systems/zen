@@ -18,12 +18,13 @@ REQUIREMENTS:
 - Must complete in <30 seconds
 - 450-line file limit, 25-line function limit
 """
-import pytest
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
-from tests.unified.e2e.admin_user_management_tester import AdminUserManagementTester
+import pytest
+
 from tests.unified.e2e.admin_audit_trail_validator import AdminAuditTrailValidator
+from tests.unified.e2e.admin_user_management_tester import AdminUserManagementTester
 from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
 
 

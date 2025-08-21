@@ -3,12 +3,13 @@
 Monitor OAuth flow in real-time to verify token persistence fixes.
 """
 import asyncio
-import httpx
 import json
-import time
-from datetime import datetime, timedelta
 import subprocess
 import sys
+import time
+from datetime import datetime, timedelta
+
+import httpx
 
 
 class OAuthMonitor:

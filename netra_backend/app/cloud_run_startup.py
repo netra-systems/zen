@@ -3,10 +3,11 @@ Cloud Run startup wrapper for proper async context handling.
 Ensures proper initialization in containerized environments.
 """
 import asyncio
-import sys
 import os
-import uvicorn
+import sys
 from pathlib import Path
+
+import uvicorn
 
 # Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))

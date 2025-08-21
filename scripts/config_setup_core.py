@@ -14,8 +14,8 @@ from pathlib import Path
 script_dir = Path(__file__).parent
 sys.path.insert(0, str(script_dir))
 
+from env_checker import check_command_exists, run_command
 from installer_types import InstallerConfig, InstallerResult
-from env_checker import run_command, check_command_exists
 
 
 def setup_databases(config: InstallerConfig) -> InstallerResult:

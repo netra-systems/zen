@@ -16,7 +16,9 @@ import { useAuthStore } from '@/store/authStore';
 
 // Mock dependencies
 jest.mock('@/services/webSocketService');
-jest.mock('@/store/authStore');
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn()
+}));
 jest.mock('@/lib/logger');
 
 // Test helpers following 25-line limit

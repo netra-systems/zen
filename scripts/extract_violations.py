@@ -2,6 +2,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
+
 def extract_violations():
     """Extract and organize all function violations for systematic fixing."""
     

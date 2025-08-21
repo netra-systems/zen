@@ -17,19 +17,26 @@ Refactored into focused modules for 300/8 compliance.
 from pathlib import Path
 from typing import List
 
+from boundary_enforcer_cli_handler import (
+    CLIArgumentParser,
+    CLIOrchestrator,
+    HookInstaller,
+    ViolationDisplayer,
+)
 from boundary_enforcer_core_types import (
-    BoundaryViolation, SystemBoundaries, BoundaryReport
+    BoundaryReport,
+    BoundaryViolation,
+    SystemBoundaries,
 )
 from boundary_enforcer_file_checks import FileBoundaryChecker
 from boundary_enforcer_function_checks import FunctionBoundaryChecker
+from boundary_enforcer_report_generator import (
+    BoundaryReportGenerator,
+    ConsoleReportPrinter,
+    PRCommentGenerator,
+)
 from boundary_enforcer_system_checks import SystemBoundaryChecker
 from boundary_enforcer_type_checks import TypeBoundaryChecker
-from boundary_enforcer_report_generator import (
-    BoundaryReportGenerator, ConsoleReportPrinter, PRCommentGenerator
-)
-from boundary_enforcer_cli_handler import (
-    CLIArgumentParser, HookInstaller, CLIOrchestrator, ViolationDisplayer
-)
 
 
 class BoundaryEnforcer:

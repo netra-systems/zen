@@ -15,28 +15,30 @@ ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
 
 import asyncio
 import json
-import time
-from typing import Dict, Any, List
+
 # Add project root to path
 import sys
+import time
 from pathlib import Path
+from typing import Any, Dict, List
+
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from netra_backend.app.logging_config import central_logger
+from test_framework.comprehensive_reporter import ComprehensiveReporter
+from test_framework.decorators import integration_only, performance_test
 from test_framework.test_user_journeys import (
-    UserJourneyTestSuite, 
-    FirstTimeUserJourneyTest, 
-    ChatInteractionJourneyTest
+    ChatInteractionJourneyTest,
+    FirstTimeUserJourneyTest,
+    UserJourneyTestSuite,
 )
 from test_framework.test_user_journeys_extended import (
     ExtendedUserJourneyTestSuite,
     OAuthLoginJourneyTest,
-    RealWebSocketJourneyTest
+    RealWebSocketJourneyTest,
 )
-from test_framework.decorators import integration_only, performance_test
-from test_framework.comprehensive_reporter import ComprehensiveReporter
 
 logger = central_logger.get_logger(__name__)
 

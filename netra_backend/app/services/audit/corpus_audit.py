@@ -5,17 +5,23 @@ Main audit logger for corpus operations with comprehensive tracking.
 Follows 450-line limit and 25-line function rule.
 """
 
-from typing import Optional, List, Dict, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.schemas.registry import (
-    CorpusAuditRecord, CorpusAuditAction, CorpusAuditStatus,
-    CorpusAuditMetadata, CorpusAuditSearchFilter, CorpusAuditReport
-)
-from netra_backend.app.db.models_postgres import CorpusAuditLog
-from netra_backend.app.services.audit.repository import CorpusAuditRepository
-from netra_backend.app.logging_config import central_logger
+
 from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.db.models_postgres import CorpusAuditLog
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import (
+    CorpusAuditAction,
+    CorpusAuditMetadata,
+    CorpusAuditRecord,
+    CorpusAuditReport,
+    CorpusAuditSearchFilter,
+    CorpusAuditStatus,
+)
+from netra_backend.app.services.audit.repository import CorpusAuditRepository
 
 logger = central_logger.get_logger(__name__)
 
@@ -82,7 +88,11 @@ class CorpusAuditLogger:
 
     def _prepare_audit_data_from_params(self, params: Dict[str, Any]) -> Dict[str, Any]:
         """Prepare audit data from parameters dictionary."""
-        from .corpus_audit_helpers import prepare_audit_data_dict, extract_metadata_core_fields, extract_metadata_extended_fields
+        from .corpus_audit_helpers import (
+            extract_metadata_core_fields,
+            extract_metadata_extended_fields,
+            prepare_audit_data_dict,
+        )
         base_data = prepare_audit_data_dict(**{k: v for k, v in params.items() if k != 'metadata'})
         core_metadata = extract_metadata_core_fields(params['metadata'])
         extended_metadata = extract_metadata_extended_fields(params['metadata'])
@@ -90,7 +100,10 @@ class CorpusAuditLogger:
 
     def _extract_metadata_fields(self, metadata: Optional[CorpusAuditMetadata]) -> Dict[str, Any]:
         """Extract metadata fields for database storage."""
-        from .corpus_audit_helpers import extract_metadata_core_fields, extract_metadata_extended_fields
+        from .corpus_audit_helpers import (
+            extract_metadata_core_fields,
+            extract_metadata_extended_fields,
+        )
         if not metadata:
             return {}
         core_fields = extract_metadata_core_fields(metadata)
@@ -109,7 +122,10 @@ class CorpusAuditLogger:
     
     def _create_audit_record_from_log(self, audit_log: CorpusAuditLog, metadata: CorpusAuditMetadata) -> CorpusAuditRecord:
         """Create audit record object from database log and metadata."""
-        from .corpus_audit_helpers import create_audit_record_base, create_audit_record_extended
+        from .corpus_audit_helpers import (
+            create_audit_record_base,
+            create_audit_record_extended,
+        )
         core_fields = create_audit_record_base(audit_log)
         operational_fields = create_audit_record_extended(audit_log, metadata)
         return CorpusAuditRecord(**core_fields, **operational_fields)

@@ -13,11 +13,12 @@ BVJ: Enterprise/Mid - User Retention - Complete event coverage prevents user
 confusion about system state and builds confidence in platform reliability.
 """
 
-import pytest
 import asyncio
 import json
-from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+
+import pytest
 
 from netra_backend.tests.unified.clients.backend_client import BackendTestClient
 from netra_backend.tests.unified.clients.websocket_client import WebSocketTestClient

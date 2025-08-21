@@ -8,17 +8,27 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents customer churn from incomplete responses
 """
 
-import pytest
 import asyncio
 import uuid
 from datetime import datetime, timezone
 
+import pytest
+
 from netra_backend.tests.e2e.websocket_resilience.fixtures.shared_websocket_fixtures import (
-    network_condition, stream_buffer, test_user_id, response_configs,
-    ConnectionState, ResponseType
+    ConnectionState,
+    ResponseType,
+    network_condition,
+    response_configs,
+    stream_buffer,
+    test_user_id,
 )
-from netra_backend.tests.e2e.websocket_resilience.utils.network_simulator import NetworkSimulator
-from netra_backend.tests.e2e.websocket_resilience.utils.streaming_response_generator import StreamingResponseGenerator
+from netra_backend.tests.e2e.websocket_resilience.utils.network_simulator import (
+    NetworkSimulator,
+)
+from netra_backend.tests.e2e.websocket_resilience.utils.streaming_response_generator import (
+    StreamingResponseGenerator,
+)
+
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

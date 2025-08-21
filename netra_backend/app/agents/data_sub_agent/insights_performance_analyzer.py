@@ -6,7 +6,7 @@ Handles performance trends, outliers, error rates, and latency analysis.
 Business Value: Performance optimization insights for customer reliability.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class PerformanceInsightsAnalyzer:

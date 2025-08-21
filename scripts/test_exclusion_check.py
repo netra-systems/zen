@@ -3,8 +3,9 @@
 Quick script to verify that test scanning is excluding site-packages and virtual environments
 """
 
-from pathlib import Path
 import sys
+from pathlib import Path
+
 
 def check_test_file_locations():
     """Check if any test files are being counted from excluded directories"""

@@ -10,17 +10,23 @@ Business Value: Demonstrates AI optimization capabilities to drive Free tier con
 import asyncio
 import json
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List, Union
+from typing import Any, Dict, List, Optional, Union
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, ValidationError
 
+from netra_backend.app.agents.example_message_processor import (
+    get_example_message_supervisor,
+)
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.error_handling import (
+    ErrorCategory,
+    ErrorContext,
+    handle_example_message_error,
+)
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.agents.example_message_processor import get_example_message_supervisor
 from netra_backend.app.services.websocket.ws_manager import get_manager
-from netra_backend.app.db.postgres import get_async_db
-from netra_backend.app.error_handling import handle_example_message_error, ErrorContext, ErrorCategory
 
 logger = central_logger.get_logger(__name__)
 

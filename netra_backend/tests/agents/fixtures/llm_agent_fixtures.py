@@ -3,21 +3,22 @@ Shared fixtures for LLM Agent E2E tests
 Extracted from oversized test files to maintain 450-line limit
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+import time
 import uuid
 from datetime import datetime
-import time
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+import pytest
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 @pytest.fixture
@@ -58,8 +59,12 @@ def _get_optimization_response() -> Dict[str, Any]:
 def _setup_triage_agent_responses(llm_manager: Mock) -> None:
     """Setup triage agent structured LLM responses."""
     from netra_backend.app.agents.triage_sub_agent import (
-        TriageResult, Priority, Complexity, UserIntent,
-        ExtractedEntities, TriageMetadata
+        Complexity,
+        ExtractedEntities,
+        Priority,
+        TriageMetadata,
+        TriageResult,
+        UserIntent,
     )
     llm_manager.ask_structured_llm = AsyncMock(return_value=_create_triage_result())
 
@@ -67,8 +72,12 @@ def _setup_triage_agent_responses(llm_manager: Mock) -> None:
 def _create_triage_result() -> 'TriageResult':
     """Create mock triage result."""
     from netra_backend.app.agents.triage_sub_agent import (
-        TriageResult, Priority, Complexity, UserIntent,
-        ExtractedEntities, TriageMetadata
+        Complexity,
+        ExtractedEntities,
+        Priority,
+        TriageMetadata,
+        TriageResult,
+        UserIntent,
     )
     return TriageResult(
         category="AI Optimization",
@@ -235,8 +244,10 @@ def setup_websocket_manager(ws_manager):
 
 def create_supervisor_with_mocks(db_session, llm_manager, ws_manager, mock_persistence):
     """Create supervisor with all mocked dependencies"""
+    from netra_backend.app.agents.supervisor.execution_context import (
+        AgentExecutionResult,
+    )
     from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-    from netra_backend.app.agents.supervisor.execution_context import AgentExecutionResult
     dispatcher = Mock(spec=ToolDispatcher)
     dispatcher.dispatch_tool = AsyncMock(return_value={"status": "success"})
     supervisor = SupervisorAgent(db_session, llm_manager, ws_manager, dispatcher)

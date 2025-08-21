@@ -8,19 +8,28 @@ ULTRA DEEP THINKING APPLIED: Each test designed for maximum enterprise security 
 All functions ≤8 lines. File ≤300 lines as per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import os
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
-
 # Core config secrets components  
 from config_secrets_manager import ConfigSecretsManager
+
 from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
 from netra_backend.app.schemas.Config import AppConfig
 

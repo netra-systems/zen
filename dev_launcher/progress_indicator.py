@@ -8,10 +8,11 @@ and ETA calculation for development launcher.
 import sys
 import time
 from typing import List, Optional, Tuple
+
 try:
-    from .progress_core import Phase, PhaseStatus, SpinnerAnimation, ProgressCalculator
+    from .progress_core import Phase, PhaseStatus, ProgressCalculator, SpinnerAnimation
 except ImportError:
-    from progress_core import Phase, PhaseStatus, SpinnerAnimation, ProgressCalculator
+    from progress_core import Phase, PhaseStatus, ProgressCalculator, SpinnerAnimation
 
 
 class ProgressIndicator:

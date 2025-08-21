@@ -4,9 +4,9 @@ Core data structures and types for architecture compliance checking.
 Enforces CLAUDE.md architectural rules with modular design.
 """
 
-from dataclasses import dataclass, asdict
-from typing import List, Dict, Optional, Union
+from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Dict, List, Optional, Union
 
 
 @dataclass

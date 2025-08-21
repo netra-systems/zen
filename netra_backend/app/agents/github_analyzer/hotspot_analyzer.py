@@ -4,7 +4,7 @@ Specialized module for identifying and analyzing AI hotspots in code.
 Handles pattern counting, hotspot ranking, and result formatting.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class HotspotAnalyzer:

@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Aggressive script to fix remaining syntax errors by any means necessary"""
 
-import os
 import ast
+import os
 import re
 from pathlib import Path
 from typing import List
+
 
 def get_files_with_errors():
     """Get all files that still have syntax errors"""

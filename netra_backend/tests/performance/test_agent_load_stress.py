@@ -5,26 +5,35 @@ Comprehensive testing for agent system under load conditions.
 Tests concurrent agent requests, resource isolation, and performance degradation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import psutil
 import gc
-from typing import Dict, List, Any, Optional, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
-from concurrent.futures import ThreadPoolExecutor
 import statistics
+import time
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import psutil
+import pytest
+from ws_manager import WebSocketManager
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from ws_manager import WebSocketManager
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 # Add project root to path

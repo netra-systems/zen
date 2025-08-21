@@ -14,14 +14,15 @@ Usage:
     from netra_backend.app.schemas.core_models import User, Message, Thread
 """
 
-from typing import Dict, List, Optional, Union, Any
-from datetime import datetime, timezone
-from pydantic import BaseModel, Field, EmailStr, ConfigDict
-from dataclasses import dataclass, field
 import uuid
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Union
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 # Import enums from the dedicated module
-from netra_backend.app.schemas.core_enums import MessageType, CircuitBreakerState
+from netra_backend.app.schemas.core_enums import CircuitBreakerState, MessageType
 
 
 class UserBase(BaseModel):

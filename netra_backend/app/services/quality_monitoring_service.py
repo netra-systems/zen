@@ -5,12 +5,12 @@ The actual implementation is now modularized in the quality_monitoring package.
 """
 
 from netra_backend.app.services.quality_monitoring import (
-    QualityMonitoringService,
+    AgentQualityProfile,
     AlertSeverity,
     MetricType,
     QualityAlert,
+    QualityMonitoringService,
     QualityTrend,
-    AgentQualityProfile
 )
 
 __all__ = [

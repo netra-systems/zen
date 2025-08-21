@@ -18,14 +18,14 @@ Architecture:
 """
 
 import asyncio
-import time
 import logging
-from typing import Dict, Any
+import time
 from dataclasses import dataclass
+from typing import Any, Dict
 
-from tests.unified.real_services_manager import create_real_services_manager
-from tests.unified.real_client_factory import create_real_client_factory
 from tests.unified.load_test_utilities import SystemResourceMonitor
+from tests.unified.real_client_factory import create_real_client_factory
+from tests.unified.real_services_manager import create_real_services_manager
 
 logger = logging.getLogger(__name__)
 
@@ -120,10 +120,10 @@ def create_startup_test_suite(
         await suite["user_manager"].cleanup_users()
         await suite["orchestrator"].stop_all_services()
     """
+    from tests.unified.agent_startup_failure_simulator import FailureSimulator
+    from tests.unified.agent_startup_performance_measurer import PerformanceMeasurer
     from tests.unified.agent_startup_user_manager import UserManager
     from tests.unified.agent_startup_websocket_manager import WebSocketManager
-    from tests.unified.agent_startup_performance_measurer import PerformanceMeasurer
-    from tests.unified.agent_startup_failure_simulator import FailureSimulator
     
     return {
         "orchestrator": ServiceOrchestrator(),

@@ -3,23 +3,34 @@ WebSocket connection test mocks and shared utilities
 Provides mock classes and fixtures for WebSocket connection testing
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
-from datetime import datetime, timezone, UTC
-from typing import Dict, List, Any
+import time
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from fastapi import WebSocket
-from starlette.websockets import WebSocketState, WebSocketDisconnect
+from starlette.websockets import WebSocketDisconnect, WebSocketState
 
 # Add project root to path
-
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
+from netra_backend.app.services.websocket.ws_manager import (
+    ConnectionInfo,
+    WebSocketManager,
+)
 
 # Add project root to path
 

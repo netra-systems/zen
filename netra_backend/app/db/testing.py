@@ -1,7 +1,9 @@
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+
 from netra_backend.app.config import settings
 from netra_backend.app.db.base import Base
+
 
 # Convert database URL to async format if needed
 def _convert_postgresql_url(db_url: str) -> str:

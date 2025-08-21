@@ -21,9 +21,15 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.real_llm_config import get_real_llm_manager, configure_real_llm_testing
-from test_framework.test_environment_setup import TestEnvironmentValidator, get_test_orchestrator
+from test_framework.real_llm_config import (
+    configure_real_llm_testing,
+    get_real_llm_manager,
+)
 from test_framework.seed_data_manager import get_seed_data_manager
+from test_framework.test_environment_setup import (
+    TestEnvironmentValidator,
+    get_test_orchestrator,
+)
 
 
 async def demo_environment_validation():

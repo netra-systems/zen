@@ -1,7 +1,7 @@
 """Data Tools Module - MCP tools for data management operations"""
 
 import json
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class DataTools:

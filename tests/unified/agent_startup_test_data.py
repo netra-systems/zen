@@ -18,15 +18,15 @@ ARCHITECTURAL COMPLIANCE:
 - Load testing support for 100+ users
 """
 
+import json
 import random
 import uuid
-from typing import Dict, List, Any, Optional, Generator, Tuple
-from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-import json
+from typing import Any, Dict, Generator, List, Optional, Tuple
 
-from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
+from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.shared_types import TestTier
 from tests.unified.config import TestUser, get_test_user
 

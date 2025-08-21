@@ -17,7 +17,8 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Set
+from typing import List, Set, Tuple
+
 
 def find_files_with_connection_manager_imports(root_dir: str) -> List[Path]:
     """Find all Python files importing ConnectionManager from connection_manager."""

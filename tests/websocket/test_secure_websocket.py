@@ -13,24 +13,24 @@ Tests cover all critical security and functionality aspects:
 
 import asyncio
 import json
-import pytest
 import time
-from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from test_framework.mock_utils import mock_justified
-from fastapi import WebSocket, HTTPException
+import pytest
+from fastapi import HTTPException, WebSocket
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.routes.websocket_secure import (
-    SecureWebSocketManager, 
-    get_secure_websocket_manager,
-    SECURE_WEBSOCKET_CONFIG
-)
-from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
 from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
+from netra_backend.app.routes.websocket_secure import (
+    SECURE_WEBSOCKET_CONFIG,
+    SecureWebSocketManager,
+    get_secure_websocket_manager,
+)
+from test_framework.mock_utils import mock_justified
 
 
 class MockWebSocket:

@@ -11,25 +11,34 @@ This test validates database migration failure scenarios and automatic rollback 
 using real PostgreSQL containers (L3 realism) to catch production-level issues.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import tempfile
-import subprocess
 import os
+import subprocess
+import tempfile
 from pathlib import Path
-from typing import Dict, Any, List, Optional
-from unittest.mock import patch, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
+from logging_config import central_logger
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 # Add project root to path
-
 from netra_backend.app.db.base import Base
 from netra_backend.app.db.postgres_core import Database
-from logging_config import central_logger
 
 # Add project root to path
 

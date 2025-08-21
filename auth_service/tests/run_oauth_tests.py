@@ -2,10 +2,10 @@
 OAuth Tests Runner
 Runs comprehensive OAuth flow tests for auth service
 """
-import os
-import sys
-import subprocess
 import asyncio
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 # Add auth service to Python path
@@ -92,9 +92,9 @@ def run_tests():
 def check_dependencies():
     """Check if test dependencies are installed"""
     try:
-        import pytest
-        import httpx
         import fastapi
+        import httpx
+        import pytest
         print("✅ Test dependencies available")
         return True
     except ImportError as e:

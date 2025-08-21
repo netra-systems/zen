@@ -29,13 +29,14 @@ USAGE:
     python test_runner.py --level comprehensive # Full validation
 """
 
-import os
-import sys
-import json
-import time
 import argparse
+import json
+import os
 import subprocess
+import sys
+import time
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Add project root to path
@@ -46,13 +47,22 @@ sys.path.insert(0, str(PROJECT_ROOT))
 load_dotenv()
 
 # Import test framework modules
-from .runner import UnifiedTestRunner
-from .test_config import TEST_LEVELS, COMPONENT_MAPPINGS, SHARD_MAPPINGS, configure_staging_environment, configure_dev_environment, configure_real_llm, configure_gcp_staging_environment
-from .test_validation import TestValidation
 from .circular_import_detector import CircularImportDetector
-from .test_discovery import TestDiscovery
 from .feature_flags import get_feature_flag_manager
 from .import_tester import ImportTester
+from .runner import UnifiedTestRunner
+from .test_config import (
+    COMPONENT_MAPPINGS,
+    SHARD_MAPPINGS,
+    TEST_LEVELS,
+    configure_dev_environment,
+    configure_gcp_staging_environment,
+    configure_real_llm,
+    configure_staging_environment,
+)
+from .test_discovery import TestDiscovery
+from .test_validation import TestValidation
+
 
 def handle_test_discovery(args):
     """Handle test discovery and listing."""
@@ -810,7 +820,9 @@ def print_test_configuration(level, config, speed_opts):
 
 def configure_real_llm_if_requested(args, level, config):
     """Configure real LLM testing if requested"""
-    from .test_execution_engine import configure_real_llm_if_requested as engine_configure
+    from .test_execution_engine import (
+        configure_real_llm_if_requested as engine_configure,
+    )
     return engine_configure(args, level, config)
 
 def validate_test_sizes(args):

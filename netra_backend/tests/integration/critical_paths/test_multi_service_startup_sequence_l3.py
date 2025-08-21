@@ -12,30 +12,38 @@ to ensure proper dependency resolution, health check propagation, and failure ha
 L3 Realism Level: Real services with Docker containers, local networking
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
 import logging
 import os
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
+import time
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
+import pytest
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
-import httpx
-
-from test_framework.docker_testing.compose_manager import DockerComposeManager
 
 # Add project root to path
-
 from netra_backend.app.core.configuration.base import get_unified_config
+from netra_backend.app.services.database.postgres_service import PostgresService
 from netra_backend.app.services.health_checker import HealthChecker
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
-from netra_backend.app.services.database.postgres_service import PostgresService
+from test_framework.docker_testing.compose_manager import DockerComposeManager
 
 # Add project root to path
 

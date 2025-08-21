@@ -14,18 +14,20 @@ This test ensures rate limiting protects the API from abuse.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
 import json
+import random
 import sys
 import time
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 import aiohttp
 import pytest
-from datetime import datetime, timedelta
-import random
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

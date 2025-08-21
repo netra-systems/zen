@@ -1,13 +1,16 @@
 """Checkpoint management functionality for supervisor state."""
 
-from typing import Dict, Optional, Tuple
 from datetime import datetime, timezone
+from typing import Dict, Optional, Tuple
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.schemas.agent_state import (
-    StatePersistenceRequest, CheckpointType, AgentPhase
-)
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.agent_state import (
+    AgentPhase,
+    CheckpointType,
+    StatePersistenceRequest,
+)
+from netra_backend.app.services.state_persistence import state_persistence_service
 
 logger = central_logger.get_logger(__name__)
 

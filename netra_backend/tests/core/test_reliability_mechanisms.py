@@ -3,25 +3,39 @@ Comprehensive reliability mechanism test suite for Netra agents.
 Tests circuit breakers, retry logic, timeouts, and system resilience.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
+from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock
-from typing import Dict, Any
+
+import pytest
+
+from netra_backend.app.core.exceptions_service import ServiceError, ServiceTimeoutError
 
 # Add project root to path
-
-from netra_backend.app.core.reliability import AgentReliabilityWrapper, get_reliability_wrapper
-from netra_backend.app.core.reliability_circuit_breaker import (
-
-# Add project root to path
-    CircuitBreaker, CircuitBreakerConfig, CircuitBreakerState
+from netra_backend.app.core.reliability import (
+    AgentReliabilityWrapper,
+    get_reliability_wrapper,
 )
-from netra_backend.app.core.reliability_retry import RetryHandler, RetryConfig
-from netra_backend.app.core.exceptions_service import ServiceTimeoutError, ServiceError
+from netra_backend.app.core.reliability_circuit_breaker import (
+    # Add project root to path
+    CircuitBreaker,
+    CircuitBreakerConfig,
+    CircuitBreakerState,
+)
+from netra_backend.app.core.reliability_retry import RetryConfig, RetryHandler
 
 
 class TestCircuitBreakerCore:

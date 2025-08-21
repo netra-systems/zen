@@ -1,17 +1,18 @@
 """Core exception processing logic and utilities."""
 
+from datetime import datetime, timezone
 from typing import Dict, Optional, Union
 from uuid import uuid4
-from datetime import datetime, timezone
+
 from fastapi import Request
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.error_response_models import ErrorResponse
-from netra_backend.app.core.exceptions import NetraException, ErrorSeverity
-from netra_backend.app.core.error_handlers_netra import NetraExceptionHandler
-from netra_backend.app.core.error_handlers_validation import ValidationErrorHandler
 from netra_backend.app.core.error_handlers_database import DatabaseErrorHandler
 from netra_backend.app.core.error_handlers_http import HttpExceptionHandler
+from netra_backend.app.core.error_handlers_netra import NetraExceptionHandler
+from netra_backend.app.core.error_handlers_validation import ValidationErrorHandler
+from netra_backend.app.core.error_response_models import ErrorResponse
+from netra_backend.app.core.exceptions import ErrorSeverity, NetraException
+from netra_backend.app.logging_config import central_logger
 
 
 class ErrorProcessor:
@@ -78,9 +79,9 @@ class ErrorProcessor:
     
     def _get_handler_map(self) -> Dict[type, object]:
         """Get mapping of exception types to handlers."""
+        from fastapi import HTTPException
         from pydantic import ValidationError
         from sqlalchemy.exc import SQLAlchemyError
-        from fastapi import HTTPException
         
         return {
             NetraException: self._netra_handler,

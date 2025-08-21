@@ -10,16 +10,17 @@ This test verifies that our fixed service startup sequence works correctly:
 5. Health check verification
 """
 
-import pytest
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
 
-from netra_backend.tests.unified.harness_complete import (
-    UnifiedTestHarnessComplete,
-    TestHarnessContext,
-    create_test_harness
-)
+import pytest
+
 from netra_backend.tests.unified.config import setup_test_environment
+from netra_backend.tests.unified.harness_complete import (
+    TestHarnessContext,
+    UnifiedTestHarnessComplete,
+    create_test_harness,
+)
 
 
 class TestUnifiedHarness:

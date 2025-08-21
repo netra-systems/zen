@@ -8,20 +8,26 @@ Business Value: Enables comprehensive reconnection testing for enterprise reliab
 
 import asyncio
 import time
-from datetime import datetime, UTC
-from typing import Dict, List, Any
+from datetime import UTC, datetime
+from typing import Any, Dict, List
 from unittest.mock import MagicMock
+
 import pytest
 
 # Import test utilities with fallback mocks
 try:
-    from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
+    from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+        create_test_token,
+    )
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
         return f"mock_token_{user_id}_{exp_offset}"
 
 try:
-    from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+    from netra_backend.app.tests.test_utilities.websocket_mocks import (
+        MockWebSocket,
+        WebSocketBuilder,
+    )
 except ImportError:
     # Fallback mock implementations
     class MockWebSocket:

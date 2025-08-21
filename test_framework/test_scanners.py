@@ -4,9 +4,9 @@ Test Scanners - Test file discovery and scanning logic
 Handles scanning for different types of test files
 """
 
+from collections import defaultdict
 from pathlib import Path
 from typing import List
-from collections import defaultdict
 
 
 class TestScanners:

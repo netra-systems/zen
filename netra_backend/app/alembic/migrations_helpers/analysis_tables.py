@@ -3,8 +3,9 @@ Analysis and Corpus Table Creation Functions
 Handles creation of analysis, analysis_results, and corpora tables
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 
 def _create_analyses() -> None:

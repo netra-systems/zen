@@ -5,6 +5,7 @@ import os
 import re
 from pathlib import Path
 
+
 def fix_datetime_in_file(filepath) -> bool:
     """Fix datetime deprecation in a single file"""
     content = _read_file_content(filepath)

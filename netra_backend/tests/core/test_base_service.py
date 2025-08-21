@@ -1,16 +1,26 @@
 """Tests for BaseService functionality."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from datetime import datetime
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.core.service_interfaces import BaseService, ServiceHealth
 from netra_backend.app.core.exceptions_service import ServiceError
+
+# Add project root to path
+from netra_backend.app.core.service_interfaces import BaseService, ServiceHealth
 
 # Add project root to path
 

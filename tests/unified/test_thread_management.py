@@ -19,16 +19,24 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import json
 import uuid
-from typing import Dict, List, Any, Optional
-from unittest.mock import patch, Mock, AsyncMock
-import pytest
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
-from netra_backend.tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from netra_backend.tests.unified.test_harness import UnifiedTestHarness
-from netra_backend.app.schemas.registry import Thread, ThreadMetadata, Message
-from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+import pytest
+
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.registry import Message, Thread, ThreadMetadata
+from netra_backend.app.tests.test_utilities.websocket_mocks import (
+    MockWebSocket,
+    WebSocketBuilder,
+)
+from netra_backend.tests.unified.config import (
+    TEST_ENDPOINTS,
+    TEST_USERS,
+    TestDataFactory,
+)
+from netra_backend.tests.unified.test_harness import UnifiedTestHarness
 
 logger = central_logger.get_logger(__name__)
 

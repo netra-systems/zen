@@ -3,51 +3,59 @@ Advanced features tests for Quality Gate Service
 Tests caching, batch processing, statistics, and system behavior
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import hashlib
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
-from netra_backend.tests.helpers.quality_gate_fixtures import (
-
-# Add project root to path
-    redis_mock,
-    quality_service,
-    create_test_quality_metrics,
-    create_weighted_score_metrics,
-    create_optimization_weights,
-    create_borderline_metrics,
-    add_multiple_test_metrics,
-    create_memory_overflow_metrics,
-    setup_redis_error_mocks,
-    setup_pattern_test_texts,
-    setup_domain_content_for_recognition,
-    setup_content_type_test_cases
-)
 from netra_backend.tests.helpers.quality_gate_content import (
     get_batch_validation_contents,
     get_batch_validation_context,
-    get_brief_optimization_contents
+    get_brief_optimization_contents,
+)
+from netra_backend.tests.helpers.quality_gate_fixtures import (
+    add_multiple_test_metrics,
+    create_borderline_metrics,
+    create_memory_overflow_metrics,
+    create_optimization_weights,
+    create_test_quality_metrics,
+    create_weighted_score_metrics,
+    quality_service,
+    # Add project root to path
+    redis_mock,
+    setup_content_type_test_cases,
+    setup_domain_content_for_recognition,
+    setup_pattern_test_texts,
+    setup_redis_error_mocks,
 )
 from netra_backend.tests.helpers.quality_gate_helpers import (
+    assert_batch_validation_results,
     assert_cache_key_format,
     assert_caching_identical_results,
-    assert_weighted_score_range,
-    assert_threshold_check_result,
-    assert_suggestions_for_issues,
-    assert_prompt_adjustments_structure,
-    assert_metrics_storage_structure,
-    assert_quality_stats_structure,
-    assert_batch_validation_results,
-    assert_memory_limit_respected,
-    assert_pattern_compilation,
+    assert_content_type_threshold_behavior,
     assert_domain_terms_count,
-    assert_content_type_threshold_behavior
+    assert_memory_limit_respected,
+    assert_metrics_storage_structure,
+    assert_pattern_compilation,
+    assert_prompt_adjustments_structure,
+    assert_quality_stats_structure,
+    assert_suggestions_for_issues,
+    assert_threshold_check_result,
+    assert_weighted_score_range,
 )
 
 
@@ -95,7 +103,9 @@ class TestQualityGateAdvanced:
 
     def test_generate_suggestions_for_issues(self, quality_service):
         """Test suggestion generation for various quality issues"""
-        from netra_backend.tests.helpers.quality_gate_fixtures import create_low_specificity_metrics
+        from netra_backend.tests.helpers.quality_gate_fixtures import (
+            create_low_specificity_metrics,
+        )
         low_spec_metrics = create_low_specificity_metrics()
         
         suggestions = quality_service.validator.generate_suggestions(low_spec_metrics, ContentType.OPTIMIZATION)
@@ -103,7 +113,9 @@ class TestQualityGateAdvanced:
 
     def test_generate_prompt_adjustments(self, quality_service):
         """Test prompt adjustment generation"""
-        from netra_backend.tests.helpers.quality_gate_fixtures import create_poor_metrics
+        from netra_backend.tests.helpers.quality_gate_fixtures import (
+            create_poor_metrics,
+        )
         poor_metrics = create_poor_metrics()
         
         adjustments = quality_service.validator.generate_prompt_adjustments(poor_metrics)

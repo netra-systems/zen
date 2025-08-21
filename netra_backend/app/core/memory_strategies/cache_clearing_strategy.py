@@ -8,7 +8,7 @@ from netra_backend.app.core.memory_recovery_base import (
     MemoryPressureLevel,
     MemoryRecoveryStrategy,
     MemorySnapshot,
-    RecoveryAction
+    RecoveryAction,
 )
 from netra_backend.app.core.memory_recovery_utils import get_current_process_memory_mb
 from netra_backend.app.logging_config import central_logger

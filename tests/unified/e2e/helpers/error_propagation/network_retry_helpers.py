@@ -5,19 +5,22 @@ and progressive timeout scenarios.
 """
 
 import asyncio
-import time
 import logging
-from typing import Dict, Any
-from pathlib import Path
 
 # Add project root to path for imports
 import sys
+import time
+from pathlib import Path
+from typing import Any, Dict
+
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from tests.unified.e2e.helpers.error_propagation.error_generators import (
+    RealErrorPropagationTester,
+)
 from tests.unified.e2e.real_client_types import ClientConfig
 from tests.unified.e2e.real_http_client import RealHTTPClient
-from tests.unified.e2e.helpers.error_propagation.error_generators import RealErrorPropagationTester
 
 logger = logging.getLogger(__name__)
 

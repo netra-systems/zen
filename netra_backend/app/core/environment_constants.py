@@ -14,7 +14,7 @@ errors and ensures consistent environment handling across all services.
 
 import os
 from enum import Enum
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 class Environment(Enum):

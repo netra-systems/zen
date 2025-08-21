@@ -1,10 +1,16 @@
 """Metrics generation for demo service."""
 
 import random
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 import numpy as np
-from datetime import datetime, timedelta, UTC
-from typing import Dict, Any, List, Optional
-from netra_backend.app.services.demo.demo_constants import INDUSTRY_FACTORS, WORKLOAD_TEMPLATES
+
+from netra_backend.app.services.demo.demo_constants import (
+    INDUSTRY_FACTORS,
+    WORKLOAD_TEMPLATES,
+)
+
 
 class DemoMetricsGenerator:
     """Generates realistic metrics for demo scenarios."""

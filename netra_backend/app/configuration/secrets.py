@@ -4,10 +4,11 @@ Focused module for handling secrets loading and application.
 Integrates with the secret manager for secure configuration.
 """
 
-from typing import Dict, Any, List, Tuple
-from netra_backend.app.schemas.Config import AppConfig, SECRET_CONFIG
+from typing import Any, Dict, List, Tuple
+
 from netra_backend.app.core.secret_manager import SecretManager
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.Config import SECRET_CONFIG, AppConfig
 
 
 def get_all_secret_mappings() -> Dict[str, Dict[str, Any]]:

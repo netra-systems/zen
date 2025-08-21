@@ -5,9 +5,11 @@ ULTRA DEEP THINK: Module-based architecture - Main coordinator ≤300 lines
 """
 
 from pathlib import Path
-from code_review_smoke_tests import CodeReviewSmokeTests
+
 from code_review_ai_detector import CodeReviewAIDetector
 from code_review_analysis import CodeReviewAnalysis
+from code_review_smoke_tests import CodeReviewSmokeTests
+
 
 class CodeReviewAnalyzer:
     """Main coordinator for code analysis operations"""

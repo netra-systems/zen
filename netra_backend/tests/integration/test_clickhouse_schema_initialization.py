@@ -11,29 +11,40 @@ This test validates ClickHouse schema initialization using real ClickHouse conta
 to ensure production-level schema consistency and version tracking.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import subprocess
 import os
-from typing import Dict, Any, List, Optional, Tuple
-from clickhouse_driver import Client
+import subprocess
+import time
+from typing import Any, Dict, List, Optional, Tuple
+
 import aiohttp
-
-# Add project root to path
-
-from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables, verify_workload_events_table
-from netra_backend.app.db.models_clickhouse import (
-
-# Add project root to path
-    LOGS_TABLE_SCHEMA, 
-    SUPPLY_TABLE_SCHEMA, 
-    WORKLOAD_EVENTS_TABLE_SCHEMA
-)
+import pytest
+from clickhouse_driver import Client
 from logging_config import central_logger
+
+# Add project root to path
+from netra_backend.app.db.clickhouse_init import (
+    initialize_clickhouse_tables,
+    verify_workload_events_table,
+)
+from netra_backend.app.db.models_clickhouse import (
+    # Add project root to path
+    LOGS_TABLE_SCHEMA,
+    SUPPLY_TABLE_SCHEMA,
+    WORKLOAD_EVENTS_TABLE_SCHEMA,
+)
 
 logger = central_logger.get_logger(__name__)
 

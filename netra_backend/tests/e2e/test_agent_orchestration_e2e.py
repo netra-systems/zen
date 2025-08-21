@@ -6,25 +6,40 @@ Maximum 300 lines, functions ≤8 lines.
 
 # Add project root to path
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-from netra_backend.app.core.websocket.manager import ConnectionManager as WebSocketManager
+import asyncio
+import uuid
 from typing import Dict, List
 from unittest.mock import AsyncMock
-import asyncio
+
 import pytest
-import uuid
 
-
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+    ActionsToMeetGoalsSubAgent,
+)
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
-from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+from netra_backend.app.agents.optimizations_core_sub_agent import (
+    OptimizationsCoreSubAgent,
+)
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.core.websocket.manager import (
+    ConnectionManager as WebSocketManager,
+)
 from netra_backend.app.core.websocket.manager import WebSocketManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas import SubAgentLifecycle
 
 # Add project root to path

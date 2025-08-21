@@ -18,14 +18,15 @@ if 'netra_backend' not in sys.path:
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine
 
+from netra_backend.app.config import settings
+
 # Import all models to ensure they are registered with Base
 from netra_backend.app.db.base import Base
-from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
-from netra_backend.app.db.models_postgres import *
-from netra_backend.app.db.models_content import *
 from netra_backend.app.db.models_agent_state import *
+from netra_backend.app.db.models_content import *
+from netra_backend.app.db.models_postgres import *
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
-from netra_backend.app.config import settings
 
 @pytest.fixture(scope="function")
 async def test_engine():

@@ -5,12 +5,13 @@ Test suite for verify_workflow_status.py
 Tests various scenarios and documents the verification results.
 """
 
-import os
-import sys
-import subprocess
 import json
-from typing import Dict, List, Tuple
+import os
+import subprocess
+import sys
 from dataclasses import dataclass
+from typing import Dict, List, Tuple
+
 
 @dataclass
 class TestResult:

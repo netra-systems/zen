@@ -2,11 +2,12 @@
 Strong type definitions for data ingestion operations following Netra conventions.
 """
 
-from typing import Dict, Any, Optional, List, Union, Literal, TypeVar, Generic
-from datetime import datetime, UTC
-from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict, field_validator
 import uuid
+from datetime import UTC, datetime
+from enum import Enum
+from typing import Any, Dict, Generic, List, Literal, Optional, TypeVar, Union
+
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class DataSourceType(str, Enum):

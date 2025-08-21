@@ -3,22 +3,34 @@ Test runner logic for Example Prompts E2E Tests
 Handles test execution and result validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
 import uuid
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
+from langchain_core.messages import HumanMessage
+from schemas import SubAgentState
+
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.agents.state import DeepAgentState
-from schemas import SubAgentState
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
 from netra_backend.app.services.quality_gate_service import ContentType
-from langchain_core.messages import HumanMessage
 
 # Add project root to path
 

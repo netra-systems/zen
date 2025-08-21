@@ -4,7 +4,7 @@ Single message batch container with flush logic.
 """
 
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.websocket.batch_message_config import BatchConfig, BatchedMessage

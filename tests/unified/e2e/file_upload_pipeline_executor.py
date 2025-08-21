@@ -10,13 +10,13 @@ import asyncio
 import json
 import time
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 import aiofiles
 import aiohttp
 
-from tests.unified.e2e.user_journey_executor import TestUser
 from tests.unified.e2e.file_upload_test_context import FileUploadTestContext
+from tests.unified.e2e.user_journey_executor import TestUser
 
 
 class FileUploadPipelineExecutor:

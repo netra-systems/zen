@@ -7,17 +7,17 @@ validates connection pooling, monitors connection health, and tests recovery.
 Follows 450-line file limit and 25-line function limit constraints.
 """
 
+import asyncio
 import os
 import sys
 import time
-import asyncio
-import redis
-from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-import pytest
-import asyncpg
 import aiohttp
+import asyncpg
+import pytest
+import redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 

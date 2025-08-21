@@ -2,7 +2,7 @@
 
 import multiprocessing
 import os
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Determine optimal parallelization
 CPU_COUNT = multiprocessing.cpu_count()
@@ -285,26 +285,6 @@ COMPONENT_MAPPINGS = {
     "backend": {
         "paths": ["netra_backend/tests"],
         "exclude": ["frontend", "auth_service"]
-    },
-    "frontend": {
-        "paths": ["frontend/__tests__"],
-        "exclude": []
-    },
-    "auth": {
-        "paths": ["netra_backend/tests/auth_integration", "auth_service/tests"],
-        "exclude": []
-    },
-    "agents": {
-        "paths": ["netra_backend/tests/agents"],
-        "exclude": []
-    },
-    "database": {
-        "paths": ["netra_backend/tests/database", "netra_backend/tests/clickhouse"],
-        "exclude": []
-    },
-    "websocket": {
-        "paths": ["netra_backend/tests/websocket", "netra_backend/tests/ws_manager"],
-        "exclude": []
     },
     "frontend": {
         "paths": ["frontend/__tests__"],

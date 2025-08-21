@@ -4,12 +4,16 @@ Implementation of the QualityValidator class with all validation logic.
 Part of the modular quality validation system.
 """
 
-from typing import Dict, Optional, Any, List, Tuple
 import re
+from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.factory_status.quality_metrics import QualityMetrics, ValidationResult, ContentType
 from netra_backend.app.core.quality_content_analysis import QualityContentAnalyzer
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.factory_status.quality_metrics import (
+    ContentType,
+    QualityMetrics,
+    ValidationResult,
+)
 
 logger = central_logger.get_logger(__name__)
 

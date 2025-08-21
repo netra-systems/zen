@@ -4,26 +4,30 @@ Core DevLauncher class and main entry point.
 Unified launcher with real-time streaming, monitoring, and enhanced secret loading.
 """
 
+import signal
 import sys
 import time
-import signal
 from pathlib import Path
 from typing import Optional
 
 from .dev_launcher_config import (
-    get_project_root, check_emoji_support, 
-    validate_dependencies, validate_frontend_directory, import_service_discovery,
-    print_with_emoji_fallback
+    check_emoji_support,
+    get_project_root,
+    import_service_discovery,
+    print_with_emoji_fallback,
+    validate_dependencies,
+    validate_frontend_directory,
 )
-from .dev_launcher_processes import (
-    ProcessMonitor, cleanup_process
-)
-from .dev_launcher_secrets import EnhancedSecretLoader
 from .dev_launcher_monitoring import (
-    validate_backend_health, validate_frontend_health, 
-    print_service_summary, print_configuration_summary,
-    monitor_processes_loop, open_browser
+    monitor_processes_loop,
+    open_browser,
+    print_configuration_summary,
+    print_service_summary,
+    validate_backend_health,
+    validate_frontend_health,
 )
+from .dev_launcher_processes import ProcessMonitor, cleanup_process
+from .dev_launcher_secrets import EnhancedSecretLoader
 from .dev_launcher_service import ServiceManager
 
 

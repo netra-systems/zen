@@ -30,12 +30,13 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
+
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError, InvalidStatusCode
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.unified.jwt_token_helpers import JWTTestHelper
 from tests.unified.real_websocket_client import RealWebSocketClient
 

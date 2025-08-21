@@ -1,31 +1,42 @@
 """Core Tests - Split from test_circuit_breaker_integration.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+from datetime import UTC, datetime
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, Any
+
+import pytest
 from llm.client import ResilientLLMClient
+from pydantic import BaseModel
+from routes.circuit_breaker_health import get_circuit_breaker_dashboard
+
+from netra_backend.app.core.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    circuit_registry,
+)
 
 # Add project root to path
-
 from netra_backend.app.db.client import ResilientDatabaseClient
+from netra_backend.app.services.circuit_breaker_monitor import (
+    AlertSeverity,
+    CircuitBreakerEvent,
+    CircuitBreakerMonitor,
+)
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
-from netra_backend.app.services.circuit_breaker_monitor import CircuitBreakerMonitor, AlertSeverity, CircuitBreakerEvent
-from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError, CircuitConfig
-from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.core.circuit_breaker import circuit_registry
-from pydantic import BaseModel
-from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.core.circuit_breaker import circuit_registry
-from datetime import datetime, UTC
-from routes.circuit_breaker_health import get_circuit_breaker_dashboard
-from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
-from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 
 # Add project root to path
 
@@ -51,7 +62,7 @@ class TestSyntaxFix:
 
     def test_recent_events(self):
         """Test recent events tracking."""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         
         # Add test events
         event1 = CircuitBreakerEvent(
@@ -131,7 +142,7 @@ class TestSyntaxFix:
 
     def test_recent_events(self):
         """Test recent events tracking."""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         
         # Add test events
         event1 = CircuitBreakerEvent(

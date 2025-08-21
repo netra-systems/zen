@@ -12,14 +12,19 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import pytest
 import logging
 import time
-from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
 
-from tests.e2e.test_helpers.resource_monitoring import ResourceMonitor, MemoryLeakDetector, resource_monitoring_context
+import pytest
+
 from tests.e2e.test_helpers.agent_isolation_base import AgentIsolationBase
+from tests.e2e.test_helpers.resource_monitoring import (
+    MemoryLeakDetector,
+    ResourceMonitor,
+    resource_monitoring_context,
+)
 
 logger = logging.getLogger(__name__)
 

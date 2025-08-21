@@ -7,21 +7,24 @@ Business Value: Eliminates $8K MRR loss from poor real-time experience
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
-from typing import Dict, Any, Union, List, Optional, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from fastapi import WebSocket
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.schemas.websocket_message_types import (
-    WebSocketValidationError,
+    BroadcastResult,
     ServerMessage,
-    BroadcastResult
+    WebSocketValidationError,
 )
 from netra_backend.app.websocket.connection import ConnectionInfo
 
 # Import unified WebSocket system
-from netra_backend.app.websocket.unified import get_unified_manager, UnifiedWebSocketManager
+from netra_backend.app.websocket.unified import (
+    UnifiedWebSocketManager,
+    get_unified_manager,
+)
 
 logger = central_logger.get_logger(__name__)
 

@@ -6,18 +6,19 @@ Ensures graceful degradation and automatic recovery.
 """
 
 import asyncio
-import time
-import pytest
 import logging
-from typing import Dict, Any, Optional
+import time
+from typing import Any, Dict, Optional
 
-from netra_backend.tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from netra_backend.tests.unified.e2e.error_cascade_core import (
-    ServiceFailureSimulator, 
-    GracefulDegradationValidator,
-    AutoRecoveryVerifier
-)
+import pytest
+
 from netra_backend.tests.unified.clients.factory import TestClientFactory
+from netra_backend.tests.unified.e2e.error_cascade_core import (
+    AutoRecoveryVerifier,
+    GracefulDegradationValidator,
+    ServiceFailureSimulator,
+)
+from netra_backend.tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
 from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)

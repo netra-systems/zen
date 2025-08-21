@@ -4,8 +4,9 @@ Statistics module for compliance reporting.
 Handles violation statistics calculation and display.
 """
 
-from typing import List, Dict
-from .core import Violation, ComplianceResults
+from typing import Dict, List
+
+from .core import ComplianceResults, Violation
 
 
 class StatisticsCalculator:

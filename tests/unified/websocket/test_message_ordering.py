@@ -30,26 +30,33 @@ import uuid
 from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Tuple, Deque
+from typing import Any, Deque, Dict, List, Optional, Tuple
 from unittest.mock import patch
+
 import pytest
 
 try:
     # Try relative imports first (for pytest execution)
-    from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
-    from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
-    from netra_backend.tests.unified.real_services_manager import RealServicesManager
     from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+    from netra_backend.tests.unified.real_client_types import (
+        ClientConfig,
+        ConnectionState,
+    )
+    from netra_backend.tests.unified.real_services_manager import RealServicesManager
+    from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 except ImportError:
     # Fallback for standalone execution
-    import sys
     import os
+    import sys
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
     sys.path.insert(0, project_root)
 
-from netra_backend.app.schemas.websocket_models import WebSocketMessage, BaseWebSocketPayload
-from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.schemas.websocket_models import (
+    BaseWebSocketPayload,
+    WebSocketMessage,
+)
 
 logger = central_logger.get_logger(__name__)
 

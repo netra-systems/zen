@@ -10,28 +10,37 @@ Critical Path: Primary failure -> Strategy selection -> Fallback execution -> Re
 Coverage: Real fallback managers, strategy selection, recovery handlers, monitoring
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, List, Optional, Any, Callable, Union
-from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
 import random
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Union
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
-
-# Real components for L2 testing
-from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.agents.base import BaseSubAgent
+
+# Add project root to path
+# Real components for L2 testing
+from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
 

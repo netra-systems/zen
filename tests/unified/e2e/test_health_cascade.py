@@ -18,24 +18,29 @@ CRITICAL: Maximum 300 lines, async/await pattern, real service validation
 """
 
 import asyncio
-import time
-import pytest
-import httpx
 import logging
-from typing import Dict, Any, List, Optional
-from pathlib import Path
 
 # Add project root for imports
 import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import httpx
+import pytest
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
-from netra_backend.tests.unified.health_check_core import (
-    HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
-    create_service_error_result, create_healthy_result
-)
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
+from netra_backend.tests.unified.health_check_core import (
+    HEALTH_STATUS,
+    SERVICE_ENDPOINTS,
+    HealthCheckResult,
+    create_healthy_result,
+    create_service_error_result,
+)
+from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
 
 logger = logging.getLogger(__name__)
 

@@ -20,30 +20,43 @@ Mock-Real Spectrum: L4 (Multi-region production topology)
 - Real DNS/load balancer switching
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-import httpx
-from typing import Dict, Any, List, Optional, Tuple
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import uuid
+from typing import Any, Dict, List, Optional, Tuple
 
-# Add project root to path
+import httpx
+import pytest
 
-from netra_backend.app.schemas.auth_types import (
+from netra_backend.app.clients.auth_client import auth_client
 
-# Add project root to path
-    Token, LoginRequest, LoginResponse,
-    SessionInfo
-)
 # # # HealthStatus, FailoverEvent - these don't exist in auth_types, using generic structures  # Class may not exist, commented out  # Class may not exist, commented out
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.redis_manager import redis_manager as get_redis_manager
-from netra_backend.app.clients.auth_client import auth_client
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    LoginRequest,
+    LoginResponse,
+    SessionInfo,
+    # Add project root to path
+    Token,
+)
+
 # from netra_backend.app.core.monitoring import metrics_collector  # May not exist
 # from netra_backend.app.core.failover_coordinator import FailoverCoordinator  # Does not exist
 FailoverCoordinator = type('FailoverCoordinator', (), {})  # Mock class

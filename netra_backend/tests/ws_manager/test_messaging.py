@@ -2,20 +2,29 @@
 Tests for WebSocketManager messaging functionality
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 from datetime import datetime
-from unittest.mock import AsyncMock, patch, call
+from unittest.mock import AsyncMock, call, patch
+
+import pytest
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
+from netra_backend.tests.ws_manager.test_base import MockWebSocket, WebSocketTestBase
 
 # Add project root to path
 

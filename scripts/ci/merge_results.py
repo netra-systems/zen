@@ -7,7 +7,7 @@ import os
 import shutil
 from functools import reduce
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
 
 def create_empty_results() -> Dict[str, Any]:

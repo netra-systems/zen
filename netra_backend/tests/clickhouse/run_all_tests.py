@@ -3,12 +3,13 @@ ClickHouse Test Runner
 Runs all ClickHouse test suites and generates coverage report
 """
 
-import sys
-import pytest
 import asyncio
-from pathlib import Path
-from datetime import datetime
 import json
+import sys
+from datetime import datetime
+from pathlib import Path
+
+import pytest
 
 
 def run_clickhouse_tests():

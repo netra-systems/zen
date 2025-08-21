@@ -4,8 +4,8 @@ Test Insights - Generates insights about test suite health and performance
 Provides comprehensive analysis and performance insights for test suites
 """
 
-from typing import Dict, List, Any
 from collections import defaultdict
+from typing import Any, Dict, List
 
 from .failure_patterns import FailurePatternAnalyzer
 

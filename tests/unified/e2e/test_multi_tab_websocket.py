@@ -11,12 +11,13 @@ Compliance: <300 lines, <8 lines per function, real connections only, <5s execut
 import asyncio
 import time
 import uuid
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
+
 import pytest
 
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 
 
 class MultiTabWebSocketManager:

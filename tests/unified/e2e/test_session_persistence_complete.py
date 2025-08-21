@@ -18,33 +18,35 @@ Test Pattern: Create session → Restart service → Validate persistence
 """
 
 import asyncio
-import pytest
-import time
-import uuid
 import json
-import httpx
 import os
 import signal
 import subprocess
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone, timedelta
 
 # Add project root to path for imports
 import sys
+import time
+import uuid
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import httpx
+import pytest
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import test helpers
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from netra_backend.tests.unified.clients.factory import TestClientFactory
+# Redis for session persistence validation
+import redis.asyncio as redis
 
 # Simple WebSocket client for testing
 import websockets
 from websockets.exceptions import ConnectionClosedError
 
-# Redis for session persistence validation
-import redis.asyncio as redis
+from netra_backend.tests.unified.clients.factory import TestClientFactory
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class SessionPersistenceTestManager:

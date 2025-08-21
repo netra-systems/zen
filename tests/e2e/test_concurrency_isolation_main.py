@@ -17,23 +17,31 @@ The original file was refactored into focused modules:
 - test_concurrent_cache_contention.py - Cache contention handling
 """
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, Any, List
+import time
+from typing import Any, Dict, List
 
-from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
-from netra_backend.tests.e2e.test_helpers.concurrency_base import (
-    ConcurrencyTestBase, ConcurrencyTestConfig, StressTestGenerator, PerformanceAnalyzer
-)
+import pytest
+
 from netra_backend.tests.e2e.fixtures.concurrency_scenarios import (
-    ConcurrencyScenarioRunner, get_load_levels_for_scaling
+    ConcurrencyScenarioRunner,
+    get_load_levels_for_scaling,
+)
+from netra_backend.tests.e2e.test_helpers.concurrency_base import (
+    ConcurrencyTestBase,
+    ConcurrencyTestConfig,
+    PerformanceAnalyzer,
+    StressTestGenerator,
 )
 from netra_backend.tests.e2e.test_helpers.performance_testing import (
-    PerformanceTestOrchestrator, StressTestOrchestrator, ResourceMonitoringHelper,
-    TestResultValidator, create_session_result_converter
+    PerformanceTestOrchestrator,
+    ResourceMonitoringHelper,
+    StressTestOrchestrator,
+    TestResultValidator,
+    create_session_result_converter,
 )
+from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
 
 logger = logging.getLogger(__name__)
 

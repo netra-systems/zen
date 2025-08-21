@@ -5,22 +5,32 @@ Tests the fundamental login process from different angles including
 normal flow, edge cases, and error scenarios.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
-import pytest
 import uuid
-from typing import Dict, Any, Optional
-import aiohttp
 from datetime import datetime, timedelta
-from unittest.mock import patch, AsyncMock
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, patch
+
+import aiohttp
+import pytest
+
+from netra_backend.app.auth_integration.auth import JWTTokenManager
 
 # Add project root to path
-
 from netra_backend.app.db.models_postgres import User
-from netra_backend.app.auth_integration.auth import JWTTokenManager
 from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path

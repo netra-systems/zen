@@ -1,9 +1,11 @@
-import pytest
 import os
+from unittest.mock import MagicMock, patch
+
+import pytest
 from fastapi.testclient import TestClient
-from netra_backend.app.main import app
-from unittest.mock import patch, MagicMock
+
 from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.main import app
 
 # Set testing flags to simplify startup
 os.environ["TESTING"] = "1"
@@ -118,6 +120,7 @@ def test_ready_endpoint_db_failure(client: TestClient):
 
 def test_ready_endpoint_clickhouse_failure(client: TestClient):
     from contextlib import asynccontextmanager
+
     from netra_backend.app.core.health_types import HealthStatus
     
     mock_client = MagicMock()

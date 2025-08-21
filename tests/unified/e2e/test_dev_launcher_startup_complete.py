@@ -27,21 +27,23 @@ Maximum 300 lines, real system validation, no mocks.
 """
 
 import asyncio
-import time
-import pytest
-import httpx
 import logging
-import signal
-import threading
-import subprocess
 import os
-from typing import Dict, Any, Optional, List
-from pathlib import Path
-from dataclasses import dataclass
-from contextlib import asynccontextmanager
+import signal
+import subprocess
 
 # Add project root for imports
 import sys
+import threading
+import time
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import httpx
+import pytest
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 

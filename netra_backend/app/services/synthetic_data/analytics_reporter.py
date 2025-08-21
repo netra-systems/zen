@@ -1,9 +1,13 @@
 """Analytics Reporter Module - Analytics and reporting functionality"""
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
+from netra_backend.app.services.synthetic_data.metrics import (
+    get_generation_metrics,
+    profile_generation,
+)
 from netra_backend.app.services.synthetic_data.resource_tracker import ResourceTracker
-from netra_backend.app.services.synthetic_data.metrics import profile_generation, get_generation_metrics
 
 
 class AnalyticsReporter(CoreServiceBase):

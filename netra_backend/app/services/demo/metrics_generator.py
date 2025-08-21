@@ -1,8 +1,9 @@
 """Metrics generation for demo service."""
 
 import random
-from datetime import datetime, timedelta, UTC
-from typing import Dict, Any, List
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List
+
 import numpy as np
 
 from netra_backend.app.logging_config import central_logger

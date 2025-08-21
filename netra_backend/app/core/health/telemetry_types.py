@@ -4,10 +4,10 @@ Revenue-protecting telemetry types for Enterprise SLA monitoring and compliance.
 Prevents $10K MRR loss through proactive health monitoring and alerting.
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
 
 
 class MetricType(Enum):

@@ -17,17 +17,18 @@ TEST FLOW:
 ARCHITECTURE: Modular design with 25-line function limit, under 300 lines total
 """
 
-import pytest
 import asyncio
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
 
 from tests.unified.database_test_connections import DatabaseConnectionManager
 from tests.unified.database_test_operations import (
-    UserDataOperations, 
-    ChatMessageOperations, 
-    SessionCacheOperations
+    ChatMessageOperations,
+    SessionCacheOperations,
+    UserDataOperations,
 )
 
 

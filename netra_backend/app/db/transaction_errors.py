@@ -4,7 +4,7 @@ Handles error detection, classification, and retry logic for database transactio
 Focused module adhering to 25-line function limit and modular architecture.
 """
 
-from sqlalchemy.exc import OperationalError, DisconnectionError
+from sqlalchemy.exc import DisconnectionError, OperationalError
 
 
 class TransactionError(Exception):

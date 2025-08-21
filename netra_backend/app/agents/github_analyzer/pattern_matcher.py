@@ -5,7 +5,7 @@ Includes regex matching, result merging, and summary generation.
 """
 
 import re
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from netra_backend.app.logging_config import central_logger as logger
 

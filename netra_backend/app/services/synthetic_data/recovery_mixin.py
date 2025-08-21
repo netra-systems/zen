@@ -2,9 +2,9 @@
 Recovery and resilience mixin for SyntheticDataService
 """
 
-from typing import Any, Dict, List, Optional
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 
 
 class RecoveryMixin:

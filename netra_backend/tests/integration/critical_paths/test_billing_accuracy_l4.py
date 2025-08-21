@@ -11,25 +11,35 @@ L4 Realism: Real LLM calls, real Redis cache, real database operations in stagin
 Performance Requirements: p99 < 500ms for billing calculations, 99.9% accuracy under load
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
+import statistics
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
-from decimal import Decimal
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-import statistics
+from decimal import Decimal
+from typing import Any, Dict, List, Optional
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.token_counter import TokenCounter
+
+# Add project root to path
+from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.llm.llm_manager import LLMManager
 
 # Add project root to path

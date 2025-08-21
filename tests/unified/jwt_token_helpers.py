@@ -22,15 +22,16 @@ Usage:
     # Force dev mode  
     helper = JWTTestHelper(environment="dev")
 """
-import httpx
-import jwt
+import base64
 import json
-import pytest
 import os
+import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
-import uuid
-import base64
+
+import httpx
+import jwt
+import pytest
 
 
 class JWTTestHelper:
@@ -69,7 +70,11 @@ class JWTTestHelper:
     
     def _configure_urls(self) -> None:
         """Configure service URLs based on environment."""
-        from netra_backend.app.core.network_constants import ServicePorts, HostConstants, URLConstants
+        from netra_backend.app.core.network_constants import (
+            HostConstants,
+            ServicePorts,
+            URLConstants,
+        )
         
         if self.environment == "test":
             # Test mode: Auth on 8083, Backend on 8001

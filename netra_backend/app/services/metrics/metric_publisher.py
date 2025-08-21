@@ -3,11 +3,14 @@ Metric publisher module for alerts and notifications.
 Handles publishing operations with 25-line function limit.
 """
 
-from typing import Dict
 from collections import deque
+from typing import Dict
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.metrics.agent_metrics_models import AgentOperationRecord, AgentMetrics
+from netra_backend.app.services.metrics.agent_metrics_models import (
+    AgentMetrics,
+    AgentOperationRecord,
+)
 
 logger = central_logger.get_logger(__name__)
 

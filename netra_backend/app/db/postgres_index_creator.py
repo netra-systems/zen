@@ -4,13 +4,14 @@ Index creation operations for PostgreSQL optimization.
 """
 
 from typing import List
-from netra_backend.app.logging_config import central_logger
+
 from netra_backend.app.db.index_optimizer_core import (
+    DatabaseErrorHandler,
     IndexCreationResult,
     IndexExistenceChecker,
-    DatabaseErrorHandler
 )
 from netra_backend.app.db.postgres_index_connection import PostgreSQLConnectionManager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

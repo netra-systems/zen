@@ -6,15 +6,15 @@ These are simplified implementations focused on testing the core patterns.
 """
 
 import asyncio
-import time
 import json
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, AsyncMock
+import time
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.schemas.strict_types import TypedAgentResult
-from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
 class MockSupervisorAgent:

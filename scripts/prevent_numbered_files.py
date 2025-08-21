@@ -15,8 +15,8 @@ Returns:
     1 if any files have problematic naming patterns
 """
 
-import sys
 import re
+import sys
 from pathlib import Path
 from typing import List, Tuple
 

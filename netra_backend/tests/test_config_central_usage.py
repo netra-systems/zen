@@ -10,15 +10,25 @@ This test suite validates that all modules properly use the central
 configuration system and don't bypass it with direct imports.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import ast
 import os
-import pytest
-from pathlib import Path
-from typing import List, Dict, Set, Tuple
 import re
+from pathlib import Path
+from typing import Dict, List, Set, Tuple
+
+import pytest
 
 
 class ConfigUsageAnalyzer(ast.NodeVisitor):

@@ -1,8 +1,12 @@
 """Corpus-specific operations for DataSubAgent."""
 
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse, UsagePattern
+from netra_backend.app.schemas.shared_types import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+    UsagePattern,
+)
 
 
 class CorpusOperations:

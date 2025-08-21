@@ -9,11 +9,18 @@ import subprocess
 from typing import List
 
 from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser
-from netra_backend.app.services.factory_status.technical_debt_calculator import TechnicalDebtCalculator
 from netra_backend.app.services.factory_status.quality_core import (
-    ArchitectureCompliance, TechnicalDebt, ComplianceStatus, 
-    QualityConstants, QualityMetrics, QualityLevel,
-    TestCoverageMetrics, DocumentationMetrics
+    ArchitectureCompliance,
+    ComplianceStatus,
+    DocumentationMetrics,
+    QualityConstants,
+    QualityLevel,
+    QualityMetrics,
+    TechnicalDebt,
+    TestCoverageMetrics,
+)
+from netra_backend.app.services.factory_status.technical_debt_calculator import (
+    TechnicalDebtCalculator,
 )
 
 
@@ -197,7 +204,7 @@ class QualityCalculator:
     
     def _initialize_calculators(self) -> tuple:
         """Initialize all quality calculators."""
-        from .quality_metrics import TestCoverageCalculator, DocumentationCalculator
+        from .quality_metrics import DocumentationCalculator, TestCoverageCalculator
         coverage_calc = TestCoverageCalculator(self.repo_path)
         doc_calc = DocumentationCalculator(self.repo_path)
         arch_validator = ArchitectureValidator(self.repo_path)

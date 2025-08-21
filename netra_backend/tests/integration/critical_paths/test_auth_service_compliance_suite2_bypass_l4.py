@@ -7,16 +7,26 @@ for authentication and authorization operations. All auth operations
 MUST use the centralized auth service.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import ast
-import os
-from pathlib import Path
-from typing import List, Dict, Set, Optional
-import re
 import json
+import os
+import re
+from pathlib import Path
+from typing import Dict, List, Optional, Set
+
+import pytest
 
 
 class TestAuthServiceBypassDetection:

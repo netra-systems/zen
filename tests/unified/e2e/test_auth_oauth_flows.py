@@ -19,19 +19,24 @@ Test Coverage:
 """
 
 import asyncio
-import pytest
+import json
 import time
 import uuid
-import json
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock, Mock
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
-from tests.unified.oauth_test_providers import GoogleOAuthProvider, GitHubOAuthProvider, OAuthUserFactory
-from tests.unified.real_services_manager import create_real_services_manager
-from tests.unified.real_http_client import RealHTTPClient
+import pytest
+
 from netra_backend.app.logging_config import central_logger
+from tests.unified.oauth_test_providers import (
+    GitHubOAuthProvider,
+    GoogleOAuthProvider,
+    OAuthUserFactory,
+)
+from tests.unified.real_http_client import RealHTTPClient
+from tests.unified.real_services_manager import create_real_services_manager
 
 logger = central_logger.get_logger(__name__)
 

@@ -3,8 +3,8 @@
 Type definitions and data structures for state synchronization.
 """
 
-from datetime import datetime, timezone
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
 
 from netra_backend.app.core.exceptions_base import NetraException

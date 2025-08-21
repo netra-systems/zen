@@ -3,22 +3,32 @@ Critical Integration Tests - Audit-driven failing tests for basic functions
 Tests designed to fail initially to expose integration gaps per testing.xml L3 requirements
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta
 import json
-import redis
-import psycopg2
-from typing import Dict, List, Any
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import clickhouse_driver
+import psycopg2
+import pytest
+import redis
 from sqlalchemy.ext.asyncio import AsyncSession
+from testcontainers.clickhouse import ClickHouseContainer
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
-from testcontainers.clickhouse import ClickHouseContainer
 
 # Critical Integration Test Suite - 30 challenging tests that will initially fail
 
@@ -140,6 +150,7 @@ class TestAgentOrchestrationIntegration:
         """Test for memory leaks during sustained agent operations"""
         # Will fail - memory leaks exist in agent lifecycle
         import tracemalloc
+
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         
         tracemalloc.start()
@@ -449,6 +460,7 @@ class TestObservabilityIntegration:
         """Test distributed tracing across service boundaries"""
         # Will fail - incomplete tracing
         from opentelemetry import trace
+
         from netra_backend.app.tracing.manager import TracingManager
         
         tracer = trace.get_tracer(__name__)

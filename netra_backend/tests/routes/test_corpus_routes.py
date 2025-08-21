@@ -9,23 +9,32 @@ Business Value Justification (BVJ):
 - Revenue Impact: Improved agent accuracy drives customer satisfaction and retention
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from unittest.mock import patch, MagicMock
 from contextlib import asynccontextmanager
+from unittest.mock import MagicMock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.config import settings
-from netra_backend.tests.routes.test_route_fixtures import (
+from netra_backend.app.services.key_manager import KeyManager
 
 # Add project root to path
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.tests.routes.test_route_fixtures import (
+    TEST_DOCUMENT_DATA,
+    # Add project root to path
     CommonResponseValidators,
-    TEST_DOCUMENT_DATA
 )
 
 
@@ -35,8 +44,9 @@ class TestCorpusRoute:
     @pytest.fixture
     def client(self):
         """Corpus-specific test client with required app state."""
-        from netra_backend.app.routes.mcp.main import app
         from fastapi.testclient import TestClient
+
+        from netra_backend.app.routes.mcp.main import app
         
         # Mock the db_session_factory to prevent state errors
         @asynccontextmanager
@@ -76,8 +86,8 @@ class TestCorpusRoute:
     
     async def test_corpus_search(self):
         """Test corpus search functionality."""
-        from netra_backend.app.routes.corpus import search_corpus
         from netra_backend.app.db.models_postgres import User
+        from netra_backend.app.routes.corpus import search_corpus
         
         # Mock the corpus service search method
         with patch('app.services.corpus_service.corpus_service_instance.search_with_fallback') as mock_search:
@@ -106,7 +116,10 @@ class TestCorpusRoute:
     
     async def test_corpus_bulk_operations(self):
         """Test bulk corpus operations."""
-        from netra_backend.app.routes.corpus import bulk_index_documents, BulkIndexRequest
+        from netra_backend.app.routes.corpus import (
+            BulkIndexRequest,
+            bulk_index_documents,
+        )
         
         documents = [
             {"title": f"Doc {i}", "content": f"Content {i}"}

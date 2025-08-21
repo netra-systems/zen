@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Script to fix remaining specific syntax errors in test files"""
 
-import os
 import ast
+import os
 import re
 from pathlib import Path
 from typing import List, Tuple
+
 
 def fix_empty_imports(content: str) -> str:
     """Fix empty import statements like 'from module import ()'"""

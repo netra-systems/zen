@@ -10,10 +10,10 @@ modules under 300 lines each.
 from netra_backend.app.mcp.main import router
 from netra_backend.app.mcp.models import (
     MCPClientCreateRequest,
+    MCPPromptGetRequest,
+    MCPResourceReadRequest,
     MCPSessionCreateRequest,
     MCPToolCallRequest,
-    MCPResourceReadRequest,
-    MCPPromptGetRequest
 )
 from netra_backend.app.mcp.service_factory import get_mcp_service
 

@@ -1,8 +1,8 @@
 """Factory for creating typed test clients with real service connections."""
 
 import logging
-from typing import Optional
 from pathlib import Path
+from typing import Optional
 
 try:
     from dev_launcher.discovery import ServiceDiscovery

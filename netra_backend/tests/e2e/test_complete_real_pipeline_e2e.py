@@ -7,6 +7,14 @@ Maximum 300 lines, functions ≤8 lines.
 # Add project root to path
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 from netra_backend.app.monitoring.performance_monitor import PerformanceMonitor as PerformanceMetric
@@ -377,7 +385,6 @@ class TestRealPipelineWithValidationReporting:
         for agent_result in pipeline_result["agent_results"]:
 
             assert agent_result["state"] == SubAgentLifecycle.COMPLETED, \
-
                    f"Stage {agent_result['stage']} should complete successfully"
     
 
@@ -487,7 +494,6 @@ class TestRealPipelineConcurrencyAndStability:
         """Validate exception result is handled gracefully."""
 
         assert "agent" in str(result).lower() or "timeout" in str(result).lower(), \
-
                f"Task {task_id} had unexpected exception: {result}"
     
 
@@ -498,7 +504,6 @@ class TestRealPipelineConcurrencyAndStability:
         assert result["task_id"] == task_id, f"Task ID mismatch for task {task_id}"
 
         assert result["triage_state"] in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], \
-
                f"Task {task_id} should complete or fail gracefully"
 
 
@@ -617,7 +622,6 @@ class TestRealPipelinePerformanceMetrics:
         total_stage_duration = sum(stage["duration"] for stage in metrics["stages"])
 
         assert total_stage_duration <= metrics["total_duration"] + 1.0, \
-
                "Stage durations should not exceed total (allowing 1s margin)"
     
 
@@ -630,5 +634,4 @@ class TestRealPipelinePerformanceMetrics:
             assert stage["duration"] < 60.0, f"Stage {stage['stage']} took too long: {stage['duration']}s"
 
             assert stage["agent_state"] in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], \
-
                    f"Stage {stage['stage']} should complete"

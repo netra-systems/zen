@@ -31,15 +31,20 @@ Architecture Compliance:
 
 import asyncio
 import time
-import pytest
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
-from tests.unified.real_websocket_client import RealWebSocketClient
+import pytest
+
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS
+from tests.unified.e2e.token_lifecycle_helpers import (
+    PerformanceBenchmark,
+    TokenLifecycleManager,
+    WebSocketSessionManager,
+)
 from tests.unified.real_client_types import ClientConfig
-from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, PerformanceBenchmark
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class TokenExpiryReconnectionTester:

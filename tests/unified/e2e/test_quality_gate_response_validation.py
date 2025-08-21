@@ -13,23 +13,27 @@ Uses real QualityGateService components with minimal external dependency mocking
 """
 
 import asyncio
-import pytest
 import os
-from typing import Dict, List, Any, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 # Set testing environment before imports
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.services.quality_gate.quality_gate_models import (
-    ContentType, QualityLevel, QualityMetrics, ValidationResult
-)
-from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.services.quality_gate.quality_gate_models import (
+    ContentType,
+    QualityLevel,
+    QualityMetrics,
+    ValidationResult,
+)
+from netra_backend.app.services.quality_gate_service import QualityGateService
 
 logger = central_logger.get_logger(__name__)
 

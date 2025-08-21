@@ -25,14 +25,15 @@ REQUIREMENTS:
 - Performance validation (<5 seconds per test scenario)
 - Architecture: File <300 lines, functions <8 lines each
 """
-import pytest
 import time
 import uuid
 from decimal import Decimal
 
+import pytest
+
 from netra_backend.app.schemas.UserPlan import PlanTier
-from tests.unified.e2e.payment_billing_helpers import BillingAccuracyValidator
 from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.payment_billing_helpers import BillingAccuracyValidator
 
 
 @pytest.mark.asyncio

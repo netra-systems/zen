@@ -1,16 +1,16 @@
 """Base service interfaces and mixins."""
 
 import asyncio
-from typing import Dict, Any
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict
 
 from netra_backend.app.core.exceptions import ServiceError
-from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.core.interfaces_service import (
-    BaseServiceInterface, 
-    ServiceHealth, 
-    ServiceMetrics
+    BaseServiceInterface,
+    ServiceHealth,
+    ServiceMetrics,
 )
+from netra_backend.app.schemas.shared_types import ErrorContext
 
 
 class BaseServiceMixin:

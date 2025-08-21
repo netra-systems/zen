@@ -3,9 +3,10 @@ Core base type definitions for LLM operations.
 These are foundational types with no dependencies on other LLM schema modules.
 """
 
-from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+
 from pydantic import BaseModel, Field
 
 

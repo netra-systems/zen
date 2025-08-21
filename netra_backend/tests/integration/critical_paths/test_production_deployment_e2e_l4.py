@@ -14,23 +14,25 @@ This test ensures the complete production environment is deployment-ready.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
 import json
 import os
+import socket
+import subprocess
 import sys
 import time
-import subprocess
-from pathlib import Path
-from typing import Optional, Dict, Any, List
-import aiohttp
-import websockets
-import pytest
 from datetime import datetime, timedelta
-import yaml
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import aiohttp
 import psutil
-import socket
+import pytest
+import websockets
+import yaml
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

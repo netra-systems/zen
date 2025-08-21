@@ -8,9 +8,13 @@ Business Value: Ensures production reliability and prevents customer-facing issu
 
 # Simplified imports to prevent conflicts
 try:
-    from tests.unified.unified_e2e_harness import UnifiedE2ETestHarness, create_e2e_harness, quick_e2e_test
     from tests.unified.service_orchestrator import E2EServiceOrchestrator
-    from tests.unified.user_journey_executor import UserJourneyExecutor, TestUser
+    from tests.unified.unified_e2e_harness import (
+        UnifiedE2ETestHarness,
+        create_e2e_harness,
+        quick_e2e_test,
+    )
+    from tests.unified.user_journey_executor import TestUser, UserJourneyExecutor
     
     __all__ = [
         "UnifiedE2ETestHarness",

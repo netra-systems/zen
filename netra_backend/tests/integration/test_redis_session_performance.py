@@ -10,26 +10,41 @@ Business Value Justification (BVJ):
 Performance and load testing for Redis session state synchronization.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-from datetime import datetime, timezone
-from typing import Dict, Any
 
 # Add project root to path
-
-
 # Set testing environment
 import os
+import time
+from datetime import datetime, timezone
+from typing import Any, Dict
+
+import pytest
+
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from logging_config import central_logger
-from netra_backend.tests.redis_session_mocks import MockRedisConnection, MockWebSocketConnection, MockRedisSessionManager, MockWebSocketManagerWithRedis
+
+from netra_backend.tests.redis_session_mocks import (
+    MockRedisConnection,
+    MockRedisSessionManager,
+    MockWebSocketConnection,
+    MockWebSocketManagerWithRedis,
+)
 
 logger = central_logger.get_logger(__name__)
 

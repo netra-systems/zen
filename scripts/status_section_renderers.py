@@ -6,19 +6,40 @@ Complies with 450-line and 25-line function limits.
 """
 
 from typing import Dict, List, Tuple
+
 try:
     from .status_types import (
-        StatusReportData, PatternMatch, IntegrationStatus, AgentSystemStatus,
-        TestCoverageStatus, TestResults, ComponentHealthData, WebSocketStatus,
-        ApiSyncStatus, OAuthStatus, SupervisorStatus, SubAgentInfo,
-        ApexOptimizerStatus, TestCoverageInfo
+        AgentSystemStatus,
+        ApexOptimizerStatus,
+        ApiSyncStatus,
+        ComponentHealthData,
+        IntegrationStatus,
+        OAuthStatus,
+        PatternMatch,
+        StatusReportData,
+        SubAgentInfo,
+        SupervisorStatus,
+        TestCoverageInfo,
+        TestCoverageStatus,
+        TestResults,
+        WebSocketStatus,
     )
 except ImportError:
     from status_types import (
-        StatusReportData, PatternMatch, IntegrationStatus, AgentSystemStatus,
-        TestCoverageStatus, TestResults, ComponentHealthData, WebSocketStatus,
-        ApiSyncStatus, OAuthStatus, SupervisorStatus, SubAgentInfo,
-        ApexOptimizerStatus, TestCoverageInfo
+        AgentSystemStatus,
+        ApexOptimizerStatus,
+        ApiSyncStatus,
+        ComponentHealthData,
+        IntegrationStatus,
+        OAuthStatus,
+        PatternMatch,
+        StatusReportData,
+        SubAgentInfo,
+        SupervisorStatus,
+        TestCoverageInfo,
+        TestCoverageStatus,
+        TestResults,
+        WebSocketStatus,
     )
 
 

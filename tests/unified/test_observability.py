@@ -12,16 +12,17 @@ log aggregation, error tracking, and alerting mechanisms using real services.
 Each test validates actual observability infrastructure, not mocked components.
 """
 
-import pytest
 import asyncio
 import json
+import os
 import time
 import uuid
-import os
-from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import aiohttp
+import pytest
 import websockets
 
 # Set test environment
@@ -30,7 +31,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 os.environ["LOG_LEVEL"] = "INFO"
 os.environ["ENABLE_JSON_LOGGING"] = "true"
 
-from tests.unified.config import create_unified_config, TestDataFactory
+from tests.unified.config import TestDataFactory, create_unified_config
 
 
 class ObservabilityTestHarness:

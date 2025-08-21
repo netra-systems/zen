@@ -1,10 +1,14 @@
-import pytest
 import asyncio
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+import pytest
+
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
 from netra_backend.app.llm.llm_manager import LLMManager
+
 
 @pytest.mark.asyncio
 @patch('app.agents.triage_sub_agent.agent.TriageSubAgent.execute')

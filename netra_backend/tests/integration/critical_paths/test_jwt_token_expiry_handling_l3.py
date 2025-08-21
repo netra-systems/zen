@@ -20,32 +20,45 @@ Mock-Real Spectrum: L3 (Real JWT with time manipulation)
 - Simulated time progression
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-import jwt
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import MagicMock, patch
+
 import freezegun
-
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    Token, TokenData, RefreshRequest, RefreshResponse,
-    TokenExpiryNotification, TokenStatus
-)
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.db.redis_manager import get_redis_manager
+import jwt
+import pytest
 from clients.auth_client import auth_client
-from netra_backend.app.core.token_manager import TokenManager
+
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.core.token_manager import TokenManager
+from netra_backend.app.db.redis_manager import get_redis_manager
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    RefreshRequest,
+    RefreshResponse,
+    # Add project root to path
+    Token,
+    TokenData,
+    TokenExpiryNotification,
+    TokenStatus,
+)
 
 
 @dataclass

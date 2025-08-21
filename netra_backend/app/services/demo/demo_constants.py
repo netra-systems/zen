@@ -1,6 +1,6 @@
 """Constants and configuration for demo service."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Industry-specific optimization factors
 INDUSTRY_FACTORS: Dict[str, Dict[str, Any]] = {

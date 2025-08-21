@@ -16,14 +16,14 @@ All tests maintain ≤8 lines per test function and ≤300 lines per module.
 """
 
 from netra_backend.tests.shared_fixtures import (
-    MockSecurityInfrastructure,
     AuthenticationAuditHelper,
-    DataAccessAuditHelper,
     ComplianceReportingHelper,
-    enterprise_security_infrastructure,
+    DataAccessAuditHelper,
+    MockSecurityInfrastructure,
     auth_audit_helper,
+    compliance_helper,
     data_access_helper,
-    compliance_helper
+    enterprise_security_infrastructure,
 )
 
 __all__ = [

@@ -1,9 +1,9 @@
 """API Gateway Rate Limiter implementation."""
 
 import time
-from typing import Dict, Optional, Any
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 
 @dataclass

@@ -5,9 +5,9 @@ Modular design for error cascade testing with service failure simulation.
 """
 
 import asyncio
-import time
 import logging
-from typing import Dict, Any, Optional
+import time
+from typing import Any, Dict, Optional
 
 from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
 from tests.unified.real_websocket_client import RealWebSocketClient

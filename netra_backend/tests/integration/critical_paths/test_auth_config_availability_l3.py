@@ -11,6 +11,14 @@ Tests config availability, response time, structure validation, and resilience.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
@@ -28,7 +36,7 @@ from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 
-from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer
+from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer
 
 # Add project root to path
 

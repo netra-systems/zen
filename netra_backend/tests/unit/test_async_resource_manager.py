@@ -8,22 +8,34 @@ Tests critical paths including resource cleanup, task concurrency limits,
 background task handling, and shutdown procedures.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import time
 from concurrent.futures import ThreadPoolExecutor
 from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.core.async_resource_manager import (
-
-# Add project root to path
-    AsyncResourceManager, AsyncTaskPool, get_global_resource_manager,
-    get_global_task_pool, run_in_threadpool, shutdown_async_utils
+    # Add project root to path
+    AsyncResourceManager,
+    AsyncTaskPool,
+    get_global_resource_manager,
+    get_global_task_pool,
+    run_in_threadpool,
+    shutdown_async_utils,
 )
 from netra_backend.app.core.exceptions_service import ServiceError
 
@@ -339,13 +351,17 @@ class TestThreadPoolExecution:
 
     def test_thread_pool_executor_creation(self):
         """Thread pool executor is created on demand."""
-        from netra_backend.app.core.async_resource_manager import _get_thread_pool_executor
+        from netra_backend.app.core.async_resource_manager import (
+            _get_thread_pool_executor,
+        )
         executor = _get_thread_pool_executor()
         assert isinstance(executor, ThreadPoolExecutor)
 
     def test_thread_pool_executor_reuse(self):
         """Thread pool executor is reused."""
-        from netra_backend.app.core.async_resource_manager import _get_thread_pool_executor
+        from netra_backend.app.core.async_resource_manager import (
+            _get_thread_pool_executor,
+        )
         executor1 = _get_thread_pool_executor()
         executor2 = _get_thread_pool_executor()
         assert executor1 is executor2

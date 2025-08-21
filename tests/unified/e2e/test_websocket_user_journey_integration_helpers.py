@@ -17,21 +17,26 @@ Performance Requirements:
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-import pytest
-from typing import Dict, Optional, List, Any
 from datetime import datetime, timedelta, timezone
-from unittest.mock import AsyncMock, patch, MagicMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import httpx
+import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError
+
 from test_framework.mock_utils import mock_justified
-from tests.unified.config import TestTier, TestUser, TEST_ENDPOINTS, TEST_SECRETS
-from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.e2e.websocket_dev_utilities import WebSocketClientSimulator, ConnectionState
+from tests.unified.config import TEST_ENDPOINTS, TEST_SECRETS, TestTier, TestUser
 from tests.unified.e2e.auth_flow_manager import AuthCompleteFlowManager
+from tests.unified.e2e.websocket_dev_utilities import (
+    ConnectionState,
+    WebSocketClientSimulator,
+)
+from tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketUserJourneyTester:

@@ -11,31 +11,41 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate connection p
 initialization, configuration limits, concurrent access, and failure handling.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import uuid
-from typing import List, Dict, Any, Optional, Tuple
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import patch
 
 import asyncpg
 import clickhouse_connect
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+import pytest
+from sqlalchemy.exc import OperationalError
+from sqlalchemy.exc import TimeoutError as SQLTimeoutError
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import OperationalError, TimeoutError as SQLTimeoutError
-from testcontainers.postgres import PostgresContainer
 from testcontainers.clickhouse import ClickHouseContainer
+from testcontainers.postgres import PostgresContainer
+
+from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 
 # Add project root to path
-
 from netra_backend.app.db.postgres_core import Database
-from netra_backend.app.db.postgres_pool import get_pool_status, close_async_db
-from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
+from netra_backend.app.db.postgres_pool import close_async_db, get_pool_status
 from netra_backend.app.logging_config import central_logger
 
 # Add project root to path

@@ -7,14 +7,19 @@ Tests complete token flow: Auth service → Backend → WebSocket → Agent cont
 CRITICAL: NO MOCKING of internal services - uses real HTTP calls and WebSocket connections
 Maximum 300 lines enforced - core tests only, see jwt_token_helpers.py for utilities
 """
-import pytest
-import httpx
-import websockets
-import jwt
 import time
 
+import httpx
+import jwt
+import pytest
+import websockets
+
+from tests.unified.jwt_token_helpers import (
+    JWTSecurityTester,
+    JWTTestFixtures,
+    JWTTestHelper,
+)
 from tests.unified.test_harness import UnifiedTestHarness
-from tests.unified.jwt_token_helpers import JWTTestHelper, JWTTestFixtures, JWTSecurityTester
 
 
 class TestRealTokenGeneration(JWTTestFixtures):

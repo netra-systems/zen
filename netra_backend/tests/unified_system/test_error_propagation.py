@@ -8,32 +8,47 @@ Comprehensive tests covering error flow from system components to user-facing
 error messages, including recovery mechanisms and notification channels.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import json
 import time
-from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timezone
-import websockets
 from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
+import websockets
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.error_recovery_handler import (
-
-# Add project root to path
-    WebSocketErrorRecoveryHandler, ErrorType, ErrorContext
-)
-from netra_backend.app.core.error_handlers import handle_exception, get_http_status_code
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.core.error_handlers import get_http_status_code, handle_exception
+
+# Add project root to path
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.websocket.error_recovery_handler import (
+    ErrorContext,
+    ErrorType,
+    # Add project root to path
+    WebSocketErrorRecoveryHandler,
+)
 from netra_backend.tests.fixtures import TestUser, WebSocketClient, unified_services
-from netra_backend.tests.mock_services import MockOAuthProvider, MockLLMService, ServiceRegistry
+from netra_backend.tests.mock_services import (
+    MockLLMService,
+    MockOAuthProvider,
+    ServiceRegistry,
+)
 
 logger = central_logger.get_logger(__name__)
 

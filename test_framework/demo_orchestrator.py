@@ -8,11 +8,12 @@ Shows the orchestrator functionality without actually running services
 
 import asyncio
 import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from .unified_orchestrator import UnifiedOrchestrator
+
 
 async def demo_orchestrator():
     """Demo the unified orchestrator functionality"""

@@ -13,15 +13,19 @@ Business Value Justification (BVJ):
 Module Architecture Compliance: Under 300 lines, functions under 8 lines
 """
 
-import pytest
 import asyncio
 import json
-import websockets
-from typing import Dict, Optional, List
 from datetime import datetime, timedelta
-from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from typing import Dict, List, Optional
+
+import pytest
+import websockets
+
 from netra_backend.tests.unified.database_sync_fixtures import create_test_user_data
+from netra_backend.tests.unified.harness_complete import (
+    UnifiedTestHarnessComplete as TestHarness,
+)
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketAuthTester:

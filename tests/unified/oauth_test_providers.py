@@ -12,7 +12,7 @@ OAuth Test Data Providers - Phase 2 Unified Testing
 
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 
 # Enterprise OAuth Configuration
 OAUTH_ENTERPRISE_CONFIG = {

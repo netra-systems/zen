@@ -11,24 +11,34 @@ REVENUE PROTECTION:
 - Concurrent conversion attempt protection
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import asyncio
+import tempfile
 import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
-# Add project root to path
-
-from netra_backend.app.db.models_user import User, ToolUsageLog
-from netra_backend.app.schemas.UserPlan import PlanTier
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 from netra_backend.app.db.base import Base
-import tempfile
-import asyncio
+
+# Add project root to path
+from netra_backend.app.db.models_user import ToolUsageLog, User
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 # Add project root to path
 

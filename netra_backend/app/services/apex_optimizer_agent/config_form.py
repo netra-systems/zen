@@ -1,5 +1,7 @@
 from typing import List, Optional
+
 from pydantic import BaseModel, Field
+
 
 class AdditionalTable(BaseModel):
     name: str = Field(..., description="The name of the additional table.")

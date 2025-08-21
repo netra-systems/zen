@@ -4,14 +4,16 @@ Staging Environment Test Script
 Verifies that the staging environment is properly configured and all components are communicating
 """
 
+import asyncio
+import json
 import sys
 import time
-import json
-import asyncio
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
 import requests
 import websocket
-from typing import Dict, Any, List, Tuple
-from pathlib import Path
+
 
 class StagingTester:
     """Test suite for staging environment"""

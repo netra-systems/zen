@@ -19,8 +19,9 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
+
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed

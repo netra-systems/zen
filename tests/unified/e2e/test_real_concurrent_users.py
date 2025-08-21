@@ -25,19 +25,22 @@ ARCHITECTURAL COMPLIANCE:
 - Type safety with annotations
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
+import statistics
 import time
 import uuid
-import statistics
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
-from netra_backend.tests.unified.real_services_manager import create_real_services_manager
-from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
-from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
+import pytest
+import pytest_asyncio
+
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.tests.unified.real_client_types import ClientConfig, ConnectionState
+from netra_backend.tests.unified.real_services_manager import (
+    create_real_services_manager,
+)
+from netra_backend.tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @dataclass

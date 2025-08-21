@@ -1,12 +1,12 @@
 """Agent conversation test helpers for unified e2e testing."""
 
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
 import asyncio
 import time
+from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock
-from dataclasses import field
+
 
 @dataclass
 class ConversationTurn:
@@ -112,7 +112,9 @@ class AgentConversationTestCore:
     
     async def setup_test_environment(self):
         """Set up test environment."""
-        from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
+        from tests.unified.e2e.websocket_resilience_core import (
+            WebSocketResilienceTestCore,
+        )
         self.websocket_core = WebSocketResilienceTestCore()
         self.test_env = {
             "initialized": True,
@@ -127,8 +129,8 @@ class AgentConversationTestCore:
     
     async def establish_conversation_session(self, plan_tier) -> Dict[str, Any]:
         """Establish authenticated conversation session."""
-        from tests.unified.config import TEST_USERS
         from netra_backend.app.schemas.UserPlan import PlanTier
+        from tests.unified.config import TEST_USERS
         
         # Map plan tier to test user
         tier_user_map = {

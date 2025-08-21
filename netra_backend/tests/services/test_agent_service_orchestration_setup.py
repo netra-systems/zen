@@ -3,24 +3,36 @@ Setup fixtures and mock classes for Agent Service orchestration tests.
 Provides shared infrastructure for testing agent lifecycle, orchestration, and error handling.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, UTC
-from typing import Dict, List, Any, Optional
-from unittest.mock import AsyncMock, MagicMock
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from netra_backend.app import schemas
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app import schemas
+from netra_backend.app.services.thread_service import ThreadService
 
 # Add project root to path
 

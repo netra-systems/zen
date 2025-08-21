@@ -11,25 +11,38 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock, patch
 from fastapi import Request, Response
+from logging_config import central_logger
+
+from netra_backend.app.agents.quality_hooks import QualityHooksManager
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
+from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
 
 # Add project root to path
-
 from netra_backend.app.middleware.security_middleware import SecurityMiddleware
-from netra_backend.app.agents.quality_hooks import QualityHooksManager
-from netra_backend.app.core.agent_reliability_mixin import AgentReliabilityMixin
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.quality_gate_service import ValidationResult, QualityMetrics
-from netra_backend.app.core.exceptions_auth import NetraSecurityException
-from logging_config import central_logger
+from netra_backend.app.services.quality_gate_service import (
+    QualityMetrics,
+    ValidationResult,
+)
 
 # Add project root to path
 

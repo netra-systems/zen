@@ -5,7 +5,6 @@ This module contains prompt templates for the data sub-agent.
 
 from langchain_core.prompts import PromptTemplate
 
-
 # Data Sub-Agent Prompt
 data_prompt_template = PromptTemplate(
     input_variables=["triage_result", "user_request", "thread_id"],

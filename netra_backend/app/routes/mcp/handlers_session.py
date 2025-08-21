@@ -1,12 +1,14 @@
 """MCP session handlers."""
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.db.models_postgres import User as UserInDB
-from netra_backend.app.services.mcp_service import MCPService
 from netra_backend.app.routes.mcp.models import MCPSessionCreateRequest
 from netra_backend.app.routes.mcp.utils import (
-    build_session_response, handle_session_error, raise_session_not_found
+    build_session_response,
+    handle_session_error,
+    raise_session_not_found,
 )
+from netra_backend.app.services.mcp_service import MCPService
 
 
 async def handle_session_creation(

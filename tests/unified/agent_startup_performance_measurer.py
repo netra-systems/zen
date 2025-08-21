@@ -18,10 +18,11 @@ Architecture:
 
 import asyncio
 import statistics
-from typing import Dict, Any, List
 from dataclasses import dataclass
+from typing import Any, Dict, List
 
 from tests.unified.load_test_utilities import SystemResourceMonitor
+
 
 @dataclass
 class PerformanceMetrics:

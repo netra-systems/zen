@@ -7,29 +7,39 @@ WebSocket event propagation, and frontend state consistency.
 Business Value: $12K MRR - Data consistency and real-time synchronization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-import sqlalchemy
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+import sqlalchemy
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import text, select
 
 # Add project root to path
-
-from netra_backend.app.db.models_postgres import Thread, Message, User
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.db.models_postgres import Message, Thread, User
 from netra_backend.app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.schemas.websocket_message_types import ServerMessage
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.tests.fixtures import (
-
-# Add project root to path
-    test_user, test_database, clean_database_state
+    clean_database_state,
+    test_database,
+    # Add project root to path
+    test_user,
 )
 
 

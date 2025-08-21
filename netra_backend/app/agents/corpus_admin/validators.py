@@ -5,9 +5,13 @@ Validates corpus operations and determines approval requirements.
 Maintains single responsibility and 25-line function limit.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
+from netra_backend.app.agents.corpus_admin.models import (
+    CorpusOperation,
+    CorpusOperationRequest,
+)
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.corpus_admin.models import CorpusOperation, CorpusOperationRequest
 
 
 class CorpusApprovalValidator:

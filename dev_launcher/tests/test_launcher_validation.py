@@ -5,13 +5,13 @@ These tests verify that the launcher can actually start
 and handle common scenarios.
 """
 
-import sys
-import os
-import time
-import subprocess
-from pathlib import Path
-import tempfile
 import json
+import os
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
 
 # Set UTF-8 encoding for Windows
 if sys.platform == "win32":
@@ -52,9 +52,9 @@ def test_launcher_imports():
     """Test that all launcher modules can be imported."""
     try:
         from dev_launcher import DevLauncher, LauncherConfig
-        from dev_launcher.process_manager import ProcessManager
         from dev_launcher.health_monitor import HealthMonitor
         from dev_launcher.log_streamer import LogManager
+        from dev_launcher.process_manager import ProcessManager
         from dev_launcher.secret_loader import SecretLoader
         print("[PASS] All modules import successfully")
     except ImportError as e:
@@ -65,8 +65,9 @@ def test_launcher_imports():
 
 def test_launcher_dry_run():
     """Test launcher initialization without actually starting services."""
-    from dev_launcher import DevLauncher, LauncherConfig
     from unittest.mock import patch
+
+    from dev_launcher import DevLauncher, LauncherConfig
     
     # Create config with no secrets and no browser
     with patch.object(LauncherConfig, '_validate'):
@@ -136,9 +137,10 @@ def test_health_monitor_basic():
 
 def test_process_manager_basic():
     """Test basic process manager functionality."""
-    from dev_launcher.process_manager import ProcessManager
-    from unittest.mock import Mock
     import subprocess
+    from unittest.mock import Mock
+
+    from dev_launcher.process_manager import ProcessManager
     
     manager = ProcessManager()
     
@@ -157,9 +159,10 @@ def test_process_manager_basic():
 
 def test_config_env_vars():
     """Test that configuration handles environment variables."""
-    from dev_launcher.config import LauncherConfig
-    from unittest.mock import patch
     import os
+    from unittest.mock import patch
+
+    from dev_launcher.config import LauncherConfig
     
     # Set a test project ID
     os.environ['GOOGLE_CLOUD_PROJECT'] = 'test-project-123'
@@ -175,9 +178,10 @@ def test_config_env_vars():
 
 def test_error_messages():
     """Test that error messages are user-friendly."""
-    from dev_launcher.launcher import DevLauncher
+    from unittest.mock import Mock, patch
+
     from dev_launcher.config import LauncherConfig
-    from unittest.mock import patch, Mock
+    from dev_launcher.launcher import DevLauncher
     
     with patch.object(LauncherConfig, '_validate'):
         config = LauncherConfig(load_secrets=False)
@@ -207,8 +211,9 @@ def test_error_messages():
 
 def test_launcher_with_defaults():
     """Test that launcher can be created with default settings."""
-    from dev_launcher import DevLauncher, LauncherConfig
     from unittest.mock import patch
+
+    from dev_launcher import DevLauncher, LauncherConfig
     
     # Create launcher with defaults
     try:

@@ -19,7 +19,8 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-from typing import Dict, Any
+from typing import Any, Dict
+
 import pytest
 
 # Import test configuration and network simulator

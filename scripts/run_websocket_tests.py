@@ -18,8 +18,8 @@ Business Value Justification (BVJ):
 
 import asyncio
 import os
-import sys
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -220,8 +220,14 @@ class WebSocketTestRunner:
         
         # Test 1: Import all WebSocket modules successfully
         try:
-            from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, get_secure_websocket_manager
-            from netra_backend.app.core.websocket_cors import WebSocketCORSHandler, get_websocket_cors_handler
+            from netra_backend.app.core.websocket_cors import (
+                WebSocketCORSHandler,
+                get_websocket_cors_handler,
+            )
+            from netra_backend.app.routes.websocket_secure import (
+                SecureWebSocketManager,
+                get_secure_websocket_manager,
+            )
             validation_results.append(("Module imports", True, "All WebSocket modules imported successfully"))
         except Exception as e:
             validation_results.append(("Module imports", False, f"Import error: {e}"))
@@ -236,8 +242,9 @@ class WebSocketTestRunner:
         
         # Test 3: WebSocket config endpoints
         try:
-            from netra_backend.app.main import app
             from fastapi.testclient import TestClient
+
+            from netra_backend.app.main import app
             
             client = TestClient(app)
             response = client.get("/ws/secure/config")

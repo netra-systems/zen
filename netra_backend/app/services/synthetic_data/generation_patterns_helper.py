@@ -3,12 +3,17 @@ Generation Patterns Helper - Advanced pattern generation utilities
 """
 
 import asyncio
-from datetime import datetime, UTC
-from typing import List, Dict
+from datetime import UTC, datetime
+from typing import Dict, List
+
+from netra_backend.app.services.synthetic_data.generation_patterns import (
+    generate_domain_specific as _generate_domain_specific,
+)
+from netra_backend.app.services.synthetic_data.generation_patterns import (
+    generate_with_errors as _generate_with_errors,
+)
 from netra_backend.app.services.synthetic_data.generation_patterns import (
     generate_with_temporal_patterns as _generate_with_temporal_patterns,
-    generate_with_errors as _generate_with_errors,
-    generate_domain_specific as _generate_domain_specific
 )
 
 
@@ -35,8 +40,9 @@ class GenerationPatternsHelper:
 
     async def generate_with_distribution(self, config) -> List[Dict]:
         """Generate with specific distributions"""
-        import numpy as np
         import random
+
+        import numpy as np
         
         records = []
         num_traces = getattr(config, 'num_traces', 10)

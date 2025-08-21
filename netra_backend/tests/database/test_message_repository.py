@@ -4,18 +4,28 @@ Tests message queries and pagination functionality
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import AsyncMock
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.schemas.registry import Message, MessageType
+
+# Add project root to path
+from netra_backend.app.services.database.message_repository import MessageRepository
 
 # Add project root to path
 

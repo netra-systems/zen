@@ -6,8 +6,9 @@ compression and decompression operations.
 
 import gzip
 import zlib
-import lz4.frame
 from typing import Callable, Dict
+
+import lz4.frame
 
 from netra_backend.app.compression_config import CompressionAlgorithm, CompressionConfig
 

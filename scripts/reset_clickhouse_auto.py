@@ -1,9 +1,10 @@
 """Auto-reset ClickHouse script - drops all tables without prompts."""
 
-import clickhouse_connect
 import os
 import sys
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import clickhouse_connect
 
 # ClickHouse configurations
 CLOUD_CONFIG = {

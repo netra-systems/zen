@@ -16,16 +16,17 @@ Architecture:
 - Agent resource initialization validation patterns
 """
 
-import pytest
 import asyncio
-import psutil
-import time
 import threading
-from typing import Dict, Any, Optional, List, Tuple
-from unittest.mock import AsyncMock, patch, MagicMock
-from dataclasses import dataclass, field
+import time
 from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import psutil
+import pytest
 
 from tests.unified.config import TEST_CONFIG, TestDatabaseManager
 

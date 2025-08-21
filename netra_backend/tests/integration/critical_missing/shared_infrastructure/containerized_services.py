@@ -5,10 +5,11 @@ Simplified version that uses existing database connections for testing.
 
 import asyncio
 import os
-from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
 
 import asyncpg
+
 
 # Simplified mock services for testing
 class MockContainer:

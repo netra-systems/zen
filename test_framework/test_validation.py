@@ -4,9 +4,10 @@ Test Validation - Test structure and naming validation
 Validates test files follow expected conventions
 """
 
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List, Optional
-from collections import defaultdict
+
 from .circular_import_detector import CircularImportDetector
 
 

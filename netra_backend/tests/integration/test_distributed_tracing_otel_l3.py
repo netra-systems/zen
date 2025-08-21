@@ -7,23 +7,33 @@ Enables rapid troubleshooting and performance optimization of AI workloads.
 Tests distributed tracing with real OpenTelemetry and Jaeger containers.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import docker
-import time
-import aiohttp
 import json
-from typing import Dict, Any, List, Optional
+import time
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import docker
+import pytest
 from opentelemetry import trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
+from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
-from tracing.tracer_manager import TracerManager
 from tracing.span_processor import CustomSpanProcessor
+from tracing.tracer_manager import TracerManager
 
 
 @pytest.mark.L3

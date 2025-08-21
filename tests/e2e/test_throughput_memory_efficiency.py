@@ -10,15 +10,18 @@ Business Value Justification (BVJ):
 This test validates memory efficiency under high load conditions.
 """
 
-import pytest
 import asyncio
-import time
-import logging
 import gc
-from typing import Dict, Any
+import logging
+import time
+from typing import Any, Dict
+
+import pytest
 
 from netra_backend.tests.e2e.test_helpers.resource_monitoring import (
-    ResourceMonitor, MemoryLeakDetector, resource_monitoring_context
+    MemoryLeakDetector,
+    ResourceMonitor,
+    resource_monitoring_context,
 )
 from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
 

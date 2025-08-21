@@ -3,15 +3,16 @@ User Journey Executor - E2E User Flow Management
 Business Value: Validates complete user experience flows
 Executes user journeys, WebSocket connections, and test scenarios.
 """
-import uuid
 import asyncio
 import logging
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 
 # Add project root to path for imports
 import sys
+import uuid
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Validation helper functions for corpus creation."""
 
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 VALID_TYPES = ["failed_request", "tool_use", "simple_chat", "rag_pipeline"]
 REQUIRED = ["prompt", "response", "workload_type"]

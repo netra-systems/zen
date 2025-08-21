@@ -10,23 +10,35 @@ Business Value Justification:
 - Strategic Impact: Core platform functionality critical for all paid tiers
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 import time
-from typing import Dict, Any
+from typing import Any, Dict
 
-# Add project root to path
+import pytest
 
-from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
-from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.db.models_agent import Run, Step
-from netra_backend.app.schemas.Request import RequestModel
 from netra_backend.app.core.database_recovery_core import ConnectionPoolRefreshStrategy
 from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.db.models_agent import Run, Step
+from netra_backend.app.schemas.Request import RequestModel
+from netra_backend.app.services.agent_service_core import AgentService
+
+# Add project root to path
+from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import (
+    ServiceOrchestrator,
+)
 
 # Add project root to path
 

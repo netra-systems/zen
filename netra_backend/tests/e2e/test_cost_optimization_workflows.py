@@ -4,26 +4,40 @@ Tests real LLM agents with complete data flow validation.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import pytest_asyncio
 import asyncio
 import uuid
 from decimal import Decimal
 from typing import Dict, List, Optional
 
-# Add project root to path
+import pytest
+import pytest_asyncio
+from schemas import SubAgentLifecycle
+from ws_manager import WebSocketManager
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from ws_manager import WebSocketManager
-from schemas import SubAgentLifecycle
+
+# Add project root to path
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityGateService,
+    QualityLevel,
+)
 
 # Add project root to path
 
@@ -32,8 +46,12 @@ from netra_backend.app.services.quality_gate_service import QualityGateService, 
 def cost_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for cost optimization testing."""
     # Import additional agents to avoid circular dependencies
-    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+        ActionsToMeetGoalsSubAgent,
+    )
+    from netra_backend.app.agents.optimizations_core_sub_agent import (
+        OptimizationsCoreSubAgent,
+    )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     agents = {

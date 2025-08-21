@@ -5,17 +5,21 @@ Follows 450-line limit with focused test infrastructure.
 """
 
 import asyncio
-import pytest
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_service.tests.config.test_settings import TestSettings
 from auth_service.tests.config.test_env import TestEnvironment
+from auth_service.tests.config.test_settings import TestSettings
 from auth_service.tests.factories import (
-    UserFactory, AuthUserFactory,
-    SessionFactory, AuthSessionFactory,
-    TokenFactory, PermissionFactory
+    AuthSessionFactory,
+    AuthUserFactory,
+    PermissionFactory,
+    SessionFactory,
+    TokenFactory,
+    UserFactory,
 )
 
 

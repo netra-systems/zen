@@ -17,18 +17,18 @@ ARCHITECTURAL COMPLIANCE:
 - Supports all test runner flags and options
 """
 
-import sys
 import asyncio
+import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 # Add project root to path for imports
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from netra_backend.tests.unified.run_agent_startup_tests import (
+    print_startup_test_summary,
     run_agent_startup_test_suite,
-    print_startup_test_summary
 )
 
 

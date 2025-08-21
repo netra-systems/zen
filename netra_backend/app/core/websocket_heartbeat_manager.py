@@ -7,10 +7,10 @@ and detect connection issues through ping/pong mechanism.
 import asyncio
 import json
 from datetime import datetime
-from typing import Optional, Callable
+from typing import Callable, Optional
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.websocket_recovery_types import ConnectionMetrics
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

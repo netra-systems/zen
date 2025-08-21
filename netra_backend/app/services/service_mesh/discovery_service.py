@@ -1,8 +1,8 @@
 """Service Discovery Service for service mesh"""
 
-from typing import Dict, Any, List, Optional
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 
 
 class ServiceDiscoveryService:

@@ -3,11 +3,14 @@ Metric reader module for accessing and filtering metric data.
 Handles data retrieval operations with 25-line function limit.
 """
 
+from collections import deque
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-from collections import deque
 
-from netra_backend.app.services.metrics.agent_metrics_models import AgentOperationRecord, AgentMetrics
+from netra_backend.app.services.metrics.agent_metrics_models import (
+    AgentMetrics,
+    AgentOperationRecord,
+)
 
 
 class MetricReader:

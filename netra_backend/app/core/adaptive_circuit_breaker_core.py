@@ -8,11 +8,14 @@ import asyncio
 from datetime import datetime, timedelta
 from typing import Any, Callable, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
+from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
-from netra_backend.app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
+from netra_backend.app.schemas.core_models import (
+    CircuitBreakerConfig,
+    HealthCheckResult,
+)
 
 logger = central_logger.get_logger(__name__)
 

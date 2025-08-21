@@ -18,19 +18,20 @@ Test Coverage:
 - OAuth edge cases and malformed request handling
 """
 
-import pytest
-import httpx
-from unittest.mock import patch, Mock, AsyncMock
 import json
-from typing import Dict, Any
 import secrets
+import sys
 import uuid
 from datetime import datetime, timedelta
-
-from fastapi.testclient import TestClient
-from auth_service.auth_core.models.auth_models import AuthProvider
-import sys
 from pathlib import Path
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
+
+import httpx
+import pytest
+from fastapi.testclient import TestClient
+
+from auth_service.auth_core.models.auth_models import AuthProvider
 
 # Add auth service to path
 auth_service_dir = Path(__file__).parent.parent.parent

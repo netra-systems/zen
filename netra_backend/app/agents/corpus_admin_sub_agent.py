@@ -20,12 +20,12 @@ modules under 300 lines each.
 # Import from modular implementation
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
 from netra_backend.app.agents.corpus_admin.models import (
-    CorpusOperation,
-    CorpusType,
     CorpusMetadata,
+    CorpusOperation,
     CorpusOperationRequest,
     CorpusOperationResult,
-    CorpusStatistics
+    CorpusStatistics,
+    CorpusType,
 )
 
 # Maintain backward compatibility - all legacy code removed

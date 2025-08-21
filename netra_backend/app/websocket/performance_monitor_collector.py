@@ -4,9 +4,9 @@ Optimized metric collection with 25-line function limit compliance.
 """
 
 import statistics
-from datetime import datetime, timezone, timedelta
+from collections import defaultdict, deque
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Optional
-from collections import deque, defaultdict
 
 from netra_backend.app.performance_monitor_types import MetricPoint, MetricType
 

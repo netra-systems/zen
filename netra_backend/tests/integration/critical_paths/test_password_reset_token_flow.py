@@ -23,24 +23,34 @@ Architecture Compliance:
 - Performance benchmarks
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import hashlib
+import secrets
 import time
 import uuid
-import secrets
-import hashlib
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
 import redis.asyncio as aioredis
 
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import TokenData, UserInfo
 from netra_backend.app.logging_config import central_logger
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import TokenData, UserInfo
 
 # Add project root to path
 

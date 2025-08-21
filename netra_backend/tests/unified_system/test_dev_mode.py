@@ -19,24 +19,34 @@ CRITICAL: These tests validate developer experience optimizations
 that directly impact time-to-market and feature delivery velocity.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import os
-from unittest.mock import AsyncMock, MagicMock, patch
-from fastapi.testclient import TestClient
-from datetime import datetime, timedelta
 import json
+import os
+from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from fastapi.testclient import TestClient
+
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.core.config import get_config
 
 # Add project root to path
-
 from netra_backend.app.routes.mcp.main import app
-from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.schemas.core_models import User
 from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.core.config import get_config
+from netra_backend.app.schemas.core_models import User
 
 # Add project root to path
 
@@ -100,9 +110,10 @@ class TestDevModeAuthentication:
                 }
 
                 # Test: Dev token validation (auto-generated in dev mode)
-                from netra_backend.app.auth_integration.auth import get_current_user
                 from fastapi.security import HTTPAuthorizationCredentials
                 from sqlalchemy.ext.asyncio import AsyncSession
+
+                from netra_backend.app.auth_integration.auth import get_current_user
                 from netra_backend.app.db.models_postgres import User as DBUser
                 
                 # Mock database user

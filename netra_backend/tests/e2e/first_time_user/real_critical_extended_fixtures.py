@@ -11,11 +11,12 @@ Real Critical User Journey Extended Fixtures - Team, Error Recovery, and Cross-S
 Provides specialized pytest fixtures for advanced real service testing scenarios.
 """
 
-import pytest
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, Mock
+
+import pytest
 
 from netra_backend.tests.real_critical_auth_helpers import CriticalUserJourneyHelpers
 

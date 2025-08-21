@@ -12,13 +12,19 @@ CRITICAL ARCHITECTURAL COMPLIANCE:
 - Single responsibility: Error data formatting only
 """
 
-from datetime import datetime, timezone, timedelta
-from typing import List, Any, Tuple
+from datetime import datetime, timedelta, timezone
+from typing import Any, List, Tuple
+
 from loguru import logger
 
 from netra_backend.app.schemas.monitoring_schemas import (
-    GCPError, GCPErrorEvent, ErrorContext, ErrorStatus,
-    ErrorSeverity as GCPErrorSeverity
+    ErrorContext,
+    ErrorStatus,
+    GCPError,
+    GCPErrorEvent,
+)
+from netra_backend.app.schemas.monitoring_schemas import (
+    ErrorSeverity as GCPErrorSeverity,
 )
 
 

@@ -10,27 +10,37 @@ Critical Path: Load spike detection -> Circuit activation <5s -> Graceful degrad
 Coverage: Agent pipeline overload scenarios, circuit breaker coordination, load shedding strategies, cascade prevention
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
 import time
 import uuid
-import logging
-import json
-from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
-from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+
+# Add project root to path
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import AgentMessage, TaskPriority
 

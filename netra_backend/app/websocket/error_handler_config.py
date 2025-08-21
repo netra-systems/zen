@@ -3,7 +3,8 @@
 Configuration and initialization for error handling system.
 """
 
-from typing import Dict, Any, Callable, Optional
+from typing import Any, Callable, Dict, Optional
+
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.websocket.error_types import ErrorSeverity
 
@@ -38,7 +39,9 @@ class ErrorHandlerConfig:
 
     def get_recovery_handlers(self) -> Dict[str, Callable]:
         """Get dictionary of recovery handlers."""
-        from netra_backend.app.websocket.error_handler_recovery import ErrorHandlerRecovery
+        from netra_backend.app.websocket.error_handler_recovery import (
+            ErrorHandlerRecovery,
+        )
         recovery = ErrorHandlerRecovery(self)
         return {
             "connection_error": recovery.recover_connection_error,

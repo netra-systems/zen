@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enterprise feature for sustainability
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 async def assess_sustainability(request_data: Dict[str, Any]) -> Dict[str, Any]:

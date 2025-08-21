@@ -26,7 +26,8 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional, Any
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 import pytest
 
 

@@ -12,8 +12,8 @@ Usage:
     python scripts/test_imports.py --module app.services  # Test specific module
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to path

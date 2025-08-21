@@ -6,9 +6,9 @@ This script verifies that the staging configuration tests are properly
 set up and can be discovered by the test runner.
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
 
 # Add project root to path

@@ -27,12 +27,12 @@ This script converts it to:
     )
 """
 
+import argparse
+import ast
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Optional
-import ast
-import argparse
+from typing import List, Optional, Tuple
 
 
 class MalformedImportFixer:

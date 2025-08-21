@@ -3,28 +3,40 @@ WebSocket connection basic functionality tests
 Tests core connection management, pooling, heartbeat, and cleanup
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from datetime import datetime, timezone, UTC
-from typing import Dict, List, Any
-from unittest.mock import AsyncMock, MagicMock, patch, call
+from datetime import UTC, datetime, timezone
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
+import pytest
 from fastapi import WebSocket
-from starlette.websockets import WebSocketState, WebSocketDisconnect
+from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-# Add project root to path
-
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
 from netra_backend.app.core.exceptions_base import NetraException
 
-from netra_backend.tests.test_ws_connection_mocks import (
-
 # Add project root to path
-    MockWebSocket, MockConnectionPool, WebSocketTestHelpers
+from netra_backend.app.services.websocket.ws_manager import (
+    ConnectionInfo,
+    WebSocketManager,
+)
+from netra_backend.tests.test_ws_connection_mocks import (
+    MockConnectionPool,
+    # Add project root to path
+    MockWebSocket,
+    WebSocketTestHelpers,
 )
 
 

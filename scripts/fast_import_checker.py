@@ -4,12 +4,12 @@ Fast Import Checker and Fixer
 Focused on quickly finding and fixing the critical import issues
 """
 
+import ast
 import os
 import sys
-import ast
+import time
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-import time
 
 
 def check_module_exists(module_path: str, base_dir: Path) -> bool:

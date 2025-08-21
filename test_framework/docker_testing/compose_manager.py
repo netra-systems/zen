@@ -4,23 +4,24 @@ Docker Compose management for local testing.
 Manages Docker containers for testing Cloud Run services locally.
 """
 
-import subprocess
 import asyncio
-import yaml
 import json
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
+import re
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import aiofiles
-import re
+import yaml
 
 from ..unified.base_interfaces import (
-    IContainerManager,
     BaseTestComponent,
-    ServiceStatus,
+    IContainerManager,
     ServiceConfig,
-    TestEnvironment
+    ServiceStatus,
+    TestEnvironment,
 )
 
 

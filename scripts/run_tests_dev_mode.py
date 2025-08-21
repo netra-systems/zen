@@ -14,11 +14,11 @@ Usage:
     python scripts/run_tests_dev_mode.py --level unit --fast-fail
 """
 
+import argparse
 import os
+import subprocess
 import sys
 import time
-import subprocess
-import argparse
 from pathlib import Path
 from typing import List, Optional
 

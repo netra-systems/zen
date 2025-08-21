@@ -11,8 +11,12 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 from boundary_enforcer_core_types import (
-    BoundaryViolation, SystemBoundaries, should_skip_file, get_test_stub_patterns
+    BoundaryViolation,
+    SystemBoundaries,
+    get_test_stub_patterns,
+    should_skip_file,
 )
+
 
 class TypeBoundaryChecker:
     """Handles duplicate type and test stub boundary validation"""

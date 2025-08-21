@@ -7,10 +7,17 @@ execution, and finalization of synthetic data generation.
 
 import time
 from typing import Optional
-from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.synthetic_data_generator import SyntheticDataGenerator, SyntheticDataResult, GenerationStatus
-from netra_backend.app.agents.synthetic_data_presets import DataGenerationType
+from netra_backend.app.agents.synthetic_data_generator import (
+    GenerationStatus,
+    SyntheticDataGenerator,
+    SyntheticDataResult,
+)
+from netra_backend.app.agents.synthetic_data_presets import (
+    DataGenerationType,
+    WorkloadProfile,
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

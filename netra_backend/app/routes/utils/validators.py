@@ -1,6 +1,7 @@
 """Validation utilities for route handlers."""
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from fastapi import HTTPException, status
 
 

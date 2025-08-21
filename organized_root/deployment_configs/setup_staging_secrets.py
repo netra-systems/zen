@@ -9,12 +9,11 @@ This script creates/updates all required secrets in Google Secret Manager.
 import argparse
 import base64
 import os
+import secrets
 import subprocess
 import sys
-import secrets
 from pathlib import Path
 from typing import List, Optional
-
 
 # Configuration
 PROJECT_ID = "netra-staging"

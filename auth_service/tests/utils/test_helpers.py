@@ -6,17 +6,21 @@ Provides common functionality for test setup, data creation, and assertions.
 
 import asyncio
 import uuid
-from typing import Dict, Any, List, Optional, Union
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from auth_service.auth_core.database.models import AuthUser, AuthSession, AuthAuditLog
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from auth_service.auth_core.database.models import AuthAuditLog, AuthSession, AuthUser
 from auth_service.tests.factories import (
-    UserFactory, AuthUserFactory,
-    SessionFactory, AuthSessionFactory,
-    TokenFactory, AuditLogFactory
+    AuditLogFactory,
+    AuthSessionFactory,
+    AuthUserFactory,
+    SessionFactory,
+    TokenFactory,
+    UserFactory,
 )
 
 

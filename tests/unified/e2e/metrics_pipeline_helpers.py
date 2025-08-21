@@ -8,10 +8,10 @@ BVJ: Enterprise ($35K+ MRR) - Prevents revenue loss from analytics failures
 """
 
 import asyncio
+import random
 import time
 import uuid
-import random
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 

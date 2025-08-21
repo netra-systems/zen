@@ -13,28 +13,37 @@ Uses REAL agent components with NO MOCKS as required by unified system testing.
 Follows CLAUDE.md patterns for async testing and agent integration.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import uuid
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
 from logging_config import central_logger
+from ws_manager import WebSocketManager, manager
+
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.db.models_postgres import Message, Thread
+from netra_backend.app.schemas.registry import WebSocketMessage
 
 # Add project root to path
-
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from ws_manager import WebSocketManager, manager
-from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.db.models_postgres import Thread, Message
 
 # Add project root to path
 
@@ -127,8 +136,10 @@ def websocket_capture():
 @pytest.fixture
 async def real_thread_service():
     """Fixture providing real thread service."""
+    from netra_backend.app.agents.supply_researcher.database_manager import (
+        get_database_manager,
+    )
     from netra_backend.app.core.config import get_config
-    from netra_backend.app.agents.supply_researcher.database_manager import get_database_manager
     
     # Use real components with test configuration
     config = get_config()
@@ -139,8 +150,8 @@ async def real_thread_service():
 @pytest.fixture
 async def real_supervisor_agent(real_websocket_manager, real_tool_dispatcher, mock_db_session):
     """Fixture providing real supervisor agent with real components."""
-    from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.core.config import get_config
+    from netra_backend.app.llm.llm_manager import LLMManager
     
     try:
         # Try to create real LLM manager
@@ -172,6 +183,7 @@ async def real_agent_service(real_supervisor_agent):
 async def mock_db_session():
     """Fixture providing mock database session."""
     from unittest.mock import AsyncMock, MagicMock
+
     from sqlalchemy.ext.asyncio import AsyncSession
     
     session = AsyncMock(spec=AsyncSession)

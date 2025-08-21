@@ -7,22 +7,33 @@ Business Value: Ensures precise usage metrics collection for billing,
 preventing revenue loss and customer disputes.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from datetime import datetime, timedelta
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from collections import defaultdict, deque
+from datetime import datetime, timedelta
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.monitoring.metrics_collector import (
-
-# Add project root to path
-    MetricsCollector, PerformanceMetric, SystemResourceMetrics,
-    WebSocketMetrics, DatabaseMetrics
+    DatabaseMetrics,
+    # Add project root to path
+    MetricsCollector,
+    PerformanceMetric,
+    SystemResourceMetrics,
+    WebSocketMetrics,
 )
 
 

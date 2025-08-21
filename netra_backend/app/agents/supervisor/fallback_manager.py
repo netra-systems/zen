@@ -1,23 +1,24 @@
 """Fallback and circuit breaker management."""
 
 import time
-from typing import Dict, TYPE_CHECKING
 from datetime import datetime, timezone
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 
-from netra_backend.app.core.config import get_config
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (
-    AgentExecutionContext, AgentExecutionResult
+    AgentExecutionContext,
+    AgentExecutionResult,
 )
-from netra_backend.app.llm.fallback_handler import LLMFallbackHandler, FallbackConfig
 from netra_backend.app.agents.supervisor_circuit_breaker import CircuitBreaker
-from netra_backend.app.schemas.core_models import CircuitBreakerConfig
 from netra_backend.app.core.circuit_breaker import circuit_registry
+from netra_backend.app.core.config import get_config
+from netra_backend.app.llm.fallback_handler import FallbackConfig, LLMFallbackHandler
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
+from netra_backend.app.schemas.core_models import CircuitBreakerConfig
 
 logger = central_logger.get_logger(__name__)
 

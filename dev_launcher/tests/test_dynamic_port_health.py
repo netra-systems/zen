@@ -4,13 +4,13 @@ Regression tests for dynamic port health checks.
 Tests to ensure health checks work correctly with dynamically allocated ports.
 """
 
-import unittest
 import json
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, MagicMock, mock_open
-import sys
 import os
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, mock_open, patch
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

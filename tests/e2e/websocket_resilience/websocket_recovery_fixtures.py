@@ -6,23 +6,22 @@ Extracted from original test files to reduce duplication and maintain consistenc
 """
 
 import asyncio
+import hashlib
 import json
+import random
+import secrets
 import time
 import uuid
-import hashlib
-import secrets
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from typing import Any, AsyncGenerator, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
-import pytest
 import jwt
+import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
-from dataclasses import dataclass, field
-from enum import Enum
-from typing import AsyncGenerator
-import random
 
 from netra_backend.app.logging_config import central_logger
 

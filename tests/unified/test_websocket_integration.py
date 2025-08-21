@@ -18,12 +18,14 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import json
-from typing import Dict, List, Any, Optional
-from unittest.mock import patch, Mock
-import pytest
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import Mock, patch
+
+import pytest
 
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+
 # Import MockWebSocket from the actual location
 try:
     from netra_backend.app.tests.services.test_ws_connection_mocks import MockWebSocket
@@ -55,8 +57,8 @@ except ImportError:
         
         def simulate_message(self, message):
             return message
-from netra_backend.app.websocket.connection_manager import get_connection_manager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection_manager import get_connection_manager
 
 logger = central_logger.get_logger(__name__)
 

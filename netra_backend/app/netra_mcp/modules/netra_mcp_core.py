@@ -3,9 +3,9 @@
 from fastmcp import FastMCP
 
 from netra_backend.app.logging_config import CentralLogger
-from netra_backend.app.netra_mcp.modules.netra_mcp_tools import NetraMCPTools
-from netra_backend.app.netra_mcp.modules.netra_mcp_resources import NetraMCPResources
 from netra_backend.app.netra_mcp.modules.netra_mcp_prompts import NetraMCPPrompts
+from netra_backend.app.netra_mcp.modules.netra_mcp_resources import NetraMCPResources
+from netra_backend.app.netra_mcp.modules.netra_mcp_tools import NetraMCPTools
 
 logger = CentralLogger()
 

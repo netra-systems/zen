@@ -11,31 +11,42 @@ Coverage: Health check timing, dependency chain validation, cascading failure de
 L3 Realism: Tests with real health check endpoints and actual service dependency chains
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-import aiohttp
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock, MagicMock
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
+import pytest
+from routes.health import health_interface
 
 # Add project root to path
-
 from netra_backend.app.core.health_checkers import (
-
-# Add project root to path
-    check_postgres_health, check_clickhouse_health, 
-    check_redis_health, check_websocket_health, check_system_resources
+    check_clickhouse_health,
+    # Add project root to path
+    check_postgres_health,
+    check_redis_health,
+    check_system_resources,
+    check_websocket_health,
 )
 from netra_backend.app.core.health_types import HealthCheckResult
-from routes.health import health_interface
 from netra_backend.app.logging_config import central_logger
 
 logger = logging.getLogger(__name__)

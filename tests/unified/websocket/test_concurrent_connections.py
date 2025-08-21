@@ -32,13 +32,14 @@ Performance: <5s execution, real connections only, no mocking
 import asyncio
 import time
 import uuid
+from typing import Any, Dict, List, Optional, Set
+
 import httpx
-from typing import Dict, List, Any, Optional, Set
 import pytest
 
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class ConcurrentConnectionManager:

@@ -8,22 +8,23 @@ import json
 import os
 import sys
 import tempfile
-from unittest.mock import Mock, patch, MagicMock
-import pytest
-import httpx
 from datetime import datetime
+from unittest.mock import MagicMock, Mock, patch
+
+import httpx
+import pytest
 
 # Add scripts directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../scripts'))
 
 from verify_workflow_status import (
-    WorkflowRun,
-    VerificationConfig,
-    GitHubAPIError,
-    WorkflowStatusVerifier,
     CLIHandler,
+    GitHubAPIError,
     OutputFormatter,
-    create_config_from_args
+    VerificationConfig,
+    WorkflowRun,
+    WorkflowStatusVerifier,
+    create_config_from_args,
 )
 
 

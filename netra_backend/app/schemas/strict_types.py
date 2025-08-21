@@ -4,20 +4,24 @@ This module defines all agent interfaces with complete type safety,
 replacing all Any types with proper typed unions and concrete types.
 """
 
-from typing import Protocol, Dict, List, Optional, Union, Literal
 from abc import ABC, abstractmethod
-from datetime import datetime, UTC
-from pydantic import BaseModel, Field
+from datetime import UTC, datetime
+from typing import Dict, List, Literal, Optional, Protocol, Union
 
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+from pydantic import BaseModel, Field
+from netra_backend.app.schemas.agent_result_types import (
+    AgentExecutionResult,
+    ExecutionResult,
+    JsonCompatibleDict,
+    TypedAgentResult,
+)
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.schemas.shared_types import (
-    DataAnalysisResponse, AnomalyDetectionResponse, PerformanceMetrics
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+    PerformanceMetrics,
 )
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
-from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.schemas.agent_result_types import (
-    TypedAgentResult, JsonCompatibleDict, ExecutionResult, AgentExecutionResult
-)
 
 
 class StrictAgentState(Protocol):
@@ -26,7 +30,7 @@ class StrictAgentState(Protocol):
     user_request: str
     chat_thread_id: Optional[str]
     user_id: Optional[str]
-    triage_result: Optional[TriageResult]
+    triage_result: Optional[Dict[str, Union[str, int, List[str], Dict[str, Union[str, List[str]]]]]]
     data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]]
     optimizations_result: Optional[Dict[str, Union[str, float, List[str]]]]
     action_plan_result: Optional[Dict[str, Union[str, List[str]]]]
@@ -183,7 +187,7 @@ class TriageAgentProtocol(StrictAgentProtocol, Protocol):
         """Execute triage with TriageResult."""
         ...
     
-    async def classify_request(self, user_request: str) -> TriageResult:
+    async def classify_request(self, user_request: str) -> Dict[str, Union[str, int, List[str], Dict[str, Union[str, List[str]]]]]:
         """Classify user request and return typed result."""
         ...
 
@@ -223,7 +227,7 @@ class SupervisorAgentProtocol(StrictAgentProtocol, Protocol):
 
 
 # Type aliases for better readability
-StrictAgentResultType = Union[TriageResult, DataAnalysisResponse, AnomalyDetectionResponse]
+StrictAgentResultType = Union[Dict[str, Union[str, int, List[str], Dict[str, Union[str, List[str]]]]], DataAnalysisResponse, AnomalyDetectionResponse]
 StrictParameterType = Union[str, int, float, bool]
 StrictReturnType = Union[str, int, float, bool, List[str], Dict[str, StrictParameterType]]
 
@@ -232,7 +236,7 @@ class AgentTypeRegistry:
     """Registry for agent type mappings."""
     
     AGENT_RESULT_TYPES = {
-        'triage': TriageResult,
+        'triage': Dict[str, Union[str, int, List[str], Dict[str, Union[str, List[str]]]]],
         'data': Union[DataAnalysisResponse, AnomalyDetectionResponse],
         'optimization': Dict[str, Union[str, float, List[str]]],
         'action_plan': Dict[str, Union[str, List[str]]],

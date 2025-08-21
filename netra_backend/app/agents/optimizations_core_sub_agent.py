@@ -8,28 +8,39 @@ Target segments: Growth & Enterprise. High revenue impact through performance fe
 """
 
 import json
-from typing import Any, List, Dict, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol, AgentExecutionMixin
-)
 from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.interface import (
+    AgentExecutionMixin,
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+    ExecutionStatus,
+    WebSocketManagerProtocol,
+)
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.reliability import ReliabilityManager, CircuitBreakerConfig
+from netra_backend.app.agents.base.reliability import (
+    CircuitBreakerConfig,
+    ReliabilityManager,
+)
 from netra_backend.app.agents.prompts import optimizations_core_prompt_template
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.utils import extract_json_from_response
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.llm.observability import (
+    generate_llm_correlation_id,
+    log_agent_communication,
+    log_agent_input,
+    log_agent_output,
+    start_llm_heartbeat,
+    stop_llm_heartbeat,
+)
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.llm.observability import (
-    start_llm_heartbeat, stop_llm_heartbeat, generate_llm_correlation_id,
-    log_agent_communication, log_agent_input, log_agent_output
-)
 
 
 class OptimizationsCoreSubAgent(BaseExecutionInterface, AgentExecutionMixin, BaseSubAgent):

@@ -4,7 +4,7 @@ All mocks must be justified per testing.xml rule: mock-justification-required.
 """
 
 from functools import wraps
-from typing import Callable, Any
+from typing import Any, Callable
 
 
 def mock_justified(reason: str) -> Callable:

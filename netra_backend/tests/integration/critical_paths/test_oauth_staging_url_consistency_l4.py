@@ -12,28 +12,39 @@ Coverage: Complete OAuth URL consistency across Python, TypeScript, configuratio
 L4 Realism Level: Tests against actual staging configuration and real service endpoints
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import httpx
-import re
 import json
 import os
-from typing import Dict, Any, List, Optional, Set
-from pathlib import Path
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 # Add project root to path
-
-
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
+
+import httpx
+import pytest
+
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import L4StagingCriticalPathTestBase
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+    L4StagingCriticalPathTestBase,
+)
 
 
 @dataclass

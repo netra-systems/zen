@@ -6,15 +6,17 @@ Maintains 25-line function limit and coordinating responsibility.
 """
 
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from fastapi import FastAPI
+
+from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.startup_checks.models import StartupCheckResult
-from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
 from netra_backend.app.startup_checks.database_checks import DatabaseChecker
+from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
+from netra_backend.app.startup_checks.models import StartupCheckResult
 from netra_backend.app.startup_checks.service_checks import ServiceChecker
 from netra_backend.app.startup_checks.system_checks import SystemChecker
-from netra_backend.app.core.configuration import unified_config_manager
 
 
 class StartupChecker:

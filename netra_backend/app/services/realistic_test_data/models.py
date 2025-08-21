@@ -3,8 +3,8 @@
 This module defines models, enums, and configuration data for realistic test data generation.
 """
 
-from typing import Dict, List, Any, Tuple
 from enum import Enum
+from typing import Any, Dict, List, Tuple
 
 
 class RealisticDataPatterns(Enum):

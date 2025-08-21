@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Find largest Python files in app/ directory (excluding tests)"""
 
-import os
 import glob
+import os
+
 
 def count_lines(file_path):
     """Count lines in a file"""

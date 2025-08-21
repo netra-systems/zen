@@ -1,5 +1,6 @@
 """Agent route validation functions."""
-from typing import Dict, Any
+from typing import Any, Dict
+
 from fastapi import HTTPException
 
 

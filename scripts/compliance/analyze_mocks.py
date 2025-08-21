@@ -5,13 +5,13 @@ Finds mocks without justifications and categorizes them for remediation.
 """
 
 import ast
-import re
-import os
-from pathlib import Path
-from typing import List, Dict, Tuple, Optional
-from dataclasses import dataclass
-from collections import defaultdict
 import json
+import os
+import re
+from collections import defaultdict
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 
 
 @dataclass

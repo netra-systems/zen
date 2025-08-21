@@ -2,14 +2,14 @@
 Cloud Run service deployment management for GCP.
 """
 
-import os
 import json
-import subprocess
 import logging
+import os
+import subprocess
 import time
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

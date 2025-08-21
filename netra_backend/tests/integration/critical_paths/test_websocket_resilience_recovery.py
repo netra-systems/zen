@@ -10,25 +10,35 @@ Critical Path: Connection loss detection -> State preservation -> Reconnection -
 Coverage: Connection resilience, state persistence, automatic recovery, message integrity
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import time
+import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.app.services.state_persistence import StatePersistenceService
+from netra_backend.app.services.websocket.connection_recovery import ConnectionRecovery
 
 # Add project root to path
-
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.services.websocket.connection_recovery import ConnectionRecovery
-from netra_backend.app.services.state_persistence import StatePersistenceService
-from netra_backend.app.schemas.registry import WebSocketMessage
 
 # Add project root to path
 

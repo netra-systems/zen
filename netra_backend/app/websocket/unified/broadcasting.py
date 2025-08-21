@@ -13,12 +13,15 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 
 import asyncio
 import time
-from typing import Dict, Any, Union, List, Set, Optional
 from collections import defaultdict
+from typing import Any, Dict, List, Optional, Set, Union
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
-from netra_backend.app.schemas.websocket_message_types import ServerMessage, BroadcastResult
+from netra_backend.app.schemas.websocket_message_types import (
+    BroadcastResult,
+    ServerMessage,
+)
 
 logger = central_logger.get_logger(__name__)
 

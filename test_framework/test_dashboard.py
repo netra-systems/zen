@@ -4,10 +4,10 @@ Test Dashboard Viewer - Display test results from the single authoritative file.
 """
 
 import json
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, Optional
 import sys
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, Optional
 
 
 class TestDashboard:

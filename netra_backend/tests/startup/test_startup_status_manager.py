@@ -4,29 +4,46 @@ Tests all critical paths, edge cases, and error conditions with strong typing.
 COMPLIANCE: 450-line max file, 25-line max functions, async test support.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import json
 import asyncio
+import json
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from datetime import datetime, timezone, timedelta
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.startup.status_manager import StartupStatusManager
-from netra_backend.app.schemas.startup_types import (
-
-# Add project root to path
-    StartupStatus, LastStartup, MigrationStatus, ServiceConfig,
-    CrashEntry, HealthCheckHistory, ServiceType, Environment
-)
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.core.exceptions_file import FileError, DataParsingError
-from netra_backend.app.core.exceptions_file import FileNotFoundError as NetraFileNotFoundError
+from netra_backend.app.core.exceptions_file import DataParsingError, FileError
+from netra_backend.app.core.exceptions_file import (
+    FileNotFoundError as NetraFileNotFoundError,
+)
+from netra_backend.app.schemas.startup_types import (
+    CrashEntry,
+    Environment,
+    HealthCheckHistory,
+    LastStartup,
+    MigrationStatus,
+    ServiceConfig,
+    ServiceType,
+    # Add project root to path
+    StartupStatus,
+)
+
+# Add project root to path
+from netra_backend.app.startup.status_manager import StartupStatusManager
 
 
 @pytest.fixture

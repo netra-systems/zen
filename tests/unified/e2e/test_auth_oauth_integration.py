@@ -19,17 +19,21 @@ Test Coverage:
 """
 
 import asyncio
-import pytest
+import json
 import time
 import uuid
-import json
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock, Mock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
-from tests.unified.e2e.test_auth_oauth_flows import OAuthFlowTestRunner, OAuthIntegrationTestValidator
-from tests.unified.oauth_test_providers import OAuthUserFactory
+import pytest
+
 from netra_backend.app.logging_config import central_logger
+from tests.unified.e2e.test_auth_oauth_flows import (
+    OAuthFlowTestRunner,
+    OAuthIntegrationTestValidator,
+)
+from tests.unified.oauth_test_providers import OAuthUserFactory
 
 logger = central_logger.get_logger(__name__)
 

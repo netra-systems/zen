@@ -1,14 +1,26 @@
 """Tests for convenience functions for common APIs."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 # Add project root to path
-
-from netra_backend.app.services.external_api_client import call_google_api, call_openai_api
+from netra_backend.app.services.external_api_client import (
+    call_google_api,
+    call_openai_api,
+)
 
 # Add project root to path
 

@@ -1,9 +1,10 @@
 """Synthetic data route specific utilities."""
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app import schemas
-from netra_backend.app.routes.utils.validators import validate_job_ownership
 from netra_backend.app.routes.utils.error_handlers import handle_validation_error
+from netra_backend.app.routes.utils.validators import validate_job_ownership
 
 
 def build_generation_config(request) -> schemas.LogGenParams:
@@ -185,7 +186,7 @@ def _generate_random_email(i: int, domains: List[str]) -> str:
 def _generate_random_created_date() -> str:
     """Generate random creation date."""
     import random
-    from datetime import datetime, UTC, timedelta
+    from datetime import UTC, datetime, timedelta
     return (datetime.now(UTC) - timedelta(days=random.randint(1, 365))).isoformat()
 
 def _build_user_basic_fields(i: int, first_names: List[str], last_names: List[str], domains: List[str]) -> Dict:

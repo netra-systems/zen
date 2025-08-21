@@ -5,19 +5,19 @@ Tests cover full launch cycles, multi-service coordination, and complex scenario
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock, call, ANY
+import os
 import subprocess
 import sys
-from pathlib import Path
-import os
 import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import ANY, MagicMock, Mock, call, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.service_config import ServicesConfiguration, ResourceMode
+from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
 
 class TestDevLauncher(unittest.TestCase):

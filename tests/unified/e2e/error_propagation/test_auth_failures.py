@@ -8,17 +8,23 @@ Business Value Justification (BVJ):
 - Strategic/Revenue Impact: Prevents auth failures from cascading
 """
 
-import pytest
 import asyncio
-import uuid
 import json
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
 
 from netra_backend.tests.unified.e2e.fixtures.error_propagation_fixtures import (
-    service_orchestrator, real_websocket_client, real_http_client,
-    error_correlation_context, test_user, ErrorCorrelationContext
+    ErrorCorrelationContext,
+    error_correlation_context,
+    real_http_client,
+    real_websocket_client,
+    service_orchestrator,
+    test_user,
 )
+
 
 @pytest.mark.asyncio
 @pytest.mark.e2e

@@ -11,6 +11,7 @@ from pathlib import Path
 from function_complexity_linter import FunctionComplexityLinter
 from function_complexity_templates import create_pre_commit_hook, handle_fix_suggestions
 
+
 def create_argument_parser() -> argparse.ArgumentParser:
     """Create and configure CLI argument parser"""
     parser = argparse.ArgumentParser(

@@ -3,8 +3,10 @@ Test Cloud SQL URL handling in auth service
 Ensures proper handling of Cloud SQL Unix socket format
 """
 import os
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
+
 from auth_service.auth_core.database.connection import AuthDatabase
 
 

@@ -13,10 +13,16 @@ Business Value Justification (BVJ):
 import asyncio
 import json
 import ssl
-from typing import Dict, Any, Optional, Union
+from typing import Any, Dict, Optional, Union
+
 import websockets
 from websockets.exceptions import ConnectionClosedError
-from tests.unified.real_client_types import ConnectionMetrics, ClientConfig, ConnectionState
+
+from tests.unified.real_client_types import (
+    ClientConfig,
+    ConnectionMetrics,
+    ConnectionState,
+)
 
 
 class RealWebSocketClient:

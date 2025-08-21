@@ -5,10 +5,13 @@ This module generates realistic LLM responses with production-like characteristi
 
 import random
 from datetime import datetime, timezone
-from typing import Dict, Any, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
+
 import numpy as np
 
-from netra_backend.app.services.apex_optimizer_agent.models import RealisticTestDataConfigManager
+from netra_backend.app.services.apex_optimizer_agent.models import (
+    RealisticTestDataConfigManager,
+)
 
 
 class LLMResponseGenerator:

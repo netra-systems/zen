@@ -5,9 +5,9 @@ This module handles verification of backend and frontend services
 during the startup process.
 """
 
-import time
 import logging
-from typing import Optional, Dict, Any, Tuple
+import time
+from typing import Any, Dict, Optional, Tuple
 
 from dev_launcher.utils import print_with_emoji, wait_for_service
 
@@ -72,8 +72,8 @@ class StartupValidator:
     def verify_all_services_ready(self, services: Dict[str, Any] = None) -> bool:
         """Verify that all services (auth, backend, frontend) are ready."""
         # Get service discovery info for dynamic ports
-        from pathlib import Path
         import json
+        from pathlib import Path
         discovery_dir = Path.cwd() / ".service_discovery"
         
         # Get auth port

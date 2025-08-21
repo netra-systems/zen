@@ -15,7 +15,7 @@ Usage:
     database_url = f"postgresql://user:pass@{HostConstants.LOCALHOST}:{ServicePorts.POSTGRES_DEFAULT}/db"
 """
 
-from typing import Final, Dict, Optional
+from typing import Dict, Final, Optional
 
 
 class ServicePorts:

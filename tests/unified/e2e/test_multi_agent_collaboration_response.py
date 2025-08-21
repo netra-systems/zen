@@ -13,31 +13,36 @@ Uses real agent components with proper lifecycle management and coordination.
 """
 
 import asyncio
-import pytest
 import os
 import uuid
-from typing import Dict, List, Any, Optional
-from datetime import datetime, UTC
-from unittest.mock import AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Set testing environment before imports
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.db.models_postgres import Assistant, Message, Thread
 from netra_backend.app.db.postgres import get_postgres_db
-from netra_backend.app.db.models_postgres import Thread, Assistant, Message
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.services.quality_gate.quality_gate_models import ContentType, QualityLevel
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
-from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.services.quality_gate.quality_gate_models import (
+    ContentType,
+    QualityLevel,
+)
+from netra_backend.app.services.quality_gate_service import QualityGateService
 
 logger = central_logger.get_logger(__name__)
 

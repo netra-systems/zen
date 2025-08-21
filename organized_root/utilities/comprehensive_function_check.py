@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 from typing import List, Tuple
 
+
 def count_function_lines(node: ast.FunctionDef) -> int:
     """Count the actual lines of code in a function."""
     if not node.body:

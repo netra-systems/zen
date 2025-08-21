@@ -7,7 +7,7 @@ Quality and debt scanning functions
 import glob
 import re
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 from architecture_scanner_helpers import ScannerHelpers
 

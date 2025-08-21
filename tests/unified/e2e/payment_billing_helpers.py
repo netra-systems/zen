@@ -19,11 +19,11 @@ import json
 import time
 import uuid
 from decimal import Decimal
-from typing import Dict, Any, Optional, List
-from unittest.mock import MagicMock, AsyncMock
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
 from netra_backend.app.services.cost_calculator import CostCalculatorService
 from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 
@@ -113,7 +113,7 @@ class UsageTrackingService:
     def record_usage(self, user_id: str, operation_type: str, 
                     tokens: int, model: str = "gpt-4") -> Dict[str, Any]:
         """Record usage for billing calculation."""
-        from netra_backend.app.schemas.llm_base_types import TokenUsage, LLMProvider
+        from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
         
         usage = TokenUsage(
             prompt_tokens=int(tokens * 0.7),

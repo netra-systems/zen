@@ -4,11 +4,16 @@ Performance Testing Fixtures
 Shared fixtures for all performance tests.
 """
 
-import pytest
 import asyncio
 import os
-from netra_backend.tests.e2e.test_helpers.performance_base import HighVolumeWebSocketServer, HighVolumeThroughputClient
+
+import pytest
+
 from netra_backend.tests.e2e.fixtures.high_volume_data import test_user_token
+from netra_backend.tests.e2e.test_helpers.performance_base import (
+    HighVolumeThroughputClient,
+    HighVolumeWebSocketServer,
+)
 
 # Environment configuration
 E2E_TEST_CONFIG = {

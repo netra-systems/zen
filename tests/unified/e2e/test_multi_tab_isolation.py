@@ -13,17 +13,18 @@ Architecture: <300 lines per module, real connections only, deterministic testin
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Set
+
 import pytest
 
 # Test infrastructure
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @dataclass

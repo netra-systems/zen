@@ -7,19 +7,19 @@ configuration loading, health checks, port allocation, and graceful shutdown.
 Follows 450-line file limit and 25-line function limit constraints.
 """
 
+import asyncio
+import json
 import os
+import signal
+import subprocess
 import sys
 import time
-import json
-import asyncio
-import subprocess
-import signal
-from typing import Dict, List, Optional, Tuple
 from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
-from unittest.mock import patch, MagicMock
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent

@@ -20,12 +20,13 @@ Business Value Justification (BVJ):
 Module Architecture Compliance: Under 300 lines, functions under 25 lines
 """
 
-import pytest
 import asyncio
 import time
 import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
+
+import pytest
 
 
 class AuthDatabaseMock:

@@ -10,19 +10,20 @@ CRITICAL TEST IMPLEMENTATION #5: Distributed Cache Coherence
 Architecture: <300 lines, functions <8 lines per CLAUDE.md requirements
 """
 
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
+import pytest
+
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 from netra_backend.tests.unified.e2e.cache_coherence_helpers import (
-    CacheCoherenceValidator,
     CacheCoherenceEvent,
-    CacheCoherenceMetrics
+    CacheCoherenceMetrics,
+    CacheCoherenceValidator,
 )
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

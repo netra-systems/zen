@@ -5,13 +5,14 @@ Handles test finding, coverage analysis, and untested module identification
 Complies with 450-line limit and 25-line function constraint
 """
 
-import subprocess
 import re
+import subprocess
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class TestMetrics:

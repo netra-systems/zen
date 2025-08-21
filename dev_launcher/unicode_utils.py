@@ -2,8 +2,8 @@
 Unicode output utilities for cross-platform compatibility.
 """
 
-import sys
 import os
+import sys
 
 
 def safe_print(text: str, fallback_text: str = None):

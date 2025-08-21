@@ -7,7 +7,7 @@ from netra_backend.app.core.memory_recovery_base import (
     MemoryPressureLevel,
     MemoryRecoveryStrategy,
     MemorySnapshot,
-    RecoveryAction
+    RecoveryAction,
 )
 from netra_backend.app.logging_config import central_logger
 

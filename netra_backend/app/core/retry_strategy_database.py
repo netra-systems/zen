@@ -3,8 +3,8 @@ Database-specific retry strategy implementation.
 Handles retry logic for database operations with connection and constraint awareness.
 """
 
-from netra_backend.app.core.error_recovery import RecoveryContext
 from netra_backend.app.core.error_codes import ErrorSeverity
+from netra_backend.app.core.error_recovery import RecoveryContext
 from netra_backend.app.core.retry_strategy_base import EnhancedRetryStrategy
 
 

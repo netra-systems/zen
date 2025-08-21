@@ -4,13 +4,15 @@ Main orchestration module for building structured AI operations maps.
 Coordinates with specialized component builders for modular functionality.
 """
 
-from typing import Dict, List, Any
 from datetime import datetime
+from typing import Any, Dict, List
 
-from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.agents.github_analyzer.dependency_extractor import (
+    DependencyExtractor,
+)
 from netra_backend.app.agents.github_analyzer.map_components import MapComponentsBuilder
 from netra_backend.app.agents.github_analyzer.security_analyzer import SecurityAnalyzer
-from netra_backend.app.agents.github_analyzer.dependency_extractor import DependencyExtractor
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class AIMapBuilder:

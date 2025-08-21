@@ -21,21 +21,27 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import json
 import time
-from typing import Dict, List, Any, Optional, Set
-from datetime import datetime, timezone
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional, Set
+
 import pytest
 
 # Configure pytest-asyncio
 pytestmark = pytest.mark.asyncio
 
-from tests.unified.config import TEST_CONFIG, TEST_USERS, TEST_ENDPOINTS, TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
+from netra_backend.app.logging_config import central_logger
+from tests.unified.config import (
+    TEST_CONFIG,
+    TEST_ENDPOINTS,
+    TEST_USERS,
+    TestDataFactory,
+)
 from tests.unified.e2e.agent_conversation_helpers import AgentConversationTestCore
 from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.unified.real_services_manager import RealServicesManager
-from netra_backend.app.logging_config import central_logger
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

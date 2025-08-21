@@ -4,32 +4,44 @@ This module provides REST endpoints for monitoring circuit breaker
 health, metrics, and state across the Netra platform.
 """
 
-from typing import Dict, Any, List
-from fastapi import APIRouter, HTTPException, Query, Depends
-from datetime import datetime, UTC
-from netra_backend.app.auth_integration import get_current_user, require_admin
+from datetime import UTC, datetime
+from typing import Any, Dict, List
 
-from netra_backend.app.services.circuit_breaker_monitor import (
-    circuit_monitor, metrics_collector, get_circuit_health_dashboard
-)
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from netra_backend.app.auth_integration import get_current_user, require_admin
 from netra_backend.app.core.circuit_breaker import circuit_registry
-from netra_backend.app.llm.client import ResilientLLMClient
 from netra_backend.app.db.client import db_client_manager
-from netra_backend.app.services.external_api_client import http_client_manager
+from netra_backend.app.llm.client import ResilientLLMClient
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.routes.utils.service_delegates import (
-    delegate_circuit_dashboard, delegate_circuit_status, delegate_recent_events,
-    delegate_recent_alerts, delegate_circuit_metrics, delegate_metrics_history
-)
-from netra_backend.app.routes.utils.response_builders import (
-    build_circuit_response, build_service_health_response, build_timestamped_response
-)
-from netra_backend.app.routes.utils.validators import validate_circuit_exists
 from netra_backend.app.routes.utils.circuit_helpers import (
-    filter_llm_circuits, filter_database_circuits, filter_api_circuits,
-    categorize_circuits, build_service_summary
+    build_service_summary,
+    categorize_circuits,
+    filter_api_circuits,
+    filter_database_circuits,
+    filter_llm_circuits,
 )
 from netra_backend.app.routes.utils.error_handlers import handle_circuit_breaker_error
+from netra_backend.app.routes.utils.response_builders import (
+    build_circuit_response,
+    build_service_health_response,
+    build_timestamped_response,
+)
+from netra_backend.app.routes.utils.service_delegates import (
+    delegate_circuit_dashboard,
+    delegate_circuit_metrics,
+    delegate_circuit_status,
+    delegate_metrics_history,
+    delegate_recent_alerts,
+    delegate_recent_events,
+)
+from netra_backend.app.routes.utils.validators import validate_circuit_exists
+from netra_backend.app.services.circuit_breaker_monitor import (
+    circuit_monitor,
+    get_circuit_health_dashboard,
+    metrics_collector,
+)
+from netra_backend.app.services.external_api_client import http_client_manager
 
 logger = central_logger.get_logger(__name__)
 router = APIRouter(prefix="/circuit-breakers", tags=["Circuit Breaker Health"])

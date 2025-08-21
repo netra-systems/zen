@@ -6,7 +6,7 @@ Handles usage patterns, cost efficiency, and scheduling optimization.
 Business Value: Usage optimization insights for customer cost efficiency.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class UsageInsightsAnalyzer:

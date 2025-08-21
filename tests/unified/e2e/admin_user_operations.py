@@ -15,7 +15,7 @@ REQUIREMENTS:
 """
 import time
 import uuid
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from tests.unified.e2e.auth_flow_testers import AuthFlowE2ETester
 

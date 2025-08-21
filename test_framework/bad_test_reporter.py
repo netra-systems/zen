@@ -12,11 +12,11 @@ Options:
     --export        Export report to file
 """
 
-import sys
-import json
 import argparse
-from pathlib import Path
+import json
+import sys
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 from .bad_test_detector import BadTestDetector

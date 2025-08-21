@@ -4,8 +4,10 @@ This file has been auto-generated to fix syntax errors.
 Original content had structural issues that prevented parsing.
 """
 
-import pytest
 from typing import Any, Dict, List, Optional
+
+import pytest
+
 
 class TestAuthBackendIntegrationFixtures:
     """Test class for auth_backend_integration_fixtures"""

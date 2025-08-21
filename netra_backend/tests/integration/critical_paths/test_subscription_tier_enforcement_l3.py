@@ -11,28 +11,38 @@ Coverage: Real tier limits, actual billing events, cross-service enforcement, up
 L3 Realism: Tests against real database constraints, Redis rate limiting, ClickHouse analytics
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from decimal import Decimal
-from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import pytest
+
+from netra_backend.app.core.rate_limiting.tier_enforcer import TierEnforcementService
+from netra_backend.app.redis_manager import RedisManager
 
 # Add project root to path
-
-from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
-from netra_backend.app.services.user_service import user_service as UserService
+from netra_backend.app.schemas.UserPlan import PlanTier, PlanUsageSummary, UsageRecord
 from netra_backend.app.services.audit_service import AuditService
-from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.database.session_manager import SessionManager
-from netra_backend.app.core.rate_limiting.tier_enforcer import TierEnforcementService
 from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
+from netra_backend.app.services.user_service import user_service as UserService
 from test_framework.test_config import configure_dedicated_test_environment
 
 # Add project root to path

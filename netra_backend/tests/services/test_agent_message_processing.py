@@ -1,14 +1,26 @@
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
+from netra_backend.app.schemas.websocket_server_messages import AgentUpdateMessage as AgentMessage
+
+# Add project root to path
 from netra_backend.app.services.agent_service import AgentService
-from schemas import AgentMessage, WebSocketMessage
-from datetime import datetime
+
 
 # Add project root to path
 class TestAgentMessageProcessing:

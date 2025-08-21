@@ -11,21 +11,34 @@ All functions ≤8 lines per CLAUDE.md requirements.
 Module ≤300 lines per CLAUDE.md requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock, patch
-from fastapi import Request, Response, HTTPException
+from fastapi import HTTPException, Request, Response
+from logging_config import central_logger
 from starlette.middleware.base import BaseHTTPMiddleware
 
-# Add project root to path
-
-from netra_backend.app.middleware.security_middleware import SecurityMiddleware, RateLimitTracker
 from netra_backend.app.middleware.metrics_middleware import AgentMetricsMiddleware
-from logging_config import central_logger
+
+# Add project root to path
+from netra_backend.app.middleware.security_middleware import (
+    RateLimitTracker,
+    SecurityMiddleware,
+)
 
 # Add project root to path
 
@@ -286,7 +299,9 @@ class TestMetricsMiddlewareIntegration:
     
     def test_metrics_context_manager(self):
         """Test metrics context manager functionality."""
-        from netra_backend.app.middleware.metrics_middleware import AgentMetricsContextManager
+        from netra_backend.app.middleware.metrics_middleware import (
+            AgentMetricsContextManager,
+        )
         
         context_manager = AgentMetricsContextManager(
             "TestAgent", "test_operation"

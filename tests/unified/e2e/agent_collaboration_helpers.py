@@ -17,16 +17,16 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 import asyncio
-import time
 import json
-from typing import Dict, Any, List, Optional
+import time
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
+from netra_backend.app.schemas.UserPlan import PlanTier
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS, TestDataFactory
 from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
 from tests.unified.real_websocket_client import RealWebSocketClient
-from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @dataclass

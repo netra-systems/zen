@@ -6,9 +6,10 @@ Tests various scenarios with proper expected behavior validation.
 """
 
 import os
-import sys
 import subprocess
+import sys
 from typing import List, Tuple
+
 
 class WorkflowStatusTester:
     """Test suite for workflow status verification script."""

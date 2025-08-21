@@ -16,33 +16,43 @@ REQUIREMENTS:
 - Recovery within 10 seconds
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 # Add project root to path
-
-
 # Set testing environment
 import os
+import time
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from logging_config import central_logger
+
+from netra_backend.app.agents.base_agent import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 
 logger = central_logger.get_logger(__name__)

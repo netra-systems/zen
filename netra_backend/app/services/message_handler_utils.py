@@ -1,6 +1,7 @@
 """Utility functions for message handling"""
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.websocket.ws_manager import manager
 

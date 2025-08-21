@@ -11,24 +11,34 @@ L2 Test: Real internal load balancing components with mocked external services.
 Performance target: <5ms routing decisions, 95% connection distribution accuracy.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-import time
 import random
-from typing import Dict, Any, List, Optional, Set, Tuple
-from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
-from uuid import uuid4
-from enum import Enum
-from dataclasses import dataclass, field
+import time
 from collections import defaultdict
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+
+import pytest
+from schemas import UserInDB
 
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 

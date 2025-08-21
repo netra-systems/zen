@@ -11,29 +11,41 @@ L4 Realism: Real Redis cluster, real cache operations, real service interactions
 Performance Requirements: Cache hit rate > 90%, invalidation propagation < 50ms, TTL accuracy 99.9%
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, List, Optional, Any, Set
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
 import statistics
-import redis.asyncio as aioredis
+import time
+import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set
 
-# Add project root to path
-
-
-# from netra_backend.app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
-from netra_backend.app.services.cache.cache_manager import LLMCacheManager as CacheManager
 # from netra_backend.app.services.cache.invalidation_service import CacheInvalidationService  # Class may not exist, commented out
 # Session cache replaced with mock
 from unittest.mock import AsyncMock
+
+import pytest
+import redis.asyncio as aioredis
+
+# Add project root to path
+# from netra_backend.app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
+from netra_backend.app.services.cache.cache_manager import (
+    LLMCacheManager as CacheManager,
+)
+
 # SessionCache = AsyncMock  # Class may not exist, commented out
 # from netra_backend.app.services.database.user_repository import UserRepository  # Class may not exist, commented out
 # from netra_backend.tests.unified.config import TEST_CONFIG  # Comment out since config structure may vary

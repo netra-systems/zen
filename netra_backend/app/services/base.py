@@ -1,24 +1,24 @@
 """Enhanced base service classes using the new service interfaces."""
 
+from datetime import UTC, datetime
 from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
 from uuid import UUID
-from datetime import datetime, UTC
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.db.base import Base
+from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+from netra_backend.app.core.exceptions_database import RecordNotFoundError
+from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.service_interfaces import (
     BaseService,
     CRUDService,
     DatabaseService,
-    ServiceHealth
+    ServiceHealth,
 )
-from netra_backend.app.core.exceptions_database import RecordNotFoundError
-from netra_backend.app.core.exceptions_service import ServiceError
-from netra_backend.app.core.error_context import AsyncErrorContext as ErrorContext
+from netra_backend.app.db.base import Base
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

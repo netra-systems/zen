@@ -6,7 +6,7 @@ Maximum 300 lines, functions ≤8 lines
 
 import asyncio
 import time
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 
 class AsyncPerformanceAnalyzer:

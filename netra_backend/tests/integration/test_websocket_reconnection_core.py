@@ -4,23 +4,37 @@ Tests WebSocket connection resilience, automatic reconnection, and state recover
 using real WebSocket connections to verify production-grade reliability.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import websockets
 import json
 import time
-from typing import Dict, List, Optional, Any
-from unittest.mock import MagicMock, AsyncMock, patch
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+import websockets
 
 # Import WebSocket components with fallback for missing modules
 try:
+    from netra_backend.app.services.websocket.connection_handler import (
+        ConnectionHandler,
+    )
+    from netra_backend.app.services.websocket.reconnection_manager import (
+        ReconnectionManager,
+    )
     from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-    from netra_backend.app.services.websocket.connection_handler import ConnectionHandler
-    from netra_backend.app.services.websocket.reconnection_manager import ReconnectionManager
 except ImportError:
     # Provide fallback implementations if modules don't exist
     class WebSocketManager:

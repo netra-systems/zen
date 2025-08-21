@@ -11,16 +11,17 @@ Mock utilities for agent response pipeline testing.
 """
 
 import asyncio
-import uuid
 import json
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
-from unittest.mock import Mock, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock
+
+from fastapi import WebSocket
 
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
-from fastapi import WebSocket
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 
 def mock_justified(reason: str):

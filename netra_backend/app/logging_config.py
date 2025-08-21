@@ -9,16 +9,16 @@ This module provides a single, consistent logging interface that:
 """
 
 # Import the unified logger and context variables
+from netra_backend.app.core.logging_context import (
+    request_id_context,
+    trace_id_context,
+    user_id_context,
+)
 from netra_backend.app.core.unified_logging import (
+    UnifiedLogger,
     central_logger,
     get_central_logger,
     log_execution_time,
-    UnifiedLogger,
-)
-from netra_backend.app.core.logging_context import (
-    request_id_context,
-    user_id_context,
-    trace_id_context,
 )
 
 # Create alias for backward compatibility

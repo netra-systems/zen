@@ -3,15 +3,17 @@
 Handles bulk database operations for repositories.
 """
 
-from typing import TypeVar, Generic, Type, List, Dict, Any, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
+import uuid
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
-from netra_backend.app.logging_config import central_logger
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.repository_errors import RepositoryErrorHandler
 from netra_backend.app.services.database.session_manager import SessionManager
-import uuid
 
 logger = central_logger.get_logger(__name__)
 

@@ -11,18 +11,28 @@ Coverage: Real tenant isolation in staging, production-level security testing, c
 L4 Realism: Tests against real staging database, real multi-tenant setup, real security controls
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import logging
 import os
-from typing import Dict, List, Optional, Any, Set
+import time
+import uuid
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock
+
+import pytest
 
 # Add project root to path
 
@@ -33,11 +43,14 @@ TenantService = AsyncMock
 # from auth_integration import require_permission
 # from netra_backend.app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
+
 create_access_token = AsyncMock()
 # from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
+
 validate_token_jwt = AsyncMock()
 from unittest.mock import AsyncMock
+
 PermissionsService = AsyncMock
 # from netra_backend.app.services.audit.audit_logger import AuditLogger
 # from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager

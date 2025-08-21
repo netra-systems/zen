@@ -4,24 +4,37 @@ Tests for state persistence service with Redis and PostgreSQL.
 Focuses on async session usage and datetime serialization issues.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
 import uuid
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock, patch
 
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+import pytest
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+
+from netra_backend.app.agents.state import (
+    AgentMetadata,
+    DeepAgentState,
+    OptimizationsResult,
+)
+from netra_backend.app.db.models_postgres import Reference, Run
 
 # Add project root to path
-
 from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.agents.state import DeepAgentState, AgentMetadata, OptimizationsResult
-from netra_backend.app.db.models_postgres import Run, Reference
 
 # Add project root to path
 

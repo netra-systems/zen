@@ -8,8 +8,20 @@ def import_basic_route_modules() -> dict:
 
 def _import_core_routes() -> tuple:
     """Import core route modules as tuple."""
-    from netra_backend.app.routes import (supply, generation, admin, references, health, 
-        corpus, synthetic_data, config, demo, unified_tools, quality, users)
+    from netra_backend.app.routes import (
+        admin,
+        config,
+        corpus,
+        demo,
+        generation,
+        health,
+        quality,
+        references,
+        supply,
+        synthetic_data,
+        unified_tools,
+        users,
+    )
     return (supply, generation, admin, references, health, corpus,
             synthetic_data, config, demo, unified_tools, quality, users)
 
@@ -58,16 +70,16 @@ def import_named_routers() -> dict:
 
 def _import_auth_routers() -> dict:
     """Import authentication-related routers"""
-    from netra_backend.app.routes.auth import router as auth_router
     from netra_backend.app.routes.agent_route import router as agent_router
+    from netra_backend.app.routes.auth import router as auth_router
     return {"auth_router": auth_router, "agent_router": agent_router}
 
 
 def _import_core_routers() -> dict:
     """Import core functionality routers"""
     from netra_backend.app.routes.llm_cache import router as llm_cache_router
-    from netra_backend.app.routes.threads_route import router as threads_router
     from netra_backend.app.routes.mcp import router as mcp_router
+    from netra_backend.app.routes.threads_route import router as threads_router
     return {"llm_cache_router": llm_cache_router, "threads_router": threads_router, "mcp_router": mcp_router}
 
 
@@ -79,10 +91,14 @@ def _import_extended_routers() -> dict:
 
 def _import_extended_router_modules() -> tuple:
     """Import extended router modules as tuple."""
-    from netra_backend.app.routes.health_extended import router as health_extended_router
-    from netra_backend.app.routes.monitoring import router as monitoring_router
     from netra_backend.app.routes.gcp_monitoring import router as gcp_monitoring_router
-    from netra_backend.app.routes.websocket_secure import router as websocket_secure_router
+    from netra_backend.app.routes.health_extended import (
+        router as health_extended_router,
+    )
+    from netra_backend.app.routes.monitoring import router as monitoring_router
+    from netra_backend.app.routes.websocket_secure import (
+        router as websocket_secure_router,
+    )
     return health_extended_router, monitoring_router, gcp_monitoring_router, websocket_secure_router
 
 
@@ -104,15 +120,21 @@ def import_factory_routers() -> dict:
 def _import_factory_status_routers() -> dict:
     """Import factory status router modules."""
     from netra_backend.app.routes.factory_status import router as factory_status_router
-    from netra_backend.app.routes.factory_status_simple import router as factory_status_simple_router
+    from netra_backend.app.routes.factory_status_simple import (
+        router as factory_status_simple_router,
+    )
     return {"factory_status_router": factory_status_router,
             "factory_status_simple_router": factory_status_simple_router}
 
 
 def _import_factory_analyzer_routers() -> dict:
     """Import factory analyzer router modules."""
-    from netra_backend.app.routes.factory_compliance import router as factory_compliance_router
-    from netra_backend.app.routes.github_analyzer import router as github_analyzer_router
+    from netra_backend.app.routes.factory_compliance import (
+        router as factory_compliance_router,
+    )
+    from netra_backend.app.routes.github_analyzer import (
+        router as github_analyzer_router,
+    )
     return {"factory_compliance_router": factory_compliance_router,
             "github_analyzer_router": github_analyzer_router}
 

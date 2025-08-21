@@ -1,31 +1,44 @@
 """Fixtures Tests - Split from test_llm_agent_integration.py"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+import asyncio
+import json
+import time
+import uuid
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-import asyncio
-import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-import uuid
-from datetime import datetime
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.agents.triage_sub_agent import (
+    Complexity,
+    ExtractedEntities,
+    Priority,
+    TriageMetadata,
+    # Add project root to path
+    TriageResult,
+    UserIntent,
+)
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.agents.triage_sub_agent import (
-
-# Add project root to path
-    TriageResult, Priority, Complexity, UserIntent,
-    ExtractedEntities, TriageMetadata
-)
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-import time
 
 
 @pytest.fixture
@@ -51,8 +64,12 @@ def mock_llm_manager():
         
         # Mock structured LLM for triage agent
         from netra_backend.app.agents.triage_sub_agent import (
-            TriageResult, Priority, Complexity, UserIntent,
-            ExtractedEntities, TriageMetadata
+            Complexity,
+            ExtractedEntities,
+            Priority,
+            TriageMetadata,
+            TriageResult,
+            UserIntent,
         )
         
         llm_manager.ask_structured_llm = AsyncMock(return_value=TriageResult(

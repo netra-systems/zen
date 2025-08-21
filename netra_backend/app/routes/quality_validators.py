@@ -4,22 +4,38 @@ This module provides validation and formatting utilities for quality routes.
 Each function is ≤8 lines as per architectural requirements.
 """
 
-from typing import Dict, Any, List
-from datetime import datetime, UTC
-from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.app.schemas.quality_types import (
-    QualityValidationResponse, QualityAlert, QualityDashboardData,
-    QualityStatistics, AlertAcknowledgementResponse, QualityReport,
-    QualityServiceHealth, User
-)
+from datetime import UTC, datetime
+from typing import Any, Dict, List
+
 from netra_backend.app.routes.quality_validation_utils import (
-    _get_content_mapping_part1, _get_content_mapping_part2, _build_core_metrics,
-    _build_score_metrics, _build_analysis_metrics, _build_quality_metrics,
-    _build_dashboard_primary_data, _build_dashboard_secondary_data,
-    _build_alert_basic_fields, _build_alert_detail_fields, _build_basic_statistics,
-    _build_detail_statistics, _build_services_status, _build_health_statistics,
-    build_monitoring_response, build_stop_monitoring_response
+    _build_alert_basic_fields,
+    _build_alert_detail_fields,
+    _build_analysis_metrics,
+    _build_basic_statistics,
+    _build_core_metrics,
+    _build_dashboard_primary_data,
+    _build_dashboard_secondary_data,
+    _build_detail_statistics,
+    _build_health_statistics,
+    _build_quality_metrics,
+    _build_score_metrics,
+    _build_services_status,
+    _get_content_mapping_part1,
+    _get_content_mapping_part2,
+    build_monitoring_response,
+    build_stop_monitoring_response,
 )
+from netra_backend.app.schemas.quality_types import (
+    AlertAcknowledgementResponse,
+    QualityAlert,
+    QualityDashboardData,
+    QualityReport,
+    QualityServiceHealth,
+    QualityStatistics,
+    QualityValidationResponse,
+    User,
+)
+from netra_backend.app.services.quality_gate_service import ContentType
 
 
 def map_content_type(content_type_str: str) -> ContentType:

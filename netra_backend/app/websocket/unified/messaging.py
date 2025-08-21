@@ -12,16 +12,21 @@ All functions ≤8 lines as per CLAUDE.md requirements.
 """
 
 import asyncio
-from typing import Dict, Any, Union, Optional, List, Literal
+from typing import Any, Dict, List, Literal, Optional, Union
+
 from fastapi import WebSocket
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.large_message_handler import get_large_message_handler, CompressionAlgorithm
+from netra_backend.app.websocket.large_message_handler import (
+    CompressionAlgorithm,
+    get_large_message_handler,
+)
+
+from .message_handlers import MessageBuilder, MessageHandler, MessageProcessor
 from .message_queue import MessageQueue
-from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
 logger = central_logger.get_logger(__name__)
 
@@ -250,8 +255,8 @@ class UnifiedMessagingManager:
 
 
 # Re-export classes for backward compatibility
+from .message_handlers import MessageBuilder, MessageHandler, MessageProcessor
 from .message_queue import MessageQueue
-from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
 __all__ = [
     "UnifiedMessagingManager", "MessageQueue", "MessageHandler", 

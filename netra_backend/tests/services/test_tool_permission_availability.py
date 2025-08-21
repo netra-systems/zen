@@ -3,26 +3,35 @@ Tool Permission Service - Tool Availability and Upgrade Path Tests
 Functions refactored to ≤8 lines each using helper functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier, UserPlan
+
+# Add project root to path
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS
 from netra_backend.tests.helpers.tool_permission_helpers import (
-
-# Add project root to path
+    # Add project root to path
     MockRedisClient,
-    create_user_plan,
-    create_tool_registry_sample,
-    setup_mock_user_plan,
-    setup_mock_usage_count,
     assert_tool_availability,
-    assert_tool_registry_availability
+    assert_tool_registry_availability,
+    create_tool_registry_sample,
+    create_user_plan,
+    setup_mock_usage_count,
+    setup_mock_user_plan,
 )
 
 

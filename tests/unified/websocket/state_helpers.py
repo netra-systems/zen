@@ -5,12 +5,12 @@ Utility classes for validating state synchronization and tracking state differen
 in backend-frontend communication tests.
 """
 
-import time
 import json
+import time
 import uuid
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass

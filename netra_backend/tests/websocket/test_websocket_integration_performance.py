@@ -3,22 +3,31 @@
 Integration tests of all performance improvements working together.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import time
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import AsyncMock
 
-# Add project root to path
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
+from netra_backend.app.websocket.compression import WebSocketCompressor
 
+# Add project root to path
 from netra_backend.app.websocket.memory_manager import WebSocketMemoryManager
 from netra_backend.app.websocket.message_batcher import WebSocketMessageBatcher
-from netra_backend.app.websocket.compression import WebSocketCompressor
 from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
-from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 # Add project root to path
 

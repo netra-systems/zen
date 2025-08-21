@@ -5,14 +5,15 @@ Tests token flow: Auth service → Backend validation → WebSocket auth → Age
 Business Value: Prevents unauthorized access to paid features (Growth & Enterprise tiers)
 """
 import asyncio
-import os
-import pytest
-import httpx
-import websockets
 import json
-import jwt
+import os
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import httpx
+import jwt
+import pytest
+import websockets
 
 from tests.unified.test_harness import UnifiedTestHarness
 

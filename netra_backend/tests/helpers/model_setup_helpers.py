@@ -1,7 +1,8 @@
 """Model setup helpers for tests."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import MagicMock
+
 
 def create_test_user(email: str = "test@example.com") -> Dict[str, Any]:
     """Create a test user."""

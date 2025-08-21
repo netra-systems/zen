@@ -1,10 +1,10 @@
 """Invoice Generator for creating and formatting invoices."""
 
-from typing import Dict, List, Optional, Any
+import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
-import json
+from typing import Any, Dict, List, Optional
 
 
 @dataclass

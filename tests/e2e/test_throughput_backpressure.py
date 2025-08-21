@@ -10,16 +10,19 @@ Business Value Justification (BVJ):
 This test validates backpressure mechanisms under overload conditions.
 """
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, Any
+import time
+from typing import Any, Dict
 
-from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
-    LoadTestResults, E2E_TEST_CONFIG, measure_system_resources
-)
+import pytest
+
 from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
+from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
+    E2E_TEST_CONFIG,
+    LoadTestResults,
+    measure_system_resources,
+)
 
 logger = logging.getLogger(__name__)
 

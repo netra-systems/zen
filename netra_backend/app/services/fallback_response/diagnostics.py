@@ -5,8 +5,8 @@ This module provides diagnostic tips and recovery suggestions for different fail
 
 from typing import Dict, List
 
-from netra_backend.app.services.quality_gate_service import ContentType
 from netra_backend.app.services.fallback_response.models import FailureReason
+from netra_backend.app.services.quality_gate_service import ContentType
 
 
 class DiagnosticsManager:

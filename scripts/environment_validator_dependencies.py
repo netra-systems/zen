@@ -3,12 +3,13 @@ Dependency Validation Module
 Validates Python/Node.js versions and required dependencies.
 """
 
-import sys
-import subprocess
-import json
 import asyncio
-from typing import Dict, List, Any, Optional, Tuple
+import json
+import subprocess
+import sys
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 from dotenv import load_dotenv
 
 

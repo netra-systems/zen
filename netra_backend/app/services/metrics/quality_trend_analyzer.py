@@ -4,9 +4,9 @@ Handles trend tracking and directional analysis
 """
 
 import statistics
-from datetime import datetime, UTC, timedelta
-from typing import Dict, List, Any
 from collections import defaultdict
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List
 
 from netra_backend.app.schemas.Metrics import QualityMetrics
 

@@ -5,13 +5,20 @@ for WebSocket connections and associated data structures.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.connection_info import ConnectionInfo
+from netra_backend.app.memory_cleanup import (
+    GarbageCollectionManager,
+    MemoryCleanupManager,
+)
+from netra_backend.app.memory_metrics import (
+    MemoryHealthChecker,
+    MemoryMetricsCollector,
+    MemoryStatsCollector,
+)
 from netra_backend.app.memory_tracker import ConnectionMemoryTracker
-from netra_backend.app.memory_metrics import MemoryMetricsCollector, MemoryHealthChecker, MemoryStatsCollector
-from netra_backend.app.memory_cleanup import MemoryCleanupManager, GarbageCollectionManager
+from netra_backend.app.websocket.connection_info import ConnectionInfo
 
 logger = central_logger.get_logger(__name__)
 
@@ -115,9 +122,17 @@ class WebSocketMemoryManager:
 
 
 # Re-export classes for backward compatibility
+from netra_backend.app.memory_cleanup import (
+    GarbageCollectionManager,
+    MemoryCleanupManager,
+)
+from netra_backend.app.memory_metrics import (
+    MemoryHealthChecker,
+    MemoryMetrics,
+    MemoryMetricsCollector,
+    MemoryStatsCollector,
+)
 from netra_backend.app.memory_tracker import ConnectionMemoryTracker
-from netra_backend.app.memory_metrics import MemoryMetrics, MemoryMetricsCollector, MemoryHealthChecker, MemoryStatsCollector
-from netra_backend.app.memory_cleanup import MemoryCleanupManager, GarbageCollectionManager
 
 __all__ = [
     "WebSocketMemoryManager", "ConnectionMemoryTracker", "MemoryMetrics", 

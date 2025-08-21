@@ -18,12 +18,12 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import time
 import uuid
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 from tests.unified.config import TEST_ENDPOINTS, TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 @dataclass

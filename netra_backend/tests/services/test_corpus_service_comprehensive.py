@@ -1,21 +1,33 @@
 """Comprehensive test suite for corpus service - document indexing pipeline and search relevance."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from datetime import datetime, timedelta
-from typing import List, Dict, Any
-from unittest.mock import AsyncMock, MagicMock, patch, call
-import json
 import hashlib
+import json
+from datetime import datetime, timedelta
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, call, patch
+
+import pytest
+from schemas import Corpus, CorpusCreate, CorpusUpdate
+
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-
 from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus
-from schemas import Corpus, CorpusCreate, CorpusUpdate
-from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.tests.helpers.shared_test_types import (
+    TestErrorHandling as SharedTestErrorHandling,
+)
 
 # Add project root to path
 

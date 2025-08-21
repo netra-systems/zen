@@ -5,18 +5,24 @@ for agent interactions and WebSocket message handling.
 """
 
 import json
-from typing import Union, Dict, Any, Optional, AsyncGenerator
-from starlette.websockets import WebSocketDisconnect
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, AsyncGenerator, Dict, Optional, Union
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.websockets import WebSocketDisconnect
+
 from netra_backend.app import schemas
-from netra_backend.app.services.websocket.ws_manager import manager
-from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.service_interfaces import IAgentService
-from netra_backend.app.services.streaming_service import TextStreamProcessor, get_streaming_service
+from netra_backend.app.services.streaming_service import (
+    TextStreamProcessor,
+    get_streaming_service,
+)
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.services.websocket.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 

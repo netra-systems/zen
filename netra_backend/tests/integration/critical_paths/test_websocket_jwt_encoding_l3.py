@@ -10,25 +10,32 @@ These tests verify that JWT tokens are properly encoded for WebSocket subprotoco
 to prevent "SyntaxError: Failed to construct 'WebSocket'" errors.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import base64
 import json
-import jwt
-import pytest
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import jwt
+import pytest
 from fastapi import WebSocket
+from routes.websocket_secure import SecureWebSocketManager, secure_websocket_endpoint
 from starlette.websockets import WebSocketState
 
-from routes.websocket_secure import SecureWebSocketManager, secure_websocket_endpoint
-
 # Add project root to path
-
 from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path

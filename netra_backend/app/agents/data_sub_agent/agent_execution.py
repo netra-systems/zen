@@ -1,17 +1,25 @@
 """Execution management for DataSubAgent."""
 
-from typing import Union
 import time
+from typing import Union
 
-from netra_backend.app.schemas.strict_types import TypedAgentResult, AgentExecutionMetrics
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
-from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
-
-from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
 from netra_backend.app.agents.data_sub_agent.data_operations import DataOperations
+from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
 from netra_backend.app.agents.data_sub_agent.metrics_analyzer import MetricsAnalyzer
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.core.json_parsing_utils import (
+    comprehensive_json_fix,
+    ensure_agent_response_is_json,
+)
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.shared_types import (
+    AnomalyDetectionResponse,
+    DataAnalysisResponse,
+)
+from netra_backend.app.schemas.strict_types import (
+    AgentExecutionMetrics,
+    TypedAgentResult,
+)
 
 
 class ExecutionManager:

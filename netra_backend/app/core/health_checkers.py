@@ -7,14 +7,15 @@ and graceful degradation instead of hard failures.
 
 import asyncio
 import time
-import psutil
-from typing import Dict, Any, Optional
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, Optional
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.core.health_types import HealthCheckResult
+import psutil
+
 from netra_backend.app.core.configuration import unified_config_manager
+from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -50,9 +51,10 @@ async def check_postgres_health() -> HealthCheckResult:
 
 async def _execute_postgres_query() -> None:
     """Execute test query on PostgreSQL database."""
+    from sqlalchemy import text
+
     from netra_backend.app.db.postgres import initialize_postgres
     from netra_backend.app.db.postgres_core import async_engine
-    from sqlalchemy import text
     
     # Always get fresh reference to engine after ensuring initialization
     if async_engine is None:

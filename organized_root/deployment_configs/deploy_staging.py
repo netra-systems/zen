@@ -14,10 +14,12 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-
 # Import staging configuration alignment
 try:
-    from staging_config_alignment import StagingConfigurationManager, StagingDeploymentConfig
+    from staging_config_alignment import (
+        StagingConfigurationManager,
+        StagingDeploymentConfig,
+    )
     config_manager = StagingConfigurationManager()
     deployment_config = config_manager.deployment_config
     

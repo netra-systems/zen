@@ -9,17 +9,19 @@ import json
 import os
 import sys
 import time
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 import pytest
 import websockets
-from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
-from typing import Dict, List, Optional
 
 # Add app to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../app'))
 
 # Mock classes for testing
 from enum import Enum
+
 
 class ConnectionState(Enum):
     DISCONNECTED = "disconnected"

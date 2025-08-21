@@ -7,21 +7,30 @@ isolation between tenants, preventing data leaks and maintaining SOC2 compliance
 Tests multi-tenant data isolation with real PostgreSQL containers.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import docker
 import time
-import asyncpg
 import uuid
-from typing import Dict, Any, List, Optional
-from database.tenant_manager import TenantManager
+from typing import Any, Dict, List, Optional
+
+import asyncpg
+import docker
+import pytest
 from database.row_level_security import RowLevelSecurityManager
+from database.tenant_manager import TenantManager
 
 # Add project root to path
-
 from netra_backend.app.services.tenant_service import TenantService
 
 # Add project root to path

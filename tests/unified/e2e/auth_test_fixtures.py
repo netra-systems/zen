@@ -18,18 +18,19 @@ Key Components:
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Optional, List, Any
 from datetime import datetime, timedelta, timezone
-import pytest
+from typing import Any, Dict, List, Optional
+
 import httpx
+import pytest
 import websockets
 from websockets.exceptions import ConnectionClosedError, WebSocketException
 
-from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
-from tests.unified.config import TEST_ENDPOINTS, TEST_USERS, TEST_SECRETS
+from tests.unified.config import TEST_ENDPOINTS, TEST_SECRETS, TEST_USERS
+from tests.unified.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
 from tests.unified.real_services_manager import RealServicesManager
 
 

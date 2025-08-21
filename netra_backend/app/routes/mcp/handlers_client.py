@@ -1,12 +1,12 @@
 """MCP client handlers."""
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import User as UserInDB
-from netra_backend.app.services.mcp_service import MCPService
-from netra_backend.app.routes.mcp.models import MCPClientCreateRequest
 from netra_backend.app.routes.mcp.helpers import check_admin_access
+from netra_backend.app.routes.mcp.models import MCPClientCreateRequest
 from netra_backend.app.routes.mcp.utils import handle_client_registration_error
+from netra_backend.app.services.mcp_service import MCPService
 
 
 async def handle_client_registration(

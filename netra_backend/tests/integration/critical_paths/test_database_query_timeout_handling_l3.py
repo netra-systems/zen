@@ -11,23 +11,32 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers to validate query timeou
 enforcement, graceful degradation, and system recovery from timeout scenarios.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
 import uuid
-from typing import List, Dict, Any, Optional
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 import asyncpg
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
+import pytest
 from sqlalchemy.exc import OperationalError
-from testcontainers.postgres import PostgresContainer
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 from testcontainers.clickhouse import ClickHouseContainer
+from testcontainers.postgres import PostgresContainer
 
 from netra_backend.app.logging_config import central_logger
 

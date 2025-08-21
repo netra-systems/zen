@@ -3,20 +3,30 @@ L3 Integration Test: OAuth Authentication Flow
 Tests OAuth 2.0 authentication flows
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import time
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import jwt
-from unittest.mock import patch, AsyncMock, MagicMock
+import pytest
+
+from netra_backend.app.config import settings
 
 # Add project root to path
-
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.oauth_service import OAuthService
-from netra_backend.app.config import settings
-import time
 
 # Add project root to path
 

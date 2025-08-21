@@ -4,34 +4,39 @@ Comprehensive tests for Generation Service
 Covers all methods, error handling, and edge cases.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import asyncio
 import json
-import uuid
 import os
 import time
-import asyncio
-from datetime import datetime
-from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
+import uuid
 from collections import defaultdict
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, call, patch
 
-# Add project root to path
+import pytest
+from schemas import ContentGenParams, LogGenParams, SyntheticDataGenParams
 
-from netra_backend.app.services.generation_service import (
-
-# Add project root to path
-    update_job_status,
-    get_corpus_from_clickhouse,
-    save_corpus_to_clickhouse
-)
-from schemas import (
-    ContentGenParams,
-    LogGenParams,
-    SyntheticDataGenParams
-)
 from netra_backend.app.core.exceptions_base import NetraException
+
+# Add project root to path
+from netra_backend.app.services.generation_service import (
+    get_corpus_from_clickhouse,
+    save_corpus_to_clickhouse,
+    # Add project root to path
+    update_job_status,
+)
 
 
 @pytest.fixture

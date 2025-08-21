@@ -7,18 +7,18 @@ import asyncio
 import json
 import time
 from datetime import datetime, timezone
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.execution_context import (
-    ExecutionStrategy,
-    AgentExecutionContext,
-    AgentExecutionResult
-)
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor.execution_context import (
+    AgentExecutionContext,
+    AgentExecutionResult,
+    ExecutionStrategy,
+)
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 def create_supervisor_mocks():

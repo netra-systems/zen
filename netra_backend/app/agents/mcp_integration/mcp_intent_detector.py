@@ -4,16 +4,20 @@ Detects when user requests require MCP tool execution and routes them appropriat
 Follows strict 25-line function design and 450-line limit.
 """
 
-from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
 import re
 import time
+from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.base.interface import AgentExecutionMixin, ExecutionContext, ExecutionResult
-from netra_backend.app.schemas.core_enums import ExecutionStatus
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
+from netra_backend.app.agents.base.interface import (
+    AgentExecutionMixin,
+    ExecutionContext,
+    ExecutionResult,
+)
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.core_enums import ExecutionStatus
 
 logger = central_logger.get_logger(__name__)
 

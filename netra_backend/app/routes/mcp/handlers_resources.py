@@ -1,15 +1,21 @@
 """MCP resources handlers."""
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from fastapi import HTTPException
 
 from netra_backend.app.db.models_postgres import User as UserInDB
-from netra_backend.app.services.mcp_service import MCPService
-from netra_backend.app.routes.mcp.models import MCPResourceReadRequest
-from netra_backend.app.routes.mcp.helpers import extract_resources_from_app, get_resource_function
-from netra_backend.app.routes.mcp.utils import (
-    build_list_response, handle_list_error,
-    build_resource_result, handle_resource_error
+from netra_backend.app.routes.mcp.helpers import (
+    extract_resources_from_app,
+    get_resource_function,
 )
+from netra_backend.app.routes.mcp.models import MCPResourceReadRequest
+from netra_backend.app.routes.mcp.utils import (
+    build_list_response,
+    build_resource_result,
+    handle_list_error,
+    handle_resource_error,
+)
+from netra_backend.app.services.mcp_service import MCPService
 
 
 async def handle_resources_listing(

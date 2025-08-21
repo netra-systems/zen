@@ -9,20 +9,31 @@ failures caused by attempting to import development-only modules in production
 environments.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import os
 import sys
-import pytest
-from unittest import mock
 from typing import Any, Dict
+from unittest import mock
+
+import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-
-from netra_backend.app.core.environment_constants import Environment, EnvironmentVariables
-
+from netra_backend.app.core.environment_constants import (
+    Environment,
+    EnvironmentVariables,
+)
 
 
 class TestStagingEnvironmentImports:
@@ -116,7 +127,11 @@ class TestStagingEnvironmentImports:
         L4 Test - End-to-end validation of backend startup without dev dependencies.
         """
         # Import should not fail even without dev_launcher
-        from netra_backend.app.core.middleware_setup import setup_cors_middleware, setup_rate_limiting, setup_security_middleware
+        from netra_backend.app.core.middleware_setup import (
+            setup_cors_middleware,
+            setup_rate_limiting,
+            setup_security_middleware,
+        )
         
         app = FastAPI()
         
@@ -134,8 +149,11 @@ class TestStagingEnvironmentImports:
         
         L3 Test - Validates fallback behavior when service discovery is not available.
         """
-        from netra_backend.app.core.middleware_setup import _setup_custom_cors_middleware
         from fastapi import FastAPI
+
+        from netra_backend.app.core.middleware_setup import (
+            _setup_custom_cors_middleware,
+        )
         
         app = FastAPI()
         
@@ -157,7 +175,9 @@ class TestStagingEnvironmentImports:
         """
         monkeypatch.setenv(EnvironmentVariables.ENVIRONMENT, environment)
         
-        from netra_backend.app.core.middleware_setup import _setup_custom_cors_middleware
+        from netra_backend.app.core.middleware_setup import (
+            _setup_custom_cors_middleware,
+        )
         
         app = FastAPI()
         
@@ -184,7 +204,9 @@ class TestStagingEnvironmentImports:
         """
         monkeypatch.setenv(EnvironmentVariables.ENVIRONMENT, Environment.DEVELOPMENT.value)
         
-        from netra_backend.app.core.middleware_setup import _setup_custom_cors_middleware
+        from netra_backend.app.core.middleware_setup import (
+            _setup_custom_cors_middleware,
+        )
         
         app = FastAPI()
         

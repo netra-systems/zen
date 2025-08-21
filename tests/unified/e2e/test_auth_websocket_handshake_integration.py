@@ -15,15 +15,16 @@ NO MOCKING - Real service integration testing only.
 """
 
 import asyncio
-import pytest
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
-from tests.unified.jwt_token_helpers import JWTTestHelper, JWTSecurityTester
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import ClientConfig, ConnectionState
+import pytest
+
 from tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager
+from tests.unified.jwt_token_helpers import JWTSecurityTester, JWTTestHelper
+from tests.unified.real_client_types import ClientConfig, ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class AuthWebSocketTester:

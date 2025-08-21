@@ -4,14 +4,15 @@ Import Fix Tool for Netra Apex
 Automatically fixes import issues, especially converting relative to absolute imports.
 """
 
+import argparse
 import ast
 import os
-import sys
-from pathlib import Path
-from typing import List, Dict, Optional, Set, Tuple
-import argparse
 import shutil
+import sys
 from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
 
 class ImportFixer:
     def __init__(self, root_path: Path, dry_run: bool = False):

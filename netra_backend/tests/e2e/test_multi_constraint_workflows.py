@@ -4,19 +4,28 @@ Provides shared fixtures for multi-constraint optimization tests.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import uuid
 from typing import Dict
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.tests.e2e.multi_constraint_test_helpers import (
-
-# Add project root to path
-    create_agent_instances, build_multi_constraint_setup
+    build_multi_constraint_setup,
+    # Add project root to path
+    create_agent_instances,
 )
 
 

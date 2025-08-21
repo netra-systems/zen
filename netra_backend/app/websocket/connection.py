@@ -11,7 +11,10 @@ from netra_backend.app.logging_config import central_logger
 
 # Import all modern components
 from netra_backend.app.websocket.connection_info import ConnectionInfo
-from netra_backend.app.websocket.connection_manager import ModernConnectionManager, get_connection_manager
+from netra_backend.app.websocket.connection_manager import (
+    ModernConnectionManager,
+    get_connection_manager,
+)
 
 # Connection manager will be initialized lazily when first accessed
 connection_manager = None
@@ -24,25 +27,23 @@ def get_connection_manager_instance():
     return connection_manager
 
 # Import legacy components for backward compatibility
-from netra_backend.app.websocket.connection_info import (
-    ConnectionInfo,
-    ConnectionStats,
-    ConnectionInfoBuilder,
-    ConnectionValidator,
-    ConnectionMetrics,
-    ConnectionDurationCalculator
-)
-
 from netra_backend.app.websocket.connection_executor import (
+    ConnectionExecutionOrchestrator,
     ConnectionExecutor,
     ConnectionOperationBuilder,
-    ConnectionExecutionOrchestrator
 )
-
+from netra_backend.app.websocket.connection_info import (
+    ConnectionDurationCalculator,
+    ConnectionInfo,
+    ConnectionInfoBuilder,
+    ConnectionMetrics,
+    ConnectionStats,
+    ConnectionValidator,
+)
 from netra_backend.app.websocket.connection_reliability import (
-    ConnectionReliabilityManager,
     ConnectionCloseReliability,
-    ConnectionEstablishmentReliability
+    ConnectionEstablishmentReliability,
+    ConnectionReliabilityManager,
 )
 
 logger = central_logger.get_logger(__name__)
@@ -53,7 +54,7 @@ class ConnectionManager:
     """Legacy ConnectionManager wrapper for backward compatibility."""
     
     def __init__(self):
-        self._modern_manager = ModernConnectionManager()
+        self._modern_manager = get_connection_manager()
         
     # Delegate all methods to the modern manager
     async def connect(self, user_id: str, websocket):

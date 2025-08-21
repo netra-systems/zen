@@ -1,8 +1,9 @@
 """Configuration and validation exceptions - compliant with 25-line function limit."""
 
-from typing import List, Optional, Dict, Any
-from netra_backend.app.core.exceptions_base import NetraException
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
+from netra_backend.app.core.exceptions_base import NetraException
 
 
 class ConfigurationError(NetraException):

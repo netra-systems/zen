@@ -4,11 +4,11 @@ Provides core data structures for error classification and context management.
 """
 
 import uuid
-from dataclasses import dataclass, asdict, field
+from collections import deque
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
-from collections import deque
 
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 from netra_backend.app.core.error_recovery import OperationType

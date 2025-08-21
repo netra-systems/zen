@@ -6,9 +6,9 @@ Tests fallback chains, rate limits, timeouts, and cost tracking for 99.9% availa
 
 import asyncio
 import time
-from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, MagicMock, patch
 from decimal import Decimal
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 

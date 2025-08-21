@@ -7,36 +7,41 @@ import asyncio
 import uuid
 import warnings
 from typing import Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.services.corpus.core_unified import CorpusService as ModularCorpusService
 from netra_backend.app.services.corpus.base import ContentSource, CorpusStatus
+from netra_backend.app.services.corpus.core_unified import (
+    CorpusService as ModularCorpusService,
+)
 
 # Initialize the modular corpus service
 corpus_service = ModularCorpusService()
 from netra_backend.app.services.corpus_service_helpers import (
-    validate_corpus_creation_params,
-    validate_content_upload_params,
-    validate_document_indexing_params,
+    apply_modular_search_filters,
+    calculate_relevance_score,
+    check_modular_keyword_search,
     check_modular_service_indexing,
+    get_allowed_filter_types,
+    prepare_ranked_result,
     try_document_manager_processing,
     validate_batch_documents,
-    calculate_relevance_score,
-    prepare_ranked_result,
-    validate_search_parameters,
-    check_modular_keyword_search,
+    validate_content_upload_params,
+    validate_corpus_creation_params,
+    validate_document_creation_params,
+    validate_document_indexing_params,
     validate_filter_keys,
-    get_allowed_filter_types,
-    apply_modular_search_filters,
-    validate_document_creation_params
+    validate_search_parameters,
 )
 
 
 def get_clickhouse_client():
     """Get ClickHouse client for database operations"""
-    from netra_backend.app.db.clickhouse import get_clickhouse_client as clickhouse_get_client
+    from netra_backend.app.db.clickhouse import (
+        get_clickhouse_client as clickhouse_get_client,
+    )
     return clickhouse_get_client()
 
 

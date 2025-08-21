@@ -6,9 +6,13 @@ including approval requirements checking and user interaction flows.
 """
 
 from typing import Optional
-from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.agents.synthetic_data_generator import SyntheticDataResult, GenerationStatus
+from netra_backend.app.agents.synthetic_data_generator import (
+    GenerationStatus,
+    SyntheticDataResult,
+)
+from netra_backend.app.agents.synthetic_data_presets import WorkloadProfile
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

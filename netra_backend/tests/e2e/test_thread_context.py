@@ -2,30 +2,41 @@
 Tests context preservation, message history, and state isolation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
-from typing import List, Dict, Any, Optional
+import time
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.services.thread_service import ThreadService
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.db.models_postgres import Thread, Message, Run
-from netra_backend.app.schemas.agent_state import (
-
-# Add project root to path
-    StatePersistenceRequest, StateRecoveryRequest, 
-    CheckpointType, RecoveryType
-)
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.models_postgres import Message, Run, Thread
+from netra_backend.app.schemas.agent_state import (
+    CheckpointType,
+    RecoveryType,
+    # Add project root to path
+    StatePersistenceRequest,
+    StateRecoveryRequest,
+)
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.services.state_persistence import state_persistence_service
+
+# Add project root to path
+from netra_backend.app.services.thread_service import ThreadService
 
 
 class ContextPreservationTests:

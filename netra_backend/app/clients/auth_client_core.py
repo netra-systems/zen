@@ -3,12 +3,21 @@ Core auth service client functionality.
 Handles token validation, authentication, and service-to-service communication.
 """
 
-import httpx
 import logging
-from typing import Optional, Dict
+from typing import Dict, Optional
 
-from netra_backend.app.clients.auth_client_cache import AuthTokenCache, AuthCircuitBreakerManager, AuthServiceSettings
-from netra_backend.app.clients.auth_client_config import EnvironmentDetector, OAuthConfigGenerator, OAuthConfig
+import httpx
+
+from netra_backend.app.clients.auth_client_cache import (
+    AuthCircuitBreakerManager,
+    AuthServiceSettings,
+    AuthTokenCache,
+)
+from netra_backend.app.clients.auth_client_config import (
+    EnvironmentDetector,
+    OAuthConfig,
+    OAuthConfigGenerator,
+)
 
 logger = logging.getLogger(__name__)
 

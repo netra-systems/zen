@@ -16,13 +16,14 @@ Simple, focused E2E test runner that:
 - Provides clear pass/fail status for CI/CD integration
 """
 
+import json
 import subprocess
 import sys
 import time
-import json
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import List, Dict, Any
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List
+
 
 @dataclass
 class TestFileResult:

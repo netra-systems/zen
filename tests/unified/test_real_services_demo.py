@@ -3,11 +3,13 @@ Demo test showing how to use RealServicesManager for E2E testing.
 This is a demonstration of the real services infrastructure.
 """
 
-import pytest
 import asyncio
 from pathlib import Path
-from tests.unified.real_services_manager import create_real_services_manager
+
+import pytest
+
 from tests.unified.real_services_health import RealServicesContext, ServiceHealthMonitor
+from tests.unified.real_services_manager import create_real_services_manager
 
 
 @pytest.mark.asyncio

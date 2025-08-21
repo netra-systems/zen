@@ -17,10 +17,10 @@ Architecture:
 """
 
 import asyncio
-import uuid
 import logging
-from typing import List, Optional
+import uuid
 from dataclasses import dataclass, field
+from typing import List, Optional
 
 from tests.unified.jwt_token_helpers import JWTTestHelper
 

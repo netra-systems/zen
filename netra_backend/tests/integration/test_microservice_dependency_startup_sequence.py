@@ -16,25 +16,34 @@ Tests comprehensive microservice startup orchestration:
 - Recovery from partial startup failures
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import time
 import json
 import subprocess
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from enum import Enum
-import threading
-from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-import pytest
 import aiohttp
 import docker
+import pytest
+from docker.errors import APIError, NotFound
 from docker.models.containers import Container
-from docker.errors import NotFound, APIError
 
 from test_framework.mock_utils import mock_justified
 

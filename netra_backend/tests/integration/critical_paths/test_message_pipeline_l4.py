@@ -11,36 +11,47 @@ L4 Realism: Real message queues, real WebSocket connections, real agent processi
 Performance Requirements: p99 < 500ms, 99.9% delivery success, message ordering guarantees, DLQ < 0.1%
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
-from enum import Enum
 import statistics
-import aiohttp
-import websockets
-
-# Add project root to path
-
-from netra_backend.app.services.messaging.message_queue import MessageQueue
-from netra_backend.app.services.messaging.queue_manager import QueueManager
-from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQueue
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.services.websocket.message_router import MessageRouter
+import time
+import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add project root to path
 # from agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
+
+import aiohttp
+import pytest
+import websockets
+
+from netra_backend.app.services.messaging.dead_letter_queue import DeadLetterQueue
+
+# Add project root to path
+from netra_backend.app.services.messaging.message_queue import MessageQueue
+from netra_backend.app.services.messaging.queue_manager import QueueManager
+from netra_backend.app.services.websocket.message_router import MessageRouter
+from netra_backend.app.services.websocket_manager import WebSocketManager
+
 SupervisorAgent = AsyncMock
-from netra_backend.app.schemas.registry import WebSocketMessage, QueueMessage
+from netra_backend.app.schemas.registry import QueueMessage, WebSocketMessage
 from netra_backend.tests.unified.config import TEST_CONFIG
 from netra_backend.tests.unified.e2e.real_websocket_client import RealWebSocketClient
 

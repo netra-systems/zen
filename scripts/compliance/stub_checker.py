@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 from typing import List, Tuple
 
-from .core import Violation, ComplianceConfig, ViolationBuilder
+from .core import ComplianceConfig, Violation, ViolationBuilder
 
 
 class StubChecker:

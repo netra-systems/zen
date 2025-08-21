@@ -17,8 +17,8 @@ CRITICAL: Maximum 300 lines, modular design for reusability
 """
 
 import os
-from typing import Dict, Any, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 
 # Set testing environment before any imports
 os.environ["TESTING"] = "1"

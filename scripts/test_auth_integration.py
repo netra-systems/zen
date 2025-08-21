@@ -4,11 +4,12 @@ Test Auth Service Integration
 Verifies that the auth service is properly integrated with backend and frontend
 """
 import asyncio
-import httpx
 import json
-import sys
-from typing import Optional, Dict
 import logging
+import sys
+from typing import Dict, Optional
+
+import httpx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

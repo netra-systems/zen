@@ -5,14 +5,14 @@ Coordinates all metadata tracking components
 """
 
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from .hooks_manager import GitHooksManager
-from .database_manager import DatabaseManager
-from .config_manager import ConfigurationManager
-from .validator_generator import ValidatorGenerator
 from .archiver_generator import ArchiverGenerator
+from .config_manager import ConfigurationManager
+from .database_manager import DatabaseManager
+from .hooks_manager import GitHooksManager
 from .status_manager import StatusManager
+from .validator_generator import ValidatorGenerator
 
 
 class MetadataTrackingEnabler:

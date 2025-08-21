@@ -12,34 +12,46 @@ to validate auth service health check endpoints, dependency management,
 circuit breaker behavior, and graceful degradation patterns.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
 import os
-from typing import Dict, Any, List, Optional
+import time
 from contextlib import asynccontextmanager
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
 import httpx
+import pytest
+from testcontainers.generic import GenericContainer
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer
-from testcontainers.generic import GenericContainer
-
-from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
-
-from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig, CircuitState
-from netra_backend.app.core.health_checkers import (
-
-# Add project root to path
-    check_postgres_health, check_redis_health, check_clickhouse_health
+from netra_backend.app.core.circuit_breaker import (
+    CircuitBreaker,
+    CircuitConfig,
+    CircuitState,
 )
+from netra_backend.app.core.health_checkers import (
+    check_clickhouse_health,
+    # Add project root to path
+    check_postgres_health,
+    check_redis_health,
+)
+from netra_backend.app.logging_config import central_logger
 from test_framework.testcontainers_utils import TestcontainerHelper
 
 logger = central_logger.get_logger(__name__)
@@ -503,8 +515,8 @@ class AuthServiceHealthDependencyManager:
             results["jwt_secret_accessible"] = True
             
             # Test secret validation
-            import hmac
             import hashlib
+            import hmac
             
             test_payload = "test_token_payload"
             signature = hmac.new(

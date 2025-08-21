@@ -13,10 +13,14 @@ Business Value Justification (BVJ):
 Architecture: 450-line compliance through focused coordination testing
 """
 
-import pytest
 import asyncio
+
+import pytest
+
 from netra_backend.tests.unified.agent_orchestration_fixtures import (
-    mock_supervisor_agent, mock_sub_agents, coordination_test_data
+    coordination_test_data,
+    mock_sub_agents,
+    mock_supervisor_agent,
 )
 
 

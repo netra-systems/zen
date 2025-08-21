@@ -6,13 +6,13 @@ BVJ: Supporting infrastructure for critical integration tests
 # Import helpers that exist
 try:
     from .critical_integration_helpers import (
-        RevenueTestHelpers,
-        AuthenticationTestHelpers, 
-        WebSocketTestHelpers,
         AgentTestHelpers,
+        AuthenticationTestHelpers,
         DatabaseTestHelpers,
+        MiscTestHelpers,
         MonitoringTestHelpers,
-        MiscTestHelpers
+        RevenueTestHelpers,
+        WebSocketTestHelpers,
     )
     CRITICAL_HELPERS_AVAILABLE = True
 except ImportError:
@@ -20,7 +20,7 @@ except ImportError:
 
 # Check if the new user flow helpers exist before importing
 try:
-    from ..test_helpers.user_flow_base import UserFlowTestBase, UserFlowAssertions
+    from ..test_helpers.user_flow_base import UserFlowAssertions, UserFlowTestBase
     USER_FLOW_HELPERS_AVAILABLE = True
 except ImportError:
     USER_FLOW_HELPERS_AVAILABLE = False

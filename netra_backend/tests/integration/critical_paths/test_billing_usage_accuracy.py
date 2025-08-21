@@ -10,26 +10,36 @@ Critical Path: Usage event capture -> Metering aggregation -> Billing calculatio
 Coverage: Usage tracking accuracy, billing calculations, invoice generation, payment reconciliation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
-from decimal import Decimal
 from datetime import datetime, timedelta
-from unittest.mock import AsyncMock, patch, MagicMock
+from decimal import Decimal
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.billing.usage_tracker import UsageTracker
+from netra_backend.app.schemas.billing import BillingTier, Invoice, UsageEvent
 from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
 from netra_backend.app.services.billing.payment_processor import PaymentProcessor
-from netra_backend.app.schemas.billing import UsageEvent, BillingTier, Invoice
+
+# Add project root to path
+from netra_backend.app.services.billing.usage_tracker import UsageTracker
 
 # Add project root to path
 

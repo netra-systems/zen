@@ -3,12 +3,12 @@
 Handles processing of various exception types into standardized error responses.
 """
 
-from typing import Dict, Any, List, Union
+from typing import Any, Dict, List, Union
 from uuid import uuid4
 
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
 from pydantic import ValidationError
-from sqlalchemy.exc import SQLAlchemyError, IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from starlette.status import (
     HTTP_401_UNAUTHORIZED,
     HTTP_403_FORBIDDEN,
@@ -18,13 +18,12 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from netra_backend.app.core.exceptions import (
-    NetraException,
-    ErrorCode,
-    ErrorSeverity
-)
+from netra_backend.app.core.exceptions import ErrorCode, ErrorSeverity, NetraException
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.services.transaction_manager.types import ErrorResponse, ErrorContext
+from netra_backend.app.services.transaction_manager.types import (
+    ErrorContext,
+    ErrorResponse,
+)
 
 logger = central_logger.get_logger(__name__)
 

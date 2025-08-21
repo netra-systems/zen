@@ -14,9 +14,9 @@ Architectural Compliance:
 - Performance tracking and reporting
 """
 
-import time
 import re
-from typing import Dict, Tuple, Optional, List
+import time
+from typing import Dict, List, Optional, Tuple
 
 
 class AgentStartupTestHandler:

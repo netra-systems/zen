@@ -3,13 +3,14 @@ Model Selection Workflow Setup Helpers
 Setup functions and fixtures for model selection testing
 """
 
-import pytest
 import uuid
 from typing import Dict
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+import pytest
+
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
-from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
+from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
@@ -18,8 +19,12 @@ from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 def model_selection_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):
     """Setup real agent environment for model selection testing."""
     # Import additional agents to avoid circular dependencies
-    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
-    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
+    from netra_backend.app.agents.actions_to_meet_goals_sub_agent import (
+        ActionsToMeetGoalsSubAgent,
+    )
+    from netra_backend.app.agents.optimizations_core_sub_agent import (
+        OptimizationsCoreSubAgent,
+    )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     
     agents = {

@@ -17,9 +17,9 @@ Architecture:
 """
 
 import asyncio
-import uuid
 import logging
-from typing import List, Dict, Callable, Optional
+import uuid
+from typing import Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

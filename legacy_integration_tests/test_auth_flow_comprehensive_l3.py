@@ -9,25 +9,26 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for enterprise adoption and compliance ($347K+ MRR protection)
 """
 
-import os
-import pytest
 import asyncio
-import json
-import time
-import uuid
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
-from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
-import jwt
 import hashlib
 import hmac
+import json
+import os
+import time
+import uuid
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.main import app
-from netra_backend.app.schemas.auth_types import AuthProvider, TokenType  
-from netra_backend.app.services.security_service import SecurityService
+import jwt
+import pytest
+from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.main import app
+from netra_backend.app.schemas.auth_types import AuthProvider, TokenType
+from netra_backend.app.services.security_service import SecurityService
 
 
 class TestAuthFlowComprehensiveL3:

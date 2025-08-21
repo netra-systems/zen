@@ -11,26 +11,36 @@ L2 Test: Real internal compression components with mocked external services.
 Performance target: >50% compression ratio, <10ms compression latency.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import base64
+import gzip
 import json
 import time
 import zlib
-import gzip
-import lz4.frame
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock, MagicMock
-from uuid import uuid4
-from enum import Enum
 from dataclasses import dataclass
-import base64
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+from uuid import uuid4
+
+import lz4.frame
+import pytest
+from schemas import UserInDB
 
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 

@@ -19,28 +19,37 @@ CRITICAL OAuth Real Service Flow Test - Enterprise SSO Integration
 """
 
 import asyncio
-import pytest
-import pytest_asyncio
+import json
 import time
 import uuid
-import json
-from datetime import datetime, timezone
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
+import pytest_asyncio
 
 try:
-    from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-    from tests.unified.real_services_manager import create_real_services_manager
+    from tests.unified.oauth_test_providers import (
+        GoogleOAuthProvider,
+        OAuthUserFactory,
+        get_enterprise_config,
+    )
     from tests.unified.real_http_client import RealHTTPClient
+    from tests.unified.real_services_manager import create_real_services_manager
 except ImportError:
     # Standalone execution - add parent directories to path
     import sys
     from pathlib import Path
     sys.path.insert(0, str(Path(__file__).parent.parent))
-    from oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory, get_enterprise_config
-    from real_services_manager import create_real_services_manager
+    from oauth_test_providers import (
+        GoogleOAuthProvider,
+        OAuthUserFactory,
+        get_enterprise_config,
+    )
     from real_http_client import RealHTTPClient
+    from real_services_manager import create_real_services_manager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

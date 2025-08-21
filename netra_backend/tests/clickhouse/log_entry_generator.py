@@ -3,8 +3,8 @@ Log Entry Generator
 Generates realistic log entry data for testing
 """
 
-import uuid
 import random
+import uuid
 from datetime import datetime, timedelta
 from typing import List, Optional
 

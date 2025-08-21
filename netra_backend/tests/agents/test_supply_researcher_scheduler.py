@@ -2,27 +2,36 @@
 Tests for SupplyResearchScheduler functionality
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime, timedelta, UTC
-
-# Add project root to path
-
-from netra_backend.app.services.supply_research_scheduler import (
-
-# Add project root to path
-    SupplyResearchScheduler,
-    ResearchSchedule,
-    ScheduleFrequency
-)
-from netra_backend.app.agents.supply_researcher_sub_agent import (
-    SupplyResearcherAgent,
-    ResearchType
-)
 from background import BackgroundTaskManager
+
+from netra_backend.app.agents.supply_researcher_sub_agent import (
+    ResearchType,
+    SupplyResearcherAgent,
+)
+
+# Add project root to path
+from netra_backend.app.services.supply_research_scheduler import (
+    ResearchSchedule,
+    ScheduleFrequency,
+    # Add project root to path
+    SupplyResearchScheduler,
+)
 
 
 class TestSupplyResearchScheduler:

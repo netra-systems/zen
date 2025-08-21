@@ -14,18 +14,22 @@ REQUIREMENTS:
 - Independent tests with proper error handling
 - 25-line function limit, 450-line file limit
 """
-import pytest
-import uuid
 import json
+import uuid
 from unittest.mock import AsyncMock, patch
 
-from netra_backend.tests.unified.e2e.unified_e2e_harness import create_e2e_harness
-from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
+import pytest
+
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.auth_constants import (
-    OAuthConstants, HeaderConstants, JWTConstants, 
-    CredentialConstants, AuthErrorConstants
+    AuthErrorConstants,
+    CredentialConstants,
+    HeaderConstants,
+    JWTConstants,
+    OAuthConstants,
 )
+from netra_backend.tests.unified.e2e.unified_e2e_harness import create_e2e_harness
+from netra_backend.tests.unified.test_environment_config import TestEnvironmentType
 
 
 class StagingOAuthTestHelper:

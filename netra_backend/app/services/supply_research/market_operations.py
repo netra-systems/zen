@@ -2,15 +2,22 @@
 Market Operations - Provider comparison, anomaly detection, and market reporting
 """
 
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.db.models_postgres import AISupplyItem
-from netra_backend.app.services.supply_research.supply_item_operations import SupplyItemOperations
-from netra_backend.app.services.supply_research.price_analysis_operations import PriceAnalysisOperations
-from netra_backend.app.services.supply_research.research_session_operations import ResearchSessionOperations
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.services.supply_research.price_analysis_operations import (
+    PriceAnalysisOperations,
+)
+from netra_backend.app.services.supply_research.research_session_operations import (
+    ResearchSessionOperations,
+)
+from netra_backend.app.services.supply_research.supply_item_operations import (
+    SupplyItemOperations,
+)
 
 
 class MarketOperations:

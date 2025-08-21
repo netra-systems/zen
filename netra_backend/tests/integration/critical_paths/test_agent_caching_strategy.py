@@ -10,31 +10,40 @@ Critical Path: Cache key generation -> Hit/miss detection -> Storage -> Retrieva
 Coverage: Real caching strategies, TTL management, cache warming, intelligent invalidation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
+import hashlib
 import json
 import logging
-import hashlib
-from typing import Dict, List, Optional, Any, Union, Tuple, Callable
-from unittest.mock import AsyncMock, patch, MagicMock
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
-from enum import Enum
+import time
 from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.config import get_settings
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 
 # Add project root to path
-
-
 # Real components for L2 testing
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.core.config import get_settings
 
 logger = logging.getLogger(__name__)
 

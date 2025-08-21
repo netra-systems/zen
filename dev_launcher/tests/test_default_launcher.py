@@ -5,11 +5,11 @@ This test ensures all recent improvements are properly integrated
 when the launcher is called without arguments.
 """
 
-import unittest
-import sys
-from pathlib import Path
-from unittest.mock import patch, MagicMock, PropertyMock
 import argparse
+import sys
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, PropertyMock, patch
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

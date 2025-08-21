@@ -5,10 +5,11 @@ ARCHITECTURE: Under 300 lines, 25-line functions max
 """
 
 import os
-import asyncpg
-import redis.asyncio as redis
-import clickhouse_connect
 from typing import Optional
+
+import asyncpg
+import clickhouse_connect
+import redis.asyncio as redis
 
 # Import test environment config for environment-aware configuration
 try:

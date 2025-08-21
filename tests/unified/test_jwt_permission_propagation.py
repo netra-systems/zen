@@ -9,12 +9,13 @@ preventing unauthorized access and maintaining enterprise security compliance.
 
 Performance Target: <500ms propagation, max 300 lines, functions <25 lines.
 """
-import pytest
 import asyncio
-import time
 import json
-from typing import Dict, Any, List, Optional
+import time
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
+
+import pytest
 
 from tests.unified.clients.auth_client import AuthTestClient
 from tests.unified.clients.backend_client import BackendTestClient

@@ -4,14 +4,15 @@ Clean Slate Executor for Netra Apex
 Automates the clean slate process with safety checks
 """
 
-import os
-import sys
 import json
+import os
 import shutil
 import subprocess
-from pathlib import Path
+import sys
 from datetime import datetime
-from typing import List, Dict, Any
+from pathlib import Path
+from typing import Any, Dict, List
+
 
 class CleanSlateExecutor:
     """Executes clean slate operations for Netra Apex."""

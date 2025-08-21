@@ -1,5 +1,6 @@
 """Corpus tool execution handlers."""
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
@@ -59,8 +60,8 @@ class CorpusToolExecutor:
     
     async def _create_corpus(self, corpus_name: str, parameters: Dict[str, Any], user_id: str) -> Any:
         """Create corpus using corpus service"""
-        from netra_backend.app.services.corpus import corpus_service
         from netra_backend.app.schemas.Corpus import CorpusCreate
+        from netra_backend.app.services.corpus import corpus_service
         
         corpus_data = self._build_corpus_create_data(corpus_name, parameters)
         return await corpus_service.create_corpus(corpus_data, user_id)
@@ -184,8 +185,8 @@ class CorpusToolExecutor:
     
     async def _update_corpus(self, corpus_id: str, parameters: Dict[str, Any]) -> Any:
         """Update corpus using corpus service"""
-        from netra_backend.app.services.corpus import corpus_service
         from netra_backend.app.schemas.Corpus import CorpusUpdate
+        from netra_backend.app.services.corpus import corpus_service
         
         update_data = self._build_corpus_update_data(parameters)
         return await corpus_service.update_corpus(None, corpus_id, update_data)

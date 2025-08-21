@@ -5,8 +5,8 @@ Modular design: <300 lines, 25-line functions max
 """
 import asyncio
 import time
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 
 class MockTimeoutException(Exception):

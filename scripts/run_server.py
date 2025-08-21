@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to Python path to ensure app module can be imported
@@ -24,10 +24,12 @@ if not app_dir.exists():
     sys.exit(1)
 
 # Now import the rest
-import uvicorn
 import argparse
-import socket
 import json
+import socket
+
+import uvicorn
+
 
 def get_free_port():
     """Get a free port by binding to port 0."""

@@ -3,26 +3,36 @@ Common fixtures and utilities for integration tests.
 Extracted from oversized test_critical_missing_integration.py
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import uuid
-import tempfile
 import os
+import tempfile
+import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from unittest.mock import Mock, AsyncMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock
 
-# Add project root to path
-
-from netra_backend.app.db.models_postgres import User, Thread, Message, Run
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from netra_backend.app.db.base import Base
-from netra_backend.app.services.websocket_manager import WebSocketManager
+
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.db.base import Base
+
+# Add project root to path
+from netra_backend.app.db.models_postgres import Message, Run, Thread, User
+from netra_backend.app.services.websocket_manager import WebSocketManager
 
 # Add project root to path
 

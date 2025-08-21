@@ -4,15 +4,16 @@ Smart Cache - Ultra-optimized test result caching with invalidation
 BUSINESS VALUE: 85% cache hit rate = 6x faster test execution
 """
 
-import json
 import hashlib
+import json
 import pickle
 import sqlite3
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, Optional, List, Set, Tuple
-from dataclasses import dataclass, asdict
 import threading
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
+
 
 @dataclass
 class CacheEntry:

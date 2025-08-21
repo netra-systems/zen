@@ -24,26 +24,29 @@ SUCCESS CRITERIA:
 Architecture: Under 500 lines, functions under 25 lines
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
-import asyncpg
-import httpx
-import uuid
-import time
 import logging
 import sys
-from datetime import datetime, timezone
-from typing import Dict, List, Optional, Any, Tuple
+import time
+import uuid
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import asyncpg
+import httpx
+import pytest
+import pytest_asyncio
 
 # Add parent directories to sys.path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from netra_backend.tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
+from netra_backend.tests.unified.real_services_manager import (
+    RealServicesManager as create_real_services_manager,
+)
 
 logger = logging.getLogger(__name__)
 

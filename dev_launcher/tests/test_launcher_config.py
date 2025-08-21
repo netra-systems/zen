@@ -5,19 +5,20 @@ Tests cover LauncherConfig, ServiceDiscovery, and resource configuration.
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-import tempfile
-from pathlib import Path
 import json
-import threading
 import os
-
 import sys
+import tempfile
+import threading
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig, find_project_root
 from dev_launcher.service_discovery import ServiceDiscovery
+
 # Remove service_config import until module exists
 
 

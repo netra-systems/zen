@@ -8,10 +8,11 @@ Ensures test files follow the same quality standards as production code:
 """
 
 import os
-import sys
 import re
+import sys
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
 
 def check_file_length(filepath: Path) -> Tuple[bool, int]:
     """Check if file exceeds 300 lines"""

@@ -1,8 +1,9 @@
 """Test client for auth service with typed methods."""
 
-import httpx
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -157,8 +158,9 @@ class AuthTestClient:
         
         # Use mock token that's signed with the test JWT secret
         # This allows the backend to validate it properly
-        import jwt
         import time
+
+        import jwt
         
         # Get JWT secret from environment (set by test config)
         jwt_secret = "test-jwt-secret-key-unified-testing-32chars"

@@ -12,26 +12,42 @@ Tests comprehensive WebSocket state management, reconnection flows, and Redis-ba
 persistence for maintaining user session continuity across connection interruptions.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-import uuid
 import time
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, List, Optional
-from unittest.mock import AsyncMock, patch, MagicMock
+import uuid
 from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
 
 # Add project root to path
-
-from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
-from netra_backend.app.websocket.reconnection_handler import get_reconnection_handler, ReconnectionContext
-from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
-from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection_manager import (
+    ModernConnectionManager,
+    get_connection_manager,
+)
+from netra_backend.app.websocket.reconnection_handler import (
+    ReconnectionContext,
+    get_reconnection_handler,
+)
 
 # Add project root to path
 
@@ -619,8 +635,9 @@ class TestWebSocketStateManagement:
 
     async def _generate_test_jwt_token(self, session):
         """Generate test JWT token."""
-        import jwt
         import time
+
+        import jwt
         
         payload = {
             "user_id": session.user_id,

@@ -30,7 +30,8 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Any, Dict, List, Optional, Tuple
+
 import pytest
 
 

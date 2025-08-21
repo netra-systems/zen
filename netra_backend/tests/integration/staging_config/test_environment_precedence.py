@@ -8,16 +8,24 @@ Validates correct precedence order for configuration:
 4. Defaults
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import os
 import json
-from unittest.mock import patch, MagicMock
-from typing import Dict, Any
+import os
+from typing import Any, Dict
+from unittest.mock import MagicMock, patch
 
 # Add project root to path
-
 from netra_backend.tests.base import StagingConfigTestBase
 
 # Add project root to path

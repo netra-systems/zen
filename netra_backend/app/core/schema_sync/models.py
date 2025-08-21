@@ -5,10 +5,10 @@ Pydantic models and enums for schema synchronization.
 Maintains type safety under 450-line limit.
 """
 
-from typing import List, Optional
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import List, Optional
 
 
 class SchemaValidationLevel(Enum):

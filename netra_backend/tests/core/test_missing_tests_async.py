@@ -7,13 +7,23 @@ Tests 13, 16, 17, 20 from original missing tests covering:
 - Startup checks async validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+from typing import Any, Dict
 from unittest.mock import AsyncMock, patch
-from typing import Dict, Any
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path

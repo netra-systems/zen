@@ -3,33 +3,57 @@
 This addresses CRITICAL validation errors where LLM returns strings instead of dicts.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import json
-from typing import Dict, Any, List
-from pydantic import ValidationError
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
+from pydantic import ValidationError
 
-from netra_backend.app.agents.triage_sub_agent.models import (
-
-# Add project root to path
-    TriageResult, ToolRecommendation, Priority, Complexity,
-    ExtractedEntities, UserIntent, TriageMetadata
-)
 from netra_backend.app.agents.data_sub_agent.models import (
-    DataAnalysisResponse, PerformanceMetrics, CorrelationAnalysis,
-    UsagePattern, DataQualityMetrics, AnomalyDetectionResponse
+    AnomalyDetectionResponse,
+    CorrelationAnalysis,
+    DataAnalysisResponse,
+    DataQualityMetrics,
+    PerformanceMetrics,
+    UsagePattern,
+)
+from netra_backend.app.agents.optimizations_core_sub_agent import (
+    OptimizationsCoreSubAgent,
 )
 from netra_backend.app.agents.state import (
-    OptimizationsResult, ActionPlanResult, PlanStep, DeepAgentState, AgentMetadata
+    ActionPlanResult,
+    AgentMetadata,
+    DeepAgentState,
+    OptimizationsResult,
+    PlanStep,
+)
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+
+# Add project root to path
+from netra_backend.app.agents.triage_sub_agent.models import (
+    Complexity,
+    ExtractedEntities,
+    Priority,
+    ToolRecommendation,
+    TriageMetadata,
+    # Add project root to path
+    TriageResult,
+    UserIntent,
 )
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 
 
 class TestPydanticValidationCritical:
@@ -208,7 +232,9 @@ class TestPydanticValidationCritical:
             "errors": "error1,error2,error3"  # String instead of list
         }
         with pytest.raises(ValidationError) as exc_info:
-            from netra_backend.app.agents.data_sub_agent.models import BatchProcessingResult
+            from netra_backend.app.agents.data_sub_agent.models import (
+                BatchProcessingResult,
+            )
             BatchProcessingResult(**invalid_batch)
         assert "Input should be a valid list" in str(exc_info.value)
     async def test_data_analysis_nested_validation_error(self):

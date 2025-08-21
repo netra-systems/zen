@@ -5,6 +5,14 @@ Tests fundamental thread creation, retrieval, updates, and deletion
 from multiple angles including edge cases and concurrent operations.
 
 # Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+# Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
@@ -12,15 +20,16 @@ setup_test_path()
 
 import asyncio
 import json
-import pytest
-from typing import Dict, Any, List
-import aiohttp
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
 
-from test_framework.test_patterns import L3IntegrationTest
-from netra_backend.app.db.models_postgres import Thread, Message
+import aiohttp
+import pytest
+
+from netra_backend.app.db.models_postgres import Message, Thread
 from netra_backend.app.redis_manager import RedisManager
+from test_framework.test_patterns import L3IntegrationTest
 
 
 class TestThreadManagementBasic(L3IntegrationTest):

@@ -3,9 +3,9 @@ Secret manager types and enums.
 Defines basic types used across the secret management system.
 """
 
+from datetime import datetime, timezone
 from enum import Enum
 from typing import Set
-from datetime import datetime, timezone
 
 from netra_backend.app.schemas.config_types import EnvironmentType
 

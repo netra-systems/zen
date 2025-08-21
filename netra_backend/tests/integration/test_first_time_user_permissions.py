@@ -8,26 +8,34 @@ BVJ (Business Value Justification):
 4. Strategic Impact: Foundation for advanced optimization features
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import uuid
-from typing import Dict, Any
+from typing import Any, Dict
 from unittest.mock import patch
 
-import pytest
 import httpx
+import pytest
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.tests.first_time_user_fixtures import (
-
-# Add project root to path
-    get_mock_provider_configs, get_mock_optimization_request,
-    simulate_oauth_callback
+    get_mock_optimization_request,
+    # Add project root to path
+    get_mock_provider_configs,
+    simulate_oauth_callback,
 )
 
 

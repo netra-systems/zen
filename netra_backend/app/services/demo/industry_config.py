@@ -1,6 +1,6 @@
 """Industry-specific configuration for demo service."""
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 INDUSTRY_FACTORS = {
     "financial": {

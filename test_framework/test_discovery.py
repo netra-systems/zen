@@ -4,9 +4,9 @@ Test Discovery - Test file discovery and categorization logic
 Finds and categorizes tests across the project structure
 """
 
+from collections import defaultdict
 from pathlib import Path
 from typing import Dict, List
-from collections import defaultdict
 
 from .test_categories import TestCategories
 from .test_scanners import TestScanners

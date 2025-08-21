@@ -11,31 +11,41 @@ Coverage: Production configuration management, real service coordination, zero-d
 L4 Realism: Tests against real staging services, real Redis propagation, real secret management, production-like config updates
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import json
 import logging
 import os
 import tempfile
+import time
 import uuid
-from typing import Dict, List, Optional, Any
-from pathlib import Path
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
+# from agents.supervisor_consolidated import SupervisorAgent
+from unittest.mock import AsyncMock
 
+import pytest
+
+# Add project root to path
 from netra_backend.app.core.config import Settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.websocket_manager import WebSocketManager
 
-# Add project root to path
-# from agents.supervisor_consolidated import SupervisorAgent
-from unittest.mock import AsyncMock
 SupervisorAgent = AsyncMock
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.secret_manager import SecretManager

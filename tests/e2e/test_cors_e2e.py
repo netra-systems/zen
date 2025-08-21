@@ -4,16 +4,17 @@ CORS End-to-End Tests
 Complete authentication and user flows across services with CORS validation.
 """
 
-import os
-import pytest
 import asyncio
-import httpx
-import websockets
 import json
+import os
 import time
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+from unittest.mock import patch
+
+import httpx
+import pytest
+import websockets
 
 
 @dataclass
@@ -196,7 +197,10 @@ class TestCORSPREnvironmentValidation:
     async def test_pr_environment_dynamic_validation(self, pr_origins):
         """Test PR environment dynamic origin validation."""
         with patch.dict(os.environ, {"ENVIRONMENT": "staging"}):
-            from netra_backend.app.core.middleware_setup import is_origin_allowed, get_cors_origins
+            from netra_backend.app.core.middleware_setup import (
+                get_cors_origins,
+                is_origin_allowed,
+            )
             
             origins = get_cors_origins()
             
@@ -278,7 +282,9 @@ class TestCORSProductionStrictValidation:
     async def test_production_no_wildcard_allowed(self):
         """Test that production never allows wildcard origins."""
         with patch.dict(os.environ, {"ENVIRONMENT": "production"}):
-            from netra_backend.app.core.middleware_setup import _evaluate_wildcard_environment
+            from netra_backend.app.core.middleware_setup import (
+                _evaluate_wildcard_environment,
+            )
             
             # Production should never allow wildcards
             assert not _evaluate_wildcard_environment(), "Production should not allow wildcard origins"

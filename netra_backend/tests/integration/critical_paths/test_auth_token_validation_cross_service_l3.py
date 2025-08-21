@@ -10,20 +10,30 @@ Business Value Justification (BVJ):
 - Revenue Impact: Critical - security incidents destroy customer trust
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import os
-import pytest
 import asyncio
+import os
 import time
 import uuid
-import jwt
-from typing import Dict, Any
 from datetime import datetime, timedelta
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import jwt
+import pytest
 from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 # Add project root to path
 
@@ -34,9 +44,10 @@ os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
 from main import app
+
 from netra_backend.app.config import settings
-from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
+from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.utils.jwt_utils import JWTUtils
 
 

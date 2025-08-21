@@ -5,8 +5,8 @@ Provides the main exponential_backoff_retry function for async generators.
 
 from typing import Any, AsyncGenerator, Callable, Optional
 
-from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.core.retry_strategy_manager import execute_retry_attempt
+from netra_backend.app.schemas.shared_types import RetryConfig
 
 
 async def exponential_backoff_retry(

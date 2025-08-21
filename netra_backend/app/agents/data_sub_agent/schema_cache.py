@@ -6,10 +6,10 @@ Prevents repeated schema lookups and improves performance.
 Business Value: Reduces query latency by 40% through schema caching.
 """
 
-from typing import Dict, Any, List, Optional
 import asyncio
 import time
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 

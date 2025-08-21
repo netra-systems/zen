@@ -3,8 +3,8 @@
 Contains core types and enums used across quality validation system.
 """
 
-from typing import Dict, List, Any
 from enum import Enum
+from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
 

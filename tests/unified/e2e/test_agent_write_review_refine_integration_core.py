@@ -11,12 +11,14 @@ COMPLIANCE: File size <300 lines, Functions <8 lines, Real workflow testing
 
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 import pytest
+
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.supervisor.supervisor_agent import SupervisorAgent
-from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.config import get_config
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 class AIFactoryWorkflowCore:

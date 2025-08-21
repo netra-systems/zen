@@ -5,13 +5,14 @@ ARCHITECTURAL COMPLIANCE: <300 lines, <8 lines per function
 """
 
 import asyncio
-import time
-import psutil
 import gc
 import logging
-from typing import Dict, List, Any, Optional
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
+
+import psutil
 
 logger = logging.getLogger(__name__)
 

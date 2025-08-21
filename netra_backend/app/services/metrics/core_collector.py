@@ -4,22 +4,33 @@ Handles generation time tracking and success rate monitoring
 """
 
 import asyncio
-from datetime import datetime, UTC, timedelta
-from typing import Dict, List, Optional, Any
-from collections import deque, defaultdict
 import time
 import uuid
+from collections import defaultdict, deque
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import (
-    CorpusMetric, MetricType, OperationMetrics, TimeSeriesPoint
+    CorpusMetric,
+    MetricType,
+    OperationMetrics,
+    TimeSeriesPoint,
 )
 from netra_backend.app.services.metrics.core_collector_helpers import (
-    create_operation_data, calculate_timing_data, prepare_base_metrics_data,
-    build_operation_metrics, calculate_throughput, get_generation_metric_base_fields,
-    get_generation_metric_additional_fields, calculate_success_rate_from_counts,
-    calculate_average_time, is_entry_valid_for_time_series, create_time_series_point,
-    extract_metric_value, filter_recent_metrics
+    build_operation_metrics,
+    calculate_average_time,
+    calculate_success_rate_from_counts,
+    calculate_throughput,
+    calculate_timing_data,
+    create_operation_data,
+    create_time_series_point,
+    extract_metric_value,
+    filter_recent_metrics,
+    get_generation_metric_additional_fields,
+    get_generation_metric_base_fields,
+    is_entry_valid_for_time_series,
+    prepare_base_metrics_data,
 )
 
 logger = central_logger.get_logger(__name__)

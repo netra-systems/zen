@@ -1,6 +1,9 @@
-from langchain_core.tools import tool
 from typing import Any
+
+from langchain_core.tools import tool
+
 from netra_backend.app.services.context import ToolContext
+
 
 @tool
 async def optimization_method_researcher(context: ToolContext, function_name: str) -> str:

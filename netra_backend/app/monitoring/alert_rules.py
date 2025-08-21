@@ -4,12 +4,16 @@ Contains default alert rules, rule evaluation logic, and condition
 checking for various system metrics and agent behaviors.
 """
 
-from typing import Dict, Any, List
-from datetime import datetime, UTC, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List
 
-from netra_backend.app.monitoring.alert_types import AlertRule, AlertLevel, NotificationChannel
-from netra_backend.app.services.metrics.agent_metrics import AgentMetrics
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.monitoring.alert_types import (
+    AlertLevel,
+    AlertRule,
+    NotificationChannel,
+)
+from netra_backend.app.services.metrics.agent_metrics import AgentMetrics
 
 logger = central_logger.get_logger(__name__)
 

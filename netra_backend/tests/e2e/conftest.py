@@ -15,29 +15,30 @@ Provides fixtures for:
 - Service startup validation
 - Authentication and authorization testing
 """
+import asyncio
 import os
 import sys
-import asyncio
-import pytest
 import time
-import httpx
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Tuple
-from unittest.mock import Mock, AsyncMock, patch
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, Mock, patch
+
+import httpx
+import pytest
 
 # Add the project root directory to Python path for imports
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
+from dev_launcher.config import LauncherConfig
+from dev_launcher.launcher import DevLauncher
 from netra_backend.tests.e2e.infrastructure import (
+    LLMResponseCache,
+    LLMTestConfig,
     LLMTestManager,
     LLMTestModel,
-    LLMTestConfig,
-    LLMResponseCache
 )
-from dev_launcher.launcher import DevLauncher
-from dev_launcher.config import LauncherConfig
 
 
 @pytest.fixture(scope="function")
@@ -73,8 +74,8 @@ def _parse_test_models(models_str: str) -> List[LLMTestModel]:
 @pytest.fixture(scope="function")
 def real_llm_manager(llm_test_config: LLMTestConfig):
     """Create real LLM manager with intelligent fallback."""
-    from netra_backend.app.llm.llm_manager import LLMManager
     from netra_backend.app.core.configuration.base import unified_config_manager
+    from netra_backend.app.llm.llm_manager import LLMManager
     
     # Try to create real LLM manager first
     try:
@@ -321,6 +322,7 @@ def performance_thresholds():
 async def db_session():
     """Database session fixture for thread tests."""
     from unittest.mock import AsyncMock
+
     from sqlalchemy.ext.asyncio import AsyncSession
     
     session = AsyncMock(spec=AsyncSession)
@@ -472,7 +474,9 @@ def agent_service():
 @pytest.fixture(scope="function")
 def supervisor_agent():
     """Create supervisor agent for testing."""
-    from netra_backend.app.agents.supervisor.supervisor_consolidated import SupervisorAgent
+    from netra_backend.app.agents.supervisor.supervisor_consolidated import (
+        SupervisorAgent,
+    )
     return SupervisorAgent()
 
 
@@ -665,9 +669,9 @@ def error_simulation():
 @pytest.fixture(scope="function")
 async def conversion_environment():
     """Create comprehensive conversion test environment."""
+    import uuid
     from datetime import datetime, timezone
     from unittest.mock import AsyncMock
-    import uuid
     
     # Create metrics tracker
     class MetricsTracker:
@@ -795,6 +799,7 @@ def optimization_service():
 def test_database_session():
     """Create isolated database session for testing."""
     from unittest.mock import AsyncMock
+
     from sqlalchemy.ext.asyncio import AsyncSession
     
     session = AsyncMock(spec=AsyncSession)
@@ -841,8 +846,8 @@ def mock_clickhouse_client():
 @pytest.fixture(scope="function")
 def thread_management_service():
     """Setup thread management service for testing."""
-    from unittest.mock import AsyncMock
     import uuid
+    from unittest.mock import AsyncMock
     
     service = AsyncMock()
     service.create_thread = AsyncMock(return_value={

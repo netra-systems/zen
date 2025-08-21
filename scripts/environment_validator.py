@@ -7,23 +7,23 @@ Validates production readiness and identifies security configurations.
 """
 
 import asyncio
+import json
 import os
 import sys
-import json
 import time
-from typing import Dict, List, Any, Optional, Tuple
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Add app to path for imports
 sys.path.append(str(Path(__file__).parent / "app"))
 
 import asyncpg
-import redis
 import clickhouse_driver
+import redis
+import requests
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
-import requests
 
 
 class EnvironmentValidationResult:

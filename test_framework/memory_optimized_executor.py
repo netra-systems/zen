@@ -4,18 +4,20 @@ Memory Optimized Executor - Hardware-aware test execution with 100x gains
 BUSINESS VALUE: Reduces infrastructure costs by 75% through optimal resource usage
 """
 
-import gc
-import psutil
 import asyncio
+import gc
+import json
 import multiprocessing
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
-from typing import List, Dict, Optional, Tuple, Any
-from pathlib import Path
 from datetime import datetime
-import json
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-from .smart_cache import SmartCache
+import psutil
+
 from .priority_engine import PriorityEngine
+from .smart_cache import SmartCache
+
 
 class MemoryMonitor:
     """Real-time memory monitoring for hardware optimization"""

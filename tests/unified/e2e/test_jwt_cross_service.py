@@ -8,19 +8,30 @@ Performance requirement: Token operations <2s (network-aware)
 Business Value: $50K+ MRR - Prevents authentication failures across service boundaries
 CRITICAL: Real token flows only - no mocking of internal authentication systems
 """
-import pytest
 import asyncio
-import httpx
-import websockets
-import jwt
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Optional, Any
+from typing import Any, Dict, Optional
 
+import httpx
+import jwt
+import pytest
+import websockets
+
+from netra_backend.tests.unified.e2e.token_lifecycle_helpers import (
+    PerformanceBenchmark,
+    TokenLifecycleManager,
+    WebSocketSessionManager,
+)
+from netra_backend.tests.unified.jwt_token_helpers import (
+    JWTSecurityTester,
+    JWTTestFixtures,
+    JWTTestHelper,
+)
+from netra_backend.tests.unified.test_data_factory import (
+    create_test_service_credentials,
+)
 from netra_backend.tests.unified.test_harness import UnifiedTestHarness
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper, JWTTestFixtures, JWTSecurityTester
-from netra_backend.tests.unified.e2e.token_lifecycle_helpers import TokenLifecycleManager, WebSocketSessionManager, PerformanceBenchmark
-from netra_backend.tests.unified.test_data_factory import create_test_service_credentials
 
 
 class CrossServiceJWTValidator:

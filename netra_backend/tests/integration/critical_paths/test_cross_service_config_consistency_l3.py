@@ -10,25 +10,34 @@ Critical Path: Configuration synchronization -> Consistency validation -> Drift 
 Coverage: Multi-service config sync, version compatibility checks, drift detection mechanisms, automated reconciliation, service mesh integration
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import json
-import time
-import logging
 import hashlib
-from typing import Dict, List, Optional, Any, Set, Tuple
+import json
+import logging
+import time
 from dataclasses import dataclass, field
-from unittest.mock import patch, AsyncMock, MagicMock
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional, Set, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from config import get_config
 
 # Add project root to path
-
 from netra_backend.app.core.cache.redis_manager import RedisManager
 from test_framework.mock_utils import mock_justified
 

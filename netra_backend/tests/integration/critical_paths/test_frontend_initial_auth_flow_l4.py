@@ -18,27 +18,35 @@ L4 Test Coverage:
 - Session persistence across page refresh
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-import httpx
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from urllib.parse import urlparse, parse_qs
+from typing import Any, Dict, List, Optional
+from urllib.parse import parse_qs, urlparse
+
+import httpx
+import pytest
 
 # Add project root to path
-
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
-# Add project root to path
+    CriticalPathMetrics,
+    # Add project root to path
     L4StagingCriticalPathTestBase,
-    CriticalPathMetrics
 )
 
 

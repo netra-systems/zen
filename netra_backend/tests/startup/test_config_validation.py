@@ -4,20 +4,33 @@ Tests for file checking, config loading, endpoint validation, and main workflow.
 Compliance: <300 lines, 25-line max functions, modular design.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from pathlib import Path
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from pathlib import Path
 from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
 
 from dev_launcher.config_validator import (
-    ServiceConfigValidator, ConfigStatus, ConfigValidationResult, ValidationContext
+    ConfigStatus,
+    ConfigValidationResult,
+    ServiceConfigValidator,
+    ValidationContext,
 )
-from dev_launcher.service_config import ServicesConfiguration, ResourceMode
+from dev_launcher.service_config import ResourceMode, ServicesConfiguration
 
 
 @pytest.fixture

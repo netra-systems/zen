@@ -13,20 +13,29 @@ Business Value Justification (BVJ):
 Architecture: 450-line compliance with 25-line function limit enforced
 """
 
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, Optional
-from unittest.mock import AsyncMock, patch
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, patch
 
-from netra_backend.app.core.fallback_coordinator import FallbackCoordinator
+import pytest
+
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker, CircuitConfig
-from netra_backend.app.core.degradation_manager import GracefulDegradationManager, DegradationLevel
+from netra_backend.app.core.degradation_manager import (
+    DegradationLevel,
+    GracefulDegradationManager,
+)
+from netra_backend.app.core.fallback_coordinator import FallbackCoordinator
 from netra_backend.app.core.resilience.fallback import (
-    UnifiedFallbackChain, StaticResponseFallback, CacheLastKnownFallback,
-    AlternativeServiceFallback, FallbackConfig, FallbackStrategy, FallbackPriority
+    AlternativeServiceFallback,
+    CacheLastKnownFallback,
+    FallbackConfig,
+    FallbackPriority,
+    FallbackStrategy,
+    StaticResponseFallback,
+    UnifiedFallbackChain,
 )
 
 
@@ -229,7 +238,10 @@ class TestDegradedModeActivation:
     @pytest.mark.asyncio  
     async def test_service_specific_degradation(self, degradation_manager):
         """Test individual service degradation without affecting others"""
-        from netra_backend.app.core.degradation_types import DegradationPolicy, ServiceTier
+        from netra_backend.app.core.degradation_types import (
+            DegradationPolicy,
+            ServiceTier,
+        )
         
         policy = DegradationPolicy(tier=ServiceTier.OPTIONAL, max_degradation=DegradationLevel.EMERGENCY)
         mock_strategy = AsyncMock()

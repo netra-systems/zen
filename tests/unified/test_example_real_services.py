@@ -3,10 +3,10 @@ Example test demonstrating the new real service testing infrastructure.
 Shows how to use dev_launcher-based fixtures for E2E testing.
 """
 
-import pytest
 import asyncio
 import os
 
+import pytest
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(

@@ -21,9 +21,10 @@ TEST SCENARIOS:
 4. MFA challenge after SSO authentication
 5. Session invalidation on IdP logout
 """
-import pytest
 import time
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
 
 from tests.unified.e2e.enterprise_sso_helpers import EnterpriseSSOTestHarness
 

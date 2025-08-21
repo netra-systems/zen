@@ -8,22 +8,36 @@ Tests critical paths including middleware setup, route registration,
 error handling, and security configurations.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, MagicMock
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
 
 # Add project root to path
-
 from netra_backend.app.core.app_factory import (
-
-# Add project root to path
-    create_fastapi_app, create_app, register_error_handlers,
-    setup_middleware, setup_security_middleware, setup_request_middleware,
-    register_api_routes, setup_root_endpoint, initialize_oauth
+    create_app,
+    # Add project root to path
+    create_fastapi_app,
+    initialize_oauth,
+    register_api_routes,
+    register_error_handlers,
+    setup_middleware,
+    setup_request_middleware,
+    setup_root_endpoint,
+    setup_security_middleware,
 )
 from netra_backend.app.core.exceptions_base import NetraException
 
@@ -184,7 +198,9 @@ class TestSecurityMiddleware:
     def test_path_traversal_middleware_added(self, mock_app):
         """Path traversal protection middleware is added."""
         with patch('app.middleware.path_traversal_protection.path_traversal_protection_middleware'):
-            from netra_backend.app.core.app_factory import _add_path_traversal_middleware
+            from netra_backend.app.core.app_factory import (
+                _add_path_traversal_middleware,
+            )
             _add_path_traversal_middleware(mock_app)
             mock_app.middleware.assert_called_with("http")
 
@@ -193,7 +209,9 @@ class TestSecurityMiddleware:
         with patch('app.middleware.security_headers.SecurityHeadersMiddleware') as mock_middleware:
             with patch('app.config.settings') as mock_settings:
                 mock_settings.environment = "development"
-                from netra_backend.app.core.app_factory import _add_security_headers_middleware
+                from netra_backend.app.core.app_factory import (
+                    _add_security_headers_middleware,
+                )
                 _add_security_headers_middleware(mock_app)
                 mock_app.add_middleware.assert_called_once()
 
@@ -240,7 +258,9 @@ class TestRouteRegistration:
                 with patch('app.core.app_factory._register_route_modules') as mock_register:
                     mock_import.return_value = {}
                     mock_config.return_value = {}
-                    from netra_backend.app.core.app_factory import _import_and_register_routes
+                    from netra_backend.app.core.app_factory import (
+                        _import_and_register_routes,
+                    )
                     _import_and_register_routes(mock_app)
                     mock_import.assert_called_once()
                     mock_config.assert_called_once()
@@ -313,7 +333,9 @@ class TestConfigurationMethods:
         with patch('app.core.app_factory.register_error_handlers') as mock_errors:
             with patch('app.core.app_factory.setup_middleware') as mock_middleware:
                 with patch('app.core.app_factory.initialize_oauth') as mock_oauth:
-                    from netra_backend.app.core.app_factory import _configure_app_handlers
+                    from netra_backend.app.core.app_factory import (
+                        _configure_app_handlers,
+                    )
                     _configure_app_handlers(mock_app)
                     mock_errors.assert_called_once_with(mock_app)
                     mock_middleware.assert_called_once_with(mock_app)

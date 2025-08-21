@@ -4,9 +4,9 @@ Defines enums, dataclasses and interfaces for quality assessment.
 Module follows 450-line limit with 25-line function limit.
 """
 
-from typing import Dict, List
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List
 
 
 class QualityLevel(Enum):

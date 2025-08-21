@@ -7,20 +7,26 @@ Consolidated log filtering based on startup mode as per spec v2.0.
 import os
 import re
 import time
-from typing import Dict, Any, Optional, Set
 from enum import Enum
+from typing import Any, Dict, Optional, Set
 
 try:
     from .filter_patterns import (
-        NOISE_PATTERNS, CRITICAL_PATTERNS, KEY_STARTUP_MESSAGES,
-        CRITICAL_STARTUP_FAILURES, COMMON_NOISE_PATTERNS,
-        STANDARD_CONDENSE_PATTERNS
+        COMMON_NOISE_PATTERNS,
+        CRITICAL_PATTERNS,
+        CRITICAL_STARTUP_FAILURES,
+        KEY_STARTUP_MESSAGES,
+        NOISE_PATTERNS,
+        STANDARD_CONDENSE_PATTERNS,
     )
 except ImportError:
     from filter_patterns import (
-        NOISE_PATTERNS, CRITICAL_PATTERNS, KEY_STARTUP_MESSAGES,
-        CRITICAL_STARTUP_FAILURES, COMMON_NOISE_PATTERNS,
-        STANDARD_CONDENSE_PATTERNS
+        COMMON_NOISE_PATTERNS,
+        CRITICAL_PATTERNS,
+        CRITICAL_STARTUP_FAILURES,
+        KEY_STARTUP_MESSAGES,
+        NOISE_PATTERNS,
+        STANDARD_CONDENSE_PATTERNS,
     )
 
 

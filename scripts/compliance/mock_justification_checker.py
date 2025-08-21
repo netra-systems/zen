@@ -6,12 +6,12 @@ Per testing.xml: A mock without justification is a violation.
 """
 
 import ast
-import re
 import glob
+import re
 from pathlib import Path
 from typing import List, Optional, Set, Tuple
 
-from .core import Violation, ComplianceConfig
+from .core import ComplianceConfig, Violation
 
 
 class MockJustificationChecker:

@@ -1,11 +1,13 @@
 """Secret management utilities for configuration loading."""
 
 import os
-from typing import Dict, Any, Optional, List
-from netra_backend.app.logging_config import central_logger as logger
+from typing import Any, Dict, List, Optional
+
 from google.cloud import secretmanager
 from tenacity import retry, stop_after_attempt, wait_fixed
+
 from netra_backend.app.core.configuration.base import config_manager
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class SecretManagerError(Exception):
@@ -153,7 +155,10 @@ class SecretManager:
     
     def _fetch_all_secrets(self, client: secretmanager.SecretManagerServiceClient, is_staging: bool) -> Dict[str, Any]:
         """Fetch all required secrets with proper tracking."""
-        from .secret_manager_helpers import get_secret_names_list, initialize_fetch_tracking
+        from .secret_manager_helpers import (
+            get_secret_names_list,
+            initialize_fetch_tracking,
+        )
         secret_names = get_secret_names_list()
         successful_secrets, failed_secrets = initialize_fetch_tracking()
         secrets = self._process_secret_names(client, secret_names, is_staging, successful_secrets, failed_secrets)

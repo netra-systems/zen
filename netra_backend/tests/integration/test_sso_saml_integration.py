@@ -24,37 +24,43 @@ Architecture Requirements:
 - Comprehensive error handling
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import json
 import base64
+import json
+import time
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
 
-from sqlalchemy.ext.asyncio import AsyncSession
+import pytest
+from auth_integration.auth import get_current_user
+from clients.auth_client_core import AuthServiceClient
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_integration.auth import get_current_user
-
-# Add project root to path
-
-from netra_backend.app.db.session import get_db_session
-from clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
-from netra_backend.app.schemas.registry import WebSocketMessage
-
-from netra_backend.tests.helpers.sso_saml_components import (
 
 # Add project root to path
-    SAMLAssertionValidator,
-    EnterpriseTokenManager,
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.schemas.registry import WebSocketMessage
+from netra_backend.tests.helpers.sso_saml_components import (
     EnterpriseSessionManager,
-    MockIdPErrorGenerator
+    EnterpriseTokenManager,
+    MockIdPErrorGenerator,
+    # Add project root to path
+    SAMLAssertionValidator,
 )
 
 

@@ -6,15 +6,24 @@ These tests ensure the message routing fix is working end-to-end.
 ROOT CAUSE ADDRESSED: Messages were being validated but never forwarded to agent service.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
 from logging_config import central_logger
 
 # Add project root to path
@@ -29,9 +38,9 @@ class TestWebSocketAgentIntegration:
     
     async def test_end_to_end_message_flow(self):
         """Test complete flow: WebSocket message → Agent → Response."""
-        from netra_backend.app.services.agent_service_core import AgentService
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
         from netra_backend.app.schemas.Config import AppConfig
+        from netra_backend.app.services.agent_service_core import AgentService
         
         # Setup mocks
         config = AppConfig()
@@ -82,8 +91,9 @@ class TestWebSocketAgentIntegration:
     
     async def test_agent_registration_during_startup(self):
         """Test that agents are properly registered during startup."""
-        from netra_backend.app.startup_module import _create_agent_supervisor
         from fastapi import FastAPI
+
+        from netra_backend.app.startup_module import _create_agent_supervisor
         
         app = FastAPI()
         app.state.llm_manager = Mock()

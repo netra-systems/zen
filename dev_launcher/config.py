@@ -6,11 +6,15 @@ import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Optional, Dict, Any
-from netra_backend.app.core.network_constants import ServicePorts, HostConstants
+from typing import Any, Dict, Optional
+
 from netra_backend.app.core.environment_constants import (
-    Environment, EnvironmentVariables, get_current_environment, get_current_project_id
+    Environment,
+    EnvironmentVariables,
+    get_current_environment,
+    get_current_project_id,
 )
+from netra_backend.app.core.network_constants import HostConstants, ServicePorts
 
 logger = logging.getLogger(__name__)
 
@@ -227,8 +231,9 @@ class LauncherConfig:
     def _load_service_config(self):
         """Load service configuration."""
         try:
-            from dev_launcher.service_config import load_or_create_config
             import sys
+
+            from dev_launcher.service_config import load_or_create_config
             interactive = sys.stdin.isatty() and not self.non_interactive
             self._services_config = load_or_create_config(interactive=interactive)
         except ImportError:

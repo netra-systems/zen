@@ -6,14 +6,15 @@ Extracted from test_complete_oauth_chat_journey.py for modularity.
 """
 
 import asyncio
-import uuid
-import time
-import httpx
 import json
+import time
+import uuid
+from typing import Any, Dict, Optional
+from unittest.mock import AsyncMock, patch
+from urllib.parse import parse_qs, urlparse
+
+import httpx
 import websockets
-from typing import Dict, Any, Optional
-from unittest.mock import patch, AsyncMock
-from urllib.parse import urlparse, parse_qs
 
 from netra_backend.tests.unified.oauth_test_providers import GoogleOAuthProvider
 

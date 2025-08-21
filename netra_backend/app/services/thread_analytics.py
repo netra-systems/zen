@@ -8,7 +8,8 @@ Business Value Justification (BVJ):
 - Revenue Impact: Analytics features for Enterprise tier customers
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 async def get_analytics_dashboard(dashboard_request: dict) -> dict:
     """Get analytics dashboard - placeholder implementation"""

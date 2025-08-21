@@ -8,15 +8,15 @@ Business Value: Prevents agent failures worth $100K+ MRR through robust error re
 
 import asyncio
 import time
-from typing import Dict, Any, Optional, List, Callable, Awaitable
-from enum import Enum
 from dataclasses import dataclass
 from datetime import datetime, timezone
+from enum import Enum
+from typing import Any, Awaitable, Callable, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
+from netra_backend.app.websocket.connection_info import ConnectionInfo, ConnectionState
 
 logger = central_logger.get_logger(__name__)
 
@@ -146,7 +146,9 @@ class WebSocketErrorRecoveryHandler:
         
         if context.retry_count < self.max_recovery_attempts:
             # Network errors are good candidates for reconnection
-            from netra_backend.app.websocket.reconnection_handler import get_reconnection_handler
+            from netra_backend.app.websocket.reconnection_handler import (
+                get_reconnection_handler,
+            )
             
             reconnection_handler = get_reconnection_handler()
             # Create a mock connection info for reconnection preparation

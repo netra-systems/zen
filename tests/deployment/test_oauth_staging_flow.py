@@ -3,9 +3,10 @@ Deployment test for OAuth flow in staging environment.
 This test verifies the complete OAuth flow works correctly when deployed.
 """
 
-import httpx
 import asyncio
 import os
+
+import httpx
 
 
 class OAuthStagingTester:

@@ -8,21 +8,21 @@ import hashlib
 import random
 import uuid
 from multiprocessing import Pool, cpu_count
-from typing import Dict, Any
+from typing import Any, Dict
 
 import numpy as np
 import pandas as pd
 from faker import Faker
 
 from netra_backend.app.data.content_corpus import DEFAULT_CONTENT_CORPUS
-from netra_backend.app.services.generation_job_manager import (
-    update_job_status,
-    load_corpus_from_file,
-    create_output_directory,
-    save_job_result_to_file,
-    finalize_job_completion
-)
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.generation_job_manager import (
+    create_output_directory,
+    finalize_job_completion,
+    load_corpus_from_file,
+    save_job_result_to_file,
+    update_job_status,
+)
 
 logger = central_logger.get_logger(__name__)
 

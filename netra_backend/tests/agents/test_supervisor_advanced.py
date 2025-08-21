@@ -4,30 +4,47 @@ Split from large test file for architecture compliance
 Test classes: TestSupervisorAdvancedFeatures
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock, patch, call
-from datetime import datetime, timezone
 import json
 import time
+from datetime import datetime, timezone
+from unittest.mock import AsyncMock, MagicMock, call, patch
 
-# Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.supervisor.execution_context import (
-
-# Add project root to path
-    ExecutionStrategy,
-    AgentExecutionContext,
-    AgentExecutionResult
+import pytest
+from schemas import (
+    AgentCompleted,
+    AgentStarted,
+    SubAgentLifecycle,
+    SubAgentUpdate,
+    WebSocketMessage,
 )
-from netra_backend.app.agents.state import DeepAgentState  # Use the state module version with methods
-from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
-from netra_backend.app.llm.llm_manager import LLMManager
+
+from netra_backend.app.agents.state import (
+    DeepAgentState,  # Use the state module version with methods
+)
+from netra_backend.app.agents.supervisor.execution_context import (
+    AgentExecutionContext,
+    AgentExecutionResult,
+    # Add project root to path
+    ExecutionStrategy,
+)
+
+# Add project root to path
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 class TestSupervisorAdvancedFeatures:

@@ -10,26 +10,38 @@ L3 Test: Real Redis Streams with producer/consumer patterns, acknowledgments,
 retries, dead letter queue, and stream processing validation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timezone, timedelta
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import patch
 
+import pytest
 import redis.asyncio as redis
-from netra_backend.app.redis_manager import RedisManager
 from logging_config import central_logger
 
-# Add project root to path
+from netra_backend.app.redis_manager import RedisManager
 
-from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
+# Add project root to path
+from netra_backend.tests.helpers.redis_l3_helpers import (
+    RedisContainer,
+    verify_redis_connection,
+)
 
 # Add project root to path
 

@@ -1,9 +1,13 @@
 """Demo ROI calculation handlers."""
-from fastapi import BackgroundTasks
-from typing import Dict, Any
+from typing import Any, Dict
 
+from fastapi import BackgroundTasks
+
+from netra_backend.app.schemas.demo_schemas import (
+    ROICalculationRequest,
+    ROICalculationResponse,
+)
 from netra_backend.app.services.demo_service import DemoService
-from netra_backend.app.schemas.demo_schemas import ROICalculationRequest, ROICalculationResponse
 
 
 async def handle_roi_calculation(

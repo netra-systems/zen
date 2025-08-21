@@ -11,25 +11,28 @@ Business Value: Critical for customer insights and AI optimization
 BVJ: Growth & Enterprise | Data Intelligence | +15% performance fee capture
 """
 
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus,
-    WebSocketManagerProtocol, AgentExecutionMixin
+    AgentExecutionMixin, BaseExecutionInterface, ExecutionContext, ExecutionResult, ExecutionStatus, WebSocketManagerProtocol
 )
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.core.error_handlers.agents.execution_error_handler import ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.errors import ExecutionErrorHandler
-from netra_backend.app.core.exceptions import NetraException
 
 # Import modular helpers
 from netra_backend.app.agents.data_sub_agent.analysis_engine_helpers import (
-    StatisticsHelpers, TrendHelpers, SeasonalityHelpers, OutlierHelpers
+    OutlierHelpers,
+    SeasonalityHelpers,
+    StatisticsHelpers,
+    TrendHelpers,
 )
+from netra_backend.app.core.exceptions import NetraException
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

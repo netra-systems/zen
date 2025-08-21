@@ -20,33 +20,46 @@ Mock-Real Spectrum: L3 (Real auth with simulated users)
 - Simulated concurrent users
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import hashlib
+import random
 import time
 import uuid
-from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set
 from unittest.mock import AsyncMock, MagicMock, patch
-import random
-import hashlib
 
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    LoginRequest, LoginResponse, SessionInfo,
-    UserProfile, AuthError, RateLimitError
-)
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.db.redis_manager import get_redis_manager
-from netra_backend.app.db.postgres import get_async_db
+import pytest
 from clients.auth_client import auth_client
+
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.db.redis_manager import get_redis_manager
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    AuthError,
+    # Add project root to path
+    LoginRequest,
+    LoginResponse,
+    RateLimitError,
+    SessionInfo,
+    UserProfile,
+)
 
 
 @dataclass

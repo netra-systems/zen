@@ -14,9 +14,9 @@ REQUIREMENTS:
 - Data consistency verification
 - 450-line file limit, 25-line function limit
 """
-import uuid
 import time
-from typing import Dict, Any, List, Optional
+import uuid
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.schemas.UserPlan import PlanTier

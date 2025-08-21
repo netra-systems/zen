@@ -5,12 +5,12 @@ These tests ensure that the launcher correctly validates the actual project
 structure and fails appropriately when directories are missing.
 """
 
-import unittest
-import sys
-from pathlib import Path
-import tempfile
 import shutil
-from unittest.mock import patch, MagicMock
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))

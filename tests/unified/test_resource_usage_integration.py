@@ -16,12 +16,17 @@ Architecture:
 - Tests system behavior under concurrent load patterns
 """
 
-import pytest
 import asyncio
-from typing import Dict, List, Any
 from datetime import datetime, timezone
+from typing import Any, Dict, List
 
-from tests.unified.test_resource_usage import ResourceMonitor, ResourceLimits, ResourceMetrics
+import pytest
+
+from tests.unified.test_resource_usage import (
+    ResourceLimits,
+    ResourceMetrics,
+    ResourceMonitor,
+)
 
 
 class TestResourceEfficiencyIntegration:

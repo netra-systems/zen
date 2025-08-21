@@ -16,16 +16,21 @@ This module handles fallback response generation and agent output replacement
 when quality validation fails. All functions are ≤8 lines.
 """
 
-from typing import Dict, Any, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 
-from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.services.fallback_response_service import (
-    FallbackResponseService, FallbackContext, FailureReason
-)
-from netra_backend.app.services.quality_gate_service import ValidationResult, ContentType
+from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.fallback_response_service import (
+    FailureReason,
+    FallbackContext,
+    FallbackResponseService,
+)
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    ValidationResult,
+)
 
 logger = central_logger.get_logger(__name__)
 

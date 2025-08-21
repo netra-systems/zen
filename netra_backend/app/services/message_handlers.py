@@ -1,40 +1,65 @@
-from typing import Dict, Optional, List, TYPE_CHECKING, TypedDict, Union, Any
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, Union
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.websockets import WebSocketDisconnect
+
+from netra_backend.app.db.models_postgres import Run, Thread
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.service_interfaces import IMessageHandlerService
-from netra_backend.app.db.models_postgres import Thread, Run
 
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor import SupervisorAgent
-from netra_backend.app.services.thread_service import ThreadService
+import json
+
 from netra_backend.app.schemas.registry import (
-    UserMessagePayload,
-    CreateThreadPayload,
-    SwitchThreadPayload,
-    DeleteThreadPayload,
-    ThreadHistoryResponse,
     AgentCompletedPayload,
+    AgentResponseData,
     AgentStoppedPayload,
-    AgentResponseData
+    CreateThreadPayload,
+    DeleteThreadPayload,
+    SwitchThreadPayload,
+    ThreadHistoryResponse,
+    UserMessagePayload,
 )
-from netra_backend.app.services.websocket.ws_manager import manager
-from netra_backend.app.services.message_handler_utils import handle_thread_history as _handle_thread_history
-from netra_backend.app.services.message_handler_utils import handle_stop_agent as _handle_stop_agent
 from netra_backend.app.services.message_handler_base import MessageHandlerBase
+from netra_backend.app.services.message_handler_utils import (
+    handle_stop_agent as _handle_stop_agent,
+)
+from netra_backend.app.services.message_handler_utils import (
+    handle_thread_history as _handle_thread_history,
+)
+from netra_backend.app.services.message_processing import (
+    execute_and_persist as _execute_and_persist,
+)
+from netra_backend.app.services.message_processing import (
+    handle_disconnect as _handle_disconnect,
+)
+from netra_backend.app.services.message_processing import (
+    handle_processing_error as _handle_processing_error,
+)
+from netra_backend.app.services.message_processing import (
+    is_connection_error as _is_connection_error,
+)
+from netra_backend.app.services.message_processing import (
+    mark_run_completed as _mark_run_completed,
+)
+from netra_backend.app.services.message_processing import (
+    persist_response as _persist_response,
+)
 from netra_backend.app.services.message_processing import (
     process_user_message_with_notifications as _process_user_message,
-    execute_and_persist as _execute_and_persist,
-    persist_response as _persist_response,
-    save_assistant_message as _save_assistant_message,
-    mark_run_completed as _mark_run_completed,
-    send_response_safely as _send_response_safely,
-    handle_disconnect as _handle_disconnect,
-    handle_processing_error as _handle_processing_error,
-    is_connection_error as _is_connection_error,
-    send_error_safely as _send_error_safely
 )
-import json
+from netra_backend.app.services.message_processing import (
+    save_assistant_message as _save_assistant_message,
+)
+from netra_backend.app.services.message_processing import (
+    send_error_safely as _send_error_safely,
+)
+from netra_backend.app.services.message_processing import (
+    send_response_safely as _send_response_safely,
+)
+from netra_backend.app.services.thread_service import ThreadService
+from netra_backend.app.services.websocket.ws_manager import manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -482,7 +507,9 @@ class MessageHandlerService(IMessageHandlerService):
             
             # Import the example message handler with deferred import to avoid circular dependencies
             try:
-                from netra_backend.app.handlers.example_message_handler import handle_example_message
+                from netra_backend.app.handlers.example_message_handler import (
+                    handle_example_message,
+                )
             except ImportError as import_error:
                 logger.error(f"Failed to import example message handler: {import_error}")
                 await manager.send_error(user_id, "Example message handler not available")

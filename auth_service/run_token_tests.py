@@ -22,16 +22,16 @@ os.environ.update({
 })
 
 # Import test classes
-from netra_backend.tests.test_token_validation import (
-    TestJWTTokenGeneration,
-    TestJWTTokenValidation,
-    TestJWTTokenExpiry,
-    TestJWTRefreshFlow,
+from tests.unified.test_token_validation import (
     TestJWTClaimsExtraction,
-    TestJWTSignatureVerification,
-    TestJWTTokenRevocation,
     TestJWTKeyRotation,
-    TestJWTSecurityTampering
+    TestJWTRefreshFlow,
+    TestJWTSecurityTampering,
+    TestJWTSignatureVerification,
+    TestJWTTokenExpiry,
+    TestJWTTokenGeneration,
+    TestJWTTokenRevocation,
+    TestJWTTokenValidation,
 )
 
 

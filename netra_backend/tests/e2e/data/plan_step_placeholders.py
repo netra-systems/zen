@@ -19,7 +19,13 @@ Usage:
 """
 
 from typing import List
-from netra_backend.tests.e2e.data.default_plans import PlanStep, PlanStepType, PlanPriority, ValidationCriteria
+
+from netra_backend.tests.e2e.data.default_plans import (
+    PlanPriority,
+    PlanStep,
+    PlanStepType,
+    ValidationCriteria,
+)
 
 
 def _create_validation_criteria(threshold: float, unit: str, method: str, timeout: int = 24) -> ValidationCriteria:

@@ -22,35 +22,49 @@ Mock-Real Spectrum: L4 (Production-like staging environment)
 - Real monitoring
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import httpx
 import json
-import websockets
-from typing import Dict, Any, List, Optional, Tuple
+import logging
+import os
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
-import os
+
+import httpx
 import psutil
-import logging
+import pytest
+import websockets
 
-# Add project root to path
-
-
-# Import auth types
-from netra_backend.app.schemas.auth_types import (
-    Token, TokenData, LoginRequest, LoginResponse,
-    SessionInfo, HealthResponse, AuthError
-)
+from netra_backend.app.clients.auth_client import auth_client
 
 # Test infrastructure
 from netra_backend.app.core.config import get_settings
-from netra_backend.app.clients.auth_client import auth_client
+
+# Add project root to path
+# Import auth types
+from netra_backend.app.schemas.auth_types import (
+    AuthError,
+    HealthResponse,
+    LoginRequest,
+    LoginResponse,
+    SessionInfo,
+    Token,
+    TokenData,
+)
 
 
 @dataclass

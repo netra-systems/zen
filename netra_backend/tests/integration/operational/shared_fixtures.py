@@ -8,25 +8,31 @@ BVJ:
 - Revenue Impact: Maintains system reliability and operational efficiency
 """
 
-import pytest
 import asyncio
 import json
-import uuid
 import time
+import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
-from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
+
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.error_recovery import ErrorRecoveryManager
+from netra_backend.app.core.health.interface import HealthInterface
+from netra_backend.app.services.demo.session_manager import SessionManager
+from netra_backend.app.services.permission_service import PermissionService
+from netra_backend.app.services.quality_monitoring.service import (
+    QualityMonitoringService,
+)
+from netra_backend.app.services.supply_research_scheduler import SupplyResearchScheduler
 
 # Operational imports
-from netra_backend.app.services.unified_tool_registry.registry import UnifiedToolRegistry
-from netra_backend.app.services.supply_research_scheduler import SupplyResearchScheduler
-from netra_backend.app.core.error_recovery import ErrorRecoveryManager
-from netra_backend.app.services.quality_monitoring.service import QualityMonitoringService
-from netra_backend.app.services.demo.session_manager import SessionManager
-from netra_backend.app.core.health.interface import HealthInterface
-from netra_backend.app.services.permission_service import PermissionService
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.services.unified_tool_registry.registry import (
+    UnifiedToolRegistry,
+)
 
 
 class MockOperationalInfrastructure:

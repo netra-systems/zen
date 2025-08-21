@@ -4,19 +4,29 @@ Tests for load handling, throughput, and resource management.
 Total MRR Protection: $80K
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import psutil
 import gc
-from typing import Dict, Any, List, Optional
-from unittest.mock import MagicMock, AsyncMock, patch
+import json
+import time
 from dataclasses import dataclass
 from datetime import datetime
-import json
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import psutil
+import pytest
 
 from netra_backend.app.logging_config import central_logger
 

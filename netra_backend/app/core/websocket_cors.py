@@ -6,6 +6,7 @@ which require special handling compared to regular HTTP CORS.
 
 import re
 from typing import List, Optional, Union
+
 from fastapi import Request, WebSocket
 from starlette.middleware.cors import CORSMiddleware
 from starlette.types import ASGIApp, Receive, Scope, Send

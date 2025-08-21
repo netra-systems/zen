@@ -2,8 +2,8 @@
 """Run integration tests with proper environment setup."""
 
 import os
-import sys
 import subprocess
+import sys
 
 # Set required environment variables
 os.environ.update({

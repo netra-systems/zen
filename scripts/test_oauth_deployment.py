@@ -3,9 +3,9 @@
 Script to test OAuth flow after deployment.
 Run this after deploying to staging to ensure OAuth is working correctly.
 """
-import sys
-import os
 import asyncio
+import os
+import sys
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

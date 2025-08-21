@@ -2,7 +2,9 @@
 
 import os
 import sys
+
 from google.cloud import secretmanager
+
 
 def fetch_secret(client, project_id, secret_name, version="latest"):
     """Fetch a single secret from Secret Manager."""

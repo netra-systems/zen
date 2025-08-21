@@ -1,6 +1,7 @@
 # netra_apex/utils/predictors.py
 
-from netra_backend.app.schemas.workload_models import WorkloadProfile, SupplyRecord
+from netra_backend.app.schemas.workload_models import SupplyRecord, WorkloadProfile
+
 
 class TokenizationInefficiencyPredictor:
     """

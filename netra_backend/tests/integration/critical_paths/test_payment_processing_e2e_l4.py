@@ -20,26 +20,44 @@ Test Coverage:
 - Payment state transitions and error recovery
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-import httpx
-from typing import Dict, Any, List, Optional
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import httpx
+import pytest
 
-from netra_backend.tests.integration.critical_paths.test_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from netra_backend.tests.unified.e2e.payment_flow_manager import PaymentFlowManager, MockPaymentProvider
-from netra_backend.tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from netra_backend.app.schemas.UserPlan import PlanTier
+
+# Add project root to path
+from netra_backend.tests.integration.critical_paths.test_base import (
+    CriticalPathMetrics,
+    L4StagingCriticalPathTestBase,
+)
+from netra_backend.tests.unified.e2e.clickhouse_billing_helper import (
+    ClickHouseBillingHelper,
+)
+from netra_backend.tests.unified.e2e.payment_flow_manager import (
+    MockPaymentProvider,
+    PaymentFlowManager,
+)
 
 # Add project root to path
 

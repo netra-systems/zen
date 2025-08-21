@@ -10,27 +10,36 @@ Critical Path: Workflow definition -> Agent coordination -> State management -> 
 Coverage: Real workflow engine, agent orchestration, conditional routing, parallel execution
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, List, Optional, Any, Callable
-from unittest.mock import AsyncMock, patch, MagicMock
+import time
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
+import pytest
 
-
-# Real components for L2 testing
-from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.core.circuit_breaker import CircuitBreaker
-from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
 from netra_backend.app.services.llm.llm_manager import LLMManager
+
+# Add project root to path
+# Real components for L2 testing
+from netra_backend.app.services.redis_service import RedisService
 
 logger = logging.getLogger(__name__)
 

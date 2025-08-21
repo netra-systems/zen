@@ -6,8 +6,8 @@ Each handler checks if it can handle the error type, otherwise passes to next ha
 """
 
 from abc import ABC, abstractmethod
-from typing import Optional, Dict
 from enum import Enum
+from typing import Dict, Optional
 
 
 class FailureType(Enum):

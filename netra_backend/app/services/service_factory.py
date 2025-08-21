@@ -4,7 +4,7 @@ Provides factory functions to create service instances.
 Follows 450-line limit with 25-line function limit.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 def _create_agent_service():
@@ -31,8 +31,8 @@ def _create_message_handler_service():
 
 def _create_core_services() -> Dict[str, Any]:
     """Create core service instances."""
-    from netra_backend.app.services.thread_service import ThreadService
     from netra_backend.app.services.corpus_service import CorpusService
+    from netra_backend.app.services.thread_service import ThreadService
     
     return {
         'agent_service': _create_agent_service(),
@@ -43,9 +43,9 @@ def _create_core_services() -> Dict[str, Any]:
 
 def _create_data_services() -> Dict[str, Any]:
     """Create data service instances."""
-    from netra_backend.app.services.synthetic_data_service import SyntheticDataService
     from netra_backend.app.services.security_service import SecurityService
     from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
+    from netra_backend.app.services.synthetic_data_service import SyntheticDataService
     
     return {
         'synthetic_data_service': SyntheticDataService(),

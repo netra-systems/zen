@@ -14,28 +14,29 @@ ARCHITECTURE: Real database connections, no mocks, comprehensive cross-service t
 """
 
 import asyncio
-import uuid
-import pytest
 import time
-from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+import uuid
 from contextlib import asynccontextmanager
-
-# Import test infrastructure
-from tests.unified.database_test_connections import DatabaseTestConnections
-from tests.unified.database_test_operations import (
-    UserDataOperations, 
-    ChatMessageOperations, 
-    SessionCacheOperations
-)
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 # Import real database managers
 import asyncpg
 import clickhouse_connect
+import pytest
 import redis.asyncio as redis
 
 # Central logging
 from netra_backend.app.logging_config import central_logger
+
+# Import test infrastructure
+from tests.unified.database_test_connections import DatabaseTestConnections
+from tests.unified.database_test_operations import (
+    ChatMessageOperations,
+    SessionCacheOperations,
+    UserDataOperations,
+)
+
 logger = central_logger.get_logger(__name__)
 
 

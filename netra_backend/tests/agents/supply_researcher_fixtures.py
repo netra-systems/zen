@@ -3,14 +3,15 @@ Shared test fixtures for SupplyResearcherAgent tests
 Modular design with ≤300 lines, ≤8 lines per function
 """
 
-import pytest
 import json
-from unittest.mock import Mock, AsyncMock
 from datetime import datetime
 from decimal import Decimal
+from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
+import pytest
+
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 

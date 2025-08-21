@@ -5,7 +5,8 @@ import ast
 import os
 import re
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
 
 def find_test_files(root_dir: str = ".") -> List[Path]:
     """Find all Python test files."""

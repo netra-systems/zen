@@ -6,17 +6,18 @@ Architecture: <300 lines, async/await pattern, comprehensive AAA testing.
 """
 
 import asyncio
-import time
-import pytest
-import httpx
 import logging
 import os
 import sys
-from pathlib import Path
-from typing import Dict, Any, Optional, List
-from dataclasses import dataclass
-from unittest.mock import AsyncMock, patch
+import time
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import httpx
+import pytest
 
 # Add auth_service to Python path for imports
 auth_service_path = Path(__file__).parent.parent.parent / "auth_service"

@@ -1,14 +1,23 @@
 """Service delegation utilities for route handlers."""
 
-from typing import Dict, Any, List, Optional
-from netra_backend.app.core.error_handlers import handle_service_error, handle_circuit_breaker_error
-from netra_backend.app.services.circuit_breaker_monitor import circuit_monitor, metrics_collector
+from typing import Any, Dict, List, Optional
+
+from netra_backend.app.core.error_handlers import (
+    handle_circuit_breaker_error,
+    handle_service_error,
+)
+from netra_backend.app.services.circuit_breaker_monitor import (
+    circuit_monitor,
+    metrics_collector,
+)
 
 
 async def delegate_circuit_dashboard() -> Dict[str, Any]:
     """Delegate circuit breaker dashboard request."""
     try:
-        from netra_backend.app.services.circuit_breaker_monitor import get_circuit_health_dashboard
+        from netra_backend.app.services.circuit_breaker_monitor import (
+            get_circuit_health_dashboard,
+        )
         return await get_circuit_health_dashboard()
     except Exception as e:
         handle_circuit_breaker_error(e, "dashboard")

@@ -20,34 +20,47 @@ Mock-Real Spectrum: L3 (Real service with controlled failures)
 - Controlled crash simulation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import os
 import signal
-from typing import Dict, Any, List, Optional, Tuple
+import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
+
 import psutil
-
-# Add project root to path
-
-from netra_backend.app.schemas.auth_types import (
-
-# Add project root to path
-    Token, LoginRequest, LoginResponse,
-    SessionInfo, HealthResponse, ServiceStatus
-)
-from netra_backend.app.core.config import get_settings
-from netra_backend.app.db.redis_manager import get_redis_manager
-from netra_backend.app.db.postgres import get_async_db
+import pytest
 from clients.auth_client import auth_client
+
 from netra_backend.app.core.circuit_breaker import CircuitBreaker
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.core.monitoring import metrics_collector
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.db.redis_manager import get_redis_manager
+
+# Add project root to path
+from netra_backend.app.schemas.auth_types import (
+    HealthResponse,
+    LoginRequest,
+    LoginResponse,
+    ServiceStatus,
+    SessionInfo,
+    # Add project root to path
+    Token,
+)
 
 
 @dataclass

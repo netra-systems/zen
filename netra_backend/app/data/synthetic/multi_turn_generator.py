@@ -1,12 +1,17 @@
 # Multi-Turn Trace Generation Module for Synthetic Data
 # Handles complex conversation trace generation with tool usage
 
+import hashlib
 import random
 import uuid
-import hashlib
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from faker import Faker
-from netra_backend.app.log_formatter import format_log_entry, _generate_contextual_response
+
+from netra_backend.app.log_formatter import (
+    _generate_contextual_response,
+    format_log_entry,
+)
 
 fake = Faker()
 

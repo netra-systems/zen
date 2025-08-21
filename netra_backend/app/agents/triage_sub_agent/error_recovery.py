@@ -126,7 +126,7 @@ class TriageErrorRecovery:
     
     def _get_current_timestamp(self) -> str:
         """Get current timestamp for recovery metadata."""
-        from datetime import datetime, UTC
+        from datetime import UTC, datetime
         return datetime.now(UTC).isoformat()
     
     def should_attempt_recovery(self, error: Exception, operation: str) -> bool:

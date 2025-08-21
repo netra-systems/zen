@@ -5,11 +5,12 @@ with proper rollback and commit handling.
 """
 
 from typing import Callable
+
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from netra_backend.app.services.transaction_manager import transaction_manager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.transaction_manager import transaction_manager
 
 logger = central_logger.get_logger(__name__)
 

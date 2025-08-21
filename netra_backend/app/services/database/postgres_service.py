@@ -3,10 +3,10 @@ PostgreSQL service for database operations.
 Provides high-level interface for PostgreSQL database interactions.
 """
 
-from typing import Dict, List, Any, Optional, Union
 import asyncio
 import logging
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 

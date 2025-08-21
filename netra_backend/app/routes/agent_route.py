@@ -1,27 +1,37 @@
 """Agent routes - Main agent endpoint handlers."""
+from typing import Any, Dict, Optional
+
 from fastapi import APIRouter, Depends, Request, WebSocket
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from netra_backend.app.schemas.Request import RequestModel
-from typing import Dict, Any, Optional
-from netra_backend.app.services.state_persistence import state_persistence_service
-from netra_backend.app.services.agent_service import get_agent_service, AgentService
-from netra_backend.app.dependencies import get_llm_manager, DbDep
-from netra_backend.app.llm.llm_manager import LLMManager
 from pydantic import BaseModel, Field
-from netra_backend.app.routes.agent_route_validators import (
-    validate_agent_state, validate_agent_state_exists, 
-    build_agent_status_response, build_agent_state_response,
-    build_thread_runs_response, handle_run_agent_error,
-    handle_agent_message_error
+
+from netra_backend.app.agents.supervisor_consolidated import (
+    SupervisorAgent as Supervisor,
+)
+from netra_backend.app.dependencies import DbDep, get_llm_manager
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.routes.agent_route_processors import (
+    execute_message_processing,
+    process_multimodal_message,
+    process_with_context,
+    process_with_fallback,
 )
 from netra_backend.app.routes.agent_route_streaming import (
-    get_agent_service_for_streaming, create_streaming_response,
-    stream_agent_response
+    create_streaming_response,
+    get_agent_service_for_streaming,
+    stream_agent_response,
 )
-from netra_backend.app.routes.agent_route_processors import (
-    process_multimodal_message, process_with_context, 
-    process_with_fallback, execute_message_processing
+from netra_backend.app.routes.agent_route_validators import (
+    build_agent_state_response,
+    build_agent_status_response,
+    build_thread_runs_response,
+    handle_agent_message_error,
+    handle_run_agent_error,
+    validate_agent_state,
+    validate_agent_state_exists,
 )
+from netra_backend.app.schemas.Request import RequestModel
+from netra_backend.app.services.agent_service import AgentService, get_agent_service
+from netra_backend.app.services.state_persistence import state_persistence_service
 
 router = APIRouter()
 

@@ -4,16 +4,17 @@ Extracted from test_agent_resource_isolation.py and other files.
 """
 
 import asyncio
-import time
-import logging
-import threading
 import gc
-import psutil
+import logging
 import os
-from typing import Dict, List, Optional, Any, NamedTuple
-from dataclasses import dataclass, field
-from contextlib import asynccontextmanager
+import threading
+import time
 from collections import defaultdict, deque
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, NamedTuple, Optional
+
+import psutil
 
 logger = logging.getLogger(__name__)
 

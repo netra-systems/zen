@@ -10,23 +10,32 @@ Tests configuration from multiple sources:
 - Configuration validation and hot-reload
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import os
 import tempfile
-import json
-from unittest.mock import Mock, patch, mock_open
-from typing import Dict, Any
 from pathlib import Path
+from typing import Any, Dict
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
 
 from config import get_config, reload_config, validate_configuration
 
 # Add project root to path
-
-from netra_backend.app.core.configuration.base import get_unified_config, config_manager
+from netra_backend.app.core.configuration.base import config_manager, get_unified_config
 from netra_backend.app.schemas.Config import AppConfig
 from test_framework.mock_utils import mock_justified
 

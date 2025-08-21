@@ -4,19 +4,20 @@ CRITICAL E2E Test #3: 10 concurrent users with real agent processing
 ARCHITECTURAL COMPLIANCE: <300 lines, <8 lines per function
 """
 
-import pytest
 import asyncio
 import time
-import psutil
 import uuid
-from typing import List, Dict, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_http_client import RealHTTPClient
-from tests.unified.real_client_types import ClientConfig
+import psutil
+import pytest
+
 from tests.unified.database_test_connections import DatabaseConnectionManager
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.real_http_client import RealHTTPClient
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class ConcurrentUserSession:

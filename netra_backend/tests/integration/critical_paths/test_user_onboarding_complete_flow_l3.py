@@ -14,6 +14,7 @@ This test validates the entire new user journey from signup to first AI agent de
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
@@ -22,12 +23,13 @@ import os
 import sys
 import time
 import uuid
-from pathlib import Path
-from typing import Optional, Dict, Any, List
-import aiohttp
-import websockets
-import pytest
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import pytest
+import websockets
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

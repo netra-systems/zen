@@ -5,16 +5,26 @@ Test 8: WebSocket Reconnect State Recovery - $10K MRR
 Test 9: Database Transaction Rollback Safety - $15K MRR
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from typing import Dict, Any, List
-from unittest.mock import Mock, AsyncMock, patch
-from datetime import datetime
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 # Add project root to path
 
@@ -143,7 +153,7 @@ class TestDatabaseRollback:
     
     async def test_transaction_atomicity(self):
         """Test database transactions are atomic."""
-        from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+        from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
         from sqlalchemy.orm import sessionmaker
         
         engine = create_async_engine("sqlite+aiosqlite:///:memory:")

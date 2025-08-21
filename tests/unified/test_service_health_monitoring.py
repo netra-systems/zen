@@ -19,18 +19,23 @@ Implementation uses REAL services with comprehensive error handling and SLA vali
 
 import asyncio
 import time
+from datetime import UTC, datetime
+from typing import Any, Dict, List
+
 import httpx
 import pytest
-from typing import Dict, Any, List
-from datetime import datetime, UTC
 
+from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.unified.health_check_core import (
-    HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
-    create_healthy_result, create_service_error_result,
-    calculate_overall_health_score, get_critical_services
+    HEALTH_STATUS,
+    SERVICE_ENDPOINTS,
+    HealthCheckResult,
+    calculate_overall_health_score,
+    create_healthy_result,
+    create_service_error_result,
+    get_critical_services,
 )
 from netra_backend.tests.unified.health_service_checker import ServiceHealthChecker
-from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -228,8 +233,9 @@ class ServiceHealthMonitor:
         """Check PostgreSQL database dependency."""
         try:
             # Import here to avoid circular imports
-            from netra_backend.app.db.postgres import async_engine
             from sqlalchemy import text
+
+            from netra_backend.app.db.postgres import async_engine
             
             async with async_engine.begin() as conn:
                 await conn.execute(text("SELECT 1"))

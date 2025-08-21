@@ -6,7 +6,7 @@ Focused module for database operations
 
 import sqlite3
 from pathlib import Path
-from typing import Tuple, Any
+from typing import Any, Tuple
 
 
 class DatabaseManager:

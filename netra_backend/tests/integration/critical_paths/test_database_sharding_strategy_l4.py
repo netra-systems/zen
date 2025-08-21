@@ -12,33 +12,42 @@ Shard key selection -> Data distribution -> Cross-shard queries -> Shard rebalan
 Coverage: Real PostgreSQL sharding, ClickHouse distribution, cross-shard joins, rebalancing operations, staging validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import hashlib
+import json
 import time
 import uuid
-import json
-import hashlib
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
+# Add project root to path
+# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+from unittest.mock import AsyncMock
+
+import pytest
 import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-
-# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
-from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
-from netra_backend.app.db.postgres import AsyncSessionLocal, get_async_session
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
-from netra_backend.app.db.models_user import User, UserPlan
-from netra_backend.app.db.models_content import Thread, Message
 from netra_backend.app.core.health_checkers import HealthChecker
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+from netra_backend.app.db.models_content import Message, Thread
+from netra_backend.app.db.models_user import User, UserPlan
+from netra_backend.app.db.postgres import AsyncSessionLocal, get_async_session
 
 
 # Mock sharding components for L4 testing

@@ -10,13 +10,17 @@ Business Value Justification (BVJ):
 - Strategic Impact: Critical for production stability under sustained high load
 """
 
-import pytest
 import asyncio
-import time
 import json
 import logging
+import time
+
+import pytest
+
 from netra_backend.tests.e2e.test_helpers.performance_base import (
-    LoadTestResults, ThroughputAnalyzer, HIGH_VOLUME_CONFIG
+    HIGH_VOLUME_CONFIG,
+    LoadTestResults,
+    ThroughputAnalyzer,
 )
 
 logger = logging.getLogger(__name__)

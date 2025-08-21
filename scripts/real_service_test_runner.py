@@ -4,15 +4,17 @@ Real Service Test Runner
 ULTRA DEEP THINK: Module-based architecture - Test runner extracted for 450-line compliance
 """
 
-import os
-import sys
 import json
-import time
+import os
 import subprocess
-from pathlib import Path
+import sys
+import time
 from datetime import datetime
-from typing import List, Optional, Tuple, Dict
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+
 from real_service_test_metrics import RealServiceTestMetrics
+
 
 class EnhancedRealServiceTestRunner:
     """Enhanced runner for real service tests with detailed reporting"""

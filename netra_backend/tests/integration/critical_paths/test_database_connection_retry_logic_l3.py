@@ -11,24 +11,33 @@ L3 Test: Uses real PostgreSQL and ClickHouse containers with controlled network
 disruption to validate connection retry logic, backoff strategies, and recovery.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import subprocess
 import time
 import uuid
-import subprocess
-from typing import List, Dict, Any, Optional
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
 import asyncpg
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+import pytest
+from sqlalchemy.exc import DisconnectionError, OperationalError
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import OperationalError, DisconnectionError
-from testcontainers.postgres import PostgresContainer
 from testcontainers.clickhouse import ClickHouseContainer
+from testcontainers.postgres import PostgresContainer
 
 from netra_backend.app.logging_config import central_logger
 

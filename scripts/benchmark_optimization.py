@@ -12,15 +12,15 @@ Business Value Justification (BVJ):
 - Revenue Impact: Justifies optimization investment with measurable ROI
 """
 
+import asyncio
+import json
 import os
+import statistics
+import subprocess
 import sys
 import time
-import asyncio
-import subprocess
 from pathlib import Path
-from typing import Dict, List, Any, Tuple
-import json
-import statistics
+from typing import Any, Dict, List, Tuple
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

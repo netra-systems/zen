@@ -19,17 +19,18 @@ Test Coverage:
 - Environment configuration
 """
 
-import pytest
 import asyncio
-import aiohttp
 import json
-import time
 import os
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
 import subprocess
+import time
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import aiohttp
 import psutil
-from unittest.mock import patch, AsyncMock, MagicMock
+import pytest
 
 
 class StartupValidationTester:

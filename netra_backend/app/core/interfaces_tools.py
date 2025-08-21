@@ -4,19 +4,27 @@ Main ToolExecutionEngine implementation with proper modular design.
 Follows 450-line limit and 25-line functions.
 """
 
-from typing import Dict, Any, Optional, List, TYPE_CHECKING
-from abc import ABC, abstractmethod
-from datetime import datetime, UTC
 import inspect
+from abc import ABC, abstractmethod
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
+from netra_backend.app.logging_config import central_logger
 
 if TYPE_CHECKING:
     from netra_backend.app.db.models_postgres import User
-    from netra_backend.app.schemas.Tool import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
-    from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
+    from netra_backend.app.schemas.Tool import (
+        SimpleToolPayload,
+        ToolInput,
+        ToolResult,
+        ToolStatus,
+    )
+    from netra_backend.app.schemas.ToolPermission import (
+        PermissionCheckResult,
+        ToolExecutionContext,
+    )
     from netra_backend.app.services.tool_permission_service import ToolPermissionService
 
 logger = central_logger.get_logger(__name__)
@@ -134,7 +142,7 @@ class ToolExecutionEngine:
     def _validate_input_schema(self, tool: UnifiedTool, arguments: Dict[str, Any]) -> None:
         """Validate input arguments against tool schema."""
         if tool.input_schema:
-            from jsonschema import validate, ValidationError
+            from jsonschema import ValidationError, validate
             try:
                 validate(instance=arguments, schema=tool.input_schema)
             except ValidationError as ve:
@@ -208,7 +216,11 @@ class ToolExecutionEngine:
     
     def _create_success_result(self, tool_input: 'ToolInput', result: Any) -> 'ToolResult':
         """Create successful tool result for simple interface."""
-        from netra_backend.app.schemas.unified_tools import ToolResult, ToolStatus, SimpleToolPayload
+        from netra_backend.app.schemas.unified_tools import (
+            SimpleToolPayload,
+            ToolResult,
+            ToolStatus,
+        )
         
         payload = SimpleToolPayload(result=result)
         return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, payload=payload)

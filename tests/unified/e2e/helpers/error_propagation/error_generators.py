@@ -12,24 +12,25 @@ for comprehensive error propagation testing.
 
 import asyncio
 import json
-import time
 import logging
-import uuid
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone
-from pathlib import Path
-from dataclasses import dataclass
 
 # Add project root to path for imports
 import sys
+import time
+import uuid
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
+from tests.unified.e2e.config import TEST_ENDPOINTS, TEST_USERS
 from tests.unified.e2e.helpers.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 from tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
-from tests.unified.e2e.config import TEST_USERS, TEST_ENDPOINTS
 from tests.unified.e2e.real_http_client import RealHTTPClient
+from tests.unified.e2e.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

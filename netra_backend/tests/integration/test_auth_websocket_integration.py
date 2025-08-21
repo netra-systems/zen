@@ -5,21 +5,29 @@ Components: Auth Service → Backend → WebSocket Manager
 Critical: Users can't interact without successful auth→WS flow
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
-from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock, patch
-import jwt
 from datetime import datetime, timedelta
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock, patch
 
+import jwt
+import pytest
 from schemas import UserInDB
 
 # Add project root to path
-
 from netra_backend.app.config import settings
 
 # Add project root to path
@@ -126,8 +134,8 @@ class TestAuthToWebSocketFlow:
     
     async def test_auth_service_unavailable_fallback(self):
         """Test fallback when auth service is unavailable."""
-        from netra_backend.app.services.auth_service import AuthService
         from netra_backend.app.core.circuit_breaker import CircuitBreaker
+        from netra_backend.app.services.auth_service import AuthService
         
         circuit_breaker = CircuitBreaker(
             failure_threshold=3,

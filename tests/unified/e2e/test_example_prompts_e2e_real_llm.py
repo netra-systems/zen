@@ -19,24 +19,26 @@ ARCHITECTURAL COMPLIANCE:
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 import asyncio
 import os
 import time
-from typing import Dict, Any, List
-from unittest.mock import patch, AsyncMock
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import pytest_asyncio
 
-from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas.Agent import AgentRequest
 from netra_backend.agent_conversation_helpers import (
     AgentConversationTestCore,
+    AgentConversationTestUtils,
     ConversationFlowValidator,
-    AgentConversationTestUtils
 )
+from netra_backend.app.schemas.Agent import AgentRequest
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @dataclass

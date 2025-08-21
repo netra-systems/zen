@@ -8,17 +8,17 @@ This script demonstrates the complete feature flag testing system capabilities:
 4. Feature status management
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from test_framework.feature_flags import get_feature_flag_manager, FeatureStatus
-from test_framework.decorators import feature_flag, tdd_test, requires_feature
+from test_framework.decorators import feature_flag, requires_feature, tdd_test
+from test_framework.feature_flags import FeatureStatus, get_feature_flag_manager
 
 
 def print_header(title: str):

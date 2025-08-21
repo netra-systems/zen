@@ -3,10 +3,10 @@ Model selection service for choosing optimal LLM models.
 Selects models based on requirements, performance, and cost constraints.
 """
 
-from typing import Dict, List, Optional, Any, Tuple
 import logging
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

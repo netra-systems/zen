@@ -10,23 +10,33 @@ Business Value Justification (BVJ):
 Core first-time user journey tests from registration to first successful interaction.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
+import tempfile
 import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any
-from unittest.mock import Mock, AsyncMock
-import tempfile
+from typing import Any, Dict
+from unittest.mock import AsyncMock, Mock
 
-# Add project root to path
-
-from netra_backend.app.db.models_user import User, ToolUsageLog
-from netra_backend.app.db.models_agent import Thread, Message
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
+
 from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_agent import Message, Thread
+
+# Add project root to path
+from netra_backend.app.db.models_user import ToolUsageLog, User
 
 # Add project root to path
 

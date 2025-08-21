@@ -29,37 +29,57 @@ CRITICAL SECURITY SCENARIOS TESTED:
 Architecture: 450-line module limit, 25-line function limit enforced
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import uuid
 import time
+import uuid
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
+import pytest
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
 from fastapi import HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from argon2.exceptions import VerifyMismatchError, InvalidHashError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-
 from netra_backend.app.auth_integration.auth import (
-
-# Add project root to path
-    get_current_user, get_current_user_optional, require_admin,
-    require_developer, require_permission, get_password_hash,
-    verify_password, create_access_token, validate_token_jwt,
-    _validate_user_permission, _check_password_rehash_needed
+    _check_password_rehash_needed,
+    _validate_user_permission,
+    create_access_token,
+    # Add project root to path
+    get_current_user,
+    get_current_user_optional,
+    get_password_hash,
+    require_admin,
+    require_developer,
+    require_permission,
+    validate_token_jwt,
+    verify_password,
 )
-from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
 from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 from netra_backend.app.schemas.auth_types import (
-    LoginRequest, LoginResponse, TokenData, TokenResponse,
-    AuthProvider, UserPermission, SessionInfo, AuditLog
+    AuditLog,
+    AuthProvider,
+    LoginRequest,
+    LoginResponse,
+    SessionInfo,
+    TokenData,
+    TokenResponse,
+    UserPermission,
 )
 
 

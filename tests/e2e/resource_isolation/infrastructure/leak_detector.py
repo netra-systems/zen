@@ -5,10 +5,10 @@ Detects resource leaks in agent processes.
 """
 
 import asyncio
-import time
 import logging
-from typing import Dict, List
+import time
 from collections import defaultdict
+from typing import Dict, List
 
 from tests.e2e.resource_isolation.infrastructure.data_models import ResourceMetrics
 

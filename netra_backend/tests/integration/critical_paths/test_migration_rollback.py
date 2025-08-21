@@ -10,23 +10,37 @@ Critical Path: Migration execution -> Failure detection -> Rollback initiation -
 Coverage: Migration safety, rollback mechanisms, data integrity, recovery validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
 import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import time
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
-
-from netra_backend.app.services.database.rollback_manager_core import rollback_manager, RollbackManager, RollbackState
-from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
-from netra_backend.app.db.postgres_core import initialize_postgres
+import pytest
 import sqlalchemy as sa
 from sqlalchemy.sql import text
+
+from netra_backend.app.db.postgres_core import initialize_postgres
+
+# Add project root to path
+from netra_backend.app.services.database.rollback_manager_core import (
+    RollbackManager,
+    RollbackState,
+    rollback_manager,
+)
+from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
 
 # Add project root to path
 

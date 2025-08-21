@@ -26,25 +26,25 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Import all test modules to register their tests
-from tests.e2e.resource_isolation.test_monitoring_baseline import test_per_tenant_resource_monitoring_baseline, test_monitoring_accuracy_validation
+from tests.e2e.resource_isolation.test_monitoring_baseline import (
     test_per_tenant_resource_monitoring_baseline,
     test_monitoring_accuracy_validation
 )
 
-from tests.e2e.resource_isolation.test_quota_enforcement import test_cpu_memory_quota_enforcement
+from tests.e2e.resource_isolation.test_quota_enforcement import (
     test_cpu_memory_quota_enforcement
 )
 
-from tests.e2e.resource_isolation.test_leak_detection import test_resource_leak_detection_and_prevention
+from tests.e2e.resource_isolation.test_leak_detection import (
     test_resource_leak_detection_and_prevention
 )
 
-from tests.e2e.resource_isolation.test_performance_isolation import test_performance_isolation_under_load
+from tests.e2e.resource_isolation.test_performance_isolation import (
     test_performance_isolation_under_load
 )
 
 # Import fixtures
-from tests.e2e.resource_isolation.test_suite import resource_isolation_suite, tenant_agents
+from tests.e2e.resource_isolation.test_suite import (
     resource_isolation_suite,
     tenant_agents
 )

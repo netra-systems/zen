@@ -7,9 +7,10 @@ Follows CLAUDE.md requirements: intelligent decomposition strategies.
 
 import ast
 import re
-from pathlib import Path
-from typing import List, Dict, Any, Tuple, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 
 @dataclass
 class FunctionDecomposition:

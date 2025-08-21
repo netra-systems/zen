@@ -4,9 +4,10 @@ Generation patterns for synthetic data
 
 import random
 import uuid
+from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional
+
 import numpy as np
-from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Any, Optional, Callable, Awaitable, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from netra_backend.app.schemas.Generation import SyntheticDataGenParams

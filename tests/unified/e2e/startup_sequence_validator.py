@@ -4,17 +4,19 @@ Business Value: Ensures proper service dependency order for system availability
 Modular design: <300 lines, 25-line functions max
 """
 import asyncio
-import time
-from typing import Dict, Any, List
-from pathlib import Path
 import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, List
 
 # Add project root to path for imports
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 from netra_backend.tests.unified.e2e.mock_services_manager import (
-    MockE2EServiceOrchestrator, MockDatabaseConnections, MockHttpClient
+    MockDatabaseConnections,
+    MockE2EServiceOrchestrator,
+    MockHttpClient,
 )
 
 

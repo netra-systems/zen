@@ -30,10 +30,11 @@ ARCHITECTURAL COMPLIANCE:
 import asyncio
 import json
 import time
-from typing import Dict, Any, List, Optional, Union, Set
+from typing import Any, Dict, List, Optional, Set, Union
+
 import pytest
 
-from tests.unified.config import TEST_USERS, TEST_ENDPOINTS
+from tests.unified.config import TEST_ENDPOINTS, TEST_USERS
 from tests.unified.real_websocket_client import RealWebSocketClient
 
 

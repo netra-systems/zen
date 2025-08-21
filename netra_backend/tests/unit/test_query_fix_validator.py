@@ -1,18 +1,25 @@
 """Tests for the query fix validator module."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
 from netra_backend.app.agents.data_sub_agent.query_fix_validator import (
-
-# Add project root to path
-    validate_and_fix_query,
     ensure_query_uses_arrayElement,
-    fix_simplified_correlation_query
+    fix_simplified_correlation_query,
+    # Add project root to path
+    validate_and_fix_query,
 )
 
 

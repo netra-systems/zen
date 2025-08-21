@@ -5,19 +5,32 @@ Tests WebSocket message handling for thread operations including
 history, creation, switching, deletion, and listing.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import AsyncMock
 
-# Add project root to path
+import pytest
 
-from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import agent_service, mock_supervisor
 from netra_backend.tests.helpers.test_agent_orchestration_assertions import (
+    assert_thread_operations_handled,
+    # Add project root to path
+    setup_websocket_message,
+)
 
 # Add project root to path
-    setup_websocket_message, assert_thread_operations_handled
+from netra_backend.tests.helpers.test_agent_orchestration_pytest_fixtures import (
+    agent_service,
+    mock_supervisor,
 )
 
 

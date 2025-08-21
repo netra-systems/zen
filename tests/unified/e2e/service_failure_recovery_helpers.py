@@ -10,15 +10,15 @@ Modular design for service failure recovery testing with state preservation.
 """
 
 import asyncio
-import time
-import logging
 import json
-from typing import Dict, Any, Optional, List
+import logging
+import time
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ClientConfig
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = logging.getLogger(__name__)
 

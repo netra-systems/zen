@@ -6,7 +6,8 @@ ARCHITECTURAL COMPLIANCE: <500 lines, <25 lines per function, real WebSocket tes
 import asyncio
 import json
 import time
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 from tests.unified.config import TEST_ENDPOINTS, TestDataFactory
 from tests.unified.real_websocket_client import RealWebSocketClient
 

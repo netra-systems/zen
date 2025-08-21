@@ -6,7 +6,11 @@ project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..
 if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
-from netra_backend.app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
+from netra_backend.app.core.network_constants import (
+    DatabaseConstants,
+    HostConstants,
+    ServicePorts,
+)
 
 # Set test environment variables BEFORE importing any app modules
 # Use isolated values if TEST_ISOLATION is enabled
@@ -59,28 +63,34 @@ else:
         os.environ.setdefault("ANTHROPIC_API_KEY", "test-anthropic-api-key")
 
 import pytest
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-from netra_backend.app.db.base import Base
-from netra_backend.app.main import app
 from fastapi.testclient import TestClient
-from netra_backend.app.db.session import get_db_session
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
 from netra_backend.app.config import settings
-from netra_backend.tests.conftest_helpers import (
-    _setup_basic_llm_mocks, _setup_performance_llm_mocks,
-    _setup_websocket_interface_compatibility, _setup_websocket_test_mocks,
-    _create_real_tool_dispatcher, _create_mock_tool_dispatcher,
-    _import_agent_classes, _instantiate_agents
-)
+from netra_backend.app.db.base import Base
+from netra_backend.app.db.models_agent_state import *  # Import all agent state models
+from netra_backend.app.db.models_content import *  # Import all content models
+from netra_backend.app.db.models_postgres import *  # Import all postgres models
 
 # Import all models to ensure they are registered with Base before creating tables
-from netra_backend.app.db.models_user import User, Secret, ToolUsageLog
-from netra_backend.app.db.models_postgres import *  # Import all postgres models
-from netra_backend.app.db.models_content import *  # Import all content models
-from netra_backend.app.db.models_agent_state import *  # Import all agent state models
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
 # Initialize database on import to ensure async_session_factory is available
 from netra_backend.app.db.postgres import initialize_postgres
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.main import app
+from netra_backend.tests.conftest_helpers import (
+    _create_mock_tool_dispatcher,
+    _create_real_tool_dispatcher,
+    _import_agent_classes,
+    _instantiate_agents,
+    _setup_basic_llm_mocks,
+    _setup_performance_llm_mocks,
+    _setup_websocket_interface_compatibility,
+    _setup_websocket_test_mocks,
+)
+
 try:
     initialize_postgres()
 except Exception as e:
@@ -143,8 +153,8 @@ def client(db_session):
 def real_llm_manager():
     """Create real LLM manager when ENABLE_REAL_LLM_TESTING=true, otherwise proper mock."""
     if os.environ.get("ENABLE_REAL_LLM_TESTING") == "true":
-        from netra_backend.app.llm.llm_manager import LLMManager
         from netra_backend.app.config import settings
+        from netra_backend.app.llm.llm_manager import LLMManager
         return LLMManager(settings)
     else:
         return _create_mock_llm_manager()

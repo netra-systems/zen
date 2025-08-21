@@ -2,19 +2,19 @@
 Helper functions for triage sub agent tests to ensure functions are ≤8 lines
 """
 
-import json
 import asyncio
+import json
 from datetime import datetime
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock
 
-from netra_backend.app.agents.triage_sub_agent import (
-    ExtractedEntities,
-    UserIntent,
-    Priority,
-    Complexity
-)
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.triage_sub_agent import (
+    Complexity,
+    ExtractedEntities,
+    Priority,
+    UserIntent,
+)
 
 
 class TriageMockHelpers:
@@ -91,7 +91,11 @@ class MockLLMManager:
     async def _get_structured_response(self):
         """Convert JSON response to TriageResult object asynchronously"""
         import json
-        from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
+
+        from netra_backend.app.agents.triage_sub_agent.models import (
+            TriageMetadata,
+            TriageResult,
+        )
         
         # Use the same response without incrementing the call count twice
         if self._should_fail():

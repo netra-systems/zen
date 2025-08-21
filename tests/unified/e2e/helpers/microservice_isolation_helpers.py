@@ -18,18 +18,19 @@ Critical Requirements:
 Prevents: Cascading failures, deployment coupling, enterprise compliance violations
 """
 
-import pytest
-import asyncio
 import ast
-import os
-import sys
-import re
+import asyncio
 import json
+import os
+import re
+import sys
 import time
-from pathlib import Path
-from typing import Dict, List, Any, Set, Tuple, Optional
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
 from unittest.mock import patch
+
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent

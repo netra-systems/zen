@@ -10,31 +10,45 @@ Critical Path: WebSocket message -> Authentication -> Routing -> Agent processin
 Coverage: End-to-end message flow, error handling, performance validation, state consistency
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import time
+import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
 
-# Add project root to path
-
-from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+import pytest
 
 # Add project root to path
 # JWT service replaced with auth_integration
 from auth_integration import create_access_token, validate_token_jwt
-from unittest.mock import AsyncMock
+
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+
+# Add project root to path
+from netra_backend.app.services.websocket_manager import WebSocketManager
+
 JWTService = AsyncMock
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.schemas.registry import WebSocketMessage, AgentStarted, AgentCompleted
+from netra_backend.app.schemas.registry import (
+    AgentCompleted,
+    AgentStarted,
+    WebSocketMessage,
+)
 from netra_backend.app.services.database.message_repository import MessageRepository
 from netra_backend.app.services.state_persistence import StatePersistenceService
 

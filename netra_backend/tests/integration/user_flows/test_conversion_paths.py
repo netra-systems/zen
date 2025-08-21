@@ -10,6 +10,14 @@ BVJ (Business Value Justification):
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
@@ -31,8 +39,8 @@ from netra_backend.app.models.user import User
 from netra_backend.app.models.conversion_event import ConversionEvent
 from netra_backend.app.services.user_service import UserService as UsageService
 
-from netra_backend.tests..test_helpers.user_flow_base import UserFlowTestBase
-from netra_backend.tests..fixtures.user_journey_data import UserTestData
+from netra_backend.tests.test_helpers.user_flow_base import UserFlowTestBase
+from netra_backend.tests.fixtures.user_journey_data import UserTestData
 
 # Add project root to path
 

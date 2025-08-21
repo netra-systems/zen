@@ -15,18 +15,19 @@ CRITICAL REQUIREMENTS:
 NOTE: Now uses dev_launcher_real_system for better integration
 """
 
+import asyncio
+import logging
 import os
+import platform
+import socket
+import subprocess
 import sys
 import time
-import socket
-import logging
-import subprocess
-import platform
-import asyncio
-import httpx
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
 
 # Import test environment config for environment-aware configuration
 try:

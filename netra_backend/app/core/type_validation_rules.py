@@ -2,7 +2,10 @@
 
 from typing import Optional
 
-from netra_backend.app.core.type_validation_errors import TypeMismatch, TypeMismatchSeverity
+from netra_backend.app.core.type_validation_errors import (
+    TypeMismatch,
+    TypeMismatchSeverity,
+)
 
 
 class TypeCompatibilityChecker:

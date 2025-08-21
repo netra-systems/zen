@@ -27,19 +27,23 @@ Success Criteria:
 - Profile data syncs correctly
 - Dashboard loads with proper user context
 """
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-import httpx
-import websockets
-from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
 
+import httpx
+import pytest
+import websockets
+
+from tests.unified.oauth_test_providers import (
+    GoogleOAuthProvider,
+    get_enterprise_config,
+)
 from tests.unified.service_manager import ServiceManager
 from tests.unified.test_harness import UnifiedTestHarness
-from tests.unified.oauth_test_providers import GoogleOAuthProvider, get_enterprise_config
 
 
 class RealOAuthFlowTester:

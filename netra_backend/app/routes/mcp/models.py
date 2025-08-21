@@ -5,7 +5,8 @@ Pydantic models for MCP API requests and responses.
 Maintains type safety and validation under 450-line limit.
 """
 
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
+
 from pydantic import BaseModel
 
 

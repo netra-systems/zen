@@ -1,26 +1,40 @@
 """
 Database Monitoring API Router - Main route definitions
 """
-from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, Query, Depends
+from typing import Any, Dict, List, Optional
+
+from fastapi import APIRouter, Depends, Query
+
+from netra_backend.app.routes.database_monitoring.alert_routes import (
+    get_alerts_handler,
+    get_performance_summary_handler,
+)
+from netra_backend.app.routes.database_monitoring.cache_routes import (
+    clear_all_cache_handler,
+    get_cache_metrics_handler,
+    invalidate_cache_by_pattern_handler,
+    invalidate_cache_by_tag_handler,
+)
+from netra_backend.app.routes.database_monitoring.control_routes import (
+    start_monitoring_handler,
+    stop_monitoring_handler,
+)
 
 # Import auth functions (will need to be uncommented when auth is configured)
 # from netra_backend.app.auth_integration.enhanced_auth_security import get_current_user, require_admin
-
 from netra_backend.app.routes.database_monitoring.dashboard_routes import (
-    get_dashboard_handler, get_current_metrics_handler, 
-    get_metrics_history_handler, get_connection_status_handler
+    get_connection_status_handler,
+    get_current_metrics_handler,
+    get_dashboard_handler,
+    get_metrics_history_handler,
 )
-from netra_backend.app.routes.database_monitoring.cache_routes import (
-    get_cache_metrics_handler, invalidate_cache_by_tag_handler,
-    invalidate_cache_by_pattern_handler, clear_all_cache_handler
+from netra_backend.app.routes.database_monitoring.health_routes import (
+    get_database_health_handler,
 )
 from netra_backend.app.routes.database_monitoring.transaction_routes import (
-    get_transaction_stats_handler, get_active_transactions_handler
+    get_active_transactions_handler,
+    get_transaction_stats_handler,
 )
-from netra_backend.app.routes.database_monitoring.alert_routes import get_alerts_handler, get_performance_summary_handler
-from netra_backend.app.routes.database_monitoring.control_routes import start_monitoring_handler, stop_monitoring_handler
-from netra_backend.app.routes.database_monitoring.health_routes import get_database_health_handler
 
 router = APIRouter(prefix="/api/v1/database", tags=["database-monitoring"])
 

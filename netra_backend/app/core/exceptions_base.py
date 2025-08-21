@@ -1,8 +1,10 @@
 """Base exception classes - compliant with 25-line function limit."""
 
-from typing import Any, Dict, Optional
 from datetime import datetime, timezone
-from pydantic import BaseModel, Field, ConfigDict
+from typing import Any, Dict, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
+
 from netra_backend.app.core.error_codes import ErrorCode, ErrorSeverity
 
 

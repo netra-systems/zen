@@ -2,17 +2,17 @@
 Utility functions for the dev launcher.
 """
 
-import os
-import sys
-import socket
-import time
-import subprocess
-import webbrowser
-import urllib.request
-import urllib.error
-from pathlib import Path
-from typing import Optional, Dict, Any, Tuple
 import logging
+import os
+import socket
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+import webbrowser
+from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

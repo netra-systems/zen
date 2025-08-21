@@ -10,16 +10,19 @@ Business Value Justification (BVJ):
 This test validates connection scalability under concurrent load.
 """
 
-import pytest
 import asyncio
-import time
-import logging
 import json
+import logging
+import time
 from typing import Dict, List
 
-from netra_backend.tests.e2e.test_helpers.websocket_helpers import stress_test_connections
+import pytest
+
 from netra_backend.tests.e2e.test_helpers.resource_monitoring import ResourceMonitor
 from netra_backend.tests.e2e.test_helpers.throughput_helpers import E2E_TEST_CONFIG
+from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+    stress_test_connections,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -137,7 +140,9 @@ class TestConcurrentConnectionScalability:
     
     async def _single_connection_test(self, connection_id: int) -> Dict[str, any]:
         """Single connection test for burst testing"""
-        from netra_backend.tests.e2e.test_helpers.websocket_helpers import websocket_test_context
+        from netra_backend.tests.e2e.test_helpers.websocket_helpers import (
+            websocket_test_context,
+        )
         
         try:
             async with websocket_test_context(E2E_TEST_CONFIG["websocket_url"], timeout=10.0) as websocket:

@@ -4,24 +4,34 @@ Tests basic transaction commit, rollback scenarios, and error handling
 MODULAR VERSION: <300 lines, all functions ≤8 lines
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import uuid
-from datetime import datetime, UTC
-from typing import Dict, List, Any, Optional
-from unittest.mock import AsyncMock, MagicMock, patch, call
 from contextlib import asynccontextmanager
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, call, patch
+
+import pytest
 from sqlalchemy import select, text
+from sqlalchemy.exc import DisconnectionError, IntegrityError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-
 from netra_backend.app.services.database.base_repository import BaseRepository
-from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
 

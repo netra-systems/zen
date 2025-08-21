@@ -10,15 +10,18 @@ Business Value Justification (BVJ):
 This test validates latency distribution under various load conditions.
 """
 
-import pytest
 import asyncio
-import time
 import logging
 import statistics
+import time
 from typing import Dict, List
 
+import pytest
+
 from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
-    LatencyMeasurement, analyze_latency_distribution, E2E_TEST_CONFIG
+    E2E_TEST_CONFIG,
+    LatencyMeasurement,
+    analyze_latency_distribution,
 )
 
 logger = logging.getLogger(__name__)

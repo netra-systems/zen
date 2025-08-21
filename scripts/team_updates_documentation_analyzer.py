@@ -1,12 +1,12 @@
 """Documentation Analyzer - Tracks documentation and spec updates."""
 
 import asyncio
+import re
 import subprocess
+import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import re
-import xml.etree.ElementTree as ET
+from typing import Any, Dict, List, Optional
 
 
 class DocumentationAnalyzer:

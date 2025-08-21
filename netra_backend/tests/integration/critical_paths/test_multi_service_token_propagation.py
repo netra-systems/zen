@@ -19,29 +19,38 @@ Critical Path Coverage:
 Architecture Compliance: <450 lines, <25 line functions, real components (L2)
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-from typing import Dict, Any, Optional, List
+import time
+import uuid
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 from unittest.mock import patch
 
+import pytest
 from auth_integration.auth import get_current_user
 from clients.auth_client import auth_client
+from sqlalchemy import select
+
+from netra_backend.app.db.models_postgres import User
 
 # Add project root to path
-
 from netra_backend.app.db.postgres import get_postgres_db
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.redis_manager import RedisManager  
+from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.services.agent_service import get_agent_service
-from sqlalchemy import select
 
 # Add project root to path
 

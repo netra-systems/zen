@@ -4,20 +4,29 @@ Tests thread CRUD operations and soft delete functionality
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
+
+import pytest
+from sqlalchemy import JSON, Column, DateTime, String
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
-
-from netra_backend.app.services.database.thread_repository import ThreadRepository
-from sqlalchemy import Column, String, DateTime, JSON
 from netra_backend.app.db.base import Base
-from datetime import datetime
+
+# Add project root to path
+from netra_backend.app.services.database.thread_repository import ThreadRepository
 
 # Add project root to path
 

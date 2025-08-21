@@ -17,30 +17,30 @@ Provides standardized execution, reliability management, and monitoring.
 Business Value: Improves tool execution reliability by 15-20%.
 Target Segments: Growth & Enterprise (improved admin operations).
 """
-from typing import Dict, Any, Optional, Callable
+from typing import Any, Callable, Dict, Optional
+
 from sqlalchemy.ext.asyncio import AsyncSession
-
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agents.state import DeepAgentState
-
-# Import modern tool handlers from core module
-from netra_backend.app.agents.admin_tool_dispatcher.tool_handlers_core import (
-    ModernToolHandler,
-    CorpusManagerHandler,
-    SyntheticGeneratorHandler,
-    UserAdminHandler,
-    SystemConfiguratorHandler,
-    LogAnalyzerHandler,
-    create_modern_tool_handler
-)
 
 # Import operation functions
 from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_operations import (
-    extract_corpus_create_params,
+    _create_corpus_response,
     _execute_corpus_creation,
-    _create_corpus_response
+    extract_corpus_create_params,
 )
+
+# Import modern tool handlers from core module
+from netra_backend.app.agents.admin_tool_dispatcher.tool_handlers_core import (
+    CorpusManagerHandler,
+    LogAnalyzerHandler,
+    ModernToolHandler,
+    SyntheticGeneratorHandler,
+    SystemConfiguratorHandler,
+    UserAdminHandler,
+    create_modern_tool_handler,
+)
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger
 
@@ -127,6 +127,7 @@ async def handle_corpus_create(user: User, db: AsyncSession, **kwargs) -> Dict[s
 async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
     """Legacy function"""
     from netra_backend.app.core.configuration.services import corpus_service
+
     from .tool_handler_helpers import create_corpus_list_response
     corpora = await corpus_service.list_corpora(db)
     return create_corpus_list_response(corpora)
@@ -134,7 +135,10 @@ async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
 
 async def handle_corpus_validate(**kwargs) -> Dict[str, Any]:
     """Legacy function"""
-    from .tool_handler_helpers import check_corpus_id_required, create_corpus_validation_response
+    from .tool_handler_helpers import (
+        check_corpus_id_required,
+        create_corpus_validation_response,
+    )
     corpus_id = kwargs.get('corpus_id')
     check_corpus_id_required(corpus_id)
     return create_corpus_validation_response(corpus_id)

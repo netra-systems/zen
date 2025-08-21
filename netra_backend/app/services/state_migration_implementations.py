@@ -3,7 +3,8 @@
 This module contains the specific migration classes for each version transition.
 """
 
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from netra_backend.app.services.state_migration_core import StateMigration
 
 

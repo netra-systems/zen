@@ -4,10 +4,11 @@ Backwards compatibility interface for refactored pattern detection.
 This module now delegates to the modular components.
 """
 
-from typing import Dict, List, Any, Optional, TypedDict
 from pathlib import Path
+from typing import Any, Dict, List, Optional, TypedDict
 
 from netra_backend.app.agents.github_analyzer.pattern_scanner import PatternScanner
+
 
 # Type definitions for backwards compatibility
 class PatternCategory(TypedDict):

@@ -5,13 +5,14 @@ Verifies all imports follow the correct pattern for the new project structure.
 """
 
 import ast
+import json
 import os
 import sys
+from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-from dataclasses import dataclass
-from collections import defaultdict
-import json
+
 
 @dataclass
 class ImportIssue:

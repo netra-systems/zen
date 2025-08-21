@@ -70,11 +70,11 @@ class RollbackManager:
     
     def __init__(self):
         """Initialize rollback manager with executors and resolver."""
-        from .rollback_manager_transactions import (
-            PostgresRollbackExecutor, 
-            ClickHouseRollbackExecutor
-        )
         from .rollback_manager_recovery import DependencyResolver
+        from .rollback_manager_transactions import (
+            ClickHouseRollbackExecutor,
+            PostgresRollbackExecutor,
+        )
         
         self.active_sessions: Dict[str, RollbackSession] = {}
         self.postgres_executor = PostgresRollbackExecutor()

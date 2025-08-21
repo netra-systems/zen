@@ -3,7 +3,9 @@ Permission Service - Handles user permissions and developer auto-detection
 """
 import os
 from typing import Dict, List, Optional, Set
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
 

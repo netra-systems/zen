@@ -14,20 +14,27 @@ Usage:
     from netra_backend.app.schemas.agent_models import DeepAgentState, AgentResult, AgentMetadata
 """
 
-from typing import Dict, List, Optional, Union, Any, TYPE_CHECKING
-from datetime import datetime, UTC
-from pydantic import BaseModel, Field, field_validator
 import uuid
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-# Import forward-referenced types - these are needed for model rebuild
-# Using try/except to handle missing types gracefully
-try:
+from pydantic import BaseModel, Field, field_validator
+
+# Import forward-referenced types for type checking
+if TYPE_CHECKING:
     from netra_backend.app.agents.triage_sub_agent.models import TriageResult
-except ImportError:
-    TriageResult = None  # type: ignore
+else:
+    # Runtime fallback for model instantiation
+    try:
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
+    except ImportError:
+        TriageResult = None  # type: ignore
 
 try:
-    from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
+    from netra_backend.app.schemas.shared_types import (
+        AnomalyDetectionResponse,
+        DataAnalysisResponse,
+    )
 except ImportError:
     DataAnalysisResponse = None  # type: ignore
     AnomalyDetectionResponse = None  # type: ignore
@@ -116,7 +123,7 @@ class DeepAgentState(BaseModel):
     user_id: Optional[str] = None
     
     # Strongly typed result fields with proper type unions
-    triage_result: Optional[TriageResult] = None
+    triage_result: Optional["TriageResult"] = None
     data_result: Optional[Union[DataAnalysisResponse, AnomalyDetectionResponse]] = None
     optimizations_result: Optional[Any] = None  # Will be strongly typed when OptimizationsResult is moved to schemas
     action_plan_result: Optional[Any] = None    # Will be strongly typed when ActionPlanResult is moved to schemas

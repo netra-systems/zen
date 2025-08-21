@@ -5,21 +5,25 @@ SPEC: auth_microservice_migration_plan.xml lines 322-341
 ISSUE: No validation of internal service authentication tokens
 IMPACT: Services can't authenticate with each other securely
 """
-import pytest
 import asyncio
-import os
 import logging
+import os
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
-# Test framework imports
-from netra_backend.tests.unified.test_data_factory import create_test_service_credentials
-from netra_backend.tests.unified.jwt_token_helpers import JWTTokenTestHelper
+import pytest
+
+from auth_service.auth_core.models.auth_models import ServiceTokenRequest
+from auth_service.auth_core.services.auth_service import AuthService
 
 # App imports
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from auth_service.auth_core.services.auth_service import AuthService
-from auth_service.auth_core.models.auth_models import ServiceTokenRequest
+from netra_backend.tests.unified.jwt_token_helpers import JWTTokenTestHelper
+
+# Test framework imports
+from netra_backend.tests.unified.test_data_factory import (
+    create_test_service_credentials,
+)
 
 logger = logging.getLogger(__name__)
 

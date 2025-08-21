@@ -4,14 +4,15 @@ FIRST USER JOURNEY INTEGRATION TEST - Phase 2 Unified Testing
 BVJ: Free → Paid conversion (100% new revenue). Prevents $50K+ MRR loss.
 ARCHITECTURE: 450-line limit, ≤8 lines per function
 """
-import pytest
-import uuid
 import time
+import uuid
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, Any
+
+import pytest
 
 from netra_backend.app.schemas.registry import User, UserCreate
-from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.schemas.UserPlan import PLAN_DEFINITIONS, PlanTier
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Helper function for backward compatibility

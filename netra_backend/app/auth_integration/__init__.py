@@ -28,83 +28,78 @@ except ImportError:
 # Auth dependency functions
 from netra_backend.app.auth_integration.auth import (
     ActiveUserDep,
-    DeveloperDep,
-    AdminDep,
     ActiveUserWsDep,
-    require_permission,
-    get_current_user,
+    AdminDep,
+    DeveloperDep,
+    create_access_token,
     get_current_active_user,
+    get_current_user,
     get_current_user_optional,
+    get_password_hash,
     require_admin,
     require_developer,
-    get_password_hash,
+    require_permission,
+    validate_token_jwt,
     verify_password,
-    create_access_token,
-    validate_token_jwt
-)
-
-# 🔴 CONSOLIDATED AUTH MODELS - Single Source of Truth
-from netra_backend.app.schemas.auth_types import (
-    # Core auth models
-    LoginRequest,
-    LoginResponse,
-    TokenData,
-    TokenRequest,
-    TokenResponse,
-    RefreshRequest,
-    HealthResponse,
-    
-    # Service auth models
-    ServiceTokenRequest,
-    ServiceTokenResponse,
-    
-    # Session and audit models
-    SessionInfo,
-    UserPermission,
-    AuthError,
-    AuditLog,
-    
-    # OAuth models
-    GoogleUser,
-    DevUser,
-    DevLoginRequest,
-    AuthEndpoints,
-    AuthConfigResponse,
-    AuthConfig,
-    
-    # Enums
-    TokenType,
-    AuthProvider,
-    
-    # Backward compatibility aliases
-    HealthCheck,
-    UserToken,
-    AuthRequest,
-    AuthResponse
-)
-
-# Validation utilities
-from netra_backend.app.auth_integration.validators import (
-    validate_email_format,
-    validate_password_strength,
-    validate_token_format,
-    validate_service_id,
-    validate_permission_format,
-    AuthValidationError
 )
 
 # Type-safe interfaces
 from netra_backend.app.auth_integration.interfaces import (
-    AuthClientProtocol,
-    AuthServiceProtocol,
-    SessionManagerProtocol,
-    PermissionManagerProtocol,
     AuditLoggerProtocol,
-    TokenValidatorProtocol,
-    PasswordManagerProtocol,
+    AuthClientProtocol,
+    AuthDependencies,
+    AuthServiceProtocol,
     OAuthProviderProtocol,
+    PasswordManagerProtocol,
+    PermissionManagerProtocol,
     RateLimiterProtocol,
-    AuthDependencies
+    SessionManagerProtocol,
+    TokenValidatorProtocol,
+)
+
+# Validation utilities
+from netra_backend.app.auth_integration.validators import (
+    AuthValidationError,
+    validate_email_format,
+    validate_password_strength,
+    validate_permission_format,
+    validate_service_id,
+    validate_token_format,
+)
+
+# 🔴 CONSOLIDATED AUTH MODELS - Single Source of Truth
+from netra_backend.app.schemas.auth_types import (
+    AuditLog,
+    AuthConfig,
+    AuthConfigResponse,
+    AuthEndpoints,
+    AuthError,
+    AuthProvider,
+    AuthRequest,
+    AuthResponse,
+    DevLoginRequest,
+    DevUser,
+    # OAuth models
+    GoogleUser,
+    # Backward compatibility aliases
+    HealthCheck,
+    HealthResponse,
+    # Core auth models
+    LoginRequest,
+    LoginResponse,
+    RefreshRequest,
+    # Service auth models
+    ServiceTokenRequest,
+    ServiceTokenResponse,
+    # Session and audit models
+    SessionInfo,
+    TokenData,
+    TokenRequest,
+    TokenResponse,
+    # Enums
+    TokenType,
+    UserPermission,
+    UserToken,
 )
 
 __all__ = [

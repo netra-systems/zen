@@ -4,16 +4,16 @@ Architecture Health Monitoring Dashboard
 Main orchestrator using focused modules for monitoring architecture compliance
 """
 
-import sys
 import argparse
+import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
-from architecture_scanner import ArchitectureScanner
+from architecture_dashboard import ArchitectureDashboard
 from architecture_metrics import ArchitectureMetrics
 from architecture_reporter import ArchitectureReporter
-from architecture_dashboard import ArchitectureDashboard
+from architecture_scanner import ArchitectureScanner
 
 
 class ArchitectureHealthMonitor:

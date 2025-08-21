@@ -26,12 +26,10 @@ def _lazy_import():
     """Lazily import the WebSocket manager to avoid circular imports."""
     global _manager, _WebSocketManager, _get_ws_manager, _get_manager
     if _manager is None:
-        from netra_backend.app.ws_manager import (
-            WebSocketManager as _WSM,
-            get_ws_manager as _get_ws,
-            get_manager as _get_mgr,
-            manager as _mgr
-        )
+        from netra_backend.app.ws_manager import WebSocketManager as _WSM
+        from netra_backend.app.ws_manager import get_manager as _get_mgr
+        from netra_backend.app.ws_manager import get_ws_manager as _get_ws
+        from netra_backend.app.ws_manager import manager as _mgr
         _WebSocketManager = _WSM
         _get_ws_manager = _get_ws
         _get_manager = _get_mgr

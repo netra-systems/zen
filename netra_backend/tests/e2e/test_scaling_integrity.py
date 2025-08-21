@@ -4,22 +4,32 @@ Tests integrity of complete scaling analysis workflows.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
-# Add project root to path
-
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 
-from netra_backend.tests.e2e.scaling_test_helpers import (
-
 # Add project root to path
-    create_scaling_setup, execute_scaling_workflow,
-    create_50_percent_increase_state, create_gradual_scaling_state,
-    validate_data_consistency_across_agents, validate_recommendation_coherence
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.tests.e2e.scaling_test_helpers import (
+    create_50_percent_increase_state,
+    create_gradual_scaling_state,
+    # Add project root to path
+    create_scaling_setup,
+    execute_scaling_workflow,
+    validate_data_consistency_across_agents,
+    validate_recommendation_coherence,
 )
 
 

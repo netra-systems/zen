@@ -4,8 +4,8 @@ Data structures for quality validation metrics and validation results.
 Part of the modular quality validation system.
 """
 
-from typing import Dict, Any, List
 from enum import Enum
+from typing import Any, Dict, List
 
 
 class ContentType(Enum):

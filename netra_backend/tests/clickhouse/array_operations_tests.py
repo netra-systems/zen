@@ -3,13 +3,14 @@ ClickHouse Array Operations Tests
 Tests array operations and query fixing functionality
 """
 
-import pytest
 from unittest.mock import AsyncMock
 
+import pytest
+
 from netra_backend.app.db.clickhouse_query_fixer import (
+    ClickHouseQueryInterceptor,
     fix_clickhouse_array_syntax,
     validate_clickhouse_query,
-    ClickHouseQueryInterceptor
 )
 
 

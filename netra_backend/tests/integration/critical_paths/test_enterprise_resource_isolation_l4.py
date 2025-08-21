@@ -14,42 +14,51 @@ Critical Path: Enterprise tenant provisioning -> Resource allocation ->
 Isolation verification -> Noisy neighbor simulation -> Performance validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
-import psutil
 import json
+import multiprocessing
 import os
 import threading
-import multiprocessing
-from typing import Dict, List, Optional, Any, Set, Tuple
-from datetime import datetime, timedelta
-from dataclasses import dataclass, field
+import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
-
-import redis.asyncio as redis
-import asyncpg
-import httpx
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set, Tuple
 from unittest.mock import AsyncMock
 
-# Add project root to path
+import asyncpg
+import httpx
+import psutil
+import pytest
+import redis.asyncio as redis
 
+# Add project root to path
 from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
-# Add project root to path
+    CriticalPathMetrics,
+    # Add project root to path
     L4StagingCriticalPathTestBase,
-    CriticalPathMetrics
 )
+
 # from netra_backend.app.services.resource_management.tenant_isolator import TenantIsolator
 # from netra_backend.app.services.resource_management.resource_monitor import ResourceMonitor
 TenantIsolator = AsyncMock
 ResourceMonitor = AsyncMock
 # from netra_backend.app.services.database.connection_pool_manager import ConnectionPoolManager
 from unittest.mock import AsyncMock
+
 ConnectionPoolManager = AsyncMock
 # from netra_backend.app.services.redis.namespace_manager import RedisNamespaceManager
 # from netra_backend.app.services.monitoring.performance_tracker import PerformanceTracker

@@ -15,10 +15,11 @@ Architecture:
 - Strong typing with proper error handling
 """
 import re
-from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
+
+from email_validator import EmailNotValidError, validate_email
 from pydantic import ValidationError
-from email_validator import validate_email, EmailNotValidError
 
 
 def validate_email_format(email: str) -> bool:

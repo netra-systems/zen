@@ -8,12 +8,12 @@ import json
 import subprocess
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
-from .types import TestAnalysis, ReviewMode, TestMetadata
-from .ultra_thinking_analyzer import UltraThinkingAnalyzer
-from .test_generator import TestGenerator
 from .report_generator import ReportGenerator
+from .test_generator import TestGenerator
+from .types import ReviewMode, TestAnalysis, TestMetadata
+from .ultra_thinking_analyzer import UltraThinkingAnalyzer
 
 
 class AutonomousTestReviewer:

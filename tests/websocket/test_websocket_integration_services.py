@@ -2,24 +2,26 @@
 
 import asyncio
 import json
+import time
+from typing import Any, Dict
+from unittest.mock import AsyncMock, patch
+
 import pytest
 import websockets
-import time
-from typing import Dict, Any
-from unittest.mock import patch, AsyncMock
-from test_framework.mock_utils import mock_justified
+from fastapi import HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.main import app
-from netra_backend.app.db.postgres import get_async_db
+
 from netra_backend.app.clients.auth_client import auth_client
 from netra_backend.app.core.websocket_cors import get_websocket_cors_handler
+from netra_backend.app.db.postgres import get_async_db
+from netra_backend.app.main import app
 from netra_backend.app.routes.websocket_secure import (
-    SecureWebSocketManager,
     SECURE_WEBSOCKET_CONFIG,
-    get_secure_websocket_manager
+    SecureWebSocketManager,
+    get_secure_websocket_manager,
 )
-from fastapi import HTTPException
+from test_framework.mock_utils import mock_justified
 
 
 class TestWebSocketServices:

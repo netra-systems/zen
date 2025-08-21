@@ -50,16 +50,16 @@ Integration with Existing Tests:
 
 import os
 import sys
-from typing import Dict, Any, Optional, Union, Literal
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
+from typing import Any, Dict, Literal, Optional, Union
 
 # Import from existing modules following established patterns
 from netra_backend.app.core.auth_constants import (
-    JWTConstants, 
-    CredentialConstants, 
-    AuthConstants
+    AuthConstants,
+    CredentialConstants,
+    JWTConstants,
 )
 
 # Environment types

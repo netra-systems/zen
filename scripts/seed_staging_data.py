@@ -4,34 +4,38 @@ Seed staging environment with test data for comprehensive testing.
 This script creates realistic test data for staging environments.
 """
 
-import os
-import sys
-import json
 import argparse
 import asyncio
-import random
 import hashlib
+import json
+import os
+import random
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 from faker import Faker
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from netra_backend.app.db.database import get_db, engine
-from netra_backend.app.schemas.userbase import UserBase
-from netra_backend.app.schemas.thread import ThreadCreate
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+
+from netra_backend.app.auth_integration.auth_utils import get_password_hash
+from netra_backend.app.db.database import engine, get_db
 from netra_backend.app.schemas.message import MessageCreate
 from netra_backend.app.schemas.optimization_request import OptimizationRequestCreate
-from netra_backend.app.services.database.user_repository import UserRepository
-from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.schemas.thread import ThreadCreate
+from netra_backend.app.schemas.userbase import UserBase
 from netra_backend.app.services.database.message_repository import MessageRepository
-from netra_backend.app.services.database.optimization_repository import OptimizationRepository
-from netra_backend.app.auth_integration.auth_utils import get_password_hash
-from sqlalchemy.orm import Session
-from sqlalchemy.ext.asyncio import AsyncSession
+from netra_backend.app.services.database.optimization_repository import (
+    OptimizationRepository,
+)
+from netra_backend.app.services.database.thread_repository import ThreadRepository
+from netra_backend.app.services.database.user_repository import UserRepository
 
 # Initialize Faker for realistic data generation
 fake = Faker()

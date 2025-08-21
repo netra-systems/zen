@@ -3,18 +3,28 @@ WebSocket message ordering and protocol testing module.
 Tests message sequencing, protocol version handling, and binary data transmission.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import json
-import time
-import struct
-import random
 import hashlib
-from typing import Dict, Any, List
+import json
+import random
+import struct
+import time
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock
+
+import pytest
 import websockets
 
 

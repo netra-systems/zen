@@ -8,10 +8,11 @@ Business Value Justification (BVJ):
 """
 
 import os
-import pytest
+from datetime import UTC, datetime
+from typing import Any, Dict, List
 from unittest.mock import AsyncMock, Mock
-from typing import Dict, List, Any
-from datetime import datetime, UTC
+
+import pytest
 
 # Set testing environment before imports
 os.environ["TESTING"] = "1"
@@ -19,13 +20,16 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from netra_backend.app.services.quality_gate import (
+    ContentType,
     QualityGateService,
     QualityLevel,
-    ContentType,
     QualityMetrics,
-    ValidationResult
+    ValidationResult,
 )
-from netra_backend.app.tests.helpers.quality_gate_helpers import create_redis_mock, create_quality_service
+from netra_backend.app.tests.helpers.quality_gate_helpers import (
+    create_quality_service,
+    create_redis_mock,
+)
 
 
 class TestResponseQualityValidation:

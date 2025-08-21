@@ -4,10 +4,11 @@ This bypasses git operations entirely and uses mock data.
 Module follows 450-line limit with 25-line function limit.
 """
 
-from datetime import datetime
-from typing import Dict, Any, List
-from fastapi import APIRouter, HTTPException
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
+
+from fastapi import APIRouter, HTTPException
 
 router = APIRouter(
     prefix="/api/factory-status",

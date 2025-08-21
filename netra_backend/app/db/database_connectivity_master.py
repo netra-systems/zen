@@ -17,37 +17,37 @@ Business Value Justification (BVJ):
 
 import asyncio
 import time
-from typing import Dict, Any, Optional, List
 from contextlib import asynccontextmanager
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger
-
-# Import all the improved database components
-from netra_backend.app.db.fast_startup_connection_manager import (
-    connection_registry, 
-    setup_fast_startup_databases
-)
 from netra_backend.app.db.clickhouse_reliable_manager import (
+    initialize_reliable_clickhouse,
     reliable_clickhouse_service,
-    initialize_reliable_clickhouse
-)
-from netra_backend.app.db.graceful_degradation_manager import (
-    degradation_manager,
-    start_degradation_monitoring
-)
-from netra_backend.app.db.intelligent_retry_system import (
-    intelligent_retry_system,
-    retry_database_operation
-)
-from netra_backend.app.db.optimized_startup_checks import (
-    optimized_startup_checker,
-    run_optimized_database_checks
 )
 from netra_backend.app.db.comprehensive_health_monitor import (
     health_monitor,
+    register_database_for_health_monitoring,
     start_database_health_monitoring,
-    register_database_for_health_monitoring
 )
+
+# Import all the improved database components
+from netra_backend.app.db.fast_startup_connection_manager import (
+    connection_registry,
+    setup_fast_startup_databases,
+)
+from netra_backend.app.db.graceful_degradation_manager import (
+    degradation_manager,
+    start_degradation_monitoring,
+)
+from netra_backend.app.db.intelligent_retry_system import (
+    intelligent_retry_system,
+    retry_database_operation,
+)
+from netra_backend.app.db.optimized_startup_checks import (
+    optimized_startup_checker,
+    run_optimized_database_checks,
+)
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

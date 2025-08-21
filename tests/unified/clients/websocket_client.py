@@ -3,7 +3,8 @@
 import asyncio
 import json
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
 import websockets
 from websockets.client import WebSocketClientProtocol
 

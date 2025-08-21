@@ -20,14 +20,15 @@ This script runs the most critical tests that validate core system functionality
 Exit codes: 0 = all critical tests pass, 1 = any critical test failed
 """
 
+import argparse
+import json
 import subprocess
 import sys
 import time
-import json
-import argparse
+from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
-from dataclasses import dataclass, asdict
+from typing import Any, Dict, List, Tuple
+
 
 @dataclass
 class CriticalTestResult:

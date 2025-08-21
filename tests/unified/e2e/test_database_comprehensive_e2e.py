@@ -15,15 +15,18 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-import pytest
-import pytest_asyncio
 import asyncio
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
+
+import pytest
+import pytest_asyncio
+
 from tests.unified.database_sync_fixtures import create_test_user_data
 from tests.unified.database_test_operations import DatabaseOperations
 from tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness

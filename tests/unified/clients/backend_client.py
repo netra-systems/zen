@@ -1,8 +1,9 @@
 """Test client for backend service with typed methods."""
 
-import httpx
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
+import httpx
 
 logger = logging.getLogger(__name__)
 

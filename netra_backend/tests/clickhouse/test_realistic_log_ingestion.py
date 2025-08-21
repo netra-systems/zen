@@ -3,20 +3,28 @@ Realistic Log Ingestion Tests
 Test realistic log ingestion patterns
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import validate_clickhouse_query
 from netra_backend.tests.realistic_test_fixtures import (
-
-# Add project root to path
+    # Add project root to path
     generate_realistic_logs_fixture,
-    mock_clickhouse_client
+    mock_clickhouse_client,
 )
 
 

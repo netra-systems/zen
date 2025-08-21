@@ -4,9 +4,11 @@ This plugin integrates with pytest to track test failures and identify
 consistently failing tests.
 """
 
-import pytest
 from pathlib import Path
 from typing import Optional
+
+import pytest
+
 from .bad_test_detector import BadTestDetector
 
 

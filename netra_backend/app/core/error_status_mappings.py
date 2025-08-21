@@ -1,6 +1,7 @@
 """HTTP status code mappings for error codes."""
 
 from typing import Dict
+
 from starlette.status import (
     HTTP_400_BAD_REQUEST,
     HTTP_401_UNAUTHORIZED,

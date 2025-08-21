@@ -2,13 +2,13 @@
 Error analysis and pattern detection for deployment logs.
 """
 
-import re
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+import re
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from collections import defaultdict
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 

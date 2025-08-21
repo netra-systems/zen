@@ -1,9 +1,14 @@
 """
 Database Monitoring Control Routes
 """
-from typing import Dict, Any
+from typing import Any, Dict
+
 from fastapi import HTTPException
-from netra_backend.app.db.observability import database_observability, setup_database_observability
+
+from netra_backend.app.db.observability import (
+    database_observability,
+    setup_database_observability,
+)
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

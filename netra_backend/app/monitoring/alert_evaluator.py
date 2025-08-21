@@ -4,12 +4,15 @@ Handles the logic for evaluating alert rules against metrics data.
 """
 
 import asyncio
-from typing import Dict, Any, Optional
-from datetime import datetime, UTC
+from datetime import UTC, datetime
+from typing import Any, Dict, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.alert_models import AlertRule, AlertLevel, Alert
-from netra_backend.app.services.metrics.agent_metrics import AgentMetrics, AgentMetricsCollector
+from netra_backend.app.monitoring.alert_models import Alert, AlertLevel, AlertRule
+from netra_backend.app.services.metrics.agent_metrics import (
+    AgentMetrics,
+    AgentMetricsCollector,
+)
 
 logger = central_logger.get_logger(__name__)
 

@@ -3,11 +3,11 @@ Log correlation across services for deployment monitoring.
 """
 
 import logging
-from typing import Dict, List, Optional, Any, Tuple, Set
+import re
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-from collections import defaultdict
-import re
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 

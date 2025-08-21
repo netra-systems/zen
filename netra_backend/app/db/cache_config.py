@@ -3,11 +3,11 @@
 Configuration classes and cache entry structures for the query caching system.
 """
 
-import time
 import json
-from typing import Any, Dict, Set, Optional
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from enum import Enum
+from typing import Any, Dict, Optional, Set
 
 
 class CacheStrategy(Enum):

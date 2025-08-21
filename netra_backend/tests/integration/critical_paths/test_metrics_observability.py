@@ -10,23 +10,35 @@ Critical Path: Metrics collection -> Data aggregation -> Alert generation -> Das
 Coverage: Prometheus metrics, Grafana dashboards, OpenTelemetry tracing, log aggregation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.services.observability.alert_manager import AlertManager
 
 # Add project root to path
-
 from netra_backend.app.services.observability.metrics_collector import MetricsCollector
-from netra_backend.app.services.observability.prometheus_exporter import PrometheusExporter
+from netra_backend.app.services.observability.prometheus_exporter import (
+    PrometheusExporter,
+)
 from netra_backend.app.services.observability.tracing_service import TracingService
-from netra_backend.app.services.observability.alert_manager import AlertManager
 
 # Add project root to path
 

@@ -6,9 +6,9 @@ Ensures test isolation and proper cleanup of environment state.
 
 import os
 import tempfile
-from typing import Dict, Any, Optional
 from contextlib import contextmanager
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 from auth_service.auth_core.config import AuthConfig
 

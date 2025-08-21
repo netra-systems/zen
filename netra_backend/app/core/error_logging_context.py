@@ -5,18 +5,18 @@ Provides context managers and utilities for maintaining error context across ope
 
 import traceback
 from contextlib import contextmanager
-from typing import Optional, List
+from typing import List, Optional
 
-from netra_backend.app.core.error_logging_types import (
-    DetailedErrorContext, 
-    ErrorCategory, 
-    ErrorSeverity,
-    LogLevel
-)
 from netra_backend.app.core.error_codes import ErrorCode
+from netra_backend.app.core.error_logging_types import (
+    DetailedErrorContext,
+    ErrorCategory,
+    ErrorSeverity,
+    LogLevel,
+)
 from netra_backend.app.core.error_recovery import OperationType, RecoveryContext
-from netra_backend.app.schemas.shared_types import ErrorContext
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import ErrorContext
 
 logger = central_logger.get_logger(__name__)
 

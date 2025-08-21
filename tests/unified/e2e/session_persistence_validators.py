@@ -7,8 +7,8 @@ Modular design: <300 lines, 25-line functions max
 
 import time
 import uuid
-from typing import Dict, Any
 from datetime import datetime, timezone
+from typing import Any, Dict
 
 from tests.unified.e2e.session_persistence_core import SessionPersistenceManager
 

@@ -11,32 +11,45 @@ L3 Test: Uses real state persistence with recovery mechanisms.
 Recovery target: <30 seconds recovery time with full context preservation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import uuid
 import json
 import logging
-import pickle
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock, MagicMock
-from enum import Enum
 import os
+import pickle
 import tempfile
+import time
+import uuid
+from datetime import datetime, timedelta, timezone
+from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from schemas import UserInDB
+
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
 # Add project root to path
-
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.base import BaseSubAgent
-from netra_backend.app.agents.state import DeepAgentState 
-from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
+from netra_backend.app.core.exceptions_base import (
+    NetraException,
+    StateRecoveryException,
+)
 from netra_backend.app.redis_manager import RedisManager
-from schemas import UserInDB
-from netra_backend.app.core.exceptions_base import NetraException, StateRecoveryException
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path

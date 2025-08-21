@@ -5,11 +5,12 @@ Contains test priority, status enums, and profile/suite management classes
 """
 
 import json
-from pathlib import Path
-from datetime import datetime
-from typing import List, Set, Optional
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import List, Optional, Set
+
 
 class TestPriority(Enum):
     """Test priority levels for execution ordering"""

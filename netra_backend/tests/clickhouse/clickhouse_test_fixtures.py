@@ -3,22 +3,23 @@ Common fixtures and helpers for ClickHouse tests
 Shared utilities for real ClickHouse API integration tests
 """
 
-import pytest
-import uuid
 import json
 import random
-from datetime import datetime, timedelta, UTC
-from typing import List, Dict, Any
+import uuid
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List
 
+import pytest
+
+from netra_backend.app.config import settings
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from netra_backend.app.db.clickhouse_init import (
+    create_workload_events_table_if_missing,
     initialize_clickhouse_tables,
     verify_workload_events_table,
-    create_workload_events_table_if_missing
 )
 from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
-from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger as logger
 
 

@@ -3,12 +3,14 @@ OAuth Validation Logic
 """
 import urllib.parse
 from typing import Optional
+
 from fastapi import Request
 from fastapi.responses import RedirectResponse
+
 from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.core.configuration import unified_config_manager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.routes.auth_routes.utils import get_frontend_url_for_environment
-from netra_backend.app.core.configuration import unified_config_manager
 
 logger = central_logger.get_logger(__name__)
 

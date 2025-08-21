@@ -4,9 +4,9 @@ Type definitions for the Netra AI Platform installer modules.
 Shared types across env_checker.py, dependency_installer.py, and config_setup.py.
 """
 
-from typing import Dict, List, Optional, Tuple, NamedTuple
-from pathlib import Path
 import platform
+from pathlib import Path
+from typing import Dict, List, NamedTuple, Optional, Tuple
 
 
 class InstallerConfig(NamedTuple):

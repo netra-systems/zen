@@ -1,10 +1,10 @@
 """Retry Policy Service for service mesh"""
 
-from typing import Dict, Any, Optional, Callable, List
 import asyncio
 import random
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
 
 
 class RetryStrategy(Enum):

@@ -6,23 +6,33 @@ Manages cache operations, data processing, and legacy interface support.
 Business Value: Ensures seamless backward compatibility during modernization.
 """
 
-from typing import Dict, Any, Optional, List
-from datetime import datetime
 import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.schemas.strict_types import TypedAgentResult
+from netra_backend.app.agents.data_sub_agent.agent_anomaly_processing import (
+    AnomalyProcessor,
+)
 
 # Import existing modular components for delegation
 from netra_backend.app.agents.data_sub_agent.agent_cache import CacheManager
-from netra_backend.app.agents.data_sub_agent.agent_execution import ExecutionManager
+from netra_backend.app.agents.data_sub_agent.agent_corpus_operations import (
+    CorpusOperations,
+)
 from netra_backend.app.agents.data_sub_agent.agent_data_processing import DataProcessor
-from netra_backend.app.agents.data_sub_agent.agent_corpus_operations import CorpusOperations
-from netra_backend.app.agents.data_sub_agent.agent_anomaly_processing import AnomalyProcessor
-from netra_backend.app.agents.data_sub_agent.modern_execution_interface import DataSubAgentModernExecution
-from netra_backend.app.agents.data_sub_agent.delegation_helper import DataSubAgentDelegationHelper
-from netra_backend.app.agents.data_sub_agent.configuration_manager import DataSubAgentConfigurationManager
+from netra_backend.app.agents.data_sub_agent.agent_execution import ExecutionManager
+from netra_backend.app.agents.data_sub_agent.configuration_manager import (
+    DataSubAgentConfigurationManager,
+)
+from netra_backend.app.agents.data_sub_agent.delegation_helper import (
+    DataSubAgentDelegationHelper,
+)
+from netra_backend.app.agents.data_sub_agent.modern_execution_interface import (
+    DataSubAgentModernExecution,
+)
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 
 class DataSubAgentHelpers:

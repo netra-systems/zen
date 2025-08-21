@@ -4,11 +4,14 @@ Secret configuration and categorization utilities.
 Provides secret configuration, categorization, and static defaults.
 """
 
-import os
 import logging
-from typing import Dict, Set, List, Tuple, Optional
+import os
+from typing import Dict, List, Optional, Set, Tuple
+
 from netra_backend.app.core.environment_constants import (
-    Environment, EnvironmentVariables, get_current_project_id
+    Environment,
+    EnvironmentVariables,
+    get_current_project_id,
 )
 
 logger = logging.getLogger(__name__)

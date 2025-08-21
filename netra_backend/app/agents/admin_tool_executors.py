@@ -16,11 +16,13 @@ This module contains the execution logic for individual admin tools.
 All functions are ≤8 lines as per CLAUDE.md requirements.
 """
 
-from typing import Dict, Any
-from netra_backend.app.schemas.shared_types import ToolResult
+from typing import Any, Dict
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.shared_types import ToolResult
 
 logger = central_logger.get_logger(__name__)
 
@@ -99,7 +101,9 @@ class AdminToolExecutors:
     
     async def _generate_synthetic_data(self, **kwargs) -> Dict[str, Any]:
         """Generate synthetic data"""
-        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import (
+            SyntheticDataService,
+        )
         
         synthetic_service = SyntheticDataService(self.db)
         generation_params = self._extract_synthetic_params(**kwargs)
@@ -121,7 +125,9 @@ class AdminToolExecutors:
     
     async def _list_synthetic_presets(self) -> Dict[str, Any]:
         """List available synthetic data presets"""
-        from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+        from netra_backend.app.services.synthetic_data_service import (
+            SyntheticDataService,
+        )
         
         synthetic_service = SyntheticDataService(self.db)
         presets = await synthetic_service.list_presets()

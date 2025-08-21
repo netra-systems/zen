@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Team Updates Sync - Synchronous version for testing."""
 
+import json
 import subprocess
 from datetime import datetime, timedelta
 from pathlib import Path
-import json
 
 
 def get_top_changed_files(since_date, limit=10):

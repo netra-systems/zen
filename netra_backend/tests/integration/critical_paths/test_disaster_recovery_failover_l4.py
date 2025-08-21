@@ -22,40 +22,53 @@ cascade failure, region failover simulation, data corruption recovery, backup in
 validation, and service resurrection orchestration.
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
-import pytest
-import asyncio
-import time
-import uuid
-import json
-import tempfile
-import subprocess
-import shutil
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from contextlib import asynccontextmanager
-from enum import Enum
+# Add project root to path
+import sys
 from pathlib import Path
 
+from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+setup_test_path()
+
+import asyncio
+import json
+import shutil
+import subprocess
+import tempfile
+import time
+import uuid
+from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import asyncpg
+import pytest
 import redis.asyncio as redis
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# Add project root to path
-
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
-# Add project root to path
-    L4StagingCriticalPathTestBase,
-    CriticalPathMetrics
+from netra_backend.app.core.cross_service_validators.data_consistency_validators import (
+    CrossServiceDataValidator,
 )
-from netra_backend.app.core.health_checkers import check_postgres_health, check_clickhouse_health
-from netra_backend.app.core.cross_service_validators.data_consistency_validators import CrossServiceDataValidator
+from netra_backend.app.core.health_checkers import (
+    check_clickhouse_health,
+    check_postgres_health,
+)
 from netra_backend.app.logging_config import central_logger
+
+# Add project root to path
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    # Add project root to path
+    L4StagingCriticalPathTestBase,
+)
 
 logger = central_logger.get_logger(__name__)
 

@@ -15,21 +15,28 @@ All functions ≤8 lines per CLAUDE.md requirements.
 
 import asyncio
 import json
-import uuid
-import time
 import random
+import time
+import uuid
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Tuple
-from unittest.mock import AsyncMock, patch, Mock, MagicMock
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 from starlette.websockets import WebSocketDisconnect, WebSocketState
 
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
-from netra_backend.app.websocket.connection import ConnectionInfo
-from netra_backend.app.websocket.reconnection_manager import WebSocketReconnectionManager
-from netra_backend.app.websocket.reconnection_types import ReconnectionConfig, ReconnectionState, DisconnectReason
+from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.schemas.websocket_models import WebSocketValidationError
-from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.connection import ConnectionInfo
+from netra_backend.app.websocket.reconnection_manager import (
+    WebSocketReconnectionManager,
+)
+from netra_backend.app.websocket.reconnection_types import (
+    DisconnectReason,
+    ReconnectionConfig,
+    ReconnectionState,
+)
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

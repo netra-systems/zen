@@ -11,25 +11,33 @@ Coverage: Dynamic metric creation, schema validation, registration persistence, 
 L3 Realism: Tests with real metric registration services and actual schema validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
 import time
 import uuid
-import logging
-import json
-from typing import Dict, List, Any, Optional, Union
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from unittest.mock import patch, AsyncMock
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+from unittest.mock import AsyncMock, patch
 
+import pytest
 from monitoring.metrics_collector import MetricsCollector
 
 # Add project root to path
-
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 
 # Add project root to path

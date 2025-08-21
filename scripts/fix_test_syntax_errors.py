@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Script to fix common syntax errors in test files"""
 
-import os
 import ast
+import os
 import re
 from pathlib import Path
 from typing import List, Tuple
+
 
 def fix_unclosed_parenthesis(content: str) -> str:
     """Fix unclosed parenthesis in import statements"""

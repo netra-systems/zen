@@ -1,8 +1,10 @@
 import json
 import time
-from typing import Dict, Any, List, Tuple
-from netra_backend.app.logging_config import central_logger
+from typing import Any, Dict, List, Tuple
+
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.logging_config import central_logger
+
 
 def _extract_all_column_names(flattened_records: list[dict]) -> list[str]:
     """Extract and order all unique column names from records."""

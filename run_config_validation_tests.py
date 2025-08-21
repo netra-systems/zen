@@ -4,8 +4,8 @@ This script runs all three test suites to validate configuration usage
 across the codebase and reports violations.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -14,9 +14,18 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / 'netra_backend'))
 
 # Import test classes
-from netra_backend.tests.test_config_central_usage import TestCentralConfigUsage, ConfigUsageAnalyzer
-from netra_backend.tests.test_os_environ_violations import TestOSEnvironViolations, OSEnvironAnalyzer
-from netra_backend.tests.test_config_isolation_patterns import TestConfigIsolationPatterns, ConfigIsolationAnalyzer
+from netra_backend.tests.test_config_central_usage import (
+    ConfigUsageAnalyzer,
+    TestCentralConfigUsage,
+)
+from netra_backend.tests.test_config_isolation_patterns import (
+    ConfigIsolationAnalyzer,
+    TestConfigIsolationPatterns,
+)
+from netra_backend.tests.test_os_environ_violations import (
+    OSEnvironAnalyzer,
+    TestOSEnvironViolations,
+)
 
 
 def run_central_config_tests():

@@ -6,9 +6,11 @@ Maintains 25-line function limit and focused responsibility.
 """
 
 import socket
-from typing import List, Tuple
 from pathlib import Path
+from typing import List, Tuple
+
 import psutil
+
 from netra_backend.app.config import settings
 from netra_backend.app.startup_checks.models import StartupCheckResult
 

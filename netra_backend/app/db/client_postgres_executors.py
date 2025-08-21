@@ -3,14 +3,15 @@
 Query execution components with circuit breaker protection.
 """
 
-from typing import Any, Dict, Optional, List
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Any, Dict, List, Optional
+
 from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.core.circuit_breaker import CircuitBreakerOpenError
-from netra_backend.app.logging_config import central_logger
 from netra_backend.app.db.client_config import CircuitBreakerManager
 from netra_backend.app.db.client_postgres_session import TransactionHandler
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

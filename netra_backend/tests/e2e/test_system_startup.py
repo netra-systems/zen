@@ -20,23 +20,33 @@ COVERAGE:
 - Error handling and recovery
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import os
 import time
-import pytest
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
+
 import httpx
 import psutil
-from pathlib import Path
-from typing import Dict, Any, Optional, List
-from unittest.mock import Mock, AsyncMock, patch
+import pytest
 
-from dev_launcher.launcher import DevLauncher
 from dev_launcher.config import LauncherConfig
-from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.health_monitor import HealthMonitor
+from dev_launcher.launcher import DevLauncher
+from dev_launcher.service_discovery import ServiceDiscovery
 
 # Add project root to path
 
@@ -132,7 +142,10 @@ class TestSystemStartup:
     @pytest.mark.asyncio  
     async def test_database_connections_established(self):
         """Test database connections are properly established."""
-        from netra_backend.app.db.client import get_postgres_client, get_clickhouse_client
+        from netra_backend.app.db.client import (
+            get_clickhouse_client,
+            get_postgres_client,
+        )
         
         # Test PostgreSQL connection
         postgres_client = await get_postgres_client()

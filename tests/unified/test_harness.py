@@ -5,20 +5,20 @@ Business Value: $200K+ MRR protection through comprehensive test coverage
 Provides reusable testing utilities for authentication, WebSocket, and service flows.
 """
 import asyncio
-import uuid
-import time
 import json
 import logging
 import subprocess
-from typing import Dict, Any, Optional, List, Tuple
-from unittest.mock import AsyncMock, MagicMock, patch
+import time
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from tests.unified.test_environment_config import (
-    get_test_environment_config,
     TestEnvironmentConfig,
-    TestEnvironmentType
+    TestEnvironmentType,
+    get_test_environment_config,
 )
 
 logger = logging.getLogger(__name__)

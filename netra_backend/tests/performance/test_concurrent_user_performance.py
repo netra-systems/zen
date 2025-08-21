@@ -11,19 +11,29 @@ Business Value Justification (BVJ):
 - Revenue Impact: Supports 10x user growth (+$50K MRR)
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import statistics
-import uuid
 import json
-from typing import Dict, List, Any, Optional
-from unittest.mock import AsyncMock, patch, MagicMock
-from dataclasses import dataclass, field
+import statistics
+import time
+import uuid
 from contextlib import asynccontextmanager
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 @dataclass

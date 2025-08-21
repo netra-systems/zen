@@ -4,10 +4,10 @@ Test Index Manager - Centralized test indexing and management
 Maintains comprehensive test catalog and relationships
 """
 
-from typing import Dict, List, Optional, Set
-from pathlib import Path
-from datetime import datetime
 import json
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional, Set
 
 
 class TestIndexManager:

@@ -3,12 +3,12 @@
 Script to add pytest markers to test files based on their dependencies
 """
 
-import os
-import sys
 import json
+import os
 import re
+import sys
 from pathlib import Path
-from typing import List, Dict
+from typing import Dict, List
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

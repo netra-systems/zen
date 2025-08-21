@@ -16,24 +16,39 @@ L3 Integration Test Level:
 - Measures actual performance under load
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-from typing import Dict, Any, List
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
+from typing import Any, Dict, List
+
+import pytest
+
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
 
 # Add project root to path
-
-from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
+from netra_backend.app.services.websocket.message_queue import (
+    MessagePriority,
+    MessageQueue,
+    MessageStatus,
+    QueuedMessage,
+)
 from netra_backend.app.websocket.unified.job_queue import JobQueueManager
-from netra_backend.app.redis_manager import redis_manager
-from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
 

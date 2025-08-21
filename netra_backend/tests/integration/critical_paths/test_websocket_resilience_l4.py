@@ -12,30 +12,40 @@ Connection establishment -> Load testing -> Network interruption -> Reconnection
 Coverage: 100+ concurrent connections, network fault injection, message delivery guarantees, staging environment validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import websockets
 import json
+import ssl
 import time
 import uuid
-import ssl
-from typing import Dict, Any, List, Optional
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 # Add project root to path
-
-
 # from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
+
+import pytest
+import websockets
+
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 # from ws_manager import WebSocketManager
 from unittest.mock import AsyncMock
+
 WebSocketManager = AsyncMock
 # from netra_backend.app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock

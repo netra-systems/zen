@@ -3,24 +3,31 @@ Tests for ClickHouse array syntax fixing functionality.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
 from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax
-from netra_backend.tests.clickhouse_test_helpers import (
-
-# Add project root to path
-    assert_array_syntax_fixed,
-    assert_query_structure_preserved,
-    assert_multiple_replacements,
-    assert_complex_query_fixes,
-    get_nested_array_patterns
-)
 from netra_backend.tests.clickhouse_query_fixtures import get_all_test_queries
+from netra_backend.tests.clickhouse_test_helpers import (
+    # Add project root to path
+    assert_array_syntax_fixed,
+    assert_complex_query_fixes,
+    assert_multiple_replacements,
+    assert_query_structure_preserved,
+    get_nested_array_patterns,
+)
 
 
 @pytest.fixture

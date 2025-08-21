@@ -4,8 +4,9 @@ Handles building individual components of the AI operations map.
 Focused on repository info, infrastructure, and code locations.
 """
 
-from typing import Dict, List, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from netra_backend.app.agents.github_analyzer.agent_extractor import AgentExtractor
 from netra_backend.app.agents.github_analyzer.hotspot_analyzer import HotspotAnalyzer
 

@@ -1,8 +1,9 @@
 """Test output parsing utilities."""
 
 import re
-from typing import Dict, List, Optional
 from datetime import datetime
+from typing import Dict, List, Optional
+
 
 def parse_test_counts(output: str, component: str) -> Dict:
     """Parse test counts from pytest/jest output."""

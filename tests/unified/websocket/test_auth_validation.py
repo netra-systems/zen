@@ -24,14 +24,14 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import json
-import jwt
-import pytest
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 from unittest.mock import Mock, patch
 
 import httpx
+import jwt
+import pytest
 from fastapi.testclient import TestClient
 
 # Import from unified test config to avoid config issues

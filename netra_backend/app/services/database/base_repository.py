@@ -4,8 +4,10 @@ Provides abstract base class for all repositories with common CRUD operations.
 Refactored into modular components for better maintainability and adherence to 450-line limit.
 """
 
-from typing import TypeVar, Generic, Optional, List, Dict, Any, Type
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from netra_backend.app.services.database.base_crud import BaseCRUD
 
 T = TypeVar('T')

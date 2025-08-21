@@ -10,19 +10,20 @@ Coverage: JWT lifecycle, token refresh, expiry handling, WebSocket auth persiste
 """
 
 import asyncio
-import pytest
 import time
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock
+
 import jwt
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone, timedelta
+import pytest
 
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.services.user_service import user_service
-from unittest.mock import MagicMock
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
 
 
 class JWTTokenManager:

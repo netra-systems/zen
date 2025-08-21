@@ -5,25 +5,33 @@ Previous tests for OAuth and CSRF utilities have been moved to test_pr_router_st
 or removed as the functionality no longer exists in the current implementation.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import Mock, patch
+
+import pytest
 from fastapi import HTTPException
 
 # Add project root to path
-
 from netra_backend.app.auth_integration.auth import (
-
-# Add project root to path
+    PR_STATE_TTL,
+    # Add project root to path
     build_pr_redirect_url,
-    handle_pr_routing_error,
-    get_pr_environment_status,
-    extract_pr_number_from_request,
     extract_pr_from_host,
+    extract_pr_number_from_request,
+    get_pr_environment_status,
+    handle_pr_routing_error,
     route_pr_authentication,
-    PR_STATE_TTL
 )
 from netra_backend.app.core.exceptions_auth import AuthenticationError
 

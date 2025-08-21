@@ -1,19 +1,26 @@
 """Unit tests for ToolDispatcher initialization and tool registration."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.tests.helpers.tool_dispatcher_helpers import (
-
-# Add project root to path
-    create_mock_tool,
+    assert_corpus_tools_registered,
     assert_synthetic_tools_registered,
-    assert_corpus_tools_registered
+    # Add project root to path
+    create_mock_tool,
 )
 
 

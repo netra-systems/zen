@@ -23,22 +23,23 @@ Compliance:
 """
 
 import asyncio
-import pytest
+import json
+import os
 import time
 import uuid
-import json
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+import pytest
 
 # Import Redis directly to avoid configuration issues
 import redis.asyncio as redis
-import os
 
 # Simplified WebSocket client for testing
 import websockets
 from websockets.exceptions import ConnectionClosedError
+
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class RealSessionPersistenceManager:

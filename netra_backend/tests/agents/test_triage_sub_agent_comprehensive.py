@@ -6,20 +6,27 @@ This file serves as the main entry point that imports all the split test modules
 Each module focuses on a specific aspect of testing with functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import sys
 from pathlib import Path
 
-
-from netra_backend.tests.agents.test_triage_init_validation import *
-from netra_backend.tests.agents.test_triage_entity_intent import *
-from netra_backend.tests.agents.test_triage_caching_async import *
-from netra_backend.tests.agents.test_triage_edge_performance import *
-
 import pytest
 
+from netra_backend.tests.agents.test_triage_caching_async import *
+from netra_backend.tests.agents.test_triage_edge_performance import *
+from netra_backend.tests.agents.test_triage_entity_intent import *
+from netra_backend.tests.agents.test_triage_init_validation import *
 
 
 def test_architectural_compliance():

@@ -8,6 +8,7 @@ import asyncio
 from pathlib import Path
 from typing import Dict, Optional
 
+
 def integrate_ultra_optimization(runner, args) -> bool:
     """
     Integrate ultra optimization into existing test runner

@@ -11,24 +11,33 @@ Coverage: Alert routing accuracy, escalation timing, notification reliability, i
 L3 Realism: Tests with real notification services and actual escalation workflows
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import logging
 import time
 import uuid
-import logging
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock, MagicMock
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.core.alert_manager import HealthAlertManager
-from netra_backend.app.core.shared_health_types import SystemAlert, AlertSeverity
+from netra_backend.app.core.shared_health_types import AlertSeverity, SystemAlert
 
 # Add project root to path
 

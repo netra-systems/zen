@@ -11,11 +11,11 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import subprocess
 import json
+import subprocess
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from dataclasses import dataclass
 
 
 @dataclass
@@ -123,7 +123,9 @@ class StartupValidator:
             # Import and run auth service validation
             import sys
             sys.path.insert(0, str(Path(__file__).parent.parent))
-            from netra_backend.app.tests.startup.test_comprehensive_startup import AuthServiceValidator
+            from netra_backend.app.tests.startup.test_comprehensive_startup import (
+                AuthServiceValidator,
+            )
             
             validator = AuthServiceValidator()
             result = await validator.validate_connectivity()
@@ -149,7 +151,8 @@ class StartupValidator:
             import sys
             sys.path.insert(0, str(Path(__file__).parent.parent))
             from netra_backend.app.tests.startup.test_comprehensive_startup import (
-                ClickHouseValidator, RedisValidator
+                ClickHouseValidator,
+                RedisValidator,
             )
             
             # Test ClickHouse

@@ -5,7 +5,7 @@ Provides strongly typed data models for test fixtures
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
 
 @dataclass

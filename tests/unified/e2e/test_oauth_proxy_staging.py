@@ -27,23 +27,24 @@ OAuth Proxy PR Environment Test - P1 STAGING BROKEN
 """
 
 import asyncio
-import pytest
-import time
-import uuid
-import json
 import base64
 import hashlib
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List
-from unittest.mock import patch, AsyncMock, Mock
-from contextlib import asynccontextmanager
-import httpx
+import json
+import time
 import urllib.parse
+import uuid
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
-from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
-from tests.unified.real_services_manager import create_real_services_manager
-from tests.unified.real_http_client import RealHTTPClient
+import httpx
+import pytest
+
 from netra_backend.app.logging_config import central_logger
+from tests.unified.oauth_test_providers import GoogleOAuthProvider, OAuthUserFactory
+from tests.unified.real_http_client import RealHTTPClient
+from tests.unified.real_services_manager import create_real_services_manager
 
 logger = central_logger.get_logger(__name__)
 

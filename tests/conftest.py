@@ -1,9 +1,10 @@
-import pytest
+import asyncio
 import os
 import sys
-from unittest.mock import AsyncMock, MagicMock
 from typing import Optional
-import asyncio
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 # Set testing environment variables
 os.environ["TESTING"] = "1"
@@ -35,9 +36,9 @@ except ImportError:
 
 try:
     from sqlalchemy.ext.asyncio import (
-        create_async_engine,
         AsyncSession,
         async_sessionmaker,
+        create_async_engine,
     )
     from sqlalchemy.pool import StaticPool
 
@@ -240,8 +241,8 @@ def sample_data():
 async def dev_launcher():
     """Provides dev_launcher instance for real service testing."""
     try:
-        from dev_launcher.launcher import DevLauncher
         from dev_launcher.config import LauncherConfig
+        from dev_launcher.launcher import DevLauncher
     except ImportError:
         pytest.skip("Dev launcher not available")
         return

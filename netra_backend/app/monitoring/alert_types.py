@@ -4,10 +4,10 @@ Defines core alert types, severity levels, and data structures
 used throughout the alert management system.
 """
 
-from datetime import datetime
-from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class AlertLevel(Enum):

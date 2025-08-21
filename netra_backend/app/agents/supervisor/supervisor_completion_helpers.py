@@ -4,7 +4,7 @@ Business Value: Centralized completion tracking and statistics for supervisor op
 Supports monitoring and observability requirements for Enterprise segment.
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.logging_config import central_logger
 
@@ -44,9 +44,15 @@ class SupervisorCompletionHelpers:
     
     def create_supporting_helpers(self, supervisor):
         """Create supervisor supporting helper components."""
-        from netra_backend.app.agents.supervisor.modern_execution_helpers import SupervisorExecutionHelpers
-        from netra_backend.app.agents.supervisor.workflow_execution import SupervisorWorkflowExecutor
-        from netra_backend.app.agents.supervisor.agent_routing import SupervisorAgentRouter
+        from netra_backend.app.agents.supervisor.agent_routing import (
+            SupervisorAgentRouter,
+        )
+        from netra_backend.app.agents.supervisor.modern_execution_helpers import (
+            SupervisorExecutionHelpers,
+        )
+        from netra_backend.app.agents.supervisor.workflow_execution import (
+            SupervisorWorkflowExecutor,
+        )
         return (SupervisorExecutionHelpers(supervisor), 
                 SupervisorWorkflowExecutor(supervisor),
                 SupervisorAgentRouter(supervisor))

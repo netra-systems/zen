@@ -4,16 +4,30 @@ Tests core health monitoring models and initialization
 COMPLIANCE: 450-line max file, 25-line max functions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from datetime import datetime
 from unittest.mock import Mock
 
+import pytest
+
 from dev_launcher.staged_health_monitor import (
-    StagedHealthMonitor, HealthStage, ServiceConfig, HealthCheckResult,
-    StageConfig, ServiceState
+    HealthCheckResult,
+    HealthStage,
+    ServiceConfig,
+    ServiceState,
+    StageConfig,
+    StagedHealthMonitor,
 )
 
 

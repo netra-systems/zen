@@ -4,11 +4,12 @@ Specialized collectors for different types of factory metrics.
 Each collector handles a specific domain of metrics collection.
 """
 
-from typing import Dict, List, Any, Optional
-from datetime import datetime
 import asyncio
-import psutil
 import os
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import psutil
 
 from netra_backend.app.logging_config import central_logger
 

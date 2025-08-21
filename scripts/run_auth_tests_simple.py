@@ -10,9 +10,9 @@ This script runs all real auth integration tests to ensure:
 3. At least 20 auth tests use real service calls
 """
 
+import os
 import subprocess
 import sys
-import os
 from pathlib import Path
 
 

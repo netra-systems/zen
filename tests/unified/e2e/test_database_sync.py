@@ -20,28 +20,31 @@ SUCCESS CRITERIA:
 Module Architecture Compliance: Under 300 lines, functions under 8 lines
 """
 
-import pytest
-import pytest_asyncio
 import asyncio
 import time
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
+import pytest
+import pytest_asyncio
 
 from netra_backend.tests.unified.database_sync_fixtures import (
-    DatabaseSyncValidator, 
-    create_test_user_data,
+    DatabaseSyncValidator,
+    create_eventual_consistency_user,
     create_performance_user_data,
-    create_eventual_consistency_user
+    create_test_user_data,
 )
 from netra_backend.tests.unified.database_sync_helpers import (
-    sync_user_to_backend,
-    verify_sync_consistency,
     create_sync_task,
+    measure_performance_duration,
+    sync_user_to_backend,
     verify_auth_backend_consistency,
     verify_backend_user_exists,
-    measure_performance_duration
+    verify_sync_consistency,
 )
-from netra_backend.tests.unified.database_test_connections import DatabaseTestConnections
+from netra_backend.tests.unified.database_test_connections import (
+    DatabaseTestConnections,
+)
 
 
 @pytest_asyncio.fixture

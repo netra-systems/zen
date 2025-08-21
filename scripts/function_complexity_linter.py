@@ -8,11 +8,12 @@ This module contains the main FunctionComplexityLinter class and core analysis l
 
 import ast
 import json
-from pathlib import Path
-from typing import List, Dict, Optional
 from dataclasses import asdict
+from pathlib import Path
+from typing import Dict, List, Optional
 
 from function_complexity_types import FunctionComplexityViolation
+
 
 class FunctionComplexityLinter:
     """Linter for enforcing function complexity rules"""

@@ -13,33 +13,41 @@ Test Level: L3 (Real SUT with Real Local Services - Out-of-Process)
 - Tests failure recovery and compensating transactions
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, List, Optional, Tuple
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from contextlib import asynccontextmanager
-from unittest.mock import patch, MagicMock
+from typing import Any, Dict, List, Optional, Tuple
+from unittest.mock import MagicMock, patch
 
-# Add project root to path
-
-
-# Docker container management
-import docker
-from docker.errors import DockerException
-import psycopg2
 import clickhouse_connect
 
-from netra_backend.app.services.transaction_manager import TransactionManager
-from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
-from netra_backend.app.db.clickhouse import get_clickhouse_client
+# Add project root to path
+# Docker container management
+import docker
+import psycopg2
+import pytest
+from docker.errors import DockerException
 from logging_config import central_logger
+
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.postgres import get_postgres_session, initialize_postgres
+from netra_backend.app.services.transaction_manager import TransactionManager
 
 logger = central_logger.get_logger(__name__)
 

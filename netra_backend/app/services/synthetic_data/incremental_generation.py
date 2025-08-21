@@ -4,8 +4,8 @@ Incremental Generation Module - Handles incremental data generation with checkpo
 
 import asyncio
 import uuid
-from datetime import datetime, UTC
-from typing import Dict, List, Optional, Callable
+from datetime import UTC, datetime
+from typing import Callable, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
 

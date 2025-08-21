@@ -9,16 +9,22 @@ Strategic Impact: Proper isolation ensures thread independence and data integrit
 """
 
 import asyncio
-import pytest
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
+import pytest
+
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
 from netra_backend.tests.unified.config import TEST_USERS
 from netra_backend.tests.unified.e2e.thread_test_fixtures_core import (
-    ThreadWebSocketFixtures, ThreadContextManager, ThreadTestDataFactory,
-    unified_harness, ws_thread_fixtures, thread_context_manager, test_users
+    ThreadContextManager,
+    ThreadTestDataFactory,
+    ThreadWebSocketFixtures,
+    test_users,
+    thread_context_manager,
+    unified_harness,
+    ws_thread_fixtures,
 )
-from netra_backend.app.schemas.core_enums import WebSocketMessageType
 
 
 @pytest.mark.asyncio

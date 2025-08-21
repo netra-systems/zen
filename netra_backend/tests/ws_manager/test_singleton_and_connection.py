@@ -2,20 +2,34 @@
 Tests for WebSocketManager singleton pattern and connection management
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import threading
 from datetime import datetime, timezone
-from unittest.mock import Mock, AsyncMock, patch
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 from starlette.websockets import WebSocketState
 
 # Add project root to path
-
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo, manager, ws_manager
-from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
+from netra_backend.app.services.websocket.ws_manager import (
+    ConnectionInfo,
+    WebSocketManager,
+    manager,
+    ws_manager,
+)
+from netra_backend.tests.ws_manager.test_base import MockWebSocket, WebSocketTestBase
 
 # Add project root to path
 
@@ -69,8 +83,10 @@ class TestSingletonPattern(WebSocketTestBase):
         """Test singleton works across different import styles"""
         self.reset_manager_singleton()
         
-        from netra_backend.app.services.websocket.ws_manager import WebSocketManager as WSM1
         from netra_backend.app import ws_manager as ws_module
+        from netra_backend.app.services.websocket.ws_manager import (
+            WebSocketManager as WSM1,
+        )
         WSM2 = ws_module.WebSocketManager
         
         instance1 = WSM1()

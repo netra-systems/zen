@@ -17,17 +17,18 @@ Comprehensive E2E test runner with:
 - Real service coordination
 """
 
+import argparse
 import asyncio
-import sys
-import time
 import json
 import logging
-import argparse
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass, asdict
 import subprocess
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import pytest
 
 # Configure logging

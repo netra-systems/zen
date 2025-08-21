@@ -4,6 +4,7 @@
 from datetime import datetime
 from typing import Dict, List
 
+
 class TestResultsUpdater:
     """Handles updating test results data."""
     

@@ -5,6 +5,7 @@ import subprocess
 import sys
 from typing import List
 
+
 def _print_reset_header() -> None:
     """Print the reset operation header."""
     print("\n" + "=" * 60)

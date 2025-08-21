@@ -12,14 +12,16 @@ Provides reusable helper methods for authentication and provider connection test
 """
 
 import uuid
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional, List
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock
 
 from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.services.websocket.ws_manager import get_manager as get_ws_manager
-from netra_backend.app.services.demo_service import DemoService
 from netra_backend.app.services.cost_calculator import CostCalculatorService
+from netra_backend.app.services.demo_service import DemoService
+from netra_backend.app.services.websocket.ws_manager import (
+    get_manager as get_ws_manager,
+)
 
 
 class CriticalUserJourneyHelpers:

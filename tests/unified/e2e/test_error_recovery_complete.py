@@ -18,27 +18,37 @@ mechanisms against real service failures, ensuring business continuity.
 """
 
 import asyncio
-import time
-import pytest
-import pytest_asyncio
 import logging
-from typing import Dict, Any, List, Optional, Tuple
-from dataclasses import dataclass
-from pathlib import Path
-import httpx
 
 # Add project root to path
 import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import httpx
+import pytest
+import pytest_asyncio
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.e2e.error_cascade_core import ServiceFailureSimulator, GracefulDegradationValidator, AutoRecoveryVerifier
-from tests.unified.real_websocket_client import RealWebSocketClient
-from tests.unified.real_client_types import ClientConfig
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
-from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState, CircuitBreakerOpenError
+from netra_backend.app.core.circuit_breaker_types import (
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    CircuitState,
+)
 from netra_backend.app.logging_config import central_logger
+from tests.unified.e2e.error_cascade_core import (
+    AutoRecoveryVerifier,
+    GracefulDegradationValidator,
+    ServiceFailureSimulator,
+)
+from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
+from tests.unified.real_client_types import ClientConfig
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 logger = central_logger.get_logger(__name__)
 

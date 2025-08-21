@@ -11,16 +11,20 @@ This test validates that the Netra Apex platform scales linearly
 with increasing message rates up to system limits.
 """
 
-import pytest
 import asyncio
-import time
 import logging
 import statistics
-from typing import Dict, Any
+import time
+from typing import Any, Dict
+
+import pytest
 
 from netra_backend.tests.e2e.test_helpers.throughput_helpers import (
-    ThroughputMetrics, LoadTestResults, E2E_TEST_CONFIG,
-    create_test_message, measure_system_resources
+    E2E_TEST_CONFIG,
+    LoadTestResults,
+    ThroughputMetrics,
+    create_test_message,
+    measure_system_resources,
 )
 
 logger = logging.getLogger(__name__)

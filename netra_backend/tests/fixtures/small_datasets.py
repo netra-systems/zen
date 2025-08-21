@@ -4,18 +4,28 @@ Provides realistic test data matching production schemas.
 Maximum 300 lines, functions ≤8 lines.
 """
 
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any
-from decimal import Decimal
 import uuid
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal
+from typing import Any, Dict, List
 
 from netra_backend.app.schemas.Agent import AgentStatus, SubAgentLifecycle, TodoStatus
+from netra_backend.app.schemas.FinOps import CostComparison, FinOps
+from netra_backend.app.schemas.llm_request_types import (
+    LLMFunction,
+    LLMRequest,
+    StructuredOutputSchema,
+)
+from netra_backend.app.schemas.Metrics import (
+    CorpusMetric,
+    MetricType,
+    QualityMetrics,
+    ResourceType,
+    ResourceUsage,
+)
 from netra_backend.app.schemas.Performance import Performance
-from netra_backend.app.schemas.FinOps import FinOps, CostComparison
-from netra_backend.app.schemas.Metrics import CorpusMetric, MetricType, ResourceUsage, ResourceType, QualityMetrics
-from netra_backend.app.schemas.Supply import SupplyOption, ModelIdentifier
 from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
-from netra_backend.app.schemas.llm_request_types import LLMRequest, LLMFunction, StructuredOutputSchema
+from netra_backend.app.schemas.Supply import ModelIdentifier, SupplyOption
 
 
 class SmallTestDatasets:

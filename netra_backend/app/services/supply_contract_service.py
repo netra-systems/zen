@@ -9,7 +9,7 @@ Business Value Justification (BVJ):
 - Revenue Impact: Enterprise feature for contract management
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 async def manage_contract(request_data: Dict[str, Any]) -> Dict[str, Any]:

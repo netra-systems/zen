@@ -5,6 +5,7 @@ Handles violation sorting, limits, and severity markers.
 """
 
 from typing import List
+
 from .core import Violation
 
 

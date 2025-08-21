@@ -4,11 +4,11 @@ Manage pre-commit hooks configuration
 Easily enable/disable pre-commit checks without removing files
 """
 
+import argparse
 import json
 import sys
-from pathlib import Path
 from datetime import datetime
-import argparse
+from pathlib import Path
 
 CONFIG_FILE = Path(__file__).parent.parent / ".githooks" / "config.json"
 

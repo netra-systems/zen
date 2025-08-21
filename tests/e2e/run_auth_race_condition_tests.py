@@ -28,11 +28,11 @@ Examples:
     python run_auth_race_condition_tests.py --stress
 """
 
-import sys
-import os
 import argparse
-import time
+import os
 import subprocess
+import sys
+import time
 from pathlib import Path
 
 # Add the project root to Python path

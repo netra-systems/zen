@@ -9,32 +9,34 @@ Business Value Justification (BVJ):
 - Strategic Impact: Protects $347K+ MRR by validating critical paths
 """
 
-import os
-import pytest
 import asyncio
 import json
-from typing import Dict, Any, List
-from datetime import datetime
+import os
 import time
-from fastapi.testclient import TestClient
-from httpx import AsyncClient, ASGITransport
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List
+
+import pytest
+from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
+
+from netra_backend.app.dependencies import get_db_session, get_security_service
 
 # Import app components
 from netra_backend.app.main import app
 from netra_backend.app.schemas import (
-    RequestModel, 
-    Workload, 
-    DataSource, 
+    DataSource,
+    RequestModel,
     TimeRange,
-    User, 
+    User,
+    UserPlan,
     WebSocketMessage,
-    UserPlan
+    Workload,
 )
 from netra_backend.app.schemas.UserPlan import PlanTier
 from netra_backend.app.services.agent_service import AgentService, get_agent_service
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.dependencies import get_db_session, get_security_service
 
 # Import test helpers - removed due to missing module
 

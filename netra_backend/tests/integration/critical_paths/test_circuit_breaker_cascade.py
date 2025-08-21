@@ -11,26 +11,42 @@ Coverage: Real circuit breaker states, cascade protection, auto-recovery, failur
 Level: L2-L3 (Real SUT with Real Internal Dependencies + Real Local Services)
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-import time
-import logging
 import json
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+import logging
+import time
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Add project root to path
-
-
 # Real services for L2-L3 testing
-from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitBreakerRegistry
-from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.core.circuit_breaker import (
+    CircuitBreaker,
+    CircuitBreakerRegistry,
+)
 from netra_backend.app.core.database_connection_manager import DatabaseConnectionManager
-from netra_backend.app.core.health_checkers import check_postgres_health, check_redis_health
-from netra_backend.app.services.websocket.connection_manager import WebSocketConnectionManager
+from netra_backend.app.core.health_checkers import (
+    check_postgres_health,
+    check_redis_health,
+)
+from netra_backend.app.services.redis_service import RedisService
+from netra_backend.app.services.websocket.connection_manager import (
+    WebSocketConnectionManager,
+)
 
 logger = logging.getLogger(__name__)
 

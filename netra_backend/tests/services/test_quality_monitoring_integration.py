@@ -1,33 +1,46 @@
 """Integration and edge case tests for Quality Monitoring Service"""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 
-# Add project root to path
-
-from netra_backend.app.services.quality_monitoring_service import (
-
-# Add project root to path
-    QualityMonitoringService,
-    AlertSeverity,
-    MetricType
+from netra_backend.app.services.quality_gate_service import (
+    ContentType,
+    QualityLevel,
+    QualityMetrics,
 )
-from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel, QualityMetrics
+
+# Add project root to path
+from netra_backend.app.services.quality_monitoring_service import (
+    AlertSeverity,
+    MetricType,
+    # Add project root to path
+    QualityMonitoringService,
+)
 from netra_backend.tests.helpers.quality_monitoring_fixtures import (
+    minimal_quality_metrics,
     service_with_mocks,
-    minimal_quality_metrics
 )
 from netra_backend.tests.helpers.quality_monitoring_helpers import (
-    create_buffer_overflow_events,
-    create_alert_history_overflow,
-    assert_buffer_max_length,
     assert_alert_history_max_length,
-    create_test_alert
+    assert_buffer_max_length,
+    create_alert_history_overflow,
+    create_buffer_overflow_events,
+    create_test_alert,
 )
 
 
@@ -43,7 +56,11 @@ class TestIntegrationWithOtherServices:
         assert service.trend_analyzer is not None
         
         # Test basic integration flow
-        from netra_backend.app.services.quality_gate_service import QualityMetrics, QualityLevel, ContentType
+        from netra_backend.app.services.quality_gate_service import (
+            ContentType,
+            QualityLevel,
+            QualityMetrics,
+        )
         metrics = QualityMetrics(overall_score=0.8, quality_level=QualityLevel.GOOD)
         
         await service.record_quality_event("integration_agent", ContentType.GENERAL, metrics)
@@ -59,7 +76,11 @@ class TestIntegrationWithOtherServices:
         await service.start_monitoring(interval_seconds=0.01)
         
         # Add some data
-        from netra_backend.app.services.quality_gate_service import QualityMetrics, QualityLevel, ContentType
+        from netra_backend.app.services.quality_gate_service import (
+            ContentType,
+            QualityLevel,
+            QualityMetrics,
+        )
         metrics = QualityMetrics(overall_score=0.6, quality_level=QualityLevel.ACCEPTABLE)
         
         await service.record_quality_event("cycle_agent", ContentType.OPTIMIZATION, metrics)

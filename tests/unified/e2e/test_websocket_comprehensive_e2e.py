@@ -15,20 +15,25 @@ Module Architecture Compliance: Under 300 lines, functions under 8 lines
 
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
-import pytest
-import pytest_asyncio
 import asyncio
 import json
 import uuid
-from typing import Dict, List, Optional
 from datetime import datetime
+from typing import Dict, List, Optional
+
+import pytest
+import pytest_asyncio
 import websockets
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+
 from netra_backend.tests.unified.database_sync_fixtures import create_test_user_data
-from netra_backend.tests.unified.harness_complete import UnifiedTestHarnessComplete as TestHarness
+from netra_backend.tests.unified.harness_complete import (
+    UnifiedTestHarnessComplete as TestHarness,
+)
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 
 class WebSocketE2ETester:

@@ -1,11 +1,12 @@
 """IP blocking middleware for Cloud Run."""
-from fastapi import Request, HTTPException
-from fastapi.responses import JSONResponse
-from typing import Set
 import ipaddress
-import logging
 import json
+import logging
 from pathlib import Path
+from typing import Set
+
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
 
 logger = logging.getLogger(__name__)
 

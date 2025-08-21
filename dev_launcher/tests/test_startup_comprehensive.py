@@ -11,22 +11,24 @@ This test suite addresses Agent 2's critical review points:
 Tests cover all critical scenarios identified in the startup implementation.
 """
 
-import pytest
 import asyncio
-import sys
-import subprocess
 import socket
-import time
+import subprocess
+import sys
 import threading
-from unittest.mock import Mock, patch, MagicMock, call
-from pathlib import Path
+import time
 from datetime import datetime, timedelta
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, call, patch
+
+import pytest
+
+from dev_launcher.config import LauncherConfig
+from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
+from dev_launcher.port_manager import PortManager
 
 # Import the modules we're testing
 from dev_launcher.process_manager import ProcessManager
-from dev_launcher.port_manager import PortManager
-from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
-from dev_launcher.config import LauncherConfig
 from netra_backend.app.core.network_constants import ServicePorts
 
 

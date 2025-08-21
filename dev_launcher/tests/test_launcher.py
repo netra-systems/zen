@@ -5,23 +5,23 @@ Tests cover configuration, process management, health monitoring,
 error handling, and recovery scenarios.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock, call
 import subprocess
 import sys
 import tempfile
-from pathlib import Path
-from datetime import datetime
 import threading
 import time
+import unittest
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, call, patch
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.config import LauncherConfig, find_project_root
+from dev_launcher.health_monitor import HealthMonitor, HealthStatus
 from dev_launcher.launcher import DevLauncher
 from dev_launcher.process_manager import ProcessManager
-from dev_launcher.health_monitor import HealthMonitor, HealthStatus
 
 
 class TestLauncherConfig(unittest.TestCase):

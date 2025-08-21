@@ -7,29 +7,35 @@ Business Value: Ensures Enterprise SLA compliance and prevents $12K MRR loss
 from database instability under high load conditions.
 """
 
-import pytest
 import asyncio
-import time
-import psutil
 import gc
+import time
 from contextlib import asynccontextmanager
-from typing import List, Dict, Any, Optional
-from unittest.mock import patch, MagicMock
+from typing import Any, Dict, List, Optional
+from unittest.mock import MagicMock, patch
 
-import httpx
 import asyncpg
+import httpx
+import psutil
+import pytest
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool, QueuePool
-from sqlalchemy import text
 
-from netra_backend.app.core.database_connection_manager import database_recovery_registry
-from netra_backend.app.core.database_health_monitoring import PoolHealthChecker
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
-from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetrics
-from netra_backend.app.db.postgres import async_engine, async_session_factory, initialize_postgres
-from netra_backend.app.db.postgres_config import DatabaseConfig
+from netra_backend.app.core.database_connection_manager import (
+    database_recovery_registry,
+)
+from netra_backend.app.core.database_health_monitoring import PoolHealthChecker
 from netra_backend.app.core.database_types import DatabaseType, PoolHealth
+from netra_backend.app.db.postgres import (
+    async_engine,
+    async_session_factory,
+    initialize_postgres,
+)
+from netra_backend.app.db.postgres_config import DatabaseConfig
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetrics
 
 logger = central_logger.get_logger(__name__)
 

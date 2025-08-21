@@ -1,7 +1,7 @@
 """HTTP error handling utilities."""
 
-from typing import Optional
 from datetime import datetime, timezone
+from typing import Optional
 
 from fastapi import HTTPException
 from starlette.status import (
@@ -13,8 +13,8 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from netra_backend.app.core.exceptions import ErrorCode
 from netra_backend.app.core.error_response import ErrorResponse
+from netra_backend.app.core.exceptions import ErrorCode
 
 
 class HttpErrorHandler:

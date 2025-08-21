@@ -14,22 +14,34 @@ REQUIREMENTS:
 - Storage metadata tracking for operations
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import time
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
+
+import pytest
 
 # Add project root to path
-
 from netra_backend.app.logging_config import central_logger
 from netra_backend.tests.shared_fixtures import (
-
-# Add project root to path
-    MetricEvent, MockMetricsStorage, MockMetricsAggregator,
-    metrics_storage, metrics_aggregator, metrics_collector
+    # Add project root to path
+    MetricEvent,
+    MockMetricsAggregator,
+    MockMetricsStorage,
+    metrics_aggregator,
+    metrics_collector,
+    metrics_storage,
 )
 
 logger = central_logger.get_logger(__name__)

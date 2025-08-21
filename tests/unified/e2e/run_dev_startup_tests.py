@@ -5,10 +5,10 @@ Executes comprehensive startup tests with proper setup and teardown.
 Follows 450-line file limit and 25-line function limit constraints.
 """
 
-import os
-import sys
 import asyncio
 import logging
+import os
+import sys
 from pathlib import Path
 from typing import Dict, List, Optional
 

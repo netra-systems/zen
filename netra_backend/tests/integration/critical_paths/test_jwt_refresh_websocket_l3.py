@@ -11,6 +11,14 @@ Tests seamless token rotation without disrupting real-time features.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
@@ -30,7 +38,7 @@ from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, To
 from ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
+from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, MockWebSocketForRedis
 
 # Add project root to path
 

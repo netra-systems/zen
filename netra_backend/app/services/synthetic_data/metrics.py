@@ -4,13 +4,14 @@ Metrics and analytics for synthetic data generation
 
 import random
 import uuid
-from datetime import datetime, UTC
-from typing import Dict, List, Any, Union, TYPE_CHECKING, Callable
+from datetime import UTC, datetime
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Union
 
 if TYPE_CHECKING:
-    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
     from netra_backend.app.schemas.data_ingestion_types import IngestionConfig
+    from netra_backend.app.schemas.Generation import SyntheticDataGenParams
 from collections import namedtuple
+
 
 def _calculate_validation_rate(records: List[Dict[str, Any]], validate_schema_fn: Callable[[Dict[str, Any]], bool]) -> float:
     """Calculate validation pass rate"""

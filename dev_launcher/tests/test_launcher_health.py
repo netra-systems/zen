@@ -5,18 +5,18 @@ Tests cover HealthMonitor, recovery mechanisms, and error handling.
 All functions follow 25-line maximum rule per CLAUDE.md.
 """
 
-import unittest
-from unittest.mock import Mock, patch, MagicMock
 import sys
-from pathlib import Path
-import time
 import threading
+import time
+import unittest
+from pathlib import Path
+from unittest.mock import MagicMock, Mock, patch
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+from dev_launcher.config import LauncherConfig
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.config import LauncherConfig
 
 
 class TestHealthMonitor(unittest.TestCase):

@@ -1,14 +1,31 @@
 """Thread route handlers."""
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.services.database.message_repository import MessageRepository
-from netra_backend.app.routes.utils.thread_creators import get_user_threads, generate_thread_id, prepare_thread_metadata, create_thread_record
-from netra_backend.app.routes.utils.thread_builders import convert_threads_to_responses, build_thread_response, build_thread_messages_response
-from netra_backend.app.routes.utils.thread_validators import get_thread_with_validation, archive_thread_safely
-from netra_backend.app.routes.utils.thread_title_generator import (
-    get_first_user_message_safely, generate_title_with_llm,
-    update_thread_with_title, send_thread_rename_notification, create_final_thread_response
-)
 import time
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.routes.utils.thread_builders import (
+    build_thread_messages_response,
+    build_thread_response,
+    convert_threads_to_responses,
+)
+from netra_backend.app.routes.utils.thread_creators import (
+    create_thread_record,
+    generate_thread_id,
+    get_user_threads,
+    prepare_thread_metadata,
+)
+from netra_backend.app.routes.utils.thread_title_generator import (
+    create_final_thread_response,
+    generate_title_with_llm,
+    get_first_user_message_safely,
+    send_thread_rename_notification,
+    update_thread_with_title,
+)
+from netra_backend.app.routes.utils.thread_validators import (
+    archive_thread_safely,
+    get_thread_with_validation,
+)
+from netra_backend.app.services.database.message_repository import MessageRepository
 
 
 async def handle_list_threads_request(db: AsyncSession, user_id: int, offset: int, limit: int):

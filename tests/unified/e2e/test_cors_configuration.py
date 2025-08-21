@@ -19,16 +19,17 @@ Test Coverage:
 ✅ Performance monitoring
 """
 
-import pytest
 import asyncio
-import httpx
-import websockets
 import json
-import time
 import os
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass
+import time
 from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+import httpx
+import pytest
+import websockets
 
 # Test environment setup
 os.environ["TESTING"] = "1"

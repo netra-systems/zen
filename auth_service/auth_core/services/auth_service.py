@@ -2,24 +2,35 @@
 Auth Service - Core authentication business logic
 Single Source of Truth for authentication operations
 """
-import os
 import hashlib
-import secrets
-import httpx
-from datetime import datetime, timedelta
-from typing import Optional, Dict, Tuple
 import logging
+import os
+import secrets
+from datetime import datetime, timedelta
+from typing import Dict, Optional, Tuple
+
+import httpx
 
 from auth_service.auth_core.core.jwt_handler import JWTHandler
 from auth_service.auth_core.core.session_manager import SessionManager
-from auth_service.auth_core.models.auth_models import (
-    LoginRequest, LoginResponse, TokenResponse,
-    ServiceTokenRequest, ServiceTokenResponse,
-    AuthProvider, AuthError, AuthException, PasswordResetRequest,
-    PasswordResetResponse, PasswordResetConfirm,
-    PasswordResetConfirmResponse
+from auth_service.auth_core.database.repository import (
+    AuthAuditRepository,
+    AuthUserRepository,
 )
-from auth_service.auth_core.database.repository import AuthUserRepository, AuthAuditRepository
+from auth_service.auth_core.models.auth_models import (
+    AuthError,
+    AuthException,
+    AuthProvider,
+    LoginRequest,
+    LoginResponse,
+    PasswordResetConfirm,
+    PasswordResetConfirmResponse,
+    PasswordResetRequest,
+    PasswordResetResponse,
+    ServiceTokenRequest,
+    ServiceTokenResponse,
+    TokenResponse,
+)
 
 logger = logging.getLogger(__name__)
 

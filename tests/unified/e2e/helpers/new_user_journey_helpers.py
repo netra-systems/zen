@@ -6,15 +6,16 @@ Extracted from test_new_user_complete_real.py for modularity.
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
+from typing import Any, Dict, Optional
+
 import aiosqlite
-from typing import Dict, Any, Optional
 
 from netra_backend.app.clients.auth_client import auth_client
-from tests.unified.database_test_connections import DatabaseTestConnections
 from netra_backend.tests.unified.test_harness import UnifiedTestHarness
+from tests.unified.database_test_connections import DatabaseTestConnections
 
 
 class DatabaseSetupHelper:

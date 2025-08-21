@@ -3,16 +3,21 @@
 Handles structured output generation, schema validation, and fallback parsing.
 Each function must be ≤8 lines as per architecture requirements.
 """
-from typing import Any, Type, TypeVar, Optional
+from typing import Any, Optional, Type, TypeVar
+
 from pydantic import BaseModel
-from netra_backend.app.llm.llm_response_processing import (
-    parse_nested_json_recursive, attempt_json_fallback_parse,
-    create_structured_cache_key, get_cached_structured_response,
-    cache_structured_response, should_cache_structured_response
-)
+
 from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json
-from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
+from netra_backend.app.llm.llm_response_processing import (
+    attempt_json_fallback_parse,
+    cache_structured_response,
+    create_structured_cache_key,
+    get_cached_structured_response,
+    parse_nested_json_recursive,
+    should_cache_structured_response,
+)
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
 
 logger = central_logger.get_logger(__name__)
 T = TypeVar('T', bound=BaseModel)

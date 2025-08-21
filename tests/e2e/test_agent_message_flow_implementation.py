@@ -17,17 +17,20 @@ Business Value Justification (BVJ):
 
 import asyncio
 import json
-import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, timezone
-from typing import Dict, Any
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.routes.websocket_secure import (
+    SECURE_WEBSOCKET_CONFIG,
+    SecureWebSocketManager,
+)
+from netra_backend.app.services.agent_service_core import AgentService
 
 
 class TestAgentMessageFlowImplementation:

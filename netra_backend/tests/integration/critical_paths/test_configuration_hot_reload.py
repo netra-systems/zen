@@ -10,28 +10,38 @@ Critical Path: Config change detection -> Validation -> Service notification -> 
 Coverage: Dynamic configuration updates, service coordination, rollback capabilities, consistency validation
 """
 
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
-import pytest
-import asyncio
-import time
-import json
-import logging
-import tempfile
-import os
-from typing import Dict, List, Optional, Any
-from unittest.mock import AsyncMock, patch, MagicMock
+# Add project root to path
+import sys
 from pathlib import Path
 
-# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
 
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+setup_test_path()
+
+import asyncio
+import json
+import logging
+import os
+import tempfile
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+
+# Add project root to path
 from netra_backend.app.core.config import Settings
 from netra_backend.app.services.config_service import ConfigService
+from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.websocket_manager import WebSocketManager
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.services.health_check_service import HealthCheckService
 
 # Add project root to path
 

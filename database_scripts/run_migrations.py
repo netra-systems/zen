@@ -1,4 +1,5 @@
 import os
+
 import alembic.config
 
 print(os.getcwd())

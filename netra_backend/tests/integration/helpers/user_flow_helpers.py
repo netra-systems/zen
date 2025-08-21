@@ -8,13 +8,14 @@ import json
 import time
 import uuid
 from datetime import datetime, timedelta
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock
 
 import httpx
 from fastapi import status
-from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
+from sqlalchemy.ext.asyncio import AsyncSession
+
 
 # Test data generation
 def generate_test_user_data() -> Dict[str, Any]:

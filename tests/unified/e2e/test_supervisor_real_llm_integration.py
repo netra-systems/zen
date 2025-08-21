@@ -4,14 +4,15 @@ Tests complete supervisor workflow with actual LLM calls.
 Business Value: Validates end-to-end AI optimization value creation.
 """
 
-import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock
+from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+import pytest
+
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
 from netra_backend.app.config import get_config
+from netra_backend.app.llm.llm_manager import LLMManager
 
 
 @pytest.mark.real_llm

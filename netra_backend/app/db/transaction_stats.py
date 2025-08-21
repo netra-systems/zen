@@ -5,8 +5,8 @@ Focused module adhering to 25-line function limit and modular architecture.
 """
 
 import time
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 
 @dataclass

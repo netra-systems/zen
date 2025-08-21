@@ -6,11 +6,21 @@ Tests 11, 12, 14 from original missing tests covering:
 - Custom exception types and validation
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import Mock
+
+import pytest
 from cryptography.fernet import Fernet
 from pydantic import ValidationError
 
@@ -172,7 +182,11 @@ class TestCustomExceptions:
     
     def test_netra_exception_hierarchy(self):
         """Test NetraException hierarchy."""
-        from netra_backend.app.core.exceptions import NetraException, ValidationException, AuthenticationException
+        from netra_backend.app.core.exceptions import (
+            AuthenticationException,
+            NetraException,
+            ValidationException,
+        )
         
         assert issubclass(ValidationException, NetraException)
         assert issubclass(AuthenticationException, NetraException)
@@ -229,7 +243,10 @@ class TestCustomExceptions:
     
     def test_exception_chaining(self):
         """Test exception chaining for root cause analysis."""
-        from netra_backend.app.core.exceptions import NetraException, ValidationException
+        from netra_backend.app.core.exceptions import (
+            NetraException,
+            ValidationException,
+        )
         
         try:
             raise ValueError("Original error")
@@ -263,8 +280,9 @@ class TestValidationUtilities:
     
     def _create_test_model(self):
         """Helper to create test model."""
-        from pydantic import BaseModel
         from typing import Optional
+
+        from pydantic import BaseModel
         
         class TestModel(BaseModel):
             name: str

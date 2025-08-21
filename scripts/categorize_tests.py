@@ -4,13 +4,13 @@ Test Categorization Script - Analyzes and categorizes tests based on their depen
 Separates real service tests from mock/plumbing tests
 """
 
-import os
-import sys
-import re
 import ast
+import json
+import os
+import re
+import sys
 from pathlib import Path
 from typing import Dict, List, Set, Tuple
-import json
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent

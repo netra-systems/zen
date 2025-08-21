@@ -5,16 +5,25 @@ Validates LLM API integrations (Gemini, OpenAI, Anthropic)
 with staging API keys.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import os
-import httpx
 import asyncio
-from typing import Optional, Dict
+import os
+from typing import Dict, Optional
+
+import httpx
 
 # Add project root to path
-
 from netra_backend.tests.base import StagingConfigTestBase
 
 # Add project root to path

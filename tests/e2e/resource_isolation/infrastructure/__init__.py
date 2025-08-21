@@ -5,7 +5,8 @@ This module contains the core infrastructure for resource isolation testing,
 split from the original test_infrastructure.py to maintain file size limits.
 """
 
-from tests.e2e.resource_isolation.data_models import ResourceMetrics, TenantAgent, ResourceViolation, PerformanceImpactReport, RESOURCE_LIMITS
+from tests.e2e.resource_isolation.data_models import (
+    ResourceMetrics, TenantAgent, ResourceViolation, PerformanceImpactReport, RESOURCE_LIMITS,
     ResourceMetrics, TenantAgent, ResourceViolation, PerformanceImpactReport, RESOURCE_LIMITS
 )
 from tests.e2e.resource_isolation.resource_monitor import ResourceMonitor

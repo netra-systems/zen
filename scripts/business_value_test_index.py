@@ -10,14 +10,15 @@ import ast
 import json
 import os
 import re
-import xml.etree.ElementTree as ET
-from collections import defaultdict
-from dataclasses import dataclass, field, asdict
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Any
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
+from collections import defaultdict
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 
 @dataclass
 class TestMetadata:

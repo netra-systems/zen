@@ -6,9 +6,10 @@ Security and logging helpers moved to core_test_security_helpers.py to maintain 
 
 import json
 import logging
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from typing import Dict, Any, List
 from datetime import datetime, timedelta
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
 from cryptography.fernet import Fernet
 
 
@@ -161,8 +162,8 @@ def _assert_extra_fields(changes: Dict, expected_extra: List[str]):
 
 # Security and logging helpers moved to core_test_security_helpers.py
 from netra_backend.tests.core_test_security_helpers import (
+    assert_service_categorization,
     create_mock_secret_manager_with_rotation,
-    create_unified_logger_with_context,
     create_startup_check_results,
-    assert_service_categorization
+    create_unified_logger_with_context,
 )

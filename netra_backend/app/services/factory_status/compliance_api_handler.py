@@ -1,8 +1,10 @@
 """Compliance API Handler for Factory Status Integration."""
 
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.services.factory_status.factory_status_reporter import FactoryStatusReporter
+from netra_backend.app.services.factory_status.factory_status_reporter import (
+    FactoryStatusReporter,
+)
 
 
 class ComplianceAPIHandler:

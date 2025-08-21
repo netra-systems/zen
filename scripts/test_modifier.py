@@ -6,11 +6,11 @@ Complies with 450-line limit and 25-line function constraint
 """
 
 from pathlib import Path
-from typing import Dict, List, Any
+from typing import Any, Dict, List
 
 # Import modular components
 from test_generator import TestGenerator
-from test_optimizer import TestPerformanceOptimizer, LegacyTestUpdater, MetadataManager
+from test_optimizer import LegacyTestUpdater, MetadataManager, TestPerformanceOptimizer
 
 
 class TestModifier:

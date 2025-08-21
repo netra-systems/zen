@@ -7,9 +7,9 @@ The actual implementation has been split into multiple modules in the unified_to
 
 # Import from the new modular structure for backward compatibility
 from netra_backend.app.services.unified_tool_registry import (
-    UnifiedTool,
     ToolExecutionResult,
-    UnifiedToolRegistry
+    UnifiedTool,
+    UnifiedToolRegistry,
 )
 
 # Maintain metadata for tracking

@@ -5,30 +5,43 @@ Comprehensive tests for audit logging, search, filtering, and reporting function
 Follows 450-line limit and async patterns.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# Add project root to path
+from netra_backend.app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_database import DatabaseError
+from netra_backend.app.db.models_postgres import CorpusAuditLog
+from netra_backend.app.schemas.registry import (
+    CorpusAuditAction,
+    CorpusAuditMetadata,
+    CorpusAuditRecord,
+    CorpusAuditSearchFilter,
+    CorpusAuditStatus,
+)
 
+# Add project root to path
 from netra_backend.app.services.audit.corpus_audit import (
-
-# Add project root to path
-    CorpusAuditLogger, create_audit_logger
+    # Add project root to path
+    CorpusAuditLogger,
+    create_audit_logger,
 )
 from netra_backend.app.services.audit.repository import CorpusAuditRepository
 from netra_backend.app.services.audit.utils import AuditTimer
-from netra_backend.app.schemas.registry import (
-    CorpusAuditAction, CorpusAuditStatus, CorpusAuditMetadata,
-    CorpusAuditSearchFilter, CorpusAuditRecord
-)
-from netra_backend.app.db.models_postgres import CorpusAuditLog
-from netra_backend.app.core.exceptions_database import DatabaseError
-from netra_backend.app.core.exceptions_base import NetraException
 
 
 class TestCorpusAuditRepository:

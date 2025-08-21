@@ -16,19 +16,28 @@ ARCHITECTURE COMPLIANCE: ≤300 lines, functions ≤8 lines, modular design
 
 import asyncio
 import json
+
+# Add project root to path
+import sys
 import time
 import uuid
-import websockets
-import requests
 from datetime import datetime, timezone
-from typing import Dict, Any, List, Optional, Tuple
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, Mock
+
 import pytest
 import pytest_asyncio
-from pathlib import Path
+import requests
+import websockets
 
 from netra_backend.app.logging_config import central_logger
-from test_framework.decorators import performance_test, integration_only
+from test_framework.decorators import integration_only, performance_test
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 
 logger = central_logger.get_logger(__name__)
 

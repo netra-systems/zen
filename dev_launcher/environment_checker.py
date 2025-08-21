@@ -6,7 +6,11 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional
 
-from dev_launcher.utils import check_dependencies, check_project_structure, print_with_emoji
+from dev_launcher.utils import (
+    check_dependencies,
+    check_project_structure,
+    print_with_emoji,
+)
 
 logger = logging.getLogger(__name__)
 

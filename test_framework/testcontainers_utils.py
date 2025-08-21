@@ -7,8 +7,8 @@ that require real containerized services according to the testing specification.
 
 import logging
 import time
-from typing import Dict, Any, Optional, Tuple
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional, Tuple
 
 from testcontainers.postgres import PostgresContainer
 from testcontainers.redis import RedisContainer

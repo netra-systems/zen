@@ -12,11 +12,12 @@ BVJ: Enterprise/Platform - Configuration Management - Service discovery
 prevents connection failures during deployment changes and multi-environment support.
 """
 
-import pytest
 import asyncio
 import json
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 from unittest.mock import patch
+
+import pytest
 
 from netra_backend.tests.unified.clients.backend_client import BackendTestClient
 from netra_backend.tests.unified.clients.websocket_client import WebSocketTestClient

@@ -8,6 +8,7 @@ Complies with 450-line limit and 25-line function constraint
 from pathlib import Path
 from typing import List
 
+
 class TestGenerator:
     """Generates missing test files for untested modules"""
     

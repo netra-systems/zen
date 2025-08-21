@@ -12,6 +12,14 @@ Health target: <30 second dead connection detection with automated cleanup.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
+# Add project root to path
+import sys
+from pathlib import Path
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
@@ -31,7 +39,7 @@ from test_framework.mock_utils import mock_justified
 
 # Add project root to path
 
-from netra_backend.tests..helpers.redis_l3_helpers import (
+from netra_backend.tests.helpers.redis_l3_helpers import (
 
 # Add project root to path
     RedisContainer, 

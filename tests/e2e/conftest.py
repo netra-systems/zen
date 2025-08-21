@@ -8,13 +8,14 @@ validation for comprehensive E2E test execution.
 Business Value: Enables reliable E2E testing that validates production readiness
 """
 
-import pytest
 import asyncio
-import os
 import logging
+import os
 import time
-from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
+
+import pytest
 
 # Configure E2E test logging
 logging.basicConfig(
@@ -42,9 +43,9 @@ class E2EEnvironmentValidator:
     @staticmethod
     async def validate_services_available() -> Dict[str, bool]:
         """Validate that all required services are available."""
+        import asyncpg
         import httpx
         import redis
-        import asyncpg
         
         service_status = {}
         

@@ -3,20 +3,30 @@ L3 Integration Test: Cross-Database Data Consistency
 Tests data consistency across multiple databases
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
-from unittest.mock import patch, AsyncMock
+import uuid
+from unittest.mock import AsyncMock, patch
+
+import pytest
+
+from netra_backend.app.config import settings
+from netra_backend.app.services.clickhouse_service import ClickHouseService
 
 # Add project root to path
-
 from netra_backend.app.services.postgres_service import PostgresService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.services.clickhouse_service import ClickHouseService
-from netra_backend.app.config import settings
-import uuid
 
 # Add project root to path
 

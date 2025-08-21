@@ -3,18 +3,28 @@
 Tests for critical exception handling requirements from websocket_reliability.xml.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-# Add project root to path
+import pytest
 
+from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
+
+# Add project root to path
 from netra_backend.app.websocket.state_synchronizer import ConnectionStateSynchronizer
 from netra_backend.app.websocket.sync_types import CriticalCallbackFailure
-from netra_backend.app.websocket.connection import ConnectionManager, ConnectionInfo
 
 # Add project root to path
 

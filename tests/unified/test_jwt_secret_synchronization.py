@@ -8,12 +8,13 @@ Performance requirement: <10s validation across services (includes WebSocket han
 Business Value: Prevents authentication failures that cost revenue and customer trust
 CRITICAL: Real service authentication - validates actual JWT secret synchronization
 """
-import pytest
 import asyncio
-import websockets
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
+from typing import Any, Dict
+
+import pytest
+import websockets
 
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.tests.unified.test_harness import UnifiedTestHarness

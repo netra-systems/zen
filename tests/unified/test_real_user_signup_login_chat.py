@@ -11,15 +11,16 @@ BVJ (Business Value Justification):
 3. Value Impact: Catches breaking changes before they reach production
 4. Revenue Impact: Prevents user conversion funnel failures
 """
-import pytest
 import asyncio
+import json
 import time
 import uuid
-import json
-import httpx
-import websockets
-from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional
+
+import httpx
+import pytest
+import websockets
 
 from tests.unified.service_manager import ServiceManager
 from tests.unified.test_harness import UnifiedTestHarness

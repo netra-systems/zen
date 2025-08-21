@@ -3,11 +3,12 @@ Architecture: Modular test fixtures supporting multi-agent system validation
 BVJ: Shared testing infrastructure reduces duplication and ensures consistency
 """
 
-import pytest
 import uuid
-from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock
 from datetime import datetime, timezone
+from typing import Any, Dict
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from netra_backend.tests.unified.config import TestTier
 

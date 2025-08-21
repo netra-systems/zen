@@ -13,19 +13,20 @@ Tests essential startup functionality:
 - Core service initialization order
 """
 
-import os
-import pytest
 import asyncio
+import os
 import time
 from datetime import datetime
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
+import pytest
+
+from netra_backend.app.core.auth_constants import CredentialConstants, JWTConstants
+from netra_backend.app.core.configuration.base import validate_config_integrity
 from netra_backend.tests.unified.e2e.staging_test_helpers import (
     StagingTestSuite,
-    get_staging_suite
+    get_staging_suite,
 )
-from netra_backend.app.core.configuration.base import validate_config_integrity
-from netra_backend.app.core.auth_constants import JWTConstants, CredentialConstants
 
 
 @pytest.mark.asyncio

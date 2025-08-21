@@ -19,15 +19,19 @@ Test Coverage:
 """
 
 import asyncio
-import pytest
-import time
 import logging
+import time
 from datetime import datetime, timedelta, timezone
-from typing import Dict, Any
-import jwt
+from typing import Any, Dict
 from uuid import uuid4
 
-from tests.unified.e2e.test_auth_jwt_generation import JWTGenerationTestManager, TokenSet
+import jwt
+import pytest
+
+from tests.unified.e2e.test_auth_jwt_generation import (
+    JWTGenerationTestManager,
+    TokenSet,
+)
 
 logger = logging.getLogger(__name__)
 

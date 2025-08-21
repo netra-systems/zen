@@ -12,13 +12,15 @@ Business Value Justification (BVJ):
 """
 
 import asyncio
-import time
 import random
-from typing import Dict, Any, List
+import time
 from dataclasses import dataclass
+from typing import Any, Dict, List
 
 from netra_backend.tests.e2e.test_helpers.concurrency_base import (
-    ConcurrencyTestBase, UserSessionResult, PerformanceMetrics
+    ConcurrencyTestBase,
+    PerformanceMetrics,
+    UserSessionResult,
 )
 
 

@@ -12,16 +12,18 @@ Comprehensive test for Prometheus metrics collection:
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
 import os
 import sys
+from datetime import datetime
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 import pytest
-from datetime import datetime
 from prometheus_client.parser import text_string_to_metric_families
 
 project_root = Path(__file__).parent.parent.parent.parent.parent

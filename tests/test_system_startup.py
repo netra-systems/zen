@@ -1,12 +1,13 @@
 """System startup tests for dev launcher."""
 
-import pytest
+import os
+import platform
+import signal
 import subprocess
 import time
-import os
-import signal
-import platform
 from pathlib import Path
+
+import pytest
 
 
 class TestSystemStartup:

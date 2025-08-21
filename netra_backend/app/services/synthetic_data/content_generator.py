@@ -4,9 +4,10 @@ Content generation for synthetic data
 
 import random
 import uuid
+from datetime import UTC, datetime, timedelta
+from typing import Any, Dict, List, Optional
+
 import numpy as np
-from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Optional, Any
 
 
 def select_workload_type() -> str:

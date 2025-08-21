@@ -29,14 +29,15 @@ Complete User Journey: OAuth Login → User Creation → Chat Test
 """
 
 import asyncio
-import pytest
-import time
-import httpx
 import os
 import sys
-from typing import Dict, Any, Optional
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
+from typing import Any, Dict, Optional
+
+import httpx
+import pytest
 
 # Set test environment
 os.environ["TESTING"] = "1" 
@@ -47,27 +48,30 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
-from netra_backend.tests.unified.real_services_manager import RealServicesManager as create_real_services_manager
-from netra_backend.app.logging_config import central_logger
+from helpers.chat_helpers import (
+    ChatInteractionHelper,
+    ConversationPersistenceHelper,
+    WebSocketConnectionHelper,
+)
+from helpers.journey_validation_helpers import (
+    validate_auth_callback,
+    validate_chat_interaction,
+    validate_conversation_persistence,
+    validate_oauth_authentication,
+    validate_returning_user_flow,
+    validate_user_sync,
+    validate_websocket_connection,
+)
 from helpers.oauth_journey_helpers import (
     OAuthAuthenticationHelper,
     OAuthCallbackHelper,
+    OAuthReturningUserHelper,
     OAuthUserSyncHelper,
-    OAuthReturningUserHelper
 )
-from helpers.chat_helpers import (
-    WebSocketConnectionHelper,
-    ChatInteractionHelper,
-    ConversationPersistenceHelper
-)
-from helpers.journey_validation_helpers import (
-    validate_oauth_authentication,
-    validate_auth_callback,
-    validate_user_sync,
-    validate_websocket_connection,
-    validate_chat_interaction,
-    validate_conversation_persistence,
-    validate_returning_user_flow
+
+from netra_backend.app.logging_config import central_logger
+from netra_backend.tests.unified.real_services_manager import (
+    RealServicesManager as create_real_services_manager,
 )
 
 logger = central_logger.get_logger(__name__)

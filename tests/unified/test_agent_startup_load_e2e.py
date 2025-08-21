@@ -22,32 +22,36 @@ ARCHITECTURAL COMPLIANCE:
 """
 
 # Test infrastructure
-from contextlib import asynccontextmanager
-from datetime import datetime, timezone
-from tests.config import TEST_CONFIG, TestTier, get_test_user
-from tests.harness_complete import (
-    UnifiedTestHarnessComplete, TestHarnessContext,
-    get_auth_service_url, get_backend_service_url
-)
-from typing import Dict, Any, List, Optional
 import asyncio
 import gc
 import json
-import psutil
-import pytest
 import statistics
 import time
-
-from tests.unified.real_client_factory import create_real_client_factory
-from tests.unified.load_test_utilities import (
-    LoadMetrics, SystemResourceMonitor, LoadTestSimulator
-)
-from tests.unified.real_services_manager import RealServicesManager
+from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional
 
 # HTTP and WebSocket clients
 import httpx
+import psutil
+import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, WebSocketException
+
+from tests.config import TEST_CONFIG, TestTier, get_test_user
+from tests.harness_complete import (
+    TestHarnessContext,
+    UnifiedTestHarnessComplete,
+    get_auth_service_url,
+    get_backend_service_url,
+)
+from tests.unified.load_test_utilities import (
+    LoadMetrics,
+    LoadTestSimulator,
+    SystemResourceMonitor,
+)
+from tests.unified.real_client_factory import create_real_client_factory
+from tests.unified.real_services_manager import RealServicesManager
 
 
 class CorruptedStateTestManager:

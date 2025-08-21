@@ -11,36 +11,46 @@ integrity across PostgreSQL, ClickHouse, and Redis with 100K+ records.
 Tests migration, rollback, performance, and zero data loss guarantees.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import hashlib
+import json
 import time
 import uuid
-import json
-import hashlib
-from typing import Dict, Any, List, Optional, Tuple
-from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
-import asyncpg
-import redis.asyncio as redis
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-
-# Add project root to path
-
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
-# Add project root to path
-    L4StagingCriticalPathTestBase,
-    CriticalPathMetrics
-)
-from netra_backend.app.db.clickhouse import ClickHouseDatabase
-from netra_backend.app.db.client_clickhouse import ClickHouseClient
 # from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
+
+import asyncpg
+import pytest
+import redis.asyncio as redis
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
+
+from netra_backend.app.db.clickhouse import ClickHouseDatabase
+from netra_backend.app.db.client_clickhouse import ClickHouseClient
+
+# Add project root to path
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+    CriticalPathMetrics,
+    # Add project root to path
+    L4StagingCriticalPathTestBase,
+)
+
 RedisSessionManager = AsyncMock
 from netra_backend.app.logging_config import central_logger
 

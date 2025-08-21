@@ -13,32 +13,36 @@ Tests both PostgreSQL and ClickHouse persistence where applicable.
 """
 
 import asyncio
-import pytest
-import os
 import json
+import os
 import uuid
-from typing import Dict, List, Any, Optional
-from datetime import datetime, UTC
-from unittest.mock import AsyncMock, patch, MagicMock
 from contextlib import asynccontextmanager
+from datetime import UTC, datetime
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Set testing environment before imports
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from netra_backend.app.db.postgres import get_postgres_db
-from netra_backend.app.db.models_postgres import Message, Thread, Run, Assistant
-from netra_backend.app.db.clickhouse import get_clickhouse_client
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.app.services.quality_gate.quality_gate_models import (
-    ContentType, QualityLevel, ValidationResult
-)
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.logging_config import central_logger
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, text
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.models_postgres import Assistant, Message, Run, Thread
+from netra_backend.app.db.postgres import get_postgres_db
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.quality_gate.quality_gate_models import (
+    ContentType,
+    QualityLevel,
+    ValidationResult,
+)
+from netra_backend.app.services.quality_gate_service import QualityGateService
 
 logger = central_logger.get_logger(__name__)
 

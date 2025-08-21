@@ -4,23 +4,38 @@ Core business logic for MCP API operations.
 Maintains 25-line function limit and single responsibility.
 """
 
-from typing import Dict, Any, Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.db.models_postgres import User as UserInDB
+from typing import Any, Dict, Optional
 
-from netra_backend.app.routes.mcp.handlers_server import handle_server_info
-from netra_backend.app.routes.mcp.handlers_client import handle_client_registration
-from netra_backend.app.routes.mcp.handlers_session import (
-    handle_session_creation, handle_session_retrieval, handle_session_closure
-)
-from netra_backend.app.routes.mcp.handlers_tools import handle_tools_listing, handle_tool_call
-from netra_backend.app.routes.mcp.handlers_resources import handle_resources_listing, handle_resource_read
-from netra_backend.app.routes.mcp.handlers_prompts import handle_prompts_listing, handle_prompt_get
-from netra_backend.app.routes.mcp.models import (
-    MCPClientCreateRequest, MCPSessionCreateRequest, 
-    MCPToolCallRequest, MCPResourceReadRequest, MCPPromptGetRequest
-)
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.db.models_postgres import User as UserInDB
 from netra_backend.app.routes.mcp.config import get_mcp_config
+from netra_backend.app.routes.mcp.handlers_client import handle_client_registration
+from netra_backend.app.routes.mcp.handlers_prompts import (
+    handle_prompt_get,
+    handle_prompts_listing,
+)
+from netra_backend.app.routes.mcp.handlers_resources import (
+    handle_resource_read,
+    handle_resources_listing,
+)
+from netra_backend.app.routes.mcp.handlers_server import handle_server_info
+from netra_backend.app.routes.mcp.handlers_session import (
+    handle_session_closure,
+    handle_session_creation,
+    handle_session_retrieval,
+)
+from netra_backend.app.routes.mcp.handlers_tools import (
+    handle_tool_call,
+    handle_tools_listing,
+)
+from netra_backend.app.routes.mcp.models import (
+    MCPClientCreateRequest,
+    MCPPromptGetRequest,
+    MCPResourceReadRequest,
+    MCPSessionCreateRequest,
+    MCPToolCallRequest,
+)
 from netra_backend.app.services.mcp_service import MCPService
 
 

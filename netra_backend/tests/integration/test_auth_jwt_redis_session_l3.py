@@ -10,26 +10,37 @@ L3 Test: Real Redis session store with JWT token validation, session storage,
 refresh flows, and revocation testing with actual auth service integration.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
 import json
 import time
 import uuid
-from typing import Dict, Any, Optional, List
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
 
+import pytest
 import redis.asyncio as redis
+from logging_config import central_logger
 
 # Add project root to path
-
-from netra_backend.app.core.unified.jwt_validator import UnifiedJWTValidator, TokenType
+from netra_backend.app.core.unified.jwt_validator import TokenType, UnifiedJWTValidator
 from netra_backend.app.redis_manager import RedisManager
-from logging_config import central_logger
-from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
+from netra_backend.tests.helpers.redis_l3_helpers import (
+    RedisContainer,
+    verify_redis_connection,
+)
 
 # Add project root to path
 

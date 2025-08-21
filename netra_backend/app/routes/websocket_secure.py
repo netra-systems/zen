@@ -18,20 +18,23 @@ Business Value Justification (BVJ):
 import asyncio
 import json
 import time
-from typing import Dict, Any, Optional, Union, List
-from datetime import datetime, timezone
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Union
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.security import HTTPBearer
-from starlette.websockets import WebSocketState
 from sqlalchemy.ext.asyncio import AsyncSession
+from starlette.websockets import WebSocketState
 
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.core.websocket_cors import (
+    check_websocket_cors,
+    get_websocket_cors_handler,
+)
 from netra_backend.app.dependencies import get_async_db
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.clients.auth_client import auth_client
-from netra_backend.app.core.websocket_cors import check_websocket_cors, get_websocket_cors_handler
-from netra_backend.app.schemas.registry import WebSocketMessage, ServerMessage
+from netra_backend.app.schemas.registry import ServerMessage, WebSocketMessage
 from netra_backend.app.schemas.websocket_message_types import WebSocketValidationError
 
 logger = central_logger.get_logger(__name__)
@@ -89,7 +92,9 @@ class SecureWebSocketManager:
     def _init_agent_response_integration(self) -> None:
         """Initialize integration with WebSocket manager for agent responses."""
         # Register this manager as the response handler for agent messages
-        from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
+        from netra_backend.app.services.websocket.ws_manager import (
+            manager as ws_manager,
+        )
         
         # Override the send_message method to route through secure connections
         original_send_message = ws_manager.send_message_to_user
@@ -362,9 +367,11 @@ class SecureWebSocketManager:
             # Update connection state to processing
             await self._update_connection_state(user_id, "processing", "Processing message...")
             
-            from netra_backend.app.services.agent_service_factory import _create_supervisor_agent
-            from netra_backend.app.services.agent_service_core import AgentService
             from netra_backend.app.llm.llm_manager import LLMManager
+            from netra_backend.app.services.agent_service_core import AgentService
+            from netra_backend.app.services.agent_service_factory import (
+                _create_supervisor_agent,
+            )
             
             # Create properly configured agent service
             llm_manager = LLMManager()

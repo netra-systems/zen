@@ -8,20 +8,20 @@ All functions ≤8 lines as per SPEC/conventions.xml
 """
 
 import asyncio
-import time
 import json
-import uuid
 import logging
+import time
+import uuid
+from contextlib import asynccontextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import httpx
 import websockets
-from typing import Dict, Any, Optional, List, Tuple
-from contextlib import asynccontextmanager
-from pathlib import Path
-from dataclasses import dataclass
 
-from tests.unified.service_manager import ServiceManager, TestDataSeeder, HealthMonitor
-from tests.unified.test_harness import UnifiedTestHarness, ServiceConfig
-
+from tests.unified.service_manager import HealthMonitor, ServiceManager, TestDataSeeder
+from tests.unified.test_harness import ServiceConfig, UnifiedTestHarness
 
 logger = logging.getLogger(__name__)
 

@@ -13,13 +13,14 @@ BVJ: Segment: ALL | Goal: Real-time features | Impact: $8K+ MRR churn risk
 """
 
 import asyncio
-import time
-import uuid
 import os
 import sys
-from typing import Dict, Optional, Any
+import time
+import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict, Optional
+
 import pytest
 
 # Add parent directories to sys.path for imports
@@ -28,7 +29,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent))
 
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
-
 
 # Enable real services for this test module
 pytestmark = pytest.mark.skipif(

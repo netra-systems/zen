@@ -10,24 +10,24 @@ This script specifically runs tests that require real external services like:
 These tests are separated from the basic plumbing tests for better organization.
 """
 
-import os
-import sys
 import json
-import time
+import os
 import subprocess
-from pathlib import Path
-from typing import List, Dict, Optional
+import sys
+import time
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Optional
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from netra_backend.tests.test_categories import (
     TEST_CATEGORIES,
-    get_runnable_categories,
     categorize_test_files,
+    get_runnable_categories,
+    should_run_category,
     validate_environment_for_category,
-    should_run_category
 )
 
 

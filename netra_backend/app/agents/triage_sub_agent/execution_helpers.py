@@ -6,8 +6,9 @@ Contains utility functions for result processing, state management, and messagin
 
 import time
 from typing import Any, Dict
-from netra_backend.app.logging_config import central_logger
+
 from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -36,7 +37,7 @@ class TriageExecutionHelpers:
     
     def _create_default_triage_result(self):
         """Create default TriageResult for error cases."""
-        from .models import TriageResult, TriageMetadata
+        from .models import TriageMetadata, TriageResult
         return TriageResult(
             category="unknown", 
             confidence_score=0.5,
@@ -45,7 +46,7 @@ class TriageExecutionHelpers:
     
     def create_error_result(self, error_message: str):
         """Create result object for error cases."""
-        from .models import TriageResult, TriageMetadata
+        from .models import TriageMetadata, TriageResult
         error_metadata = self._create_error_metadata(error_message)
         params = self._build_error_result_params(error_metadata)
         return TriageResult(**params)
@@ -69,7 +70,7 @@ class TriageExecutionHelpers:
     
     def create_emergency_fallback_result(self):
         """Create basic emergency fallback response."""
-        from .models import TriageResult, Priority, TriageMetadata
+        from .models import Priority, TriageMetadata, TriageResult
         metadata = self._create_emergency_metadata()
         params = self._build_emergency_fallback_params(metadata)
         return TriageResult(**params)
@@ -111,7 +112,7 @@ class TriageExecutionHelpers:
     
     def create_validation_error_result(self, validation):
         """Create validation error result."""
-        from .models import TriageResult, TriageMetadata
+        from .models import TriageMetadata, TriageResult
         validation_metadata = TriageMetadata(triage_duration_ms=0, fallback_used=True)
         params = self._build_validation_error_params(validation, validation_metadata)
         return TriageResult(**params)

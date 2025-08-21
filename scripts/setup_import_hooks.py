@@ -8,11 +8,11 @@ This script:
 3. Verifies import management tools are working
 """
 
-import sys
 import os
-from pathlib import Path
-import subprocess
 import shutil
+import subprocess
+import sys
+from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).parent.parent
 

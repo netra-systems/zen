@@ -4,15 +4,21 @@ Main orchestrator for AI operations map formatting.
 Coordinates AI map building, metrics calculation, and output formatting.
 """
 
-from typing import Dict, List, Any, Optional
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.agents.github_analyzer.ai_map_builder import AIMapBuilder
-from netra_backend.app.agents.github_analyzer.metrics_calculator import GitHubAnalyzerMetricsCalculator
-from netra_backend.app.agents.github_analyzer.recommendation_generator import RecommendationGenerator
-from netra_backend.app.agents.github_analyzer.markdown_formatter import MarkdownFormatter
 from netra_backend.app.agents.github_analyzer.html_formatter import HTMLFormatter
+from netra_backend.app.agents.github_analyzer.markdown_formatter import (
+    MarkdownFormatter,
+)
+from netra_backend.app.agents.github_analyzer.metrics_calculator import (
+    GitHubAnalyzerMetricsCalculator,
+)
+from netra_backend.app.agents.github_analyzer.recommendation_generator import (
+    RecommendationGenerator,
+)
+from netra_backend.app.logging_config import central_logger as logger
 
 
 class AIOperationsMapFormatter:

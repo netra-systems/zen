@@ -3,19 +3,19 @@ Unified E2E Test Harness - Complete Service Orchestration
 Business Value: $500K+ MRR protection via comprehensive E2E validation
 Main harness composing service orchestration and user journey execution.
 """
-import uuid
 import logging
-from typing import Dict, List, Optional, Any
-from pathlib import Path
+import uuid
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from tests.unified.e2e.service_orchestrator import E2EServiceOrchestrator
-from tests.unified.e2e.user_journey_executor import UserJourneyExecutor, TestUser
+from tests.unified.e2e.user_journey_executor import TestUser, UserJourneyExecutor
 from tests.unified.test_environment_config import (
-    get_test_environment_config,
     TestEnvironmentConfig,
-    TestEnvironmentType
+    TestEnvironmentType,
+    get_test_environment_config,
 )
 
 logger = logging.getLogger(__name__)

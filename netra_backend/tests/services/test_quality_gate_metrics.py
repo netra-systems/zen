@@ -3,49 +3,57 @@ Metrics calculation tests for Quality Gate Service
 Tests individual metric calculation methods
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
 from netra_backend.app.services.quality_gate_service import ContentType, QualityMetrics
-from netra_backend.tests.helpers.quality_gate_fixtures import redis_mock, quality_service
 from netra_backend.tests.helpers.quality_gate_content import (
-
-# Add project root to path
-    get_high_specificity_content,
-    get_low_specificity_content,
+    get_clear_content,
+    get_complete_action_plan_simple,
+    get_complete_optimization_content,
     get_high_actionability_content,
-    get_low_actionability_content,
+    get_high_hallucination_risk_content,
     get_high_quantification_content,
+    get_high_redundancy_content,
+    # Add project root to path
+    get_high_specificity_content,
+    get_irrelevant_context,
+    get_low_actionability_content,
+    get_low_hallucination_risk_content,
     get_low_quantification_content,
+    get_low_redundancy_content,
+    get_low_specificity_content,
     get_optimization_context,
     get_relevant_context,
-    get_irrelevant_context,
-    get_complete_optimization_content,
-    get_complete_action_plan_simple,
-    get_clear_content,
     get_unclear_content,
-    get_high_redundancy_content,
-    get_low_redundancy_content,
-    get_high_hallucination_risk_content,
-    get_low_hallucination_risk_content
-)
-from netra_backend.tests.helpers.quality_gate_helpers import (
-    assert_specificity_score_range,
-    assert_actionability_score_range,
-    assert_quantification_score_range,
-    assert_relevance_with_context,
-    assert_completeness_by_content_type,
-    assert_clarity_score_approximation,
-    assert_redundancy_algorithm_behavior,
-    assert_hallucination_risk_range
 )
 from netra_backend.tests.helpers.quality_gate_fixtures import (
+    quality_service,
+    redis_mock,
+    setup_novelty_mocks_duplicate,
     setup_novelty_mocks_fresh,
-    setup_novelty_mocks_duplicate
+)
+from netra_backend.tests.helpers.quality_gate_helpers import (
+    assert_actionability_score_range,
+    assert_clarity_score_approximation,
+    assert_completeness_by_content_type,
+    assert_hallucination_risk_range,
+    assert_quantification_score_range,
+    assert_redundancy_algorithm_behavior,
+    assert_relevance_with_context,
+    assert_specificity_score_range,
 )
 
 

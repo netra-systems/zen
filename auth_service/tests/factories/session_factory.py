@@ -4,10 +4,10 @@ Creates test sessions with proper expiration and metadata.
 Supports both active and expired sessions for comprehensive testing.
 """
 
-import uuid
-from datetime import datetime, timezone, timedelta
-from typing import Dict, Any, Optional
 import hashlib
+import uuid
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, Optional
 
 from auth_service.auth_core.database.models import AuthSession
 

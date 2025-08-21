@@ -5,15 +5,21 @@ Handles JSON-RPC over WebSocket with automatic reconnection and heartbeat.
 
 import asyncio
 import json
-import uuid
 import logging
-from typing import Dict, Any, Optional, Callable
-import websockets
-from websockets.exceptions import ConnectionClosed, InvalidMessage
 import ssl
+import uuid
+from typing import Any, Callable, Dict, Optional
 from urllib.parse import urlparse
 
-from netra_backend.app.db.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
+import websockets
+from websockets.exceptions import ConnectionClosed, InvalidMessage
+
+from netra_backend.app.db.base import (
+    MCPConnectionError,
+    MCPProtocolError,
+    MCPTimeoutError,
+    MCPTransport,
+)
 
 logger = logging.getLogger(__name__)
 

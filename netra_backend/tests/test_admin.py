@@ -1,16 +1,27 @@
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
-import uuid
 import datetime
+import uuid
+from unittest.mock import MagicMock, patch
 
+import pytest
+from auth_integration.auth import ActiveUserWsDep
+from fastapi.testclient import TestClient
 from main import app
 from schemas import User
-from auth_integration.auth import ActiveUserWsDep
+
 from config import settings
+
 
 @pytest.fixture(scope="function", autouse=True)
 def settings_override():

@@ -5,8 +5,9 @@ Validates all required environment variables and configurations.
 
 import os
 import re
-from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 from dotenv import load_dotenv
 
 

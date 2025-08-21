@@ -14,26 +14,31 @@ Business Value: Supports demo reliability and reduces demo failure rates
 by 30% through standardized execution patterns.
 """
 
-from typing import Dict, Any, Optional, List
 import json
 import time
-
-# Modern execution patterns
-from netra_backend.app.agents.base.interface import (
-    BaseExecutionInterface, ExecutionContext, ExecutionResult
-)
-from netra_backend.app.agents.base.executor import BaseExecutionEngine
-from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.agents.base.monitoring import ExecutionMonitor
-from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+from typing import Any, Dict, List, Optional
 
 # Legacy compatibility
 from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.agents.base.errors import (
+    AgentExecutionError,
+    ExecutionErrorHandler,
+)
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+
+# Modern execution patterns
+from netra_backend.app.agents.base.interface import (
+    BaseExecutionInterface,
+    ExecutionContext,
+    ExecutionResult,
+)
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -210,8 +215,9 @@ class DemoTriageService(BaseSubAgent, BaseExecutionInterface):
         
     def _create_execution_context(self, message: str, context: Optional[Dict[str, Any]]) -> ExecutionContext:
         """Create execution context from legacy parameters."""
-        from netra_backend.app.agents.state import DeepAgentState
         import uuid
+
+        from netra_backend.app.agents.state import DeepAgentState
         
         state = DeepAgentState(message=message, context=context or {})
         return ExecutionContext(

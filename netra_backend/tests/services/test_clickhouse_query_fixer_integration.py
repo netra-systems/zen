@@ -3,19 +3,27 @@ Integration tests for ClickHouse Query Fixer.
 All functions ≤8 lines per requirements.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 from unittest.mock import patch
 
-# Add project root to path
+import pytest
 
+# Add project root to path
 from netra_backend.app.db.clickhouse_query_fixer import (
-
-# Add project root to path
+    ClickHouseQueryInterceptor,
+    # Add project root to path
     fix_clickhouse_array_syntax,
-    ClickHouseQueryInterceptor
 )
 from netra_backend.tests.clickhouse_test_mocks import MockClickHouseClient
 

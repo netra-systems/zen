@@ -6,12 +6,13 @@ Extracted from test_user_journey_complete_real.py for modularity.
 """
 
 import asyncio
+import json
 import time
 import uuid
-import json
-import websockets
-from typing import Dict, Any
 from datetime import datetime, timedelta, timezone
+from typing import Any, Dict
+
+import websockets
 
 from dev_launcher.discovery import ServiceDiscovery
 

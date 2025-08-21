@@ -14,20 +14,22 @@ This test ensures cache consistency across all service layers.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
+import hashlib
 import json
+import random
 import sys
 import time
-import redis.asyncio as redis
+from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Optional, Dict, Any, List, Set
+from typing import Any, Dict, List, Optional, Set
+
 import aiohttp
 import pytest
-from datetime import datetime, timedelta
-import hashlib
-import random
+import redis.asyncio as redis
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

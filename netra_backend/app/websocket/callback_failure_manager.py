@@ -5,25 +5,36 @@ Handles callback criticality, circuit breaking, and failure propagation.
 
 import asyncio
 from datetime import datetime, timezone
-from typing import Dict, Callable, Optional, Any, List
+from typing import Any, Callable, Dict, List, Optional
 
 try:
     from netra_backend.app.logging_config import central_logger
-    from .reconnection_types import (
-        CallbackType, CallbackCriticality, CallbackFailure, CallbackCircuitBreaker
-    )
+
     from .reconnection_exceptions import (
-        CriticalCallbackFailure, CallbackCircuitBreakerOpen, StateNotificationFailure
+        CallbackCircuitBreakerOpen,
+        CriticalCallbackFailure,
+        StateNotificationFailure,
+    )
+    from .reconnection_types import (
+        CallbackCircuitBreaker,
+        CallbackCriticality,
+        CallbackFailure,
+        CallbackType,
     )
 except ImportError:
     # For standalone testing
     import logging
     central_logger = type('Logger', (), {'get_logger': lambda self, name: logging.getLogger(name)})()
-    from reconnection_types import (
-        CallbackType, CallbackCriticality, CallbackFailure, CallbackCircuitBreaker
-    )
     from reconnection_exceptions import (
-        CriticalCallbackFailure, CallbackCircuitBreakerOpen, StateNotificationFailure
+        CallbackCircuitBreakerOpen,
+        CriticalCallbackFailure,
+        StateNotificationFailure,
+    )
+    from reconnection_types import (
+        CallbackCircuitBreaker,
+        CallbackCriticality,
+        CallbackFailure,
+        CallbackType,
     )
 
 logger = central_logger.get_logger(__name__)

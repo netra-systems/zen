@@ -4,9 +4,9 @@ Compliance report generator.
 Generates human-readable reports for architecture compliance violations.
 """
 
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
-from .core import Violation, ComplianceResults
+from .core import ComplianceResults, Violation
 from .reporter_stats import StatisticsCalculator
 from .reporter_utils import ReporterUtils
 

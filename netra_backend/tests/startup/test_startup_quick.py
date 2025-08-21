@@ -11,12 +11,14 @@ Business Value Justification (BVJ):
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
-import pytest
 import os
 import sys
 from pathlib import Path
+
+import pytest
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -25,7 +27,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 @pytest.mark.asyncio
 async def test_clickhouse_configuration():
     """Test ClickHouse is properly configured"""
-    from netra_backend.app.db.clickhouse import use_mock_clickhouse, get_clickhouse_config
+    from netra_backend.app.db.clickhouse import (
+        get_clickhouse_config,
+        use_mock_clickhouse,
+    )
     
     # In testing environment, should use mock
     if os.getenv("ENVIRONMENT") == "testing":
@@ -127,11 +132,11 @@ async def test_websocket_types_exist():
     """Test WebSocket types are properly defined"""
     try:
         from netra_backend.app.schemas.websocket_types import (
+            AgentCompletedPayload,
+            AgentStartedPayload,
+            AgentUpdatePayload,
             WebSocketMessage,
             WebSocketMessageType,
-            AgentStartedPayload,
-            AgentCompletedPayload,
-            AgentUpdatePayload
         )
         
         # Verify enums have values

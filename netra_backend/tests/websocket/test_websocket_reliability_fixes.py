@@ -13,28 +13,37 @@ This test suite validates production-ready fixes addressing the
 identified WebSocket reliability concerns.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
-import pytest
 import time
 from datetime import datetime, timezone
+from typing import Any, Dict
 from unittest.mock import AsyncMock, MagicMock, patch
-from typing import Dict, Any
+
+import pytest
+
+from netra_backend.app.core.websocket_cors import SECURITY_CONFIG, WebSocketCORSHandler
 
 # Add project root to path
-
 from netra_backend.app.routes.websocket_enhanced import (
-
-# Add project root to path
-    DatabaseConnectionPool, 
-    WebSocketConnectionManager, 
-    db_pool
+    # Add project root to path
+    DatabaseConnectionPool,
+    WebSocketConnectionManager,
+    db_pool,
 )
 from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
-from netra_backend.app.core.websocket_cors import WebSocketCORSHandler, SECURITY_CONFIG
 
 
 class TestDatabaseConnectionPooling:

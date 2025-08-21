@@ -13,19 +13,19 @@ ARCHITECTURAL COMPLIANCE:
 - Real service integration with deterministic cost mocking
 """
 
-import time
-import json
 import asyncio
-from typing import Dict, Any, List, Optional
+import json
+import time
 from decimal import Decimal
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, patch
 
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.services.cost_calculator import CostCalculatorService
 from tests.unified.config import TEST_USERS
 from tests.unified.e2e.clickhouse_billing_helper import ClickHouseBillingHelper
 from tests.unified.e2e.websocket_resilience_core import WebSocketResilienceTestCore
-from netra_backend.app.schemas.UserPlan import PlanTier
-from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
-from netra_backend.app.services.cost_calculator import CostCalculatorService
 
 
 class CostTrackingTestCore:

@@ -7,7 +7,8 @@ authentication, and error handling capabilities.
 import asyncio
 import json
 import time
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import websockets
 from websockets.exceptions import ConnectionClosedError
 

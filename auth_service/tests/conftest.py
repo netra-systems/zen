@@ -2,11 +2,12 @@
 Pytest configuration for auth service tests
 Fixtures and test setup
 """
-import pytest
 import asyncio
 import os
 from typing import AsyncGenerator
 from unittest.mock import patch
+
+import pytest
 
 # Set test environment variables
 os.environ["ENVIRONMENT"] = "test"

@@ -13,24 +13,41 @@ Follows SPEC/websockets.xml and SPEC/learnings/websocket_message_paradox.xml
 Business Value: Ensures WebSocket infrastructure supports real-time AI optimization
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import asyncio
 import json
-import pytest
 import time
-import websockets
 from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 
-# Add project root to path
+import pytest
+import websockets
 
-from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
+from netra_backend.app.core.network_constants import (
+    HostConstants,
+    ServicePorts,
+    URLConstants,
+)
 from netra_backend.app.routes.websocket_enhanced import connection_manager
-from netra_backend.app.core.network_constants import ServicePorts, URLConstants, HostConstants
-from netra_backend.app.schemas.websocket_models import UserMessagePayload, AgentUpdatePayload
+from netra_backend.app.schemas.websocket_models import (
+    AgentUpdatePayload,
+    UserMessagePayload,
+)
+
+# Add project root to path
+from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Add project root to path
 
@@ -273,7 +290,9 @@ class TestServiceDiscovery:
     
     async def test_websocket_config_discovery(self):
         """Test backend provides WebSocket configuration."""
-        from netra_backend.app.routes.websocket_enhanced import get_websocket_service_discovery
+        from netra_backend.app.routes.websocket_enhanced import (
+            get_websocket_service_discovery,
+        )
         
         config = await get_websocket_service_discovery()
         
@@ -408,7 +427,9 @@ class TestManualDatabaseSessions:
         mock_session = AsyncMock()
         mock_db.return_value.__aenter__.return_value = mock_session
         
-        from netra_backend.app.routes.websocket_enhanced import authenticate_websocket_with_database
+        from netra_backend.app.routes.websocket_enhanced import (
+            authenticate_websocket_with_database,
+        )
         
         session_info = {"user_id": "test_user", "email": "test@example.com"}
         

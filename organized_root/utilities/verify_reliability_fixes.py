@@ -6,6 +6,7 @@ Verify all functions in reliability.py are ≤8 lines.
 import ast
 import re
 
+
 def count_function_lines(file_path: str):
     """Count lines for each function in the file"""
     with open(file_path, 'r', encoding='utf-8') as f:

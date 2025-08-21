@@ -3,7 +3,7 @@ Cache Statistics and Metrics
 Handles performance tracking and statistics for cache operations
 """
 
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class CacheStatistics:

@@ -5,14 +5,16 @@ Tests core degraded mode logic for faster feedback during development.
 """
 
 import asyncio
-import pytest
 import logging
-from typing import Dict, Any
-from pathlib import Path
 import os
 
 # Add project root to path for imports
 import sys
+from pathlib import Path
+from typing import Any, Dict
+
+import pytest
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 

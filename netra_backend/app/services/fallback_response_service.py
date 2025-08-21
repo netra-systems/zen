@@ -5,13 +5,13 @@ This service provides intelligent, context-aware fallback responses when AI gene
 fails or produces low-quality output, replacing generic error messages with helpful alternatives.
 """
 
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
+from netra_backend.app.services.fallback_response import FailureReason, FallbackContext
 
 # Import the actual implementation
 from netra_backend.app.services.fallback_response import (
     FallbackResponseService as _OriginalFallbackResponseService,
-    FailureReason,
-    FallbackContext
 )
 
 # Backward compatibility - create instance of the modularized service

@@ -4,9 +4,10 @@ Handles prompt construction and enhancement for triage operations.
 Keeps functions under 8 lines and module under 300 lines.
 """
 
-from typing import List, Dict, Any
-from netra_backend.app.logging_config import central_logger
+from typing import Any, Dict, List
+
 from netra_backend.app.agents.prompts import triage_prompt_template
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -10,39 +10,58 @@ BVJ:
 4. Revenue Impact: Maintains customer satisfaction and prevents performance-related churn
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
+
+import asyncio
+import json
+import time
+import uuid
+from datetime import datetime
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
 import pytest
 import pytest_asyncio
-import asyncio
-import json
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-import uuid
-from datetime import datetime
-import time
-
-# Add project root to path
-
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.agents.test_fixtures import (
+from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-    mock_llm_manager, mock_db_session, mock_websocket_manager,
-    mock_tool_dispatcher, mock_persistence_service, supervisor_agent,
-    create_mock_infrastructure, setup_llm_responses, setup_websocket_manager,
-    create_supervisor_with_mocks
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.tests.agents.test_fixtures import (
+    create_mock_infrastructure,
+    create_supervisor_with_mocks,
+    mock_db_session,
+    # Add project root to path
+    mock_llm_manager,
+    mock_persistence_service,
+    mock_tool_dispatcher,
+    mock_websocket_manager,
+    setup_llm_responses,
+    setup_websocket_manager,
+    supervisor_agent,
 )
 from netra_backend.tests.helpers.performance_test_helpers import (
-    create_benchmark_supervisor, create_lightweight_supervisor,
-    execute_lightweight_flow, setup_e2e_responses, create_e2e_persistence_mock,
-    create_flow_persistence_mock, run_concurrency_benchmark,
-    execute_optimization_flow, verify_performance_requirements
+    create_benchmark_supervisor,
+    create_e2e_persistence_mock,
+    create_flow_persistence_mock,
+    create_lightweight_supervisor,
+    execute_lightweight_flow,
+    execute_optimization_flow,
+    run_concurrency_benchmark,
+    setup_e2e_responses,
+    verify_performance_requirements,
 )
 
 

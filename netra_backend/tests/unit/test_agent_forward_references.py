@@ -4,18 +4,32 @@ This test ensures that AgentCompleted and related models can be properly
 instantiated with all their forward references resolved.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
 import pytest
 
 # Add project root to path
-
-
 # Import all required types
-from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
-from netra_backend.app.schemas.unified_tools import AgentCompleted, AgentResult, AgentState
-from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
+from netra_backend.app.agents.triage_sub_agent.models import (
+    TriageMetadata,
+    TriageResult,
+)
+from netra_backend.app.schemas.agent_models import AgentMetadata, DeepAgentState
+from netra_backend.app.schemas.unified_tools import (
+    AgentCompleted,
+    AgentResult,
+    AgentState,
+)
 
 
 # Helper functions for 25-line compliance

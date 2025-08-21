@@ -1,5 +1,5 @@
 """Demo session management handlers."""
-from typing import Dict, Any
+from typing import Any, Dict
 
 from netra_backend.app.services.demo_service import DemoService
 
@@ -69,5 +69,7 @@ async def handle_feedback_submission(
 
 def build_success_response() -> Dict[str, str]:
     """Build feedback success response."""
-    from netra_backend.app.routes.demo_handlers_utils import build_feedback_success_response
+    from netra_backend.app.routes.demo_handlers_utils import (
+        build_feedback_success_response,
+    )
     return build_feedback_success_response()

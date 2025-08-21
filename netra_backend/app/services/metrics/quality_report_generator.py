@@ -3,8 +3,8 @@ Quality report generation for corpus operations
 Handles comprehensive report creation and recommendations
 """
 
-from datetime import datetime, UTC
-from typing import Dict, List, Any
+from datetime import UTC, datetime
+from typing import Any, Dict, List
 
 
 class QualityReportGenerator:

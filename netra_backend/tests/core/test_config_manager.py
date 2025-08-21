@@ -1,20 +1,33 @@
 """Tests for the configuration management system."""
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
+import pytest
 from pydantic import ValidationError
 
-# Add project root to path
-
-from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
-from netra_backend.app.core.config_validator import ConfigValidator, ConfigurationValidationError
-from netra_backend.app.core.exceptions_config import ConfigurationError
-from netra_backend.app.core.configuration.manager import ConfigManager
 from config import get_config, reload_config
+from netra_backend.app.core.config_validator import (
+    ConfigurationValidationError,
+    ConfigValidator,
+)
+from netra_backend.app.core.configuration.manager import ConfigManager
+from netra_backend.app.core.exceptions_config import ConfigurationError
+
+# Add project root to path
+from netra_backend.app.core.secret_manager import SecretManager, SecretManagerError
 from netra_backend.app.schemas.Config import AppConfig, DevelopmentConfig
 
 # Add project root to path

@@ -6,8 +6,8 @@ for WebSocket resilience testing.
 
 import asyncio
 import random
-from typing import Dict, Any, Optional
 from enum import Enum
+from typing import Any, Dict, Optional
 
 
 class FailureType(Enum):

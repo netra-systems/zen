@@ -19,7 +19,8 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 import pytest
 
 from tests.unified.config import TEST_USERS

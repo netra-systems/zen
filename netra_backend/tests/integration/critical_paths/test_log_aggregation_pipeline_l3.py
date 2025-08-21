@@ -11,20 +11,30 @@ Coverage: Log collection accuracy, aggregation performance, structured logging, 
 L3 Realism: Tests with real log aggregation services and actual log volumes
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
 import asyncio
+import json
+import logging
 import time
 import uuid
-import logging
-import json
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timezone, timedelta
-from unittest.mock import patch, AsyncMock
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
 from enum import Enum
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import pytest
 
 logger = logging.getLogger(__name__)
 

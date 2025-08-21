@@ -3,8 +3,8 @@ Secret loader for auth service.
 Handles loading secrets from environment variables and Google Secret Manager.
 Ensures consistency with main backend service.
 """
-import os
 import logging
+import os
 from typing import Optional
 
 logger = logging.getLogger(__name__)

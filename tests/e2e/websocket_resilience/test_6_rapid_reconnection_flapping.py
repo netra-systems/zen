@@ -10,14 +10,14 @@ handling of unstable enterprise networks and mobile connections.
 
 import asyncio
 import json
+import os
 import time
 import uuid
-import psutil
-import os
-from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Any, Optional, Tuple
+from datetime import datetime, timedelta, timezone
+from typing import Any, Dict, List, Optional, Tuple
 from unittest.mock import AsyncMock, MagicMock, patch
 
+import psutil
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode

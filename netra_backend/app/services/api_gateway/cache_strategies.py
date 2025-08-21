@@ -1,7 +1,7 @@
 """Cache strategies for API Gateway."""
 
-from typing import Dict, Optional, Any
 from abc import ABC, abstractmethod
+from typing import Any, Dict, Optional
 
 
 class CacheStrategy(ABC):

@@ -3,7 +3,8 @@ Migration Runner for database migrations
 """
 
 import asyncio
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
+
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

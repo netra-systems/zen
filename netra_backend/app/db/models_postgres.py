@@ -7,50 +7,46 @@ Maintains backward compatibility while adhering to modular architecture.
 # Import Base class for SQLAlchemy models
 from netra_backend.app.db.base import Base
 
-# Import user and authentication models
-from netra_backend.app.db.models_user import (
-    User,
-    Secret,
-    ToolUsageLog
-)
-
-# Import supply and research models
-from netra_backend.app.db.models_supply import (
-    Supply,
-    SupplyOption,
-    AvailabilityStatus,
-    AISupplyItem,
-    ResearchSessionStatus,
-    ResearchSession,
-    SupplyUpdateLog
-)
-
 # Import agent and assistant models
 from netra_backend.app.db.models_agent import (
+    ApexOptimizerAgentRun,
+    ApexOptimizerAgentRunReport,
     Assistant,
-    Thread,
     Message,
     Run,
     Step,
-    ApexOptimizerAgentRun,
-    ApexOptimizerAgentRunReport
+    Thread,
 )
 
 # Import content and corpus models
 from netra_backend.app.db.models_content import (
-    CorpusAuditLog,
     Analysis,
     AnalysisResult,
+    Corpus,
+    CorpusAuditLog,
     Reference,
-    Corpus
 )
 
 # Import MCP client models
 from netra_backend.app.db.models_mcp_client import (
     MCPExternalServer,
+    MCPResourceAccess,
     MCPToolExecution,
-    MCPResourceAccess
 )
+
+# Import supply and research models
+from netra_backend.app.db.models_supply import (
+    AISupplyItem,
+    AvailabilityStatus,
+    ResearchSession,
+    ResearchSessionStatus,
+    Supply,
+    SupplyOption,
+    SupplyUpdateLog,
+)
+
+# Import user and authentication models
+from netra_backend.app.db.models_user import Secret, ToolUsageLog, User
 
 # Re-export all models for backward compatibility
 __all__ = [

@@ -3,10 +3,12 @@ Response-related type definitions for LLM operations.
 Following Netra conventions with strong typing.
 """
 
-from typing import Dict, Any, Optional, List, Union, ForwardRef
-from datetime import datetime, UTC
-from pydantic import BaseModel, Field
 import uuid
+from datetime import UTC, datetime
+from typing import Any, Dict, ForwardRef, List, Optional, Union
+
+from pydantic import BaseModel, Field
+
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 
 # Forward reference for LLMRequest to avoid circular imports

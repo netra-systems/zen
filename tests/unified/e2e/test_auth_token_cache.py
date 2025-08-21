@@ -7,14 +7,19 @@ IMPACT: 100ms+ latency on every API call degrades user experience
 """
 
 import asyncio
-import pytest
 import time
-import httpx
 from datetime import datetime, timedelta
-from typing import Dict, Optional, List
-from unittest.mock import Mock, patch, AsyncMock
+from typing import Dict, List, Optional
+from unittest.mock import AsyncMock, Mock, patch
 
-from netra_backend.app.clients.auth_client_cache import AuthTokenCache, CachedToken, AuthServiceSettings
+import httpx
+import pytest
+
+from netra_backend.app.clients.auth_client_cache import (
+    AuthServiceSettings,
+    AuthTokenCache,
+    CachedToken,
+)
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
 
 

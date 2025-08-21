@@ -18,23 +18,33 @@ Without this, 100% system downtime occurs when auth has issues.
 """
 
 import asyncio
-import pytest
-import time
-import httpx
 import logging
-from typing import Dict, Any, Optional, List
-from pathlib import Path
-from unittest.mock import AsyncMock, patch
 
 # Add project root to path for imports
 import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+from unittest.mock import AsyncMock, patch
+
+import httpx
+import pytest
+
 project_root = Path(__file__).parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
-from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState, CircuitBreakerOpenError
+from netra_backend.app.clients.auth_client_cache import (
+    AuthCircuitBreakerManager,
+    AuthTokenCache,
+    CachedToken,
+)
 from netra_backend.app.clients.auth_client_core import AuthServiceClient
-from netra_backend.app.clients.auth_client_cache import AuthTokenCache, AuthCircuitBreakerManager, CachedToken
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import (
+    CircuitBreakerOpenError,
+    CircuitConfig,
+    CircuitState,
+)
 
 logger = logging.getLogger(__name__)
 

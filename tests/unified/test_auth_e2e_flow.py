@@ -10,14 +10,15 @@ Business Value Justification (BVJ):
 Test cases protect critical authentication flows that enable revenue generation.
 Each test completes in <5 seconds to maintain fast feedback for continuous deployment.
 """
-import pytest
 import asyncio
 import json
+import os
 import time
 import uuid
-import os
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 # Set minimal environment for testing
 os.environ["TESTING"] = "1"

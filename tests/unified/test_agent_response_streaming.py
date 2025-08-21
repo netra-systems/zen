@@ -13,11 +13,14 @@ Business Value Justification (BVJ):
 Architecture: 450-line compliance through focused streaming scenario testing
 """
 
-import pytest
 import asyncio
 from datetime import datetime, timezone
+
+import pytest
+
 from netra_backend.tests.unified.agent_orchestration_fixtures import (
-    websocket_mock, streaming_test_data
+    streaming_test_data,
+    websocket_mock,
 )
 
 

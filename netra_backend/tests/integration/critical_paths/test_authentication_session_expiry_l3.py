@@ -12,18 +12,20 @@ This test ensures proper session lifecycle management.
 """
 
 from netra_backend.tests.test_utils import setup_test_path
+
 setup_test_path()
 
 import asyncio
 import json
 import sys
 import time
-import jwt
-from pathlib import Path
-from typing import Optional, Dict, Any, List
-import aiohttp
-import pytest
 from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import aiohttp
+import jwt
+import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent.parent.parent

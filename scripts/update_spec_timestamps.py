@@ -4,11 +4,11 @@ Script to identify legacy SPECs and add last_edited timestamps to all SPEC files
 """
 
 import os
-import xml.etree.ElementTree as ET
-from pathlib import Path
-from datetime import datetime
-from typing import List, Dict, Tuple
 import re
+import xml.etree.ElementTree as ET
+from datetime import datetime
+from pathlib import Path
+from typing import Dict, List, Tuple
 
 # Define patterns that indicate legacy/outdated specs
 LEGACY_INDICATORS = [

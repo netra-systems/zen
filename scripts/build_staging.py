@@ -4,9 +4,9 @@ Unified Staging Build Script
 Handles Docker image building and local testing for staging environment
 """
 
+import os
 import subprocess
 import sys
-import os
 import time
 
 # Set UTF-8 encoding for Windows
@@ -17,7 +17,8 @@ if sys.platform == "win32":
 import argparse
 import json
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 
 class StagingBuilder:
     """Manages staging environment builds and deployments"""

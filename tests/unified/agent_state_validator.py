@@ -4,20 +4,25 @@ BVJ: Enterprise/Growth segment - $50K+ revenue protection from session failures.
 Architecture: ≤300 lines, ≤8 lines per function, modular validators.
 """
 
-import pytest
 import asyncio
-import psutil
 import time
-from typing import Dict, Any, List, Optional, Union
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Union
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.tests.unified.config import UnifiedTestConfig, TestTier, get_test_user
-from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
+import psutil
+import pytest
+
 from netra_backend.app.agents.base.interface import ExecutionContext
-from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.state import AgentMetadata, DeepAgentState
 from netra_backend.app.schemas.agent_models import AgentMetadata
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.tests.unified.config import (
+    TestTier,
+    UnifiedTestConfig,
+    get_test_user,
+)
 
 
 @dataclass

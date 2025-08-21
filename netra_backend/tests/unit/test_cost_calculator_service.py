@@ -11,23 +11,37 @@ Tests ALL cost calculation scenarios for business-critical accuracy.
 Maximum 300 lines, functions ≤8 lines.
 """
 
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 from unittest.mock import Mock, patch
 
-# Add project root to path
+import pytest
 
-from netra_backend.app.services.cost_calculator import (
-
-# Add project root to path
-    CostCalculatorService, BudgetManager, CostTier, ModelCostInfo,
-    create_cost_calculator, create_budget_manager, optimize_model_selection,
-    calculate_cost_savings
-)
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+
+# Add project root to path
+from netra_backend.app.services.cost_calculator import (
+    BudgetManager,
+    # Add project root to path
+    CostCalculatorService,
+    CostTier,
+    ModelCostInfo,
+    calculate_cost_savings,
+    create_budget_manager,
+    create_cost_calculator,
+    optimize_model_selection,
+)
 
 
 # Global fixtures for token usage scenarios (shared across test classes)

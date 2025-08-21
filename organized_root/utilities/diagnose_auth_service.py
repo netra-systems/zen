@@ -4,14 +4,16 @@ Auth Service Diagnostic Tool
 Diagnoses and fixes common auth service deployment issues
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
+import sys
 import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
+
 import requests
+
 
 class AuthServiceDiagnostic:
     """Comprehensive diagnostic tool for auth service issues"""

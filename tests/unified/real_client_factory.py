@@ -17,8 +17,14 @@ Architecture:
 - Comprehensive error handling and retry logic
 """
 
-from typing import Dict, Any, Optional
-from tests.unified.real_client_types import ClientConfig, create_test_config, create_auth_config, create_backend_config
+from typing import Any, Dict, Optional
+
+from tests.unified.real_client_types import (
+    ClientConfig,
+    create_auth_config,
+    create_backend_config,
+    create_test_config,
+)
 from tests.unified.real_http_client import RealHTTPClient
 from tests.unified.real_websocket_client import RealWebSocketClient
 

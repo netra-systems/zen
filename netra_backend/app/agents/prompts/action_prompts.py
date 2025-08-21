@@ -5,7 +5,6 @@ This module contains prompt templates for the action planning agent.
 
 from langchain_core.prompts import PromptTemplate
 
-
 # Actions to Meet Goals Sub-Agent Prompt
 actions_to_meet_goals_prompt_template = PromptTemplate(
     input_variables=["optimizations", "data", "user_request"],

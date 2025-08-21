@@ -14,19 +14,20 @@ Supervisor Agent Initialization with Admin Tool Support
 This module provides factory functions for creating supervisor agents
 with admin tool support using the unified supervisor architecture.
 """
-from typing import Optional
-from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.db.models_postgres import User
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
-from enum import Enum
 from dataclasses import dataclass
-from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.services.permission_service import PermissionService
-from netra_backend.app.logging_config import central_logger
+from enum import Enum
+from typing import List, Optional
+
 from langchain_core.tools import BaseTool
-from typing import List
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.permission_service import PermissionService
 
 logger = central_logger
 

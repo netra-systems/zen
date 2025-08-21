@@ -4,12 +4,13 @@ Validate Service Independence Script
 Ensures microservices are truly independent from the main application
 """
 
-import os
-import sys
-import subprocess
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
+
 
 class ServiceIndependenceValidator:
     """Validates that services are completely independent."""

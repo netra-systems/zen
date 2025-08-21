@@ -1,7 +1,8 @@
 """WebSocket Manager Module"""
 
-from typing import Dict, Set
 import asyncio
+from typing import Dict, Set
+
 from fastapi import WebSocket
 
 

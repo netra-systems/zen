@@ -8,15 +8,23 @@ Business Value: Reusable testing components for reliable reconnection validation
 
 import asyncio
 import time
-from datetime import datetime, UTC
-from typing import Dict, List, Any
+from datetime import UTC, datetime
+from typing import Any, Dict, List
 from unittest.mock import MagicMock
 
 # Import utilities with fallbacks
 try:
-    from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token, create_expired_token
-    from netra_backend.app.core.websocket_reconnection_handler import WebSocketReconnectionHandler
-    from netra_backend.app.core.websocket_recovery_types import ReconnectionReason, ReconnectionConfig
+    from netra_backend.app.core.websocket_reconnection_handler import (
+        WebSocketReconnectionHandler,
+    )
+    from netra_backend.app.core.websocket_recovery_types import (
+        ReconnectionConfig,
+        ReconnectionReason,
+    )
+    from netra_backend.app.tests.test_utilities.auth_test_helpers import (
+        create_expired_token,
+        create_test_token,
+    )
 except ImportError:
     def create_test_token(user_id: str, exp_offset: int = 3600) -> str:
         return f"mock_token_{user_id}_{exp_offset}"
@@ -50,7 +58,10 @@ except ImportError:
             return self.attempts
 
 try:
-    from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+    from netra_backend.app.tests.test_utilities.websocket_mocks import (
+        MockWebSocket,
+        WebSocketBuilder,
+    )
 except ImportError:
     class MockWebSocket:
         def __init__(self, user_id: str = None):

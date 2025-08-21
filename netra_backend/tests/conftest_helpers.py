@@ -59,14 +59,16 @@ def _import_agent_classes():
 
 def _import_base_agent_classes():
     """Import base agent classes."""
-    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
     from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
+    from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
     return {'triage': TriageSubAgent, 'data': DataSubAgent}
 
 
 def _import_additional_agent_classes():
     """Import additional agent classes."""
-    from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
+    from netra_backend.app.agents.optimizations_core_sub_agent import (
+        OptimizationsCoreSubAgent,
+    )
     from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
     return {'optimization': OptimizationsCoreSubAgent, 'reporting': ReportingSubAgent}
 

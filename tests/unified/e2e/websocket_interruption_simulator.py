@@ -17,10 +17,11 @@ ARCHITECTURAL COMPLIANCE:
 
 import asyncio
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from tests.unified.config import TestDataFactory
-from tests.unified.real_websocket_client import RealWebSocketClient
 from tests.unified.real_client_types import ConnectionState
+from tests.unified.real_websocket_client import RealWebSocketClient
 
 
 class NetworkInterruptionSimulator:

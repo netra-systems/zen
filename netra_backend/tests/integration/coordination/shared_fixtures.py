@@ -8,27 +8,29 @@ BVJ:
 - Revenue Impact: Prevents customer requests from failing due to broken agent coordination
 """
 
-import pytest
 import asyncio
-import time
-import uuid
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional, Callable
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
 # Set testing environment
 import os
+import time
+import uuid
+from datetime import datetime, timezone
+from typing import Any, Callable, Dict, List, Optional
+from unittest.mock import AsyncMock, MagicMock, Mock, patch
+
+import pytest
+
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from netra_backend.app.agents.base_agent import BaseSubAgent
-from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.logging_config import central_logger
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 

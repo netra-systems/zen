@@ -4,14 +4,24 @@ This test demonstrates why the 'settings' is not defined error occurs.
 """
 
 # Add project root to path
+# Add project root to path
+import sys
+from pathlib import Path
+
 from netra_backend.tests.test_utils import setup_test_path
+
+PROJECT_ROOT = Path(__file__).parent.parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 setup_test_path()
 
-import pytest
-import os
-from unittest.mock import patch, MagicMock, AsyncMock
-from fastapi.testclient import TestClient
 import asyncio
+import os
+from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
+from fastapi.testclient import TestClient
 
 # Set minimal test environment
 os.environ["TESTING"] = "1"
@@ -123,8 +133,8 @@ def test_llm_manager_instantiation_without_settings():
     across the codebase.
     """
     # In llm/llm_manager.py, it requires settings parameter
-    from netra_backend.app.llm.llm_manager import LLMManager as LLMManagerWithSettings
     from netra_backend.app.config import AppConfig
+    from netra_backend.app.llm.llm_manager import LLMManager as LLMManagerWithSettings
     
     # This requires settings
     settings = AppConfig()
@@ -132,7 +142,9 @@ def test_llm_manager_instantiation_without_settings():
     assert llm_with_settings.settings == settings
     
     # In services/llm_manager.py, it doesn't require settings
-    from netra_backend.app.services.llm_manager import LLMManager as LLMManagerNoSettings
+    from netra_backend.app.services.llm_manager import (
+        LLMManager as LLMManagerNoSettings,
+    )
     
     # This doesn't require settings
     llm_no_settings = LLMManagerNoSettings()
