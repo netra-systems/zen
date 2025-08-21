@@ -200,18 +200,27 @@
     <url_parsing_fix>COMPLETED - Modified configuration to handle Unix socket URLs</url_parsing_fix>
     <ssl_validation_fix>COMPLETED - Fixed SSL validation for Cloud SQL Unix sockets</ssl_validation_fix>
     <auth_service>WORKING - Successfully connects to database</auth_service>
-    <backend_service>PENDING - Still has startup issues with SECRET_KEY validation</backend_service>
+    <backend_service>WORKING - Fixed SSL requirement issue (2025-08-21)</backend_service>
   </resolution_status>
   
   <working_configuration>
-    <database_url>postgresql://postgres:6K8LHm@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres</database_url>
+    <database_url>postgresql://postgres:6K8LHm@/postgres?host=/cloudsql/netra-staging:us-central1:staging-shared-postgres&amp;sslmode=require</database_url>
     <notes>
       - Simple password without special characters
       - Unix socket connection via Cloud SQL proxy
-      - No sslmode parameter needed for Unix sockets
+      - MUST include sslmode=require parameter for staging/production
       - Both services configured with same DATABASE_URL secret
     </notes>
   </working_configuration>
+  
+  <ssl_mode_requirement_fix>
+    <date>2025-08-21</date>
+    <issue>Backend service failing with "SSL required for staging environment" error</issue>
+    <root_cause>DATABASE_URL secret was missing the required sslmode parameter</root_cause>
+    <solution>Added sslmode=require to the database-url-staging secret</solution>
+    <verification>All services (backend, auth, frontend) now healthy in staging</verification>
+    <important_note>Cloud SQL connections in staging/production MUST have sslmode parameter even with Unix sockets</important_note>
+  </ssl_mode_requirement_fix>
   
   <critical_fixes_applied>
     <fix file="app/db/postgres_core.py">

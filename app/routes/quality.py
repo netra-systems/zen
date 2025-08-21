@@ -86,14 +86,6 @@ async def stop_quality_monitoring(current_user: User = Depends(get_current_user)
     return await handle_stop_monitoring(monitoring_service, current_user)
 
 
-@router.get("/health")
-async def quality_service_health() -> QualityServiceHealth:
-    """
-    Check quality service health
-    
-    Returns the health status of all quality services.
-    """
-    return handle_service_health(quality_gate_service, monitoring_service, fallback_service)
 
 
 # Test-friendly functions for direct import and testing

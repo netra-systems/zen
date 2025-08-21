@@ -135,9 +135,9 @@ async def get_example_message_stats():
         )
 
 
-@router.get("/health")
-async def example_message_health():
-    """Health check for example message system"""
+@router.get("/status")
+async def example_message_status():
+    """Status check for example message system"""
     
     try:
         handler = get_example_message_handler()

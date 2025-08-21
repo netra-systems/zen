@@ -80,8 +80,13 @@
             <critical-takeaway>Extended timeouts required: Backend/Auth 30s, Frontend 60s, Overall 120s.</critical-takeaway>
         </category>
 
-        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging">
+        <category name="Deployment" path="SPEC/learnings/deployment_staging.xml" keywords="GCP, Cloud Run, Docker, Staging, SSL, Database, OAuth, Frontend, Proxy">
             <critical-takeaway>Use gunicorn with uvicorn workers for Cloud Run (cloud-run-uvicorn-workers).</critical-takeaway>
+            <critical-takeaway>DATABASE_URL in staging/production MUST include sslmode=require parameter for Cloud SQL connections.</critical-takeaway>
+            <critical-takeaway>Frontend NEXT_PUBLIC_API_URL must point to backend API URL (e.g., https://api.staging.netrasystems.ai) for proxy rewrites to work.</critical-takeaway>
+            <critical-takeaway>Health check /health/ready endpoint in staging may fail with 503 if database connectivity isn't properly configured - check DATABASE_URL and SSL settings.</critical-takeaway>
+            <critical-takeaway>OAuth flow requires auth service at separate domain (e.g., auth.staging.netrasystems.ai) with proper CORS and callback URL configuration.</critical-takeaway>
+            <critical-takeaway>CRITICAL: USE_OAUTH_PROXY must be "true" for backend to validate tokens through auth service, even if OAUTH_PROXY_URL is correctly set.</critical-takeaway>
         </category>
 
         <category name="GitHub Actions" path="SPEC/learnings/github_actions.xml" keywords="CI/CD, Pipeline, Workflow">
@@ -158,8 +163,18 @@
         <category name="GCP Database Connection Failures" path="SPEC/learnings/gcp_database_connection_failures.xml" keywords="GCP, Database, Connection, sslmode, asyncpg, Cloud SQL, Authentication">
             <critical-takeaway>Backend health checks must convert sslmode= to ssl= for asyncpg connections</critical-takeaway>
             <critical-takeaway>Use Unix socket format for Cloud SQL proxy connections: postgresql://user:pass@/db?host=/cloudsql/instance</critical-takeaway>
+            <critical-takeaway>Cloud SQL connections MUST include sslmode=require even with Unix sockets in staging/production</critical-takeaway>
             <critical-takeaway>Both backend and auth services must have Cloud SQL proxy configured</critical-takeaway>
             <critical-takeaway>Verify database credentials match actual Cloud SQL users and passwords</critical-takeaway>
+        </category>
+        
+        <category name="Pragmatic Rigor/Resilience" path="SPEC/learnings/pragmatic_rigor.xml" keywords="Pragmatic, Rigor, Resilience, Postel, Duck Typing, Validation, Fallback, Progressive">
+            <critical-takeaway>Focus on minimum constraints necessary for correctness, not maximum constraints for purity (pragmatic-rigor-over-rigid-purity).</critical-takeaway>
+            <critical-takeaway>Default to resilience with relaxed configuration - systems should default to functional, permissive states (default-to-resilience).</critical-takeaway>
+            <critical-takeaway>Apply Postel's Law: "Be conservative in what you send, liberal in what you accept" for interface design (postels-law-adherence).</critical-takeaway>
+            <critical-takeaway>Use progressive validation modes (WARN, ENFORCE_CRITICAL, ENFORCE_ALL) instead of binary strict/permissive (progressive-validation-modes).</critical-takeaway>
+            <critical-takeaway>Implement fallback behaviors and graceful degradation rather than hard failures (fallback-behaviors).</critical-takeaway>
+            <critical-takeaway>Prefer duck typing over strict isinstance() checks - focus on behavior over inheritance (duck-typing-over-isinstance).</critical-takeaway>
         </category>
     </categories>
 </specification>

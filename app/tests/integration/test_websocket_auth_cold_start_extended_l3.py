@@ -1394,45 +1394,1642 @@ class TestWebSocketAuthColdStartExtendedL3:
                         assert failover_sequence == ["primary", "replica", "cache"]
                         assert data.get("from_cache") is True
     
-    # Continue with remaining test sections (6-10) following same pattern...
-    # Due to length constraints, I'll provide a summary structure for remaining tests
+    # ==================== TEST 6: ROLE-BASED ACCESS CONTROL (DEPTH & BREADTH) ====================
     
-    # TEST 6: ROLE-BASED ACCESS CONTROL (6 tests)
-    # - Test 6.1 (Depth): Privilege escalation attempts
-    # - Test 6.2 (Depth): Role inheritance and delegation
-    # - Test 6.3 (Depth): Dynamic role changes during session
-    # - Test 6.4 (Breadth): Cross-tenant access prevention
-    # - Test 6.5 (Breadth): Role-specific rate limits
-    # - Test 6.6 (Breadth): Audit logging for privileged operations
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rbac_privilege_escalation_attempts(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 6.1 (Depth): Detect and prevent privilege escalation attempts."""
+        # Create token with basic user role
+        user_token = jwt.encode(
+            {
+                "user_id": "escalation_user",
+                "email": "escalation@example.com",
+                "tier": "free",
+                "roles": ["user"],
+                "permissions": ["read:own_data"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {user_token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Attempt various privilege escalation techniques
+            escalation_attempts = [
+                {
+                    "type": "update_user",
+                    "user_id": "escalation_user",
+                    "data": {"roles": ["admin"]}  # Try to add admin role
+                },
+                {
+                    "type": "execute_admin_command",
+                    "command": "delete_all_users",
+                    "sudo": True  # Try to use sudo
+                },
+                {
+                    "type": "impersonate_user",
+                    "target_user_id": "admin_user"  # Try to impersonate admin
+                },
+                {
+                    "type": "modify_permissions",
+                    "permissions": ["write:all_data"]  # Try to add permissions
+                }
+            ]
+            
+            for attempt in escalation_attempts:
+                await ws.send(json.dumps(attempt))
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                # All escalation attempts should be blocked
+                assert data["type"] == "error"
+                assert "unauthorized" in data["message"].lower() or "forbidden" in data["message"].lower()
     
-    # TEST 7: SESSION PERSISTENCE (6 tests)
-    # - Test 7.1 (Depth): Session fixation attacks
-    # - Test 7.2 (Depth): Distributed session consistency
-    # - Test 7.3 (Depth): Session timeout and renewal
-    # - Test 7.4 (Breadth): Cross-device session management
-    # - Test 7.5 (Breadth): Session migration during failover
-    # - Test 7.6 (Breadth): Session storage limits
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rbac_role_inheritance_delegation(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 6.2 (Depth): Complex role inheritance and delegation chains."""
+        # Create token with inherited roles
+        manager_token = jwt.encode(
+            {
+                "user_id": "manager_user",
+                "email": "manager@example.com",
+                "tier": "enterprise",
+                "roles": ["manager", "team_lead"],
+                "inherited_roles": ["user", "viewer"],
+                "delegated_from": "director_user",
+                "delegation_expires": (datetime.utcnow() + timedelta(minutes=30)).isoformat(),
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {manager_token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Test inherited permissions
+            await ws.send(json.dumps({
+                "type": "access_resource",
+                "resource": "team_reports",
+                "required_role": "team_lead"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "access_granted"
+            
+            # Test delegated permissions
+            await ws.send(json.dumps({
+                "type": "access_resource",
+                "resource": "director_dashboard",
+                "use_delegation": True
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "access_granted"
+            assert data.get("delegation_used") is True
+            
+            # Wait for delegation to expire
+            await asyncio.sleep(31 * 60)  # 31 minutes
+            
+            # Delegated access should now fail
+            await ws.send(json.dumps({
+                "type": "access_resource",
+                "resource": "director_dashboard",
+                "use_delegation": True
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "error"
+            assert "delegation expired" in data["message"].lower()
     
-    # TEST 8: RATE LIMITING (6 tests)
-    # - Test 8.1 (Depth): Distributed rate limiting accuracy
-    # - Test 8.2 (Depth): Rate limit bypass attempts
-    # - Test 8.3 (Depth): Sliding window vs fixed window
-    # - Test 8.4 (Breadth): Tier-based rate limits
-    # - Test 8.5 (Breadth): Geographic rate limiting
-    # - Test 8.6 (Breadth): Rate limit recovery and backoff
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rbac_dynamic_role_changes(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 6.3 (Depth): Handle dynamic role changes during active session."""
+        user_id = "dynamic_role_user"
+        
+        # Start with basic role
+        initial_token = jwt.encode(
+            {
+                "user_id": user_id,
+                "email": "dynamic@example.com",
+                "tier": "early",
+                "roles": ["user"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {initial_token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Initial access check
+            await ws.send(json.dumps({
+                "type": "access_resource",
+                "resource": "admin_panel"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "error"  # Should be denied
+            
+            # Simulate role upgrade in backend
+            with patch('app.clients.auth_client.auth_client.get_user_roles') as mock_roles:
+                mock_roles.return_value = ["user", "admin"]
+                
+                # Notify session of role change
+                await ws.send(json.dumps({
+                    "type": "refresh_roles"
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                assert data["type"] == "roles_updated"
+                assert "admin" in data["new_roles"]
+                
+                # Now admin access should work
+                await ws.send(json.dumps({
+                    "type": "access_resource",
+                    "resource": "admin_panel"
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                assert data["type"] == "access_granted"
     
-    # TEST 9: MULTI-FACTOR AUTH (6 tests)
-    # - Test 9.1 (Depth): TOTP time synchronization
-    # - Test 9.2 (Depth): Backup code exhaustion
-    # - Test 9.3 (Depth): MFA bypass detection
-    # - Test 9.4 (Breadth): Multiple MFA methods
-    # - Test 9.5 (Breadth): MFA device registration
-    # - Test 9.6 (Breadth): MFA recovery procedures
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rbac_cross_tenant_access_prevention(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 6.4 (Breadth): Prevent cross-tenant data access."""
+        # Create tokens for different tenants
+        tenant_a_token = jwt.encode(
+            {
+                "user_id": "tenant_a_user",
+                "email": "user@tenanta.com",
+                "tier": "enterprise",
+                "tenant_id": "tenant_a",
+                "roles": ["admin"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        tenant_b_token = jwt.encode(
+            {
+                "user_id": "tenant_b_user",
+                "email": "user@tenantb.com",
+                "tier": "enterprise",
+                "tenant_id": "tenant_b",
+                "roles": ["admin"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Tenant A creates data
+        headers_a = {"Authorization": f"Bearer {tenant_a_token}"}
+        async with websockets.connect(ws_url, extra_headers=headers_a) as ws_a:
+            await ws_a.send(json.dumps({
+                "type": "create_resource",
+                "resource_type": "secret_data",
+                "data": {"content": "Tenant A secret"}
+            }))
+            
+            response = await ws_a.recv()
+            data = json.loads(response)
+            resource_id = data["resource_id"]
+        
+        # Tenant B tries to access Tenant A's data
+        headers_b = {"Authorization": f"Bearer {tenant_b_token}"}
+        async with websockets.connect(ws_url, extra_headers=headers_b) as ws_b:
+            await ws_b.send(json.dumps({
+                "type": "access_resource",
+                "resource_id": resource_id,
+                "tenant_override": "tenant_a"  # Try to override tenant
+            }))
+            
+            response = await ws_b.recv()
+            data = json.loads(response)
+            
+            # Should be blocked despite admin role
+            assert data["type"] == "error"
+            assert "tenant" in data["message"].lower()
     
-    # TEST 10: CORS VALIDATION (6 tests)
-    # - Test 10.1 (Depth): Wildcard origin exploitation
-    # - Test 10.2 (Depth): Null origin handling
-    # - Test 10.3 (Depth): Preflight request validation
-    # - Test 10.4 (Breadth): Dynamic origin whitelisting
-    # - Test 10.5 (Breadth): Subdomain validation
-    # - Test 10.6 (Breadth): Protocol mismatch handling
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rbac_role_specific_rate_limits(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 6.5 (Breadth): Different rate limits based on user roles."""
+        # Create tokens with different roles
+        free_token = jwt.encode(
+            {
+                "user_id": "free_user",
+                "email": "free@example.com",
+                "tier": "free",
+                "roles": ["user"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        premium_token = jwt.encode(
+            {
+                "user_id": "premium_user",
+                "email": "premium@example.com",
+                "tier": "enterprise",
+                "roles": ["premium_user"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Test free user rate limit (should be lower)
+        free_headers = {"Authorization": f"Bearer {free_token}"}
+        free_request_count = 0
+        
+        async with websockets.connect(ws_url, extra_headers=free_headers) as ws:
+            for i in range(20):
+                await ws.send(json.dumps({"type": "api_request", "index": i}))
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                if data["type"] == "rate_limited":
+                    free_request_count = i
+                    break
+        
+        # Test premium user rate limit (should be higher)
+        premium_headers = {"Authorization": f"Bearer {premium_token}"}
+        premium_request_count = 0
+        
+        async with websockets.connect(ws_url, extra_headers=premium_headers) as ws:
+            for i in range(100):
+                await ws.send(json.dumps({"type": "api_request", "index": i}))
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                if data["type"] == "rate_limited":
+                    premium_request_count = i
+                    break
+        
+        # Premium should have higher limit
+        assert premium_request_count > free_request_count * 2
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rbac_audit_logging_privileged_ops(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 6.6 (Breadth): Comprehensive audit logging for privileged operations."""
+        admin_token = jwt.encode(
+            {
+                "user_id": "audit_admin",
+                "email": "audit@example.com",
+                "tier": "enterprise",
+                "roles": ["admin", "auditor"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {admin_token}"}
+        
+        audit_logs = []
+        
+        # Mock audit logging
+        with patch('app.core.audit.log_privileged_operation') as mock_audit:
+            async def capture_audit(*args, **kwargs):
+                audit_logs.append(kwargs)
+                return True
+            
+            mock_audit.side_effect = capture_audit
+            
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                # Perform various privileged operations
+                privileged_ops = [
+                    {"type": "delete_user", "user_id": "some_user"},
+                    {"type": "modify_system_config", "setting": "rate_limit", "value": 1000},
+                    {"type": "access_audit_logs", "date_range": "last_week"},
+                    {"type": "export_user_data", "format": "csv"}
+                ]
+                
+                for op in privileged_ops:
+                    await ws.send(json.dumps(op))
+                    await ws.recv()
+            
+            # Verify audit logs were created
+            assert len(audit_logs) == len(privileged_ops)
+            
+            for log in audit_logs:
+                assert "user_id" in log
+                assert "operation" in log
+                assert "timestamp" in log
+                assert "ip_address" in log
+    
+    # ==================== TEST 7: SESSION PERSISTENCE (DEPTH & BREADTH) ====================
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_session_fixation_attacks(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 7.1 (Depth): Prevent session fixation attacks."""
+        # Attacker creates a session
+        attacker_token = jwt.encode(
+            {
+                "user_id": "attacker",
+                "email": "attacker@evil.com",
+                "tier": "free",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        attacker_headers = {"Authorization": f"Bearer {attacker_token}"}
+        
+        # Attacker gets a session ID
+        fixed_session_id = None
+        async with websockets.connect(ws_url, extra_headers=attacker_headers) as ws:
+            await ws.send(json.dumps({"type": "get_session"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            fixed_session_id = data["session_id"]
+        
+        # Victim tries to use the fixed session ID
+        victim_token = jwt.encode(
+            {
+                "user_id": "victim",
+                "email": "victim@example.com",
+                "tier": "enterprise",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        victim_headers = {
+            "Authorization": f"Bearer {victim_token}",
+            "X-Session-Id": fixed_session_id  # Using attacker's session
+        }
+        
+        async with websockets.connect(ws_url, extra_headers=victim_headers) as ws:
+            await ws.send(json.dumps({"type": "get_user_data"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            
+            # Should create new session, not use fixed one
+            assert data.get("session_id") != fixed_session_id
+            assert data["user_id"] == "victim"
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_session_distributed_consistency(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 7.2 (Depth): Maintain session consistency across distributed nodes."""
+        token = jwt.encode(
+            {
+                "user_id": "distributed_user",
+                "email": "distributed@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Simulate multiple server nodes
+        nodes = ["node1", "node2", "node3"]
+        session_data = {}
+        
+        for node in nodes:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "X-Server-Node": node
+            }
+            
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                # Write data on this node
+                await ws.send(json.dumps({
+                    "type": "update_session",
+                    "data": {f"from_{node}": f"data_{node}"}
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                session_data[node] = data.get("session_data", {})
+        
+        # Verify all nodes see consistent data
+        for node in nodes:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "X-Server-Node": node
+            }
+            
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                await ws.send(json.dumps({"type": "get_session_data"}))
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                # Should see data from all nodes
+                for other_node in nodes:
+                    assert f"from_{other_node}" in data["session_data"]
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_session_timeout_renewal(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 7.3 (Depth): Session timeout and automatic renewal mechanisms."""
+        token = jwt.encode(
+            {
+                "user_id": "timeout_user",
+                "email": "timeout@example.com",
+                "tier": "early",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Set short session timeout
+            await ws.send(json.dumps({
+                "type": "configure_session",
+                "idle_timeout": 5,  # 5 seconds
+                "absolute_timeout": 60  # 60 seconds
+            }))
+            
+            await ws.recv()
+            
+            # Keep session alive with activity
+            for _ in range(3):
+                await asyncio.sleep(3)  # Activity before idle timeout
+                await ws.send(json.dumps({"type": "ping"}))
+                response = await ws.recv()
+                data = json.loads(response)
+                assert data["type"] == "pong"
+            
+            # Let session idle timeout
+            await asyncio.sleep(6)
+            
+            # Should require re-authentication
+            await ws.send(json.dumps({"type": "ping"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] in ["session_expired", "reauth_required"]
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_session_cross_device_management(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 7.4 (Breadth): Manage sessions across multiple devices."""
+        user_id = "multi_device_user"
+        base_token_data = {
+            "user_id": user_id,
+            "email": "devices@example.com",
+            "tier": "enterprise",
+            "exp": datetime.utcnow() + timedelta(hours=1)
+        }
+        
+        # Create tokens for different devices
+        devices = {
+            "mobile": {"device_id": "iphone_123", "user_agent": "iOS/14.0"},
+            "desktop": {"device_id": "mac_456", "user_agent": "Chrome/90.0"},
+            "tablet": {"device_id": "ipad_789", "user_agent": "Safari/14.0"}
+        }
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        active_sessions = {}
+        
+        # Create sessions on all devices
+        for device_type, device_info in devices.items():
+            token_data = {**base_token_data, **device_info}
+            token = jwt.encode(token_data, auth_service_config["jwt_secret"], algorithm="HS256")
+            
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "User-Agent": device_info["user_agent"]
+            }
+            
+            ws = await websockets.connect(ws_url, extra_headers=headers)
+            active_sessions[device_type] = ws
+            
+            await ws.send(json.dumps({"type": "register_device"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "device_registered"
+        
+        # List all active sessions from one device
+        await active_sessions["desktop"].send(json.dumps({"type": "list_sessions"}))
+        response = await active_sessions["desktop"].recv()
+        data = json.loads(response)
+        
+        assert len(data["sessions"]) == 3
+        assert all(d in [s["device_type"] for s in data["sessions"]] for d in devices.keys())
+        
+        # Revoke mobile session from desktop
+        await active_sessions["desktop"].send(json.dumps({
+            "type": "revoke_session",
+            "device_id": "iphone_123"
+        }))
+        
+        # Mobile session should be terminated
+        try:
+            await active_sessions["mobile"].send(json.dumps({"type": "ping"}))
+            response = await active_sessions["mobile"].recv()
+            data = json.loads(response)
+            assert data["type"] == "session_revoked"
+        except websockets.exceptions.ConnectionClosed:
+            pass  # Connection closed is also valid
+        
+        # Clean up
+        for ws in active_sessions.values():
+            if ws.open:
+                await ws.close()
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_session_migration_during_failover(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 7.5 (Breadth): Session migration during server failover."""
+        token = jwt.encode(
+            {
+                "user_id": "failover_user",
+                "email": "failover@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Connect to primary server
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "X-Server": "primary"
+        }
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Store session data
+            await ws.send(json.dumps({
+                "type": "store_data",
+                "data": {"important": "session_data", "counter": 42}
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            session_id = data["session_id"]
+            
+            # Simulate primary server failure
+            await ws.send(json.dumps({"type": "simulate_failure"}))
+        
+        # Connect to backup server
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "X-Server": "backup",
+            "X-Session-Id": session_id
+        }
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Retrieve migrated session
+            await ws.send(json.dumps({"type": "get_session_data"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            
+            # Session data should be preserved
+            assert data["session_data"]["important"] == "session_data"
+            assert data["session_data"]["counter"] == 42
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_session_storage_limits(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 7.6 (Breadth): Handle session storage limits and cleanup."""
+        token = jwt.encode(
+            {
+                "user_id": "storage_limit_user",
+                "email": "storage@example.com",
+                "tier": "free",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Try to store large amount of session data
+            large_data = "x" * (1024 * 1024)  # 1MB string
+            
+            for i in range(10):
+                await ws.send(json.dumps({
+                    "type": "store_session_data",
+                    "key": f"large_data_{i}",
+                    "value": large_data
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                if data["type"] == "error":
+                    # Should hit storage limit
+                    assert "storage" in data["message"].lower()
+                    assert "limit" in data["message"].lower()
+                    assert i < 10  # Should fail before storing all
+                    break
+            else:
+                pytest.fail("Should have hit storage limit")
+    
+    # ==================== TEST 8: RATE LIMITING (DEPTH & BREADTH) ====================
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rate_limit_distributed_accuracy(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 8.1 (Depth): Accurate rate limiting across distributed systems."""
+        token = jwt.encode(
+            {
+                "user_id": "distributed_rate_user",
+                "email": "distrate@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Simulate requests from multiple nodes
+        nodes = ["node1", "node2", "node3"]
+        total_requests = 0
+        rate_limit = 100  # Expected rate limit
+        
+        async def send_requests_from_node(node, count):
+            nonlocal total_requests
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "X-Node": node
+            }
+            
+            successful = 0
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                for _ in range(count):
+                    await ws.send(json.dumps({"type": "api_request"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    if data["type"] == "rate_limited":
+                        break
+                    successful += 1
+            
+            return successful
+        
+        # Send requests concurrently from all nodes
+        tasks = [send_requests_from_node(node, 50) for node in nodes]
+        results = await asyncio.gather(*tasks)
+        total_requests = sum(results)
+        
+        # Total across all nodes should respect global rate limit
+        assert total_requests <= rate_limit + 5  # Allow small margin for timing
+        assert total_requests >= rate_limit - 5
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rate_limit_bypass_attempts(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 8.2 (Depth): Prevent rate limit bypass attempts."""
+        base_token_data = {
+            "email": "bypass@example.com",
+            "tier": "free",
+            "exp": datetime.utcnow() + timedelta(hours=1)
+        }
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Various bypass techniques
+        bypass_attempts = [
+            # Technique 1: Different user IDs
+            {"user_id": "bypass_user_1"},
+            {"user_id": "bypass_user_2"},
+            
+            # Technique 2: Case variations
+            {"user_id": "ByPass_User"},
+            {"user_id": "BYPASS_USER"},
+            
+            # Technique 3: Adding whitespace
+            {"user_id": " bypass_user "},
+            {"user_id": "bypass_user\n"},
+            
+            # Technique 4: Unicode variations
+            {"user_id": "bypäss_üser"},
+            {"user_id": "bypass\u200buser"},  # Zero-width space
+        ]
+        
+        total_successful = 0
+        
+        for attempt in bypass_attempts:
+            token_data = {**base_token_data, **attempt}
+            token = jwt.encode(token_data, auth_service_config["jwt_secret"], algorithm="HS256")
+            
+            headers = {"Authorization": f"Bearer {token}"}
+            
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                for _ in range(10):
+                    await ws.send(json.dumps({"type": "api_request"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    if data["type"] != "rate_limited":
+                        total_successful += 1
+        
+        # Should detect bypass attempts and apply consistent rate limiting
+        assert total_successful < 50  # Much less than 80 (8 attempts × 10 requests)
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rate_limit_sliding_vs_fixed_window(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 8.3 (Depth): Compare sliding window vs fixed window rate limiting."""
+        token = jwt.encode(
+            {
+                "user_id": "window_test_user",
+                "email": "window@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Configure sliding window rate limit
+            await ws.send(json.dumps({
+                "type": "configure_rate_limit",
+                "algorithm": "sliding_window",
+                "limit": 10,
+                "window": 60  # 60 seconds
+            }))
+            
+            await ws.recv()
+            
+            # Send burst at start of window
+            for i in range(10):
+                await ws.send(json.dumps({"type": "api_request", "index": i}))
+                response = await ws.recv()
+                data = json.loads(response)
+                assert data["type"] != "rate_limited"
+            
+            # Wait 30 seconds (half window)
+            await asyncio.sleep(30)
+            
+            # Try more requests - sliding window should still block
+            await ws.send(json.dumps({"type": "api_request"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "rate_limited"
+            
+            # Wait another 30 seconds (full window from first request)
+            await asyncio.sleep(31)
+            
+            # Now should allow new requests
+            await ws.send(json.dumps({"type": "api_request"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] != "rate_limited"
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rate_limit_tier_based(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 8.4 (Breadth): Different rate limits for different tiers."""
+        tiers = {
+            "free": 10,
+            "early": 50,
+            "mid": 200,
+            "enterprise": 1000
+        }
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        results = {}
+        
+        for tier, expected_limit in tiers.items():
+            token = jwt.encode(
+                {
+                    "user_id": f"{tier}_user",
+                    "email": f"{tier}@example.com",
+                    "tier": tier,
+                    "exp": datetime.utcnow() + timedelta(hours=1)
+                },
+                auth_service_config["jwt_secret"],
+                algorithm="HS256"
+            )
+            
+            headers = {"Authorization": f"Bearer {token}"}
+            successful_requests = 0
+            
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                # Send requests until rate limited
+                for i in range(expected_limit + 50):
+                    await ws.send(json.dumps({"type": "api_request", "index": i}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    if data["type"] == "rate_limited":
+                        break
+                    successful_requests += 1
+            
+            results[tier] = successful_requests
+        
+        # Verify tier-based limits
+        assert results["free"] < results["early"]
+        assert results["early"] < results["mid"]
+        assert results["mid"] < results["enterprise"]
+        
+        # Check approximate values
+        for tier, expected in tiers.items():
+            assert abs(results[tier] - expected) < expected * 0.1  # Within 10%
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rate_limit_geographic(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 8.5 (Breadth): Geographic-based rate limiting."""
+        token = jwt.encode(
+            {
+                "user_id": "geo_rate_user",
+                "email": "georate@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Different geographic regions with different limits
+        regions = {
+            "US": {"limit": 100, "ip": "1.1.1.1"},
+            "EU": {"limit": 100, "ip": "2.2.2.2"},
+            "CN": {"limit": 10, "ip": "3.3.3.3"},  # Restricted region
+            "RU": {"limit": 5, "ip": "4.4.4.4"}  # More restricted
+        }
+        
+        results = {}
+        
+        for region, config in regions.items():
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "X-Real-IP": config["ip"],
+                "X-Region": region
+            }
+            
+            successful = 0
+            
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                for i in range(150):
+                    await ws.send(json.dumps({"type": "api_request"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    if data["type"] == "rate_limited":
+                        break
+                    successful += 1
+            
+            results[region] = successful
+        
+        # Verify geographic limits
+        assert results["US"] > results["CN"]
+        assert results["EU"] > results["CN"]
+        assert results["CN"] > results["RU"]
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_rate_limit_recovery_backoff(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 8.6 (Breadth): Rate limit recovery with exponential backoff."""
+        token = jwt.encode(
+            {
+                "user_id": "backoff_user",
+                "email": "backoff@example.com",
+                "tier": "free",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Hit rate limit
+            for _ in range(15):
+                await ws.send(json.dumps({"type": "api_request"}))
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                if data["type"] == "rate_limited":
+                    first_retry_after = data.get("retry_after", 1)
+                    break
+            
+            # Continue hitting rate limit to trigger backoff
+            backoff_times = [first_retry_after]
+            
+            for attempt in range(3):
+                await asyncio.sleep(0.5)  # Short wait
+                
+                await ws.send(json.dumps({"type": "api_request"}))
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                if data["type"] == "rate_limited":
+                    backoff_times.append(data.get("retry_after", 0))
+            
+            # Verify exponential backoff
+            for i in range(1, len(backoff_times)):
+                # Each retry_after should be larger than previous
+                assert backoff_times[i] > backoff_times[i-1]
+            
+            # Wait for full recovery
+            await asyncio.sleep(max(backoff_times))
+            
+            # Should be able to make requests again
+            await ws.send(json.dumps({"type": "api_request"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] != "rate_limited"
+    
+    # ==================== TEST 9: MULTI-FACTOR AUTH (DEPTH & BREADTH) ====================
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_mfa_totp_time_sync(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 9.1 (Depth): TOTP time synchronization tolerance."""
+        import pyotp
+        
+        # Create user with MFA enabled
+        secret = pyotp.random_base32()
+        token = jwt.encode(
+            {
+                "user_id": "totp_user",
+                "email": "totp@example.com",
+                "tier": "enterprise",
+                "mfa_enabled": True,
+                "mfa_secret": secret,
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Initial auth triggers MFA
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_required"
+            
+            totp = pyotp.TOTP(secret)
+            
+            # Test with current time
+            current_code = totp.now()
+            await ws.send(json.dumps({
+                "type": "mfa_verify",
+                "code": current_code
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_verified"
+            
+            # Test with time drift (30 seconds in past)
+            past_code = totp.at(datetime.utcnow() - timedelta(seconds=30))
+            await ws.send(json.dumps({
+                "type": "mfa_verify",
+                "code": past_code
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            # Should accept with reasonable time drift
+            assert data["type"] in ["mfa_verified", "mfa_accepted_with_drift"]
+            
+            # Test with excessive drift (5 minutes)
+            old_code = totp.at(datetime.utcnow() - timedelta(minutes=5))
+            await ws.send(json.dumps({
+                "type": "mfa_verify",
+                "code": old_code
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "error"
+            assert "expired" in data["message"].lower()
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_mfa_backup_code_exhaustion(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 9.2 (Depth): Handle backup code exhaustion scenarios."""
+        backup_codes = ["BACKUP1", "BACKUP2", "BACKUP3"]
+        
+        token = jwt.encode(
+            {
+                "user_id": "backup_code_user",
+                "email": "backup@example.com",
+                "tier": "mid",
+                "mfa_enabled": True,
+                "backup_codes": backup_codes,
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_required"
+            
+            # Use all backup codes
+            for code in backup_codes:
+                await ws.send(json.dumps({
+                    "type": "mfa_verify",
+                    "backup_code": code
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                assert data["type"] == "mfa_verified"
+                
+                # Try to reuse the same code
+                await ws.send(json.dumps({
+                    "type": "mfa_verify",
+                    "backup_code": code
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                assert data["type"] == "error"
+                assert "already used" in data["message"].lower()
+            
+            # All codes exhausted - should prompt for recovery
+            await ws.send(json.dumps({
+                "type": "mfa_verify",
+                "backup_code": "INVALID"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "backup_codes_exhausted"
+            assert "recovery" in data["message"].lower()
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_mfa_bypass_detection(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 9.3 (Depth): Detect and prevent MFA bypass attempts."""
+        token = jwt.encode(
+            {
+                "user_id": "mfa_bypass_user",
+                "email": "bypass@example.com",
+                "tier": "enterprise",
+                "mfa_enabled": True,
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_required"
+            
+            # Bypass attempt 1: Skip MFA and try direct access
+            await ws.send(json.dumps({
+                "type": "access_resource",
+                "resource": "sensitive_data",
+                "skip_mfa": True
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "error"
+            assert "mfa required" in data["message"].lower()
+            
+            # Bypass attempt 2: Manipulate session state
+            await ws.send(json.dumps({
+                "type": "update_session",
+                "mfa_verified": True
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "error"
+            assert "unauthorized" in data["message"].lower()
+            
+            # Bypass attempt 3: Use expired MFA token
+            await ws.send(json.dumps({
+                "type": "mfa_verify",
+                "cached_token": "expired_mfa_token"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "error"
+            
+            # Multiple failed attempts should trigger security alert
+            assert data.get("security_alert") is True
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_mfa_multiple_methods(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 9.4 (Breadth): Support multiple MFA methods simultaneously."""
+        token = jwt.encode(
+            {
+                "user_id": "multi_mfa_user",
+                "email": "multimfa@example.com",
+                "tier": "enterprise",
+                "mfa_methods": ["totp", "sms", "email", "biometric"],
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_required"
+            assert "available_methods" in data
+            assert len(data["available_methods"]) == 4
+            
+            # Test each MFA method
+            mfa_tests = [
+                {"method": "totp", "code": "123456"},
+                {"method": "sms", "code": "SMS123"},
+                {"method": "email", "code": "EMAIL456"},
+                {"method": "biometric", "data": "fingerprint_hash"}
+            ]
+            
+            for test in mfa_tests:
+                await ws.send(json.dumps({
+                    "type": "mfa_verify",
+                    "method": test["method"],
+                    **{k: v for k, v in test.items() if k != "method"}
+                }))
+                
+                response = await ws.recv()
+                data = json.loads(response)
+                
+                # Each method should be validated
+                assert data["type"] in ["mfa_verified", "mfa_pending"]
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_mfa_device_registration(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 9.5 (Breadth): MFA device registration and management."""
+        token = jwt.encode(
+            {
+                "user_id": "device_reg_user",
+                "email": "devreg@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            # Register new MFA device
+            await ws.send(json.dumps({
+                "type": "register_mfa_device",
+                "device_type": "authenticator",
+                "device_name": "iPhone 12"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "device_registration_started"
+            assert "qr_code" in data
+            assert "secret" in data
+            
+            # Verify device with code
+            await ws.send(json.dumps({
+                "type": "verify_device",
+                "code": "123456",
+                "device_id": data["device_id"]
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "device_registered"
+            
+            # List registered devices
+            await ws.send(json.dumps({"type": "list_mfa_devices"}))
+            response = await ws.recv()
+            data = json.loads(response)
+            assert len(data["devices"]) == 1
+            assert data["devices"][0]["name"] == "iPhone 12"
+            
+            # Remove device
+            device_id = data["devices"][0]["id"]
+            await ws.send(json.dumps({
+                "type": "remove_mfa_device",
+                "device_id": device_id,
+                "confirmation_code": "123456"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "device_removed"
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_mfa_recovery_procedures(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 9.6 (Breadth): MFA recovery procedures for locked out users."""
+        token = jwt.encode(
+            {
+                "user_id": "recovery_user",
+                "email": "recovery@example.com",
+                "tier": "enterprise",
+                "mfa_enabled": True,
+                "recovery_email": "backup@example.com",
+                "recovery_phone": "+1234567890",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        async with websockets.connect(ws_url, extra_headers=headers) as ws:
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_required"
+            
+            # Initiate recovery
+            await ws.send(json.dumps({
+                "type": "initiate_mfa_recovery",
+                "reason": "lost_device"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "recovery_initiated"
+            assert "recovery_methods" in data
+            
+            # Choose email recovery
+            await ws.send(json.dumps({
+                "type": "select_recovery_method",
+                "method": "email",
+                "send_to": "backup@example.com"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "recovery_code_sent"
+            recovery_id = data["recovery_id"]
+            
+            # Verify recovery code
+            await ws.send(json.dumps({
+                "type": "verify_recovery",
+                "recovery_id": recovery_id,
+                "code": "RECOVERY123"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "recovery_verified"
+            
+            # Reset MFA settings
+            await ws.send(json.dumps({
+                "type": "reset_mfa",
+                "new_method": "totp"
+            }))
+            
+            response = await ws.recv()
+            data = json.loads(response)
+            assert data["type"] == "mfa_reset_complete"
+            assert "new_secret" in data
+    
+    # ==================== TEST 10: CORS VALIDATION (DEPTH & BREADTH) ====================
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_cors_wildcard_exploitation(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 10.1 (Depth): Prevent wildcard origin exploitation."""
+        token = jwt.encode(
+            {
+                "user_id": "cors_wildcard_user",
+                "email": "wildcard@example.com",
+                "tier": "enterprise",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Test various wildcard exploitation attempts
+        test_origins = [
+            "*",  # Literal wildcard
+            "*.evil.com",  # Wildcard subdomain
+            "https://*",  # Wildcard domain
+            "https://evil.com.example.com",  # Subdomain injection
+            "https://example.com.evil.com",  # Domain suffix attack
+            "https://example.com@evil.com",  # @ character exploit
+            "https://example.com%2eevil.com"  # URL encoding
+        ]
+        
+        for origin in test_origins:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Origin": origin
+            }
+            
+            # Should reject all wildcard/malicious origins
+            with pytest.raises(websockets.exceptions.InvalidStatusCode) as exc_info:
+                async with websockets.connect(ws_url, extra_headers=headers):
+                    pass
+            
+            assert exc_info.value.status_code == 403
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_cors_null_origin_handling(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 10.2 (Depth): Proper handling of null origin."""
+        token = jwt.encode(
+            {
+                "user_id": "null_origin_user",
+                "email": "null@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Test null origin (can occur with file:// or sandboxed iframes)
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Origin": "null"
+        }
+        
+        # Should reject null origin for security
+        with pytest.raises(websockets.exceptions.InvalidStatusCode) as exc_info:
+            async with websockets.connect(ws_url, extra_headers=headers):
+                pass
+        
+        assert exc_info.value.status_code == 403
+        
+        # Test missing origin header
+        headers = {"Authorization": f"Bearer {token}"}
+        # No Origin header
+        
+        # Behavior depends on implementation - either accept or reject
+        try:
+            async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                await ws.send(json.dumps({"type": "ping"}))
+                response = await ws.recv()
+                data = json.loads(response)
+                # If accepted, should work normally
+                assert data["type"] in ["auth_success", "pong"]
+        except websockets.exceptions.InvalidStatusCode as e:
+            # If rejected, should be 403
+            assert e.status_code == 403
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_cors_preflight_validation(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 10.3 (Depth): Validate preflight request handling."""
+        # Note: WebSocket doesn't use traditional CORS preflight,
+        # but we test similar validation for upgrade requests
+        
+        token = jwt.encode(
+            {
+                "user_id": "preflight_user",
+                "email": "preflight@example.com",
+                "tier": "early",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Test with various upgrade headers
+        test_cases = [
+            {
+                "Authorization": f"Bearer {token}",
+                "Origin": "https://app.netra.ai",
+                "Sec-WebSocket-Version": "13",
+                "Sec-WebSocket-Key": base64.b64encode(os.urandom(16)).decode()
+            },
+            {
+                "Authorization": f"Bearer {token}",
+                "Origin": "https://app.netra.ai",
+                "Sec-WebSocket-Version": "8",  # Old version
+                "Sec-WebSocket-Key": base64.b64encode(os.urandom(16)).decode()
+            }
+        ]
+        
+        for headers in test_cases:
+            try:
+                async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                    await ws.send(json.dumps({"type": "ping"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    # Modern version should work
+                    if headers["Sec-WebSocket-Version"] == "13":
+                        assert data["type"] in ["auth_success", "pong"]
+                    
+            except websockets.exceptions.InvalidStatusCode as e:
+                # Old version might be rejected
+                if headers["Sec-WebSocket-Version"] != "13":
+                    assert e.status_code in [400, 426]  # Bad Request or Upgrade Required
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_cors_dynamic_origin_whitelisting(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 10.4 (Breadth): Dynamic origin whitelisting based on configuration."""
+        token = jwt.encode(
+            {
+                "user_id": "dynamic_cors_user",
+                "email": "dynamic@example.com",
+                "tier": "enterprise",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Test origins that might be dynamically configured
+        test_origins = [
+            ("https://app.netra.ai", True),  # Production
+            ("https://staging.netra.ai", True),  # Staging
+            ("http://localhost:3000", True),  # Local development
+            ("https://partner.example.com", False),  # Partner domain (might be allowed)
+            ("https://malicious.com", False),  # Should never be allowed
+        ]
+        
+        for origin, should_allow in test_origins:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Origin": origin
+            }
+            
+            try:
+                async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                    await ws.send(json.dumps({"type": "ping"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    if should_allow:
+                        assert data["type"] in ["auth_success", "pong"]
+                    
+            except websockets.exceptions.InvalidStatusCode as e:
+                if not should_allow:
+                    assert e.status_code == 403
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_cors_subdomain_validation(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 10.5 (Breadth): Validate subdomain handling in CORS."""
+        token = jwt.encode(
+            {
+                "user_id": "subdomain_user",
+                "email": "subdomain@example.com",
+                "tier": "mid",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        ws_url = f"ws://localhost:8000/websocket"
+        
+        # Test various subdomain patterns
+        subdomain_tests = [
+            ("https://app.netra.ai", True),
+            ("https://api.netra.ai", True),
+            ("https://staging.netra.ai", True),
+            ("https://evil.netra.ai.attacker.com", False),  # Subdomain attack
+            ("https://netra.ai", True),  # Root domain
+            ("https://sub.sub.netra.ai", False),  # Deep subdomain
+            ("https://xn--netra.ai", False),  # IDN homograph
+        ]
+        
+        for origin, expected_allow in subdomain_tests:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Origin": origin
+            }
+            
+            try:
+                async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                    await ws.send(json.dumps({"type": "ping"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    if expected_allow:
+                        assert data["type"] in ["auth_success", "pong"]
+                    else:
+                        # Shouldn't get here for disallowed origins
+                        pytest.fail(f"Origin {origin} was allowed but shouldn't be")
+                        
+            except websockets.exceptions.InvalidStatusCode as e:
+                if not expected_allow:
+                    assert e.status_code == 403
+                else:
+                    pytest.fail(f"Origin {origin} was blocked but should be allowed")
+    
+    @pytest.mark.integration
+    @pytest.mark.l3
+    async def test_cors_protocol_mismatch(self, auth_service_config, mock_postgres, mock_redis):
+        """Test 10.6 (Breadth): Handle protocol mismatches in CORS."""
+        token = jwt.encode(
+            {
+                "user_id": "protocol_user",
+                "email": "protocol@example.com",
+                "tier": "early",
+                "exp": datetime.utcnow() + timedelta(hours=1)
+            },
+            auth_service_config["jwt_secret"],
+            algorithm="HS256"
+        )
+        
+        # Test connecting to ws:// with https:// origin and vice versa
+        test_cases = [
+            ("ws://localhost:8000/websocket", "https://app.netra.ai"),  # WS with HTTPS origin
+            ("wss://localhost:8443/websocket", "http://app.netra.ai"),  # WSS with HTTP origin
+            ("ws://localhost:8000/websocket", "http://app.netra.ai"),  # WS with HTTP origin (match)
+            ("wss://localhost:8443/websocket", "https://app.netra.ai"),  # WSS with HTTPS origin (match)
+        ]
+        
+        for ws_url, origin in test_cases:
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Origin": origin
+            }
+            
+            # Protocol mismatch handling
+            is_secure_ws = ws_url.startswith("wss://")
+            is_secure_origin = origin.startswith("https://")
+            
+            try:
+                async with websockets.connect(ws_url, extra_headers=headers) as ws:
+                    await ws.send(json.dumps({"type": "ping"}))
+                    response = await ws.recv()
+                    data = json.loads(response)
+                    
+                    # Should only allow if protocols match in security level
+                    if is_secure_ws == is_secure_origin:
+                        assert data["type"] in ["auth_success", "pong"]
+                    
+            except (websockets.exceptions.InvalidStatusCode, OSError) as e:
+                # Mismatch or connection error
+                if isinstance(e, websockets.exceptions.InvalidStatusCode):
+                    if is_secure_ws != is_secure_origin:
+                        assert e.status_code == 403

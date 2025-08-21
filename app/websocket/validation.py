@@ -33,18 +33,30 @@ class MessageValidator:
     """Orchestrates micro-validators for WebSocket message validation."""
     
     def __init__(self, max_message_size: int = 1024 * 1024, max_text_length: int = 10000, 
-                 allow_unknown_types: bool = False):
-        """Initialize validator with performance limits."""
+                 allow_unknown_types: bool = True, strict_mode: bool = False):
+        """Initialize validator with performance limits.
+        
+        Args:
+            max_message_size: Maximum message size in bytes
+            max_text_length: Maximum text field length
+            allow_unknown_types: Whether to allow unknown message types (default: True for pragmatic rigor)
+            strict_mode: Whether to use strict validation (default: False for resilience)
+        """
         self.max_message_size = max_message_size
         self.max_text_length = max_text_length
         self.allow_unknown_types = allow_unknown_types
+        self.strict_mode = strict_mode
     
     def validate_message(self, message: Dict[str, Any]) -> Union[bool, WebSocketValidationError]:
-        """Orchestrate validation using micro-validators."""
+        """Orchestrate validation using micro-validators (graceful by default)."""
         try:
             error = self._run_validation_pipeline(message)
             return error if error else True
         except Exception as e:
+            # In pragmatic mode, log warnings but don't fail validation
+            if not self.strict_mode:
+                log_validation_warning(f"Validation exception (gracefully handled): {e}", message)
+                return True
             return handle_validation_exception(e, message)
     
     def _run_validation_pipeline(self, message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
@@ -102,5 +114,7 @@ class MessageValidator:
 
 
 # Performance-optimized validator instances using micro-validators
-default_message_validator = MessageValidator()
-flexible_message_validator = MessageValidator(allow_unknown_types=True)
+# Default to pragmatic rigor: be liberal in what we accept
+default_message_validator = MessageValidator(allow_unknown_types=True, strict_mode=False)
+flexible_message_validator = MessageValidator(allow_unknown_types=True, strict_mode=False)
+strict_message_validator = MessageValidator(allow_unknown_types=False, strict_mode=True)

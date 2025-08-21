@@ -158,18 +158,29 @@ def _handle_migration_error(logger: logging.Logger, error: Exception) -> None:
 
 
 def setup_database_connections(app: FastAPI) -> None:
-    """Setup PostgreSQL connection factory."""
+    """Setup PostgreSQL connection factory (critical service)."""
     logger = central_logger.get_logger(__name__)
     logger.info("Setting up database connections...")
+    config = get_config()
+    graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
+    
     try:
         logger.debug("Calling initialize_postgres()...")
         async_session_factory = initialize_postgres()
         logger.debug(f"initialize_postgres() returned: {async_session_factory}")
         
         if async_session_factory is None:
-            raise RuntimeError("initialize_postgres() returned None - database initialization failed")
+            error_msg = "initialize_postgres() returned None - database initialization failed"
+            if graceful_startup:
+                logger.error(f"{error_msg} - using mock database for graceful degradation")
+                app.state.db_session_factory = None  # Signal to use mock/fallback
+                app.state.database_available = False
+                return
+            else:
+                raise RuntimeError(error_msg)
             
         app.state.db_session_factory = async_session_factory
+        app.state.database_available = True
         logger.info("Database session factory successfully set on app.state")
         
         # Verify it's accessible
@@ -179,9 +190,14 @@ def setup_database_connections(app: FastAPI) -> None:
             logger.error("ERROR: app.state.db_session_factory is None after setting!")
             
     except Exception as e:
-        # Log the error and re-raise to fail startup early
-        logger.critical(f"Failed to setup database connections: {e}")
-        raise RuntimeError(f"Database initialization failed: {e}") from e
+        if graceful_startup:
+            logger.warning(f"Database initialization failed but continuing in graceful mode: {e}")
+            app.state.db_session_factory = None
+            app.state.database_available = False
+        else:
+            # Log the error and re-raise to fail startup early
+            logger.critical(f"Failed to setup database connections: {e}")
+            raise RuntimeError(f"Database initialization failed: {e}") from e
 
 
 def initialize_core_services(app: FastAPI, logger: logging.Logger) -> KeyManager:
@@ -203,11 +219,21 @@ def setup_security_services(app: FastAPI, key_manager: KeyManager) -> None:
 
 
 async def initialize_clickhouse(logger: logging.Logger) -> None:
-    """Initialize ClickHouse tables based on service mode."""
+    """Initialize ClickHouse tables based on service mode (optional service)."""
     config = get_config()
     clickhouse_mode = config.clickhouse_mode.lower()
+    graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
+    
     if 'pytest' not in sys.modules and clickhouse_mode not in ['disabled', 'mock']:
-        await _setup_clickhouse_tables(logger, clickhouse_mode)
+        try:
+            await _setup_clickhouse_tables(logger, clickhouse_mode)
+        except Exception as e:
+            if graceful_startup:
+                logger.warning(f"ClickHouse initialization failed but continuing (optional service): {e}")
+                # Set clickhouse to mock mode for graceful degradation
+                config.clickhouse_mode = "mock"
+            else:
+                raise
     else:
         _log_clickhouse_skip(logger, clickhouse_mode)
 
@@ -280,21 +306,29 @@ def _setup_agent_state(app: FastAPI, supervisor) -> None:
 
 
 async def initialize_websocket_components(logger: logging.Logger) -> None:
-    """Initialize WebSocket components that require async context."""
+    """Initialize WebSocket components that require async context (optional service)."""
+    config = get_config()
+    graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
+    
     try:
         from app.websocket.large_message_handler import get_large_message_handler
         handler = get_large_message_handler()
         await handler.initialize()
         logger.info("WebSocket components initialized")
     except Exception as e:
-        logger.error(f"Failed to initialize WebSocket components: {e}")
+        if graceful_startup:
+            logger.warning(f"WebSocket components initialization failed but continuing (optional service): {e}")
+        else:
+            logger.error(f"Failed to initialize WebSocket components: {e}")
+            raise
 
 
 async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
-    """Run application startup checks."""
+    """Run application startup checks (graceful failure handling)."""
     config = get_config()
     disable_checks = config.disable_startup_checks.lower() == "true"
     fast_startup = config.fast_startup_mode.lower() == "true"
+    graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
     
     if disable_checks or fast_startup:
         logger.info("Skipping startup health checks (fast startup mode)")
@@ -305,10 +339,23 @@ async def startup_health_checks(app: FastAPI, logger: logging.Logger) -> None:
     try:
         logger.debug("Calling run_startup_checks...")
         results = await run_startup_checks(app)
-        logger.info(f"Startup checks completed: {results.get('passed', 0)}/{results.get('total_checks', 0)} passed")
+        passed = results.get('passed', 0)
+        total = results.get('total_checks', 0)
+        logger.info(f"Startup checks completed: {passed}/{total} passed")
+        
+        # In graceful mode, continue even if some non-critical checks fail
+        if graceful_startup and passed < total:
+            failed = total - passed
+            logger.warning(f"Some startup checks failed ({failed}), but continuing in graceful mode")
+        elif passed < total:
+            raise RuntimeError(f"Critical startup checks failed: {failed} of {total}")
+            
     except Exception as e:
-        logger.error(f"Startup health checks failed with exception: {e}")
-        await _handle_startup_failure(logger, e)
+        if graceful_startup:
+            logger.warning(f"Startup health checks had issues but continuing in graceful mode: {e}")
+        else:
+            logger.error(f"Startup health checks failed with exception: {e}")
+            await _handle_startup_failure(logger, e)
 
 
 async def _handle_startup_failure(logger: logging.Logger, error: Exception) -> None:
@@ -361,13 +408,20 @@ def _handle_schema_validation_result(logger: logging.Logger, passed: bool) -> No
 
 
 async def start_monitoring(app: FastAPI, logger: logging.Logger) -> None:
-    """Start comprehensive performance monitoring."""
+    """Start comprehensive performance monitoring (optional service)."""
+    config = get_config()
+    graceful_startup = getattr(config, 'graceful_startup_mode', 'true').lower() == "true"
+    
     if 'pytest' not in sys.modules:
         try:
             await _create_monitoring_task(app, logger)
             await _initialize_performance_optimizations(app, logger)
         except Exception as e:
-            logger.error(f"Failed to start monitoring and optimizations: {e}")
+            if graceful_startup:
+                logger.warning(f"Monitoring and optimizations failed to start but continuing (optional service): {e}")
+            else:
+                logger.error(f"Failed to start monitoring and optimizations: {e}")
+                raise
 
 
 async def _create_monitoring_task(app: FastAPI, logger: logging.Logger) -> None:

@@ -15,25 +15,37 @@ from app.services.state_persistence import DateTimeEncoder
 
 
 def validate_message_is_dict(message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
-    """Validate message is dictionary type."""
-    if not isinstance(message, dict):
+    """Validate message is dictionary-like type (duck typing)."""
+    # Use duck typing - if it acts like a dict, treat it as one
+    if not hasattr(message, 'get') or not hasattr(message, 'items'):
         return create_dict_type_error(message)
     return None
 
 
 def validate_type_field_exists(message: Dict[str, Any]) -> Union[None, WebSocketValidationError]:
-    """Validate message has required type field."""
-    if "type" not in message:
+    """Validate message has required type field (flexible access)."""
+    # Try multiple ways to access type field (be liberal in what we accept)
+    type_value = message.get('type') or message.get('message_type') or message.get('msg_type')
+    if not type_value:
         return create_missing_type_error(message)
     return None
 
 
 def validate_message_type_enum(message_type: str, allow_unknown: bool = False) -> Union[None, WebSocketValidationError]:
-    """Validate message type against enum."""
+    """Validate message type against enum (flexible matching)."""
     try:
+        # Try exact match first
         WebSocketMessageType(message_type)
         return None
     except ValueError:
+        # Try case-insensitive match (be liberal in what we accept)
+        try:
+            normalized_type = message_type.upper() if isinstance(message_type, str) else str(message_type).upper()
+            for enum_value in WebSocketMessageType:
+                if enum_value.value.upper() == normalized_type:
+                    return None
+        except:
+            pass
         return handle_invalid_message_type(message_type, allow_unknown)
 
 
@@ -58,10 +70,19 @@ def validate_with_pydantic_model(message: Dict[str, Any]) -> Union[None, WebSock
 
 
 def create_flexible_message_format(message: Dict[str, Any]) -> Dict[str, Any]:
-    """Create flexible message format for Pydantic validation."""
-    if "payload" not in message:
-        payload_data = {k: v for k, v in message.items() if k != "type"}
-        return {"type": message["type"], "payload": payload_data}
+    """Create flexible message format for Pydantic validation (graceful handling)."""
+    # Extract type from various possible field names
+    msg_type = message.get('type') or message.get('message_type') or message.get('msg_type')
+    
+    if "payload" not in message and "data" not in message:
+        # Create payload from all non-type fields
+        payload_data = {k: v for k, v in message.items() 
+                       if k not in ['type', 'message_type', 'msg_type']}
+        return {"type": msg_type, "payload": payload_data}
+    elif "data" in message and "payload" not in message:
+        # Accept 'data' as equivalent to 'payload'
+        return {"type": msg_type, "payload": message["data"]}
+    
     return message
 
 

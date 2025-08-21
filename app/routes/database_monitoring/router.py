@@ -138,7 +138,7 @@ async def stop_monitoring(
     return await stop_monitoring_handler()
 
 
-@router.get("/health", response_model=Dict[str, Any])
-async def get_database_health() -> Dict[str, Any]:
-    """Get database health status (no authentication required)."""
+@router.get("/status", response_model=Dict[str, Any])
+async def get_database_status() -> Dict[str, Any]:
+    """Get database status (no authentication required)."""
     return await get_database_health_handler()
