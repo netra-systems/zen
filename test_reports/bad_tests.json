@@ -2548,9 +2548,9 @@
       "component": "backend",
       "first_seen": "2025-08-20T21:50:38.343100",
       "last_failure": "2025-08-20T21:50:58.252900",
-      "last_pass": "2025-08-20T21:52:13.421594",
+      "last_pass": "2025-08-21T09:54:52.330605",
       "total_failures": 2,
-      "total_passes": 2,
+      "total_passes": 3,
       "consecutive_failures": 0,
       "recent_failures": [
         {
@@ -3233,30 +3233,6 @@
     }
   },
   "runs": [
-    {
-      "run_id": "run_20250820_193216_36808",
-      "timestamp": "2025-08-20T19:32:25.651578",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_193233_53417",
-      "timestamp": "2025-08-20T19:32:39.677799",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_193242_62149",
-      "timestamp": "2025-08-20T19:32:48.708823",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
     {
       "run_id": "run_20250820_193517_17319",
       "timestamp": "2025-08-20T19:35:26.608162",
@@ -4032,10 +4008,34 @@
       "passed": -5,
       "failed": 5,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_095411_51910",
+      "timestamp": "2025-08-21T09:54:11.954701",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_095421_61439",
+      "timestamp": "2025-08-21T09:54:38.056752",
+      "total_tests": 0,
+      "passed": -227,
+      "failed": 227,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_095452_92140",
+      "timestamp": "2025-08-21T09:54:52.341112",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 421,
-    "last_updated": "2025-08-21T09:54:01.197653"
+    "total_runs": 424,
+    "last_updated": "2025-08-21T09:54:52.341112"
   }
 }
