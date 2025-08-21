@@ -237,11 +237,6 @@ class ProcessManager:
                 logger.debug(f"Force kill attempt {i+1} failed for {name}: {e}")
         
         logger.error(f"All force kill attempts failed for {name}")
-    
-    def _run_taskkill_command(self, process: subprocess.Popen):
-        """Legacy method - kept for compatibility."""
-        return self._run_taskkill_tree_command(process)
-    
     def _terminate_unix_process(self, process: subprocess.Popen, name: str):
         """Terminate Unix process using process group."""
         try:

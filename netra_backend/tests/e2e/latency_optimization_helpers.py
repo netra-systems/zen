@@ -13,7 +13,7 @@ from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.app.routes.unified_tools.models import SubAgentLifecycle
+from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
 
 
 def create_latency_optimization_setup(real_llm_manager, real_websocket_manager, real_tool_dispatcher):

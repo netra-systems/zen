@@ -10,7 +10,7 @@ Correct pattern:
     from netra_backend.app.schemas.request import RequestModel
     
 Wrong patterns:
-    from netra_backend.app.routes.unified_tools.schemas import RequestModel
+    from netra_backend.app.schemas.unified_tools import RequestModel
     from netra_backend.app.agents.some_agent.schemas import SomeSchema
 """
 

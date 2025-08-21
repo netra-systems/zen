@@ -655,7 +655,7 @@
         
         <key_insights>
             1. Specifications drive everything - code is generated, not written
-            2. Multi-agent orchestration enables handling of arbitrary complexity
+            2. Multi-agent orchestration and atomic operations enables handling of arbitrary complexity
             3. Comprehensive tooling prevents common errors and enforces standards
             4. Continuous validation catches issues before they reach production
             5. Systematic learning capture makes the system smarter over time

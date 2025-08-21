@@ -212,3 +212,6 @@ class LLMCostOptimizer:
 
 # Global instance
 llm_cost_optimizer = LLMCostOptimizer()
+
+# Create alias for backwards compatibility
+CostOptimizer = LLMCostOptimizer

@@ -8,7 +8,7 @@ setup_test_path()
 
 from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 from netra_backend.app.db import models_postgres
-from netra_backend.app.routes.unified_tools.models import SupplyOptionCreate, SupplyOptionUpdate
+from netra_backend.app.schemas.unified_tools import SupplyOptionCreate, SupplyOptionUpdate
 
 # Add project root to path
 

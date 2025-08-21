@@ -21,7 +21,7 @@ import json
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from netra_backend.app.core.configuration.base import get_unified_config
-from netra_backend.app.configuration.schemas import (
+from netra_backend.app.schemas.config import (
     StagingConfig, SecretReference, SECRET_CONFIG
 )
 from netra_backend.app.core.environment_constants import Environment

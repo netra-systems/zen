@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec name="import_patterns">
+  <overview>
+    <title>Import Patterns and Resolution Guide</title>
+    <description>
+      Systematic documentation of import patterns between services and agents directories,
+      common import errors, and their resolutions.
+    </description>
+    <business_value>
+      BVJ:
+      - Segment: Platform/Internal
+      - Business Goal: Development Velocity
+      - Value Impact: Reduced import errors = 30% faster development
+      - Revenue Impact: Faster development = More features shipped
+    </business_value>
+  </overview>
+
+  <common_import_issues>
+    <issue id="factory_status_models">
+      <problem>
+        Imports from netra_backend.app.services.apex_optimizer_agent.models fail for
+        ReportResponse, MetricResponse, GenerateReportRequest
+      </problem>
+      <resolution>
+        These models are actually in netra_backend.app.routes.factory_status.models
+      </resolution>
+      <pattern>
+        from netra_backend.app.services.apex_optimizer_agent.models import ReportResponse
+        → from netra_backend.app.routes.factory_status.models import ReportResponse
+      </pattern>
+    </issue>
+
+    <issue id="monitoring_models">
+      <problem>
+        Imports from netra_backend.app.monitoring.models fail
+      </problem>
+      <resolution>
+        Models are in netra_backend.app.monitoring.metrics_collector
+      </resolution>
+      <pattern>
+        from netra_backend.app.monitoring.models import MetricsCollector
+        → from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+      </pattern>
+    </issue>
+
+    <issue id="unified_tools_schemas">
+      <problem>
+        Imports from netra_backend.app.routes.unified_tools.models fail
+      </problem>
+      <resolution>
+        Models are in netra_backend.app.routes.unified_tools.schemas
+      </resolution>
+      <pattern>
+        from netra_backend.app.routes.unified_tools.models import ToolExecutionRequest
+        → from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest
+      </pattern>
+    </issue>
+
+    <issue id="clickhouse_operations">
+      <problem>
+        DataSubAgentClickHouseOperations doesn't exist in clickhouse_operations
+      </problem>
+      <resolution>
+        Use ClickHouseOperations and alias it
+      </resolution>
+      <pattern>
+        from netra_backend.app.services.corpus.clickhouse_operations import DataSubAgentClickHouseOperations
+        → from netra_backend.app.services.corpus.clickhouse_operations import ClickHouseOperations as DataSubAgentClickHouseOperations
+      </pattern>
+    </issue>
+
+    <issue id="execution_engine">
+      <problem>
+        ExecutionEngine doesn't exist in execution_engine module
+      </problem>
+      <resolution>
+        Use ToolExecutionEngine from tool_execution_engine
+      </resolution>
+      <pattern>
+        from netra_backend.app.services.unified_tool_registry.execution_engine import ExecutionEngine
+        → from netra_backend.app.services.unified_tool_registry.tool_execution_engine import ToolExecutionEngine as ExecutionEngine
+      </pattern>
+    </issue>
+
+    <issue id="error_types">
+      <problem>
+        ClickHouseQueryError not in error_types
+      </problem>
+      <resolution>
+        Import from exceptions module
+      </resolution>
+      <pattern>
+        from netra_backend.app.core.error_types import ClickHouseQueryError
+        → from netra_backend.app.core.exceptions import ClickHouseQueryError
+      </pattern>
+    </issue>
+
+    <issue id="missing_enum">
+      <problem>
+        Enum not imported where needed (e.g., Config.py)
+      </problem>
+      <resolution>
+        Add from enum import Enum
+      </resolution>
+    </issue>
+  </common_import_issues>
+
+  <import_hierarchy>
+    <principle>
+      Services and agents should follow clear import boundaries
+    </principle>
+    
+    <layer name="schemas">
+      <location>netra_backend/app/schemas/</location>
+      <purpose>Base data models and types</purpose>
+      <imports_from>Nothing (leaf layer)</imports_from>
+    </layer>
+
+    <layer name="core">
+      <location>netra_backend/app/core/</location>
+      <purpose>Core utilities and configuration</purpose>
+      <imports_from>schemas</imports_from>
+    </layer>
+
+    <layer name="services">
+      <location>netra_backend/app/services/</location>
+      <purpose>Business logic services</purpose>
+      <imports_from>schemas, core</imports_from>
+    </layer>
+
+    <layer name="agents">
+      <location>netra_backend/app/agents/</location>
+      <purpose>AI agent implementations</purpose>
+      <imports_from>schemas, core, services</imports_from>
+      <warning>Should NOT import from routes</warning>
+    </layer>
+
+    <layer name="routes">
+      <location>netra_backend/app/routes/</location>
+      <purpose>API endpoints</purpose>
+      <imports_from>schemas, core, services, agents</imports_from>
+    </layer>
+  </import_hierarchy>
+
+  <fix_script_usage>
+    <description>
+      Use scripts/fix_all_import_issues.py to systematically fix import issues
+    </description>
+    <commands>
+      <dry_run>python scripts/fix_all_import_issues.py --dry-run</dry_run>
+      <apply>python scripts/fix_all_import_issues.py</apply>
+      <verify>python scripts/fix_all_import_issues.py --verify</verify>
+      <report>python scripts/fix_all_import_issues.py --report</report>
+    </commands>
+    <features>
+      - Scans all Python files for known import patterns
+      - Applies fixes systematically
+      - Generates detailed report
+      - Verifies fixes by testing imports
+    </features>
+  </fix_script_usage>
+
+  <best_practices>
+    <practice>
+      Always use absolute imports starting with netra_backend
+    </practice>
+    <practice>
+      Avoid circular imports by respecting layer hierarchy
+    </practice>
+    <practice>
+      Use type checking imports (TYPE_CHECKING) for circular dependencies
+    </practice>
+    <practice>
+      Create aliases when renaming imports for compatibility
+    </practice>
+    <practice>
+      Run import verification tests after changes
+    </practice>
+  </best_practices>
+
+  <testing>
+    <test_command>python -m pytest netra_backend/tests/unit/test_imports.py -v</test_command>
+    <verification_command>python -c "from netra_backend.app.main import app"</verification_command>
+    <import_test_framework>test_framework/import_tester.py</import_test_framework>
+  </testing>
+
+  <learnings>
+    <learning date="2025-08-21">
+      Import paths often diverge between what tests expect and actual module locations.
+      Always verify actual file locations before fixing imports.
+    </learning>
+    <learning date="2025-08-21">
+      Many import errors cascade - fixing one reveals others downstream.
+      Use systematic scanning and fixing approach rather than one-by-one.
+    </learning>
+    <learning date="2025-08-21">
+      Windows file paths require special handling in scripts.
+      Use Python's pathlib for cross-platform compatibility.
+    </learning>
+  </learnings>
+</spec>

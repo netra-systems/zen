@@ -23,7 +23,7 @@ from netra_backend.app.main import app
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.schemas.core_enums import AgentStatus
 from netra_backend.app.core.agent_recovery_types import AgentType
-from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest
+from netra_backend.app.schemas.unified_tools import ToolExecutionRequest
 
 
 class TestAgentOrchestrationL3:

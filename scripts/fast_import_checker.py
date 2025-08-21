@@ -393,7 +393,7 @@ def verify_fixes():
     print("="*60)
     
     test_imports = [
-        ("netra_backend.app.core.configuration.services", ["thread_service"]),
+        ("netra_backend.app.services.thread_service", ["thread_service"]),
         ("netra_backend.app.services.apex_optimizer_agent.models", ["StartupCheckResult"]),
         ("netra_backend.app.services.llm.cost_optimizer", ["CostOptimizer"]),
         ("netra_backend.app.dependencies", ["get_async_db"]),

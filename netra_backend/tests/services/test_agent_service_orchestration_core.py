@@ -250,7 +250,7 @@ class TestAgentServiceBasic:
     
     def _create_full_request_model(self):
         """Create full RequestModel with all required fields."""
-        from netra_backend.app.routes.unified_tools.models import Settings, Workload, DataSource, TimeRange, RequestModel
+        from netra_backend.app.schemas.unified_tools import Settings, Workload, DataSource, TimeRange, RequestModel
         
         settings = Settings(debug_mode=True)
         workload = Workload(

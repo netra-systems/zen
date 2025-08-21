@@ -22,7 +22,7 @@ import subprocess
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
 from netra_backend.app.core.environment_constants import Environment, EnvironmentVariables
-from netra_backend.app.configuration.schemas import SECRET_CONFIG
+from netra_backend.app.schemas.config import SECRET_CONFIG
 from staging_config_alignment import StagingConfigurationManager, StagingDeploymentConfig
 
 

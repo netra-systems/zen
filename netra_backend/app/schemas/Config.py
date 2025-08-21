@@ -10,6 +10,7 @@ with the centralized configuration management.
 
 import os
 from typing import List, Dict, Optional, Any
+from enum import Enum
 from pydantic import BaseModel, Field
 from netra_backend.app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
 from netra_backend.app.schemas.registry import User
@@ -436,3 +437,12 @@ class NetraTestingConfig(AppConfig):
     database_url: str = "postgresql+asyncpg://postgres:123@localhost/netra_test"
     auth_service_url: str = "http://localhost:8001"
     fast_startup_mode: str = "true"  # Enable fast startup for tests
+
+class LLMProvider(str, Enum):
+    """LLM provider enum for configuration schemas (local to avoid circular imports)."""
+    OPENAI = "openai"
+    GOOGLE = "google"
+    ANTHROPIC = "anthropic"
+    COHERE = "cohere"
+    MOCK = "mock"
+

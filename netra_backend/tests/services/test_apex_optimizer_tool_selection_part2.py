@@ -56,7 +56,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_latency_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for latency optimization requests"""
         # Create latency-focused request
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Improve response time and reduce latency for our AI system",
@@ -91,7 +91,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_cache_optimization(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for cache optimization requests"""
         # Create cache-focused request
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_789",
             query="Audit and optimize our KV cache configuration",
@@ -126,7 +126,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_model_analysis(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for model analysis requests"""
         # Create model analysis request
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_analysis",
             query="Analyze effectiveness of new models for our use case",
@@ -161,7 +161,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_multi_objective(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection for multi-objective optimization"""
         # Create multi-objective request
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_multi",
             query="Optimize for both cost reduction and latency improvement",
@@ -196,7 +196,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_empty_query(self, apex_tool_selector, mock_app_config):
         """Test tool selection with empty query"""
         # Create state with empty query
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_empty",
             query="",
@@ -230,7 +230,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_llm_failure(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection when LLM fails"""
         # Create sample agent state
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
@@ -263,7 +263,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_tool_selection_invalid_json_response(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test tool selection with invalid JSON response from LLM"""
         # Create sample agent state
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         from netra_backend.app.services.apex_optimizer_agent.models import BaseMessage
         request = RequestModel(
             user_id="test_user_123",
@@ -296,7 +296,7 @@ class TestApexOptimizerAdvancedToolSelection:
     async def test_custom_tool_selection(self, apex_tool_selector, mock_llm_connector, mock_app_config):
         """Test custom tool selection logic"""
         # Create custom tool selection scenario
-        from netra_backend.app.routes.unified_tools.models import Workload, DataSource, TimeRange
+        from netra_backend.app.schemas.unified_tools import Workload, DataSource, TimeRange
         request = RequestModel(
             user_id="test_user_123",
             query="Custom optimization requirements",

@@ -19,7 +19,7 @@ from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
 from netra_backend.app.agents.agent_lifecycle import AgentLifecycleMixin
-from netra_backend.app.routes.unified_tools.models import SubAgentLifecycle
+from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
 from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path

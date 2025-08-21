@@ -13,7 +13,7 @@ setup_test_path()
 
 # Import all required types
 from netra_backend.app.agents.triage_sub_agent.models import TriageResult, TriageMetadata
-from netra_backend.app.routes.unified_tools.models import AgentCompleted, AgentResult, AgentState
+from netra_backend.app.schemas.unified_tools import AgentCompleted, AgentResult, AgentState
 from netra_backend.app.schemas.agent_models import DeepAgentState, AgentMetadata
 
 

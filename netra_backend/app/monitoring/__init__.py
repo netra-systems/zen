@@ -23,6 +23,12 @@ from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
 from netra_backend.app.monitoring.alert_notifications import NotificationDeliveryManager
 from netra_backend.app.monitoring.health_calculator import HealthScoreCalculator
 
+# Monitoring models
+from netra_backend.app.monitoring.models import (
+    MetricType, MetricUnit, Metric, MetricDataPoint, 
+    MetricSeries, MonitoringDashboard, HealthCheck
+)
+
 __all__ = [
     # Core monitoring
     "MetricsCollector",
@@ -46,5 +52,15 @@ __all__ = [
     "AlertRule",
     "Alert",
     "AlertEvaluator",
-    "NotificationDeliveryManager"
+    "NotificationDeliveryManager",
+    "HealthScoreCalculator",
+    
+    # Monitoring models
+    "MetricType",
+    "MetricUnit", 
+    "Metric",
+    "MetricDataPoint",
+    "MetricSeries",
+    "MonitoringDashboard",
+    "HealthCheck"
 ]

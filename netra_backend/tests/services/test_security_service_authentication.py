@@ -231,7 +231,7 @@ def _assert_user_permissions(result: Dict[str, Any]) -> None:
 
 def _create_token_data(user: MockUser):
     """Create token data for user"""
-    from netra_backend.app.routes.unified_tools.models import TokenPayload
+    from netra_backend.app.schemas.unified_tools import TokenPayload
     return TokenPayload(
         sub=user.email,
         user_id=user.id,
@@ -242,7 +242,7 @@ def _create_token_data(user: MockUser):
 
 def _create_expired_token_data(user: MockUser):
     """Create expired token data"""
-    from netra_backend.app.routes.unified_tools.models import TokenPayload
+    from netra_backend.app.schemas.unified_tools import TokenPayload
     return TokenPayload(
         sub=user.email,
         user_id=user.id,

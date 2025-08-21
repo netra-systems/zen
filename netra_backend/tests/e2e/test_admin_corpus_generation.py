@@ -93,7 +93,7 @@ class TestAdminCorpusGeneration:
         # Run the agent to get real results
         await agent.execute(state, f"run-{request.session_id}", stream_updates=True)
         # Validate the agent ran successfully
-        from netra_backend.app.routes.unified_tools.models import SubAgentLifecycle
+        from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Agent should complete execution"
     
     async def test_configuration_suggestions(self, admin_corpus_setup):
@@ -143,7 +143,7 @@ class TestAdminCorpusGeneration:
         # Run the agent for corpus generation
         await agent.execute(state, f"gen-{request.session_id}", stream_updates=True)
         # Validate the agent completed successfully
-        from netra_backend.app.routes.unified_tools.models import SubAgentLifecycle
+        from netra_backend.app.schemas.unified_tools import SubAgentLifecycle
         assert agent.state in [SubAgentLifecycle.COMPLETED, SubAgentLifecycle.FAILED], "Generation should complete"
     
     async def test_error_recovery(self, admin_corpus_setup):

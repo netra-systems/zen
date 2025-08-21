@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.unified_tool_registry import ToolExecutionResult
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.routes.unified_tools.models import ToolExecutionRequest
+from netra_backend.app.schemas.unified_tools import ToolExecutionRequest
 
 logger = central_logger
 

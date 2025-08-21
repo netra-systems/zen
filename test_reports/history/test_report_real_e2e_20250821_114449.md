@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:44:49.802251  
+**Generated:** 2025-08-21T11:41:25.759701  
 **Test Level:** real_e2e - Full end-to-end tests with real LLM and services (20-30 minutes)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.52s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 8.24s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,7 +28,7 @@
 - **Purpose:** Complete user journey validation with actual services
 - **Timeout:** 1800s
 - **Coverage Enabled:** No
-- **Total Duration:** 7.52s
+- **Total Duration:** 8.24s
 - **Exit Code:** 4
 
 ### Backend Configuration
@@ -60,10 +60,10 @@ Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -vv -n 2 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m real_e2e
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.49s
+[FAIL] TESTS FAILED with exit code 4 after 6.82s
 ================================================================================
 
-2025-08-21 11:44:47.889 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
+2025-08-21 11:41:22.369 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
 netra_backend\tests\conftest.py:59: in <module>
     from netra_backend.app.main import app
@@ -79,19 +79,27 @@ netra_backend\app\core\app_factory.py:97: in register_api_routes
 netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
     route_modules = import_all_route_modules()
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:122: in import_all_route_modules
-    basic_modules = import_basic_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:5: in import_basic_route_modules
-    route_imports = _import_core_routes()
-                    ^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:11: in _import_core_routes
-    from netra_backend.app.routes import (supply, generation, admin, references, health,
-netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
-    from netra_backend.app.routes.unified_tools.router import router
-netra_backend\app\routes\unified_tools\router.py:14: in <module>
-    from netra_backend.app.routes.unified_tools.models import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
-E   ModuleNotFoundError: No module named 'netra_backend.app.routes.unified_tools.models'
+netra_backend\app\core\app_factory_route_imports.py:124: in import_all_route_modules
+    factory_routers = import_factory_routers()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:99: in import_factory_routers
+    status_routers = _import_factory_status_routers()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:106: in _import_factory_status_routers
+    from netra_backend.app.routes.factory_status import router as factory_status_router
+netra_backend\app\routes\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.routes.factory_status.router import router
+netra_backend\app\routes\factory_status\router.py:9: in <module>
+    from netra_backend.app.routes.factory_status.report_routes import (
+netra_backend\app\routes\factory_status\report_routes.py:9: in <module>
+    from netra_backend.app.routes.factory_status.business_logic import get_cached_reports, get_latest_report_id, generate_new_report
+netra_backend\app\routes\factory_status\business_logic.py:5: in <module>
+    from netra_backend.app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
+netra_backend\app\services\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.services.factory_status.factory_status_service import FactoryStatusService
+netra_backend\app\services\factory_status\factory_status_service.py:13: in <module>
+    from netra_backend.app.monitoring.metrics_collectors import (
+E   ModuleNotFoundError: No module named 'netra_backend.app.monitoring.metrics_collectors'
 
 ```
 

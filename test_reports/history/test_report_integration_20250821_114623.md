@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:46:23.074461  
+**Generated:** 2025-08-21T11:43:40.214075  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 8.45s | [FAILED] |
-| Frontend  | 69 | 11 | 58 | 0 | 0 | 55.48s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 7.25s | [FAILED] |
+| Frontend  | 69 | 11 | 58 | 0 | 0 | 55.42s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 63.93s
+- **Total Duration:** 62.67s
 - **Exit Code:** 4
 
 ### Backend Configuration
@@ -52,19 +52,18 @@ NETRA AI PLATFORM - BACKEND TEST RUNNER
 Test Configuration:
   Category: integration
   Parallel: 4
-  Coverage: enabled
+  Coverage: disabled
   Fail Fast: enabled
   Environment: test
 
 Running command:
-  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings --cov=app --cov-report=html:reports/coverage/html --cov-report=term-missing --cov-report=json:reports/coverage/coverage.json --cov-fail-under=70 -m not real_services
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 7.63s
-[Coverage] Coverage Report: reports/coverage/html/index.html
+[FAIL] TESTS FAILED with exit code 4 after 6.14s
 ================================================================================
 
-2025-08-21 11:45:25.624 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
+2025-08-21 11:42:41.994 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
 ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
 netra_backend\tests\conftest.py:59: in <module>
     from netra_backend.app.main import app
@@ -80,21 +79,27 @@ netra_backend\app\core\app_factory.py:97: in register_api_routes
 netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
     route_modules = import_all_route_modules()
                     ^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:122: in import_all_route_modules
-    basic_modules = import_basic_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:5: in import_basic_route_modules
-    route_imports = _import_core_routes()
-                    ^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:11: in _import_core_routes
-    from netra_backend.app.routes import (supply, generation, admin, references, health,
-netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
-    from netra_backend.app.routes.unified_tools.router import router
-netra_backend\app\routes\unified_tools\router.py:15: in <module>
-    from netra_backend.app.routes.unified_tools.tool_listing import gather_tool_data, build_tool_availability_response
-netra_backend\app\routes\unified_tools\tool_listing.py:8: in <module>
-    from netra_backend.app.routes.unified_tools.models import ToolAvailabilityResponse
-E   ModuleNotFoundError: No module named 'netra_backend.app.routes.unified_tools.models'
+netra_backend\app\core\app_factory_route_imports.py:124: in import_all_route_modules
+    factory_routers = import_factory_routers()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:99: in import_factory_routers
+    status_routers = _import_factory_status_routers()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+netra_backend\app\core\app_factory_route_imports.py:106: in _import_factory_status_routers
+    from netra_backend.app.routes.factory_status import router as factory_status_router
+netra_backend\app\routes\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.routes.factory_status.router import router
+netra_backend\app\routes\factory_status\router.py:9: in <module>
+    from netra_backend.app.routes.factory_status.report_routes import (
+netra_backend\app\routes\factory_status\report_routes.py:9: in <module>
+    from netra_backend.app.routes.factory_status.business_logic import get_cached_reports, get_latest_report_id, generate_new_report
+netra_backend\app\routes\factory_status\business_logic.py:5: in <module>
+    from netra_backend.app.services.factory_status.report_builder import ReportBuilder, FactoryStatusReport
+netra_backend\app\services\factory_status\__init__.py:5: in <module>
+    from netra_backend.app.services.factory_status.factory_status_service import FactoryStatusService
+netra_backend\app\services\factory_status\factory_status_service.py:19: in <module>
+    from netra_backend.app.monitoring.health_calculator import HealthScoreCalculator
+E   ModuleNotFoundError: No module named 'netra_backend.app.monitoring.health_calculator'
 
 ```
 
@@ -120,7 +125,7 @@ Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests_
 
 Cleaning up test processes...
 
-FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.294 s)
+FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.213 s)
   ● WebSocket Connection Lifecycle Tests › Connection Establishment › should track real connection state transitions with history
 
     Connection timeout
@@ -322,8 +327,8 @@ FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.294 s)
 
 ### Frontend Errors
 - [FAIL] CHECKS FAILED with exit code 1
-- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.294 s)
-- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.294 s)
+- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.213 s)
+- FAIL __tests__/integration/websocket-complete-refactored.test.tsx (53.213 s)
 
 ---
 *Generated by Netra AI Unified Test Runner v3.0*  

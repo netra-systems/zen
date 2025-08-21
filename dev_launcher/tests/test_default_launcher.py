@@ -237,7 +237,6 @@ class TestGracefulShutdownImprovements(unittest.TestCase):
         config.silent_mode = False
         config.no_cache = False
         config.profile_startup = False
-        config.legacy_mode = False
         
         launcher = DevLauncher(config)
         
@@ -268,7 +267,6 @@ class TestGracefulShutdownImprovements(unittest.TestCase):
         config.silent_mode = False
         config.no_cache = False
         config.profile_startup = False
-        config.legacy_mode = False
         
         launcher = DevLauncher(config)
         
