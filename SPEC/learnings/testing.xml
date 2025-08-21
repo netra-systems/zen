@@ -48,6 +48,71 @@
             <verification>Mixed syntax tests now pass with correct wrappers</verification>
         </learning>
         
+        <learning id="e2e-test-import-refactoring">
+            <title>E2E Test Import Refactoring</title>
+            <problem>
+                ConnectionManager was renamed to ModernConnectionManager but e2e tests still imported old name
+                validate_token was renamed to validate_token_jwt but tests used old function
+                35+ test files had incorrect imports causing ImportError failures
+            </problem>
+            <solution>
+                Updated all imports to use ModernConnectionManager and get_connection_manager()
+                Changed all validate_token imports to validate_token_jwt
+                Fixed mock specifications to use ModernConnectionManager
+                Created automated script to fix import issues systematically
+            </solution>
+            <files_affected>
+                <file>app/tests/e2e/test_websocket_integration_*.py</file>
+                <file>tests/unified/e2e/*.py</file>
+                <file>tests/websocket/*.py</file>
+                <file>scripts/fix_e2e_connection_manager_imports.py</file>
+            </files_affected>
+            <verification>All e2e test imports now resolve correctly</verification>
+        </learning>
+        
+        <learning id="e2e-test-missing-fixtures">
+            <title>E2E Test Missing Fixtures</title>
+            <problem>
+                Many e2e tests referenced fixtures that didn't exist (conversion_environment, cost_savings_calculator)
+                Test files had fixtures defined but no actual test implementations
+                Tests couldn't run due to missing fixture dependencies
+            </problem>
+            <solution>
+                Created comprehensive conftest.py with 11 commonly needed fixtures
+                Added test implementations to files that only had fixtures
+                Created MockWebSocket with proper async interface
+                Standardized fixture patterns across all e2e test files
+            </solution>
+            <files_affected>
+                <file>app/tests/e2e/conftest.py</file>
+                <file>app/tests/e2e/test_websocket_integration_core.py</file>
+                <file>app/tests/e2e/test_websocket_integration_fixtures.py</file>
+                <file>scripts/fix_e2e_tests_comprehensive.py</file>
+            </files_affected>
+            <verification>408 e2e tests now collected successfully, fixture tests passing</verification>
+        </learning>
+        
+        <learning id="test-syntax-fix-classes">
+            <title>TestSyntaxFix Classes with Invalid Constructors</title>
+            <problem>
+                TestSyntaxFix classes had __init__ methods causing pytest collection warnings
+                Pytest test classes cannot have __init__ constructors
+                Classes had multiple __init__ definitions causing syntax errors
+            </problem>
+            <solution>
+                Converted TestSyntaxFix to utility classes (StateMergeUtil)
+                Made methods static for state merging operations
+                Removed all __init__ methods from test classes
+                Fixed empty import statements and orphaned parentheses
+            </solution>
+            <files_affected>
+                <file>app/tests/agents/test_supervisor_integration_core.py</file>
+                <file>app/tests/agents/test_supervisor_integration_helpers.py</file>
+                <file>24 other test files with empty imports</file>
+            </files_affected>
+            <verification>No more pytest collection warnings for TestSyntaxFix</verification>
+        </learning>
+        
         <learning id="integration-test-business-value-patterns">
             <title>Integration Test Business Value Justification Patterns</title>
             <problem>

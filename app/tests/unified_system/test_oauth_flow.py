@@ -172,7 +172,7 @@ class TestTokenGenerationAndValidation:
         }
         
         # Validate token
-        validation_result = await mock_security_service.validate_token(access_token)
+        validation_result = await mock_security_service.validate_token_jwt(access_token)
         assert validation_result["valid"] is True
         assert validation_result["user_id"] == "test_user"
         
@@ -185,7 +185,7 @@ class TestTokenGenerationAndValidation:
         }
         
         expired_token = "expired_jwt_token"
-        validation_result = await mock_security_service.validate_token(expired_token)
+        validation_result = await mock_security_service.validate_token_jwt(expired_token)
         
         assert validation_result["valid"] is False
         assert "expired" in validation_result.get("error", "").lower()

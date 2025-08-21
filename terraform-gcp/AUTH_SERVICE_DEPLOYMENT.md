@@ -63,12 +63,12 @@ cd terraform-gcp
 3. Edit your OAuth 2.0 Client ID
 4. Add Authorized JavaScript origins:
    - `https://auth.staging.netrasystems.ai`
-   - `https://staging.netrasystems.ai`
+   - `https://app.staging.netrasystems.ai`
    - `http://localhost:3000` (for development)
 
 5. Add Authorized redirect URIs:
    - `https://auth.staging.netrasystems.ai/api/auth/callback`
-   - `https://staging.netrasystems.ai/api/auth/callback`
+   - `https://app.staging.netrasystems.ai/api/auth/callback`
    - `http://localhost:3000/api/auth/callback` (for development)
 
 ### 4. Update DNS Records
@@ -120,7 +120,7 @@ JWT_SECRET=<from_secret_manager>
 GOOGLE_OAUTH_CLIENT_ID_STAGING=<from_secret_manager>
 GOOGLE_OAUTH_CLIENT_SECRET_STAGING=<from_secret_manager>
 AUTH_SERVICE_URL=https://auth.staging.netrasystems.ai
-FRONTEND_URL=https://staging.netrasystems.ai
+FRONTEND_URL=https://app.staging.netrasystems.ai
 CORS_ORIGINS=<allowed_origins>
 ```
 

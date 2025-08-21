@@ -102,7 +102,7 @@
 
 ## Important URLs
 
-- Frontend: https://staging.netrasystems.ai
+- Frontend: https://app.staging.netrasystems.ai
 - Backend API: https://api.staging.netrasystems.ai
 - WebSocket: wss://api.staging.netrasystems.ai/ws
 - Health Check: https://api.staging.netrasystems.ai/health

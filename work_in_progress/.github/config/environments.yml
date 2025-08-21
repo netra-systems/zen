@@ -19,7 +19,7 @@ environments:
   
   staging:
     description: Staging environment for PR previews
-    url: https://staging.netrasystems.ai
+    url: https://app.staging.netrasystems.ai
     protection_rules:
       required_reviewers: 0
       wait_timer: 0

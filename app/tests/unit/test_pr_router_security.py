@@ -21,7 +21,7 @@ class TestValidateReturnUrl:
         """Test validation of valid return URLs."""
         valid_urls = [
             "https://pr-123.staging.netrasystems.ai",
-            "https://staging.netrasystems.ai",
+            "https://app.staging.netrasystems.ai",
             "http://localhost",
             "https://localhost"
         ]
@@ -34,7 +34,7 @@ class TestValidateReturnUrl:
         """Test validation rejects malicious return URLs."""
         malicious_urls = [
             "https://evil.com",
-            "https://staging.netrasystems.ai.evil.com",
+            "https://app.staging.netrasystems.ai.evil.com",
             "javascript:alert('xss')",
             "ftp://malicious.com",
             "not-a-url"
@@ -75,7 +75,7 @@ class TestInputValidation:
     async def test_validate_pr_inputs_success(self):
         """Test successful input validation."""
         # Should not raise exception
-        await _validate_pr_inputs("123", "https://staging.netrasystems.ai")
+        await _validate_pr_inputs("123", "https://app.staging.netrasystems.ai")
 
     async def test_validate_pr_inputs_invalid_pr(self):
         """Test input validation with invalid PR number."""
@@ -167,7 +167,7 @@ class TestGitHubValidation:
     def test_is_allowed_return_domain_spoofing(self):
         """Test domain validation prevents spoofing attempts."""
         spoofing_attempts = [
-            "https://staging.netrasystems.ai.evil.com",
+            "https://app.staging.netrasystems.ai.evil.com",
             "https://evil.com/staging.netrasystems.ai",
             "https://localhostevil.com",
             "https://evil-staging.netrasystems.ai.com"

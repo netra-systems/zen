@@ -30,9 +30,12 @@ from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import Mock, AsyncMock, patch
 from pathlib import Path
 
-from app.auth_integration.auth import validate_token, create_token
-from app.db.client import get_postgres_client, get_clickhouse_client
-from app.services.user_service import UserService
+from app.auth_integration.auth import get_current_user
+from app.clients.auth_client import auth_client
+from app.db.clickhouse import get_clickhouse_client
+from app.db.postgres import get_async_db as get_postgres_client
+from app.services.user_service import CRUDUser
+from app.db.models_postgres import User
 from app.services.thread_service import ThreadService
 from dev_launcher.health_monitor import HealthMonitor
 
@@ -73,12 +76,12 @@ class TestCrossServiceAuthentication:
     async def test_auth_service_creates_valid_tokens(self, test_user_data):
         """Test auth service creates tokens that backend can validate."""
         # Mock auth service token creation
-        with patch('app.auth_integration.auth.create_token') as mock_create:
+        with patch('app.clients.auth_client.auth_client.create_token') as mock_create:
             expected_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test_payload"
             mock_create.return_value = expected_token
             
             # Create token
-            token = create_token(test_user_data)
+            token = await auth_client.create_token(test_user_data)
             
             # Verify token created
             assert token is not None
@@ -89,12 +92,12 @@ class TestCrossServiceAuthentication:
     async def test_backend_validates_auth_service_tokens(self, test_user_data):
         """Test backend can validate tokens from auth service."""
         # Mock token validation
-        with patch('app.auth_integration.auth.validate_token') as mock_validate:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = test_user_data
             
             # Validate token
             valid_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.test_payload"
-            result = validate_token(valid_token)
+            result = await auth_client.validate_token_jwt(valid_token)
             
             # Verify validation succeeded
             assert result is not None
@@ -105,8 +108,8 @@ class TestCrossServiceAuthentication:
     async def test_frontend_auth_flow_with_backend(self, service_endpoints, test_user_data):
         """Test complete auth flow from frontend through backend to auth service."""
         # Mock the complete auth chain
-        with patch('app.auth_integration.auth.validate_token') as mock_validate, \
-             patch('app.services.user_service.UserService.get_user') as mock_get_user:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate, \
+             patch('app.services.user_service.CRUDUser.get') as mock_get_user:
             
             mock_validate.return_value = test_user_data
             mock_get_user.return_value = test_user_data
@@ -119,9 +122,12 @@ class TestCrossServiceAuthentication:
                 try:
                     # This would normally be a real HTTP request
                     # For testing, we verify the auth flow logic
-                    user_data = validate_token("valid_token")
-                    user_service = UserService()
-                    user_details = await user_service.get_user(user_data["user_id"])
+                    user_data = await auth_client.validate_token_jwt("valid_token")
+                    user_service = CRUDUser("user_service", User)
+                    # Mock a database session for the CRUDUser.get call
+                    from unittest.mock import AsyncMock
+                    mock_db = AsyncMock()
+                    user_details = await user_service.get(mock_db, user_data["user_id"])
                     
                     # Verify auth flow succeeded
                     assert user_details is not None
@@ -137,13 +143,13 @@ class TestCrossServiceAuthentication:
         token = "consistent_test_token"
         
         # Mock consistent validation across services
-        with patch('app.auth_integration.auth.validate_token') as mock_validate:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.return_value = test_user_data
             
             # Validate token in multiple contexts
-            backend_validation = validate_token(token)
-            websocket_validation = validate_token(token)
-            api_validation = validate_token(token)
+            backend_validation = await auth_client.validate_token_jwt(token)
+            websocket_validation = await auth_client.validate_token_jwt(token)
+            api_validation = await auth_client.validate_token_jwt(token)
             
             # Verify consistency
             assert backend_validation == websocket_validation == api_validation
@@ -157,8 +163,8 @@ class TestDatabaseConsistency:
     async def test_postgres_clickhouse_data_consistency(self):
         """Test data consistency between PostgreSQL and ClickHouse."""
         # Mock database clients
-        with patch('app.db.client.get_postgres_client') as mock_postgres, \
-             patch('app.db.client.get_clickhouse_client') as mock_clickhouse:
+        with patch('app.db.postgres.get_async_db') as mock_postgres, \
+             patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
             
             # Mock user data in PostgreSQL
             mock_postgres_client = AsyncMock()
@@ -191,11 +197,11 @@ class TestDatabaseConsistency:
     @pytest.mark.asyncio
     async def test_transaction_atomicity_across_services(self):
         """Test transaction atomicity when operations span multiple services."""
-        user_service = UserService()
+        user_service = CRUDUser("user_service", User)
         thread_service = ThreadService()
         
         # Mock transaction scenario: creating user and their first thread
-        with patch('app.db.client.get_postgres_client') as mock_postgres:
+        with patch('app.db.postgres.get_async_db') as mock_postgres:
             mock_client = AsyncMock()
             mock_client.begin.return_value = AsyncMock()
             mock_client.commit = AsyncMock()
@@ -216,8 +222,11 @@ class TestDatabaseConsistency:
             
             try:
                 # Simulate atomic operation across services
-                await user_service.create_user(user_data)
-                await thread_service.create_thread(thread_data)
+                # Mock a database session for the CRUDUser.create call
+                from unittest.mock import AsyncMock
+                mock_db = AsyncMock()
+                await user_service.create(mock_db, obj_in=user_data)
+                await thread_service.create_thread(user_data['user_id'], mock_db)
                 
                 # Verify both operations completed
                 mock_client.commit.assert_called()
@@ -233,7 +242,7 @@ class TestDatabaseConsistency:
         write_time = time.time()
         
         # Mock database write
-        with patch('app.db.client.get_postgres_client') as mock_postgres:
+        with patch('app.db.postgres.get_async_db') as mock_postgres:
             mock_client = AsyncMock()
             mock_postgres.return_value = mock_client
             
@@ -242,7 +251,7 @@ class TestDatabaseConsistency:
                                     "sync_test_user", "sync@test.com")
             
             # Simulate read from analytics database (ClickHouse)
-            with patch('app.db.client.get_clickhouse_client') as mock_clickhouse:
+            with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
                 mock_ch_client = AsyncMock()
                 mock_ch_client.query.return_value = [{"user_id": "sync_test_user", "synced_at": write_time}]
                 mock_clickhouse.return_value = mock_ch_client
@@ -348,15 +357,15 @@ class TestErrorPropagation:
     async def test_cascade_failure_prevention(self):
         """Test system prevents cascade failures across services."""
         # Simulate auth service failure
-        with patch('app.auth_integration.auth.validate_token') as mock_validate:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_validate:
             mock_validate.side_effect = Exception("Auth service unavailable")
             
             # Backend should handle auth failure gracefully
-            user_service = UserService()
+            user_service = CRUDUser("user_service", User)
             
             try:
                 # This should fail gracefully, not crash the service
-                result = validate_token("test_token")
+                result = await auth_client.validate_token_jwt("test_token")
                 assert result is None  # Should return None for invalid token
                 
             except Exception:
@@ -367,20 +376,23 @@ class TestErrorPropagation:
     async def test_graceful_degradation_modes(self):
         """Test services operate in graceful degradation modes."""
         # Simulate ClickHouse unavailability
-        with patch('app.db.client.get_clickhouse_client') as mock_clickhouse:
+        with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
             mock_clickhouse.side_effect = Exception("ClickHouse unavailable")
             
             # System should continue operating without analytics
-            user_service = UserService()
+            user_service = CRUDUser("user_service", User)
             
             # Mock PostgreSQL still available
-            with patch('app.db.client.get_postgres_client') as mock_postgres:
+            with patch('app.db.postgres.get_async_db') as mock_postgres:
                 mock_client = AsyncMock()
                 mock_client.fetchrow.return_value = {"user_id": "test", "email": "test@test.com"}
                 mock_postgres.return_value = mock_client
                 
                 # Should still be able to get user data
-                user_data = await user_service.get_user("test")
+                # Mock a database session for the CRUDUser.get call
+                from unittest.mock import AsyncMock
+                mock_db = AsyncMock()
+                user_data = await user_service.get(mock_db, "test")
                 assert user_data is not None
     
     @pytest.mark.asyncio
@@ -430,19 +442,22 @@ class TestMultiServiceIntegration:
     async def test_complete_user_journey(self):
         """Test complete user journey across all services."""
         # 1. User authentication (Frontend -> Auth Service)
-        with patch('app.auth_integration.auth.validate_token') as mock_auth:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
             mock_auth.return_value = {"user_id": "journey_user", "email": "journey@test.com"}
             
             user_token = "valid_journey_token"
-            auth_result = validate_token(user_token)
+            auth_result = await auth_client.validate_token_jwt(user_token)
             assert auth_result is not None
             
             # 2. User data retrieval (Backend -> PostgreSQL)
-            with patch('app.services.user_service.UserService.get_user') as mock_get_user:
+            with patch('app.services.user_service.CRUDUser.get') as mock_get_user:
                 mock_get_user.return_value = auth_result
                 
-                user_service = UserService()
-                user_data = await user_service.get_user(auth_result["user_id"])
+                user_service = CRUDUser("user_service", User)
+                # Mock a database session for the CRUDUser.get call
+                from unittest.mock import AsyncMock
+                mock_db = AsyncMock()
+                user_data = await user_service.get(mock_db, auth_result["user_id"])
                 assert user_data["user_id"] == "journey_user"
                 
                 # 3. Thread creation (Backend -> PostgreSQL)
@@ -450,14 +465,11 @@ class TestMultiServiceIntegration:
                     mock_create_thread.return_value = {"thread_id": "new_thread", "user_id": "journey_user"}
                     
                     thread_service = ThreadService()
-                    thread = await thread_service.create_thread({
-                        "user_id": "journey_user",
-                        "title": "Integration Test Thread"
-                    })
+                    thread = await thread_service.create_thread("journey_user")
                     assert thread["thread_id"] == "new_thread"
                     
                     # 4. Analytics logging (Backend -> ClickHouse)
-                    with patch('app.db.client.get_clickhouse_client') as mock_clickhouse:
+                    with patch('app.db.clickhouse.get_clickhouse_client') as mock_clickhouse:
                         mock_client = AsyncMock()
                         mock_clickhouse.return_value = mock_client
                         
@@ -475,7 +487,7 @@ class TestMultiServiceIntegration:
     async def test_high_availability_scenarios(self):
         """Test high availability scenarios with service failures."""
         # Scenario 1: Auth service temporary failure
-        with patch('app.auth_integration.auth.validate_token') as mock_auth:
+        with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth:
             # First call fails, second succeeds (recovery)
             mock_auth.side_effect = [
                 Exception("Auth service down"),
@@ -484,17 +496,17 @@ class TestMultiServiceIntegration:
             
             # First attempt should fail gracefully
             try:
-                result1 = validate_token("test_token")
+                result1 = await auth_client.validate_token_jwt("test_token")
             except Exception:
                 pass  # Expected failure
             
             # Second attempt should succeed (service recovered)
-            result2 = validate_token("test_token")
+            result2 = await auth_client.validate_token_jwt("test_token")
             assert result2 is not None
             assert result2["user_id"] == "ha_user"
         
         # Scenario 2: Database failover
-        with patch('app.db.client.get_postgres_client') as mock_postgres:
+        with patch('app.db.postgres.get_async_db') as mock_postgres:
             # Simulate primary DB failure, then failover to replica
             mock_postgres.side_effect = [
                 Exception("Primary database unavailable"),
@@ -518,8 +530,8 @@ class TestMultiServiceIntegration:
         
         async def simulate_request(request_id):
             # Mock service chain: Frontend -> Backend -> Auth -> Database
-            with patch('app.auth_integration.auth.validate_token') as mock_auth, \
-                 patch('app.services.user_service.UserService.get_user') as mock_user:
+            with patch('app.clients.auth_client.auth_client.validate_token') as mock_auth, \
+                 patch('app.services.user_service.CRUDUser.get') as mock_user:
                 
                 mock_auth.return_value = {"user_id": f"user_{request_id}"}
                 mock_user.return_value = {"user_id": f"user_{request_id}", "email": f"user_{request_id}@test.com"}

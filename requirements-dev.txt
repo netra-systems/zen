@@ -23,6 +23,7 @@ websockets>=11.0.0  # For real WebSocket testing
 faker>=18.0.0  # For test data generation
 freezegun>=1.2.0  # For mocking datetime
 responses>=0.23.0  # For mocking HTTP requests
+testcontainers>=4.0.0  # For L3 integration tests with real services
 
 # Development tools
 ipython>=8.14.0

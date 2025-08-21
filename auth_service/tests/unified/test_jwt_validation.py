@@ -57,14 +57,14 @@ class TestJWTSignatureValidation:
         )
         
         # Valid signature should pass
-        decoded = jwt_handler.validate_token(valid_token, "access")
+        decoded = jwt_handler.validate_token_jwt(valid_token, "access")
         assert decoded is not None
         assert decoded["sub"] == valid_user_payload["sub"]
         assert decoded["email"] == valid_user_payload["email"]
         
         # Invalid signature should be rejected
         tampered_token = valid_token[:-10] + "tampered123"
-        decoded_tampered = jwt_handler.validate_token(tampered_token, "access")
+        decoded_tampered = jwt_handler.validate_token_jwt(tampered_token, "access")
         assert decoded_tampered is None
     
     def test_algorithm_mismatch_rejected(self, jwt_handler, valid_user_payload):
@@ -87,7 +87,7 @@ class TestJWTSignatureValidation:
         none_token = f"{encoded_header}.{encoded_payload}."
         
         # Should be rejected
-        decoded = jwt_handler.validate_token(none_token, "access")
+        decoded = jwt_handler.validate_token_jwt(none_token, "access")
         assert decoded is None
     
     def test_expired_token_rejected(self, jwt_handler, valid_user_payload):
@@ -106,7 +106,7 @@ class TestJWTSignatureValidation:
         expired_token = jwt.encode(payload, jwt_handler.secret, algorithm=jwt_handler.algorithm)
         
         # Should be rejected due to expiration
-        decoded = jwt_handler.validate_token(expired_token, "access")
+        decoded = jwt_handler.validate_token_jwt(expired_token, "access")
         assert decoded is None
 
 
@@ -128,7 +128,7 @@ class TestJWTClaimsValidation:
         permissions = ["read", "write", "admin"]
         
         token = jwt_handler.create_access_token(user_id, email, permissions)
-        decoded = jwt_handler.validate_token(token, "access")
+        decoded = jwt_handler.validate_token_jwt(token, "access")
         
         # User_id claim validated
         assert decoded["sub"] == user_id
@@ -164,7 +164,7 @@ class TestJWTClaimsValidation:
         )
         
         # Token should validate structurally but missing business claims
-        decoded = jwt_handler.validate_token(incomplete_token, "access")
+        decoded = jwt_handler.validate_token_jwt(incomplete_token, "access")
         assert decoded is not None  # Structurally valid
         assert "email" not in decoded  # Missing expected claim
         assert "permissions" not in decoded  # Missing expected claim
@@ -175,18 +175,18 @@ class TestJWTClaimsValidation:
         refresh_token = jwt_handler.create_refresh_token("test-user-789")
         
         # Should validate as refresh token
-        refresh_decoded = jwt_handler.validate_token(refresh_token, "refresh") 
+        refresh_decoded = jwt_handler.validate_token_jwt(refresh_token, "refresh") 
         assert refresh_decoded is not None
         assert refresh_decoded["token_type"] == "refresh"
         
         # Should NOT validate as access token
-        access_decoded = jwt_handler.validate_token(refresh_token, "access")
+        access_decoded = jwt_handler.validate_token_jwt(refresh_token, "access")
         assert access_decoded is None
     
     def test_service_token_claims(self, jwt_handler):
         """Test service token specific claims."""
         service_token = jwt_handler.create_service_token("backend-svc", "netra-backend")
-        decoded = jwt_handler.validate_token(service_token, "service")
+        decoded = jwt_handler.validate_token_jwt(service_token, "service")
         
         assert decoded is not None
         assert decoded["sub"] == "backend-svc"
@@ -215,7 +215,7 @@ class TestJWTRevocation:
         token = jwt_handler.create_access_token("test-user", "revoke@netra.ai")
         
         # Token should be valid initially
-        decoded = jwt_handler.validate_token(token)
+        decoded = jwt_handler.validate_token_jwt(token)
         assert decoded is not None
         
         # Add token to blacklist
@@ -240,8 +240,8 @@ class TestJWTRevocation:
         token2 = jwt_handler.create_refresh_token(user_id)
         
         # Both should be valid
-        assert jwt_handler.validate_token(token1) is not None
-        assert jwt_handler.validate_token(token2, "refresh") is not None
+        assert jwt_handler.validate_token_jwt(token1) is not None
+        assert jwt_handler.validate_token_jwt(token2, "refresh") is not None
         
         # Revoke all tokens for user (by storing user ID in revoked list)
         revoked_users = {user_id}
@@ -307,12 +307,12 @@ class TestJWTIntegrationScenarios:
         refresh_token = jwt_handler.create_refresh_token(user_id)
         
         # Validate access token
-        access_decoded = jwt_handler.validate_token(access_token, "access")
+        access_decoded = jwt_handler.validate_token_jwt(access_token, "access")
         assert access_decoded["sub"] == user_id
         assert access_decoded["email"] == email
         
         # Validate refresh token
-        refresh_decoded = jwt_handler.validate_token(refresh_token, "refresh")
+        refresh_decoded = jwt_handler.validate_token_jwt(refresh_token, "refresh")
         assert refresh_decoded["sub"] == user_id
         assert refresh_decoded["token_type"] == "refresh"
         

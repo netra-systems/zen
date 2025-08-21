@@ -125,7 +125,7 @@ class TestAuthAgentFlow:
     async def _validate_jwt_with_backend(self, jwt_token: str) -> Dict[str, Any]:
         """Validate JWT token with backend auth service."""
         try:
-            validation_result = await self.harness.auth_client.validate_token(jwt_token)
+            validation_result = await self.harness.auth_client.validate_token_jwt(jwt_token)
             if validation_result and validation_result.get("valid"):
                 return validation_result
         except Exception:
@@ -193,7 +193,7 @@ class TestAuthAgentFlow:
     async def _validate_invalid_token(self, token: str) -> Dict[str, Any]:
         """Validate invalid token - should fail."""
         try:
-            result = await self.harness.auth_client.validate_token(token)
+            result = await self.harness.auth_client.validate_token_jwt(token)
             return result or {"valid": False}
         except Exception:
             return {"valid": False, "error": "Token validation failed"}
@@ -286,7 +286,7 @@ class TestAuthAgentFlow:
     async def _handle_auth_service_down(self) -> Dict[str, Any]:
         """Handle auth service unavailable scenario."""
         try:
-            return await auth_client.validate_token("test-token")
+            return await auth_client.validate_token_jwt("test-token")
         except Exception:
             return {"valid": False, "error": "Auth service unavailable"}
 

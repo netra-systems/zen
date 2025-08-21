@@ -181,7 +181,7 @@ class URLConstants:
     # Production domains
     PRODUCTION_FRONTEND: Final[str] = "https://netrasystems.ai"
     PRODUCTION_APP: Final[str] = "https://app.netrasystems.ai"
-    STAGING_FRONTEND: Final[str] = "https://staging.netrasystems.ai"
+    STAGING_FRONTEND: Final[str] = "https://app.staging.netrasystems.ai"
     STAGING_APP: Final[str] = "https://app.staging.netrasystems.ai"
     
     @classmethod

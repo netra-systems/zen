@@ -107,6 +107,10 @@ class RealWebSocketClient:
             self._handle_receive_error(str(e))
             return None
     
+    async def send_message(self, message: str) -> bool:
+        """Send string message to WebSocket server (alias for send)."""
+        return await self.send(message)
+    
     async def send_and_wait(self, message: Union[Dict[str, Any], str],
                            timeout: Optional[float] = None) -> Optional[Dict[str, Any]]:
         """Send message and wait for response"""

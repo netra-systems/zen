@@ -40,7 +40,7 @@
           <usage>ALL optional auth routes MUST use this dependency</usage>
           <description>Returns user if authenticated, None otherwise</description>
         </function>
-        <function name="validate_token">
+        <function name="validate_token_jwt">
           <usage>ALL WebSocket connections MUST use this</usage>
           <description>Validates JWT tokens for WebSocket auth</description>
         </function>
@@ -106,11 +106,11 @@
         </example>
         
         <example type="websocket_auth">
-          from app.auth_integration.auth import validate_token
+          from app.auth_integration.auth import validate_token_jwt
           
           @router.websocket("/ws")
           async def websocket_endpoint(websocket: WebSocket, token: str):
-              user = await validate_token(token)  # MANDATORY for WebSocket
+              user = await validate_token_jwt(token)  # MANDATORY for WebSocket
               if not user:
                   await websocket.close(code=1008)
                   return
@@ -131,7 +131,7 @@
     </point>
     <point>
       <location>app/websocket/*</location>
-      <description>WebSocket auth MUST use auth_integration.validate_token</description>
+      <description>WebSocket auth MUST use auth_integration.validate_token_jwt</description>
     </point>
     <point>
       <location>app/services/*</location>

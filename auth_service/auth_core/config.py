@@ -40,7 +40,7 @@ class AuthConfig:
         env = AuthConfig.get_environment()
         
         if env == "staging":
-            return "https://staging.netrasystems.ai"
+            return "https://app.staging.netrasystems.ai"
         elif env == "production":
             return "https://netrasystems.ai"
         

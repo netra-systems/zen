@@ -149,23 +149,15 @@ class TestSupervisorE2EWithRealLLM:
     async def test_websocket_updates_e2e(self, supervisor, optimization_request_state, mock_dependencies):
         """Test WebSocket updates during E2E execution."""
         run_id = "websocket_test_005"
-        
-        # Execute with stream updates enabled
-        await supervisor.execute(
-            optimization_request_state,
-            run_id,
-            stream_updates=True
-        )
-        
-        # Validate WebSocket manager was called
+        await supervisor.execute(optimization_request_state, run_id, stream_updates=True)
         websocket_manager = mock_dependencies["websocket_manager"]
         websocket_manager.send_agent_update.assert_called()
-        
-        # Validate update structure
         calls = websocket_manager.send_agent_update.call_args_list
         assert len(calls) > 0
-        
-        # Each call should have run_id, agent_name, and update data
+        self._validate_websocket_call_structure(calls, run_id)
+    
+    def _validate_websocket_call_structure(self, calls, run_id):
+        """Validate WebSocket call structure and arguments."""
         for call in calls:
             args, kwargs = call
             assert len(args) == 3  # run_id, agent_name, update
@@ -228,25 +220,23 @@ class TestSupervisorE2EWithRealLLM:
     @pytest.mark.asyncio
     async def test_performance_under_load_e2e(self, supervisor, optimization_request_state):
         """Test supervisor performance under concurrent load."""
-        # Create multiple concurrent executions
+        tasks = self._create_concurrent_execution_tasks(supervisor, optimization_request_state)
+        await asyncio.gather(*tasks, return_exceptions=True)
+        metrics = supervisor.get_performance_metrics()
+        assert metrics["metrics"]["total_workflows"] >= 3
+        self._validate_performance_percentiles(metrics)
+    
+    def _create_concurrent_execution_tasks(self, supervisor, optimization_request_state):
+        """Create multiple concurrent execution tasks for load testing."""
         tasks = []
         for i in range(3):  # Light load for E2E testing
             run_id = f"load_test_{i:03d}"
-            task = supervisor.execute(
-                optimization_request_state,
-                run_id,
-                stream_updates=False
-            )
+            task = supervisor.execute(optimization_request_state, run_id, stream_updates=False)
             tasks.append(task)
-        
-        # Execute all tasks concurrently
-        await asyncio.gather(*tasks, return_exceptions=True)
-        
-        # Validate metrics after concurrent execution
-        metrics = supervisor.get_performance_metrics()
-        assert metrics["metrics"]["total_workflows"] >= 3
-        
-        # Validate performance percentiles are calculated
+        return tasks
+    
+    def _validate_performance_percentiles(self, metrics):
+        """Validate performance percentiles are calculated correctly."""
         assert "performance_percentiles" in metrics
         percentiles = metrics["performance_percentiles"]
         assert "p50" in percentiles

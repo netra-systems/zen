@@ -66,7 +66,7 @@ class RealAuthServiceTestFixture:
     
     async def validate_real_token(self, token: str) -> dict:
         """Validate token via real auth service"""
-        return await self.auth_service_client.validate_token(token)
+        return await self.auth_service_client.validate_token_jwt(token)
     
     async def close(self):
         """Close connections"""
@@ -323,7 +323,7 @@ class TestRealServiceCommunication:
         client = AuthServiceClient()
         
         try:
-            result = await client.validate_token(real_token)
+            result = await client.validate_token_jwt(real_token)
             
             assert result is not None
             assert result.get("valid") is True

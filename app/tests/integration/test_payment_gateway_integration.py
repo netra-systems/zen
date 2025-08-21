@@ -22,13 +22,13 @@ class TestPaymentGatewayIntegration:
     async def payment_infrastructure(self):
         """Setup payment gateway infrastructure"""
         return {
-            "stripe_client": Mock(),
-            "payment_processor": Mock(),
-            "subscription_manager": Mock(),
-            "webhook_handler": Mock(),
-            "billing_service": Mock(),
-            "refund_processor": Mock(),
-            "payment_method_manager": Mock()
+            "stripe_client": Mock(),  # Stripe client is sync, keep as Mock
+            "payment_processor": AsyncMock(),
+            "subscription_manager": AsyncMock(),
+            "webhook_handler": AsyncMock(),
+            "billing_service": AsyncMock(),
+            "refund_processor": AsyncMock(),
+            "payment_method_manager": AsyncMock()
         }
 
     @pytest.mark.asyncio
@@ -36,8 +36,8 @@ class TestPaymentGatewayIntegration:
         """BVJ: Protects successful payment processing worth $50K+ MRR"""
         request = {"amount": Decimal("49.99"), "currency": "usd"}
         intent = {"id": f"pi_{uuid.uuid4().hex}", "status": "succeeded", "amount_received": 4999}
-        payment_infrastructure["stripe_client"].PaymentIntent.create = Mock(return_value=intent)
-        payment_infrastructure["payment_processor"].complete_transaction = AsyncMock(return_value=intent)
+        payment_infrastructure["stripe_client"].PaymentIntent.create = Mock(return_value=intent)  # Sync Stripe call
+        payment_infrastructure["payment_processor"].complete_transaction.return_value = intent
         result = await payment_infrastructure["payment_processor"].complete_transaction(intent)
         assert result["status"] == "succeeded"
         assert result["amount_received"] == 4999
@@ -48,8 +48,8 @@ class TestPaymentGatewayIntegration:
         failed_intent = {"id": f"pi_{uuid.uuid4().hex}", "status": "payment_failed"}
         retry_result = {"final_status": "failed", "retry_attempts": 3}
         handling = {"customer_notified": True, "subscription_status": "past_due", "grace_period_days": 7}
-        payment_infrastructure["payment_processor"].retry_payment = AsyncMock(return_value=retry_result)
-        payment_infrastructure["billing_service"].handle_payment_failure = AsyncMock(return_value=handling)
+        payment_infrastructure["payment_processor"].retry_payment.return_value = retry_result
+        payment_infrastructure["billing_service"].handle_payment_failure.return_value = handling
         result = await payment_infrastructure["billing_service"].handle_payment_failure(retry_result)
         assert result["customer_notified"] is True
         assert result["subscription_status"] == "past_due"
@@ -60,8 +60,8 @@ class TestPaymentGatewayIntegration:
         sub_id = f"sub_{uuid.uuid4().hex}"
         subscription = {"id": sub_id, "status": "active", "plan": {"amount": 4999}}
         cancelled = {"id": sub_id, "status": "canceled", "canceled_at": int(time.time())}
-        payment_infrastructure["subscription_manager"].create_subscription = AsyncMock(return_value=subscription)
-        payment_infrastructure["subscription_manager"].cancel_subscription = AsyncMock(return_value=cancelled)
+        payment_infrastructure["subscription_manager"].create_subscription.return_value = subscription
+        payment_infrastructure["subscription_manager"].cancel_subscription.return_value = cancelled
         result = await payment_infrastructure["subscription_manager"].cancel_subscription(sub_id)
         assert result["status"] == "canceled"
         assert result["canceled_at"] is not None
@@ -72,7 +72,7 @@ class TestPaymentGatewayIntegration:
         event_id = f"evt_{uuid.uuid4().hex}"
         first_result = {"event_id": event_id, "processing_status": "completed", "idempotency_key": event_id}
         duplicate_result = {"event_id": event_id, "processing_status": "duplicate_ignored", "idempotency_key": event_id}
-        payment_infrastructure["webhook_handler"].process_event = AsyncMock(side_effect=[first_result, duplicate_result])
+        payment_infrastructure["webhook_handler"].process_event.side_effect = [first_result, duplicate_result]
         result1 = await payment_infrastructure["webhook_handler"].process_event({"id": event_id})
         result2 = await payment_infrastructure["webhook_handler"].process_event({"id": event_id})
         assert result1["processing_status"] == "completed"
@@ -84,8 +84,8 @@ class TestPaymentGatewayIntegration:
         refund_amount = Decimal("49.99")
         stripe_refund = {"id": f"re_{uuid.uuid4().hex}", "status": "succeeded", "amount": 4999}
         accounting = {"refund_id": stripe_refund["id"], "revenue_adjustment": -refund_amount}
-        payment_infrastructure["stripe_client"].Refund.create = Mock(return_value=stripe_refund)
-        payment_infrastructure["billing_service"].record_refund = AsyncMock(return_value=accounting)
+        payment_infrastructure["stripe_client"].Refund.create = Mock(return_value=stripe_refund)  # Sync Stripe call
+        payment_infrastructure["billing_service"].record_refund.return_value = accounting
         result = await payment_infrastructure["billing_service"].record_refund(stripe_refund)
         assert result["revenue_adjustment"] == -refund_amount
         assert result["refund_id"] is not None
@@ -97,8 +97,8 @@ class TestPaymentGatewayIntegration:
         payment_method = {"id": method_id, "type": "card", "card": {"last4": "4242"}}
         security_check = {"method_id": method_id, "encryption_verified": True, "pci_compliant": True}
         deletion = {"method_id": method_id, "secure_cleanup": True, "audit_log_created": True}
-        payment_infrastructure["payment_method_manager"].verify_security = AsyncMock(return_value=security_check)
-        payment_infrastructure["payment_method_manager"].delete_payment_method = AsyncMock(return_value=deletion)
+        payment_infrastructure["payment_method_manager"].verify_security.return_value = security_check
+        payment_infrastructure["payment_method_manager"].delete_payment_method.return_value = deletion
         result = await payment_infrastructure["payment_method_manager"].delete_payment_method(method_id)
         assert result["secure_cleanup"] is True
         assert result["audit_log_created"] is True

@@ -57,7 +57,7 @@ class TestAuthToWebSocketFlow:
         mock_websocket.send_json = AsyncMock()
         
         # Execute auth validation
-        user = await auth_service.validate_token(auth_token)
+        user = await auth_service.validate_token_jwt(auth_token)
         assert user.id == "test_user_123"
         
         # Establish WebSocket connection
@@ -89,7 +89,7 @@ class TestAuthToWebSocketFlow:
         
         # Attempt connection with invalid token
         with pytest.raises(ValueError):
-            await auth_service.validate_token("invalid_token")
+            await auth_service.validate_token_jwt("invalid_token")
         
         # Verify no connection established
         assert len(ws_manager.active_connections) == 0
@@ -114,7 +114,7 @@ class TestAuthToWebSocketFlow:
         )
         
         with pytest.raises(jwt.ExpiredSignatureError):
-            await auth_service.validate_token(expired_token)
+            await auth_service.validate_token_jwt(expired_token)
     
     async def test_auth_service_unavailable_fallback(self):
         """Test fallback when auth service is unavailable."""

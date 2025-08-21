@@ -197,7 +197,7 @@ class EnhancedSecurityService(SecurityService):
         }
         self.audit_log.append(log_entry)
     
-    async def validate_token(self, token: str) -> Dict[str, Any]:
+    async def validate_token_jwt(self, token: str) -> Dict[str, Any]:
         """Validate token and return user data"""
         payload = await self.decode_access_token(token)
         if not payload:
@@ -243,7 +243,7 @@ class EnhancedSecurityService(SecurityService):
         if cached_result:
             return cached_result
         
-        result = await self.validate_token(token)
+        result = await self.validate_token_jwt(token)
         self._cache_session(token, result)
         return result
     

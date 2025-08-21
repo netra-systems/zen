@@ -156,6 +156,65 @@
         </business-impact>
     </learning>
 
+    <learning id="python-import-caching-health-check-failure">
+        <title>Python Import Caching Causes Health Check 503 Errors</title>
+        <problem>
+            Health check endpoints consistently returned 503 Service Unavailable errors despite
+            database services running correctly. The issue persisted through multiple "fix" attempts
+            and was incorrectly marked as solved repeatedly.
+        </problem>
+        <root-cause>
+            Python caches module-level imports. When health_checkers.py imported async_engine from
+            app.db.postgres at module load time (before database initialization), it cached the
+            None value. Even after database initialization in postgres_core.py set async_engine
+            to a valid engine, the cached import reference in health_checkers.py remained None,
+            causing "Database engine not initialized" errors.
+        </root-cause>
+        <solution>
+            Modified health check functions to use dynamic imports that get fresh references
+            after database initialization:
+            1. Import directly from app.db.postgres_core where engine is defined
+            2. Check if engine is None and initialize if needed
+            3. Re-import after initialization to get fresh reference
+            4. Use the fresh reference for database operations
+        </solution>
+        <implementation>
+            <file>app/core/health_checkers.py</file>
+            <pattern>
+                from app.db.postgres import initialize_postgres
+                from app.db.postgres_core import async_engine
+                
+                if async_engine is None:
+                    initialize_postgres()
+                    from app.db.postgres_core import async_engine as engine_ref
+                    engine = engine_ref
+                else:
+                    engine = async_engine
+                
+                if engine is None:
+                    raise RuntimeError("Database engine not initialized")
+                    
+                async with engine.begin() as conn:
+                    await conn.execute(text("SELECT 1"))
+            </pattern>
+        </implementation>
+        <prevention>
+            Never import dynamically initialized resources at module level in health checks.
+            Always use dynamic imports or getter functions to retrieve current references.
+        </prevention>
+        <validation>
+            Health checks now properly return:
+            - /health: status "healthy"
+            - /health/ready: status "ready" with all database checks passing
+            - No more 503 Service Unavailable errors
+        </validation>
+        <business-impact>
+            Critical fix for production deployments - without this, Kubernetes readiness
+            probes fail, load balancers mark services as unhealthy, and deployments fail
+            to roll out, affecting all customer segments and SLAs.
+        </business-impact>
+    </learning>
+
     <best-practices>
         <practice>
             Always implement both /health (liveness) and /health/ready (readiness) endpoints

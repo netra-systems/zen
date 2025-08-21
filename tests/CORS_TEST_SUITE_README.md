@@ -126,7 +126,7 @@ export CORS_ORIGINS="*"
 ### Staging Environment  
 ```bash
 export ENVIRONMENT=staging
-export CORS_ORIGINS="https://staging.netrasystems.ai,https://app.staging.netrasystems.ai"
+export CORS_ORIGINS="https://app.staging.netrasystems.ai,https://auth.staging.netrasystems.ai"
 ```
 - ✅ Staging domain patterns allowed
 - ✅ PR environment dynamic validation

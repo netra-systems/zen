@@ -33,7 +33,7 @@ echo "Add these redirect URIs to your Google OAuth 2.0 Client ID:"
 echo ""
 echo "1. https://${AUTH_DOMAIN}/api/auth/callback"
 echo "2. ${AUTH_SERVICE_URL}/api/auth/callback"
-echo "3. https://staging.netrasystems.ai/api/auth/callback"
+echo "3. https://app.staging.netrasystems.ai/api/auth/callback"
 echo "4. https://app.staging.netrasystems.ai/api/auth/callback"
 echo ""
 echo "For development:"
@@ -50,7 +50,7 @@ echo "Add these JavaScript origins:"
 echo ""
 echo "1. https://${AUTH_DOMAIN}"
 echo "2. ${AUTH_SERVICE_URL}"
-echo "3. https://staging.netrasystems.ai"
+echo "3. https://app.staging.netrasystems.ai"
 echo "4. https://app.staging.netrasystems.ai"
 echo ""
 echo "For development:"
@@ -67,7 +67,7 @@ echo "==================================="
 gcloud run services update netra-auth-service \
     --region=us-central1 \
     --update-env-vars="GOOGLE_OAUTH_REDIRECT_URI=https://${AUTH_DOMAIN}/api/auth/callback" \
-    --update-env-vars="GOOGLE_OAUTH_JAVASCRIPT_ORIGINS=https://${AUTH_DOMAIN},https://staging.netrasystems.ai" \
+    --update-env-vars="GOOGLE_OAUTH_JAVASCRIPT_ORIGINS=https://${AUTH_DOMAIN},https://app.staging.netrasystems.ai" \
     --update-env-vars="AUTH_DOMAIN=${AUTH_DOMAIN}"
 
 # Update backend service to use auth service

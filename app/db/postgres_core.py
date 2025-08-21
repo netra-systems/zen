@@ -301,8 +301,7 @@ def initialize_postgres():
     # Reset both if either is None to ensure clean initialization
     if async_engine is None or async_session_factory is None:
         logger.debug("Database not fully initialized, performing clean initialization...")
-        async_engine = None
-        async_session_factory = None
+        # Don't reassign to None here, as it creates local variables
         
         try:
             _initialize_async_engine()
@@ -313,9 +312,7 @@ def initialize_postgres():
                 
         except Exception as e:
             logger.error(f"Failed to initialize PostgreSQL: {e}")
-            # Ensure both are None on failure for clean state
-            async_engine = None
-            async_session_factory = None
+            # Note: Not resetting to None here as it would create local variables
             raise RuntimeError(f"Failed to initialize PostgreSQL: {e}") from e
     
     logger.debug(f"initialize_postgres returning: {async_session_factory}")

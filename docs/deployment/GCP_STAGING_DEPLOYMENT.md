@@ -96,7 +96,7 @@ After deployment, services are available at:
 - **Auth**: `https://netra-auth-service-[hash]-uc.a.run.app`
 
 Custom domains (if configured):
-- **Frontend**: `https://staging.netrasystems.ai`
+- **Frontend**: `https://app.staging.netrasystems.ai`
 - **Backend**: `https://api.staging.netrasystems.ai`
 
 ## Environment Configuration

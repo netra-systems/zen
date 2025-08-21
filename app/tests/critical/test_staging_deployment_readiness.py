@@ -133,7 +133,7 @@ class TestStagingServiceEndpoints:
     def test_staging_cors_configuration(self):
         """Test staging CORS allows correct origins."""
         allowed_origins = [
-            "https://staging.netrasystems.ai",
+            "https://app.staging.netrasystems.ai",
             "https://api.staging.netrasystems.ai"
         ]
         for origin in allowed_origins:

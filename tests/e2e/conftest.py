@@ -275,8 +275,92 @@ def requires_llm_performance(max_seconds: float = 10.0):
     return decorator
 
 
+# Throughput testing fixtures
+@pytest.fixture
+async def high_volume_server():
+    """High-volume WebSocket server fixture for throughput testing."""
+    from .test_helpers.high_volume_server import HighVolumeWebSocketServer
+    
+    # Skip if not in mock test mode
+    if os.getenv("HIGH_VOLUME_TEST_MODE", "mock") != "mock":
+        yield None
+        return
+        
+    server = HighVolumeWebSocketServer()
+    await server.start()
+    
+    # Allow server startup time
+    await asyncio.sleep(1.0)
+    
+    yield server
+    await server.stop()
+
+
+@pytest.fixture
+async def test_user_token():
+    """Create test user and return auth token for throughput testing."""
+    import uuid
+    import httpx
+    
+    if os.getenv("HIGH_VOLUME_TEST_MODE", "mock") == "real":
+        # Use real authentication service
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(
+                    f"{E2E_CONFIG['auth_service_url']}/auth/test-user",
+                    json={"email": f"throughput-test-{uuid.uuid4().hex[:8]}@example.com"},
+                    timeout=10.0
+                )
+                if response.status_code == 200:
+                    token_data = response.json()
+                    return {
+                        "user_id": token_data["user_id"],
+                        "token": token_data["token"],
+                        "email": token_data["email"]
+                    }
+        except Exception as e:
+            logger.warning(f"Real auth failed, using mock: {e}")
+    
+    # Fallback to mock authentication
+    test_user_id = f"throughput-user-{uuid.uuid4().hex[:8]}"
+    return {
+        "user_id": test_user_id,
+        "token": f"mock-token-{uuid.uuid4().hex}",
+        "email": f"{test_user_id}@example.com"
+    }
+
+
+@pytest.fixture
+async def throughput_client(test_user_token, high_volume_server):
+    """High-volume throughput client fixture."""
+    from .test_helpers.high_volume_server import HighVolumeThroughputClient
+    
+    websocket_uri = os.getenv("E2E_WEBSOCKET_URL", "ws://localhost:8765")
+    client = HighVolumeThroughputClient(websocket_uri, test_user_token["token"], "primary-client")
+    
+    # Establish connection with retry logic
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            await client.connect()
+            break
+        except Exception as e:
+            if attempt == max_retries - 1:
+                pytest.skip(f"WebSocket connection failed after {max_retries} attempts: {e}")
+            await asyncio.sleep(1.0)
+    
+    yield client
+    
+    # Cleanup
+    try:
+        await client.disconnect()
+    except Exception as e:
+        logger.warning(f"Client cleanup error: {e}")
+
+
 # Pytest markers for E2E tests
 pytest.mark.e2e = pytest.mark.e2e
 pytest.mark.real_services = pytest.mark.real_services
 pytest.mark.performance = pytest.mark.performance
 pytest.mark.critical = pytest.mark.critical
+pytest.mark.throughput = pytest.mark.throughput

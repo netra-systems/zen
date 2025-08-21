@@ -51,9 +51,9 @@ def _get_default_staging_origins() -> list[str]:
 def _get_staging_domains() -> list[str]:
     """Get staging domain origins."""
     return [
-        "https://staging.netrasystems.ai",
         "https://app.staging.netrasystems.ai",
         "https://auth.staging.netrasystems.ai",
+        "https://api.staging.netrasystems.ai",
         "https://backend.staging.netrasystems.ai"
     ]
 

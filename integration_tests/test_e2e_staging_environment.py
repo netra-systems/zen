@@ -167,6 +167,10 @@ class TestStagingHealthChecks(StagingEnvironmentE2ETests):
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.staging
+    @pytest.mark.skipif(
+        os.getenv("TEST_ENV", "dev").lower() in ["dev", "test", "local"] or not os.getenv("STAGING_API_URL"),
+        reason="Staging health check not applicable in test/dev environment"
+    )
     async def test_staging_services_health(self, staging_client):
         """Verify all staging services are healthy."""
         health_endpoints = {
@@ -229,6 +233,10 @@ class TestStagingAuthentication(StagingEnvironmentE2ETests):
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.staging
+    @pytest.mark.skipif(
+        os.getenv("TEST_ENV", "dev").lower() in ["dev", "test", "local"] or not os.getenv("STAGING_API_URL"),
+        reason="Staging authentication test not applicable in local/dev environment"
+    )
     async def test_staging_login_flow(self, staging_client):
         """Test login flow in staging environment."""
         for tier, creds in STAGING_TEST_USERS.items():

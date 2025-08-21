@@ -65,13 +65,17 @@ class TestStagingSecretsManagerIntegration:
     @mock_justified("Google Secret Manager is external service not available in test environment")
     def test_google_secret_manager_client_initialization(self, staging_project_id, mock_gsm_client):
         """Test Google Secret Manager client initializes correctly for staging."""
-        with patch('dev_launcher.google_secret_manager.secretmanager.SecretManagerServiceClient') as mock_client_class:
+        with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
             gsm = GoogleSecretManager(staging_project_id, verbose=True)
             
             assert gsm.project_id == staging_project_id
-            assert gsm.client is not None
+            assert gsm.client is None  # Client is created lazily
+            
+            # Test client creation
+            client = gsm._create_client()
+            assert client == mock_gsm_client
             mock_client_class.assert_called_once()
     
     @mock_justified("Google Secret Manager is external service not available in test environment")
@@ -82,7 +86,7 @@ class TestStagingSecretsManagerIntegration:
         mock_response.payload.data = b'test-secret-value'
         mock_gsm_client.access_secret_version.return_value = mock_response
         
-        with patch('dev_launcher.google_secret_manager.secretmanager.SecretManagerServiceClient') as mock_client_class:
+        with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
             gsm = GoogleSecretManager(staging_project_id)
@@ -137,7 +141,7 @@ class TestStagingSecretsManagerIntegration:
         
         mock_gsm_client.access_secret_version.side_effect = [initial_response, rotated_response]
         
-        with patch('dev_launcher.google_secret_manager.secretmanager.SecretManagerServiceClient') as mock_client_class:
+        with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
             gsm = GoogleSecretManager(staging_project_id)
@@ -184,7 +188,7 @@ class TestStagingSecretsManagerIntegration:
         from google.cloud.exceptions import NotFound
         mock_gsm_client.access_secret_version.side_effect = NotFound("Secret not found")
         
-        with patch('dev_launcher.google_secret_manager.secretmanager.SecretManagerServiceClient') as mock_client_class:
+        with patch('google.cloud.secretmanager.SecretManagerServiceClient') as mock_client_class:
             mock_client_class.return_value = mock_gsm_client
             
             gsm = GoogleSecretManager(staging_project_id)

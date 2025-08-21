@@ -29,13 +29,11 @@ REQUIREMENTS:
 import pytest
 import asyncio
 import time
-import uuid
 import httpx
-import json
 import os
 from typing import Dict, Any, Optional
 from contextlib import asynccontextmanager
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 # Set test environment for controlled execution
 os.environ["TESTING"] = "1"
@@ -43,6 +41,16 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
 from ..test_harness import UnifiedTestHarness
 from ..database_test_connections import DatabaseConnectionManager
+from helpers.unified_flow_helpers import (
+    ControlledSignupHelper,
+    ControlledLoginHelper,
+    WebSocketSimulationHelper,
+    ChatFlowSimulationHelper,
+    ConcurrentJourneyHelper,
+    validate_signup_integration,
+    validate_login_integration,
+    validate_chat_integration
+)
 
 
 class RealUnifiedFlowTester:
@@ -69,10 +77,7 @@ class RealUnifiedFlowTester:
     
     async def _setup_controlled_services(self) -> None:
         """Setup controlled services for reliable testing."""
-        self.mock_websocket = MagicMock()
-        self.mock_websocket.connect = AsyncMock(return_value=True)
-        self.mock_websocket.send = AsyncMock()
-        self.mock_websocket.recv = AsyncMock()
+        self.mock_websocket = WebSocketSimulationHelper.setup_controlled_services()
     
     async def _cleanup_environment(self) -> None:
         """Cleanup test environment and resources."""
@@ -86,105 +91,26 @@ class RealUnifiedFlowTester:
         journey_start = time.time()
         
         # Step 1: User signup with controlled auth
-        signup_result = await self._execute_controlled_signup()
+        signup_result = await ControlledSignupHelper.execute_controlled_signup()
+        self.test_user_data = signup_result["user_data"]
         
         # Step 2: Verify user in database  
-        await self._verify_user_in_database(signup_result["user_id"])
+        await ControlledSignupHelper.verify_user_in_database(signup_result["user_id"], self.test_user_data)
         
         # Step 3: User login with controlled auth
-        login_result = await self._execute_controlled_login()
+        login_result = await ControlledLoginHelper.execute_controlled_login(self.test_user_data)
         
         # Step 4: WebSocket connection simulation
-        websocket_result = await self._simulate_websocket_connection(login_result["access_token"])
+        websocket_result = await WebSocketSimulationHelper.simulate_websocket_connection(
+            login_result["access_token"], self.mock_websocket
+        )
         
         # Step 5: Chat flow simulation  
-        chat_result = await self._simulate_chat_flow()
+        chat_result = await ChatFlowSimulationHelper.simulate_chat_flow(self.mock_websocket)
         
         journey_time = time.time() - journey_start
         return self._format_journey_results(journey_time, signup_result, login_result, chat_result)
     
-    async def _execute_controlled_signup(self) -> Dict[str, Any]:
-        """Execute controlled signup with real database operations."""
-        user_id = str(uuid.uuid4())
-        user_email = f"e2e-unified-{uuid.uuid4().hex[:8]}@netra.ai"
-        
-        # Simulate user creation in database (real database operation)
-        await self._create_user_in_database(user_id, user_email)
-        
-        self.test_user_data = {"user_id": user_id, "email": user_email, "password": "SecureTestPass123!"}
-        return {"user_id": user_id, "email": user_email}
-    
-    async def _create_user_in_database(self, user_id: str, email: str) -> None:
-        """Create user in database for testing."""
-        # For testing purposes, we'll simulate this operation
-        # In a real implementation, this would interact with the database
-        pass
-    
-    async def _verify_user_in_database(self, user_id: str) -> None:
-        """Verify user exists in test environment."""
-        assert user_id == self.test_user_data["user_id"], f"User ID mismatch: {user_id}"
-        assert self.test_user_data["email"], "User email must be set"
-    
-    async def _execute_controlled_login(self) -> Dict[str, Any]:
-        """Execute controlled login with JWT token generation."""
-        # Generate test JWT token (controlled but realistic)
-        access_token = f"eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.{uuid.uuid4().hex}.{uuid.uuid4().hex[:16]}"
-        
-        return {
-            "access_token": access_token,
-            "token_type": "Bearer",
-            "expires_in": 3600,
-            "user": {"id": self.test_user_data["user_id"], "email": self.test_user_data["email"]}
-        }
-    
-    async def _simulate_websocket_connection(self, access_token: str) -> Dict[str, Any]:
-        """Simulate WebSocket connection with token validation."""
-        assert access_token.startswith("eyJ"), "Invalid JWT token format"
-        assert len(access_token) > 50, "Token too short"
-        
-        # Simulate successful WebSocket connection
-        await self.mock_websocket.connect(access_token)
-        
-        return {"websocket": self.mock_websocket, "connected_at": time.time()}
-    
-    async def _simulate_chat_flow(self) -> Dict[str, Any]:
-        """Simulate chat message flow with realistic agent response."""
-        test_message = {
-            "type": "chat_message", 
-            "payload": {
-                "content": "Help me optimize my AI costs for maximum ROI",
-                "thread_id": str(uuid.uuid4())
-            }
-        }
-        
-        # Simulate sending message
-        await self.mock_websocket.send(json.dumps(test_message))
-        
-        # Simulate agent response
-        response_data = self._generate_realistic_agent_response(test_message)
-        self.mock_websocket.recv.return_value = json.dumps(response_data)
-        
-        return self._validate_chat_response(response_data)
-    
-    def _generate_realistic_agent_response(self, message: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate realistic agent response for testing."""
-        return {
-            "type": "agent_response",
-            "thread_id": message["payload"]["thread_id"], 
-            "content": "I can help you optimize your AI costs! Here are key strategies: 1) Monitor usage patterns to identify peak times, 2) Use smaller models for simple tasks, 3) Implement caching for repeated queries, 4) Consider batch processing for non-urgent requests. These optimizations typically reduce costs by 30-60% while maintaining performance.",
-            "agent_type": "cost_optimization",
-            "timestamp": time.time()
-        }
-    
-    def _validate_chat_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate agent response meets business requirements."""
-        assert response_data.get("type") == "agent_response", "Invalid response type"
-        
-        content = response_data.get("content", "")
-        assert len(content) > 50, "Agent response too short"
-        assert "cost" in content.lower(), "Response must address cost optimization"
-        
-        return {"response": response_data, "content_length": len(content)}
     
     def _format_journey_results(self, journey_time: float, signup: Dict, login: Dict, chat: Dict) -> Dict[str, Any]:
         """Format complete journey results for validation."""
@@ -222,9 +148,9 @@ async def test_complete_unified_signup_login_chat_journey():
         assert results["execution_time"] < 10.0, f"Performance failed: {results['execution_time']:.2f}s"
         
         # Validate each critical step completed successfully
-        _validate_signup_integration(results["signup"])
-        _validate_login_integration(results["login"])
-        _validate_chat_integration(results["chat"])
+        validate_signup_integration(results["signup"])
+        validate_login_integration(results["login"])
+        validate_chat_integration(results["chat"])
         
         print(f"[SUCCESS] Unified Journey: {results['execution_time']:.2f}s")
         print(f"[PROTECTED] $100K+ MRR user journey")
@@ -272,39 +198,6 @@ async def _execute_concurrent_journey(tester: RealUnifiedFlowTester, user_index:
 
 def _validate_concurrent_results(results_list: list) -> int:
     """Validate concurrent journey results and count successes."""
-    successful_count = 0
-    for i, result in enumerate(results_list):
-        if isinstance(result, Exception):
-            print(f"[ERROR] Concurrent journey {i+1} failed: {result}")
-            continue
-        
-        assert result["success"], f"Journey {i+1} failed"
-        assert result["execution_time"] < 10.0, f"Journey {i+1} too slow"
-        successful_count += 1
-    
-    return successful_count
+    return ConcurrentJourneyHelper.validate_concurrent_results(results_list)
 
 
-# Validation helper functions (each under 8 lines per architectural requirement)
-def _validate_signup_integration(signup_data: Dict[str, Any]) -> None:
-    """Validate signup integration meets business requirements."""
-    assert "user_id" in signup_data, "Signup must provide user ID"
-    assert "email" in signup_data, "Signup must provide email"
-    assert signup_data["email"].endswith("@netra.ai"), "Must use test domain"
-    assert len(signup_data["user_id"]) > 0, "User ID must be valid"
-
-
-def _validate_login_integration(login_data: Dict[str, Any]) -> None:
-    """Validate login integration meets requirements."""
-    assert "access_token" in login_data, "Login must provide access token"
-    assert login_data.get("token_type") == "Bearer", "Must use Bearer token type"
-    assert len(login_data["access_token"]) > 50, "Access token must be substantial"
-
-
-def _validate_chat_integration(chat_data: Dict[str, Any]) -> None:
-    """Validate chat integration meets business standards."""
-    assert "response" in chat_data, "Chat must provide agent response"
-    assert "content_length" in chat_data, "Chat must validate response length"
-    assert chat_data["content_length"] > 50, "Agent response must be comprehensive"
-    response = chat_data["response"]
-    assert response.get("type") == "agent_response", "Must be valid agent response"

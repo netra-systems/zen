@@ -61,7 +61,7 @@ class TestAuthClientCrossServiceIntegration:
         mock_httpx_client.post = AsyncMock(return_value=mock_response)
         
         with patch.object(auth_client, '_create_http_client', return_value=mock_httpx_client):
-            result = await auth_client.validate_token("test-token-456")
+            result = await auth_client.validate_token_jwt("test-token-456")
         
         # Verify result
         assert result is not None
@@ -117,7 +117,7 @@ class TestAuthClientCrossServiceIntegration:
         
         with patch.object(auth_client, '_create_http_client', return_value=mock_httpx_client):
             # First call should fail and trigger circuit breaker
-            result = await auth_client.validate_token("test-token")
+            result = await auth_client.validate_token_jwt("test-token")
             
             # Should fall back to local validation
             assert result is not None  # Should not be None due to fallback
@@ -139,11 +139,11 @@ class TestAuthClientCrossServiceIntegration:
         with patch.object(auth_client, '_validate_token_remote', new_callable=AsyncMock) as mock_validate:
             mock_validate.return_value = mock_result
             
-            result1 = await auth_client.validate_token(test_token)
+            result1 = await auth_client.validate_token_jwt(test_token)
             assert result1 == mock_result
             
             # Second validation - should use cache
-            result2 = await auth_client.validate_token(test_token)
+            result2 = await auth_client.validate_token_jwt(test_token)
             assert result2 == mock_result
             
             # Remote validation should only be called once (first time)

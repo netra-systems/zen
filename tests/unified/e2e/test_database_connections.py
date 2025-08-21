@@ -201,12 +201,13 @@ async def test_all_databases_available_in_dev_mode(db_test_fixture):
     """Test all databases are available when dev environment starts."""
     startup_success = await db_test_fixture.start_dev_environment()
     assert startup_success, "Dev environment should start successfully"
-    
-    # Test all database connections
+    await _verify_all_database_connections(db_test_fixture)
+
+async def _verify_all_database_connections(db_test_fixture):
+    """Verify all database connections are working."""
     postgres_ok, pg_error = await db_test_fixture.db_tester.test_postgres_connection()
     clickhouse_ok, ch_error = await db_test_fixture.db_tester.test_clickhouse_connection()
     redis_ok, redis_error = db_test_fixture.db_tester.test_redis_connection()
-    
     assert postgres_ok, f"PostgreSQL not available: {pg_error}"
     assert clickhouse_ok, f"ClickHouse not available: {ch_error}"
     assert redis_ok, f"Redis not available: {redis_error}"

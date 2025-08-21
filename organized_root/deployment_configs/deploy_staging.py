@@ -602,7 +602,7 @@ def main():
     
     print("")
     print_colored("Custom domains (if configured):", Colors.CYAN)
-    print_colored("  Frontend:  https://staging.netrasystems.ai", Colors.BLUE)
+    print_colored("  Frontend:  https://app.staging.netrasystems.ai", Colors.BLUE)
     print_colored("  Backend:   https://api.staging.netrasystems.ai", Colors.BLUE)
     print("")
     

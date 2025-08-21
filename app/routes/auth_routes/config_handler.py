@@ -67,7 +67,7 @@ def determine_environment_urls() -> tuple[str, str]:
     """Determine auth service and frontend URLs based on environment."""
     environment = auth_client.detect_environment()
     if environment.value == 'staging':
-        return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
+        return 'https://auth.staging.netrasystems.ai', 'https://app.staging.netrasystems.ai'
     elif environment.value == 'production':
         return 'https://auth.netrasystems.ai', 'https://netrasystems.ai'
     config = get_config()
@@ -115,7 +115,7 @@ def create_auth_response(endpoints: AuthEndpoints, oauth_config) -> AuthConfigRe
 
 def _get_fallback_urls() -> tuple[str, str]:
     """Get fallback URLs for auth service and frontend."""
-    return 'https://auth.staging.netrasystems.ai', 'https://staging.netrasystems.ai'
+    return 'https://auth.staging.netrasystems.ai', 'https://app.staging.netrasystems.ai'
 
 def build_fallback_endpoints() -> AuthEndpoints:
     """Build fallback authentication endpoints."""
@@ -139,7 +139,7 @@ def _create_fallback_config(fallback_endpoints: AuthEndpoints, frontend_url: str
 def create_fallback_response() -> AuthConfigResponse:
     """Create fallback authentication configuration response."""
     fallback_endpoints = build_fallback_endpoints()
-    frontend_url = 'https://staging.netrasystems.ai'
+    frontend_url = 'https://app.staging.netrasystems.ai'
     return _create_fallback_config(fallback_endpoints, frontend_url)
 
 

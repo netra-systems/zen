@@ -1,94 +1,216 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<learnings category="dev-launcher">
-  <title>Dev Launcher Startup Issues and Solutions</title>
+<learnings category="dev-launcher" priority="high">
+  <title>Dev Launcher Comprehensive Guide</title>
+  <description>Consolidated learnings for dev launcher setup, configuration, and troubleshooting</description>
+  <last_updated>2025-08-20</last_updated>
   
-  <learning id="secret-key-length">
-    <problem>
-      Backend fails to start with error: "SECRET_KEY must be at least 32 characters"
-    </problem>
-    <cause>
-      The startup check in app/startup_checks/environment_checks.py requires SECRET_KEY 
-      to be longer than 32 characters. Additionally, the DevelopmentConfig class was not
-      reading SECRET_KEY from environment variables.
-    </cause>
-    <solution>
-      1. Generate a longer SECRET_KEY (64+ characters) using:
-         python -c "import secrets; print(secrets.token_urlsafe(48))"
-      2. Update SECRET_KEY in both .env and .env.development.local files
-      3. Ensure DevelopmentConfig reads SECRET_KEY from environment:
-         secret_key: str = os.environ.get("SECRET_KEY", "default_long_key...")
-    </solution>
-    <prevention>
-      - Ensure all generated SECRET_KEYs are at least 64 characters long
-      - Always configure config classes to read from environment variables
-      - Keep .env and .env.development.local files in sync for critical settings
-    </prevention>
-  </learning>
-
-  <learning id="alembic-helper-files">
-    <problem>
-      Alembic fails with: "Could not determine revision id from filename agent_tables.py"
-    </problem>
-    <cause>
-      Helper files (agent_tables.py, analysis_tables.py, etc.) were placed in the 
-      alembic/versions directory. Alembic expects only proper migration files with
-      revision variables in the versions directory.
-    </cause>
-    <solution>
-      Move helper files to a separate directory:
-      1. Create app/alembic/migrations_helpers/ directory
-      2. Move all helper files (*_tables.py, *_workflow.py, migration_metadata.py) to this directory
-      3. Update imports in migration files to reference the new location using relative imports
-    </solution>
-    <prevention>
-      Never place non-migration files in alembic/versions/. Only files with proper
-      Alembic migration structure (revision, down_revision, upgrade(), downgrade()) 
-      should be in the versions directory.
-    </prevention>
-  </learning>
-
-  <learning id="non-critical-service-failures">
-    <problem>
-      ClickHouse connection failures appear as errors but are not critical for development
-    </problem>
-    <insight>
-      ClickHouse is optional for development. The application continues to run despite
-      connection failures, but the error messages can be confusing.
-    </insight>
-    <recommendation>
-      These warnings can be safely ignored in development. ClickHouse features will be
-      limited but the core application functionality remains available.
-    </recommendation>
-  </learning>
-
-  <learning id="llm-api-keys">
-    <problem>
-      Multiple LLM configuration failures due to missing API keys
-    </problem>
-    <insight>
-      LLM API keys (GEMINI_API_KEY, etc.) are optional for basic development but required
-      for agent functionality. The application starts successfully without them.
-    </insight>
-    <recommendation>
-      Add LLM API keys to .env.development.local when working on agent features:
-      - GEMINI_API_KEY for Google AI
-      - ANTHROPIC_API_KEY for Claude
-      - OPENAI_API_KEY for OpenAI
-    </recommendation>
-  </learning>
-
-  <best-practices>
-    <practice>
-      Always check startup logs for critical vs non-critical failures. 
-      Critical failures prevent the application from starting.
+  <!-- SECTION 1: Configuration and Secrets -->
+  <section name="Configuration">
+    
+    <learning id="secret-key-configuration">
+      <problem>Backend fails with "SECRET_KEY must be at least 32 characters"</problem>
+      <solution>
+        Generate 64+ character key: python -c "import secrets; print(secrets.token_urlsafe(48))"
+        Update in both .env and .env.development.local
+        Ensure DevelopmentConfig reads from environment
+      </solution>
+      <prevention>Always use 64+ character keys, keep .env files synchronized</prevention>
+    </learning>
+    
+    <learning id="missing-api-keys">
+      <problem>Environment loader warns about missing LLM API keys</problem>
+      <solution>
+        Add placeholder keys for development:
+        ANTHROPIC_API_KEY=sk-ant-dev-placeholder-key-for-development
+        OPENAI_API_KEY=sk-openai-dev-placeholder-key-for-development
+        GEMINI_API_KEY=your-actual-key-if-using-agents
+      </solution>
+      <note>Placeholders satisfy checks when LLM_MODE=shared (mocked mode)</note>
+    </learning>
+    
+    <learning id="service-mode-configuration">
+      <problem>Services connect to cloud endpoints despite local Docker services</problem>
+      <solution>
+        Set all service modes to local in .env:
+        REDIS_MODE=local
+        CLICKHOUSE_MODE=local
+        REDIS_HOST=localhost
+        CLICKHOUSE_HOST=localhost
+        DEV_MODE_*_ENABLED=true
+      </solution>
+      <files_affected>dev_launcher/service_config.py, .env</files_affected>
+    </learning>
+    
+  </section>
+  
+  <!-- SECTION 2: Database and Migrations -->
+  <section name="Database">
+    
+    <learning id="alembic-helper-files">
+      <problem>Alembic fails: "Could not determine revision id from filename"</problem>
+      <cause>Helper files in alembic/versions directory</cause>
+      <solution>
+        1. Create app/alembic/migrations_helpers/ directory
+        2. Move all helper files (*_tables.py, migration_metadata.py) there
+        3. Only keep proper migration files in versions/
+      </solution>
+      <prevention>Never place non-migration files in alembic/versions/</prevention>
+    </learning>
+    
+    <learning id="migration-relative-imports">
+      <problem>Migrations fail with "attempted relative import with no known parent package"</problem>
+      <solution>
+        Convert all relative imports to absolute:
+        FROM: from ..migrations_helpers.migration_metadata import
+        TO: from app.alembic.migrations_helpers.migration_metadata import
+      </solution>
+    </learning>
+    
+    <learning id="database-schema-sync">
+      <problem>Schema validation fails with missing tables</problem>
+      <solution>
+        1. Check status: alembic current
+        2. Generate: alembic revision --autogenerate -m "description"
+        3. Review migration file
+        4. Apply: alembic upgrade head
+      </solution>
+      <common_missing_tables>
+        agent_state_transactions, corpus_audit_logs, 
+        agent_state_snapshots, mcp_tool_executions,
+        mcp_external_servers, agent_recovery_logs
+      </common_missing_tables>
+    </learning>
+    
+    <learning id="database-metrics-schema">
+      <problem>DatabaseMetrics instantiation fails with unexpected arguments</problem>
+      <solution>
+        Ensure DatabaseMetrics has all fields MetricsCollector passes:
+        - Add pool_size and pool_overflow fields
+        - Fix parameter mismatches (query_count → total_queries)
+        - Add required timestamp parameter
+      </solution>
+      <files_affected>app/db/observability_metrics.py, app/monitoring/metrics_collector.py</files_affected>
+    </learning>
+    
+  </section>
+  
+  <!-- SECTION 3: Health Checks and Timeouts -->
+  <section name="HealthChecks">
+    
+    <learning id="health-check-timeouts">
+      <problem>Health checks timeout during database optimization</problem>
+      <root_cause>Database optimization takes 10-15 seconds on startup</root_cause>
+      <solution>
+        Extended timeouts:
+        - Auth: 30s
+        - Backend: 30s
+        - Frontend: 60s
+        - Service startup: 30-50s
+        - Overall: 120s
+      </solution>
+    </learning>
+    
+    <learning id="dynamic-port-health-checks">
+      <problem>Health checks use hardcoded ports instead of dynamic ports</problem>
+      <solution>
+        Read ports from .service_discovery/*.json files
+        Use actual allocated ports for health checks
+        Fall back to defaults if files missing
+      </solution>
+      <files_affected>dev_launcher/startup_validator.py</files_affected>
+    </learning>
+    
+    <learning id="health-checks-development">
+      <problem>Health checks fail when optional services unavailable</problem>
+      <solution>
+        Make environment-aware:
+        - PostgreSQL: critical in all environments
+        - Redis/ClickHouse: optional in development
+        - Check environment: os.getenv("ENVIRONMENT", "development")
+      </solution>
+    </learning>
+    
+    <learning id="quick-health-check-method">
+      <problem>QuickHealthChecker missing quick_health_check method</problem>
+      <solution>
+        Use correct method name: run_quick_checks()
+        Update all references in startup_sequencer.py and launcher_integration.py
+      </solution>
+    </learning>
+    
+  </section>
+  
+  <!-- SECTION 4: Non-Critical Services -->
+  <section name="OptionalServices">
+    
+    <learning id="clickhouse-optional">
+      <insight>ClickHouse is optional for development</insight>
+      <behavior>Application continues despite connection failures</behavior>
+      <recommendation>Warnings can be safely ignored in development</recommendation>
+    </learning>
+    
+    <learning id="llm-services-optional">
+      <insight>LLM API keys optional for basic development</insight>
+      <requirement>Required only for agent functionality</requirement>
+      <keys_needed>GEMINI_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY</keys_needed>
+    </learning>
+    
+  </section>
+  
+  <!-- BEST PRACTICES -->
+  <best_practices>
+    <practice priority="critical">
+      Always check startup logs for critical vs non-critical failures
     </practice>
-    <practice>
-      Keep .env.development.local properly configured with valid SECRET_KEY 
-      and database connections.
+    <practice priority="high">
+      Keep .env.development.local synchronized with .env
     </practice>
-    <practice>
-      Organize Alembic migrations properly - only migration files in versions/, 
-      helper modules in separate directories.
+    <practice priority="high">
+      Use absolute imports in Alembic migrations
     </practice>
-  </best-practices>
+    <practice priority="medium">
+      Read dynamic ports from service discovery files
+    </practice>
+    <practice priority="medium">
+      Set timeouts based on worst-case startup times
+    </practice>
+    <practice priority="low">
+      Monitor actual startup times to adjust timeouts
+    </practice>
+  </best_practices>
+  
+  <!-- TESTING CHECKLIST -->
+  <testing_checklist>
+    <item>Backend starts without critical errors</item>
+    <item>Frontend compiles and serves</item>
+    <item>Health endpoint returns 200 OK</item>
+    <item>Database migrations apply successfully</item>
+    <item>Schema validation passes or shows only warnings</item>
+    <item>Dynamic ports allocated correctly</item>
+    <item>Auth system configuration loads</item>
+    <item>Service discovery files created</item>
+  </testing_checklist>
+  
+  <!-- TROUBLESHOOTING GUIDE -->
+  <troubleshooting>
+    <issue symptom="SECRET_KEY error">
+      Check .env and .env.development.local for 64+ character key
+    </issue>
+    <issue symptom="Alembic revision error">
+      Move helper files out of alembic/versions/
+    </issue>
+    <issue symptom="Import errors in migrations">
+      Convert relative imports to absolute
+    </issue>
+    <issue symptom="Health check timeouts">
+      Increase timeouts in startup_validator.py
+    </issue>
+    <issue symptom="Wrong port in health checks">
+      Check .service_discovery/*.json files
+    </issue>
+    <issue symptom="ClickHouse connection errors">
+      Non-critical in development, can ignore
+    </issue>
+  </troubleshooting>
+  
 </learnings>

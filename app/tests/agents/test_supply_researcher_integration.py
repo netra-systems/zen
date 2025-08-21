@@ -95,8 +95,8 @@ class TestSupplyResearcherIntegration:
     def _setup_database_mocks(self, mock_db):
         """Setup database mock expectations"""
         mock_db.query().filter().first.return_value = None  # No existing GPT-5
-        mock_db.add = Mock()
-        mock_db.commit = Mock()
+        mock_db.add = AsyncMock()
+        mock_db.commit = AsyncMock()
 
     def _verify_research_results(self, state):
         """Verify research processing results"""

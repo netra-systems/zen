@@ -104,7 +104,7 @@ class AuthCircuitBreakerTester:
                             side_effect=httpx.ConnectError("Auth service unavailable")):
                 
                 # Attempt token validation - should use fallback
-                validation_result = await self.auth_client.validate_token(self.test_token)
+                validation_result = await self.auth_client.validate_token_jwt(self.test_token)
                 
                 results["fallback_used"] = validation_result is not None
                 results["token_valid"] = validation_result.get("valid", False) if validation_result else False
@@ -171,7 +171,7 @@ class AuthCircuitBreakerTester:
                                 side_effect=httpx.ConnectError("Service down")):
                     
                     # Token validation should use cache, not hit auth service
-                    validation_result = await self.auth_client.validate_token(self.test_token)
+                    validation_result = await self.auth_client.validate_token_jwt(self.test_token)
                     
                     results["auth_bypassed"] = (
                         validation_result is not None and 

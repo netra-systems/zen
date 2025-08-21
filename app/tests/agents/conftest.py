@@ -63,9 +63,9 @@ async def _mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
 def _setup_llm_manager() -> Mock:
     """Create LLM manager mock with realistic response methods."""
     llm_manager = Mock(spec=LLMManager)
-    llm_manager.call_llm = _mock_call_llm
-    llm_manager.ask_llm = _mock_ask_llm
-    llm_manager.ask_structured_llm = _mock_ask_structured_llm
+    llm_manager.call_llm = AsyncMock(side_effect=_mock_call_llm)
+    llm_manager.ask_llm = AsyncMock(side_effect=_mock_ask_llm)
+    llm_manager.ask_structured_llm = AsyncMock(side_effect=_mock_ask_structured_llm)
     llm_manager.get = Mock(return_value=Mock())
     return llm_manager
 

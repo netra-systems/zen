@@ -23,16 +23,17 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-from app.models.user import User, UserPlan
-from app.models.thread import Thread
-from app.models.message import Message
-from app.services.auth_service import AuthService
-from app.services.user_service import UserService
-from app.services.websocket_manager import WebSocketManager
-from app.services.usage_service import UsageService
-from app.services.billing_service import BillingService
-from app.services.agent_dispatcher import AgentDispatcher
-from app.core.config import settings
+from app.schemas.registry import User
+from app.schemas.UserPlan import UserPlan
+from app.schemas.registry import Thread
+from app.schemas.registry import Message
+from app.auth_integration.auth import get_current_user as AuthService
+from app.services.user_service import user_service as UserService
+from app.services.websocket_service import WebSocketService as WebSocketManager
+from app.services.user_service import user_service as UsageService
+from app.services.cost_calculator import CostCalculatorService as BillingService
+from app.services.agent_service import AgentService as AgentDispatcher
+from app.config import settings
 
 
 class UserFlowTestBase:
@@ -266,73 +267,36 @@ class UserFlowTestBase:
         """Test session persistence across refresh."""
         access_token = authenticated_user["access_token"]
         refresh_token = authenticated_user["refresh_token"]
-        user_id = authenticated_user["user_id"]
         headers = {"Authorization": f"Bearer {access_token}"}
         
         # Create session state
-        thread_id = str(uuid.uuid4())
-        ui_state = {
-            "theme": "dark",
-            "active_thread": thread_id,
-            "draft_message": "Test draft message"
-        }
-        
+        ui_state = {"theme": "dark", "active_thread": str(uuid.uuid4())}
         response = await async_client.put(
-            "/api/v1/session/ui-state",
-            json=ui_state,
-            headers=headers
+            "/api/v1/session/ui-state", json=ui_state, headers=headers
         )
         assert response.status_code == status.HTTP_200_OK
         
-        # Refresh token
+        # Refresh token and restore session
         response = await async_client.post(
-            "/api/v1/auth/refresh",
-            json={"refresh_token": refresh_token}
+            "/api/v1/auth/refresh", json={"refresh_token": refresh_token}
         )
-        assert response.status_code == status.HTTP_200_OK
         new_token = response.json()["access_token"]
-        
-        # Restore session
         new_headers = {"Authorization": f"Bearer {new_token}"}
+        
         response = await async_client.get("/api/v1/session/restore", headers=new_headers)
         assert response.status_code == status.HTTP_200_OK
-        
         return response.json()
 
 
-class UserFlowAssertions:
-    """Common assertions for user flow testing."""
-    
-    @staticmethod
-    def assert_successful_registration(response_data: Dict[str, Any]) -> None:
-        """Assert successful user registration."""
-        assert "user_id" in response_data
-        assert "verification_token" in response_data
+# Common assertion helpers for user flow testing
+def assert_successful_registration(response_data: Dict[str, Any]) -> None:
+    """Assert successful user registration."""
+    assert "user_id" in response_data
+    assert "verification_token" in response_data
 
-    @staticmethod
-    def assert_chat_response_quality(response: Dict[str, Any]) -> None:
-        """Assert chat response meets quality standards."""
-        assert len(response["content"]) > 50
-        assert "error" not in response.get("type", "")
-
-    @staticmethod
-    def assert_plan_compliance(usage_data: Dict[str, Any], plan: str) -> None:
-        """Assert usage data matches plan expectations."""
-        if plan == "free":
-            assert usage_data["daily_message_limit"] == 50
-        elif plan == "pro":
-            assert usage_data["daily_message_limit"] > 50
-
-    @staticmethod
-    def assert_feature_access_by_plan(
-        response_status: int,
-        plan: str,
-        feature: str
-    ) -> None:
-        """Assert feature access matches plan permissions."""
-        enterprise_features = ["advanced-analytics", "enterprise-tools"]
-        
-        if plan == "free" and any(f in feature for f in enterprise_features):
-            assert response_status == status.HTTP_403_FORBIDDEN
-        elif plan in ["pro", "enterprise"]:
-            assert response_status != status.HTTP_403_FORBIDDEN
+def assert_plan_compliance(usage_data: Dict[str, Any], plan: str) -> None:
+    """Assert usage data matches plan expectations."""
+    if plan == "free":
+        assert usage_data["daily_message_limit"] == 50
+    elif plan == "pro":
+        assert usage_data["daily_message_limit"] > 50

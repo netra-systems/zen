@@ -74,7 +74,7 @@ def test_websocket_sends_message_to_agent_service(client, mock_demo_service):
     user_id = str(uuid.uuid4())
     
     # Connect to WebSocket without authentication (demo endpoint doesn't require it)
-    with client.websocket_connect("/ws") as websocket:
+    with client.websocket_connect("/api/demo/ws") as websocket:
         # Receive connection established message
         connection_msg = websocket.receive_json()
         assert connection_msg["type"] == "connection_established"
@@ -96,7 +96,7 @@ def test_websocket_receives_message_from_server(client, mock_demo_service):
     user_id = str(uuid.uuid4())
     
     # Connect to WebSocket without authentication (demo endpoint doesn't require it)
-    with client.websocket_connect("/ws") as websocket:
+    with client.websocket_connect("/api/demo/ws") as websocket:
         # Receive and verify connection established message from server
         connection_msg = websocket.receive_json()
         assert connection_msg["type"] == "connection_established"

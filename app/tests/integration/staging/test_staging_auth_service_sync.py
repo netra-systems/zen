@@ -99,7 +99,7 @@ class TestStagingAuthServiceSync:
             mock_session.post.return_value.__aenter__.return_value = mock_response
             
             # Test token validation synchronization
-            auth_context = await auth_manager.validate_token(user_token)
+            auth_context = await auth_manager.validate_token_jwt(user_token)
             
             assert auth_context.authenticated is True
             assert auth_context.user_id == test_user_data["user_id"]
@@ -116,14 +116,14 @@ class TestStagingAuthServiceSync:
         )
         
         # Validate token initially (should be cached)
-        auth_context1 = await auth_manager.validate_token(user_token)
+        auth_context1 = await auth_manager.validate_token_jwt(user_token)
         assert auth_context1.authenticated is True
         
         # Simulate auth service restart by clearing service tokens
         auth_manager._service_tokens.clear()
         
         # User token should still be valid from cache
-        auth_context2 = await auth_manager.validate_token(user_token)
+        auth_context2 = await auth_manager.validate_token_jwt(user_token)
         assert auth_context2.authenticated is True
         assert auth_context2.user_id == test_user_data["user_id"]
 
@@ -137,7 +137,7 @@ class TestStagingAuthServiceSync:
         
         # Multiple token validations
         for _ in range(3):
-            await auth_manager.validate_token(user_token)
+            await auth_manager.validate_token_jwt(user_token)
         
         # Get metrics
         metrics = auth_manager.get_metrics()

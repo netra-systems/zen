@@ -40,7 +40,7 @@ class CORSValidationTester:
                 "https://localhost:3000"
             ],
             "staging": [
-                "https://staging.netrasystems.ai",
+                "https://app.staging.netrasystems.ai",
                 "https://app.staging.netrasystems.ai",
                 "https://auth.staging.netrasystems.ai"
             ],

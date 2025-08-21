@@ -161,7 +161,7 @@ class MockAuthService:
         }
         return token
     
-    async def validate_token(self, token: str) -> bool:
+    async def validate_token_jwt(self, token: str) -> bool:
         """Validate session token."""
         return token in self.valid_tokens
     
@@ -757,8 +757,8 @@ async def test_mock_services_functionality(mock_auth_service, mock_agent_context
     """Test mock service functionality for proper test isolation."""
     # Test auth service
     token = mock_auth_service.create_session_token("test_user")
-    assert await mock_auth_service.validate_token(token)
-    assert not await mock_auth_service.validate_token("invalid_token")
+    assert await mock_auth_service.validate_token_jwt(token)
+    assert not await mock_auth_service.validate_token_jwt("invalid_token")
     
     metadata = await mock_auth_service.get_token_metadata(token)
     assert metadata["user_id"] == "test_user"

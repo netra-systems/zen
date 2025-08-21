@@ -173,9 +173,9 @@
       "component": "backend",
       "first_seen": "2025-08-20T14:41:19.338805",
       "last_failure": "2025-08-20T14:41:19.338805",
-      "last_pass": "2025-08-20T14:42:48.188800",
+      "last_pass": "2025-08-20T15:20:13.438325",
       "total_failures": 1,
-      "total_passes": 2,
+      "total_passes": 3,
       "consecutive_failures": 0,
       "recent_failures": [
         {
@@ -192,9 +192,9 @@
       "component": "backend",
       "first_seen": "2025-08-20T14:41:19.499729",
       "last_failure": "2025-08-20T14:41:19.499729",
-      "last_pass": "2025-08-20T14:42:48.281989",
+      "last_pass": "2025-08-20T15:20:13.498155",
       "total_failures": 1,
-      "total_passes": 2,
+      "total_passes": 3,
       "consecutive_failures": 0,
       "recent_failures": [
         {
@@ -211,9 +211,9 @@
       "component": "backend",
       "first_seen": "2025-08-20T14:41:19.531883",
       "last_failure": "2025-08-20T14:41:19.531883",
-      "last_pass": "2025-08-20T14:42:48.287560",
+      "last_pass": "2025-08-20T15:20:13.502698",
       "total_failures": 1,
-      "total_passes": 2,
+      "total_passes": 3,
       "consecutive_failures": 0,
       "recent_failures": [
         {
@@ -230,9 +230,9 @@
       "component": "backend",
       "first_seen": "2025-08-20T14:41:19.544642",
       "last_failure": "2025-08-20T14:42:09.285891",
-      "last_pass": "2025-08-20T14:42:48.290561",
+      "last_pass": "2025-08-20T15:20:13.506398",
       "total_failures": 2,
-      "total_passes": 2,
+      "total_passes": 4,
       "consecutive_failures": 0,
       "recent_failures": [
         {
@@ -573,15 +573,21 @@
     "tests/integration/staging/test_staging_secrets_manager_integration.py::TestStagingSecretsManagerIntegration::test_google_secret_manager_client_initialization": {
       "component": "backend",
       "first_seen": "2025-08-20T14:46:03.567050",
-      "last_failure": "2025-08-20T14:46:03.567050",
-      "last_pass": null,
-      "total_failures": 1,
-      "total_passes": 0,
-      "consecutive_failures": 1,
+      "last_failure": "2025-08-20T15:32:23.069975",
+      "last_pass": "2025-08-20T15:32:55.989733",
+      "total_failures": 2,
+      "total_passes": 1,
+      "consecutive_failures": 0,
       "recent_failures": [
         {
           "run_id": "run_20250820_144602_62692",
           "timestamp": "2025-08-20T14:46:03.567050",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: module 'dev_launcher.google_secret_manager' has no attribute 'secretmanager'"
+        },
+        {
+          "run_id": "run_20250820_153222_42376",
+          "timestamp": "2025-08-20T15:32:23.069975",
           "error_type": "AttributeError",
           "error_message": "AttributeError: module 'dev_launcher.google_secret_manager' has no attribute 'secretmanager'"
         }
@@ -650,10 +656,10 @@
       "component": "backend",
       "first_seen": "2025-08-20T14:48:34.214378",
       "last_failure": "2025-08-20T14:51:47.269195",
-      "last_pass": null,
+      "last_pass": "2025-08-20T15:27:25.616454",
       "total_failures": 2,
-      "total_passes": 0,
-      "consecutive_failures": 2,
+      "total_passes": 3,
+      "consecutive_failures": 0,
       "recent_failures": [
         {
           "run_id": "run_20250820_144812_92811",
@@ -674,17 +680,23 @@
     "tests/integration/test_cache_invalidation_chain.py::TestCacheInvalidationChain::test_cache_warming_performance": {
       "component": "backend",
       "first_seen": "2025-08-20T14:48:35.058925",
-      "last_failure": "2025-08-20T14:48:35.058925",
-      "last_pass": null,
-      "total_failures": 1,
-      "total_passes": 0,
-      "consecutive_failures": 1,
+      "last_failure": "2025-08-20T15:22:45.987064",
+      "last_pass": "2025-08-20T15:27:25.756266",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
       "recent_failures": [
         {
           "run_id": "run_20250820_144812_92811",
           "timestamp": "2025-08-20T14:48:35.058925",
           "error_type": "AssertionError",
           "error_message": "AssertionError: Cache warming for small_batch took 804.2006492614746ms, exceeds 100ms target\nassert 804.2006492614746 < 100"
+        },
+        {
+          "run_id": "run_20250820_152220_40946",
+          "timestamp": "2025-08-20T15:22:45.987064",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Cache warming for medium_batch took 3095.0820446014404ms, exceeds 2000ms target\nassert 3095.0820446014404 < 2000"
         }
       ],
       "marked_as_bad": false,
@@ -693,17 +705,23 @@
     "tests/integration/test_cache_invalidation_chain.py::test_comprehensive_cache_invalidation_validation": {
       "component": "backend",
       "first_seen": "2025-08-20T14:48:35.828412",
-      "last_failure": "2025-08-20T14:48:35.828412",
-      "last_pass": null,
-      "total_failures": 1,
-      "total_passes": 0,
-      "consecutive_failures": 1,
+      "last_failure": "2025-08-20T15:23:14.671003",
+      "last_pass": "2025-08-20T15:27:46.919607",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
       "recent_failures": [
         {
           "run_id": "run_20250820_144812_92811",
           "timestamp": "2025-08-20T14:48:35.828412",
           "error_type": "Error",
           "error_message": "Failed: Fixture \"setup_test_environment\" called directly. Fixtures are not meant to be called directly,\nbut are created automatically when test functions request them as parameters.\nSee https://docs.pytest.org/en/stable/explanation/fixtures.html for more information about fixtures, and\nhttps://docs.pytest.org/en/stable/deprecations.html#calling-fixtures-directly"
+        },
+        {
+          "run_id": "run_20250820_152220_40946",
+          "timestamp": "2025-08-20T15:23:14.671003",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Cache invalidation test suite success rate 66.66666666666666% below 85% requirement\nassert 66.66666666666666 >= 85.0"
         }
       ],
       "marked_as_bad": false,
@@ -1350,812 +1368,1668 @@
       ],
       "marked_as_bad": false,
       "bad_reason": null
+    },
+    "tests/integration/test_dev_environment_initialization.py::TestDevEnvironmentInitialization::test_auto_recovery_mechanisms": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:21:43.231082",
+      "last_failure": "2025-08-20T15:21:43.231082",
+      "last_pass": "2025-08-20T15:23:22.927303",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_152131_91819",
+          "timestamp": "2025-08-20T15:21:43.231082",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Backend recovery should have been called\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_dev_environment_initialization.py::TestDevEnvironmentInitialization::test_startup_timing_and_performance": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:23:49.212976",
+      "last_failure": "2025-08-20T15:23:49.212976",
+      "last_pass": "2025-08-20T15:25:21.667148",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_152317_97778",
+          "timestamp": "2025-08-20T15:23:49.212976",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Database validation took 26.03s\nassert 26.029118299484253 < 10.0"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cold_start_to_agent_response.py::TestColdStartToAgentResponse::test_cold_start_to_first_agent_response_e2e": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:33:52.290612",
+      "last_failure": "2025-08-20T15:35:30.482336",
+      "last_pass": "2025-08-20T17:27:58.348999",
+      "total_failures": 4,
+      "total_passes": 5,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153348_28739",
+          "timestamp": "2025-08-20T15:33:52.290612",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: WebSocket connection failed\nassert False"
+        },
+        {
+          "run_id": "run_20250820_153421_61139",
+          "timestamp": "2025-08-20T15:34:24.840906",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Agent response not received within timeout\nassert False"
+        },
+        {
+          "run_id": "run_20250820_153435_75487",
+          "timestamp": "2025-08-20T15:34:39.467412",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'QualityMetricValidator' object has no attribute '_calculate_quality_metrics'"
+        },
+        {
+          "run_id": "run_20250820_153526_26621",
+          "timestamp": "2025-08-20T15:35:30.482336",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Response quality below threshold: {'metrics': {'specificity': 0.336, 'actionability': 0.48649999999999993, 'completeness': 0.168, 'clarity': 0.6255}, 'thresholds': {'specificity': 0.6, 'actionability': 0.6, 'completeness': 0.5, 'clarity': 0.7}, 'passed': False, 'expected_quality': 'good', 'overall_score': 0.40545}\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/test_system_startup.py::TestSystemStartup::test_dev_launcher_list_services": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:37:33.798496",
+      "last_failure": "2025-08-20T15:38:02.621847",
+      "last_pass": "2025-08-20T15:40:37.912102",
+      "total_failures": 2,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153731_51937",
+          "timestamp": "2025-08-20T15:37:33.798496",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 'Current service configuration:' in '\\n============================================================\\n\u00f0\u0178\u201d\u00a7 Current Service Configuration\\n=================...ocal instance\\n                       localhost:8081\\n\\n============================================================\\n'\n +  where '\\n============================================================\\n\u00f0\u0178\u201d\u00a7 Current Service Configuration\\n=================...ocal instance\\n                       localhost:8081\\n\\n============="
+        },
+        {
+          "run_id": "run_20250820_153800_80998",
+          "timestamp": "2025-08-20T15:38:02.621847",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 'Current service configuration:' in '\\n============================================================\\n\u00f0\u0178\u201d\u00a7 Current Service Configuration\\n============================================================\\n\\nConfiguration file: C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\.dev_services.json\\n\\n   Redis           : local    - Local instance\\n                       localhost:6379\\n   ClickHouse      : local    - Local instance\\n                       localho"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_database_connectivity.py::test_database_connectivity_check_success": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:38:52.669669",
+      "last_failure": "2025-08-20T15:38:52.669669",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153849_29243",
+          "timestamp": "2025-08-20T15:38:52.669669",
+          "error_type": "Error",
+          "error_message": "assert False is True"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_database_connectivity.py::test_database_connectivity_with_none_engine": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:38:52.715210",
+      "last_failure": "2025-08-20T15:38:52.715210",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153849_29243",
+          "timestamp": "2025-08-20T15:38:52.715210",
+          "error_type": "AttributeError",
+          "error_message": "Failed: DID NOT RAISE <class 'AttributeError'>"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_database_connectivity.py::test_startup_schema_validation_with_uninitialized_engine": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:38:52.885677",
+      "last_failure": "2025-08-20T15:38:52.885677",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153849_29243",
+          "timestamp": "2025-08-20T15:38:52.885677",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'app.startup_module' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\app\\\\startup_module.py'> does not have the attribute 'async_engine'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_database_connectivity.py::test_comprehensive_validation_with_engine": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:38:52.918457",
+      "last_failure": "2025-08-20T15:38:52.918457",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153849_29243",
+          "timestamp": "2025-08-20T15:38:52.918457",
+          "error_type": "Error",
+          "error_message": "assert False is True"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_websocket.py::test_websocket_receives_message_from_server": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:39:28.737224",
+      "last_failure": "2025-08-20T15:39:28.737224",
+      "last_pass": "2025-08-20T16:36:58.879335",
+      "total_failures": 1,
+      "total_passes": 4,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_153924_64528",
+          "timestamp": "2025-08-20T15:39:28.737224",
+          "error_type": "Error",
+          "error_message": "starlette.websockets.WebSocketDisconnect"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_websocket_simple.py::test_websocket_connection": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:44:04.327045",
+      "last_failure": "2025-08-20T15:44:04.327045",
+      "last_pass": "2025-08-20T15:59:14.284235",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_154401_41016",
+          "timestamp": "2025-08-20T15:44:04.327045",
+          "error_type": "Error",
+          "error_message": "starlette.websockets.WebSocketDisconnect"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_dev_environment.py::TestDatabaseTransactionsE2E::test_concurrent_transactions": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:44:51.389691",
+      "last_failure": "2025-08-20T15:44:51.389691",
+      "last_pass": "2025-08-20T15:59:17.010727",
+      "total_failures": 1,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_154445_85298",
+          "timestamp": "2025-08-20T15:44:51.389691",
+          "error_type": "Error",
+          "error_message": "assert 404 in [200, 201]\n +  where 404 = <Response [404 Not Found]>.status_code"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_dev_environment.py::TestAuthenticationE2E::test_complete_auth_lifecycle": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:46:00.707612",
+      "last_failure": "2025-08-20T15:52:40.201156",
+      "last_pass": "2025-08-20T16:30:38.413964",
+      "total_failures": 3,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_154551_51591",
+          "timestamp": "2025-08-20T15:46:00.707612",
+          "error_type": "Error",
+          "error_message": "assert 403 in [200, 201]\n +  where 403 = <Response [403 Forbidden]>.status_code"
+        },
+        {
+          "run_id": "run_20250820_154715_35080",
+          "timestamp": "2025-08-20T15:47:23.107011",
+          "error_type": "Error",
+          "error_message": "assert 404 == 200\n +  where 404 = <Response [404 Not Found]>.status_code"
+        },
+        {
+          "run_id": "run_20250820_155230_50321",
+          "timestamp": "2025-08-20T15:52:40.201156",
+          "error_type": "Error",
+          "error_message": "assert 404 == 200\n +  where 404 = <Response [404 Not Found]>.status_code"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_websocket_error_recovery.py::TestWebSocketPerformanceUnderLoad::test_websocket_performance_under_connection_load": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:49:39.686329",
+      "last_failure": "2025-08-20T15:49:39.686329",
+      "last_pass": "2025-08-20T15:50:35.813179",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_154937_77465",
+          "timestamp": "2025-08-20T15:49:39.686329",
+          "error_type": "Error",
+          "error_message": "KeyError: 'connections_opened'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_websocket_error_recovery.py::TestWebSocketPerformanceUnderLoad::test_message_queue_performance_under_load": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:49:39.704231",
+      "last_failure": "2025-08-20T15:49:39.704231",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_154937_77465",
+          "timestamp": "2025-08-20T15:49:39.704231",
+          "error_type": "Error",
+          "error_message": "KeyError: 'connections_opened'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_websocket_error_recovery.py::TestWebSocketErrorScenarios::test_recovery_with_corrupted_state_data": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:49:39.722050",
+      "last_failure": "2025-08-20T15:49:39.722050",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_154937_77465",
+          "timestamp": "2025-08-20T15:49:39.722050",
+          "error_type": "Error",
+          "error_message": "KeyError: 'connections_opened'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_multi_tab_websocket.py::TestMultiTabWebSocket::test_multi_tab_websocket_broadcast": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:51:03.583192",
+      "last_failure": "2025-08-20T15:54:00.191889",
+      "last_pass": "2025-08-20T16:11:09.738210",
+      "total_failures": 5,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_155043_43846",
+          "timestamp": "2025-08-20T15:51:03.583192",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Expected 3 connections, got 0\nassert 0 == 3\n +  where 0 = len([])"
+        },
+        {
+          "run_id": "run_20250820_155208_28982",
+          "timestamp": "2025-08-20T15:52:11.069570",
+          "error_type": "TypeError",
+          "error_message": "TypeError: BaseEventLoop.create_connection() got an unexpected keyword argument 'extra_headers'"
+        },
+        {
+          "run_id": "run_20250820_155300_80943",
+          "timestamp": "2025-08-20T15:53:05.247120",
+          "error_type": "Error",
+          "error_message": "UnicodeEncodeError: 'charmap' codec can't encode character '\\u2713' in position 0: character maps to <undefined>"
+        },
+        {
+          "run_id": "run_20250820_155331_11464",
+          "timestamp": "2025-08-20T15:53:35.151661",
+          "error_type": "Error",
+          "error_message": "UnicodeEncodeError: 'charmap' codec can't encode character '\\u2713' in position 0: character maps to <undefined>"
+        },
+        {
+          "run_id": "run_20250820_155351_31450",
+          "timestamp": "2025-08-20T15:54:00.191889",
+          "error_type": "Error",
+          "error_message": "UnicodeEncodeError: 'charmap' codec can't encode character '\\u2713' in position 0: character maps to <undefined>"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_database_consistency.py::TestDatabaseConsistencyE2E::test_cross_service_database_transaction": {
+      "component": "backend",
+      "first_seen": "2025-08-20T15:56:18.703347",
+      "last_failure": "2025-08-20T15:57:17.527305",
+      "last_pass": "2025-08-20T16:11:23.971214",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_155601_61874",
+          "timestamp": "2025-08-20T15:56:18.703347",
+          "error_type": "Error",
+          "error_message": "KeyError: 'id'"
+        },
+        {
+          "run_id": "run_20250820_155701_21426",
+          "timestamp": "2025-08-20T15:57:17.527305",
+          "error_type": "Error",
+          "error_message": "KeyError: 'id'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "test_e2e_dev_environment.py::TestEndToEndUserJourney::test_complete_optimization_journey": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:06:27.943503",
+      "last_failure": "2025-08-20T16:06:27.943503",
+      "last_pass": "2025-08-20T16:49:58.852076",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160618_78169",
+          "timestamp": "2025-08-20T16:06:27.943503",
+          "error_type": "Error",
+          "error_message": "assert 404 in [200, 201]\n +  where 404 = <Response [404 Not Found]>.status_code"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_service_failure_recovery.py::TestServiceFailureRecovery::test_auth_service_failure_isolation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:06:51.251121",
+      "last_failure": "2025-08-20T16:06:51.251121",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160638_98887",
+          "timestamp": "2025-08-20T16:06:51.251121",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Failed to simulate Auth service failure\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_service_failure_recovery.py::TestServiceFailureRecovery::test_cascading_failure_prevention": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:08:02.211529",
+      "last_failure": "2025-08-20T16:08:02.211529",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160638_98887",
+          "timestamp": "2025-08-20T16:08:02.211529",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Failed to simulate Auth failure\nassert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/routes/test_thread_messaging.py::TestThreadMessaging::test_message_search_within_thread": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:08:29.101950",
+      "last_failure": "2025-08-20T16:08:29.101950",
+      "last_pass": "2025-08-20T16:50:44.963131",
+      "total_failures": 1,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160828_8516",
+          "timestamp": "2025-08-20T16:08:29.101950",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'app.services.thread_service' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\app\\\\services\\\\thread_service.py'> does not have the attribute 'search_messages_in_thread'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cross_service_transaction.py::TestCrossServiceTransaction::test_successful_cross_service_transaction": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:08:56.047566",
+      "last_failure": "2025-08-20T16:08:56.047566",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160833_13317",
+          "timestamp": "2025-08-20T16:08:56.047566",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'NoneType' object has no attribute 'fetchrow'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cross_service_transaction.py::TestCrossServiceTransaction::test_transaction_rollback_on_backend_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:09:04.873741",
+      "last_failure": "2025-08-20T16:09:04.873741",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160833_13317",
+          "timestamp": "2025-08-20T16:09:04.873741",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'NoneType' object has no attribute 'fetchrow'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cross_service_transaction.py::TestCrossServiceTransaction::test_transaction_rollback_on_clickhouse_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:09:13.666773",
+      "last_failure": "2025-08-20T16:09:13.666773",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160833_13317",
+          "timestamp": "2025-08-20T16:09:13.666773",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'NoneType' object has no attribute 'fetchrow'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cross_service_transaction.py::TestCrossServiceTransaction::test_partial_transaction_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:09:22.499638",
+      "last_failure": "2025-08-20T16:09:22.499638",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_160833_13317",
+          "timestamp": "2025-08-20T16:09:22.499638",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'NoneType' object has no attribute 'fetchrow'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_database_consistency.py::TestDatabaseConsistencyE2E::test_transaction_rollback_on_failure": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:11:39.110368",
+      "last_failure": "2025-08-20T16:11:39.110368",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_161022_22447",
+          "timestamp": "2025-08-20T16:11:39.110368",
+          "error_type": "TypeError",
+          "error_message": "Failed: DID NOT RAISE any of (<class 'ValueError'>, <class 'TypeError'>)"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_dev_environment.py::TestEndToEndUserJourney::test_complete_optimization_journey": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:12:15.673877",
+      "last_failure": "2025-08-20T16:12:15.673877",
+      "last_pass": "2025-08-20T16:13:42.527459",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_161207_27384",
+          "timestamp": "2025-08-20T16:12:15.673877",
+          "error_type": "Error",
+          "error_message": "assert 403 in [200, 201]\n +  where 403 = <Response [403 Forbidden]>.status_code"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_dev_environment.py::TestAgentOrchestrationE2E::test_multi_agent_coordination": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:13:06.501265",
+      "last_failure": "2025-08-20T16:13:06.501265",
+      "last_pass": "2025-08-20T16:30:54.351938",
+      "total_failures": 1,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_161253_73494",
+          "timestamp": "2025-08-20T16:13:06.501265",
+          "error_type": "Error",
+          "error_message": "assert 500 in [200, 202, 401, 404]\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/e2e/test_multi_service.py::TestCrossServiceAuthentication::test_frontend_auth_flow_with_backend": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:19:37.773589",
+      "last_failure": "2025-08-20T16:19:37.773589",
+      "last_pass": "2025-08-20T16:20:25.139870",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_161936_76735",
+          "timestamp": "2025-08-20T16:19:37.773589",
+          "error_type": "Error",
+          "error_message": "Failed: Auth flow failed: EnhancedCRUDService.__init__() missing 1 required positional argument: 'model_class'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_staging_environment.py::TestStagingHealthChecks::test_staging_services_health": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:20:23.450981",
+      "last_failure": "2025-08-20T16:20:23.450981",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_162009_9704",
+          "timestamp": "2025-08-20T16:20:23.450981",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Backend service unhealthy\nassert False\n +  where False = <built-in method get of dict object at 0x000001CEB2B0EB80>('healthy')\n +    where <built-in method get of dict object at 0x000001CEB2B0EB80> = {'error': \"[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'netra-backend-staging-xyz123.run.app'. (_ssl.c:1000)\", 'healthy': False}.get\n +      where {'error': \"[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Ho"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_dev_environment.py::TestWebSocketE2E::test_websocket_lifecycle": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:27:04.054308",
+      "last_failure": "2025-08-20T16:27:04.054308",
+      "last_pass": "2025-08-20T16:31:01.519618",
+      "total_failures": 1,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_162652_12775",
+          "timestamp": "2025-08-20T16:27:04.054308",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 'connection_established' in ['pong', 'acknowledgment']\n +  where 'connection_established' = <built-in method get of dict object at 0x000001D74E19F3C0>('type')\n +    where <built-in method get of dict object at 0x000001D74E19F3C0> = {'message': 'Connected to Netra AI Demo WebSocket', 'session_id': 'demo-ws-81157319-6d34-408e-9fd2-6ad541bffde3', 'type': 'connection_established'}.get"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "integration_tests/test_e2e_dev_environment.py::TestWebSocketE2E::test_websocket_real_time_updates": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:31:07.012417",
+      "last_failure": "2025-08-20T16:32:13.263515",
+      "last_pass": null,
+      "total_failures": 2,
+      "total_passes": 0,
+      "consecutive_failures": 2,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_163031_31969",
+          "timestamp": "2025-08-20T16:31:07.012417",
+          "error_type": "Error",
+          "error_message": "assert 0 > 0\n +  where 0 = len([])"
+        },
+        {
+          "run_id": "run_20250820_163201_21924",
+          "timestamp": "2025-08-20T16:32:13.263515",
+          "error_type": "TypeError",
+          "error_message": "TypeError: WebSocketTestSession.receive_json() got an unexpected keyword argument 'timeout'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/critical_paths/test_redis_websocket_state_sync.py::TestRedisWebSocketStateSyncL3::test_session_store_websocket_state_recovery": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:32:46.612963",
+      "last_failure": "2025-08-20T16:32:46.612963",
+      "last_pass": "2025-08-20T16:36:21.516813",
+      "total_failures": 1,
+      "total_passes": 4,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_163244_64027",
+          "timestamp": "2025-08-20T16:32:46.612963",
+          "error_type": "Error",
+          "error_message": "assert False"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/critical_paths/test_redis_websocket_state_sync.py::TestRedisWebSocketStateSyncL3::test_multiple_websocket_connections_share_redis_session": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:33:48.570926",
+      "last_failure": "2025-08-20T16:35:54.247153",
+      "last_pass": null,
+      "total_failures": 3,
+      "total_passes": 0,
+      "consecutive_failures": 3,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_163344_24304",
+          "timestamp": "2025-08-20T16:33:48.570926",
+          "error_type": "Error",
+          "error_message": "assert False"
+        },
+        {
+          "run_id": "run_20250820_163501_1221",
+          "timestamp": "2025-08-20T16:35:05.363558",
+          "error_type": "Error",
+          "error_message": "KeyError: 'target_cost_reduction'"
+        },
+        {
+          "run_id": "run_20250820_163550_50987",
+          "timestamp": "2025-08-20T16:35:54.247153",
+          "error_type": "Error",
+          "error_message": "KeyError: 'target_cost_reduction'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/critical_paths/test_redis_websocket_state_sync.py::TestRedisWebSocketStateSyncL3::test_concurrent_session_updates_from_multiple_connections": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:33:54.579462",
+      "last_failure": "2025-08-20T16:35:59.548911",
+      "last_pass": null,
+      "total_failures": 3,
+      "total_passes": 0,
+      "consecutive_failures": 3,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_163344_24304",
+          "timestamp": "2025-08-20T16:33:54.579462",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 'connection_0_data' in {'connection_1_data': {'connection_specific': 'data_from_conn_1', 'last_activity': '2025-08-20T23:33:54.539566+00:00'}}"
+        },
+        {
+          "run_id": "run_20250820_163501_1221",
+          "timestamp": "2025-08-20T16:35:11.587439",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 'connection_0_data' in {'base_session': {'created_at': '2025-08-20T23:35:11.552517+00:00', 'user_id': 'state_sync_user_123'}, 'connection_2_data': {'connection_specific': 'data_from_conn_2', 'last_activity': '2025-08-20T23:35:11.560068+00:00', 'update_sequence': 2}}"
+        },
+        {
+          "run_id": "run_20250820_163550_50987",
+          "timestamp": "2025-08-20T16:35:59.548911",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: assert 'connection_0_data' in {'base_session': {'created_at': '2025-08-20T23:35:59.528942+00:00', 'user_id': 'state_sync_user_123'}, 'connection_1_data': {'connection_specific': 'data_from_conn_1', 'last_activity': '2025-08-20T23:35:59.533933+00:00', 'update_sequence': 1}}"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/critical_paths/test_redis_websocket_state_sync.py::TestRedisWebSocketStateSyncL3::test_state_recovery_after_redis_restart": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:33:56.076557",
+      "last_failure": "2025-08-20T16:33:56.076557",
+      "last_pass": "2025-08-20T16:36:27.330378",
+      "total_failures": 1,
+      "total_passes": 3,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_163344_24304",
+          "timestamp": "2025-08-20T16:33:56.076557",
+          "error_type": "Error",
+          "error_message": "assert 0 > 0"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_workflow_verification_l2.py::TestWorkflowStatusVerifier::test_api_request_http_error": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:40:41.171120",
+      "last_failure": "2025-08-20T16:40:41.171120",
+      "last_pass": "2025-08-20T16:41:19.103680",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_164032_32349",
+          "timestamp": "2025-08-20T16:40:41.171120",
+          "error_type": "Error",
+          "error_message": "tenacity.RetryError: RetryError[<Future at 0x16a2d4ed580 state=finished raised GitHubAPIError>]"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/critical_paths/test_supervisor_subagent_communication.py::TestSupervisorSubAgentCommunication::test_basic_supervisor_delegation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:43:25.689573",
+      "last_failure": "2025-08-20T16:43:25.689573",
+      "last_pass": "2025-08-20T16:43:48.351377",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_164324_4409",
+          "timestamp": "2025-08-20T16:43:25.689573",
+          "error_type": "Error",
+          "error_message": "assert False is True"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/routes/test_websocket_connection.py::TestWebSocketConnection::test_websocket_authentication_user_not_found": {
+      "component": "backend",
+      "first_seen": "2025-08-20T16:49:58.872995",
+      "last_failure": "2025-08-20T16:49:58.872995",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_164942_82144",
+          "timestamp": "2025-08-20T16:49:58.872995",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: 'NoneType' object has no attribute 'is_active'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/unified/e2e/test_cold_start_to_agent_response.py::TestColdStartToAgentResponse::test_cold_start_timeout_scenarios": {
+      "component": "backend",
+      "first_seen": "2025-08-20T17:27:59.006600",
+      "last_failure": "2025-08-20T17:27:59.006600",
+      "last_pass": "2025-08-20T17:28:30.932767",
+      "total_failures": 1,
+      "total_passes": 1,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_172753_73550",
+          "timestamp": "2025-08-20T17:27:59.006600",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Should handle connection timeout gracefully\nassert not True"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
     }
   },
   "runs": [
     {
-      "run_id": "run_20250820_143422_62564",
-      "timestamp": "2025-08-20T14:34:23.540343",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143431_71524",
-      "timestamp": "2025-08-20T14:34:31.858564",
-      "total_tests": 11,
-      "passed": 11,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143504_4257",
-      "timestamp": "2025-08-20T14:35:04.500273",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143513_13765",
-      "timestamp": "2025-08-20T14:35:13.832044",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143520_20332",
-      "timestamp": "2025-08-20T14:35:21.012178",
-      "total_tests": 8,
-      "passed": 4,
-      "failed": 4,
-      "bad_tests_count": 4
-    },
-    {
-      "run_id": "run_20250820_143526_26636",
-      "timestamp": "2025-08-20T14:35:26.765152",
-      "total_tests": 13,
-      "passed": 13,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143539_39345",
-      "timestamp": "2025-08-20T14:35:39.590097",
-      "total_tests": 13,
-      "passed": 13,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143539_39657",
-      "timestamp": "2025-08-20T14:35:39.805354",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143542_42348",
-      "timestamp": "2025-08-20T14:35:42.474515",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143545_45022",
-      "timestamp": "2025-08-20T14:35:45.138878",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143547_47820",
-      "timestamp": "2025-08-20T14:35:47.974348",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143554_54390",
-      "timestamp": "2025-08-20T14:35:57.683292",
-      "total_tests": 5,
-      "passed": 5,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143622_82934",
-      "timestamp": "2025-08-20T14:36:23.754811",
-      "total_tests": 8,
-      "passed": 7,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143700_20970",
-      "timestamp": "2025-08-20T14:37:02.551551",
-      "total_tests": 8,
-      "passed": 5,
-      "failed": 3,
-      "bad_tests_count": 3
-    },
-    {
-      "run_id": "run_20250820_143805_85272",
-      "timestamp": "2025-08-20T14:38:06.276745",
-      "total_tests": 8,
-      "passed": 7,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_143826_6263",
-      "timestamp": "2025-08-20T14:38:26.754870",
-      "total_tests": 8,
-      "passed": 8,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_143858_38083",
-      "timestamp": "2025-08-20T14:38:58.940548",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144103_63909",
-      "timestamp": "2025-08-20T14:41:04.322009",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144118_78616",
-      "timestamp": "2025-08-20T14:41:19.562724",
-      "total_tests": 8,
-      "passed": 4,
-      "failed": 4,
-      "bad_tests_count": 4
-    },
-    {
-      "run_id": "run_20250820_144154_14843",
-      "timestamp": "2025-08-20T14:41:55.080436",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144208_28347",
-      "timestamp": "2025-08-20T14:42:09.307713",
-      "total_tests": 8,
-      "passed": 7,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144224_44634",
-      "timestamp": "2025-08-20T14:42:25.274957",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144231_51396",
-      "timestamp": "2025-08-20T14:42:31.630233",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144247_67929",
-      "timestamp": "2025-08-20T14:42:48.307797",
-      "total_tests": 8,
-      "passed": 8,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144304_84597",
-      "timestamp": "2025-08-20T14:43:05.207637",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144343_23971",
-      "timestamp": "2025-08-20T14:43:44.745769",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144359_39724",
-      "timestamp": "2025-08-20T14:43:59.752807",
-      "total_tests": 0,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144408_48699",
-      "timestamp": "2025-08-20T14:44:10.628126",
+      "run_id": "run_20250820_161415_55709",
+      "timestamp": "2025-08-20T16:15:01.471794",
       "total_tests": 6,
-      "passed": 6,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144511_11997",
-      "timestamp": "2025-08-20T14:45:12.267851",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144525_25929",
-      "timestamp": "2025-08-20T14:45:26.656318",
-      "total_tests": 9,
-      "passed": 8,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144532_32475",
-      "timestamp": "2025-08-20T14:45:34.894526",
-      "total_tests": 1,
       "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_144538_38080",
-      "timestamp": "2025-08-20T14:45:38.327178",
-      "total_tests": 7,
-      "passed": 7,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144547_47379",
-      "timestamp": "2025-08-20T14:45:47.681766",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144602_62692",
-      "timestamp": "2025-08-20T14:46:04.097229",
-      "total_tests": 28,
-      "passed": 14,
-      "failed": 14,
-      "bad_tests_count": 14
-    },
-    {
-      "run_id": "run_20250820_144615_75949",
-      "timestamp": "2025-08-20T14:46:16.171711",
-      "total_tests": 8,
-      "passed": 8,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144628_88167",
-      "timestamp": "2025-08-20T14:46:28.423074",
-      "total_tests": 13,
-      "passed": 13,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144729_49175",
-      "timestamp": "2025-08-20T14:47:30.095763",
-      "total_tests": 0,
-      "passed": -1,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144756_76242",
-      "timestamp": "2025-08-20T14:47:56.911928",
-      "total_tests": 8,
-      "passed": 8,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_144812_92811",
-      "timestamp": "2025-08-20T14:48:35.848136",
-      "total_tests": 7,
-      "passed": 4,
       "failed": 3,
-      "bad_tests_count": 3
-    },
-    {
-      "run_id": "run_20250820_144852_32613",
-      "timestamp": "2025-08-20T14:50:00.831496",
-      "total_tests": 7,
-      "passed": 6,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145011_11288",
-      "timestamp": "2025-08-20T14:50:13.409046",
-      "total_tests": 7,
-      "passed": 7,
-      "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_145013_13440",
-      "timestamp": "2025-08-20T14:50:13.958276",
-      "total_tests": 6,
-      "passed": 6,
-      "failed": 0,
+      "run_id": "run_20250820_161509_9537",
+      "timestamp": "2025-08-20T16:15:55.033837",
+      "total_tests": 177,
+      "passed": 171,
+      "failed": 3,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_145023_23735",
-      "timestamp": "2025-08-20T14:50:25.809077",
-      "total_tests": 8,
-      "passed": 8,
-      "failed": 0,
+      "run_id": "run_20250820_161600_60489",
+      "timestamp": "2025-08-20T16:16:39.440337",
+      "total_tests": 172,
+      "passed": 167,
+      "failed": 2,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_145109_69571",
-      "timestamp": "2025-08-20T14:51:09.889894",
-      "total_tests": 9,
-      "passed": 0,
-      "failed": 9,
-      "bad_tests_count": 9
+      "run_id": "run_20250820_161645_5421",
+      "timestamp": "2025-08-20T16:17:29.040930",
+      "total_tests": 172,
+      "passed": 167,
+      "failed": 2,
+      "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_145136_96970",
-      "timestamp": "2025-08-20T14:51:37.410099",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145139_99434",
-      "timestamp": "2025-08-20T14:51:41.329360",
-      "total_tests": 7,
-      "passed": 0,
-      "failed": 7,
-      "bad_tests_count": 7
-    },
-    {
-      "run_id": "run_20250820_145145_5514",
-      "timestamp": "2025-08-20T14:51:47.300090",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145155_15054",
-      "timestamp": "2025-08-20T14:51:58.319033",
-      "total_tests": 11,
-      "passed": 10,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145204_24935",
-      "timestamp": "2025-08-20T14:52:05.797278",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145213_33355",
-      "timestamp": "2025-08-20T14:52:16.899101",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145348_28249",
-      "timestamp": "2025-08-20T14:53:48.670420",
+      "run_id": "run_20250820_161909_49000",
+      "timestamp": "2025-08-20T16:19:09.216146",
       "total_tests": 1,
       "passed": 1,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_145427_67690",
-      "timestamp": "2025-08-20T14:54:28.476423",
+      "run_id": "run_20250820_161922_62625",
+      "timestamp": "2025-08-20T16:19:22.895962",
       "total_tests": 1,
       "passed": 1,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_145442_82064",
-      "timestamp": "2025-08-20T14:54:45.995035",
-      "total_tests": 11,
-      "passed": 10,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145525_25515",
-      "timestamp": "2025-08-20T14:55:26.349930",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_145546_46519",
-      "timestamp": "2025-08-20T14:55:48.866898",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145555_55563",
-      "timestamp": "2025-08-20T14:55:56.523325",
-      "total_tests": 2,
-      "passed": 1,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145619_79375",
-      "timestamp": "2025-08-20T14:56:19.630946",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_145730_50104",
-      "timestamp": "2025-08-20T14:57:31.212193",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_145812_92060",
-      "timestamp": "2025-08-20T14:58:12.768696",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_145824_4590",
-      "timestamp": "2025-08-20T14:58:27.421986",
-      "total_tests": 11,
-      "passed": 10,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_145935_75610",
-      "timestamp": "2025-08-20T14:59:36.430303",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_145948_88495",
-      "timestamp": "2025-08-20T14:59:51.331009",
-      "total_tests": 11,
-      "passed": 10,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150112_72022",
-      "timestamp": "2025-08-20T15:01:14.854401",
-      "total_tests": 11,
-      "passed": 11,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150448_88051",
-      "timestamp": "2025-08-20T15:04:50.144765",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150541_41869",
-      "timestamp": "2025-08-20T15:05:43.946814",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150553_53006",
-      "timestamp": "2025-08-20T15:05:54.919228",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150605_65071",
-      "timestamp": "2025-08-20T15:06:05.376488",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150611_71531",
-      "timestamp": "2025-08-20T15:06:15.906396",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150658_18807",
-      "timestamp": "2025-08-20T15:06:59.201428",
-      "total_tests": 11,
-      "passed": 11,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150702_22081",
-      "timestamp": "2025-08-20T15:07:03.717334",
-      "total_tests": 1,
-      "passed": 1,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150707_27447",
-      "timestamp": "2025-08-20T15:07:10.255757",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150713_33604",
-      "timestamp": "2025-08-20T15:07:14.057783",
-      "total_tests": 11,
-      "passed": 11,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150714_34491",
-      "timestamp": "2025-08-20T15:07:16.114910",
-      "total_tests": 0,
-      "passed": -1,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150728_48834",
-      "timestamp": "2025-08-20T15:07:29.359348",
-      "total_tests": 5,
-      "passed": 5,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150746_66648",
-      "timestamp": "2025-08-20T15:07:48.735063",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150755_75927",
-      "timestamp": "2025-08-20T15:07:58.587845",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150821_1161",
-      "timestamp": "2025-08-20T15:08:21.403739",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150834_14656",
-      "timestamp": "2025-08-20T15:08:34.860445",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150849_29023",
-      "timestamp": "2025-08-20T15:08:49.224551",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150922_62766",
-      "timestamp": "2025-08-20T15:09:23.935158",
-      "total_tests": 52,
-      "passed": 51,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_150938_78010",
-      "timestamp": "2025-08-20T15:09:38.228586",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_150953_93631",
-      "timestamp": "2025-08-20T15:09:53.819523",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_151117_77253",
-      "timestamp": "2025-08-20T15:11:17.989902",
-      "total_tests": 7,
+      "run_id": "run_20250820_161936_76735",
+      "timestamp": "2025-08-20T16:19:37.793237",
+      "total_tests": 4,
       "passed": 3,
-      "failed": 4,
-      "bad_tests_count": 4
-    },
-    {
-      "run_id": "run_20250820_151233_53249",
-      "timestamp": "2025-08-20T15:12:33.501947",
-      "total_tests": 7,
-      "passed": 6,
       "failed": 1,
       "bad_tests_count": 1
     },
     {
-      "run_id": "run_20250820_151259_79602",
-      "timestamp": "2025-08-20T15:12:59.830726",
-      "total_tests": 7,
-      "passed": 7,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_151313_93297",
-      "timestamp": "2025-08-20T15:13:13.492090",
-      "total_tests": 7,
-      "passed": 7,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_151423_63429",
-      "timestamp": "2025-08-20T15:14:23.763581",
+      "run_id": "run_20250820_161956_96834",
+      "timestamp": "2025-08-20T16:19:57.052355",
       "total_tests": 1,
       "passed": 1,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151435_75088",
-      "timestamp": "2025-08-20T15:14:37.761051",
-      "total_tests": 11,
-      "passed": 11,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_151449_89503",
-      "timestamp": "2025-08-20T15:14:52.369510",
-      "total_tests": 76,
-      "passed": 64,
-      "failed": 12,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_151506_6753",
-      "timestamp": "2025-08-20T15:15:07.486570",
-      "total_tests": 9,
-      "passed": 1,
-      "failed": 8,
-      "bad_tests_count": 8
-    },
-    {
-      "run_id": "run_20250820_151519_19878",
-      "timestamp": "2025-08-20T15:15:20.520683",
+      "run_id": "run_20250820_162009_9704",
+      "timestamp": "2025-08-20T16:20:23.456502",
       "total_tests": 1,
       "passed": 0,
       "failed": 1,
       "bad_tests_count": 1
     },
     {
-      "run_id": "run_20250820_151612_72651",
-      "timestamp": "2025-08-20T15:16:13.221275",
+      "run_id": "run_20250820_162024_24453",
+      "timestamp": "2025-08-20T16:20:25.185500",
+      "total_tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162028_28599",
+      "timestamp": "2025-08-20T16:20:29.009531",
+      "total_tests": 5,
+      "passed": 5,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162037_37256",
+      "timestamp": "2025-08-20T16:20:37.572422",
+      "total_tests": 5,
+      "passed": 5,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162040_40774",
+      "timestamp": "2025-08-20T16:20:42.052336",
       "total_tests": 1,
       "passed": 1,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151620_80525",
-      "timestamp": "2025-08-20T15:16:24.816836",
+      "run_id": "run_20250820_162052_52203",
+      "timestamp": "2025-08-20T16:21:00.550918",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162111_71060",
+      "timestamp": "2025-08-20T16:21:11.293176",
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162119_79779",
+      "timestamp": "2025-08-20T16:22:01.629060",
+      "total_tests": 7,
+      "passed": 0,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162212_32747",
+      "timestamp": "2025-08-20T16:22:23.329500",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162231_51675",
+      "timestamp": "2025-08-20T16:23:26.152764",
+      "total_tests": 8,
+      "passed": 0,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162332_12695",
+      "timestamp": "2025-08-20T16:24:30.531427",
+      "total_tests": 8,
+      "passed": 0,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162551_51827",
+      "timestamp": "2025-08-20T16:25:52.657508",
       "total_tests": 0,
       "passed": -1,
       "failed": 1,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151627_87384",
-      "timestamp": "2025-08-20T15:16:28.054358",
+      "run_id": "run_20250820_162554_54603",
+      "timestamp": "2025-08-20T16:25:55.643372",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162629_89201",
+      "timestamp": "2025-08-20T16:26:29.479069",
       "total_tests": 1,
       "passed": 1,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151640_738",
-      "timestamp": "2025-08-20T15:16:43.608991",
-      "total_tests": 11,
-      "passed": 11,
+      "run_id": "run_20250820_162640_383",
+      "timestamp": "2025-08-20T16:26:41.833416",
+      "total_tests": 1,
+      "passed": 1,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151659_19404",
-      "timestamp": "2025-08-20T15:17:02.455685",
+      "run_id": "run_20250820_162652_12775",
+      "timestamp": "2025-08-20T16:27:04.399086",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_162714_34220",
+      "timestamp": "2025-08-20T16:27:14.724269",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162723_43443",
+      "timestamp": "2025-08-20T16:27:32.897704",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_162750_70197",
+      "timestamp": "2025-08-20T16:27:56.022608",
       "total_tests": 3,
       "passed": 3,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151704_24138",
-      "timestamp": "2025-08-20T15:17:31.619666",
-      "total_tests": 5,
+      "run_id": "run_20250820_162816_96940",
+      "timestamp": "2025-08-20T16:29:15.413424",
+      "total_tests": 15,
       "passed": 0,
-      "failed": 4,
+      "failed": 2,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151747_67354",
-      "timestamp": "2025-08-20T15:18:13.794435",
-      "total_tests": 5,
+      "run_id": "run_20250820_162921_61012",
+      "timestamp": "2025-08-20T16:30:16.955042",
+      "total_tests": 14,
       "passed": 0,
-      "failed": 4,
+      "failed": 1,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151832_12962",
-      "timestamp": "2025-08-20T15:18:34.193870",
+      "run_id": "run_20250820_163031_31969",
+      "timestamp": "2025-08-20T16:31:07.354911",
+      "total_tests": 214,
+      "passed": 213,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_163118_78238",
+      "timestamp": "2025-08-20T16:31:18.719365",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163137_97667",
+      "timestamp": "2025-08-20T16:31:38.017542",
       "total_tests": 5,
       "passed": 5,
       "failed": 0,
       "bad_tests_count": 0
     },
     {
-      "run_id": "run_20250820_151845_25461",
-      "timestamp": "2025-08-20T15:18:48.566031",
+      "run_id": "run_20250820_163141_1169",
+      "timestamp": "2025-08-20T16:31:44.282774",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163157_17732",
+      "timestamp": "2025-08-20T16:31:58.036853",
+      "total_tests": 6,
+      "passed": 6,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163201_21924",
+      "timestamp": "2025-08-20T16:32:13.564334",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_163221_41432",
+      "timestamp": "2025-08-20T16:32:22.048143",
+      "total_tests": 29,
+      "passed": 29,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163244_64027",
+      "timestamp": "2025-08-20T16:32:47.277728",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_163309_89969",
+      "timestamp": "2025-08-20T16:33:42.826319",
+      "total_tests": 214,
+      "passed": 214,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163344_24304",
+      "timestamp": "2025-08-20T16:33:56.915690",
+      "total_tests": 5,
+      "passed": 2,
+      "failed": 3,
+      "bad_tests_count": 3
+    },
+    {
+      "run_id": "run_20250820_163452_92636",
+      "timestamp": "2025-08-20T16:34:54.087231",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163501_1221",
+      "timestamp": "2025-08-20T16:35:13.950721",
+      "total_tests": 5,
+      "passed": 3,
+      "failed": 2,
+      "bad_tests_count": 2
+    },
+    {
+      "run_id": "run_20250820_163550_50987",
+      "timestamp": "2025-08-20T16:36:01.690318",
+      "total_tests": 5,
+      "passed": 3,
+      "failed": 2,
+      "bad_tests_count": 2
+    },
+    {
+      "run_id": "run_20250820_163620_80286",
+      "timestamp": "2025-08-20T16:36:28.057881",
+      "total_tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163654_14839",
+      "timestamp": "2025-08-20T16:36:58.991410",
+      "total_tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163713_33102",
+      "timestamp": "2025-08-20T16:37:13.353202",
+      "total_tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163907_47889",
+      "timestamp": "2025-08-20T16:39:07.917494",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163909_49467",
+      "timestamp": "2025-08-20T16:39:10.253013",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_163920_60494",
+      "timestamp": "2025-08-20T16:39:21.334438",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164032_32349",
+      "timestamp": "2025-08-20T16:40:56.228074",
+      "total_tests": 28,
+      "passed": 27,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_164118_78766",
+      "timestamp": "2025-08-20T16:41:19.109554",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164128_88466",
+      "timestamp": "2025-08-20T16:41:28.919068",
+      "total_tests": 33,
+      "passed": 6,
+      "failed": 27,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164132_92239",
+      "timestamp": "2025-08-20T16:41:32.460641",
       "total_tests": 5,
       "passed": 5,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164148_8201",
+      "timestamp": "2025-08-20T16:41:48.827150",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164224_44856",
+      "timestamp": "2025-08-20T16:42:25.474047",
+      "total_tests": 5,
+      "passed": 0,
+      "failed": 5,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164243_63970",
+      "timestamp": "2025-08-20T16:42:44.310327",
+      "total_tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164254_74148",
+      "timestamp": "2025-08-20T16:42:54.532360",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164304_84502",
+      "timestamp": "2025-08-20T16:43:05.426101",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164324_4409",
+      "timestamp": "2025-08-20T16:43:25.710660",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_164347_27945",
+      "timestamp": "2025-08-20T16:43:48.372210",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164628_88582",
+      "timestamp": "2025-08-20T16:46:29.721456",
+      "total_tests": 0,
+      "passed": -3,
+      "failed": 3,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164705_25486",
+      "timestamp": "2025-08-20T16:47:05.496554",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164815_95999",
+      "timestamp": "2025-08-20T16:48:48.152604",
+      "total_tests": 214,
+      "passed": 214,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_164942_82144",
+      "timestamp": "2025-08-20T16:50:22.916456",
+      "total_tests": 214,
+      "passed": 212,
+      "failed": 2,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_165043_43256",
+      "timestamp": "2025-08-20T16:51:15.060686",
+      "total_tests": 214,
+      "passed": 214,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_165424_64961",
+      "timestamp": "2025-08-20T16:54:43.215698",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_165512_12469",
+      "timestamp": "2025-08-20T16:55:30.481695",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_165554_54950",
+      "timestamp": "2025-08-20T16:56:12.384526",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_165650_10654",
+      "timestamp": "2025-08-20T16:57:43.197556",
+      "total_tests": 205,
+      "passed": 191,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_165939_79474",
+      "timestamp": "2025-08-20T17:00:02.389553",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170049_49178",
+      "timestamp": "2025-08-20T17:01:11.192319",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170126_86388",
+      "timestamp": "2025-08-20T17:01:46.534820",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170201_21962",
+      "timestamp": "2025-08-20T17:02:21.995086",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170421_61437",
+      "timestamp": "2025-08-20T17:04:38.027182",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170622_82865",
+      "timestamp": "2025-08-20T17:06:31.828679",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170718_38285",
+      "timestamp": "2025-08-20T17:07:54.983112",
+      "total_tests": 1,
+      "passed": -241,
+      "failed": 242,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_170829_9460",
+      "timestamp": "2025-08-20T17:09:23.108548",
+      "total_tests": 13,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171047_47282",
+      "timestamp": "2025-08-20T17:10:56.766880",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171255_75580",
+      "timestamp": "2025-08-20T17:13:21.660928",
+      "total_tests": 2,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171630_90404",
+      "timestamp": "2025-08-20T17:16:31.537183",
+      "total_tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171639_99662",
+      "timestamp": "2025-08-20T17:16:43.366627",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171703_23387",
+      "timestamp": "2025-08-20T17:17:07.110646",
+      "total_tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171716_36666",
+      "timestamp": "2025-08-20T17:17:20.462575",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171732_52961",
+      "timestamp": "2025-08-20T17:17:33.002998",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_171753_73063",
+      "timestamp": "2025-08-20T17:17:53.094190",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172325_5164",
+      "timestamp": "2025-08-20T17:23:30.244839",
+      "total_tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172629_89411",
+      "timestamp": "2025-08-20T17:26:29.544945",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172642_2565",
+      "timestamp": "2025-08-20T17:26:42.678721",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172733_53379",
+      "timestamp": "2025-08-20T17:27:33.423276",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172753_73550",
+      "timestamp": "2025-08-20T17:27:59.012510",
+      "total_tests": 3,
+      "passed": 2,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_172826_6442",
+      "timestamp": "2025-08-20T17:28:30.940389",
+      "total_tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_172841_21400",
+      "timestamp": "2025-08-20T17:28:41.434533",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173143_3697",
+      "timestamp": "2025-08-20T17:32:09.397755",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173226_46706",
+      "timestamp": "2025-08-20T17:32:50.768865",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173422_62717",
+      "timestamp": "2025-08-20T17:34:35.465571",
+      "total_tests": 14,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173450_90882",
+      "timestamp": "2025-08-20T17:35:02.133225",
+      "total_tests": 14,
+      "passed": 8,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173559_59111",
+      "timestamp": "2025-08-20T17:36:10.703381",
+      "total_tests": 53,
+      "passed": 53,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173709_29389",
+      "timestamp": "2025-08-20T17:37:32.905227",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_173756_76551",
+      "timestamp": "2025-08-20T17:38:18.310638",
+      "total_tests": 100,
+      "passed": 55,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_174021_21467",
+      "timestamp": "2025-08-20T17:40:34.776710",
+      "total_tests": 53,
+      "passed": 53,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_174052_52858",
+      "timestamp": "2025-08-20T17:41:06.390828",
+      "total_tests": 53,
+      "passed": 53,
       "failed": 0,
       "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 100,
-    "last_updated": "2025-08-20T15:18:48.566031"
+    "total_runs": 289,
+    "last_updated": "2025-08-20T17:41:06.390828"
   }
 }

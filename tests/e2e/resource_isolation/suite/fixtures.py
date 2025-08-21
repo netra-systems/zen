@@ -1,0 +1,37 @@
+"""
+Pytest Fixtures for Resource Isolation Testing
+
+Contains pytest fixtures for the resource isolation test suite.
+"""
+
+import pytest
+import logging
+
+from .test_suite_core import ResourceIsolationTestSuite
+
+logger = logging.getLogger(__name__)
+
+@pytest.fixture
+async def resource_isolation_suite():
+    """Fixture providing a configured resource isolation test suite."""
+    suite = ResourceIsolationTestSuite()
+    
+    try:
+        await suite.initialize_test_environment()
+        yield suite
+    finally:
+        await suite.cleanup_test_environment()
+
+@pytest.fixture
+async def tenant_agents(resource_isolation_suite):
+    """Fixture providing connected tenant agents."""
+    suite = resource_isolation_suite
+    
+    # Create 3 tenant agents for most tests
+    agents = await suite.create_tenant_agents(count=3)
+    connected_agents = await suite.establish_agent_connections(agents)
+    
+    if len(connected_agents) < 3:
+        pytest.skip(f"Could not establish minimum connections: {len(connected_agents)}/3")
+    
+    return connected_agents

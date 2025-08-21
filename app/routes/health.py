@@ -1,6 +1,5 @@
 from sqlalchemy import text
 from fastapi import APIRouter, HTTPException, Depends
-from app.db.postgres import async_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.logging_config import central_logger
 from app.services.database_env_service import DatabaseEnvironmentValidator
@@ -24,10 +23,16 @@ logger = central_logger.get_logger(__name__)
 health_interface = HealthInterface("netra-ai-platform", "1.0.0")
 response_builder = HealthResponseBuilder("netra-ai-platform", "1.0.0")
 
-# Register health checkers
-health_interface.register_checker(DatabaseHealthChecker("postgres"))
-health_interface.register_checker(DatabaseHealthChecker("clickhouse"))
-health_interface.register_checker(DatabaseHealthChecker("redis"))
+# Register health checkers - using simple names for critical component matching
+class SimpleNameDatabaseHealthChecker(DatabaseHealthChecker):
+    """Database health checker with simple naming for critical component matching."""
+    def __init__(self, db_type: str, timeout: float = 5.0):
+        super().__init__(db_type, timeout)
+        self.name = db_type  # Override to use simple name instead of "database_{db_type}"
+
+health_interface.register_checker(SimpleNameDatabaseHealthChecker("postgres"))
+health_interface.register_checker(SimpleNameDatabaseHealthChecker("clickhouse"))
+health_interface.register_checker(SimpleNameDatabaseHealthChecker("redis"))
 health_interface.register_checker(DependencyHealthChecker("websocket"))
 health_interface.register_checker(DependencyHealthChecker("llm"))
 
@@ -125,14 +130,20 @@ async def database_environment() -> Dict[str, Any]:
 async def _run_schema_validation() -> Dict[str, Any]:
     """Run schema validation with error handling."""
     try:
-        from app.db.postgres import async_engine, initialize_postgres
-        engine = async_engine
-        if engine is None:
+        from app.db.postgres import initialize_postgres
+        from app.db.postgres_core import async_engine
+        
+        # Always get fresh reference to engine after ensuring initialization
+        if async_engine is None:
             initialize_postgres()
-            from app.db.postgres import async_engine as refreshed_engine
-            engine = refreshed_engine
-        if engine is None:
-            raise RuntimeError("Database engine not initialized")
+            # Get fresh reference after initialization
+            from app.db.postgres_core import async_engine as engine_ref
+            if engine_ref is None:
+                raise RuntimeError("Database engine not initialized after initialization")
+            engine = engine_ref
+        else:
+            engine = async_engine
+            
         return await SchemaValidationService.validate_schema(engine)
     except Exception as e:
         logger.error(f"Schema validation check failed: {e}")

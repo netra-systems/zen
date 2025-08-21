@@ -366,7 +366,7 @@ class OAuthConfigGenerator:
             client_id=client_id,
             client_secret="",  # Empty but service can still start
             redirect_uris=["https://api.staging.netrasystems.ai/api/auth/callback"],
-            javascript_origins=["https://staging.netrasystems.ai"],
+            javascript_origins=["https://app.staging.netrasystems.ai"],
             allow_dev_login=False,
             allow_mock_auth=False,
             use_proxy=False

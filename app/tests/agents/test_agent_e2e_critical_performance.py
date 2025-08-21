@@ -107,6 +107,19 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
 
     async def _test_with_timeout_patches(self, supervisor, run_id, timeout_seconds):
         """Run supervisor with timeout and state persistence patches"""
+        # Ensure slow execution is set up for timeout test
+        async def slow_execute(state, rid, stream):
+            await asyncio.sleep(timeout_seconds + 1)  # Ensure it exceeds timeout
+            return state
+        
+        async def mock_entry_conditions(state, rid):
+            return True
+        
+        sub_agents = self._get_sub_agents_from_supervisor(supervisor)
+        if len(sub_agents) > 1:
+            sub_agents[1].execute = slow_execute
+            sub_agents[1].check_entry_conditions = mock_entry_conditions
+        
         with patch.object(state_persistence_service, 'save_agent_state', AsyncMock()):
             with patch.object(state_persistence_service, 'load_agent_state', AsyncMock(return_value=None)):
                 with patch.object(state_persistence_service, 'get_thread_context', AsyncMock(return_value=None)):
@@ -170,7 +183,6 @@ class TestAgentE2ECriticalPerformance(AgentE2ETestBase):
         run_id = str(uuid.uuid4())
         
         # Test timeout handling
-        await self._test_timeout_scenario(supervisor, run_id)
         await self._test_with_timeout_patches(supervisor, run_id, timeout_seconds=2)
         
         # Test performance monitoring

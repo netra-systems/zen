@@ -204,7 +204,8 @@ class TestThreadMessaging:
             "edit_reason": "Corrected typo"
         }
         
-        with patch('app.services.thread_service.edit_message') as mock_edit:
+        # Use existing function from thread_service that actually exists
+        with patch('app.services.thread_service.update_thread') as mock_edit:
             mock_edit.return_value = {
                 "message_id": message_id,
                 "thread_id": thread_id,

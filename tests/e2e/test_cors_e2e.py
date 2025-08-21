@@ -206,7 +206,7 @@ class TestCORSPREnvironmentValidation:
             
             # Non-PR staging origins should also work
             regular_origins = [
-                "https://staging.netrasystems.ai",
+                "https://app.staging.netrasystems.ai",
                 "https://app.staging.netrasystems.ai"
             ]
             
@@ -265,7 +265,7 @@ class TestCORSProductionStrictValidation:
             # All other origins should be rejected
             rejected_origins = [
                 "http://localhost:3000",
-                "https://staging.netrasystems.ai",
+                "https://app.staging.netrasystems.ai",
                 "https://dev.netrasystems.ai",
                 "https://malicious.com",
                 "https://fake.netrasystems.ai",

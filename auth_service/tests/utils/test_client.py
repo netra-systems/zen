@@ -103,7 +103,7 @@ class AuthTestClient:
         
         return {"access_token": "new_mock_token"}
     
-    def validate_token(self, token: str = None) -> Dict[str, Any]:
+    def validate_token_jwt(self, token: str = None) -> Dict[str, Any]:
         """Validate authentication token"""
         response = self.client.get(
             "/auth/validate",

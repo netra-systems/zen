@@ -77,7 +77,7 @@ class ServiceAuthTestValidator:
         """Test backend authenticating with auth service using service token"""
         try:
             # Use auth client to validate token
-            validation_result = await self.auth_client.validate_token(token)
+            validation_result = await self.auth_client.validate_token_jwt(token)
             
             assert validation_result is not None, "Token validation returned None"
             assert validation_result.get("valid") is True, "Service token should be valid"
@@ -165,7 +165,7 @@ class ServiceAuthTestValidator:
         expired_token = helper.create_expired_service_token("test-service")
         
         # Test direct JWT validation using auth service
-        token_response = await self.auth_service.validate_token(expired_token)
+        token_response = await self.auth_service.validate_token_jwt(expired_token)
         
         # Should return invalid response for expired token
         assert token_response.valid is False, "Expired service token should be invalid"
