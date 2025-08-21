@@ -392,6 +392,7 @@ class TestWebSocketE2E(DevEnvironmentE2ETests):
     @pytest.mark.asyncio
     @pytest.mark.e2e
     @pytest.mark.dev
+    @pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")
     async def test_websocket_real_time_updates(self, client):
         """Test real-time updates via WebSocket."""
         user = self.create_test_user(PlanTier.ENTERPRISE)

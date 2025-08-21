@@ -19,6 +19,7 @@ from app.logging_config import central_logger
 from app.schemas.registry import WebSocketMessage
 from app.schemas.websocket_message_types import ServerMessage
 from app.websocket.connection import ConnectionInfo
+from app.websocket.large_message_handler import get_large_message_handler, CompressionAlgorithm
 from .message_queue import MessageQueue
 from .message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 
@@ -40,6 +41,7 @@ class UnifiedMessagingManager:
         self.message_handler = MessageHandler(self.manager)
         self.message_processor = MessageProcessor(self.manager, self.message_handler)
         self.message_builder = MessageBuilder()
+        self.large_message_handler = get_large_message_handler()
     
     def _ensure_queue_processor_started(self) -> None:
         """Lazily start queue processor when first needed."""

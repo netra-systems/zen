@@ -2296,38 +2296,6 @@
   },
   "runs": [
     {
-      "run_id": "run_20250820_163031_31969",
-      "timestamp": "2025-08-20T16:31:07.354911",
-      "total_tests": 214,
-      "passed": 213,
-      "failed": 1,
-      "bad_tests_count": 1
-    },
-    {
-      "run_id": "run_20250820_163118_78238",
-      "timestamp": "2025-08-20T16:31:18.719365",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_163137_97667",
-      "timestamp": "2025-08-20T16:31:38.017542",
-      "total_tests": 5,
-      "passed": 5,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_163141_1169",
-      "timestamp": "2025-08-20T16:31:44.282774",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
       "run_id": "run_20250820_163157_17732",
       "timestamp": "2025-08-20T16:31:58.036853",
       "total_tests": 6,
@@ -3094,10 +3062,42 @@
       "passed": 0,
       "failed": 3,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_192813_93597",
+      "timestamp": "2025-08-20T19:29:02.899833",
+      "total_tests": 17,
+      "passed": 0,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_192918_58338",
+      "timestamp": "2025-08-20T19:30:09.138464",
+      "total_tests": 17,
+      "passed": 0,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_193025_25531",
+      "timestamp": "2025-08-20T19:31:14.524627",
+      "total_tests": 17,
+      "passed": 0,
+      "failed": 2,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_193216_36808",
+      "timestamp": "2025-08-20T19:32:25.651578",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 318,
-    "last_updated": "2025-08-20T19:27:39.456223"
+    "total_runs": 322,
+    "last_updated": "2025-08-20T19:32:25.651578"
   }
 }
