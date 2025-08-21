@@ -293,9 +293,11 @@ class DevelopmentConfig(AppConfig):
     database_url: str = None  # Will be loaded from environment
     dev_user_email: str = "dev@example.com"
     log_level: str = "DEBUG"
-    secret_key: str = os.environ.get("SECRET_KEY", "development_secret_key_that_is_at_least_32_characters_long_for_validation")
-    jwt_secret_key: str = os.environ.get("JWT_SECRET_KEY", "development_secret_key_for_jwt_do_not_use_in_production")
-    fernet_key: str = os.environ.get("FERNET_KEY", "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg=")  # Generated with Fernet.generate_key()
+    # CRITICAL: These are default values only. Actual values loaded by SecretManager
+    # NEVER use os.environ directly - values will be populated by unified config
+    secret_key: str = "development_secret_key_that_is_at_least_32_characters_long_for_validation"
+    jwt_secret_key: str = "development_secret_key_for_jwt_do_not_use_in_production"
+    fernet_key: str = "ZmDfcTF7_60GrrY167zsiPd67pEvs0aGOv2oasOM1Pg="  # Generated with Fernet.generate_key()
     
     # OAuth configuration for development - populated by SecretReference system
     oauth_config: OAuthConfig = OAuthConfig(
