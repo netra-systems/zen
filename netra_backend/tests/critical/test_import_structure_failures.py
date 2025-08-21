@@ -273,8 +273,8 @@ class TestCorrectImportStructure:
         """
         from netra_backend.app.checker import SystemChecker
         from netra_backend.app.startup_checks.checker import StartupChecker
-        from netra_backend.app.environment_checks import EnvironmentChecker
-        from netra_backend.app.database_checks import DatabaseChecker
+        from netra_backend.app.startup_checks.environment_checks import EnvironmentChecker
+        from netra_backend.app.startup_checks.database_checks import DatabaseChecker
         
         # Each should have unique interface
         checkers = {

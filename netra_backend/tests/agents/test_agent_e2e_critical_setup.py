@@ -16,11 +16,9 @@ setup_test_path()
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from schemas import (
-
-# Add project root to path
-    SubAgentLifecycle, WebSocketMessage, AgentStarted, 
-    SubAgentUpdate, AgentCompleted, SubAgentState
+from netra_backend.app.schemas.Agent import SubAgentLifecycle, SubAgentState
+from netra_backend.app.schemas.websocket_server_messages import (
+    WebSocketMessage, AgentStarted, SubAgentUpdate, AgentCompleted
 )
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService

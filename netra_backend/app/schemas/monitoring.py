@@ -216,6 +216,36 @@ class PerformanceMonitorProtocol(Protocol):
         ...
 
 
+# === System Resource Metrics ===
+
+class SystemResourceMetrics(BaseModel):
+    """System resource utilization metrics."""
+    cpu_percent: float = Field(default=0.0, description="CPU usage percentage")
+    memory_percent: float = Field(default=0.0, description="Memory usage percentage")
+    memory_mb: float = Field(default=0.0, description="Memory usage in MB")
+    disk_io_read_mb: float = Field(default=0.0, description="Disk read in MB")
+    disk_io_write_mb: float = Field(default=0.0, description="Disk write in MB")
+    network_io_sent_mb: float = Field(default=0.0, description="Network sent in MB")
+    network_io_recv_mb: float = Field(default=0.0, description="Network received in MB")
+    open_files: int = Field(default=0, description="Number of open files")
+    thread_count: int = Field(default=0, description="Number of threads")
+    process_count: int = Field(default=0, description="Number of processes")
+
+# === WebSocket Metrics ===
+
+class WebSocketMetrics(BaseModel):
+    """WebSocket connection and messaging metrics."""
+    active_connections: int = Field(default=0, description="Active WebSocket connections")
+    total_connections: int = Field(default=0, description="Total connections established")
+    messages_sent: int = Field(default=0, description="Total messages sent")
+    messages_received: int = Field(default=0, description="Total messages received")
+    bytes_sent: int = Field(default=0, description="Total bytes sent")
+    bytes_received: int = Field(default=0, description="Total bytes received")
+    connection_errors: int = Field(default=0, description="Connection errors")
+    message_errors: int = Field(default=0, description="Message processing errors")
+    avg_message_size: float = Field(default=0.0, description="Average message size")
+    connection_duration_avg_seconds: float = Field(default=0.0, description="Average connection duration")
+
 # === Database Metrics ===
 
 class DatabaseConnectionMetrics(BaseModel):

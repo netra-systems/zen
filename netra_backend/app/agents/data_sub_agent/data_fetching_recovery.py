@@ -6,8 +6,7 @@ Handles data source failures with alternative time ranges and cached data.
 from typing import Any, Dict, Optional, List
 from datetime import datetime, timedelta
 from netra_backend.app.logging_config import central_logger
-# FIXME: DataFetchingError not available in error_types
-# from netra_backend.app.core.error_types import DataFetchingError
+from netra_backend.app.agents.data_sub_agent.error_types import DataFetchingError
 from netra_backend.app.agents.error_handler import ErrorContext
 
 logger = central_logger.get_logger(__name__)

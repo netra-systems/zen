@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T12:11:19.982712  
+**Generated:** 2025-08-21T12:04:14.969724  
 **Test Level:** real_e2e - Full end-to-end tests with real LLM and services (20-30 minutes)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 19.45s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 20.42s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,7 +28,7 @@
 - **Purpose:** Complete user journey validation with actual services
 - **Timeout:** 1800s
 - **Coverage Enabled:** No
-- **Total Duration:** 19.45s
+- **Total Duration:** 20.42s
 - **Exit Code:** 5
 
 ### Backend Configuration
@@ -77,14 +77,14 @@ BAD TEST DETECTION REPORT
 ================================================================================
 
 Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 125
+Total Test Runs Analyzed: 119
 
 ================================================================================
 
 
-[33m=========================== [33mno tests ran[0m[33m in 10.11s[0m[33m ============================[0m
+[33m=========================== [33mno tests ran[0m[33m in 10.96s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 5 after 18.29s
+[FAIL] TESTS FAILED with exit code 5 after 19.13s
 ================================================================================
 
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
