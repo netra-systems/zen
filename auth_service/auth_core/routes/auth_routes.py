@@ -391,11 +391,15 @@ async def oauth_callback(
     from ..database.repository import AuthUserRepository
     import uuid
     
+    logger.info(f"OAuth callback received - code: {code[:10]}..., state: {state[:10]}...")
+    
     try:
         # Exchange code for tokens
         google_client_id = AuthConfig.get_google_client_id()
         google_client_secret = AuthConfig.get_google_client_secret()
         redirect_uri = _determine_urls()[1] + "/auth/callback"
+        
+        logger.info(f"Using redirect_uri: {redirect_uri}")
         
         async with httpx.AsyncClient() as client:
             # Exchange code for tokens
@@ -411,9 +415,11 @@ async def oauth_callback(
             )
             
             if token_response.status_code != 200:
+                logger.error(f"Token exchange failed: {token_response.status_code} - {token_response.text}")
                 raise HTTPException(status_code=401, detail="Failed to exchange code")
             
             tokens = token_response.json()
+            logger.info(f"Successfully exchanged code for tokens - access_token present: {bool(tokens.get('access_token'))}")
             
             # Get user info
             user_response = await client.get(
@@ -470,12 +476,14 @@ async def oauth_callback(
         )
         
         logger.info(f"OAuth login successful for {user_info['email']} with user ID {user_id}")
+        logger.info(f"Generated JWT access token: {access_token[:20]}...")
         
         # Redirect to frontend with tokens
         frontend_url = _determine_urls()[1]
         redirect_url = return_url or f"{frontend_url}/chat"
         redirect_url += f"?token={access_token}&refresh={refresh_token}"
         
+        logger.info(f"Redirecting to: {redirect_url[:50]}...")
         return RedirectResponse(url=redirect_url, status_code=302)
         
     except Exception as e:

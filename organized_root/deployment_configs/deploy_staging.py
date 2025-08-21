@@ -686,6 +686,39 @@ def main():
     if not args.skip_health_checks:
         run_health_checks(backend_url, frontend_url)
     
+    # OAuth flow tests
+    if not args.skip_health_checks and auth_url:
+        print("")
+        print_colored("Running OAuth flow tests...", Colors.CYAN)
+        try:
+            # Set environment variables for the test
+            env = os.environ.copy()
+            env['AUTH_SERVICE_URL'] = auth_url or 'https://auth.staging.netrasystems.ai'
+            env['FRONTEND_URL'] = frontend_url or 'https://app.staging.netrasystems.ai'
+            env['API_URL'] = backend_url or 'https://api.staging.netrasystems.ai'
+            env['ENVIRONMENT'] = 'staging'
+            
+            result = subprocess.run(
+                ["python", "scripts/test_oauth_deployment.py"],
+                capture_output=True,
+                text=True,
+                env=env,
+                timeout=60
+            )
+            
+            if result.returncode == 0:
+                print_colored("  [OK] OAuth flow tests passed", Colors.GREEN)
+            else:
+                print_colored("  [WARNING] OAuth flow tests failed - check logs for details", Colors.YELLOW)
+                if result.stdout:
+                    print(result.stdout)
+                if result.stderr:
+                    print(result.stderr)
+        except subprocess.TimeoutExpired:
+            print_colored("  [WARNING] OAuth tests timed out", Colors.YELLOW)
+        except Exception as e:
+            print_colored(f"  [WARNING] Could not run OAuth tests: {e}", Colors.YELLOW)
+    
     # Error monitoring
     run_error_monitoring(args.skip_error_monitoring)
     

@@ -2486,17 +2486,66 @@
       ],
       "marked_as_bad": false,
       "bad_reason": null
+    },
+    "tests/integration/test_oauth_token_flow.py::test_oauth_callback_token_exchange": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:34:26.648089",
+      "last_failure": "2025-08-20T21:34:26.648089",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_213426_66002",
+          "timestamp": "2025-08-20T21:34:26.648089",
+          "error_type": "AttributeError",
+          "error_message": "AttributeError: <module 'auth_service.auth_core.routes.auth_routes' from 'C:\\\\Users\\\\antho\\\\OneDrive\\\\Desktop\\\\Netra\\\\netra-core-generation-1\\\\auth_service\\\\auth_core\\\\routes\\\\auth_routes.py'> does not have the attribute 'auth_db'"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_oauth_token_flow.py::test_token_validation_after_storage": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:34:26.891261",
+      "last_failure": "2025-08-20T21:34:26.891261",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_213426_66002",
+          "timestamp": "2025-08-20T21:34:26.891261",
+          "error_type": "TypeError",
+          "error_message": "TypeError: object MagicMock can't be used in 'await' expression"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_oauth_token_flow.py::test_oauth_error_handling": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:34:26.912266",
+      "last_failure": "2025-08-20T21:34:26.912266",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_213426_66002",
+          "timestamp": "2025-08-20T21:34:26.912266",
+          "error_type": "Error",
+          "error_message": "assert 500 == 401\n +  where 500 = <Response [500 Internal Server Error]>.status_code"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
     }
   },
   "runs": [
-    {
-      "run_id": "run_20250820_164942_82144",
-      "timestamp": "2025-08-20T16:50:22.916456",
-      "total_tests": 214,
-      "passed": 212,
-      "failed": 2,
-      "bad_tests_count": 1
-    },
     {
       "run_id": "run_20250820_165043_43256",
       "timestamp": "2025-08-20T16:51:15.060686",
@@ -3288,10 +3337,18 @@
       "passed": 0,
       "failed": 0,
       "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_213426_66002",
+      "timestamp": "2025-08-20T21:34:26.926875",
+      "total_tests": 6,
+      "passed": 3,
+      "failed": 3,
+      "bad_tests_count": 3
     }
   ],
   "stats": {
-    "total_runs": 351,
-    "last_updated": "2025-08-20T21:26:09.657386"
+    "total_runs": 352,
+    "last_updated": "2025-08-20T21:34:26.926875"
   }
 }
