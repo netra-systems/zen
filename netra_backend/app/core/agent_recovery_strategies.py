@@ -8,8 +8,8 @@ from typing import Any, Dict, List, Optional
 
 from netra_backend.app.core.error_recovery import RecoveryContext
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agent_recovery_base import BaseAgentRecoveryStrategy
-from netra_backend.app.interfaces_agent_recovery import CorpusAdminRecoveryStrategy
+from netra_backend.app.core.agent_recovery_base import BaseAgentRecoveryStrategy
+from netra_backend.app.core.interfaces_agent_recovery import CorpusAdminRecoveryStrategy
 
 logger = central_logger.get_logger(__name__)
 

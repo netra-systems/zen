@@ -9,7 +9,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.database.unit_of_work import get_unit_of_work
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.services.websocket.message_queue import message_queue, QueuedMessage, MessagePriority
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.services.websocket.ws_manager import manager
 from abc import ABC, abstractmethod
 import json
 
@@ -426,4 +426,4 @@ class MessageHandlerService:
 
 
 # Import MessageRouter for backward compatibility with tests
-from netra_backend.app.message_router import MessageRouter
+from netra_backend.app.services.websocket.message_router import MessageRouter

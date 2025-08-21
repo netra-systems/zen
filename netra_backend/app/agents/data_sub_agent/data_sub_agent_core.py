@@ -20,11 +20,11 @@ from netra_backend.app.redis_manager import RedisManager
 from netra_backend.app.agents.config import agent_config
 
 # Core analysis components
-from netra_backend.app.query_builder import QueryBuilder
-from netra_backend.app.analysis_engine import AnalysisEngine
-from netra_backend.app.clickhouse_operations import DataSubAgentClickHouseOperations
-from netra_backend.app.extended_operations import ExtendedOperations
-from netra_backend.app.delegation import AgentDelegation
+from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
+from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
+from netra_backend.app.services.corpus.clickhouse_operations import DataSubAgentClickHouseOperations
+from netra_backend.app.agents.data_sub_agent.extended_operations import ExtendedOperations
+from netra_backend.app.agents.data_sub_agent.delegation import AgentDelegation
 
 
 class DataSubAgentCore:

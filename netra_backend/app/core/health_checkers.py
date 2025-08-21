@@ -13,7 +13,8 @@ from datetime import datetime
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.health_types import HealthCheckResult
+from netra_backend.app.core.health_types import HealthCheckResult
+from netra_backend.app.core.configuration import unified_config_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -378,17 +379,16 @@ def _build_websocket_health_details(stats: Dict[str, Any], health_score: float) 
 
 def _is_development_mode() -> bool:
     """Check if running in development mode."""
-    import os
-    environment = os.environ.get("ENVIRONMENT", "development").lower()
-    return environment == "development"
+    config = unified_config_manager.get_config()
+    return config.environment.lower() == "development"
 
 
 def _is_clickhouse_disabled() -> bool:
     """Check if ClickHouse is disabled in environment."""
-    import os
-    clickhouse_mode = os.environ.get("CLICKHOUSE_MODE", "shared").lower()
-    skip_clickhouse = os.environ.get("SKIP_CLICKHOUSE_INIT", "false").lower()
-    return clickhouse_mode == "disabled" or skip_clickhouse == "true"
+    config = unified_config_manager.get_config()
+    clickhouse_mode = getattr(config, 'clickhouse_mode', 'shared').lower()
+    skip_clickhouse = getattr(config, 'skip_clickhouse_init', False)
+    return clickhouse_mode == "disabled" or skip_clickhouse
 
 
 class HealthChecker:

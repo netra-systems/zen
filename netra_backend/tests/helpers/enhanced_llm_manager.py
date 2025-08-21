@@ -7,7 +7,7 @@ import asyncio
 from datetime import datetime, timedelta, UTC
 from typing import Dict, List, Any, Optional
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.llm_manager_helpers import LLMProvider
 from netra_backend.tests.llm_mock_clients import MockLLMClient

@@ -5,14 +5,13 @@ Handles external service connectivity (Redis, ClickHouse, LLM providers).
 Maintains 25-line function limit and focused responsibility.
 """
 
-import os
 import time
 import asyncio
 from typing import List
-from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.llm_types import LLMProvider
-from netra_backend.app.models import StartupCheckResult
+from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 class ServiceChecker:
@@ -23,13 +22,15 @@ class ServiceChecker:
     
     @property
     def environment(self):
-        """Get current environment from settings"""
-        return settings.environment.lower()
+        """Get current environment from unified config"""
+        config = unified_config_manager.get_config()
+        return config.environment.lower()
     
     @property 
     def is_staging(self):
         """Check if running in staging environment"""
-        return self.environment == "staging" or os.getenv("K_SERVICE")
+        config = unified_config_manager.get_config()
+        return self.environment == "staging" or (hasattr(config, 'k_service') and config.k_service)
     
     async def check_redis(self) -> StartupCheckResult:
         """Check Redis connection"""
@@ -163,7 +164,9 @@ class ServiceChecker:
         """Test all LLM provider connections"""
         llm_manager = self.app.state.llm_manager
         available_providers, failed_providers = [], []
-        for llm_name in settings.llm_configs:
+        config = unified_config_manager.get_config()
+        llm_configs = getattr(config, 'llm_configs', {})
+        for llm_name in llm_configs:
             available, failed = self._test_single_llm_provider(llm_manager, llm_name)
             self._process_llm_test_result(available_providers, failed_providers, available, failed)
         return available_providers, failed_providers

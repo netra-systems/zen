@@ -7,7 +7,7 @@ checking for various system metrics and agent behaviors.
 from typing import Dict, Any, List
 from datetime import datetime, UTC, timedelta
 
-from netra_backend.app.alert_types import AlertRule, AlertLevel, NotificationChannel
+from netra_backend.app.monitoring.alert_types import AlertRule, AlertLevel, NotificationChannel
 from netra_backend.app.services.metrics.agent_metrics import AgentMetrics
 from netra_backend.app.logging_config import central_logger
 

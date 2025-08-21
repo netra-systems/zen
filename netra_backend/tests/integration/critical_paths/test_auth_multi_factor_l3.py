@@ -8,7 +8,7 @@ import asyncio
 import pyotp
 from unittest.mock import patch, AsyncMock, MagicMock
 from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import time
 
 

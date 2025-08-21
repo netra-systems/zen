@@ -8,11 +8,11 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.ai_map_builder import AIMapBuilder
-from netra_backend.app.metrics_calculator import GitHubAnalyzerMetricsCalculator
-from netra_backend.app.recommendation_generator import RecommendationGenerator
-from netra_backend.app.markdown_formatter import MarkdownFormatter
-from netra_backend.app.html_formatter import HTMLFormatter
+from netra_backend.app.agents.github_analyzer.ai_map_builder import AIMapBuilder
+from netra_backend.app.agents.github_analyzer.metrics_calculator import GitHubAnalyzerMetricsCalculator
+from netra_backend.app.agents.github_analyzer.recommendation_generator import RecommendationGenerator
+from netra_backend.app.agents.github_analyzer.markdown_formatter import MarkdownFormatter
+from netra_backend.app.agents.github_analyzer.html_formatter import HTMLFormatter
 
 
 class AIOperationsMapFormatter:

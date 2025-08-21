@@ -25,7 +25,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, BaseExecut
 from netra_backend.app.agents.base.errors import ValidationError, ExecutionErrorHandler
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.validation_helpers import ValidationHelpers, PermissionHelpers
+from netra_backend.app.agents.admin_tool_dispatcher.validation_helpers import ValidationHelpers, PermissionHelpers
 
 logger = central_logger.get_logger(__name__)
 

@@ -5,7 +5,7 @@ Maintains existing API while using focused modules under 300 lines each.
 """
 
 # Re-export all types and classes for backward compatibility
-from netra_backend.app.compensation_models import (
+from netra_backend.app.services.compensation_models import (
     CompensationState,
     SagaState,
     CompensationAction,
@@ -13,14 +13,14 @@ from netra_backend.app.compensation_models import (
     Saga,
     BaseCompensationHandler
 )
-from netra_backend.app.compensation_handlers_core import (
+from netra_backend.app.services.compensation_handlers_core import (
     DatabaseCompensationHandler,
     FileSystemCompensationHandler,
     CacheCompensationHandler,
     ExternalServiceCompensationHandler
 )
-from netra_backend.app.compensation_engine_core import CompensationEngine
-from netra_backend.app.saga_engine import SagaEngine
+from netra_backend.app.services.compensation_engine_core import CompensationEngine
+from netra_backend.app.services.saga_engine import SagaEngine
 
 # Create global instances for backward compatibility
 compensation_engine = CompensationEngine()

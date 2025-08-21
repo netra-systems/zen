@@ -8,7 +8,7 @@ import re
 import subprocess
 from typing import Dict, List, Any
 
-from netra_backend.app.quality_models import ArchitectureCompliance, ComplianceStatus
+from netra_backend.app.services.factory_status.quality_models import ArchitectureCompliance, ComplianceStatus
 
 
 class ArchitectureComplianceChecker:

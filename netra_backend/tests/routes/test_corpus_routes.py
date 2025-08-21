@@ -28,7 +28,7 @@ class TestCorpusRoute:
     @pytest.fixture
     def client(self):
         """Corpus-specific test client with required app state."""
-        from netra_backend.app.main import app
+        from netra_backend.app.routes.mcp.main import app
         from fastapi.testclient import TestClient
         
         # Mock the db_session_factory to prevent state errors

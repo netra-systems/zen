@@ -9,7 +9,7 @@ from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.postgres_service import PostgresService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.clickhouse_service import ClickHouseService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import uuid
 
 

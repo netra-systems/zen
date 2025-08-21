@@ -11,7 +11,7 @@ from collections import defaultdict
 
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.message_handler import BaseMessageHandler
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 
 logger = central_logger.get_logger(__name__)
 

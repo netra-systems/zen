@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import Dict, List, Tuple, Any
 
-from netra_backend.app.spec_analyzer_core import SpecLoader, SpecViolation, ViolationSeverity
+from netra_backend.app.services.factory_status.spec_analyzer_core import SpecLoader, SpecViolation, ViolationSeverity
 
 
 class ArchitectureAnalyzer:

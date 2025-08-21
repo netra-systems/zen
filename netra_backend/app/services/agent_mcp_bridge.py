@@ -9,7 +9,7 @@ from dataclasses import dataclass
 import asyncio
 
 from netra_backend.app.services.mcp_client_service import MCPClientService
-from netra_backend.app.mcp_client import MCPTool, MCPToolResult
+from netra_backend.app.routes.mcp_client import MCPTool, MCPToolResult
 from netra_backend.app.agents.mcp_integration.context_manager import MCPAgentContext
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.logging_config import central_logger

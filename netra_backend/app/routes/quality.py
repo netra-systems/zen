@@ -17,7 +17,7 @@ from netra_backend.app.schemas.quality_types import (
     QualityDashboardData, QualityReport, QualityReportType,
     QualityStatistics, QualityServiceHealth
 )
-from netra_backend.app.quality_handlers import (
+from netra_backend.app.routes.quality_handlers import (
     handle_dashboard_request, handle_content_validation, handle_agent_report_request,
     handle_alerts_request, handle_alert_acknowledgement, handle_report_generation,
     handle_statistics_request, handle_start_monitoring, handle_stop_monitoring,

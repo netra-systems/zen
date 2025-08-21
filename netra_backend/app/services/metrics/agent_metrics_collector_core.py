@@ -11,15 +11,15 @@ from collections import deque, defaultdict
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import TimeSeriesPoint
-from netra_backend.app.agent_metrics_models import (
+from netra_backend.app.services.metrics.agent_metrics_models import (
     AgentOperationRecord, AgentMetrics, FailureType, AgentMetricType,
     create_operation_record, calculate_operation_metrics,
     update_agent_metrics, calculate_health_score
 )
-from netra_backend.app.metric_reader import MetricReader
-from netra_backend.app.metric_aggregator import MetricAggregator
-from netra_backend.app.metric_formatter import MetricFormatter
-from netra_backend.app.metric_publisher import MetricPublisher
+from netra_backend.app.services.metrics.metric_reader import MetricReader
+from netra_backend.app.services.metrics.metric_aggregator import MetricAggregator
+from netra_backend.app.services.metrics.metric_formatter import MetricFormatter
+from netra_backend.app.services.metrics.metric_publisher import MetricPublisher
 
 logger = central_logger.get_logger(__name__)
 

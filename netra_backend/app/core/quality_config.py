@@ -5,7 +5,7 @@ Contains all weight mappings and threshold configurations.
 """
 
 from typing import Dict
-from netra_backend.app.quality_types import ContentType
+from netra_backend.app.core.quality_types import ContentType
 
 
 def get_weight_mappings() -> Dict[ContentType, Dict[str, float]]:

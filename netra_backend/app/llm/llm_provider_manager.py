@@ -5,7 +5,7 @@ Each function must be ≤8 lines as per architecture requirements.
 """
 
 from typing import Dict, Any, Optional
-from netra_backend.app.schemas import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.schemas.llm_base_types import LLMProvider
 from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from netra_backend.app.llm.llm_provider_handlers import create_llm_for_provider, validate_provider_key

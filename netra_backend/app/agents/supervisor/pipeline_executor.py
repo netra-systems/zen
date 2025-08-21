@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 logger = central_logger.get_logger(__name__)
 
@@ -209,13 +209,13 @@ class PipelineExecutor:
     
     def _create_completion_content(self, state: DeepAgentState, run_id: str):
         """Create agent completion content."""
-        from netra_backend.app.schemas import AgentCompleted, AgentResult
+        from netra_backend.app.routes.unified_tools.schemas import AgentCompleted, AgentResult
         result = AgentResult(success=True, output=state.to_dict())
         return AgentCompleted(run_id=run_id, result=result, execution_time_ms=0.0)
     
     def _create_websocket_message(self, content) -> 'WebSocketMessage':
         """Create WebSocket message wrapper."""
-        from netra_backend.app.schemas import WebSocketMessage
+        from netra_backend.app.routes.unified_tools.schemas import WebSocketMessage
         return WebSocketMessage(
             type="agent_completed", payload=content.model_dump()
         )

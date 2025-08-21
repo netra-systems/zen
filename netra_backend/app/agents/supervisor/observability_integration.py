@@ -7,7 +7,7 @@ Each function must be ≤8 lines as per architecture requirements.
 from typing import Dict, List, Callable, Any, Optional
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.llm.observability import generate_llm_correlation_id
-from netra_backend.app.observability_flow import get_supervisor_flow_logger
+from netra_backend.app.agents.supervisor.observability_flow import get_supervisor_flow_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -24,9 +24,9 @@ from netra_backend.app.schemas.monitoring_schemas import (
     ErrorDetailResponse, ErrorResolution, GCPErrorServiceConfig,
     ErrorStatus, ErrorSeverity as GCPErrorSeverity
 )
-from netra_backend.app.gcp_client_manager import GCPClientManager
-from netra_backend.app.error_formatter import ErrorFormatter
-from netra_backend.app.rate_limiter import GCPRateLimiter
+from netra_backend.app.services.monitoring.gcp_client_manager import GCPClientManager
+from netra_backend.app.services.monitoring.error_formatter import ErrorFormatter
+from netra_backend.app.services.api_gateway.rate_limiter import GCPRateLimiter
 
 
 class GCPErrorService:

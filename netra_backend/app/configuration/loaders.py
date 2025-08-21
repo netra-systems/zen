@@ -2,6 +2,10 @@
 
 Focused module for loading environment variables into configuration.
 Includes specialized functions for different config types.
+
+**DEPRECATION NOTICE**: This module should be migrated to use the
+unified configuration system instead of direct os.environ access.
+For new code, use: from netra_backend.app.core.configuration import unified_config_manager
 """
 
 import os
@@ -9,9 +13,18 @@ from typing import Dict, Any, Optional, Tuple, Callable
 from netra_backend.app.configuration.schemas import AppConfig
 from netra_backend.app.logging_config import central_logger as logger
 
+# MIGRATION NOTE: For new code, use the unified configuration system:
+# from netra_backend.app.core.configuration import unified_config_manager
+# config = unified_config_manager.get_config()
+# This provides centralized, validated configuration access.
+
 
 def load_env_var(env_var: str, config: AppConfig, field_name: str) -> bool:
-    """Load a single environment variable into config."""
+    """Load a single environment variable into config.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     value = os.environ.get(env_var)
     if value and hasattr(config, field_name):
         setattr(config, field_name, value)
@@ -62,7 +75,11 @@ def _handle_clickhouse_vars(config: AppConfig) -> None:
 
 
 def _get_clickhouse_env_vars() -> Dict[str, Optional[str]]:
-    """Get ClickHouse environment variables."""
+    """Get ClickHouse environment variables.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     return {
         "host": os.environ.get("CLICKHOUSE_HOST"),
         "port": os.environ.get("CLICKHOUSE_PORT"),
@@ -95,13 +112,21 @@ def _apply_clickhouse_vars(config: AppConfig, vars_dict: Dict[str, Optional[str]
 
 
 def _handle_gemini_var(config: AppConfig) -> None:
-    """Handle Gemini API key environment variable."""
+    """Handle Gemini API key environment variable.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     if key := os.environ.get("GEMINI_API_KEY"):
         set_gemini_api_key(config, key)
 
 
 def _log_loaded_vars() -> None:
-    """Log summary of loaded environment variables."""
+    """Log summary of loaded environment variables.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     all_vars = list(get_critical_vars_mapping().keys())
     all_vars.extend(["CLICKHOUSE_HOST", "CLICKHOUSE_PORT", 
                     "CLICKHOUSE_PASSWORD", "CLICKHOUSE_USER", "GEMINI_API_KEY"])

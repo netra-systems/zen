@@ -26,7 +26,7 @@ os.environ["ENVIRONMENT"] = "testing"
 os.environ["TESTING"] = "true"
 os.environ["SKIP_STARTUP_CHECKS"] = "true"
 
-from netra_backend.app.main import app
+from netra_backend.app.routes.mcp.main import app
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.user_service import UserService

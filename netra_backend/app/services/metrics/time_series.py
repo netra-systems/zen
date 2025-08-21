@@ -13,7 +13,7 @@ import json
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import TimeSeriesPoint, MetricType
 from netra_backend.app.redis_manager import RedisManager
-from netra_backend.app.time_series_aggregation import (
+from netra_backend.app.services.metrics.time_series_aggregation import (
     aggregate_series_data, apply_aggregation_function, calculate_series_statistics,
     filter_points_by_time, calculate_storage_status
 )

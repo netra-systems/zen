@@ -9,7 +9,7 @@ from netra_backend.app.synthetic_data.enums import WorkloadCategory, GenerationS
 from netra_backend.app.synthetic_data.validators import validate_data, validate_schema
 
 # Import get_clickhouse_client for test patching compatibility
-from netra_backend.app..db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 # Advanced functionality imports
 from netra_backend.app.synthetic_data.job_manager import JobManager

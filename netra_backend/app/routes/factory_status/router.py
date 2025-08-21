@@ -5,15 +5,15 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Query, Depends
 
-from netra_backend.app.models import ReportResponse, MetricResponse, GenerateReportRequest
-from netra_backend.app.report_routes import (
+from netra_backend.app.services.apex_optimizer_agent.models import ReportResponse, MetricResponse, GenerateReportRequest
+from netra_backend.app.routes.factory_status.report_routes import (
     get_latest_report_handler, get_report_history_handler, generate_report_handler
 )
-from netra_backend.app.metrics_routes import (
+from netra_backend.app.routes.factory_status.metrics_routes import (
     get_specific_metric_handler, get_velocity_trend_handler,
     get_business_objectives_handler, get_compliance_status_handler
 )
-from netra_backend.app.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
+from netra_backend.app.routes.database_monitoring.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
 
 
 router = APIRouter(

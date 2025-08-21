@@ -1,3 +1,13 @@
+"""Configuration schemas and data models.
+
+**DEPRECATION NOTICE**: This file is legacy and should be migrated
+to use the unified configuration system. For new code, use:
+from netra_backend.app.core.configuration import unified_config_manager
+
+This file contains direct os.environ access that should be replaced
+with the centralized configuration management.
+"""
+
 import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
@@ -16,6 +26,7 @@ class SecretReference(BaseModel):
     name: str
     target_field: str
     target_models: Optional[List[str]] = None
+    # LEGACY: Direct env access - should migrate to unified config
     project_id: str = Field(default_factory=lambda: os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
                                                                    os.environ.get("SECRET_MANAGER_PROJECT_ID", 
                                                                    "701982941522" if os.environ.get("ENVIRONMENT", "").lower() == "staging" else "304612253870")))
@@ -324,6 +335,12 @@ class DevelopmentConfig(AppConfig):
     )
     
     def __init__(self, **data):
+        """Initialize development configuration.
+        
+        LEGACY: This method uses direct os.environ access. Consider
+        migration to unified configuration system.
+        """
+        # LEGACY: Direct env access - should migrate to unified config
         import os
         self._load_database_url(data, os)
         service_modes = self._get_service_modes(os)
@@ -332,7 +349,11 @@ class DevelopmentConfig(AppConfig):
         super().__init__(**data)
     
     def _load_database_url(self, data: dict, os_module) -> None:
-        """Load database URL from environment - always prefer environment over defaults."""
+        """Load database URL from environment - always prefer environment over defaults.
+        
+        LEGACY: Direct env access - should migrate to unified config.
+        """
+        # LEGACY: Direct env access - should migrate to unified config
         env_db_url = os_module.environ.get('DATABASE_URL')
         if env_db_url:
             data['database_url'] = env_db_url
@@ -341,7 +362,11 @@ class DevelopmentConfig(AppConfig):
             data['database_url'] = "postgresql+asyncpg://postgres:postgres@localhost:5432/netra"
     
     def _get_service_modes(self, os_module) -> dict:
-        """Get service modes from environment variables."""
+        """Get service modes from environment variables.
+        
+        LEGACY: Direct env access - should migrate to unified config.
+        """
+        # LEGACY: Direct env access - should migrate to unified config
         return {
             'redis': os_module.environ.get("REDIS_MODE", "shared").lower(),
             'clickhouse': os_module.environ.get("CLICKHOUSE_MODE", "shared").lower(),
@@ -393,7 +418,12 @@ class StagingConfig(AppConfig):
     # Staging uses production-like settings but with relaxed validation
     
     def __init__(self, **data):
-        """Initialize staging config with environment variables."""
+        """Initialize staging config with environment variables.
+        
+        LEGACY: This method uses direct os.environ access. Consider
+        migration to unified configuration system.
+        """
+        # LEGACY: Direct env access - should migrate to unified config
         import os
         # Load database URL from environment if not provided
         if 'database_url' not in data and os.environ.get('DATABASE_URL'):

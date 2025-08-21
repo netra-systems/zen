@@ -17,7 +17,7 @@ from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.database_service import DatabaseService
 from netra_backend.app.models.user import User, UserState, UserPreferences
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestUserStatePersistenceCompleteL4:

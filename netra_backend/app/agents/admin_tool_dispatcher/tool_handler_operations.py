@@ -43,7 +43,7 @@ def extract_synthetic_params(kwargs: Dict[str, Any], user: User) -> Dict[str, An
 # Helper functions for corpus operations
 async def _execute_corpus_creation(params: Dict[str, Any], db: AsyncSession) -> Any:
     """Execute corpus creation with service"""
-    from netra_backend.app.services import corpus_service
+    from netra_backend.app.core.configuration.services import corpus_service
     return await corpus_service.create_corpus(**params, db=db)
 
 
@@ -77,7 +77,7 @@ def _prepare_user_create_params(kwargs: Dict[str, Any], db: AsyncSession) -> Dic
 
 async def _execute_user_creation(params: Dict[str, Any]) -> Any:
     """Execute user creation with service"""
-    from netra_backend.app.services import user_service
+    from netra_backend.app.core.configuration.services import user_service
     return await user_service.create_user(**params)
 
 

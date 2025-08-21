@@ -8,8 +8,8 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, UTC, timedelta
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app..health_types import HealthCheckResult
-from netra_backend.app.telemetry_types import MetricType, HealthMetric, SLAViolation
+from netra_backend.app.health_types import HealthCheckResult
+from netra_backend.app.core.health.telemetry_types import MetricType, HealthMetric, SLAViolation
 
 logger = central_logger.get_logger(__name__)
 

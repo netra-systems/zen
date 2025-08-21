@@ -5,7 +5,7 @@ Generation Patterns Helper - Advanced pattern generation utilities
 import asyncio
 from datetime import datetime, UTC
 from typing import List, Dict
-from netra_backend.app.generation_patterns import (
+from netra_backend.app.services.synthetic_data.generation_patterns import (
     generate_with_temporal_patterns as _generate_with_temporal_patterns,
     generate_with_errors as _generate_with_errors,
     generate_domain_specific as _generate_domain_specific

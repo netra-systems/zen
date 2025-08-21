@@ -1,7 +1,7 @@
 """Validation utilities for route handlers."""
 
 from typing import Dict, Any, Optional
-from netra_backend.app.error_handlers import handle_not_found_error, handle_access_denied_error
+from netra_backend.app.core.error_handlers import handle_not_found_error, handle_access_denied_error
 
 
 def validate_resource_exists(resource: Any, resource_type: str, identifier: str) -> None:

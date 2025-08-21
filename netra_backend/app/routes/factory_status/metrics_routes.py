@@ -6,9 +6,9 @@ from typing import Dict, List, Any
 from fastapi import HTTPException, Query, Depends
 from netra_backend.app.services.factory_status.report_builder import ReportBuilder
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.models import MetricResponse
-from netra_backend.app.business_logic import fetch_metric
-from netra_backend.app.utils import calculate_trend
+from netra_backend.app.services.apex_optimizer_agent.models import MetricResponse
+from netra_backend.app.routes.factory_status.business_logic import fetch_metric
+from netra_backend.app.services.audit.utils import calculate_trend
 
 
 def build_metric_response(metric_name: str, value: Any, hours: int) -> MetricResponse:

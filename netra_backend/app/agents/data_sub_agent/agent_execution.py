@@ -9,9 +9,9 @@ from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
 from netra_backend.app.core.json_parsing_utils import ensure_agent_response_is_json, comprehensive_json_fix
 
-from netra_backend.app.execution_engine import ExecutionEngine
-from netra_backend.app.data_operations import DataOperations
-from netra_backend.app.metrics_analyzer import MetricsAnalyzer
+from netra_backend.app.services.unified_tool_registry.execution_engine import ExecutionEngine
+from netra_backend.app.agents.data_sub_agent.data_operations import DataOperations
+from netra_backend.app.agents.data_sub_agent.metrics_analyzer import MetricsAnalyzer
 
 
 class ExecutionManager:

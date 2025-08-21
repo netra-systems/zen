@@ -8,7 +8,7 @@ from typing import Dict, Any, List
 from datetime import datetime, timezone, timedelta
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agent_reliability_types import AgentError, AgentHealthStatus
+from netra_backend.app.core.agent_reliability_types import AgentError, AgentHealthStatus
 
 logger = central_logger.get_logger(__name__)
 

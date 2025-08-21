@@ -4,7 +4,7 @@ Factory Status Utilities
 from datetime import datetime, timedelta
 from typing import Dict, List, Any
 from netra_backend.app.services.factory_status.report_builder import FactoryStatusReport
-from netra_backend.app.models import ReportResponse
+from netra_backend.app.services.apex_optimizer_agent.models import ReportResponse
 
 
 def _filter_by_start_date(reports: List, start_date: datetime) -> List:

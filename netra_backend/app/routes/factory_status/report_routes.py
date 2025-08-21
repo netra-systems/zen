@@ -5,9 +5,9 @@ from datetime import datetime
 from typing import List, Dict
 from fastapi import HTTPException, Query, Depends
 from netra_backend.app.auth_integration.auth import get_current_user
-from netra_backend.app.models import ReportResponse, GenerateReportRequest
-from netra_backend.app.business_logic import get_cached_reports, get_latest_report_id, generate_new_report
-from netra_backend.app.utils import (
+from netra_backend.app.services.apex_optimizer_agent.models import ReportResponse, GenerateReportRequest
+from netra_backend.app.routes.factory_status.business_logic import get_cached_reports, get_latest_report_id, generate_new_report
+from netra_backend.app.services.audit.utils import (
     filter_reports_by_date_range, sort_and_limit_reports, 
     convert_reports_to_responses, convert_report_to_response
 )

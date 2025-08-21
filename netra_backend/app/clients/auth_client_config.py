@@ -8,7 +8,7 @@ from typing import List
 from enum import Enum
 from dataclasses import dataclass
 
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 
 logger = logging.getLogger(__name__)
 

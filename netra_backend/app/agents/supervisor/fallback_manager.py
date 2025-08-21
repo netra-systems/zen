@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 if TYPE_CHECKING:
     from netra_backend.app.agents.supervisor.websocket_notifier import WebSocketNotifier
 
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.supervisor.execution_context import (

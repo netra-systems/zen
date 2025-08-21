@@ -4,14 +4,14 @@ Aggregates quality metrics from all calculators.
 Follows 450-line limit with 25-line function limit.
 """
 
-from netra_backend.app.quality_models import (
+from netra_backend.app.services.factory_status.quality_models import (
     QualityMetrics, QualityLevel, TestCoverageMetrics,
     DocumentationMetrics, ArchitectureCompliance, TechnicalDebt
 )
-from netra_backend.app.test_coverage_calculator import TestCoverageCalculator
-from netra_backend.app.documentation_assessor import DocumentationAssessor
-from netra_backend.app.architecture_compliance_checker import ArchitectureComplianceChecker
-from netra_backend.app.metrics_technical_debt import TechnicalDebtCalculator
+from netra_backend.app.services.factory_status.test_coverage_calculator import TestCoverageCalculator
+from netra_backend.app.services.factory_status.documentation_assessor import DocumentationAssessor
+from netra_backend.app.services.factory_status.architecture_compliance_checker import ArchitectureComplianceChecker
+from netra_backend.app.services.factory_status.metrics_technical_debt import TechnicalDebtCalculator
 
 
 class QualityAggregator:

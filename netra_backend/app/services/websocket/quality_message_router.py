@@ -8,12 +8,12 @@ from typing import Dict, Any
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from netra_backend.app.services.quality_monitoring_service import QualityMonitoringService
-from netra_backend.app.ws_manager import manager
-from netra_backend.app.quality_metrics_handler import QualityMetricsHandler
-from netra_backend.app.quality_alert_handler import QualityAlertHandler
+from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.services.websocket.quality_metrics_handler import QualityMetricsHandler
+from netra_backend.app.services.websocket.quality_alert_handler import QualityAlertHandler
 from netra_backend.app.quality_enhanced_start_handler import QualityEnhancedStartAgentHandler
-from netra_backend.app.quality_validation_handler import QualityValidationHandler
-from netra_backend.app.quality_report_handler import QualityReportHandler
+from netra_backend.app.services.websocket.quality_validation_handler import QualityValidationHandler
+from netra_backend.app.services.websocket.quality_report_handler import QualityReportHandler
 
 logger = central_logger.get_logger(__name__)
 

@@ -4,7 +4,7 @@ Provides global access functions for supervisor flow logging without requiring
 direct instance management. Each function must be ≤8 lines as per architecture requirements.
 """
 from typing import Optional, List
-from netra_backend.app.flow_logger import SupervisorPipelineLogger
+from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLogger
 
 # Global supervisor flow logger instance
 _global_flow_logger: Optional[SupervisorPipelineLogger] = None

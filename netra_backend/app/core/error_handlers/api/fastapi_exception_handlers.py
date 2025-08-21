@@ -13,7 +13,7 @@ from starlette.status import (
 )
 
 from netra_backend.app.core.exceptions import NetraException, ErrorCode
-from netra_backend.app.api_error_handler import handle_exception, get_http_status_code
+from netra_backend.app.core.error_handlers.api.api_error_handler import handle_exception, get_http_status_code
 
 
 async def netra_exception_handler(request: Request, exc: NetraException) -> JSONResponse:

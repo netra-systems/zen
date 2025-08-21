@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from netra_backend.app.core.exceptions import NetraException
-from netra_backend.app.models import ConnectionStatus
+from netra_backend.app.services.apex_optimizer_agent.models import ConnectionStatus
 
 
 class MCPTransport(str, Enum):

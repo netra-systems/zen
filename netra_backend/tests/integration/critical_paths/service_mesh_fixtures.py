@@ -17,7 +17,7 @@ from datetime import datetime, timedelta
 import httpx
 import random
 
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 from netra_backend.app.redis_manager import RedisManager
 from unittest.mock import AsyncMock, MagicMock
 

@@ -1,7 +1,7 @@
 """Agent-related service interfaces for multi-agent systems."""
 
-from netra_backend.app.interfaces_service import AsyncServiceInterface
-from netra_backend.app.interfaces_base import BaseService
+from netra_backend.app.core.interfaces_service import AsyncServiceInterface
+from netra_backend.app.core.interfaces_base import BaseService
 
 
 class AsyncTaskService(BaseService, AsyncServiceInterface):

@@ -73,7 +73,7 @@ def _ensure_sync_database_url(url: str) -> str:
 
 def _get_configuration() -> dict:
     """Get database configuration from environment."""
-    from netra_backend.app.config import get_config
+    from netra_backend.app.core.config import get_config
     app_config = get_config()
     configuration = config.get_section(config.config_ini_section, {})
     if app_config.database_url:

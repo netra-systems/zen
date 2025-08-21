@@ -1,7 +1,7 @@
 """Service delegation utilities for route handlers."""
 
 from typing import Dict, Any, List, Optional
-from netra_backend.app.error_handlers import handle_service_error, handle_circuit_breaker_error
+from netra_backend.app.core.error_handlers import handle_service_error, handle_circuit_breaker_error
 from netra_backend.app.services.circuit_breaker_monitor import circuit_monitor, metrics_collector
 
 

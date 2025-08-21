@@ -25,7 +25,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.state import DeepAgentState
 
 # Import modern tool handlers from core module
-from netra_backend.app.tool_handlers_core import (
+from netra_backend.app.agents.admin_tool_dispatcher.tool_handlers_core import (
     ModernToolHandler,
     CorpusManagerHandler,
     SyntheticGeneratorHandler,
@@ -36,7 +36,7 @@ from netra_backend.app.tool_handlers_core import (
 )
 
 # Import operation functions
-from netra_backend.app.tool_handler_operations import (
+from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_operations import (
     extract_corpus_create_params,
     _execute_corpus_creation,
     _create_corpus_response
@@ -126,7 +126,7 @@ async def handle_corpus_create(user: User, db: AsyncSession, **kwargs) -> Dict[s
 
 async def handle_corpus_list(db: AsyncSession) -> Dict[str, Any]:
     """Legacy function"""
-    from netra_backend.app.services import corpus_service
+    from netra_backend.app.core.configuration.services import corpus_service
     from .tool_handler_helpers import create_corpus_list_response
     corpora = await corpus_service.list_corpora(db)
     return create_corpus_list_response(corpora)

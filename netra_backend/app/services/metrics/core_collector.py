@@ -14,7 +14,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import (
     CorpusMetric, MetricType, OperationMetrics, TimeSeriesPoint
 )
-from netra_backend.app.core_collector_helpers import (
+from netra_backend.app.services.metrics.core_collector_helpers import (
     create_operation_data, calculate_timing_data, prepare_base_metrics_data,
     build_operation_metrics, calculate_throughput, get_generation_metric_base_fields,
     get_generation_metric_additional_fields, calculate_success_rate_from_counts,

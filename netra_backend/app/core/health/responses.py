@@ -129,8 +129,9 @@ class HealthResponseBuilder:
     
     def _detect_environment(self) -> str:
         """Detect current deployment environment."""
-        import os
-        return os.getenv("ENVIRONMENT", "development")
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return config.environment
     
     def _calculate_sla_status(self, checks: Dict[str, ComponentCheckResult]) -> Dict[str, Any]:
         """Calculate SLA compliance status from check results."""

@@ -5,8 +5,8 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import List
-from netra_backend.app.git_commit_parser import CommitInfo, CommitType
-from netra_backend.app.metrics_business_value_types import BusinessObjective
+from netra_backend.app.services.factory_status.git_commit_parser import CommitInfo, CommitType
+from netra_backend.app.services.factory_status.metrics_business_value_types import BusinessObjective
 
 
 class BusinessValuePatternMatcher:

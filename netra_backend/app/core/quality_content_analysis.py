@@ -5,7 +5,7 @@ Part of the modular quality validation system.
 """
 
 import re
-from netra_backend.app.quality_metrics import ContentType
+from netra_backend.app.services.factory_status.quality_metrics import ContentType
 
 
 class QualityContentAnalyzer:

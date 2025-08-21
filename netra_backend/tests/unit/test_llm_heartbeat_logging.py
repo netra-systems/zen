@@ -99,7 +99,7 @@ class TestHeartbeatIntegration:
     """Test cases for heartbeat integration with LLM operations."""
     async def test_heartbeat_with_app_config(self):
         """Test heartbeat logger with app configuration."""
-        from netra_backend.app.config import get_config
+        from netra_backend.app.core.config import get_config
         config = get_config()
         
         # Verify configuration has heartbeat settings
@@ -136,7 +136,7 @@ class TestHeartbeatIntegration:
     def test_heartbeat_configuration_integration(self):
         """Test heartbeat configuration is properly integrated."""
         from netra_backend.app.llm.llm_core_operations import LLMCoreOperations
-        from netra_backend.app.config import get_config
+        from netra_backend.app.core.config import get_config
         
         config = get_config()
         operations = LLMCoreOperations(config)

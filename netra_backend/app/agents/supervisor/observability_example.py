@@ -3,12 +3,12 @@
 Demonstrates how to use the supervisor observability features for tracking
 TODO lists and flow states. This file serves as documentation and examples.
 """
-from netra_backend.app.observability_helpers import (
+from netra_backend.app.agents.supervisor.observability_helpers import (
     set_global_flow_logger, 
     log_todo_added, log_todo_started, log_todo_completed, log_todo_failed,
     log_flow_started, log_step_started, log_step_completed, log_decision_made
 )
-from netra_backend.app.flow_logger import SupervisorPipelineLogger
+from netra_backend.app.agents.supervisor.flow_logger import SupervisorPipelineLogger
 
 
 def example_direct_usage():

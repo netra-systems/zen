@@ -7,7 +7,7 @@ Follows 450-line limit with 25-line function limit.
 import subprocess
 from typing import List
 
-from netra_backend.app.quality_models import DocumentationMetrics, QualityLevel
+from netra_backend.app.services.factory_status.quality_models import DocumentationMetrics, QualityLevel
 
 
 class DocumentationAssessor:

@@ -2,7 +2,7 @@
 import logging
 from typing import Dict, Tuple, Optional, Any
 from clickhouse_driver import Client
-from netra_backend.app..config import settings
+from netra_backend.app.config import settings
 
 class DataEnricher:
     """

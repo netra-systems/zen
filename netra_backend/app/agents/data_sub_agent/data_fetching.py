@@ -35,7 +35,7 @@ from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Import modular components
-from netra_backend.app.data_fetching_validation import DataFetchingValidation
+from netra_backend.app.agents.data_sub_agent.data_fetching_validation import DataFetchingValidation
 
 logger = central_logger.get_logger(__name__)
 

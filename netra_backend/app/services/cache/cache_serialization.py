@@ -5,7 +5,7 @@ Handles serialization and deserialization of cache entries
 
 import json
 from datetime import datetime
-from netra_backend.app.cache_models import CacheEntry
+from netra_backend.app.services.cache.cache_models import CacheEntry
 
 
 class CacheSerializer:

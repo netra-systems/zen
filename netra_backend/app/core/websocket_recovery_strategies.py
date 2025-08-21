@@ -7,15 +7,15 @@ This module aggregates WebSocket recovery components that have been split
 into focused modules for better maintainability and compliance.
 """
 
-from netra_backend.app.websocket_recovery_types import (
+from netra_backend.app.core.websocket_recovery_types import (
     ConnectionState,
     ReconnectionReason,
     ConnectionMetrics,
     MessageState,
     ReconnectionConfig
 )
-from netra_backend.app.websocket_connection_manager import WebSocketConnectionManager
-from netra_backend.app.websocket_recovery_manager import WebSocketRecoveryManager, websocket_recovery_manager
+from netra_backend.app.core.websocket_connection_manager import WebSocketConnectionManager
+from netra_backend.app.core.websocket_recovery_manager import WebSocketRecoveryManager, websocket_recovery_manager
 
 __all__ = [
     'ConnectionState',

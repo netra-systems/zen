@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
 from netra_backend.app.services.corpus_service import CorpusService
-from netra_backend.app.ws_manager import manager as ws_manager
+from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
 
 
 # ==================== Mock Classes ====================

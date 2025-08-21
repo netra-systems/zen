@@ -23,8 +23,8 @@ from netra_backend.app.core.error_handlers import (
     http_exception_handler,
     general_exception_handler,
 )
-from netra_backend.app.app_factory_route_imports import import_all_route_modules
-from netra_backend.app.app_factory_route_configs import get_all_route_configurations
+from netra_backend.app.core.app_factory_route_imports import import_all_route_modules
+from netra_backend.app.core.app_factory_route_configs import get_all_route_configurations
 # OAuth now handled by auth service
 
 

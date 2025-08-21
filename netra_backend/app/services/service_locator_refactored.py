@@ -5,13 +5,13 @@ Follows 450-line limit with 25-line function limit.
 """
 
 from typing import Type, TypeVar
-from netra_backend.app.service_locator_core import ServiceLocator, ServiceNotFoundError, CircularDependencyError
-from netra_backend.app.service_interfaces import (
+from netra_backend.app.services.service_locator_core import ServiceLocator, ServiceNotFoundError, CircularDependencyError
+from netra_backend.app.services.service_interfaces import (
     IAgentService, IThreadService, IMessageHandlerService,
     IMCPService, IWebSocketService, IMCPClientService
 )
-from netra_backend.app.service_registration import register_core_services
-from netra_backend.app.service_decorators import create_inject_decorator
+from netra_backend.app.services.service_registration import register_core_services
+from netra_backend.app.services.service_decorators import create_inject_decorator
 
 T = TypeVar("T")
 

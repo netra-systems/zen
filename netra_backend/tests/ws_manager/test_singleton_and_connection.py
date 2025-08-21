@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.ws_manager import WebSocketManager, ConnectionInfo, manager, ws_manager
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo, manager, ws_manager
 from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
 
 
@@ -62,7 +62,7 @@ class TestSingletonPattern(WebSocketTestBase):
         """Test singleton works across different import styles"""
         self.reset_manager_singleton()
         
-        from netra_backend.app.ws_manager import WebSocketManager as WSM1
+        from netra_backend.app.services.websocket.ws_manager import WebSocketManager as WSM1
         from netra_backend.app import ws_manager as ws_module
         WSM2 = ws_module.WebSocketManager
         

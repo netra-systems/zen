@@ -5,13 +5,13 @@ Handles database connectivity and schema validation.
 Maintains 25-line function limit and focused responsibility.
 """
 
-import os
 import time
 from typing import List
 from sqlalchemy import text, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db.models_postgres import Assistant
-from netra_backend.app.models import StartupCheckResult
+from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 class DatabaseChecker:
@@ -19,9 +19,11 @@ class DatabaseChecker:
     
     def __init__(self, app):
         self.app = app
-        self.environment = os.getenv("ENVIRONMENT", "development").lower()
-        self.is_staging = self.environment == "staging" or os.getenv("K_SERVICE")
-        self.is_mock = "mock" in os.getenv("DATABASE_URL", "").lower()
+        config = unified_config_manager.get_config()
+        self.environment = config.environment.lower()
+        self.is_staging = self.environment == "staging" or (hasattr(config, 'k_service') and config.k_service)
+        database_url = getattr(config, 'database_url', '')
+        self.is_mock = "mock" in database_url.lower()
     
     async def check_database_connection(self) -> StartupCheckResult:
         """Check PostgreSQL database connection and schema"""
@@ -248,7 +250,9 @@ class DatabaseChecker:
     
     async def _table_exists(self, db: AsyncSession, table: str) -> bool:
         """Check if table exists in database"""
-        if "sqlite" in os.getenv("DATABASE_URL", "").lower():
+        config = unified_config_manager.get_config()
+        database_url = getattr(config, 'database_url', '')
+        if "sqlite" in database_url.lower():
             return await self._sqlite_table_exists(db, table)
         return await self._postgres_table_exists(db, table)
     

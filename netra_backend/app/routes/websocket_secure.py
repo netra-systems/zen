@@ -89,7 +89,7 @@ class SecureWebSocketManager:
     def _init_agent_response_integration(self) -> None:
         """Initialize integration with WebSocket manager for agent responses."""
         # Register this manager as the response handler for agent messages
-        from netra_backend.app.ws_manager import manager as ws_manager
+        from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
         
         # Override the send_message method to route through secure connections
         original_send_message = ws_manager.send_message_to_user

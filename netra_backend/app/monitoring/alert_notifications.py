@@ -8,7 +8,7 @@ import asyncio
 from datetime import datetime, UTC, timedelta
 from typing import Dict, List, Any, Callable, Optional
 
-from netra_backend.app.alert_types import Alert, NotificationChannel, NotificationConfig, AlertLevel
+from netra_backend.app.monitoring.alert_types import Alert, NotificationChannel, NotificationConfig, AlertLevel
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

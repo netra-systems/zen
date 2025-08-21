@@ -10,8 +10,8 @@ from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 
-from netra_backend.app.git_commit_parser import GitCommitParser, CommitInfo, CommitType
-from netra_backend.app.git_branch_tracker import GitBranchTracker, BranchInfo, BranchType
+from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
+from netra_backend.app.services.factory_status.git_branch_tracker import GitBranchTracker, BranchInfo, BranchType
 
 
 class VelocityPeriod(Enum):

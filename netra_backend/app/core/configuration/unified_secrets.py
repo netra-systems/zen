@@ -3,6 +3,10 @@
 Provides a unified interface for all secret management operations.
 Wraps the existing SecretManager with additional functionality.
 
+**CONFIGURATION MANAGER**: This module is part of the configuration system
+and requires direct os.environ access for loading secrets into configuration.
+Application code should use the unified configuration system instead.
+
 Business Value: Centralizes secret management, reducing security
 incidents and ensuring compliance with Enterprise requirements.
 """
@@ -11,8 +15,8 @@ import os
 from typing import Dict, Any, Optional, List
 from functools import lru_cache
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.secrets import SecretManager
-from netra_backend.app.environment import EnvironmentDetector
+from netra_backend.app.core.configuration.secrets import SecretManager
+from netra_backend.app.core.configuration.environment import EnvironmentDetector
 
 
 class UnifiedSecretManager:
@@ -62,6 +66,8 @@ class UnifiedSecretManager:
     def _load_env_secrets(self) -> Dict[str, Any]:
         """Load secrets from environment variables.
         
+        CONFIG MANAGER: Direct env access required for secret loading.
+        
         Returns:
             Dict of secrets from environment
         """
@@ -81,6 +87,7 @@ class UnifiedSecretManager:
             "GCP_SECRET_KEY"
         ]
         
+        # CONFIG BOOTSTRAP: Direct env access for secret loading
         secrets = {}
         for key in secret_keys:
             value = os.environ.get(key)
@@ -114,18 +121,24 @@ class UnifiedSecretManager:
     def _is_gcp_available(self) -> bool:
         """Check if Google Cloud Platform is available.
         
+        CONFIG MANAGER: Direct env access for GCP availability check.
+        
         Returns:
             bool: True if GCP is available
         """
+        # CONFIG BOOTSTRAP: Direct env access for GCP detection
         return bool(os.environ.get("GOOGLE_CLOUD_PROJECT")) or \
                bool(os.environ.get("GCP_PROJECT"))
     
     def _is_aws_available(self) -> bool:
         """Check if AWS is available.
         
+        CONFIG MANAGER: Direct env access for AWS availability check.
+        
         Returns:
             bool: True if AWS is available
         """
+        # CONFIG BOOTSTRAP: Direct env access for AWS detection
         return bool(os.environ.get("AWS_REGION")) or \
                bool(os.environ.get("AWS_DEFAULT_REGION"))
     
@@ -143,6 +156,7 @@ class UnifiedSecretManager:
         if key in self._cache:
             return self._cache[key]
             
+        # CONFIG BOOTSTRAP: Direct env access for secret retrieval
         # Try environment variable
         env_value = os.environ.get(key)
         if env_value:
@@ -174,6 +188,7 @@ class UnifiedSecretManager:
             self._logger.error("Cannot set secrets in production")
             return False
             
+        # CONFIG BOOTSTRAP: Direct env access for secret setting (dev/test only)
         os.environ[key] = value
         self._cache[key] = value
         return True
@@ -201,9 +216,12 @@ class UnifiedSecretManager:
     def get_database_credentials(self) -> Dict[str, Any]:
         """Get database connection credentials.
         
+        CONFIG MANAGER: Direct env access for database credential loading.
+        
         Returns:
             Dict with database credentials
         """
+        # CONFIG BOOTSTRAP: Direct env access for database credentials
         return {
             "host": os.environ.get("DATABASE_HOST", "localhost"),
             "port": int(os.environ.get("DATABASE_PORT", "5432")),
@@ -215,9 +233,12 @@ class UnifiedSecretManager:
     def get_redis_credentials(self) -> Dict[str, Any]:
         """Get Redis connection credentials.
         
+        CONFIG MANAGER: Direct env access for Redis credential loading.
+        
         Returns:
             Dict with Redis credentials
         """
+        # CONFIG BOOTSTRAP: Direct env access for Redis credentials
         return {
             "host": os.environ.get("REDIS_HOST", "localhost"),
             "port": int(os.environ.get("REDIS_PORT", "6379")),
@@ -228,9 +249,12 @@ class UnifiedSecretManager:
     def get_llm_credentials(self) -> Dict[str, Any]:
         """Get LLM API credentials.
         
+        CONFIG MANAGER: Direct env access for LLM credential loading.
+        
         Returns:
             Dict with LLM credentials
         """
+        # CONFIG BOOTSTRAP: Direct env access for LLM credentials
         provider = os.environ.get("LLM_PROVIDER", "openai")
         
         credentials = {
@@ -261,6 +285,63 @@ class UnifiedSecretManager:
     def clear_cache(self):
         """Clear the secret cache."""
         self._cache.clear()
+    
+    def populate_secrets(self, config) -> None:
+        """Populate secrets into configuration object.
+        
+        This method is called by the unified configuration manager
+        to populate secrets into the application configuration.
+        """
+        secrets = self.load_all_secrets()
+        
+        # Populate common secret fields if they exist on config
+        if hasattr(config, 'jwt_secret_key'):
+            config.jwt_secret_key = self.get_jwt_secret()
+        
+        if hasattr(config, 'database_password'):
+            config.database_password = self.get_secret("DATABASE_PASSWORD", "")
+            
+        if hasattr(config, 'redis_password'):
+            config.redis_password = self.get_secret("REDIS_PASSWORD", "")
+            
+        if hasattr(config, 'clickhouse_password'):
+            config.clickhouse_password = self.get_secret("CLICKHOUSE_PASSWORD", "")
+            
+        # Populate LLM credentials
+        llm_creds = self.get_llm_credentials()
+        if hasattr(config, 'llm_api_key'):
+            config.llm_api_key = llm_creds.get('api_key', '')
+            
+        self._logger.info(f"Populated {len(secrets)} secrets into configuration")
+    
+    def validate_secrets_consistency(self, config) -> List[str]:
+        """Validate secrets configuration consistency.
+        
+        Returns:
+            List of validation issues
+        """
+        issues = []
+        
+        # Check for required secrets based on environment
+        if self._environment_detector.is_production():
+            required_secrets = ["JWT_SECRET_KEY", "DATABASE_PASSWORD"]
+            if not self.validate_required_secrets(required_secrets):
+                issues.append("Missing required production secrets")
+                
+        # Check for conflicting credentials
+        if hasattr(config, 'database_password') and hasattr(config, 'database_url'):
+            if config.database_password and "password" in (config.database_url or ""):
+                issues.append("Both database_password and password in database_url specified")
+                
+        return issues
+    
+    def get_loaded_secrets_count(self) -> int:
+        """Get count of loaded secrets for monitoring.
+        
+        Returns:
+            Number of secrets currently loaded
+        """
+        return len(self._cache)
         
     @lru_cache(maxsize=1)
     def get_secret_mappings(self) -> Dict[str, str]:

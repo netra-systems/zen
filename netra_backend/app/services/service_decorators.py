@@ -6,7 +6,7 @@ Follows 450-line limit with 25-line function limit.
 
 import asyncio
 from typing import Type, Callable, TypeVar
-from netra_backend.app.service_locator_core import ServiceLocator
+from netra_backend.app.services.service_locator_core import ServiceLocator
 
 T = TypeVar("T")
 

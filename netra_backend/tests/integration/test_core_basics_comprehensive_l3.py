@@ -28,7 +28,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspa
 # from netra_backend.app.db.postgres_core import get_async_session
 # from netra_backend.app.core.cache import CacheManager
 # from netra_backend.app.core.configuration.config import config_instance
-# from netra_backend.app.models import User, Organization
+# from netra_backend.app.services.apex_optimizer_agent.models import User, Organization
 # from netra_backend.app.core.cross_service_auth import CrossServiceAuth
 
 # Mock implementations for testing

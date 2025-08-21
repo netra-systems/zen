@@ -206,7 +206,7 @@ class TestImplementationConsistency:
 
     def test_websocket_manager_exists(self):
         """Verify WebSocket manager exists for real-time updates"""
-        from netra_backend.app.ws_manager import manager
+        from netra_backend.app.services.websocket.ws_manager import manager
         
         assert manager != None
         assert hasattr(manager, 'connect')

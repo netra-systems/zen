@@ -8,7 +8,7 @@ import os
 from typing import Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.config import Settings
+    from netra_backend.app.core.config import Settings
 from netra_backend.app.logging_config import central_logger as logger
 
 # Import from modular components to maintain backward compatibility

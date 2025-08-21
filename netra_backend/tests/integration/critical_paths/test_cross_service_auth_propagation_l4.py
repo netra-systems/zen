@@ -30,7 +30,7 @@ from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.middleware.auth_middleware import AuthMiddleware
 from netra_backend.app.services.api_gateway import APIGateway
 from netra_backend.app.utils.service_mesh import ServiceMesh
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 @dataclass

@@ -53,7 +53,7 @@ class AdminToolExecutors:
     
     async def _create_corpus(self, **kwargs) -> ToolResult:
         """Create new corpus"""
-        from netra_backend.app.services import corpus_service
+        from netra_backend.app.core.configuration.services import corpus_service
         
         corpus_params = self._extract_corpus_params(**kwargs)
         result = await self._call_corpus_service(corpus_service, corpus_params)
@@ -74,7 +74,7 @@ class AdminToolExecutors:
     
     async def _list_corpora(self) -> ToolResult:
         """List all available corpora"""
-        from netra_backend.app.services import corpus_service
+        from netra_backend.app.core.configuration.services import corpus_service
         
         corpora = await corpus_service.list_corpora(self.db)
         return {"status": "success", "corpora": corpora}
@@ -146,7 +146,7 @@ class AdminToolExecutors:
     
     async def _create_user_with_service(self, email: str, role: str) -> Dict[str, Any]:
         """Create user using service"""
-        from netra_backend.app.services import user_service
+        from netra_backend.app.core.configuration.services import user_service
         result = await user_service.create_user(email=email, role=role, db=self.db)
         return {"status": "success", "user": result}
     

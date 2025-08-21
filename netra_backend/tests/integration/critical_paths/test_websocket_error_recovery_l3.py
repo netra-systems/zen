@@ -9,7 +9,7 @@ import websockets
 import json
 from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.websocket_service import WebSocketService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestWebSocketErrorRecoveryL3:

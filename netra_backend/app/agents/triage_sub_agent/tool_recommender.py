@@ -4,7 +4,7 @@ This module handles tool recommendations based on category and extracted entitie
 """
 
 from typing import List, Dict
-from netra_backend.app.models import ToolRecommendation, ExtractedEntities
+from netra_backend.app.services.apex_optimizer_agent.models import ToolRecommendation, ExtractedEntities
 
 
 class ToolRecommender:

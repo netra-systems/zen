@@ -6,7 +6,7 @@ from typing import Dict, Any, List
 import numpy as np
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.industry_config import get_industry_factors
+from netra_backend.app.services.demo.industry_config import get_industry_factors
 
 logger = central_logger.get_logger(__name__)
 

@@ -21,8 +21,8 @@ from contextlib import asynccontextmanager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.schemas import AppConfig
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.schemas.Config import AppConfig
+from netra_backend.app.services.websocket.ws_manager import manager
 from netra_backend.app.db.postgres import get_async_db
 
 logger = central_logger.get_logger(__name__)

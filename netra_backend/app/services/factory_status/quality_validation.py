@@ -8,9 +8,9 @@ import re
 import subprocess
 from typing import List
 
-from netra_backend.app.git_commit_parser import GitCommitParser
-from netra_backend.app.technical_debt_calculator import TechnicalDebtCalculator
-from netra_backend.app.quality_core import (
+from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser
+from netra_backend.app.services.factory_status.technical_debt_calculator import TechnicalDebtCalculator
+from netra_backend.app.services.factory_status.quality_core import (
     ArchitectureCompliance, TechnicalDebt, ComplianceStatus, 
     QualityConstants, QualityMetrics, QualityLevel,
     TestCoverageMetrics, DocumentationMetrics

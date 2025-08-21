@@ -4,7 +4,7 @@ Import CorpusAdminRecoveryStrategy from single source of truth.
 Re-exports for backward compatibility.
 """
 
-from netra_backend.app.interfaces_agent_recovery import CorpusAdminRecoveryStrategy
+from netra_backend.app.core.interfaces_agent_recovery import CorpusAdminRecoveryStrategy
 
 # Re-export for backward compatibility
 __all__ = ['CorpusAdminRecoveryStrategy']

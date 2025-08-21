@@ -44,10 +44,10 @@ from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.schemas.shared_types import RetryConfig
 
 # Import existing modular components
-from netra_backend.app.execution_core import ExecutionCore
-from netra_backend.app.execution_parameters import ParameterProcessor
-from netra_backend.app.execution_analysis import AnalysisRouter
-from netra_backend.app.execution_fallbacks import ExecutionFallbackHandler
+from netra_backend.app.agents.data_sub_agent.execution_core import ExecutionCore
+from netra_backend.app.agents.data_sub_agent.execution_parameters import ParameterProcessor
+from netra_backend.app.agents.data_sub_agent.execution_analysis import AnalysisRouter
+from netra_backend.app.agents.data_sub_agent.execution_fallbacks import ExecutionFallbackHandler
 
 
 class DataSubAgentExecutionEngine(BaseExecutionInterface):

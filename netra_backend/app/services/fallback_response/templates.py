@@ -4,7 +4,7 @@ This module provides backward compatibility while delegating to the new modular
 architecture with strong typing and 25-line function compliance.
 """
 
-from netra_backend.app.templates_core import TemplateManager
+from netra_backend.app.services.fallback_response.templates_core import TemplateManager
 
 # Re-export the main class for backward compatibility
 __all__ = ['TemplateManager']

@@ -3,11 +3,11 @@
 from pathlib import Path
 from typing import Dict, Any
 
-from netra_backend.app.spec_analyzer_core import SpecLoader, ComplianceScore, SpecViolation, ViolationSeverity
-from netra_backend.app.architecture_analyzer import ArchitectureAnalyzer
-from netra_backend.app.type_safety_analyzer import TypeSafetyAnalyzer
-from netra_backend.app.claude_cli_runner import ClaudeCLIRunner
-from netra_backend.app.score_calculator import ScoreCalculator
+from netra_backend.app.services.factory_status.spec_analyzer_core import SpecLoader, ComplianceScore, SpecViolation, ViolationSeverity
+from netra_backend.app.services.factory_status.architecture_analyzer import ArchitectureAnalyzer
+from netra_backend.app.services.factory_status.type_safety_analyzer import TypeSafetyAnalyzer
+from netra_backend.app.services.factory_status.claude_cli_runner import ClaudeCLIRunner
+from netra_backend.app.services.factory_status.score_calculator import ScoreCalculator
 
 
 class SpecComplianceScorer:

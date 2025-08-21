@@ -5,8 +5,8 @@ import hashlib
 from typing import Dict, Optional, Any
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.quality_gate_models import ContentType, QualityMetrics
-from netra_backend.app.quality_gate_patterns import QualityPatterns
+from netra_backend.app.services.quality_gate.quality_gate_models import ContentType, QualityMetrics
+from netra_backend.app.services.quality_gate.quality_gate_patterns import QualityPatterns
 
 logger = central_logger.get_logger(__name__)
 

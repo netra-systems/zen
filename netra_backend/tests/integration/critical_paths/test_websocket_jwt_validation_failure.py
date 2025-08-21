@@ -21,7 +21,7 @@ async def test_websocket_jwt_validation_failure():
     2. Auth service returning 401 Unauthorized
     3. WebSocket connection being rejected with proper error
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     
     # Mock the auth client to return validation failure
     with patch('app.clients.auth_client.auth_client') as mock_auth_client:
@@ -68,7 +68,7 @@ async def test_websocket_auth_service_401_response():
     - Auth service endpoint returns 401 Unauthorized
     - WebSocket connection is properly rejected
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     from httpx import Response
     
     # Mock httpx client to simulate 401 from auth service
@@ -114,7 +114,7 @@ async def test_websocket_no_token_provided():
     """
     Test WebSocket rejection when no authentication token is provided.
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     
     with TestClient(app) as client:
         try:
@@ -143,7 +143,7 @@ async def test_websocket_auth_token_validation_flow():
     - Auth service validation call returning 401
     - Proper error logging and connection rejection
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     import logging
     
     # Capture logs to verify proper error logging
@@ -181,7 +181,7 @@ async def test_websocket_successful_auth_dev_environment():
     Test successful WebSocket connection in development environment.
     Dev environment bypasses auth validation for local development.
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     import os
     
     # Set development environment
@@ -223,7 +223,7 @@ async def test_websocket_successful_valid_oauth_token():
     Test successful WebSocket connection with valid OAuth token.
     Simulates production scenario with valid JWT from OAuth provider.
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     from datetime import datetime, timedelta
     import jwt
     
@@ -288,7 +288,7 @@ async def test_websocket_auth_with_authorization_header():
     """
     Test successful WebSocket connection using Authorization header instead of subprotocol.
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     
     with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:
         mock_validate.return_value = {
@@ -329,7 +329,7 @@ async def test_websocket_token_refresh_during_connection():
     Test WebSocket connection handles token refresh properly.
     Simulates scenario where token is refreshed while connection is active.
     """
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     from datetime import datetime, timedelta
     
     with patch('app.core.auth_client.auth_client.validate_token') as mock_validate:

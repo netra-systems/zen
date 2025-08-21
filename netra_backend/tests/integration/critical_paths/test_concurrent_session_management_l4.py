@@ -16,7 +16,7 @@ import random
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.resource_manager import ResourceManager
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestConcurrentSessionManagementL4:

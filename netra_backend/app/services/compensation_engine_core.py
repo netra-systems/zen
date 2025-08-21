@@ -11,12 +11,12 @@ from datetime import datetime
 from netra_backend.app.core.error_recovery import RecoveryContext
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.compensation_models import (
+from netra_backend.app.services.compensation_models import (
     BaseCompensationHandler,
     CompensationAction,
     CompensationState
 )
-from netra_backend.app.compensation_handlers_core import (
+from netra_backend.app.services.compensation_handlers_core import (
     DatabaseCompensationHandler,
     FileSystemCompensationHandler,
     CacheCompensationHandler,

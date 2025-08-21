@@ -95,7 +95,7 @@ class TestFirstMessageThreadInit:
     
     async def test_thread_persistence_to_database(self, db_session):
         """Test thread data persists correctly to database."""
-        from netra_backend.app.models import Thread
+        from netra_backend.app.services.apex_optimizer_agent.models import Thread
         
         # Create thread model
         thread = Thread(
@@ -214,7 +214,7 @@ class TestFirstMessageThreadInit:
     
     async def test_websocket_notification_on_thread_creation(self, thread_data):
         """Test WebSocket notification sent when thread created."""
-        from netra_backend.app.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
         
         ws_manager = Mock(spec=WebSocketManager)
         ws_manager.send_message = AsyncMock()

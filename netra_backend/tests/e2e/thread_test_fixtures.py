@@ -15,7 +15,7 @@ from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.db.models_postgres import Thread, Message, Run
 from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType, AgentPhase
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.services.websocket.ws_manager import manager
 
 
 class ThreadTestDataFactory:

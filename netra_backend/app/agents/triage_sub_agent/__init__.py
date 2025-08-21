@@ -4,7 +4,7 @@ Enhanced triage agent with advanced categorization and caching capabilities.
 This module provides comprehensive request analysis, entity extraction, and intelligent routing.
 """
 
-from netra_backend.app.models import (
+from netra_backend.app.agents.triage_sub_agent.models import (
     Priority,
     Complexity,
     KeyParameters,
@@ -17,11 +17,11 @@ from netra_backend.app.models import (
     TriageResult
 )
 
-from netra_backend.app.entity_extractor import EntityExtractor
-from netra_backend.app.validator import RequestValidator
-from netra_backend.app.intent_detector import IntentDetector
-from netra_backend.app.tool_recommender import ToolRecommender
-from netra_backend.app.core import TriageCore
+from netra_backend.app.agents.triage_sub_agent.entity_extractor import EntityExtractor
+from netra_backend.app.agents.triage_sub_agent.validator import RequestValidator
+from netra_backend.app.agents.triage_sub_agent.intent_detector import IntentDetector
+from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
+from netra_backend.app.agents.triage_sub_agent.core import TriageCore
 
 # Note: TriageSubAgent is imported directly where needed to avoid circular imports
 # Use: from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent

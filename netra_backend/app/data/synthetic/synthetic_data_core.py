@@ -13,7 +13,7 @@ from multiprocessing import cpu_count
 from rich.console import Console
 
 from netra_backend.app.synthetic_data_loader import ConfigurationManager, ContentCorpusManager
-from netra_backend.app.synthetic_data_generator import (
+from netra_backend.app.agents.synthetic_data_generator import (
     ParallelProcessor, MultiTurnGenerator, TraceDistributionCalculator
 )
 

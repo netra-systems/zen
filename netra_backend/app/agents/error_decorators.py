@@ -9,8 +9,8 @@ from uuid import uuid4
 from typing import Any, Optional
 
 from netra_backend.app.schemas.shared_types import ErrorContext
-from netra_backend.app.agent_error_handler import AgentErrorHandler
-from netra_backend.app.error_recovery_strategy import ErrorRecoveryStrategy
+from netra_backend.app.core.agent_error_handler import AgentErrorHandler
+from netra_backend.app.agents.error_recovery_strategy import ErrorRecoveryStrategy
 
 
 # Global error handler instance

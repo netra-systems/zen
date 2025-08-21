@@ -7,7 +7,7 @@ from dataclasses import asdict
 import statistics
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.models import QualityTrend, MetricType, AgentQualityProfile
+from netra_backend.app.services.apex_optimizer_agent.models import QualityTrend, MetricType, AgentQualityProfile
 
 logger = central_logger.get_logger(__name__)
 

@@ -2,7 +2,7 @@
 
 from typing import Dict, Any, List
 
-from netra_backend.app.industry_config import get_industry_factors
+from netra_backend.app.services.demo.industry_config import get_industry_factors
 
 def generate_demo_response(message: str, industry: str, 
                           metrics: Dict[str, Any]) -> str:

@@ -11,10 +11,10 @@ from typing import Dict, Optional
 from netra_backend.app.core.error_recovery import OperationType
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.types import Transaction, Operation, TransactionState, OperationState
-from netra_backend.app.compensation import create_compensation_system, CompensationExecutor
-from netra_backend.app.postgres_ops import PostgresOperationManager
-from netra_backend.app.clickhouse_ops import ClickHouseOperationManager
+from netra_backend.app.services.transaction_manager.types import Transaction, Operation, TransactionState, OperationState
+from netra_backend.app.services.transaction_manager.compensation import create_compensation_system, CompensationExecutor
+from netra_backend.app.services.transaction_manager.postgres_ops import PostgresOperationManager
+from netra_backend.app.services.transaction_manager.clickhouse_ops import ClickHouseOperationManager
 
 logger = central_logger.get_logger(__name__)
 

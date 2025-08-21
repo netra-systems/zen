@@ -5,16 +5,16 @@ Modular MCP API endpoints split into focused components under 450-line limit.
 Each module handles specific MCP functionality with single responsibility.
 """
 
-from netra_backend.app.main import router
-from netra_backend.app.models import (
+from netra_backend.app.routes.mcp.main import router
+from netra_backend.app.services.apex_optimizer_agent.models import (
     MCPClientCreateRequest,
     MCPSessionCreateRequest,
     MCPToolCallRequest,
     MCPResourceReadRequest,
     MCPPromptGetRequest
 )
-from netra_backend.app.service_factory import get_mcp_service
-from netra_backend.app.handlers import MCPHandlers, execute_tool
+from netra_backend.app.services.service_factory import get_mcp_service
+from netra_backend.app.routes.mcp.handlers import MCPHandlers, execute_tool
 
 __all__ = [
     "router",

@@ -5,9 +5,9 @@ Handles ClickHouse query failures with fallback and simplification strategies.
 
 from typing import Any, Dict, Optional
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.error_types import ClickHouseQueryError
+from netra_backend.app.core.error_types import ClickHouseQueryError
 from netra_backend.app.agents.error_handler import ErrorContext
-from netra_backend.app.query_fix_validator import validate_and_fix_query
+from netra_backend.app.agents.data_sub_agent.query_fix_validator import validate_and_fix_query
 
 logger = central_logger.get_logger(__name__)
 

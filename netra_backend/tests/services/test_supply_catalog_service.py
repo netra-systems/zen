@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 from netra_backend.app.db import models_postgres
-from netra_backend.app.schemas import SupplyOptionCreate, SupplyOptionUpdate
+from netra_backend.app.routes.unified_tools.schemas import SupplyOptionCreate, SupplyOptionUpdate
 
 
 @pytest.fixture

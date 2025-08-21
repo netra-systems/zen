@@ -5,16 +5,16 @@ Main orchestrator for startup checks with modular delegation.
 Maintains 25-line function limit and coordinating responsibility.
 """
 
-import os
 import time
 from typing import Dict, Any, List
 from fastapi import FastAPI
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.models import StartupCheckResult
+from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
 from netra_backend.app.environment_checks import EnvironmentChecker
 from netra_backend.app.database_checks import DatabaseChecker
 from netra_backend.app.service_checks import ServiceChecker
 from netra_backend.app.system_checks import SystemChecker
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 class StartupChecker:
@@ -150,8 +150,8 @@ class StartupChecker:
     
     def _is_staging_environment(self) -> bool:
         """Check if running in staging environment"""
-        environment = os.getenv("ENVIRONMENT", "development").lower()
-        return environment == "staging" or bool(os.getenv("K_SERVICE"))
+        config = unified_config_manager.get_config()
+        return config.environment.lower() == "staging" or (hasattr(config, 'k_service') and config.k_service)
     
     def _record_check_success(self, result: StartupCheckResult, start_time: float) -> None:
         """Record successful check result with timing"""

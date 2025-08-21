@@ -27,11 +27,11 @@ from fastapi.testclient import TestClient
 from datetime import datetime, timedelta
 import json
 
-from netra_backend.app.main import app
+from netra_backend.app.routes.mcp.main import app
 from netra_backend.app.auth_integration.auth import get_current_user
 from netra_backend.app.schemas.core_models import User
 from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 
 
 class TestDevModeAuthentication:
@@ -323,7 +323,7 @@ class TestDevModeAuthentication:
         Business Value: Enables development without API costs
         and consistent testing with predictable responses
         """
-        from netra_backend.app.config import get_config
+        from netra_backend.app.core.config import get_config
         
         with patch('app.config.get_config') as mock_config:
             mock_config.return_value.DEV_MODE = True

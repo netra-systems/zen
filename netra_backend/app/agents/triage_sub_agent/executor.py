@@ -17,7 +17,7 @@ from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionR
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
-from netra_backend.app.execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
+from netra_backend.app.agents.admin_tool_dispatcher.execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
 
 logger = central_logger.get_logger(__name__)
 

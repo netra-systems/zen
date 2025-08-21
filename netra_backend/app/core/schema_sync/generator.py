@@ -9,7 +9,7 @@ from typing import Dict, Any, List
 from datetime import datetime, UTC
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.core.error_context import ErrorContext
-from netra_backend.app.models import SchemaValidationLevel
+from netra_backend.app.services.apex_optimizer_agent.models import SchemaValidationLevel
 
 
 class TypeScriptGenerator:

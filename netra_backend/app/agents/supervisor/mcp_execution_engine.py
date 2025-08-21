@@ -7,7 +7,7 @@ Follows strict 25-line function design and 450-line limit.
 from typing import Dict, List, Optional, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 
 from netra_backend.app.logging_config import central_logger

@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from uuid import uuid4
 from pydantic import BaseModel
 
-from netra_backend.app.validator_framework import (
+from netra_backend.app.core.cross_service_validators.validator_framework import (
     BaseValidator, ValidationResult, ValidationStatus, ValidationSeverity
 )
 

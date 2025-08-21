@@ -26,7 +26,7 @@ from netra_backend.app.db.migration_utils import (
     log_migration_status, should_continue_on_error, validate_database_url
 )
 from netra_backend.app.core.performance_optimization_manager import performance_manager
-from netra_backend.app.monitoring import performance_monitor
+from netra_backend.app.agents.base.monitoring import performance_monitor
 from netra_backend.app.db.index_optimizer import index_manager
 
 
@@ -289,7 +289,7 @@ def _create_agent_supervisor(app: FastAPI) -> None:
 def _build_supervisor_agent(app: FastAPI):
     """Build supervisor agent instance."""
     from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-    from netra_backend.app.ws_manager import manager as websocket_manager
+    from netra_backend.app.services.websocket.ws_manager import manager as websocket_manager
     return SupervisorAgent(
         app.state.db_session_factory, 
         app.state.llm_manager, 

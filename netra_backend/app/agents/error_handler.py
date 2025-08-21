@@ -11,9 +11,9 @@ from netra_backend.app.core.error_handlers import (
 )
 
 # Import from existing modular components for backward compatibility
-from netra_backend.app.agent_error_types import AgentValidationError, NetworkError
-from netra_backend.app.error_recovery_strategy import ErrorRecoveryStrategy
-from netra_backend.app.error_decorators import handle_agent_error
+from netra_backend.app.agents.agent_error_types import AgentValidationError, NetworkError
+from netra_backend.app.agents.error_recovery_strategy import ErrorRecoveryStrategy
+from netra_backend.app.agents.error_decorators import handle_agent_error
 
 # Import external dependencies that were referenced
 from netra_backend.app.core.exceptions_database import DatabaseError

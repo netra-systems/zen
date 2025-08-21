@@ -11,13 +11,13 @@ from netra_backend.app.services.tool_permission_service import ToolPermissionSer
 import redis
 import os
 
-from netra_backend.app.schemas import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
-from netra_backend.app.tool_listing import gather_tool_data, build_tool_availability_response
-from netra_backend.app.tool_execution import process_tool_execution
-from netra_backend.app.permissions import execute_permission_check
-from netra_backend.app.user_plan import gather_user_plan_data, build_user_plan_response
-from netra_backend.app.migration import process_migration_request
-from netra_backend.app.error_handlers import (
+from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
+from netra_backend.app.routes.unified_tools.tool_listing import gather_tool_data, build_tool_availability_response
+from netra_backend.app.routes.unified_tools.tool_execution import process_tool_execution
+from netra_backend.app.routes.unified_tools.permissions import execute_permission_check
+from netra_backend.app.routes.unified_tools.user_plan import gather_user_plan_data, build_user_plan_response
+from netra_backend.app.routes.unified_tools.migration import process_migration_request
+from netra_backend.app.core.error_handlers import (
     handle_list_tools_error, handle_tool_execution_error, handle_categories_error,
     handle_permission_check_error, handle_user_plan_error, handle_migration_error
 )

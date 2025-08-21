@@ -7,11 +7,11 @@ from fastapi import Request
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.error_response_models import ErrorResponse
-from netra_backend.app.exceptions import NetraException, ErrorSeverity
-from netra_backend.app.error_handlers_netra import NetraExceptionHandler
-from netra_backend.app.error_handlers_validation import ValidationErrorHandler
-from netra_backend.app.error_handlers_database import DatabaseErrorHandler
-from netra_backend.app.error_handlers_http import HttpExceptionHandler
+from netra_backend.app.core.exceptions import NetraException, ErrorSeverity
+from netra_backend.app.core.error_handlers_netra import NetraExceptionHandler
+from netra_backend.app.core.error_handlers_validation import ValidationErrorHandler
+from netra_backend.app.core.error_handlers_database import DatabaseErrorHandler
+from netra_backend.app.core.error_handlers_http import HttpExceptionHandler
 
 
 class ErrorProcessor:

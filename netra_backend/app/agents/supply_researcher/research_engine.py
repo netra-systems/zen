@@ -6,7 +6,7 @@ Maintains 25-line function limit and focused responsibility.
 """
 
 from typing import Dict, Any, Optional
-from netra_backend.app.models import ResearchType
+from netra_backend.app.services.apex_optimizer_agent.models import ResearchType
 
 
 class SupplyResearchEngine:

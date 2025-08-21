@@ -18,7 +18,7 @@ from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock
 
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.redis_manager import RedisManager
 from fastapi import WebSocket
 

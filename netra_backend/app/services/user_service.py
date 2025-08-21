@@ -1,6 +1,6 @@
-from netra_backend.app.db.base import EnhancedCRUDService
-from netra_backend.app..db.models_postgres import User
-from netra_backend.app..schemas.User import UserCreate, UserUpdate
+from netra_backend.app.services.base import EnhancedCRUDService
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.schemas.User import UserCreate, UserUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
 from fastapi.encoders import jsonable_encoder

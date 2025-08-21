@@ -8,7 +8,7 @@ from datetime import datetime
 from typing import Any
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.database_types import DatabaseType, PoolHealth, PoolMetrics
+from netra_backend.app.core.database_types import DatabaseType, PoolHealth, PoolMetrics
 
 logger = central_logger.get_logger(__name__)
 

@@ -9,7 +9,7 @@ from typing import Dict, List, Any, Optional
 
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.compensation_models import Saga, SagaStep, SagaState
+from netra_backend.app.services.compensation_models import Saga, SagaStep, SagaState
 
 logger = central_logger.get_logger(__name__)
 

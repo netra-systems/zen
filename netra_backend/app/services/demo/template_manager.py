@@ -2,10 +2,10 @@
 
 from typing import Dict, Any, List
 
-from netra_backend.app.industry_config import INDUSTRY_FACTORS
-from netra_backend.app.response_generator import (generate_prompt_template, 
+from netra_backend.app.services.demo.industry_config import INDUSTRY_FACTORS
+from netra_backend.app.services.demo.response_generator import (generate_prompt_template, 
                                 generate_optimization_scenarios)
-from netra_backend.app.metrics_generator import (generate_baseline_metrics,
+from netra_backend.app.services.demo.metrics_generator import (generate_baseline_metrics,
                                generate_optimized_metrics)
 
 async def get_industry_templates(industry: str) -> List[Dict[str, Any]]:

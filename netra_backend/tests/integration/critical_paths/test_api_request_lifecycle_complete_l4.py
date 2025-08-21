@@ -16,7 +16,7 @@ from netra_backend.app.services.api_gateway import APIGateway
 from netra_backend.app.services.rate_limiter import RateLimiter
 from netra_backend.app.services.request_validator import RequestValidator
 from netra_backend.app.services.middleware_chain import MiddlewareChain
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestAPIRequestLifecycleCompleteL4:

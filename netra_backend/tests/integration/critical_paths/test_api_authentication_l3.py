@@ -7,7 +7,7 @@ import pytest
 import asyncio
 import httpx
 import jwt
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import time
 
 

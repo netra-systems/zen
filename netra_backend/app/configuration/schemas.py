@@ -2,6 +2,11 @@
 
 Moved from netra_backend.app.schemas.Config for better organization.
 Contains all Pydantic models for configuration validation.
+
+**MIGRATION NOTE**: Some configuration classes in this module still use
+direct os.environ access during initialization. For new code, prefer
+using the unified configuration system from:
+from netra_backend.app.core.configuration import unified_config_manager
 """
 
 import os
@@ -321,6 +326,12 @@ class DevelopmentConfig(AppConfig):
     )
     
     def __init__(self, **data):
+        """Initialize development configuration.
+        
+        LEGACY: This method uses direct os.environ access for configuration
+        loading. Consider migration to unified configuration system.
+        """
+        # LEGACY: Direct env access - consider migration to unified config
         import os
         # Load configuration from environment BEFORE parent init
         if not data:  # If called with no arguments (from UnifiedConfigManager)
@@ -454,7 +465,12 @@ class StagingConfig(AppConfig):
     # Staging uses production-like settings but with relaxed validation
     
     def __init__(self, **data):
-        """Initialize staging config with environment variables."""
+        """Initialize staging config with environment variables.
+        
+        LEGACY: This method uses direct os.environ access. Consider
+        migration to unified configuration system.
+        """
+        # LEGACY: Direct env access - consider migration to unified config
         import os
         # Load database URL from environment if not provided
         if 'database_url' not in data and os.environ.get(EnvironmentVariables.DATABASE_URL):

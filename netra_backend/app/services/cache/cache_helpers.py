@@ -5,7 +5,7 @@ import json
 import asyncio
 from typing import Optional, Dict, Any, List
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.cache_models import CacheEntry
+from netra_backend.app.services.cache.cache_models import CacheEntry
 
 logger = central_logger.get_logger(__name__)
 

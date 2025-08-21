@@ -12,7 +12,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from netra_backend.app.core.exceptions import NetraException, ErrorCode
 from netra_backend.app.core.error_response import ErrorResponse
 from netra_backend.app.core.error_handlers_status_mapping import StatusCodeMapper
-from netra_backend.app.response_builder import ErrorResponseBuilder
+from netra_backend.app.core.error_handlers.api.response_builder import ErrorResponseBuilder
 
 
 class ExceptionRouter:

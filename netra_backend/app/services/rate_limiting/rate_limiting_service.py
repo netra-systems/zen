@@ -12,7 +12,7 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from netra_backend.app.rate_limiter import RateLimiter, RateLimitConfig
+from netra_backend.app.services.api_gateway.rate_limiter import RateLimiter, RateLimitConfig
 
 
 @dataclass

@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Any, List
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.database_types import DatabaseConfig, PoolHealth, PoolMetrics
+from netra_backend.app.core.database_types import DatabaseConfig, PoolHealth, PoolMetrics
 
 logger = central_logger.get_logger(__name__)
 

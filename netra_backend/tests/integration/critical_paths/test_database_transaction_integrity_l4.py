@@ -15,7 +15,7 @@ import random
 from netra_backend.app.services.database_service import DatabaseService
 from netra_backend.app.services.transaction_manager import TransactionManager
 from netra_backend.app.services.user_service import UserService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestDatabaseTransactionIntegrityL4:

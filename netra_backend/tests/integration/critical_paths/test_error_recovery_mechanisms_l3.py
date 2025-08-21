@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock, MagicMock
 from netra_backend.app.services.resilience_service import ResilienceService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestErrorRecoveryMechanismsL3:

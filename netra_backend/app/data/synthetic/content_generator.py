@@ -13,7 +13,7 @@ from rich.progress import Progress
 from dotenv import load_dotenv
 
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.schemas import LLMConfig
+from netra_backend.app.routes.unified_tools.schemas import LLMConfig
 
 console = Console()
 

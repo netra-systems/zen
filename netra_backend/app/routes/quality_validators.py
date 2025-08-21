@@ -12,7 +12,7 @@ from netra_backend.app.schemas.quality_types import (
     QualityStatistics, AlertAcknowledgementResponse, QualityReport,
     QualityServiceHealth, User
 )
-from netra_backend.app.quality_validation_utils import (
+from netra_backend.app.routes.quality_validation_utils import (
     _get_content_mapping_part1, _get_content_mapping_part2, _build_core_metrics,
     _build_score_metrics, _build_analysis_metrics, _build_quality_metrics,
     _build_dashboard_primary_data, _build_dashboard_secondary_data,

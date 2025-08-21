@@ -33,10 +33,10 @@ class TestStagingStartup(StagingConfigTestBase):
             os.environ.update(env_vars)
             
             # Import app modules
-            from netra_backend.app.main import app
-            from netra_backend.app.config import get_config
+            from netra_backend.app.routes.mcp.main import app
+            from netra_backend.app.core.config import get_config
             from netra_backend.app.db.session import get_db
-            from netra_backend.app.ws_manager import WebSocketManager
+            from netra_backend.app.services.websocket.ws_manager import WebSocketManager
             
             # Initialize configuration
             config = get_config()
@@ -254,7 +254,7 @@ class TestStagingStartup(StagingConfigTestBase):
             self.skipTest("Application startup failed")
             
         # Simulate shutdown
-        from netra_backend.app.main import shutdown_handlers
+        from netra_backend.app.routes.mcp.main import shutdown_handlers
         
         shutdown_start = time.time()
         

@@ -2,7 +2,7 @@
 
 from typing import Dict, Any, Optional, List
 import asyncio
-from netra_backend.app.message_queue import MessageQueue
+from netra_backend.app.services.message_queue import MessageQueue
 
 
 class QueueManager:

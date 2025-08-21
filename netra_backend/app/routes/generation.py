@@ -11,7 +11,7 @@ from netra_backend.app.services.generation_service import run_content_generation
 from netra_backend.app.services.job_store import job_store
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.schemas import (LogGenParams, SyntheticDataGenParams, ContentGenParams, 
+from netra_backend.app.routes.unified_tools.schemas import (LogGenParams, SyntheticDataGenParams, ContentGenParams, 
                          DataIngestionParams, ContentCorpusGenParams)
 
 router = APIRouter()

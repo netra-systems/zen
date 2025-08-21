@@ -1,7 +1,7 @@
 """MCP session handlers."""
 from typing import Dict, Any
 
-from netra_backend.app.schemas import UserInDB
+from netra_backend.app.routes.unified_tools.schemas import UserInDB
 from netra_backend.app.services.mcp_service import MCPService
 from netra_backend.app.routes.mcp.models import MCPSessionCreateRequest
 from netra_backend.app.routes.mcp.utils import (

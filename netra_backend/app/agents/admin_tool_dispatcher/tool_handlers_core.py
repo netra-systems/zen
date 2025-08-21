@@ -93,7 +93,7 @@ class CorpusManagerHandler(ModernToolHandler):
     
     async def _handle_corpus_list(self, db: AsyncSession) -> Dict[str, Any]:
         """Handle corpus listing"""
-        from netra_backend.app.services import corpus_service
+        from netra_backend.app.core.configuration.services import corpus_service
         from .tool_handler_helpers import create_corpus_list_response
         corpora = await corpus_service.list_corpora(db)
         return create_corpus_list_response(corpora)
@@ -275,7 +275,7 @@ def create_modern_tool_handler(tool_name: str, websocket_manager=None) -> Modern
 
 
 # Import essential helper functions from other modules
-from netra_backend.app.tool_handler_operations import (
+from netra_backend.app.agents.admin_tool_dispatcher.tool_handler_operations import (
     extract_corpus_create_params,
     extract_synthetic_params,
     _execute_corpus_creation,

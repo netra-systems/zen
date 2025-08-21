@@ -8,7 +8,7 @@ import re
 from typing import Dict
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.quality_types import ContentType, QualityMetrics
+from netra_backend.app.core.quality_types import ContentType, QualityMetrics
 
 logger = central_logger.get_logger(__name__)
 

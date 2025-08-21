@@ -30,7 +30,7 @@ from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExe
 # Legacy compatibility
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig

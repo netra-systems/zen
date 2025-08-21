@@ -347,7 +347,7 @@ class TestStartupEnvironment:
     @pytest.mark.asyncio
     async def test_environment_variables_loaded(self):
         """Test required environment variables are loaded."""
-        from netra_backend.app.config import get_config
+        from netra_backend.app.core.config import get_config
         
         config = get_config()
         

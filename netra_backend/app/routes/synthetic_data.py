@@ -17,7 +17,7 @@ from netra_backend.app.schemas.shared_types import BaseAgentConfig
 from netra_backend.app.db.models_postgres import User
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.app.services import synthetic_data_service as sds
+from netra_backend.app.core.configuration.services import synthetic_data_service as sds
 from netra_backend.app.routes.utils.synthetic_data_helpers import (
     build_generation_config, execute_generation_safely, extract_result_fields,
     fetch_and_validate_job_status, extract_status_fields, cancel_job_safely,

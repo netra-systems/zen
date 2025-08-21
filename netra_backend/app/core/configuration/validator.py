@@ -16,11 +16,11 @@ from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.core.environment_constants import get_current_environment
 
-from netra_backend.app.validator_types import ValidationResult
-from netra_backend.app.validator_database import DatabaseValidator
-from netra_backend.app.validator_llm import LLMValidator
-from netra_backend.app.validator_auth import AuthValidator
-from netra_backend.app.validator_environment import EnvironmentValidator
+from netra_backend.app.core.configuration.validator_types import ValidationResult
+from netra_backend.app.core.configuration.validator_database import DatabaseValidator
+from netra_backend.app.core.configuration.validator_llm import LLMValidator
+from netra_backend.app.core.configuration.validator_auth import AuthValidator
+from netra_backend.app.core.configuration.validator_environment import EnvironmentValidator
 
 
 class ValidationMode(str, Enum):

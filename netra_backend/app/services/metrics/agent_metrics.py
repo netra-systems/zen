@@ -8,10 +8,10 @@ from typing import Dict, List, Optional, Any
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import TimeSeriesPoint
-from netra_backend.app.agent_metrics_models import (
+from netra_backend.app.services.metrics.agent_metrics_models import (
     AgentOperationRecord, AgentMetrics, FailureType, AgentMetricType
 )
-from netra_backend.app.agent_metrics_collector_core import AgentMetricsCollectorCore
+from netra_backend.app.services.metrics.agent_metrics_collector_core import AgentMetricsCollectorCore
 
 logger = central_logger.get_logger(__name__)
 

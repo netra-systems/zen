@@ -7,7 +7,7 @@ with 25-line function compliance.
 from typing import Dict, List, Tuple
 
 from netra_backend.app.services.quality_gate_service import ContentType
-from netra_backend.app.models import FailureReason
+from netra_backend.app.services.apex_optimizer_agent.models import FailureReason
 
 
 class OptimizationTemplates:

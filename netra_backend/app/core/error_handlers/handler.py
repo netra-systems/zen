@@ -9,9 +9,9 @@ from fastapi import Request
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.exceptions import ErrorCode
-from netra_backend.app.types import ErrorResponse
-from netra_backend.app.processors import ExceptionProcessor
-from netra_backend.app.status_mapping import status_mapper
+from netra_backend.app.services.transaction_manager.types import ErrorResponse
+from netra_backend.app.core.error_handlers.processors import ExceptionProcessor
+from netra_backend.app.core.error_handlers.status_mapping import status_mapper
 
 logger = central_logger.get_logger(__name__)
 

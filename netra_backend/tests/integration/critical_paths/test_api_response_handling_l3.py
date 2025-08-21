@@ -6,7 +6,7 @@ Tests API response formatting and error handling
 import pytest
 import asyncio
 import httpx
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import json
 
 

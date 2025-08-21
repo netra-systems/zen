@@ -11,19 +11,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.dependencies import DbDep
 from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
-from netra_backend.app.schemas import UserInDB
+from netra_backend.app.routes.unified_tools.schemas import UserInDB
 from netra_backend.app.services.mcp_models import MCPClient
 
-from netra_backend.app.models import (
+from netra_backend.app.services.apex_optimizer_agent.models import (
     MCPClientCreateRequest,
     MCPSessionCreateRequest,
     MCPToolCallRequest,
     MCPResourceReadRequest,
     MCPPromptGetRequest
 )
-from netra_backend.app.service_factory import get_mcp_service
-from netra_backend.app.handlers import MCPHandlers
-from netra_backend.app.websocket_handler import MCPWebSocketHandler
+from netra_backend.app.services.service_factory import get_mcp_service
+from netra_backend.app.routes.mcp.handlers import MCPHandlers
+from netra_backend.app.routes.mcp.websocket_handler import MCPWebSocketHandler
 
 router = APIRouter(tags=["MCP"])
 

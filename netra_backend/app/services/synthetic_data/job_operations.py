@@ -1,7 +1,7 @@
 """Job Operations Module - Job management and status operations"""
 
 from typing import Dict, Optional
-from netra_backend.app.core_service_base import CoreServiceBase
+from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
 
 
 class JobOperations(CoreServiceBase):

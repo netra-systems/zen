@@ -9,7 +9,7 @@ from contextlib import asynccontextmanager
 from typing import Dict, List, Optional, Tuple, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 import asyncio
 from datetime import datetime, timezone
@@ -25,7 +25,7 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
-from netra_backend.app.schemas import (
+from netra_backend.app.routes.unified_tools.schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted, 
     SubAgentUpdate, AgentCompleted, SubAgentState
 )

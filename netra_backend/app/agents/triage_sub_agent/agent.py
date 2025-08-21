@@ -8,7 +8,7 @@ import uuid
 from typing import Optional, Dict, Any, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent

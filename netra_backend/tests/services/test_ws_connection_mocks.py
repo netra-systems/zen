@@ -13,7 +13,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
-from netra_backend.app.ws_manager import WebSocketManager, ConnectionInfo
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
 
 
 class MockWebSocket:

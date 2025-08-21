@@ -12,7 +12,7 @@ from typing import Dict, Any
 import json
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.services.websocket.ws_manager import get_manager
 from netra_backend.app.handlers.example_message_handler import handle_example_message, get_example_message_handler
 from netra_backend.app.auth_dependencies import get_current_user_from_websocket
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage

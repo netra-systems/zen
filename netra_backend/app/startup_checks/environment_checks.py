@@ -5,18 +5,18 @@ Handles environment variable and configuration validation.
 Maintains 25-line function limit and focused responsibility.
 """
 
-import os
 from typing import List
-from netra_backend.app.config import settings
-from netra_backend.app.models import StartupCheckResult
+from netra_backend.app.services.apex_optimizer_agent.models import StartupCheckResult
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 class EnvironmentChecker:
     """Handles environment and configuration checks"""
     
     def __init__(self):
-        self.environment = os.getenv("ENVIRONMENT", "development").lower()
-        self.is_staging = self.environment == "staging" or os.getenv("K_SERVICE")
+        config = unified_config_manager.get_config()
+        self.environment = config.environment.lower()
+        self.is_staging = self.environment == "staging" or (hasattr(config, 'k_service') and config.k_service)
     
     async def check_environment_variables(self) -> StartupCheckResult:
         """Check required environment variables are set"""
@@ -70,7 +70,14 @@ class EnvironmentChecker:
     
     def _check_missing_vars(self, vars_list: List[str]) -> List[str]:
         """Check for missing variables"""
-        return [var for var in vars_list if not os.getenv(var)]
+        config = unified_config_manager.get_config()
+        missing = []
+        for var in vars_list:
+            # Convert env var names to config attribute names (lowercase, underscores)
+            attr_name = var.lower()
+            if not hasattr(config, attr_name) or not getattr(config, attr_name):
+                missing.append(var)
+        return missing
     
     def _create_success_result(self, missing_optional: List[str]) -> StartupCheckResult:
         """Create success result with optional variables info"""
@@ -85,7 +92,8 @@ class EnvironmentChecker:
         # In development, allow default database URL
         if self.environment == "development":
             return  # Skip validation, allow defaults
-        if not self.is_staging and not settings.database_url:
+        config = unified_config_manager.get_config()
+        if not self.is_staging and not getattr(config, 'database_url', None):
             raise ValueError("DATABASE_URL is not configured")
     
     def _validate_secret_key(self) -> None:
@@ -93,14 +101,17 @@ class EnvironmentChecker:
         # In development, allow default secret key
         if self.environment == "development":
             return  # Skip validation, allow defaults
-        if not settings.secret_key or len(settings.secret_key) < 32:
+        config = unified_config_manager.get_config()
+        secret_key = getattr(config, 'secret_key', '')
+        if not secret_key or len(secret_key) < 32:
             raise ValueError("SECRET_KEY must be at least 32 characters")
     
     def _validate_environment(self) -> None:
         """Validate environment setting"""
         valid_environments = ["development", "testing", "staging", "production"]
-        if settings.environment not in valid_environments:
-            raise ValueError(f"Invalid environment: {settings.environment}")
+        config = unified_config_manager.get_config()
+        if config.environment not in valid_environments:
+            raise ValueError(f"Invalid environment: {config.environment}")
     
     def _create_missing_vars_result(self, missing_required: List[str]) -> StartupCheckResult:
         """Create result for missing required variables"""
@@ -119,7 +130,7 @@ class EnvironmentChecker:
         """Create successful configuration result"""
         return StartupCheckResult(
             name="configuration", success=True, critical=not self.is_staging,
-            message=f"Configuration valid for {settings.environment} environment"
+            message=f"Configuration valid for {self.environment} environment"
         )
     
     def _create_config_failure_result(self, error: Exception) -> StartupCheckResult:

@@ -26,7 +26,7 @@ except ImportError:
     get_llm_manager = None
 
 # Auth dependency functions
-from netra_backend.app.auth import (
+from netra_backend.app.routes.auth.auth import (
     ActiveUserDep,
     DeveloperDep,
     AdminDep,
@@ -44,7 +44,7 @@ from netra_backend.app.auth import (
 )
 
 # 🔴 CONSOLIDATED AUTH MODELS - Single Source of Truth
-from netra_backend.app.models import (
+from netra_backend.app.services.apex_optimizer_agent.models import (
     # Core auth models
     LoginRequest,
     LoginResponse,
@@ -84,7 +84,7 @@ from netra_backend.app.models import (
 )
 
 # Validation utilities
-from netra_backend.app.validators import (
+from netra_backend.app.services.synthetic_data.validators import (
     validate_email_format,
     validate_password_strength,
     validate_token_format,
@@ -94,7 +94,7 @@ from netra_backend.app.validators import (
 )
 
 # Type-safe interfaces
-from netra_backend.app.interfaces import (
+from netra_backend.app.agents.interfaces import (
     AuthClientProtocol,
     AuthServiceProtocol,
     SessionManagerProtocol,

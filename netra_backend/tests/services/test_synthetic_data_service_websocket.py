@@ -8,7 +8,7 @@ import asyncio
 import uuid
 from unittest.mock import AsyncMock, MagicMock
 
-from netra_backend.app.ws_manager import manager as ws_manager
+from netra_backend.app.services.websocket.ws_manager import manager as ws_manager
 
 
 @pytest.fixture

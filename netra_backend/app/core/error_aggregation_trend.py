@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.error_aggregation_utils import (
+from netra_backend.app.core.error_aggregation_utils import (
     ErrorPattern, ErrorTrend, ErrorPatternMatcher, 
     TimeWindowCalculator, TrendCalculationHelper
 )

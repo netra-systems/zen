@@ -60,14 +60,14 @@ class CorpusToolExecutor:
     async def _create_corpus(self, corpus_name: str, parameters: Dict[str, Any], user_id: str) -> Any:
         """Create corpus using corpus service"""
         from netra_backend.app.services.corpus import corpus_service
-        from netra_backend.app.schemas import CorpusCreate
+        from netra_backend.app.routes.unified_tools.schemas import CorpusCreate
         
         corpus_data = self._build_corpus_create_data(corpus_name, parameters)
         return await corpus_service.create_corpus(corpus_data, user_id)
     
     def _build_corpus_create_data(self, corpus_name: str, parameters: Dict[str, Any]):
         """Build CorpusCreate data object."""
-        from netra_backend.app.schemas import CorpusCreate
+        from netra_backend.app.routes.unified_tools.schemas import CorpusCreate
         return CorpusCreate(
             name=corpus_name,
             description=parameters.get('description', f'Corpus {corpus_name}')
@@ -185,14 +185,14 @@ class CorpusToolExecutor:
     async def _update_corpus(self, corpus_id: str, parameters: Dict[str, Any]) -> Any:
         """Update corpus using corpus service"""
         from netra_backend.app.services.corpus import corpus_service
-        from netra_backend.app.schemas import CorpusUpdate
+        from netra_backend.app.routes.unified_tools.schemas import CorpusUpdate
         
         update_data = self._build_corpus_update_data(parameters)
         return await corpus_service.update_corpus(None, corpus_id, update_data)
     
     def _build_corpus_update_data(self, parameters: Dict[str, Any]):
         """Build CorpusUpdate data object."""
-        from netra_backend.app.schemas import CorpusUpdate
+        from netra_backend.app.routes.unified_tools.schemas import CorpusUpdate
         return CorpusUpdate(**{k: v for k, v in parameters.items() if k != 'corpus_id'})
     
     def _create_update_success_response(self, corpus_id: str) -> Dict[str, Any]:

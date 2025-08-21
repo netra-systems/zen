@@ -11,9 +11,9 @@ from datetime import datetime, UTC
 from enum import Enum
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app..shared_health_types import HealthStatus
+from netra_backend.app.shared_health_types import HealthStatus
 from netra_backend.app.schemas.core_models import HealthCheckResult
-from netra_backend.app.telemetry import telemetry_manager
+from netra_backend.app.core.health.telemetry import telemetry_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -222,9 +222,9 @@ class HealthInterface:
     
     def _is_development_environment(self) -> bool:
         """Check if running in development environment."""
-        import os
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
-        return environment == "development"
+        from netra_backend.app.core.configuration import unified_config_manager
+        config = unified_config_manager.get_config()
+        return config.environment.lower() == "development"
     
     def _is_optional_in_development(self, component_name: str) -> bool:
         """Check if component is optional in development mode."""

@@ -11,8 +11,8 @@ from typing import Dict, List, Optional, Set, Tuple, Any
 from dataclasses import dataclass
 from enum import Enum
 
-from netra_backend.app.git_commit_parser import GitCommitParser, CommitInfo, CommitType
-from netra_backend.app.git_diff_analyzer import GitDiffAnalyzer, DiffMetrics, ChangeCategory
+from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
+from netra_backend.app.services.factory_status.git_diff_analyzer import GitDiffAnalyzer, DiffMetrics, ChangeCategory
 
 
 class ImpactLevel(Enum):

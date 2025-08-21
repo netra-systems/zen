@@ -7,7 +7,7 @@ Maintains 25-line function limit and single responsibility.
 
 import os
 from typing import Dict, Any, Optional
-from netra_backend.app.schemas import UserInDB
+from netra_backend.app.routes.unified_tools.schemas import UserInDB
 
 
 def get_mcp_config(user: Optional[UserInDB]) -> Dict[str, Any]:

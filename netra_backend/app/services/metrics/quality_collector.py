@@ -12,10 +12,10 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.Metrics import (
     QualityMetrics, CorpusMetric, MetricType, TimeSeriesPoint
 )
-from netra_backend.app.quality_trend_analyzer import QualityTrendAnalyzer
-from netra_backend.app.quality_statistics_calculator import QualityStatisticsCalculator
-from netra_backend.app.quality_issue_analyzer import QualityIssueAnalyzer
-from netra_backend.app.quality_report_generator import QualityReportGenerator
+from netra_backend.app.services.metrics.quality_trend_analyzer import QualityTrendAnalyzer
+from netra_backend.app.services.metrics.quality_statistics_calculator import QualityStatisticsCalculator
+from netra_backend.app.services.metrics.quality_issue_analyzer import QualityIssueAnalyzer
+from netra_backend.app.services.metrics.quality_report_generator import QualityReportGenerator
 
 logger = central_logger.get_logger(__name__)
 

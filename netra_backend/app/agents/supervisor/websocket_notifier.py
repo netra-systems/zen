@@ -4,11 +4,11 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.supervisor.execution_context import AgentExecutionContext
-from netra_backend.app.schemas import WebSocketMessage, AgentStarted
+from netra_backend.app.routes.unified_tools.schemas import WebSocketMessage, AgentStarted
 
 logger = central_logger.get_logger(__name__)
 

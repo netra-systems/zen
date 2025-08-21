@@ -9,7 +9,7 @@ import base64
 import urllib.parse
 from typing import List, Set
 
-from netra_backend.app.validation_rules import SecurityThreat
+from netra_backend.app.core.validation_rules import SecurityThreat
 
 
 class InputNormalizer:

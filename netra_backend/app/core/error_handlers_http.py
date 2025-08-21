@@ -13,8 +13,8 @@ from starlette.status import (
     HTTP_503_SERVICE_UNAVAILABLE,
 )
 
-from netra_backend.app.exceptions import ErrorCode
-from netra_backend.app.error_response import ErrorResponse
+from netra_backend.app.core.exceptions import ErrorCode
+from netra_backend.app.core.error_response import ErrorResponse
 
 
 class HttpErrorHandler:

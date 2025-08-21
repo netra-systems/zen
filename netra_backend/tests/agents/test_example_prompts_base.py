@@ -79,7 +79,7 @@ def _get_mock_ask_llm():
 def _get_mock_ask_structured_llm():
     """Get mock ask_structured_llm async function"""
     async def mock_ask_structured_llm(prompt, llm_config_name, schema, **kwargs):
-        from netra_backend.app.schemas import TriageResult
+        from netra_backend.app.routes.unified_tools.schemas import TriageResult
         if schema == TriageResult:
             return TriageResult(
                 category="optimization", severity="medium",

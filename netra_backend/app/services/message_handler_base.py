@@ -4,7 +4,7 @@ from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.db.models_postgres import Thread, Run
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.services.websocket.ws_manager import manager
 import json
 
 logger = central_logger.get_logger(__name__)

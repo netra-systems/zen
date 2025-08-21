@@ -6,7 +6,7 @@ Handles CRUD operations for research schedules
 from typing import List, Dict, Any
 from netra_backend.app.agents.supply_researcher.models import ResearchType
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.scheduler_models import ScheduleFrequency, ResearchSchedule
+from netra_backend.app.services.supply_research.scheduler_models import ScheduleFrequency, ResearchSchedule
 
 
 class ScheduleManager:

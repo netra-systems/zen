@@ -6,8 +6,8 @@ Module follows 450-line limit with 25-line function limit.
 
 from typing import Dict, List
 
-from netra_backend.app.git_commit_parser import GitCommitParser, CommitInfo, CommitType
-from netra_backend.app.business_core import (
+from netra_backend.app.services.factory_status.git_commit_parser import GitCommitParser, CommitInfo, CommitType
+from netra_backend.app.services.factory_status.business_core import (
     BusinessObjective, CustomerImpactMetrics, RevenueMetrics, 
     ComplianceSecurityMetrics, BusinessConstants
 )

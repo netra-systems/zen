@@ -5,13 +5,13 @@ from typing import Dict, Any, List, Optional
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.agent_service import AgentService
 
-from netra_backend.app.session_manager import SessionManager
-from netra_backend.app.analytics_tracker import AnalyticsTracker
-from netra_backend.app.report_generator import ReportGenerator
-from netra_backend.app.response_generator import generate_demo_response
-from netra_backend.app.metrics_generator import (generate_optimization_metrics, calculate_roi,
+from netra_backend.app.services.database.session_manager import SessionManager
+from netra_backend.app.services.demo.analytics_tracker import AnalyticsTracker
+from netra_backend.app.services.demo.report_generator import ReportGenerator
+from netra_backend.app.services.demo.response_generator import generate_demo_response
+from netra_backend.app.services.demo.metrics_generator import (generate_optimization_metrics, calculate_roi,
                                generate_synthetic_metrics)
-from netra_backend.app.template_manager import get_industry_templates
+from netra_backend.app.services.demo.template_manager import get_industry_templates
 
 logger = central_logger.get_logger(__name__)
 

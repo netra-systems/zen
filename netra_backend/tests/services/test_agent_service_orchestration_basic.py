@@ -144,7 +144,7 @@ class TestAgentServiceBasic:
     
     def _create_complex_request_model(self):
         """Create complex RequestModel for testing."""
-        from netra_backend.app.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
+        from netra_backend.app.routes.unified_tools.schemas import Settings, Workload, DataSource, TimeRange, RequestModel
         
         settings = Settings(debug_mode=True)
         workload = self._create_test_workload()
@@ -158,7 +158,7 @@ class TestAgentServiceBasic:
     
     def _create_test_workload(self):
         """Create test workload for RequestModel."""
-        from netra_backend.app.schemas import Workload, DataSource, TimeRange
+        from netra_backend.app.routes.unified_tools.schemas import Workload, DataSource, TimeRange
         
         return Workload(
             run_id="test_run",

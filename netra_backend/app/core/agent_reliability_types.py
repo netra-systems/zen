@@ -7,7 +7,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime
 from dataclasses import dataclass, field
 
-from netra_backend.app.error_codes import ErrorSeverity
+from netra_backend.app.core.error_codes import ErrorSeverity
 
 
 @dataclass

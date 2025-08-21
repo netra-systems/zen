@@ -2,7 +2,7 @@ from langchain_core.tools import tool
 from typing import List, Any
 from pydantic import BaseModel, Field
 from netra_backend.app.services.context import ToolContext
-from netra_backend.app.schemas import LearnedPolicy, PredictedOutcome
+from netra_backend.app.routes.unified_tools.schemas import LearnedPolicy, PredictedOutcome
 
 @tool
 async def final_report_generator(context: ToolContext, learned_policies: List[LearnedPolicy], predicted_outcomes: List[PredictedOutcome]) -> str:

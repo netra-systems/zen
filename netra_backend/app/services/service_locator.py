@@ -6,15 +6,15 @@ All functionality has been split into focused modules ≤300 lines with function
 
 # Import all modular components for backward compatibility
 from typing import Type, TypeVar
-from netra_backend.app.service_locator_core import (
+from netra_backend.app.services.service_locator_core import (
     ServiceLocator, ServiceNotFoundError, CircularDependencyError
 )
-from netra_backend.app.service_interfaces import (
+from netra_backend.app.services.service_interfaces import (
     IAgentService, IThreadService, IMessageHandlerService,
     IMCPService, IWebSocketService, IMCPClientService
 )
-from netra_backend.app.service_registration import register_core_services
-from netra_backend.app.service_decorators import inject
+from netra_backend.app.services.service_registration import register_core_services
+from netra_backend.app.services.service_decorators import inject
 
 T = TypeVar("T")
 

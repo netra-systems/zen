@@ -8,7 +8,7 @@ import asyncio
 from typing import Any, Dict, List
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.rollback_manager_core import RollbackOperation, RollbackState
+from netra_backend.app.services.database.rollback_manager_core import RollbackOperation, RollbackState
 
 logger = central_logger.get_logger(__name__)
 

@@ -65,7 +65,7 @@ def _parse_test_models(models_str: str) -> List[LLMTestModel]:
 def real_llm_manager(llm_test_config: LLMTestConfig):
     """Create real LLM manager with intelligent fallback."""
     from netra_backend.app.llm.llm_manager import LLMManager
-    from netra_backend.app.config import get_config
+    from netra_backend.app.core.config import get_config
     
     # Try to create real LLM manager first
     try:
@@ -429,7 +429,7 @@ def mock_websocket() -> MockWebSocket:
 @pytest.fixture(scope="function")
 def websocket_manager():
     """Create WebSocket manager for testing."""
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
     return WebSocketManager()
 
 

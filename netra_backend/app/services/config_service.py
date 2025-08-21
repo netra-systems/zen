@@ -13,7 +13,7 @@ from typing import Dict, Any, Optional
 from uuid import uuid4
 from pathlib import Path
 
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.app.logging_config import central_logger
 

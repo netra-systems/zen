@@ -9,8 +9,8 @@ from typing import List, Dict, Any, Callable, Optional
 from datetime import datetime, UTC
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
-from netra_backend.app.health_types import AlertSeverity, RecoveryAction
+from netra_backend.app.core.shared_health_types import HealthStatus, ComponentHealth, SystemAlert
+from netra_backend.app.core.health_types import AlertSeverity, RecoveryAction
 
 logger = central_logger.get_logger(__name__)
 

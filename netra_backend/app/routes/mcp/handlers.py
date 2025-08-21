@@ -6,7 +6,7 @@ Maintains 25-line function limit and single responsibility.
 
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.schemas import UserInDB
+from netra_backend.app.routes.unified_tools.schemas import UserInDB
 
 from netra_backend.app.routes.mcp.handlers_server import handle_server_info
 from netra_backend.app.routes.mcp.handlers_client import handle_client_registration

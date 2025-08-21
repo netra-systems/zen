@@ -23,11 +23,29 @@ All files ≤300 lines, all functions ≤8 lines.
 
 from netra_backend.app.core.configuration.base import (
     UnifiedConfigManager,
-    DatabaseConfigManager,
-    ServiceConfigManager,
-    SecretManager,
-    ConfigurationValidator
+    ActualSecretManager as SecretManager,
+    ConfigurationValidator,
+    config_manager,
+    get_unified_config,
+    reload_unified_config,
+    validate_config_integrity
 )
+
+# Import actual configuration managers
+try:
+    from netra_backend.app.core.configuration.services import ServiceConfigManager
+except ImportError:
+    # Use placeholder if not available
+    from netra_backend.app.core.configuration.base import ActualServiceConfigManager as ServiceConfigManager
+
+try:
+    from netra_backend.app.core.configuration.database import DatabaseConfigManager
+except ImportError:
+    # Use placeholder if not available
+    from netra_backend.app.core.configuration.base import ActualDatabaseConfigManager as DatabaseConfigManager
+
+# Create global instance alias for easy access
+unified_config_manager = config_manager
 
 # Placeholder functions for missing imports
 def get_configuration():
@@ -84,6 +102,10 @@ __all__ = [
     "ConfigurationLoader",
     "EnvironmentDetector",
     "UnifiedSecretManager",
+    "unified_config_manager",
+    "get_unified_config",
+    "reload_unified_config",
+    "validate_config_integrity",
     "get_configuration",
     "reload_configuration",
     "get_environment",

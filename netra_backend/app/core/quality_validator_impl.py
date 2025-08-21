@@ -8,8 +8,8 @@ from typing import Dict, Optional, Any, List, Tuple
 import re
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.quality_metrics import QualityMetrics, ValidationResult, ContentType
-from netra_backend.app.quality_content_analysis import QualityContentAnalyzer
+from netra_backend.app.services.factory_status.quality_metrics import QualityMetrics, ValidationResult, ContentType
+from netra_backend.app.core.quality_content_analysis import QualityContentAnalyzer
 
 logger = central_logger.get_logger(__name__)
 

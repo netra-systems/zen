@@ -56,7 +56,7 @@ import pytest
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
-from netra_backend.app.main import app
+from netra_backend.app.routes.mcp.main import app
 from fastapi.testclient import TestClient
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.config import settings
@@ -156,7 +156,7 @@ def _create_mock_llm_manager():
 @pytest.fixture(scope="function") 
 def real_websocket_manager():
     """Create real WebSocket manager for E2E tests with interface compatibility."""
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
     manager = WebSocketManager()
     _setup_websocket_interface_compatibility(manager)
     _setup_websocket_test_mocks(manager)

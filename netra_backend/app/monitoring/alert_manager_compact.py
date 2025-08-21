@@ -10,13 +10,13 @@ from typing import Dict, List, Optional, Any, Set
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector, agent_metrics_collector
-from netra_backend.app.alert_models import (
+from netra_backend.app.monitoring.alert_models import (
     AlertRule, Alert, NotificationConfig, AlertLevel, NotificationChannel
 )
-from netra_backend.app.alert_rules import create_default_alert_rules
-from netra_backend.app.alert_notifications import create_default_notification_configs
-from netra_backend.app.alert_evaluator import AlertEvaluator
-from netra_backend.app.alert_notifications import NotificationDeliveryManager
+from netra_backend.app.monitoring.alert_rules import create_default_alert_rules
+from netra_backend.app.monitoring.alert_notifications import create_default_notification_configs
+from netra_backend.app.monitoring.alert_evaluator import AlertEvaluator
+from netra_backend.app.monitoring.alert_notifications import NotificationDeliveryManager
 
 logger = central_logger.get_logger(__name__)
 

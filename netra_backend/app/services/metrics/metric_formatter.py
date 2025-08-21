@@ -6,7 +6,7 @@ Handles data formatting operations with 25-line function limit.
 from datetime import datetime
 from typing import Dict, Any, Optional
 
-from netra_backend.app.agent_metrics_models import AgentOperationRecord, FailureType
+from netra_backend.app.services.metrics.agent_metrics_models import AgentOperationRecord, FailureType
 
 
 class MetricFormatter:

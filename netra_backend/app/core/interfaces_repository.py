@@ -7,14 +7,14 @@ from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.exceptions import ServiceError, RecordNotFoundError
+from netra_backend.app.core.exceptions import ServiceError, RecordNotFoundError
 from netra_backend.app.schemas.shared_types import ErrorContext
-from netra_backend.app.interfaces_service import (
+from netra_backend.app.core.interfaces_service import (
     BaseServiceInterface, 
     ServiceHealth,
     T, ID, CreateSchema, UpdateSchema, ResponseSchema
 )
-from netra_backend.app.interfaces_base import BaseService
+from netra_backend.app.core.interfaces_base import BaseService
 
 
 class DatabaseService(BaseService):

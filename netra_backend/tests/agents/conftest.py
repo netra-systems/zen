@@ -5,8 +5,8 @@ import uuid
 from unittest.mock import Mock, AsyncMock
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.llm.llm_manager import LLMManager
-from netra_backend.app.ws_manager import WebSocketManager
-from netra_backend.app.config import get_config
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.core.config import get_config
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.services.agent_service import AgentService

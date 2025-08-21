@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any, Optional, Tuple
 import numpy as np
 
-from netra_backend.app.models import RealisticTestDataConfigManager
+from netra_backend.app.services.apex_optimizer_agent.models import RealisticTestDataConfigManager
 
 
 class LLMResponseGenerator:

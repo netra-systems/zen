@@ -9,7 +9,7 @@ import time
 from typing import Dict, Any, Optional, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from netra_backend.app.ws_manager import WebSocketManager
+    from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.base import BaseSubAgent
@@ -29,10 +29,10 @@ from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.errors import ExecutionErrorHandler, ValidationError
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.schemas.shared_types import RetryConfig
-from netra_backend.app.models import CorpusOperationResult, CorpusMetadata, CorpusType, CorpusOperation
-from netra_backend.app.parsers import CorpusRequestParser
-from netra_backend.app.validators import CorpusApprovalValidator
-from netra_backend.app.operations import CorpusOperationHandler
+from netra_backend.app.services.apex_optimizer_agent.models import CorpusOperationResult, CorpusMetadata, CorpusType, CorpusOperation
+from netra_backend.app.agents.corpus_admin.parsers import CorpusRequestParser
+from netra_backend.app.services.synthetic_data.validators import CorpusApprovalValidator
+from netra_backend.app.agents.corpus_admin.operations import CorpusOperationHandler
 
 logger = central_logger.get_logger(__name__)
 

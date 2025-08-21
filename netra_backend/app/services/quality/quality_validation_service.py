@@ -6,9 +6,9 @@ Main service class for validating AI output quality with comprehensive metrics
 import json
 from typing import Dict, Any, Tuple, Optional
 
-from netra_backend.app.quality_models import ValidationConfig, QualityMetrics
-from netra_backend.app.quality_score_calculators import QualityScoreCalculators
-from netra_backend.app.quality_validators import QualityValidators
+from netra_backend.app.services.factory_status.quality_models import ValidationConfig, QualityMetrics
+from netra_backend.app.services.quality.quality_score_calculators import QualityScoreCalculators
+from netra_backend.app.services.quality.quality_validators import QualityValidators
 
 
 class QualityValidationService:

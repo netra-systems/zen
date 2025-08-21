@@ -7,7 +7,7 @@ from typing import Dict, Optional
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig
 

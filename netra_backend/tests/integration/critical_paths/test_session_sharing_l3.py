@@ -7,7 +7,7 @@ import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.session_service import SessionService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import json
 
 

@@ -25,7 +25,7 @@ class TestWebSocketAgentIntegration:
         """Test complete flow: WebSocket message → Agent → Response."""
         from netra_backend.app.services.agent_service_core import AgentService
         from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-        from netra_backend.app.schemas import AppConfig
+        from netra_backend.app.schemas.Config import AppConfig
         
         # Setup mocks
         config = AppConfig()

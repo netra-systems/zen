@@ -4,12 +4,12 @@ from typing import Optional, Dict, Any, List
 import asyncio
 from netra_backend.app.redis_manager import redis_manager
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.cache_models import CacheStrategy, CacheEntry
-from netra_backend.app.cache_statistics import CacheStatistics
-from netra_backend.app.cache_eviction import CacheEvictionManager
-from netra_backend.app.cache_serialization import CacheSerializer
-from netra_backend.app.cache_workers import CacheBackgroundWorkers
-from netra_backend.app.cache_helpers import CacheHelpers
+from netra_backend.app.services.cache.cache_models import CacheStrategy, CacheEntry
+from netra_backend.app.services.cache.cache_statistics import CacheStatistics
+from netra_backend.app.services.cache.cache_eviction import CacheEvictionManager
+from netra_backend.app.services.cache.cache_serialization import CacheSerializer
+from netra_backend.app.services.cache.cache_workers import CacheBackgroundWorkers
+from netra_backend.app.services.cache.cache_helpers import CacheHelpers
 
 logger = central_logger.get_logger(__name__)
 

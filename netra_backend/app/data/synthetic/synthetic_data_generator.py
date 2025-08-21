@@ -12,7 +12,7 @@ from multiprocessing import Pool, cpu_count
 from faker import Faker
 from rich.progress import Progress
 
-from netra_backend.app..content_corpus import DEFAULT_CONTENT_CORPUS
+from netra_backend.app.content_corpus import DEFAULT_CONTENT_CORPUS
 
 fake = Faker()
 

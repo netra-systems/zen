@@ -15,7 +15,7 @@ from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.auth_failover_service import AuthFailoverService
 from netra_backend.app.services.health_monitor import HealthMonitor
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestAuthServiceFailoverCompleteL4:

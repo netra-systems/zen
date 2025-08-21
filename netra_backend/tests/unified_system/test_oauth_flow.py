@@ -14,7 +14,7 @@ from typing import Dict, Any, Optional
 
 # Import main app with error handling
 try:
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
 except ImportError:
     # Create a minimal FastAPI app for testing if import fails
     from fastapi import FastAPI

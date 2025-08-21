@@ -15,14 +15,14 @@ from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.strict_types import TypedAgentResult
 
 # Import existing modular components for delegation
-from netra_backend.app.agent_cache import CacheManager
-from netra_backend.app.agent_execution import ExecutionManager
-from netra_backend.app.agent_data_processing import DataProcessor
-from netra_backend.app.agent_corpus_operations import CorpusOperations
-from netra_backend.app.agent_anomaly_processing import AnomalyProcessor
-from netra_backend.app.modern_execution_interface import DataSubAgentModernExecution
-from netra_backend.app.delegation_helper import DataSubAgentDelegationHelper
-from netra_backend.app.configuration_manager import DataSubAgentConfigurationManager
+from netra_backend.app.agents.data_sub_agent.agent_cache import CacheManager
+from netra_backend.app.agents.data_sub_agent.agent_execution import ExecutionManager
+from netra_backend.app.agents.data_sub_agent.agent_data_processing import DataProcessor
+from netra_backend.app.agents.data_sub_agent.agent_corpus_operations import CorpusOperations
+from netra_backend.app.agents.data_sub_agent.agent_anomaly_processing import AnomalyProcessor
+from netra_backend.app.agents.data_sub_agent.modern_execution_interface import DataSubAgentModernExecution
+from netra_backend.app.agents.data_sub_agent.delegation_helper import DataSubAgentDelegationHelper
+from netra_backend.app.agents.data_sub_agent.configuration_manager import DataSubAgentConfigurationManager
 
 
 class DataSubAgentHelpers:

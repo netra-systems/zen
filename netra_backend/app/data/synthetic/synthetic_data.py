@@ -8,7 +8,7 @@ from netra_backend.app.synthetic_data_core import main, SyntheticDataOrchestrato
 from netra_backend.app.synthetic_data_loader import (
     ClickHouseCorpusLoader, FileCorpusLoader, ConfigurationManager, ContentCorpusManager
 )
-from netra_backend.app.synthetic_data_generator import (
+from netra_backend.app.agents.synthetic_data_generator import (
     generate_data_chunk, DataGenerationHelper, ContentPairGenerator, 
     DataFrameBuilder, ParallelProcessor, MultiTurnGenerator
 )

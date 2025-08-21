@@ -10,7 +10,7 @@ from typing import Dict, Any
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.models import CorpusOperationRequest, CorpusOperationResult
+from netra_backend.app.services.apex_optimizer_agent.models import CorpusOperationRequest, CorpusOperationResult
 
 logger = central_logger.get_logger(__name__)
 

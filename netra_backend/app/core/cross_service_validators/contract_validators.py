@@ -12,7 +12,7 @@ import json
 from pydantic import BaseModel, ValidationError
 from datetime import datetime
 
-from netra_backend.app.validator_framework import (
+from netra_backend.app.core.cross_service_validators.validator_framework import (
     BaseValidator, ValidationResult, ValidationStatus, ValidationSeverity
 )
 from netra_backend.app.schemas.auth_types import (

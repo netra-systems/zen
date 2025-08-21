@@ -9,8 +9,8 @@ from typing import Dict, List, Any, Optional, Set
 from pathlib import Path
 
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.ai_pattern_definitions import AIPatternDefinitions
-from netra_backend.app.pattern_matcher import GitHubAnalyzerPatternMatcher
+from netra_backend.app.agents.github_analyzer.ai_pattern_definitions import AIPatternDefinitions
+from netra_backend.app.agents.github_analyzer.pattern_matcher import GitHubAnalyzerPatternMatcher
 
 
 class PatternScanner:

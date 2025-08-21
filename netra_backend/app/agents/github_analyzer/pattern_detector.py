@@ -7,7 +7,7 @@ This module now delegates to the modular components.
 from typing import Dict, List, Any, Optional, TypedDict
 from pathlib import Path
 
-from netra_backend.app.pattern_scanner import PatternScanner
+from netra_backend.app.agents.github_analyzer.pattern_scanner import PatternScanner
 
 # Type definitions for backwards compatibility
 class PatternCategory(TypedDict):

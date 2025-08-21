@@ -8,8 +8,8 @@ from typing import Dict, Any, Optional
 
 from netra_backend.app.core.error_recovery import RecoveryContext
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.compensation_types import CompensationAction, CompensationState
-from netra_backend.app.compensation_helpers import (
+from netra_backend.app.services.compensation_types import CompensationAction, CompensationState
+from netra_backend.app.services.compensation_helpers import (
     validate_required_keys,
     update_action_state_executing,
     update_action_state_completed,

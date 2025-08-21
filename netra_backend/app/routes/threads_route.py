@@ -15,7 +15,7 @@ from netra_backend.app.routes.utils.thread_helpers import (
     handle_auto_rename_request, handle_route_with_error_logging
 )
 from pydantic import BaseModel
-from netra_backend.app.services import thread_service, thread_analytics
+from netra_backend.app.core.configuration.services import thread_service, thread_analytics
 import time
 
 logger = central_logger.get_logger(__name__)

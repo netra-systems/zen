@@ -6,9 +6,9 @@ from typing import Any, Dict, Optional
 from netra_backend.app.agents.error_handler import ErrorContext, global_error_handler
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.error_types import IntentDetectionError, EntityExtractionError, ToolRecommendationError
-from netra_backend.app.error_recovery import TriageErrorRecovery
-from netra_backend.app.error_reporting import TriageErrorReporter
+from netra_backend.app.core.error_types import IntentDetectionError, EntityExtractionError, ToolRecommendationError
+from netra_backend.app.core.error_recovery import TriageErrorRecovery
+from netra_backend.app.agents.triage_sub_agent.error_reporting import TriageErrorReporter
 
 logger = central_logger.get_logger(__name__)
 

@@ -13,7 +13,7 @@ from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.fallback_helpers import FallbackDataHelpers, FallbackSystemIntegrations
+from netra_backend.app.agents.data_sub_agent.fallback_helpers import FallbackDataHelpers, FallbackSystemIntegrations
 
 logger = central_logger.get_logger(__name__)
 

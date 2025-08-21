@@ -13,7 +13,7 @@ from typing import List, Dict, Any, Optional
 from langchain_core.tools import BaseTool
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.schemas import ToolResult, ToolStatus, ToolInput
+from netra_backend.app.routes.unified_tools.schemas import ToolResult, ToolStatus, ToolInput
 from netra_backend.app.schemas.admin_tool_types import (
     ToolResponse, ToolSuccessResponse, ToolFailureResponse,
     AdminToolType, AdminToolInfo,

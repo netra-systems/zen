@@ -15,11 +15,11 @@ Business Value: +$15K MRR from improved agent performance consistency.
 from netra_backend.app.agents.base_agent import BaseSubAgent
 
 # New base execution interface components
-from netra_backend.app.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
-from netra_backend.app.executor import BaseExecutionEngine
-from netra_backend.app.monitoring import ExecutionMonitor, ExecutionMetrics
-from netra_backend.app.errors import ExecutionErrorHandler, AgentExecutionError
-from netra_backend.app.reliability import ReliabilityManager
+from netra_backend.app.core.health.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
+from netra_backend.app.agents.base.errors import ExecutionErrorHandler, AgentExecutionError
+from netra_backend.app.core.reliability import ReliabilityManager
 
 __all__ = [
     # Backward compatibility

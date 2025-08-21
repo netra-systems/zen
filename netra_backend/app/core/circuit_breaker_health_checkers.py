@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.shared_health_types import HealthChecker, HealthStatus
+from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 logger = central_logger.get_logger(__name__)

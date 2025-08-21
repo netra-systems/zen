@@ -14,7 +14,7 @@ from enum import Enum
 from dataclasses import dataclass, field
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.ws_manager import get_manager
+from netra_backend.app.services.websocket.ws_manager import get_manager
 from netra_backend.app.schemas.registry import WebSocketMessage
 
 logger = central_logger.get_logger(__name__)

@@ -16,14 +16,14 @@ from config import settings
 @pytest.fixture
 def base_client():
     """Base FastAPI test client with minimal setup."""
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     return TestClient(app)
 
 
 @pytest.fixture  
 def secured_client():
     """Test client with security service configured."""
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     
     # Mock db session factory
     @asynccontextmanager

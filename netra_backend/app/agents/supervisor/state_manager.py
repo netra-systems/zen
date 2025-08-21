@@ -3,7 +3,7 @@
 from typing import Optional, Tuple
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.agent_state import CheckpointType, AgentPhase
-from netra_backend.app.state_manager_core import StateManagerCore
+from netra_backend.app.agents.supervisor.state_manager_core import StateManagerCore
 
 
 class AgentStateManager(StateManagerCore):

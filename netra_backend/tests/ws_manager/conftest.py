@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.ws_manager import WebSocketManager, ConnectionInfo
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
 
 
 class MockWebSocket:

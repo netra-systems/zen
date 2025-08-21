@@ -10,20 +10,20 @@ Business Value:
 - Telemetry for revenue protection
 """
 
-from netra_backend.app.interface import BaseHealthChecker, HealthInterface, HealthLevel
-from netra_backend.app.responses import (
+from netra_backend.app.core.health.interface import BaseHealthChecker, HealthInterface, HealthLevel
+from netra_backend.app.core.health.responses import (
     HealthResponseFormat, 
     StandardHealthResponse,
     ComprehensiveHealthResponse,
     HealthResponseBuilder
 )
-from netra_backend.app.checks import (
+from netra_backend.app.core.health.checks import (
     DatabaseHealthChecker,
     ServiceHealthChecker,
     DependencyHealthChecker,
     CircuitBreakerHealthChecker
 )
-from netra_backend.app.telemetry import (
+from netra_backend.app.core.health.telemetry import (
     EnterpriseHealthTelemetry,
     TelemetryManager,
     telemetry_manager

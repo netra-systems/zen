@@ -7,7 +7,7 @@ from typing import Dict
 from collections import deque
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.agent_metrics_models import AgentOperationRecord, AgentMetrics
+from netra_backend.app.services.metrics.agent_metrics_models import AgentOperationRecord, AgentMetrics
 
 logger = central_logger.get_logger(__name__)
 

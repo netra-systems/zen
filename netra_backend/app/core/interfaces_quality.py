@@ -7,9 +7,9 @@ Follows 450-line limit and 25-line functions.
 from typing import Dict, Optional, Any, List, Tuple
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.quality_types import ContentType, QualityLevel, QualityMetrics, ValidationResult
-from netra_backend.app.quality_analysis import QualityAnalyzer, QualityIssueDetector
-from netra_backend.app.quality_config import (
+from netra_backend.app.core.quality_types import ContentType, QualityLevel, QualityMetrics, ValidationResult
+from netra_backend.app.core.quality_analysis import QualityAnalyzer, QualityIssueDetector
+from netra_backend.app.core.quality_config import (
     get_weight_mappings, get_default_weights, initialize_content_type_thresholds
 )
 

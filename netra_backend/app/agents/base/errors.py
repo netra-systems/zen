@@ -8,18 +8,18 @@ Business Value: Reduces error-related customer impact by 80%.
 from netra_backend.app.logging_config import central_logger
 
 # Import all error handling components for unified access
-from netra_backend.app.agent_errors import (
+from netra_backend.app.agents.base.agent_errors import (
     AgentExecutionError, 
     ValidationError, 
     ExternalServiceError, 
     DatabaseError
 )
-from netra_backend.app.error_classification import (
+from netra_backend.app.core.error_handlers.error_classification import (
     ErrorCategory,
     ErrorClassification, 
     ErrorClassifier
 )
-from netra_backend.app.error_handler import ExecutionErrorHandler
+from netra_backend.app.services.synthetic_data.error_handler import ExecutionErrorHandler
 
 logger = central_logger.get_logger(__name__)
 

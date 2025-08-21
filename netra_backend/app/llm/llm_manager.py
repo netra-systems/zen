@@ -5,7 +5,7 @@ Each function must be ≤8 lines as per CLAUDE.md requirements.
 """
 from typing import Any, Type, TypeVar, Optional, AsyncIterator
 from pydantic import BaseModel
-from netra_backend.app.schemas import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.schemas.llm_config_types import LLMConfig as GenerationConfig
 from netra_backend.app.schemas.llm_response_types import LLMResponse
 from netra_backend.app.schemas.llm_base_types import LLMConfigInfo, LLMManagerStats, LLMHealthCheck

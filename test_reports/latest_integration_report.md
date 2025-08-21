@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T10:04:26.179123  
+**Generated:** 2025-08-21T10:18:11.441752  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 8.37s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 1.25s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 7.76s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 1.23s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 9.63s
+- **Total Duration:** 8.99s
 - **Exit Code:** 15
 
 ### Backend Configuration
@@ -77,16 +77,17 @@ BAD TEST DETECTION REPORT
 ================================================================================
 
 Total Bad Tests Detected: 0
-Total Test Runs Analyzed: 1
+Total Test Runs Analyzed: 14
 
 ================================================================================
 
 
-[33m============================ [33mno tests ran[0m[33m in 4.16s[0m[33m ============================[0m
+[33m============================ [33mno tests ran[0m[33m in 4.12s[0m[33m ============================[0m
 ================================================================================
-[FAIL] TESTS FAILED with exit code 5 after 7.84s
+[FAIL] TESTS FAILED with exit code 5 after 7.00s
 ================================================================================
 
+2025-08-21 10:18:04.944 | WARNING  | netra_backend.app.core.unified_logging:_emit_log:117 | Failed to load GCP secrets: 'SecretManager' object has no attribute 'load_all_secrets'
 
 ```
 

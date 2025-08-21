@@ -41,35 +41,41 @@ except ImportError:
             """Get count of enabled services."""
             return 0
 
-# Placeholder classes for missing configuration managers
-# These will be replaced with actual implementations
-class DatabaseConfigManager:
-    """Placeholder for database configuration manager."""
-    def populate_database_config(self, config):
-        """Populate database configuration."""
-        pass
-    
-    def validate_database_consistency(self, config):
-        """Validate database configuration consistency."""
-        return []
-    
-    def refresh_environment(self):
-        """Refresh environment settings."""
-        pass
+try:
+    from netra_backend.app.core.configuration.database import DatabaseConfigManager as ActualDatabaseConfigManager
+except ImportError:
+    # Fallback placeholder if database module not available
+    class ActualDatabaseConfigManager:
+        """Placeholder for database configuration manager."""
+        def populate_database_config(self, config):
+            """Populate database configuration."""
+            pass
+        
+        def validate_database_consistency(self, config):
+            """Validate database configuration consistency."""
+            return []
+        
+        def refresh_environment(self):
+            """Refresh environment settings."""
+            pass
 
-class SecretManager:
-    """Placeholder for secret manager."""
-    def populate_secrets(self, config):
-        """Populate secrets."""
-        pass
-    
-    def validate_secrets_consistency(self, config):
-        """Validate secrets consistency."""
-        return []
-    
-    def get_loaded_secrets_count(self):
-        """Get count of loaded secrets."""
-        return 0
+try:
+    from netra_backend.app.core.configuration.unified_secrets import UnifiedSecretManager as ActualSecretManager
+except ImportError:
+    # Fallback placeholder if unified_secrets module not available
+    class ActualSecretManager:
+        """Placeholder for secret manager."""
+        def populate_secrets(self, config):
+            """Populate secrets."""
+            pass
+        
+        def validate_secrets_consistency(self, config):
+            """Validate secrets consistency."""
+            return []
+        
+        def get_loaded_secrets_count(self):
+            """Get count of loaded secrets."""
+            return 0
 
 class ConfigurationValidator:
     """Placeholder for configuration validator."""
@@ -121,9 +127,9 @@ class UnifiedConfigManager:
     
     def _initialize_config_managers(self) -> None:
         """Initialize specialized configuration managers."""
-        self._database_manager = DatabaseConfigManager()
+        self._database_manager = ActualDatabaseConfigManager()
         self._services_manager = ActualServiceConfigManager()
-        self._secrets_manager = SecretManager()
+        self._secrets_manager = ActualSecretManager()
         self._hot_reload_enabled = self._check_hot_reload_enabled()
     
     def _detect_environment(self) -> str:

@@ -9,10 +9,10 @@ from collections import defaultdict
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.redis_manager import RedisManager
 
-from netra_backend.app.quality_gate_models import ContentType, QualityLevel, QualityMetrics, ValidationResult
-from netra_backend.app.quality_gate_patterns import QualityPatterns
-from netra_backend.app.quality_gate_metrics import QualityGateMetricsCalculator
-from netra_backend.app.quality_gate_validators import QualityValidator
+from netra_backend.app.services.quality_gate.quality_gate_models import ContentType, QualityLevel, QualityMetrics, ValidationResult
+from netra_backend.app.services.quality_gate.quality_gate_patterns import QualityPatterns
+from netra_backend.app.services.quality_gate.quality_gate_metrics import QualityGateMetricsCalculator
+from netra_backend.app.services.quality_gate.quality_gate_validators import QualityValidator
 
 logger = central_logger.get_logger(__name__)
 

@@ -24,7 +24,7 @@ from netra_backend.app.core.exceptions import (
     ErrorSeverity
 )
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.types import ErrorResponse, ErrorContext
+from netra_backend.app.services.transaction_manager.types import ErrorResponse, ErrorContext
 
 logger = central_logger.get_logger(__name__)
 

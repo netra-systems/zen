@@ -8,7 +8,7 @@ Will be removed in v2.0. Migration guide: /docs/configuration-migration.md
 
 from typing import Dict, Any, Optional, Tuple, Callable
 from netra_backend.app.schemas.Config import AppConfig
-from netra_backend.app.config import get_config
+from netra_backend.app.core.config import get_config
 from netra_backend.app.config_loader import (
     load_env_var, set_clickhouse_host, set_clickhouse_port,
     set_clickhouse_password, set_clickhouse_user, set_gemini_api_key,

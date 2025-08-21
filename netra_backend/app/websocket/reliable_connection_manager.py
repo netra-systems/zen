@@ -14,7 +14,7 @@ from netra_backend.app.core.reliability import (
 )
 from netra_backend.app.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.heartbeat import HeartbeatManager
-from netra_backend.app.error_handler import WebSocketErrorHandler, default_error_handler
+from netra_backend.app.services.synthetic_data.error_handler import WebSocketErrorHandler, default_error_handler
 from netra_backend.app.reliable_message_handler import ReliableMessageHandler, MessageTypeRouter
 from netra_backend.app.connection_lifecycle_manager import ConnectionLifecycleManager
 from netra_backend.app.connection_message_handler import ConnectionMessageHandler

@@ -9,6 +9,7 @@ from typing import Dict, Any
 from fastapi import FastAPI
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.checker import StartupChecker
+from netra_backend.app.core.configuration import unified_config_manager
 
 
 async def run_startup_checks(app: FastAPI) -> Dict[str, Any]:
@@ -50,8 +51,9 @@ def _log_non_critical_failures(results: Dict[str, Any]) -> None:
 
 def _should_skip_startup_checks() -> bool:
     """Check if startup checks should be skipped"""
-    import os
-    return os.getenv("SKIP_STARTUP_CHECKS", "").lower() in ("true", "1", "yes")
+    config = unified_config_manager.get_config()
+    skip_value = getattr(config, 'skip_startup_checks', '')
+    return str(skip_value).lower() in ("true", "1", "yes")
 
 
 def _create_skipped_result() -> Dict[str, Any]:
@@ -74,8 +76,8 @@ def _handle_startup_results(results: Dict[str, Any]) -> None:
     _log_startup_results(results)
     
     # In staging, treat ALL failures as critical
-    import os
-    is_staging = os.getenv("ENVIRONMENT", "development").lower() == "staging" or bool(os.getenv("K_SERVICE"))
+    config = unified_config_manager.get_config()
+    is_staging = config.environment.lower() == "staging" or (hasattr(config, 'k_service') and config.k_service)
     
     if results['failed_critical'] > 0:
         _handle_critical_failures(results)
@@ -104,5 +106,5 @@ def _handle_critical_failures(results: Dict[str, Any]) -> None:
 
 def _is_staging_environment() -> bool:
     """Check if running in staging environment"""
-    import os
-    return os.getenv("ENVIRONMENT", "development").lower() == "staging" or bool(os.getenv("K_SERVICE"))
+    config = unified_config_manager.get_config()
+    return config.environment.lower() == "staging" or (hasattr(config, 'k_service') and config.k_service)

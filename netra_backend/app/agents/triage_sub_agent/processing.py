@@ -18,11 +18,11 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.agents.base.interface import ExecutionContext
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor, ExecutionMetrics
 from netra_backend.app.agents.base.errors import ExecutionErrorHandler
-from netra_backend.app.processing_monitoring import (
+from netra_backend.app.agents.triage_sub_agent.processing_monitoring import (
     TriageProcessingMonitor, TriageWebSocketMonitor, TriageProcessingErrorHelper
 )
 
-from netra_backend.app.models import TriageResult, ExtractedEntities
+from netra_backend.app.services.apex_optimizer_agent.models import TriageResult, ExtractedEntities
 
 logger = central_logger.get_logger(__name__)
 

@@ -8,7 +8,7 @@ from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.alert_models import AlertRule, AlertLevel, Alert
+from netra_backend.app.monitoring.alert_models import AlertRule, AlertLevel, Alert
 from netra_backend.app.services.metrics.agent_metrics import AgentMetrics, AgentMetricsCollector
 
 logger = central_logger.get_logger(__name__)

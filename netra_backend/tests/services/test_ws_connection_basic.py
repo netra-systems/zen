@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch, call
 
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState, WebSocketDisconnect
-from netra_backend.app.ws_manager import WebSocketManager, ConnectionInfo
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager, ConnectionInfo
 from netra_backend.app.core.exceptions_base import NetraException
 
 from netra_backend.tests.test_ws_connection_mocks import (

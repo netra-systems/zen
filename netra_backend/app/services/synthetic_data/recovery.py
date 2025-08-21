@@ -3,9 +3,9 @@ Recovery and resilience methods for SyntheticDataService - Backward compatibilit
 """
 
 # Import the modular components for backward compatibility
-from netra_backend.app.recovery_mixin import RecoveryMixin
-from netra_backend.app.circuit_breaker import CircuitBreaker
-from netra_backend.app.transaction import Transaction
+from netra_backend.app.services.synthetic_data.recovery_mixin import RecoveryMixin
+from netra_backend.app.services.api_gateway.circuit_breaker import CircuitBreaker
+from netra_backend.app.services.synthetic_data.transaction import Transaction
 
 # Re-export for backward compatibility
 __all__ = [

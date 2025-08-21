@@ -2,12 +2,21 @@
 
 Focused module for environment detection logic only.
 Separated from the main configuration for clarity.
+
+**DEPRECATION NOTICE**: This module should be migrated to use the
+unified configuration system instead of direct os.environ access.
+For new code, use: from netra_backend.app.core.configuration import unified_config_manager
 """
 
 import os
 from typing import Dict, Type
 from netra_backend.app.configuration.schemas import AppConfig, DevelopmentConfig, ProductionConfig, StagingConfig, NetraTestingConfig
 from netra_backend.app.logging_config import central_logger as logger
+
+# MIGRATION NOTE: For new code, use the unified configuration system:
+# from netra_backend.app.core.configuration import unified_config_manager
+# config = unified_config_manager.get_config()
+# This provides centralized, validated configuration access.
 
 
 def detect_cloud_run_environment() -> str:
@@ -19,7 +28,11 @@ def detect_cloud_run_environment() -> str:
 
 
 def _check_k_service_for_staging() -> str:
-    """Check K_SERVICE environment variable for staging."""
+    """Check K_SERVICE environment variable for staging.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     k_service = os.environ.get("K_SERVICE")
     if k_service and "staging" in k_service.lower():
         logger.debug(f"Staging from K_SERVICE: {k_service}")
@@ -28,7 +41,11 @@ def _check_k_service_for_staging() -> str:
 
 
 def _check_pr_number_for_staging() -> str:
-    """Check PR_NUMBER environment variable for staging."""
+    """Check PR_NUMBER environment variable for staging.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     if os.environ.get("PR_NUMBER"):
         logger.debug(f"Staging from PR_NUMBER")
         return "staging"
@@ -36,7 +53,11 @@ def _check_pr_number_for_staging() -> str:
 
 
 def get_environment() -> str:
-    """Determine the current environment."""
+    """Determine the current environment.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     if os.environ.get("TESTING"):
         return "testing"
     cloud_env = detect_cloud_run_environment()
@@ -46,7 +67,11 @@ def get_environment() -> str:
 
 
 def _get_default_environment() -> str:
-    """Get default environment from env vars."""
+    """Get default environment from env vars.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     env = os.environ.get("ENVIRONMENT", "development").lower()
     logger.debug(f"Environment determined as: {env}")
     return env
@@ -77,7 +102,11 @@ def _init_config(config_classes: dict, env: str) -> AppConfig:
 
 
 def _update_websocket_url(config: AppConfig) -> None:
-    """Update WebSocket URL if server port is set."""
+    """Update WebSocket URL if server port is set.
+    
+    DEPRECATION: Consider using unified configuration system instead.
+    """
+    # LEGACY: Direct env access - should migrate to unified config
     server_port = os.environ.get('SERVER_PORT')
     if server_port:
         config.ws_config.ws_url = f"ws://localhost:{server_port}/ws"

@@ -2,7 +2,7 @@
 from typing import Dict, Any, Optional
 from fastapi import HTTPException
 
-from netra_backend.app.schemas import UserInDB
+from netra_backend.app.routes.unified_tools.schemas import UserInDB
 from netra_backend.app.services.mcp_service import MCPService
 from netra_backend.app.routes.mcp.models import MCPPromptGetRequest
 from netra_backend.app.routes.mcp.helpers import extract_prompts_from_app, get_prompt_function

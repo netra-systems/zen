@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock
 from enum import Enum
 import json
 
-from netra_backend.app.schemas import AppConfig, LLMConfig
+from netra_backend.app.schemas.Config import AppConfig, LLMConfig
 from pydantic import BaseModel
 
 

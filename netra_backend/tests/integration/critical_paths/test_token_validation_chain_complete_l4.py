@@ -16,7 +16,7 @@ import secrets
 from netra_backend.app.services.token_service import TokenService
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
     InvalidTokenError,
     TokenExpiredError,

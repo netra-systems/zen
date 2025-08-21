@@ -27,7 +27,7 @@ from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
-from netra_backend.app.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)

@@ -8,7 +8,7 @@ import asyncio
 import asyncpg
 from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.postgres_service import PostgresService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import uuid
 
 

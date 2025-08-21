@@ -6,16 +6,16 @@ from datetime import datetime, UTC
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.db import models_postgres as models
-from netra_backend.app.enums import GenerationStatus
-from netra_backend.app.audit_logger import SyntheticDataAuditLogger
-from netra_backend.app.generation_utilities import GenerationUtilities
-from netra_backend.app.tools import initialize_default_tools
-from netra_backend.app.job_manager import JobManager
-from netra_backend.app.generation_engine import GenerationEngine
-from netra_backend.app.ingestion_manager import IngestionManager
-from netra_backend.app.error_handler import ErrorHandler
-from netra_backend.app.recovery import RecoveryMixin
-from netra_backend.app.audit_interface import AuditInterface
+from netra_backend.app.services.synthetic_data.enums import GenerationStatus
+from netra_backend.app.services.synthetic_data.audit_logger import SyntheticDataAuditLogger
+from netra_backend.app.services.synthetic_data.generation_utilities import GenerationUtilities
+from netra_backend.app.services.synthetic_data.tools import initialize_default_tools
+from netra_backend.app.services.synthetic_data.job_manager import JobManager
+from netra_backend.app.services.synthetic_data.generation_engine import GenerationEngine
+from netra_backend.app.services.synthetic_data.ingestion_manager import IngestionManager
+from netra_backend.app.services.synthetic_data.error_handler import ErrorHandler
+from netra_backend.app.services.synthetic_data.recovery import RecoveryMixin
+from netra_backend.app.services.synthetic_data.audit_interface import AuditInterface
 
 central_logger.info("SyntheticDataService initialized successfully")
 

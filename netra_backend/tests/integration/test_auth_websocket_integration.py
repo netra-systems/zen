@@ -14,7 +14,7 @@ import jwt
 from datetime import datetime, timedelta
 
 from schemas import UserInDB
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 @pytest.mark.asyncio
@@ -45,7 +45,7 @@ class TestAuthToWebSocketFlow:
     async def test_successful_auth_to_websocket(self, auth_token, mock_user):
         """Test successful auth flow leading to WS connection."""
         from netra_backend.app.services.auth_service import AuthService
-        from netra_backend.app.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
         
         # Setup mocks
         auth_service = Mock(spec=AuthService)
@@ -79,7 +79,7 @@ class TestAuthToWebSocketFlow:
     async def test_invalid_token_blocks_websocket(self):
         """Test invalid token prevents WS connection."""
         from netra_backend.app.services.auth_service import AuthService
-        from netra_backend.app.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
         
         auth_service = Mock(spec=AuthService)
         auth_service.validate_token = AsyncMock(side_effect=ValueError("Invalid token"))
@@ -147,7 +147,7 @@ class TestAuthToWebSocketFlow:
     async def test_concurrent_auth_requests(self, auth_token, mock_user):
         """Test system handles concurrent auth requests."""
         from netra_backend.app.services.auth_service import AuthService
-        from netra_backend.app.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
         
         auth_service = Mock(spec=AuthService)
         auth_service.validate_token = AsyncMock(return_value=mock_user)
@@ -196,7 +196,7 @@ class TestAuthToWebSocketFlow:
     
     async def test_websocket_auth_header_validation(self, auth_token):
         """Test WebSocket connection validates auth headers."""
-        from netra_backend.app.ws_manager import WebSocketManager
+        from netra_backend.app.services.websocket.ws_manager import WebSocketManager
         
         ws_manager = WebSocketManager()
         mock_websocket = Mock()

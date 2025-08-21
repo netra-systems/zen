@@ -5,6 +5,10 @@
 Manages all DATABASE_URL, CLICKHOUSE_URL, POSTGRES_URL references.
 Eliminates inconsistencies across 110+ files.
 
+**CONFIGURATION MANAGER**: This module is part of the configuration system
+and requires direct os.environ access for loading database configuration.
+Application code should use the unified configuration system instead.
+
 Business Value: Prevents $12K MRR loss from database configuration errors.
 Enterprise customers require 100% database reliability.
 
@@ -93,7 +97,11 @@ class DatabaseConfigManager:
             self._update_redis_config_object(config, redis_url)
     
     def _get_postgres_url(self) -> Optional[str]:
-        """Get PostgreSQL URL from environment or defaults."""
+        """Get PostgreSQL URL from environment or defaults.
+        
+        CONFIG MANAGER: Direct env access required for database URL loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for database URL configuration
         url = os.environ.get("DATABASE_URL")
         if url:
             # Mask password but show full URL structure for debugging
@@ -158,7 +166,11 @@ class DatabaseConfigManager:
                 raise ConfigurationError(f"Localhost not allowed in {self._environment}")
     
     def _get_clickhouse_configuration(self) -> Dict[str, str]:
-        """Get ClickHouse configuration from environment."""
+        """Get ClickHouse configuration from environment.
+        
+        CONFIG MANAGER: Direct env access required for ClickHouse configuration loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for ClickHouse configuration
         # Ensure HTTP port 8123 is used for development
         default_port = "8123"  # Always use HTTP port for dev launcher
         return {
@@ -175,9 +187,13 @@ class DatabaseConfigManager:
         self._apply_to_clickhouse_https(config, ch_config)
     
     def _apply_to_clickhouse_native(self, config: AppConfig, ch_config: Dict[str, str]) -> None:
-        """Apply configuration to ClickHouse native connection."""
+        """Apply configuration to ClickHouse native connection.
+        
+        CONFIG MANAGER: Direct env access for native port configuration.
+        """
         if hasattr(config, 'clickhouse_native'):
             config.clickhouse_native.host = ch_config["host"]
+            # CONFIG BOOTSTRAP: Direct env access for native port
             config.clickhouse_native.port = int(os.environ.get("CLICKHOUSE_NATIVE_PORT", "9000"))
             config.clickhouse_native.user = ch_config["user"]
             config.clickhouse_native.password = ch_config["password"]
@@ -195,7 +211,11 @@ class DatabaseConfigManager:
     
     
     def _set_clickhouse_url(self, config: AppConfig) -> None:
-        """Set unified ClickHouse URL for external integrations."""
+        """Set unified ClickHouse URL for external integrations.
+        
+        CONFIG MANAGER: Direct env access for ClickHouse URL configuration.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for ClickHouse URL
         clickhouse_url = os.environ.get("CLICKHOUSE_URL")
         if not clickhouse_url and hasattr(config, 'clickhouse_native'):
             clickhouse_url = self._build_clickhouse_url(config.clickhouse_native)
@@ -210,7 +230,11 @@ class DatabaseConfigManager:
         return f"clickhouse://{ch_config.user}{password_part}@{ch_config.host}:{port}/{ch_config.database}"
     
     def _get_redis_url(self) -> Optional[str]:
-        """Get Redis URL from environment."""
+        """Get Redis URL from environment.
+        
+        CONFIG MANAGER: Direct env access required for Redis URL loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for Redis URL
         return os.environ.get("REDIS_URL")
     
     def _update_redis_config_object(self, config: AppConfig, redis_url: str) -> None:
@@ -273,7 +297,11 @@ class DatabaseConfigManager:
             return False
     
     def get_database_summary(self) -> Dict[str, str]:
-        """Get database configuration summary for monitoring."""
+        """Get database configuration summary for monitoring.
+        
+        CONFIG MANAGER: Direct env access for database summary.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for configuration summary
         return {
             "postgres_configured": bool(os.environ.get("DATABASE_URL")),
             "clickhouse_configured": bool(os.environ.get("CLICKHOUSE_HOST")),

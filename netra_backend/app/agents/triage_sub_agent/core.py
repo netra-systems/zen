@@ -15,11 +15,11 @@ from netra_backend.app.agents.utils import extract_json_from_response
 from netra_backend.app.agents.config import agent_config
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.models import TriageResult, TriageMetadata, Priority, Complexity
-from netra_backend.app.entity_extractor import EntityExtractor
-from netra_backend.app.validator import RequestValidator
-from netra_backend.app.intent_detector import IntentDetector
-from netra_backend.app.tool_recommender import ToolRecommender
+from netra_backend.app.services.apex_optimizer_agent.models import TriageResult, TriageMetadata, Priority, Complexity
+from netra_backend.app.agents.triage_sub_agent.entity_extractor import EntityExtractor
+from netra_backend.app.core.configuration.validator import RequestValidator
+from netra_backend.app.agents.triage_sub_agent.intent_detector import IntentDetector
+from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
 
 logger = central_logger.get_logger(__name__)
 

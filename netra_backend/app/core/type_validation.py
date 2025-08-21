@@ -3,19 +3,19 @@
 from typing import Any, Dict, List
 
 # Import all components from new modules
-from netra_backend.app.type_validation_errors import (
+from netra_backend.app.core.type_validation_errors import (
     TypeMismatch,
     TypeMismatchSeverity,
     generate_validation_report
 )
-from netra_backend.app.type_validation_helpers import (
+from netra_backend.app.core.type_validation_helpers import (
     TypeScriptParser,
     get_backend_field_type
 )
-from netra_backend.app.type_validation_rules import (
+from netra_backend.app.core.type_validation_rules import (
     TypeCompatibilityChecker
 )
-from netra_backend.app.type_validation_core import (
+from netra_backend.app.core.type_validation_core import (
     SchemaValidator,
     validate_type_consistency
 )

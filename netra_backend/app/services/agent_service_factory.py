@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.dependencies import get_llm_manager, DbDep
-from netra_backend.app.ws_manager import manager
-from netra_backend.app.agent_service_core import AgentService
+from netra_backend.app.services.websocket.ws_manager import manager
+from netra_backend.app.services.agent_service_core import AgentService
 
 
 def get_agent_service(

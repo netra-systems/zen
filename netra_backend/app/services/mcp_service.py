@@ -24,9 +24,9 @@ from netra_backend.app.services.synthetic_data_service import SyntheticDataServi
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 from netra_backend.app.services.database.mcp_repository import MCPClientRepository, MCPToolExecutionRepository
-from netra_backend.app.schemas import UserInDB
+from netra_backend.app.routes.unified_tools.schemas import UserInDB
 from netra_backend.app.netra_mcp.netra_mcp_server import NetraMCPServer
-from netra_backend.app.mcp_models import MCPClient, MCPToolExecution
+from netra_backend.app.services.mcp_models import MCPClient, MCPToolExecution
 
 logger = CentralLogger()
 
@@ -526,7 +526,7 @@ class MCPService(IMCPService):
 
 
 # Import request handler from separate module for modularity
-from netra_backend.app.mcp_request_handler import handle_request
+from netra_backend.app.services.mcp_request_handler import handle_request
 
 
 # Module-level functions for test compatibility

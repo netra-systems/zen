@@ -8,9 +8,9 @@ import asyncio
 from typing import Any, Dict, List, Optional
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.database_types import DatabaseType, DatabaseConfig, PoolMetrics, PoolHealth
-from netra_backend.app.database_health_monitoring import CoreDatabaseHealthChecker as DatabaseHealthChecker
-from netra_backend.app.database_recovery_core import (
+from netra_backend.app.core.database_types import DatabaseType, DatabaseConfig, PoolMetrics, PoolHealth
+from netra_backend.app.core.database_health_monitoring import CoreDatabaseHealthChecker as DatabaseHealthChecker
+from netra_backend.app.core.database_recovery_core import (
     DatabaseRecoveryStrategy, ConnectionPoolRefreshStrategy, 
     ConnectionPoolRecreateStrategy
 )

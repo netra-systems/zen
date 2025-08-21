@@ -19,13 +19,13 @@ from netra_backend.app.core.reliability import get_reliability_wrapper
 from netra_backend.app.agents.input_validation import validate_agent_input
 
 # Import modular components
-from netra_backend.app.scanner_core import RepositoryScanner
-from netra_backend.app.pattern_detector import AIPatternDetector
-from netra_backend.app.config_parser import ConfigurationExtractor
-from netra_backend.app.llm_mapper import LLMCallMapper
-from netra_backend.app.tool_analyzer import ToolUsageAnalyzer
-from netra_backend.app.output_formatter import AIOperationsMapFormatter
-from netra_backend.app.github_client import GitHubAPIClient
+from netra_backend.app.agents.github_analyzer.scanner_core import RepositoryScanner
+from netra_backend.app.agents.github_analyzer.pattern_detector import AIPatternDetector
+from netra_backend.app.agents.github_analyzer.config_parser import ConfigurationExtractor
+from netra_backend.app.agents.github_analyzer.llm_mapper import LLMCallMapper
+from netra_backend.app.agents.github_analyzer.tool_analyzer import ToolUsageAnalyzer
+from netra_backend.app.agents.github_analyzer.output_formatter import AIOperationsMapFormatter
+from netra_backend.app.agents.github_analyzer.github_client import GitHubAPIClient
 
 
 class GitHubAnalyzerService(BaseSubAgent):

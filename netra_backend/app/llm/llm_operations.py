@@ -6,7 +6,7 @@ Each function must be ≤8 lines as per architecture requirements.
 
 import time
 from typing import Any, AsyncIterator, Optional, Tuple
-from netra_backend.app.schemas import AppConfig
+from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.schemas.llm_response_types import LLMResponse
 from netra_backend.app.llm.llm_provider_manager import LLMProviderManager
 from netra_backend.app.llm.llm_utils import LLMUtils

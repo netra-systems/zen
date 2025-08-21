@@ -34,7 +34,7 @@ def test_health_endpoint_direct():
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     
     from fastapi.testclient import TestClient
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")
@@ -52,7 +52,7 @@ def test_live_endpoint():
     os.environ["DEV_MODE_DISABLE_CLICKHOUSE"] = "true"
     
     from fastapi.testclient import TestClient
-    from netra_backend.app.main import app
+    from netra_backend.app.routes.mcp.main import app
     
     client = TestClient(app)
     response = client.get("/health/live")

@@ -5,6 +5,10 @@
 Handles secure loading, rotation, and management of secrets.
 Supports GCP Secret Manager integration and local development.
 
+**CONFIGURATION MANAGER**: This module is part of the configuration system
+and requires direct os.environ access for secure secret loading.
+Application code should use the unified configuration system instead.
+
 Business Value: Prevents security breaches that could affect Enterprise customers.
 Ensures compliance with security requirements for revenue-critical operations.
 
@@ -37,7 +41,11 @@ class SecretManager:
         self._cache_timestamp = None
     
     def _get_environment(self) -> str:
-        """Get current environment for secret management."""
+        """Get current environment for secret management.
+        
+        CONFIG MANAGER: Direct env access required for secure environment detection.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for secure environment detection
         return os.environ.get("ENVIRONMENT", "development").lower()
     
     def _load_secret_mappings(self) -> Dict[str, dict]:
@@ -149,7 +157,11 @@ class SecretManager:
         self._cache_timestamp = datetime.now()
     
     def _load_from_environment_variables(self) -> None:
-        """Load secrets from environment variables."""
+        """Load secrets from environment variables.
+        
+        CONFIG MANAGER: Direct env access required for secure secret loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for secure secret loading
         env_mapping = self._get_environment_variable_mapping()
         for secret_name, env_var in env_mapping.items():
             value = os.environ.get(env_var)
@@ -246,7 +258,11 @@ class SecretManager:
         }
     
     def _is_gcp_available(self) -> bool:
-        """Check if GCP Secret Manager is available."""
+        """Check if GCP Secret Manager is available.
+        
+        CONFIG MANAGER: Direct env access required for GCP availability check.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for GCP availability detection
         return (self._environment in ["staging", "production"] and 
                 os.environ.get("GCP_PROJECT_ID") is not None)
     
@@ -262,7 +278,11 @@ class SecretManager:
             return {}
     
     def _get_gcp_project_id(self) -> str:
-        """Get GCP project ID for secret access."""
+        """Get GCP project ID for secret access.
+        
+        CONFIG MANAGER: Direct env access required for GCP project ID.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for GCP project ID
         staging_project = "701982941522"
         production_project = "304612253870"
         return os.environ.get("GCP_PROJECT_ID", 

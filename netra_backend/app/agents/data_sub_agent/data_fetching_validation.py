@@ -20,7 +20,7 @@ Business Value: Data integrity validation prevents errors and improves reliabili
 from typing import Dict, List, Optional, Any
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.data_fetching_operations import DataFetchingOperations
+from netra_backend.app.agents.data_sub_agent.data_fetching_operations import DataFetchingOperations
 
 logger = central_logger.get_logger(__name__)
 

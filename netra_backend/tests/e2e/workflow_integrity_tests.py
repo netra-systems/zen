@@ -6,7 +6,7 @@ Tests for data flow, edge cases, and overall workflow integrity
 from typing import Dict, List
 
 from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
-from netra_backend.app.schemas import SubAgentLifecycle
+from netra_backend.app.routes.unified_tools.schemas import SubAgentLifecycle
 from netra_backend.app.core.exceptions import NetraException
 from netra_backend.tests.model_effectiveness_tests import _execute_model_selection_workflow, _create_model_effectiveness_state
 

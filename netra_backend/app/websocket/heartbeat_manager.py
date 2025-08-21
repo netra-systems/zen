@@ -9,7 +9,7 @@ from typing import Dict, Optional, Any
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.connection import ConnectionInfo, ConnectionManager
-from netra_backend.app.error_handler import WebSocketErrorHandler
+from netra_backend.app.services.synthetic_data.error_handler import WebSocketErrorHandler
 from netra_backend.app.heartbeat_config import HeartbeatConfig
 from netra_backend.app.heartbeat_statistics import HeartbeatStatistics
 from netra_backend.app.heartbeat_loop_operations import HeartbeatLoopOperations

@@ -27,7 +27,7 @@ from netra_backend.app.agents.base.errors import ExecutionErrorHandler
 from netra_backend.app.core.exceptions import NetraException
 
 # Import modular helpers
-from netra_backend.app.analysis_engine_helpers import (
+from netra_backend.app.agents.data_sub_agent.analysis_engine_helpers import (
     StatisticsHelpers, TrendHelpers, SeasonalityHelpers, OutlierHelpers
 )
 

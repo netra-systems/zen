@@ -4,10 +4,10 @@ Re-export from modular alert system components.
 """
 
 # Import types for backward compatibility
-from netra_backend.app.alert_models import Alert, AlertRule, AlertLevel, NotificationChannel, NotificationConfig
+from netra_backend.app.monitoring.alert_models import Alert, AlertRule, AlertLevel, NotificationChannel, NotificationConfig
 
 # Import the main alert manager from the modular core
-from netra_backend.app.alert_manager_core import AlertManager, alert_manager
+from netra_backend.app.monitoring.alert_manager_core import AlertManager, alert_manager
 
 # Re-export for backward compatibility
 __all__ = [

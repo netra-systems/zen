@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Dict, Any
 
-from netra_backend.app.spec_analyzer_core import ComplianceScore
+from netra_backend.app.services.factory_status.spec_analyzer_core import ComplianceScore
 
 
 class ScoreCalculator:

@@ -18,7 +18,7 @@ from netra_backend.app.schemas.registry import (
     AgentStoppedPayload,
     AgentResponseData
 )
-from netra_backend.app.ws_manager import manager
+from netra_backend.app.services.websocket.ws_manager import manager
 from netra_backend.app.services.message_handler_utils import handle_thread_history as _handle_thread_history
 from netra_backend.app.services.message_handler_utils import handle_stop_agent as _handle_stop_agent
 from netra_backend.app.services.message_handler_base import MessageHandlerBase

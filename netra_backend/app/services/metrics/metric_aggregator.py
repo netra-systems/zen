@@ -6,7 +6,7 @@ Handles aggregation operations with 25-line function limit.
 from typing import Dict, Any
 from collections import deque, defaultdict
 
-from netra_backend.app.agent_metrics_models import AgentMetrics, AgentOperationRecord
+from netra_backend.app.services.metrics.agent_metrics_models import AgentMetrics, AgentOperationRecord
 
 
 class MetricAggregator:

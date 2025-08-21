@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from collections import deque
 
-from netra_backend.app.agent_metrics_models import AgentOperationRecord, AgentMetrics
+from netra_backend.app.services.metrics.agent_metrics_models import AgentOperationRecord, AgentMetrics
 
 
 class MetricReader:

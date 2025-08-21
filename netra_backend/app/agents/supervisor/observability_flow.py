@@ -8,8 +8,8 @@ import time
 import uuid
 from typing import Dict, List, Any, Optional
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.observability_flow_builders import FlowDataBuilder
-from netra_backend.app.observability_todo_tracker import TodoTracker
+from netra_backend.app.agents.supervisor.observability_flow_builders import FlowDataBuilder
+from netra_backend.app.agents.supervisor.observability_todo_tracker import TodoTracker
 
 logger = central_logger.get_logger(__name__)
 

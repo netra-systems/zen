@@ -6,7 +6,7 @@ All functions maintain 25-line limit with single responsibility.
 """
 
 from typing import Dict, Optional, Tuple
-from netra_backend.app.corpus_models import CorpusToolType
+from netra_backend.app.agents.admin_tool_dispatcher.corpus_models import CorpusToolType
 
 
 class CorpusValidators:

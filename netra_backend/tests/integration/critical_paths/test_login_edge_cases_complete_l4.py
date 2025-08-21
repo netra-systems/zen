@@ -17,7 +17,7 @@ from netra_backend.app.services.user_service import UserService
 from netra_backend.app.services.rate_limit_service import RateLimitService
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.models.user import User, UserStatus
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
     AuthenticationError,
     RateLimitExceeded,

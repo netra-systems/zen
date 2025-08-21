@@ -18,8 +18,8 @@ from dataclasses import dataclass
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.connection import ConnectionInfo
-from netra_backend.app.validation import MessageValidator, default_message_validator
-from netra_backend.app.error_handler import WebSocketErrorHandler, default_error_handler
+from netra_backend.app.services.corpus.validation import MessageValidator, default_message_validator
+from netra_backend.app.services.synthetic_data.error_handler import WebSocketErrorHandler, default_error_handler
 
 # Modern architecture imports
 from netra_backend.app.agents.base.interface import (

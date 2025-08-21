@@ -5,7 +5,7 @@ This module now delegates to the modular components.
 """
 
 # Import the refactored formatter for backwards compatibility
-from netra_backend.app.output_formatters import AIOperationsMapFormatter
+from netra_backend.app.agents.github_analyzer.output_formatters import AIOperationsMapFormatter
 
 # Maintain the same interface for existing code
 __all__ = ['AIOperationsMapFormatter']

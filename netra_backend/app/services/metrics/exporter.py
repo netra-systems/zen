@@ -5,6 +5,6 @@ COMPATIBILITY WRAPPER - Main implementation moved to exporter_core.py
 """
 
 # Re-export the main class for backward compatibility
-from netra_backend.app.exporter_core import MetricsExporter
+from netra_backend.app.services.metrics.exporter_core import MetricsExporter
 
 __all__ = ['MetricsExporter']

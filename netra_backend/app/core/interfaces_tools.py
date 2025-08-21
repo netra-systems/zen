@@ -11,11 +11,11 @@ import inspect
 
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.exceptions_base import NetraException
-from netra_backend.app.tool_models import ToolExecutionResult, UnifiedTool
+from netra_backend.app.core.tool_models import ToolExecutionResult, UnifiedTool
 
 if TYPE_CHECKING:
     from netra_backend.app.db.models_postgres import User
-    from netra_backend.app.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
+    from netra_backend.app.routes.unified_tools.schemas import ToolResult, ToolStatus, ToolInput, SimpleToolPayload
     from netra_backend.app.schemas.ToolPermission import ToolExecutionContext, PermissionCheckResult
     from netra_backend.app.services.tool_permission_service import ToolPermissionService
 
@@ -208,14 +208,14 @@ class ToolExecutionEngine:
     
     def _create_success_result(self, tool_input: 'ToolInput', result: Any) -> 'ToolResult':
         """Create successful tool result for simple interface."""
-        from netra_backend.app.schemas import ToolResult, ToolStatus, SimpleToolPayload
+        from netra_backend.app.routes.unified_tools.schemas import ToolResult, ToolStatus, SimpleToolPayload
         
         payload = SimpleToolPayload(result=result)
         return ToolResult(tool_input=tool_input, status=ToolStatus.SUCCESS, payload=payload)
     
     def _create_error_result(self, tool_input: 'ToolInput', message: str) -> 'ToolResult':
         """Create error result for simple interface."""
-        from netra_backend.app.schemas import ToolResult, ToolStatus
+        from netra_backend.app.routes.unified_tools.schemas import ToolResult, ToolStatus
         
         return ToolResult(tool_input=tool_input, status=ToolStatus.ERROR, message=message)
     

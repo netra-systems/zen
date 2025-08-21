@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app...db import models_postgres as models
 from netra_backend.app.db.base import CorpusNotFoundError
-from netra_backend.app.base_service import BaseCorpusService
+from netra_backend.app.services.corpus.base_service import BaseCorpusService
 
 
 class ContentOperationsService(BaseCorpusService):

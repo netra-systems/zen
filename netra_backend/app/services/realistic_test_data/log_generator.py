@@ -8,7 +8,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict, Any
 
-from netra_backend.app.models import RealisticTestDataConfigManager
+from netra_backend.app.services.apex_optimizer_agent.models import RealisticTestDataConfigManager
 
 
 class LogGenerator:

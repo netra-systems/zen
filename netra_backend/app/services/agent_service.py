@@ -5,16 +5,16 @@ service components that have been split into focused modules for better maintain
 """
 
 # Core agent service
-from netra_backend.app.agent_service_core import AgentService
+from netra_backend.app.services.agent_service_core import AgentService
 
 # Factory functions
-from netra_backend.app.agent_service_factory import get_agent_service
+from netra_backend.app.services.agent_service_factory import get_agent_service
 
 # Streaming components
-from netra_backend.app.agent_service_streaming import AgentResponseProcessor
+from netra_backend.app.services.agent_service_streaming import AgentResponseProcessor
 
 # Backward compatibility
-from netra_backend.app.agent_service_compat import process_message, generate_stream
+from netra_backend.app.services.agent_service_compat import process_message, generate_stream
 
 # Multimodal processing
 async def process_multimodal(multimodal_data: dict) -> dict:

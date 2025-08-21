@@ -11,13 +11,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from netra_backend.app import schemas
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.corpus import (
+from netra_backend.app.routes.corpus import (
     CorpusService as ModularCorpusService,
     corpus_service,
     CorpusStatus,
     ContentSource
 )
-from netra_backend.app.corpus_service_helpers import (
+from netra_backend.app.services.corpus_service_helpers import (
     validate_corpus_creation_params,
     validate_content_upload_params,
     validate_document_indexing_params,

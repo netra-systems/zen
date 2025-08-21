@@ -4,7 +4,7 @@ Tool Generation Utilities - Helper functions for tool invocation generation
 
 import uuid
 from typing import List, Dict
-from netra_backend.app.tools import generate_tool_invocations
+from netra_backend.app.services.synthetic_data.tools import generate_tool_invocations
 
 
 class ToolGenerationHelper:

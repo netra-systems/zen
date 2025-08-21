@@ -7,7 +7,7 @@ for complex rollback scenarios across multiple operations.
 from typing import Dict, List, Set
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.rollback_manager_core import RollbackOperation, DependencyType
+from netra_backend.app.services.database.rollback_manager_core import RollbackOperation, DependencyType
 
 logger = central_logger.get_logger(__name__)
 

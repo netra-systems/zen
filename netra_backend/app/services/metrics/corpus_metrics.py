@@ -15,12 +15,12 @@ from netra_backend.app.schemas.Metrics import (
     ResourceUsage, OperationMetrics, TimeSeriesPoint,
     CorpusMetric, MetricType
 )
-from netra_backend.app.core_collector import CoreMetricsCollector
-from netra_backend.app.quality_collector import QualityMetricsCollector
-from netra_backend.app.resource_monitor import ResourceMonitor
-from netra_backend.app.exporter import MetricsExporter
-from netra_backend.app.time_series import TimeSeriesStorage
-from netra_backend.app.corpus_metrics_helpers import CorpusMetricsHelpers
+from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector
+from netra_backend.app.services.metrics.quality_collector import QualityMetricsCollector
+from netra_backend.app.services.metrics.resource_monitor import ResourceMonitor
+from netra_backend.app.services.metrics.exporter import MetricsExporter
+from netra_backend.app.services.metrics.time_series import TimeSeriesStorage
+from netra_backend.app.services.metrics.corpus_metrics_helpers import CorpusMetricsHelpers
 
 logger = central_logger.get_logger(__name__)
 

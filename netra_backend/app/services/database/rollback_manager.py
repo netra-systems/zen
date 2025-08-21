@@ -5,7 +5,7 @@ and functions from the split rollback manager modules.
 """
 
 # Import core components
-from netra_backend.app.rollback_manager_core import (
+from netra_backend.app.services.database.rollback_manager_core import (
     RollbackState,
     DependencyType,
     RollbackOperation,
@@ -15,18 +15,18 @@ from netra_backend.app.rollback_manager_core import (
 )
 
 # Import transaction executors
-from netra_backend.app.rollback_manager_transactions import (
+from netra_backend.app.services.database.rollback_manager_transactions import (
     PostgresRollbackExecutor,
     ClickHouseRollbackExecutor
 )
 
 # Import recovery components
-from netra_backend.app.rollback_manager_recovery import (
+from netra_backend.app.services.database.rollback_manager_recovery import (
     DependencyResolver
 )
 
 # Import execution components
-from netra_backend.app.rollback_manager_execution import (
+from netra_backend.app.services.database.rollback_manager_execution import (
     BatchExecutor
 )
 

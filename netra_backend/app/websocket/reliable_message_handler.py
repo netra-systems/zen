@@ -6,7 +6,7 @@ Keeps file under 300 lines as required by architecture standards.
 
 # Import all classes and functions from focused modules for backward compatibility
 from netra_backend.app.message_handler_core import ReliableMessageHandler
-from netra_backend.app.message_router import MessageTypeRouter
+from netra_backend.app.services.websocket.message_router import MessageTypeRouter
 
 # Create default instances for backward compatibility
 default_reliable_handler = ReliableMessageHandler()

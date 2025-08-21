@@ -4,10 +4,10 @@ from typing import Dict, List, Any, Tuple, Optional
 from datetime import datetime
 
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.performance_analyzer import PerformanceAnalyzer
-from netra_backend.app.anomaly_detector import AnomalyDetector
-from netra_backend.app.correlation_analyzer import CorrelationAnalyzer
-from netra_backend.app.usage_pattern_analyzer import UsagePatternAnalyzer
+from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
+from netra_backend.app.agents.data_sub_agent.anomaly_detector import AnomalyDetector
+from netra_backend.app.agents.data_sub_agent.correlation_analyzer import CorrelationAnalyzer
+from netra_backend.app.agents.data_sub_agent.usage_pattern_analyzer import UsagePatternAnalyzer
 
 
 class AnalysisOperations:

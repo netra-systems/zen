@@ -12,9 +12,9 @@ from netra_backend.app.schemas.Metrics import (
     MetricsSnapshot, ExportFormat, CorpusMetric, 
     TimeSeriesPoint, ResourceUsage, QualityMetrics
 )
-from netra_backend.app.prometheus_exporter import PrometheusExporter
-from netra_backend.app.csv_exporter import CSVExporter
-from netra_backend.app.influx_exporter import InfluxExporter
+from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
+from netra_backend.app.services.metrics.csv_exporter import CSVExporter
+from netra_backend.app.services.metrics.influx_exporter import InfluxExporter
 
 logger = central_logger.get_logger(__name__)
 

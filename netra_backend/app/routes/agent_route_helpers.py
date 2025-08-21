@@ -2,7 +2,7 @@
 from typing import Dict, Any, Optional, AsyncGenerator, Union, List
 from fastapi import HTTPException, WebSocket
 from netra_backend.app.services.agent_service import AgentService
-from netra_backend.app.schemas import RequestModel
+from netra_backend.app.routes.unified_tools.schemas import RequestModel
 from pydantic import BaseModel
 import json
 

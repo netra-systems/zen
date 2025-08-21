@@ -18,7 +18,7 @@ from netra_backend.app.services.api_gateway_service import APIGatewayService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
 from netra_backend.app.services.backend_service import BackendService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestCrossServiceAuthPropagationCompleteL4:

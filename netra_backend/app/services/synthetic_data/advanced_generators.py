@@ -2,8 +2,8 @@
 
 import random
 from typing import Dict, List, Any, Union, Optional
-from netra_backend.app.core_service_base import CoreServiceBase
-from netra_backend.app.content_generator import generate_content
+from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
+from netra_backend.app.services.synthetic_data.content_generator import generate_content
 
 
 class AdvancedGenerators(CoreServiceBase):

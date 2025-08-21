@@ -340,7 +340,7 @@ class ReliableClickHouseService:
     async def get_client(self):
         """Get ClickHouse client with automatic initialization."""
         if not self._initialized or not self.manager:
-            from netra_backend.app.config import get_config
+            from netra_backend.app.core.config import get_config
             config = get_config()
             ch_config = config.clickhouse_https
             
@@ -382,7 +382,7 @@ async def get_reliable_clickhouse_client():
 
 async def initialize_reliable_clickhouse() -> bool:
     """Initialize reliable ClickHouse with configuration from settings."""
-    from netra_backend.app.config import get_config
+    from netra_backend.app.core.config import get_config
     config = get_config()
     ch_config = config.clickhouse_https
     

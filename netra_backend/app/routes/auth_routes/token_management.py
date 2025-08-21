@@ -5,7 +5,7 @@ from fastapi import HTTPException, status
 from fastapi.responses import RedirectResponse
 from netra_backend.app.schemas.Token import TokenPayload
 from netra_backend.app.services.security_service import SecurityService
-from netra_backend.app.utils import get_frontend_url_for_environment
+from netra_backend.app.routes.auth_routes.utils import get_frontend_url_for_environment
 
 
 def validate_user_auth(user) -> None:

@@ -27,9 +27,9 @@ from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 
 # Modular Data Sub Agent Components
-from netra_backend.app.data_sub_agent_core import DataSubAgentCore
-from netra_backend.app.data_sub_agent_helpers import DataSubAgentHelpers
-from netra_backend.app.data_processing_operations import DataProcessingOperations
+from netra_backend.app.agents.data_sub_agent.data_sub_agent_core import DataSubAgentCore
+from netra_backend.app.agents.data_sub_agent.data_sub_agent_helpers import DataSubAgentHelpers
+from netra_backend.app.agents.data_sub_agent.data_processing_operations import DataProcessingOperations
 
 
 class DataSubAgent(BaseSubAgent, BaseExecutionInterface):

@@ -5,7 +5,7 @@ and re-exporting from the focused modular structure.
 """
 
 # Import from service layer interfaces
-from netra_backend.app.interfaces_service import (
+from netra_backend.app.core.interfaces_service import (
     ServiceHealth,
     ServiceMetrics,
     BaseServiceInterface,
@@ -15,25 +15,25 @@ from netra_backend.app.interfaces_service import (
 )
 
 # Import from base interfaces
-from netra_backend.app.interfaces_base import (
+from netra_backend.app.core.interfaces_base import (
     BaseServiceMixin,
     BaseService
 )
 
 # Import from repository pattern interfaces
-from netra_backend.app.interfaces_repository import (
+from netra_backend.app.core.interfaces_repository import (
     DatabaseService,
     CRUDService,
     ServiceRegistry
 )
 
 # Import from agent interfaces
-from netra_backend.app.interfaces_agent import (
+from netra_backend.app.core.interfaces_agent import (
     AsyncTaskService
 )
 
 # Import from WebSocket interfaces
-from netra_backend.app.interfaces_websocket import (
+from netra_backend.app.core.interfaces_websocket import (
     WebSocketServiceInterface,
     WebSocketManagerInterface
 )

@@ -14,15 +14,15 @@ if TYPE_CHECKING:
 from netra_backend.app import schemas
 from netra_backend.app.logging_config import central_logger
 
-from netra_backend.app.content_generator import (
+from netra_backend.app.services.synthetic_data.content_generator import (
     select_workload_type, generate_timestamp, select_agent_type,
     generate_content, generate_child_spans
 )
-from netra_backend.app.tools import generate_tool_invocations, calculate_metrics
-from netra_backend.app.tool_generation import ToolGenerationHelper
-from netra_backend.app.generation_patterns_helper import GenerationPatternsHelper
-from netra_backend.app.advanced_generation_methods import AdvancedGenerationMethods
-from netra_backend.app.incremental_generation import IncrementalGenerationHandler
+from netra_backend.app.services.synthetic_data.tools import generate_tool_invocations, calculate_metrics
+from netra_backend.app.services.synthetic_data.tool_generation import ToolGenerationHelper
+from netra_backend.app.services.synthetic_data.generation_patterns_helper import GenerationPatternsHelper
+from netra_backend.app.services.synthetic_data.advanced_generation_methods import AdvancedGenerationMethods
+from netra_backend.app.services.synthetic_data.incremental_generation import IncrementalGenerationHandler
 
 
 class GenerationEngine:

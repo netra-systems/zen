@@ -7,7 +7,7 @@ modules under 300 lines each.
 """
 
 # Import from modular implementation
-from netra_backend.app.schema_sync import (
+from netra_backend.app.core.schema_sync import (
     SchemaValidationLevel,
     SchemaChangeInfo,
     SyncReport,

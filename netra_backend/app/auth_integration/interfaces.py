@@ -18,7 +18,7 @@ from abc import ABC, abstractmethod
 from typing import Protocol, Optional, Dict, Any, List
 from datetime import datetime
 
-from netra_backend.app.models import (
+from netra_backend.app.services.apex_optimizer_agent.models import (
     LoginRequest, LoginResponse, TokenData, TokenRequest, TokenResponse,
     RefreshRequest, ServiceTokenRequest, ServiceTokenResponse,
     HealthResponse, SessionInfo, UserPermission, AuditLog

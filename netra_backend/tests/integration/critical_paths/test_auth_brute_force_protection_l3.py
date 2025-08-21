@@ -8,7 +8,7 @@ import asyncio
 import time
 from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.auth_service import AuthService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 
 
 class TestAuthBruteForceProtectionL3:

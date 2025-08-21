@@ -7,7 +7,7 @@ Maintains 25-line function limit and single responsibility.
 
 import re
 from typing import Dict, Any, List
-from netra_backend.app.models import ResearchType, ProviderPatterns
+from netra_backend.app.services.apex_optimizer_agent.models import ResearchType, ProviderPatterns
 
 
 class SupplyRequestParser:

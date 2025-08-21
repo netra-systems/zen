@@ -3,10 +3,10 @@
 from typing import Dict, Optional, Any
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.quality_gate_models import ContentType, QualityMetrics
-from netra_backend.app.quality_gate_patterns import QualityPatterns
-from netra_backend.app.metrics_core import CoreMetricsCalculator
-from netra_backend.app.metrics_specialized import SpecializedMetricsCalculator
+from netra_backend.app.services.quality_gate.quality_gate_models import ContentType, QualityMetrics
+from netra_backend.app.services.quality_gate.quality_gate_patterns import QualityPatterns
+from netra_backend.app.services.quality_gate.metrics_core import CoreMetricsCalculator
+from netra_backend.app.services.quality_gate.metrics_specialized import SpecializedMetricsCalculator
 
 logger = central_logger.get_logger(__name__)
 

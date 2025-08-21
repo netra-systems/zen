@@ -8,7 +8,7 @@ from typing import Dict, Optional, Callable, Awaitable
 
 from netra_backend.app.core.error_recovery import OperationType
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.types import Operation, OperationState
+from netra_backend.app.services.transaction_manager.types import Operation, OperationState
 
 logger = central_logger.get_logger(__name__)
 

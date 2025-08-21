@@ -28,7 +28,7 @@ from fastapi import WebSocket
 from fastapi.testclient import TestClient
 import websockets
 
-from netra_backend.app.main import app
+from netra_backend.app.routes.mcp.main import app
 from netra_backend.app.routes.websocket_enhanced import (
     enhanced_websocket_endpoint,
     get_websocket_service_discovery,

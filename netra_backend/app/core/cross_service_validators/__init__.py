@@ -11,35 +11,35 @@ Validates contracts, data consistency, performance, and security
 across service boundaries to ensure reliable service interactions.
 """
 
-from netra_backend.app.contract_validators import (
+from netra_backend.app.core.cross_service_validators.contract_validators import (
     APIContractValidator,
     WebSocketContractValidator,
     SchemaCompatibilityValidator,
     EndpointValidator
 )
 
-from netra_backend.app.data_consistency_validators import (
+from netra_backend.app.core.cross_service_validators.data_consistency_validators import (
     UserDataConsistencyValidator,
     SessionStateValidator,
     MessageDeliveryValidator,
     CrossServiceDataValidator
 )
 
-from netra_backend.app.performance_validators import (
+from netra_backend.app.core.cross_service_validators.performance_validators import (
     LatencyValidator,
     ThroughputValidator,
     ResourceUsageValidator,
     CommunicationOverheadValidator
 )
 
-from netra_backend.app.security_validators import (
+from netra_backend.app.core.cross_service_validators.security_validators import (
     TokenValidationValidator,
     PermissionEnforcementValidator,
     AuditTrailValidator,
     ServiceAuthValidator
 )
 
-from netra_backend.app.validator_framework import (
+from netra_backend.app.core.cross_service_validators.validator_framework import (
     CrossServiceValidatorFramework,
     ValidationReport,
     ValidationResult,

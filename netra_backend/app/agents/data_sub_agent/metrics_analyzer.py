@@ -18,11 +18,11 @@ from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 
-from netra_backend.app.metric_distribution_analyzer import MetricDistributionAnalyzer
-from netra_backend.app.metric_trend_analyzer import MetricTrendAnalyzer
-from netra_backend.app.metric_percentile_analyzer import MetricPercentileAnalyzer
-from netra_backend.app.metric_comparison_analyzer import MetricComparisonAnalyzer
-from netra_backend.app.metric_seasonality_analyzer import MetricSeasonalityAnalyzer
+from netra_backend.app.agents.data_sub_agent.metric_distribution_analyzer import MetricDistributionAnalyzer
+from netra_backend.app.agents.data_sub_agent.metric_trend_analyzer import MetricTrendAnalyzer
+from netra_backend.app.agents.data_sub_agent.metric_percentile_analyzer import MetricPercentileAnalyzer
+from netra_backend.app.agents.data_sub_agent.metric_comparison_analyzer import MetricComparisonAnalyzer
+from netra_backend.app.agents.data_sub_agent.metric_seasonality_analyzer import MetricSeasonalityAnalyzer
 
 
 class MetricsAnalyzer(BaseExecutionInterface):

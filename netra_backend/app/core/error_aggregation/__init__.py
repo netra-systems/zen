@@ -4,7 +4,7 @@ Provides sophisticated error pattern recognition, trend analysis,
 and intelligent alerting to proactively identify system issues.
 """
 
-from netra_backend.app.models import (
+from netra_backend.app.services.apex_optimizer_agent.models import (
     AggregationLevel,
     AlertSeverity,
     ErrorSignature,

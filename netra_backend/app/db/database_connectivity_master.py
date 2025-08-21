@@ -23,27 +23,27 @@ from contextlib import asynccontextmanager
 from netra_backend.app.logging_config import central_logger
 
 # Import all the improved database components
-from netra_backend.app.fast_startup_connection_manager import (
+from netra_backend.app.db.fast_startup_connection_manager import (
     connection_registry, 
     setup_fast_startup_databases
 )
-from netra_backend.app.clickhouse_reliable_manager import (
+from netra_backend.app.db.clickhouse_reliable_manager import (
     reliable_clickhouse_service,
     initialize_reliable_clickhouse
 )
-from netra_backend.app.graceful_degradation_manager import (
+from netra_backend.app.db.graceful_degradation_manager import (
     degradation_manager,
     start_degradation_monitoring
 )
-from netra_backend.app.intelligent_retry_system import (
+from netra_backend.app.db.intelligent_retry_system import (
     intelligent_retry_system,
     retry_database_operation
 )
-from netra_backend.app.optimized_startup_checks import (
+from netra_backend.app.db.optimized_startup_checks import (
     optimized_startup_checker,
     run_optimized_database_checks
 )
-from netra_backend.app.comprehensive_health_monitor import (
+from netra_backend.app.db.comprehensive_health_monitor import (
     health_monitor,
     start_database_health_monitoring,
     register_database_for_health_monitoring

@@ -3,7 +3,7 @@ from netra_backend.app.logging_config import central_logger
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.db import models_postgres
-from netra_backend.app.schemas import SupplyOptionCreate, SupplyOptionUpdate
+from netra_backend.app.schemas.Supply import SupplyOptionCreate, SupplyOptionUpdate
 
 logger = central_logger.get_logger(__name__)
 

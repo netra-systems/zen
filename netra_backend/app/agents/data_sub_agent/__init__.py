@@ -12,14 +12,14 @@ from typing import TYPE_CHECKING
 from netra_backend.app.schemas.shared_types import DataAnalysisResponse, AnomalyDetectionResponse
 
 # CONSOLIDATED IMPLEMENTATION - Primary export
-from netra_backend.app.data_sub_agent import DataSubAgent
+from netra_backend.app.agents.data_sub_agent.data_sub_agent import DataSubAgent
 
 # Helper modules for consolidated implementation
-from netra_backend.app.clickhouse_client import ClickHouseClient
-from netra_backend.app.schema_cache import SchemaCache
-from netra_backend.app.performance_analyzer import PerformanceAnalyzer
-from netra_backend.app.cost_optimizer import CostOptimizer
-from netra_backend.app.data_validator import DataValidator
+from netra_backend.app.agents.data_sub_agent.clickhouse_client import ClickHouseClient
+from netra_backend.app.agents.data_sub_agent.schema_cache import SchemaCache
+from netra_backend.app.agents.data_sub_agent.performance_analyzer import PerformanceAnalyzer
+from netra_backend.app.services.llm.cost_optimizer import CostOptimizer
+from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 
 # Import ClickHouse initialization function and client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing

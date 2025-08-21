@@ -8,7 +8,7 @@ import asyncio
 import redis.asyncio as redis
 from unittest.mock import patch, AsyncMock
 from netra_backend.app.services.redis_service import RedisService
-from netra_backend.app.core.config import settings
+from netra_backend.app.config import settings
 import json
 import time
 

@@ -13,7 +13,7 @@ from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.agents.base.executor import BaseExecutionEngine
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
-from netra_backend.app.corpus_models import CorpusToolRequest, CorpusToolResponse, CorpusToolType
+from netra_backend.app.agents.admin_tool_dispatcher.corpus_models import CorpusToolRequest, CorpusToolResponse, CorpusToolType
 
 
 class CorpusHandlerBase:

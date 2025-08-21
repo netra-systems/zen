@@ -25,7 +25,7 @@ class TestAgentRoute:
     
     def test_agent_message_processing(self, agent_test_client):
         """Test agent message processing endpoint."""
-        from netra_backend.app.main import app
+        from netra_backend.app.routes.mcp.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
@@ -91,7 +91,7 @@ class TestAgentRoute:
     
     def test_agent_error_handling(self, agent_test_client):
         """Test agent error handling."""
-        from netra_backend.app.main import app
+        from netra_backend.app.routes.mcp.main import app
         from netra_backend.app.services.agent_service import get_agent_service, AgentService
         
         # Create a mock AgentService that raises an exception
@@ -115,7 +115,7 @@ class TestAgentRoute:
     
     def test_agent_message_validation(self, agent_test_client):
         """Test agent message input validation."""
-        from netra_backend.app.main import app
+        from netra_backend.app.routes.mcp.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
@@ -174,7 +174,7 @@ class TestAgentRoute:
     
     def test_agent_rate_limiting(self, agent_test_client):
         """Test agent endpoint rate limiting."""
-        from netra_backend.app.main import app
+        from netra_backend.app.routes.mcp.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Create and configure mock agent service
@@ -228,7 +228,7 @@ class TestAgentRoute:
     
     def test_agent_performance_metrics(self, agent_test_client):
         """Test agent performance metric collection."""
-        from netra_backend.app.main import app
+        from netra_backend.app.routes.mcp.main import app
         from netra_backend.app.services.agent_service import get_agent_service
         
         # Mock agent service with performance metrics

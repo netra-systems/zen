@@ -11,13 +11,13 @@ from typing import Dict, Any, List, Optional, Callable
 from datetime import datetime, UTC
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.health_types import HealthStatus, ComponentHealth, SystemAlert, HealthCheckResult
-from netra_backend.app.health_checkers import (
+from netra_backend.app.core.health_types import HealthStatus, ComponentHealth, SystemAlert, HealthCheckResult
+from netra_backend.app.core.health_checkers import (
     check_postgres_health, check_clickhouse_health, check_redis_health,
     check_websocket_health, check_system_resources
 )
-from netra_backend.app.alert_manager import HealthAlertManager
-from netra_backend.app.agent_health_checker import (
+from netra_backend.app.services.observability.alert_manager import HealthAlertManager
+from netra_backend.app.core.agent_health_checker import (
     register_agent_checker, convert_legacy_result, determine_system_status
 )
 

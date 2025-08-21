@@ -217,7 +217,7 @@ class TestWebSocketBroadcasting:
     @pytest.mark.asyncio
     async def test_broadcast_to_user(self):
         """Test broadcasting message to specific user."""
-        from netra_backend.app.ws_manager import manager
+        from netra_backend.app.services.websocket.ws_manager import manager
         
         with patch.object(manager, 'send_to_user', new_callable=AsyncMock) as mock_send:
             await manager.send_to_user("user_123", {"type": "test"})
@@ -226,7 +226,7 @@ class TestWebSocketBroadcasting:
     @pytest.mark.asyncio  
     async def test_broadcast_to_room(self):
         """Test broadcasting message to room."""
-        from netra_backend.app.ws_manager import manager
+        from netra_backend.app.services.websocket.ws_manager import manager
         
         with patch.object(manager.broadcasting, 'broadcast_to_room', new_callable=AsyncMock) as mock_broadcast:
             await manager.broadcasting.broadcast_to_room("room_123", {"type": "test"})

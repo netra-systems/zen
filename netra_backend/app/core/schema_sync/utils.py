@@ -11,8 +11,8 @@ from typing import List
 from sqlalchemy import text
 from netra_backend.app.core.exceptions_config import ValidationError
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.models import SchemaValidationLevel
-from netra_backend.app.synchronizer import SchemaSynchronizer
+from netra_backend.app.services.apex_optimizer_agent.models import SchemaValidationLevel
+from netra_backend.app.core.schema_sync.synchronizer import SchemaSynchronizer
 
 
 async def validate_schema(db, expected_tables: List[str]):

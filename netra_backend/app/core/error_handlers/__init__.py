@@ -5,9 +5,9 @@ All error handlers follow consistent patterns and interfaces.
 """
 
 # Base components
-from netra_backend.app.base_error_handler import BaseErrorHandler
-from netra_backend.app.error_classification import ErrorClassifier, ErrorClassification
-from netra_backend.app.error_recovery import ErrorRecoveryStrategy, RecoveryCoordinator, RecoveryResult
+from netra_backend.app.core.error_handlers.base_error_handler import BaseErrorHandler
+from netra_backend.app.core.error_handlers.error_classification import ErrorClassifier, ErrorClassification
+from netra_backend.app.core.error_recovery import ErrorRecoveryStrategy, RecoveryCoordinator, RecoveryResult
 
 # Agent-specific handlers
 from netra_backend.app.agents import AgentErrorHandler, ExecutionErrorHandler
