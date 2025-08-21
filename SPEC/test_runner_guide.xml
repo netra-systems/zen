@@ -252,21 +252,30 @@
       <microservice_structure>
         <principle>Each microservice maintains its own test directory</principle>
         <directories>
-          <dir>app/tests/ - Backend application tests</dir>
+          <dir>netra_backend/tests/ - Primary backend application tests</dir>
+          <dir>dev_launcher/tests/ - Development launcher tests</dir>
+          <dir>app/tests/ - Legacy backend tests (backward compatibility)</dir>
           <dir>auth_service/tests/ - Auth service tests</dir>
           <dir>frontend/__tests__/ - Frontend tests</dir>
-          <dir>tests/ - Cross-service integration tests</dir>
+          <dir>tests/ - Root level cross-service integration tests</dir>
           <dir>integration_tests/ - E2E tests spanning services</dir>
         </directories>
+        <critical>
+          ALL test directories MUST be explicitly added to test_framework/test_scanners.py
+          in the _get_backend_test_directories method for proper discovery.
+        </critical>
       </microservice_structure>
       <import_patterns>
         <pattern type="correct">
-          # Within app/tests/agents/test_file.py
-          from agents.state import DeepAgentState  # Correct - relative to app/
+          # Within any test file - use absolute imports from project root
+          from netra_backend.app.agents.state import DeepAgentState  # Correct
+          from dev_launcher.config import LauncherConfig  # Correct
+          from test_framework.test_runner import UnifiedTestRunner  # Correct
         </pattern>
         <pattern type="incorrect">
-          # Within app/tests/agents/test_file.py
-          from netra_backend.app.agents.state import DeepAgentState  # Wrong - ModuleNotFoundError
+          # Avoid relative imports in test files
+          from ..agents.state import DeepAgentState  # Wrong - can break
+          from .fixtures import test_data  # Wrong - use absolute paths
         </pattern>
       </import_patterns>
       <execution_context>

@@ -16,8 +16,12 @@ import { useAuthStore } from '@/store/authStore';
 
 // Mock dependencies
 jest.mock('@/services/webSocketService');
-jest.mock('@/store/authStore');
 jest.mock('@/lib/logger');
+
+// Mock the auth store module
+jest.mock('@/store/authStore', () => ({
+  useAuthStore: jest.fn()
+}));
 
 // Test helpers following 25-line limit
 const createMockUser = () => ({
@@ -37,13 +41,14 @@ const setupAuthStore = () => {
     setLoading: jest.fn(),
     setError: jest.fn(),
   };
-  jest.mocked(useAuthStore).mockReturnValue(mockStore);
+  const mockedUseAuthStore = useAuthStore as jest.MockedFunction<typeof useAuthStore>;
+  mockedUseAuthStore.mockReturnValue(mockStore);
   return mockStore;
 };
 
 const setupWebSocketMocks = () => {
-  jest.mocked(webSocketService.disconnect).mockImplementation(() => {});
-  jest.mocked(webSocketService.getState).mockReturnValue('disconnected');
+  (webSocketService.disconnect as jest.Mock).mockImplementation(() => {});
+  (webSocketService.getState as jest.Mock).mockReturnValue('disconnected');
 };
 
 // Simple logout button component for testing

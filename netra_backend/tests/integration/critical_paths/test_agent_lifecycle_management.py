@@ -38,7 +38,7 @@ from netra_backend.app.agents.supervisor.state_manager import AgentStateManager
 
 # Add project root to path
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from netra_backend.app.core.config import Settings
+from netra_backend.app.core.config import get_settings
 from netra_backend.app.schemas.registry import (
     AgentCompleted,
     AgentStarted,
