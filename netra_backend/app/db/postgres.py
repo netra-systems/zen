@@ -6,10 +6,10 @@ Now enhanced with resilience patterns for pragmatic rigor and degraded operation
 """
 
 # Import configuration
-from netra_backend.app.postgres_config import DatabaseConfig
+from netra_backend.app.db.postgres_config import DatabaseConfig
 
 # Import core functionality
-from netra_backend.app.postgres_core import (
+from netra_backend.app.db.postgres_core import (
     Database,
     async_engine,
     async_session_factory,
@@ -17,7 +17,7 @@ from netra_backend.app.postgres_core import (
 )
 
 # Import session management
-from netra_backend.app.postgres_session import (
+from netra_backend.app.db.postgres_session import (
     validate_session,
     get_session_validation_error,
     get_async_db,
@@ -25,7 +25,7 @@ from netra_backend.app.postgres_session import (
 )
 
 # Import pool monitoring
-from netra_backend.app.postgres_pool import (
+from netra_backend.app.db.postgres_pool import (
     get_pool_status,
     close_async_db
 )

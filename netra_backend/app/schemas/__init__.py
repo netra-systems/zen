@@ -1,4 +1,4 @@
-from netra_backend.app.Agent import (
+from netra_backend.app.schemas.Agent import (
     SubAgentLifecycle,
     AgentState,
     Todo,
@@ -10,14 +10,14 @@ from netra_backend.app.Agent import (
     SubAgentStatus,
     AgentResult,
 )
-from netra_backend.app.auth_types import (
+from netra_backend.app.schemas.auth_types import (
     GoogleUser,
     DevUser,
     DevLoginRequest,
     AuthEndpoints,
     AuthConfigResponse,
 )
-from netra_backend.app.Config import (
+from netra_backend.app.schemas.Config import (
     ClickHouseCredentials,
     SecretReference,
     SECRET_CONFIG,
@@ -37,7 +37,7 @@ from netra_backend.app.Config import (
     NetraTestingConfig,
     WebSocketConfig,
 )
-from netra_backend.app.Corpus import (
+from netra_backend.app.schemas.Corpus import (
     CorpusBase,
     CorpusCreate,
     CorpusUpdate,
@@ -49,26 +49,26 @@ from netra_backend.app.Corpus import (
     DocumentUpdate,
     Document,
 )
-from netra_backend.app.Generation import (
+from netra_backend.app.schemas.Generation import (
     ContentGenParams,
     LogGenParams,
     SyntheticDataGenParams,
     DataIngestionParams,
     ContentCorpusGenParams,
 )
-from netra_backend.app.Event import EventMetadata, TraceContext
-from netra_backend.app.Message import (
+from netra_backend.app.schemas.Event import EventMetadata, TraceContext
+from netra_backend.app.schemas.Message import (
     MessageType,
     Message,
 )
-from netra_backend.app.Performance import Performance
-from netra_backend.app.FinOps import FinOps, CostComparison
-from netra_backend.app.Metrics import EnrichedMetrics, BaselineMetrics
-from netra_backend.app.Log import UnifiedLogEntry
-from netra_backend.app.Pattern import DiscoveredPattern
-from netra_backend.app.Policy import LearnedPolicy, PredictedOutcome
-from netra_backend.app.Analysis import AnalysisResult
-from netra_backend.app.Request import (
+from netra_backend.app.schemas.Performance import Performance
+from netra_backend.app.schemas.FinOps import FinOps, CostComparison
+from netra_backend.app.schemas.Metrics import EnrichedMetrics, BaselineMetrics
+from netra_backend.app.schemas.Log import UnifiedLogEntry
+from netra_backend.app.schemas.Pattern import DiscoveredPattern
+from netra_backend.app.schemas.Policy import LearnedPolicy, PredictedOutcome
+from netra_backend.app.schemas.Analysis import AnalysisResult
+from netra_backend.app.schemas.Request import (
     Settings,
     DataSource,
     TimeRange,
@@ -78,8 +78,8 @@ from netra_backend.app.Request import (
     StartAgentPayload,
     StartAgentMessage,
 )
-from netra_backend.app.Run import RunComplete
-from netra_backend.app.Supply import (
+from netra_backend.app.schemas.Run import RunComplete
+from netra_backend.app.schemas.Supply import (
     ModelIdentifier,
     SupplyOptionBase,
     SupplyOptionCreate,
@@ -88,11 +88,11 @@ from netra_backend.app.Supply import (
     SupplyOption,
     SupplyOptionInDB,
 )
-from netra_backend.app.Token import (
+from netra_backend.app.schemas.Token import (
     Token,
     TokenPayload,
 )
-from netra_backend.app.Tool import (
+from netra_backend.app.schemas.Tool import (
     ToolStatus,
     ToolInput,
     ToolResult,
@@ -101,7 +101,7 @@ from netra_backend.app.Tool import (
     ToolCompleted,
     SimpleToolPayload,
 )
-from netra_backend.app.User import (
+from netra_backend.app.schemas.User import (
     UserBase,
     UserCreate,
     UserCreateOAuth,
@@ -109,7 +109,7 @@ from netra_backend.app.User import (
     User,
     UserInDB,
 )
-from netra_backend.app.registry import (
+from netra_backend.app.schemas.registry import (
     WebSocketError,
     MessageToUser,
     AnalysisRequest,
@@ -119,13 +119,13 @@ from netra_backend.app.registry import (
     StreamEvent,
     WebSocketMessage,
 )
-from netra_backend.app.Reference import (
+from netra_backend.app.schemas.Reference import (
     ReferenceGetResponse,
     ReferenceItem,
     ReferenceCreateRequest,
     ReferenceUpdateRequest,
 )
-from netra_backend.app.monitoring import (
+from netra_backend.app.schemas.monitoring import (
     AlertSeverity,
     AlertLevel,
     CircuitState,

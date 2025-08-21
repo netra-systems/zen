@@ -3,7 +3,7 @@ MCP Transport Clients package.
 Provides transport implementations for Model Context Protocol communication.
 """
 
-from netra_backend.app.base import (
+from netra_backend.app.db.base import (
     MCPTransport,
     MCPTransportError,
     MCPConnectionError,

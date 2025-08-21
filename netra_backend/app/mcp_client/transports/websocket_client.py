@@ -13,7 +13,7 @@ from websockets.exceptions import ConnectionClosed, InvalidMessage
 import ssl
 from urllib.parse import urlparse
 
-from netra_backend.app.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
+from netra_backend.app.db.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
 
 logger = logging.getLogger(__name__)
 

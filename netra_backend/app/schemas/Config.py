@@ -1,7 +1,7 @@
 import os
 from typing import List, Dict, Optional, Any
 from pydantic import BaseModel, Field
-from netra_backend.app.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
+from netra_backend.app.schemas.auth_types import AuthEndpoints, AuthConfigResponse, DevUser
 from netra_backend.app.registry import User
 from netra_backend.app.llm_types import LLMProvider
 

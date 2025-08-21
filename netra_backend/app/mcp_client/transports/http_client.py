@@ -11,7 +11,7 @@ from typing import Dict, Any, Optional, AsyncGenerator
 import httpx
 from urllib.parse import urljoin
 
-from netra_backend.app.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
+from netra_backend.app.db.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
 
 logger = logging.getLogger(__name__)
 

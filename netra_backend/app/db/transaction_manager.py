@@ -5,7 +5,7 @@ Maintains backward compatibility while adhering to modular architecture.
 """
 
 # Import core transaction functionality
-from netra_backend.app.transaction_core import (
+from netra_backend.app.db.transaction_core import (
     TransactionManager,
     TransactionConfig,
     TransactionIsolationLevel,
@@ -16,14 +16,14 @@ from netra_backend.app.transaction_core import (
 )
 
 # Import error handling
-from netra_backend.app.transaction_errors import (
+from netra_backend.app.db.transaction_errors import (
     TransactionError,
     DeadlockError,
     ConnectionError
 )
 
 # Import statistics
-from netra_backend.app.transaction_stats import (
+from netra_backend.app.db.transaction_stats import (
     TransactionMetrics
 )
 

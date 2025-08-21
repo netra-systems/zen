@@ -10,7 +10,7 @@ from netra_backend.app.db.index_optimizer_core import (
     IndexExistenceChecker,
     DatabaseErrorHandler
 )
-from netra_backend.app.postgres_index_connection import PostgreSQLConnectionManager
+from netra_backend.app.db.postgres_index_connection import PostgreSQLConnectionManager
 
 logger = central_logger.get_logger(__name__)
 

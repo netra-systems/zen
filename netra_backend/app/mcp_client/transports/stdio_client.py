@@ -12,7 +12,7 @@ import os
 import signal
 from pathlib import Path
 
-from netra_backend.app.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
+from netra_backend.app.db.base import MCPTransport, MCPConnectionError, MCPTimeoutError, MCPProtocolError
 
 logger = logging.getLogger(__name__)
 

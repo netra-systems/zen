@@ -14,9 +14,9 @@ from netra_backend.app.db.index_optimizer_core import (
     IndexNameGenerator,
     DatabaseErrorHandler
 )
-from netra_backend.app.postgres_index_creator import PostgreSQLIndexCreator
-from netra_backend.app.postgres_index_loader import PostgreSQLIndexLoader, PostgreSQLPerformanceAnalyzer
-from netra_backend.app.postgres_table_checker import PostgreSQLTableChecker
+from netra_backend.app.db.postgres_index_creator import PostgreSQLIndexCreator
+from netra_backend.app.db.postgres_index_loader import PostgreSQLIndexLoader, PostgreSQLPerformanceAnalyzer
+from netra_backend.app.db.postgres_table_checker import PostgreSQLTableChecker
 
 logger = central_logger.get_logger(__name__)
 
