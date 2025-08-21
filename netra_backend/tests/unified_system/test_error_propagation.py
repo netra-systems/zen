@@ -18,13 +18,14 @@ from datetime import datetime, timezone
 import websockets
 from dataclasses import dataclass
 
-from netra_backend.app.logging_config import central_logger
-from netra_backend.app.websocket.error_recovery_handler import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.websocket.error_recovery_handler import (
+
+# Add project root to path
     WebSocketErrorRecoveryHandler, ErrorType, ErrorContext
 )
 from netra_backend.app.core.error_handlers import handle_exception, get_http_status_code

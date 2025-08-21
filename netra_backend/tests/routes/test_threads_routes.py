@@ -6,12 +6,13 @@ Tests for thread conversation management - app/routes/threads_route.py
 import pytest
 from unittest.mock import patch
 from datetime import datetime
-from netra_backend.tests.test_utilities import base_client
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.test_utilities import base_client
+
+# Add project root to path
 
 
 class TestThreadsRoute:

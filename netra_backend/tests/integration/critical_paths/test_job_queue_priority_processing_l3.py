@@ -25,15 +25,16 @@ from typing import Dict, Any, List
 from decimal import Decimal
 from datetime import datetime, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.websocket.message_queue import MessageQueue, QueuedMessage, MessagePriority, MessageStatus
 from netra_backend.app.websocket.unified.job_queue import JobQueueManager
 from redis_manager import redis_manager
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 

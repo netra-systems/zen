@@ -23,14 +23,15 @@ from contextlib import asynccontextmanager
 import asyncio_clickhouse
 from testcontainers.clickhouse import ClickHouseContainer
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 

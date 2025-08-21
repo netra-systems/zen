@@ -1,13 +1,14 @@
 import pytest
 from unittest.mock import MagicMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.security_service import SecurityService, KeyManager
 from schemas import AppConfig
 from cryptography.fernet import Fernet
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 @pytest.fixture
 def security_service():

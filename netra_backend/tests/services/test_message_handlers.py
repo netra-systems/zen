@@ -1,14 +1,15 @@
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch, Mock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.schemas.registry import WebSocketMessage, UserMessage, AgentMessage
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 async def test_message_handler_service_initialization():
     mock_supervisor = Mock()
     mock_thread_service = Mock()

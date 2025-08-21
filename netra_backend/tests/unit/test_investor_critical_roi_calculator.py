@@ -11,12 +11,13 @@ from decimal import Decimal
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Tuple
 
-from netra_backend.app.services.cost_calculator import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.cost_calculator import (
+
+# Add project root to path
     CostCalculatorService, CostTier, ModelCostInfo,
     calculate_cost_savings, create_cost_calculator
 )

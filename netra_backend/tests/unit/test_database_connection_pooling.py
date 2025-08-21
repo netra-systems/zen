@@ -12,14 +12,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import FastAPI, Depends
 from fastapi.testclient import TestClient
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.dependencies import DbDep, get_db_dependency
 from netra_backend.app.services.database.thread_repository import ThreadRepository
 from netra_backend.app.db.postgres import get_async_db
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestDatabaseConnectionPooling:

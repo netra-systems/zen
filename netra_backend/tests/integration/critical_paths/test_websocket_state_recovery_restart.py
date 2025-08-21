@@ -22,14 +22,15 @@ import uuid
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from ws_manager import WebSocketManager
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @dataclass

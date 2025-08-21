@@ -23,15 +23,16 @@ from unittest.mock import patch
 from datetime import datetime, timedelta
 import httpx
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.observability.metrics_collector import MetricsCollector
 from netra_backend.app.services.observability.prometheus_exporter import PrometheusExporter
 from netra_backend.app.services.observability.alert_manager import AlertManager
 from config import get_config
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

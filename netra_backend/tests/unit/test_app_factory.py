@@ -13,12 +13,13 @@ from unittest.mock import Mock, patch, MagicMock
 from fastapi import FastAPI, HTTPException
 from pydantic import ValidationError
 
-from netra_backend.app.core.app_factory import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.app_factory import (
+
+# Add project root to path
     create_fastapi_app, create_app, register_error_handlers,
     setup_middleware, setup_security_middleware, setup_request_middleware,
     register_api_routes, setup_root_endpoint, initialize_oauth

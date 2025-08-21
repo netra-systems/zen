@@ -10,6 +10,10 @@ from typing import Dict, List, Any
 from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base import BaseSubAgent
@@ -17,9 +21,6 @@ from netra_backend.app.core.agent_recovery_supervisor import SupervisorRecoveryS
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.mark.asyncio

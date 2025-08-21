@@ -9,12 +9,13 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.database.unit_of_work import UnitOfWork
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.database.unit_of_work import UnitOfWork
+
+# Add project root to path
 
 
 class TestUnitOfWorkTransactions:

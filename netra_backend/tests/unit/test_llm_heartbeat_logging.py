@@ -7,13 +7,14 @@ import asyncio
 import pytest
 import time
 from unittest.mock import patch, MagicMock
-from netra_backend.app.llm.observability import HeartbeatLogger, generate_llm_correlation_id, get_heartbeat_logger
-from netra_backend.app.schemas.Config import AppConfig
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.llm.observability import HeartbeatLogger, generate_llm_correlation_id, get_heartbeat_logger
+from netra_backend.app.schemas.Config import AppConfig
+
+# Add project root to path
 
 
 class TestHeartbeatLogger:

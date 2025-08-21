@@ -6,12 +6,13 @@ Tests connection pool creation, management, and concurrent usage
 import pytest
 import asyncio
 
-from netra_backend.tests.helpers.redis_test_fixtures import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.helpers.redis_test_fixtures import (
+
+# Add project root to path
     enhanced_redis_manager, connection_pool, MockRedisClient
 )
 from netra_backend.tests.helpers.redis_test_helpers import (

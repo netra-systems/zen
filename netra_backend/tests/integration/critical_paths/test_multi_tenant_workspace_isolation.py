@@ -25,13 +25,14 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 
-from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
-from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.integration.staging_config.base import StagingConfigTestBase
+from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
+
+# Add project root to path
 # Permissions service replaced with auth_integration
 from auth_integration import require_permission
 from unittest.mock import AsyncMock

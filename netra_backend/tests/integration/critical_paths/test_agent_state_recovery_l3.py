@@ -25,6 +25,10 @@ from enum import Enum
 import os
 import tempfile
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState 
@@ -35,9 +39,6 @@ from netra_backend.app.core.exceptions_base import NetraException, StateRecovery
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

@@ -3,14 +3,15 @@
 import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.quality_gate_service import QualityGateService
 from redis_manager import RedisManager
 from netra_backend.tests.helpers.shared_test_types import TestIntegrationScenarios as SharedTestIntegrationScenarios
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSyntaxFix:

@@ -14,12 +14,13 @@ import time
 from unittest.mock import AsyncMock, MagicMock
 from typing import Any
 
-from netra_backend.app.core.circuit_breaker import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.circuit_breaker import (
+
+# Add project root to path
     CircuitBreaker, CircuitConfig, CircuitState, CircuitBreakerOpenError,
     circuit_registry, CircuitMetrics
 )

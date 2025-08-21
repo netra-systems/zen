@@ -7,13 +7,14 @@ transaction management works correctly without requiring a real database.
 
 import pytest
 import asyncio
-from netra_backend.app.services.database.unit_of_work import UnitOfWork
-from netra_backend.tests.helpers.database_repository_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.database.unit_of_work import UnitOfWork
+from netra_backend.tests.helpers.database_repository_helpers import (
+
+# Add project root to path
     create_test_thread, create_test_message, assert_thread_created_correctly
 )
 

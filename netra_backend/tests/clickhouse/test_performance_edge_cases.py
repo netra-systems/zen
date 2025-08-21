@@ -10,6 +10,10 @@ import asyncio
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
 import numpy as np
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.corpus_service import CorpusService
 from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder
 from netra_backend.app.agents.data_sub_agent.analysis_engine import AnalysisEngine
@@ -17,9 +21,6 @@ from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.models_clickhouse import get_content_corpus_schema
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestLargeDatasetPerformance:

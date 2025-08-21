@@ -8,12 +8,13 @@ import asyncio
 import time
 from unittest.mock import Mock, AsyncMock, patch
 
-from netra_backend.app.agents.error_handler import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.error_handler import (
+
+# Add project root to path
     AgentErrorHandler as ErrorHandler, 
     AgentError,
     AgentValidationError as ValidationError,

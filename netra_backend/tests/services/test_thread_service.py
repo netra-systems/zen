@@ -1,13 +1,14 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.db.models_postgres import Thread, Message, Run
 import time
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.fixture

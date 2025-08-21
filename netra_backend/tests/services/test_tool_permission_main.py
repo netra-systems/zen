@@ -10,13 +10,14 @@ from datetime import datetime, timedelta, UTC
 from unittest.mock import Mock, MagicMock, AsyncMock, patch
 from typing import Dict, List, Any, Set
 
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.app.schemas.ToolPermission import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.app.schemas.ToolPermission import (
+
+# Add project root to path
     ToolPermission, ToolExecutionContext, PermissionCheckResult,
     ToolAvailability, PermissionLevel, BusinessRequirement, RateLimit
 )

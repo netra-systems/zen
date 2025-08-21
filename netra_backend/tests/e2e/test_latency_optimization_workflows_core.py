@@ -6,15 +6,16 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 import time
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 
 from netra_backend.tests.e2e.latency_optimization_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     create_latency_optimization_setup, execute_latency_workflow,
     create_3x_latency_state, create_bottleneck_analysis_state,
     create_caching_optimization_state, create_parallel_processing_state,

@@ -16,12 +16,13 @@ import uuid
 from typing import Dict, Any, List, Optional
 from database.tenant_manager import TenantManager
 from database.row_level_security import RowLevelSecurityManager
-from netra_backend.app.services.tenant_service import TenantService
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.tenant_service import TenantService
+
+# Add project root to path
 
 
 @pytest.mark.L3

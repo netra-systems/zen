@@ -11,12 +11,13 @@ import psycopg2
 from alembic import command
 from alembic.config import Config
 from typing import List, Dict
-from netra_backend.tests.base import StagingConfigTestBase
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.base import StagingConfigTestBase
+
+# Add project root to path
 
 
 class TestDatabaseMigrations(StagingConfigTestBase):

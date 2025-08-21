@@ -12,6 +12,10 @@ import pytest
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitBreakerOpenError
 from netra_backend.app.core.shared_health_types import HealthChecker, HealthStatus
@@ -19,9 +23,6 @@ from netra_backend.app.schemas.core_enums import CircuitBreakerState
 from netra_backend.app.schemas.core_models import CircuitBreakerConfig, HealthCheckResult
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 # Test fixtures for setup

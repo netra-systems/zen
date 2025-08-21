@@ -19,12 +19,13 @@ import asyncio
 from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock
 
-from netra_backend.tests.shared_fixtures import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.shared_fixtures import (
+
+# Add project root to path
     enterprise_security_infrastructure, compliance_helper,
     ComplianceReportingHelper
 )

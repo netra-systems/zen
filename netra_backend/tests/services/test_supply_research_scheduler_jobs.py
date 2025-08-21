@@ -10,12 +10,13 @@ from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock, patch, call
 from typing import Dict, List, Any
 
-from netra_backend.app.services.supply_research_scheduler import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.supply_research_scheduler import (
+
+# Add project root to path
     SupplyResearchScheduler,
     ResearchSchedule,
     ScheduleFrequency

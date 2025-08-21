@@ -8,12 +8,13 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, patch
 
-from netra_backend.app.services.generation_service import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.generation_service import (
+
+# Add project root to path
     run_content_generation_job,
     run_synthetic_data_generation_job,
     save_corpus_to_clickhouse,

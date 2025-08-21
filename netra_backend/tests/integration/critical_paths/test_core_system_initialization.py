@@ -19,6 +19,10 @@ from unittest.mock import AsyncMock, patch
 import aiohttp
 import json
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.health_check_service import HealthCheckService  
 from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
@@ -27,9 +31,6 @@ from netra_backend.app.core.config import Settings
 from netra_backend.app.services.redis_service import RedisService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

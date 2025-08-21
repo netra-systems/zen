@@ -6,13 +6,14 @@ Tests caching, batch processing, statistics, and system behavior
 import pytest
 import hashlib
 from unittest.mock import patch
-from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
-from netra_backend.tests.helpers.quality_gate_fixtures import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.quality_gate_service import ContentType, QualityLevel
+from netra_backend.tests.helpers.quality_gate_fixtures import (
+
+# Add project root to path
     redis_mock,
     quality_service,
     create_test_quality_metrics,

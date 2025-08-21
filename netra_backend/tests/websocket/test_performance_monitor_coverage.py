@@ -9,13 +9,14 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, timezone
 
-from netra_backend.app.websocket.performance_monitor_core import PerformanceMonitor
-from netra_backend.app.websocket.performance_monitor_types import PerformanceThresholds
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.websocket.performance_monitor_core import PerformanceMonitor
+from netra_backend.app.websocket.performance_monitor_types import PerformanceThresholds
+
+# Add project root to path
 
 
 class TestMonitoringCoverage:

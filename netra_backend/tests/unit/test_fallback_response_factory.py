@@ -1,12 +1,13 @@
 """Test fallback response factory handles different response types correctly."""
 
 import pytest
-from netra_backend.app.llm.fallback_responses import FallbackResponseFactory
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.llm.fallback_responses import FallbackResponseFactory
+
+# Add project root to path
 
 
 class TestFallbackResponseFactory:

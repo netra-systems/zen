@@ -7,14 +7,15 @@ import pytest
 import asyncio
 import time
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.async_retry_logic import async_timeout, with_timeout, with_retry
 from netra_backend.app.core.exceptions_service import ServiceTimeoutError
 from netra_backend.tests.helpers.async_utils_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     create_quick_operation,
     create_slow_operation,
     create_retry_counter,

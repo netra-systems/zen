@@ -9,14 +9,15 @@ from decimal import Decimal
 from typing import Dict, Any, List, Tuple
 from unittest.mock import MagicMock, patch
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import AISupplyItem, SupplyUpdateLog
 from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.fixture

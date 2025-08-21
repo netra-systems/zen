@@ -24,12 +24,13 @@ from fastapi import Request, Response, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials
 from starlette.datastructures import Headers, URL
 
-from netra_backend.app.middleware.security_middleware import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.middleware.security_middleware import (
+
+# Add project root to path
     SecurityMiddleware, SecurityConfig, RateLimitTracker,
     InputValidator, create_security_middleware
 )

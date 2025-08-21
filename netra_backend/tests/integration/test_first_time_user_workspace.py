@@ -18,12 +18,13 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
-from netra_backend.tests.first_time_user_fixtures import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.first_time_user_fixtures import (
+
+# Add project root to path
     assert_api_key_properties, verify_rate_limiting,
     get_mock_user_preferences, assert_export_response
 )

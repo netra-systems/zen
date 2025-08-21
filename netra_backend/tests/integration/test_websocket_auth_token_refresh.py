@@ -11,15 +11,16 @@ from typing import Dict, Any
 from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timedelta, timezone
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.auth_service import AuthService
 from ws_manager import WebSocketManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.mark.asyncio

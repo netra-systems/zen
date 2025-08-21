@@ -7,12 +7,13 @@ Maximum 300 lines, functions ≤8 lines.
 import pytest
 import asyncio
 import aiohttp
-from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest, analyze_pool_exhaustion_results
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest, analyze_pool_exhaustion_results
+
+# Add project root to path
 class TestResourceExhaustion:
     """Test resource pool exhaustion handling"""
     

@@ -1,12 +1,13 @@
 """Tests for ResilientHTTPClient URL building and header merging."""
 
 import pytest
-from netra_backend.app.services.external_api_client import ResilientHTTPClient
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.external_api_client import ResilientHTTPClient
+
+# Add project root to path
 
 
 class TestResilientHTTPClientUrlHeaders:

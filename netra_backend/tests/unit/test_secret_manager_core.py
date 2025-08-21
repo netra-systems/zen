@@ -11,15 +11,16 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.secret_manager_core import EnhancedSecretManager
 from netra_backend.app.core.secret_manager_types import SecretAccessLevel, SecretMetadata
 from netra_backend.app.core.exceptions_auth import NetraSecurityException
 from netra_backend.app.schemas.config_types import EnvironmentType
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSecretManagerCore:

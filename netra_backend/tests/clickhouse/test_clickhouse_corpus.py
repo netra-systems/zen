@@ -5,14 +5,15 @@ Tests for corpus table creation and management operations
 
 import pytest
 import uuid
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from logging_config import central_logger as logger
 from netra_backend.tests.test_clickhouse_permissions import _check_table_create_permission
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestCorpusTableOperations:

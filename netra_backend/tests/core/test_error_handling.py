@@ -8,12 +8,13 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError as PydanticValidationError
 from sqlalchemy.exc import IntegrityError
 
-from netra_backend.app.core.exceptions import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.exceptions import (
+
+# Add project root to path
     ErrorCode,
     ErrorSeverity,
     ErrorDetails,

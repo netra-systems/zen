@@ -10,13 +10,14 @@ from typing import Dict, Any
 from unittest.mock import Mock, patch, AsyncMock
 from fastapi import Request
 
-from netra_backend.app.middleware.security_middleware import SecurityMiddleware, RateLimitTracker
-from netra_backend.app.core.exceptions_auth import NetraSecurityException
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.middleware.security_middleware import SecurityMiddleware, RateLimitTracker
+from netra_backend.app.core.exceptions_auth import NetraSecurityException
+
+# Add project root to path
 
 
 class TestSecurityMiddleware:

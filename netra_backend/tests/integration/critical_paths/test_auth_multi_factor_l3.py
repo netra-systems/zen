@@ -7,14 +7,15 @@ import pytest
 import asyncio
 import pyotp
 from unittest.mock import patch, AsyncMock, MagicMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.config import settings
 import time
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestAuthMultiFactorL3:

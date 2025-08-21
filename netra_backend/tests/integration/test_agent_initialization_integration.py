@@ -8,6 +8,10 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
@@ -15,9 +19,6 @@ from netra_backend.app.core.agent_recovery_supervisor import SupervisorRecoveryS
 from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 # Agent interfaces imported as needed
 from test_framework.mock_utils import mock_justified
 

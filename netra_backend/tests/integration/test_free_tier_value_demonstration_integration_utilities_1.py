@@ -8,6 +8,10 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any, List
 from decimal import Decimal
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.models_user import User, ToolUsageLog
 from netra_backend.app.services.cost_calculator import CostCalculatorService, CostTier
 from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
@@ -18,9 +22,6 @@ import tempfile
 from sqlalchemy import select
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSyntaxFix:

@@ -20,15 +20,16 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime
 from enum import Enum
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.data.transaction_coordinator import TransactionCoordinator
 from netra_backend.app.services.data.consistency_manager import ConsistencyManager
 from netra_backend.app.services.data.conflict_resolver import ConflictResolver
 from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

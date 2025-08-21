@@ -4,13 +4,14 @@ This test prevents the regression where frontend sends 'content' but backend exp
 """
 
 import pytest
-from netra_backend.app.services.message_handlers import MessageHandlerService
-from netra_backend.app.schemas.websocket_models import UserMessagePayload
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.message_handlers import MessageHandlerService
+from netra_backend.app.schemas.websocket_models import UserMessagePayload
+
+# Add project root to path
 
 
 class TestWebSocketFieldAlignment:

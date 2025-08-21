@@ -22,13 +22,14 @@ from unittest.mock import patch, AsyncMock, MagicMock
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-from netra_backend.app.core.alert_manager import HealthAlertManager
-from netra_backend.app.core.shared_health_types import SystemAlert, AlertSeverity
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.alert_manager import HealthAlertManager
+from netra_backend.app.core.shared_health_types import SystemAlert, AlertSeverity
+
+# Add project root to path
 
 logger = logging.getLogger(__name__)
 

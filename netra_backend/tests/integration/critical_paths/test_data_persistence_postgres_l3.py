@@ -7,14 +7,15 @@ import pytest
 import asyncio
 import asyncpg
 from unittest.mock import patch, AsyncMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.postgres_service import PostgresService
 from netra_backend.app.config import settings
 import uuid
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestDataPersistencePostgresL3:

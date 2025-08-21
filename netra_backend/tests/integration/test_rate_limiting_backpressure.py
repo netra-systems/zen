@@ -16,6 +16,10 @@ This test validates comprehensive rate limiting functionality including:
 - Priority queuing for premium users
 
 CRITICAL ARCHITECTURAL COMPLIANCE:
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 - Uses canonical rate limiting types from netra_backend.app.schemas.rate_limit_types
 - Tests real rate limiting infrastructure (not mocks)
 - Validates fairness algorithms and priority queuing
@@ -33,9 +37,6 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import patch, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 # Mock justification decorator
 def mock_justified(reason: str):

@@ -18,12 +18,13 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock
 
-from netra_backend.tests.shared_fixtures import mock_llm_manager, llm_test_agent
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.shared_fixtures import mock_llm_manager, llm_test_agent
+
+# Add project root to path
 
 
 class TestResponseHandling:

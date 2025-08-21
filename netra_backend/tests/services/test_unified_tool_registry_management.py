@@ -5,14 +5,15 @@ All functions ≤8 lines per requirements.
 
 import pytest
 from unittest.mock import MagicMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.tests.tool_registry_test_mocks import MockAdvancedTool, create_test_tools, assert_tool_status, ToolStatus
 from netra_backend.tests.tool_registry_management_core import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     UnifiedToolRegistry, ToolOrchestrator, ToolLifecycleManager, 
     ToolHealthMonitor, ToolMetricsCollector
 )

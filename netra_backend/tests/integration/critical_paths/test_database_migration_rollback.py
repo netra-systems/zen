@@ -21,15 +21,16 @@ from datetime import datetime
 import tempfile
 import os
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.database.migration_service import MigrationService
 from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
 from netra_backend.app.services.database.backup_service import BackupService
 from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

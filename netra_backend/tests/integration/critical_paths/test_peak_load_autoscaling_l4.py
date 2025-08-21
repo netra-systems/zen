@@ -30,15 +30,16 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from monitoring.metrics_collector import MetricsCollector
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.core.configuration.base import get_unified_config
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

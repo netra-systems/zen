@@ -1,13 +1,14 @@
 """Tests for Quality Gate Service quantification and relevance calculations"""
 
 import pytest
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
+
+# Add project root to path
     setup_quantification_patterns_content,
     setup_relevance_test_context
 )

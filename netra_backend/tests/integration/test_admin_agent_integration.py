@@ -10,6 +10,10 @@ import pytest_asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.corpus_admin import CorpusAdminSubAgent
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
@@ -17,9 +21,6 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as 
 from ws_manager import WebSocketManager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestAdminAgentIntegration:

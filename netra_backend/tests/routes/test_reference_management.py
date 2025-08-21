@@ -2,13 +2,14 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, AsyncMock, MagicMock
 from main import app
-from netra_backend.app.db.session import get_db_session
-from datetime import datetime
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.session import get_db_session
+from datetime import datetime
+
+# Add project root to path
 
 class TestReferenceManagement:
     

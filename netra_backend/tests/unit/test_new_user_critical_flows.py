@@ -23,6 +23,10 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.auth_integration.auth import create_access_token, validate_token_jwt, get_password_hash
 from netra_backend.app.db.models_postgres import User, Secret, ToolUsageLog
 from netra_backend.app.schemas.registry import UserCreate
@@ -30,9 +34,6 @@ from netra_backend.app.services.user_service import user_service
 from netra_backend.app.clients.auth_client import auth_client
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestNewUserCriticalFlows:

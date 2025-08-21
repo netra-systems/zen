@@ -9,6 +9,10 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from unittest.mock import AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.memory_manager import WebSocketMemoryManager
 from netra_backend.app.websocket.message_batcher import WebSocketMessageBatcher
 from netra_backend.app.websocket.compression import WebSocketCompressor
@@ -16,9 +20,6 @@ from netra_backend.app.websocket.performance_monitor import PerformanceMonitor
 from netra_backend.app.schemas.websocket_models import WebSocketMessage
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class WebSocketIntegrationTestHelper:

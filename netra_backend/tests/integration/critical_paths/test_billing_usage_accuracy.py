@@ -20,6 +20,10 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock, patch, MagicMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
@@ -27,9 +31,6 @@ from netra_backend.app.services.billing.payment_processor import PaymentProcesso
 from netra_backend.app.schemas.billing import UsageEvent, BillingTier, Invoice
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

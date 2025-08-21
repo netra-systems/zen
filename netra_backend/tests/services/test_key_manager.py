@@ -1,13 +1,14 @@
 
 import pytest
 from pydantic import ValidationError
-from netra_backend.app.services.key_manager import KeyManager
-from schemas import AppConfig
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.key_manager import KeyManager
+from schemas import AppConfig
+
+# Add project root to path
 
 # Mock AppConfig for testing
 class MockAppConfig(AppConfig):

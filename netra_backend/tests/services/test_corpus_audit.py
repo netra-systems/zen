@@ -10,12 +10,13 @@ from datetime import datetime, timedelta, UTC
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.services.audit.corpus_audit import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.audit.corpus_audit import (
+
+# Add project root to path
     CorpusAuditLogger, create_audit_logger
 )
 from netra_backend.app.services.audit.repository import CorpusAuditRepository

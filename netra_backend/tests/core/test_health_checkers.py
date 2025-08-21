@@ -5,12 +5,13 @@ import time
 from unittest.mock import Mock, patch, AsyncMock
 from datetime import datetime
 
-from netra_backend.app.core.health_checkers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.health_checkers import (
+
+# Add project root to path
     check_postgres_health, check_clickhouse_health, check_redis_health,
     check_websocket_health, check_system_resources,
     _create_success_result, _create_failed_result, _create_disabled_result

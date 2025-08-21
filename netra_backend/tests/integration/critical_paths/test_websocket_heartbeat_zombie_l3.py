@@ -23,14 +23,15 @@ from enum import Enum
 import uuid
 
 from ws_manager import WebSocketManager
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.cache.redis_manager import RedisManager
 from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

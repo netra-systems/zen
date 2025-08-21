@@ -11,6 +11,10 @@ import json
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 from typing import Dict, Optional
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.message_handler_base import MessageHandlerBase
@@ -22,9 +26,6 @@ import uuid
 from datetime import datetime
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestWebSocketMessageRegression:

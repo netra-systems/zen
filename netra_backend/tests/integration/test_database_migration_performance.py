@@ -18,12 +18,13 @@ from pathlib import Path
 import pytest
 import asyncpg
 
-from netra_backend.tests.database_migration_validators import MigrationValidator, ContainerizedDatabaseManager
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.database_migration_validators import MigrationValidator, ContainerizedDatabaseManager
+
+# Add project root to path
 
 
 class TestDatabaseMigrationPerformance:

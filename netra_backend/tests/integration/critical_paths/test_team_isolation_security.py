@@ -12,12 +12,13 @@ Coverage: Multi-tenant isolation, edge case handling, security boundaries
 
 import pytest
 import uuid
-from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.integration.test_helpers.team_collaboration_base import (
+
+# Add project root to path
     TeamCollaborationManager, TeamRole, PermissionType, validate_audit_trail
 )
 

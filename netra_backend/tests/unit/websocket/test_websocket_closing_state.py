@@ -9,14 +9,15 @@ from unittest.mock import AsyncMock, Mock, patch, MagicMock
 from starlette.websockets import WebSocketState
 from datetime import datetime, timezone
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.connection import ConnectionInfo, ConnectionManager
 from netra_backend.app.websocket.broadcast_core import BroadcastManager
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestWebSocketClosingState:

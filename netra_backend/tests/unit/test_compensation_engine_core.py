@@ -21,13 +21,14 @@ from datetime import datetime, timezone
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List
 
-from netra_backend.app.services.compensation_engine_core import CompensationEngine
-from netra_backend.app.services.compensation_models import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.compensation_engine_core import CompensationEngine
+from netra_backend.app.services.compensation_models import (
+
+# Add project root to path
     CompensationAction, CompensationState, BaseCompensationHandler
 )
 from netra_backend.app.core.error_recovery import RecoveryContext, OperationType

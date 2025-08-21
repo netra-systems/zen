@@ -15,6 +15,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from concurrent.futures import ThreadPoolExecutor
 import statistics
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from ws_manager import WebSocketManager
@@ -23,9 +27,6 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class AgentLoadTestFixtures:

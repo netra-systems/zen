@@ -5,12 +5,13 @@ All functions ≤8 lines per requirements.
 
 import pytest
 from unittest.mock import patch
-from netra_backend.app.core.json_parsing_utils import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.json_parsing_utils import (
+
+# Add project root to path
     fix_tool_parameters,
     fix_list_recommendations,
     comprehensive_json_fix

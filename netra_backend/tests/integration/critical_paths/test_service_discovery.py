@@ -18,6 +18,10 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 
 from redis_manager import RedisManager
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.health_checkers import HealthChecker
 from netra_backend.app.core.health.interface import HealthStatus
 import httpx
@@ -25,9 +29,6 @@ import json
 from unittest.mock import AsyncMock, MagicMock
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

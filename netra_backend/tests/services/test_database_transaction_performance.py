@@ -10,12 +10,13 @@ from typing import List
 from unittest.mock import AsyncMock, MagicMock
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.database_transaction_test_mocks import MockRepository
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.database_transaction_test_mocks import MockRepository
+
+# Add project root to path
 
 
 @pytest.fixture

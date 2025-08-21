@@ -37,6 +37,10 @@ from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
 
 from auth_integration.auth import get_current_user
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.session import get_db_session
 from clients.auth_client_core import AuthServiceClient
 from netra_backend.app.core.auth_constants import AuthConstants, JWTConstants
@@ -45,9 +49,6 @@ from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.tests.helpers.sso_saml_components import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     SAMLAssertionValidator,
     EnterpriseTokenManager,
     EnterpriseSessionManager,

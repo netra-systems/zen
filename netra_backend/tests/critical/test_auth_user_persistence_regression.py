@@ -9,6 +9,10 @@ import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.services.security_service import SecurityService
 from routes.utils.websocket_helpers import authenticate_websocket_user
@@ -17,9 +21,6 @@ import jwt
 from datetime import datetime, timedelta, timezone
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestAuthUserPersistenceRegression:

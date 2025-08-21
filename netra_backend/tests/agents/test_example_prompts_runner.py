@@ -9,6 +9,10 @@ import uuid
 from datetime import datetime
 from typing import Dict, Any, Optional
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentState
@@ -16,9 +20,6 @@ from netra_backend.app.services.quality_gate_service import ContentType
 from langchain_core.messages import HumanMessage
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestRunner:

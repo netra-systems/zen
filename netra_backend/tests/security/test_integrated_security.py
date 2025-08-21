@@ -9,13 +9,14 @@ import time
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from netra_backend.app.middleware.security_middleware import SecurityMiddleware
-from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.middleware.security_middleware import SecurityMiddleware
+from netra_backend.app.middleware.security_headers import SecurityHeadersMiddleware
+
+# Add project root to path
 
 
 class TestIntegratedSecurity:

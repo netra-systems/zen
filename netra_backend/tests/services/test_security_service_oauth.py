@@ -8,12 +8,13 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from cryptography.fernet import Fernet
 
-from netra_backend.tests.security_service_test_mocks import MockUser, EnhancedSecurityService
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.security_service_test_mocks import MockUser, EnhancedSecurityService
+
+# Add project root to path
 
 
 @pytest.fixture

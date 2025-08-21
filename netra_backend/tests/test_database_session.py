@@ -7,14 +7,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.pool import NullPool, QueuePool
 from sqlalchemy.exc import OperationalError, TimeoutError
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.session import get_db_session
 from netra_backend.app.db.postgres import async_engine, async_session_factory, get_async_db, Database
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 class TestDatabaseConnectionPooling:
     """Test database connection pooling behavior."""
 

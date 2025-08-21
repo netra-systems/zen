@@ -11,6 +11,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -21,9 +25,6 @@ from netra_backend.app.services.quality_gate_service import QualityGateService, 
 from netra_backend.app.core.exceptions import NetraException
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.fixture

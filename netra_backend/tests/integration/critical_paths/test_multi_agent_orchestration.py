@@ -19,6 +19,10 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, patch
 from contextlib import asynccontextmanager
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.services.state.state_manager import StateManager, StateStorage
@@ -27,9 +31,6 @@ from netra_backend.app.db.postgres import get_postgres_session
 from logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 

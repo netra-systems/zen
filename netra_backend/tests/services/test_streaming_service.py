@@ -6,12 +6,13 @@ import asyncio
 from typing import AsyncGenerator
 from unittest.mock import Mock, AsyncMock
 
-from netra_backend.app.services.streaming_service import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.streaming_service import (
+
+# Add project root to path
     StreamingService,
     StreamChunk,
     StreamProtocol,

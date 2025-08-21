@@ -8,12 +8,13 @@ import pytest
 import asyncio
 import time
 import aiohttp
-from netra_backend.tests.e2e.concurrent_load_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.e2e.concurrent_load_helpers import (
+
+# Add project root to path
     ConcurrentUserLoadTest, 
     create_priority_user_request, 
     validate_fair_queuing_results

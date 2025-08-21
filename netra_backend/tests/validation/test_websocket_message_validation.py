@@ -6,6 +6,10 @@ Tests message validation, field extraction, and error handling for malformed mes
 import pytest
 import json
 from unittest.mock import Mock, AsyncMock, patch
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.unified.message_handlers import MessageHandler, MessageBuilder, MessageProcessor
 from netra_backend.app.websocket.unified.types import WebSocketValidationError
 from netra_backend.app.services.message_handlers import MessageHandlerService
@@ -13,9 +17,6 @@ from netra_backend.app.websocket.connection import ConnectionInfo
 import uuid
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestWebSocketMessageValidation:

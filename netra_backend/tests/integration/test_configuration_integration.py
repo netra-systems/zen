@@ -20,14 +20,15 @@ from typing import Dict, Any
 from pathlib import Path
 
 from config import get_config, reload_config, validate_configuration
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.configuration.base import get_unified_config, config_manager
 from netra_backend.app.schemas.Config import AppConfig
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestConfigurationIntegration:

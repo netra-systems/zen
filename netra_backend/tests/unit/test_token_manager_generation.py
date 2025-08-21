@@ -11,14 +11,15 @@ from unittest.mock import AsyncMock, Mock, patch
 from freezegun import freeze_time
 from jose import jwt, JWTError
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.auth_integration.auth import JWTTokenManager, TokenClaims
 from netra_backend.app.core.exceptions_auth import AuthenticationError
 from netra_backend.app.core.exceptions_base import ValidationError
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 # Test fixtures

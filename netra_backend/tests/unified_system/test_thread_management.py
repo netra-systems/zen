@@ -17,15 +17,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text, select, func, and_, or_
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.models_postgres import Thread, Message, User
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.schemas.websocket_message_types import ServerMessage
 from netra_backend.tests.fixtures import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     test_user, test_database, clean_database_state
 )
 

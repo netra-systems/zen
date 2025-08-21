@@ -16,13 +16,14 @@ from unittest.mock import patch, MagicMock, AsyncMock
 import aiohttp
 
 from main import create_app
-from netra_backend.app.core.configuration.base import UnifiedConfigManager
-from startup_checks.checker import StartupChecker
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.configuration.base import UnifiedConfigManager
+from startup_checks.checker import StartupChecker
+
+# Add project root to path
 
 
 @pytest.fixture

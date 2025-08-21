@@ -14,6 +14,10 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.db.models_postgres import Thread, Message, Run, User
@@ -21,9 +25,6 @@ from schemas import UserInDB, ThreadCreate
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.mark.asyncio

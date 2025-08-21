@@ -32,12 +32,13 @@ from enum import Enum
 import httpx
 import jwt
 
-from netra_backend.app.schemas.auth_types import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.auth_types import (
+
+# Add project root to path
     Token, LoginRequest, LoginResponse,
     UserProfile, Permission, Role, ResourceAccess,
     # AuditEvent, AuthorizationResult  # Class may not exist, commented out

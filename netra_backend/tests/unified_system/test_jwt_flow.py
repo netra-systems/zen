@@ -16,12 +16,13 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Optional
 
-from netra_backend.tests.test_harness import UnifiedTestHarness
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.test_harness import UnifiedTestHarness
+
+# Add project root to path
 
 
 class JWTTestHelper:

@@ -30,6 +30,10 @@ import time
 from typing import Dict, Any, List, Optional
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
@@ -39,9 +43,6 @@ from llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class MockLLMResponse:

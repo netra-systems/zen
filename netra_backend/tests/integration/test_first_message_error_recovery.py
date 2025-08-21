@@ -11,6 +11,10 @@ from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime, timezone
 import json
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.websocket.unified.circuit_breaker import CircuitBreaker
@@ -20,9 +24,6 @@ from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.mark.asyncio

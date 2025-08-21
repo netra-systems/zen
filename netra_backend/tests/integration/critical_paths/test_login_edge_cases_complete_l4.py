@@ -12,6 +12,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.user_service import UserService
 from netra_backend.app.services.rate_limit_service import RateLimitService
@@ -21,9 +25,6 @@ from netra_backend.app.config import settings
 from netra_backend.app.core.exceptions import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     AuthenticationError,
     RateLimitExceeded,
     AccountLocked,

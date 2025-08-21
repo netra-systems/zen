@@ -8,14 +8,15 @@ import asyncio
 from datetime import datetime, UTC
 from typing import Dict, Any
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.websocket.message_handler import MessageRouter
 from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.tests.websocket_test_utilities import MockMessageHandler
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestWebSocketMessageHandlerRouting:

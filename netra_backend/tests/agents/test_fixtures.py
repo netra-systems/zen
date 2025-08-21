@@ -9,13 +9,14 @@ import uuid
 from unittest.mock import Mock, AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
-from llm.llm_manager import LLMManager
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from llm.llm_manager import LLMManager
+
+# Add project root to path
 
 
 def _create_basic_llm_responses():

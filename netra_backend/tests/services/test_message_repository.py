@@ -7,12 +7,13 @@ message-specific data access patterns work correctly.
 
 import pytest
 import asyncio
-from netra_backend.tests.helpers.database_repository_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.helpers.database_repository_helpers import (
+
+# Add project root to path
     create_test_thread, create_test_message, create_test_messages,
     assert_pagination_result
 )

@@ -20,15 +20,16 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime, timedelta
 from dataclasses import dataclass
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
 from netra_backend.app.services.quota.quota_manager import QuotaManager
 from netra_backend.app.services.backpressure.backpressure_service import BackpressureService
 from netra_backend.app.schemas.user import UserTier
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

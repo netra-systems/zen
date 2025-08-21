@@ -2,13 +2,14 @@
 
 import pytest
 from unittest.mock import patch, MagicMock
-from netra_backend.app.services.external_api_client import ResilientHTTPClient, HTTPError
-from netra_backend.tests.services.external_api_client_utils import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.external_api_client import ResilientHTTPClient, HTTPError
+from netra_backend.tests.services.external_api_client_utils import (
+
+# Add project root to path
     create_success_response_mock,
     create_async_context_manager,
     setup_circuit_and_session_mocks,

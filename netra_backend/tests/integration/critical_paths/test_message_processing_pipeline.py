@@ -20,13 +20,14 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime
 
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
+
+# Add project root to path
 # JWT service replaced with auth_integration
 from auth_integration import create_access_token, validate_token_jwt
 from unittest.mock import AsyncMock

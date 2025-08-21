@@ -18,14 +18,15 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 import requests
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.monitoring.metrics_service import MetricsService
 from netra_backend.app.services.monitoring.prometheus_exporter import PrometheusExporter
 from netra_backend.app.services.health_check_service import HealthCheckService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

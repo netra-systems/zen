@@ -9,12 +9,13 @@ import pytest
 from unittest.mock import Mock, patch
 from fastapi import HTTPException
 
-from netra_backend.app.auth_integration.auth import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.auth_integration.auth import (
+
+# Add project root to path
     build_pr_redirect_url,
     handle_pr_routing_error,
     get_pr_environment_status,

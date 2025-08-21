@@ -6,14 +6,15 @@ Tests error handling for validation failures
 import pytest
 import asyncio
 from unittest.mock import patch, AsyncMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.validation_service import ValidationService
 from netra_backend.app.config import settings
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestErrorValidationFailuresL3:

@@ -7,13 +7,14 @@ import pytest
 import asyncio
 import httpx
 import jwt
-from netra_backend.app.config import settings
-import time
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.config import settings
+import time
+
+# Add project root to path
 
 
 class TestAPIAuthenticationL3:

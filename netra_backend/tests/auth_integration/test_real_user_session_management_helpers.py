@@ -30,14 +30,15 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from fastapi import HTTPException
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.models_postgres import User
 from netra_backend.app.db.session import get_db_session
 from clients.auth_client_core import AuthServiceClient
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class RealUserSessionHelper:

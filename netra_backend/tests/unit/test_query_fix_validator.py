@@ -1,12 +1,13 @@
 """Tests for the query fix validator module."""
 
 import pytest
-from netra_backend.app.agents.data_sub_agent.query_fix_validator import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.data_sub_agent.query_fix_validator import (
+
+# Add project root to path
     validate_and_fix_query,
     ensure_query_uses_arrayElement,
     fix_simplified_correlation_query

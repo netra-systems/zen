@@ -5,13 +5,14 @@ import json
 from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime, UTC
 from netra_mcp.netra_mcp_server import NetraMCPServer
-from netra_backend.app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
-from datetime import timedelta
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.mcp_service import MCPService, MCPClient, MCPToolExecution
+from datetime import timedelta
+
+# Add project root to path
 
 
 class TestSyntaxFix:

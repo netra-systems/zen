@@ -22,12 +22,13 @@ from datetime import datetime, timezone
 from unittest.mock import patch
 
 from logging_config import central_logger
-from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests..helpers.redis_l3_helpers import RedisContainer
+
+# Add project root to path
 
 logger = central_logger.get_logger(__name__)
 

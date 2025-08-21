@@ -8,6 +8,10 @@ from typing import Dict, List, Any, Optional, Tuple
 from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.app.schemas.core_enums import WebSocketMessageType, AgentStatus
 from logging_config import central_logger
@@ -19,9 +23,6 @@ import tracemalloc
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 def flow_tracker():
     """Create message flow tracker."""

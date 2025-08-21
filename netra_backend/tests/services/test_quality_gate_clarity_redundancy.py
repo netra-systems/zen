@@ -1,13 +1,14 @@
 """Tests for Quality Gate Service clarity and redundancy calculations"""
 
 import pytest
-from netra_backend.app.services.quality_gate_service import QualityGateService
-from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.tests.helpers.quality_gate_comprehensive_helpers import (
+
+# Add project root to path
     create_very_long_sentence,
     create_excessive_acronyms_content,
     create_nested_parentheses_content,

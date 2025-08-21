@@ -12,6 +12,10 @@ import pytest
 import json
 import asyncio
 from unittest.mock import AsyncMock, Mock, patch, MagicMock, call
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.unified.message_handlers import MessageProcessor, MessageHandler
 from netra_backend.app.websocket.connection import ConnectionInfo
 from netra_backend.app.services.agent_service_core import AgentService
@@ -21,9 +25,6 @@ from datetime import datetime
 import uuid
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestCriticalMessageRoutingToAgentService:

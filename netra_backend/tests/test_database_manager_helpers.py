@@ -30,6 +30,10 @@ from sqlalchemy import text, create_engine
 import asyncpg
 import clickhouse_connect
 from logging_config import central_logger
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.database_types import DatabaseType, DatabaseConfig
 from netra_backend.app.core.exceptions_config import DatabaseError
 from netra_backend.tests.fixtures.database_test_fixtures import create_mock_user, create_mock_thread, create_mock_message
@@ -37,9 +41,6 @@ import subprocess
 import shutil
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestDatabaseManager:

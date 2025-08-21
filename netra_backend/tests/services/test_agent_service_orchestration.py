@@ -24,10 +24,11 @@ For new tests, add them to the appropriate specialized module.
 """
 
 # Import redirects for backwards compatibility
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.test_agent_service_orchestration_core import TestAgentServiceOrchestrationCore, TestAgentServiceBasic
 from netra_backend.tests.test_agent_service_orchestration_agents import TestAgentLifecycleManagement  
 from netra_backend.tests.test_agent_service_orchestration_workflows import TestAgentErrorRecovery
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()

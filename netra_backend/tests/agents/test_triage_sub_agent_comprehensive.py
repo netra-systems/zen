@@ -7,6 +7,9 @@ Each module focuses on a specific aspect of testing with functions ≤8 lines.
 """
 
 # Import all split test modules to maintain comprehensive coverage
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.agents.test_triage_init_validation import *
 from netra_backend.tests.agents.test_triage_entity_intent import *
 from netra_backend.tests.agents.test_triage_caching_async import *
@@ -15,9 +18,6 @@ from netra_backend.tests.agents.test_triage_edge_performance import *
 import pytest
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 def test_architectural_compliance():

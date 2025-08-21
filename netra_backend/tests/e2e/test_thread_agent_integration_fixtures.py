@@ -7,6 +7,10 @@ import uuid
 from typing import Dict, Any, List, Optional
 from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.state_persistence import state_persistence_service
@@ -17,9 +21,6 @@ from netra_backend.app.db.models_postgres import Thread, Message, Run
 from netra_backend.app.core.exceptions import NetraException
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.fixture

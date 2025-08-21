@@ -18,12 +18,13 @@ import httpx
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from netra_backend.tests.first_time_user_fixtures import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.first_time_user_fixtures import (
+
+# Add project root to path
     get_mock_provider_configs, get_mock_optimization_request,
     simulate_oauth_callback
 )

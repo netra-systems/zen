@@ -6,12 +6,13 @@ before being sent to ClickHouse.
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
-from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, ClickHouseQueryInterceptor
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.clickhouse_query_fixer import fix_clickhouse_array_syntax, ClickHouseQueryInterceptor
+
+# Add project root to path
 
 
 class TestMetricsValueTypeMismatch:

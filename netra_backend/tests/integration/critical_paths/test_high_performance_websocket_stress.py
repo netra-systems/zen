@@ -30,6 +30,10 @@ from concurrent.futures import ThreadPoolExecutor
 from fastapi import WebSocket
 from starlette.websockets import WebSocketState
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.enhanced_rate_limiter import DistributedRateLimiter, BackpressureManager, RateLimitConfig
 from netra_backend.app.websocket.high_performance_broadcast import HighPerformanceBroadcaster, BroadcastPerformanceConfig
 from netra_backend.app.websocket.load_balanced_connection_manager import LoadBalancedConnectionManager, LoadBalancingStrategy
@@ -40,9 +44,6 @@ from schemas import UserInDB
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class MockWebSocketForStress:

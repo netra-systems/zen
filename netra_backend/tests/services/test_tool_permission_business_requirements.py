@@ -4,14 +4,15 @@ Functions refactored to ≤8 lines each using helper functions
 """
 
 import pytest
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.tool_permission_service import ToolPermissionService
 from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITIONS, PlanFeatures
 from netra_backend.tests.helpers.tool_permission_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     create_sample_context,
     create_developer_context,
     create_user_plan,

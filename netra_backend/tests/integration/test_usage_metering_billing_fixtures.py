@@ -22,6 +22,10 @@ from datetime import datetime, timedelta, UTC
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock, patch
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.clickhouse_init import create_workload_events_table_if_missing
 from netra_backend.app.services.cost_calculator import CostCalculatorService, BudgetManager, CostTier
@@ -30,9 +34,6 @@ from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
 from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord, PlanUsageSummary
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class RealTimeUsageTracker:

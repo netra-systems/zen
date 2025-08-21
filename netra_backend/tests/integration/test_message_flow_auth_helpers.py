@@ -7,6 +7,10 @@ from typing import Dict, Any, Optional, List
 from unittest.mock import AsyncMock, patch, Mock
 import pytest
 from datetime import datetime, timezone, timedelta
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.unified.jwt_token_helpers import JWTTestHelper
 from netra_backend.tests.integration.test_unified_message_flow import MessageFlowTracker
 from logging_config import central_logger
@@ -15,9 +19,6 @@ import time
 from routes.utils.websocket_helpers import validate_websocket_token
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 def create_test_token(user_id: str) -> str:
     """Create a valid test token."""

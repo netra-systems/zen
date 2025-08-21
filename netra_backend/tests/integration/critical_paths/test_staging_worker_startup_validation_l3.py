@@ -25,14 +25,15 @@ from dataclasses import dataclass, field
 import httpx
 from unittest.mock import patch, MagicMock, AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.configuration.base import get_unified_config
 from loguru import logger
 from netra_backend.app.services.health_check_service import HealthCheckService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @dataclass

@@ -22,15 +22,16 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 from enum import Enum
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.api_gateway.cache_manager import ApiCacheManager
 from netra_backend.app.services.api_gateway.cache_strategies import CacheStrategy
 from netra_backend.app.services.redis.redis_cache import RedisCache
 from netra_backend.app.services.metrics.cache_metrics import CacheMetricsService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

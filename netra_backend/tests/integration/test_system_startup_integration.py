@@ -18,14 +18,15 @@ from typing import Dict, Any
 from pathlib import Path
 
 from startup_checks import StartupChecker, StartupCheckResult
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.app_factory import create_app
 from config import get_config
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSystemStartupIntegration:

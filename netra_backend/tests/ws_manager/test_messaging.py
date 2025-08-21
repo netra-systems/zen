@@ -9,13 +9,14 @@ from datetime import datetime
 from unittest.mock import AsyncMock, patch, call
 from starlette.websockets import WebSocketState
 
-from netra_backend.app.services.websocket.ws_manager import WebSocketManager
-from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.websocket.ws_manager import WebSocketManager
+from netra_backend.tests.ws_manager.test_base import WebSocketTestBase, MockWebSocket
+
+# Add project root to path
 
 
 class TestMessageSending(WebSocketTestBase):

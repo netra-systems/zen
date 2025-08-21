@@ -24,6 +24,10 @@ from decimal import Decimal
 from unittest.mock import AsyncMock, patch, MagicMock
 from enum import Enum
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.resilience.circuit_breaker import CircuitBreaker, CircuitState
 from netra_backend.app.services.resilience.retry_manager import RetryManager, RetryStrategy
 from netra_backend.app.services.resilience.error_aggregator import ErrorAggregator
@@ -34,9 +38,6 @@ from netra_backend.app.core.exceptions_base import NetraException, ServiceUnavai
 from netra_backend.app.core.logging_config import get_logger
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = get_logger(__name__)
 

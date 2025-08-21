@@ -9,13 +9,14 @@ import time
 from unittest.mock import AsyncMock, Mock
 from typing import Dict, Any
 
-from netra_backend.app.core.reliability import AgentReliabilityWrapper, get_reliability_wrapper
-from netra_backend.app.core.reliability_circuit_breaker import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.reliability import AgentReliabilityWrapper, get_reliability_wrapper
+from netra_backend.app.core.reliability_circuit_breaker import (
+
+# Add project root to path
     CircuitBreaker, CircuitBreakerConfig, CircuitBreakerState
 )
 from netra_backend.app.core.reliability_retry import RetryHandler, RetryConfig

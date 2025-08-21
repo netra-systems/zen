@@ -10,6 +10,10 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any, List
 from datetime import datetime, UTC
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.metrics.prometheus_exporter import PrometheusExporter
 from netra_backend.app.services.metrics.core_collector import CoreMetricsCollector
 from netra_backend.app.services.metrics.agent_metrics import AgentMetricsCollector
@@ -17,9 +21,6 @@ from netra_backend.app.schemas.Metrics import MetricsSnapshot, CorpusMetric, Met
 from test_framework.mock_utils import mock_justified
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class MockMetricsData:

@@ -12,6 +12,10 @@ from typing import Dict, List, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 import hashlib
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.api_gateway import APIGateway
 from netra_backend.app.services.rate_limiter import RateLimiter
 from netra_backend.app.services.request_validator import RequestValidator
@@ -19,9 +23,6 @@ from netra_backend.app.services.middleware_chain import MiddlewareChain
 from netra_backend.app.config import settings
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestAPIRequestLifecycleCompleteL4:

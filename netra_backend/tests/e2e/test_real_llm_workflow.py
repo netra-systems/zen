@@ -11,15 +11,16 @@ import time
 from typing import Dict, Any, List
 from unittest.mock import AsyncMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel
 from netra_backend.tests.e2e.infrastructure.llm_test_manager import LLMTestManager, LLMTestRequest, LLMTestModel
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.fixture

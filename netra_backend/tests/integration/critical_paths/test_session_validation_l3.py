@@ -7,14 +7,15 @@ import pytest
 import asyncio
 import time
 from unittest.mock import patch, AsyncMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.session_service import SessionService
 from netra_backend.app.config import settings
 import json
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSessionValidationL3:

@@ -7,13 +7,14 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 
-from netra_backend.app.agents.state import DeepAgentState
-from netra_backend.tests.supply_researcher_fixtures import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.tests.supply_researcher_fixtures import (
+
+# Add project root to path
     agent, malicious_inputs, assert_malicious_input_safe
 )
 

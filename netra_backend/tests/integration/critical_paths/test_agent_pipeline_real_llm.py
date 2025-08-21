@@ -25,6 +25,10 @@ from websockets.exceptions import ConnectionClosedError
 
 from config import settings
 from llm.llm_manager import LLMManager
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -39,9 +43,6 @@ from netra_backend.tests.unified.e2e.real_websocket_client import RealWebSocketC
 from netra_backend.tests.unified.e2e.real_client_types import ClientConfig, ConnectionState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

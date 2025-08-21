@@ -10,6 +10,10 @@ from unittest.mock import AsyncMock, Mock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.thread_service import ThreadService
 from netra_backend.app.services.state_persistence import state_persistence_service
 from netra_backend.app.core.exceptions_database import DatabaseError, RecordNotFoundError
@@ -19,9 +23,6 @@ from netra_backend.app.schemas.agent_state import StateRecoveryRequest, Recovery
 from netra_backend.app.db.models_postgres import Thread, Message, Run
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class ThreadDatabaseErrorTests:

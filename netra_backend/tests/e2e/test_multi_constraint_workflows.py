@@ -8,12 +8,13 @@ import pytest
 import uuid
 from typing import Dict
 
-from netra_backend.tests.e2e.multi_constraint_test_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.e2e.multi_constraint_test_helpers import (
+
+# Add project root to path
     create_agent_instances, build_multi_constraint_setup
 )
 

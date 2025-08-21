@@ -9,13 +9,14 @@ from typing import List, Optional
 import json
 
 from llm.llm_manager import LLMManager
-from netra_backend.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM
-from schemas import AppConfig, LLMConfig
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.helpers.llm_mocks import MockLLM, MockStructuredLLM
+from schemas import AppConfig, LLMConfig
+
+# Add project root to path
 
 
 class SampleResponseModel(BaseModel):

@@ -4,12 +4,13 @@ import time
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.auth_integration.auth import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.auth_integration.auth import (
+
+# Add project root to path
     _build_pr_state_data,
     _encode_state_to_base64,
     _decode_state_from_base64,

@@ -3,14 +3,15 @@
 from unittest.mock import MagicMock, AsyncMock
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.data_sub_agent.execution_engine import ExecutionEngine
 from netra_backend.app.agents.triage_sub_agent.models import KeyParameters, TriageResult
 from netra_backend.app.agents.state import DeepAgentState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestKeyParametersAccess:

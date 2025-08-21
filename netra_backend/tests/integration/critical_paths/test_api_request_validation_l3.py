@@ -6,13 +6,14 @@ Tests API request validation and sanitization
 import pytest
 import asyncio
 import httpx
-from netra_backend.app.config import settings
-import json
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.config import settings
+import json
+
+# Add project root to path
 
 
 class TestAPIRequestValidationL3:

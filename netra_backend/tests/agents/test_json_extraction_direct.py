@@ -3,13 +3,14 @@
 import pytest
 from unittest.mock import Mock
 
-from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-from netra_backend.app.agents.utils import extract_json_from_response
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
+from netra_backend.app.agents.utils import extract_json_from_response
+
+# Add project root to path
 
 
 def test_extract_json_with_trailing_comma():

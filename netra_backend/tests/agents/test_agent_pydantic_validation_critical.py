@@ -9,12 +9,13 @@ from typing import Dict, Any, List
 from pydantic import ValidationError
 from unittest.mock import AsyncMock, Mock, patch
 
-from netra_backend.app.agents.triage_sub_agent.models import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.triage_sub_agent.models import (
+
+# Add project root to path
     TriageResult, ToolRecommendation, Priority, Complexity,
     ExtractedEntities, UserIntent, TriageMetadata
 )

@@ -23,12 +23,13 @@ from fastapi import HTTPException, status
 from fastapi.testclient import TestClient
 
 from routes.gcp_monitoring import router
-from netra_backend.app.schemas.monitoring_schemas import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.monitoring_schemas import (
+
+# Add project root to path
     ErrorResponse, ErrorDetailResponse, ErrorQuery, ErrorSummary,
     GCPError, ErrorSeverity, ErrorStatus, ErrorResolution
 )

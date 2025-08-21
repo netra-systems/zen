@@ -22,6 +22,10 @@ from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime
 
 from logging_config import central_logger
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.agent_service_core import AgentService
 from netra_backend.app.services.message_handlers import MessageHandlerService
 from netra_backend.app.services.thread_service import ThreadService
@@ -31,9 +35,6 @@ from netra_backend.app.schemas.registry import WebSocketMessage
 from netra_backend.app.db.models_postgres import Thread, Message
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 

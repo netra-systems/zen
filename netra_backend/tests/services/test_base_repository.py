@@ -8,12 +8,13 @@ data access patterns work correctly without requiring a real database.
 import pytest
 import time
 from unittest.mock import AsyncMock
-from netra_backend.tests.helpers.database_repository_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.helpers.database_repository_helpers import (
+
+# Add project root to path
     create_test_thread, create_test_threads, assert_thread_created_correctly,
     assert_pagination_result
 )

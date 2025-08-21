@@ -12,15 +12,16 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from decimal import Decimal
 import random
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.database_service import DatabaseService
 from netra_backend.app.services.transaction_manager import TransactionManager
 from netra_backend.app.services.user_service import UserService
 from netra_backend.app.config import settings
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestDatabaseTransactionIntegrityL4:

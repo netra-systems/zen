@@ -10,6 +10,10 @@ import uuid
 from unittest.mock import AsyncMock
 from typing import Dict, List
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
@@ -21,9 +25,6 @@ from ws_manager import WebSocketManager
 from schemas import SubAgentLifecycle
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.fixture

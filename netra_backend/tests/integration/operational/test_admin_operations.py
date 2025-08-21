@@ -20,12 +20,13 @@ import uuid
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
-from netra_backend.tests.shared_fixtures import operational_infrastructure
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.shared_fixtures import operational_infrastructure
+
+# Add project root to path
 
 
 class TestAdminOperations:

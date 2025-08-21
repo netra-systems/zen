@@ -8,13 +8,14 @@ import asyncio
 import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.services.synthetic_data_service import SyntheticDataService
-from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.synthetic_data_service import SyntheticDataService
+from netra_backend.tests.test_synthetic_data_service_basic import GenerationConfig
+
+# Add project root to path
 
 
 @pytest.fixture

@@ -8,13 +8,14 @@ import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus, ContentSource
-from schemas import CorpusCreate, CorpusUpdate
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.corpus_service import CorpusService, CorpusStatus, ContentSource
+from schemas import CorpusCreate, CorpusUpdate
+
+# Add project root to path
 
 
 class TestMetadataTracking:

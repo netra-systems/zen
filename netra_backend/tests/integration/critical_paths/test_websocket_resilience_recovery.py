@@ -20,15 +20,16 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 from datetime import datetime
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 from netra_backend.app.services.websocket.connection_recovery import ConnectionRecovery
 from netra_backend.app.services.state_persistence import StatePersistenceService
 from netra_backend.app.schemas.registry import WebSocketMessage
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

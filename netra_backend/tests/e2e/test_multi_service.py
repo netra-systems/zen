@@ -32,6 +32,10 @@ from pathlib import Path
 
 from auth_integration.auth import get_current_user
 from clients.auth_client import auth_client
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.postgres import get_async_db as get_postgres_client
 from netra_backend.app.services.user_service import CRUDUser
@@ -40,9 +44,6 @@ from netra_backend.app.services.thread_service import ThreadService
 from dev_launcher.health_monitor import HealthMonitor
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class ServiceEndpoint:

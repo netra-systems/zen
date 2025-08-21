@@ -4,12 +4,13 @@ All functions ≤8 lines per requirements.
 """
 
 import pytest
-from netra_backend.app.agents.error_handler import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.agents.error_handler import (
+
+# Add project root to path
     AgentError,
     AgentValidationError as ValidationError,
     NetworkError,

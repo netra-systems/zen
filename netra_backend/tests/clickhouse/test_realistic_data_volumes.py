@@ -4,12 +4,13 @@ Test with realistic data volumes
 """
 
 import pytest
-from netra_backend.app.db.clickhouse_query_fixer import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.clickhouse_query_fixer import (
+
+# Add project root to path
     fix_clickhouse_array_syntax,
     validate_clickhouse_query
 )

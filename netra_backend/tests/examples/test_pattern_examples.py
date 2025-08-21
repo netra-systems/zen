@@ -10,13 +10,14 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from datetime import datetime
 import asyncio
 
-from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
-from netra_backend.app.services.agent_service import AgentService
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.helpers.shared_test_types import TestErrorHandling as SharedTestErrorHandling
+from netra_backend.app.services.agent_service import AgentService
+
+# Add project root to path
 
 
 # ==============================================================================

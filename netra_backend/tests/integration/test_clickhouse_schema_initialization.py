@@ -19,13 +19,14 @@ import os
 from typing import Dict, Any, List, Optional, Tuple
 from clickhouse_driver import Client
 import aiohttp
-from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables, verify_workload_events_table
-from netra_backend.app.db.models_clickhouse import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.clickhouse_init import initialize_clickhouse_tables, verify_workload_events_table
+from netra_backend.app.db.models_clickhouse import (
+
+# Add project root to path
     LOGS_TABLE_SCHEMA, 
     SUPPLY_TABLE_SCHEMA, 
     WORKLOAD_EVENTS_TABLE_SCHEMA

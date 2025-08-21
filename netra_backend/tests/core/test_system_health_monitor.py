@@ -6,14 +6,15 @@ import time
 from unittest.mock import Mock, AsyncMock, patch
 from datetime import datetime, UTC
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.system_health_monitor import SystemHealthMonitor, system_health_monitor
 from netra_backend.app.core.shared_health_types import HealthStatus, ComponentHealth
 from netra_backend.app.schemas.core_models import HealthCheckResult
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSystemHealthMonitor:

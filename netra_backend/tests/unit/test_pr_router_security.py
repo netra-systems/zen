@@ -3,12 +3,13 @@
 import pytest
 from unittest.mock import AsyncMock, Mock
 
-from netra_backend.app.auth_integration.auth import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.auth_integration.auth import (
+
+# Add project root to path
     _validate_pr_inputs,
     _validate_pr_number_format,
     _validate_pr_with_github,

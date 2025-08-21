@@ -20,12 +20,13 @@ from unittest.mock import AsyncMock, patch, MagicMock
 from dataclasses import dataclass
 from datetime import datetime
 
-from netra_backend.app.services.database.tenant_service import TenantService
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.database.tenant_service import TenantService
+
+# Add project root to path
 # Permissions service replaced with auth_integration
 from auth_integration import require_permission
 from unittest.mock import AsyncMock

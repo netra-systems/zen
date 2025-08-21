@@ -28,12 +28,13 @@ from ws_manager import WebSocketManager
 from schemas import UserInDB
 from clients.auth_client import auth_client
 from test_framework.mock_utils import mock_justified
-from netra_backend.tests..helpers.redis_l3_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests..helpers.redis_l3_helpers import (
+
+# Add project root to path
     RedisContainer, 
     MockWebSocketForRedis, 
     create_test_message,

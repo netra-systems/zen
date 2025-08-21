@@ -8,12 +8,13 @@ import pytest_asyncio
 import asyncio
 from typing import Dict, Any
 
-from netra_backend.tests.agents.test_example_prompts_base import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.agents.test_example_prompts_base import (
+
+# Add project root to path
     EXAMPLE_PROMPTS, 
     setup_real_infrastructure,
     ExamplePromptsTestBase

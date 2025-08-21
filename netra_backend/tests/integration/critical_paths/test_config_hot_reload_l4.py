@@ -23,15 +23,16 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 from datetime import datetime, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.config import Settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.redis_service import RedisService
 from netra_backend.app.services.websocket.ws_manager import WebSocketManager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 # from agents.supervisor_consolidated import SupervisorAgent
 from unittest.mock import AsyncMock
 SupervisorAgent = AsyncMock

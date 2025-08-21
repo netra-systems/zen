@@ -31,6 +31,10 @@ from unittest.mock import patch
 
 from auth_integration.auth import get_current_user
 from clients.auth_client import auth_client
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.postgres import get_postgres_db
 from netra_backend.app.db.models_postgres import User
 from redis_manager import RedisManager  
@@ -38,9 +42,6 @@ from netra_backend.app.services.agent_service import get_agent_service
 from sqlalchemy import select
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

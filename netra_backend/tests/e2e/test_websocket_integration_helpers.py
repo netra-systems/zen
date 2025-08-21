@@ -9,6 +9,10 @@ from typing import Dict, Any, List, Optional
 from unittest.mock import Mock, AsyncMock, patch
 from fastapi.testclient import TestClient
 from main import app
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager
 from netra_backend.app.websocket.message_handler_core import ModernReliableMessageHandler
 from ws_manager import WebSocketManager
@@ -17,9 +21,6 @@ from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 from routes.mcp.main import websocket_endpoint
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSyntaxFix:

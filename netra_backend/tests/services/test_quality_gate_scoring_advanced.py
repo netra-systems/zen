@@ -9,12 +9,13 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from typing import Dict, Any, List
 
-from netra_backend.app.services.quality_gate_service import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.quality_gate_service import (
+
+# Add project root to path
     QualityGateService,
     QualityLevel,
     ContentType,

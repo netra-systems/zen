@@ -29,6 +29,10 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.models.user import User, UserPlan
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message
@@ -39,9 +43,6 @@ from netra_backend.app.services.agent_service import AgentService as AgentDispat
 from netra_backend.tests..test_helpers.user_flow_base import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     UserFlowTestBase, assert_successful_registration, assert_plan_compliance
 )
 from netra_backend.tests..fixtures.user_journey_data import UserTestData, UserJourneyScenarios

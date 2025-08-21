@@ -5,12 +5,12 @@ COMPLIANCE: Modular split from 514-line monolith
 """
 
 # Import all test classes from focused modules
-from netra_backend.tests.startup.test_health_monitor_core import (
-
-# Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.startup.test_health_monitor_core import (
+
+# Add project root to path
     TestHealthStage,
     TestServiceConfig,
     TestHealthCheckResult,

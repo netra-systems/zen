@@ -21,6 +21,10 @@ from datetime import datetime, timezone
 from testcontainers.redis import RedisContainer
 from testcontainers.postgres import PostgresContainer
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.state import DeepAgentState
@@ -32,9 +36,6 @@ from security.context_isolation import ContextIsolationManager
 from test_framework.testcontainers_utils import TestcontainerHelper
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

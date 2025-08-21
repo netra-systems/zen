@@ -6,13 +6,14 @@ Tests to prevent IndexError when logging SQLAlchemy errors.
 import pytest
 from unittest.mock import Mock, patch, MagicMock
 from sqlalchemy.exc import DataError, IntegrityError
-from netra_backend.app.core.error_handlers import ApiErrorHandler
-from netra_backend.app.core.exceptions_database import ErrorCode
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.error_handlers import ApiErrorHandler
+from netra_backend.app.core.exceptions_database import ErrorCode
+
+# Add project root to path
 
 
 def test_error_handler_sqlalchemy_logging():

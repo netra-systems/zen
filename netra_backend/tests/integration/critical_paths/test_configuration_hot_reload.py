@@ -21,6 +21,10 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 from pathlib import Path
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.config import Settings
 from netra_backend.app.services.config_service import ConfigService
 from netra_backend.app.services.redis_service import RedisService
@@ -29,9 +33,6 @@ from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.services.health_check_service import HealthCheckService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

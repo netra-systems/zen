@@ -12,13 +12,14 @@ from datetime import datetime
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional
 
-from netra_backend.app.startup.migration_tracker import MigrationTracker, MigrationState, FailedMigration
-from netra_backend.app.core.exceptions import NetraException
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.startup.migration_tracker import MigrationTracker, MigrationState, FailedMigration
+from netra_backend.app.core.exceptions import NetraException
+
+# Add project root to path
 
 
 @pytest.fixture

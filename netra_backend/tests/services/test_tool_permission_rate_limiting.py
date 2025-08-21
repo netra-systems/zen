@@ -6,13 +6,14 @@ Functions refactored to ≤8 lines each using helper functions
 import pytest
 import asyncio
 from datetime import datetime, UTC
-from netra_backend.app.services.tool_permission_service import ToolPermissionService
-from netra_backend.tests.helpers.tool_permission_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.tool_permission_service import ToolPermissionService
+from netra_backend.tests.helpers.tool_permission_helpers import (
+
+# Add project root to path
     MockRedisClient,
     create_sample_context,
     setup_redis_usage,

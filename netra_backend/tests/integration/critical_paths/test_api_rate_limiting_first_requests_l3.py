@@ -24,15 +24,16 @@ from unittest.mock import AsyncMock, patch
 import redis.asyncio as redis
 from datetime import datetime, timezone, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.async_rate_limiter import AsyncRateLimiter
 from redis_manager import RedisManager
 from logging_config import central_logger
 from netra_backend.tests.unified.config import TestTier
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 

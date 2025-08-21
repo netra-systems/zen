@@ -19,14 +19,15 @@ from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 from redis.asyncio import Redis
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.models.thread import Thread
 from netra_backend.app.models.message import Message
 from netra_backend.tests.first_time_user_fixtures import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     websocket_manager, agent_dispatcher, 
     assert_websocket_message_flow, wait_for_agent_response,
     verify_user_in_database

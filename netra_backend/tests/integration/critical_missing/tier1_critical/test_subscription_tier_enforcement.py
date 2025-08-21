@@ -14,6 +14,10 @@ import pytest
 from typing import Dict, Any
 from datetime import datetime, timezone, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.integration.critical_missing.shared_infrastructure.containerized_services import ServiceOrchestrator
 from netra_backend.app.services.tool_permissions.tool_permission_service_main import ToolPermissionService
 from netra_backend.app.db.models_user import User
@@ -22,9 +26,6 @@ from netra_backend.app.schemas.UserPlan import UserPlan, PlanTier, PLAN_DEFINITI
 from netra_backend.app.core.exceptions_base import NetraException
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 # Define test-specific exception
 class AuthorizationError(NetraException):

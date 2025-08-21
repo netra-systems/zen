@@ -19,15 +19,16 @@ from typing import Dict, List, Optional, Any
 from unittest.mock import AsyncMock, patch, MagicMock
 from enum import Enum
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.circuit_breaker.circuit_breaker_service import CircuitBreakerService
 from netra_backend.app.services.circuit_breaker.circuit_state import CircuitState, CircuitBreaker
 from netra_backend.app.services.health_check_service import HealthCheckService
 from netra_backend.app.services.fallback_service import FallbackService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

@@ -24,12 +24,13 @@ from unittest.mock import Mock, patch, MagicMock
 import os
 
 from config_environment import ConfigEnvironment
-from netra_backend.app.schemas.Config import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.Config import (
+
+# Add project root to path
     AppConfig, 
     DevelopmentConfig, 
     ProductionConfig, 

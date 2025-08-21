@@ -23,12 +23,13 @@ from unittest.mock import Mock, patch, MagicMock
 from typing import Dict, Any
 
 from config_secrets_manager import ConfigSecretsManager
-from netra_backend.app.schemas.Config import AppConfig
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.schemas.Config import AppConfig
+
+# Add project root to path
 
 
 class TestConfigSecretsManager:

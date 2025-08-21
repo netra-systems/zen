@@ -23,15 +23,16 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from netra_backend.app.services.billing.cost_calculator import CostCalculator
 from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.billing.invoice_generator import InvoiceGenerator
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @dataclass

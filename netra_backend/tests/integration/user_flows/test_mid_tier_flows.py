@@ -21,6 +21,10 @@ import httpx
 from fastapi import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.models.team import Team
 from netra_backend.app.services.user_service import UserService as UsageService
 
@@ -28,9 +32,6 @@ from netra_backend.tests..test_helpers.user_flow_base import UserFlowTestBase
 from netra_backend.tests..fixtures.user_journey_data import BillingTestData
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 @pytest.mark.integration

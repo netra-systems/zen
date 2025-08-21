@@ -9,14 +9,15 @@ import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.migrations.migration_runner import MigrationRunner
 from netra_backend.app.db.health_checks import DatabaseHealthChecker
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestClickHouseConnectionPool:

@@ -12,6 +12,10 @@ from typing import Dict, Any
 from datetime import datetime
 from unittest.mock import Mock, MagicMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
 from netra_backend.app.schemas.core_enums import ExecutionStatus
 from netra_backend.app.agents.base.error_handler import ExecutionErrorHandler
@@ -19,9 +23,6 @@ from netra_backend.app.agents.base.monitoring import ExecutionMonitor
 from netra_backend.app.schemas.agent_models import DeepAgentState
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestExecutionContextHashableRegression:

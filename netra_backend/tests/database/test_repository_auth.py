@@ -9,15 +9,16 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import AsyncMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.repositories.user_repository import UserRepository
 from netra_backend.app.db.models_postgres import User
 from sqlalchemy import Column, String, Integer, JSON, DateTime, Float
 from netra_backend.app.db.base import Base
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 # Mock models for testing (these don't exist in the actual codebase)
 class Optimization(Base):

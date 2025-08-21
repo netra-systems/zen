@@ -6,12 +6,13 @@ from datetime import datetime, timedelta, UTC
 import json
 import numpy as np
 
-from netra_backend.app.services.demo_service import DemoService
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.demo_service import DemoService
+
+# Add project root to path
 class TestDemoService:
     """Test suite for DemoService."""
     

@@ -7,13 +7,14 @@ import json
 from typing import List, Dict, Any
 from dataclasses import asdict
 
-from netra_backend.tests.data_models import LLMEvent, WorkloadMetric, LogEntry
-from netra_backend.tests.data_generator import RealisticDataGenerator
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.data_models import LLMEvent, WorkloadMetric, LogEntry
+from netra_backend.tests.data_generator import RealisticDataGenerator
+
+# Add project root to path
 
 
 class ClickHouseTestData:

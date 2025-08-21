@@ -5,6 +5,9 @@ Imports all modular test files to maintain test discovery while enforcing archit
 """
 
 # Import all split test modules to ensure test discovery
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.core.test_async_resource_manager import TestAsyncResourceManager
 from netra_backend.tests.core.test_async_task_pool import TestAsyncTaskPool
 from netra_backend.tests.core.test_async_rate_limiter import TestAsyncRateLimiter
@@ -15,9 +18,6 @@ from netra_backend.tests.core.test_async_connection_pool import TestAsyncConnect
 from netra_backend.tests.core.test_async_globals_threadpool import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     TestGlobalInstances,
     TestRunInThreadpool,
     TestShutdownAsyncUtils,

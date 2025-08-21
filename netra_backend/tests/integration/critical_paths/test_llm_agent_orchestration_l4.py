@@ -24,12 +24,13 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
-from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.integration.critical_paths.l4_staging_critical_base import (
+
+# Add project root to path
     L4StagingCriticalPathTestBase, CriticalPathMetrics
 )
 # # # from agents.supervisor_agent_modern import ModernSupervisorAgent

@@ -14,12 +14,13 @@ from datetime import datetime
 from unittest.mock import Mock, AsyncMock, patch, MagicMock, call
 from collections import defaultdict
 
-from netra_backend.app.services.generation_service import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.generation_service import (
+
+# Add project root to path
     update_job_status,
     get_corpus_from_clickhouse,
     save_corpus_to_clickhouse

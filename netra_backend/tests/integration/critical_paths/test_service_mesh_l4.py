@@ -24,6 +24,10 @@ from datetime import datetime, timedelta
 import httpx
 import random
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.services.service_mesh.discovery_service import ServiceDiscoveryService
 from netra_backend.app.services.service_mesh.load_balancer import LoadBalancerService
 from netra_backend.app.services.service_mesh.circuit_breaker import CircuitBreakerService
@@ -31,9 +35,6 @@ from netra_backend.app.services.service_mesh.retry_policy import RetryPolicyServ
 from config import get_config
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

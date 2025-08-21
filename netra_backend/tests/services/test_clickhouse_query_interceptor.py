@@ -9,12 +9,13 @@ import logging
 from typing import Dict, List, Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from netra_backend.app.db.clickhouse_query_fixer import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.clickhouse_query_fixer import (
+
+# Add project root to path
     fix_clickhouse_array_syntax,
     ClickHouseQueryInterceptor
 )

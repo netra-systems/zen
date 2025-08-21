@@ -4,14 +4,15 @@ All functions are ≤8 lines, file is <300 lines
 """
 
 import pytest
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.fallback_handler import FallbackHandler, FallbackMetadata
 from netra_backend.app.services.fallback_response.models import FallbackContext, FailureReason
 from netra_backend.app.schemas.quality_types import ContentType
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestFallbackHandlerSimple:

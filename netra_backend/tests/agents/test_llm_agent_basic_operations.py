@@ -13,6 +13,10 @@ import uuid
 from datetime import datetime
 import time
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
 from llm.llm_manager import LLMManager
@@ -22,9 +26,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.tests.fixtures.llm_agent_fixtures import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     mock_llm_manager, mock_db_session, mock_websocket_manager,
     mock_tool_dispatcher, mock_persistence_service, supervisor_agent
 )

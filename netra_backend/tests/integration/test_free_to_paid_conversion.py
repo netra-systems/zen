@@ -16,6 +16,10 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import Mock, AsyncMock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.models_user import User, ToolUsageLog
 from netra_backend.app.schemas.UserPlan import PlanTier
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -25,9 +29,6 @@ import tempfile
 import asyncio
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 def mock_justified(reason):

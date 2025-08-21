@@ -7,14 +7,15 @@ import pytest
 import asyncio
 from unittest.mock import Mock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.async_connection_pool import AsyncConnectionPool
 from netra_backend.app.core.exceptions_service import ServiceError
 from netra_backend.tests.helpers.async_utils_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     create_connection_counter,
     create_close_connection,
     create_slow_connection_factory,

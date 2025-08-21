@@ -26,15 +26,16 @@ from testcontainers.redis import RedisContainer
 import httpx
 
 from test_framework.docker_testing.compose_manager import DockerComposeManager
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.configuration.base import get_unified_config
 from netra_backend.app.services.health_checker import HealthChecker
 from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from netra_backend.app.services.database.postgres_service import PostgresService
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

@@ -17,6 +17,10 @@ from typing import Dict, Any
 from unittest.mock import Mock, AsyncMock
 import tempfile
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.models_user import User, ToolUsageLog
 from netra_backend.app.db.models_agent import Thread, Message
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -24,9 +28,6 @@ from sqlalchemy.orm import sessionmaker
 from netra_backend.app.db.base import Base
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestFirstTimeUserJourneyCore:

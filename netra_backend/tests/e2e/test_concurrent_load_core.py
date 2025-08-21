@@ -6,12 +6,13 @@ Maximum 300 lines, functions ≤8 lines.
 
 import pytest
 import asyncio
-from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.e2e.concurrent_load_helpers import ConcurrentUserLoadTest
+
+# Add project root to path
 class TestConcurrentLoadCore:
     """Core concurrent user load tests"""
     

@@ -5,6 +5,10 @@ import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 from llm.client import ResilientLLMClient
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.client import ResilientDatabaseClient
 from netra_backend.app.services.external_api_client import ResilientHTTPClient
 from netra_backend.app.services.circuit_breaker_monitor import CircuitBreakerMonitor, AlertSeverity, CircuitBreakerEvent
@@ -22,9 +26,6 @@ from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 from netra_backend.app.core.circuit_breaker import CircuitBreaker, CircuitConfig
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSyntaxFix:

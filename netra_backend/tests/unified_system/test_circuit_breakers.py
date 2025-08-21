@@ -24,6 +24,10 @@ from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, patch, MagicMock
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.adaptive_circuit_breaker_core import AdaptiveCircuitBreaker
 from netra_backend.app.schemas.core_enums import CircuitBreakerState
 from netra_backend.app.schemas.core_models import CircuitBreakerConfig
@@ -32,9 +36,6 @@ from netra_backend.app.db.postgres import async_engine
 from netra_backend.app.logging_config import central_logger
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = central_logger.get_logger(__name__)
 

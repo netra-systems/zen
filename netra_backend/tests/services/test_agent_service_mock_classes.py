@@ -21,12 +21,13 @@ from datetime import datetime, UTC
 from typing import Dict, Any
 from enum import Enum
 
-from netra_backend.app.core.exceptions_base import NetraException
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.exceptions_base import NetraException
+
+# Add project root to path
 
 
 class AgentState(Enum):

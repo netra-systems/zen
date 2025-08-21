@@ -14,13 +14,14 @@ import pytest
 import uuid
 from datetime import datetime, timezone
 from test_framework.decorators import tdd_test
-from netra_backend.app.db.models_user import User
-from netra_backend.tests.first_time_user_fixtures import FirstTimeUserFixtures
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.models_user import User
+from netra_backend.tests.first_time_user_fixtures import FirstTimeUserFixtures
+
+# Add project root to path
 
 
 class TestFirstTimeUserExperience:

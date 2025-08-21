@@ -6,13 +6,14 @@ Split from test_async_utils.py for architectural compliance (≤300 lines, ≤8 
 import pytest
 from unittest.mock import Mock, AsyncMock
 
-from netra_backend.app.core.async_resource_manager import AsyncResourceManager
-from netra_backend.tests.helpers.async_utils_helpers import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.async_resource_manager import AsyncResourceManager
+from netra_backend.tests.helpers.async_utils_helpers import (
+
+# Add project root to path
     create_mock_resources,
     register_test_resources,
     create_failing_callback,

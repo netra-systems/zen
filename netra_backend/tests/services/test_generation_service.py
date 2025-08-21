@@ -1,13 +1,14 @@
 import pytest
 import time
 from unittest.mock import MagicMock, AsyncMock, patch
-from netra_backend.app.services.generation_service import update_job_status, get_corpus_from_clickhouse, save_corpus_to_clickhouse
-from netra_backend.app.services.job_store import job_store
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.generation_service import update_job_status, get_corpus_from_clickhouse, save_corpus_to_clickhouse
+from netra_backend.app.services.job_store import job_store
+
+# Add project root to path
 async def test_update_job_status():
     # Arrange
     job_id = "test_job"

@@ -12,13 +12,14 @@ from datetime import datetime, timezone, timedelta
 from unittest.mock import Mock, patch, AsyncMock, MagicMock
 from typing import Dict, List, Optional
 
-from netra_backend.app.startup.status_manager import StartupStatusManager
-from netra_backend.app.schemas.startup_types import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.startup.status_manager import StartupStatusManager
+from netra_backend.app.schemas.startup_types import (
+
+# Add project root to path
     StartupStatus, LastStartup, MigrationStatus, ServiceConfig,
     CrashEntry, HealthCheckHistory, ServiceType, Environment
 )

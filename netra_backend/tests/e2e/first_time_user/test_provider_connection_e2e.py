@@ -14,13 +14,14 @@ These tests validate Tests 3, 4, and 6 from the critical conversion paths.
 import pytest
 from datetime import datetime, timezone
 
-from netra_backend.tests.e2e.conftest import *
-from netra_backend.tests.helpers import FirstTimeUserTestHelpers
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.e2e.conftest import *
+from netra_backend.tests.helpers import FirstTimeUserTestHelpers
+
+# Add project root to path
 
 
 class TestProviderConnectionE2E:

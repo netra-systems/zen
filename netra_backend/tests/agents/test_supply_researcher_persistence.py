@@ -7,15 +7,16 @@ import pytest
 from unittest.mock import Mock, AsyncMock, patch
 from decimal import Decimal
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.db.models_postgres import SupplyUpdateLog
 from netra_backend.tests.supply_researcher_fixtures import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     agent, mock_db, mock_supply_service, anomaly_test_data
 )
 

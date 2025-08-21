@@ -7,12 +7,13 @@ from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock, patch
 from enum import Enum
 
-from netra_backend.app.services.job_store import JobStore, job_store
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.job_store import JobStore, job_store
+
+# Add project root to path
 class TestJobStore:
     """Test basic job store functionality."""
 

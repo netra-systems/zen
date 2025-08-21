@@ -21,12 +21,13 @@ import time
 from unittest.mock import Mock, AsyncMock, patch
 from typing import Dict, Any
 
-from netra_backend.app.db.fast_startup_connection_manager import (
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.db.fast_startup_connection_manager import (
+
+# Add project root to path
     FastStartupConnectionManager, 
     ConnectionHealth,
     connection_registry

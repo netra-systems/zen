@@ -2,6 +2,10 @@
 
 import pytest
 from unittest.mock import AsyncMock, Mock
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.agents.base import BaseSubAgent
@@ -10,9 +14,6 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class TestSupervisorAgentInitialization:

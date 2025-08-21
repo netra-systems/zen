@@ -11,6 +11,10 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 import random
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
@@ -18,9 +22,6 @@ from netra_backend.app.services.apex_optimizer_agent.tools.tool_dispatcher impor
 from sqlalchemy.ext.asyncio import AsyncSession
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 
 class BusinessValueFixtures:

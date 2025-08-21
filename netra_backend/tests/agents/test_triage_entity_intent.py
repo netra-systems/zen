@@ -5,14 +5,15 @@ Refactored to comply with 25-line function limit and 450-line file limit
 
 import pytest
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.triage_sub_agent import ExtractedEntities
 from netra_backend.tests.helpers.triage_test_helpers import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     TriageMockHelpers,
     EntityExtractionHelpers,
     IntentHelpers

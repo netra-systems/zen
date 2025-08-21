@@ -15,13 +15,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError, DisconnectionError
 from sqlalchemy import select, text
 
-from netra_backend.app.services.database.base_repository import BaseRepository
-from netra_backend.app.core.exceptions_base import NetraException
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.services.database.base_repository import BaseRepository
+from netra_backend.app.core.exceptions_base import NetraException
+
+# Add project root to path
 
 
 class MockDatabaseModel:

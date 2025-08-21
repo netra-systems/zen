@@ -21,6 +21,10 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
@@ -30,9 +34,6 @@ from netra_backend.app.core.exceptions_base import NetraException
 from netra_backend.app.schemas.registry import AgentMessage, TaskPriority
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

@@ -23,12 +23,13 @@ from unittest.mock import patch
 import redis.asyncio as redis
 from redis_manager import RedisManager
 from logging_config import central_logger
-from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.tests.helpers.redis_l3_helpers import RedisContainer, verify_redis_connection
+
+# Add project root to path
 
 logger = central_logger.get_logger(__name__)
 

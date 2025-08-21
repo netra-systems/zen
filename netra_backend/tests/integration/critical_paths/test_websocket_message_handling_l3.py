@@ -16,12 +16,13 @@ import uuid
 import base64
 
 from test_framework.test_patterns import L3IntegrationTest
-from netra_backend.app.core.redis_client import RedisManager
-
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
+from netra_backend.app.core.redis_client import RedisManager
+
+# Add project root to path
 
 
 class TestWebSocketMessageHandling(L3IntegrationTest):

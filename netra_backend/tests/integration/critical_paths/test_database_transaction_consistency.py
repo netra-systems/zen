@@ -26,14 +26,15 @@ from typing import Dict, List, Optional, Any
 from datetime import datetime
 from decimal import Decimal
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.app.db.clickhouse import get_clickhouse_client
 from netra_backend.app.db.postgres_core import async_engine, async_session_factory
 from netra_backend.app.core.configuration.database import DatabaseConfigManager
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
 
 logger = logging.getLogger(__name__)
 

@@ -30,14 +30,15 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass, field
 
+# Add project root to path
+from netra_backend.tests.test_utils import setup_test_path
+setup_test_path()
+
 from netra_backend.tests.l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
 from netra_backend.app.schemas.auth_types import AuditLog, AuthProvider, TokenType
 from netra_backend.app.schemas.registry import (
 
 # Add project root to path
-from netra_backend.tests.test_utils import setup_test_path
-setup_test_path()
-
     CorpusAuditRecord, CorpusAuditAction, CorpusAuditStatus, 
     CorpusAuditMetadata, CorpusAuditSearchFilter, CorpusAuditReport
 )
