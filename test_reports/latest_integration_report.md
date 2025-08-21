@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:56:34.379471  
+**Generated:** 2025-08-21T12:05:59.391415  
 **Test Level:** integration - Integration tests for component interaction (3-5 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.96s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 33.73s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 18.71s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 8.24s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,8 +28,8 @@
 - **Purpose:** Feature validation, API testing
 - **Timeout:** 300s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 40.69s
-- **Exit Code:** 15
+- **Total Duration:** 26.95s
+- **Exit Code:** 143
 
 ### Backend Configuration
 ```
@@ -59,42 +59,38 @@ Test Configuration:
 Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini integration_tests netra_backend/tests/routes -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
 ================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'langsmith': '0.4.10', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.5.3, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, langsmith-0.4.10, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+created: 4/4 workers
+4 workers [0 items]
+
+scheduling tests via LoadScheduling
+
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.99s
+BAD TEST DETECTION REPORT
+================================================================================
+
+Total Bad Tests Detected: 0
+Total Test Runs Analyzed: 122
+
+================================================================================
+
+
+[33m============================ [33mno tests ran[0m[33m in 9.48s[0m[33m ============================[0m
+================================================================================
+[FAIL] TESTS FAILED with exit code 5 after 17.07s
 ================================================================================
 
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
   warnings.warn(
 C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
   warnings.warn(
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
-netra_backend\tests\conftest.py:59: in <module>
-    from netra_backend.app.main import app
-netra_backend\app\main.py:93: in <module>
-    app = create_app()
-          ^^^^^^^^^^^^
-netra_backend\app\core\app_factory.py:127: in create_app
-    _configure_app_routes(app)
-netra_backend\app\core\app_factory.py:140: in _configure_app_routes
-    register_api_routes(app)
-netra_backend\app\core\app_factory.py:97: in register_api_routes
-    _import_and_register_routes(app)
-netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
-    route_modules = import_all_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:124: in import_all_route_modules
-    factory_routers = import_factory_routers()
-                      ^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:99: in import_factory_routers
-    status_routers = _import_factory_status_routers()
-                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:106: in _import_factory_status_routers
-    from netra_backend.app.routes.factory_status import router as factory_status_router
-netra_backend\app\routes\factory_status\__init__.py:5: in <module>
-    from netra_backend.app.routes.factory_status.router import router
-netra_backend\app\routes\factory_status\router.py:16: in <module>
-    from netra_backend.app.routes.database_monitoring.dashboard_routes import get_dashboard_summary_handler, test_factory_status_handler
-E   ImportError: cannot import name 'get_dashboard_summary_handler' from 'netra_backend.app.routes.database_monitoring.dashboard_routes' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\routes\database_monitoring\dashboard_routes.py)
 
 ```
 
@@ -104,21 +100,6 @@ E   ImportError: cannot import name 'get_dashboard_summary_handler' from 'netra_
 > netra-frontend-apex-v1@0.1.0 test
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
 
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/integration/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 15
-================================================================================
-
-Cleaning up test processes...
 
 
 ```

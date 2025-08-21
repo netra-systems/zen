@@ -22,7 +22,7 @@ from netra_backend.app.agents.triage_sub_agent import (
     UserIntent
 )
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from redis_manager import RedisManager
 

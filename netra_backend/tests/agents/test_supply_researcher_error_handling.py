@@ -12,7 +12,7 @@ setup_test_path()
 from netra_backend.app.agents.supply_researcher_sub_agent import SupplyResearcherAgent
 from netra_backend.app.services.supply_research_service import SupplyResearchService
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 
 # Add project root to path
 

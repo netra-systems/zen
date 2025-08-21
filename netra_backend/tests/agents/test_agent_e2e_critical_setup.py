@@ -22,7 +22,7 @@ from schemas import (
     SubAgentLifecycle, WebSocketMessage, AgentStarted, 
     SubAgentUpdate, AgentCompleted, SubAgentState
 )
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.websocket.message_handler import BaseMessageHandler
 from netra_backend.app.services.state_persistence import state_persistence_service

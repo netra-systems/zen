@@ -18,7 +18,7 @@ setup_test_path()
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from ws_manager import WebSocketManager
 from schemas import SubAgentLifecycle
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel

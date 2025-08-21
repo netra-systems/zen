@@ -20,7 +20,7 @@ setup_test_path()
 from netra_backend.app.services.security_service import SecurityService
 from netra_backend.app.services.key_manager import KeyManager
 from netra_backend.app.config import settings
-from netra_backend.tests.test_route_fixtures import (
+from netra_backend.tests.routes.test_route_fixtures import (
 
 # Add project root to path
     CommonResponseValidators,

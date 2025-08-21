@@ -419,3 +419,12 @@ class SecretManager:
             "gcp_available": self._is_gcp_available(),
             "cache_valid": self._is_cache_valid()
         }
+    
+    def load_all_secrets(self) -> Dict[str, Any]:
+        """Load all secrets from configured sources.
+        
+        Public method for UnifiedSecretManager compatibility.
+        Returns a copy of the loaded secrets.
+        """
+        self._load_secrets_from_sources()
+        return dict(self._secret_cache)

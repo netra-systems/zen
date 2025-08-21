@@ -46,7 +46,7 @@ ExecutionContext = dict
 ExecutionResult = dict
 ExecutionContext = dict  # Use dict as placeholder
 ExecutionResult = dict   # Use dict as placeholder
-# # from llm.llm_manager import LLMManager
+# # from netra_backend.app.llm.llm_manager import LLMManager
 LLMManager = AsyncMock
 from netra_backend.app.core.configuration.base import get_unified_config
 # # # from agents.tool_dispatcher import ToolDispatcher

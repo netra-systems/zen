@@ -17,7 +17,7 @@ from contextlib import asynccontextmanager
 from datetime import datetime
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.monitoring.metrics_collector import MetricsCollector, PerformanceMetric
+from netra_backend.app.monitoring.models import MetricsCollector, PerformanceMetric
 from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager
 from netra_backend.app.monitoring.dashboard import PerformanceDashboard
 

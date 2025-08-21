@@ -13,7 +13,7 @@ setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 from netra_backend.app.agents.triage_sub_agent import (

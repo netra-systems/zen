@@ -2,7 +2,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock
-from main import app
+from netra_backend.app.main import app
 from auth_integration.auth import require_admin, get_current_user
 
 @pytest.fixture

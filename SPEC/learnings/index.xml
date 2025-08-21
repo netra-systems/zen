@@ -70,6 +70,13 @@
             <critical-takeaway>Configuration validation is MANDATORY: validate_configuration() must pass before deployment.</critical-takeaway>
             <critical-takeaway>Secrets use unified SecretManager with GCP Secret Manager (staging/production) or local files (dev).</critical-takeaway>
         </category>
+        
+        <category name="Secret Manager Interface" path="SPEC/learnings/secret_manager_interface.xml" keywords="SecretManager, load_all_secrets, Interface Contract, UnifiedSecretManager">
+            <critical-takeaway>SecretManager MUST provide public load_all_secrets() method for UnifiedSecretManager compatibility.</critical-takeaway>
+            <critical-takeaway>Never access private methods (_method) from external components - use public interfaces.</critical-takeaway>
+            <critical-takeaway>Secret loading failures should log warnings but NOT crash the application.</critical-takeaway>
+            <critical-takeaway>Always write interface contract tests when creating component dependencies.</critical-takeaway>
+        </category>
 
         <category name="CORS/Dynamic Ports" path="SPEC/learnings/cors_dynamic_ports.xml" keywords="CORS, Dynamic Ports, Localhost, Development">
             <critical-takeaway>CRITICAL: CORS configuration MUST support dynamic ports in development. Pattern matching for localhost with ANY port must be checked FIRST.</critical-takeaway>

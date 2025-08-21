@@ -8,7 +8,7 @@ Maintains 25-line function limit and focused functionality.
 from typing import Dict, Any
 from fastapi import FastAPI
 from netra_backend.app.logging_config import central_logger as logger
-from netra_backend.app.checker import StartupChecker
+from netra_backend.app.startup_checks.checker import StartupChecker
 from netra_backend.app.core.configuration import unified_config_manager
 
 

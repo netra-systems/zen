@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:44:49.802251  
+**Generated:** 2025-08-21T12:04:14.969724  
 **Test Level:** real_e2e - Full end-to-end tests with real LLM and services (20-30 minutes)  
 
 ## 1. Test Summary
@@ -18,7 +18,7 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 7.52s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 20.42s | [FAILED] |
 | Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
@@ -28,8 +28,8 @@
 - **Purpose:** Complete user journey validation with actual services
 - **Timeout:** 1800s
 - **Coverage Enabled:** No
-- **Total Duration:** 7.52s
-- **Exit Code:** 4
+- **Total Duration:** 20.42s
+- **Exit Code:** 5
 
 ### Backend Configuration
 ```
@@ -59,39 +59,38 @@ Test Configuration:
 Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -vv -n 2 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m real_e2e
 ================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'langsmith': '0.4.10', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.5.3, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, langsmith-0.4.10, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+created: 2/2 workers
+2 workers [0 items]
+
+scheduling tests via LoadScheduling
+
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 6.49s
+BAD TEST DETECTION REPORT
 ================================================================================
 
-2025-08-21 11:44:47.889 | ERROR    | logging:handle:1028 | Error loading blocked IPs config: [Errno 2] No such file or directory: 'C:\\Users\\antho\\OneDrive\\Desktop\\Netra\\netra-core-generation-1\\netra_backend\\config\\blocked_ips.json'
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
-netra_backend\tests\conftest.py:59: in <module>
-    from netra_backend.app.main import app
-netra_backend\app\main.py:93: in <module>
-    app = create_app()
-          ^^^^^^^^^^^^
-netra_backend\app\core\app_factory.py:127: in create_app
-    _configure_app_routes(app)
-netra_backend\app\core\app_factory.py:140: in _configure_app_routes
-    register_api_routes(app)
-netra_backend\app\core\app_factory.py:97: in register_api_routes
-    _import_and_register_routes(app)
-netra_backend\app\core\app_factory.py:102: in _import_and_register_routes
-    route_modules = import_all_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:122: in import_all_route_modules
-    basic_modules = import_basic_route_modules()
-                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:5: in import_basic_route_modules
-    route_imports = _import_core_routes()
-                    ^^^^^^^^^^^^^^^^^^^^^
-netra_backend\app\core\app_factory_route_imports.py:11: in _import_core_routes
-    from netra_backend.app.routes import (supply, generation, admin, references, health,
-netra_backend\app\routes\unified_tools\__init__.py:5: in <module>
-    from netra_backend.app.routes.unified_tools.router import router
-netra_backend\app\routes\unified_tools\router.py:14: in <module>
-    from netra_backend.app.routes.unified_tools.models import ToolExecutionRequest, ToolAvailabilityResponse, UserPlanResponse
-E   ModuleNotFoundError: No module named 'netra_backend.app.routes.unified_tools.models'
+Total Bad Tests Detected: 0
+Total Test Runs Analyzed: 119
+
+================================================================================
+
+
+[33m=========================== [33mno tests ran[0m[33m in 10.96s[0m[33m ============================[0m
+================================================================================
+[FAIL] TESTS FAILED with exit code 5 after 19.13s
+================================================================================
+
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
+  warnings.warn(
 
 ```
 

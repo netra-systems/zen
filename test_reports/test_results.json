@@ -1,23 +1,23 @@
 {
   "metadata": {
     "version": "2.0",
-    "last_update": "2025-08-21T11:56:34.371507",
-    "total_runs": 63
+    "last_update": "2025-08-21T12:05:59.385837",
+    "total_runs": 69
   },
   "current_state": {
     "overall_status": "[UNKNOWN]",
     "last_run_level": "integration",
-    "last_run_time": "2025-08-21T11:56:34.371507",
-    "last_exit_code": 15
+    "last_run_time": "2025-08-21T12:05:59.385837",
+    "last_exit_code": 143
   },
   "known_test_counts": {
     "integration:frontend": {
-      "total": 81,
-      "passed": 22,
-      "failed": 59,
+      "total": 80,
+      "passed": 20,
+      "failed": 60,
       "skipped": 0,
       "errors": 0,
-      "last_update": "2025-08-21T11:55:01.791739"
+      "last_update": "2025-08-21T11:58:49.036224"
     }
   },
   "category_results": {
@@ -36,7 +36,7 @@
       "actual": 0,
       "passed": 0,
       "failed": 0,
-      "last_run": "2025-08-21T11:33:01.941801",
+      "last_run": "2025-08-21T11:59:14.580303",
       "status": "[NO TESTS]"
     },
     "integration": {
@@ -45,7 +45,7 @@
       "actual": 0,
       "passed": 0,
       "failed": 0,
-      "last_run": "2025-08-21T11:56:34.371507",
+      "last_run": "2025-08-21T12:05:59.385837",
       "status": "[NO TESTS]"
     },
     "critical": {
@@ -162,7 +162,7 @@
       "actual": 0,
       "passed": 0,
       "failed": 0,
-      "last_run": "2025-08-21T10:58:52.802341",
+      "last_run": "2025-08-21T12:01:18.344201",
       "status": "[NO TESTS]"
     }
   },
@@ -175,12 +175,12 @@
         "failed": 0,
         "skipped": 0,
         "errors": 0,
-        "import_errors": 2,
-        "status": "import_error",
-        "test_files": 0
+        "import_errors": 0,
+        "test_files": 0,
+        "status": "no_tests"
       },
-      "last_duration": 6.963200569152832,
-      "last_run": "2025-08-21T11:56:34.371507"
+      "last_duration": 18.710582494735718,
+      "last_run": "2025-08-21T12:05:59.385837"
     },
     "frontend": {
       "status": "failed",
@@ -194,8 +194,8 @@
         "test_files": 0,
         "status": "unknown"
       },
-      "last_duration": 33.72832775115967,
-      "last_run": "2025-08-21T11:56:34.371507"
+      "last_duration": 8.236271142959595,
+      "last_run": "2025-08-21T12:05:59.385837"
     },
     "e2e": {
       "status": "pending",
@@ -207,95 +207,11 @@
         "errors": 0
       },
       "last_duration": 0,
-      "last_run": "2025-08-21T11:56:34.371507"
+      "last_run": "2025-08-21T12:05:59.385837"
     }
   },
   "failing_tests": [],
   "test_history": [
-    {
-      "timestamp": "2025-08-21T11:25:57.361042",
-      "level": "unit",
-      "exit_code": 15,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 81,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-21T11:26:24.779163",
-      "level": "real_e2e",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 81,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-21T11:28:07.780829",
-      "level": "integration",
-      "exit_code": 4,
-      "status": "[FAILED] 59 failures",
-      "statistics": {
-        "total_tests_known": 81,
-        "total_tests_run": 81,
-        "total_passed": 22,
-        "total_failed": 59,
-        "total_skipped": 0,
-        "pass_rate": 27.16
-      }
-    },
-    {
-      "timestamp": "2025-08-21T11:28:33.390164",
-      "level": "real_e2e",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 81,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-21T11:29:10.370745",
-      "level": "unit",
-      "exit_code": 255,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 81,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
-    {
-      "timestamp": "2025-08-21T11:29:23.132845",
-      "level": "real_e2e",
-      "exit_code": 4,
-      "status": "[UNKNOWN]",
-      "statistics": {
-        "total_tests_known": 81,
-        "total_tests_run": 0,
-        "total_passed": 0,
-        "total_failed": 0,
-        "total_skipped": 0,
-        "pass_rate": 0.0
-      }
-    },
     {
       "timestamp": "2025-08-21T11:30:01.056368",
       "level": "unit",
@@ -491,10 +407,94 @@
         "total_skipped": 0,
         "pass_rate": 0.0
       }
+    },
+    {
+      "timestamp": "2025-08-21T11:58:49.036224",
+      "level": "integration",
+      "exit_code": 4,
+      "status": "[FAILED] 60 failures",
+      "statistics": {
+        "total_tests_known": 80,
+        "total_tests_run": 80,
+        "total_passed": 20,
+        "total_failed": 60,
+        "total_skipped": 0,
+        "pass_rate": 25.0
+      }
+    },
+    {
+      "timestamp": "2025-08-21T11:59:14.580303",
+      "level": "unit",
+      "exit_code": 255,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 80,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-21T12:01:18.344201",
+      "level": "comprehensive",
+      "exit_code": 15,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 80,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-21T12:03:38.314504",
+      "level": "integration",
+      "exit_code": 15,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 80,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-21T12:04:14.964580",
+      "level": "real_e2e",
+      "exit_code": 5,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 80,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
+    },
+    {
+      "timestamp": "2025-08-21T12:05:59.385837",
+      "level": "integration",
+      "exit_code": 143,
+      "status": "[UNKNOWN]",
+      "statistics": {
+        "total_tests_known": 80,
+        "total_tests_run": 0,
+        "total_passed": 0,
+        "total_failed": 0,
+        "total_skipped": 0,
+        "pass_rate": 0.0
+      }
     }
   ],
   "statistics": {
-    "total_tests_known": 81,
+    "total_tests_known": 80,
     "total_tests_run": 0,
     "total_passed": 0,
     "total_failed": 0,

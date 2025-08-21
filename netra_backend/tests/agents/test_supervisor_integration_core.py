@@ -12,7 +12,7 @@ setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.admin_tool_dispatcher import AdminToolDispatcher
 

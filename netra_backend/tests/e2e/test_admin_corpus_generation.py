@@ -26,7 +26,7 @@ from netra_backend.app.schemas.admin_corpus_messages import (
     CorpusOperationStatus, CorpusErrorMessage
 )
 from netra_backend.app.agents.corpus_admin.agent import CorpusAdminSubAgent
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 

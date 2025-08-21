@@ -23,7 +23,7 @@ from netra_backend.app.agents.data_sub_agent.performance_analyzer import Perform
 from netra_backend.app.services.llm.cost_optimizer import LLMCostOptimizer
 from netra_backend.app.agents.data_sub_agent.data_validator import DataValidator
 
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.schemas.strict_types import TypedAgentResult

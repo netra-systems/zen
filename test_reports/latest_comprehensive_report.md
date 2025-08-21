@@ -1,6 +1,6 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T10:58:52.807364  
+**Generated:** 2025-08-21T12:01:18.349742  
 **Test Level:** comprehensive - Full test suite with coverage including staging tests (30-45 minutes)  
 
 ## 1. Test Summary
@@ -18,8 +18,8 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 4.48s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.93s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 19.01s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 24.54s | [FAILED] |
 
 ## 3. Environment and Configuration
 
@@ -28,7 +28,7 @@
 - **Purpose:** Pre-release validation, full system testing including staging environment
 - **Timeout:** 2700s
 - **Coverage Enabled:** Yes
-- **Total Duration:** 5.41s
+- **Total Duration:** 43.55s
 - **Exit Code:** 15
 
 ### Backend Configuration
@@ -59,40 +59,41 @@ Test Configuration:
 Running command:
   pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -v -n 6 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings --html=reports/tests/report.html --self-contained-html
 ================================================================================
+[1m============================= test session starts =============================[0m
+platform win32 -- Python 3.12.4, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\antho\miniconda3\python.exe
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.4', 'Platform': 'Windows-11-10.0.26100-SP0', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'anyio': '4.9.0', 'Faker': '37.5.3', 'asyncio': '1.1.0', 'cov': '6.2.1', 'mock': '3.14.1', 'xdist': '3.8.0', 'langsmith': '0.4.10', 'html': '4.1.1', 'json-report': '1.5.0', 'metadata': '3.1.1', 'timeout': '2.4.0', 'typeguard': '4.4.4'}}
+rootdir: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1
+configfile: pytest.ini
+plugins: anyio-4.9.0, Faker-37.5.3, asyncio-1.1.0, cov-6.2.1, mock-3.14.1, xdist-3.8.0, langsmith-0.4.10, html-4.1.1, json-report-1.5.0, metadata-3.1.1, timeout-2.4.0, typeguard-4.4.4
+asyncio: mode=Mode.AUTO, asyncio_default_fixture_loop_scope=function, asyncio_default_test_loop_scope=function
+created: 6/6 workers
+6 workers [0 items]
+
+scheduling tests via LoadScheduling
+
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 3.80s
+BAD TEST DETECTION REPORT
+================================================================================
+
+Total Bad Tests Detected: 0
+Total Test Runs Analyzed: 113
+
+================================================================================
+
+
+- Generated html report: file:///C:/Users/antho/OneDrive/Desktop/Netra/netra-core-generation-1/reports/tests/report.html -
+[33m=========================== [33mno tests ran[0m[33m in 10.85s[0m[33m ============================[0m
+================================================================================
+[FAIL] TESTS FAILED with exit code 5 after 17.90s
 
 [Report] HTML Report: reports/tests/report.html
 ================================================================================
 
-ImportError while loading conftest 'C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\tests\conftest.py'.
-netra_backend\tests\conftest.py:59: in <module>
-    from netra_backend.app.routes.mcp.main import app
-netra_backend\app\routes\mcp\__init__.py:8: in <module>
-    from netra_backend.app.routes.mcp.main import router
-netra_backend\app\routes\mcp\main.py:13: in <module>
-    from netra_backend.app.auth_integration.auth import get_current_user, get_current_user_optional
-netra_backend\app\auth_integration\__init__.py:87: in <module>
-    from netra_backend.app.services.synthetic_data.validators import (
-netra_backend\app\services\synthetic_data\__init__.py:5: in <module>
-    from netra_backend.app.services.synthetic_data.core_service import SyntheticDataService, synthetic_data_service
-netra_backend\app\services\synthetic_data\core_service.py:9: in <module>
-    from netra_backend.app.services.synthetic_data.synthetic_data_service_main import SyntheticDataService, synthetic_data_service
-netra_backend\app\services\synthetic_data\synthetic_data_service_main.py:7: in <module>
-    from netra_backend.app.services.synthetic_data.generation_coordinator import GenerationCoordinator
-netra_backend\app\services\synthetic_data\generation_coordinator.py:8: in <module>
-    from netra_backend.app.services.synthetic_data.core_service_base import CoreServiceBase
-netra_backend\app\services\synthetic_data\core_service_base.py:13: in <module>
-    from netra_backend.app.services.synthetic_data.job_manager import JobManager
-netra_backend\app\services\synthetic_data\job_manager.py:15: in <module>
-    from netra_backend.app.services.quality_monitoring.metrics import calculate_generation_rate
-netra_backend\app\services\quality_monitoring\__init__.py:3: in <module>
-    from netra_backend.app.services.quality_monitoring.service import QualityMonitoringService
-netra_backend\app\services\quality_monitoring\service.py:17: in <module>
-    from netra_backend.app.services.quality_monitoring.analytics import TrendAnalyzer
-netra_backend\app\services\quality_monitoring\analytics.py:10: in <module>
-    from netra_backend.app.services.apex_optimizer_agent.models import QualityTrend, MetricType, AgentQualityProfile
-E   ImportError: cannot import name 'QualityTrend' from 'netra_backend.app.services.apex_optimizer_agent.models' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\apex_optimizer_agent\models.py)
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataSample" shadows an attribute in parent "BaseModel"
+  warnings.warn(
+C:\Users\antho\miniconda3\Lib\site-packages\pydantic\_internal\_fields.py:198: UserWarning: Field name "schema" in "DataCatalog" shadows an attribute in parent "BaseModel"
+  warnings.warn(
 
 ```
 
@@ -103,15 +104,6 @@ E   ImportError: cannot import name 'QualityTrend' from 'netra_backend.app.servi
 > node run-jest.js --config jest.config.simple.cjs --forceExit --detectOpenHandles --coverage --coverageDirectory=../reports/frontend-coverage
 
 
-Error: Can't find a root directory while resolving a config file path.
-Provided path to resolve: jest.config.simple.cjs
-cwd: C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend
-    at resolveConfigPath (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\node_modules\jest-config\build\index.js:2448:11)
-    at readInitialOptions (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\node_modules\jest-config\build\index.js:1138:55)
-    at readConfig (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\node_modules\jest-config\build\index.js:918:13)
-    at readConfigs (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\node_modules\jest-config\build\index.js:1168:32)
-    at runCLI (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\node_modules\@jest\core\build\index.js:1393:43)
-    at Object.run (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\frontend\node_modules\jest-cli\build\index.js:656:34)
 
 ```
 

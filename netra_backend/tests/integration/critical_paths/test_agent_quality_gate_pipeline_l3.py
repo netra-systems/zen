@@ -34,7 +34,7 @@ from netra_backend.app.services.quality_gate.quality_gate_core import QualityGat
 from netra_backend.app.services.quality_gate.quality_gate_models import ContentType, QualityLevel, QualityMetrics, ValidationResult
 from redis_manager import RedisManager
 from schemas import UserInDB
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.core.exceptions_base import NetraException, QualityGateException
 from test_framework.mock_utils import mock_justified
 

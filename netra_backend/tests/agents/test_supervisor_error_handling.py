@@ -21,7 +21,7 @@ from netra_backend.app.agents.supervisor.execution_context import (
 )
 from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentLifecycle
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 
 from netra_backend.tests.helpers.supervisor_test_helpers import (

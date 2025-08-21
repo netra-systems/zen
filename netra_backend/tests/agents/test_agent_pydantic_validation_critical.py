@@ -26,7 +26,7 @@ from netra_backend.app.agents.data_sub_agent.models import (
 from netra_backend.app.agents.state import (
     OptimizationsResult, ActionPlanResult, PlanStep, DeepAgentState, AgentMetadata
 )
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsCoreSubAgent
 

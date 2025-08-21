@@ -20,7 +20,7 @@ from netra_backend.app.agents.optimizations_core_sub_agent import OptimizationsC
 from netra_backend.app.agents.actions_to_meet_goals_sub_agent import ActionsToMeetGoalsSubAgent
 from netra_backend.app.agents.reporting_sub_agent import ReportingSubAgent
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from ws_manager import WebSocketManager
 from schemas import SubAgentLifecycle
 

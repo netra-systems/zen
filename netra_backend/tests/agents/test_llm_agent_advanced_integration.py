@@ -14,7 +14,7 @@ from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.tests.test_fixtures import mock_db_session, mock_llm_manager, mock_websocket_manager, mock_tool_dispatcher
 from netra_backend.tests.test_helpers import (
 

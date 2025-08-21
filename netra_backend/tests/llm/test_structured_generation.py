@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 import json
 
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 # Add project root to path
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()

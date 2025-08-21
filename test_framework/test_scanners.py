@@ -48,9 +48,22 @@ class TestScanners:
     def _get_backend_test_directories(self, path: Path) -> List[Path]:
         """Return backend test directories to scan"""
         test_dirs = []
+        
+        # Primary location: netra_backend/tests
+        netra_backend_tests = path / "netra_backend" / "tests"
+        if netra_backend_tests.exists():
+            test_dirs.append(netra_backend_tests)
+        
+        # Legacy location: app/tests (kept for backward compatibility)
         app_tests = path / "app" / "tests"
         if app_tests.exists():
             test_dirs.append(app_tests)
+        
+        # Additional location: tests (root level tests)
+        root_tests = path / "tests"
+        if root_tests.exists():
+            test_dirs.append(root_tests)
+        
         return test_dirs
     
     def _scan_backend_test_directories(self, test_dirs: List[Path], discovered: defaultdict):

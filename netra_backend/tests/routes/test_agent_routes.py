@@ -17,7 +17,7 @@ from typing import Optional
 from netra_backend.tests.test_utils import setup_test_path
 setup_test_path()
 
-from netra_backend.tests.test_route_fixtures import (
+from netra_backend.tests.routes.test_route_fixtures import (
 
 # Add project root to path
     agent_test_client,

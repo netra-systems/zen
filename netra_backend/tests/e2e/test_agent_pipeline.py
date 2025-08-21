@@ -39,7 +39,7 @@ from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.data_sub_agent.agent import DataSubAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.services.agent_service import AgentService
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.schemas.websocket_message_types import WebSocketMessage
 
 # Add project root to path

@@ -37,7 +37,7 @@ os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.agents.base_agent import BaseSubAgent
 from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from logging_config import central_logger
 from test_framework.mock_utils import mock_justified
 

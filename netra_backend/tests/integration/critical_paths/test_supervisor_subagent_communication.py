@@ -30,7 +30,7 @@ from netra_backend.app.agents.base import BaseSubAgent
 from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
 from netra_backend.app.schemas.registry import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from ws_manager import WebSocketManager
 from redis_manager import RedisManager
 from schemas import SubAgentLifecycle, WebSocketMessage, AgentStarted, AgentCompleted

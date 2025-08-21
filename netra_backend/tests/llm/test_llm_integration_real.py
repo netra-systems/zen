@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from pydantic import BaseModel, Field, ValidationError
 from typing import List, Dict, Any, Optional
 
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from llm.llm_response_processing import (
 
 # Add project root to path

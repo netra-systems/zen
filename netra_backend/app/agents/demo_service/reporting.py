@@ -13,9 +13,11 @@
 from typing import Dict, Any, Optional
 from datetime import datetime, UTC
 
-from netra_backend.app.agents.base import BaseSubAgent, BaseExecutionInterface, ExecutionContext, ExecutionResult
-# FIXME: # FIXME: BaseExecutionEngine not available
-# FIXME: # from netra_backend.app.agents.base import BaseExecutionEngine, ExecutionMonitor, ReliabilityManager
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.base.interface import BaseExecutionInterface, ExecutionContext, ExecutionResult
+# FIXME: from netra_backend.app.agents.base.executor import BaseExecutionEngine
+from netra_backend.app.agents.base.monitoring import ExecutionMonitor
+from netra_backend.app.agents.base.reliability_manager import ReliabilityManager
 from netra_backend.app.agents.base.circuit_breaker import CircuitBreakerConfig
 from netra_backend.app.schemas.shared_types import RetryConfig
 from netra_backend.app.llm.llm_manager import LLMManager

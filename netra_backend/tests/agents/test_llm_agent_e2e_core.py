@@ -10,6 +10,11 @@ BVJ:
 4. Revenue Impact: Maintains customer trust and prevents churn from failed optimizations
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+
 import pytest
 import pytest_asyncio
 import asyncio
@@ -25,7 +30,7 @@ setup_test_path()
 
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 from netra_backend.app.agents.state import DeepAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -189,7 +194,7 @@ async def test_basic_error_handling():
 
 async def test_mock_infrastructure_creation():
     """Test mock infrastructure creation helpers"""
-    from .fixtures.llm_agent_fixtures import create_mock_infrastructure
+    from netra_backend.fixtures.llm_agent_fixtures import create_mock_infrastructure
     
     db_session, llm_manager, ws_manager = create_mock_infrastructure()
     

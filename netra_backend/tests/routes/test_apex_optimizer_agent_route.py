@@ -2,9 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
-from main import app
+from netra_backend.app.main import app
 from schemas import RequestModel, Workload, DataSource, TimeRange
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from config import settings
 
 # Add project root to path

@@ -5,8 +5,7 @@ Autonomous AI supply information research and updates with modular architecture.
 Split into focused components under 450-line limit.
 """
 
-# FIXME: # FIXME: SupplyResearcherAgent not available
-# FIXME: # from netra_backend.app.agents.corpus_admin.agent import SupplyResearcherAgent
+# FIXME: from netra_backend.app.agents.supply_researcher.agent import SupplyResearcherAgent
 from netra_backend.app.services.apex_optimizer_agent.models import ResearchType
 from netra_backend.app.agents.corpus_admin.parsers import SupplyRequestParser
 from netra_backend.app.agents.supply_researcher.research_engine import SupplyResearchEngine

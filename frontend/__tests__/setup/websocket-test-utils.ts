@@ -102,7 +102,9 @@ export class TestWebSocket implements WebSocketLike {
   }
   
   connect(): void {
-    if (this.readyState === 0) {
+    // Allow connection if not already connected or connecting
+    if (this.readyState !== 1) {
+      this.readyState = 0; // Set to CONNECTING
       this.scheduleOpenEvent();
     }
   }

@@ -11,7 +11,7 @@ import logging
 
 def _get_alembic_ini_path() -> str:
     """Get absolute path to alembic.ini file."""
-    project_root = Path(__file__).parent.parent.parent
+    project_root = Path(__file__).parent.parent.parent.parent
     return str(project_root / "config" / "alembic.ini")
 
 

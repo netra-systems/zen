@@ -21,7 +21,7 @@ setup_test_path()
 from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
 from netra_backend.app.agents.state import DeepAgentState
 from schemas import SubAgentState
-from llm.llm_manager import LLMManager
+from netra_backend.app.llm.llm_manager import LLMManager
 from netra_backend.app.services.agent_service import AgentService
 from netra_backend.app.services.synthetic_data_service import SyntheticDataService, WorkloadCategory
 from netra_backend.app.services.quality_gate_service import QualityGateService, ContentType, QualityLevel

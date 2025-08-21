@@ -32,7 +32,7 @@ from netra_backend.app.agents.supply_researcher.database_manager import SupplyDa
         supply_service: Optional[SupplyResearchService] = None
     ):
         # FIXME: super().__init__(llm_manager, name="SupplyResearcherAgent", 
-                        description="Researches and updates AI model supply information using Google Deep Research")
+                         description="Researches and updates AI model supply information using Google Deep Research")
         self._init_database_components(db, supply_service)
         self._init_research_components(db)
     
