@@ -2543,73 +2543,452 @@
       ],
       "marked_as_bad": false,
       "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_basic_login_flow_valid_credentials": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:50:38.343100",
+      "last_failure": "2025-08-20T21:50:58.252900",
+      "last_pass": "2025-08-20T21:52:13.421594",
+      "total_failures": 2,
+      "total_passes": 2,
+      "consecutive_failures": 0,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215037_37866",
+          "timestamp": "2025-08-20T21:50:38.343100",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        },
+        {
+          "run_id": "run_20250820_215057_57804",
+          "timestamp": "2025-08-20T21:50:58.252900",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_token_validation_full_cycle": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.558914",
+      "last_failure": "2025-08-20T21:51:22.558914",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.558914",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_expired_token_detection_and_handling": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.565373",
+      "last_failure": "2025-08-20T21:51:22.565373",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.565373",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_token_refresh_complete_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.567449",
+      "last_failure": "2025-08-20T21:51:22.567449",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.567449",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_session_persistence_across_multiple_requests": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.612312",
+      "last_failure": "2025-08-20T21:51:22.612312",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.612312",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_logout_flow_token_invalidation": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.626232",
+      "last_failure": "2025-08-20T21:51:22.626232",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.626232",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_oauth_login_flow_initialization": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.633026",
+      "last_failure": "2025-08-20T21:51:22.633026",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.633026",
+          "error_type": "TypeError",
+          "error_message": "TypeError: argument of type 'NoneType' is not iterable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_oauth_callback_processing": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.635823",
+      "last_failure": "2025-08-20T21:51:22.635823",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.635823",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_mfa_authentication_complete_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.639862",
+      "last_failure": "2025-08-20T21:51:22.639862",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.639862",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_password_reset_complete_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.643472",
+      "last_failure": "2025-08-20T21:51:22.643472",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.643472",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_session_timeout_detection_and_handling": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.647532",
+      "last_failure": "2025-08-20T21:51:22.647532",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.647532",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_api_key_authentication_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.689071",
+      "last_failure": "2025-08-20T21:51:22.689071",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.689071",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_service_account_authentication": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.693278",
+      "last_failure": "2025-08-20T21:51:22.693278",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.693278",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_token_introspection_detailed": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.722577",
+      "last_failure": "2025-08-20T21:51:22.722577",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.722577",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_device_code_authentication_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.739324",
+      "last_failure": "2025-08-20T21:51:22.739324",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.739324",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_sso_authentication_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.754422",
+      "last_failure": "2025-08-20T21:51:22.754422",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.754422",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_biometric_authentication_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.758455",
+      "last_failure": "2025-08-20T21:51:22.758455",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.758455",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_guest_authentication_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.765993",
+      "last_failure": "2025-08-20T21:51:22.765993",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.765993",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_token_delegation_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.773850",
+      "last_failure": "2025-08-20T21:51:22.773850",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.773850",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_emergency_access_bypass_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.802820",
+      "last_failure": "2025-08-20T21:51:22.802820",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.802820",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_token_rotation_on_refresh": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.816421",
+      "last_failure": "2025-08-20T21:51:22.816421",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.816421",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_auth_login_l3_comprehensive.py::TestAuthLoginL3Integration::test_impersonation_authentication_flow": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:51:22.831626",
+      "last_failure": "2025-08-20T21:51:22.831626",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215122_82273",
+          "timestamp": "2025-08-20T21:51:22.831626",
+          "error_type": "TypeError",
+          "error_message": "TypeError: 'NoneType' object is not subscriptable"
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
+    },
+    "tests/integration/test_websocket_l3_comprehensive.py::TestWebSocketL3Integration::test_websocket_connection_establishment": {
+      "component": "backend",
+      "first_seen": "2025-08-20T21:52:13.459486",
+      "last_failure": "2025-08-20T21:52:13.459486",
+      "last_pass": null,
+      "total_failures": 1,
+      "total_passes": 0,
+      "consecutive_failures": 1,
+      "recent_failures": [
+        {
+          "run_id": "run_20250820_215213_33081",
+          "timestamp": "2025-08-20T21:52:13.459486",
+          "error_type": "AssertionError",
+          "error_message": "AssertionError: Expected 'connect' to be called once. Called 0 times."
+        }
+      ],
+      "marked_as_bad": false,
+      "bad_reason": null
     }
   },
   "runs": [
-    {
-      "run_id": "run_20250820_165043_43256",
-      "timestamp": "2025-08-20T16:51:15.060686",
-      "total_tests": 214,
-      "passed": 214,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_165424_64961",
-      "timestamp": "2025-08-20T16:54:43.215698",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_165512_12469",
-      "timestamp": "2025-08-20T16:55:30.481695",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_165554_54950",
-      "timestamp": "2025-08-20T16:56:12.384526",
-      "total_tests": 1,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_165650_10654",
-      "timestamp": "2025-08-20T16:57:43.197556",
-      "total_tests": 205,
-      "passed": 191,
-      "failed": 1,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_165939_79474",
-      "timestamp": "2025-08-20T17:00:02.389553",
-      "total_tests": 2,
-      "passed": 0,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_170049_49178",
-      "timestamp": "2025-08-20T17:01:11.192319",
-      "total_tests": 100,
-      "passed": 55,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
-    {
-      "run_id": "run_20250820_170126_86388",
-      "timestamp": "2025-08-20T17:01:46.534820",
-      "total_tests": 100,
-      "passed": 55,
-      "failed": 0,
-      "bad_tests_count": 0
-    },
     {
       "run_id": "run_20250820_170201_21962",
       "timestamp": "2025-08-20T17:02:21.995086",
@@ -3345,10 +3724,74 @@
       "passed": 3,
       "failed": 3,
       "bad_tests_count": 3
+    },
+    {
+      "run_id": "run_20250820_214836_16140",
+      "timestamp": "2025-08-20T21:48:36.783620",
+      "total_tests": 0,
+      "passed": -1,
+      "failed": 1,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_215037_37866",
+      "timestamp": "2025-08-20T21:50:38.346283",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_215057_57804",
+      "timestamp": "2025-08-20T21:50:58.258641",
+      "total_tests": 1,
+      "passed": 0,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250820_215122_82273",
+      "timestamp": "2025-08-20T21:51:22.839188",
+      "total_tests": 30,
+      "passed": 9,
+      "failed": 21,
+      "bad_tests_count": 21
+    },
+    {
+      "run_id": "run_20250820_215158_18133",
+      "timestamp": "2025-08-20T21:51:58.586951",
+      "total_tests": 120,
+      "passed": 120,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250820_215213_33081",
+      "timestamp": "2025-08-20T21:52:13.501847",
+      "total_tests": 5,
+      "passed": 4,
+      "failed": 1,
+      "bad_tests_count": 1
+    },
+    {
+      "run_id": "run_20250821_043751_71268",
+      "timestamp": "2025-08-21T04:37:55.862368",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
+    },
+    {
+      "run_id": "run_20250821_043757_77466",
+      "timestamp": "2025-08-21T04:38:11.005198",
+      "total_tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "bad_tests_count": 0
     }
   ],
   "stats": {
-    "total_runs": 352,
-    "last_updated": "2025-08-20T21:34:26.926875"
+    "total_runs": 360,
+    "last_updated": "2025-08-21T04:38:11.005198"
   }
 }
