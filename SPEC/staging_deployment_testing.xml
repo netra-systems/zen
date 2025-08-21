@@ -1,0 +1,390 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spec>
+  <meta>
+    <title>Staging Deployment Testing Strategy</title>
+    <category>testing</category>
+    <created>2025-08-21</created>
+    <cross_references>
+      <ref>learnings/deployment_staging.xml</ref>
+      <ref>learnings/startup.xml</ref>
+      <ref>test_runner_guide.xml</ref>
+      <ref>testing.xml</ref>
+    </cross_references>
+    <business_value>
+      <segment>Platform</segment>
+      <goal>Prevent staging deployment failures that impact customer confidence</goal>
+      <impact>Reduces failed deployments by 90%, saving $15K MRR from customer churn</impact>
+    </business_value>
+  </meta>
+
+  <critical_gaps_identified>
+    <gap severity="critical">
+      <name>No Pre-Deployment Validation</name>
+      <description>Deploy script doesn't run critical tests before building/pushing images</description>
+      <impact>Broken code gets deployed to staging, causing downtime</impact>
+      <solution>Add mandatory pre-deploy test gate</solution>
+    </gap>
+    
+    <gap severity="high">
+      <name>Missing Startup Sequence Testing</name>
+      <description>No validation of service startup order and dependencies</description>
+      <impact>Services fail to start due to missing dependencies</impact>
+      <solution>Implement startup sequence validation tests</solution>
+    </gap>
+    
+    <gap severity="high">
+      <name>No Configuration Drift Detection</name>
+      <description>Local vs staging configuration differences not tested</description>
+      <impact>Services fail in staging due to config mismatches</impact>
+      <solution>Add configuration parity tests</solution>
+    </gap>
+    
+    <gap severity="medium">
+      <name>Limited Post-Deploy Validation</name>
+      <description>Only basic health checks, no functional validation</description>
+      <impact>Broken functionality not detected until customer reports</impact>
+      <solution>Add comprehensive post-deploy smoke tests</solution>
+    </gap>
+    
+    <gap severity="medium">
+      <name>No Rollback Testing</name>
+      <description>Rollback procedures not tested automatically</description>
+      <impact>Failed rollbacks cause extended downtime</impact>
+      <solution>Implement automated rollback validation</solution>
+    </gap>
+  </critical_gaps_identified>
+
+  <deployment_test_phases>
+    
+    <!-- PHASE 1: PRE-DEPLOYMENT TESTS -->
+    <phase name="pre_deployment" timing="before_build">
+      <purpose>Prevent broken code from being deployed</purpose>
+      <duration>2-3 minutes</duration>
+      <fail_behavior>Abort deployment immediately</fail_behavior>
+      
+      <test_suite name="critical_path_validation">
+        <description>Validate all critical functionality locally</description>
+        <command>python -m test_framework.test_runner --level critical --fast-fail</command>
+        <tests>
+          <test>Core API endpoints</test>
+          <test>WebSocket connectivity</test>
+          <test>Database operations</test>
+          <test>Authentication flows</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="startup_simulation">
+        <description>Simulate staging startup sequence locally</description>
+        <command>python scripts/test_staging_startup.py --simulate</command>
+        <tests>
+          <test>Service initialization order</test>
+          <test>Dependency resolution</test>
+          <test>Configuration loading</test>
+          <test>Secret access validation</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="configuration_validation">
+        <description>Validate staging configuration compatibility</description>
+        <command>python scripts/validate_staging_config.py</command>
+        <tests>
+          <test>Environment variable presence</test>
+          <test>Secret format validation</test>
+          <test>Service URL formats</test>
+          <test>Database connection strings</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="docker_build_validation">
+        <description>Test Docker builds locally before pushing</description>
+        <command>python scripts/test_docker_builds.py --staging</command>
+        <tests>
+          <test>Dockerfile syntax validation</test>
+          <test>Build argument validation</test>
+          <test>Layer caching optimization</test>
+          <test>Security scanning</test>
+        </tests>
+      </test_suite>
+    </phase>
+    
+    <!-- PHASE 2: DURING DEPLOYMENT TESTS -->
+    <phase name="during_deployment" timing="after_push_before_deploy">
+      <purpose>Validate deployment readiness</purpose>
+      <duration>1-2 minutes</duration>
+      <fail_behavior>Rollback to previous version</fail_behavior>
+      
+      <test_suite name="image_validation">
+        <description>Validate pushed Docker images</description>
+        <command>python scripts/validate_staging_images.py</command>
+        <tests>
+          <test>Image pull verification</test>
+          <test>Image size validation</test>
+          <test>Security vulnerability scan</test>
+          <test>Image metadata validation</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="infrastructure_readiness">
+        <description>Verify GCP infrastructure is ready</description>
+        <command>python scripts/check_gcp_readiness.py --project netra-staging</command>
+        <tests>
+          <test>Cloud Run service availability</test>
+          <test>Database connectivity</test>
+          <test>Secret Manager access</test>
+          <test>Network configuration</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="migration_safety">
+        <description>Validate database migrations are safe</description>
+        <command>python scripts/validate_migrations.py --env staging</command>
+        <tests>
+          <test>Migration compatibility check</test>
+          <test>Rollback script validation</test>
+          <test>Data integrity verification</test>
+          <test>Schema conflict detection</test>
+        </tests>
+      </test_suite>
+    </phase>
+    
+    <!-- PHASE 3: POST-DEPLOYMENT TESTS -->
+    <phase name="post_deployment" timing="after_deploy">
+      <purpose>Validate deployment success</purpose>
+      <duration>3-5 minutes</duration>
+      <fail_behavior>Alert and optionally rollback</fail_behavior>
+      
+      <test_suite name="startup_verification">
+        <description>Verify all services started correctly</description>
+        <command>python scripts/verify_staging_startup.py</command>
+        <tests>
+          <test>Service health endpoints</test>
+          <test>Startup log analysis</test>
+          <test>Error rate monitoring</test>
+          <test>Resource utilization</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="smoke_tests">
+        <description>Run smoke tests against staging</description>
+        <command>python -m test_framework.test_runner --level smoke --env staging</command>
+        <tests>
+          <test>API availability</test>
+          <test>Authentication flow</test>
+          <test>Basic CRUD operations</test>
+          <test>WebSocket connection</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="integration_tests">
+        <description>Run integration tests against staging</description>
+        <command>python -m test_framework.test_runner --level integration --env staging --fast-fail</command>
+        <tests>
+          <test>Cross-service communication</test>
+          <test>Database transactions</test>
+          <test>Cache operations</test>
+          <test>Message queue processing</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="performance_baseline">
+        <description>Establish performance baseline</description>
+        <command>python scripts/staging_performance_test.py --baseline</command>
+        <tests>
+          <test>API response times</test>
+          <test>WebSocket latency</test>
+          <test>Database query performance</test>
+          <test>Memory usage patterns</test>
+        </tests>
+      </test_suite>
+      
+      <test_suite name="security_validation">
+        <description>Validate security configurations</description>
+        <command>python scripts/staging_security_scan.py</command>
+        <tests>
+          <test>HTTPS enforcement</test>
+          <test>CORS configuration</test>
+          <test>Authentication required</test>
+          <test>Secret exposure scan</test>
+        </tests>
+      </test_suite>
+    </phase>
+    
+    <!-- PHASE 4: CONTINUOUS MONITORING -->
+    <phase name="continuous_monitoring" timing="post_deploy_ongoing">
+      <purpose>Detect issues early in staging</purpose>
+      <duration>Continuous</duration>
+      <fail_behavior>Alert engineering team</fail_behavior>
+      
+      <test_suite name="synthetic_monitoring">
+        <description>Continuous synthetic user journeys</description>
+        <command>python scripts/staging_synthetic_monitor.py --continuous</command>
+        <tests>
+          <test>User registration flow</test>
+          <test>Thread creation flow</test>
+          <test>Agent execution flow</test>
+          <test>WebSocket stability</test>
+        </tests>
+        <frequency>Every 5 minutes</frequency>
+      </test_suite>
+      
+      <test_suite name="error_monitoring">
+        <description>Monitor for critical errors</description>
+        <command>python scripts/staging_error_monitor.py --watch</command>
+        <tests>
+          <test>Error rate thresholds</test>
+          <test>Stack trace analysis</test>
+          <test>Service crash detection</test>
+          <test>Memory leak detection</test>
+        </tests>
+        <frequency>Every 1 minute</frequency>
+      </test_suite>
+    </phase>
+  </deployment_test_phases>
+
+  <implementation_requirements>
+    <requirement priority="critical">
+      <name>Deploy Script Integration</name>
+      <description>Integrate pre-deploy tests into deploy_staging.py</description>
+      <implementation>
+        <file>organized_root/deployment_configs/deploy_staging.py</file>
+        <changes>
+          <change>Add --skip-tests flag (default: run tests)</change>
+          <change>Run critical tests before build</change>
+          <change>Abort on test failure</change>
+        </changes>
+      </implementation>
+    </requirement>
+    
+    <requirement priority="high">
+      <name>Staging Test Runner Support</name>
+      <description>Add staging-specific test levels to test runner</description>
+      <implementation>
+        <file>test_framework/test_runner.py</file>
+        <changes>
+          <change>Add --env staging support</change>
+          <change>Add staging-quick level (2 min)</change>
+          <change>Add staging-full level (10 min)</change>
+          <change>Configure staging endpoints automatically</change>
+        </changes>
+      </implementation>
+    </requirement>
+    
+    <requirement priority="high">
+      <name>Startup Sequence Test Suite</name>
+      <description>Create comprehensive startup testing</description>
+      <implementation>
+        <file>app/tests/staging/test_startup_sequence.py</file>
+        <tests>
+          <test>Database connection order</test>
+          <test>Service dependency resolution</test>
+          <test>Configuration loading sequence</test>
+          <test>Health check timing</test>
+        </tests>
+      </implementation>
+    </requirement>
+    
+    <requirement priority="medium">
+      <name>Configuration Drift Detection</name>
+      <description>Detect configuration differences</description>
+      <implementation>
+        <file>scripts/detect_config_drift.py</file>
+        <features>
+          <feature>Compare local vs staging env vars</feature>
+          <feature>Validate secret formats</feature>
+          <feature>Check service URLs</feature>
+          <feature>Report discrepancies</feature>
+        </features>
+      </implementation>
+    </requirement>
+    
+    <requirement priority="medium">
+      <name>Rollback Testing</name>
+      <description>Automated rollback validation</description>
+      <implementation>
+        <file>scripts/test_staging_rollback.py</file>
+        <features>
+          <feature>Deploy known-good version</feature>
+          <feature>Deploy new version</feature>
+          <feature>Trigger rollback</feature>
+          <feature>Validate rollback success</feature>
+        </features>
+      </implementation>
+    </requirement>
+  </implementation_requirements>
+
+  <test_commands>
+    <command_set name="developer_workflow">
+      <command purpose="Before pushing code">
+        python -m test_framework.test_runner --level critical --fast-fail
+      </command>
+      
+      <command purpose="Before deploying to staging">
+        python scripts/validate_staging_config.py && python -m test_framework.test_runner --level integration
+      </command>
+      
+      <command purpose="Deploy with full validation">
+        python organized_root/deployment_configs/deploy_staging.py
+      </command>
+      
+      <command purpose="Quick staging validation">
+        python -m test_framework.test_runner --level staging-quick --env staging
+      </command>
+      
+      <command purpose="Full staging validation">
+        python -m test_framework.test_runner --level staging-full --env staging --real-llm
+      </command>
+    </command_set>
+    
+    <command_set name="ci_cd_workflow">
+      <command purpose="PR validation">
+        python -m test_framework.test_runner --level integration --no-coverage
+      </command>
+      
+      <command purpose="Pre-deploy gate">
+        python scripts/staging_deploy_gate.py --strict
+      </command>
+      
+      <command purpose="Post-deploy validation">
+        python scripts/staging_post_deploy_validation.py --comprehensive
+      </command>
+      
+      <command purpose="Continuous monitoring">
+        python scripts/staging_monitor.py --daemon
+      </command>
+    </command_set>
+  </test_commands>
+
+  <metrics>
+    <metric name="deployment_success_rate">
+      <target>95%</target>
+      <current>Unknown</current>
+      <measurement>Successful deployments / Total deployments</measurement>
+    </metric>
+    
+    <metric name="mean_time_to_detection">
+      <target>&lt;5 minutes</target>
+      <current>Unknown</current>
+      <measurement>Time from deployment to issue detection</measurement>
+    </metric>
+    
+    <metric name="rollback_success_rate">
+      <target>100%</target>
+      <current>Unknown</current>
+      <measurement>Successful rollbacks / Total rollback attempts</measurement>
+    </metric>
+    
+    <metric name="staging_availability">
+      <target>99.5%</target>
+      <current>Unknown</current>
+      <measurement>Uptime / Total time</measurement>
+    </metric>
+  </metrics>
+
+  <references>
+    <reference>organized_root/deployment_configs/deploy_staging.py</reference>
+    <reference>app/tests/critical/test_staging_deployment_readiness.py</reference>
+    <reference>test_framework/test_runner.py</reference>
+    <reference>SPEC/learnings/deployment_staging.xml</reference>
+    <reference>SPEC/learnings/startup.xml</reference>
+  </references>
+</spec>
