@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from .l4_staging_critical_base import L4StagingCriticalPathTestBase, CriticalPathMetrics
-from app.services.monitoring.metrics_collector import MetricsCollector
+from app.monitoring.metrics_collector import MetricsCollector
 from app.services.redis_service import RedisService
 from app.core.configuration.base import get_unified_config
 
