@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.cluster import KMeans
 import json
 from typing import List, Any, Tuple
-from netra_backend.app.routes.unified_tools.schemas import DiscoveredPattern
+from netra_backend.app.schemas.Pattern import DiscoveredPattern
 from netra_backend.app.config import settings
 from netra_backend.app.services.apex_optimizer_agent.tools.base import BaseTool, ToolMetadata
 from netra_backend.app.services.context import ToolContext

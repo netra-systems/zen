@@ -24,7 +24,7 @@ from typing import Any, Dict, List, Optional, Set
 from netra_backend.app.core.exceptions import NetraException, ServiceError
 from netra_backend.app.core.unified_logging import UnifiedLogger
 
-from netra_backend.app.services.apex_optimizer_agent.models import (
+from netra_backend.app.mcp_client.models import (
     ConnectionStatus,
     MCPConnection,
     MCPOperationContext,

@@ -13,8 +13,6 @@ import time
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dev_launcher.launcher import DevLauncher
-from dev_launcher.optimized_startup import OptimizedStartupOrchestrator
-from dev_launcher.legacy_service_runner import LegacyServiceRunner
 
 
 class TestLauncherMainLoop(unittest.TestCase):

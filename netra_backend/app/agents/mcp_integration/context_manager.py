@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 import asyncio
 
-from netra_backend.app.routes.mcp_client import MCPTool, MCPConnection
+from netra_backend.app.mcp_client.models import MCPTool, MCPConnection
 from netra_backend.app.services.mcp_client_service import MCPClientService
 from netra_backend.app.schemas.core_enums import MCPServerStatus, MCPToolExecutionStatus, ExecutionStatus
 from netra_backend.app.core.exceptions_service import ServiceError

@@ -185,7 +185,9 @@ class UnifiedConfigManager:
         """Create base configuration for current environment."""
         config_class = self._get_config_class_for_environment()
         base_config = config_class()
-        self._logger.info(f"Created {self._environment} configuration")
+        # Skip logging during initial load to prevent recursion
+        # The logger filter may try to load config, creating a loop
+        pass  # Removed logging to prevent recursion
         return base_config
     
     def _get_config_class_for_environment(self) -> type:
@@ -206,19 +208,21 @@ class UnifiedConfigManager:
         self._database_manager.populate_database_config(config)
         self._services_manager.populate_service_config(config) 
         self._secrets_manager.populate_secrets(config)
-        self._logger.info("Populated configuration from all sources")
+        # Skip logging during initial load to prevent recursion
     
     def _validate_final_config(self, config: AppConfig) -> None:
         """Validate final configuration before use."""
         validation_result = self._validator.validate_complete_config(config)
         if not validation_result.is_valid:
             raise ConfigurationError(f"Configuration validation failed: {validation_result.errors}")
-        self._logger.info("Configuration validation passed")
+        # Skip logging during initial load to prevent recursion
     
     def _handle_configuration_error(self, error: Exception) -> None:
         """Handle configuration loading errors."""
         error_msg = f"CRITICAL: Configuration loading failed: {error}"
-        self._logger.error(error_msg)
+        # Only log if not RecursionError to prevent further recursion
+        if not isinstance(error, RecursionError):
+            self._logger.error(error_msg)
         if isinstance(error, ValidationError):
             raise ConfigurationError(f"Configuration validation error: {error}")
         raise ConfigurationError(error_msg)

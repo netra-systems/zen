@@ -3,7 +3,7 @@
 This module handles user intent detection and admin mode detection.
 """
 
-from netra_backend.app.services.apex_optimizer_agent.models import UserIntent
+from netra_backend.app.agents.triage_sub_agent.models import UserIntent
 
 
 class IntentDetector:

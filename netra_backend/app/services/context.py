@@ -1,6 +1,6 @@
 from typing import Optional, List, TYPE_CHECKING
 from sqlalchemy.ext.asyncio import AsyncSession
-from netra_backend.app.routes.unified_tools.schemas import Log
+from netra_backend.app.core.logging_formatters import LogEntry as Log
 from netra_backend.app.agents.state import DeepAgentState
 from netra_backend.app.services.supply_catalog_service import SupplyCatalogService
 from netra_backend.app.llm.llm_manager import LLMManager

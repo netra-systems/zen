@@ -1,7 +1,7 @@
 # Netra AI Platform - Test Report
 
-**Generated:** 2025-08-21T11:23:05.129415  
-**Test Level:** unit - Unit tests for isolated components (1-2 minutes)  
+**Generated:** 2025-08-21T11:21:34.441359  
+**Test Level:** real_e2e - Full end-to-end tests with real LLM and services (20-30 minutes)  
 
 ## 1. Test Summary
 
@@ -18,27 +18,27 @@
 
 | Component | Total | Passed | Failed | Skipped | Errors | Duration | Status |
 |-----------|-------|--------|--------|---------|--------|----------|--------|
-| Backend   | 0 | 0 | 0 | 0 | 0 | 6.38s | [FAILED] |
-| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.46s | [FAILED] |
+| Backend   | 0 | 0 | 0 | 0 | 0 | 5.26s | [FAILED] |
+| Frontend  | 0 | 0 | 0 | 0 | 0 | 0.00s | [SKIPPED] |
 
 ## 3. Environment and Configuration
 
-- **Test Level:** unit
-- **Description:** Unit tests for isolated components (1-2 minutes)
-- **Purpose:** Development validation, component testing
-- **Timeout:** 120s
-- **Coverage Enabled:** Yes
-- **Total Duration:** 6.84s
-- **Exit Code:** 255
+- **Test Level:** real_e2e
+- **Description:** Full end-to-end tests with real LLM and services (20-30 minutes)
+- **Purpose:** Complete user journey validation with actual services
+- **Timeout:** 1800s
+- **Coverage Enabled:** No
+- **Total Duration:** 5.26s
+- **Exit Code:** 4
 
 ### Backend Configuration
 ```
---category unit -v --coverage --fail-fast --parallel=4 --markers not real_services
+-m real_e2e -v --fail-fast --parallel=2
 ```
 
 ### Frontend Configuration
 ```
---category unit
+
 ```
 
 ## 4. Test Output
@@ -50,17 +50,17 @@ Loaded test environment from C:\Users\antho\OneDrive\Desktop\Netra\netra-core-ge
 NETRA AI PLATFORM - BACKEND TEST RUNNER
 ================================================================================
 Test Configuration:
-  Category: unit
-  Parallel: 4
+  Category: all
+  Parallel: 2
   Coverage: disabled
   Fail Fast: enabled
   Environment: test
 
 Running command:
-  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests/services netra_backend/tests/core -vv -n 4 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m not real_services
+  pytest -c C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\pytest.ini netra_backend/tests tests integration_tests -vv -n 2 -x --maxfail=1 --tb=short --asyncio-mode=auto --color=yes --strict-markers --disable-warnings -p no:warnings -m real_e2e
 ================================================================================
 ================================================================================
-[FAIL] TESTS FAILED with exit code 4 after 5.42s
+[FAIL] TESTS FAILED with exit code 4 after 4.48s
 ================================================================================
 
 C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\base\monitoring.py:68: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
@@ -88,34 +88,16 @@ netra_backend\app\agents\supervisor\__init__.py:5: in <module>
     from netra_backend.app.agents.supervisor.agent_registry import AgentRegistry
 netra_backend\app\agents\supervisor\agent_registry.py:13: in <module>
     from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
-netra_backend\app\agents\triage_sub_agent\agent.py:34: in <module>
-    from netra_backend.app.agents.triage_sub_agent.executor import TriageExecutor
-netra_backend\app\agents\triage_sub_agent\executor.py:20: in <module>
-    from netra_backend.app.agents.admin_tool_dispatcher.execution_helpers import TriageExecutionHelpers, TriageValidationHelpers
-E   ImportError: cannot import name 'TriageExecutionHelpers' from 'netra_backend.app.agents.admin_tool_dispatcher.execution_helpers' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\agents\admin_tool_dispatcher\execution_helpers.py)
+netra_backend\app\agents\triage_sub_agent\__init__.py:23: in <module>
+    from netra_backend.app.agents.triage_sub_agent.tool_recommender import ToolRecommender
+netra_backend\app\agents\triage_sub_agent\tool_recommender.py:7: in <module>
+    from netra_backend.app.services.apex_optimizer_agent.models import ToolRecommendation, ExtractedEntities
+E   ImportError: cannot import name 'ToolRecommendation' from 'netra_backend.app.services.apex_optimizer_agent.models' (C:\Users\antho\OneDrive\Desktop\Netra\netra-core-generation-1\netra_backend\app\services\apex_optimizer_agent\models.py)
 
 ```
 
 ### Frontend Output
 ```
-================================================================================
-NETRA AI PLATFORM - FRONTEND TEST RUNNER
-================================================================================
-
-================================================================================
-Running Jest Tests
---------------------------------------------------------------------------------
-Running: npm run test -- --forceExit --detectOpenHandles --testMatch **/__tests__/@(components|hooks|store|services|lib|utils)/**/*.test.[jt]s?(x)
---------------------------------------------------------------------------------
-
-================================================================================
-[FAIL] CHECKS FAILED with exit code 255
-================================================================================
-
-Cleaning up test processes...
-
-'hooks' is not recognized as an internal or external command,
-operable program or batch file.
 
 ```
 

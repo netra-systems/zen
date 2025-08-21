@@ -16,8 +16,8 @@ Architecture:
 All modules follow strict 450-line and 25-line function limits.
 """
 
-from netra_backend.app.client_core import MCPClient, MCPClientError, MCPConnectionError, MCPProtocolError
-from netra_backend.app.services.apex_optimizer_agent.models import (
+from netra_backend.app.mcp_client.client_core import MCPClient, MCPClientError, MCPConnectionError, MCPProtocolError
+from netra_backend.app.mcp_client.models import (
     MCPServerConfig,
     MCPConnection,
     MCPTool,

@@ -27,7 +27,7 @@ class AuthClient:
     async def login(self, email, password, remember_me=False, headers=None, captcha_token=None):
         return await self._make_request()
     
-    async def validate_token(self, token):
+    async def validate_token_jwt(self, token):
         return await self._make_request()
     
     async def refresh_token(self, refresh_token):
@@ -147,7 +147,7 @@ class TestAuthLoginL3Integration:
                 "expires_at": (datetime.utcnow() + timedelta(hours=1)).isoformat()
             }
             
-            result = await auth_client.validate_token("valid_token_123")
+            result = await auth_client.validate_token_jwt("valid_token_123")
             
             assert result["valid"] is True
             assert result["user_id"] == "user_123"
@@ -166,7 +166,7 @@ class TestAuthLoginL3Integration:
                 "message": "Token has expired"
             }
             
-            result = await auth_client.validate_token("expired_token")
+            result = await auth_client.validate_token_jwt("expired_token")
             
             assert result["valid"] is False
             assert result["error"] == "token_expired"
@@ -229,7 +229,7 @@ class TestAuthLoginL3Integration:
             
             # Subsequent request with session
             mock_request.return_value = {"valid": True, "session_id": session_id}
-            validation = await auth_client.validate_token("session_token")
+            validation = await auth_client.validate_token_jwt("session_token")
             
             assert validation["session_id"] == session_id
 
@@ -247,7 +247,7 @@ class TestAuthLoginL3Integration:
             
             # Token should be invalid after logout
             mock_request.return_value = {"valid": False, "error": "token_revoked"}
-            validation = await auth_client.validate_token("valid_token")
+            validation = await auth_client.validate_token_jwt("valid_token")
             assert validation["valid"] is False
 
     # Test 9: Rate limiting on login attempts
@@ -386,7 +386,7 @@ class TestAuthLoginL3Integration:
                 "message": "Session has timed out due to inactivity"
             }
             
-            result = await auth_client.validate_token("timed_out_token")
+            result = await auth_client.validate_token_jwt("timed_out_token")
             
             assert result["valid"] is False
             assert result["error"] == "session_timeout"
