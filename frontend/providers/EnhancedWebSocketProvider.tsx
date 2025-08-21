@@ -428,7 +428,9 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
       logger.info('[WebSocket] Connecting to:', wsUrl);
 
       // Step 3: Create WebSocket connection with JWT subprotocol for secure auth
-      const protocols = [`jwt.${token}`];
+      // Ensure token has Bearer prefix for proper authentication
+      const bearerToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+      const protocols = [`jwt.${bearerToken}`];
       const ws = new WebSocket(wsUrl, protocols);
       wsRef.current = ws;
 
@@ -515,10 +517,37 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
         logger.info(`[WebSocket] Connection closed: ${event.code} - ${event.reason}`);
 
-        // Attempt reconnection for abnormal closures
+        // Handle authentication errors specifically
+        if (event.code === 1008) {
+          const isSecurityViolation = event.reason && (
+            event.reason.includes('Use Authorization header') ||
+            event.reason.includes('Sec-WebSocket-Protocol') ||
+            event.reason.includes('security')
+          );
+          
+          handleError({
+            code: isSecurityViolation ? 'SECURITY_VIOLATION' : 'AUTHENTICATION_FAILED',
+            message: isSecurityViolation 
+              ? 'Security violation: Using deprecated authentication method'
+              : 'Authentication failed: Invalid or expired token',
+            timestamp: Date.now(),
+            recoverable: !isSecurityViolation,
+            help: isSecurityViolation 
+              ? 'Please upgrade to secure authentication methods'
+              : 'Please check your login status and try again'
+          });
+          
+          // Don't retry for security violations
+          if (isSecurityViolation) {
+            return;
+          }
+        }
+
+        // Attempt reconnection for abnormal closures (excluding auth errors)
         if (
           wasConnected && 
           event.code !== 1000 && 
+          event.code !== 1008 && // Don't retry auth failures
           reconnectAttemptsRef.current < maxReconnectAttempts &&
           autoConnect
         ) {
@@ -529,7 +558,21 @@ export const EnhancedWebSocketProvider: React.FC<WebSocketProviderProps> = ({
       ws.onerror = (event) => {
         clearTimeout(connectionTimeout);
         isConnectingRef.current = false;
-        handleError(new Error('WebSocket connection error'));
+        
+        // Distinguish between connection and authentication errors
+        const errorMessage = token 
+          ? 'WebSocket authentication error - check token validity'
+          : 'WebSocket connection error - no authentication token';
+          
+        handleError({
+          code: token ? 'AUTH_ERROR' : 'CONNECTION_ERROR',
+          message: errorMessage,
+          timestamp: Date.now(),
+          recoverable: !!token,
+          help: token 
+            ? 'Check if your session is still valid'
+            : 'Please log in to establish a secure connection'
+        });
       };
 
     } catch (error) {
