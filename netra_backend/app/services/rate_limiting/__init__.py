@@ -7,7 +7,7 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains compatibility for rate limiting functionality
 """
 
-from netra_backend.app.rate_limiter import RateLimiter
-from netra_backend.app.rate_limiting_service import RateLimitingService
+from netra_backend.app.services.rate_limiting.rate_limiter import RateLimiter
+from netra_backend.app.services.rate_limiting.rate_limiting_service import RateLimitingService
 
 __all__ = ["RateLimiter", "RateLimitingService"]

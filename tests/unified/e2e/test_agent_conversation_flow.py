@@ -28,7 +28,7 @@ from .agent_conversation_helpers import (
     AgentConversationTestCore, ConversationFlowSimulator, ConversationFlowValidator,
     AgentConversationTestUtils, RealTimeUpdateValidator
 )
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @pytest.mark.asyncio

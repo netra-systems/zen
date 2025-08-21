@@ -5,6 +5,7 @@ from typing import Dict, Any, Optional, List
 from netra_backend.app.logging_config import central_logger as logger
 from google.cloud import secretmanager
 from tenacity import retry, stop_after_attempt, wait_fixed
+from netra_backend.app.core.configuration.base import config_manager
 
 
 class SecretManagerError(Exception):
@@ -18,46 +19,48 @@ class SecretManager:
     def __init__(self):
         self._logger = logger
         self._client: Optional[secretmanager.SecretManagerServiceClient] = None
+        self._config = config_manager.get_config()
         self._project_id = self._initialize_project_id()
         self._log_initialization_status()
     
     def _initialize_project_id(self) -> str:
         """Initialize project ID based on environment."""
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        environment = getattr(self._config, 'environment', 'development').lower()
         if environment == "staging":
             return self._get_staging_project_id()
         return self._get_production_project_id()
     
     def _get_staging_project_id(self) -> str:
         """Get staging project ID with fallbacks."""
-        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
-                             "701982941522"))
+        return getattr(self._config, 'gcp_project_id_numerical_staging', 
+                      getattr(self._config, 'secret_manager_project_id', "701982941522"))
     
     def _get_production_project_id(self) -> str:
         """Get production project ID with fallbacks."""
-        return os.environ.get("GCP_PROJECT_ID_NUMERICAL_STAGING", 
-                             os.environ.get("SECRET_MANAGER_PROJECT_ID",
-                             "304612253870"))
+        return getattr(self._config, 'gcp_project_id_numerical_staging', 
+                      getattr(self._config, 'secret_manager_project_id', "304612253870"))
     
     def _log_initialization_status(self) -> None:
         """Log Secret Manager initialization status."""
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
-        if environment in ["staging", "production"] or os.environ.get("K_SERVICE"):
+        environment = getattr(self._config, 'environment', 'development').lower()
+        k_service = getattr(self._config, 'k_service', None)
+        if environment in ["staging", "production"] or k_service:
             self._logger.info(f"Secret Manager initialized with project ID: {self._project_id} for environment: {environment}")
         
     def load_secrets(self) -> Dict[str, Any]:
         """Load secrets from Secret Manager with environment variables as base, Google Secrets supersede."""
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
+        environment = getattr(self._config, 'environment', 'development').lower()
         should_load_secrets = self._should_load_from_secret_manager(environment)
         secrets = self._load_base_environment_secrets(environment)
         return self._merge_google_secrets_if_needed(secrets, should_load_secrets, environment)
     
     def _should_load_from_secret_manager(self, environment: str) -> bool:
         """Determine if we should load from Secret Manager."""
-        return (os.environ.get("LOAD_SECRETS", "false").lower() == "true" or
+        load_secrets = getattr(self._config, 'load_secrets', False)
+        k_service = getattr(self._config, 'k_service', None)
+        return (load_secrets or
                 environment == "staging" or environment == "production" or
-                bool(os.environ.get("K_SERVICE")))
+                bool(k_service))
     
     def _load_base_environment_secrets(self, environment: str) -> Dict[str, Any]:
         """Load base secrets from environment variables."""
@@ -144,7 +147,7 @@ class SecretManager:
         """Detect environment configuration and log details."""
         from .secret_manager_helpers import detect_environment_config
         environment, is_staging = detect_environment_config()
-        k_service = os.environ.get("K_SERVICE")
+        k_service = getattr(self._config, 'k_service', None)
         self._logger.info(f"Secret Manager environment detection - Environment: {environment}, K_SERVICE: {k_service}, Is Staging: {is_staging}")
         return environment, is_staging
     
@@ -276,17 +279,18 @@ class SecretManager:
 
     def _detect_staging_environment(self) -> bool:
         """Detect if we're running in staging environment."""
-        environment = os.environ.get("ENVIRONMENT", "development").lower()
-        k_service = os.environ.get("K_SERVICE")
+        environment = getattr(self._config, 'environment', 'development').lower()
+        k_service = getattr(self._config, 'k_service', None)
         return environment == "staging" or (k_service and "staging" in k_service.lower())
 
     def _get_secret_value_for_environment(self, env_var: str, is_staging: bool) -> Optional[str]:
         """Get secret value for environment, checking staging suffix if needed."""
         if is_staging:
-            staging_value = os.environ.get(f"{env_var}_STAGING")
+            staging_attr = f"{env_var.lower()}_staging"
+            staging_value = getattr(self._config, staging_attr, None)
             if staging_value:
                 return staging_value
-        return os.environ.get(env_var)
+        return getattr(self._config, env_var.lower(), None)
 
     def _process_environment_secrets(self, env_mapping: Dict[str, str], is_staging: bool) -> Dict[str, Any]:
         """Process environment secrets using mapping and staging detection."""

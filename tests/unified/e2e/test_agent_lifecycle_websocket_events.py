@@ -35,7 +35,7 @@ from ..real_websocket_client import RealWebSocketClient
 from .agent_conversation_helpers import AgentConversationTestCore
 from .websocket_resilience_core import WebSocketResilienceTestCore
 from ..real_services_manager import RealServicesManager
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -334,7 +334,7 @@ class AgentLifecycleEventTestCore:
     def _create_test_token(self, user_id: str) -> str:
         """Create test JWT token."""
         try:
-            from app.auth_integration.auth import create_access_token
+            from netra_backend.app.auth_integration.auth import create_access_token
             return create_access_token(data={"sub": f"test-{user_id}"})
         except ImportError:
             return f"mock-token-{user_id}"

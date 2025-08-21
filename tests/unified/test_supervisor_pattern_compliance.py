@@ -9,15 +9,15 @@ import asyncio
 from unittest.mock import AsyncMock, Mock, patch
 from datetime import datetime
 
-from app.agents.supervisor_agent_modern import ModernSupervisorAgent
-from app.agents.supervisor.lifecycle_manager import SupervisorLifecycleManager
-from app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
-from app.agents.supervisor.circuit_breaker_integration import SupervisorCircuitBreakerIntegration
-from app.agents.supervisor.comprehensive_observability import SupervisorObservability
-from app.agents.base.interface import ExecutionContext, ExecutionResult
-from app.agents.state import DeepAgentState
-from app.schemas.core_enums import ExecutionStatus
-from app.agents.base.errors import ValidationError
+from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.supervisor.lifecycle_manager import SupervisorLifecycleManager
+from netra_backend.app.agents.supervisor.workflow_orchestrator import WorkflowOrchestrator
+from netra_backend.app.agents.supervisor.circuit_breaker_integration import SupervisorCircuitBreakerIntegration
+from netra_backend.app.agents.supervisor.comprehensive_observability import SupervisorObservability
+from netra_backend.app.agents.base.interface import ExecutionContext, ExecutionResult
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.schemas.core_enums import ExecutionStatus
+from netra_backend.app.agents.base.errors import ValidationError
 
 
 class TestSupervisorLifecycleManager:

@@ -15,7 +15,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Any, Optional
 from unittest.mock import Mock, AsyncMock
 
-from app.db.models_user import User, ToolUsageLog
+from netra_backend.app.db.models_user import User, ToolUsageLog
 
 
 class MockRateLimiter:

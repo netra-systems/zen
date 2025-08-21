@@ -47,7 +47,7 @@ from netra_backend.app.core.configuration.base import get_unified_config
 from unittest.mock import AsyncMock
 ToolDispatcher = AsyncMock
 ToolDispatcher = AsyncMock
-# # from app.services.redis.session_manager import RedisSessionManager
+# # from netra_backend.app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
 from netra_backend.app.logging_config import central_logger
 

@@ -12,7 +12,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import websockets
 from collections import defaultdict
 
-# from app.services.websocket_service import WebSocketService
+# from netra_backend.app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
 from netra_backend.app.services.message_queue_service import MessageQueueService

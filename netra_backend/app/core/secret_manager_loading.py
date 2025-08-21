@@ -9,6 +9,7 @@ from typing import Optional, Dict, List
 from netra_backend.app.logging_config import central_logger
 from netra_backend.app.schemas.config_types import EnvironmentType
 from netra_backend.app.core.secret_manager_types import SecretAccessLevel
+from netra_backend.app.core.configuration.base import config_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -19,6 +20,7 @@ class SecretLoader:
     def __init__(self, secret_manager):
         """Initialize with reference to main secret manager."""
         self.secret_manager = secret_manager
+        self._config = config_manager.get_config()
     
     def load_secrets(self) -> None:
         """Load secrets based on environment configuration."""
@@ -79,10 +81,10 @@ class SecretLoader:
     def _get_development_secrets(self) -> Dict[str, str]:
         """Get development secrets from environment variables."""
         return {
-            "dev-database-password": os.environ.get("DEV_DATABASE_PASSWORD", "dev_password_123"),
-            "dev-api-key": os.environ.get("DEV_API_KEY", "dev_api_key_456"), 
-            "dev-jwt-secret": os.environ.get("DEV_JWT_SECRET", "dev_jwt_secret_789"),
-            "dev-encryption-key": os.environ.get("DEV_ENCRYPTION_KEY", "dev_encryption_key_012")
+            "dev-database-password": getattr(self._config, 'dev_database_password', "dev_password_123"),
+            "dev-api-key": getattr(self._config, 'dev_api_key', "dev_api_key_456"), 
+            "dev-jwt-secret": getattr(self._config, 'dev_jwt_secret', "dev_jwt_secret_789"),
+            "dev-encryption-key": getattr(self._config, 'dev_encryption_key', "dev_encryption_key_012")
         }
     
     def _load_secrets_by_patterns(self, patterns: List[str], access_level: SecretAccessLevel, rotation_days: int) -> None:
@@ -107,7 +109,8 @@ class SecretLoader:
     
     def _get_from_environment(self, secret_name: str) -> Optional[str]:
         """Get secret from environment variable."""
-        return os.environ.get(secret_name.upper().replace("-", "_"))
+        attr_name = secret_name.lower().replace("-", "_")
+        return getattr(self._config, attr_name, None)
     
     def _log_secret_not_found(self, secret_name: str) -> None:
         """Log when secret is not found."""

@@ -14,9 +14,9 @@ This guide helps you migrate from the legacy configuration system to the new uni
 ### Before (Legacy System)
 ```python
 # Old way - DEPRECATED
-from app.config_manager import ConfigManager
-from app.config_loader import load_env_var
-from app.config_environment import ConfigEnvironment
+from netra_backend.app.config_manager import ConfigManager
+from netra_backend.app.config_loader import load_env_var
+from netra_backend.app.config_environment import ConfigEnvironment
 
 config_manager = ConfigManager()
 config = config_manager.get_config()
@@ -25,7 +25,7 @@ config = config_manager.get_config()
 ### After (Unified System)
 ```python
 # New way - RECOMMENDED
-from app.core.configuration import ConfigurationLoader, get_configuration
+from netra_backend.app.core.configuration import ConfigurationLoader, get_configuration
 
 # Simple usage
 config = get_configuration()
@@ -43,14 +43,14 @@ Replace all legacy imports with unified system imports:
 
 ```python
 # Replace these:
-from app.config import get_config
-from app.config_manager import ConfigManager
-from app.config_loader import load_env_var
-from app.config_environment import ConfigEnvironment
-from app.config_secrets_manager import ConfigSecretsManager
+from netra_backend.app.config import get_config
+from netra_backend.app.config_manager import ConfigManager
+from netra_backend.app.config_loader import load_env_var
+from netra_backend.app.config_environment import ConfigEnvironment
+from netra_backend.app.config_secrets_manager import ConfigSecretsManager
 
 # With these:
-from app.core.configuration import (
+from netra_backend.app.core.configuration import (
     ConfigurationLoader,
     EnvironmentDetector,
     UnifiedSecretManager,
@@ -66,13 +66,13 @@ from app.core.configuration import (
 
 **Old:**
 ```python
-from app.config import get_config
+from netra_backend.app.config import get_config
 config = get_config()
 ```
 
 **New:**
 ```python
-from app.core.configuration import get_configuration
+from netra_backend.app.core.configuration import get_configuration
 config = get_configuration()
 ```
 
@@ -80,19 +80,19 @@ config = get_configuration()
 
 **Old:**
 ```python
-from app.config_environment import ConfigEnvironment
+from netra_backend.app.config_environment import ConfigEnvironment
 env = ConfigEnvironment()
 environment = env.get_environment()
 ```
 
 **New:**
 ```python
-from app.core.configuration import EnvironmentDetector
+from netra_backend.app.core.configuration import EnvironmentDetector
 detector = EnvironmentDetector()
 environment = detector.detect()
 
 # Or use the helper function
-from app.core.configuration import get_environment
+from netra_backend.app.core.configuration import get_environment
 environment = get_environment()
 ```
 
@@ -100,19 +100,19 @@ environment = get_environment()
 
 **Old:**
 ```python
-from app.config_secrets_manager import ConfigSecretsManager
+from netra_backend.app.config_secrets_manager import ConfigSecretsManager
 secrets_manager = ConfigSecretsManager()
 secrets_manager.load_secrets_into_config(config)
 ```
 
 **New:**
 ```python
-from app.core.configuration import UnifiedSecretManager
+from netra_backend.app.core.configuration import UnifiedSecretManager
 secret_manager = UnifiedSecretManager()
 secrets = secret_manager.load_all_secrets()
 
 # Or get a specific secret
-from app.core.configuration import get_secret
+from netra_backend.app.core.configuration import get_secret
 api_key = get_secret("OPENAI_API_KEY")
 ```
 
@@ -155,14 +155,14 @@ Replace test configuration mocks:
 
 **Old:**
 ```python
-from app.config_manager import ConfigManager
+from netra_backend.app.config_manager import ConfigManager
 with patch.object(ConfigManager, 'get_config') as mock:
     mock.return_value = test_config
 ```
 
 **New:**
 ```python
-from app.core.configuration import ConfigurationLoader
+from netra_backend.app.core.configuration import ConfigurationLoader
 loader = ConfigurationLoader()
 with patch.object(loader._manager, 'get_config') as mock:
     mock.return_value = test_config
@@ -198,7 +198,7 @@ if os.environ.get("ENVIRONMENT") == "production":
 
 **New:**
 ```python
-from app.core.configuration import is_production
+from netra_backend.app.core.configuration import is_production
 if is_production():
     # production logic
 ```
@@ -212,7 +212,7 @@ config_manager.reload_config()
 
 **New:**
 ```python
-from app.core.configuration import reload_configuration
+from netra_backend.app.core.configuration import reload_configuration
 config = reload_configuration(force=True)
 ```
 

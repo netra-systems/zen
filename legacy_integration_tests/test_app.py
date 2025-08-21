@@ -4,10 +4,10 @@ import asyncio
 import os
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
-from app.main import app
-from app.db.testing import override_get_db
-from app.dependencies import get_db_dependency
-from app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestionParams
+from netra_backend.app.main import app
+from netra_backend.app.db.testing import override_get_db
+from netra_backend.app.dependencies import get_db_dependency
+from netra_backend.app.schemas.Generation import ContentGenParams, LogGenParams, DataIngestionParams
 
 # Set testing flags to simplify startup
 os.environ["TESTING"] = "1"
@@ -77,7 +77,7 @@ async def test_generation_api(mock_generative_model, test_client: TestClient):
     # 7. Verify data in ClickHouse (optional, requires ClickHouse connection)
     # This part is commented out as it requires a live ClickHouse instance
     # and credentials, which might not be available in a standard test environment.
-    # from app.db.clickhouse import get_clickhouse_client
+    # from netra_backend.app.db.clickhouse import get_clickhouse_client
     # client = get_clickhouse_client()
     # result = client.execute("SELECT count() FROM test_logs")
     # assert result[0][0] > 0

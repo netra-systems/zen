@@ -7,8 +7,8 @@ import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Dict, Any
-from app.core.network_constants import ServicePorts, HostConstants
-from app.core.environment_constants import (
+from netra_backend.app.core.network_constants import ServicePorts, HostConstants
+from netra_backend.app.core.environment_constants import (
     Environment, EnvironmentVariables, get_current_environment, get_current_project_id
 )
 

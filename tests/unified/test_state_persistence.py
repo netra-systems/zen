@@ -28,12 +28,12 @@ from test_framework.mock_utils import mock_justified
 
 from tests.unified.config import TEST_USERS, TestDataFactory
 from tests.unified.test_harness import UnifiedTestHarness
-from app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
-from app.agents.state import DeepAgentState
-from app.services.state_persistence import state_persistence_service
-from app.schemas.agent_state import StatePersistenceRequest, CheckpointType
-from app.schemas.agent_models import AgentMetadata
-from app.logging_config import central_logger
+from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.state_persistence import state_persistence_service
+from netra_backend.app.schemas.agent_state import StatePersistenceRequest, CheckpointType
+from netra_backend.app.schemas.agent_models import AgentMetadata
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

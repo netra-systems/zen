@@ -145,7 +145,7 @@ The main Netra backend service integrates with this auth service using the auth 
 ```python
 # In the main Netra app (not in auth service)
 # Import the auth client from main app's client module
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 
 # Validate token
 result = await auth_client.validate_token(token)

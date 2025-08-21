@@ -41,7 +41,7 @@ from .service_manager import ServiceManager
 
 # Conditional imports to avoid configuration issues in testing
 try:
-    from app.db.clickhouse import get_clickhouse_client, use_mock_clickhouse
+    from netra_backend.app.db.clickhouse import get_clickhouse_client, use_mock_clickhouse
     CLICKHOUSE_AVAILABLE = True
 except ImportError:
     CLICKHOUSE_AVAILABLE = False
@@ -51,7 +51,7 @@ except ImportError:
         return True
 
 try:
-    from app.logging_config import central_logger as logger
+    from netra_backend.app.logging_config import central_logger as logger
 except ImportError:
     import logging
     logger = logging.getLogger(__name__)

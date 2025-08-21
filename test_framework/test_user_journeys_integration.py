@@ -19,7 +19,7 @@ import time
 from typing import Dict, Any, List
 from pathlib import Path
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 from test_framework.test_user_journeys import (
     UserJourneyTestSuite, 
     FirstTimeUserJourneyTest, 

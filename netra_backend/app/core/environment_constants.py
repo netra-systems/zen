@@ -3,6 +3,11 @@
 Single source of truth for all environment-related constants and utilities.
 Eliminates hardcoded environment strings throughout the codebase.
 
+**BOOTSTRAP MODULE**: This module contains infrastructure-level environment
+detection that requires direct os.environ access for initial configuration
+system setup. All application-level environment access should use the
+unified configuration system instead.
+
 Business Value: Platform/Internal - Deployment Stability - Prevents deployment
 errors and ensures consistent environment handling across all services.
 """
@@ -106,7 +111,12 @@ class EnvironmentDetector:
         
         Returns:
             str: The detected environment (guaranteed to be a valid Environment value)
+        
+        NOTE: This is a bootstrap method that requires direct os.environ access
+        to initialize the configuration system. All other environment access
+        should use the unified configuration system.
         """
+        # BOOTSTRAP ONLY: Direct env access required for initial config loading
         # Check explicit environment variable first (highest priority)
         env_var = os.environ.get(EnvironmentVariables.ENVIRONMENT, "").lower()
         if Environment.is_valid(env_var):
@@ -130,7 +140,10 @@ class EnvironmentDetector:
         
         Returns:
             bool: True if in testing context
+            
+        NOTE: Bootstrap method requiring direct environment access.
         """
+        # BOOTSTRAP ONLY: Direct env access for testing detection
         # If ENVIRONMENT is explicitly set to something other than testing, respect that
         explicit_env = os.environ.get(EnvironmentVariables.ENVIRONMENT, "").lower()
         if explicit_env and explicit_env != Environment.TESTING.value:
@@ -168,12 +181,20 @@ class EnvironmentDetector:
     
     @staticmethod
     def is_cloud_run() -> bool:
-        """Check if running on Google Cloud Run."""
+        """Check if running on Google Cloud Run.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for cloud platform detection
         return bool(os.environ.get(EnvironmentVariables.K_SERVICE))
     
     @staticmethod
     def get_cloud_run_environment() -> str:
-        """Get environment for Cloud Run deployment."""
+        """Get environment for Cloud Run deployment.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for cloud environment detection
         service_name = os.environ.get(EnvironmentVariables.K_SERVICE, "")
         if "prod" in service_name.lower():
             return Environment.PRODUCTION.value
@@ -188,12 +209,20 @@ class EnvironmentDetector:
     
     @staticmethod
     def is_app_engine() -> bool:
-        """Check if running on Google App Engine."""
+        """Check if running on Google App Engine.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for App Engine detection
         return bool(os.environ.get(EnvironmentVariables.GAE_ENV))
     
     @staticmethod
     def get_app_engine_environment() -> str:
-        """Get environment for App Engine deployment."""
+        """Get environment for App Engine deployment.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for App Engine environment detection
         gae_env = os.environ.get(EnvironmentVariables.GAE_ENV, "")
         gae_app = os.environ.get(EnvironmentVariables.GAE_APPLICATION, "")
         gae_version = os.environ.get(EnvironmentVariables.GAE_VERSION, "")
@@ -207,7 +236,11 @@ class EnvironmentDetector:
     
     @staticmethod
     def is_aws() -> bool:
-        """Check if running on AWS."""
+        """Check if running on AWS.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for AWS detection
         return (
             bool(os.environ.get(EnvironmentVariables.AWS_EXECUTION_ENV)) or 
             bool(os.environ.get(EnvironmentVariables.AWS_LAMBDA_FUNCTION_NAME))
@@ -215,7 +248,11 @@ class EnvironmentDetector:
     
     @staticmethod
     def get_aws_environment() -> str:
-        """Get environment for AWS deployment."""
+        """Get environment for AWS deployment.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for AWS environment detection
         # Check for explicit AWS environment tag
         aws_env = os.environ.get(EnvironmentVariables.AWS_ENVIRONMENT, "").lower()
         if Environment.is_valid(aws_env):
@@ -232,7 +269,11 @@ class EnvironmentDetector:
     
     @staticmethod
     def is_kubernetes() -> bool:
-        """Check if running on Kubernetes."""
+        """Check if running on Kubernetes.
+        
+        NOTE: Bootstrap method requiring direct environment access.
+        """
+        # BOOTSTRAP ONLY: Direct env access for Kubernetes detection
         return bool(os.environ.get(EnvironmentVariables.KUBERNETES_SERVICE_HOST))
 
 
@@ -361,9 +402,14 @@ def get_environment_config() -> Dict[str, Any]:
 
 
 def get_current_project_id() -> str:
-    """Get the appropriate GCP project ID for the current environment."""
+    """Get the appropriate GCP project ID for the current environment.
+    
+    NOTE: Bootstrap method for infrastructure setup.
+    For application use, prefer config.google_cloud_project.
+    """
     current_env = get_current_environment()
     
+    # BOOTSTRAP ONLY: Direct env access for project ID detection
     # Check for explicit override first
     explicit_project_id = os.environ.get(EnvironmentVariables.GOOGLE_CLOUD_PROJECT)
     if explicit_project_id:

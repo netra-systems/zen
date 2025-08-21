@@ -10,6 +10,10 @@ import sys
 os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 
+# Fix Python path for netra_backend imports
+if 'netra_backend' not in sys.path:
+    sys.path.insert(0, 'netra_backend')
+
 # Import the test engine fixture from app tests
 import pytest
 from sqlalchemy.ext.asyncio import create_async_engine

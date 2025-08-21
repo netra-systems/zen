@@ -10,7 +10,7 @@ from typing import Dict, Any, Optional
 from contextlib import contextmanager
 from pathlib import Path
 
-from auth_core.config import AuthConfig
+from auth_service.auth_core.config import AuthConfig
 
 
 class TestEnvironment:

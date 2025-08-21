@@ -25,7 +25,7 @@ from .helpers.thread_management_helpers import (
     measure_thread_operation_timing,
     validate_thread_websocket_flow
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

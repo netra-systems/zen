@@ -12,7 +12,7 @@ The new `app.core.network_constants` module provides a centralized configuration
 Defines all default service ports and provides environment-aware port selection.
 
 ```python
-from app.core.network_constants import ServicePorts
+from netra_backend.app.core.network_constants import ServicePorts
 
 # Default ports
 ServicePorts.POSTGRES_DEFAULT      # 5432
@@ -32,7 +32,7 @@ redis_port = ServicePorts.get_redis_port(is_test=False)       # Returns 6379 for
 Provides standardized host configurations.
 
 ```python
-from app.core.network_constants import HostConstants
+from netra_backend.app.core.network_constants import HostConstants
 
 HostConstants.LOCALHOST         # "localhost"
 HostConstants.LOCALHOST_IP      # "127.0.0.1"
@@ -46,7 +46,7 @@ default_host = HostConstants.get_default_host(use_localhost_ip=True)  # "127.0.0
 Builds database connection URLs consistently.
 
 ```python
-from app.core.network_constants import DatabaseConstants
+from netra_backend.app.core.network_constants import DatabaseConstants
 
 # PostgreSQL URL
 pg_url = DatabaseConstants.build_postgres_url(
@@ -81,7 +81,7 @@ ch_url = DatabaseConstants.build_clickhouse_url(
 Builds HTTP and WebSocket URLs with proper formatting.
 
 ```python
-from app.core.network_constants import URLConstants
+from netra_backend.app.core.network_constants import URLConstants
 
 # HTTP URL
 api_url = URLConstants.build_http_url(
@@ -110,7 +110,7 @@ dev_origins = URLConstants.get_cors_origins("development")
 Provides service-specific endpoint builders and external service URLs.
 
 ```python
-from app.core.network_constants import ServiceEndpoints
+from netra_backend.app.core.network_constants import ServiceEndpoints
 
 # Service URL builders
 auth_url = ServiceEndpoints.build_auth_service_url()
@@ -132,7 +132,7 @@ ServiceEndpoints.GOOGLE_USERINFO_ENDPOINT  # Google userinfo endpoint
 Provides environment-aware configuration helpers.
 
 ```python
-from app.core.network_constants import NetworkEnvironmentHelper
+from netra_backend.app.core.network_constants import NetworkEnvironmentHelper
 
 # Environment detection
 env = NetworkEnvironmentHelper.get_environment()           # "development", "staging", "production"
@@ -173,18 +173,18 @@ service_urls = NetworkEnvironmentHelper.get_service_urls_for_environment()
 ### 1. Import Pattern
 ```python
 # Good - Import specific components
-from app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
+from netra_backend.app.core.network_constants import ServicePorts, HostConstants, DatabaseConstants
 
 # Better - Use in functions to avoid circular imports
 def get_database_config():
-    from app.core.network_constants import DatabaseConstants, ServicePorts
+    from netra_backend.app.core.network_constants import DatabaseConstants, ServicePorts
     return DatabaseConstants.build_postgres_url(port=ServicePorts.POSTGRES_DEFAULT)
 ```
 
 ### 2. Environment-Aware Configuration
 ```python
 # Good - Use environment helpers
-from app.core.network_constants import NetworkEnvironmentHelper
+from netra_backend.app.core.network_constants import NetworkEnvironmentHelper
 
 db_urls = NetworkEnvironmentHelper.get_database_urls_for_environment()
 postgres_url = db_urls["postgres"]
@@ -201,7 +201,7 @@ except Exception as e:
 ### 3. Testing Configuration
 ```python
 # Use test-specific ports and configurations
-from app.core.network_constants import ServicePorts, DatabaseConstants
+from netra_backend.app.core.network_constants import ServicePorts, DatabaseConstants
 
 if os.environ.get("TESTING"):
     postgres_port = ServicePorts.get_postgres_port(is_test=True)  # 5433

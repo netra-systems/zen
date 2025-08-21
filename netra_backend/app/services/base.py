@@ -31,7 +31,7 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     """Legacy CRUD base class - DEPRECATED
     
-    This class is deprecated. Use the new service interfaces from app.core.service_interfaces
+    This class is deprecated. Use the new service interfaces from netra_backend.app.core.service_interfaces
     or EnhancedCRUDService for new implementations.
     
     TODO: Migrate app.services.user_service to use EnhancedCRUDService

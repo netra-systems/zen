@@ -7,10 +7,10 @@ Business Value Justification (BVJ):
 4. Revenue Impact: +$15K MRR from enhanced reliability features
 """
 
-from netra_backend.app.gcp_error_service import GCPErrorService
-from netra_backend.app.gcp_client_manager import GCPClientManager
-from netra_backend.app.error_formatter import ErrorFormatter
-from netra_backend.app.rate_limiter import GCPRateLimiter
+from netra_backend.app.services.monitoring.gcp_error_service import GCPErrorService
+from netra_backend.app.services.monitoring.gcp_client_manager import GCPClientManager
+from netra_backend.app.services.monitoring.error_formatter import ErrorFormatter
+from netra_backend.app.services.monitoring.rate_limiter import GCPRateLimiter
 
 __all__ = [
     "GCPErrorService",

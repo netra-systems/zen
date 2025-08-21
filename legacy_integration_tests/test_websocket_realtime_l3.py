@@ -21,9 +21,9 @@ import websockets
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
-from app.main import app
-from app.schemas.websocket_models import WebSocketMessage
-from app.schemas.websocket_message_types import WebSocketMessageType
+from netra_backend.app.main import app
+from netra_backend.app.schemas.websocket_models import WebSocketMessage
+from netra_backend.app.schemas.websocket_message_types import WebSocketMessageType
 
 
 class TestWebSocketRealTimeL3:

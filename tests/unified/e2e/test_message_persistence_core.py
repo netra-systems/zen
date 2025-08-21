@@ -10,8 +10,8 @@ import pytest
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.handlers.example_message_handler import ExampleMessageHandler
-from app.db.repositories.agent_repository import ThreadRepository, MessageRepository
+from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
+from netra_backend.app.db.repositories.agent_repository import ThreadRepository, MessageRepository
 from tests.unified.e2e.database_consistency_fixtures import database_test_session
 from tests.unified.e2e.example_message_test_helpers import (
     create_thread_data,

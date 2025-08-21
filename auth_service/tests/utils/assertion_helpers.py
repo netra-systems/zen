@@ -9,7 +9,7 @@ from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth_core.database.models import AuthUser, AuthSession
+from auth_service.auth_core.database.models import AuthUser, AuthSession
 from auth_service.tests..factories import TokenFactory
 
 

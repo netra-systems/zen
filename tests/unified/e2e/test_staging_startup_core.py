@@ -24,8 +24,8 @@ from tests.unified.e2e.staging_test_helpers import (
     StagingTestSuite,
     get_staging_suite
 )
-from app.core.configuration.base import validate_config_integrity
-from app.core.auth_constants import JWTConstants, CredentialConstants
+from netra_backend.app.core.configuration.base import validate_config_integrity
+from netra_backend.app.core.auth_constants import JWTConstants, CredentialConstants
 
 
 @pytest.mark.asyncio

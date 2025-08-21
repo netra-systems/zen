@@ -16,7 +16,7 @@ This test validates comprehensive rate limiting functionality including:
 - Priority queuing for premium users
 
 CRITICAL ARCHITECTURAL COMPLIANCE:
-- Uses canonical rate limiting types from app.schemas.rate_limit_types
+- Uses canonical rate limiting types from netra_backend.app.schemas.rate_limit_types
 - Tests real rate limiting infrastructure (not mocks)
 - Validates fairness algorithms and priority queuing
 - Ensures 100% code coverage for rate limiting components

@@ -130,7 +130,7 @@ class TypeDeduplicator:
         
         # Patterns to match imports
         import_patterns = [
-            # from app.agents.state import AgentState
+            # from netra_backend.app.agents.state import AgentState
             r'from\s+([a-zA-Z_][a-zA-Z0-9_.]*)\s+import\s+([a-zA-Z_][a-zA-Z0-9_,\s]*)',
             # import app.agents.state
             r'import\s+([a-zA-Z_][a-zA-Z0-9_.]*)',
@@ -155,7 +155,7 @@ class TypeDeduplicator:
                                     if name in self.python_type_mappings:
                                         replacements.append(ImportReplacement(
                                             old_import=line.strip(),
-                                            new_import=f"from app.schemas.registry import {name}",
+                                            new_import=f"from netra_backend.app.schemas.registry import {name}",
                                             file_path=str(py_file),
                                             line_number=line_num,
                                             type_name=name

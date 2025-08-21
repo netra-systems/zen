@@ -42,7 +42,7 @@ def get_openapi_spec():
 
 def _extract_base_schema() -> dict:
     """Extract base OpenAPI schema from FastAPI app."""
-    from app.main import app
+    from netra_backend.app.main import app
     return app.openapi()
 
 

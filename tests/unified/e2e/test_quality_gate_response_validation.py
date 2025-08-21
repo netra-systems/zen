@@ -24,12 +24,12 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from app.services.quality_gate_service import QualityGateService
-from app.services.quality_gate.quality_gate_models import (
+from netra_backend.app.services.quality_gate_service import QualityGateService
+from netra_backend.app.services.quality_gate.quality_gate_models import (
     ContentType, QualityLevel, QualityMetrics, ValidationResult
 )
-from app.redis_manager import RedisManager
-from app.logging_config import central_logger
+from netra_backend.app.redis_manager import RedisManager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

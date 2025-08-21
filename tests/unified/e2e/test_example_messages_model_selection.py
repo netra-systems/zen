@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from typing import Dict, Any
 from uuid import uuid4
 
-from app.handlers.example_message_handler import ExampleMessageHandler
+from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
 
 
 # Model selection prompts from SPEC/exampleNetraPrompts.xml

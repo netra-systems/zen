@@ -54,7 +54,7 @@
       <description>
         NEVER create duplicate authentication functions.
         NEVER copy auth logic to other files.
-        ALWAYS import from app.auth_integration.auth.
+        ALWAYS import from netra_backend.app.auth_integration.auth.
       </description>
       <violation_examples>
         <!-- BAD: Creating duplicate auth function -->
@@ -68,7 +68,7 @@
         <!-- GOOD: Using shared auth service -->
         <good>
           # In some_route.py
-          from app.auth_integration.auth import get_current_user
+          from netra_backend.app.auth_integration.auth import get_current_user
           
           @router.get("/protected")
           async def protected_route(user = Depends(get_current_user)):
@@ -82,7 +82,7 @@
       <description>ALL routes requiring authentication MUST follow this pattern</description>
       <examples>
         <example type="protected_route">
-          from app.auth_integration.auth import get_current_user
+          from netra_backend.app.auth_integration.auth import get_current_user
           
           @router.post("/api/resource")
           async def create_resource(
@@ -94,7 +94,7 @@
         </example>
         
         <example type="optional_auth_route">
-          from app.auth_integration.auth import get_current_user_optional
+          from netra_backend.app.auth_integration.auth import get_current_user_optional
           
           @router.get("/api/public")
           async def public_with_optional_auth(
@@ -106,7 +106,7 @@
         </example>
         
         <example type="websocket_auth">
-          from app.auth_integration.auth import validate_token_jwt
+          from netra_backend.app.auth_integration.auth import validate_token_jwt
           
           @router.websocket("/ws")
           async def websocket_endpoint(websocket: WebSocket, token: str):
@@ -172,7 +172,7 @@
       Expected: Minimal results (JWT handling should be centralized)
     </check>
     <check>
-      Run: grep -r "from app.auth_integration.auth import" app/
+      Run: grep -r "from netra_backend.app.auth_integration.auth import" app/
       Expected: Many results (all protected routes should import from here)
     </check>
   </compliance_check>
@@ -245,8 +245,8 @@
     
     <remaining_issues>
       <issue>🔴 CRITICAL: Legacy app/auth/ directory MUST be removed</issue>
-      <issue>Test files importing from app.auth.token_manager need migration</issue>
-      <issue>Test files importing from app.auth.pr_router need migration</issue>
+      <issue>Test files importing from netra_backend.app.auth.token_manager need migration</issue>
+      <issue>Test files importing from netra_backend.app.auth.pr_router need migration</issue>
       <issue>Security service needs to use auth_integration imports only</issue>
     </remaining_issues>
     

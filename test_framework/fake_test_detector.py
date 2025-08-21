@@ -37,7 +37,7 @@ from collections import defaultdict, Counter
 from dataclasses import dataclass, asdict
 from datetime import datetime
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

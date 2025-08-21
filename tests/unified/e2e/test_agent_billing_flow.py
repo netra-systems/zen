@@ -37,7 +37,7 @@ from .agent_billing_test_helpers import (
     BillingFlowValidator,
     AgentBillingTestUtils
 )
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @pytest.mark.asyncio

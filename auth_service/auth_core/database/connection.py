@@ -33,7 +33,7 @@ class AuthDatabase:
             database_url = "sqlite+aiosqlite:///:memory:"
         else:
             # Get database URL from config
-            from auth_core.config import AuthConfig
+            from auth_service.auth_core.config import AuthConfig
             database_url = AuthConfig.get_database_url()
             
             if not database_url:

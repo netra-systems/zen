@@ -42,7 +42,7 @@ class ImportIndependenceValidator:
                 path=self.project_root / "auth_service",
                 entry_point="main.py",
                 required_files=["main.py", "requirements.txt", "auth_core/__init__.py"],
-                forbidden_patterns=["from app.", "import app.", "from app ", "import app "],
+                forbidden_patterns=["from netra_backend.app.", "import app.", "from app ", "import app "],
                 allowed_external_deps={"fastapi", "uvicorn", "sqlalchemy", "pydantic", "httpx"},
                 api_endpoints=["/health", "/docs", "/openapi.json"]
             ),
@@ -256,7 +256,7 @@ class ImportIndependenceValidator:
         file_path_str = str(file_path)
         
         # Allow documented sync imports in specific files
-        if "main_db_sync.py" in file_path_str and "from app.db.models_postgres" in line:
+        if "main_db_sync.py" in file_path_str and "from netra_backend.app.db.models_postgres" in line:
             return True
             
         # Allow test files to import from other services for testing purposes

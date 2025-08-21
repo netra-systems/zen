@@ -23,13 +23,13 @@ from dataclasses import dataclass, asdict
 import statistics
 import redis.asyncio as aioredis
 
-# from app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
+# from netra_backend.app.services.cache.distributed_cache import DistributedCache  # Class may not exist, commented out
 from netra_backend.app.services.cache.cache_manager import LLMCacheManager as CacheManager
-# from app.services.cache.invalidation_service import CacheInvalidationService  # Class may not exist, commented out
+# from netra_backend.app.services.cache.invalidation_service import CacheInvalidationService  # Class may not exist, commented out
 # Session cache replaced with mock
 from unittest.mock import AsyncMock
 # SessionCache = AsyncMock  # Class may not exist, commented out
-# from app.services.database.user_repository import UserRepository  # Class may not exist, commented out
+# from netra_backend.app.services.database.user_repository import UserRepository  # Class may not exist, commented out
 # from tests.unified.config import TEST_CONFIG  # Comment out since config structure may vary
 TEST_CONFIG = {"mock": True}
 

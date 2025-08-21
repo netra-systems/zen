@@ -36,17 +36,17 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
     L4StagingCriticalPathTestBase,
     CriticalPathMetrics
 )
-# from app.services.resource_management.tenant_isolator import TenantIsolator
-# from app.services.resource_management.resource_monitor import ResourceMonitor
+# from netra_backend.app.services.resource_management.tenant_isolator import TenantIsolator
+# from netra_backend.app.services.resource_management.resource_monitor import ResourceMonitor
 TenantIsolator = AsyncMock
 ResourceMonitor = AsyncMock
-# from app.services.database.connection_pool_manager import ConnectionPoolManager
+# from netra_backend.app.services.database.connection_pool_manager import ConnectionPoolManager
 from unittest.mock import AsyncMock
 ConnectionPoolManager = AsyncMock
-# from app.services.redis.namespace_manager import RedisNamespaceManager
-# from app.services.monitoring.performance_tracker import PerformanceTracker
-# from app.services.rate_limiting.enterprise_rate_limiter import EnterpriseRateLimiter
-# from app.core.security.access_control import EnterpriseAccessController
+# from netra_backend.app.services.redis.namespace_manager import RedisNamespaceManager
+# from netra_backend.app.services.monitoring.performance_tracker import PerformanceTracker
+# from netra_backend.app.services.rate_limiting.enterprise_rate_limiter import EnterpriseRateLimiter
+# from netra_backend.app.core.security.access_control import EnterpriseAccessController
 RedisNamespaceManager = AsyncMock
 PerformanceTracker = AsyncMock
 EnterpriseRateLimiter = AsyncMock

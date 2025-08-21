@@ -13,10 +13,10 @@ import asyncio
 import time
 from typing import Dict, Any, List
 import pytest
-from app.agents.base import BaseSubAgent
-from app.agents.supervisor.supervisor_agent import SupervisorAgent
-from app.llm.llm_manager import LLMManager
-from app.config import get_config
+from netra_backend.app.agents.base import BaseSubAgent
+from netra_backend.app.agents.supervisor.supervisor_agent import SupervisorAgent
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
 
 
 class AIFactoryWorkflowCore:

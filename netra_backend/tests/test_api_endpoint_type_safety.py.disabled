@@ -10,17 +10,17 @@ from datetime import datetime
 from pydantic import ValidationError
 
 # Import API schemas
-from app.schemas.Request import RequestModel, StartAgentPayload
-from app.schemas.Generation import ContentGenParams, LogGenParams, SyntheticDataGenParams
-from app.schemas.Auth import LoginRequest, LoginResponse, TokenData
-from app.schemas.User import UserCreate, UserResponse, UserUpdate
-from app.schemas.Config import ConfigRequest, ConfigResponse
-from app.schemas.Corpus import CorpusCreate, CorpusResponse, CorpusUpdate
-from app.schemas.Reference import ReferenceCreate, ReferenceResponse
-from app.schemas.Supply import SupplyRequest, SupplyResponse
-from app.schemas.Analysis import AnalysisRequest, AnalysisResult
-from app.schemas.Tool import ToolExecutionRequest, ToolExecutionResponse
-from app.schemas.ToolPermission import ToolPermissionRequest, ToolPermissionResponse
+from netra_backend.app.schemas.Request import RequestModel, StartAgentPayload
+from netra_backend.app.schemas.Generation import ContentGenParams, LogGenParams, SyntheticDataGenParams
+from netra_backend.app.schemas.Auth import LoginRequest, LoginResponse, TokenData
+from netra_backend.app.schemas.User import UserCreate, UserResponse, UserUpdate
+from netra_backend.app.schemas.Config import ConfigRequest, ConfigResponse
+from netra_backend.app.schemas.Corpus import CorpusCreate, CorpusResponse, CorpusUpdate
+from netra_backend.app.schemas.Reference import ReferenceCreate, ReferenceResponse
+from netra_backend.app.schemas.Supply import SupplyRequest, SupplyResponse
+from netra_backend.app.schemas.Analysis import AnalysisRequest, AnalysisResult
+from netra_backend.app.schemas.Tool import ToolExecutionRequest, ToolExecutionResponse
+from netra_backend.app.schemas.ToolPermission import ToolPermissionRequest, ToolPermissionResponse
 
 
 class APIRequestFactory:

@@ -2,7 +2,7 @@
 import pytest
 import json
 from fastapi.testclient import TestClient
-from app.main import app
+from netra_backend.app.main import app
 
 
 @pytest.mark.skip(reason="Demo WebSocket endpoint has been removed")

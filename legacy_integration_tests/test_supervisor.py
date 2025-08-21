@@ -2,9 +2,9 @@ import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock, patch
 
-from app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent as Supervisor
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
 
 @pytest.mark.asyncio
 @patch('app.agents.triage_sub_agent.agent.TriageSubAgent.execute')
@@ -44,7 +44,7 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     async def structured_side_effect(prompt, llm_config_name, schema, use_cache=False):
         # For structured calls, create the actual TriageResult object for triage calls
         if llm_config_name == 'triage':
-            from app.agents.triage_sub_agent.models import TriageResult
+            from netra_backend.app.agents.triage_sub_agent.models import TriageResult
             return TriageResult(category="Data Analysis", confidence_score=0.9)
         # For other agents, return the regular JSON response
         return llm_responses[llm_config_name]
@@ -54,7 +54,7 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Mock the triage agent execute method to set the correct triage result
     async def mock_triage_execute_impl(state, run_id, stream_updates):
-        from app.agents.triage_sub_agent.models import TriageResult
+        from netra_backend.app.agents.triage_sub_agent.models import TriageResult
         state.triage_result = TriageResult(category="Data Analysis", confidence_score=0.9)
         state.step_count += 1
     
@@ -62,7 +62,7 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Mock the data agent execute method
     async def mock_data_execute_impl(state, run_id, stream_updates):
-        from app.schemas.shared_types import DataAnalysisResponse
+        from netra_backend.app.schemas.shared_types import DataAnalysisResponse
         state.data_result = DataAnalysisResponse(
             query="Data analysis query",
             results=[{"key": "value"}],
@@ -75,7 +75,7 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Mock the optimizations agent execute method  
     async def mock_optimizations_execute_impl(state, run_id, stream_updates):
-        from app.agents.state import OptimizationsResult
+        from netra_backend.app.agents.state import OptimizationsResult
         state.optimizations_result = OptimizationsResult(
             optimization_type="performance",
             recommendations=["Optimization 1", "Optimization 2"],
@@ -87,7 +87,7 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Mock the actions agent execute method
     async def mock_actions_execute_impl(state, run_id, stream_updates):
-        from app.agents.state import ActionPlanResult
+        from netra_backend.app.agents.state import ActionPlanResult
         state.action_plan_result = ActionPlanResult(
             action_plan_summary="Generated action plan for optimization",
             actions=[{"action": "Action 1", "priority": "high"}, {"action": "Action 2", "priority": "medium"}],
@@ -100,7 +100,7 @@ async def test_supervisor_flow(mock_reporting_execute, mock_actions_execute,
     
     # Mock the reporting agent execute method
     async def mock_reporting_execute_impl(state, run_id, stream_updates):
-        from app.agents.state import ReportResult
+        from netra_backend.app.agents.state import ReportResult
         state.report_result = ReportResult(
             report_type="optimization_report",
             content="This is the final optimization report with detailed analysis and recommendations.",

@@ -27,8 +27,8 @@ from unittest.mock import patch, AsyncMock
 import pytest
 import pytest_asyncio
 
-from app.schemas.UserPlan import PlanTier
-from app.schemas.agent_requests import AgentRequest
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.agent_requests import AgentRequest
 from .agent_conversation_helpers import (
     AgentConversationTestCore,
     ConversationFlowValidator,
@@ -369,7 +369,7 @@ class TestProductionDataE2ERealLLM:
     async def _execute_production_request(self, session_data: Dict[str, Any], request: Dict[str, Any], use_real_llm: bool) -> Dict[str, Any]:
         """Execute production request with real LLM."""
         if use_real_llm:
-            from app.llm.llm_manager import LLMManager
+            from netra_backend.app.llm.llm_manager import LLMManager
             llm_manager = LLMManager()
             
             # Build production-quality prompt

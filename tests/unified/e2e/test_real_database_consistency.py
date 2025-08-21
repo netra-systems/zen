@@ -36,7 +36,7 @@ from typing import Dict, List, Optional, Any
 import asyncpg
 import redis.asyncio as redis
 import clickhouse_connect
-from app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 
 @pytest_asyncio.fixture

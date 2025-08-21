@@ -29,7 +29,7 @@ The Netra platform implements a production-grade streaming service for real-time
 ### Basic Usage
 
 ```python
-from app.services.streaming_service import get_streaming_service, TextStreamProcessor
+from netra_backend.app.services.streaming_service import get_streaming_service, TextStreamProcessor
 
 # Get singleton instance
 streaming_service = get_streaming_service()

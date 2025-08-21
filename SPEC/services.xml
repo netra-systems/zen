@@ -33,15 +33,15 @@
         <requirement>Services declare their dependencies</requirement>
         <requirement>Dependencies are injected using a dependency injection framework</requirement>
         <requirement>Services are easily testable</requirement>
-        <requirement priority="critical">LLMManager MUST be injected using Depends(get_llm_manager) from app.dependencies, NOT Depends(LLMManager)</requirement>
-        <requirement priority="critical">All singleton services (LLMManager, SecurityService, etc.) MUST be retrieved from app.state via dependency functions, not instantiated directly</requirement>
+        <requirement priority="critical">LLMManager MUST be injected using Depends(get_llm_manager) from netra_backend.app.dependencies, NOT Depends(LLMManager)</requirement>
+        <requirement priority="critical">All singleton services (LLMManager, SecurityService, etc.) MUST be retrieved from netra_backend.app.state via dependency functions, not instantiated directly</requirement>
         <requirement>Dependency providers should be defined in app/dependencies.py for reusability</requirement>
       </requirements>
       <common-issues>
         <issue>
           <problem>Using Depends(LLMManager) instead of Depends(get_llm_manager)</problem>
           <symptom>API keys missing, "API key for provider 'google' is missing" error</symptom>
-          <solution>Always use dependency provider functions that retrieve from app.state</solution>
+          <solution>Always use dependency provider functions that retrieve from netra_backend.app.state</solution>
           <example>
             <incorrect>llm_manager: LLMManager = Depends(LLMManager)</incorrect>
             <correct>llm_manager: LLMManager = Depends(get_llm_manager)</correct>

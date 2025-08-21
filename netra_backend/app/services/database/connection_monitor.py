@@ -8,6 +8,7 @@ from netra_backend.app.logging_config import central_logger
 from netra_backend.app.core.exceptions_database import DatabaseError
 from netra_backend.app.services.database.pool_metrics import ConnectionPoolMetrics
 from netra_backend.app.services.database.health_checker import ConnectionHealthChecker
+from netra_backend.app.core.configuration.base import config_manager
 
 logger = central_logger.get_logger(__name__)
 
@@ -32,9 +33,9 @@ async def get_connection_status() -> Dict[str, Any]:
 
 async def start_connection_monitoring() -> None:
     """Start the connection monitoring service"""
-    import os
+    config = config_manager.get_config()
     # Skip monitoring if database is in mock mode
-    database_url = os.getenv("DATABASE_URL", "")
+    database_url = getattr(config, 'database_url', '')
     if "mock" in database_url.lower():
         logger.info("Skipping connection monitoring in mock mode")
         return

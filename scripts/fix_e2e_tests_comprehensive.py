@@ -169,8 +169,8 @@ class E2ETestFixer:
         
         # Check for common problematic imports
         problematic_imports = [
-            'from app.agents.validate_token_jwt',  # Should be from auth_integration
-            'from app.websocket.ModernConnectionManager',  # Wrong import path
+            'from netra_backend.app.agents.validate_token_jwt',  # Should be from auth_integration
+            'from netra_backend.app.websocket.ModernConnectionManager',  # Wrong import path
             'import TestSyntaxFix',  # Non-existent module
         ]
         
@@ -216,8 +216,8 @@ class E2ETestFixer:
     def _fix_import_errors(self, content: str) -> str:
         """Fix common import errors."""
         fixes = {
-            'from app.agents.validate_token_jwt': 'from app.auth_integration.auth import validate_token_jwt',
-            'from app.websocket.ModernConnectionManager': 'from app.websocket.connection_manager import ModernConnectionManager',
+            'from netra_backend.app.agents.validate_token_jwt': 'from netra_backend.app.auth_integration.auth import validate_token_jwt',
+            'from netra_backend.app.websocket.ModernConnectionManager': 'from netra_backend.app.websocket.connection_manager import ModernConnectionManager',
             'import TestSyntaxFix': '# Removed invalid import: TestSyntaxFix',
             'from TestSyntaxFix': '# Removed invalid import: TestSyntaxFix',
         }

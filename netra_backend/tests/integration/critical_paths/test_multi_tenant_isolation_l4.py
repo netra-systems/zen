@@ -21,22 +21,22 @@ from typing import Dict, List, Optional, Any, Set
 from datetime import datetime, timedelta
 from unittest.mock import AsyncMock
 
-# from app.services.database.tenant_service import TenantService
+# from netra_backend.app.services.database.tenant_service import TenantService
 TenantService = AsyncMock
 # Permissions service replaced with auth_integration
 # from auth_integration import require_permission
-# from app.auth_integration.auth import create_access_token
+# from netra_backend.app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 create_access_token = AsyncMock()
-# from app.core.unified.jwt_validator import validate_token_jwt
+# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 validate_token_jwt = AsyncMock()
 from unittest.mock import AsyncMock
 PermissionsService = AsyncMock
-# from app.services.audit.audit_logger import AuditLogger
-# from app.services.database.connection_manager import DatabaseConnectionManager
-# from app.schemas.tenant import Tenant, TenantResource, Permission
-# from app.core.security import SecurityContext
+# from netra_backend.app.services.audit.audit_logger import AuditLogger
+# from netra_backend.app.services.database.connection_manager import DatabaseConnectionManager
+# from netra_backend.app.schemas.tenant import Tenant, TenantResource, Permission
+# from netra_backend.app.core.security import SecurityContext
 # from tests.integration.staging_config.base import StagingConfigTestBase
 AuditLogger = AsyncMock
 DatabaseConnectionManager = AsyncMock

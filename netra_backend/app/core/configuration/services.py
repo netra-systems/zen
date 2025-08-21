@@ -5,6 +5,10 @@
 Manages LLM, Redis, OAuth, and external service configurations.
 Eliminates scattered service configuration across the codebase.
 
+**CONFIGURATION MANAGER**: This module is part of the configuration system
+and requires some direct os.environ access for bootstrapping. Application
+code should use the unified configuration system instead.
+
 Business Value: Ensures reliable service integrations for Enterprise customers.
 Prevents service configuration inconsistencies affecting revenue.
 
@@ -41,7 +45,11 @@ class ServiceConfigManager:
         return get_current_environment()
     
     def _load_service_modes(self) -> Dict[str, str]:
-        """Load service operation modes from environment."""
+        """Load service operation modes from environment.
+        
+        CONFIG MANAGER: Direct env access required for service mode bootstrapping.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for service mode configuration
         return {
             "llm": os.environ.get(EnvironmentVariables.LLM_MODE, "shared").lower(),
             "redis": os.environ.get(EnvironmentVariables.REDIS_MODE, "shared").lower(),
@@ -130,7 +138,11 @@ class ServiceConfigManager:
         config.dev_mode_clickhouse_enabled = self._get_service_enabled_status("clickhouse", defaults)
     
     def _populate_external_urls(self, config: AppConfig) -> None:
-        """Populate external service URLs."""
+        """Populate external service URLs.
+        
+        CONFIG MANAGER: Direct env access for URL configuration loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for URL configuration
         defaults = self._service_defaults.get(self._environment, {})
         config.frontend_url = os.environ.get("FRONTEND_URL", defaults.get("frontend_url"))
         config.api_base_url = os.environ.get("API_BASE_URL", self._get_api_base_url())
@@ -142,13 +154,21 @@ class ServiceConfigManager:
             self._set_oauth_scopes(config)
     
     def _populate_cors_config(self, config: AppConfig) -> None:
-        """Populate CORS configuration from environment."""
+        """Populate CORS configuration from environment.
+        
+        CONFIG MANAGER: Direct env access for CORS configuration loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for CORS configuration
         cors_origins_env = os.environ.get("CORS_ORIGINS")
         if cors_origins_env:
             config.cors_origins = self._parse_cors_origins(cors_origins_env)
     
     def _get_llm_api_key(self) -> Optional[str]:
-        """Get LLM API key from environment."""
+        """Get LLM API key from environment.
+        
+        CONFIG MANAGER: Direct env access for API key configuration loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for API key loading
         return os.environ.get("GEMINI_API_KEY") or os.environ.get("LLM_API_KEY")
     
     def _set_llm_api_keys(self, config: AppConfig, api_key: str) -> None:
@@ -159,7 +179,11 @@ class ServiceConfigManager:
                     llm_config.api_key = api_key
     
     def _configure_llm_settings(self, config: AppConfig) -> None:
-        """Configure LLM-specific settings."""
+        """Configure LLM-specific settings.
+        
+        CONFIG MANAGER: Direct env access for LLM configuration loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for LLM settings
         config.llm_cache_enabled = self._get_bool_env("LLM_CACHE_ENABLED", True)
         config.llm_cache_ttl = int(os.environ.get("LLM_CACHE_TTL", "3600"))
         config.llm_heartbeat_enabled = self._get_bool_env("LLM_HEARTBEAT_ENABLED", True)
@@ -227,7 +251,11 @@ class ServiceConfigManager:
             config.oauth_config.scopes.append("https://www.googleapis.com/auth/userinfo.email")
     
     def _get_bool_env(self, env_var: str, default: bool) -> bool:
-        """Get boolean environment variable with default."""
+        """Get boolean environment variable with default.
+        
+        CONFIG MANAGER: Direct env access for boolean configuration parsing.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for boolean parsing
         value = os.environ.get(env_var, str(default)).lower()
         return value in ["true", "1", "yes", "on"]
     
@@ -289,7 +317,11 @@ class ServiceConfigManager:
         return enabled_count
     
     def _populate_environment_vars(self, config: AppConfig) -> None:
-        """Populate environment variables into config."""
+        """Populate environment variables into config.
+        
+        CONFIG MANAGER: Direct env access for configuration variable loading.
+        """
+        # CONFIG BOOTSTRAP: Direct env access for configuration population
         # Environment detection variables
         config.pytest_current_test = os.environ.get("PYTEST_CURRENT_TEST")
         config.testing = os.environ.get("TESTING")
@@ -320,6 +352,6 @@ class ServiceConfigManager:
             "environment": self._environment,
             "service_modes": self._service_modes,
             "llm_configured": bool(self._get_llm_api_key()),
-            "oauth_configured": bool(os.environ.get("GOOGLE_CLIENT_ID")),
+            "oauth_configured": bool(os.environ.get("GOOGLE_CLIENT_ID")),  # CONFIG BOOTSTRAP
             "enabled_services": self.get_enabled_services_count()
         }

@@ -22,8 +22,8 @@ import subprocess
 import time
 import logging
 from typing import Dict, List, Optional, Any
-from app.schemas.service_types import ServiceStatus, ServiceHealthCheck
-from app.core.exceptions_base import NetraException
+from netra_backend.app.schemas.service_types import ServiceStatus, ServiceHealthCheck
+from netra_backend.app.core.exceptions_base import NetraException
 
 # Import modular components
 from .crash_recovery_models import (

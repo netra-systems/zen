@@ -87,26 +87,26 @@
     <smoke-test id="backend-startup" critical="true">
       <title>Backend Startup Validation</title>
       <commands>
-        <command>python -c "from app.main import app; print('✓ FastAPI app imports successfully')"</command>
-        <command>python -c "from app.db.postgres import get_engine; print('✓ Database connection configured')"</command>
-        <command>python -c "from app.redis_manager import RedisManager; print('✓ Redis manager available')"</command>
+        <command>python -c "from netra_backend.app.main import app; print('✓ FastAPI app imports successfully')"</command>
+        <command>python -c "from netra_backend.app.db.postgres import get_engine; print('✓ Database connection configured')"</command>
+        <command>python -c "from netra_backend.app.redis_manager import RedisManager; print('✓ Redis manager available')"</command>
       </commands>
     </smoke-test>
     
     <smoke-test id="agent-system" critical="true">
       <title>Agent System Health Check</title>
       <commands>
-        <command>python -c "from app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')"</command>
-        <command>python -c "from app.services.agent_service import AgentService; print('✓ Agent service available')"</command>
-        <command>python -c "from app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')"</command>
+        <command>python -c "from netra_backend.app.agents.supervisor import SupervisorAgent; print('✓ Supervisor agent loads')"</command>
+        <command>python -c "from netra_backend.app.services.agent_service import AgentService; print('✓ Agent service available')"</command>
+        <command>python -c "from netra_backend.app.agents.tool_dispatcher import ToolDispatcher; print('✓ Tool dispatcher functional')"</command>
       </commands>
     </smoke-test>
     
     <smoke-test id="websocket-system" critical="true">
       <title>WebSocket System Validation</title>
       <commands>
-        <command>python -c "from app.ws_manager import WebSocketManager; print('✓ WebSocket manager loads')"</command>
-        <command>python -c "from app.services.websocket.message_handler import MessageHandler; print('✓ Message handler available')"</command>
+        <command>python -c "from netra_backend.app.ws_manager import WebSocketManager; print('✓ WebSocket manager loads')"</command>
+        <command>python -c "from netra_backend.app.services.websocket.message_handler import MessageHandler; print('✓ Message handler available')"</command>
       </commands>
     </smoke-test>
     

@@ -266,7 +266,7 @@
         </pattern>
         <pattern type="incorrect">
           # Within app/tests/agents/test_file.py
-          from app.agents.state import DeepAgentState  # Wrong - ModuleNotFoundError
+          from netra_backend.app.agents.state import DeepAgentState  # Wrong - ModuleNotFoundError
         </pattern>
       </import_patterns>
       <execution_context>

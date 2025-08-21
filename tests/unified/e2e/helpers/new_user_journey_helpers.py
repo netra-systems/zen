@@ -12,7 +12,7 @@ import json
 import aiosqlite
 from typing import Dict, Any, Optional
 
-from app.clients.auth_client import auth_client
+from netra_backend.app.clients.auth_client import auth_client
 from ..database_test_connections import DatabaseTestConnections
 from tests.unified.test_harness import UnifiedTestHarness
 

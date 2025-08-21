@@ -62,12 +62,12 @@ def assert_middleware_added(app, middleware_type):
 
 
 def get_handler_calls(app):
-    """Get exception handler calls from app."""
+    """Get exception handler calls from netra_backend.app."""
     return app.add_exception_handler.call_args_list
 
 
 def get_middleware_calls(app):
-    """Get middleware calls from app."""
+    """Get middleware calls from netra_backend.app."""
     return app.middleware.call_args_list if hasattr(app.middleware, 'call_args_list') else []
 
 

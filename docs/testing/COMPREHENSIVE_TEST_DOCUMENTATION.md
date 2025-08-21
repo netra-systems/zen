@@ -254,7 +254,7 @@ BVJ (Business Value Justification):
 
 import pytest
 from unittest.mock import Mock, patch
-from app.core.types import [StronglyTypedModels]
+from netra_backend.app.core.types import [StronglyTypedModels]
 
 class TestComponentName:
     """Test class following 450-line limit."""
@@ -333,7 +333,7 @@ def test_new_feature():
 
 ### Strong Type Safety (MANDATORY)
 ```python
-from app.core.types import (
+from netra_backend.app.core.types import (
     AgentRequest,
     AgentResponse,
     ValidationResult
@@ -412,7 +412,7 @@ export PYTHONPATH="${PYTHONPATH}:$(pwd)"
 python scripts/init_test_db.py
 
 # Check database status  
-python -c "from app.db.connection import get_db; print('DB OK')"
+python -c "from netra_backend.app.db.connection import get_db; print('DB OK')"
 ```
 
 #### 3. Test Environment Issues

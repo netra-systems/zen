@@ -9,9 +9,9 @@ from typing import Optional, Dict, Any
 from contextlib import asynccontextmanager
 
 from netra_backend.app.logging_config import central_logger
-from netra_backend.app.metrics_collector import MetricsCollector
-from netra_backend.app.performance_alerting import PerformanceAlertManager  
-from netra_backend.app.dashboard import PerformanceDashboard, OperationMeasurement, SystemOverview
+from netra_backend.app.monitoring.metrics_collector import MetricsCollector
+from netra_backend.app.monitoring.performance_alerting import PerformanceAlertManager  
+from netra_backend.app.monitoring.dashboard import PerformanceDashboard, OperationMeasurement, SystemOverview
 
 logger = central_logger.get_logger(__name__)
 

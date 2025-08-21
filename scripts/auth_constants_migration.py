@@ -208,7 +208,7 @@ class AuthConstantsMigrator:
             
             # Look for existing imports
             for i, line in enumerate(lines):
-                if line.strip().startswith('from app.core.auth_constants import'):
+                if line.strip().startswith('from netra_backend.app.core.auth_constants import'):
                     # Update existing import
                     existing_classes = self._extract_imported_classes(line)
                     all_classes = existing_classes.union(required_classes)
@@ -254,7 +254,7 @@ class AuthConstantsMigrator:
     
     def _extract_imported_classes(self, import_line: str) -> Set[str]:
         """Extract class names from an import line."""
-        # Parse "from app.core.auth_constants import Class1, Class2"
+        # Parse "from netra_backend.app.core.auth_constants import Class1, Class2"
         if ' import ' in import_line:
             import_part = import_line.split(' import ')[1]
             classes = [cls.strip() for cls in import_part.split(',')]

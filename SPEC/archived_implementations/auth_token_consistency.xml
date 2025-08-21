@@ -33,7 +33,7 @@
       </file>
       <file path="app/auth/auth_dependencies.py">
         <change>Update OAuth2PasswordBearer tokenUrl from '/auth/token' to '/api/auth/token'</change>
-        <change>Use get_db_session from app.dependencies instead of get_async_db</change>
+        <change>Use get_db_session from netra_backend.app.dependencies instead of get_async_db</change>
       </file>
     </affected_files>
     <correct_implementations>
@@ -69,7 +69,7 @@
     <issue>
       <description>Database session dependency inconsistency</description>
       <problem>auth_dependencies used get_async_db while other routes used get_db_session</problem>
-      <solution>Standardized to use get_db_session from app.dependencies</solution>
+      <solution>Standardized to use get_db_session from netra_backend.app.dependencies</solution>
     </issue>
   </backend_issues_fixed>
   <prevention>

@@ -54,8 +54,8 @@
       </change>
       <change file="app/services/permission_service.py">
         <description>Fix incorrect import path for logging module</description>
-        <before>from app.core.logging_config import central_logger</before>
-        <after>from app.logging_config import central_logger</after>
+        <before>from netra_backend.app.core.logging_config import central_logger</before>
+        <after>from netra_backend.app.logging_config import central_logger</after>
       </change>
     </changes>
   </solution>

@@ -28,13 +28,13 @@ from netra_backend.app.services.user_service import CRUDUser as UserService
 from netra_backend.app.services.metrics.billing_metrics import BillingMetricsCollector
 from netra_backend.app.services.audit_service import AuditService
 from netra_backend.app.schemas.UserPlan import PlanTier
-# from app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
+# from netra_backend.app.schemas.agent_models import AgentRequest, AgentResponse, AgentTask  # These classes don't exist, using generic dict structures
 # Available classes in agent_models: AgentResult, DeepAgentState, AgentMetadata, ToolResultData
 from unittest.mock import AsyncMock, MagicMock
-# from app.services.websocket_service import WebSocketService
+# from netra_backend.app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
-# from app.services.state.state_manager import StateManager
+# from netra_backend.app.services.state.state_manager import StateManager
 StateManager = AsyncMock
 from test_framework.test_config import configure_dedicated_test_environment
 

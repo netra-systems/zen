@@ -26,7 +26,7 @@ from datetime import datetime
 from ..config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
 from .websocket_resilience_core import WebSocketResilienceTestCore
 from ..real_websocket_client import RealWebSocketClient
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @dataclass

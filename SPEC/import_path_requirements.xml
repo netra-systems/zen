@@ -97,7 +97,7 @@
   <forbidden_patterns>
     <pattern>
       <description>Old app-relative imports</description>
-      <forbidden>from app.agents.base import BaseAgent</forbidden>
+      <forbidden>from netra_backend.app.agents.base import BaseAgent</forbidden>
       <correct>from netra_backend.app.agents.base import BaseAgent</correct>
       <severity>CRITICAL</severity>
     </pattern>
@@ -177,7 +177,7 @@
     <fix>
       <problem>ModuleNotFoundError: No module named 'app'</problem>
       <solution>
-        <step>Replace 'from app.' with 'from netra_backend.app.'</step>
+        <step>Replace 'from netra_backend.app.' with 'from netra_backend.app.'</step>
         <step>Ensure PYTHONPATH includes project root</step>
       </solution>
     </fix>

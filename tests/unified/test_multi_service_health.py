@@ -31,10 +31,10 @@ os.environ["TESTING"] = "1"
 os.environ["ENVIRONMENT"] = "testing"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
 
-from app.config import settings
-from app.logging_config import central_logger
-from app.db.postgres import get_async_db, async_engine
-from app.redis_manager import RedisManager
+from netra_backend.app.config import settings
+from netra_backend.app.logging_config import central_logger
+from netra_backend.app.db.postgres import get_async_db, async_engine
+from netra_backend.app.redis_manager import RedisManager
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -202,7 +202,7 @@ class MultiServiceHealthChecker:
                 )
             
             async with asyncio.timeout(DATABASE_TIMEOUTS["clickhouse"]):
-                from app.db.clickhouse import get_clickhouse_client
+                from netra_backend.app.db.clickhouse import get_clickhouse_client
                 async with get_clickhouse_client() as client:
                     await client.test_connection()
                     response_time_ms = (time.time() - start_time) * 1000

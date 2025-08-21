@@ -7,9 +7,9 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains compatibility for observability functionality
 """
 
-from netra_backend.app.metrics_collector import MetricsCollector
-from netra_backend.app.prometheus_exporter import PrometheusExporter
-from netra_backend.app.tracing_service import TracingService
-from netra_backend.app.alert_manager import AlertManager
+from netra_backend.app.services.observability.metrics_collector import MetricsCollector
+from netra_backend.app.services.observability.prometheus_exporter import PrometheusExporter
+from netra_backend.app.services.observability.tracing_service import TracingService
+from netra_backend.app.services.observability.alert_manager import AlertManager
 
 __all__ = ["MetricsCollector", "PrometheusExporter", "TracingService", "AlertManager"]

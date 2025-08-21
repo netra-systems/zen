@@ -21,8 +21,8 @@ from httpx import AsyncClient, ASGITransport
 import uuid
 
 # Import app components
-from app.main import app
-from app.schemas import (
+from netra_backend.app.main import app
+from netra_backend.app.schemas import (
     RequestModel, 
     Workload, 
     DataSource, 
@@ -31,10 +31,10 @@ from app.schemas import (
     WebSocketMessage,
     UserPlan
 )
-from app.schemas.UserPlan import PlanTier
-from app.services.agent_service import AgentService, get_agent_service
-from app.services.security_service import SecurityService
-from app.dependencies import get_db_session, get_security_service
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.services.agent_service import AgentService, get_agent_service
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.dependencies import get_db_session, get_security_service
 
 # Import test helpers - removed due to missing module
 

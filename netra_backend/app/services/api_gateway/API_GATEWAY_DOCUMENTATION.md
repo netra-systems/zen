@@ -60,7 +60,7 @@ Client Response
 
 **Usage Example**:
 ```python
-from app.services.api_gateway.router import ApiGatewayRouter
+from netra_backend.app.services.api_gateway.router import ApiGatewayRouter
 
 # Initialize router
 router = ApiGatewayRouter()
@@ -101,7 +101,7 @@ health = router.get_health_status()
 
 **Usage Example**:
 ```python
-from app.services.api_gateway.rate_limiter import (
+from netra_backend.app.services.api_gateway.rate_limiter import (
     ApiGatewayRateLimiter,
     RateLimitConfig
 )
@@ -149,7 +149,7 @@ stats = rate_limiter.get_client_stats("client_123")
 
 **Usage Example**:
 ```python
-from app.services.api_gateway.cache_manager import ApiCacheManager
+from netra_backend.app.services.api_gateway.cache_manager import ApiCacheManager
 
 # Initialize cache manager
 cache = ApiCacheManager(max_size=1000)
@@ -194,7 +194,7 @@ stats = cache.get_stats()
 
 **Usage Example**:
 ```python
-from app.services.api_gateway.circuit_breaker import (
+from netra_backend.app.services.api_gateway.circuit_breaker import (
     CircuitBreakerManager,
     CircuitBreakerConfig
 )
@@ -241,7 +241,7 @@ stats = circuit_breaker.get_stats()
 
 **Usage Example**:
 ```python
-from app.services.api_gateway.transformation_engine import (
+from netra_backend.app.services.api_gateway.transformation_engine import (
     TransformationEngine,
     TransformationRule
 )
@@ -340,9 +340,9 @@ circuit_breaker:
 
 ```python
 from fastapi import FastAPI, Request, HTTPException
-from app.services.api_gateway.router import ApiGatewayRouter
-from app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
-from app.services.api_gateway.cache_manager import ApiCacheManager
+from netra_backend.app.services.api_gateway.router import ApiGatewayRouter
+from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
+from netra_backend.app.services.api_gateway.cache_manager import ApiCacheManager
 
 app = FastAPI()
 router = ApiGatewayRouter()
@@ -378,7 +378,7 @@ async def api_gateway_middleware(request: Request, call_next):
 
 ```python
 import asyncio
-from app.services.api_gateway.circuit_breaker import ApiCircuitBreaker
+from netra_backend.app.services.api_gateway.circuit_breaker import ApiCircuitBreaker
 
 async def process_with_gateway(endpoint: str, params: dict):
     """Process request through API Gateway components."""
@@ -521,7 +521,7 @@ class ApiGatewayOrchestrator:
 
 ```python
 import pytest
-from app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
+from netra_backend.app.services.api_gateway.rate_limiter import ApiGatewayRateLimiter
 
 def test_rate_limiter():
     limiter = ApiGatewayRateLimiter()

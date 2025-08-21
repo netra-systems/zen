@@ -30,7 +30,7 @@ The Database Isolation System provides comprehensive isolated database environme
 ### Basic Isolated PostgreSQL Test
 ```python
 import pytest
-from app.tests.isolated_test_config import isolated_postgres
+from netra_backend.app.tests.isolated_test_config import isolated_postgres
 
 @pytest.mark.asyncio
 async def test_user_creation(isolated_postgres):
@@ -63,7 +63,7 @@ async def test_analytics_workflow(isolated_full_stack):
 
 ### Context Manager Usage
 ```python
-from app.tests.isolated_test_config import with_isolated_postgres
+from netra_backend.app.tests.isolated_test_config import with_isolated_postgres
 
 async def my_test():
     async with with_isolated_postgres("my_test", "user_management", "basic_workflow") as (session, config):
@@ -268,8 +268,8 @@ pytest_plugins = ["app.tests.isolated_test_config"]
 #### Import Errors
 ```python
 # Ensure proper imports
-from app.tests.isolated_test_config import isolated_postgres
-# Not: from app.tests.database_isolation import ...
+from netra_backend.app.tests.isolated_test_config import isolated_postgres
+# Not: from netra_backend.app.tests.database_isolation import ...
 ```
 
 #### Database Connection Failures

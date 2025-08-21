@@ -21,8 +21,8 @@ from datetime import datetime, timezone
 from tests.unified.config import TEST_USERS, TEST_ENDPOINTS, TestDataFactory
 from tests.unified.e2e.unified_e2e_harness import UnifiedE2ETestHarness
 from tests.unified.test_harness import UnifiedTestHarness
-from app.schemas.core_enums import WebSocketMessageType
-from app.logging_config import central_logger
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

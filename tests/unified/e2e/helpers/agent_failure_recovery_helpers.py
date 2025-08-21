@@ -17,7 +17,7 @@ from enum import Enum
 
 from ..config import TEST_USERS, TEST_ENDPOINTS
 from ..real_websocket_client import RealWebSocketClient
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

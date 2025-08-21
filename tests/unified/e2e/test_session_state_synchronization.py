@@ -27,7 +27,7 @@ from .helpers.session_test_helpers import (
     validate_session_timeout_behavior,
     create_session_test_scenarios
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

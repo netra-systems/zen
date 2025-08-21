@@ -24,7 +24,7 @@ from netra_backend.app.tool_recommender import ToolRecommender
 from netra_backend.app.core import TriageCore
 
 # Note: TriageSubAgent is imported directly where needed to avoid circular imports
-# Use: from app.agents.triage_sub_agent.agent import TriageSubAgent
+# Use: from netra_backend.app.agents.triage_sub_agent.agent import TriageSubAgent
 
 __all__ = [
     "Priority",

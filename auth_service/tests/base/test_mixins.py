@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy.ext.asyncio import AsyncSession
 import aioredis
 
-from auth_core.database.models import AuthUser, AuthSession
+from auth_service.auth_core.database.models import AuthUser, AuthSession
 from auth_service.tests.factories import AuthUserFactory, AuthSessionFactory, AuditLogFactory
 
 

@@ -13,9 +13,9 @@ from datetime import datetime, timezone
 from enum import Enum
 
 from tests.unified.config import UnifiedTestConfig, TestTier
-from app.schemas.shared_types import ProcessingResult, ErrorContext, AgentStatus
-from app.schemas.quality_types import QualityMetrics, QualityLevel, ContentType
-from app.schemas.monitoring_types import MetricData, MetricType, AlertSeverity
+from netra_backend.app.schemas.shared_types import ProcessingResult, ErrorContext, AgentStatus
+from netra_backend.app.schemas.quality_types import QualityMetrics, QualityLevel, ContentType
+from netra_backend.app.schemas.monitoring_types import MetricData, MetricType, AlertSeverity
 
 
 class ResponseValidationType(str, Enum):

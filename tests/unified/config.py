@@ -210,7 +210,7 @@ class TestTokenManager:
     def create_test_token(self, user_data: Dict[str, Any]) -> str:
         """Create test JWT token"""
         try:
-            from app.auth_integration.auth import create_access_token
+            from netra_backend.app.auth_integration.auth import create_access_token
             return create_access_token(data={"sub": user_data["email"]})
         except ImportError:
             return f"mock-token-{user_data['id']}"

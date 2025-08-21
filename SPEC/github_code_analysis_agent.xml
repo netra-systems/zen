@@ -18,7 +18,7 @@
   <system_integration>
     <supervisor_integration>
       <description>Operates under supervisor agent control</description>
-      <state_management>Uses existing StateManager from app.agents.supervisor.state_manager</state_management>
+      <state_management>Uses existing StateManager from netra_backend.app.agents.supervisor.state_manager</state_management>
       <error_handling>Integrates with triage_sub_agent for error recovery</error_handling>
       <compensation>Uses existing compensation_engine for rollback operations</compensation>
     </supervisor_integration>

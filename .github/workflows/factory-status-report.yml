@@ -78,7 +78,7 @@ jobs:
           import sys
           import json
           from datetime import datetime
-          from app.services.factory_status.report_builder import ReportBuilder
+          from netra_backend.app.services.factory_status.report_builder import ReportBuilder
           
           hours = int('${{ steps.params.outputs.hours }}')
           print(f'Analyzing last {hours} hours of activity...')

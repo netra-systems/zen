@@ -15,7 +15,7 @@ from enum import Enum
 import pytest
 import websockets
 from websockets.exceptions import ConnectionClosed, InvalidStatusCode
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 async def test_reconnection_performance_benchmarks(websocket_reconnect_client, mock_backend_server):
     """Benchmark reconnection performance across different scenarios."""

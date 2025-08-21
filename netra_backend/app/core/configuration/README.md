@@ -33,7 +33,7 @@ app/core/configuration/
 
 ### Primary Access (PREFERRED)
 ```python
-from app.config import get_config, reload_config, validate_configuration
+from netra_backend.app.config import get_config, reload_config, validate_configuration
 
 # Get configuration - SINGLE SOURCE OF TRUTH
 config = get_config()
@@ -48,7 +48,7 @@ is_valid, issues = validate_configuration()
 
 ### Direct Unified Access
 ```python
-from app.core.configuration.base import (
+from netra_backend.app.core.configuration.base import (
     get_unified_config,
     reload_unified_config, 
     validate_config_integrity
@@ -67,7 +67,7 @@ export CONFIG_HOT_RELOAD=true
 
 ### Trigger Configuration Reload
 ```python
-from app.config import reload_config
+from netra_backend.app.config import reload_config
 
 # Reload configuration from all sources
 reload_config()
@@ -75,7 +75,7 @@ reload_config()
 
 ### Secret Rotation
 ```python
-from app.core.configuration.secrets import SecretManager
+from netra_backend.app.core.configuration.secrets import SecretManager
 
 secret_manager = SecretManager()
 
@@ -86,7 +86,7 @@ success = secret_manager.rotate_secret("gemini-api-key")
 ### Programmatic Hot Reload
 ```python
 # Monitor configuration changes
-from app.core.configuration.base import config_manager
+from netra_backend.app.core.configuration.base import config_manager
 
 # Get configuration summary
 summary = config_manager.get_config_summary()
@@ -188,7 +188,7 @@ is_valid, issues = validate_configuration()
 
 ### Configuration Summary
 ```python
-from app.core.configuration.base import config_manager
+from netra_backend.app.core.configuration.base import config_manager
 
 summary = config_manager.get_config_summary()
 # Returns:
@@ -217,23 +217,23 @@ if not is_valid:
 ### From Legacy Configuration
 ```python
 # OLD (DEPRECATED)
-from app.config_manager import ConfigManager
+from netra_backend.app.config_manager import ConfigManager
 config_manager = ConfigManager()
 config = config_manager.get_config()
 
 # NEW (PREFERRED)
-from app.config import get_config
+from netra_backend.app.config import get_config
 config = get_config()
 ```
 
 ### Update Import Statements
 ```python
 # Replace all instances of:
-from app.config_manager import ConfigManager
-from app.schemas.Config import AppConfig
+from netra_backend.app.config_manager import ConfigManager
+from netra_backend.app.schemas.Config import AppConfig
 
 # With:
-from app.config import get_config
+from netra_backend.app.config import get_config
 ```
 
 ## Enterprise Features
@@ -257,7 +257,7 @@ is_valid, issues = validate_configuration()
 
 ### Compliance Reporting
 ```python
-from app.core.configuration.validator import ConfigurationValidator
+from netra_backend.app.core.configuration.validator import ConfigurationValidator
 
 validator = ConfigurationValidator()
 result = validator.validate_complete_config(config)
@@ -277,13 +277,13 @@ result = validator.validate_complete_config(config)
 ```bash
 # Check secret loading
 export LOG_LEVEL=DEBUG
-python -c "from app.config import get_config; get_config()"
+python -c "from netra_backend.app.config import get_config; get_config()"
 ```
 
 #### Import Errors
 ```bash
 # Validate unified system
-python -c "from app.core.configuration.base import get_unified_config; print('OK')"
+python -c "from netra_backend.app.core.configuration.base import get_unified_config; print('OK')"
 ```
 
 #### Hot Reload Not Working
@@ -293,7 +293,7 @@ export CONFIG_HOT_RELOAD=true
 
 # Check configuration summary
 python -c "
-from app.core.configuration.base import config_manager
+from netra_backend.app.core.configuration.base import config_manager
 print(config_manager.get_config_summary())
 "
 ```
@@ -302,7 +302,7 @@ print(config_manager.get_config_summary())
 ```bash
 # Test configuration loading
 python -c "
-from app.config import get_config, validate_configuration
+from netra_backend.app.config import get_config, validate_configuration
 config = get_config()
 print(f'Environment: {config.environment}')
 is_valid, issues = validate_configuration()
@@ -311,7 +311,7 @@ print(f'Valid: {is_valid}, Issues: {len(issues)}')
 
 # Test secret management
 python -c "
-from app.core.configuration.secrets import SecretManager
+from netra_backend.app.core.configuration.secrets import SecretManager
 sm = SecretManager()
 print(sm.get_secret_summary())
 "

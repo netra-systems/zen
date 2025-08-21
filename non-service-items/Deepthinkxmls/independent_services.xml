@@ -55,8 +55,8 @@
       </good_example>
       <bad_example>
         # In auth_service files
-        from app.models.user import User  # WRONG - importing from main app
-        from app.core.config import settings  # WRONG - dependency on main app
+        from netra_backend.app.models.user import User  # WRONG - importing from main app
+        from netra_backend.app.core.config import settings  # WRONG - dependency on main app
       </bad_example>
     </rule>
 
@@ -228,7 +228,7 @@
     <step number="3">
       <action>Update all internal imports</action>
       <example>
-        # Change: from app.models import X
+        # Change: from netra_backend.app.models import X
         # To: from service_core.models import X
       </example>
     </step>
@@ -270,7 +270,7 @@
   <regression_prevention>
     <critical_checks>
       <check>NEVER create an 'app' directory in any service - use unique names</check>
-      <check>ALWAYS grep for "from app." imports before deployment</check>
+      <check>ALWAYS grep for "from netra_backend.app." imports before deployment</check>
       <check>Test service startup in isolation: cd service_name && python main.py</check>
       <check>Dockerfile must copy entire service directory, not selective files</check>
       <check>Requirements.txt must include ALL dependencies (e.g., gunicorn)</check>

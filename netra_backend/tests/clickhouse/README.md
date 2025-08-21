@@ -156,7 +156,7 @@ ORDER BY (workload_type, created_at)
 ### 1. Always Use Query Interceptor
 Wrap ClickHouse clients with the interceptor to fix syntax issues:
 ```python
-from app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
+from netra_backend.app.db.clickhouse_query_fixer import ClickHouseQueryInterceptor
 
 client = ClickHouseDatabase(...)
 interceptor = ClickHouseQueryInterceptor(client)

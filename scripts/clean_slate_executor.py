@@ -105,7 +105,7 @@ class CleanSlateExecutor:
         self.log("Resetting PostgreSQL...")
         self.run_command([
             "python", "-c",
-            "from app.db.postgres import Base, engine; "
+            "from netra_backend.app.db.postgres import Base, engine; "
             "Base.metadata.drop_all(bind=engine); "
             "print('PostgreSQL tables dropped')"
         ])

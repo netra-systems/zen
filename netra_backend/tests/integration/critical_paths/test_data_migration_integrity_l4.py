@@ -32,7 +32,7 @@ from netra_backend.tests.integration.critical_paths.l4_staging_critical_base imp
 )
 from netra_backend.app.db.clickhouse import ClickHouseDatabase
 from netra_backend.app.db.client_clickhouse import ClickHouseClient
-# from app.services.redis.session_manager import RedisSessionManager
+# from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 RedisSessionManager = AsyncMock
 from netra_backend.app.logging_config import central_logger

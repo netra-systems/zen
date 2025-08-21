@@ -24,13 +24,13 @@ from fastapi import WebSocket, HTTPException
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.routes.websocket_secure import (
+from netra_backend.app.routes.websocket_secure import (
     SecureWebSocketManager, 
     get_secure_websocket_manager,
     SECURE_WEBSOCKET_CONFIG
 )
-from app.core.websocket_cors import WebSocketCORSHandler
-from app.clients.auth_client import auth_client
+from netra_backend.app.core.websocket_cors import WebSocketCORSHandler
+from netra_backend.app.clients.auth_client import auth_client
 
 
 class MockWebSocket:
@@ -448,7 +448,7 @@ class TestSecureWebSocketEndpoint:
         }
         
         # Test that CORS validation is called
-        from app.routes.websocket_secure import SecureWebSocketManager
+        from netra_backend.app.routes.websocket_secure import SecureWebSocketManager
         
         async with get_secure_websocket_manager(mock_db_session) as manager:
             result = await manager.validate_secure_auth(mock_websocket)

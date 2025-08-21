@@ -37,8 +37,8 @@ from netra_backend.app.schemas.auth_types import (
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.redis_manager import redis_manager as get_redis_manager
 from netra_backend.app.clients.auth_client import auth_client
-# from app.core.monitoring import metrics_collector  # May not exist
-# from app.core.failover_coordinator import FailoverCoordinator  # Does not exist
+# from netra_backend.app.core.monitoring import metrics_collector  # May not exist
+# from netra_backend.app.core.failover_coordinator import FailoverCoordinator  # Does not exist
 FailoverCoordinator = type('FailoverCoordinator', (), {})  # Mock class
 
 

@@ -12,6 +12,7 @@ from netra_backend.app.db.models_clickhouse import (
 )
 from netra_backend.app.config import settings
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.configuration.base import config_manager
 
 
 # List of table schemas to create on startup
@@ -30,8 +31,8 @@ def _should_skip_initialization() -> bool:
 
 def _get_clickhouse_mode_from_env() -> str:
     """Get ClickHouse mode from environment variable."""
-    import os
-    return os.environ.get("CLICKHOUSE_MODE", "shared").lower()
+    config = config_manager.get_config()
+    return getattr(config, 'clickhouse_mode', 'shared').lower()
 
 def _should_skip_for_disabled_mode(mode: str) -> bool:
     """Check if should skip for disabled mode."""
@@ -132,8 +133,8 @@ async def initialize_clickhouse_tables(verbose: bool = False) -> None:
     if _should_skip_initialization() or _check_clickhouse_mode() or _check_development_config():
         return
     
-    import os
-    verbose = verbose or os.getenv('VERBOSE_TABLES', 'false').lower() == 'true'
+    config = config_manager.get_config()
+    verbose = verbose or getattr(config, 'verbose_tables', False)
     
     try:
         async with get_clickhouse_client() as client:

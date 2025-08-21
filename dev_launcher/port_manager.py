@@ -25,7 +25,7 @@ import time
 import logging
 import sys
 from typing import Optional, Set, Dict, List, Tuple
-from app.core.network_constants import ServicePorts
+from netra_backend.app.core.network_constants import ServicePorts
 
 logger = logging.getLogger(__name__)
 

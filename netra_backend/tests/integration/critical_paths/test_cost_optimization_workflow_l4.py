@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import random
 
-# from app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 LLMManager = AsyncMock
 StagingTestSuite = AsyncMock

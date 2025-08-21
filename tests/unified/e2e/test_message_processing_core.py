@@ -11,7 +11,7 @@ import asyncio
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from app.handlers.example_message_handler import ExampleMessageHandler
+from netra_backend.app.handlers.example_message_handler import ExampleMessageHandler
 from tests.unified.e2e.example_message_test_helpers import (
     create_example_message_request,
     assert_completed_response,

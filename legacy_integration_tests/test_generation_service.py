@@ -5,13 +5,13 @@ import uuid
 from unittest.mock import patch, MagicMock, AsyncMock
 
 from fastapi.testclient import TestClient
-from app.main import app
-from app.services.job_store import job_store
-from app.services.generation_service import get_corpus_from_clickhouse, save_corpus_to_clickhouse, run_synthetic_data_generation_job
-from app.db.clickhouse import get_clickhouse_client
-from app.db.models_clickhouse import get_content_corpus_schema, get_llm_events_table_schema
-from app.schemas import ContentCorpus
-from app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.main import app
+from netra_backend.app.services.job_store import job_store
+from netra_backend.app.services.generation_service import get_corpus_from_clickhouse, save_corpus_to_clickhouse, run_synthetic_data_generation_job
+from netra_backend.app.db.clickhouse import get_clickhouse_client
+from netra_backend.app.db.models_clickhouse import get_content_corpus_schema, get_llm_events_table_schema
+from netra_backend.app.schemas import ContentCorpus
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 @pytest.fixture(scope="module")
 def test_client():

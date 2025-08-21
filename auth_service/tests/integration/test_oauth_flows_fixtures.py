@@ -9,7 +9,7 @@ import secrets
 import uuid
 from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
-from auth_core.models.auth_models import AuthProvider
+from auth_service.auth_core.models.auth_models import AuthProvider
 import sys
 from pathlib import Path
 from main import app

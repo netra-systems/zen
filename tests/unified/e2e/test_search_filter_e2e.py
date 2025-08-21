@@ -28,7 +28,7 @@ from .search_filter_helpers import (
     SearchFilterTestCore, SearchOperationSimulator, FilterValidationCore,
     PerformanceValidator, PaginationTester, SearchDataGenerator
 )
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 
 @pytest.mark.asyncio

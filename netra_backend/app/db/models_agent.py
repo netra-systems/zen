@@ -13,9 +13,11 @@ from sqlalchemy.orm import relationship
 from netra_backend.app.db.base import Base
 import uuid
 from datetime import datetime, timezone
+from netra_backend.app.core.configuration.base import config_manager
 
 # Use JSON instead of ARRAY for SQLite compatibility during testing
-if os.getenv("TESTING", "0") == "1":
+config = config_manager.get_config()
+if getattr(config, 'testing', False):
     # For SQLite testing, use JSON instead of ARRAY
     ArrayType = JSON
 else:

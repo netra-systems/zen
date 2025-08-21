@@ -4,13 +4,13 @@ This module provides comprehensive quality validation for all AI-generated outpu
 to prevent generic, low-value, or meaningless responses (AI slop).
 """
 
-from netra_backend.app.quality_gate_models import (
+from netra_backend.app.services.quality_gate.quality_gate_models import (
     QualityLevel,
     ContentType,
     QualityMetrics,
     ValidationResult
 )
-from netra_backend.app.quality_gate_core import QualityGateService
+from netra_backend.app.services.quality_gate.quality_gate_core import QualityGateService
 
 __all__ = [
     'QualityGateService',

@@ -1,6 +1,6 @@
 """Configuration schemas and data models.
 
-Moved from app.schemas.Config for better organization.
+Moved from netra_backend.app.schemas.Config for better organization.
 Contains all Pydantic models for configuration validation.
 """
 

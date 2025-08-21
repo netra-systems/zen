@@ -35,7 +35,7 @@
 auth_service/
 ├── app/
 └── tests/
-# Imports: from app.core import ...
+# Imports: from netra_backend.app.core import ...
         </before>
         <after description="CORRECT: Service-based namespace">
 auth_service/

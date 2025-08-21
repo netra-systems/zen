@@ -26,8 +26,8 @@ from dataclasses import dataclass
 from enum import Enum
 import json
 
-from app.agents.state import DeepAgentState, AgentMetadata
-from app.schemas.shared_types import TestTier
+from netra_backend.app.agents.state import DeepAgentState, AgentMetadata
+from netra_backend.app.schemas.shared_types import TestTier
 from .config import TestUser, get_test_user
 
 

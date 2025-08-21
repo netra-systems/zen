@@ -42,7 +42,7 @@ from tests.unified.real_websocket_client import RealWebSocketClient
 test_config = setup_test_environment()
 
 # Now import app components  
-from app.main import app
+from netra_backend.app.main import app
 
 
 class WebSocketAuthTester:

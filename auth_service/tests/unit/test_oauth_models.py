@@ -6,7 +6,7 @@ import pytest
 from pydantic import ValidationError
 from datetime import datetime, UTC
 
-from auth_core.models.auth_models import (
+from auth_service.auth_core.models.auth_models import (
     AuthProvider,
     LoginRequest,
     LoginResponse,

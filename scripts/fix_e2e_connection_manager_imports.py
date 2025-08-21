@@ -40,7 +40,7 @@ def find_files_with_connection_manager_imports(root_dir: str) -> List[Path]:
                 try:
                     with open(py_file, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        if 'from app.websocket.connection_manager import' in content and 'ConnectionManager' in content:
+                        if 'from netra_backend.app.websocket.connection_manager import' in content and 'ConnectionManager' in content:
                             files.append(py_file)
                 except Exception as e:
                     print(f"Warning: Could not read {py_file}: {e}")
@@ -59,7 +59,7 @@ def fix_connection_manager_imports(file_path: Path) -> Tuple[bool, List[str]]:
         
         # Pattern 1: Direct import replacement
         pattern1 = r'from app\.websocket\.connection_manager import ConnectionManager'
-        replacement1 = 'from app.websocket.connection_manager import get_connection_manager, ModernConnectionManager'
+        replacement1 = 'from netra_backend.app.websocket.connection_manager import get_connection_manager, ModernConnectionManager'
         if re.search(pattern1, content):
             content = re.sub(pattern1, replacement1, content)
             changes.append("Updated import statement to use ModernConnectionManager")

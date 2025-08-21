@@ -31,7 +31,7 @@ from .helpers.agent_failure_recovery_helpers import (
     validate_recovery_timing,
     create_mock_websocket_error
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -14,7 +14,7 @@ import hashlib
 
 from netra_backend.app.services.auth_service import AuthService
 from netra_backend.app.services.api_gateway_service import APIGatewayService
-# from app.services.websocket_service import WebSocketService
+# from netra_backend.app.services.websocket_service import WebSocketService
 from unittest.mock import AsyncMock
 WebSocketService = AsyncMock
 from netra_backend.app.services.backend_service import BackendService

@@ -27,7 +27,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -220,8 +220,8 @@ class WebSocketTestRunner:
         
         # Test 1: Import all WebSocket modules successfully
         try:
-            from app.routes.websocket_secure import SecureWebSocketManager, get_secure_websocket_manager
-            from app.core.websocket_cors import WebSocketCORSHandler, get_websocket_cors_handler
+            from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, get_secure_websocket_manager
+            from netra_backend.app.core.websocket_cors import WebSocketCORSHandler, get_websocket_cors_handler
             validation_results.append(("Module imports", True, "All WebSocket modules imported successfully"))
         except Exception as e:
             validation_results.append(("Module imports", False, f"Import error: {e}"))
@@ -236,7 +236,7 @@ class WebSocketTestRunner:
         
         # Test 3: WebSocket config endpoints
         try:
-            from app.main import app
+            from netra_backend.app.main import app
             from fastapi.testclient import TestClient
             
             client = TestClient(app)

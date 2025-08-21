@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 
 import asyncpg
 import redis.asyncio as redis
-from app.db.clickhouse_base import ClickHouseDatabase
+from netra_backend.app.db.clickhouse_base import ClickHouseDatabase
 
 logger = logging.getLogger(__name__)
 

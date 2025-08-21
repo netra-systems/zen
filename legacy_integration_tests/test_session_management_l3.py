@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
-from app.main import app
+from netra_backend.app.main import app
 # Session and cache services not available in current codebase
 
 

@@ -21,10 +21,10 @@ from unittest.mock import AsyncMock, patch
 from dataclasses import dataclass
 from enum import Enum
 
-from app.core.fallback_coordinator import FallbackCoordinator
-from app.core.circuit_breaker_core import CircuitBreaker, CircuitConfig
-from app.core.degradation_manager import GracefulDegradationManager, DegradationLevel
-from app.core.resilience.fallback import (
+from netra_backend.app.core.fallback_coordinator import FallbackCoordinator
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker, CircuitConfig
+from netra_backend.app.core.degradation_manager import GracefulDegradationManager, DegradationLevel
+from netra_backend.app.core.resilience.fallback import (
     UnifiedFallbackChain, StaticResponseFallback, CacheLastKnownFallback,
     AlternativeServiceFallback, FallbackConfig, FallbackStrategy, FallbackPriority
 )
@@ -229,7 +229,7 @@ class TestDegradedModeActivation:
     @pytest.mark.asyncio  
     async def test_service_specific_degradation(self, degradation_manager):
         """Test individual service degradation without affecting others"""
-        from app.core.degradation_types import DegradationPolicy, ServiceTier
+        from netra_backend.app.core.degradation_types import DegradationPolicy, ServiceTier
         
         policy = DegradationPolicy(tier=ServiceTier.OPTIONAL, max_degradation=DegradationLevel.EMERGENCY)
         mock_strategy = AsyncMock()
@@ -241,7 +241,7 @@ class TestDegradedModeActivation:
     @pytest.mark.asyncio
     async def test_automatic_recovery_from_degraded(self, degradation_manager):
         """Test automatic recovery when conditions improve"""
-        from app.core.degradation_types import DegradationPolicy, ServiceTier
+        from netra_backend.app.core.degradation_types import DegradationPolicy, ServiceTier
         
         policy = DegradationPolicy(tier=ServiceTier.STANDARD, max_degradation=DegradationLevel.MINIMAL)
         mock_strategy = AsyncMock()

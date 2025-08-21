@@ -111,7 +111,7 @@ class TestCORSDynamicFrontendPorts:
             # Mock the pattern matching to return False to simulate restrictive env
             with patch('app.core.middleware_setup._check_pattern_matches', return_value=False):
                 with patch('app.core.middleware_setup._check_wildcard_match', return_value=False):
-                    from app.core.middleware_setup import is_origin_allowed, _get_localhost_origins
+                    from netra_backend.app.core.middleware_setup import is_origin_allowed, _get_localhost_origins
                     
                     localhost_origins = _get_localhost_origins()
                     
@@ -142,7 +142,7 @@ class TestCORSDynamicFrontendPorts:
         for config in dynamic_frontend_configs:
             with mock_service_discovery(config):
                 from dev_launcher.service_discovery import ServiceDiscovery
-                from app.core.middleware_setup import get_cors_origins
+                from netra_backend.app.core.middleware_setup import get_cors_origins
                 
                 # Service discovery knows about the dynamic port
                 discovery = ServiceDiscovery()
@@ -179,7 +179,7 @@ class TestCORSDynamicFrontendPorts:
         """
         for config in dynamic_frontend_configs:
             with mock_service_discovery(config):
-                from app.core.middleware_setup import CustomCORSMiddleware
+                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 from fastapi import Request
                 from starlette.responses import Response
                 
@@ -304,7 +304,7 @@ class TestCORSDynamicBackendPorts:
                 )
                 
                 # But CORS integration will fail
-                from app.core.middleware_setup import CustomCORSMiddleware
+                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 mock_app = MagicMock()
                 middleware = CustomCORSMiddleware(app=mock_app, service_discovery=discovery)
                 
@@ -331,7 +331,7 @@ class TestCORSDynamicBackendPorts:
                 "ENVIRONMENT": "development"
             }):
                 with mock_service_discovery(config):
-                    from app.core.middleware_setup import get_cors_origins, _get_default_dev_origins
+                    from netra_backend.app.core.middleware_setup import get_cors_origins, _get_default_dev_origins
                     
                     origins = get_cors_origins()
                     
@@ -463,7 +463,7 @@ class TestCORSDynamicAuthServicePorts:
                 )
                 
                 # Test CORS integration
-                from app.core.middleware_setup import CustomCORSMiddleware
+                from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
                 mock_app = MagicMock()
                 middleware = CustomCORSMiddleware(app=mock_app, service_discovery=discovery)
                 
@@ -549,7 +549,7 @@ class TestCORSComprehensiveDynamicPortFailures:
             with patch('app.core.middleware_setup._check_pattern_matches', return_value=False):
                 with patch('app.core.middleware_setup._check_wildcard_match', return_value=False):
                     with mock_service_discovery(config):
-                        from app.core.middleware_setup import get_cors_origins, is_origin_allowed
+                        from netra_backend.app.core.middleware_setup import get_cors_origins, is_origin_allowed
                         
                         failures = []
                         cors_origins = get_cors_origins()
@@ -591,7 +591,7 @@ class TestCORSComprehensiveDynamicPortFailures:
         # Simulate production-like environment where wildcards are not allowed with credentials
         with patch.dict(os.environ, {"ENVIRONMENT": "staging", "CORS_ORIGINS": ""}):
             with patch('app.core.middleware_setup._check_wildcard_match', return_value=False):
-                from app.core.middleware_setup import is_origin_allowed, get_cors_origins
+                from netra_backend.app.core.middleware_setup import is_origin_allowed, get_cors_origins
                 
                 cors_origins = get_cors_origins()
                 origin = config.frontend_url
@@ -619,7 +619,7 @@ class TestCORSComprehensiveDynamicPortFailures:
         """
         # Get what the system thinks are valid CORS origins
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
-            from app.core.middleware_setup import get_cors_origins, _get_localhost_origins
+            from netra_backend.app.core.middleware_setup import get_cors_origins, _get_localhost_origins
             
             static_origins = get_cors_origins()
             localhost_origins = _get_localhost_origins()
@@ -640,7 +640,7 @@ class TestCORSComprehensiveDynamicPortFailures:
             # Check if actual origins are covered by static configuration
             uncovered_origins = []
             for origin in actual_origins:
-                from app.core.middleware_setup import is_origin_allowed
+                from netra_backend.app.core.middleware_setup import is_origin_allowed
                 if not is_origin_allowed(origin, static_origins):
                     uncovered_origins.append(origin)
             
@@ -669,7 +669,7 @@ class TestCORSRegexPatternLimitations:
         FAIL because they expose limitations in how patterns are applied.
         """
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
-            from app.core.middleware_setup import _check_localhost_pattern
+            from netra_backend.app.core.middleware_setup import _check_localhost_pattern
             
             # These should work (and test that pattern is correct)
             valid_cases = [
@@ -704,7 +704,7 @@ class TestCORSRegexPatternLimitations:
         logic allows more origins than the static origin list includes.
         """
         with patch.dict(os.environ, {"ENVIRONMENT": "development"}):
-            from app.core.middleware_setup import (
+            from netra_backend.app.core.middleware_setup import (
                 _check_localhost_pattern, 
                 _get_localhost_origins,
                 is_origin_allowed,

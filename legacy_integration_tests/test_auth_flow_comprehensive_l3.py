@@ -23,11 +23,11 @@ import jwt
 import hashlib
 import hmac
 
-from app.main import app
-from app.schemas.auth_types import AuthProvider, TokenType  
-from app.services.security_service import SecurityService
-from app.auth_integration.auth import get_current_user
-from app.db.postgres import get_postgres_db
+from netra_backend.app.main import app
+from netra_backend.app.schemas.auth_types import AuthProvider, TokenType  
+from netra_backend.app.services.security_service import SecurityService
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.db.postgres import get_postgres_db
 
 
 class TestAuthFlowComprehensiveL3:

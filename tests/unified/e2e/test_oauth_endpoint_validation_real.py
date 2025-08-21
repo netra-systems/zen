@@ -45,7 +45,7 @@ from tests.unified.real_services_manager import RealServicesManager as create_re
 from tests.unified.real_http_client import RealHTTPClient
 from tests.unified.real_client_types import create_auth_config, create_backend_config
 
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

@@ -43,7 +43,7 @@
       <title>State Management Testing</title>
       <description>Use real DeepAgentState objects instead of mocks for state testing</description>
       <implementation>
-        - Import DeepAgentState from app.agents.state
+        - Import DeepAgentState from netra_backend.app.agents.state
         - Create valid state objects with required fields
         - Test state transitions and validations
       </implementation>

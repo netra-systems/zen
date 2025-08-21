@@ -69,7 +69,7 @@ def mock_component():
 ### 4. State Management
 ```python
 # Use real DeepAgentState objects for realistic testing
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 
 state = DeepAgentState(
     user_request="test request",

@@ -34,7 +34,7 @@ from enum import Enum
 sys.path.append(str(Path(__file__).parent.parent.parent))
 from test_framework.test_config import configure_real_llm, TEST_LEVELS
 from test_framework.runner import UnifiedTestRunner
-from app.tests.performance.performance_baseline_config import (
+from netra_backend.app.tests.performance.performance_baseline_config import (
     get_benchmark_runner, PerformanceCategory
 )
 

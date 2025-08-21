@@ -25,9 +25,9 @@ from typing import Dict, Any
 from fastapi.testclient import TestClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
-from app.services.agent_service_core import AgentService
-from app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.routes.websocket_secure import SecureWebSocketManager, SECURE_WEBSOCKET_CONFIG
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
 
 
 class TestAgentMessageFlowImplementation:

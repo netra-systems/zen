@@ -24,14 +24,14 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
 
-# from app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 # from ws_manager import WebSocketManager
 from unittest.mock import AsyncMock
 WebSocketManager = AsyncMock
-# from app.services.redis.session_manager import RedisSessionManager
+# from netra_backend.app.services.redis.session_manager import RedisSessionManager
 RedisSessionManager = AsyncMock
 
 

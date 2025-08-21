@@ -34,10 +34,10 @@ from unittest.mock import AsyncMock
 OAuthService = AsyncMock
 # JWT service replaced with auth_integration
 # from auth_integration import create_access_token, validate_token_jwt
-# from app.auth_integration.auth import create_access_token
+# from netra_backend.app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 create_access_token = AsyncMock()
-# from app.core.unified.jwt_validator import validate_token_jwt
+# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 validate_token_jwt = AsyncMock()
 JWTService = AsyncMock

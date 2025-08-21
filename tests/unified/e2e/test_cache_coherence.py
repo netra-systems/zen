@@ -21,8 +21,8 @@ from tests.unified.e2e.cache_coherence_helpers import (
     CacheCoherenceMetrics
 )
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from app.redis_manager import redis_manager
-from app.logging_config import central_logger
+from netra_backend.app.redis_manager import redis_manager
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

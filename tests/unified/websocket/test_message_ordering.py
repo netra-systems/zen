@@ -51,9 +51,9 @@ except ImportError:
     from tests.unified.real_services_manager import RealServicesManager
     from tests.unified.jwt_token_helpers import JWTTestHelper
 
-from app.schemas.websocket_models import WebSocketMessage, BaseWebSocketPayload
-from app.schemas.core_enums import WebSocketMessageType
-from app.logging_config import central_logger
+from netra_backend.app.schemas.websocket_models import WebSocketMessage, BaseWebSocketPayload
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

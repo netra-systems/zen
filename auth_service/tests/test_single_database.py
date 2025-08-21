@@ -21,12 +21,12 @@ async def test_no_main_db_sync_module():
     
     # Verify we cannot import it
     with pytest.raises(ImportError):
-        from auth_core.database import main_db_sync
+        from auth_service.auth_core.database import main_db_sync
 
 @pytest.mark.asyncio
 async def test_single_database_initialization():
     """Test that auth service initializes only one database connection"""
-    from auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.connection import auth_db
     
     # Mock the database initialization
     with patch.object(auth_db, 'initialize') as mock_init:
@@ -58,7 +58,7 @@ async def test_single_database_initialization():
 @pytest.mark.asyncio  
 async def test_auth_routes_no_duplicate_sync():
     """Test that auth routes don't attempt to sync to a separate database"""
-    from auth_core.routes.auth_routes import _sync_user_to_main_db
+    from auth_service.auth_core.routes.auth_routes import _sync_user_to_main_db
     
     # Create a mock user
     mock_user = MagicMock()
@@ -77,7 +77,7 @@ async def test_auth_routes_no_duplicate_sync():
 @pytest.mark.asyncio
 async def test_database_url_configuration():
     """Test that auth service uses DATABASE_URL from environment"""
-    from auth_core.config import AuthConfig
+    from auth_service.auth_core.config import AuthConfig
     
     # Set a test database URL
     test_db_url = "postgresql://test:test@localhost:5432/test_db"

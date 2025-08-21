@@ -21,7 +21,7 @@ import json
 from typing import Dict, Any, List, Optional, Tuple
 from unittest.mock import AsyncMock, patch
 from dataclasses import dataclass
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 # Configure pytest-asyncio
 pytest_plugins = ('pytest_asyncio',)

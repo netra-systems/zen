@@ -7,6 +7,6 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains compatibility for backpressure functionality
 """
 
-from netra_backend.app.backpressure_service import BackpressureService
+from netra_backend.app.services.backpressure.backpressure_service import BackpressureService
 
 __all__ = ["BackpressureService"]

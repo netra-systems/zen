@@ -32,7 +32,7 @@ import pytest
 from .config import UnifiedTestConfig, TestUser
 # Import MockWebSocket from the actual location
 try:
-    from app.tests.services.test_ws_connection_mocks import MockWebSocket
+    from netra_backend.app.tests.services.test_ws_connection_mocks import MockWebSocket
     # Create dummy classes for missing ones
     class WebSocketBuilder:
         def build(self):
@@ -48,7 +48,7 @@ except ImportError:
         def build(self):
             return MockWebSocket()
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

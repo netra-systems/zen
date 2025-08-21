@@ -23,9 +23,9 @@ from unittest.mock import AsyncMock, patch
 from ..config import TEST_USERS
 from .clickhouse_billing_helper import ClickHouseBillingHelper
 from .websocket_resilience_core import WebSocketResilienceTestCore
-from app.schemas.UserPlan import PlanTier
-from app.schemas.llm_base_types import LLMProvider, TokenUsage
-from app.services.cost_calculator import CostCalculatorService
+from netra_backend.app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.llm_base_types import LLMProvider, TokenUsage
+from netra_backend.app.services.cost_calculator import CostCalculatorService
 
 
 class CostTrackingTestCore:

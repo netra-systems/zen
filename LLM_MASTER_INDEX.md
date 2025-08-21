@@ -537,51 +537,51 @@ A comprehensive AI optimization agent system with 30+ specialized tools:
 ### Core Infrastructure (Most Referenced)
 | Concept | Primary Location | Import | Frequency | Notes |
 |---------|-----------------|--------|-----------|-------|
-| **Logging** | `/app/logging_config.py` | `from app.logging_config import central_logger` | 495 | EVERY module uses this |
-| **Config** | `/app/config.py` | `from app.config import settings` | 41 | App-wide settings |
-| **WebSocket Manager** | `/app/ws_manager.py` | `from app.ws_manager import ws_manager` | 55 | WebSocket state management |
-| **Redis Manager** | `/app/redis_manager.py` | `from app.redis_manager import redis_manager` | 49 | Cache & pub/sub |
+| **Logging** | `/app/logging_config.py` | `from netra_backend.app.logging_config import central_logger` | 495 | EVERY module uses this |
+| **Config** | `/app/config.py` | `from netra_backend.app.config import settings` | 41 | App-wide settings |
+| **WebSocket Manager** | `/app/ws_manager.py` | `from netra_backend.app.ws_manager import ws_manager` | 55 | WebSocket state management |
+| **Redis Manager** | `/app/redis_manager.py` | `from netra_backend.app.redis_manager import redis_manager` | 49 | Cache & pub/sub |
 
 ### Type System & Schemas (Critical for Type Safety)
 | Concept | Primary Location | Import | Used For |
 |---------|-----------------|--------|----------|
-| **Schemas** | `/app/schemas/` | `from app.schemas import *` | 90+ | All data models |
-| **Shared Types** | `/app/schemas/shared_types.py` | `from app.schemas.shared_types import ToolResult, ErrorContext` | Type definitions |
-| **Core Enums** | `/app/schemas/core_enums.py` | `from app.schemas.core_enums import ErrorCategory, ToolStatus` | Enum constants |
-| **Registry** | `/app/schemas/registry.py` | `from app.schemas.registry import WebSocketMessage` | Message types |
-| **Metrics** | `/app/schemas/Metrics.py` | `from app.schemas.Metrics import MetricData` | Metrics types |
+| **Schemas** | `/app/schemas/` | `from netra_backend.app.schemas import *` | 90+ | All data models |
+| **Shared Types** | `/app/schemas/shared_types.py` | `from netra_backend.app.schemas.shared_types import ToolResult, ErrorContext` | Type definitions |
+| **Core Enums** | `/app/schemas/core_enums.py` | `from netra_backend.app.schemas.core_enums import ErrorCategory, ToolStatus` | Enum constants |
+| **Registry** | `/app/schemas/registry.py` | `from netra_backend.app.schemas.registry import WebSocketMessage` | Message types |
+| **Metrics** | `/app/schemas/Metrics.py` | `from netra_backend.app.schemas.Metrics import MetricData` | Metrics types |
 
 ### Database Layer (Stable Core)
 | Concept | Primary Location | Import | Purpose |
 |---------|-----------------|--------|---------|
-| **PostgreSQL Models** | `/app/db/models_postgres.py` | `from app.db.models_postgres import User, Team` | 73 uses |
-| **ClickHouse Client** | `/app/db/clickhouse.py` | `from app.db.clickhouse import get_clickhouse_client` | 27 uses |
-| **PostgreSQL Session** | `/app/db/postgres.py` | `from app.db.postgres import get_postgres_db` | 26 uses |
-| **Query Fixer** | `/app/db/clickhouse_query_fixer.py` | `from app.db.clickhouse_query_fixer import fix_query` | ClickHouse fixes |
+| **PostgreSQL Models** | `/app/db/models_postgres.py` | `from netra_backend.app.db.models_postgres import User, Team` | 73 uses |
+| **ClickHouse Client** | `/app/db/clickhouse.py` | `from netra_backend.app.db.clickhouse import get_clickhouse_client` | 27 uses |
+| **PostgreSQL Session** | `/app/db/postgres.py` | `from netra_backend.app.db.postgres import get_postgres_db` | 26 uses |
+| **Query Fixer** | `/app/db/clickhouse_query_fixer.py` | `from netra_backend.app.db.clickhouse_query_fixer import fix_query` | ClickHouse fixes |
 
 ### Exception Hierarchy (Stable)
 | Concept | Primary Location | Import | Coverage |
 |---------|-----------------|--------|----------|
-| **Base Exceptions** | `/app/core/exceptions_base.py` | `from app.core.exceptions_base import NetraException` | 66 uses |
-| **Service Exceptions** | `/app/core/exceptions_service.py` | `from app.core.exceptions_service import ServiceError` | Service errors |
-| **Auth Exceptions** | `/app/core/exceptions_auth.py` | `from app.core.exceptions_auth import AuthenticationError` | Auth errors |
-| **Error Codes** | `/app/core/error_codes.py` | `from app.core.error_codes import ErrorSeverity` | 42 uses |
+| **Base Exceptions** | `/app/core/exceptions_base.py` | `from netra_backend.app.core.exceptions_base import NetraException` | 66 uses |
+| **Service Exceptions** | `/app/core/exceptions_service.py` | `from netra_backend.app.core.exceptions_service import ServiceError` | Service errors |
+| **Auth Exceptions** | `/app/core/exceptions_auth.py` | `from netra_backend.app.core.exceptions_auth import AuthenticationError` | Auth errors |
+| **Error Codes** | `/app/core/error_codes.py` | `from netra_backend.app.core.error_codes import ErrorSeverity` | 42 uses |
 
 ### LLM Integration (Core Functionality)
 | Concept | Primary Location | Import | Purpose |
 |---------|-----------------|--------|---------|
-| **LLM Manager** | `/app/llm/llm_manager.py` | `from app.llm.llm_manager import LLMManager` | 87 uses |
-| **Observability** | `/app/llm/observability.py` | `from app.llm.observability import log_agent_*` | LLM tracking |
-| **LLM Operations** | `/app/llm/llm_operations.py` | `from app.llm.llm_operations import *` | LLM ops |
+| **LLM Manager** | `/app/llm/llm_manager.py` | `from netra_backend.app.llm.llm_manager import LLMManager` | 87 uses |
+| **Observability** | `/app/llm/observability.py` | `from netra_backend.app.llm.observability import log_agent_*` | LLM tracking |
+| **LLM Operations** | `/app/llm/llm_operations.py` | `from netra_backend.app.llm.llm_operations import *` | LLM ops |
 
 ### Agent System (Complex but Stable)
 | Concept | Primary Location | Import | Purpose |
 |---------|-----------------|--------|---------|
-| **Agent State** | `/app/agents/state.py` | `from app.agents.state import DeepAgentState` | 114 uses |
-| **Tool Dispatcher** | `/app/agents/tool_dispatcher.py` | `from app.agents.tool_dispatcher import ToolDispatcher` | 49 uses |
-| **Supervisor** | `/app/agents/supervisor_consolidated.py` | `from app.agents.supervisor_consolidated import SupervisorAgent` | 32 uses |
-| **Base Agent** | `/app/agents/base.py` | `from app.agents.base import BaseSubAgent` | 21 uses |
-| **Error Handler** | `/app/agents/error_handler.py` | `from app.agents.error_handler import global_error_handler` | Agent errors |
+| **Agent State** | `/app/agents/state.py` | `from netra_backend.app.agents.state import DeepAgentState` | 114 uses |
+| **Tool Dispatcher** | `/app/agents/tool_dispatcher.py` | `from netra_backend.app.agents.tool_dispatcher import ToolDispatcher` | 49 uses |
+| **Supervisor** | `/app/agents/supervisor_consolidated.py` | `from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent` | 32 uses |
+| **Base Agent** | `/app/agents/base.py` | `from netra_backend.app.agents.base import BaseSubAgent` | 21 uses |
+| **Error Handler** | `/app/agents/error_handler.py` | `from netra_backend.app.agents.error_handler import global_error_handler` | Agent errors |
 
 ### Core Services (Business Logic)
 | Concept | Primary Location | Import | Purpose |
@@ -606,7 +606,7 @@ A comprehensive AI optimization agent system with 30+ specialized tools:
 ### Authentication (MANDATORY Shared)
 | Concept | Primary Location | Import | Purpose |
 |---------|-----------------|--------|---------|
-| **Auth Integration** | `/app/auth_integration/auth.py` | `from app.auth_integration.auth import get_current_user` | 14 uses |
+| **Auth Integration** | `/app/auth_integration/auth.py` | `from netra_backend.app.auth_integration.auth import get_current_user` | 14 uses |
 | **Dependencies** | `/app/dependencies.py` | 16 uses | Dependency injection |
 
 ### Utilities
@@ -617,29 +617,29 @@ A comprehensive AI optimization agent system with 30+ specialized tools:
 ### Quick Reference Patterns
 ```python
 # Most common import pattern
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 logger = central_logger.get_logger(__name__)
 
 # Database session pattern
-from app.db.postgres import get_postgres_db
+from netra_backend.app.db.postgres import get_postgres_db
 async with get_postgres_db() as db:
     # operations
 
 # Error handling pattern
-from app.core.exceptions_base import NetraException
+from netra_backend.app.core.exceptions_base import NetraException
 raise NetraException("message", error_code="CODE")
 
 # Type-safe schema pattern
-from app.schemas import RequestModel, ResponseModel
+from netra_backend.app.schemas import RequestModel, ResponseModel
 
 # Agent state pattern
-from app.agents.state import DeepAgentState
+from netra_backend.app.agents.state import DeepAgentState
 state = DeepAgentState(...)
 ```
 
 ### Performance Tips
-1. **Import only what you need** - e.g use `from app.schemas import {specific exact thing needed}`
-2. **Use TYPE_CHECKING** for circular imports - `if TYPE_CHECKING: from app.x import Y`
+1. **Import only what you need** - e.g use `from netra_backend.app.schemas import {specific exact thing needed}`
+2. **Use TYPE_CHECKING** for circular imports - `if TYPE_CHECKING: from netra_backend.app.x import Y`
 3. **Cache heavy imports** - Store LLMManager, connections as module variables
 4. **Lazy load optional features** - Import inside functions if rarely used
 

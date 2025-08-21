@@ -10,7 +10,7 @@ def fix_imports_in_file(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         content = f.read()
     
-    # Pattern to match imports starting with "from app."
+    # Pattern to match imports starting with "from netra_backend.app."
     original_content = content
     
     # Replace patterns

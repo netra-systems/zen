@@ -20,15 +20,15 @@ def test_environment_setup():
 def test_imports_work():
     """Test that auth_core modules can be imported"""
     try:
-        from auth_core.models.auth_models import AuthProvider, LoginRequest
-        from auth_core.config import AuthConfig
+        from auth_service.auth_core.models.auth_models import AuthProvider, LoginRequest
+        from auth_service.auth_core.config import AuthConfig
         assert True
     except ImportError as e:
         pytest.fail(f"Failed to import auth_core modules: {e}")
 
 def test_auth_provider_enum():
     """Test AuthProvider enum is accessible"""
-    from auth_core.models.auth_models import AuthProvider
+    from auth_service.auth_core.models.auth_models import AuthProvider
     
     assert AuthProvider.GOOGLE == "google"
     assert AuthProvider.GITHUB == "github"
@@ -36,7 +36,7 @@ def test_auth_provider_enum():
 
 def test_config_in_test_mode():
     """Test configuration works in test mode"""
-    from auth_core.config import AuthConfig
+    from auth_service.auth_core.config import AuthConfig
     
     env = AuthConfig.get_environment()
     # Environment might be development in this context

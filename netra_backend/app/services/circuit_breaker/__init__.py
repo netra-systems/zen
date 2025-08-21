@@ -7,8 +7,8 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains compatibility for circuit breaker functionality
 """
 
-from netra_backend.app.circuit_breaker_manager import CircuitBreakerManager
-from netra_backend.app.service_health_monitor import ServiceHealthMonitor
-from netra_backend.app.failure_detector import FailureDetector
+from netra_backend.app.services.circuit_breaker.circuit_breaker_manager import CircuitBreakerManager
+from netra_backend.app.services.circuit_breaker.service_health_monitor import ServiceHealthMonitor
+from netra_backend.app.services.circuit_breaker.failure_detector import FailureDetector
 
 __all__ = ["CircuitBreakerManager", "ServiceHealthMonitor", "FailureDetector"]

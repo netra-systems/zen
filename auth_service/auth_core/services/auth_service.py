@@ -10,16 +10,16 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Tuple
 import logging
 
-from auth_service.app..core.jwt_handler import JWTHandler
-from auth_service.app..core.session_manager import SessionManager
-from auth_service.app..models.auth_models import (
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.models.auth_models import (
     LoginRequest, LoginResponse, TokenResponse,
     ServiceTokenRequest, ServiceTokenResponse,
     AuthProvider, AuthError, AuthException, PasswordResetRequest,
     PasswordResetResponse, PasswordResetConfirm,
     PasswordResetConfirmResponse
 )
-from auth_service.app..database.repository import AuthUserRepository, AuthAuditRepository
+from auth_service.auth_core.database.repository import AuthUserRepository, AuthAuditRepository
 
 logger = logging.getLogger(__name__)
 

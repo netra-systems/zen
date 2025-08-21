@@ -18,7 +18,7 @@ from tests.unified.e2e.thread_test_fixtures_core import (
     ThreadWebSocketFixtures, ThreadContextManager, ThreadTestDataFactory,
     unified_harness, ws_thread_fixtures, thread_context_manager, test_users
 )
-from app.schemas.core_enums import WebSocketMessageType
+from netra_backend.app.schemas.core_enums import WebSocketMessageType
 
 
 @pytest.mark.asyncio

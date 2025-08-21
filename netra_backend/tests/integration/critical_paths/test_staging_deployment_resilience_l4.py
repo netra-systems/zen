@@ -33,7 +33,7 @@ from concurrent.futures import ThreadPoolExecutor
 from netra_backend.app.core.configuration.base import get_unified_config
 from loguru import logger
 from netra_backend.app.services.health_check_service import HealthCheckService
-# from app.services.redis.session_manager import RedisSessionManager
+# from netra_backend.app.services.redis.session_manager import RedisSessionManager
 from unittest.mock import AsyncMock
 RedisSessionManager = AsyncMock
 from netra_backend.app.services.database.postgres_service import PostgresService

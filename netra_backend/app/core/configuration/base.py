@@ -22,6 +22,25 @@ from netra_backend.app.schemas.Config import AppConfig
 from netra_backend.app.logging_config import central_logger as logger
 from netra_backend.app.core.exceptions_config import ConfigurationError
 
+# Import actual configuration managers
+try:
+    from netra_backend.app.core.configuration.services import ServiceConfigManager as ActualServiceConfigManager
+except ImportError:
+    # Fallback placeholder if services module not available
+    class ActualServiceConfigManager:
+        """Placeholder for service configuration manager."""
+        def populate_service_config(self, config):
+            """Populate service configuration."""
+            pass
+        
+        def validate_service_consistency(self, config):
+            """Validate service configuration consistency."""
+            return []
+        
+        def get_enabled_services_count(self):
+            """Get count of enabled services."""
+            return 0
+
 # Placeholder classes for missing configuration managers
 # These will be replaced with actual implementations
 class DatabaseConfigManager:
@@ -37,20 +56,6 @@ class DatabaseConfigManager:
     def refresh_environment(self):
         """Refresh environment settings."""
         pass
-
-class ServiceConfigManager:
-    """Placeholder for service configuration manager."""
-    def populate_service_config(self, config):
-        """Populate service configuration."""
-        pass
-    
-    def validate_service_consistency(self, config):
-        """Validate service configuration consistency."""
-        return []
-    
-    def get_enabled_services_count(self):
-        """Get count of enabled services."""
-        return 0
 
 class SecretManager:
     """Placeholder for secret manager."""
@@ -117,7 +122,7 @@ class UnifiedConfigManager:
     def _initialize_config_managers(self) -> None:
         """Initialize specialized configuration managers."""
         self._database_manager = DatabaseConfigManager()
-        self._services_manager = ServiceConfigManager()
+        self._services_manager = ActualServiceConfigManager()
         self._secrets_manager = SecretManager()
         self._hot_reload_enabled = self._check_hot_reload_enabled()
     

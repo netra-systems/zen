@@ -7,11 +7,11 @@ realistic patterns for LLM responses, logs, workloads, and performance scenarios
 
 from typing import Dict, List, Any, Optional
 
-from netra_backend.app.models import RealisticDataPatterns, RealisticTestDataConfigManager
-from netra_backend.app.llm_response_generator import LLMResponseGenerator
-from netra_backend.app.log_generator import LogGenerator
-from netra_backend.app.workload_simulator import WorkloadSimulator
-from netra_backend.app.performance_simulator import PerformanceSimulator
+from netra_backend.app.services.realistic_test_data.models import RealisticDataPatterns, RealisticTestDataConfigManager
+from netra_backend.app.services.realistic_test_data.llm_response_generator import LLMResponseGenerator
+from netra_backend.app.services.realistic_test_data.log_generator import LogGenerator
+from netra_backend.app.services.realistic_test_data.workload_simulator import WorkloadSimulator
+from netra_backend.app.services.realistic_test_data.performance_simulator import PerformanceSimulator
 
 
 class RealisticTestDataService:

@@ -25,16 +25,16 @@ from datetime import datetime, timedelta
 import httpx
 import aioredis
 
-# from app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock
 from redis_manager import RedisManager
 # from auth_integration import create_access_token, validate_token_jwt
-# from app.auth_integration.auth import create_access_token
+# from netra_backend.app.auth_integration.auth import create_access_token
 from unittest.mock import AsyncMock
 create_access_token = AsyncMock()
-# from app.core.unified.jwt_validator import validate_token_jwt
+# from netra_backend.app.core.unified.jwt_validator import validate_token_jwt
 from unittest.mock import AsyncMock
 validate_token_jwt = AsyncMock()
 from netra_backend.app.core.health_checkers import HealthChecker

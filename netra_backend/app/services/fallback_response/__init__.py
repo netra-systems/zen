@@ -7,11 +7,11 @@ fails or produces low-quality output, replacing generic error messages with help
 
 from typing import Dict, List, Any
 
-from netra_backend.app.models import FailureReason, FallbackContext
-from netra_backend.app.templates import TemplateManager
-from netra_backend.app.diagnostics import DiagnosticsManager
-from netra_backend.app.content_processor import ContentProcessor
-from netra_backend.app.response_generator import ResponseGenerator
+from netra_backend.app.services.fallback_response.models import FailureReason, FallbackContext
+from netra_backend.app.services.fallback_response.templates import TemplateManager
+from netra_backend.app.services.fallback_response.diagnostics import DiagnosticsManager
+from netra_backend.app.services.fallback_response.content_processor import ContentProcessor
+from netra_backend.app.services.fallback_response.response_generator import ResponseGenerator
 
 
 class FallbackResponseService:

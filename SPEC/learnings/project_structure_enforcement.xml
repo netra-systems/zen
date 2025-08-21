@@ -76,7 +76,7 @@
       <description>All backend imports MUST use netra_backend.app.* prefix</description>
       <example>
         <correct>from netra_backend.app.agents.base import BaseAgent</correct>
-        <incorrect>from app.agents.base import BaseAgent</incorrect>
+        <incorrect>from netra_backend.app.agents.base import BaseAgent</incorrect>
         <incorrect>from agents.base import BaseAgent</incorrect>
       </example>
     </rule>

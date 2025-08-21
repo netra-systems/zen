@@ -28,8 +28,8 @@ from datetime import datetime, timedelta
 
 from test_framework.mock_utils import mock_justified
 from tests.unified.jwt_token_helpers import JWTTestHelper
-from app.tests.test_utilities.websocket_mocks import MockWebSocket
-from app.logging_config import central_logger
+from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

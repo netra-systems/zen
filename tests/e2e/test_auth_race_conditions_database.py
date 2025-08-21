@@ -26,10 +26,10 @@ import os
 # Add auth_service to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'auth_service'))
 
-from auth_core.services.auth_service import AuthService
-from auth_core.core.jwt_handler import JWTHandler
-from auth_core.core.session_manager import SessionManager
-from auth_core.models.auth_models import (
+from auth_service.auth_core.services.auth_service import AuthService
+from auth_service.auth_core.core.jwt_handler import JWTHandler
+from auth_service.auth_core.core.session_manager import SessionManager
+from auth_service.auth_core.models.auth_models import (
     LoginRequest, LoginResponse, AuthProvider, TokenResponse
 )
 from tests.factories.user_factory import UserFactory

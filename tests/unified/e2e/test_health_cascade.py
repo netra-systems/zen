@@ -35,7 +35,7 @@ from tests.unified.health_check_core import (
     HealthCheckResult, SERVICE_ENDPOINTS, HEALTH_STATUS,
     create_service_error_result, create_healthy_result
 )
-from app.schemas.core_enums import CircuitBreakerState
+from netra_backend.app.schemas.core_enums import CircuitBreakerState
 
 logger = logging.getLogger(__name__)
 

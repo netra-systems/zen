@@ -269,7 +269,7 @@
       <validation>
         Test that injected services have proper configuration:
         - Check llm_manager.settings has API keys populated
-        - Verify services are retrieved from app.state, not instantiated
+        - Verify services are retrieved from netra_backend.app.state, not instantiated
       </validation>
     </checklist-item>
   </section>
@@ -664,13 +664,13 @@
         - Use: db_session: AsyncSession = Depends(get_db_session)
         - NOT: db_session = Depends(get_db_session)
         - Import AsyncSession from sqlalchemy.ext.asyncio
-        - Use get_db_session from app.dependencies (not get_async_db from app.db.postgres directly)
+        - Use get_db_session from netra_backend.app.dependencies (not get_async_db from netra_backend.app.db.postgres directly)
       </prevention>
       <example>
         <code language="python">
           # CORRECT:
           from sqlalchemy.ext.asyncio import AsyncSession
-          from app.dependencies import get_db_session
+          from netra_backend.app.dependencies import get_db_session
           
           async def get_current_user(
               token: str,

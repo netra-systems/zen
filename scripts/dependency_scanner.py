@@ -17,7 +17,7 @@ from packaging import version as pkg_version
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.schemas.diagnostic_types import (
+from netra_backend.app.schemas.diagnostic_types import (
     DependencyReport, DependencyInfo, DependencyStatus, 
     DiagnosticResult, DiagnosticError, FixResult
 )

@@ -17,8 +17,8 @@ import pytest
 from tests.unified.config import UnifiedTestConfig, TestDataFactory, TEST_CONFIG
 from tests.unified.harness_complete import TestHarnessContext
 from tests.unified.message_flow_validators import MessageFlowValidator
-from app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
-from app.logging_config import central_logger
+from netra_backend.app.tests.test_utilities.websocket_mocks import MockWebSocket, WebSocketBuilder
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

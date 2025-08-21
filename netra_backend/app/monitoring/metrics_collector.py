@@ -48,7 +48,7 @@ class SystemResourceMetrics:
     timestamp: datetime = field(default_factory=datetime.now)
 
 
-# DatabaseMetrics imported from app.db.observability_metrics
+# DatabaseMetrics imported from netra_backend.app.db.observability_metrics
 
 
 @dataclass

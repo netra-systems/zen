@@ -67,7 +67,7 @@ All existing static methods preserved:
 
 ### Modern Interface
 ```python
-from app.agents.data_sub_agent.query_builder import QueryBuilder, QueryExecutionRequest
+from netra_backend.app.agents.data_sub_agent.query_builder import QueryBuilder, QueryExecutionRequest
 
 builder = QueryBuilder(websocket_manager)
 

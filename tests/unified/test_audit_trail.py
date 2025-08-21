@@ -23,7 +23,7 @@ from typing import Dict, List, Any
 import json
 import hashlib
 
-from app.services.audit_service import get_recent_logs, log_admin_action
+from netra_backend.app.services.audit_service import get_recent_logs, log_admin_action
 from .audit_trail_factories import AuditTestDataFactory
 
 

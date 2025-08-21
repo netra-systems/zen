@@ -1,9 +1,9 @@
 import pytest
 import os
 from fastapi.testclient import TestClient
-from app.main import app
+from netra_backend.app.main import app
 from unittest.mock import patch, MagicMock
-from app.dependencies import get_db_dependency
+from netra_backend.app.dependencies import get_db_dependency
 
 # Set testing flags to simplify startup
 os.environ["TESTING"] = "1"
@@ -118,7 +118,7 @@ def test_ready_endpoint_db_failure(client: TestClient):
 
 def test_ready_endpoint_clickhouse_failure(client: TestClient):
     from contextlib import asynccontextmanager
-    from app.core.health_types import HealthStatus
+    from netra_backend.app.core.health_types import HealthStatus
     
     mock_client = MagicMock()
     mock_client.execute.side_effect = Exception("ClickHouse connection failed")

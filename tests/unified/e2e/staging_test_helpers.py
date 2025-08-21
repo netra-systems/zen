@@ -36,7 +36,7 @@ from tests.unified.test_environment_config import (
     setup_test_environment
 )
 from tests.unified.real_services_manager import RealServicesManager
-from app.core.configuration.base import (
+from netra_backend.app.core.configuration.base import (
     UnifiedConfigManager,
     get_unified_config,
     validate_config_integrity

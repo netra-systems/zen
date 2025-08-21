@@ -35,7 +35,7 @@ from .oauth_flow_manager import (
     create_oauth_validator,
     create_oauth_session_manager
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

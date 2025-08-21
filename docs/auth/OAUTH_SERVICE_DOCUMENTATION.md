@@ -343,7 +343,7 @@ OAuthConfig(
 ### Protected Route Example
 
 ```python
-from app.auth_integration.auth import ActiveUserDep
+from netra_backend.app.auth_integration.auth import ActiveUserDep
 
 @router.get("/protected")
 async def protected_endpoint(user: ActiveUserDep):
@@ -361,7 +361,7 @@ async def protected_endpoint(user: ActiveUserDep):
 ### Admin-Only Route
 
 ```python
-from app.auth_integration.auth import AdminDep
+from netra_backend.app.auth_integration.auth import AdminDep
 
 @router.post("/admin/action")
 async def admin_action(admin: AdminDep):
@@ -378,7 +378,7 @@ async def admin_action(admin: AdminDep):
 ### Optional Authentication
 
 ```python
-from app.auth_integration.auth import OptionalUserDep
+from netra_backend.app.auth_integration.auth import OptionalUserDep
 
 @router.get("/public")
 async def public_endpoint(user: OptionalUserDep):
@@ -497,10 +497,10 @@ curl -X POST http://localhost:8081/auth/validate \
 echo "your-jwt-token" | cut -d. -f2 | base64 -d
 
 # Check environment
-python -c "from app.clients.auth_client import auth_client; print(auth_client.detect_environment())"
+python -c "from netra_backend.app.clients.auth_client import auth_client; print(auth_client.detect_environment())"
 
 # Test OAuth config
-python -c "from app.clients.auth_client import auth_client; print(auth_client.get_oauth_config())"
+python -c "from netra_backend.app.clients.auth_client import auth_client; print(auth_client.get_oauth_config())"
 ```
 
 ### Logging

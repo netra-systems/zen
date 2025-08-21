@@ -23,7 +23,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from datetime import datetime
 
-# from app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
+# from netra_backend.app.tests.unified.e2e.staging_test_helpers import StagingTestSuite, get_staging_suite
 from unittest.mock import AsyncMock
 StagingTestSuite = AsyncMock
 get_staging_suite = AsyncMock

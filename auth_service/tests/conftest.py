@@ -27,7 +27,7 @@ def event_loop():
 @pytest.fixture
 async def auth_db():
     """Mock auth database for testing"""
-    from auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.connection import auth_db
     await auth_db.initialize()
     yield auth_db
     await auth_db.close()

@@ -56,7 +56,7 @@ from enum import Enum
 from pathlib import Path
 
 # Import from existing modules following established patterns
-from app.core.auth_constants import (
+from netra_backend.app.core.auth_constants import (
     JWTConstants, 
     CredentialConstants, 
     AuthConstants

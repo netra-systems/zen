@@ -30,7 +30,7 @@ import time
 import uuid
 from decimal import Decimal
 
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 from .payment_billing_helpers import BillingAccuracyValidator
 from .auth_flow_manager import AuthCompleteFlowManager
 

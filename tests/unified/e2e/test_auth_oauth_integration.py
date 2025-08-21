@@ -29,7 +29,7 @@ from unittest.mock import patch, AsyncMock, Mock
 
 from .test_auth_oauth_flows import OAuthFlowTestRunner, OAuthIntegrationTestValidator
 from ..oauth_test_providers import OAuthUserFactory
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 

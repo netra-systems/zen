@@ -194,7 +194,7 @@ def test_enterprise_sso_flow():
     
     Currently disabled as enterprise_sso depends on features not yet launched.
     """
-    # from app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
+    # from netra_backend.app.auth.enterprise_sso import SSOProvider  # DEPRECATED: Use auth_integration
     pytest.skip("enterprise_sso module not available - use auth_integration")
     return
     

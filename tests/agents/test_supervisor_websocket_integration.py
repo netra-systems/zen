@@ -23,11 +23,11 @@ from typing import Dict, Any
 from test_framework.mock_utils import mock_justified
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.agents.supervisor_consolidated import SupervisorAgent
-from app.agents.state import DeepAgentState
-from app.services.agent_service_core import AgentService
-from app.llm.llm_manager import LLMManager
-from app.ws_manager import WebSocketManager
+from netra_backend.app.agents.supervisor_consolidated import SupervisorAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.services.agent_service_core import AgentService
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.ws_manager import WebSocketManager
 
 
 class TestSupervisorWebSocketIntegration:
@@ -58,7 +58,7 @@ class TestSupervisorWebSocketIntegration:
     @pytest.fixture
     async def mock_tool_dispatcher(self):
         """Mock tool dispatcher."""
-        from app.agents.tool_dispatcher import ToolDispatcher
+        from netra_backend.app.agents.tool_dispatcher import ToolDispatcher
         dispatcher = AsyncMock(spec=ToolDispatcher)
         return dispatcher
     

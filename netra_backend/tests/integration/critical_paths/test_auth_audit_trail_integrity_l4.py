@@ -34,7 +34,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa, padding
 from cryptography.hazmat.primitives import serialization
 import uuid
 
-# from app.schemas.auth_types import (
+# from netra_backend.app.schemas.auth_types import (
 # # # #     AuditEvent, AuditQuery, ComplianceReport,  # Class may not exist, commented out  # Class may not exist, commented out  # Class may not exist, commented out
 # # #     ForensicAnalysis, IntegrityCheck  # Class may not exist, commented out  # Class may not exist, commented out
 # )
@@ -42,8 +42,8 @@ import uuid
 from netra_backend.app.core.config import get_settings
 from netra_backend.app.db.postgres import get_async_db
 from netra_backend.app.clients.auth_client import auth_client
-# from app.core.audit_logger import AuditLogger  # May not exist, commenting out
-# from app.core.monitoring import metrics_collector  # May not exist, commenting out
+# from netra_backend.app.core.audit_logger import AuditLogger  # May not exist, commenting out
+# from netra_backend.app.core.monitoring import metrics_collector  # May not exist, commenting out
 
 
 @dataclass

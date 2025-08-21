@@ -21,8 +21,8 @@ from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 import aiohttp
 
-from app.main import app
-from app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.main import app
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
 
 
 class TestErrorRecoveryResilienceL3:

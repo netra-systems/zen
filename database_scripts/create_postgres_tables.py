@@ -3,7 +3,7 @@
 PostgreSQL Table Creation Script for Netra Dev Database
 
 This script creates all PostgreSQL tables in the netra_dev database by:
-1. Importing Base from app.db.base
+1. Importing Base from netra_backend.app.db.base
 2. Explicitly importing ALL model classes to register them with Base.metadata
 3. Creating an async engine and using Base.metadata.create_all()
 4. Verifying tables were created successfully
@@ -18,19 +18,19 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import text
 
 # Import Base first
-from app.db.base import Base
+from netra_backend.app.db.base import Base
 
 # Explicitly import ALL model classes to ensure they're registered with Base.metadata
 
 # User models
-from app.db.models_user import (
+from netra_backend.app.db.models_user import (
     User,
     Secret,
     ToolUsageLog
 )
 
 # Supply models  
-from app.db.models_supply import (
+from netra_backend.app.db.models_supply import (
     Supply,
     SupplyOption,
     AvailabilityStatus,
@@ -41,7 +41,7 @@ from app.db.models_supply import (
 )
 
 # Agent models
-from app.db.models_agent import (
+from netra_backend.app.db.models_agent import (
     Assistant,
     Thread,
     Message,
@@ -52,7 +52,7 @@ from app.db.models_agent import (
 )
 
 # Content models
-from app.db.models_content import (
+from netra_backend.app.db.models_content import (
     CorpusAuditLog,
     Analysis,
     AnalysisResult,
@@ -61,14 +61,14 @@ from app.db.models_content import (
 )
 
 # MCP Client models
-from app.db.models_mcp_client import (
+from netra_backend.app.db.models_mcp_client import (
     MCPExternalServer,
     MCPToolExecution,
     MCPResourceAccess
 )
 
 # Agent State models
-from app.db.models_agent_state import (
+from netra_backend.app.db.models_agent_state import (
     AgentStateSnapshot,
     AgentStateTransaction,
     AgentRecoveryLog

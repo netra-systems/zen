@@ -32,8 +32,8 @@ else:
 try:
     from auth_service.auth_core.secret_loader import AuthSecretLoader
     from auth_service.auth_core.core.jwt_handler import JWTHandler
-    from app.core.configuration.secrets import SecretManager
-    from app.schemas.Config import AppConfig
+    from netra_backend.app.core.configuration.secrets import SecretManager
+    from netra_backend.app.schemas.Config import AppConfig
 except ImportError as e:
     print(f"❌ Import error: {e}")
     print("Make sure you're running this from the project root directory")

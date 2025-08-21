@@ -25,7 +25,7 @@ else:
     load_dotenv()
     print("Loaded environment from current directory or system")
 
-from auth_core.routes.auth_routes import router as auth_router
+from auth_service.auth_core.routes.auth_routes import router as auth_router
 
 # Configure logging
 logging.basicConfig(
@@ -66,12 +66,12 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service...")
     
     # Log configuration
-    from auth_core.config import AuthConfig
+    from auth_service.auth_core.config import AuthConfig
     AuthConfig.log_configuration()
     logger.info(f"Port: {os.getenv('PORT', '8080')}")
     
     # Log Redis configuration status
-    from auth_core.routes.auth_routes import auth_service
+    from auth_service.auth_core.routes.auth_routes import auth_service
     redis_enabled = auth_service.session_manager.redis_enabled
     redis_status = "enabled" if redis_enabled else "disabled (staging environment)"
     logger.info(f"Redis session management: {redis_status}")
@@ -86,7 +86,7 @@ async def lifespan(app: FastAPI):
         return
     
     # Initialize single database connection
-    from auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.connection import auth_db
     
     initialization_errors = []
     
@@ -294,7 +294,7 @@ async def health() -> Dict[str, Any]:
 async def health_ready() -> Dict[str, Any]:
     """Readiness probe to check if the service is ready to serve requests"""
     # Check if database connections are available
-    from auth_core.database.connection import auth_db
+    from auth_service.auth_core.database.connection import auth_db
     
     try:
         # Try to check database connectivity

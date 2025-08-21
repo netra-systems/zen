@@ -46,7 +46,7 @@ class TestCircularImportRegression:
                 content = f.read()
             
             # Check for BaseExecutionEngine import
-            assert 'from app.agents.base.executor import BaseExecutionEngine' not in content, \
+            assert 'from netra_backend.app.agents.base.executor import BaseExecutionEngine' not in content, \
                 f"{module_name} imports BaseExecutionEngine - CIRCULAR DEPENDENCY!"
             
             # Also check for any reference to BaseExecutionEngine

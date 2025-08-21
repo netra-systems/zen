@@ -16,12 +16,12 @@ import jwt
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone, timedelta
 
-from app.auth_integration.auth import get_current_user
-from app.clients.auth_client import auth_client
-from app.websocket.unified.manager import UnifiedWebSocketManager
-from app.db.models_postgres import User
-from app.db.session import get_db_session
-from app.services.user_service import user_service
+from netra_backend.app.auth_integration.auth import get_current_user
+from netra_backend.app.clients.auth_client import auth_client
+from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager
+from netra_backend.app.db.models_postgres import User
+from netra_backend.app.db.session import get_db_session
+from netra_backend.app.services.user_service import user_service
 from unittest.mock import MagicMock
 
 

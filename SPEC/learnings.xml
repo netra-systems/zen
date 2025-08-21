@@ -1003,8 +1003,8 @@
                         load_dotenv('.env.development.local')
                         
                         from sqlalchemy.ext.asyncio import create_async_engine
-                        from app.db.base import Base
-                        from app.db.models_postgres import *
+                        from netra_backend.app.db.base import Base
+                        from netra_backend.app.db.models_postgres import *
                         
                         async def create_tables():
                             database_url = os.getenv("DATABASE_URL")
@@ -1524,8 +1524,8 @@
                     <cause>Duplicate type definitions across multiple files violating single source of truth</cause>
                 </root-causes>
                 <comprehensive-solution>
-                    <step>Fixed WebSocketConnectionManager import - changed from app.core.websocket_recovery_strategies to app.websocket.connection.ConnectionManager</step>
-                    <step>Fixed AgentConfig import - changed from app.schemas.shared_types to app.agents.config</step>
+                    <step>Fixed WebSocketConnectionManager import - changed from netra_backend.app.core.websocket_recovery_strategies to app.websocket.connection.ConnectionManager</step>
+                    <step>Fixed AgentConfig import - changed from netra_backend.app.schemas.shared_types to app.agents.config</step>
                     <step>Updated agent state transitions to allow RUNNING->RUNNING and FAILED->RUNNING for proper retry scenarios</step>
                     <step>Added default value 'unknown' to TriageResult.category field for fallback compatibility</step>
                     <step>Added missing 'messages: List[Dict[str, Any]]' field to DeepAgentState for test compatibility</step>
@@ -2706,11 +2706,11 @@
                 </files-changed>
             </solution>
             <validation>
-                <test>python -c "from app.core.circuit_breaker import CircuitBreaker" - Success</test>
-                <test>python -c "from app.agents.supervisor_circuit_breaker import CircuitBreaker" - Success</test>
-                <test>python -c "from app.services.synthetic_data.circuit_breaker import CircuitBreaker" - Success</test>
-                <test>python -c "from app.core.error_recovery import CircuitBreaker" - Success</test>
-                <test>python -c "from app.core.reliability_circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.core.circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.agents.supervisor_circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.services.synthetic_data.circuit_breaker import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.core.error_recovery import CircuitBreaker" - Success</test>
+                <test>python -c "from netra_backend.app.core.reliability_circuit_breaker import CircuitBreaker" - Success</test>
                 <test>python test_runner.py --level smoke - 7/7 tests passed</test>
             </validation>
             <key-learnings>

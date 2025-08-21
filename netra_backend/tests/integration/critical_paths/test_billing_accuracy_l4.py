@@ -26,7 +26,7 @@ from netra_backend.app.services.billing.usage_tracker import UsageTracker
 from netra_backend.app.services.billing.billing_engine import BillingEngine
 from netra_backend.app.services.billing.token_counter import TokenCounter
 from netra_backend.app.services.llm.llm_manager import LLMManager
-# # from app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
+# # from netra_backend.app.schemas.billing import UsageEvent, BillingTier  # Class may not exist, commented out  # Class may not exist, commented out
 # from tests.unified.config import TEST_CONFIG, TestTier  # Comment out since config structure may vary
 TEST_CONFIG = {"mock": True}
 class TestTier:

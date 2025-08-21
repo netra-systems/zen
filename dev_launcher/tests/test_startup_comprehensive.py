@@ -27,7 +27,7 @@ from dev_launcher.process_manager import ProcessManager
 from dev_launcher.port_manager import PortManager
 from dev_launcher.health_monitor import HealthMonitor, HealthStatus, ServiceState
 from dev_launcher.config import LauncherConfig
-from app.core.network_constants import ServicePorts
+from netra_backend.app.core.network_constants import ServicePorts
 
 
 class TestProcessManagerWindows:

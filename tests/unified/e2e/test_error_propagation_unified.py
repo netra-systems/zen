@@ -121,7 +121,7 @@ class AuthErrorPropagationValidator:
         """Test that expired token errors provide actionable messages."""
         # Create expired token (if test infrastructure supports it)
         try:
-            from app.tests.test_utilities.auth_test_helpers import create_expired_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_expired_test_token
             expired_token = create_expired_test_token("test_user")
         except ImportError:
             # Fallback: use obviously expired token format
@@ -298,7 +298,7 @@ class WebSocketErrorRecoveryValidator:
         
         try:
             # Create test token for authentication
-            from app.tests.test_utilities.auth_test_helpers import create_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
             test_token = create_test_token("error_recovery_user")
         except ImportError:
             test_token = "mock-token-error_recovery_user"
@@ -358,7 +358,7 @@ class WebSocketErrorRecoveryValidator:
         ws_url = self.tester.orchestrator.get_websocket_url()
         
         try:
-            from app.tests.test_utilities.auth_test_helpers import create_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
             test_token = create_test_token("malformed_test_user")
         except ImportError:
             test_token = "mock-token-malformed_test_user"

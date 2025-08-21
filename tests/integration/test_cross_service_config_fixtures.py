@@ -11,7 +11,7 @@ from typing import Dict, Any, Generator
 import httpx
 from dev_launcher.service_discovery import ServiceDiscovery
 from dev_launcher.health_monitor import HealthMonitor
-from app.core.middleware_setup import CustomCORSMiddleware
+from netra_backend.app.core.middleware_setup import CustomCORSMiddleware
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 

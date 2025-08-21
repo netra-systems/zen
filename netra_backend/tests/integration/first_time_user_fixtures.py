@@ -34,7 +34,7 @@ from netra_backend.app.services.cost_calculator import CostCalculatorService as 
 from netra_backend.app.services.agent_service import AgentService as AgentDispatcher
 from netra_backend.app.services.tool_registry import ToolRegistry
 from netra_backend.app.config import settings
-# from app.utils.test_helpers import create_test_user, create_test_session  # TODO: Fix missing helper
+# from netra_backend.app.utils.test_helpers import create_test_user, create_test_session  # TODO: Fix missing helper
 
 
 # ============================================================================

@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from dataclasses import dataclass
 
 from .config import UnifiedTestConfig
-from app.schemas.registry import MessageType
+from netra_backend.app.schemas.registry import MessageType
 
 
 @dataclass

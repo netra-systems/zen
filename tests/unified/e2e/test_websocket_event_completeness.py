@@ -21,7 +21,7 @@ from .helpers.websocket_test_helpers import (
     extract_events_by_type,
     validate_event_payload
 )
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 pytestmark = pytest.mark.asyncio

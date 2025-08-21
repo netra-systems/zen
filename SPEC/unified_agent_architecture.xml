@@ -282,7 +282,7 @@
       <title>BaseSubAgent Extension</title>
       <description>All LLM agents MUST extend BaseSubAgent class</description>
       <implementation>
-        <import>from app.agents.base import BaseSubAgent</import>
+        <import>from netra_backend.app.agents.base import BaseSubAgent</import>
         <inheritance>class MyAgent(BaseSubAgent)</inheritance>
         <required_methods>
           <method>async def execute(self, state: DeepAgentState) -&gt; DeepAgentState</method>
@@ -295,7 +295,7 @@
       <title>State Management</title>
       <description>Use DeepAgentState for all state transitions</description>
       <implementation>
-        <import>from app.agents.state import DeepAgentState</import>
+        <import>from netra_backend.app.agents.state import DeepAgentState</import>
         <validation>State transitions must be atomic and validated</validation>
         <persistence>Critical state persisted to Redis/PostgreSQL</persistence>
       </implementation>
@@ -304,7 +304,7 @@
       <title>WebSocket Integration</title>
       <description>Real-time updates through WebSocket</description>
       <implementation>
-        <import>from app.websocket.unified.manager import UnifiedWebSocketManager</import>
+        <import>from netra_backend.app.websocket.unified.manager import UnifiedWebSocketManager</import>
         <updates>Send progress updates during execution</updates>
         <format>Use WebSocketMessage model for all messages</format>
       </implementation>

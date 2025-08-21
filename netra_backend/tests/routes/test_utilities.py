@@ -76,7 +76,7 @@ def setup_agent_mocks(app):
 
 
 def clear_dependency_overrides(app):
-    """Clear all dependency overrides from app."""
+    """Clear all dependency overrides from netra_backend.app."""
     app.dependency_overrides.clear()
 
 

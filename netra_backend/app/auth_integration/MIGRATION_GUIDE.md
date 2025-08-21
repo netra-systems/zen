@@ -23,13 +23,13 @@ from auth_service_standalone import LoginRequest, LoginResponse, TokenData, Heal
 from auth_service.app.models.auth_models import LoginRequest, LoginResponse
 
 # DUPLICATE 3: app/schemas/Auth.py
-from app.schemas.Auth import GoogleUser, DevUser, AuthConfigResponse
+from netra_backend.app.schemas.Auth import GoogleUser, DevUser, AuthConfigResponse
 ```
 
 ### After (Single Source):
 ```python
 # ✅ CONSOLIDATED - Use this everywhere
-from app.auth_integration import (
+from netra_backend.app.auth_integration import (
     LoginRequest, LoginResponse, TokenData, HealthResponse,
     GoogleUser, DevUser, AuthConfigResponse, TokenType, AuthProvider
 )
@@ -47,7 +47,7 @@ from app.auth_integration import (
 from ..models.auth_models import LoginRequest, LoginResponse, TokenResponse
 
 # AFTER
-from app.auth_integration import LoginRequest, LoginResponse, TokenResponse
+from netra_backend.app.auth_integration import LoginRequest, LoginResponse, TokenResponse
 ```
 
 **File: `auth_service/app/routes/auth_routes.py`**
@@ -56,7 +56,7 @@ from app.auth_integration import LoginRequest, LoginResponse, TokenResponse
 from ..models.auth_models import LoginRequest, LoginResponse, HealthResponse
 
 # AFTER  
-from app.auth_integration import LoginRequest, LoginResponse, HealthResponse
+from netra_backend.app.auth_integration import LoginRequest, LoginResponse, HealthResponse
 ```
 
 ### 2. Update Main App Schemas
@@ -64,7 +64,7 @@ from app.auth_integration import LoginRequest, LoginResponse, HealthResponse
 **File: `app/schemas/__init__.py`**
 ```python
 # ADD - Export consolidated models for backward compatibility
-from app.auth_integration import (
+from netra_backend.app.auth_integration import (
     LoginRequest, LoginResponse, TokenData, HealthResponse,
     GoogleUser, DevUser, AuthConfigResponse
 )
@@ -75,10 +75,10 @@ from app.auth_integration import (
 **Files: `app/routes/auth_routes/*.py`**
 ```python
 # BEFORE
-from app.schemas.Auth import GoogleUser, DevUser, AuthConfigResponse
+from netra_backend.app.schemas.Auth import GoogleUser, DevUser, AuthConfigResponse
 
 # AFTER
-from app.auth_integration import GoogleUser, DevUser, AuthConfigResponse
+from netra_backend.app.auth_integration import GoogleUser, DevUser, AuthConfigResponse
 ```
 
 ---
@@ -87,7 +87,7 @@ from app.auth_integration import GoogleUser, DevUser, AuthConfigResponse
 
 ### New Enum Types Available:
 ```python
-from app.auth_integration import TokenType, AuthProvider
+from netra_backend.app.auth_integration import TokenType, AuthProvider
 
 # Enhanced LoginRequest with provider support
 request = LoginRequest(
@@ -105,7 +105,7 @@ token_request = TokenRequest(
 
 ### New Validation Utilities:
 ```python
-from app.auth_integration import (
+from netra_backend.app.auth_integration import (
     validate_email_format,
     validate_password_strength,
     validate_token_format,
@@ -124,7 +124,7 @@ if not strength["valid"]:
 
 ### New Interface Types:
 ```python
-from app.auth_integration import AuthClientProtocol, SessionManagerProtocol
+from netra_backend.app.auth_integration import AuthClientProtocol, SessionManagerProtocol
 
 # Type-safe auth client implementation
 class MyAuthClient(AuthClientProtocol):
@@ -163,7 +163,7 @@ python test_runner.py --level unit --backend-only --real-llm
 ### 2. Import Validation
 ```python
 # Test all consolidated imports work
-from app.auth_integration import (
+from netra_backend.app.auth_integration import (
     LoginRequest, LoginResponse, TokenData, HealthResponse,
     GoogleUser, DevUser, AuthConfigResponse, 
     TokenType, AuthProvider,
@@ -255,7 +255,7 @@ All functions follow **25-line function limits** ✅
 **Migration Issues?**
 1. Check this guide first
 2. Test with: `python test_runner.py --level integration --fast-fail`
-3. Verify imports: `python -c "from app.auth_integration import LoginRequest; print('✅ Success')"`
+3. Verify imports: `python -c "from netra_backend.app.auth_integration import LoginRequest; print('✅ Success')"`
 4. Review consolidated models in `app/auth_integration/models.py`
 
 **Architecture Questions?**
@@ -269,7 +269,7 @@ All functions follow **25-line function limits** ✅
 
 ```python
 # 🔴 AFTER MIGRATION - Single import for ALL auth models
-from app.auth_integration import (
+from netra_backend.app.auth_integration import (
     # Core models (replacing duplicates)
     LoginRequest, LoginResponse, TokenData, HealthResponse,
     

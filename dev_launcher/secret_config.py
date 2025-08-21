@@ -7,7 +7,7 @@ Provides secret configuration, categorization, and static defaults.
 import os
 import logging
 from typing import Dict, Set, List, Tuple, Optional
-from app.core.environment_constants import (
+from netra_backend.app.core.environment_constants import (
     Environment, EnvironmentVariables, get_current_project_id
 )
 

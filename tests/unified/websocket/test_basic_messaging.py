@@ -42,7 +42,7 @@ class BasicMessagingTester:
     def _create_test_token(self) -> str:
         """Create test JWT token for authentication."""
         try:
-            from app.tests.test_utilities.auth_test_helpers import create_test_token
+            from netra_backend.app.tests.test_utilities.auth_test_helpers import create_test_token
             return create_test_token("basic_messaging_user")
         except ImportError:
             return "mock-token-basic-messaging-user"

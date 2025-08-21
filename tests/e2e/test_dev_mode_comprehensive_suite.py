@@ -33,8 +33,8 @@ from datetime import datetime
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from app.config import get_config
-from app.core.network_constants import ServicePorts, URLConstants
+from netra_backend.app.config import get_config
+from netra_backend.app.core.network_constants import ServicePorts, URLConstants
 
 
 @dataclass

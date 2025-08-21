@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, patch
 from ..config import TEST_USERS
 from .clickhouse_billing_helper import ClickHouseBillingHelper
 from .websocket_resilience_core import WebSocketResilienceTestCore
-from app.schemas.UserPlan import PlanTier, UsageRecord
+from netra_backend.app.schemas.UserPlan import PlanTier, UsageRecord
 
 
 class AgentBillingTestCore:

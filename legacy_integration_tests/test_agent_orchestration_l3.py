@@ -19,11 +19,11 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
-from app.main import app
-from app.services.agent_service import AgentService
-from app.schemas.core_enums import AgentStatus
-from app.core.agent_recovery_types import AgentType
-from app.routes.unified_tools.schemas import ToolExecutionRequest
+from netra_backend.app.main import app
+from netra_backend.app.services.agent_service import AgentService
+from netra_backend.app.schemas.core_enums import AgentStatus
+from netra_backend.app.core.agent_recovery_types import AgentType
+from netra_backend.app.routes.unified_tools.schemas import ToolExecutionRequest
 
 
 class TestAgentOrchestrationL3:

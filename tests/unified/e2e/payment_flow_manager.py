@@ -19,7 +19,7 @@ import uuid
 from typing import Dict, Any, Optional
 from unittest.mock import AsyncMock, MagicMock
 
-from app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS, UserPlan, PlanFeatures
+from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS, UserPlan, PlanFeatures
 from .clickhouse_billing_helper import ClickHouseBillingHelper
 
 

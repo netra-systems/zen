@@ -95,9 +95,9 @@
   <implementation>
     <class_structure>
       <imports>
-        <import>from app.db.clickhouse import get_clickhouse_client</import>
-        <import>from app.db.postgres import get_session</import>
-        <import>from app.redis_manager import get_redis_client</import>
+        <import>from netra_backend.app.db.clickhouse import get_clickhouse_client</import>
+        <import>from netra_backend.app.db.postgres import get_session</import>
+        <import>from netra_backend.app.redis_manager import get_redis_client</import>
         <import>import numpy as np</import>
         <import>import pandas as pd</import>
         <import>from typing import Dict, List, Optional, Any</import>

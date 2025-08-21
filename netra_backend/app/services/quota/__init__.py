@@ -7,6 +7,6 @@ Business Value Justification (BVJ):
 - Strategic Impact: Maintains compatibility for quota functionality
 """
 
-from netra_backend.app.quota_manager import QuotaManager
+from netra_backend.app.services.quota.quota_manager import QuotaManager
 
 __all__ = ["QuotaManager"]

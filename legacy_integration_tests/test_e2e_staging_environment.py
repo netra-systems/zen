@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import app schemas for consistency
-from app.schemas import (
+from netra_backend.app.schemas import (
     RequestModel,
     Workload,
     DataSource, 
@@ -34,7 +34,7 @@ from app.schemas import (
     WebSocketMessage,
     UserPlan
 )
-from app.schemas.UserPlan import PlanTier
+from netra_backend.app.schemas.UserPlan import PlanTier
 
 # Import test helpers - removed due to missing module
 

@@ -20,7 +20,7 @@
             Use netra_backend namespace for all imports:
             - Change: from db.models_postgres import User
             - To: from netra_backend.app.db.models_postgres import User
-            - Change: from app.core.auth import validate_token
+            - Change: from netra_backend.app.core.auth import validate_token
             - To: from netra_backend.app.core.auth import validate_token
         </solution>
         <prevention>

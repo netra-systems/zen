@@ -78,8 +78,8 @@ The Supervisor Agent is the central orchestrator of the multi-agent system.
 ```python
 # app/agents/supervisor.py
 from typing import Dict, List, Optional
-from app.agents.base import BaseAgent
-from app.agents.prompts import SUPERVISOR_SYSTEM_PROMPT
+from netra_backend.app.agents.base import BaseAgent
+from netra_backend.app.agents.prompts import SUPERVISOR_SYSTEM_PROMPT
 
 class SupervisorAgent(BaseAgent):
     def __init__(self, llm_manager, tools=None):
@@ -879,7 +879,7 @@ class StatePersistenceService:
 
 ```python
 # Template for new agent
-from app.agents.base import BaseAgent
+from netra_backend.app.agents.base import BaseAgent
 
 class CustomAgent(BaseAgent):
     """Custom agent for specific task"""

@@ -116,7 +116,7 @@ Location: `app/auth/enhanced_auth_security.py`
 #### Implementation:
 
 ```python
-from app.auth.enhanced_auth_security import enhanced_auth_security
+from netra_backend.app.auth.enhanced_auth_security import enhanced_auth_security
 
 # Authenticate user
 result, session_id = enhanced_auth_security.authenticate_user(
@@ -174,7 +174,7 @@ Location: `app/core/enhanced_input_validation.py`
 #### Usage:
 
 ```python
-from app.core.enhanced_input_validation import strict_validator
+from netra_backend.app.core.enhanced_input_validation import strict_validator
 
 # Validate input
 result = strict_validator.validate_input(
@@ -265,7 +265,7 @@ Following `PRODUCTION_SECRETS_ISOLATION.xml`:
 #### Usage:
 
 ```python
-from app.core.enhanced_secret_manager import enhanced_secret_manager
+from netra_backend.app.core.enhanced_secret_manager import enhanced_secret_manager
 
 # Get secret with access control
 secret_value = enhanced_secret_manager.get_secret(

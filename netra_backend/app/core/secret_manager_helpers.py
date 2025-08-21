@@ -4,12 +4,14 @@ from typing import Dict, Any, List, Optional, Tuple
 from google.cloud import secretmanager
 import os
 from netra_backend.app.logging_config import central_logger as logger
+from netra_backend.app.core.configuration.base import config_manager
 
 
 def detect_environment_config() -> Tuple[str, bool]:
     """Detect environment and staging configuration."""
-    environment = os.environ.get("ENVIRONMENT", "development").lower()
-    k_service = os.environ.get("K_SERVICE")
+    config = config_manager.get_config()
+    environment = getattr(config, 'environment', 'development').lower()
+    k_service = getattr(config, 'k_service', None)
     is_staging = environment == "staging" or (k_service and "staging" in k_service.lower())
     return environment, is_staging
 

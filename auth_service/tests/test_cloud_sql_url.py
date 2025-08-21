@@ -5,7 +5,7 @@ Ensures proper handling of Cloud SQL Unix socket format
 import os
 import pytest
 from unittest.mock import patch, MagicMock
-from auth_core.database.connection import AuthDatabase
+from auth_service.auth_core.database.connection import AuthDatabase
 
 
 @pytest.mark.asyncio

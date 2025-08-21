@@ -215,7 +215,7 @@ function ChatPage() {
 ### Backend Usage
 
 ```python
-from app.handlers import handle_example_message
+from netra_backend.app.handlers import handle_example_message
 
 # Process an example message
 response = await handle_example_message({

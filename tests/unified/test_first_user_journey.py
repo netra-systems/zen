@@ -10,8 +10,8 @@ import time
 from unittest.mock import AsyncMock, MagicMock, patch
 from typing import Dict, Any
 
-from app.schemas.registry import User, UserCreate
-from app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
+from netra_backend.app.schemas.registry import User, UserCreate
+from netra_backend.app.schemas.UserPlan import PlanTier, PLAN_DEFINITIONS
 from tests.unified.jwt_token_helpers import JWTTestHelper
 
 # Helper function for backward compatibility

@@ -19,9 +19,9 @@ from datetime import datetime, timedelta
 from fastapi.testclient import TestClient
 from httpx import AsyncClient, ASGITransport
 
-from app.main import app
+from netra_backend.app.main import app
 # Thread-related services and schemas not available in current codebase
-from app.db.postgres import get_postgres_db
+from netra_backend.app.db.postgres import get_postgres_db
 
 
 class TestThreadLifecycleL3:

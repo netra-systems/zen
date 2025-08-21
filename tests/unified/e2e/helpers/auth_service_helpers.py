@@ -6,7 +6,7 @@ ISSUE: Auth service imports from main app violate microservice independence
 IMPACT: Blocks SOC2 compliance and enterprise deals worth $50K+ MRR
 
 CRITICAL P0 TEST: Validates auth service has ZERO imports from main app
-This test MUST verify that the auth service has NO "from app." imports and:
+This test MUST verify that the auth service has NO "from netra_backend.app." imports and:
 1. Can start independently without main app
 2. Uses auth_core module, not app module  
 3. Includes 3+ error scenarios for robustness
@@ -58,7 +58,7 @@ class AuthServiceIndependenceValidator:
         start_time = time.time()
         
         try:
-            # CRITICAL P0: Import Independence Check - ZERO tolerance for "from app." imports
+            # CRITICAL P0: Import Independence Check - ZERO tolerance for "from netra_backend.app." imports
             import_results = await self._validate_import_independence_fast()
             results["validations"]["critical_import_scan"] = import_results
             
@@ -111,7 +111,7 @@ class AuthServiceIndependenceValidator:
         
         try:
             forbidden_patterns = [
-                "from app.",
+                "from netra_backend.app.",
                 "import app.",
                 "from app ",
                 "import app "
@@ -128,7 +128,7 @@ class AuthServiceIndependenceValidator:
                         
                     for pattern in forbidden_patterns:
                         if pattern in content:
-                            # ZERO TOLERANCE - any "from app." import fails the test
+                            # ZERO TOLERANCE - any "from netra_backend.app." import fails the test
                             results["forbidden_imports"].append({
                                 "file": str(py_file.relative_to(self.project_root)),
                                 "pattern": pattern,
@@ -329,10 +329,10 @@ class AuthServiceIndependenceValidator:
         try:
             # Test various import patterns that should be caught
             test_patterns = [
-                "from app.models import User",
+                "from netra_backend.app.models import User",
                 "import app.config",
                 "from app import db",
-                "from app.core.config import settings"
+                "from netra_backend.app.core.config import settings"
             ]
             
             violations_found = 0
@@ -376,7 +376,7 @@ class AuthServiceIndependenceValidator:
         
         try:
             forbidden_patterns = [
-                "from app.",
+                "from netra_backend.app.",
                 "import app.",
                 "from app ",
                 "import app "
@@ -391,7 +391,7 @@ class AuthServiceIndependenceValidator:
                 for pattern in forbidden_patterns:
                     if pattern in content:
                         # Special exception for main_db_sync.py which has documented imports
-                        if "main_db_sync.py" in str(py_file) and "from app.db.models_postgres import User" in content:
+                        if "main_db_sync.py" in str(py_file) and "from netra_backend.app.db.models_postgres import User" in content:
                             # This is a known controlled import for sync purposes
                             continue
                             
@@ -648,9 +648,9 @@ class AuthServiceIndependenceValidator:
             
             # Scan for any direct database session sharing
             shared_session_patterns = [
-                "from app.db.session",
-                "from app.database",
-                "from app.core.database"
+                "from netra_backend.app.db.session",
+                "from netra_backend.app.database",
+                "from netra_backend.app.core.database"
             ]
             
             shared_sessions_found = []
@@ -682,9 +682,9 @@ class AuthServiceIndependenceValidator:
             
             # Check for shared config imports
             shared_config_patterns = [
-                "from app.config",
-                "from app.core.config", 
-                "from app.settings"
+                "from netra_backend.app.config",
+                "from netra_backend.app.core.config", 
+                "from netra_backend.app.settings"
             ]
             
             shared_configs_found = []
@@ -763,7 +763,7 @@ async def test_auth_service_complete_independence():
     
     ZERO TOLERANCE TEST: Validates auth service has ZERO imports from main app
     - Scans ALL Python files in auth_service/ 
-    - FAILS if ANY file contains "from app." imports
+    - FAILS if ANY file contains "from netra_backend.app." imports
     - Tests 3+ error scenarios for robustness
     - MUST complete in <10 seconds
     
@@ -795,7 +795,7 @@ def _validate_critical_independence_results(results):
     
     validations = results["validations"]
     
-    # CRITICAL P0: Import independence - ZERO tolerance for "from app." imports
+    # CRITICAL P0: Import independence - ZERO tolerance for "from netra_backend.app." imports
     import_validation = validations.get("critical_import_scan", {})
     forbidden_imports = import_validation.get("forbidden_imports", [])
     assert len(forbidden_imports) == 0, f"BLOCKING: {len(forbidden_imports)} forbidden imports found: {forbidden_imports}"
@@ -836,10 +836,10 @@ def _print_independence_success(results):
 @pytest.mark.asyncio
 async def test_zero_tolerance_forbidden_imports():
     """
-    ZERO TOLERANCE: Test that ALL Python files in auth_service/ have NO "from app." imports
+    ZERO TOLERANCE: Test that ALL Python files in auth_service/ have NO "from netra_backend.app." imports
     
     BVJ: Enterprise | SOC2 Compliance | Zero coupling to main app
-    REQUIREMENT: Scan ALL files, FAIL if ANY contains "from app." imports
+    REQUIREMENT: Scan ALL files, FAIL if ANY contains "from netra_backend.app." imports
     """
     validator = AuthServiceIndependenceValidator()
     
@@ -858,7 +858,7 @@ async def test_zero_tolerance_forbidden_imports():
         # ZERO TOLERANCE: No forbidden imports allowed
         forbidden_imports = results.get("forbidden_imports", [])
         assert len(forbidden_imports) == 0, (
-            f"BLOCKING ENTERPRISE DEALS: Found {len(forbidden_imports)} forbidden 'from app.' imports:\n" +
+            f"BLOCKING ENTERPRISE DEALS: Found {len(forbidden_imports)} forbidden 'from netra_backend.app.' imports:\n" +
             "\n".join([f"  {imp['file']}: {imp['pattern']} -> {imp['line_preview']}" for imp in forbidden_imports])
         )
         

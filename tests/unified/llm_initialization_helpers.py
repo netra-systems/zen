@@ -12,8 +12,8 @@ from unittest.mock import AsyncMock, MagicMock
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
-from app.schemas.llm_config_types import LLMConfig
-from app.schemas.Config import AppConfig
+from netra_backend.app.schemas.llm_config_types import LLMConfig
+from netra_backend.app.schemas.Config import AppConfig
 
 
 class LLMTestResponse(BaseModel):

@@ -8,10 +8,10 @@ import pytest
 import asyncio
 from unittest.mock import Mock, AsyncMock
 
-from app.agents.supervisor_agent_modern import ModernSupervisorAgent
-from app.agents.state import DeepAgentState
-from app.llm.llm_manager import LLMManager
-from app.config import get_config
+from netra_backend.app.agents.supervisor_agent_modern import ModernSupervisorAgent
+from netra_backend.app.agents.state import DeepAgentState
+from netra_backend.app.llm.llm_manager import LLMManager
+from netra_backend.app.config import get_config
 
 
 @pytest.mark.real_llm

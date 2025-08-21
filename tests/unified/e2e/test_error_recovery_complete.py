@@ -36,9 +36,9 @@ from .service_orchestrator import E2EServiceOrchestrator
 from .error_cascade_core import ServiceFailureSimulator, GracefulDegradationValidator, AutoRecoveryVerifier
 from ..real_websocket_client import RealWebSocketClient
 from ..real_client_types import ClientConfig
-from app.core.circuit_breaker_core import CircuitBreaker
-from app.core.circuit_breaker_types import CircuitConfig, CircuitState, CircuitBreakerOpenError
-from app.logging_config import central_logger
+from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+from netra_backend.app.core.circuit_breaker_types import CircuitConfig, CircuitState, CircuitBreakerOpenError
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
@@ -597,8 +597,8 @@ def validate_circuit_breaker_implementation() -> bool:
     """Validate that circuit breaker implementation exists and is accessible."""
     try:
         # Test that we can import and instantiate circuit breaker
-        from app.core.circuit_breaker_core import CircuitBreaker
-        from app.core.circuit_breaker_types import CircuitConfig
+        from netra_backend.app.core.circuit_breaker_core import CircuitBreaker
+        from netra_backend.app.core.circuit_breaker_types import CircuitConfig
         
         config = CircuitConfig(
             name="validation_test",

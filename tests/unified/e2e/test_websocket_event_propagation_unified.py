@@ -34,7 +34,7 @@ try:
 except ImportError:
     # Use clients factory if available
     from ..clients.websocket_client import WebSocketTestClient as RealWebSocketClient
-from app.logging_config import central_logger
+from netra_backend.app.logging_config import central_logger
 
 logger = central_logger.get_logger(__name__)
 
