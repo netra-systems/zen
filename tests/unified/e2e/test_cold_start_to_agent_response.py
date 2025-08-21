@@ -122,20 +122,19 @@ class WebSocketTester:
         # Mock justification: Testing WebSocket flow without actual server connection
         # Real WebSocket requires running server and network infrastructure
         try:
-            # Mock WebSocket connection
-            self.websocket = AsyncMock()
-            self.websocket.send = AsyncMock()
-            self.websocket.recv = AsyncMock()
-            self.websocket.close = AsyncMock()
+            # Try to establish WebSocket connection (will be mocked in tests)
+            import websockets
+            ws_url = "ws://localhost:8000/ws"
+            self.websocket = await websockets.connect(
+                ws_url,
+                extra_headers={"Authorization": f"Bearer {self.auth_token}"}
+            )
             
-            # Simulate successful connection
-            await asyncio.sleep(0.01)  # Simulate connection time
-            
-            # Send initial handshake (mocked)
+            # Send initial handshake
             await self._send_handshake()
             return True
             
-        except Exception as e:
+        except (asyncio.TimeoutError, Exception) as e:
             print(f"WebSocket connection failed: {e}")
             return False
     

@@ -441,11 +441,27 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
                 line_content = lines[line_number - 1].strip()
                 has_issue = any(pattern in line_content for pattern in self.incorrect_patterns)
                 
+                # Provide detailed analysis if issue found
+                issue_details = None
+                if has_issue:
+                    inconsistency = self._detect_comprehensive_inconsistency(
+                        file_path, line_number, line_content
+                    )
+                    if inconsistency:
+                        issue_details = {
+                            "incorrect_url": inconsistency.incorrect_url,
+                            "expected_url": inconsistency.expected_url,
+                            "severity": inconsistency.severity,
+                            "url_type": inconsistency.url_type,
+                            "context": inconsistency.context
+                        }
+                
                 return {
                     "exists": True,
                     "line_number": line_number,
                     "line_content": line_content,
-                    "has_incorrect_url": has_issue
+                    "has_incorrect_url": has_issue,
+                    "issue_details": issue_details
                 }
             else:
                 return {"exists": True, "error": f"File has fewer than {line_number} lines"}
@@ -453,33 +469,112 @@ class OAuthURLConsistencyL4TestSuite(L4StagingCriticalPathTestBase):
         except Exception as e:
             return {"exists": False, "error": str(e)}
     
-    async def test_oauth_endpoints(self) -> Dict[str, Any]:
-        """Test OAuth endpoints accessibility in staging."""
-        endpoints = ["https://auth.staging.netrasystems.ai/health"]
+    async def test_oauth_endpoints_accessibility(self) -> Dict[str, Any]:
+        """Test OAuth endpoints accessibility in staging environment."""
+        endpoints_to_test = [
+            ("auth_health", "https://auth.staging.netrasystems.ai/health"),
+            ("auth_oauth", "https://auth.staging.netrasystems.ai/oauth"),
+            ("api_health", "https://api.staging.netrasystems.ai/health"),
+            ("frontend_health", "https://app.staging.netrasystems.ai/health")
+        ]
+        
         results = []
         
-        for endpoint in endpoints:
+        for endpoint_name, endpoint_url in endpoints_to_test:
             try:
-                async with httpx.AsyncClient(timeout=10.0) as client:
-                    response = await client.get(endpoint)
-                    results.append({
-                        "url": endpoint,
-                        "success": response.status_code in [200, 404],
-                        "status_code": response.status_code
-                    })
+                response = await self.test_client.get(endpoint_url, timeout=10.0)
+                success = response.status_code in [200, 404, 405]  # Accept these as "accessible"
+                
+                results.append({
+                    "name": endpoint_name,
+                    "url": endpoint_url,
+                    "success": success,
+                    "status_code": response.status_code,
+                    "response_time": response.elapsed.total_seconds() if hasattr(response, 'elapsed') else 0
+                })
+                
+                self.test_metrics.service_calls += 1
+                
             except Exception as e:
-                results.append({"url": endpoint, "success": False, "error": str(e)})
+                results.append({
+                    "name": endpoint_name,
+                    "url": endpoint_url,
+                    "success": False,
+                    "error": str(e)
+                })
         
         return {
             "endpoints_tested": len(results),
             "successful_responses": sum(1 for r in results if r["success"]),
+            "failed_responses": sum(1 for r in results if not r["success"]),
             "results": results
         }
     
-    async def cleanup_l4_resources(self) -> None:
-        """Clean up L4 test resources."""
-        if self.staging_suite:
-            await self.staging_suite.cleanup()
+    async def validate_oauth_redirect_urls(self) -> Dict[str, Any]:
+        """Validate that OAuth redirect URLs follow correct subdomain pattern."""
+        redirect_validations = []
+        
+        # Check auth_client_config.py specifically for the known issue
+        auth_config_path = self.project_root / "app/clients/auth_client_config.py"
+        
+        if auth_config_path.exists():
+            try:
+                with open(auth_config_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                
+                # Look for redirect_uris patterns
+                redirect_uri_pattern = r'redirect_uris?\s*=\s*\[([^\]]+)\]'
+                javascript_origins_pattern = r'javascript_origins?\s*=\s*\[([^\]]+)\]'
+                
+                import re
+                
+                redirect_matches = re.findall(redirect_uri_pattern, content, re.IGNORECASE)
+                origin_matches = re.findall(javascript_origins_pattern, content, re.IGNORECASE)
+                
+                for match in redirect_matches:
+                    if "staging.netrasystems.ai" in match and "auth.staging.netrasystems.ai" not in match:
+                        redirect_validations.append({
+                            "type": "redirect_uri",
+                            "content": match.strip(),
+                            "valid": False,
+                            "issue": "Should use auth.staging.netrasystems.ai subdomain"
+                        })
+                    else:
+                        redirect_validations.append({
+                            "type": "redirect_uri",
+                            "content": match.strip(),
+                            "valid": True
+                        })
+                
+                for match in origin_matches:
+                    if "staging.netrasystems.ai" in match and "app.staging.netrasystems.ai" not in match:
+                        redirect_validations.append({
+                            "type": "javascript_origin",
+                            "content": match.strip(),
+                            "valid": False,
+                            "issue": "Should use app.staging.netrasystems.ai subdomain"
+                        })
+                    else:
+                        redirect_validations.append({
+                            "type": "javascript_origin",
+                            "content": match.strip(),
+                            "valid": True
+                        })
+                        
+            except Exception as e:
+                redirect_validations.append({
+                    "type": "error",
+                    "error": f"Failed to validate auth config: {str(e)}"
+                })
+        
+        valid_count = sum(1 for v in redirect_validations if v.get("valid", False))
+        
+        return {
+            "total_validations": len(redirect_validations),
+            "valid_redirects": valid_count,
+            "invalid_redirects": len(redirect_validations) - valid_count,
+            "validations": redirect_validations
+        }
 
 
 @pytest.fixture
